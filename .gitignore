@@ -34,3 +34,6 @@
 # IDEs
 .idea
 .vscode
+
+# For cmake
+build
