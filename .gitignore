@@ -37,3 +37,7 @@
 
 # For cmake
 build
+cmake-build-*
+
+# For Macs..
+.DS_Store

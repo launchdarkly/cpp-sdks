@@ -3,7 +3,8 @@
 #include <optional>
 #include <cstdint>
 
-std::optional<std::int32_t> foo() {
-  return std::nullopt;
-}
-
+namespace launchdarkly {
+    std::optional<std::int32_t> foo() {
+        return std::nullopt;
+    }
+} //namespace launchdarkly
