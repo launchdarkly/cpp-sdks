@@ -11,7 +11,7 @@ project(
 	LANGUAGES CXX C
 )
 
-set(LIBNAME "launchdarkly-client")
+set(LIBNAME "launchdarkly-cpp-client")
 
 # If this project is the main CMake project (as opposed to being included via add_subdirectory)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) 

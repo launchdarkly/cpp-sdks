@@ -11,7 +11,7 @@ project(
         LANGUAGES CXX C
 )
 
-set(LIBNAME "launchdarkly-c")
+set(LIBNAME "launchdarkly-c-client")
 
 # If this project is the main CMake project (as opposed to being included via add_subdirectory)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -25,7 +25,7 @@ endif()
 include(FetchContent)
 
 
-find_package(launchdarkly-client)
+find_package(launchdarkly-cpp-client)
 
 # Add C bindings
 add_subdirectory(src)
