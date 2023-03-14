@@ -25,7 +25,5 @@ endif()
 include(FetchContent)
 
 
-find_package(launchdarkly-cpp-client)
-
 # Add C bindings
 add_subdirectory(src)
