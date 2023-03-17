@@ -189,7 +189,8 @@ boost::optional<std::pair<std::string, std::string>> parse_field(std::string fie
     size_t colon_index = field.find(':');
     switch (colon_index) {
         case 0:
-            return std::make_pair(std::string{"comment"}, field.erase(0, 1));
+            field.erase(0, 1);
+            return std::make_pair(std::string{"comment"}, std::move(field));
         case std::string::npos:
             return std::make_pair(std::move(field), std::string{});
         default:
@@ -207,11 +208,9 @@ void client::parse_events() {
     while(true) {
         bool seen_empty_line = false;
 
-        auto it = m_complete_lines.begin();
-        while (it != m_complete_lines.end()) {
-
-            std::string line = *it;
-            it = m_complete_lines.erase(it);
+        while (!m_complete_lines.empty()) {
+            std::string line = std::move(m_complete_lines.front());
+            m_complete_lines.pop_front();
 
             if (line.empty()) {
                 if (m_event_data.has_value()) {
@@ -221,7 +220,7 @@ void client::parse_events() {
                 continue;
             }
 
-            if (auto field = parse_field(line)) {
+            if (auto field = parse_field(std::move(line))) {
 
                 if (field->first == "comment") {
                     m_events.emplace_back(field->second);

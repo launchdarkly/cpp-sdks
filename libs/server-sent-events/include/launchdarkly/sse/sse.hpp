@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include <variant>
+#include <deque>
 
 namespace launchdarkly {
 namespace sse {
@@ -66,7 +67,7 @@ class client : public std::enable_shared_from_this<client> {
     std::string m_host;
     std::string m_port;
     boost::optional<std::string> m_buffered_line;
-    std::vector<std::string> m_complete_lines;
+    std::deque<std::string> m_complete_lines;
     std::vector<event> m_events;
     bool m_begin_CR;
     boost::optional<event_data> m_event_data;
