@@ -12,6 +12,7 @@
 #include <vector>
 #include <unordered_map>
 #include <variant>
+#include <functional>
 #include <deque>
 
 namespace launchdarkly {
@@ -27,13 +28,13 @@ class client;
 
 class builder {
 public:
-    builder(net::io_context& ioc, std::string url);
+    builder(net::any_io_executor ioc, std::string url);
     builder& header(const std::string& name, const std::string& value);
     builder& method(http::verb verb);
     std::shared_ptr<client> build();
 private:
     std::string m_url;
-    net::io_context& m_executor;
+    net::any_io_executor m_executor;
     ssl::context m_ssl_ctx;
     http::request<http::empty_body> m_request;
 };
@@ -71,13 +72,19 @@ class client : public std::enable_shared_from_this<client> {
     std::vector<event> m_events;
     bool m_begin_CR;
     boost::optional<event_data> m_event_data;
+    std::function<void(event_data)> m_cb;
     void complete_line();
+
     size_t append_up_to(std::string_view body, const std::string& search);
     std::size_t parse_stream(std::uint64_t remain, std::string_view body, beast::error_code& ec);
     void parse_events();
 public:
     explicit client(net::any_io_executor ex, ssl::context &ctx, http::request<http::empty_body> req, std::string host, std::string port);
     void run();
+    template<typename Callback>
+    void on_event(Callback event_cb) {
+        m_cb = event_cb;
+    }
 
 };
 

@@ -11,6 +11,16 @@ project(
         LANGUAGES CXX C
 )
 
+
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+    # Affects robustness of timestamp checking on FetchContent dependencies.
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
+# All projects in this repo should share the same version of 3rd party depends.
+# It's the only way to remain sane.
+set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 add_subdirectory(libs/server-sent-events)
 add_subdirectory(libs/client-sdk)
 add_subdirectory(apps)

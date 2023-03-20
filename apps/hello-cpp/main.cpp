@@ -16,8 +16,7 @@ int main() {
 
     net::io_context ioc;
 
-    // curl "https://stream-stg.launchdarkly.com/all?filter=even-flags-2" -H "Authorization: sdk-66a5dbe0-8b26-445a-9313-761e7e3d381b" -v
-    auto client = launchdarkly::sse::builder(ioc, "https://stream-stg.launchdarkly.com/all")
+    auto client = launchdarkly::sse::builder(&ioc, "https://stream-stg.launchdarkly.com/all")
             .header("Authorization", "sdk-66a5dbe0-8b26-445a-9313-761e7e3d381b")
             .build();
 
@@ -29,6 +28,10 @@ int main() {
 
     std::thread t([&](){
         ioc.run();
+    });
+
+    client->on_event([](launchdarkly::sse::event_data e){
+        std::cout << "Got[" << e.get_type() << "] = <" << e.get_data() << ">\n";
     });
 
     client->run();

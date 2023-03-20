@@ -1,9 +1,7 @@
 #include <launchdarkly/sse/sse.hpp>
 #include <iostream>
-#include <boost/tokenizer.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/bind/bind.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <memory>
 #include <tuple>
@@ -16,7 +14,7 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-builder::builder(net::io_context& ctx, std::string url):
+builder::builder(net::any_io_executor ctx, std::string url):
     m_url{std::move(url)},
     m_ssl_ctx{ssl::context::tlsv12_client},
     m_executor{ctx} {
@@ -95,7 +93,10 @@ client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::e
         m_complete_lines{},
         m_begin_CR{false},
         m_event_data{},
-        m_events{}{
+        m_events{},
+        m_cb{[](event_data e){
+            std::cout << "Event[" << e.get_type() << "] = <" << e.get_data() << ">\n";
+        }}{
 
     // The HTTP response body is of potentially infinite length.
     m_parser.body_limit(boost::none);
@@ -223,7 +224,10 @@ void client::parse_events() {
             if (auto field = parse_field(std::move(line))) {
 
                 if (field->first == "comment") {
-                    m_events.emplace_back(field->second);
+                    event_data e{boost::none};
+                    e.set_type("comment");
+                    e.append_data(field->second);
+                    m_cb(std::move(e));
                     continue;
                 }
 
@@ -248,8 +252,7 @@ void client::parse_events() {
             m_event_data.reset();
 
             if (data.has_value()) {
-                std::cout << "Got event:\n";
-                std::cout << "Type = <" << data->get_type() << ">, Data = <" << data->get_data() << ">\n";
+                m_cb(std::move(data.get()));
             }
 
             continue;
