@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stream_entity.hpp"
-#include "http_connection.hpp"
+#include "session.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -40,7 +40,7 @@ public:
     }
 
     void add_capability(std::string cap) {
-
+        caps_.push_back(cap);
     }
 
     void start_accepting()
@@ -66,7 +66,7 @@ private:
         acceptor_.async_accept([this](beast::error_code ec, tcp::socket peer){
            if (!ec) {
                if (!stopped_) {
-                   std::make_shared<http_connection>(std::move(peer), manager_, caps_)->start();
+                   std::make_shared<session>(std::move(peer), manager_, caps_)->start();
                    accept_loop();
                }
            }

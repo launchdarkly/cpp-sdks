@@ -24,10 +24,10 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 
 
-class http_connection : public std::enable_shared_from_this<http_connection>
+class session : public std::enable_shared_from_this<session>
 {
 public:
-    explicit http_connection(tcp::socket socket, entity_manager& manager, std::vector<std::string> caps):
+    explicit session(tcp::socket socket, entity_manager& manager, std::vector<std::string> caps):
             socket_{std::move(socket)},
             manager_{manager},
             capabilities_{std::move(caps)}
@@ -46,10 +46,10 @@ private:
     beast::flat_buffer buffer_{8192};
 
     // The request message.
-    http::request<http::dynamic_body> request_;
+    http::request<http::string_body> request_;
 
     // The response message.
-    http::response<http::dynamic_body> response_;
+    http::response<http::string_body> response_;
 
     entity_manager& manager_;
 
@@ -105,13 +105,15 @@ private:
                 nlohmann::json status {
                     {"capabilities", capabilities_}
                 };
-                beast::ostream(response_.body()) << status.dump();
+                response_.body() = status.dump();
                 return true;
             }
             else if (request_.method() == http::verb::delete_) {
                 return false;
             } else if (request_.method() == http::verb::post) {
-                std::string id = manager_.create(config_params{});
+                auto json = nlohmann::json::parse(request_.body());
+                auto params = json.get<config_params>();
+                std::string id = manager_.create(params);
                 response_.result(http::status::ok);
                 response_.set("Location", "/shutdown/" + id);
                 std::cout << "creating entity " << id << '\n';
@@ -131,7 +133,6 @@ private:
 
         response_.result(http::status::bad_request);
         response_.set(http::field::content_type, "text/plain");
-        beast::ostream(response_.body()) << "400 Bad Request";
         return true;
     }
     void
@@ -144,7 +145,7 @@ private:
         http::async_write(
                 socket_,
                 response_,
-                [self](beast::error_code ec, std::size_t)
+                [self](beast::error_code ec, std::size_t bytes_written)
                 {
                     self->socket_.shutdown(tcp::socket::shutdown_send, ec);
                 });

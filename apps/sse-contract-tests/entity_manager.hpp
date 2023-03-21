@@ -33,6 +33,7 @@ public:
         if (it == entities_.end()) {
             return false;
         }
+        entities_.erase(it);
         return true;
     }
 };
