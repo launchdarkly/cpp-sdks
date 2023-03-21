@@ -1,7 +1,4 @@
-#include <boost/asio/placeholders.hpp>
-#include <boost/bind/bind.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/url/parse.hpp>
 #include <iostream>
 #include <launchdarkly/sse/sse.hpp>
@@ -19,6 +16,7 @@ using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 builder::builder(net::io_context& ctx, std::string url)
     : m_url{std::move(url)},
       m_ssl_ctx{ssl::context::tlsv12_client},
+      m_request{},
       m_executor{ctx} {
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);

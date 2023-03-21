@@ -1,5 +1,4 @@
 #pragma once
-#include <boost/beast.hpp>
 #include <boost/beast/websocket/stream.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/tokenizer.hpp>
@@ -8,11 +7,9 @@
 
 namespace launchdarkly::sse::detail {
 
-namespace beast = boost::beast;    // from <boost/beast.hpp>
-namespace http = beast::http;      // from <boost/beast/http.hpp>
-namespace net = boost::asio;       // from <boost/asio.hpp>
-namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
-using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
+namespace beast = boost::beast;  // from <boost/beast.hpp>
+namespace http = beast::http;    // from <boost/beast/http.hpp>
+namespace net = boost::asio;     // from <boost/asio.hpp>
 
 // A layered stream which implements the SSE protocol.
 template <class NextLayer>

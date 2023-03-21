@@ -14,8 +14,7 @@
 #include <variant>
 #include <vector>
 
-namespace launchdarkly {
-namespace sse {
+namespace launchdarkly::sse {
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
@@ -89,5 +88,4 @@ class client : public std::enable_shared_from_this<client> {
     void run();
 };
 
-}  // namespace sse
-}  // namespace launchdarkly
+}  // namespace launchdarkly::sse

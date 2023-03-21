@@ -11,6 +11,9 @@ project(
         LANGUAGES CXX C
 )
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_subdirectory(libs/server-sent-events)
 add_subdirectory(libs/client-sdk)
+add_subdirectory(bindings/c)
 add_subdirectory(apps)

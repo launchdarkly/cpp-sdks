@@ -34,10 +34,3 @@ target_compile_definitions(${LIBNAME}
         PUBLIC
         api_STATIC_DEFINE
         )
-
-# For the IDEs.
-source_group(
-        TREE "../../../libs/sdk/include/launchdarkly"
-        PREFIX "C Headers"
-        FILES ${HEADER_LIST}
-)

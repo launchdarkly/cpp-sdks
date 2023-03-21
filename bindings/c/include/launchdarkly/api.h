@@ -2,8 +2,12 @@
 
 #include <launchdarkly/export.h>
 
+#ifndef __cplusplus
 #include <stdbool.h>
 #include <stdint.h>
+#else
+#include <cstdint>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

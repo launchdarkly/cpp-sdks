@@ -1,5 +1,3 @@
-#include <boost/asio.hpp>
-#include <chrono>
 #include <iostream>
 #include <launchdarkly/api.hpp>
 #include <launchdarkly/sse/sse.hpp>

@@ -1,0 +1,55 @@
+name: lint
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+          boost_version: 1.81.0
+          platform_version: 22.04
+          boost_install_dir: /home/runner/boost
+      - name: Configure CMake
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        run: cmake -S . -B /home/runner/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - uses: cpp-linter/cpp-linter-action@v2.4.2
+        id: linter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Set this option to false to disable the use of thread comments as feedback. Defaults to false.
+          thread-comments: false
+          # Set this option to false to disable the use of file annotations as feedback. Defaults to true.
+          file-annotations: true
+          # The style rules to use (defaults to 'llvm'). Set this to 'file' to have clang-format use the closest relative .clang-format file.
+          style: file
+          # The file extensions to run the action against. This comma-separated string defaults to 'c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx'.
+          # extensions: # optional, default is c,h,C,H,cpp,hpp,cc,hh,c++,h++,cxx,hxx
+          # A string of regex-like patterns specifying what checks clang-tidy will use. This defaults to 'boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,clang-analyzer-*,cppcoreguidelines-*'. See also clang-tidy docs for more info.
+          tidy-checks: boost-*,bugprone-*,performance-*,readability-*,portability-*,modernize-*,-modernize-use-trailing-return-type,clang-analyzer-*,cppcoreguidelines-*
+          # The relative path to the repository root directory. The default value '.' is relative to the runner's GITHUB_WORKSPACE environment variable.
+          #  repo-root: # optional, default is .
+          # The desired version of the clang tools to use. Accepted options are strings which can be 15, 14, 13, 12, 11, 10, 9, or 8. Defaults to 12.
+          version: 15
+          # A hidden option to control the action's log verbosity. This is the `logging` level (defaults to DEBUG).
+          # verbosity: # optional, default is 10
+          # Set this option to 'true' to only analyze changes in the event's diff. Defaults to 'false'.
+          #lines-changed-only: # optional
+          # Set this option to 'false' to analyze any source files in the repo. Defaults to 'true'.
+          files-changed-only: false
+          # Set this option with string of path(s) to ignore.
+          ignore: '.github|.idea|.vscode|extern'
+          # The directory containing compile_commands.json file.
+          database: /home/runner/build
+          # A string of extra arguments passed to clang-tidy for use as compiler arguments. Multiple arguments are separated by spaces so the argument name and value should use an '=' sign instead of a space.
+          # extra-args: # optional
