@@ -14,12 +14,12 @@ project(
 set(LIBNAME "launchdarkly-c-client")
 
 # If this project is the main CMake project (as opposed to being included via add_subdirectory)
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Disable C++ extensions for portability.
     set(CMAKE_CXX_EXTENSIONS OFF)
     # Enable folder support in IDEs.
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-endif()
+endif ()
 
 # Needed to fetch external dependencies.
 include(FetchContent)

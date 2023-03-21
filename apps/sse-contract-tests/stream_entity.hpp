@@ -63,7 +63,7 @@ public:
                 http::write(stream, req);
             });
 
-            client_->read()
+            client_->read();
         }
     }
 };

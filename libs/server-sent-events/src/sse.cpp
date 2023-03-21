@@ -19,7 +19,6 @@ builder::builder(net::any_io_executor ctx, std::string url):
     m_url{std::move(url)},
     m_ssl_ctx{ssl::context::tlsv12_client},
     m_executor{ctx} {
-
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);
 
@@ -30,7 +29,7 @@ builder::builder(net::any_io_executor ctx, std::string url):
     m_request.set("Cache-Control", "no-cache");
 }
 
-builder& builder::header(const std::string& name, const std::string& value) {
+builder& builder::header(std::string const& name, std::string const& value) {
     m_request.set(name, value);
     return *this;
 }
@@ -40,39 +39,32 @@ builder& builder::method(http::verb verb) {
     return *this;
 }
 
-
 std::shared_ptr<client> builder::build() {
-    boost::system::result<boost::urls::url_view> uri_components = boost::urls::parse_uri(m_url);
+    boost::system::result<boost::urls::url_view> uri_components =
+        boost::urls::parse_uri(m_url);
     if (!uri_components) {
         return nullptr;
     }
     std::string port;
-    if (!uri_components->has_port() && uri_components->scheme_id() == boost::urls::scheme::https) {
+    if (!uri_components->has_port() &&
+        uri_components->scheme_id() == boost::urls::scheme::https) {
         port = "443";
     }
 
     m_request.set(http::field::host, uri_components->host());
     m_request.target(uri_components->path());
 
-   return std::make_shared<client>(
-            net::make_strand(m_executor),
-            m_ssl_ctx,
-            m_request,
-            uri_components->host(),
-            port
-    );
+    return std::make_shared<client>(net::make_strand(m_executor), m_ssl_ctx,
+                                    m_request, uri_components->host(), port);
 }
 
-
-event_data::event_data(boost::optional<std::string> id):
-    m_type{},
-    m_data{},
-    m_id{std::move(id)} {}
+event_data::event_data(boost::optional<std::string> id)
+    : m_type{}, m_data{}, m_id{std::move(id)} {}
 
 void event_data::set_type(std::string type) {
     m_type = std::move(type);
 }
-void event_data::append_data(std::string const& data)  {
+void event_data::append_data(std::string const& data) {
     m_data.append(data);
 }
 
@@ -98,22 +90,18 @@ client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::e
         m_cb{[](event_data e){
             std::cout << "Event[" << e.get_type() << "] = <" << e.get_data() << ">\n";
         }}{
-
     // The HTTP response body is of potentially infinite length.
     m_parser.body_limit(boost::none);
 }
 
-
-
 void client::read() {
     // Set SNI Hostname (many hosts need this to handshake successfully)
-    if(!SSL_set_tlsext_host_name(m_stream.native_handle(), m_host.c_str()))
-    {
-        beast::error_code ec{static_cast<int>(::ERR_get_error()), net::error::get_ssl_category()};
+    if (!SSL_set_tlsext_host_name(m_stream.native_handle(), m_host.c_str())) {
+        beast::error_code ec{static_cast<int>(::ERR_get_error()),
+                             net::error::get_ssl_category()};
         std::cerr << ec.message() << "\n";
         return;
     }
-
 
     beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(10));
 
@@ -124,20 +112,18 @@ void client::read() {
 
     beast::get_lowest_layer(m_stream).expires_never();
 
-    auto callback =
-            [this](std::uint64_t remain, std::string_view body, beast::error_code& ec)
-            {
-                size_t read = this->parse_stream(remain, body, ec);
-                this->parse_events();
-                return read;
-            };
+    auto callback = [this](std::uint64_t remain, std::string_view body,
+                           beast::error_code& ec) {
+        size_t read = this->parse_stream(remain, body, ec);
+        this->parse_events();
+        return read;
+    };
 
     m_parser.on_chunk_body(callback);
 
     // Blocking call until the stream terminates.
     http::read(m_stream, m_buffer, m_parser);
 }
-
 
 void client::complete_line() {
     if (m_buffered_line.has_value()) {
@@ -147,10 +133,9 @@ void client::complete_line() {
     }
 }
 
-
-size_t client::append_up_to(std::string_view body, const std::string& search) {
+size_t client::append_up_to(std::string_view body, std::string const& search) {
     std::size_t index = body.find_first_of(search);
-    if(index != std::string::npos) {
+    if (index != std::string::npos) {
         body.remove_suffix(body.size() - index);
     }
     if (m_buffered_line.has_value()) {
@@ -161,15 +146,15 @@ size_t client::append_up_to(std::string_view body, const std::string& search) {
     return index == std::string::npos ? body.size() : index;
 }
 
-
-
-std::size_t client::parse_stream(std::uint64_t remain, std::string_view body, beast::error_code &ec) {
+std::size_t client::parse_stream(std::uint64_t remain,
+                                 std::string_view body,
+                                 beast::error_code& ec) {
     size_t i = 0;
     while (i < body.length()) {
-        i += this->append_up_to(body.substr(i, body.length()-i), "\r\n");
-        if (body[i] =='\r') {
+        i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
+        if (body[i] == '\r') {
             if (this->m_begin_CR) {
-                //todo: illegal token
+                // todo: illegal token
             } else {
                 this->m_begin_CR = true;
             }
@@ -182,8 +167,8 @@ std::size_t client::parse_stream(std::uint64_t remain, std::string_view body, be
     return body.length();
 }
 
-boost::optional<std::pair<std::string, std::string>> parse_field(std::string field){
-
+boost::optional<std::pair<std::string, std::string>> parse_field(
+    std::string field) {
     if (field.empty()) {
         assert(0 && "should never parse an empty line");
     }
@@ -205,9 +190,8 @@ boost::optional<std::pair<std::string, std::string>> parse_field(std::string fie
     }
 }
 
-
 void client::parse_events() {
-    while(true) {
+    while (true) {
         bool seen_empty_line = false;
 
         while (!m_complete_lines.empty()) {
@@ -223,7 +207,6 @@ void client::parse_events() {
             }
 
             if (auto field = parse_field(std::move(line))) {
-
                 if (field->first == "comment") {
                     event_data e{boost::none};
                     e.set_type("comment");
@@ -263,4 +246,4 @@ void client::parse_events() {
     }
 }
 
-} // namespace launchdarkly
+}  // namespace launchdarkly::sse
