@@ -20,9 +20,20 @@ public:
             executor_{executor}{
     }
 
-    std::string create(config_params params) {
+    std::optional<std::string> create(config_params params) {
         std::lock_guard<std::mutex> guard{lock_};
         auto id = std::to_string(counter_++);
+
+        auto builder = launchdarkly::sse::builder{executor_, params.streamUrl};
+        if (params.headers) {
+            for (auto h: *params.headers) {
+                builder.header(h.first, h.second);
+            }
+        }
+        auto client = builder.build();
+        if (!client) {
+            return std::nullopt;
+        }
         entities_.emplace(id, stream_entity{executor_, std::move(params)});
         return id;
     }

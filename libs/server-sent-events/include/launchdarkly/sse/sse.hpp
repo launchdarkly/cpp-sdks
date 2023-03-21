@@ -80,7 +80,7 @@ class client : public std::enable_shared_from_this<client> {
     void parse_events();
 public:
     explicit client(net::any_io_executor ex, ssl::context &ctx, http::request<http::empty_body> req, std::string host, std::string port);
-    void run();
+    void read();
     template<typename Callback>
     void on_event(Callback event_cb) {
         m_cb = event_cb;

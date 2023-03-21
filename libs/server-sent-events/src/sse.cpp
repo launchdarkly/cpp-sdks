@@ -5,6 +5,7 @@
 #include <boost/asio/placeholders.hpp>
 #include <memory>
 #include <tuple>
+#include <boost/beast/websocket.hpp>
 
 namespace launchdarkly::sse {
 
@@ -104,7 +105,7 @@ client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::e
 
 
 
-void client::run() {
+void client::read() {
     // Set SNI Hostname (many hosts need this to handshake successfully)
     if(!SSL_set_tlsext_host_name(m_stream.native_handle(), m_host.c_str()))
     {
