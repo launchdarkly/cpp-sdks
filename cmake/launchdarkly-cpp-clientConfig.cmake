@@ -5,5 +5,4 @@ include(CMakeFindDependencyMacro)
 # End 3rd party depends
 
 
-
 #include("${CMAKE_CURRENT_LIST_DIR}/launchdarkly-clientTargets.cmake")
