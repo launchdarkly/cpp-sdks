@@ -50,6 +50,7 @@ class event_data {
     void set_type(std::string);
     void set_id(std::optional<std::string>);
     void append_data(std::string const&);
+    void trim_trailing_newline();
     std::string const& get_type();
     std::string const& get_data();
     std::optional<std::string> const& get_id();

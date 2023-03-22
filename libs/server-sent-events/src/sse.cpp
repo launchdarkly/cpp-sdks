@@ -22,6 +22,7 @@ void event_data::set_type(std::string type) {
 }
 void event_data::append_data(std::string const& data) {
     m_data.append(data);
+    m_data.append("\n");
 }
 
 void event_data::set_id(std::optional<std::string> id) {
@@ -33,6 +34,12 @@ std::string const& event_data::get_type() {
 }
 std::string const& event_data::get_data() {
     return m_data;
+}
+
+void event_data::trim_trailing_newline() {
+    if (m_data[m_data.size()-1] == '\n') {
+        m_data.resize(m_data.size() - 1);
+    }
 }
 
 std::optional<std::string> const& event_data::get_id() {
@@ -114,6 +121,7 @@ void client::parse_events() {
 
             if (!m_event_data.has_value()) {
                 m_event_data.emplace(event_data{});
+                m_event_data->set_id(last_event_id_);
             }
 
             if (field.first == "event") {
@@ -138,6 +146,7 @@ void client::parse_events() {
             m_event_data = std::nullopt;
 
             if (data.has_value()) {
+                data->trim_trailing_newline();
                 m_cb(std::move(*data));
             }
 
