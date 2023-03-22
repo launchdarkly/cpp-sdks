@@ -7,13 +7,11 @@
 #include <boost/beast/version.hpp>
 #include <boost/optional.hpp>
 #include <deque>
-#include <launchdarkly/sse/detail/sse_stream.hpp>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
-#include <functional>
-#include <deque>
 #include <vector>
 
 namespace launchdarkly::sse {
@@ -27,9 +25,9 @@ using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 class client;
 
 class builder {
-public:
+   public:
     builder(net::any_io_executor ioc, std::string url);
-    builder& header(const std::string& name, const std::string& value);
+    builder& header(std::string const& name, std::string const& value);
     builder& method(http::verb verb);
     std::shared_ptr<client> build();
 
@@ -59,8 +57,7 @@ using sse_comment = std::string;
 using event = std::variant<sse_event, sse_comment>;
 
 class client : public std::enable_shared_from_this<client> {
-    using parser =
-        http::response_parser<http::string_body>;
+    using parser = http::response_parser<http::string_body>;
     tcp::resolver m_resolver;
     beast::ssl_stream<beast::tcp_stream> m_stream;
     beast::flat_buffer m_buffer;
@@ -69,25 +66,36 @@ class client : public std::enable_shared_from_this<client> {
     parser parser_;
     std::string m_host;
     std::string m_port;
-    boost::optional<std::string> m_buffered_line;
-    std::deque<std::string> m_complete_lines;
+    boost::optional<std::string> buffered_line_;
+    std::deque<std::string> complete_lines_;
     std::vector<event> m_events;
-    bool m_begin_CR;
+    bool begin_CR_;
     boost::optional<event_data> m_event_data;
     std::function<void(event_data)> m_cb;
     void complete_line();
-    size_t append_up_to(std::string_view body, const std::string& search);
-    std::size_t parse_stream(std::uint64_t remain, std::string_view body, beast::error_code& ec);
+    size_t append_up_to(boost::string_view body, std::string const& search);
+    std::size_t parse_stream(std::uint64_t remain,
+                             boost::string_view body,
+                             beast::error_code& ec);
     void parse_events();
     void on_resolve(beast::error_code, tcp::resolver::results_type);
-    void on_connect(beast::error_code, tcp::resolver::results_type::endpoint_type);
+    void on_connect(beast::error_code,
+                    tcp::resolver::results_type::endpoint_type);
     void on_handshake(beast::error_code);
     void on_write(beast::error_code ec, std::size_t);
     void on_read(beast::error_code, std::size_t);
-public:
-    explicit client(net::any_io_executor ex, ssl::context &ctx, http::request<http::empty_body> req, std::string host, std::string port);
+    std::optional<std::function<
+        size_t(uint64_t, boost::string_view, boost::system::error_code&)>>
+        on_chunk_body_trampoline_;
+
+   public:
+    explicit client(net::any_io_executor ex,
+                    ssl::context& ctx,
+                    http::request<http::empty_body> req,
+                    std::string host,
+                    std::string port);
     void read();
-    template<typename Callback>
+    template <typename Callback>
     void on_event(Callback event_cb) {
         m_cb = event_cb;
     }

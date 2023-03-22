@@ -1,24 +1,24 @@
-#include <launchdarkly/sse/sse.hpp>
-#include <iostream>
-#include <boost/url/parse.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/asio/placeholders.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/optional/optional.hpp>
+#include <boost/url/parse.hpp>
+#include <iostream>
+#include <launchdarkly/sse/sse.hpp>
 #include <memory>
 #include <tuple>
-#include <boost/beast/websocket.hpp>
 
 namespace launchdarkly::sse {
 
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
-using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+namespace beast = boost::beast;    // from <boost/beast.hpp>
+namespace http = beast::http;      // from <boost/beast/http.hpp>
+namespace net = boost::asio;       // from <boost/asio.hpp>
+namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-builder::builder(net::any_io_executor ctx, std::string url):
-    m_url{std::move(url)},
-    m_ssl_ctx{ssl::context::tlsv12_client},
-    m_executor{std::move(ctx)} {
+builder::builder(net::any_io_executor ctx, std::string url)
+    : m_url{std::move(url)},
+      m_ssl_ctx{ssl::context::tlsv12_client},
+      m_executor{std::move(ctx)} {
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);
 
@@ -75,28 +75,30 @@ std::string const& event_data::get_data() {
     return m_data;
 }
 
-client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::empty_body> req, std::string host, std::string port):
-        m_resolver{ex},
-        m_stream{ex, ctx},
-        m_request{std::move(req)},
-        m_host{std::move(host)},
-        m_port{std::move(port)},
-        parser_{},
-        m_buffered_line{},
-        m_complete_lines{},
-        m_begin_CR{false},
-        m_event_data{},
-        m_events{},
-        m_cb{[](event_data e){
-            std::cout << "Event[" << e.get_type() << "] = <" << e.get_data() << ">\n";
-        }}{
-
-}
+client::client(net::any_io_executor ex,
+               ssl::context& ctx,
+               http::request<http::empty_body> req,
+               std::string host,
+               std::string port)
+    : m_resolver{ex},
+      m_stream{ex, ctx},
+      m_request{std::move(req)},
+      m_host{std::move(host)},
+      m_port{std::move(port)},
+      parser_{},
+      buffered_line_{},
+      complete_lines_{},
+      begin_CR_{false},
+      m_event_data{},
+      m_events{},
+      on_chunk_body_trampoline_{},
+      m_cb{[](event_data e) {
+          std::cout << "Event[" << e.get_type() << "] = <" << e.get_data()
+                    << ">\n";
+      }} {}
 
 // Report a failure
-void
-fail(beast::error_code ec, char const* what)
-{
+void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
@@ -111,22 +113,23 @@ void client::read() {
 
     beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(15));
 
-    m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&client::on_resolve, shared_from_this()));
+    m_resolver.async_resolve(
+        m_host, m_port,
+        beast::bind_front_handler(&client::on_resolve, shared_from_this()));
 }
 
-
-void client::on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
-    if(ec)
+void client::on_resolve(beast::error_code ec,
+                        tcp::resolver::results_type results) {
+    if (ec)
         return fail(ec, "resolve");
     // Make the connection on the IP address we get from a lookup
     beast::get_lowest_layer(m_stream).async_connect(
         results,
-        beast::bind_front_handler(
-            &client::on_connect,
-            shared_from_this()));
+        beast::bind_front_handler(&client::on_connect, shared_from_this()));
 }
 
-void client::on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
+void client::on_connect(beast::error_code ec,
+                        tcp::resolver::results_type::endpoint_type) {
     if (ec)
         return fail(ec, "connect");
 
@@ -136,26 +139,33 @@ void client::on_connect(beast::error_code ec, tcp::resolver::results_type::endpo
 }
 
 void client::on_handshake(beast::error_code ec) {
-    if(ec)
+    if (ec)
         return fail(ec, "handshake");
 
     // Send the HTTP request to the remote host
-    http::async_write(m_stream, m_request,
-                      beast::bind_front_handler(
-                          &client::on_write,
-                          shared_from_this()));
+    http::async_write(
+        m_stream, m_request,
+        beast::bind_front_handler(&client::on_write, shared_from_this()));
 }
 
 void client::on_write(beast::error_code ec, std::size_t) {
-    if(ec)
+    if (ec)
         return fail(ec, "write");
 
     beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(10));
 
-    http::async_read_some(m_stream, m_buffer, parser_,
-                     beast::bind_front_handler(
-                         &client::on_read,
-                         shared_from_this()));
+    on_chunk_body_trampoline_.emplace(
+        [self = this->shared_from_this()](auto remain, auto body, auto ec) {
+            auto consumed = self->parse_stream(remain, body, ec);
+            self->parse_events();
+            return consumed;
+        });
+
+    parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
+
+    http::async_read_some(
+        m_stream, m_buffer, parser_,
+        beast::bind_front_handler(&client::on_read, shared_from_this()));
 }
 
 void client::on_read(beast::error_code ec, std::size_t bytes_transferred) {
@@ -166,13 +176,9 @@ void client::on_read(beast::error_code ec, std::size_t bytes_transferred) {
 
     beast::get_lowest_layer(m_stream).expires_never();
 
-    if (bytes_transferred > 0) {
-        std::cout << "got bytes: " << bytes_transferred << "; async read\n";
-    }
-
-    http::async_read_some(m_stream, m_buffer, parser_,
-                      beast::bind_front_handler(&client::on_read, shared_from_this()));
-
+    http::async_read_some(
+        m_stream, m_buffer, parser_,
+        beast::bind_front_handler(&client::on_read, shared_from_this()));
 }
 
 boost::optional<std::pair<std::string, std::string>> parse_field(
@@ -202,9 +208,9 @@ void client::parse_events() {
     while (true) {
         bool seen_empty_line = false;
 
-        while (!m_complete_lines.empty()) {
-            std::string line = std::move(m_complete_lines.front());
-            m_complete_lines.pop_front();
+        while (!complete_lines_.empty()) {
+            std::string line = std::move(complete_lines_.front());
+            complete_lines_.pop_front();
 
             if (line.empty()) {
                 if (m_event_data.has_value()) {
@@ -252,6 +258,48 @@ void client::parse_events() {
 
         break;
     }
+}
+
+void client::complete_line() {
+    if (buffered_line_.has_value()) {
+        complete_lines_.push_back(buffered_line_.value());
+        buffered_line_.reset();
+    }
+}
+
+size_t client::append_up_to(boost::string_view body,
+                            std::string const& search) {
+    std::size_t index = body.find_first_of(search);
+    if (index != std::string::npos) {
+        body.remove_suffix(body.size() - index);
+    }
+    if (buffered_line_.has_value()) {
+        buffered_line_->append(body.to_string());
+    } else {
+        buffered_line_ = std::string{body};
+    }
+    return index == std::string::npos ? body.size() : index;
+}
+
+size_t client::parse_stream(std::uint64_t remain,
+                            boost::string_view body,
+                            beast::error_code& ec) {
+    size_t i = 0;
+    while (i < body.length()) {
+        i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
+        if (body[i] == '\r') {
+            if (this->begin_CR_) {
+                // todo: illegal token
+            } else {
+                this->begin_CR_ = true;
+            }
+        } else if (body[i] == '\n') {
+            this->begin_CR_ = false;
+            this->complete_line();
+            i++;
+        }
+    }
+    return body.length();
 }
 
 }  // namespace launchdarkly::sse
