@@ -38,20 +38,21 @@ class builder {
     ssl::context m_ssl_ctx;
     http::request<http::empty_body> m_request;
     std::optional<unsigned int> tls_version_;
-
 };
 
 class event_data {
     std::string m_type;
     std::string m_data;
-    boost::optional<std::string> m_id;
+    std::optional<std::string> m_id;
 
    public:
-    explicit event_data(boost::optional<std::string> id);
+    explicit event_data();
     void set_type(std::string);
+    void set_id(std::optional<std::string>);
+    void append_data(std::string const&);
     std::string const& get_type();
     std::string const& get_data();
-    void append_data(std::string const&);
+    std::optional<std::string> const& get_id();
 };
 
 using sse_event = event_data;
@@ -69,11 +70,12 @@ class client : public std::enable_shared_from_this<client> {
     parser parser_;
     std::string host_;
     std::string port_;
-    boost::optional<std::string> buffered_line_;
+    std::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
     std::vector<event> m_events;
+    std::optional<std::string> last_event_id_;
     bool begin_CR_;
-    boost::optional<event_data> m_event_data;
+    std::optional<event_data> m_event_data;
     std::function<void(event_data)> m_cb;
     void complete_line();
     size_t append_up_to(boost::string_view body, std::string const& search);

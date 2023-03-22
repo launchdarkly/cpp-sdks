@@ -15,8 +15,7 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-event_data::event_data(boost::optional<std::string> id)
-    : m_type{}, m_data{}, m_id{std::move(id)} {}
+event_data::event_data() : m_type{}, m_data{}, m_id{} {}
 
 void event_data::set_type(std::string type) {
     m_type = std::move(type);
@@ -25,11 +24,19 @@ void event_data::append_data(std::string const& data) {
     m_data.append(data);
 }
 
+void event_data::set_id(std::optional<std::string> id) {
+    m_id = std::move(id);
+}
+
 std::string const& event_data::get_type() {
     return m_type;
 }
 std::string const& event_data::get_data() {
     return m_data;
+}
+
+std::optional<std::string> const& event_data::get_id() {
+    return m_id;
 }
 
 client::client(net::any_io_executor ex,
@@ -44,6 +51,7 @@ client::client(net::any_io_executor ex,
       buffered_line_{},
       complete_lines_{},
       begin_CR_{false},
+      last_event_id_{},
       m_event_data{},
       m_events{},
       on_chunk_body_trampoline_{},
@@ -57,8 +65,7 @@ void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-boost::optional<std::pair<std::string, std::string>> parse_field(
-    std::string field) {
+std::pair<std::string, std::string> parse_field(std::string field) {
     if (field.empty()) {
         assert(0 && "should never parse an empty line");
     }
@@ -96,37 +103,42 @@ void client::parse_events() {
                 continue;
             }
 
-            if (auto field = parse_field(std::move(line))) {
-                if (field->first == "comment") {
-                    event_data e{boost::none};
-                    e.set_type("comment");
-                    e.append_data(field->second);
-                    m_cb(std::move(e));
+            auto field = parse_field(std::move(line));
+            if (field.first == "comment") {
+                event_data e;
+                e.set_type("comment");
+                e.append_data(field.second);
+                m_cb(std::move(e));
+                continue;
+            }
+
+            if (!m_event_data.has_value()) {
+                m_event_data.emplace(event_data{});
+            }
+
+            if (field.first == "event") {
+                m_event_data->set_type(field.second);
+            } else if (field.first == "data") {
+                m_event_data->append_data(field.second);
+            } else if (field.first == "id") {
+                if (field.second.find('\0') != std::string::npos) {
+                    std::cout
+                        << "Debug: ignoring event ID will null terminator\n";
                     continue;
                 }
-
-                if (!m_event_data.has_value()) {
-                    m_event_data.emplace(event_data{boost::none});
-                }
-
-                if (field->first == "event") {
-                    m_event_data->set_type(field->second);
-                } else if (field->first == "data") {
-                    m_event_data->append_data(field->second);
-                } else if (field->first == "id") {
-                    std::cout << "Got ID field\n";
-                } else if (field->first == "retry") {
-                    std::cout << "Got RETRY field\n";
-                }
+                last_event_id_ = field.second;
+                m_event_data->set_id(last_event_id_);
+            } else if (field.first == "retry") {
+                std::cout << "Got RETRY field\n";
             }
         }
 
         if (seen_empty_line) {
-            boost::optional<event_data> data = m_event_data;
-            m_event_data.reset();
+            std::optional<event_data> data = m_event_data;
+            m_event_data = std::nullopt;
 
             if (data.has_value()) {
-                m_cb(std::move(data.get()));
+                m_cb(std::move(*data));
             }
 
             continue;
@@ -255,8 +267,7 @@ class ssl_client : public client {
                std::string host,
                std::string port)
         : client(ex, std::move(req), std::move(host), std::move(port)),
-          stream_{ex, ctx} {
-    }
+          stream_{ex, ctx} {}
 
     void read() override {
         // Set SNI Hostname (many hosts need this to handshake successfully)
@@ -343,8 +354,7 @@ class plaintext_client : public client {
                      std::string host,
                      std::string port)
         : client(ex, std::move(req), std::move(host), std::move(port)),
-          stream_{ex} {
-    }
+          stream_{ex} {}
 
     void read() override {
         beast::get_lowest_layer(stream_).expires_after(
@@ -360,7 +370,7 @@ builder::builder(net::any_io_executor ctx, std::string url)
     : m_url{std::move(url)},
       m_ssl_ctx{ssl::context::tlsv12_client},
       m_executor{std::move(ctx)},
-      tls_version_{12}{
+      tls_version_{12} {
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);
 
@@ -386,7 +396,6 @@ builder& builder::tls(ssl::context_base::method ctx) {
     return *this;
 }
 
-
 std::shared_ptr<client> builder::build() {
     boost::system::result<boost::urls::url_view> uri_components =
         boost::urls::parse_uri(m_url);
@@ -394,18 +403,19 @@ std::shared_ptr<client> builder::build() {
         return nullptr;
     }
 
-
     m_request.set(http::field::host, uri_components->host());
     m_request.target(uri_components->path());
 
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
-        std::string port = uri_components->has_port() ? uri_components->port() : "443";
+        std::string port =
+            uri_components->has_port() ? uri_components->port() : "443";
 
         return std::make_shared<ssl_client>(net::make_strand(m_executor),
                                             m_ssl_ctx, m_request,
                                             uri_components->host(), port);
     } else {
-        std::string port = uri_components->has_port() ? uri_components->port() : "80";
+        std::string port =
+            uri_components->has_port() ? uri_components->port() : "80";
 
         return std::make_shared<plaintext_client>(net::make_strand(m_executor),
                                                   m_ssl_ctx, m_request,
