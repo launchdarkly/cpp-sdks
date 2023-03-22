@@ -15,7 +15,7 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-class stream_entity : public std::enable_shared_from_this<stream_entity> {
+class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
     // Simple string body request is appropriate since the JSON
     // returned to the test service is minimal.
     using request_type = http::request<http::string_body>;
@@ -38,7 +38,7 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
     net::deadline_timer flush_timer_;
 
    public:
-    stream_entity(net::any_io_executor executor,
+    StreamEntity(net::any_io_executor executor,
                   std::shared_ptr<launchdarkly::sse::client> client,
                   std::string callback_url);
 

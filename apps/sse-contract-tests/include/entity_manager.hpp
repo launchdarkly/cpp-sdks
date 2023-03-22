@@ -17,7 +17,7 @@ class EntityManager {
     // Maps the entity's ID to the entity. Shared pointer is necessary because
     // these entities are doing async IO and must remain alive as long as that
     // is happening.
-    std::unordered_map<std::string, std::shared_ptr<stream_entity>> entities_;
+    std::unordered_map<std::string, std::shared_ptr<StreamEntity>> entities_;
     // Incremented each time create() is called to instantiate a new entity.
     std::size_t counter_;
     // Synchronizes access to create()/destroy();

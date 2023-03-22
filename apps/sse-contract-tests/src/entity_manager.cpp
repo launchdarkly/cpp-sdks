@@ -20,8 +20,8 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
     if (!client) {
         return std::nullopt;
     }
-    std::shared_ptr<stream_entity> entity =
-        std::make_shared<stream_entity>(executor_, client, params.callbackUrl);
+    std::shared_ptr<StreamEntity> entity =
+        std::make_shared<StreamEntity>(executor_, client, params.callbackUrl);
 
     // Kicks off asynchronous operations.
     entity->run();

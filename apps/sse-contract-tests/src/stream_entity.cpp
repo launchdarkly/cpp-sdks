@@ -13,7 +13,7 @@ void fail(beast::error_code ec, char const* what) {
 // at this interval.
 auto const kFlushInterval = boost::posix_time::milliseconds{10};
 
-stream_entity::stream_entity(net::any_io_executor executor,
+StreamEntity::StreamEntity(net::any_io_executor executor,
                              std::shared_ptr<launchdarkly::sse::client> client,
                              std::string callback_url)
     : client_{std::move(client)},
@@ -33,7 +33,7 @@ stream_entity::stream_entity(net::any_io_executor executor,
     callback_port_ = uri_components->port();
 }
 
-void stream_entity::run() {
+void StreamEntity::run() {
     // Setup the SSE client to callback into the entity whenever it
     // receives a comment/event.
     client_->on_event(
@@ -49,11 +49,11 @@ void stream_entity::run() {
     // Begin connecting to the test harness's event-posting service.
     resolver_.async_resolve(
         callback_host_, callback_port_,
-        beast::bind_front_handler(&stream_entity::on_resolve,
+        beast::bind_front_handler(&StreamEntity::on_resolve,
                                   shared_from_this()));
 }
 
-void stream_entity::stop() {
+void StreamEntity::stop() {
     beast::error_code ec;
     stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
 
@@ -61,7 +61,7 @@ void stream_entity::stop() {
     client_->close();
 }
 
-stream_entity::request_type stream_entity::build_request(
+StreamEntity::request_type StreamEntity::build_request(
     std::size_t counter,
     launchdarkly::sse::event_data ev) {
     request_type req;
@@ -84,18 +84,18 @@ stream_entity::request_type stream_entity::build_request(
     return req;
 }
 
-void stream_entity::on_resolve(beast::error_code ec,
+void StreamEntity::on_resolve(beast::error_code ec,
                                tcp::resolver::results_type results) {
     if (ec)
         return fail(ec, "resolve");
 
     // Make the connection on the IP address we get from a lookup.
     beast::get_lowest_layer(stream_).async_connect(
-        results, beast::bind_front_handler(&stream_entity::on_connect,
+        results, beast::bind_front_handler(&StreamEntity::on_connect,
                                            shared_from_this()));
 }
 
-void stream_entity::on_connect(beast::error_code ec,
+void StreamEntity::on_connect(beast::error_code ec,
                                tcp::resolver::results_type::endpoint_type) {
     if (ec)
         return fail(ec, "connect");
@@ -103,11 +103,11 @@ void stream_entity::on_connect(beast::error_code ec,
     // Now that we're connected, kickoff the event flush "loop".
     boost::system::error_code dummy;
     net::post(executor_,
-              beast::bind_front_handler(&stream_entity::on_flush_timer,
+              beast::bind_front_handler(&StreamEntity::on_flush_timer,
                                         shared_from_this(), dummy));
 }
 
-void stream_entity::on_flush_timer(boost::system::error_code ec) {
+void StreamEntity::on_flush_timer(boost::system::error_code ec) {
     if (ec && ec != net::error::operation_aborted) {
         return fail(ec, "flush");
     }
@@ -118,7 +118,7 @@ void stream_entity::on_flush_timer(boost::system::error_code ec) {
         // Flip-flop between this function and on_write; pushing an event
         // and then popping it.
         http::async_write(stream_, request,
-                          beast::bind_front_handler(&stream_entity::on_write,
+                          beast::bind_front_handler(&StreamEntity::on_write,
                                                     shared_from_this()));
         return;
     }
@@ -126,10 +126,10 @@ void stream_entity::on_flush_timer(boost::system::error_code ec) {
     // If the outbox is empty, wait a bit before trying again.
     flush_timer_.expires_from_now(kFlushInterval);
     flush_timer_.async_wait(beast::bind_front_handler(
-        &stream_entity::on_flush_timer, shared_from_this()));
+        &StreamEntity::on_flush_timer, shared_from_this()));
 }
 
-void stream_entity::on_write(beast::error_code ec, std::size_t) {
+void StreamEntity::on_write(beast::error_code ec, std::size_t) {
     if (ec)
         return fail(ec, "write");
 
