@@ -22,7 +22,9 @@ void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-const auto kFlushInterval = boost::posix_time::milliseconds {100};
+// Periodically check the outbox (outgoing events to the test harness)
+// at this interval.
+auto const kFlushInterval = boost::posix_time::milliseconds{10};
 
 class stream_entity : public std::enable_shared_from_this<stream_entity> {
     // Simple string body request is appropriate since the JSON
@@ -80,12 +82,17 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         // Kickoff the SSE client's async operations.
         client_->run();
 
-        // Immediately kickoff the flush "loop".
-        flush_timer_.async_wait(beast::bind_front_handler(
-            &stream_entity::on_flush_timer, shared_from_this()));
+        // Begin connecting to the test harness's event-posting service.
+        resolver_.async_resolve(
+            callback_host_, callback_port_,
+            beast::bind_front_handler(&stream_entity::on_resolve,
+                                      shared_from_this()));
     }
 
     void stop() {
+        beast::error_code ec;
+        stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
+
         flush_timer_.cancel();
         client_->close();
     }
@@ -116,7 +123,8 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
         if (ec)
             return fail(ec, "resolve");
-        // Make the connection on the IP address we get from a lookup
+
+        // Make the connection on the IP address we get from a lookup.
         beast::get_lowest_layer(stream_).async_connect(
             results, beast::bind_front_handler(&stream_entity::on_connect,
                                                shared_from_this()));
@@ -127,10 +135,34 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         if (ec)
             return fail(ec, "connect");
 
-        request_type& req = outbox_.front();
-        http::async_write(stream_, req,
-                          beast::bind_front_handler(&stream_entity::on_write,
-                                                    shared_from_this()));
+        // Now that we're connected, kickoff the event flush "loop".
+        boost::system::error_code dummy;
+        net::post(executor_,
+                  beast::bind_front_handler(&stream_entity::on_flush_timer,
+                                            shared_from_this(), dummy));
+    }
+
+    void on_flush_timer(boost::system::error_code ec) {
+        if (ec) {
+            return fail(ec, "flush");
+        }
+
+        if (!outbox_.empty()) {
+            request_type& request = outbox_.front();
+
+            // Flip-flop between this function and on_write; pushing an event
+            // and then popping it.
+            http::async_write(
+                stream_, request,
+                beast::bind_front_handler(&stream_entity::on_write,
+                                          shared_from_this()));
+            return;
+        }
+
+        // If the outbox is empty, wait a bit before trying again.
+        flush_timer_.expires_from_now(kFlushInterval);
+        flush_timer_.async_wait(beast::bind_front_handler(
+            &stream_entity::on_flush_timer, shared_from_this()));
     }
 
     void on_write(beast::error_code ec, std::size_t) {
@@ -138,40 +170,6 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
             return fail(ec, "write");
 
         outbox_.pop();
-        stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
-
-        // not_connected happens sometimes so don't bother reporting it.
-        if (ec && ec != beast::errc::not_connected)
-            return fail(ec, "shutdown");
-
-        // If there's more to do, queue up another resolve. Otherwise,
-        // wait a little while before trying again.
-        if (!outbox_.empty()) {
-            resolver_.async_resolve(
-                callback_host_, callback_port_,
-                beast::bind_front_handler(&stream_entity::on_resolve,
-                                          shared_from_this()));
-        } else {
-            flush_timer_.expires_from_now(kFlushInterval);
-            flush_timer_.async_wait(beast::bind_front_handler(
-                &stream_entity::on_flush_timer, shared_from_this()));
-        }
-    }
-
-    void on_flush_timer(boost::system::error_code const& ec) {
-        if (ec) {
-            return fail(ec, "flush");
-        }
-
-        if (!outbox_.empty()) {
-            resolver_.async_resolve(
-                callback_host_, callback_port_,
-                beast::bind_front_handler(&stream_entity::on_resolve,
-                                          shared_from_this()));
-        } else {
-            flush_timer_.expires_from_now(kFlushInterval);
-            flush_timer_.async_wait(beast::bind_front_handler(
-                &stream_entity::on_flush_timer, shared_from_this()));
-        }
+        on_flush_timer(boost::system::error_code{});
     }
 };
