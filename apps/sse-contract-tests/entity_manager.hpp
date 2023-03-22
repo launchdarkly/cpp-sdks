@@ -8,7 +8,7 @@
 #include <memory>
 
 class entity_manager {
-    std::unordered_map<std::string, stream_entity> entities_;
+    std::unordered_map<std::string, std::shared_ptr<stream_entity>> entities_;
     std::size_t counter_;
     std::mutex lock_;
     boost::asio::any_io_executor executor_;
@@ -34,7 +34,7 @@ public:
         if (!client) {
             return std::nullopt;
         }
-        entities_.emplace(id, stream_entity{executor_, std::move(params)});
+        entities_.emplace(id, std::make_shared<stream_entity>(executor_, std::move(params)));
         return id;
     }
 

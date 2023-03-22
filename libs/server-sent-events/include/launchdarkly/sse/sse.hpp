@@ -29,6 +29,7 @@ class builder {
     builder(net::any_io_executor ioc, std::string url);
     builder& header(std::string const& name, std::string const& value);
     builder& method(http::verb verb);
+    builder& tls(ssl::context_base::method);
     std::shared_ptr<client> build();
 
    private:
@@ -36,6 +37,8 @@ class builder {
     net::any_io_executor m_executor;
     ssl::context m_ssl_ctx;
     http::request<http::empty_body> m_request;
+    std::optional<unsigned int> tls_version_;
+
 };
 
 class event_data {

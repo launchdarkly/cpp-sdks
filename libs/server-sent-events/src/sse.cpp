@@ -222,8 +222,7 @@ class ssl_client : public client {
             std::chrono::seconds(10));
 
         on_chunk_body_trampoline_.emplace(
-            [self = std::static_pointer_cast<ssl_client>(
-                 this->shared_from_this())](auto remain, auto body, auto ec) {
+            [self = shared()](auto remain, auto body, auto ec) {
                 auto consumed = self->parse_stream(remain, body, ec);
                 self->parse_events();
                 return consumed;
@@ -257,8 +256,6 @@ class ssl_client : public client {
                std::string port)
         : client(ex, std::move(req), std::move(host), std::move(port)),
           stream_{ex, ctx} {
-
-        std::cout << "constructor\n";
     }
 
     void read() override {
@@ -279,10 +276,91 @@ class ssl_client : public client {
     }
 };
 
+class plaintext_client : public client {
+    beast::tcp_stream stream_;
+
+    std::shared_ptr<plaintext_client> shared() {
+        return std::static_pointer_cast<plaintext_client>(shared_from_this());
+    }
+
+    void on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
+        if (ec)
+            return fail(ec, "resolve");
+        // Make the connection on the IP address we get from a lookup
+        beast::get_lowest_layer(stream_).async_connect(
+            results,
+            beast::bind_front_handler(&plaintext_client::on_connect, shared()));
+    }
+
+    void on_connect(beast::error_code ec,
+                    tcp::resolver::results_type::endpoint_type) {
+        if (ec)
+            return fail(ec, "connect");
+
+        http::async_write(
+            stream_, m_request,
+            beast::bind_front_handler(&plaintext_client::on_write, shared()));
+    }
+
+    void on_write(beast::error_code ec, std::size_t) {
+        if (ec)
+            return fail(ec, "write");
+
+        beast::get_lowest_layer(stream_).expires_after(
+            std::chrono::seconds(10));
+
+        on_chunk_body_trampoline_.emplace(
+            [self = shared()](auto remain, auto body, auto ec) {
+                auto consumed = self->parse_stream(remain, body, ec);
+                self->parse_events();
+                return consumed;
+            });
+
+        parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
+
+        http::async_read_some(
+            stream_, m_buffer, parser_,
+            beast::bind_front_handler(&plaintext_client::on_read, shared()));
+    }
+
+    void on_read(beast::error_code ec, std::size_t bytes_transferred) {
+        boost::ignore_unused(bytes_transferred);
+        if (ec) {
+            return fail(ec, "read");
+        }
+
+        beast::get_lowest_layer(stream_).expires_never();
+
+        http::async_read_some(
+            stream_, m_buffer, parser_,
+            beast::bind_front_handler(&plaintext_client::on_read, shared()));
+    }
+
+   public:
+    plaintext_client(net::any_io_executor ex,
+                     ssl::context& ctx,
+                     http::request<http::empty_body> req,
+                     std::string host,
+                     std::string port)
+        : client(ex, std::move(req), std::move(host), std::move(port)),
+          stream_{ex} {
+    }
+
+    void read() override {
+        beast::get_lowest_layer(stream_).expires_after(
+            std::chrono::seconds(15));
+
+        m_resolver.async_resolve(
+            host_, port_,
+            beast::bind_front_handler(&plaintext_client::on_resolve, shared()));
+    }
+};
+
 builder::builder(net::any_io_executor ctx, std::string url)
     : m_url{std::move(url)},
       m_ssl_ctx{ssl::context::tlsv12_client},
-      m_executor{std::move(ctx)} {
+      m_executor{std::move(ctx)},
+      tls_version_{12}{
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);
 
@@ -303,24 +381,36 @@ builder& builder::method(http::verb verb) {
     return *this;
 }
 
+builder& builder::tls(ssl::context_base::method ctx) {
+    m_ssl_ctx = ssl::context{ctx};
+    return *this;
+}
+
+
 std::shared_ptr<client> builder::build() {
     boost::system::result<boost::urls::url_view> uri_components =
         boost::urls::parse_uri(m_url);
     if (!uri_components) {
         return nullptr;
     }
-    std::string port;
-    if (!uri_components->has_port() &&
-        uri_components->scheme_id() == boost::urls::scheme::https) {
-        port = "443";
-    }
+
 
     m_request.set(http::field::host, uri_components->host());
     m_request.target(uri_components->path());
 
-    return std::make_shared<ssl_client>(net::make_strand(m_executor), m_ssl_ctx,
-                                        m_request, uri_components->host(),
-                                        port);
+    if (uri_components->scheme_id() == boost::urls::scheme::https) {
+        std::string port = uri_components->has_port() ? uri_components->port() : "443";
+
+        return std::make_shared<ssl_client>(net::make_strand(m_executor),
+                                            m_ssl_ctx, m_request,
+                                            uri_components->host(), port);
+    } else {
+        std::string port = uri_components->has_port() ? uri_components->port() : "80";
+
+        return std::make_shared<plaintext_client>(net::make_strand(m_executor),
+                                                  m_ssl_ctx, m_request,
+                                                  uri_components->host(), port);
+    }
 }
 
 }  // namespace launchdarkly::sse
