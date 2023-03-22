@@ -65,7 +65,9 @@ client::client(net::any_io_executor ex,
       m_cb{[](event_data e) {
           std::cout << "Event[" << e.get_type() << "] = <" << e.get_data()
                     << ">\n";
-      }} {}
+      }} {
+    parser_.body_limit(boost::none);
+}
 
 // Report a failure
 void fail(beast::error_code ec, char const* what) {
@@ -130,8 +132,7 @@ void client::parse_events() {
                 m_event_data->append_data(field.second);
             } else if (field.first == "id") {
                 if (field.second.find('\0') != std::string::npos) {
-                    std::cout
-                        << "Debug: ignoring event ID will null terminator\n";
+                    // IDs with null-terminators are acceptable, but ignored.
                     continue;
                 }
                 last_event_id_ = field.second;
@@ -265,7 +266,7 @@ class ssl_client : public client {
     void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         if (ec) {
-            return fail(ec, "read");
+            return fail(ec, "sse:read");
         }
 
         beast::get_lowest_layer(stream_).expires_never();
@@ -276,8 +277,8 @@ class ssl_client : public client {
     }
 
     void on_stop() {
-        beast::error_code ec;
-        beast::close_socket(beast::get_lowest_layer(stream_));
+        //beast::close_socket(beast::get_lowest_layer(stream_));
+        beast::get_lowest_layer(stream_).cancel();
     }
 
    public:
@@ -362,7 +363,7 @@ class plaintext_client : public client {
     void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         if (ec && ec != beast::errc::operation_canceled) {
-            return fail(ec, "read");
+            return fail(ec, "sse:read");
         }
 
         beast::get_lowest_layer(stream_).expires_never();
@@ -373,8 +374,8 @@ class plaintext_client : public client {
     }
 
     void on_stop() {
-        beast::error_code ec;
-        beast::close_socket(beast::get_lowest_layer(stream_));
+      //  beast::close_socket(beast::get_lowest_layer(stream_));
+        stream_.cancel();
     }
 
    public:

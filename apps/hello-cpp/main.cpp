@@ -29,11 +29,5 @@ int main() {
     }
 
     client->run();
-
-
-//    client->on_event([](launchdarkly::sse::event_data e){
-//        std::cout << "Got[" << e.get_type() << "] = <" << e.get_data() << ">\n";
-//    });
-
     ioc.run();
 }

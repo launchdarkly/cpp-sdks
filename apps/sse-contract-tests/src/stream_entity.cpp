@@ -108,7 +108,7 @@ void stream_entity::on_connect(beast::error_code ec,
 }
 
 void stream_entity::on_flush_timer(boost::system::error_code ec) {
-    if (ec) {
+    if (ec && ec != net::error::operation_aborted) {
         return fail(ec, "flush");
     }
 
