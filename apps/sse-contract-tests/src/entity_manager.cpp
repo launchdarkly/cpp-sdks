@@ -1,5 +1,5 @@
 #include "entity_manager.hpp"
-
+#include "stream_entity.hpp"
 #include "launchdarkly/sse/sse.hpp"
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor)

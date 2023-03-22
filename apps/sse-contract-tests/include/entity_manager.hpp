@@ -1,15 +1,16 @@
 #pragma once
 
 #include "definitions.hpp"
-#include "stream_entity.hpp"
 
-#include <boost/asio/executor.hpp>
+#include <boost/asio/any_io_executor.hpp>
 
 #include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <optional>
 #include <string>
+
+class StreamEntity;
 
 // Manages the individual SSE clients (called entities here) which are
 // instantiated for each contract test.

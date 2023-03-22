@@ -1,5 +1,6 @@
 #include "server.hpp"
 
+#include <boost/asio/io_context.hpp>
 #include <iostream>
 
 int
@@ -7,9 +8,9 @@ main(int argc, char* argv[])
 {
     try
     {
-        const auto address = net::ip::make_address("0.0.0.0");
+        const auto address = boost::asio::ip::make_address("0.0.0.0");
         unsigned short port = 8111;
-        net::io_context ioc;
+        boost::asio::io_context ioc;
 
         server s{ioc.get_executor(), address, port};
         s.add_capability("headers");

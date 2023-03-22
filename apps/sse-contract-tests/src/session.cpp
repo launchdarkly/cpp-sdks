@@ -1,8 +1,11 @@
 #include "session.hpp"
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/asio/dispatch.hpp>
 #include <iostream>
 
 const std::string kEntityPath = "/entity/";
+
+namespace net = boost::asio;
 
 http::message_generator session::handle_request(
     http::request<http::string_body>&& req) {
