@@ -2,7 +2,7 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <iostream>
 
-const std::string ENTITY_PATH = "/entity/";
+const std::string kEntityPath = "/entity/";
 
 http::message_generator session::handle_request(
     http::request<http::string_body>&& req) {
@@ -53,7 +53,7 @@ http::message_generator session::handle_request(
     auto const create_entity_response = [&req](std::string const& id) {
         http::response<http::empty_body> res{http::status::ok, req.version()};
         res.keep_alive(req.keep_alive());
-        res.set("Location", ENTITY_PATH + id);
+        res.set("Location", kEntityPath + id);
         res.prepare_payload();
         return res;
     };
@@ -95,9 +95,9 @@ http::message_generator session::handle_request(
     }
 
     if (req.method() == http::verb::delete_ &&
-        req.target().starts_with(ENTITY_PATH)) {
+        req.target().starts_with(kEntityPath)) {
         std::string id = req.target();
-        boost::erase_first(id, ENTITY_PATH);
+        boost::erase_first(id, kEntityPath);
         bool erased = manager_.destroy(id);
         return destroy_entity_response(erased);
     }

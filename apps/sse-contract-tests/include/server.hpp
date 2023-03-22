@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "entity_manager.hpp"
 
 #include <boost/asio/ip/tcp.hpp>

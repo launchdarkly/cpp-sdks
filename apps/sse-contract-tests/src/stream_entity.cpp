@@ -73,9 +73,9 @@ stream_entity::request_type stream_entity::build_request(
     nlohmann::json json;
 
     if (ev.get_type() == "comment") {
-        json = comment_message{"comment", ev.get_data()};
+        json = CommentMessage{"comment", ev.get_data()};
     } else {
-        json = event_message{"event", event{ev.get_type(), ev.get_data(),
+        json = EventMessage{"event", Event{ev.get_type(), ev.get_data(),
                                             ev.get_id().value_or("")}};
     }
 

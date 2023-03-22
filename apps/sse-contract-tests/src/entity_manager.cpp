@@ -1,4 +1,4 @@
-#include "../include/entity_manager.hpp"
+#include "entity_manager.hpp"
 
 #include "launchdarkly/sse/sse.hpp"
 

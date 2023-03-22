@@ -55,24 +55,24 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
         body
 );
 
-struct event {
+struct Event {
     std::string type;
     std::string data;
     std::string id;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(event, type, data, id);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Event, type, data, id);
 
-struct event_message {
+struct EventMessage {
     std::string kind;
-    event event;
+    Event event;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(event_message, kind, event);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EventMessage, kind, event);
 
-struct comment_message {
+struct CommentMessage {
     std::string kind;
     std::string comment;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(comment_message, kind, comment);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CommentMessage, kind, comment);
