@@ -34,7 +34,9 @@ public:
         if (!client) {
             return std::nullopt;
         }
-        entities_.emplace(id, std::make_shared<stream_entity>(executor_, std::move(params)));
+        auto entity = std::make_shared<stream_entity>(executor_, std::move(params));
+        entity->run();
+        entities_.emplace(id, entity);
         return id;
     }
 
@@ -44,6 +46,7 @@ public:
         if (it == entities_.end()) {
             return false;
         }
+        it->second->close();
         entities_.erase(it);
         return true;
     }

@@ -101,6 +101,7 @@ class client : public std::enable_shared_from_this<client> {
     }
 
     virtual void read() = 0;
+    virtual void close() = 0;
 };
 
 }  // namespace launchdarkly::sse

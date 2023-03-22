@@ -37,7 +37,7 @@ std::string const& event_data::get_data() {
 }
 
 void event_data::trim_trailing_newline() {
-    if (m_data[m_data.size()-1] == '\n') {
+    if (m_data[m_data.size() - 1] == '\n') {
         m_data.resize(m_data.size() - 1);
     }
 }
@@ -269,6 +269,11 @@ class ssl_client : public client {
             beast::bind_front_handler(&ssl_client::on_read, shared()));
     }
 
+    void on_stop() {
+        beast::error_code ec;
+        beast::close_socket(beast::get_lowest_layer(stream_));
+    }
+
    public:
     ssl_client(net::any_io_executor ex,
                ssl::context& ctx,
@@ -293,6 +298,14 @@ class ssl_client : public client {
         m_resolver.async_resolve(
             host_, port_,
             beast::bind_front_handler(&ssl_client::on_resolve, shared()));
+    }
+
+    void close() override {
+        net::post(
+            stream_.get_executor(),
+            beast::bind_front_handler(
+                &ssl_client::on_stop,
+                shared()));
     }
 };
 
@@ -356,6 +369,11 @@ class plaintext_client : public client {
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
     }
 
+    void on_stop() {
+        beast::error_code ec;
+        beast::close_socket(beast::get_lowest_layer(stream_));
+    }
+
    public:
     plaintext_client(net::any_io_executor ex,
                      ssl::context& ctx,
@@ -372,6 +390,14 @@ class plaintext_client : public client {
         m_resolver.async_resolve(
             host_, port_,
             beast::bind_front_handler(&plaintext_client::on_resolve, shared()));
+    }
+
+    void close() override {
+        net::post(
+            stream_.get_executor(),
+            beast::bind_front_handler(
+                &plaintext_client::on_stop,
+                shared()));
     }
 };
 
