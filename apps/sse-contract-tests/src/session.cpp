@@ -7,7 +7,7 @@ const std::string kEntityPath = "/entity/";
 
 namespace net = boost::asio;
 
-http::message_generator session::handle_request(
+http::message_generator Session::handle_request(
     http::request<http::string_body>&& req) {
     auto const bad_request = [&req](beast::string_view why) {
         http::response<http::string_body> res{http::status::bad_request,
@@ -105,30 +105,30 @@ http::message_generator session::handle_request(
         return destroy_entity_response(erased);
     }
 
-    return bad_request("unknown route");
+    return not_found(req.target());
 }
 
-session::session(tcp::socket&& socket,
+Session::Session(tcp::socket&& socket,
                  EntityManager& manager,
                  std::vector<std::string> caps)
     : stream_{std::move(socket)},
       manager_{manager},
       capabilities_{std::move(caps)} {}
 
-void session::start() {
+void Session::start() {
     net::dispatch(
         stream_.get_executor(),
-        beast::bind_front_handler(&session::do_read, shared_from_this()));
+        beast::bind_front_handler(&Session::do_read, shared_from_this()));
 }
 
-void session::do_read() {
+void Session::do_read() {
     request_ = {};
     http::async_read(
         stream_, buffer_, request_,
-        beast::bind_front_handler(&session::on_read, shared_from_this()));
+        beast::bind_front_handler(&Session::on_read, shared_from_this()));
 }
 
-void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
+void Session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
 
     if (ec == http::error::end_of_stream) {
@@ -141,19 +141,19 @@ void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
     send_response(handle_request(std::move(request_)));
 }
 
-void session::do_close() {
+void Session::do_close() {
     beast::error_code ec;
     stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
 }
 
-void session::send_response(http::message_generator&& msg) {
+void Session::send_response(http::message_generator&& msg) {
     beast::async_write(
         stream_, std::move(msg),
-        beast::bind_front_handler(&session::on_write, shared_from_this(),
+        beast::bind_front_handler(&Session::on_write, shared_from_this(),
                                   request_.keep_alive()));
 }
 
-void session::on_write(bool keep_alive,
+void Session::on_write(bool keep_alive,
                        beast::error_code ec,
                        std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);

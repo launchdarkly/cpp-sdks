@@ -12,7 +12,7 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 
-class session : public std::enable_shared_from_this<session> {
+class Session : public std::enable_shared_from_this<Session> {
     // The socket for the currently connected client.
     beast::tcp_stream stream_;
 
@@ -27,7 +27,7 @@ class session : public std::enable_shared_from_this<session> {
     std::vector<std::string> capabilities_;
 
    public:
-    explicit session(tcp::socket&& socket,
+    explicit Session(tcp::socket&& socket,
                      EntityManager& manager,
                      std::vector<std::string> caps);
     void start();

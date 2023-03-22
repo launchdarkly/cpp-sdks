@@ -21,12 +21,12 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         return std::nullopt;
     }
     std::shared_ptr<StreamEntity> entity =
-        std::make_shared<StreamEntity>(executor_, client, params.callbackUrl);
+        std::make_shared<StreamEntity>(executor_,  client, params.callbackUrl);
 
     // Kicks off asynchronous operations.
     entity->run();
-    entities_.emplace(id, entity);
 
+    entities_.emplace(id, entity);
     return id;
 }
 
@@ -36,8 +36,10 @@ bool EntityManager::destroy(std::string const& id) {
     if (it == entities_.end()) {
         return false;
     }
-    // Shuts down asynchronous operations.
-    it->second->stop();
-    entities_.erase(it);
+
+    if (auto weak = it->second.lock()) {
+        weak->stop();
+    }
+
     return true;
 }

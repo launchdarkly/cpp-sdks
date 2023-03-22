@@ -40,7 +40,7 @@ void server::stop() {
 void server::accept_connection() {
     acceptor_.async_accept([this](beast::error_code ec, tcp::socket peer) {
         if (!ec && !stopped_) {
-            std::make_shared<session>(std::move(peer), manager_, caps_)
+            std::make_shared<Session>(std::move(peer), manager_, caps_)
                 ->start();
             accept_connection();
         }

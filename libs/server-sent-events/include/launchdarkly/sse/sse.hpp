@@ -94,6 +94,7 @@ class client : public std::enable_shared_from_this<client> {
            http::request<http::empty_body> req,
            std::string host,
            std::string port);
+    ~client();
 
     template <typename Callback>
     void on_event(Callback event_cb) {

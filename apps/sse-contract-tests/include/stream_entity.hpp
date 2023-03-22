@@ -1,5 +1,7 @@
 #pragma once
 
+#include "entity_manager.hpp"
+
 #include <launchdarkly/sse/sse.hpp>
 
 #include <boost/asio/deadline_timer.hpp>
@@ -29,21 +31,24 @@ class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
 
     net::any_io_executor executor_;
     tcp::resolver resolver_;
-    beast::tcp_stream stream_;
+    beast::tcp_stream event_stream_;
 
     // When events are received from the SSE client, they are pushed into
     // this queue.
     boost::lockfree::spsc_queue<request_type> outbox_;
     // Periodically, the events are flushed to the test harness.
     net::deadline_timer flush_timer_;
+    std::string id_;
 
    public:
     StreamEntity(net::any_io_executor executor,
-                  std::shared_ptr<launchdarkly::sse::client> client,
-                  std::string callback_url);
+                 std::shared_ptr<launchdarkly::sse::client> client,
+                 std::string callback_url);
 
+    ~StreamEntity() = default;
     void run();
     void stop();
+
    private:
     request_type build_request(std::size_t counter,
                                launchdarkly::sse::event_data ev);
@@ -52,4 +57,6 @@ class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
                     tcp::resolver::results_type::endpoint_type);
     void on_flush_timer(boost::system::error_code ec);
     void on_write(beast::error_code ec, std::size_t);
+
+    void do_shutdown(beast::error_code ec, std::string what);
 };

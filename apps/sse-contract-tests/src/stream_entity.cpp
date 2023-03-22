@@ -5,17 +5,13 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-void fail(beast::error_code ec, char const* what) {
-    std::cerr << what << ": " << ec.message() << "\n";
-}
-
 // Periodically check the outbox (outgoing events to the test harness)
 // at this interval.
 auto const kFlushInterval = boost::posix_time::milliseconds{10};
 
 StreamEntity::StreamEntity(net::any_io_executor executor,
-                             std::shared_ptr<launchdarkly::sse::client> client,
-                             std::string callback_url)
+                           std::shared_ptr<launchdarkly::sse::client> client,
+                           std::string callback_url)
     : client_{std::move(client)},
       callback_url_{std::move(callback_url)},
       callback_port_{},
@@ -23,7 +19,7 @@ StreamEntity::StreamEntity(net::any_io_executor executor,
       callback_counter_{0},
       executor_{executor},
       resolver_{executor},
-      stream_{executor},
+      event_stream_{executor},
       outbox_{1024},
       flush_timer_{executor, boost::posix_time::milliseconds{0}} {
     boost::system::result<boost::urls::url_view> uri_components =
@@ -31,6 +27,12 @@ StreamEntity::StreamEntity(net::any_io_executor executor,
 
     callback_host_ = uri_components->host();
     callback_port_ = uri_components->port();
+}
+
+void StreamEntity::do_shutdown(beast::error_code ec, std::string what) {
+    event_stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
+    flush_timer_.cancel();
+    client_->close();
 }
 
 void StreamEntity::run() {
@@ -47,18 +49,17 @@ void StreamEntity::run() {
     client_->run();
 
     // Begin connecting to the test harness's event-posting service.
-    resolver_.async_resolve(
-        callback_host_, callback_port_,
-        beast::bind_front_handler(&StreamEntity::on_resolve,
-                                  shared_from_this()));
+    resolver_.async_resolve(callback_host_, callback_port_,
+                            beast::bind_front_handler(&StreamEntity::on_resolve,
+                                                      shared_from_this()));
 }
 
 void StreamEntity::stop() {
-    beast::error_code ec;
-    stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
-
-    flush_timer_.cancel();
-    client_->close();
+    beast::error_code ec = net::error::basic_errors::operation_aborted;
+    std::string reason = "stop";
+    net::post(executor_,
+              beast::bind_front_handler(&StreamEntity::do_shutdown,
+                                        shared_from_this(), ec, reason));
 }
 
 StreamEntity::request_type StreamEntity::build_request(
@@ -76,7 +77,7 @@ StreamEntity::request_type StreamEntity::build_request(
         json = CommentMessage{"comment", ev.get_data()};
     } else {
         json = EventMessage{"event", Event{ev.get_type(), ev.get_data(),
-                                            ev.get_id().value_or("")}};
+                                           ev.get_id().value_or("")}};
     }
 
     req.body() = json.dump();
@@ -85,20 +86,23 @@ StreamEntity::request_type StreamEntity::build_request(
 }
 
 void StreamEntity::on_resolve(beast::error_code ec,
-                               tcp::resolver::results_type results) {
-    if (ec)
-        return fail(ec, "resolve");
+                              tcp::resolver::results_type results) {
+    if (ec) {
+        return do_shutdown(ec, "resolve");
+    }
 
     // Make the connection on the IP address we get from a lookup.
-    beast::get_lowest_layer(stream_).async_connect(
-        results, beast::bind_front_handler(&StreamEntity::on_connect,
-                                           shared_from_this()));
+    beast::get_lowest_layer(event_stream_)
+        .async_connect(results,
+                       beast::bind_front_handler(&StreamEntity::on_connect,
+                                                 shared_from_this()));
 }
 
 void StreamEntity::on_connect(beast::error_code ec,
-                               tcp::resolver::results_type::endpoint_type) {
-    if (ec)
-        return fail(ec, "connect");
+                              tcp::resolver::results_type::endpoint_type) {
+    if (ec) {
+        return do_shutdown(ec, "connect");
+    }
 
     // Now that we're connected, kickoff the event flush "loop".
     boost::system::error_code dummy;
@@ -108,8 +112,8 @@ void StreamEntity::on_connect(beast::error_code ec,
 }
 
 void StreamEntity::on_flush_timer(boost::system::error_code ec) {
-    if (ec && ec != net::error::operation_aborted) {
-        return fail(ec, "flush");
+    if (ec) {
+        return do_shutdown(ec, "flush");
     }
 
     if (!outbox_.empty()) {
@@ -117,7 +121,7 @@ void StreamEntity::on_flush_timer(boost::system::error_code ec) {
 
         // Flip-flop between this function and on_write; pushing an event
         // and then popping it.
-        http::async_write(stream_, request,
+        http::async_write(event_stream_, request,
                           beast::bind_front_handler(&StreamEntity::on_write,
                                                     shared_from_this()));
         return;
@@ -130,9 +134,9 @@ void StreamEntity::on_flush_timer(boost::system::error_code ec) {
 }
 
 void StreamEntity::on_write(beast::error_code ec, std::size_t) {
-    if (ec)
-        return fail(ec, "write");
-
+    if (ec) {
+        return do_shutdown(ec, "write");
+    }
     outbox_.pop();
     on_flush_timer(boost::system::error_code{});
 }

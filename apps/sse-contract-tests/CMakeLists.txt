@@ -24,3 +24,5 @@ target_link_libraries(sse-tests PRIVATE
 )
 
 target_include_directories(sse-tests PUBLIC include)
+
+#add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)

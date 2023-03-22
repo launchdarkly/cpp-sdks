@@ -68,6 +68,9 @@ client::client(net::any_io_executor ex,
       }} {
     parser_.body_limit(boost::none);
 }
+client::~client() {
+    std::cout << "~client\n";
+}
 
 // Report a failure
 void fail(beast::error_code ec, char const* what) {
@@ -277,7 +280,6 @@ class ssl_client : public client {
     }
 
     void on_stop() {
-        //beast::close_socket(beast::get_lowest_layer(stream_));
         beast::get_lowest_layer(stream_).cancel();
     }
 
@@ -374,7 +376,6 @@ class plaintext_client : public client {
     }
 
     void on_stop() {
-      //  beast::close_socket(beast::get_lowest_layer(stream_));
         stream_.cancel();
     }
 
