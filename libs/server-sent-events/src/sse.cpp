@@ -187,16 +187,19 @@ size_t client::parse_stream(std::uint64_t remain,
         if (i == body.size()) {
             continue;
         } else if (body.at(i) == '\r') {
-            if (this->begin_CR_) {
-                assert(0 && "illegal carriage return (likely a bug in the parser)");
+            complete_line();
+            begin_CR_ = true;
+            i++;
+        } else if (body.at(i) == '\n') {
+            if (begin_CR_) {
+                begin_CR_ = false;
+                i++;
             } else {
-                this->begin_CR_ = true;
+                complete_line();
                 i++;
             }
-        } else if (body.at(i) == '\n') {
-            this->begin_CR_ = false;
-            this->complete_line();
-            i++;
+        } else {
+            begin_CR_ = false;
         }
     }
     return body.length();
@@ -304,11 +307,8 @@ class ssl_client : public client {
     }
 
     void close() override {
-        net::post(
-            stream_.get_executor(),
-            beast::bind_front_handler(
-                &ssl_client::on_stop,
-                shared()));
+        net::post(stream_.get_executor(),
+                  beast::bind_front_handler(&ssl_client::on_stop, shared()));
     }
 };
 
@@ -361,7 +361,7 @@ class plaintext_client : public client {
 
     void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
-        if (ec) {
+        if (ec && ec != beast::errc::operation_canceled) {
             return fail(ec, "read");
         }
 
@@ -398,9 +398,7 @@ class plaintext_client : public client {
     void close() override {
         net::post(
             stream_.get_executor(),
-            beast::bind_front_handler(
-                &plaintext_client::on_stop,
-                shared()));
+            beast::bind_front_handler(&plaintext_client::on_stop, shared()));
     }
 };
 

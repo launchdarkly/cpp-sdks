@@ -82,7 +82,6 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         if (ec)
             return fail(ec, "write");
 
-        std::cout << "on_write: popping request; shutting down socket; setting timer\n";
         requests_.pop();
         stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
 
@@ -96,12 +95,10 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
                 beast::bind_front_handler(&stream_entity::on_resolve,
                                           shared_from_this()));
         } else {
-            flush_timer_.expires_from_now(
-                boost::posix_time::milliseconds{500});
+            flush_timer_.expires_from_now(boost::posix_time::milliseconds{100});
             flush_timer_.async_wait(beast::bind_front_handler(
                 &stream_entity::on_flush, shared_from_this()));
         }
-
     }
 
     void on_flush(boost::system::error_code const& ec) {
@@ -109,57 +106,45 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
             return fail(ec, "flush");
         }
 
-        std::cout << "on_flush\n";
-
         if (!requests_.empty()) {
-            std::cout << "on_flush: queueing resolve\n";
-                resolver_.async_resolve(
-                    callback_host_, callback_port_,
-                    beast::bind_front_handler(&stream_entity::on_resolve,
-                                              shared_from_this()));
+            resolver_.async_resolve(
+                callback_host_, callback_port_,
+                beast::bind_front_handler(&stream_entity::on_resolve,
+                                          shared_from_this()));
         } else {
-                flush_timer_.expires_from_now(
-                    boost::posix_time::milliseconds{500});
-                flush_timer_.async_wait(beast::bind_front_handler(
-                    &stream_entity::on_flush, shared_from_this()));
+            flush_timer_.expires_from_now(boost::posix_time::milliseconds{100});
+            flush_timer_.async_wait(beast::bind_front_handler(
+                &stream_entity::on_flush, shared_from_this()));
         }
     }
 
    public:
-    stream_entity(net::any_io_executor executor, config_params params)
-        : callback_url_{params.callbackUrl},
+    stream_entity(net::any_io_executor executor,
+                  std::shared_ptr<launchdarkly::sse::client> client,
+                  std::string callback_url)
+        : callback_url_{std::move(callback_url)},
           callback_host_{},
           callback_port_{},
           callback_counter_{0},
-          client_{},
+          client_{std::move(client)},
           executor_{executor},
           resolver_{executor},
           stream_{executor},
           requests_{1024},
-          flush_timer_{executor, boost::posix_time::milliseconds{50}},
+          flush_timer_{executor, boost::posix_time::milliseconds{0}},
           event_mutex_{} {
-        auto builder = launchdarkly::sse::builder{executor, params.streamUrl};
-        if (params.headers) {
-            for (auto h : *params.headers) {
-                builder.header(h.first, h.second);
-            }
-        }
-
         boost::system::result<boost::urls::url_view> uri_components =
-            boost::urls::parse_uri(params.callbackUrl);
+            boost::urls::parse_uri(callback_url_);
 
         callback_host_ = uri_components->host();
         callback_port_ = uri_components->port();
 
-        client_ = builder.build();
-        if (client_) {
-            client_->on_event([this](launchdarkly::sse::event_data ev) {
-                auto req = build_request(callback_counter_++, std::move(ev));
-                requests_.push(req);
-            });
+        client_->on_event([this](launchdarkly::sse::event_data ev) {
+            auto req = build_request(callback_counter_++, std::move(ev));
+            requests_.push(req);
+        });
 
-            client_->read();
-        }
+        client_->read();
     }
 
     void close() {
@@ -169,7 +154,6 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
 
     void run() {
         flush_timer_.async_wait(beast::bind_front_handler(
-            &stream_entity::on_flush,
-            shared_from_this()));
+            &stream_entity::on_flush, shared_from_this()));
     }
 };

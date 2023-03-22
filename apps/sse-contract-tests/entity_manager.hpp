@@ -34,7 +34,7 @@ public:
         if (!client) {
             return std::nullopt;
         }
-        auto entity = std::make_shared<stream_entity>(executor_, std::move(params));
+        auto entity = std::make_shared<stream_entity>(executor_, client, params.callbackUrl);
         entity->run();
         entities_.emplace(id, entity);
         return id;
