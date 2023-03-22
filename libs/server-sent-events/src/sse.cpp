@@ -184,13 +184,16 @@ size_t client::parse_stream(std::uint64_t remain,
     size_t i = 0;
     while (i < body.length()) {
         i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
-        if (body[i] == '\r') {
+        if (i == body.size()) {
+            continue;
+        } else if (body.at(i) == '\r') {
             if (this->begin_CR_) {
-                // todo: illegal token
+                assert(0 && "illegal carriage return (likely a bug in the parser)");
             } else {
                 this->begin_CR_ = true;
+                i++;
             }
-        } else if (body[i] == '\n') {
+        } else if (body.at(i) == '\n') {
             this->begin_CR_ = false;
             this->complete_line();
             i++;
