@@ -57,15 +57,15 @@ using sse_comment = std::string;
 using event = std::variant<sse_event, sse_comment>;
 
 class client : public std::enable_shared_from_this<client> {
+   protected:
     using parser = http::response_parser<http::string_body>;
     tcp::resolver m_resolver;
-    beast::ssl_stream<beast::tcp_stream> m_stream;
     beast::flat_buffer m_buffer;
     http::request<http::empty_body> m_request;
     http::response<http::string_body> m_response;
     parser parser_;
-    std::string m_host;
-    std::string m_port;
+    std::string host_;
+    std::string port_;
     boost::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
     std::vector<event> m_events;
@@ -78,27 +78,23 @@ class client : public std::enable_shared_from_this<client> {
                              boost::string_view body,
                              beast::error_code& ec);
     void parse_events();
-    void on_resolve(beast::error_code, tcp::resolver::results_type);
-    void on_connect(beast::error_code,
-                    tcp::resolver::results_type::endpoint_type);
-    void on_handshake(beast::error_code);
-    void on_write(beast::error_code ec, std::size_t);
-    void on_read(beast::error_code, std::size_t);
+
     std::optional<std::function<
         size_t(uint64_t, boost::string_view, boost::system::error_code&)>>
         on_chunk_body_trampoline_;
 
    public:
-    explicit client(net::any_io_executor ex,
-                    ssl::context& ctx,
-                    http::request<http::empty_body> req,
-                    std::string host,
-                    std::string port);
-    void read();
+    client(boost::asio::any_io_executor ex,
+           http::request<http::empty_body> req,
+           std::string host,
+           std::string port);
+
     template <typename Callback>
     void on_event(Callback event_cb) {
         m_cb = event_cb;
     }
+
+    virtual void read() = 0;
 };
 
 }  // namespace launchdarkly::sse
