@@ -13,11 +13,11 @@ class entity_manager {
     std::mutex lock_;
     boost::asio::any_io_executor executor_;
 public:
-    entity_manager(boost::asio::any_io_executor executor):
+    explicit entity_manager(boost::asio::any_io_executor executor):
             entities_{},
             counter_{0},
             lock_{},
-            executor_{executor}{
+            executor_{std::move(executor)}{
     }
 
     std::optional<std::string> create(config_params params) {

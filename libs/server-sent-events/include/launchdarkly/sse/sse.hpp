@@ -60,13 +60,13 @@ using event = std::variant<sse_event, sse_comment>;
 
 class client : public std::enable_shared_from_this<client> {
     using parser =
-        http::response_parser<http::basic_dynamic_body<beast::flat_buffer>>;
+        http::response_parser<http::string_body>;
     tcp::resolver m_resolver;
     beast::ssl_stream<beast::tcp_stream> m_stream;
     beast::flat_buffer m_buffer;
     http::request<http::empty_body> m_request;
     http::response<http::string_body> m_response;
-    parser m_parser;
+    parser parser_;
     std::string m_host;
     std::string m_port;
     boost::optional<std::string> m_buffered_line;
@@ -79,6 +79,11 @@ class client : public std::enable_shared_from_this<client> {
     size_t append_up_to(std::string_view body, const std::string& search);
     std::size_t parse_stream(std::uint64_t remain, std::string_view body, beast::error_code& ec);
     void parse_events();
+    void on_resolve(beast::error_code, tcp::resolver::results_type);
+    void on_connect(beast::error_code, tcp::resolver::results_type::endpoint_type);
+    void on_handshake(beast::error_code);
+    void on_write(beast::error_code ec, std::size_t);
+    void on_read(beast::error_code, std::size_t);
 public:
     explicit client(net::any_io_executor ex, ssl::context &ctx, http::request<http::empty_body> req, std::string host, std::string port);
     void read();

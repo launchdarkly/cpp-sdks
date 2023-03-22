@@ -132,8 +132,11 @@ class session : public std::enable_shared_from_this<session>
             try {
                 auto json = nlohmann::json::parse(request_.body());
                 auto params = json.get<config_params>();
-                std::string id = manager_.create(std::move(params));
-                return create_entity_response(id);
+                if (auto id = manager_.create(std::move(params))) {
+                    return create_entity_response(*id);
+                } else {
+                    return server_error("couldn't create client entity");
+                }
             } catch(nlohmann::json::exception& e) {
                 return bad_request("unable to parse config JSON");
             }

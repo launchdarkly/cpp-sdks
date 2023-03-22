@@ -18,7 +18,7 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 builder::builder(net::any_io_executor ctx, std::string url):
     m_url{std::move(url)},
     m_ssl_ctx{ssl::context::tlsv12_client},
-    m_executor{ctx} {
+    m_executor{std::move(ctx)} {
     // This needs to be verify_peer in production!!
     m_ssl_ctx.set_verify_mode(ssl::verify_none);
 
@@ -81,7 +81,7 @@ client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::e
         m_request{std::move(req)},
         m_host{std::move(host)},
         m_port{std::move(port)},
-        m_parser{},
+        parser_{},
         m_buffered_line{},
         m_complete_lines{},
         m_begin_CR{false},
@@ -90,8 +90,14 @@ client::client(net::any_io_executor ex, ssl::context &ctx, http::request<http::e
         m_cb{[](event_data e){
             std::cout << "Event[" << e.get_type() << "] = <" << e.get_data() << ">\n";
         }}{
-    // The HTTP response body is of potentially infinite length.
-    m_parser.body_limit(boost::none);
+
+}
+
+// Report a failure
+void
+fail(beast::error_code ec, char const* what)
+{
+    std::cerr << what << ": " << ec.message() << "\n";
 }
 
 void client::read() {
@@ -103,68 +109,70 @@ void client::read() {
         return;
     }
 
+    beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(15));
+
+    m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&client::on_resolve, shared_from_this()));
+}
+
+
+void client::on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
+    if(ec)
+        return fail(ec, "resolve");
+    // Make the connection on the IP address we get from a lookup
+    beast::get_lowest_layer(m_stream).async_connect(
+        results,
+        beast::bind_front_handler(
+            &client::on_connect,
+            shared_from_this()));
+}
+
+void client::on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
+    if (ec)
+        return fail(ec, "connect");
+
+    m_stream.async_handshake(
+        ssl::stream_base::client,
+        beast::bind_front_handler(&client::on_handshake, shared_from_this()));
+}
+
+void client::on_handshake(beast::error_code ec) {
+    if(ec)
+        return fail(ec, "handshake");
+
+    // Send the HTTP request to the remote host
+    http::async_write(m_stream, m_request,
+                      beast::bind_front_handler(
+                          &client::on_write,
+                          shared_from_this()));
+}
+
+void client::on_write(beast::error_code ec, std::size_t) {
+    if(ec)
+        return fail(ec, "write");
+
     beast::get_lowest_layer(m_stream).expires_after(std::chrono::seconds(10));
 
-    auto results = m_resolver.resolve(m_host, m_port);
-    beast::get_lowest_layer(m_stream).connect(results);
-    m_stream.handshake(ssl::stream_base::client);
-    http::write(m_stream, m_request);
+    http::async_read_some(m_stream, m_buffer, parser_,
+                     beast::bind_front_handler(
+                         &client::on_read,
+                         shared_from_this()));
+}
+
+void client::on_read(beast::error_code ec, std::size_t bytes_transferred) {
+    boost::ignore_unused(bytes_transferred);
+    if (ec) {
+        return fail(ec, "read");
+    }
 
     beast::get_lowest_layer(m_stream).expires_never();
 
-    auto callback = [this](std::uint64_t remain, std::string_view body,
-                           beast::error_code& ec) {
-        size_t read = this->parse_stream(remain, body, ec);
-        this->parse_events();
-        return read;
-    };
-
-    m_parser.on_chunk_body(callback);
-
-    // Blocking call until the stream terminates.
-    http::read(m_stream, m_buffer, m_parser);
-}
-
-void client::complete_line() {
-    if (m_buffered_line.has_value()) {
-        m_complete_lines.push_back(m_buffered_line.value());
-        std::cout << "Line: <" << m_buffered_line.value() << ">" << std::endl;
-        m_buffered_line.reset();
+    if (bytes_transferred > 0) {
+        std::cout << "got bytes: " << bytes_transferred << "; async read\n";
     }
-}
 
-size_t client::append_up_to(std::string_view body, std::string const& search) {
-    std::size_t index = body.find_first_of(search);
-    if (index != std::string::npos) {
-        body.remove_suffix(body.size() - index);
-    }
-    if (m_buffered_line.has_value()) {
-        m_buffered_line->append(body);
-    } else {
-        m_buffered_line = std::string{body};
-    }
-    return index == std::string::npos ? body.size() : index;
-}
+    http::async_read_some(m_stream, m_buffer, parser_,
+                      beast::bind_front_handler(&client::on_read, shared_from_this()));
 
-std::size_t client::parse_stream(std::uint64_t remain,
-                                 std::string_view body,
-                                 beast::error_code& ec) {
-    size_t i = 0;
-    while (i < body.length()) {
-        i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
-        if (body[i] == '\r') {
-            if (this->m_begin_CR) {
-                // todo: illegal token
-            } else {
-                this->m_begin_CR = true;
-            }
-        } else if (body[i] == '\n') {
-            this->m_begin_CR = false;
-            this->complete_line();
-            i++;
-        }
-    }
-    return body.length();
 }
 
 boost::optional<std::pair<std::string, std::string>> parse_field(
