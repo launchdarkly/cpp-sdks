@@ -76,6 +76,6 @@ private:
     tcp::acceptor acceptor_;
     boost::asio::signal_set signals_;
     bool stopped_;
-    entity_manager manager_;
+    EntityManager manager_;
     std::vector<std::string> caps_;
 };

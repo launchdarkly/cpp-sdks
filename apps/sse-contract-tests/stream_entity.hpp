@@ -18,41 +18,97 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-// Report a failure
 void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
+const auto kFlushInterval = boost::posix_time::milliseconds {100};
+
 class stream_entity : public std::enable_shared_from_this<stream_entity> {
+    // Simple string body request is appropriate since the JSON
+    // returned to the test service is minimal.
     using request_type = http::request<http::string_body>;
+
+    std::shared_ptr<launchdarkly::sse::client> client_;
 
     std::string callback_url_;
     std::string callback_port_;
     std::string callback_host_;
     size_t callback_counter_;
-    std::shared_ptr<launchdarkly::sse::client> client_;
+
     net::any_io_executor executor_;
     tcp::resolver resolver_;
     beast::tcp_stream stream_;
-    boost::lockfree::spsc_queue<request_type> requests_;
-    std::mutex event_mutex_;
+
+    // When events are received from the SSE client, they are pushed into
+    // this queue.
+    boost::lockfree::spsc_queue<request_type> outbox_;
+    // Periodically, the events are flushed to the test harness.
     net::deadline_timer flush_timer_;
 
+   public:
+    stream_entity(net::any_io_executor executor,
+                  std::shared_ptr<launchdarkly::sse::client> client,
+                  std::string callback_url)
+        : client_{std::move(client)},
+          callback_url_{std::move(callback_url)},
+          callback_port_{},
+          callback_host_{},
+          callback_counter_{0},
+          executor_{executor},
+          resolver_{executor},
+          stream_{executor},
+          outbox_{1024},
+          flush_timer_{executor, boost::posix_time::milliseconds{0}} {
+        boost::system::result<boost::urls::url_view> uri_components =
+            boost::urls::parse_uri(callback_url_);
+
+        callback_host_ = uri_components->host();
+        callback_port_ = uri_components->port();
+    }
+
+    void run() {
+        // Setup the SSE client to callback into the entity whenever it
+        // receives a comment/event.
+        client_->on_event(
+            [self = shared_from_this()](launchdarkly::sse::event_data ev) {
+                auto http_request = self->build_request(
+                    self->callback_counter_++, std::move(ev));
+                self->outbox_.push(http_request);
+            });
+
+        // Kickoff the SSE client's async operations.
+        client_->run();
+
+        // Immediately kickoff the flush "loop".
+        flush_timer_.async_wait(beast::bind_front_handler(
+            &stream_entity::on_flush_timer, shared_from_this()));
+    }
+
+    void stop() {
+        flush_timer_.cancel();
+        client_->close();
+    }
+
+   private:
     request_type build_request(std::size_t counter,
                                launchdarkly::sse::event_data ev) {
         request_type req;
+
         req.set(http::field::host, callback_host_);
         req.method(http::verb::get);
         req.target(callback_url_ + "/" + std::to_string(counter));
+
+        nlohmann::json json;
+
         if (ev.get_type() == "comment") {
-            nlohmann::json json = comment_message{"comment", ev.get_data()};
-            req.body() = json.dump();
+            json = comment_message{"comment", ev.get_data()};
         } else {
-            nlohmann::json json = event_message{
-                "event",
-                event{ev.get_type(), ev.get_data(), ev.get_id().value_or("")}};
-            req.body() = json.dump();
+            json = event_message{"event", event{ev.get_type(), ev.get_data(),
+                                                ev.get_id().value_or("")}};
         }
+
+        req.body() = json.dump();
         req.prepare_payload();
         return req;
     }
@@ -71,8 +127,7 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         if (ec)
             return fail(ec, "connect");
 
-        request_type& req = requests_.front();
-        std::cout << "writing event: " << req.body() << '\n';
+        request_type& req = outbox_.front();
         http::async_write(stream_, req,
                           beast::bind_front_handler(&stream_entity::on_write,
                                                     shared_from_this()));
@@ -82,77 +137,41 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         if (ec)
             return fail(ec, "write");
 
-        requests_.pop();
+        outbox_.pop();
         stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
 
         // not_connected happens sometimes so don't bother reporting it.
         if (ec && ec != beast::errc::not_connected)
             return fail(ec, "shutdown");
 
-        if (!requests_.empty()) {
+        // If there's more to do, queue up another resolve. Otherwise,
+        // wait a little while before trying again.
+        if (!outbox_.empty()) {
             resolver_.async_resolve(
                 callback_host_, callback_port_,
                 beast::bind_front_handler(&stream_entity::on_resolve,
                                           shared_from_this()));
         } else {
-            flush_timer_.expires_from_now(boost::posix_time::milliseconds{100});
+            flush_timer_.expires_from_now(kFlushInterval);
             flush_timer_.async_wait(beast::bind_front_handler(
-                &stream_entity::on_flush, shared_from_this()));
+                &stream_entity::on_flush_timer, shared_from_this()));
         }
     }
 
-    void on_flush(boost::system::error_code const& ec) {
+    void on_flush_timer(boost::system::error_code const& ec) {
         if (ec) {
             return fail(ec, "flush");
         }
 
-        if (!requests_.empty()) {
+        if (!outbox_.empty()) {
             resolver_.async_resolve(
                 callback_host_, callback_port_,
                 beast::bind_front_handler(&stream_entity::on_resolve,
                                           shared_from_this()));
         } else {
-            flush_timer_.expires_from_now(boost::posix_time::milliseconds{100});
+            flush_timer_.expires_from_now(kFlushInterval);
             flush_timer_.async_wait(beast::bind_front_handler(
-                &stream_entity::on_flush, shared_from_this()));
+                &stream_entity::on_flush_timer, shared_from_this()));
         }
-    }
-
-   public:
-    stream_entity(net::any_io_executor executor,
-                  std::shared_ptr<launchdarkly::sse::client> client,
-                  std::string callback_url)
-        : callback_url_{std::move(callback_url)},
-          callback_host_{},
-          callback_port_{},
-          callback_counter_{0},
-          client_{std::move(client)},
-          executor_{executor},
-          resolver_{executor},
-          stream_{executor},
-          requests_{1024},
-          flush_timer_{executor, boost::posix_time::milliseconds{0}},
-          event_mutex_{} {
-        boost::system::result<boost::urls::url_view> uri_components =
-            boost::urls::parse_uri(callback_url_);
-
-        callback_host_ = uri_components->host();
-        callback_port_ = uri_components->port();
-
-        client_->on_event([this](launchdarkly::sse::event_data ev) {
-            requests_.push(build_request(callback_counter_++, std::move(ev)));
-        });
-
-        client_->run();
-    }
-
-    void close() {
-        flush_timer_.cancel();
-        client_->close();
-    }
-
-    void run() {
-        flush_timer_.async_wait(beast::bind_front_handler(
-            &stream_entity::on_flush, shared_from_this()));
     }
 };

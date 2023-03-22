@@ -38,7 +38,7 @@ class session : public std::enable_shared_from_this<session>
     // The request message.
     http::request<http::string_body> request_;
 
-    entity_manager& manager_;
+    EntityManager& manager_;
 
     std::vector<std::string> capabilities_;
 
@@ -131,7 +131,7 @@ class session : public std::enable_shared_from_this<session>
         if (req.method() == http::verb::post && req.target() == "/") {
             try {
                 auto json = nlohmann::json::parse(request_.body());
-                auto params = json.get<config_params>();
+                auto params = json.get<ConfigParams>();
                 if (auto id = manager_.create(std::move(params))) {
                     return create_entity_response(*id);
                 } else {
@@ -152,7 +152,8 @@ class session : public std::enable_shared_from_this<session>
         return bad_request("unknown route");
     }
 public:
-    explicit session(tcp::socket&& socket, entity_manager& manager, std::vector<std::string> caps):
+    explicit session(tcp::socket&& socket,
+                  EntityManager& manager, std::vector<std::string> caps):
         stream_{std::move(socket)},
         manager_{manager},
         capabilities_{std::move(caps)}

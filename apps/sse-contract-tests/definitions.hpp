@@ -31,7 +31,7 @@ namespace nlohmann {
 } // namespace nlohmann
 
 
-struct config_params {
+struct ConfigParams {
     std::string streamUrl;
     std::string callbackUrl;
     std::string tag;
@@ -43,7 +43,7 @@ struct config_params {
     std::optional<std::string> body;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(config_params,
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
         streamUrl,
         callbackUrl,
         tag,
