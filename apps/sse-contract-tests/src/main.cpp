@@ -1,5 +1,7 @@
 #include "server.hpp"
 
+#include <iostream>
+
 int
 main(int argc, char* argv[])
 {
@@ -11,7 +13,7 @@ main(int argc, char* argv[])
 
         server s{ioc.get_executor(), address, port};
         s.add_capability("headers");
-        s.start_accepting();
+        s.start();
 
         std::cout << "listening on " << address << ":" << port << std::endl;
 
