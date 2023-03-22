@@ -289,7 +289,7 @@ class ssl_client : public client {
         : client(ex, std::move(req), std::move(host), std::move(port)),
           stream_{ex, ctx} {}
 
-    void read() override {
+    void run() override {
         // Set SNI Hostname (many hosts need this to handshake successfully)
         if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
             beast::error_code ec{static_cast<int>(::ERR_get_error()),
@@ -386,7 +386,7 @@ class plaintext_client : public client {
         : client(ex, std::move(req), std::move(host), std::move(port)),
           stream_{ex} {}
 
-    void read() override {
+    void run() override {
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(15));
 

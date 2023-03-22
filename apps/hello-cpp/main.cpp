@@ -28,7 +28,7 @@ int main() {
         return 1;
     }
 
-    client->read();
+    client->run();
 
 
 //    client->on_event([](launchdarkly::sse::event_data e){

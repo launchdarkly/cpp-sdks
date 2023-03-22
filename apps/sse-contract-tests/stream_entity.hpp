@@ -140,11 +140,10 @@ class stream_entity : public std::enable_shared_from_this<stream_entity> {
         callback_port_ = uri_components->port();
 
         client_->on_event([this](launchdarkly::sse::event_data ev) {
-            auto req = build_request(callback_counter_++, std::move(ev));
-            requests_.push(req);
+            requests_.push(build_request(callback_counter_++, std::move(ev)));
         });
 
-        client_->read();
+        client_->run();
     }
 
     void close() {
