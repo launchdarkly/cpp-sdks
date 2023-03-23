@@ -69,18 +69,25 @@ http::message_generator Session::handle_request(
         return res;
     };
 
+    auto const shutdown_server_response = [&req]() {
+        http::response<http::empty_body> res{http::status::ok, req.version()};
+        res.keep_alive(false);
+        res.prepare_payload();
+        return res;
+    };
+
     if (req.method() == http::verb::get && req.target() == "/") {
         return capabilities_response(capabilities_);
     }
 
     if (req.method() == http::verb::head && req.target() == "/") {
-        http::response<http::empty_body> res{http::status::ok, req.version()};
-        return res;
+        return http::response<http::empty_body>{http::status::ok,
+                                                req.version()};
     }
 
     if (req.method() == http::verb::delete_ && req.target() == "/") {
-        // not clean, but doesn't matter from the test-harness's perspective.
-        std::raise(SIGTERM);
+        shutdown_requested_ = true;
+        return shutdown_server_response();
     }
 
     if (req.method() == http::verb::post && req.target() == "/") {
@@ -113,7 +120,15 @@ Session::Session(tcp::socket&& socket,
                  std::vector<std::string> caps)
     : stream_{std::move(socket)},
       manager_{manager},
-      capabilities_{std::move(caps)} {}
+      capabilities_{std::move(caps)},
+      on_shutdown_cb_{},
+      shutdown_requested_{false} {
+    std::cout << "session created\n";
+}
+
+Session::~Session() {
+    std::cout << "~session\n";
+}
 
 void Session::start() {
     net::dispatch(
@@ -121,8 +136,20 @@ void Session::start() {
         beast::bind_front_handler(&Session::do_read, shared_from_this()));
 }
 
+void Session::stop() {
+    net::dispatch(
+        stream_.get_executor(),
+        beast::bind_front_handler(&Session::do_stop, shared_from_this()));
+}
+
+void Session::do_stop() {
+    stream_.close();
+}
+
 void Session::do_read() {
     request_ = {};
+
+    std::cout << "waiting for request\n";
     http::async_read(
         stream_, buffer_, request_,
         beast::bind_front_handler(&Session::on_read, shared_from_this()));
@@ -132,18 +159,16 @@ void Session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
 
     if (ec == http::error::end_of_stream) {
-        return do_close();
+        std::cout << "end of stream" << std::endl;
+        return do_stop();
     }
-    if (ec) {
-        std::cout << "run failed\n";
-        return;
-    }
-    send_response(handle_request(std::move(request_)));
-}
 
-void Session::do_close() {
-    beast::error_code ec;
-    stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+    if (ec) {
+        std::cout << "read failed" << ec << std::endl;
+        return do_stop();
+    }
+
+    send_response(handle_request(std::move(request_)));
 }
 
 void Session::send_response(http::message_generator&& msg) {
@@ -158,13 +183,19 @@ void Session::on_write(bool keep_alive,
                        std::size_t bytes_transferred) {
     boost::ignore_unused(bytes_transferred);
 
+    if (shutdown_requested_ && on_shutdown_cb_) {
+        on_shutdown_cb_();
+        shutdown_requested_ = false;
+    }
+
     if (ec) {
         std::cout << "write failed\n";
-        return;
+        return do_stop();
     }
 
     if (!keep_alive) {
-        return do_close();
+        std::cout << "client requested to drop the connection\n";
+        return do_stop();
     }
 
     do_read();

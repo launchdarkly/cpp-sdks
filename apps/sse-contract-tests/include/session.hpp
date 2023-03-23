@@ -1,7 +1,6 @@
 #pragma once
 
 #include "entity_manager.hpp"
-
 #include <boost/beast/http.hpp>
 #include <boost/beast.hpp>
 #include <vector>
@@ -26,14 +25,30 @@ class Session : public std::enable_shared_from_this<Session> {
 
     std::vector<std::string> capabilities_;
 
+    std::function<void()> on_shutdown_cb_;
+
+    bool shutdown_requested_;
+
    public:
     explicit Session(tcp::socket&& socket,
                      EntityManager& manager,
                      std::vector<std::string> caps);
+
+    ~Session();
+    template<typename Callback>
+    void on_shutdown(Callback cb) {
+        on_shutdown_cb_ = cb;
+    }
+
     void start();
 
+    void stop();
+
+   private:
+    http::message_generator handle_request(http::request<http::string_body>&& req);
     void do_read();
 
+    void do_stop();
     void on_read(beast::error_code ec, std::size_t bytes_transferred);
     void do_close();
 
@@ -42,6 +57,6 @@ class Session : public std::enable_shared_from_this<Session> {
     void on_write(bool keep_alive,
                   beast::error_code ec,
                   std::size_t bytes_transferred);
-   private:
-    http::message_generator handle_request(http::request<http::string_body>&& req);
 };
+
+using SessionPtr = std::shared_ptr<Session>;

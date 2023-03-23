@@ -30,5 +30,7 @@ class EntityManager {
     std::optional<std::string> create(ConfigParams params);
     bool destroy(std::string const& id);
 
+    void destroy_all();
+
     friend class StreamEntity;
 };

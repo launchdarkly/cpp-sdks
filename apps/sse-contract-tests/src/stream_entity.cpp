@@ -29,6 +29,10 @@ StreamEntity::StreamEntity(net::any_io_executor executor,
     callback_port_ = uri_components->port();
 }
 
+StreamEntity::~StreamEntity() {
+    std::cout << "~StreamEntity\n";
+}
+
 void StreamEntity::do_shutdown(beast::error_code ec, std::string what) {
     event_stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
     flush_timer_.cancel();

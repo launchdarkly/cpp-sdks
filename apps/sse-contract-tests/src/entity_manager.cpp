@@ -1,6 +1,6 @@
 #include "entity_manager.hpp"
-#include "stream_entity.hpp"
 #include "launchdarkly/sse/sse.hpp"
+#include "stream_entity.hpp"
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor)
     : entities_{}, counter_{0}, lock_{}, executor_{std::move(executor)} {}
@@ -21,7 +21,7 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         return std::nullopt;
     }
     std::shared_ptr<StreamEntity> entity =
-        std::make_shared<StreamEntity>(executor_,  client, params.callbackUrl);
+        std::make_shared<StreamEntity>(executor_, client, params.callbackUrl);
 
     // Kicks off asynchronous operations.
     entity->run();
@@ -30,6 +30,14 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
     return id;
 }
 
+void EntityManager::destroy_all() {
+    for (auto& entity : entities_) {
+        if (auto weak = entity.second.lock()) {
+            weak->stop();
+        }
+    }
+    entities_.clear();
+}
 bool EntityManager::destroy(std::string const& id) {
     std::lock_guard<std::mutex> guard{lock_};
     auto it = entities_.find(id);
@@ -40,6 +48,8 @@ bool EntityManager::destroy(std::string const& id) {
     if (auto weak = it->second.lock()) {
         weak->stop();
     }
+
+    entities_.erase(it);
 
     return true;
 }

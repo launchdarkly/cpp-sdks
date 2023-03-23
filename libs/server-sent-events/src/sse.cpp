@@ -55,6 +55,7 @@ client::client(net::any_io_executor ex,
       host_{std::move(host)},
       port_{std::move(port)},
       m_request{std::move(req)},
+      m_response{},
       buffered_line_{},
       complete_lines_{},
       begin_CR_{false},
@@ -317,6 +318,7 @@ class ssl_client : public client {
 
 class plaintext_client : public client {
     beast::tcp_stream stream_;
+    ssl::context& ctx_;
 
     std::shared_ptr<plaintext_client> shared() {
         return std::static_pointer_cast<plaintext_client>(shared_from_this());
@@ -357,6 +359,48 @@ class plaintext_client : public client {
 
         parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
+        http::async_read(
+            stream_, m_buffer, parser_,
+            beast::bind_front_handler(&plaintext_client::on_got_headers, shared()));
+    }
+
+    void on_got_headers(beast::error_code ec, std::size_t bytes_transferred) {
+        boost::ignore_unused(bytes_transferred);
+
+        if (ec) {
+            return fail(ec, "sse:headers");
+        }
+
+        if (parser_.is_header_done()) {
+            auto status = parser_.get().result();
+            if (status == http::status::moved_permanently) {
+                if (auto it = parser_.get().find("Location");
+                    it != parser_.get().end()) {
+
+                    boost::system::result<boost::urls::url_view> uri_components =
+                        boost::urls::parse_uri(it->value());
+                    if (!uri_components) {
+                        return fail(boost::asio::error::host_unreachable, "invalid 301 redirect");
+                    }
+
+                    host_ = uri_components->host();
+                    port_ = uri_components->has_port() ? uri_components->port() : "80";
+                    m_request.set(http::field::host, uri_components->host());
+                    m_request.target(uri_components->path());
+
+                    auto client =  std::make_shared<plaintext_client>(stream_.get_executor(),
+                                                                     ctx_, m_request,
+                                                                     host_, port_);
+                    client->m_cb = m_cb;
+                    client->run();
+                    return;
+                }
+            }
+
+        }
+
+        beast::get_lowest_layer(stream_).expires_never();
+
         http::async_read_some(
             stream_, m_buffer, parser_,
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
@@ -368,7 +412,7 @@ class plaintext_client : public client {
             return fail(ec, "sse:read");
         }
 
-        beast::get_lowest_layer(stream_).expires_never();
+
 
         http::async_read_some(
             stream_, m_buffer, parser_,
@@ -386,7 +430,10 @@ class plaintext_client : public client {
                      std::string host,
                      std::string port)
         : client(ex, std::move(req), std::move(host), std::move(port)),
-          stream_{ex} {}
+          stream_{ex}, ctx_{ctx} {
+
+        std::cout << "construct client: " << host_ << port_ << req.target() << '\n';
+    }
 
     void run() override {
         beast::get_lowest_layer(stream_).expires_after(

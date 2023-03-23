@@ -1,48 +1,99 @@
 #include "server.hpp"
 #include "session.hpp"
 
+#include <boost/asio/dispatch.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/bind.hpp>
 #include <iostream>
 
+void fail(beast::error_code ec, char const* what) {
+    std::cerr << what << ": " << ec.message() << "\n";
+}
 
-server::server(net::any_io_executor executor,
-               boost::asio::ip::address const& address,
-               unsigned short port)
-    : acceptor_{executor, {address, port}},
+server::server(net::io_context& ioc,
+               std::string const& address,
+               std::string const& port)
+    : ioc_{ioc},
       stopped_{false},
-      signals_{executor},
-      manager_{executor},
+      acceptor_{ioc},
+      entity_manager_{ioc.get_executor()},
       caps_{} {
-    signals_.add(SIGTERM);
-    signals_.add(SIGINT);
-    signals_.async_wait(boost::bind(&server::stop, this));
-    acceptor_.set_option(tcp::acceptor::reuse_address(true));
+    beast::error_code ec;
+
+    tcp::resolver resolver{ioc_};
+    tcp::endpoint endpoint = *resolver.resolve(address, port, ec).begin();
+    if (ec) {
+        fail(ec, "resolve");
+        return;
+    }
+    acceptor_.open(endpoint.protocol(), ec);
+    if (ec) {
+        fail(ec, "open");
+        return;
+    }
+    acceptor_.set_option(tcp::acceptor::reuse_address(true), ec);
+    if (ec) {
+        fail(ec, "set_option");
+        return;
+    }
+    acceptor_.bind(endpoint, ec);
+    if (ec) {
+        fail(ec, "bind");
+        return;
+    }
+    acceptor_.listen(net::socket_base::max_listen_connections, ec);
+    if (ec) {
+        fail(ec, "listen");
+        return;
+    }
+
+    std::cout << "listening on " << address << ":" << port << std::endl;
 }
 
 void server::add_capability(std::string cap) {
     caps_.push_back(std::move(cap));
 }
 
-void server::start() {
-    acceptor_.listen();
-    accept_connection();
+void server::run() {
+    net::dispatch(
+        acceptor_.get_executor(),
+        beast::bind_front_handler(&server::do_accept, shared_from_this()));
 }
 
 void server::stop() {
-    boost::asio::post(acceptor_.get_executor(), [this]() {
-        std::cout << "stopping server\n";
-        acceptor_.cancel();
-        stopped_ = true;
-        std::cout << "server stopped\n";
-    });
+    std::cout << "server: stop\n";
+    net::dispatch(
+        acceptor_.get_executor(),
+        beast::bind_front_handler(&server::do_stop, shared_from_this()));
 }
 
-void server::accept_connection() {
-    acceptor_.async_accept([this](beast::error_code ec, tcp::socket peer) {
-        if (!ec && !stopped_) {
-            std::make_shared<Session>(std::move(peer), manager_, caps_)
-                ->start();
-            accept_connection();
-        }
-    });
+void server::do_accept() {
+    acceptor_.async_accept(
+        net::make_strand(ioc_),
+        beast::bind_front_handler(&server::on_accept, shared_from_this()));
+}
+
+void server::do_stop() {
+    std::cout << "server: do_stop\n";
+    entity_manager_.destroy_all();
+}
+
+void server::on_accept(boost::system::error_code const& ec,
+                       tcp::socket socket) {
+    if (!acceptor_.is_open()) {
+        return;
+    }
+    if (ec) {
+        fail(ec, "accept");
+        return;
+    }
+    auto session =
+        std::make_shared<Session>(std::move(socket), entity_manager_, caps_);
+
+    session->on_shutdown([this]() { ioc_.stop(); });
+
+    session->start();
+
+    do_accept();
 }

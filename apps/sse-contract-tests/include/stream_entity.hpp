@@ -45,7 +45,7 @@ class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
                  std::shared_ptr<launchdarkly::sse::client> client,
                  std::string callback_url);
 
-    ~StreamEntity() = default;
+    ~StreamEntity();
     void run();
     void stop();
 
