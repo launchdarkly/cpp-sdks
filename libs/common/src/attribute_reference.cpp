@@ -151,7 +151,7 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
  * Literal starting with a '/' needs to be converted to an attribute
  * reference string.
  */
-std::string EscapeLiteral(std::string literal) {
+std::string EscapeLiteral(std::string const& literal) {
     std::string escaped = "/";
     for (auto& c : literal) {
         if (c == '~') {
@@ -171,7 +171,7 @@ AttributeReference::AttributeReference(std::string str, bool literal) {
         // Literal starting with a '/' needs to be converted to an attribute
         // reference string.
         if (str[0] == '/') {
-            redaction_name_ = EscapeLiteral(std::move(str));
+            redaction_name_ = EscapeLiteral(str);
         } else {
             redaction_name_ = str;
         }
