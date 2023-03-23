@@ -13,4 +13,4 @@ enum class LogLevel {
 };
 
 char const* GetLDLogLevelName(LogLevel level);
-}  // namespace launchdarkly
+}  // namespace launchdarkl
