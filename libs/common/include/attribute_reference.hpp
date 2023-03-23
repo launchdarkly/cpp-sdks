@@ -1,26 +1,30 @@
 #pragma once
 
+#include <ostream>
 #include <string>
 #include <vector>
 
 namespace launchdarkly {
 
 /**
- *  Represents an attribute name or path expression identifying a value within a [TODO: Context].
- *  This can be used to retrieve a value with [TODO: Get Value], or to identify an attribute or
- *  nested value that should be considered private with [TODO: private attribute]
- *  (the SDK configuration can also have a list of private attribute references).
+ *  Represents an attribute name or path expression identifying a value within a
+ * [TODO: Context]. This can be used to retrieve a value with [TODO: Get Value],
+ * or to identify an attribute or nested value that should be considered private
+ * with [TODO: private attribute] (the SDK configuration can also have a list of
+ * private attribute references).
  *
- *  This is represented as a separate type, rather than just a string, so that validation and parsing can
- *  be done ahead of time if an attribute reference will be used repeatedly later (such as in flag
- *  evaluations).
+ *  This is represented as a separate type, rather than just a string, so that
+ * validation and parsing can be done ahead of time if an attribute reference
+ * will be used repeatedly later (such as in flag evaluations).
  *
- *  If the string starts with '/', then this is treated as a slash-delimited path reference where the
- *  first component is the name of an attribute, and subsequent components are the names of nested JSON
- *  object properties. In this syntax, the escape sequences "~0" and "~1" represent '~' and '/'
- *  respectively within a path component.
+ *  If the string starts with '/', then this is treated as a slash-delimited
+ * path reference where the first component is the name of an attribute, and
+ * subsequent components are the names of nested JSON object properties. In this
+ * syntax, the escape sequences "~0" and "~1" represent '~' and '/' respectively
+ * within a path component.
  *
- *  If the string does not start with '/', then it is treated as the literal name of an attribute.
+ *  If the string does not start with '/', then it is treated as the literal
+ * name of an attribute.
  */
 class AttributeReference {
    public:
@@ -82,6 +86,12 @@ class AttributeReference {
      * @return A new AttributeReference based on the literal name.
      */
     static AttributeReference from_literal_str(std::string lit_str);
+
+    friend std::ostream& operator<<(std::ostream& os,
+                                    AttributeReference const& ref) {
+        os << (ref.valid() ? "valid": "invalid") << "(" << ref.redaction_name() << ")";
+        return os;
+    }
 
    private:
     AttributeReference(std::string str, bool is_literal);

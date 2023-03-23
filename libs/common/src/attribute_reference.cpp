@@ -177,9 +177,8 @@ AttributeReference::AttributeReference(std::string str, bool literal) {
         }
     } else {
         valid_ = ParseRef(str, components_);
-        if (valid_) {
-            redaction_name_ = std::move(str);
-        } else {
+        redaction_name_ = std::move(str);
+        if (!valid_) {
             components_.clear();
         }
     }

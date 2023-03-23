@@ -73,3 +73,13 @@ INSTANTIATE_TEST_SUITE_P(AttributeReferenceTests,
 TEST(AttributeReferenceTests, GetComponentOutOfBounds) {
     EXPECT_EQ("", AttributeReference::from_reference_str("a").component(1));
 }
+
+TEST(AttributeReferenceTests, OstreamOperator) {
+    std::stringstream stream;
+    stream << AttributeReference::from_reference_str("/a");
+    stream.flush();
+    EXPECT_EQ("valid(/a)", stream.str());
+    stream.str("");
+    stream << AttributeReference::from_reference_str("/~");
+    EXPECT_EQ("invalid(/~)", stream.str());
+}
