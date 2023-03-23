@@ -15,7 +15,7 @@ server::server(net::io_context& ioc,
                launchdarkly::Logger& logger)
     : ioc_{ioc},
       acceptor_{ioc},
-      entity_manager_{ioc.get_executor()},
+      entity_manager_{ioc.get_executor(), logger},
       caps_{},
       logger_{logger} {
     beast::error_code ec;

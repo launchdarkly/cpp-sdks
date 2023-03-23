@@ -1,6 +1,7 @@
 #pragma once
 
 #include "definitions.hpp"
+#include "logger.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -25,8 +26,10 @@ class EntityManager {
     std::mutex lock_;
     boost::asio::any_io_executor executor_;
 
+    launchdarkly::Logger& logger_;
+
    public:
-    explicit EntityManager(boost::asio::any_io_executor executor);
+    EntityManager(boost::asio::any_io_executor executor, launchdarkly::Logger& logger);
     std::optional<std::string> create(ConfigParams params);
     bool destroy(std::string const& id);
 

@@ -30,14 +30,16 @@ class builder {
     builder& header(std::string const& name, std::string const& value);
     builder& method(http::verb verb);
     builder& tls(ssl::context_base::method);
+    builder& logging(std::function<void(std::string)> callback);
     std::shared_ptr<client> build();
 
    private:
-    std::string m_url;
-    net::any_io_executor m_executor;
-    ssl::context m_ssl_ctx;
-    http::request<http::empty_body> m_request;
+    std::string url_;
+    net::any_io_executor executor_;
+    ssl::context ssl_context_;
+    http::request<http::empty_body> request_;
     std::optional<unsigned int> tls_version_;
+    std::function<void(std::string)> logging_cb_;
 };
 
 class event_data {
@@ -62,6 +64,24 @@ using sse_comment = std::string;
 using event = std::variant<sse_event, sse_comment>;
 
 class client : public std::enable_shared_from_this<client> {
+   public:
+    using logger = std::function<void(std::string)>;
+
+    client(boost::asio::any_io_executor ex,
+           http::request<http::empty_body> req,
+           std::string host,
+           std::string port,
+           logger logger, std::string log_tag);
+    ~client();
+
+    template <typename Callback>
+    void on_event(Callback event_cb) {
+        m_cb = event_cb;
+    }
+
+    virtual void run() = 0;
+    virtual void close() = 0;
+
    protected:
     using parser = http::response_parser<http::string_body>;
     tcp::resolver m_resolver;
@@ -78,31 +98,24 @@ class client : public std::enable_shared_from_this<client> {
     bool begin_CR_;
     std::optional<event_data> m_event_data;
     std::function<void(event_data)> m_cb;
+    logger logging_cb_;
+    std::string log_tag_;
+
     void complete_line();
+    void parse_events();
     size_t append_up_to(boost::string_view body, std::string const& search);
     std::size_t parse_stream(std::uint64_t remain,
                              boost::string_view body,
                              beast::error_code& ec);
-    void parse_events();
 
     std::optional<std::function<
         size_t(uint64_t, boost::string_view, boost::system::error_code&)>>
         on_chunk_body_trampoline_;
 
-   public:
-    client(boost::asio::any_io_executor ex,
-           http::request<http::empty_body> req,
-           std::string host,
-           std::string port);
-    ~client();
+    void log(std::string);
+    void fail(beast::error_code ec, char const* what);
 
-    template <typename Callback>
-    void on_event(Callback event_cb) {
-        m_cb = event_cb;
-    }
 
-    virtual void run() = 0;
-    virtual void close() = 0;
 };
 
 }  // namespace launchdarkly::sse

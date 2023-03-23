@@ -2,8 +2,15 @@
 #include "launchdarkly/sse/sse.hpp"
 #include "stream_entity.hpp"
 
-EntityManager::EntityManager(boost::asio::any_io_executor executor)
-    : entities_{}, counter_{0}, lock_{}, executor_{std::move(executor)} {}
+using launchdarkly::LogLevel;
+
+EntityManager::EntityManager(boost::asio::any_io_executor executor,
+                             launchdarkly::Logger& logger)
+    : entities_{},
+      counter_{0},
+      lock_{},
+      executor_{std::move(executor)},
+      logger_{logger} {}
 
 std::optional<std::string> EntityManager::create(ConfigParams params) {
     std::lock_guard<std::mutex> guard{lock_};
@@ -16,14 +23,20 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
             client_builder.header(h.first, h.second);
         }
     }
+
+    client_builder.logging([this](std::string msg){
+        LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
+    });
+
     std::shared_ptr<launchdarkly::sse::client> client = client_builder.build();
     if (!client) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "entity_manager: couldn't build sse client";
         return std::nullopt;
     }
     std::shared_ptr<StreamEntity> entity =
         std::make_shared<StreamEntity>(executor_, client, params.callbackUrl);
 
-    // Kicks off asynchronous operations.
     entity->run();
 
     entities_.emplace(id, entity);
@@ -38,6 +51,7 @@ void EntityManager::destroy_all() {
     }
     entities_.clear();
 }
+
 bool EntityManager::destroy(std::string const& id) {
     std::lock_guard<std::mutex> guard{lock_};
     auto it = entities_.find(id);

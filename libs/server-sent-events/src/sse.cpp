@@ -49,8 +49,10 @@ std::optional<std::string> const& event_data::get_id() {
 client::client(net::any_io_executor ex,
                http::request<http::empty_body> req,
                std::string host,
-               std::string port)
-    : m_resolver{ex},
+               std::string port,
+               std::function<void(std::string)> logging_cb,
+               std::string log_tag)
+    : m_resolver{std::move(ex)},
       parser_{},
       host_{std::move(host)},
       port_{std::move(port)},
@@ -62,20 +64,29 @@ client::client(net::any_io_executor ex,
       last_event_id_{},
       m_event_data{},
       m_events{},
+      logging_cb_{std::move(logging_cb)},
       on_chunk_body_trampoline_{},
-      m_cb{[](event_data e) {
-          std::cout << "Event[" << e.get_type() << "] = <" << e.get_data()
-                    << ">\n";
+      log_tag_{std::move(log_tag)},
+      m_cb{[this](event_data e) {
+          log("got event: (" + e.get_type() + ", " + e.get_data() + ")");
       }} {
     parser_.body_limit(boost::none);
+    log("create");
 }
+
 client::~client() {
-    std::cout << "~client\n";
+    log("destroy");
+}
+
+void client::log(std::string what) {
+    if (logging_cb_) {
+        logging_cb_(log_tag_ + ": " + std::move(what));
+    }
 }
 
 // Report a failure
-void fail(beast::error_code ec, char const* what) {
-    std::cerr << what << ": " << ec.message() << "\n";
+void client::fail(beast::error_code ec, char const* what) {
+    log(std::string(what) + ":" + ec.message());
 }
 
 std::pair<std::string, std::string> parse_field(std::string field) {
@@ -142,7 +153,7 @@ void client::parse_events() {
                 last_event_id_ = field.second;
                 m_event_data->set_id(last_event_id_);
             } else if (field.first == "retry") {
-                std::cout << "Got RETRY field\n";
+                log("got unhandled 'retry' field");
             }
         }
 
@@ -211,6 +222,44 @@ size_t client::parse_stream(std::uint64_t remain,
 }
 
 class ssl_client : public client {
+   public:
+    ssl_client(net::any_io_executor ex,
+               ssl::context& ctx,
+               http::request<http::empty_body> req,
+               std::string host,
+               std::string port,
+               logger logging_cb)
+        : client(ex,
+                 std::move(req),
+                 std::move(host),
+                 std::move(port),
+                 std::move(logging_cb),
+                 "sse-tls"),
+          stream_{ex, ctx} {}
+
+    void run() override {
+        // Set SNI Hostname (many hosts need this to handshake successfully)
+        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
+            beast::error_code ec{static_cast<int>(::ERR_get_error()),
+                                 net::error::get_ssl_category()};
+            log("failed to set TLS host name extension: " + ec.message());
+            return;
+        }
+
+        beast::get_lowest_layer(stream_).expires_after(
+            std::chrono::seconds(15));
+
+        m_resolver.async_resolve(
+            host_, port_,
+            beast::bind_front_handler(&ssl_client::on_resolve, shared()));
+    }
+
+    void close() override {
+        net::post(stream_.get_executor(),
+                  beast::bind_front_handler(&ssl_client::on_stop, shared()));
+    }
+
+   private:
     beast::ssl_stream<beast::tcp_stream> stream_;
 
     std::shared_ptr<ssl_client> shared() {
@@ -270,7 +319,7 @@ class ssl_client : public client {
     void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         if (ec) {
-            return fail(ec, "sse:read");
+            return fail(ec, "read");
         }
 
         beast::get_lowest_layer(stream_).expires_never();
@@ -280,43 +329,42 @@ class ssl_client : public client {
             beast::bind_front_handler(&ssl_client::on_read, shared()));
     }
 
-    void on_stop() {
-        beast::get_lowest_layer(stream_).cancel();
-    }
+    void on_stop() { beast::get_lowest_layer(stream_).cancel(); }
+};
 
+class plaintext_client : public client {
    public:
-    ssl_client(net::any_io_executor ex,
-               ssl::context& ctx,
-               http::request<http::empty_body> req,
-               std::string host,
-               std::string port)
-        : client(ex, std::move(req), std::move(host), std::move(port)),
-          stream_{ex, ctx} {}
+    plaintext_client(net::any_io_executor ex,
+                     ssl::context& ctx,
+                     http::request<http::empty_body> req,
+                     std::string host,
+                     std::string port,
+                     logger logger)
+        : client(ex,
+                 std::move(req),
+                 std::move(host),
+                 std::move(port),
+                 std::move(logger),
+                 "sse-plaintext"),
+          stream_{ex},
+          ctx_{ctx} {}
 
     void run() override {
-        // Set SNI Hostname (many hosts need this to handshake successfully)
-        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
-            beast::error_code ec{static_cast<int>(::ERR_get_error()),
-                                 net::error::get_ssl_category()};
-            std::cerr << ec.message() << "\n";
-            return;
-        }
-
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(15));
 
         m_resolver.async_resolve(
             host_, port_,
-            beast::bind_front_handler(&ssl_client::on_resolve, shared()));
+            beast::bind_front_handler(&plaintext_client::on_resolve, shared()));
     }
 
     void close() override {
-        net::post(stream_.get_executor(),
-                  beast::bind_front_handler(&ssl_client::on_stop, shared()));
+        net::post(
+            stream_.get_executor(),
+            beast::bind_front_handler(&plaintext_client::on_stop, shared()));
     }
-};
 
-class plaintext_client : public client {
+   private:
     beast::tcp_stream stream_;
     ssl::context& ctx_;
 
@@ -359,16 +407,16 @@ class plaintext_client : public client {
 
         parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
-        http::async_read(
-            stream_, m_buffer, parser_,
-            beast::bind_front_handler(&plaintext_client::on_got_headers, shared()));
+        http::async_read(stream_, m_buffer, parser_,
+                         beast::bind_front_handler(
+                             &plaintext_client::on_got_headers, shared()));
     }
 
     void on_got_headers(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
 
         if (ec) {
-            return fail(ec, "sse:headers");
+            return fail(ec, "headers");
         }
 
         if (parser_.is_header_done()) {
@@ -376,27 +424,8 @@ class plaintext_client : public client {
             if (status == http::status::moved_permanently) {
                 if (auto it = parser_.get().find("Location");
                     it != parser_.get().end()) {
-
-                    boost::system::result<boost::urls::url_view> uri_components =
-                        boost::urls::parse_uri(it->value());
-                    if (!uri_components) {
-                        return fail(boost::asio::error::host_unreachable, "invalid 301 redirect");
-                    }
-
-                    host_ = uri_components->host();
-                    port_ = uri_components->has_port() ? uri_components->port() : "80";
-                    m_request.set(http::field::host, uri_components->host());
-                    m_request.target(uri_components->path());
-
-                    auto client =  std::make_shared<plaintext_client>(stream_.get_executor(),
-                                                                     ctx_, m_request,
-                                                                     host_, port_);
-                    client->m_cb = m_cb;
-                    client->run();
-                    return;
                 }
             }
-
         }
 
         beast::get_lowest_layer(stream_).expires_never();
@@ -409,102 +438,76 @@ class plaintext_client : public client {
     void on_read(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         if (ec && ec != beast::errc::operation_canceled) {
-            return fail(ec, "sse:read");
+            return fail(ec, "read");
         }
-
-
 
         http::async_read_some(
             stream_, m_buffer, parser_,
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
     }
 
-    void on_stop() {
-        stream_.cancel();
-    }
-
-   public:
-    plaintext_client(net::any_io_executor ex,
-                     ssl::context& ctx,
-                     http::request<http::empty_body> req,
-                     std::string host,
-                     std::string port)
-        : client(ex, std::move(req), std::move(host), std::move(port)),
-          stream_{ex}, ctx_{ctx} {
-
-        std::cout << "construct client: " << host_ << port_ << req.target() << '\n';
-    }
-
-    void run() override {
-        beast::get_lowest_layer(stream_).expires_after(
-            std::chrono::seconds(15));
-
-        m_resolver.async_resolve(
-            host_, port_,
-            beast::bind_front_handler(&plaintext_client::on_resolve, shared()));
-    }
-
-    void close() override {
-        net::post(
-            stream_.get_executor(),
-            beast::bind_front_handler(&plaintext_client::on_stop, shared()));
-    }
+    void on_stop() { stream_.cancel(); }
 };
 
 builder::builder(net::any_io_executor ctx, std::string url)
-    : m_url{std::move(url)},
-      m_ssl_ctx{ssl::context::tlsv12_client},
-      m_executor{std::move(ctx)},
+    : url_{std::move(url)},
+      ssl_context_{ssl::context::tlsv12_client},
+      executor_{std::move(ctx)},
       tls_version_{12} {
     // This needs to be verify_peer in production!!
-    m_ssl_ctx.set_verify_mode(ssl::verify_none);
+    ssl_context_.set_verify_mode(ssl::verify_none);
 
-    m_request.version(11);
-    m_request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-    m_request.method(http::verb::get);
-    m_request.set("Accept", "text/event-stream");
-    m_request.set("Cache-Control", "no-cache");
+    request_.version(11);
+    request_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    request_.method(http::verb::get);
+    request_.set("Accept", "text/event-stream");
+    request_.set("Cache-Control", "no-cache");
 }
 
 builder& builder::header(std::string const& name, std::string const& value) {
-    m_request.set(name, value);
+    request_.set(name, value);
     return *this;
 }
 
 builder& builder::method(http::verb verb) {
-    m_request.method(verb);
+    request_.method(verb);
     return *this;
 }
 
 builder& builder::tls(ssl::context_base::method ctx) {
-    m_ssl_ctx = ssl::context{ctx};
+    ssl_context_ = ssl::context{ctx};
+    return *this;
+}
+
+builder& builder::logging(std::function<void(std::string)> cb) {
+    logging_cb_ = std::move(cb);
     return *this;
 }
 
 std::shared_ptr<client> builder::build() {
     boost::system::result<boost::urls::url_view> uri_components =
-        boost::urls::parse_uri(m_url);
+        boost::urls::parse_uri(url_);
     if (!uri_components) {
         return nullptr;
     }
 
-    m_request.set(http::field::host, uri_components->host());
-    m_request.target(uri_components->path());
+    request_.set(http::field::host, uri_components->host());
+    request_.target(uri_components->path());
 
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         std::string port =
             uri_components->has_port() ? uri_components->port() : "443";
 
-        return std::make_shared<ssl_client>(net::make_strand(m_executor),
-                                            m_ssl_ctx, m_request,
-                                            uri_components->host(), port);
+        return std::make_shared<ssl_client>(
+            net::make_strand(executor_), ssl_context_, request_,
+            uri_components->host(), port, logging_cb_);
     } else {
         std::string port =
             uri_components->has_port() ? uri_components->port() : "80";
 
-        return std::make_shared<plaintext_client>(net::make_strand(m_executor),
-                                                  m_ssl_ctx, m_request,
-                                                  uri_components->host(), port);
+        return std::make_shared<plaintext_client>(
+            net::make_strand(executor_), ssl_context_, request_,
+            uri_components->host(), port, logging_cb_);
     }
 }
 
