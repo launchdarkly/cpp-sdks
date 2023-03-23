@@ -215,3 +215,5 @@ bool AttributeReference::valid() const {
 std::string const& AttributeReference::redaction_name() const {
     return redaction_name_;
 }
+
+}  // namespace launchdarkly

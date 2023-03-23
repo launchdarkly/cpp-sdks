@@ -69,3 +69,7 @@ INSTANTIATE_TEST_SUITE_P(AttributeReferenceTests,
                                          std::tuple("/a/b", "/~1a~1b"),
                                          std::tuple("/~0", "/~1~00"),
                                          std::tuple("test", "test")));
+
+TEST(AttributeReferenceTests, GetComponentOutOfBounds) {
+    EXPECT_EQ("", AttributeReference::from_reference_str("a").component(1));
+}
