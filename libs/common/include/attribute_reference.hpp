@@ -89,7 +89,8 @@ class AttributeReference {
 
     friend std::ostream& operator<<(std::ostream& os,
                                     AttributeReference const& ref) {
-        os << (ref.valid() ? "valid": "invalid") << "(" << ref.redaction_name() << ")";
+        os << (ref.valid() ? "valid" : "invalid") << "(" << ref.redaction_name()
+           << ")";
         return os;
     }
 
