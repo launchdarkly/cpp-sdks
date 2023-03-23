@@ -125,6 +125,7 @@ void StreamEntity::on_flush_timer(boost::system::error_code ec) {
 
         // Flip-flop between this function and on_write; pushing an event
         // and then popping it.
+
         http::async_write(event_stream_, request,
                           beast::bind_front_handler(&StreamEntity::on_write,
                                                     shared_from_this()));
