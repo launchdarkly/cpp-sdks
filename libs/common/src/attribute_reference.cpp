@@ -116,15 +116,15 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
     for (auto index = 0; index <= str.size(); index++) {
         // The character in the string, or null if we go out of bounds of the
         // string.
-        char c = index < str.size() ? str[index] : '\0';
-        auto [new_p_state, event] = ParseChar(p_state, c);
+        char character = index < str.size() ? str[index] : '\0';
+        auto [new_p_state, event] = ParseChar(p_state, character);
         p_state = new_p_state;
 
         switch (event) {
             case ParseEvent::kNoop:
                 continue;
             case ParseEvent::kChar: {
-                tmp_token.push_back(c);
+                tmp_token.push_back(character);
             } break;
             case ParseEvent::kForwardSlash: {
                 tmp_token.push_back('/');
@@ -153,13 +153,13 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
  */
 std::string EscapeLiteral(std::string const& literal) {
     std::string escaped = "/";
-    for (auto& c : literal) {
-        if (c == '~') {
+    for (auto const& character : literal) {
+        if (character == '~') {
             escaped.append("~0");
-        } else if (c == '/') {
+        } else if (character == '/') {
             escaped.append("~1");
         } else {
-            escaped.push_back(c);
+            escaped.push_back(character);
         }
     }
     return escaped;
