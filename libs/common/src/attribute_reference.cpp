@@ -215,14 +215,3 @@ bool AttributeReference::valid() const {
 std::string const& AttributeReference::redaction_name() const {
     return redaction_name_;
 }
-
-bool AttributeReference::operator==(AttributeReference const& rhs) const {
-    // The redaction name doesn't need to be equal, but the components do.
-    return valid() == rhs.valid() && depth() == rhs.depth() &&
-           std::equal(components_.begin(), components_.end(),
-                      rhs.components_.begin());
-}
-bool AttributeReference::operator!=(AttributeReference const& rhs) const {
-    return !(rhs == *this);
-}
-}  // namespace launchdarkly

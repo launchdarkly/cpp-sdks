@@ -67,9 +67,6 @@ class AttributeReference {
      */
     static AttributeReference from_literal_str(std::string lit_str);
 
-    bool operator==(AttributeReference const& rhs) const;
-    bool operator!=(AttributeReference const& rhs) const;
-
    private:
     AttributeReference(std::string str, bool is_literal);
 
