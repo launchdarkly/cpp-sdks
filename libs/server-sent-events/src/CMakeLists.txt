@@ -2,7 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} sse.cpp boost-url.cpp ${HEADER_LIST})
+add_library(${LIBNAME} client.cpp boost-url.cpp ${HEADER_LIST})
 target_link_libraries(${LIBNAME} PUBLIC OpenSSL::SSL Boost::headers)
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})

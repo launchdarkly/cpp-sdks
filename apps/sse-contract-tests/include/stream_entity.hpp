@@ -2,7 +2,7 @@
 
 #include "entity_manager.hpp"
 
-#include <launchdarkly/sse/sse.hpp>
+#include "launchdarkly/sse/client.hpp"
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>

@@ -1,17 +1,20 @@
 #pragma once
 
-#include <boost/asio/strand.hpp>
-#include <boost/beast/core.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/ssl.hpp>
+
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/version.hpp>
-#include <boost/optional.hpp>
-#include <deque>
+#include <boost/beast/http/message.hpp>
+#include <boost/beast/ssl/ssl_stream.hpp>
+#include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/core/flat_buffer.hpp>
+
+#include <string>
 #include <functional>
 #include <memory>
-#include <string>
-#include <unordered_map>
-#include <variant>
+#include <optional>
+#include <deque>
 #include <vector>
 
 namespace launchdarkly::sse {

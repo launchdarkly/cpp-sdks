@@ -1,9 +1,11 @@
+#include <launchdarkly/sse/client.hpp>
+
+#include <boost/asio/strand.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/url/parse.hpp>
 #include <iostream>
-#include <launchdarkly/sse/sse.hpp>
 #include <memory>
 #include <tuple>
 

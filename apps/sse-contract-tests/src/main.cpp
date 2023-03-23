@@ -1,12 +1,11 @@
 #include "server.hpp"
 
 #include "console_backend.hpp"
-#include "logger.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/beast.hpp>
-#include <iostream>
+
 #include <memory>
 
 namespace net = boost::asio;

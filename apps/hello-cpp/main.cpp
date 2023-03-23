@@ -1,9 +1,11 @@
-#include <iostream>
 #include <launchdarkly/api.hpp>
-#include <launchdarkly/sse/sse.hpp>
-#include <thread>
+#include <launchdarkly/sse/client.hpp>
+
 #include "console_backend.hpp"
 #include "logger.hpp"
+
+#include <iostream>
+#include <thread>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
