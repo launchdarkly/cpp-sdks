@@ -2,14 +2,22 @@
 #include <launchdarkly/api.hpp>
 #include <launchdarkly/sse/sse.hpp>
 #include <thread>
+#include "console_backend.hpp"
+#include "logger.hpp"
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
+using launchdarkly::ConsoleBackend;
+using launchdarkly::Logger;
+using launchdarkly::LogLevel;
+
 int main() {
+    Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kInfo, "Hello"));
+
     if (auto num = launchdarkly::foo()) {
-        std::cout << "Got: " << *num << '\n';
+        LD_LOG(logger, LogLevel::kInfo) << "Got: " << *num << '\n';
     } else {
-        std::cout << "Got nothing\n";
+        LD_LOG(logger, LogLevel::kInfo) << "Got nothing\n";
     }
 
     net::io_context ioc;
@@ -24,7 +32,7 @@ int main() {
             .build();
 
     if (!client) {
-        std::cout << "Failed to build client" << std::endl;
+        LD_LOG(logger, LogLevel::kError) << "Failed to build client";
         return 1;
     }
 
