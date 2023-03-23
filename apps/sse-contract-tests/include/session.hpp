@@ -1,9 +1,11 @@
 #pragma once
 
+#include "entity_manager.hpp"
+#include "logger.hpp"
+
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
 #include <vector>
-#include "entity_manager.hpp"
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
@@ -28,10 +30,13 @@ class Session : public std::enable_shared_from_this<Session> {
 
     bool shutdown_requested_;
 
+    launchdarkly::Logger& logger_;
+
    public:
     explicit Session(tcp::socket&& socket,
                      EntityManager& manager,
-                     std::vector<std::string> caps);
+                     std::vector<std::string> caps,
+                     launchdarkly::Logger& logger);
 
     ~Session();
     template <typename Callback>
@@ -48,7 +53,7 @@ class Session : public std::enable_shared_from_this<Session> {
         http::request<http::string_body>&& req);
     void do_read();
 
-    void do_stop();
+    void do_stop(char const* reason);
     void on_read(beast::error_code ec, std::size_t bytes_transferred);
     void do_close();
 

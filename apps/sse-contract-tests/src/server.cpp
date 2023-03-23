@@ -48,40 +48,30 @@ server::server(net::io_context& ioc,
     }
 
     LD_LOG(logger_, LogLevel::kInfo)
-        << "listening on " << address << ":" << port;
+        << "server: listening on " << address << ":" << port;
 }
 
 void server::fail(beast::error_code ec, char const* what) {
-    LD_LOG(logger_, LogLevel::kError) << what << ": " << ec.message();
+    LD_LOG(logger_, LogLevel::kError) << "server: " << what << ": " << ec.message();
 }
 
 void server::add_capability(std::string cap) {
-    LD_LOG(logger_, LogLevel::kDebug) << "test capability: <" << cap << ">";
+    LD_LOG(logger_, LogLevel::kDebug) << "server: test capability: <" << cap << ">";
     caps_.push_back(std::move(cap));
 }
 
 void server::run() {
+    LD_LOG(logger_, LogLevel::kDebug) << "server: run requested";
     net::dispatch(
         acceptor_.get_executor(),
         beast::bind_front_handler(&server::do_accept, shared_from_this()));
 }
 
-void server::stop() {
-    std::cout << "server: stop\n";
-    net::dispatch(
-        acceptor_.get_executor(),
-        beast::bind_front_handler(&server::do_stop, shared_from_this()));
-}
-
 void server::do_accept() {
+    LD_LOG(logger_, LogLevel::kDebug) << "server: waiting for connection";
     acceptor_.async_accept(
         net::make_strand(ioc_),
         beast::bind_front_handler(&server::on_accept, shared_from_this()));
-}
-
-void server::do_stop() {
-    std::cout << "server: do_stop\n";
-    entity_manager_.destroy_all();
 }
 
 void server::on_accept(boost::system::error_code const& ec,
@@ -93,10 +83,15 @@ void server::on_accept(boost::system::error_code const& ec,
         fail(ec, "accept");
         return;
     }
-    auto session =
-        std::make_shared<Session>(std::move(socket), entity_manager_, caps_);
 
-    session->on_shutdown([this]() { ioc_.stop(); });
+
+    auto session =
+        std::make_shared<Session>(std::move(socket), entity_manager_, caps_, logger_);
+
+    session->on_shutdown([this]() {
+        LD_LOG(logger_, LogLevel::kDebug) << "server: terminating";
+        ioc_.stop();
+    });
 
     session->start();
 

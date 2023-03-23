@@ -27,11 +27,9 @@ class server : public std::enable_shared_from_this<server> {
            launchdarkly::Logger& logger);
     void add_capability(std::string cap);
     void run();
-    void stop();
 
    private:
     void do_accept();
     void on_accept(boost::system::error_code const& ec, tcp::socket socket);
     void fail(boost::beast::error_code ec, char const* what);
-    void do_stop();
 };

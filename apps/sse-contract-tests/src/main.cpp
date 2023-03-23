@@ -18,7 +18,7 @@ using launchdarkly::LogLevel;
 
 int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{std::make_unique<ConsoleBackend>(
-        LogLevel::kInfo, "sse-contract-tests")};
+        LogLevel::kDebug,"sse-contract-tests")};
 
     try {
         net::io_context ioc{1};
@@ -31,10 +31,11 @@ int main(int argc, char* argv[]) {
         signals.async_wait([&](beast::error_code const&, int) {
             LD_LOG(logger, LogLevel::kInfo) << "shutting down..";
             ioc.stop();
-            LD_LOG(logger, LogLevel::kInfo) << "bye!";
         });
 
         ioc.run();
+        LD_LOG(logger, LogLevel::kInfo) << "bye!";
+
     } catch (std::exception const& e) {
         LD_LOG(logger, LogLevel::kError) << e.what();
         return EXIT_FAILURE;
