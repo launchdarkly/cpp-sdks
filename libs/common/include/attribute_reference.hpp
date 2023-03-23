@@ -39,8 +39,7 @@ class AttributeReference {
     /**
      * Get the total depth of the reference.
      *
-     * For example, depth() on the reference `/a/b/c` would return
-     * 3.
+     * For example, depth() on the reference `/a/b/c` would return 3.
      * @return
      */
     size_t depth() const;
