@@ -12,7 +12,7 @@ using launchdarkly::Logger;
 using launchdarkly::LogLevel;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kInfo, "Hello"));
+    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
 
     if (auto num = launchdarkly::foo()) {
         LD_LOG(logger, LogLevel::kInfo) << "Got: " << *num << '\n';
