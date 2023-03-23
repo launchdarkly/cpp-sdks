@@ -20,6 +20,7 @@ add_executable(sse-tests
 
 target_link_libraries(sse-tests PRIVATE
         launchdarkly::sse
+        launchdarkly::common
         nlohmann_json::nlohmann_json
 )
 

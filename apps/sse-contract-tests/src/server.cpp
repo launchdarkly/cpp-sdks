@@ -7,18 +7,17 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-void fail(beast::error_code ec, char const* what) {
-    std::cerr << what << ": " << ec.message() << "\n";
-}
+using launchdarkly::LogLevel;
 
 server::server(net::io_context& ioc,
                std::string const& address,
-               std::string const& port)
+               std::string const& port,
+               launchdarkly::Logger& logger)
     : ioc_{ioc},
-      stopped_{false},
       acceptor_{ioc},
       entity_manager_{ioc.get_executor()},
-      caps_{} {
+      caps_{},
+      logger_{logger} {
     beast::error_code ec;
 
     tcp::resolver resolver{ioc_};
@@ -48,10 +47,16 @@ server::server(net::io_context& ioc,
         return;
     }
 
-    std::cout << "listening on " << address << ":" << port << std::endl;
+    LD_LOG(logger_, LogLevel::kInfo)
+        << "listening on " << address << ":" << port;
+}
+
+void server::fail(beast::error_code ec, char const* what) {
+    LD_LOG(logger_, LogLevel::kError) << what << ": " << ec.message();
 }
 
 void server::add_capability(std::string cap) {
+    LD_LOG(logger_, LogLevel::kDebug) << "test capability: <" << cap << ">";
     caps_.push_back(std::move(cap));
 }
 
