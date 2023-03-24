@@ -23,7 +23,7 @@ std::optional<std::string> const& Event::id() const {
     return id_;
 }
 
-std::string&& Event::take() {
+std::string&& Event::take() && {
     return std::move(data_);
 };
 

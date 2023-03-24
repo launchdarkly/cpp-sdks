@@ -13,7 +13,7 @@ class Event {
     std::string const& type() const;
     std::string const& data() const;
     std::optional<std::string> const& id() const;
-    std::string&& take();
+    std::string&& take() &&;
 
    private:
     std::string type_;

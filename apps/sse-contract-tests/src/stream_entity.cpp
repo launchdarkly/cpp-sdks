@@ -77,10 +77,9 @@ StreamEntity::request_type StreamEntity::build_request(
     nlohmann::json json;
 
     if (ev.type() == "comment") {
-        json = CommentMessage{"comment", ev.take()};
+        json = CommentMessage{"comment", std::move(ev).take()};
     } else {
-        json = EventMessage{"event",
-                            Event{ev.type(), ev.take(), ev.id().value_or("")}};
+        json = EventMessage{"event", Event{ev}};
     }
 
     req.body() = json.dump();

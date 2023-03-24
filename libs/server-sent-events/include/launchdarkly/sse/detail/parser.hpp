@@ -16,6 +16,9 @@
 
 namespace launchdarkly::sse::detail {
 
+using namespace boost::beast;
+
+
 struct Event {
     std::string type;
     std::string data;
@@ -27,7 +30,6 @@ struct Event {
     void trim_trailing_newline();
 };
 
-using namespace boost::beast;
 
 template <class EventReceiver>
 struct EventBody {

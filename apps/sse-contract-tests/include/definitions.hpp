@@ -1,10 +1,10 @@
 #pragma once
 
-#include "nlohmann/json.hpp"
-
+#include <launchdarkly/sse/event.hpp>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include "nlohmann/json.hpp"
 
 namespace nlohmann {
 
@@ -55,8 +55,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
 
 struct Event {
     std::string type;
-    std::string data;
     std::string id;
+    std::string data;
+    Event() = default;
+    explicit Event(launchdarkly::sse::Event event)
+        : type(event.type()),
+          id(event.id().value_or("")),
+          data(std::move(event).take()) {}
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Event, type, data, id);
