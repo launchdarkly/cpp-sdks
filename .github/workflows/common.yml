@@ -15,6 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: .github/actions/ci
+      - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-common
