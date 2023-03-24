@@ -1,7 +1,7 @@
 #include <launchdarkly/sse/client.hpp>
 
-#include <boost/asio/strand.hpp>
 #include <boost/asio/placeholders.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/url/parse.hpp>
@@ -54,22 +54,22 @@ client::client(net::any_io_executor ex,
                std::string port,
                std::function<void(std::string)> logging_cb,
                std::string log_tag)
-    : m_resolver{std::move(ex)},
+    : resolver_{std::move(ex)},
       parser_{},
       host_{std::move(host)},
       port_{std::move(port)},
-      m_request{std::move(req)},
-      m_response{},
+      request_{std::move(req)},
+      response_{},
       buffered_line_{},
       complete_lines_{},
       begin_CR_{false},
       last_event_id_{},
-      m_event_data{},
-      m_events{},
+      event_buffer_{},
+      events_{},
       logging_cb_{std::move(logging_cb)},
       on_chunk_body_trampoline_{},
       log_tag_{std::move(log_tag)},
-      m_cb{[this](event_data e) {
+      event_callback_{[this](event_data e) {
           log("got event: (" + e.get_type() + ", " + e.get_data() + ")");
       }} {
     parser_.body_limit(boost::none);
@@ -122,7 +122,7 @@ void client::parse_events() {
             complete_lines_.pop_front();
 
             if (line.empty()) {
-                if (m_event_data.has_value()) {
+                if (event_buffer_.has_value()) {
                     seen_empty_line = true;
                     break;
                 }
@@ -134,38 +134,38 @@ void client::parse_events() {
                 event_data e;
                 e.set_type("comment");
                 e.append_data(field.second);
-                m_cb(std::move(e));
+                event_callback_(std::move(e));
                 continue;
             }
 
-            if (!m_event_data.has_value()) {
-                m_event_data.emplace(event_data{});
-                m_event_data->set_id(last_event_id_);
+            if (!event_buffer_.has_value()) {
+                event_buffer_.emplace(event_data{});
+                event_buffer_->set_id(last_event_id_);
             }
 
             if (field.first == "event") {
-                m_event_data->set_type(field.second);
+                event_buffer_->set_type(field.second);
             } else if (field.first == "data") {
-                m_event_data->append_data(field.second);
+                event_buffer_->append_data(field.second);
             } else if (field.first == "id") {
                 if (field.second.find('\0') != std::string::npos) {
                     // IDs with null-terminators are acceptable, but ignored.
                     continue;
                 }
                 last_event_id_ = field.second;
-                m_event_data->set_id(last_event_id_);
+                event_buffer_->set_id(last_event_id_);
             } else if (field.first == "retry") {
                 log("got unhandled 'retry' field");
             }
         }
 
         if (seen_empty_line) {
-            std::optional<event_data> data = m_event_data;
-            m_event_data = std::nullopt;
+            std::optional<event_data> data = event_buffer_;
+            event_buffer_ = std::nullopt;
 
             if (data.has_value()) {
                 data->trim_trailing_newline();
-                m_cb(std::move(*data));
+                event_callback_(std::move(*data));
             }
 
             continue;
@@ -251,7 +251,7 @@ class ssl_client : public client {
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(15));
 
-        m_resolver.async_resolve(
+        resolver_.async_resolve(
             host_, port_,
             beast::bind_front_handler(&ssl_client::on_resolve, shared()));
     }
@@ -293,7 +293,7 @@ class ssl_client : public client {
 
         // Send the HTTP request to the remote host
         http::async_write(
-            stream_, m_request,
+            stream_, request_,
             beast::bind_front_handler(&ssl_client::on_write, shared()));
     }
 
@@ -314,7 +314,7 @@ class ssl_client : public client {
         parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
         http::async_read_some(
-            stream_, m_buffer, parser_,
+            stream_, buffer_, parser_,
             beast::bind_front_handler(&ssl_client::on_read, shared()));
     }
 
@@ -327,7 +327,7 @@ class ssl_client : public client {
         beast::get_lowest_layer(stream_).expires_never();
 
         http::async_read_some(
-            stream_, m_buffer, parser_,
+            stream_, buffer_, parser_,
             beast::bind_front_handler(&ssl_client::on_read, shared()));
     }
 
@@ -355,7 +355,7 @@ class plaintext_client : public client {
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(15));
 
-        m_resolver.async_resolve(
+        resolver_.async_resolve(
             host_, port_,
             beast::bind_front_handler(&plaintext_client::on_resolve, shared()));
     }
@@ -389,7 +389,7 @@ class plaintext_client : public client {
             return fail(ec, "connect");
 
         http::async_write(
-            stream_, m_request,
+            stream_, request_,
             beast::bind_front_handler(&plaintext_client::on_write, shared()));
     }
 
@@ -409,7 +409,7 @@ class plaintext_client : public client {
 
         parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
-        http::async_read(stream_, m_buffer, parser_,
+        http::async_read(stream_, buffer_, parser_,
                          beast::bind_front_handler(
                              &plaintext_client::on_got_headers, shared()));
     }
@@ -433,7 +433,7 @@ class plaintext_client : public client {
         beast::get_lowest_layer(stream_).expires_never();
 
         http::async_read_some(
-            stream_, m_buffer, parser_,
+            stream_, buffer_, parser_,
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
     }
 
@@ -444,7 +444,7 @@ class plaintext_client : public client {
         }
 
         http::async_read_some(
-            stream_, m_buffer, parser_,
+            stream_, buffer_, parser_,
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
     }
 
@@ -454,9 +454,8 @@ class plaintext_client : public client {
 builder::builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)},
       ssl_context_{ssl::context::tlsv12_client},
-      executor_{std::move(ctx)},
-      tls_version_{12} {
-    // This needs to be verify_peer in production!!
+      executor_{std::move(ctx)} {
+    // TODO: This needs to be verify_peer in production!!
     ssl_context_.set_verify_mode(ssl::verify_none);
 
     request_.version(11);

@@ -41,7 +41,6 @@ class builder {
     net::any_io_executor executor_;
     ssl::context ssl_context_;
     http::request<http::empty_body> request_;
-    std::optional<unsigned int> tls_version_;
     std::function<void(std::string)> logging_cb_;
 };
 
@@ -79,7 +78,7 @@ class client : public std::enable_shared_from_this<client> {
 
     template <typename Callback>
     void on_event(Callback event_cb) {
-        m_cb = event_cb;
+        event_callback_ = event_cb;
     }
 
     virtual void run() = 0;
@@ -87,20 +86,20 @@ class client : public std::enable_shared_from_this<client> {
 
    protected:
     using parser = http::response_parser<http::string_body>;
-    tcp::resolver m_resolver;
-    beast::flat_buffer m_buffer;
-    http::request<http::empty_body> m_request;
-    http::response<http::string_body> m_response;
+    tcp::resolver resolver_;
+    beast::flat_buffer buffer_;
+    http::request<http::empty_body> request_;
+    http::response<http::string_body> response_;
     parser parser_;
     std::string host_;
     std::string port_;
     std::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
-    std::vector<event> m_events;
+    std::vector<event> events_;
     std::optional<std::string> last_event_id_;
     bool begin_CR_;
-    std::optional<event_data> m_event_data;
-    std::function<void(event_data)> m_cb;
+    std::optional<event_data> event_buffer_;
+    std::function<void(event_data)> event_callback_;
     logger logging_cb_;
     std::string log_tag_;
 
