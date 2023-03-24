@@ -32,7 +32,7 @@ void EventOutbox::do_shutdown(beast::error_code ec, std::string what) {
     flush_timer_.cancel();
 }
 
-void EventOutbox::deliver_event(launchdarkly::sse::Event event) {
+void EventOutbox::post_event(launchdarkly::sse::Event event) {
     auto http_request = build_request(callback_counter_++, std::move(event));
     outbox_.push(http_request);
 }
@@ -51,10 +51,10 @@ void EventOutbox::stop() {
                                         shared_from_this(), ec, reason));
 }
 
-EventOutbox::request_type EventOutbox::build_request(
+EventOutbox::RequestType EventOutbox::build_request(
     std::size_t counter,
     launchdarkly::sse::Event ev) {
-    request_type req;
+    RequestType req;
 
     req.set(http::field::host, callback_host_);
     req.method(http::verb::get);
@@ -102,7 +102,7 @@ void EventOutbox::on_flush_timer(boost::system::error_code ec) {
     }
 
     if (!outbox_.empty()) {
-        request_type& request = outbox_.front();
+        RequestType& request = outbox_.front();
 
         // Flip-flop between this function and on_write; pushing an event
         // and then popping it.

@@ -21,13 +21,27 @@ class server : public std::enable_shared_from_this<server> {
     launchdarkly::Logger& logger_;
 
    public:
+    /**
+     * Constructs a server, which stands up a REST API at the given
+     * port and address.
+     * @param ioc IO context.
+     * @param address Address to bind.
+     * @param port Port to bind.
+     * @param logger Logger.
+     */
     server(net::io_context& ioc,
            std::string const& address,
            std::string const& port,
            launchdarkly::Logger& logger);
+    /**
+     * Advertise an optional test-harness capability, such as "comments".
+     * @param cap
+     */
     void add_capability(std::string cap);
+    /**
+     * Begins an async operation to start accepting requests.
+     */
     void run();
-
    private:
     void do_accept();
     void on_accept(boost::system::error_code const& ec, tcp::socket socket);

@@ -30,7 +30,7 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
     });
 
     client_builder.receiver([copy = poster](launchdarkly::sse::Event e) {
-        copy->deliver_event(std::move(e));
+        copy->post_event(std::move(e));
     });
 
     auto client = client_builder.build();
@@ -46,14 +46,6 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
     return id;
 }
 
-void EntityManager::destroy_all() {
-    for (auto& kv : entities_) {
-        auto& entities = kv.second;
-        // todo: entities.first.stop()
-        entities.second->stop();
-    }
-    entities_.clear();
-}
 
 bool EntityManager::destroy(std::string const& id) {
     auto it = entities_.find(id);
