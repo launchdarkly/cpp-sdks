@@ -7,8 +7,8 @@ file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(gtest_launchdarkly-cpp-common
+add_executable(gtest_${LIBNAME}
         ${tests})
-target_link_libraries(gtest_launchdarkly-cpp-common launchdarkly::common GTest::gtest_main)
+target_link_libraries(gtest_${LIBNAME} launchdarkly::common GTest::gtest_main)
 
-gtest_discover_tests(gtest_launchdarkly-cpp-common)
+gtest_discover_tests(gtest_${LIBNAME})
