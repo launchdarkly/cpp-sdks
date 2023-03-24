@@ -1,0 +1,34 @@
+name: libs/common
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md' #Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build-test-common:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+          boost_version: 1.81.0
+          platform_version: 22.04
+          boost_install_dir: /home/runner/boost
+      - name: Configure CMake
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        run: cmake -S . -B /home/runner/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Build Library
+        run: ./scripts/build.sh launchdarkly-cpp-common ON
+      - name: Build Tests
+        run: ./scripts/build.sh google_tests_common ON
+      - name: Run Tests
+        run : ./scripts/test.sh
