@@ -11,6 +11,11 @@ ConsoleBackend::ConsoleBackend(LogLevel level, std::string name)
     name_.append("] ");
 }
 
+ConsoleBackend::ConsoleBackend(std::string name)
+    : ConsoleBackend(
+          GetLogLevelEnum(std::getenv("LD_LOG_LEVEL"), LogLevel::kInfo),
+          std::move(name)) {}
+
 bool ConsoleBackend::enabled(LogLevel level) {
     return level >= level_;
 }
