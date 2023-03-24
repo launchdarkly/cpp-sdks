@@ -1,9 +1,12 @@
 #pragma once
 
+#include <boost/beast/core/buffers_to_string.hpp>
 #include <boost/beast/http/basic_parser.hpp>
 #include <boost/beast/http/fields.hpp>
+#include <boost/beast/http/message.hpp>
 #include <boost/beast/http/type_traits.hpp>
 
+#include <deque>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -13,92 +16,106 @@ namespace launchdarkly::sse {
 
 using namespace boost::beast;
 
-class parser : public http::basic_parser<false> {
-   private:
+class event_data {
+    std::string m_type;
+    std::string m_data;
+    std::optional<std::string> m_id;
+
+   public:
+    explicit event_data();
+    void set_type(std::string);
+    void set_id(std::optional<std::string>);
+    void append_data(std::string const&);
+    void trim_trailing_newline();
+    std::string const& get_type();
+    std::string const& get_data();
+    std::optional<std::string> const& get_id();
+};
+
+template <class EventContainer>
+struct EventBody {
+    using event_type = EventContainer;
+    class reader;
+    class value_type;
+    static std::uint64_t size(value_type const& body);
+};
+
+template <class EventContainer>
+class EventBody<EventContainer>::value_type {
+    friend class reader;
+    friend struct EventBody;
+
+    EventContainer events_;
+
+   public:
+    EventContainer& events() { return events_; }
+};
+
+template <class EventContainer>
+struct EventBody<EventContainer>::reader {
+    value_type& body_;
+
     std::optional<std::string> buffered_line_;
+    std::deque<std::string> complete_lines_;
     bool begin_CR_;
-    std::vector<std::string> complete_lines_;
-    void on_request_impl(http::verb method,
-                         string_view method_str,
-                         string_view target,
-                         int version,
-                         error_code& ec) override {
-        //                try {
-        //                    m_.target(target);
-        //                    if (method != http::verb::unknown)
-        //                        m_.method(method);
-        //                    else
-        //                        m_.method_string(method_str);
-        //                    ec.assign(0, ec.category());
-        //                } catch (std::bad_alloc const&) {
-        //                    ec = http::error::bad_alloc;
-        //                }
-        //                m_.version(version);
-        std::cout << "on_request\n";
-    }
-    void on_response_impl(int code,
-                          string_view reason,
-                          int version,
-                          error_code& ec) override {
-        //        m_.result(code);
-        //        m_.version(version);
-        //        try {
-        //            m_.reason(reason);
-        //            ec.assign(0, ec.category());
-        //        } catch (std::bad_alloc const&) {
-        //            ec = http::error::bad_alloc;
-        //        }
-        std::cout << "on_response\n";
-    }
-    void on_field_impl(http::field name,
-                       string_view name_string,
-                       string_view value,
-                       error_code& ec) override {
-        //        try {
-        //            m_.insert(name, name_string, value);
-        //            ec.assign(0, ec.category());
-        //        } catch (std::bad_alloc const&) {
-        //            ec = http::error::bad_alloc;
-        //        }
-        std::cout << "on_field\n";
-    }
-    void on_header_impl(error_code& ec) override {
-        // ec.assign(0, ec.category());
-        std::cout << "on_header\n";
+    std::optional<std::string> last_event_id_;
+
+    std::optional<event_data> event_;
+
+   public:
+    template <bool isRequest, class Fields>
+    reader(http::header<isRequest, Fields>& h, value_type& body)
+        : body_(body),
+          buffered_line_(),
+          complete_lines_(),
+          begin_CR_(false),
+          last_event_id_(),
+          event_() {
+        boost::ignore_unused(h);
     }
 
-    void on_body_init_impl(boost::optional<std::uint64_t> const& content_length,
-                           error_code& ec) override {
-        //  rd_.emplace(m_, content_length, ec);
-        std::cout << "on_body_init\n";
-    }
-    std::size_t on_body_impl(string_view body, error_code& ec) override {
-        // return rd_->put(boost::asio::buffer(body.data(), body.size()), ec);
-        std::cout << "on_body_impl" << body << '\n';
+    /** Initialize the reader.
 
-        return parse_stream(0, body, ec);
-    }
+    This is called after construction and before the first
+    call to `put`. The message is valid and complete upon
+    entry.@param ec Set to the error, if any occurred.
+    */
+    void init(boost::optional<std::uint64_t> const& content_length,
+              error_code& ec) {
+        boost::ignore_unused(content_length);
 
-    void on_chunk_header_impl(std::uint64_t size,
-                              string_view extensions,
-                              error_code& ec) override {
-        // ec.assign(0, ec.category());
-        std::cout << "on_chunk_header_impl\n";
-    }
-    std::size_t on_chunk_body_impl(std::uint64_t remain,
-                                   string_view body,
-                                   error_code& ec) override {
-        return parse_stream(remain, body, ec);
+        // The specification requires this to indicate "no error"
+        ec = {};
     }
 
-    void on_finish_impl(error_code& ec) override {
-        //        if (rd_)
-        //            rd_->finish(ec);
-        //        else
-        //            ec.assign(0, ec.category());
-        std::cout << "on_finish_impl\n";
+    /** Store buffers.
+    This is called zero or more times with parsed body octets.
+
+    @param buffers The constant buffer sequence to store.
+
+    @param ec Set to the error, if any occurred.
+
+    @return The number of bytes transferred from the input buffers.
+    */
+    template <class ConstBufferSequence>
+    std::size_t put(ConstBufferSequence const& buffers, error_code& ec) {
+        // The specification requires this to indicate "no error"
+        ec = {};
+        parse_stream(buffers_to_string(buffers));
+        parse_events();
+        return buffer_bytes(buffers);
     }
 
+    /** Called when the body is complete.
+
+        @param ec Set to the error, if any occurred.
+    */
+    void finish(error_code& ec) {
+        // The specification requires this to indicate "no error"
+        ec = {};
+    }
+
+   private:
     void complete_line() {
         if (buffered_line_.has_value()) {
             complete_lines_.push_back(buffered_line_.value());
@@ -119,9 +136,7 @@ class parser : public http::basic_parser<false> {
         return index == std::string::npos ? body.size() : index;
     }
 
-    size_t parse_stream(std::uint64_t remain,
-                        boost::string_view body,
-                        boost::beast::error_code& ec) {
+    void parse_stream(boost::string_view body) {
         size_t i = 0;
         while (i < body.length()) {
             i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
@@ -143,10 +158,97 @@ class parser : public http::basic_parser<false> {
                 begin_CR_ = false;
             }
         }
-        return body.length();
     }
 
-   public:
-    parser() : buffered_line_(), complete_lines_(), begin_CR_(false) {}
+    static std::pair<std::string, std::string> parse_field(std::string field) {
+        if (field.empty()) {
+            assert(0 && "should never parse an empty line");
+        }
+
+        size_t colon_index = field.find(':');
+        switch (colon_index) {
+            case 0:
+                field.erase(0, 1);
+                return std::make_pair(std::string{"comment"}, std::move(field));
+            case std::string::npos:
+                return std::make_pair(std::move(field), std::string{});
+            default:
+                auto key = field.substr(0, colon_index);
+                field.erase(0, colon_index + 1);
+                if (field.find(' ') == 0) {
+                    field.erase(0, 1);
+                }
+                return std::make_pair(std::move(key), std::move(field));
+        }
+    }
+
+    void parse_events() {
+        while (true) {
+            bool seen_empty_line = false;
+
+            while (!complete_lines_.empty()) {
+                std::string line = std::move(complete_lines_.front());
+                complete_lines_.pop_front();
+
+                if (line.empty()) {
+                    if (event_.has_value()) {
+                        seen_empty_line = true;
+                        break;
+                    }
+                    continue;
+                }
+
+                auto field = parse_field(std::move(line));
+                if (field.first == "comment") {
+                    event_data e;
+                    e.set_type("comment");
+                    e.append_data(field.second);
+                    body_.events_.push_back(std::move(e));
+                    continue;
+                }
+
+                if (!event_.has_value()) {
+                    event_.emplace(event_data{});
+                    event_->set_id(last_event_id_);
+                }
+
+                if (field.first == "event") {
+                    event_->set_type(field.second);
+                } else if (field.first == "data") {
+                    event_->append_data(field.second);
+                } else if (field.first == "id") {
+                    if (field.second.find('\0') != std::string::npos) {
+                        // IDs with null-terminators are acceptable, but
+                        // ignored.
+                        continue;
+                    }
+                    last_event_id_ = field.second;
+                    event_->set_id(last_event_id_);
+                } else if (field.first == "retry") {
+                }
+            }
+
+            if (seen_empty_line) {
+                std::optional<event_data> data = event_;
+                event_ = std::nullopt;
+
+                if (data.has_value()) {
+                    data->trim_trailing_newline();
+                    body_.events_.push_back(std::move(*data));
+                }
+
+                continue;
+            }
+
+            break;
+        }
+    }
 };
+
+template <bool isRequest, class EventContainer, class Fields>
+std::ostream& operator<<(
+    std::ostream&,
+    http::message<isRequest, EventBody<EventContainer>, Fields> const&) =
+    delete;
+
 }  // namespace launchdarkly::sse

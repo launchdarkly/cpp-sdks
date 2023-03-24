@@ -2,21 +2,21 @@
 
 #include <launchdarkly/sse/parser.hpp>
 
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl.hpp>
 
+#include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
-#include <boost/beast/core/tcp_stream.hpp>
-#include <boost/beast/core/flat_buffer.hpp>
 
-#include <string>
+#include <deque>
 #include <functional>
 #include <memory>
 #include <optional>
-#include <deque>
+#include <string>
 #include <vector>
 
 namespace launchdarkly::sse {
@@ -46,22 +46,6 @@ class builder {
     std::function<void(std::string)> logging_cb_;
 };
 
-class event_data {
-    std::string m_type;
-    std::string m_data;
-    std::optional<std::string> m_id;
-
-   public:
-    explicit event_data();
-    void set_type(std::string);
-    void set_id(std::optional<std::string>);
-    void append_data(std::string const&);
-    void trim_trailing_newline();
-    std::string const& get_type();
-    std::string const& get_data();
-    std::optional<std::string> const& get_id();
-};
-
 using sse_event = event_data;
 using sse_comment = std::string;
 
@@ -75,7 +59,8 @@ class client : public std::enable_shared_from_this<client> {
            http::request<http::empty_body> req,
            std::string host,
            std::string port,
-           logger logger, std::string log_tag);
+           logger logger,
+           std::string log_tag);
     ~client();
 
     template <typename Callback>
@@ -87,39 +72,22 @@ class client : public std::enable_shared_from_this<client> {
     virtual void close() = 0;
 
    protected:
-    using parser = launchdarkly::sse::parser;
+    using body = launchdarkly::sse::EventBody<std::vector<event_data>>;
+    using parser = http::response_parser<body>;
     tcp::resolver resolver_;
     beast::flat_buffer buffer_;
     http::request<http::empty_body> request_;
-    http::response<http::string_body> response_;
+    http::response<body> response_;
     parser parser_;
     std::string host_;
     std::string port_;
-    std::optional<std::string> buffered_line_;
-    std::deque<std::string> complete_lines_;
-    std::vector<event> events_;
-    std::optional<std::string> last_event_id_;
-    bool begin_CR_;
-    std::optional<event_data> event_buffer_;
+
     std::function<void(event_data)> event_callback_;
     logger logging_cb_;
     std::string log_tag_;
 
-    void complete_line();
-    void parse_events();
-    size_t append_up_to(boost::string_view body, std::string const& search);
-    std::size_t parse_stream(std::uint64_t remain,
-                             boost::string_view body,
-                             beast::error_code& ec);
-
-    std::optional<std::function<
-        size_t(uint64_t, boost::string_view, boost::system::error_code&)>>
-        on_chunk_body_trampoline_;
-
     void log(std::string);
     void fail(beast::error_code ec, char const* what);
-
-
 };
 
 }  // namespace launchdarkly::sse

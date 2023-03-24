@@ -17,37 +17,6 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-event_data::event_data() : m_type{}, m_data{}, m_id{} {}
-
-void event_data::set_type(std::string type) {
-    m_type = std::move(type);
-}
-void event_data::append_data(std::string const& data) {
-    m_data.append(data);
-    m_data.append("\n");
-}
-
-void event_data::set_id(std::optional<std::string> id) {
-    m_id = std::move(id);
-}
-
-std::string const& event_data::get_type() {
-    return m_type;
-}
-std::string const& event_data::get_data() {
-    return m_data;
-}
-
-void event_data::trim_trailing_newline() {
-    if (m_data[m_data.size() - 1] == '\n') {
-        m_data.resize(m_data.size() - 1);
-    }
-}
-
-std::optional<std::string> const& event_data::get_id() {
-    return m_id;
-}
-
 client::client(net::any_io_executor ex,
                http::request<http::empty_body> req,
                std::string host,
@@ -61,20 +30,12 @@ client::client(net::any_io_executor ex,
       port_{std::move(port)},
       request_{std::move(req)},
       response_{},
-      buffered_line_{},
-      complete_lines_{},
-      begin_CR_{false},
-      last_event_id_{},
-      event_buffer_{},
-      events_{},
       logging_cb_{std::move(logging_cb)},
-      on_chunk_body_trampoline_{},
       log_tag_{std::move(log_tag)},
       event_callback_{[this](event_data e) {
           log("got event: (" + e.get_type() + ", " + e.get_data() + ")");
       }} {
-
-   // parser_.body_limit(boost::none);
+    // parser_.body_limit(boost::none);
 
     log("create");
 }
@@ -92,138 +53,6 @@ void client::log(std::string what) {
 // Report a failure
 void client::fail(beast::error_code ec, char const* what) {
     log(std::string(what) + ":" + ec.message());
-}
-
-std::pair<std::string, std::string> parse_field(std::string field) {
-    if (field.empty()) {
-        assert(0 && "should never parse an empty line");
-    }
-
-    size_t colon_index = field.find(':');
-    switch (colon_index) {
-        case 0:
-            field.erase(0, 1);
-            return std::make_pair(std::string{"comment"}, std::move(field));
-        case std::string::npos:
-            return std::make_pair(std::move(field), std::string{});
-        default:
-            auto key = field.substr(0, colon_index);
-            field.erase(0, colon_index + 1);
-            if (field.find(' ') == 0) {
-                field.erase(0, 1);
-            }
-            return std::make_pair(std::move(key), std::move(field));
-    }
-}
-
-void client::parse_events() {
-    while (true) {
-        bool seen_empty_line = false;
-
-        while (!complete_lines_.empty()) {
-            std::string line = std::move(complete_lines_.front());
-            complete_lines_.pop_front();
-
-            if (line.empty()) {
-                if (event_buffer_.has_value()) {
-                    seen_empty_line = true;
-                    break;
-                }
-                continue;
-            }
-
-            auto field = parse_field(std::move(line));
-            if (field.first == "comment") {
-                event_data e;
-                e.set_type("comment");
-                e.append_data(field.second);
-                event_callback_(std::move(e));
-                continue;
-            }
-
-            if (!event_buffer_.has_value()) {
-                event_buffer_.emplace(event_data{});
-                event_buffer_->set_id(last_event_id_);
-            }
-
-            if (field.first == "event") {
-                event_buffer_->set_type(field.second);
-            } else if (field.first == "data") {
-                event_buffer_->append_data(field.second);
-            } else if (field.first == "id") {
-                if (field.second.find('\0') != std::string::npos) {
-                    // IDs with null-terminators are acceptable, but ignored.
-                    continue;
-                }
-                last_event_id_ = field.second;
-                event_buffer_->set_id(last_event_id_);
-            } else if (field.first == "retry") {
-                log("got unhandled 'retry' field");
-            }
-        }
-
-        if (seen_empty_line) {
-            std::optional<event_data> data = event_buffer_;
-            event_buffer_ = std::nullopt;
-
-            if (data.has_value()) {
-                data->trim_trailing_newline();
-                event_callback_(std::move(*data));
-            }
-
-            continue;
-        }
-
-        break;
-    }
-}
-
-void client::complete_line() {
-    if (buffered_line_.has_value()) {
-        complete_lines_.push_back(buffered_line_.value());
-        buffered_line_.reset();
-    }
-}
-
-size_t client::append_up_to(boost::string_view body,
-                            std::string const& search) {
-    std::size_t index = body.find_first_of(search);
-    if (index != std::string::npos) {
-        body.remove_suffix(body.size() - index);
-    }
-    if (buffered_line_.has_value()) {
-        buffered_line_->append(body.to_string());
-    } else {
-        buffered_line_ = std::string{body};
-    }
-    return index == std::string::npos ? body.size() : index;
-}
-
-size_t client::parse_stream(std::uint64_t remain,
-                            boost::string_view body,
-                            beast::error_code& ec) {
-    size_t i = 0;
-    while (i < body.length()) {
-        i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
-        if (i == body.size()) {
-            continue;
-        } else if (body.at(i) == '\r') {
-            complete_line();
-            begin_CR_ = true;
-            i++;
-        } else if (body.at(i) == '\n') {
-            if (begin_CR_) {
-                begin_CR_ = false;
-                i++;
-            } else {
-                complete_line();
-                i++;
-            }
-        } else {
-            begin_CR_ = false;
-        }
-    }
-    return body.length();
 }
 
 class ssl_client : public client {
@@ -307,15 +136,6 @@ class ssl_client : public client {
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(10));
 
-        on_chunk_body_trampoline_.emplace(
-            [self = shared()](auto remain, auto body, auto ec) {
-                auto consumed = self->parse_stream(remain, body, ec);
-                self->parse_events();
-                return consumed;
-            });
-
-      //  parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
-
         http::async_read_some(
             stream_, buffer_, parser_,
             beast::bind_front_handler(&ssl_client::on_read, shared()));
@@ -326,6 +146,12 @@ class ssl_client : public client {
         if (ec) {
             return fail(ec, "read");
         }
+
+        std::vector<event_data>& events = parser_.get().body().events();
+        for (auto e : events) {
+            event_callback_(std::move(e));
+        }
+        events.clear();
 
         beast::get_lowest_layer(stream_).expires_never();
 
@@ -403,38 +229,6 @@ class plaintext_client : public client {
         beast::get_lowest_layer(stream_).expires_after(
             std::chrono::seconds(10));
 
-        on_chunk_body_trampoline_.emplace(
-            [self = shared()](auto remain, auto body, auto ec) {
-                auto consumed = self->parse_stream(remain, body, ec);
-                self->parse_events();
-                return consumed;
-            });
-
-       // parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
-
-        http::async_read_some(stream_, buffer_, parser_,
-                         beast::bind_front_handler(
-                             &plaintext_client::on_got_headers, shared()));
-    }
-
-    void on_got_headers(beast::error_code ec, std::size_t bytes_transferred) {
-        boost::ignore_unused(bytes_transferred);
-
-        if (ec) {
-            return fail(ec, "headers");
-        }
-
-//        if (parser_.is_header_done()) {
-//            auto status = parser_.;
-//            if (status == http::status::moved_permanently) {
-//                if (auto it = parser_.get().find("Location");
-//                    it != parser_.get().end()) {
-//                }
-//            }
-//        }
-
-        beast::get_lowest_layer(stream_).expires_never();
-
         http::async_read_some(
             stream_, buffer_, parser_,
             beast::bind_front_handler(&plaintext_client::on_read, shared()));
@@ -445,6 +239,12 @@ class plaintext_client : public client {
         if (ec && ec != beast::errc::operation_canceled) {
             return fail(ec, "read");
         }
+
+        std::vector<event_data>& events = parser_.get().body().events();
+        for (auto e : events) {
+            event_callback_(std::move(e));
+        }
+        events.clear();
 
         http::async_read_some(
             stream_, buffer_, parser_,
