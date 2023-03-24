@@ -5,9 +5,10 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-// Periodically check the outbox (outgoing events to the test harness)
-// at this interval.
-auto const kFlushInterval = boost::posix_time::milliseconds{10};
+// Check the outbox at this interval. Normally a flush is triggered for
+// every event; this is just a failsafe in case a flush is happening concurrently.
+auto const kFlushInterval = boost::posix_time::milliseconds{500};
+auto const kOutboxCapacity = 1023;
 
 EventOutbox::EventOutbox(net::any_io_executor executor,
                          std::string callback_url)
@@ -18,10 +19,10 @@ EventOutbox::EventOutbox(net::any_io_executor executor,
       executor_{executor},
       resolver_{executor},
       event_stream_{executor},
-      outbox_{1024},
-      flush_timer_{executor, boost::posix_time::milliseconds{0}} {
-    boost::system::result<boost::urls::url_view> uri_components =
-        boost::urls::parse_uri(callback_url_);
+      outbox_{kOutboxCapacity},
+      flush_timer_{executor},
+      shutdown_(false) {
+    auto uri_components = boost::urls::parse_uri(callback_url_);
 
     callback_host_ = uri_components->host();
     callback_port_ = uri_components->port();
@@ -35,6 +36,7 @@ void EventOutbox::do_shutdown(beast::error_code ec, std::string what) {
 void EventOutbox::post_event(launchdarkly::sse::Event event) {
     auto http_request = build_request(callback_counter_++, std::move(event));
     outbox_.push(http_request);
+    flush_timer_.expires_from_now(boost::posix_time::milliseconds(0));
 }
 
 void EventOutbox::run() {
@@ -46,6 +48,7 @@ void EventOutbox::run() {
 void EventOutbox::stop() {
     beast::error_code ec = net::error::basic_errors::operation_aborted;
     std::string reason = "stop";
+    shutdown_ = true;
     net::post(executor_,
               beast::bind_front_handler(&EventOutbox::do_shutdown,
                                         shared_from_this(), ec, reason));
@@ -97,14 +100,14 @@ void EventOutbox::on_connect(beast::error_code ec,
 }
 
 void EventOutbox::on_flush_timer(boost::system::error_code ec) {
-    if (ec) {
+    if (ec && shutdown_) {
         return do_shutdown(ec, "flush");
     }
 
     if (!outbox_.empty()) {
         RequestType& request = outbox_.front();
 
-        // Flip-flop between this function and on_write; pushing an event
+        // Flip-flop between this function and on_write; peeking an event
         // and then popping it.
 
         http::async_write(event_stream_, request,

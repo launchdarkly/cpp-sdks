@@ -36,6 +36,8 @@ class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
     net::deadline_timer flush_timer_;
     std::string id_;
 
+    bool shutdown_;
+
    public:
     /**
      * Instantiate an outbox; events will be posted to the given URL.
