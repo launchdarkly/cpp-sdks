@@ -30,6 +30,7 @@ struct adl_serializer<std::optional<T>> {
 };
 }  // namespace nlohmann
 
+// Represents the initial JSON configuration sent by the test harness.
 struct ConfigParams {
     std::string streamUrl;
     std::string callbackUrl;
@@ -53,6 +54,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 method,
                                                 body);
 
+// Represents an event payload that this service posts back
+// to the test harness. The events are originally received by this server
+// via the SSE stream; they are posted back so the test harness can verify
+// that we parsed and dispatched them successfully.
 struct Event {
     std::string type;
     std::string id;

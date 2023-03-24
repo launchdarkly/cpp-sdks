@@ -11,19 +11,19 @@
 #include <string>
 #include <unordered_map>
 
-class StreamEntity;
+#include <launchdarkly/sse/client.hpp>
 
-// Manages the individual SSE clients (called entities here) which are
-// instantiated for each contract test.
+class EventOutbox;
+
+//
 class EntityManager {
-    // Maps the entity's ID to the entity. Shared pointer is necessary because
-    // these entities are doing async IO and must remain alive as long as that
-    // is happening.
-    std::unordered_map<std::string, std::weak_ptr<StreamEntity>> entities_;
-    // Incremented each time create() is called to instantiate a new entity.
+    using Inbox = std::shared_ptr<launchdarkly::sse::Client>;
+    using Outbox = std::shared_ptr<EventOutbox>;
+    using Entity = std::pair<Inbox, Outbox>;
+
+    std::unordered_map<std::string, Entity> entities_;
+
     std::size_t counter_;
-    // Synchronizes access to create()/destroy();
-    std::mutex lock_;
     boost::asio::any_io_executor executor_;
 
     launchdarkly::Logger& logger_;

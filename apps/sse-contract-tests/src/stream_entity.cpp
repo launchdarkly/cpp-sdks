@@ -9,10 +9,9 @@
 // at this interval.
 auto const kFlushInterval = boost::posix_time::milliseconds{10};
 
-StreamEntity::StreamEntity(net::any_io_executor executor,
-                           std::shared_ptr<launchdarkly::sse::client> client,
+EventOutbox::EventOutbox(net::any_io_executor executor,
                            std::string callback_url)
-    : client_{std::move(client)},
+    :
       callback_url_{std::move(callback_url)},
       callback_port_{},
       callback_host_{},
@@ -29,43 +28,33 @@ StreamEntity::StreamEntity(net::any_io_executor executor,
     callback_port_ = uri_components->port();
 }
 
-StreamEntity::~StreamEntity() {
-    std::cout << "~StreamEntity\n";
-}
-
-void StreamEntity::do_shutdown(beast::error_code ec, std::string what) {
+void EventOutbox::do_shutdown(beast::error_code ec, std::string what) {
     event_stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
     flush_timer_.cancel();
-    client_->close();
 }
 
-void StreamEntity::run() {
-    // Setup the SSE client to callback into the entity whenever it
-    // receives a comment/event.
-    client_->on_event([self = shared_from_this()](launchdarkly::sse::Event ev) {
-        auto http_request =
-            self->build_request(self->callback_counter_++, std::move(ev));
-        self->outbox_.push(http_request);
-    });
+void EventOutbox::deliver_event(launchdarkly::sse::Event event) {
+    auto http_request = build_request(callback_counter_++, std::move(event));
+    outbox_.push(http_request);
+}
 
-    // Kickoff the SSE client's async operations.
-    client_->run();
+void EventOutbox::run() {
 
     // Begin connecting to the test harness's event-posting service.
     resolver_.async_resolve(callback_host_, callback_port_,
-                            beast::bind_front_handler(&StreamEntity::on_resolve,
+                            beast::bind_front_handler(&EventOutbox::on_resolve,
                                                       shared_from_this()));
 }
 
-void StreamEntity::stop() {
+void EventOutbox::stop() {
     beast::error_code ec = net::error::basic_errors::operation_aborted;
     std::string reason = "stop";
     net::post(executor_,
-              beast::bind_front_handler(&StreamEntity::do_shutdown,
+              beast::bind_front_handler(&EventOutbox::do_shutdown,
                                         shared_from_this(), ec, reason));
 }
 
-StreamEntity::request_type StreamEntity::build_request(
+EventOutbox::request_type EventOutbox::build_request(
     std::size_t counter,
     launchdarkly::sse::Event ev) {
     request_type req;
@@ -87,7 +76,7 @@ StreamEntity::request_type StreamEntity::build_request(
     return req;
 }
 
-void StreamEntity::on_resolve(beast::error_code ec,
+void EventOutbox::on_resolve(beast::error_code ec,
                               tcp::resolver::results_type results) {
     if (ec) {
         return do_shutdown(ec, "resolve");
@@ -96,11 +85,11 @@ void StreamEntity::on_resolve(beast::error_code ec,
     // Make the connection on the IP address we get from a lookup.
     beast::get_lowest_layer(event_stream_)
         .async_connect(results,
-                       beast::bind_front_handler(&StreamEntity::on_connect,
+                       beast::bind_front_handler(&EventOutbox::on_connect,
                                                  shared_from_this()));
 }
 
-void StreamEntity::on_connect(beast::error_code ec,
+void EventOutbox::on_connect(beast::error_code ec,
                               tcp::resolver::results_type::endpoint_type) {
     if (ec) {
         return do_shutdown(ec, "connect");
@@ -109,11 +98,11 @@ void StreamEntity::on_connect(beast::error_code ec,
     // Now that we're connected, kickoff the event flush "loop".
     boost::system::error_code dummy;
     net::post(executor_,
-              beast::bind_front_handler(&StreamEntity::on_flush_timer,
+              beast::bind_front_handler(&EventOutbox::on_flush_timer,
                                         shared_from_this(), dummy));
 }
 
-void StreamEntity::on_flush_timer(boost::system::error_code ec) {
+void EventOutbox::on_flush_timer(boost::system::error_code ec) {
     if (ec) {
         return do_shutdown(ec, "flush");
     }
@@ -125,7 +114,7 @@ void StreamEntity::on_flush_timer(boost::system::error_code ec) {
         // and then popping it.
 
         http::async_write(event_stream_, request,
-                          beast::bind_front_handler(&StreamEntity::on_write,
+                          beast::bind_front_handler(&EventOutbox::on_write,
                                                     shared_from_this()));
         return;
     }
@@ -133,10 +122,10 @@ void StreamEntity::on_flush_timer(boost::system::error_code ec) {
     // If the outbox is empty, wait a bit before trying again.
     flush_timer_.expires_from_now(kFlushInterval);
     flush_timer_.async_wait(beast::bind_front_handler(
-        &StreamEntity::on_flush_timer, shared_from_this()));
+        &EventOutbox::on_flush_timer, shared_from_this()));
 }
 
-void StreamEntity::on_write(beast::error_code ec, std::size_t) {
+void EventOutbox::on_write(beast::error_code ec, std::size_t) {
     if (ec) {
         return do_shutdown(ec, "write");
     }

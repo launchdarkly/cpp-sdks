@@ -6,20 +6,22 @@ using launchdarkly::LogLevel;
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
                              launchdarkly::Logger& logger)
-    : entities_{},
+    : entities_(),
       counter_{0},
-      lock_{},
       executor_{std::move(executor)},
       logger_{logger} {}
 
 std::optional<std::string> EntityManager::create(ConfigParams params) {
-    std::lock_guard<std::mutex> guard{lock_};
     std::string id = std::to_string(counter_++);
 
+    auto poster = std::make_shared<EventOutbox>(executor_, params.callbackUrl);
+    poster->run();
+
     auto client_builder =
-        launchdarkly::sse::builder{executor_, params.streamUrl};
+        launchdarkly::sse::Builder(executor_, params.streamUrl);
+
     if (params.headers) {
-        for (auto h : *params.headers) {
+        for (auto const& h : *params.headers) {
             client_builder.header(h.first, h.second);
         }
     }
@@ -28,40 +30,39 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });
 
-    std::shared_ptr<launchdarkly::sse::client> client = client_builder.build();
+    client_builder.receiver([copy = poster](launchdarkly::sse::Event e) {
+        copy->deliver_event(std::move(e));
+    });
+
+    auto client = client_builder.build();
     if (!client) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "entity_manager: couldn't build sse client";
         return std::nullopt;
     }
-    std::shared_ptr<StreamEntity> entity =
-        std::make_shared<StreamEntity>(executor_, client, params.callbackUrl);
 
-    entity->run();
+    client->run();
 
-    entities_.emplace(id, entity);
+    entities_.emplace(id, std::make_pair(client, poster));
     return id;
 }
 
 void EntityManager::destroy_all() {
-    for (auto& entity : entities_) {
-        if (auto weak = entity.second.lock()) {
-            weak->stop();
-        }
+    for (auto& kv : entities_) {
+        auto& entities = kv.second;
+        // todo: entities.first.stop()
+        entities.second->stop();
     }
     entities_.clear();
 }
 
 bool EntityManager::destroy(std::string const& id) {
-    std::lock_guard<std::mutex> guard{lock_};
     auto it = entities_.find(id);
     if (it == entities_.end()) {
         return false;
     }
 
-    if (auto weak = it->second.lock()) {
-        weak->stop();
-    }
+    it->second.second->stop();
 
     entities_.erase(it);
 

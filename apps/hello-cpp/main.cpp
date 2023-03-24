@@ -24,13 +24,19 @@ int main() {
 
     net::io_context ioc;
 
-    const char* key = std::getenv("STG_SDK_KEY");
-    if (!key){
+    char const* key = std::getenv("STG_SDK_KEY");
+    if (!key) {
         std::cout << "Set environment variable STG_SDK_KEY to the sdk key\n";
         return 1;
     }
-    auto client = launchdarkly::sse::builder(ioc.get_executor(), "https://stream-stg.launchdarkly.com/all")
+    auto client =
+        launchdarkly::sse::Builder(ioc.get_executor(),
+                                   "https://stream-stg.launchdarkly.com/all")
             .header("Authorization", key)
+            .receiver([&](launchdarkly::sse::Event ev) {
+                LD_LOG(logger, LogLevel::kInfo) << "event: " << ev.type();
+                LD_LOG(logger, LogLevel::kInfo) << "data: " << std::move(ev).take();
+            })
             .build();
 
     if (!client) {

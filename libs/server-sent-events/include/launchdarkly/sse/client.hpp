@@ -1,16 +1,11 @@
 #pragma once
 
-#include "launchdarkly/sse/detail/parser.hpp"
+#include <launchdarkly/sse/event.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl.hpp>
 
-#include <boost/beast/core/flat_buffer.hpp>
-#include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/http/message.hpp>
-#include <boost/beast/ssl/ssl_stream.hpp>
 
 #include <deque>
 #include <functional>
@@ -24,80 +19,34 @@ namespace launchdarkly::sse {
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
-namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
-using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-class client;
+class Client;
 
-class builder {
+class Builder {
    public:
-    builder(net::any_io_executor ioc, std::string url);
-    builder& header(std::string const& name, std::string const& value);
-    builder& method(http::verb verb);
-    builder& tls(ssl::context_base::method);
-    builder& logging(std::function<void(std::string)> callback);
-    std::shared_ptr<client> build();
+    using EventReceiver = std::function<void(launchdarkly::sse::Event)>;
+    using LogCallback = std::function<void(std::string)>;
+
+    Builder(net::any_io_executor ioc, std::string url);
+    Builder& header(std::string const& name, std::string const& value);
+    Builder& method(http::verb verb);
+    Builder& receiver(EventReceiver);
+    Builder& logging(LogCallback callback);
+    std::shared_ptr<Client> build();
 
    private:
     std::string url_;
     net::any_io_executor executor_;
-    ssl::context ssl_context_;
     http::request<http::empty_body> request_;
-    std::function<void(std::string)> logging_cb_;
+    LogCallback logging_cb_;
+    EventReceiver receiver_;
 };
 
-using sse_event = Event;
-using sse_comment = std::string;
-
-using event = std::variant<sse_event, sse_comment>;
-
-// struct event_consumer_callback {
-//     std::function<void(event_data)> cb;
-//     event_consumer_callback() = default;
-//     ~event_consumer_callback() = default;
-//     void operator()(event_data data) {
-//         if (cb) {
-//             cb(std::move(data));
-//         }
-//     }
-// };
-
-class client : public std::enable_shared_from_this<client> {
+class Client {
    public:
-    using logger = std::function<void(std::string)>;
-    using events = std::function<void(Event)>;
-    client(boost::asio::any_io_executor ex,
-           http::request<http::empty_body> req,
-           std::string host,
-           std::string port,
-           logger logger,
-           std::string log_tag);
-    ~client();
-
-    template <typename Callback>
-    void on_event(Callback event_cb) {
-        parser_.get().body().on_event(event_cb);
-    }
-
+    virtual ~Client() = default;
     virtual void run() = 0;
     virtual void close() = 0;
-
-   protected:
-    using body = launchdarkly::sse::detail::EventBody<events>;
-    using parser = http::response_parser<body>;
-    tcp::resolver resolver_;
-    beast::flat_buffer buffer_;
-    http::request<http::empty_body> request_;
-    http::response<body> response_;
-    parser parser_;
-    std::string host_;
-    std::string port_;
-
-    logger logging_cb_;
-    std::string log_tag_;
-
-    void log(std::string);
-    void fail(beast::error_code ec, char const* what);
 };
 
 }  // namespace launchdarkly::sse

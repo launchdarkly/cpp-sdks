@@ -2,11 +2,14 @@
 
 #include "entity_manager.hpp"
 
-#include "launchdarkly/sse/client.hpp"
+#include <launchdarkly/sse/client.hpp>
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
+
 #include <boost/beast/http.hpp>
+#include <boost/beast/core/tcp_stream.hpp>
+
 #include <boost/lockfree/spsc_queue.hpp>
 
 #include <memory>
@@ -17,12 +20,10 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
+class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
     // Simple string body request is appropriate since the JSON
     // returned to the test service is minimal.
     using request_type = http::request<http::string_body>;
-
-    std::shared_ptr<launchdarkly::sse::client> client_;
 
     std::string callback_url_;
     std::string callback_port_;
@@ -41,11 +42,11 @@ class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
     std::string id_;
 
    public:
-    StreamEntity(net::any_io_executor executor,
-                 std::shared_ptr<launchdarkly::sse::client> client,
+    EventOutbox(net::any_io_executor executor,
                  std::string callback_url);
 
-    ~StreamEntity();
+    void deliver_event(launchdarkly::sse::Event event);
+
     void run();
     void stop();
 
