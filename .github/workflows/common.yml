@@ -22,13 +22,13 @@ jobs:
           boost_version: 1.81.0
           platform_version: 22.04
           boost_install_dir: /home/runner/boost
-      - name: Configure CMake
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake -S . -B /home/runner/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - name: Build Library
         run: ./scripts/build.sh launchdarkly-cpp-common ON
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Build Tests
         run: ./scripts/build.sh google_tests_common ON
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Run Tests
         run : ./scripts/test.sh
