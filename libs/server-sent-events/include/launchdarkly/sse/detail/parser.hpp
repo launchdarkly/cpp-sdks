@@ -133,11 +133,12 @@ struct EventBody<EventReceiver>::reader {
 
     void parse_stream(boost::string_view body) {
         size_t i = 0;
-        while (i < body.length()) {
+        while (i < body.size()) {
             i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");
             if (i == body.size()) {
-                continue;
-            } else if (body.at(i) == '\r') {
+                break;
+            }
+            if (body.at(i) == '\r') {
                 complete_line();
                 begin_CR_ = true;
                 i++;
@@ -218,20 +219,17 @@ struct EventBody<EventReceiver>::reader {
                     last_event_id_ = field.second;
                     event_->id = last_event_id_;
                 } else if (field.first == "retry") {
+                    // todo: implement
                 }
             }
 
             if (seen_empty_line) {
-                std::optional<Event> data = event_;
-                event_ = std::nullopt;
-
-                if (data.has_value()) {
-                    data->trim_trailing_newline();
+                if (event_.has_value()) {
+                    event_->trim_trailing_newline();
                     body_.events_(launchdarkly::sse::Event(
-                        data->type, data->data, data->id));
-                    data.reset();
+                        event_->type, event_->data, event_->id));
+                    event_.reset();
                 }
-
                 continue;
             }
 

@@ -224,8 +224,6 @@ class PlaintextClient : public Client,
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)}, executor_{std::move(ctx)} {
-    // TODO: This needs to be verify_peer in production!!
-
     receiver_ = [](launchdarkly::sse::Event) {};
 
     request_.version(11);
@@ -256,8 +254,7 @@ Builder& Builder::logging(std::function<void(std::string)> cb) {
 }
 
 std::shared_ptr<Client> Builder::build() {
-    boost::system::result<boost::urls::url_view> uri_components =
-        boost::urls::parse_uri(url_);
+    auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
         return nullptr;
     }
@@ -272,6 +269,8 @@ std::shared_ptr<Client> Builder::build() {
             uri_components->has_port() ? uri_components->port() : "443";
 
         ssl::context ssl_ctx{ssl::context::tlsv12_client};
+        // TODO: This needs to be verify_peer in production,
+        // and we need to provide a certificate store!
         ssl_ctx.set_verify_mode(ssl::verify_none);
 
         return std::make_shared<SecureClient>(net::make_strand(executor_),
