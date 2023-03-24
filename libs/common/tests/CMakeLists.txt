@@ -5,6 +5,8 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 
 file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 add_executable("google_tests_common"
         ${tests})
 target_link_libraries(google_tests_common launchdarkly::common GTest::gtest_main)

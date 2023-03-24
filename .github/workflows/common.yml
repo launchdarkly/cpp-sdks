@@ -31,4 +31,6 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Run Tests
-        run : ./scripts/test.sh
+        # This uses the binary, versus "make tests" because the binary
+        # has better performance and output.
+        run : ./build/google_tests_common
