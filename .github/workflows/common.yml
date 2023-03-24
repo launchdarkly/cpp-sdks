@@ -15,22 +15,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.4
-        id: install-boost
+      - uses: .github/actions/ci
         with:
-          boost_version: 1.81.0
-          platform_version: 22.04
-          boost_install_dir: /home/runner/boost
-      - name: Build Library
-        run: ./scripts/build.sh launchdarkly-cpp-common ON
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      - name: Build Tests
-        run: ./scripts/build.sh google_tests_common ON
-        env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      - name: Run Tests
-        # This uses the binary, versus "make tests" because the binary
-        # has better performance and output.
-        run : ./build/google_tests_common
+          cmake_target: launchdarkly-cpp-common
