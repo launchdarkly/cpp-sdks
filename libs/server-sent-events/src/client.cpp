@@ -54,7 +54,8 @@ client::client(net::any_io_executor ex,
                std::string port,
                std::function<void(std::string)> logging_cb,
                std::string log_tag)
-    : resolver_{std::move(ex)},
+    : resolver_{ex},
+      buffer_{},
       parser_{},
       host_{std::move(host)},
       port_{std::move(port)},
@@ -72,7 +73,9 @@ client::client(net::any_io_executor ex,
       event_callback_{[this](event_data e) {
           log("got event: (" + e.get_type() + ", " + e.get_data() + ")");
       }} {
-    parser_.body_limit(boost::none);
+
+   // parser_.body_limit(boost::none);
+
     log("create");
 }
 
@@ -311,7 +314,7 @@ class ssl_client : public client {
                 return consumed;
             });
 
-        parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
+      //  parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
         http::async_read_some(
             stream_, buffer_, parser_,
@@ -407,9 +410,9 @@ class plaintext_client : public client {
                 return consumed;
             });
 
-        parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
+       // parser_.on_chunk_body(*this->on_chunk_body_trampoline_);
 
-        http::async_read(stream_, buffer_, parser_,
+        http::async_read_some(stream_, buffer_, parser_,
                          beast::bind_front_handler(
                              &plaintext_client::on_got_headers, shared()));
     }
@@ -421,14 +424,14 @@ class plaintext_client : public client {
             return fail(ec, "headers");
         }
 
-        if (parser_.is_header_done()) {
-            auto status = parser_.get().result();
-            if (status == http::status::moved_permanently) {
-                if (auto it = parser_.get().find("Location");
-                    it != parser_.get().end()) {
-                }
-            }
-        }
+//        if (parser_.is_header_done()) {
+//            auto status = parser_.;
+//            if (status == http::status::moved_permanently) {
+//                if (auto it = parser_.get().find("Location");
+//                    it != parser_.get().end()) {
+//                }
+//            }
+//        }
 
         beast::get_lowest_layer(stream_).expires_never();
 

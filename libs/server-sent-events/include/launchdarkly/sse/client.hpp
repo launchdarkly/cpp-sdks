@@ -1,5 +1,7 @@
 #pragma once
 
+#include <launchdarkly/sse/parser.hpp>
+
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ssl.hpp>
@@ -85,7 +87,7 @@ class client : public std::enable_shared_from_this<client> {
     virtual void close() = 0;
 
    protected:
-    using parser = http::response_parser<http::string_body>;
+    using parser = launchdarkly::sse::parser;
     tcp::resolver resolver_;
     beast::flat_buffer buffer_;
     http::request<http::empty_body> request_;
