@@ -6,10 +6,8 @@
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
-
-#include <boost/beast/http.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
-
+#include <boost/beast/http.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
 
 #include <memory>
@@ -42,8 +40,7 @@ class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
     std::string id_;
 
    public:
-    EventOutbox(net::any_io_executor executor,
-                 std::string callback_url);
+    EventOutbox(net::any_io_executor executor, std::string callback_url);
 
     void deliver_event(launchdarkly::sse::Event event);
 

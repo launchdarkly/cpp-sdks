@@ -3,22 +3,18 @@
 #include <launchdarkly/sse/event.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
-
-#include <boost/beast/http.hpp>
+#include <boost/beast/http/empty_body.hpp>
 #include <boost/beast/http/message.hpp>
 
-#include <deque>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <string>
-#include <vector>
 
 namespace launchdarkly::sse {
 
-namespace beast = boost::beast;    // from <boost/beast.hpp>
-namespace http = beast::http;      // from <boost/beast/http.hpp>
-namespace net = boost::asio;       // from <boost/asio.hpp>
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace net = boost::asio;
 
 class Client;
 

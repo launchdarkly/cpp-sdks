@@ -1,5 +1,4 @@
 #include "entity_manager.hpp"
-#include "launchdarkly/sse/client.hpp"
 #include "stream_entity.hpp"
 
 using launchdarkly::LogLevel;

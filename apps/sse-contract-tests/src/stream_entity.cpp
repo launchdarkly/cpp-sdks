@@ -10,9 +10,8 @@
 auto const kFlushInterval = boost::posix_time::milliseconds{10};
 
 EventOutbox::EventOutbox(net::any_io_executor executor,
-                           std::string callback_url)
-    :
-      callback_url_{std::move(callback_url)},
+                         std::string callback_url)
+    : callback_url_{std::move(callback_url)},
       callback_port_{},
       callback_host_{},
       callback_counter_{0},
@@ -39,8 +38,6 @@ void EventOutbox::deliver_event(launchdarkly::sse::Event event) {
 }
 
 void EventOutbox::run() {
-
-    // Begin connecting to the test harness's event-posting service.
     resolver_.async_resolve(callback_host_, callback_port_,
                             beast::bind_front_handler(&EventOutbox::on_resolve,
                                                       shared_from_this()));
@@ -77,12 +74,11 @@ EventOutbox::request_type EventOutbox::build_request(
 }
 
 void EventOutbox::on_resolve(beast::error_code ec,
-                              tcp::resolver::results_type results) {
+                             tcp::resolver::results_type results) {
     if (ec) {
         return do_shutdown(ec, "resolve");
     }
 
-    // Make the connection on the IP address we get from a lookup.
     beast::get_lowest_layer(event_stream_)
         .async_connect(results,
                        beast::bind_front_handler(&EventOutbox::on_connect,
@@ -90,16 +86,14 @@ void EventOutbox::on_resolve(beast::error_code ec,
 }
 
 void EventOutbox::on_connect(beast::error_code ec,
-                              tcp::resolver::results_type::endpoint_type) {
+                             tcp::resolver::results_type::endpoint_type) {
     if (ec) {
         return do_shutdown(ec, "connect");
     }
 
-    // Now that we're connected, kickoff the event flush "loop".
     boost::system::error_code dummy;
-    net::post(executor_,
-              beast::bind_front_handler(&EventOutbox::on_flush_timer,
-                                        shared_from_this(), dummy));
+    net::post(executor_, beast::bind_front_handler(&EventOutbox::on_flush_timer,
+                                                   shared_from_this(), dummy));
 }
 
 void EventOutbox::on_flush_timer(boost::system::error_code ec) {
