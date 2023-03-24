@@ -2,6 +2,8 @@
 
 namespace launchdarkly::sse::detail {
 
+Event::Event() : type("message"), data(), id() {}
+
 void Event::append_data(std::string const& input) {
     data.append(input);
     data.append("\n");

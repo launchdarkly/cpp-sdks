@@ -23,7 +23,7 @@ struct Event {
     std::string data;
     std::optional<std::string> id;
 
-    Event() = default;
+    Event();
 
     void append_data(std::string const&);
     void trim_trailing_newline();

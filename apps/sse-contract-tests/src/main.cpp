@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
 
         auto s = std::make_shared<server>(ioc, "0.0.0.0", "8111", logger);
         s->add_capability("headers");
+        s->add_capability("comments");
         s->run();
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
