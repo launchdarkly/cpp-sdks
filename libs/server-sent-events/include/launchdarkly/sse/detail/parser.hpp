@@ -1,5 +1,7 @@
 #pragma once
 
+#include <launchdarkly/sse/event.hpp>
+
 #include <boost/beast/core/buffers_to_string.hpp>
 #include <boost/beast/http/basic_parser.hpp>
 #include <boost/beast/http/fields.hpp>
@@ -12,55 +14,48 @@
 #include <string>
 #include <vector>
 
-namespace launchdarkly::sse {
+namespace launchdarkly::sse::detail {
+
+struct Event {
+    std::string type;
+    std::string data;
+    std::optional<std::string> id;
+
+    Event() = default;
+
+    void append_data(std::string const&);
+    void trim_trailing_newline();
+};
 
 using namespace boost::beast;
 
-class event_data {
-    std::string m_type;
-    std::string m_data;
-    std::optional<std::string> m_id;
-
-   public:
-    explicit event_data();
-    void set_type(std::string);
-    void set_id(std::optional<std::string>);
-    void append_data(std::string const&);
-    void trim_trailing_newline();
-    std::string const& get_type();
-    std::string const& get_data();
-    std::optional<std::string> const& get_id();
-};
-
-template <class EventContainer>
+template <class EventReceiver>
 struct EventBody {
-    using event_type = EventContainer;
+    using event_type = EventReceiver;
     class reader;
     class value_type;
-    static std::uint64_t size(value_type const& body);
 };
 
-template <class EventContainer>
-class EventBody<EventContainer>::value_type {
+template <class EventReceiver>
+class EventBody<EventReceiver>::value_type {
     friend class reader;
     friend struct EventBody;
 
-    EventContainer events_;
+    EventReceiver events_;
 
    public:
-    EventContainer& events() { return events_; }
+    void on_event(EventReceiver&& receiver) { events_ = std::move(receiver); }
 };
 
-template <class EventContainer>
-struct EventBody<EventContainer>::reader {
+template <class EventReceiver>
+struct EventBody<EventReceiver>::reader {
     value_type& body_;
 
     std::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
     bool begin_CR_;
     std::optional<std::string> last_event_id_;
-
-    std::optional<event_data> event_;
+    std::optional<Event> event_;
 
    public:
     template <bool isRequest, class Fields>
@@ -200,20 +195,18 @@ struct EventBody<EventContainer>::reader {
 
                 auto field = parse_field(std::move(line));
                 if (field.first == "comment") {
-                    event_data e;
-                    e.set_type("comment");
-                    e.append_data(field.second);
-                    body_.events_.push_back(std::move(e));
+                    body_.events_(
+                        launchdarkly::sse::Event("comment", field.second));
                     continue;
                 }
 
                 if (!event_.has_value()) {
-                    event_.emplace(event_data{});
-                    event_->set_id(last_event_id_);
+                    event_.emplace(Event{});
+                    event_->id = last_event_id_;
                 }
 
                 if (field.first == "event") {
-                    event_->set_type(field.second);
+                    event_->type = field.second;
                 } else if (field.first == "data") {
                     event_->append_data(field.second);
                 } else if (field.first == "id") {
@@ -223,18 +216,20 @@ struct EventBody<EventContainer>::reader {
                         continue;
                     }
                     last_event_id_ = field.second;
-                    event_->set_id(last_event_id_);
+                    event_->id = last_event_id_;
                 } else if (field.first == "retry") {
                 }
             }
 
             if (seen_empty_line) {
-                std::optional<event_data> data = event_;
+                std::optional<Event> data = event_;
                 event_ = std::nullopt;
 
                 if (data.has_value()) {
                     data->trim_trailing_newline();
-                    body_.events_.push_back(std::move(*data));
+                    body_.events_(launchdarkly::sse::Event(
+                        data->type, data->data, data->id));
+                    data.reset();
                 }
 
                 continue;
@@ -245,10 +240,9 @@ struct EventBody<EventContainer>::reader {
     }
 };
 
-template <bool isRequest, class EventContainer, class Fields>
+template <bool isRequest, class EventReceiver, class Fields>
 std::ostream& operator<<(
     std::ostream&,
-    http::message<isRequest, EventBody<EventContainer>, Fields> const&) =
-    delete;
+    http::message<isRequest, EventBody<EventReceiver>, Fields> const&) = delete;
 
-}  // namespace launchdarkly::sse
+}  // namespace launchdarkly::sse::detail

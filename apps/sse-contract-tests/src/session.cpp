@@ -35,13 +35,14 @@ void Session::start() {
 
 void Session::stop() {
     LD_LOG(logger_, LogLevel::kDebug) << "session: stop";
-    net::dispatch(
-        stream_.get_executor(),
-        beast::bind_front_handler(&Session::do_stop, shared_from_this(), "stop requested"));
+    net::dispatch(stream_.get_executor(),
+                  beast::bind_front_handler(
+                      &Session::do_stop, shared_from_this(), "stop requested"));
 }
 
 void Session::do_stop(char const* reason) {
-    LD_LOG(logger_, LogLevel::kDebug) << "session: closing socket (" << reason << ")";
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "session: closing socket (" << reason << ")";
     stream_.close();
 }
 
@@ -81,7 +82,8 @@ void Session::on_write(bool keep_alive,
     boost::ignore_unused(bytes_transferred);
 
     if (shutdown_requested_ && on_shutdown_cb_) {
-        LD_LOG(logger_, LogLevel::kDebug) << "session: client requested server termination";
+        LD_LOG(logger_, LogLevel::kDebug)
+            << "session: client requested server termination";
         on_shutdown_cb_();
     }
 

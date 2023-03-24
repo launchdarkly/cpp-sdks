@@ -16,7 +16,8 @@ using launchdarkly::ConsoleBackend;
 using launchdarkly::LogLevel;
 
 int main(int argc, char* argv[]) {
-    launchdarkly::Logger logger{std::make_unique<ConsoleBackend>("sse-contract-tests")};
+    launchdarkly::Logger logger{
+        std::make_unique<ConsoleBackend>("sse-contract-tests")};
 
     try {
         net::io_context ioc{1};

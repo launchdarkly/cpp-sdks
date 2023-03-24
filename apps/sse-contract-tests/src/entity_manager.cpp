@@ -24,7 +24,7 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         }
     }
 
-    client_builder.logging([this](std::string msg){
+    client_builder.logging([this](std::string msg) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });
 

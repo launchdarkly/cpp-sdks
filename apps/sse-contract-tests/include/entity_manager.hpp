@@ -29,7 +29,8 @@ class EntityManager {
     launchdarkly::Logger& logger_;
 
    public:
-    EntityManager(boost::asio::any_io_executor executor, launchdarkly::Logger& logger);
+    EntityManager(boost::asio::any_io_executor executor,
+                  launchdarkly::Logger& logger);
     std::optional<std::string> create(ConfigParams params);
     bool destroy(std::string const& id);
 

@@ -30,12 +30,13 @@ client::client(net::any_io_executor ex,
       port_{std::move(port)},
       request_{std::move(req)},
       response_{},
-      logging_cb_{std::move(logging_cb)},
       log_tag_{std::move(log_tag)},
-      event_callback_{[this](event_data e) {
-          log("got event: (" + e.get_type() + ", " + e.get_data() + ")");
-      }} {
-    // parser_.body_limit(boost::none);
+      logging_cb_{std::move(logging_cb)} {
+    parser_.body_limit(boost::none);
+
+    on_event([this](Event e) {
+        log("got event: (" + e.type() + ", " + e.data() + ")");
+    });
 
     log("create");
 }
@@ -147,12 +148,6 @@ class ssl_client : public client {
             return fail(ec, "read");
         }
 
-        std::vector<event_data>& events = parser_.get().body().events();
-        for (auto e : events) {
-            event_callback_(std::move(e));
-        }
-        events.clear();
-
         beast::get_lowest_layer(stream_).expires_never();
 
         http::async_read_some(
@@ -239,12 +234,6 @@ class plaintext_client : public client {
         if (ec && ec != beast::errc::operation_canceled) {
             return fail(ec, "read");
         }
-
-        std::vector<event_data>& events = parser_.get().body().events();
-        for (auto e : events) {
-            event_callback_(std::move(e));
-        }
-        events.clear();
 
         http::async_read_some(
             stream_, buffer_, parser_,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <launchdarkly/sse/parser.hpp>
+#include "launchdarkly/sse/detail/parser.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -46,15 +46,26 @@ class builder {
     std::function<void(std::string)> logging_cb_;
 };
 
-using sse_event = event_data;
+using sse_event = Event;
 using sse_comment = std::string;
 
 using event = std::variant<sse_event, sse_comment>;
 
+// struct event_consumer_callback {
+//     std::function<void(event_data)> cb;
+//     event_consumer_callback() = default;
+//     ~event_consumer_callback() = default;
+//     void operator()(event_data data) {
+//         if (cb) {
+//             cb(std::move(data));
+//         }
+//     }
+// };
+
 class client : public std::enable_shared_from_this<client> {
    public:
     using logger = std::function<void(std::string)>;
-
+    using events = std::function<void(Event)>;
     client(boost::asio::any_io_executor ex,
            http::request<http::empty_body> req,
            std::string host,
@@ -65,14 +76,14 @@ class client : public std::enable_shared_from_this<client> {
 
     template <typename Callback>
     void on_event(Callback event_cb) {
-        event_callback_ = event_cb;
+        parser_.get().body().on_event(event_cb);
     }
 
     virtual void run() = 0;
     virtual void close() = 0;
 
    protected:
-    using body = launchdarkly::sse::EventBody<std::vector<event_data>>;
+    using body = launchdarkly::sse::detail::EventBody<events>;
     using parser = http::response_parser<body>;
     tcp::resolver resolver_;
     beast::flat_buffer buffer_;
@@ -82,7 +93,6 @@ class client : public std::enable_shared_from_this<client> {
     std::string host_;
     std::string port_;
 
-    std::function<void(event_data)> event_callback_;
     logger logging_cb_;
     std::string log_tag_;
 

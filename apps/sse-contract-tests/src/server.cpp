@@ -52,11 +52,13 @@ server::server(net::io_context& ioc,
 }
 
 void server::fail(beast::error_code ec, char const* what) {
-    LD_LOG(logger_, LogLevel::kError) << "server: " << what << ": " << ec.message();
+    LD_LOG(logger_, LogLevel::kError)
+        << "server: " << what << ": " << ec.message();
 }
 
 void server::add_capability(std::string cap) {
-    LD_LOG(logger_, LogLevel::kDebug) << "server: test capability: <" << cap << ">";
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "server: test capability: <" << cap << ">";
     caps_.push_back(std::move(cap));
 }
 
@@ -84,9 +86,8 @@ void server::on_accept(boost::system::error_code const& ec,
         return;
     }
 
-
-    auto session =
-        std::make_shared<Session>(std::move(socket), entity_manager_, caps_, logger_);
+    auto session = std::make_shared<Session>(std::move(socket), entity_manager_,
+                                             caps_, logger_);
 
     session->on_shutdown([this]() {
         LD_LOG(logger_, LogLevel::kDebug) << "server: terminating";

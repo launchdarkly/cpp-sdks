@@ -42,12 +42,11 @@ void StreamEntity::do_shutdown(beast::error_code ec, std::string what) {
 void StreamEntity::run() {
     // Setup the SSE client to callback into the entity whenever it
     // receives a comment/event.
-    client_->on_event(
-        [self = shared_from_this()](launchdarkly::sse::event_data ev) {
-            auto http_request =
-                self->build_request(self->callback_counter_++, std::move(ev));
-            self->outbox_.push(http_request);
-        });
+    client_->on_event([self = shared_from_this()](launchdarkly::sse::Event ev) {
+        auto http_request =
+            self->build_request(self->callback_counter_++, std::move(ev));
+        self->outbox_.push(http_request);
+    });
 
     // Kickoff the SSE client's async operations.
     client_->run();
@@ -68,7 +67,7 @@ void StreamEntity::stop() {
 
 StreamEntity::request_type StreamEntity::build_request(
     std::size_t counter,
-    launchdarkly::sse::event_data ev) {
+    launchdarkly::sse::Event ev) {
     request_type req;
 
     req.set(http::field::host, callback_host_);
@@ -77,11 +76,11 @@ StreamEntity::request_type StreamEntity::build_request(
 
     nlohmann::json json;
 
-    if (ev.get_type() == "comment") {
-        json = CommentMessage{"comment", ev.get_data()};
+    if (ev.type() == "comment") {
+        json = CommentMessage{"comment", ev.take()};
     } else {
-        json = EventMessage{"event", Event{ev.get_type(), ev.get_data(),
-                                           ev.get_id().value_or("")}};
+        json = EventMessage{"event",
+                            Event{ev.type(), ev.take(), ev.id().value_or("")}};
     }
 
     req.body() = json.dump();

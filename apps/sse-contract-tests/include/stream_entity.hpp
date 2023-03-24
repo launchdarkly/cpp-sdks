@@ -51,7 +51,7 @@ class StreamEntity : public std::enable_shared_from_this<StreamEntity> {
 
    private:
     request_type build_request(std::size_t counter,
-                               launchdarkly::sse::event_data ev);
+                               launchdarkly::sse::Event ev);
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
     void on_connect(beast::error_code ec,
                     tcp::resolver::results_type::endpoint_type);
