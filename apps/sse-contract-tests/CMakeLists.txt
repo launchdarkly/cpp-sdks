@@ -15,7 +15,7 @@ add_executable(sse-tests
         src/server.cpp
         src/entity_manager.cpp
         src/session.cpp
-        src/stream_entity.cpp
+        src/event_outbox.cpp
 )
 
 target_link_libraries(sse-tests PRIVATE

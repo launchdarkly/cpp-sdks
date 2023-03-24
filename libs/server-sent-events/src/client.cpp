@@ -1,12 +1,14 @@
 #include <launchdarkly/sse/client.hpp>
-#include "launchdarkly/sse/detail/parser.hpp"
+#include <launchdarkly/sse/detail/parser.hpp>
 
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/placeholders.hpp>
 #include <boost/asio/strand.hpp>
 
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/http/parser.hpp>
+#include <boost/beast/http/read.hpp>
+#include <boost/beast/http/write.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 
 #include <boost/url/parse.hpp>

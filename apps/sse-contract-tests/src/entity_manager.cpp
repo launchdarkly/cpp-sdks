@@ -1,5 +1,5 @@
 #include "entity_manager.hpp"
-#include "stream_entity.hpp"
+#include "event_outbox.hpp"
 
 using launchdarkly::LogLevel;
 

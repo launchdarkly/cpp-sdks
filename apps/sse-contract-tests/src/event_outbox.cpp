@@ -1,4 +1,4 @@
-#include "stream_entity.hpp"
+#include "event_outbox.hpp"
 #include "definitions.hpp"
 
 #include <boost/url/parse.hpp>
