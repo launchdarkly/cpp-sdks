@@ -6,7 +6,8 @@
 #include <nlohmann/json.hpp>
 
 // Check the outbox at this interval. Normally a flush is triggered for
-// every event; this is just a failsafe in case a flush is happening concurrently.
+// every event; this is just a failsafe in case a flush is happening
+// concurrently.
 auto const kFlushInterval = boost::posix_time::milliseconds{500};
 auto const kOutboxCapacity = 1023;
 

@@ -36,7 +36,8 @@ int main() {
             .header("Authorization", key)
             .receiver([&](launchdarkly::sse::Event ev) {
                 LD_LOG(logger, LogLevel::kInfo) << "event: " << ev.type();
-                LD_LOG(logger, LogLevel::kInfo) << "data: " << std::move(ev).take();
+                LD_LOG(logger, LogLevel::kInfo)
+                    << "data: " << std::move(ev).take();
             })
             .build();
 

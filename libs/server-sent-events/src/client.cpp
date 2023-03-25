@@ -26,7 +26,7 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-char const* kUserAgent = "CPPClient/0.0.0";
+const auto kUserAgent = "CPPClient/0.0.0";
 
 template <class Derived>
 class Session {

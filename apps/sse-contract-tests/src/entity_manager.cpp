@@ -46,7 +46,6 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
     return id;
 }
 
-
 bool EntityManager::destroy(std::string const& id) {
     auto it = entities_.find(id);
     if (it == entities_.end()) {

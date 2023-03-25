@@ -19,7 +19,6 @@ namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
 class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
-
     using RequestType = http::request<http::string_body>;
 
     std::string callback_url_;
@@ -61,8 +60,7 @@ class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
     void stop();
 
    private:
-    RequestType build_request(std::size_t counter,
-                               launchdarkly::sse::Event ev);
+    RequestType build_request(std::size_t counter, launchdarkly::sse::Event ev);
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
     void on_connect(beast::error_code ec,
                     tcp::resolver::results_type::endpoint_type);

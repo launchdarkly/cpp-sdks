@@ -42,6 +42,7 @@ class server : public std::enable_shared_from_this<server> {
      * Begins an async operation to start accepting requests.
      */
     void run();
+
    private:
     void do_accept();
     void on_accept(boost::system::error_code const& ec, tcp::socket socket);

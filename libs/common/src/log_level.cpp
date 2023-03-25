@@ -31,15 +31,17 @@ LogLevel GetLogLevelEnum(char const* level, LogLevel default_) {
 
     if (lowercase == "debug") {
         return LogLevel::kDebug;
-    } else if (lowercase == "info") {
-        return LogLevel::kInfo;
-    } else if (lowercase == "warn") {
-        return LogLevel::kWarn;
-    } else if (lowercase == "error") {
-        return LogLevel::kError;
-    } else {
-        return default_;
     }
+    if (lowercase == "info") {
+        return LogLevel::kInfo;
+    }
+    if (lowercase == "warn") {
+        return LogLevel::kWarn;
+    }
+    if (lowercase == "error") {
+        return LogLevel::kError;
+    }
+    return default_;
 }
 
 }  // namespace launchdarkly
