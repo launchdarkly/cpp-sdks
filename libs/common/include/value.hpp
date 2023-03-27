@@ -36,6 +36,7 @@ namespace launchdarkly {
  */
 class Value {
    public:
+    Value(char const* str);
     enum class Type { kNull, kBool, kNumber, kString, kObject, kArray };
 
     /**
@@ -68,6 +69,12 @@ class Value {
     Value(std::string str);
 
     /**
+     * Construct a string value from a constant string.
+     * @param str
+     */
+    Value(Value const&& other);
+
+    /**
      * Construct an array value from a vector of Value.
      * @param arr
      */
@@ -85,7 +92,7 @@ class Value {
      */
     Value(Value const& val);
 
-    Type type();
+    Type type() const;
 
     /**
      * Returns true if the value is a null.
@@ -94,14 +101,14 @@ class Value {
      * value from this function as a marker.
      * @return True if the value is null.
      */
-    bool is_null();
+    bool is_null() const;
 
     /**
      * Returns true if the value is a boolean.
      *
      * @return
      */
-    bool is_bool();
+    bool is_bool() const;
 
     /**
      * Returns true if the value is a number.
@@ -110,28 +117,28 @@ class Value {
      * an int or double for convenience.
      * @return True if the value is a number.
      */
-    bool is_number();
+    bool is_number() const;
 
     /**
      * Returns true if the value is a string.
      *
      * @return True if the value is a string.
      */
-    bool is_string();
+    bool is_string() const;
 
     /**
      * Returns true if the value is an array.
      *
      * @return True if the value is an array.
      */
-    bool is_array();
+    bool is_array() const;
 
     /**
      * Returns true if the value is an object.
      *
      * @return True if the value is an object.
      */
-    bool is_object();
+    bool is_object() const;
 
     /**
      * If the value is a boolean, then return the boolean, otherwise return
@@ -139,7 +146,7 @@ class Value {
      *
      * @return The value of the boolean, or false.
      */
-    bool as_bool();
+    bool as_bool() const;
 
     /**
      * If the value is a number, then return the internal double value as an
@@ -147,9 +154,9 @@ class Value {
      *
      * @return The value as an integer, or 0.
      */
-    int as_int();
+    int as_int() const;
 
-    double as_double();
+    double as_double() const;
 
     /**
      * If the value is a string, then return a reference to that string,
@@ -157,7 +164,7 @@ class Value {
      *
      * @return The value as a string, or an empty string.
      */
-    std::string const& as_string();
+    std::string const& as_string() const;
 
     /**
      * If the value is an array type, then return a reference to that array as a
@@ -165,7 +172,7 @@ class Value {
      *
      * @return The value as a vector, or an empty vector.
      */
-    std::vector<Value> const& as_array();
+    std::vector<Value> const& as_array() const;
 
     /**
      * if the value is an object type, then return a reference to that object
@@ -173,7 +180,7 @@ class Value {
      *
      * @return The value as a map, or an empty map.
      */
-    std::map<std::string, Value> const& as_object();
+    std::map<std::string, Value> const& as_object() const;
 
     ~Value();
 

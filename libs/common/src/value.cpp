@@ -1,5 +1,6 @@
 #include "value.hpp"
 
+#include <iostream>
 #include <iterator>
 
 using launchdarkly::Value;
@@ -14,6 +15,9 @@ Value::Value(int num) : type_(Value::Type::kNumber), storage_{num} {}
 
 Value::Value(std::string str)
     : type_(Value::Type::kString), storage_{std::move(str)} {}
+
+Value::Value(char const* str)
+    : type_(Value::Type::kString), storage_{std::string(str)} {}
 
 Value::Value(std::vector<Value> arr)
     : type_(Value::Type::kArray), storage_{std::move(arr)} {}
@@ -34,17 +38,42 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
             storage_.number_ = other.storage_.number_;
             break;
         case Type::kString:
-            storage_.string_ = other.storage_.string_;
+            new (&storage_.string_) std::string(other.storage_.string_);
             break;
         case Type::kObject:
-            storage_.object_ = other.storage_.object_;
+            new (&storage_.object_) std::map(other.storage_.object_);
             break;
         case Type::kArray:
             auto vec = std::vector<Value>();
             auto const& otherVec = other.storage_.array_;
             for (int index = 0; index < otherVec.size(); index++)
                 vec.push_back(otherVec[index]);
-            storage_.array_ = std::move(vec);
+            new (&storage_.array_) std::vector(std::move(vec));
+            break;
+    }
+}
+
+Value::Value(Value const&& other) : type_(other.type_), storage_{0} {
+    // The storage_ gets initialized as a number, because we need to inspect
+    // the type before we actually set the value.
+    switch (type_) {
+        case Type::kNull:
+            break;
+        case Type::kBool:
+            storage_.boolean_ = other.storage_.boolean_;
+            break;
+        case Type::kNumber:
+            storage_.number_ = other.storage_.number_;
+            break;
+        case Type::kString:
+            new (&storage_.string_)
+                std::string(std::move(other.storage_.string_));
+            break;
+        case Type::kObject:
+            new (&storage_.object_) std::map(std::move(other.storage_.object_));
+            break;
+        case Type::kArray:
+            auto vec = std::vector<Value>(std::move(other.storage_.array_));
             break;
     }
 }
@@ -61,39 +90,40 @@ Value::~Value() {
             storage_.string_.~basic_string();
             break;
         case Type::kObject:
-            storage_.array_.~vector();
+            storage_.object_.~map();
             break;
         case Type::kArray:
-            storage_.object_.~map();
+            storage_.array_.~vector();
+
             break;
     }
 }
 
-Value::Type launchdarkly::Value::type() {
+Value::Type launchdarkly::Value::type() const {
     return type_;
 }
 
-bool launchdarkly::Value::is_null() {
+bool launchdarkly::Value::is_null() const {
     return type_ == Type::kNull;
 }
 
-bool launchdarkly::Value::is_bool() {
+bool launchdarkly::Value::is_bool() const {
     return type_ == Type::kBool;
 }
 
-bool launchdarkly::Value::is_number() {
+bool launchdarkly::Value::is_number() const {
     return type_ == Type::kNumber;
 }
 
-bool launchdarkly::Value::is_string() {
+bool launchdarkly::Value::is_string() const {
     return type_ == Type::kString;
 }
 
-bool launchdarkly::Value::is_array() {
+bool launchdarkly::Value::is_array() const {
     return type_ == Type::kArray;
 }
 
-bool launchdarkly::Value::is_object() {
+bool launchdarkly::Value::is_object() const {
     return type_ == Type::kObject;
 }
 
@@ -103,42 +133,42 @@ Value launchdarkly::Value::Null() {
     return Value();
 }
 
-bool launchdarkly::Value::as_bool() {
+bool launchdarkly::Value::as_bool() const {
     if (type_ == Type::kBool) {
         return storage_.boolean_;
     }
     return false;
 }
 
-int launchdarkly::Value::as_int() {
+int launchdarkly::Value::as_int() const {
     if (type_ == Type::kNumber) {
         return storage_.number_;
     }
     return 0;
 }
 
-double launchdarkly::Value::as_double() {
+double launchdarkly::Value::as_double() const {
     if (type_ == Type::kNumber) {
         return storage_.number_;
     }
     return 0.0;
 }
 
-std::string const& launchdarkly::Value::as_string() {
+std::string const& launchdarkly::Value::as_string() const {
     if (type_ == Type::kString) {
         return storage_.string_;
     }
     return empty_string_;
 }
 
-std::vector<Value> const& launchdarkly::Value::as_array() {
+std::vector<Value> const& launchdarkly::Value::as_array() const {
     if (type_ == Type::kArray) {
         return storage_.array_;
     }
     return empty_vector_;
 }
 
-std::map<std::string, Value> const& launchdarkly::Value::as_object() {
+std::map<std::string, Value> const& launchdarkly::Value::as_object() const {
     if (type_ == Type::kObject) {
         return storage_.object_;
     }
@@ -158,13 +188,16 @@ launchdarkly::Value::Storage::Storage(int num) {
 }
 
 launchdarkly::Value::Storage::Storage(std::string str) {
-    string_ = str;
+    // Use in-place new, otherwise the string member will not be initialized.
+    new (&string_) std::string(std::move(str));
 }
 
 launchdarkly::Value::Storage::Storage(std::vector<Value> arr) {
-    array_ = std::move(arr);
+    // Use in-place new, otherwise the vector member will not be initialized.
+    new (&array_) std::vector(std::move(arr));
 }
 
 launchdarkly::Value::Storage::Storage(std::map<std::string, Value> obj) {
-    object_ = std::move(obj);
+    // Use in-place new, otherwise the map member will not be initialized.
+    new (&object_) std::map(std::move(obj));
 }
