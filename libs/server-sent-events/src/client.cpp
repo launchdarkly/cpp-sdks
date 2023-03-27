@@ -3,6 +3,10 @@
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/ssl/host_name_verification.hpp>
+
+#include <boost/certify/extensions.hpp>
+#include <boost/certify/https_verification.hpp>
 
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
@@ -79,6 +83,7 @@ class Session {
     }
 
     void fail(beast::error_code ec, char const* what) {
+        std::cout << what << ": " << ec.message() << '\n';
         // log(std::string(what) + ":" + ec.message());
     }
 
@@ -270,9 +275,9 @@ std::shared_ptr<Client> Builder::build() {
             uri_components->has_port() ? uri_components->port() : "443";
 
         ssl::context ssl_ctx{ssl::context::tlsv12_client};
-        // TODO: This needs to be verify_peer in production,
-        // and we need to provide a certificate store!
-        ssl_ctx.set_verify_mode(ssl::verify_none);
+
+        ssl_ctx.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+        boost::certify::enable_native_https_server_verification(ssl_ctx);
 
         return std::make_shared<SecureClient>(net::make_strand(executor_),
                                               std::move(ssl_ctx), request_,
