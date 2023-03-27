@@ -145,17 +145,17 @@ class Session {
     void do_close() { beast::get_lowest_layer(derived().stream()).cancel(); }
 };
 
-class SecureClient : public Client,
-                     public Session<SecureClient>,
-                     public std::enable_shared_from_this<SecureClient> {
+class EncryptedClient : public Client,
+                     public Session<EncryptedClient>,
+                     public std::enable_shared_from_this<EncryptedClient> {
    public:
-    SecureClient(net::any_io_executor ex,
+    EncryptedClient(net::any_io_executor ex,
                  ssl::context ctx,
                  http::request<http::empty_body> req,
                  std::string host,
                  std::string port,
                  Builder::EventReceiver receiver)
-        : Session<SecureClient>(ex,
+        : Session<EncryptedClient>(ex,
                                 host,
                                 port,
                                 req,
@@ -182,7 +182,7 @@ class SecureClient : public Client,
     void do_handshake() {
         stream_.async_handshake(
             ssl::stream_base::client,
-            beast::bind_front_handler(&SecureClient::on_handshake, shared()));
+            beast::bind_front_handler(&EncryptedClient::on_handshake, shared()));
     }
 
     beast::ssl_stream<beast::tcp_stream>& stream() { return stream_; }
@@ -191,8 +191,8 @@ class SecureClient : public Client,
     ssl::context ssl_ctx_;
     beast::ssl_stream<beast::tcp_stream> stream_;
 
-    std::shared_ptr<SecureClient> shared() {
-        return std::static_pointer_cast<SecureClient>(shared_from_this());
+    std::shared_ptr<EncryptedClient> shared() {
+        return std::static_pointer_cast<EncryptedClient>(shared_from_this());
     }
 };
 
@@ -279,7 +279,7 @@ std::shared_ptr<Client> Builder::build() {
         ssl_ctx.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
         boost::certify::enable_native_https_server_verification(ssl_ctx);
 
-        return std::make_shared<SecureClient>(net::make_strand(executor_),
+        return std::make_shared<EncryptedClient>(net::make_strand(executor_),
                                               std::move(ssl_ctx), request_,
                                               host, port, receiver_);
     } else {
