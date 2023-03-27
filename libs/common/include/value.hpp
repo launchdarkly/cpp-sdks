@@ -5,27 +5,31 @@
 namespace launchdarkly {
 
 /**
- * Value represents any of the data types supported by JSON, all of which can be used for a LaunchDarkly
- * feature flag variation, or for an attribute in an evaluation context. Value instances are immutable.
+ * Value represents any of the data types supported by JSON, all of which can be
+ * used for a LaunchDarkly feature flag variation, or for an attribute in an
+ * evaluation context. Value instances are immutable.
  *
  * # Uses of JSON types in LaunchDarkly
  *
- * LaunchDarkly feature flags can have variations of any JSON type other than null. If you want to
- * evaluate a feature flag in a general way that does not have expectations about the variation type,
- * or if the variation value is a complex data structure such as an array or object, you can use the
- * SDK method [TODO] to get the value
- * and then use Value methods to examine it.
+ * LaunchDarkly feature flags can have variations of any JSON type other than
+ * null. If you want to evaluate a feature flag in a general way that does not
+ * have expectations about the variation type, or if the variation value is a
+ * complex data structure such as an array or object, you can use the SDK method
+ * [TODO] to get the value and then use Value methods to examine it.
  *
  * Similarly, attributes of an evaluation context ([TODO])
- * can have variations of any JSON type other than null. If you want to set a context attribute in a general
- * way that will accept any type, or set the attribute value to a complex data structure such as an array
- * or object, you can use the builder method [TODO].
+ * can have variations of any JSON type other than null. If you want to set a
+ * context attribute in a general way that will accept any type, or set the
+ * attribute value to a complex data structure such as an array or object, you
+ * can use the builder method [TODO].
  *
  * Arrays and objects have special meanings in LaunchDarkly flag evaluation:
- *   - An array of values means "try to match any of these values to the targeting rule."
- *   - An object allows you to match a property within the object to the targeting rule. For instance,
- *     in the example above, a targeting rule could reference /objectAttr1/color to match the value
- *     "green". Nested property references like /objectAttr1/address/street are allowed if a property
+ *   - An array of values means "try to match any of these values to the
+ * targeting rule."
+ *   - An object allows you to match a property within the object to the
+ * targeting rule. For instance, in the example above, a targeting rule could
+ * reference /objectAttr1/color to match the value "green". Nested property
+ * references like /objectAttr1/address/street are allowed if a property
  *     contains another JSON object.
  *
  * # Constructors and builders
@@ -91,6 +95,20 @@ class Value {
      * @param val
      */
     Value(Value const& val);
+
+    Value& operator=(Value const& other) {
+        return *this = Value(other);
+    }
+
+    Value& operator=(Value&& other) {
+        type_ = other.type_;
+        destruct_storage();
+        move_storage(&other);
+
+        // Change to null so it doesn't attempt to destruct a moved value.
+        other.type_ = Type::kNull;
+        return *this;
+    }
 
     Type type() const;
 
@@ -213,6 +231,8 @@ class Value {
     inline static const std::string empty_string_;
     inline static const std::vector<Value> empty_vector_;
     inline static const std::map<std::string, Value> empty_map_;
+    void move_storage(Value const&& other);
+    void destruct_storage();
 };
 
 }  // namespace launchdarkly

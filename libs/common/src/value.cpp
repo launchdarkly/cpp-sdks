@@ -54,8 +54,13 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
 }
 
 Value::Value(Value const&& other) : type_(other.type_), storage_{0} {
-    // The storage_ gets initialized as a number, because we need to inspect
+    // The storage_ gets initialized as a
+    // number, because we need to inspect
     // the type before we actually set the value.
+    move_storage(&other);
+}
+
+void Value::move_storage(Value const&& other) {
     switch (type_) {
         case Type::kNull:
             break;
@@ -79,6 +84,9 @@ Value::Value(Value const&& other) : type_(other.type_), storage_{0} {
 }
 
 Value::~Value() {
+    destruct_storage();
+}
+void Value::destruct_storage() {
     switch (type_) {
         // Nothing to be done for the basic types.
         case Type::kNull:
