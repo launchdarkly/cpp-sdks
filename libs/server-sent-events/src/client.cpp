@@ -6,6 +6,7 @@
 
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/version.hpp>
 #include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/read.hpp>
 #include <boost/beast/http/write.hpp>
@@ -26,7 +27,7 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-const auto kUserAgent = "CPPClient/0.0.0";
+const auto kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 
 template <class Derived>
 class Session {
@@ -224,13 +225,13 @@ class PlaintextClient : public Client,
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)}, executor_{std::move(ctx)} {
-    receiver_ = [](launchdarkly::sse::Event) {};
+    receiver_ = [](const launchdarkly::sse::Event&) {};
 
     request_.version(11);
-    request_.set(http::field::user_agent, kUserAgent);
+    request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
-    request_.set("Accept", "text/event-stream");
-    request_.set("Cache-Control", "no-cache");
+    request_.set(http::field::accept, "text/event-stream");
+    request_.set(http::field::cache_control, "no-cache");
 }
 
 Builder& Builder::header(std::string const& name, std::string const& value) {
