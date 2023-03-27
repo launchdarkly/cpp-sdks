@@ -96,6 +96,15 @@ class Value {
      */
     Value(Value const& val);
 
+    /**
+     * Create an array type value from the given list.
+     *
+     * Cannot be used to create object type values.
+     * @param values
+     */
+    Value(std::initializer_list<Value> values): type_(Type::kArray), storage_(std::vector<Value>(values)) {
+    }
+
     Value& operator=(Value const& other) {
         return *this = Value(other);
     }
@@ -105,11 +114,14 @@ class Value {
         destruct_storage();
         move_storage(&other);
 
-        // Change to null so it doesn't attempt to destruct a moved value.
+        // Change to null, so it doesn't attempt to destruct a moved value.
         other.type_ = Type::kNull;
         return *this;
     }
 
+    /**
+     * Get the type of the attribute.
+     */
     Type type() const;
 
     /**
@@ -231,7 +243,7 @@ class Value {
     inline static const std::string empty_string_;
     inline static const std::vector<Value> empty_vector_;
     inline static const std::map<std::string, Value> empty_map_;
-    void move_storage(Value const&& other);
+    void move_storage(Value const& other);
     void destruct_storage();
 };
 

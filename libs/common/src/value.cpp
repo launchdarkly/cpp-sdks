@@ -57,10 +57,10 @@ Value::Value(Value const&& other) : type_(other.type_), storage_{0} {
     // The storage_ gets initialized as a
     // number, because we need to inspect
     // the type before we actually set the value.
-    move_storage(&other);
+    move_storage(other);
 }
 
-void Value::move_storage(Value const&& other) {
+void Value::move_storage(Value const& other) {
     switch (type_) {
         case Type::kNull:
             break;
@@ -78,7 +78,7 @@ void Value::move_storage(Value const&& other) {
             new (&storage_.object_) std::map(std::move(other.storage_.object_));
             break;
         case Type::kArray:
-            auto vec = std::vector<Value>(std::move(other.storage_.array_));
+            new(&storage_.object_) std::vector<Value>(std::move(other.storage_.array_));
             break;
     }
 }
