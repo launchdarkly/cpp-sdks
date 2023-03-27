@@ -15,7 +15,7 @@ namespace launchdarkly {
  * Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kInfo,
  * "Example"));
  *
- * // Use log macro for logging.
+ * // Use log macro for logger.
  * LD_LOG(logger, LogLevel::kInfo) << "this is a log";
  * ```
  */
@@ -40,7 +40,7 @@ class Logger {
     };
 
     /**
-     * Class which allows for ostream based logging.
+     * Class which allows for ostream based logger.
      *
      * Generally this should be used via the macro, but can be used directly.
      * If used directly the log level should be checked first.
@@ -93,7 +93,7 @@ class Logger {
     Logger(std::unique_ptr<ILogBackend> backend);
 
     /**
-     * Open a logging record.
+     * Open a logger record.
      *
      * @param level The level for the record.
      * @return A new record, or null-opt if there are no sinks for the severity
@@ -110,7 +110,7 @@ class Logger {
 
     /**
      * Check if a given log level is enabled. This is useful if you want to do
-     * some expensive operation only when logging is enabled.
+     * some expensive operation only when logger is enabled.
      *
      * @param level The level to check.
      * @return True if the level is enabled.

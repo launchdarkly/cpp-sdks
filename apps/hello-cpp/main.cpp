@@ -7,6 +7,7 @@
 #include "logger.hpp"
 
 #include <iostream>
+#include <utility>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
@@ -38,6 +39,9 @@ int main() {
                 LD_LOG(logger, LogLevel::kInfo) << "event: " << ev.type();
                 LD_LOG(logger, LogLevel::kInfo)
                     << "data: " << std::move(ev).take();
+            })
+            .logger([&](std::string msg) {
+                LD_LOG(logger, LogLevel::kDebug) << std::move(msg);
             })
             .build();
 

@@ -2,19 +2,19 @@
 #include <launchdarkly/sse/detail/parser.hpp>
 
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
+#include <boost/asio/strand.hpp>
 
 #include <boost/certify/extensions.hpp>
 #include <boost/certify/https_verification.hpp>
 
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
-#include <boost/beast/version.hpp>
 #include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/read.hpp>
 #include <boost/beast/http/write.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
+#include <boost/beast/version.hpp>
 
 #include <boost/url/parse.hpp>
 
@@ -31,7 +31,14 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-const auto kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
+auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
+
+// The allowed amount of time to connect the socket and perform
+// any TLS handshake, if necessary.
+auto const kDefaultConnectTimeout = std::chrono::seconds(15);
+// Once connected, the amount of time to send a request and receive the first
+// batch of bytes back.
+auto const kDefaultResponseTimeout = std::chrono::seconds(15);
 
 template <class Derived>
 class Session {
@@ -39,52 +46,65 @@ class Session {
     Derived& derived() { return static_cast<Derived&>(*this); }
     http::request<http::empty_body> req_;
     std::chrono::seconds connect_timeout_;
-    std::chrono::seconds write_timeout_;
+    std::chrono::seconds response_timeout_;
 
    protected:
     beast::flat_buffer buffer_;
     std::string host_;
     std::string port_;
     tcp::resolver resolver_;
+    Builder::LogCallback logger_;
 
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
     http::response_parser<body> parser_;
 
    public:
-    Session(net::any_io_executor exec,
+    Session(net::any_io_executor const& exec,
             std::string host,
             std::string port,
             http::request<http::empty_body> r,
             std::chrono::seconds connect_timeout,
-            Builder::EventReceiver receiver)
+            std::chrono::seconds response_timeout,
+            Builder::EventReceiver receiver,
+            Builder::LogCallback logger)
         : req_(std::move(r)),
-          resolver_(std::move(exec)),
+          resolver_(exec),
           connect_timeout_(connect_timeout),
-          write_timeout_(std::chrono::seconds(10)),
+          response_timeout_(response_timeout),
           host_(std::move(host)),
           port_(std::move(port)),
+          logger_(std::move(logger)),
           parser_() {
         parser_.get().body().on_event(std::move(receiver));
     }
 
-    void do_write() {
-        http::async_write(
-            derived().stream(), req_,
-            beast::bind_front_handler(&Session::on_write,
-                                      derived().shared_from_this()));
+    void fail(beast::error_code ec, char const* what) {
+        logger_(std::string(what) + ": " + ec.message());
     }
 
     void do_resolve() {
+        logger_("resolving " + host_ + ":" + port_);
         resolver_.async_resolve(
             host_, port_,
             beast::bind_front_handler(&Session::on_resolve,
                                       derived().shared_from_this()));
     }
 
-    void fail(beast::error_code ec, char const* what) {
-        std::cout << what << ": " << ec.message() << '\n';
-        // log(std::string(what) + ":" + ec.message());
+    void on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
+        if (ec)
+            return fail(ec, "resolve");
+
+        logger_("connecting (" + std::to_string(connect_timeout_.count()) +
+                " sec timeout)");
+
+        beast::get_lowest_layer(derived().stream())
+            .expires_after(connect_timeout_);
+
+        beast::get_lowest_layer(derived().stream())
+            .async_connect(results, beast::bind_front_handler(
+                                        &Session::on_connect,
+                                        derived().shared_from_this()));
     }
 
     void on_connect(beast::error_code ec,
@@ -92,6 +112,7 @@ class Session {
         if (ec) {
             return fail(ec, "connect");
         }
+
         derived().do_handshake();
     }
 
@@ -102,12 +123,24 @@ class Session {
         do_write();
     }
 
+    void do_write() {
+        logger_("making request (" + std::to_string(response_timeout_.count()) +
+                " sec timeout)");
+
+        beast::get_lowest_layer(derived().stream())
+            .expires_after(response_timeout_);
+
+        http::async_write(
+            derived().stream(), req_,
+            beast::bind_front_handler(&Session::on_write,
+                                      derived().shared_from_this()));
+    }
+
     void on_write(beast::error_code ec, std::size_t) {
         if (ec)
             return fail(ec, "write");
 
-        beast::get_lowest_layer(derived().stream())
-            .expires_after(write_timeout_);
+        logger_("reading response");
 
         http::async_read_some(
             derived().stream(), buffer_, parser_,
@@ -129,38 +162,31 @@ class Session {
                                       derived().shared_from_this()));
     }
 
-    void on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
-        if (ec)
-            return fail(ec, "resolve");
-
-        beast::get_lowest_layer(derived().stream())
-            .expires_after(connect_timeout_);
-
-        beast::get_lowest_layer(derived().stream())
-            .async_connect(results, beast::bind_front_handler(
-                                        &Session::on_connect,
-                                        derived().shared_from_this()));
+    void do_close() {
+        logger_("closing");
+        beast::get_lowest_layer(derived().stream()).cancel();
     }
-
-    void do_close() { beast::get_lowest_layer(derived().stream()).cancel(); }
 };
 
 class EncryptedClient : public Client,
-                     public Session<EncryptedClient>,
-                     public std::enable_shared_from_this<EncryptedClient> {
+                        public Session<EncryptedClient>,
+                        public std::enable_shared_from_this<EncryptedClient> {
    public:
     EncryptedClient(net::any_io_executor ex,
-                 ssl::context ctx,
-                 http::request<http::empty_body> req,
-                 std::string host,
-                 std::string port,
-                 Builder::EventReceiver receiver)
+                    ssl::context ctx,
+                    http::request<http::empty_body> req,
+                    std::string host,
+                    std::string port,
+                    Builder::EventReceiver receiver,
+                    Builder::LogCallback logger)
         : Session<EncryptedClient>(ex,
-                                host,
-                                port,
-                                req,
-                                std::chrono::seconds(5),
-                                std::move(receiver)),
+                                   std::move(host),
+                                   std::move(port),
+                                   std::move(req),
+                                   kDefaultConnectTimeout,
+                                   kDefaultResponseTimeout,
+                                   std::move(receiver),
+                                   std::move(logger)),
           ssl_ctx_(std::move(ctx)),
           stream_{ex, ssl_ctx_} {}
 
@@ -169,8 +195,7 @@ class EncryptedClient : public Client,
         if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
             beast::error_code ec{static_cast<int>(::ERR_get_error()),
                                  net::error::get_ssl_category()};
-            //     log("failed to set TLS host name extension: " +
-            //     ec.message());
+            logger_("failed to set TLS host name extension: " + ec.message());
             return;
         }
 
@@ -180,9 +205,9 @@ class EncryptedClient : public Client,
     virtual void close() override { do_close(); }
 
     void do_handshake() {
-        stream_.async_handshake(
-            ssl::stream_base::client,
-            beast::bind_front_handler(&EncryptedClient::on_handshake, shared()));
+        stream_.async_handshake(ssl::stream_base::client,
+                                beast::bind_front_handler(
+                                    &EncryptedClient::on_handshake, shared()));
     }
 
     beast::ssl_stream<beast::tcp_stream>& stream() { return stream_; }
@@ -204,13 +229,16 @@ class PlaintextClient : public Client,
                     http::request<http::empty_body> req,
                     std::string host,
                     std::string port,
-                    Builder::EventReceiver receiver)
+                    Builder::EventReceiver receiver,
+                    Builder::LogCallback logger)
         : Session<PlaintextClient>(ex,
-                                   host,
-                                   port,
-                                   req,
-                                   std::chrono::seconds(5),
-                                   std::move(receiver)),
+                                   std::move(host),
+                                   std::move(port),
+                                   std::move(req),
+                                   kDefaultConnectTimeout,
+                                   kDefaultResponseTimeout,
+                                   std::move(receiver),
+                                   std::move(logger)),
           stream_{ex} {}
 
     virtual void run() override { do_resolve(); }
@@ -230,7 +258,7 @@ class PlaintextClient : public Client,
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)}, executor_{std::move(ctx)} {
-    receiver_ = [](const launchdarkly::sse::Event&) {};
+    receiver_ = [](launchdarkly::sse::Event const&) {};
 
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
@@ -254,8 +282,8 @@ Builder& Builder::receiver(EventReceiver receiver) {
     return *this;
 }
 
-Builder& Builder::logging(std::function<void(std::string)> cb) {
-    logging_cb_ = std::move(cb);
+Builder& Builder::logger(std::function<void(std::string)> callback) {
+    logging_cb_ = std::move(callback);
     return *this;
 }
 
@@ -276,18 +304,20 @@ std::shared_ptr<Client> Builder::build() {
 
         ssl::context ssl_ctx{ssl::context::tlsv12_client};
 
-        ssl_ctx.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+        ssl_ctx.set_verify_mode(ssl::verify_peer |
+                                ssl::verify_fail_if_no_peer_cert);
         boost::certify::enable_native_https_server_verification(ssl_ctx);
 
-        return std::make_shared<EncryptedClient>(net::make_strand(executor_),
-                                              std::move(ssl_ctx), request_,
-                                              host, port, receiver_);
+        return std::make_shared<EncryptedClient>(
+            net::make_strand(executor_), std::move(ssl_ctx), request_, host,
+            port, receiver_, logging_cb_);
     } else {
         std::string port =
             uri_components->has_port() ? uri_components->port() : "80";
 
-        return std::make_shared<PlaintextClient>(
-            net::make_strand(executor_), request_, host, port, receiver_);
+        return std::make_shared<PlaintextClient>(net::make_strand(executor_),
+                                                 request_, host, port,
+                                                 receiver_, logging_cb_);
     }
 }
 
