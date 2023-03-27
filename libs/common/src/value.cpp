@@ -1,5 +1,6 @@
 #include "value.hpp"
 
+#include <cstring>
 #include <iostream>
 #include <iterator>
 
@@ -53,14 +54,14 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
     }
 }
 
-Value::Value(Value const&& other) : type_(other.type_), storage_{0} {
+Value::Value(Value&& other) : type_(other.type_), storage_{0} {
     // The storage_ gets initialized as a
     // number, because we need to inspect
     // the type before we actually set the value.
-    move_storage(other);
+    move_storage(std::move(other));
 }
 
-void Value::move_storage(Value const& other) {
+void Value::move_storage(Value&& other) {
     switch (type_) {
         case Type::kNull:
             break;
@@ -70,15 +71,16 @@ void Value::move_storage(Value const& other) {
         case Type::kNumber:
             storage_.number_ = other.storage_.number_;
             break;
-        case Type::kString:
+        case Type::kString: {
             new (&storage_.string_)
                 std::string(std::move(other.storage_.string_));
-            break;
+        } break;
         case Type::kObject:
             new (&storage_.object_) std::map(std::move(other.storage_.object_));
             break;
         case Type::kArray:
-            new(&storage_.object_) std::vector<Value>(std::move(other.storage_.array_));
+            new (&storage_.object_)
+                std::vector<Value>(std::move(other.storage_.array_));
             break;
     }
 }
@@ -181,6 +183,21 @@ std::map<std::string, Value> const& launchdarkly::Value::as_object() const {
         return storage_.object_;
     }
     return empty_map_;
+}
+
+ Value& launchdarkly::Value::operator=(Value const& other) {
+     return *this = Value(other);
+ }
+
+Value& launchdarkly::Value::operator=(Value&& other) {
+    // Destruct storage based on original type.
+    destruct_storage();
+    // Update the type to the new type.
+    type_ = other.type_;
+    // Allocate new storage and move teh other value.
+    move_storage(std::move(other));
+
+    return *this;
 }
 
 launchdarkly::Value::Storage::Storage(bool boolean) {

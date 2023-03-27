@@ -76,7 +76,7 @@ class Value {
      * Construct a string value from a constant string.
      * @param str
      */
-    Value(Value const&& other);
+    Value(Value && other);
 
     /**
      * Construct an array value from a vector of Value.
@@ -105,19 +105,8 @@ class Value {
     Value(std::initializer_list<Value> values): type_(Type::kArray), storage_(std::vector<Value>(values)) {
     }
 
-    Value& operator=(Value const& other) {
-        return *this = Value(other);
-    }
-
-    Value& operator=(Value&& other) {
-        type_ = other.type_;
-        destruct_storage();
-        move_storage(&other);
-
-        // Change to null, so it doesn't attempt to destruct a moved value.
-        other.type_ = Type::kNull;
-        return *this;
-    }
+    Value& operator=(Value const& other);
+    Value& operator=(Value&& other);
 
     /**
      * Get the type of the attribute.
@@ -243,7 +232,7 @@ class Value {
     inline static const std::string empty_string_;
     inline static const std::vector<Value> empty_vector_;
     inline static const std::map<std::string, Value> empty_map_;
-    void move_storage(Value const& other);
+    void move_storage(Value && other);
     void destruct_storage();
 };
 

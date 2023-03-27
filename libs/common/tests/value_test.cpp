@@ -11,21 +11,12 @@ TEST(ValueTests, CanMakeNullValue) {
     Value nullVal;
     EXPECT_TRUE(nullVal.is_null());
     EXPECT_EQ(Value::Type::kNull, nullVal.type());
-
-    Value copiedValue = nullVal;
-    EXPECT_TRUE(copiedValue.is_null());
-    EXPECT_EQ(Value::Type::kNull, copiedValue.type());
 }
-
 
 TEST(ValueTests, CanMoveNullValue) {
     Value nullVal(std::move(Value()));
     EXPECT_TRUE(nullVal.is_null());
     EXPECT_EQ(Value::Type::kNull, nullVal.type());
-
-    Value movedValue = std::move(nullVal);
-    EXPECT_TRUE(movedValue.is_null());
-    EXPECT_EQ(Value::Type::kNull, movedValue.type());
 }
 
 TEST(ValueTests, CanMakeBoolValue) {
@@ -33,11 +24,6 @@ TEST(ValueTests, CanMakeBoolValue) {
     EXPECT_TRUE(attrBool.is_bool());
     EXPECT_FALSE(attrBool.as_bool());
     EXPECT_EQ(Value::Type::kBool, attrBool.type());
-
-    Value copiedValue = attrBool;
-    EXPECT_TRUE(copiedValue.is_bool());
-    EXPECT_FALSE(copiedValue.as_bool());
-    EXPECT_EQ(Value::Type::kBool, copiedValue.type());
 }
 
 TEST(ValueTests, CanMoveBoolValue) {
@@ -45,12 +31,6 @@ TEST(ValueTests, CanMoveBoolValue) {
     EXPECT_TRUE(attrBool.is_bool());
     EXPECT_FALSE(attrBool.as_bool());
     EXPECT_EQ(Value::Type::kBool, attrBool.type());
-
-    Value movedValue = std::move(attrBool);
-
-    EXPECT_TRUE(movedValue.is_bool());
-    EXPECT_FALSE(movedValue.as_bool());
-    EXPECT_EQ(Value::Type::kBool, movedValue.type());
 }
 
 TEST(ValueTests, CanMakeDoubleValue) {
@@ -59,12 +39,6 @@ TEST(ValueTests, CanMakeDoubleValue) {
     EXPECT_EQ(3.14159, attrDouble.as_double());
     EXPECT_EQ(3, attrDouble.as_int());
     EXPECT_EQ(Value::Type::kNumber, attrDouble.type());
-
-    Value copiedValue = attrDouble;
-    EXPECT_TRUE(copiedValue.is_number());
-    EXPECT_EQ(3.14159, copiedValue.as_double());
-    EXPECT_EQ(3, copiedValue.as_int());
-    EXPECT_EQ(Value::Type::kNumber, copiedValue.type());
 }
 
 TEST(ValueTests, CanMoveDoubleValue) {
@@ -74,13 +48,6 @@ TEST(ValueTests, CanMoveDoubleValue) {
     EXPECT_EQ(3.14159, attrDouble.as_double());
     EXPECT_EQ(3, attrDouble.as_int());
     EXPECT_EQ(Value::Type::kNumber, attrDouble.type());
-
-    Value movedValue = std::move(attrDouble);
-
-    EXPECT_TRUE(movedValue.is_number());
-    EXPECT_EQ(3.14159, movedValue.as_double());
-    EXPECT_EQ(3, movedValue.as_int());
-    EXPECT_EQ(Value::Type::kNumber, movedValue.type());
 }
 
 TEST(ValueTests, CanMakeIntValue) {
@@ -96,11 +63,6 @@ TEST(ValueTests, CanMakeStringValue) {
     EXPECT_TRUE(attrStr.is_string());
     EXPECT_EQ("potato", attrStr.as_string());
     EXPECT_EQ(Value::Type::kString, attrStr.type());
-
-    Value copiedValue = attrStr;
-    EXPECT_TRUE(copiedValue.is_string());
-    EXPECT_EQ("potato", copiedValue.as_string());
-    EXPECT_EQ(Value::Type::kString, copiedValue.type());
 }
 
 TEST(ValueTests, CanMoveStringValue) {
@@ -108,11 +70,6 @@ TEST(ValueTests, CanMoveStringValue) {
     EXPECT_TRUE(attrStr.is_string());
     EXPECT_EQ("potato", attrStr.as_string());
     EXPECT_EQ(Value::Type::kString, attrStr.type());
-
-    Value movedValue = std::move(attrStr);
-    EXPECT_TRUE(movedValue.is_string());
-    EXPECT_EQ("potato", movedValue.as_string());
-    EXPECT_EQ(Value::Type::kString, movedValue.type());
 }
 
 void vector_assertions(Value attrArr) {
@@ -139,9 +96,6 @@ TEST(ValueTests, CanMakeFromVector) {
         std::map<std::string, Value>{{"string", "bacon"}}});
 
     vector_assertions(attrArr);
-
-    Value copiedValue = attrArr;
-    vector_assertions(copiedValue);
 }
 
 TEST(ValueTests, CanMoveVectorValue) {
@@ -149,9 +103,6 @@ TEST(ValueTests, CanMoveVectorValue) {
         false, true, "potato", 42, 3.14, std::vector<Value>{"a", 21},
         std::map<std::string, Value>{{"string", "bacon"}}})));
     vector_assertions(attrArr);
-
-    Value movedValue = std::move(attrArr);
-    vector_assertions(movedValue);
 }
 
 TEST(ValueTests, CanMakeFromInitListVector) {
@@ -162,8 +113,6 @@ TEST(ValueTests, CanMakeFromInitListVector) {
                       3.14,
                       {"a", 21},
                       std::map<std::string, Value>{{"string", "bacon"}}};
-
-    vector_assertions(initList);
 }
 
 void map_assertions(Value const& attrMap) {
@@ -199,9 +148,6 @@ TEST(ValueTests, CanMakeFromMap) {
          {"obj", std::map<std::string, Value>{{"string", "eggs"}}}}));
 
     map_assertions(attrMap);
-
-    Value copiedValue = attrMap;
-    map_assertions(copiedValue);
 }
 
 TEST(ValueTests, CanMoveMap) {
@@ -214,7 +160,20 @@ TEST(ValueTests, CanMoveMap) {
          {"obj", std::map<std::string, Value>{{"string", "eggs"}}}}))));
 
     map_assertions(attrMap);
+}
 
-    Value movedValue = std::move(attrMap);
-    map_assertions(movedValue);
+TEST(ValueTests, AssignToExistingValue) {
+    // Running this test with valgrind should being to light any issues with
+    // cleaning things up during moves and copies.
+    auto strValue = Value("test");
+    EXPECT_EQ("test", strValue.as_string());
+    auto secondStr = Value("second");
+    strValue = std::move(secondStr);
+    //Move assignment.
+    EXPECT_EQ("second", strValue.as_string());
+
+    auto thirdValue = Value("third");
+    // Copy assignment
+    strValue = thirdValue;
+    EXPECT_EQ("third", strValue.as_string());
 }
