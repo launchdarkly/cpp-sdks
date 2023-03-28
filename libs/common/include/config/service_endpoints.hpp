@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 
 namespace launchdarkly::config {
@@ -17,4 +18,5 @@ class ServiceEndpoints {
     [[nodiscard]] std::string const& streaming_base_url() const;
     [[nodiscard]] std::string const& events_base_url() const;
 };
+
 }  // namespace launchdarkly::config
