@@ -45,3 +45,7 @@ include(${CMAKE_FILES}/certify.cmake)
 
 
 add_subdirectory(src)
+
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif ()
