@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
         s->add_capability("comments");
         s->add_capability("report");
         s->add_capability("post");
+        s->add_capability("read-timeout");
         s->run();
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};

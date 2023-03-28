@@ -33,6 +33,11 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         client_builder.body(std::move(*params.body));
     }
 
+    if (params.readTimeoutMs) {
+        client_builder.read_timeout(
+            std::chrono::milliseconds(*params.readTimeoutMs));
+    }
+
     client_builder.logger([this](std::string msg) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });

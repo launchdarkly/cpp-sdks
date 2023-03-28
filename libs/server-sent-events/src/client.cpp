@@ -35,18 +35,21 @@ auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 
 // The allowed amount of time to connect the socket and perform
 // any TLS handshake, if necessary.
-auto const kDefaultConnectTimeout = std::chrono::seconds(15);
+const std::chrono::milliseconds kDefaultConnectTimeout =
+    std::chrono::seconds(15);
 // Once connected, the amount of time to send a request and receive the first
 // batch of bytes back.
-auto const kDefaultResponseTimeout = std::chrono::seconds(15);
+const std::chrono::milliseconds kDefaultResponseTimeout =
+    std::chrono::seconds(15);
 
 template <class Derived>
 class Session {
    private:
     Derived& derived() { return static_cast<Derived&>(*this); }
     http::request<http::string_body> req_;
-    std::chrono::seconds connect_timeout_;
-    std::chrono::seconds response_timeout_;
+    std::chrono::milliseconds connect_timeout_;
+    std::chrono::milliseconds response_timeout_;
+    std::optional<std::chrono::milliseconds> read_timeout_;
 
    protected:
     beast::flat_buffer buffer_;
@@ -64,14 +67,16 @@ class Session {
             std::string host,
             std::string port,
             http::request<http::string_body> req,
-            std::chrono::seconds connect_timeout,
-            std::chrono::seconds response_timeout,
+            std::chrono::milliseconds connect_timeout,
+            std::chrono::milliseconds response_timeout,
+            std::optional<std::chrono::milliseconds> read_timeout,
             Builder::EventReceiver receiver,
             Builder::LogCallback logger)
         : req_(std::move(req)),
           resolver_(exec),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
+          read_timeout_(std::move(read_timeout)),
           host_(std::move(host)),
           port_(std::move(port)),
           logger_(std::move(logger)),
@@ -154,7 +159,12 @@ class Session {
             return fail(ec, "read");
         }
 
-        beast::get_lowest_layer(derived().stream()).expires_never();
+        if (read_timeout_) {
+            beast::get_lowest_layer(derived().stream())
+                .expires_after(*read_timeout_);
+        } else {
+            beast::get_lowest_layer(derived().stream()).expires_never();
+        };
 
         http::async_read_some(
             derived().stream(), buffer_, parser_,
@@ -177,6 +187,7 @@ class EncryptedClient : public Client,
                     http::request<http::string_body> req,
                     std::string host,
                     std::string port,
+                    std::optional<std::chrono::milliseconds> read_timeout,
                     Builder::EventReceiver receiver,
                     Builder::LogCallback logger)
         : Session<EncryptedClient>(ex,
@@ -185,6 +196,7 @@ class EncryptedClient : public Client,
                                    std::move(req),
                                    kDefaultConnectTimeout,
                                    kDefaultResponseTimeout,
+                                   std::move(read_timeout),
                                    std::move(receiver),
                                    std::move(logger)),
           ssl_ctx_(std::move(ctx)),
@@ -229,6 +241,7 @@ class PlaintextClient : public Client,
                     http::request<http::string_body> req,
                     std::string host,
                     std::string port,
+                    std::optional<std::chrono::milliseconds> read_timeout,
                     Builder::EventReceiver receiver,
                     Builder::LogCallback logger)
         : Session<PlaintextClient>(ex,
@@ -237,6 +250,7 @@ class PlaintextClient : public Client,
                                    std::move(req),
                                    kDefaultConnectTimeout,
                                    kDefaultResponseTimeout,
+                                   read_timeout,
                                    std::move(receiver),
                                    std::move(logger)),
           stream_{ex} {}
@@ -257,7 +271,9 @@ class PlaintextClient : public Client,
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
-    : url_{std::move(url)}, executor_{std::move(ctx)} {
+    : url_{std::move(url)},
+      executor_{std::move(ctx)},
+      read_timeout_{std::nullopt} {
     receiver_ = [](launchdarkly::sse::Event const&) {};
 
     request_.version(11);
@@ -274,6 +290,11 @@ Builder& Builder::header(std::string const& name, std::string const& value) {
 
 Builder& Builder::body(std::string data) {
     request_.body() = std::move(data);
+    return *this;
+}
+
+Builder& Builder::read_timeout(std::chrono::milliseconds timeout) {
+    read_timeout_ = timeout;
     return *this;
 }
 
@@ -305,7 +326,8 @@ std::shared_ptr<Client> Builder::build() {
     } else {
         // If it is, then setup Content-Type, only if one wasn't
         // specified.
-        if (auto it = request_.find(http::field::content_type); it == request_.end()) {
+        if (auto it = request_.find(http::field::content_type);
+            it == request_.end()) {
             request_.set(http::field::content_type, "text/plain");
         }
     }
@@ -329,14 +351,14 @@ std::shared_ptr<Client> Builder::build() {
 
         return std::make_shared<EncryptedClient>(
             net::make_strand(executor_), std::move(ssl_ctx), request_, host,
-            port, receiver_, logging_cb_);
+            port, read_timeout_, receiver_, logging_cb_);
     } else {
         std::string port =
             uri_components->has_port() ? uri_components->port() : "80";
 
-        return std::make_shared<PlaintextClient>(net::make_strand(executor_),
-                                                 request_, host, port,
-                                                 receiver_, logging_cb_);
+        return std::make_shared<PlaintextClient>(
+            net::make_strand(executor_), request_, host, port, read_timeout_,
+            receiver_, logging_cb_);
     }
 }
 

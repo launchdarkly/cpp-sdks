@@ -58,9 +58,16 @@ class Builder {
     Builder& header(std::string const& name, std::string const& value);
     /**
      * Specifies a request body. The body is sent when the method is POST or REPORt
-     * @return
+     * @return Reference to this builder.
      */
     Builder& body(std::string);
+    /**
+     * Specifies the maximum time duration between subsequent reads from the stream.
+     * A read counts as receiving any amount of bytes.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& read_timeout(std::chrono::milliseconds timeout);
     /**
      * Specify the method for the initial request. The default method is GET.
      * @param verb The HTTP method.
@@ -95,6 +102,7 @@ class Builder {
     std::string url_;
     net::any_io_executor executor_;
     http::request<http::string_body> request_;
+    std::optional<std::chrono::milliseconds> read_timeout_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
 };
