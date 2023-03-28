@@ -6,6 +6,8 @@
 
 using launchdarkly::Value;
 
+const Value Value::null_value_;
+
 Value::Value() : type_(Value::Type::kNull), storage_{0} {}
 
 Value::Value(bool boolean) : type_(Value::Type::kBool), storage_{boolean} {}
@@ -137,10 +139,10 @@ bool launchdarkly::Value::is_object() const {
     return type_ == Type::kObject;
 }
 
-Value launchdarkly::Value::Null() {
+ Value const& launchdarkly::Value::Null() {
     // This still just constructs a value, but it may be more discoverable
     // for people using the API.
-    return Value();
+    return null_value_;
 }
 
 bool launchdarkly::Value::as_bool() const {

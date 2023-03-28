@@ -113,6 +113,8 @@ TEST(ValueTests, CanMakeFromInitListVector) {
                       3.14,
                       {"a", 21},
                       std::map<std::string, Value>{{"string", "bacon"}}};
+
+    vector_assertions(initList);
 }
 
 void map_assertions(Value const& attrMap) {

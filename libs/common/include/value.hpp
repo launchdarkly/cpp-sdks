@@ -1,4 +1,4 @@
-
+#pragma once
 #include <map>
 #include <vector>
 
@@ -213,7 +213,7 @@ class Value {
      * Get a null value.
      * @return The null value.
      */
-    static Value Null();
+    static Value const& Null();
 
    private:
     union Storage {
@@ -239,6 +239,7 @@ class Value {
     inline static const std::string empty_string_;
     inline static const std::vector<Value> empty_vector_;
     inline static const std::map<std::string, Value> empty_map_;
+    static const Value null_value_;
 
     void move_storage(Value && other);
     void destruct_storage();

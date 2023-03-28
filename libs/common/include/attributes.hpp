@@ -5,6 +5,8 @@
 #include "attribute_reference.hpp"
 #include "value.hpp"
 
+namespace launchdarkly {
+
 /**
  * A collection of attributes that can be present within a context.
  * A multi-context has multiple sets of attributes keyed by their "kind".
@@ -49,7 +51,7 @@ class Attributes {
         }
 
         launchdarkly::Value const* node = &custom_attributes_;
-        bool found = false;
+        bool found = true;
         for (size_t index = 0; index < ref.depth(); index++) {
             auto const& component = ref.component(index);
             if (node->is_object()) {
@@ -57,8 +59,11 @@ class Attributes {
                 if (auto search = map.find(component); search != map.end()) {
                     node = &search->second;
                 } else {
+                    found = false;
                     break;
                 }
+            } else {
+                found = false;
             }
         }
         if (!found) {
@@ -68,7 +73,6 @@ class Attributes {
         }
     }
 
-   private:
     Attributes(std::string key,
                std::optional<std::string> name,
                bool anonymous,
@@ -78,6 +82,7 @@ class Attributes {
           anonymous_(anonymous),
           custom_attributes_(std::move(attributes)) {}
 
+   private:
     // Built-in attributes.
     launchdarkly::Value key_;
     launchdarkly::Value name_;
@@ -88,3 +93,4 @@ class Attributes {
 
     // Kinds are contained at the context level, not inside attributes.
 };
+}  // namespace launchdarkly

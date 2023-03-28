@@ -1,7 +1,8 @@
-#include "attribute_reference.hpp"
 #include <gtest/gtest.h>
 #include <string>
 #include <tuple>
+
+#include "attribute_reference.hpp"
 
 using launchdarkly::AttributeReference;
 
