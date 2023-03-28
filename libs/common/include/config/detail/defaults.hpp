@@ -4,9 +4,20 @@
 
 namespace launchdarkly::config::detail {
 
+/**
+ * Represents a client-side SDK configured for production services.
+ */
 struct ClientSDK {};
+/**
+ * Represents a server-side SDK configured for production services.
+ */
 struct ServerSDK {};
 
+/**
+ * Struct templated over an SDK type, which makes available SDK-specific
+ * configuration.
+ * @tparam SDK Type of SDK. See ClientSDK, ServerSDK.
+ */
 template <typename SDK>
 struct Defaults {};
 

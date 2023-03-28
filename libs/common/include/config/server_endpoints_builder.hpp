@@ -6,7 +6,7 @@
 namespace launchdarkly::config {
 
 /**
- * Service Endpoints builder for the Server-side SDK.
+ * ServiceEndpoints builder for the Server-side SDK.
  */
 using ServerEndpointsBuilder = detail::EndpointsBuilder<detail::ServerSDK>;
 
