@@ -105,6 +105,12 @@ class Value {
     Value(std::initializer_list<Value> values): type_(Type::kArray), storage_(std::vector<Value>(values)) {
     }
 
+    /**
+     * Create either a value string, or null value, from an optional string.
+     * @param optString
+     */
+    Value(std::optional<std::string> optString);
+
     Value& operator=(Value const& other);
     Value& operator=(Value&& other);
 

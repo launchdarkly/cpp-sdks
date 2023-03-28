@@ -200,6 +200,15 @@ Value& launchdarkly::Value::operator=(Value&& other) {
     return *this;
 }
 
+launchdarkly::Value::Value(std::optional<std::string> optString) : storage_{0} {
+    if(optString.has_value()) {
+        type_ = Type::kString;
+        new(&storage_.string_)std::string(std::move(optString.value()));
+    } else {
+        type_ = Type::kNull;
+    }
+}
+
 launchdarkly::Value::Storage::Storage(bool boolean) {
     boolean_ = boolean;
 }
