@@ -1,10 +1,13 @@
 #pragma once
 
 #include "config/detail/defaults.hpp"
-#include "config/endpoints_builder.hpp"
+#include "config/detail/endpoints_builder.hpp"
 
 namespace launchdarkly::config {
 
-using ClientEndpointsBuilder = EndpointsBuilder<detail::ClientSDK>;
+/**
+ * Service Endpoints builder for the Client-side SDK.
+ */
+using ClientEndpointsBuilder = detail::EndpointsBuilder<detail::ClientSDK>;
 
 }  // namespace launchdarkly::config

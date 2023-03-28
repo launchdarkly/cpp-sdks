@@ -1,9 +1,9 @@
 #include "config/detail/defaults.hpp"
-#include "config/endpoints_builder.hpp"
+#include "config/detail/endpoints_builder.hpp"
 
 #include <utility>
 
-namespace launchdarkly::config {
+namespace launchdarkly::config::detail {
 
 template <typename SDK>
 EndpointsBuilder<SDK>::EndpointsBuilder()
@@ -49,4 +49,4 @@ std::unique_ptr<ServiceEndpoints> EndpointsBuilder<SDK>::build() {
 template class EndpointsBuilder<detail::ClientSDK>;
 template class EndpointsBuilder<detail::ServerSDK>;
 
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::detail
