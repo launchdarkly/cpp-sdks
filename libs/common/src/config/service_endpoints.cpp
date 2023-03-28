@@ -12,9 +12,11 @@ ServiceEndpoints::ServiceEndpoints(std::string polling,
 std::string const& ServiceEndpoints::polling_base_url() const {
     return polling_base_url_;
 }
+
 std::string const& ServiceEndpoints::streaming_base_url() const {
     return streaming_base_url_;
 }
+
 std::string const& ServiceEndpoints::events_base_url() const {
     return events_base_url_;
 }
