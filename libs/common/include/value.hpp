@@ -229,9 +229,11 @@ class Value {
     Storage storage_;
     Type type_;
 
+    // Empty constants used when accessing the wrong type.
     inline static const std::string empty_string_;
     inline static const std::vector<Value> empty_vector_;
     inline static const std::map<std::string, Value> empty_map_;
+
     void move_storage(Value && other);
     void destruct_storage();
 };
