@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-namespace launchdarkly::config {
+namespace launchdarkly::config::detail {
 template <typename SDK>
 class EndpointsBuilder {
    private:
@@ -22,4 +22,4 @@ class EndpointsBuilder {
     [[nodiscard]] std::unique_ptr<ServiceEndpoints> build();
 };
 
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::detail
