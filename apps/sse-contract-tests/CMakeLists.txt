@@ -16,13 +16,13 @@ add_executable(sse-tests
         src/entity_manager.cpp
         src/session.cpp
         src/event_outbox.cpp
-)
+        )
 
 target_link_libraries(sse-tests PRIVATE
         launchdarkly::sse
         launchdarkly::common
         nlohmann_json::nlohmann_json
-)
+        )
 
 target_include_directories(sse-tests PUBLIC include)
 

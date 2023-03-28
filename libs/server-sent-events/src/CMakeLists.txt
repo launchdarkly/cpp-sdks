@@ -6,7 +6,7 @@ add_library(${LIBNAME} client.cpp parser.cpp event.cpp boost-url.cpp ${HEADER_LI
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers
         PRIVATE certify::core
-)
+        )
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 

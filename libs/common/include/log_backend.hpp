@@ -7,7 +7,7 @@
 #include "log_level.hpp"
 namespace launchdarkly {
 /**
- * Interface for logger back-ends.
+ * Interface for logging back-ends.
  *
  * @example ../src/ConsoleBackend.hpp
  */

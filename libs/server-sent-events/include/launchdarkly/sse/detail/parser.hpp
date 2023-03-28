@@ -69,12 +69,14 @@ struct EventBody<EventReceiver>::reader {
         boost::ignore_unused(h);
     }
 
-    /** Initialize the reader.
-
-    This is called after construction and before the first
-    call to `put`. The message is valid and complete upon
-    entry.@param ec Set to the error, if any occurred.
-    */
+    /**
+     * Initialize the reader.
+     * This is called after construction and before the first
+     * call to `put`. The message is valid and complete upon
+     * entry.
+     * @param content_length
+     * @param ec Set to the error, if any occurred.
+     */
     void init(boost::optional<std::uint64_t> const& content_length,
               error_code& ec) {
         boost::ignore_unused(content_length);
@@ -83,15 +85,14 @@ struct EventBody<EventReceiver>::reader {
         ec = {};
     }
 
-    /** Store buffers.
-    This is called zero or more times with parsed body octets.
-
-    @param buffers The constant buffer sequence to store.
-
-    @param ec Set to the error, if any occurred.
-
-    @return The number of bytes transferred from the input buffers.
-    */
+    /**
+     * Store buffers.
+     * This is called zero or more times with parsed body octets.
+     * @tparam ConstBufferSequence
+     * @param buffers The constant buffer sequence to store.
+     * @param ec et to the error, if any occurred.
+     * @return The number of bytes transferred from the input buffers.
+     */
     template <class ConstBufferSequence>
     std::size_t put(ConstBufferSequence const& buffers, error_code& ec) {
         // The specification requires this to indicate "no error"
@@ -101,10 +102,10 @@ struct EventBody<EventReceiver>::reader {
         return buffer_bytes(buffers);
     }
 
-    /** Called when the body is complete.
-
-        @param ec Set to the error, if any occurred.
-    */
+    /**
+     * Called when the body is complete.
+     * @param ec Set to the error, if any occurred.
+     */
     void finish(error_code& ec) {
         // The specification requires this to indicate "no error"
         ec = {};
@@ -118,6 +119,9 @@ struct EventBody<EventReceiver>::reader {
         }
     }
 
+    // Appends the body to the buffered line until reaching any of the
+    // characters specified within the search parameter. The search parameter is
+    // treated as an array of search characters, not as a single token.
     size_t append_up_to(boost::string_view body, std::string const& search) {
         std::size_t index = body.find_first_of(search);
         if (index != std::string::npos) {
