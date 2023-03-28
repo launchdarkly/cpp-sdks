@@ -40,7 +40,139 @@ namespace launchdarkly {
  */
 class Value {
    public:
+    /**
+     * Array type for values. Provides const iteration and indexing.
+     */
+    class Array {
+       public:
+        struct Iterator {
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = Value;
+            using pointer = value_type const*;
+            using reference = value_type const&;
+
+            Iterator(std::vector<Value>::const_iterator it);
+
+            reference operator*() const;
+            pointer operator->();
+            Iterator& operator++();
+            const Iterator operator++(int);
+
+            friend bool operator==(Iterator const& a, Iterator const& b) {
+                return a.it_ == b.it_;
+            };
+
+            friend bool operator!=(Iterator const& a, Iterator const& b) {
+                return a.it_ != b.it_;
+            };
+
+           private:
+            std::vector<Value>::const_iterator it_;
+        };
+
+        /**
+         * Create an array from a vector of Value.
+         * @param vec The vector to base the array on.
+         */
+        Array(std::vector<Value> vec);
+        Array() = default;
+
+        Value const& operator[](size_t i) const;
+
+        size_t size() const;
+
+        Iterator begin() const;
+
+        Iterator end() const;
+
+       private:
+        std::vector<Value> vec_;
+    };
+
+    /**
+     * Object type for values. Provides const iteration and indexing.
+     */
+    class Object {
+       public:
+        struct Iterator {
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = std::pair<const std::string, Value>;
+            using pointer = value_type const*;
+            using reference = value_type const&;
+
+            Iterator(std::map<std::string, Value>::const_iterator it);
+
+            reference operator*() const;
+            pointer operator->();
+            Iterator& operator++();
+            Iterator operator++(int);
+
+            friend bool operator==(Iterator const& a, Iterator const& b) {
+                return a.it_ == b.it_;
+            };
+            friend bool operator!=(Iterator const& a, Iterator const& b) {
+                return a.it_ != b.it_;
+            };
+
+           private:
+            std::map<std::string, Value>::const_iterator it_;
+        };
+
+        /**
+         * Create an Object from a map of Values.
+         * @param map The map to base the object on.
+         */
+        Object(std::map<std::string, Value> map) : map_(std::move(map)) {}
+        Object() = default;
+
+        /*
+         * Get the Value with the specified key.
+         *
+         * This operates like `.at` on a map, and accessing out of bounds
+         * is invalid.
+         */
+        Value const& operator[](std::string const& key) const {
+            return map_.at(key);
+        }
+
+        /**
+         * The number of items in the Object.
+         * @return The number of items in the Object.
+         */
+        size_t size() const;
+
+        /**
+         * Get the number of items with the given key. Will be 1 or 0.
+         * @param key The key to get a count for.
+         * @return The count of items with the given key.
+         */
+        size_t count(std::string const& key) const {
+            return map_.count(key);
+        }
+
+        Iterator begin() const;
+
+        Iterator end() const;
+
+        /**
+         * Find a Value by key. Operates like `find` on a std::map.
+         * @param key The key to find a value for.
+         * @return The value, or the end iterator.
+         */
+        Iterator find(std::string const& key) const;
+
+       private:
+        std::map<std::string, Value> map_;
+    };
+
+    /**
+     * Create a Value from a string constant.
+     * @param str The string constant to base the value on.
+     */
     Value(char const* str);
+
     enum class Type { kNull, kBool, kNumber, kString, kObject, kArray };
 
     /**
@@ -76,7 +208,7 @@ class Value {
      * Construct a string value from a constant string.
      * @param str
      */
-    Value(Value && other);
+    Value(Value&& other);
 
     /**
      * Construct an array value from a vector of Value.
@@ -102,8 +234,7 @@ class Value {
      * Cannot be used to create object type values.
      * @param values
      */
-    Value(std::initializer_list<Value> values): type_(Type::kArray), storage_(std::vector<Value>(values)) {
-    }
+    Value(std::initializer_list<Value> values);
 
     /**
      * Create either a value string, or null value, from an optional string.
@@ -197,7 +328,7 @@ class Value {
      *
      * @return The value as a vector, or an empty vector.
      */
-    std::vector<Value> const& as_array() const;
+    Array const& as_array() const;
 
     /**
      * if the value is an object type, then return a reference to that object
@@ -205,7 +336,7 @@ class Value {
      *
      * @return The value as a map, or an empty map.
      */
-    std::map<std::string, Value> const& as_object() const;
+    Object const& as_object() const;
 
     ~Value();
 
@@ -227,8 +358,8 @@ class Value {
         bool boolean_;
         double number_;
         std::string string_;
-        std::vector<Value> array_;
-        std::map<std::string, Value> object_;
+        Array array_;
+        Object object_;
         ~Storage(){};
     };
 
@@ -237,11 +368,11 @@ class Value {
 
     // Empty constants used when accessing the wrong type.
     inline static const std::string empty_string_;
-    inline static const std::vector<Value> empty_vector_;
-    inline static const std::map<std::string, Value> empty_map_;
+    inline static const Array empty_vector_;
+    inline static const Object empty_map_;
     static const Value null_value_;
 
-    void move_storage(Value && other);
+    void move_storage(Value&& other);
     void destruct_storage();
 };
 

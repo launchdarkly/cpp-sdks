@@ -119,10 +119,12 @@ TEST(ValueTests, CanMakeFromInitListVector) {
 
 void map_assertions(Value const& attrMap) {
     EXPECT_TRUE(attrMap.is_object());
-    EXPECT_TRUE(attrMap.as_object().find("bool")->second.as_bool());
+    EXPECT_TRUE(attrMap.as_object()["bool"].as_bool());
 
     EXPECT_TRUE(attrMap.is_object());
-    EXPECT_EQ(3.14, attrMap.as_object().find("double")->second.as_double());
+    //Can index.
+    EXPECT_EQ(3.14, attrMap.as_object()["double"].as_double());
+    // Can use find.
     EXPECT_EQ(42, attrMap.as_object().find("int")->second.as_int());
     EXPECT_EQ("potato", attrMap.as_object().find("string")->second.as_string());
     EXPECT_TRUE(

@@ -44,7 +44,7 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
             new (&storage_.string_) std::string(other.storage_.string_);
             break;
         case Type::kObject:
-            new (&storage_.object_) std::map(other.storage_.object_);
+            new (&storage_.object_) Object(other.storage_.object_);
             break;
         case Type::kArray:
             auto vec = std::vector<Value>();
@@ -78,11 +78,10 @@ void Value::move_storage(Value&& other) {
                 std::string(std::move(other.storage_.string_));
         } break;
         case Type::kObject:
-            new (&storage_.object_) std::map(std::move(other.storage_.object_));
+            new (&storage_.object_) Object(std::move(other.storage_.object_));
             break;
         case Type::kArray:
-            new (&storage_.object_)
-                std::vector<Value>(std::move(other.storage_.array_));
+            new (&storage_.object_) Array(std::move(other.storage_.array_));
             break;
     }
 }
@@ -102,10 +101,10 @@ void Value::destruct_storage() {
             storage_.string_.~basic_string();
             break;
         case Type::kObject:
-            storage_.object_.~map();
+            storage_.object_.~Object();
             break;
         case Type::kArray:
-            storage_.array_.~vector();
+            storage_.array_.~Array();
 
             break;
     }
@@ -139,7 +138,7 @@ bool launchdarkly::Value::is_object() const {
     return type_ == Type::kObject;
 }
 
- Value const& launchdarkly::Value::Null() {
+Value const& launchdarkly::Value::Null() {
     // This still just constructs a value, but it may be more discoverable
     // for people using the API.
     return null_value_;
@@ -173,23 +172,23 @@ std::string const& launchdarkly::Value::as_string() const {
     return empty_string_;
 }
 
-std::vector<Value> const& launchdarkly::Value::as_array() const {
+Value::Array const& launchdarkly::Value::as_array() const {
     if (type_ == Type::kArray) {
         return storage_.array_;
     }
     return empty_vector_;
 }
 
-std::map<std::string, Value> const& launchdarkly::Value::as_object() const {
+Value::Object const& launchdarkly::Value::as_object() const {
     if (type_ == Type::kObject) {
         return storage_.object_;
     }
     return empty_map_;
 }
 
- Value& launchdarkly::Value::operator=(Value const& other) {
-     return *this = Value(other);
- }
+Value& launchdarkly::Value::operator=(Value const& other) {
+    return *this = Value(other);
+}
 
 Value& launchdarkly::Value::operator=(Value&& other) {
     // Destruct storage based on original type.
@@ -203,13 +202,15 @@ Value& launchdarkly::Value::operator=(Value&& other) {
 }
 
 launchdarkly::Value::Value(std::optional<std::string> optString) : storage_{0} {
-    if(optString.has_value()) {
+    if (optString.has_value()) {
         type_ = Type::kString;
-        new(&storage_.string_)std::string(std::move(optString.value()));
+        new (&storage_.string_) std::string(std::move(optString.value()));
     } else {
         type_ = Type::kNull;
     }
 }
+launchdarkly::Value::Value(std::initializer_list<Value> values)
+    : type_(Type::kArray), storage_(std::vector<Value>(values)) {}
 
 launchdarkly::Value::Storage::Storage(bool boolean) {
     boolean_ = boolean;
@@ -236,4 +237,91 @@ launchdarkly::Value::Storage::Storage(std::vector<Value> arr) {
 launchdarkly::Value::Storage::Storage(std::map<std::string, Value> obj) {
     // Use in-place new, otherwise the map member will not be initialized.
     new (&object_) std::map(std::move(obj));
+}
+
+launchdarkly::Value::Array::Iterator::Iterator(
+    std::vector<Value>::const_iterator it)
+    : it_(it) {}
+
+launchdarkly::Value::Array::Iterator::reference
+launchdarkly::Value::Array::Iterator::operator*() const {
+    return *it_;
+}
+
+Value::Array::Iterator::pointer
+launchdarkly::Value::Array::Iterator::operator->() {
+    return &*it_;
+}
+
+Value::Array::Iterator& launchdarkly::Value::Array::Iterator::operator++() {
+    it_++;
+    return *this;
+}
+
+const Value::Array::Iterator launchdarkly::Value::Array::Iterator::operator++(
+    int) {
+    Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+Value const& launchdarkly::Value::Array::operator[](size_t i) const {
+    return vec_[i];
+}
+
+size_t launchdarkly::Value::Array::size() const {
+    return vec_.size();
+}
+
+Value::Array::Iterator launchdarkly::Value::Array::begin() const {
+    return Iterator(vec_.begin());
+}
+
+Value::Array::Iterator launchdarkly::Value::Array::end() const {
+    return Iterator(vec_.end());
+}
+
+launchdarkly::Value::Array::Array(std::vector<Value> vec)
+    : vec_(std::move(vec)) {}
+
+launchdarkly::Value::Object::Iterator::Iterator(
+    std::map<std::string, Value>::const_iterator it)
+    : it_(it) {}
+
+Value::Object::Iterator::reference
+launchdarkly::Value::Object::Iterator::operator*() const {
+    return *it_;
+}
+
+Value::Object::Iterator::pointer
+launchdarkly::Value::Object::Iterator::operator->() {
+    return &*it_;
+}
+
+Value::Object::Iterator& launchdarkly::Value::Object::Iterator::operator++() {
+    it_++;
+    return *this;
+}
+
+Value::Object::Iterator launchdarkly::Value::Object::Iterator::operator++(int) {
+    Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+size_t launchdarkly::Value::Object::size() const {
+    return map_.size();
+}
+
+Value::Object::Iterator launchdarkly::Value::Object::begin() const {
+    return Iterator(map_.begin());
+}
+
+Value::Object::Iterator launchdarkly::Value::Object::end() const {
+    return Iterator(map_.end());
+}
+
+Value::Object::Iterator launchdarkly::Value::Object::find(
+    std::string const& key) const {
+    return Iterator(map_.find(key));
 }
