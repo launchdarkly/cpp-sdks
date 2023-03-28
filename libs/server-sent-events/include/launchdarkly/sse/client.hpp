@@ -102,7 +102,8 @@ class Builder {
     /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
-     * @return New client; call run() to kickoff the connection process and begin reading.
+     * @return New client; call run() to kickoff the connection process and
+     * begin reading.
      */
     std::shared_ptr<Client> build();
 
