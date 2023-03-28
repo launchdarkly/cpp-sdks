@@ -25,6 +25,14 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         }
     }
 
+    if (params.method) {
+        client_builder.method(http::string_to_verb(*params.method));
+    }
+
+    if (params.body) {
+        client_builder.body(std::move(*params.body));
+    }
+
     client_builder.logger([this](std::string msg) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });

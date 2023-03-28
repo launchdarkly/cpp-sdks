@@ -44,7 +44,7 @@ template <class Derived>
 class Session {
    private:
     Derived& derived() { return static_cast<Derived&>(*this); }
-    http::request<http::empty_body> req_;
+    http::request<http::string_body> req_;
     std::chrono::seconds connect_timeout_;
     std::chrono::seconds response_timeout_;
 
@@ -63,12 +63,12 @@ class Session {
     Session(net::any_io_executor const& exec,
             std::string host,
             std::string port,
-            http::request<http::empty_body> r,
+            http::request<http::string_body> req,
             std::chrono::seconds connect_timeout,
             std::chrono::seconds response_timeout,
             Builder::EventReceiver receiver,
             Builder::LogCallback logger)
-        : req_(std::move(r)),
+        : req_(std::move(req)),
           resolver_(exec),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
@@ -174,7 +174,7 @@ class EncryptedClient : public Client,
    public:
     EncryptedClient(net::any_io_executor ex,
                     ssl::context ctx,
-                    http::request<http::empty_body> req,
+                    http::request<http::string_body> req,
                     std::string host,
                     std::string port,
                     Builder::EventReceiver receiver,
@@ -226,7 +226,7 @@ class PlaintextClient : public Client,
                         public std::enable_shared_from_this<PlaintextClient> {
    public:
     PlaintextClient(net::any_io_executor ex,
-                    http::request<http::empty_body> req,
+                    http::request<http::string_body> req,
                     std::string host,
                     std::string port,
                     Builder::EventReceiver receiver,
@@ -272,6 +272,11 @@ Builder& Builder::header(std::string const& name, std::string const& value) {
     return *this;
 }
 
+Builder& Builder::body(std::string data) {
+    request_.body() = std::move(data);
+    return *this;
+}
+
 Builder& Builder::method(http::verb verb) {
     request_.method(verb);
     return *this;
@@ -292,6 +297,20 @@ std::shared_ptr<Client> Builder::build() {
     if (!uri_components) {
         return nullptr;
     }
+
+    // Don't send a body unless the method is POST or REPORT
+    if (!(request_.method() == http::verb::post ||
+          request_.method() == http::verb::report)) {
+        request_.body() = "";
+    } else {
+        // If it is, then setup Content-Type, only if one wasn't
+        // specified.
+        if (auto it = request_.find(http::field::content_type); it == request_.end()) {
+            request_.set(http::field::content_type, "text/plain");
+        }
+    }
+
+    request_.prepare_payload();
 
     std::string host = uri_components->host();
 

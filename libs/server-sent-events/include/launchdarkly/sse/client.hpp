@@ -4,6 +4,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/beast/http/empty_body.hpp>
+#include <boost/beast/http/string_body.hpp>
 #include <boost/beast/http/message.hpp>
 
 #include <functional>
@@ -48,11 +49,18 @@ class Builder {
      * Accept: text/event-stream
      * Cache-Control: no-cache
      *
+     * Note that Content-Type and
+     *
      * @param name Header name.
      * @param value Header value.
      * @return Reference to this builder.
      */
     Builder& header(std::string const& name, std::string const& value);
+    /**
+     * Specifies a request body. The body is sent when the method is POST or REPORt
+     * @return
+     */
+    Builder& body(std::string);
     /**
      * Specify the method for the initial request. The default method is GET.
      * @param verb The HTTP method.
@@ -86,7 +94,7 @@ class Builder {
    private:
     std::string url_;
     net::any_io_executor executor_;
-    http::request<http::empty_body> request_;
+    http::request<http::string_body> request_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
 };
