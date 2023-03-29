@@ -7,8 +7,8 @@ namespace launchdarkly::config::detail {
 template <typename SDK>
 struct Config {
     std::string sdk_key;
-    detail::EndpointsBuilder<SDK> service_endpoints_builder;
     bool offline;
+    detail::EndpointsBuilder<SDK> service_endpoints_builder;
 };
 
 }  // namespace launchdarkly::config::detail

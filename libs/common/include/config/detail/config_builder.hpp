@@ -14,14 +14,13 @@ class ConfigBuilder {
     using ConfigType = detail::Config<SDK>;
     ConfigBuilder(std::string sdk_key);
     ConfigBuilder& service_endpoints(detail::EndpointsBuilder<SDK> builder);
+    ConfigBuilder& offline(bool offline);
     ConfigType build() const;
 
    private:
     std::string sdk_key_;
-    bool offline_;
+    std::optional<bool> offline_;
     std::optional<EndpointsBuilder> service_endpoints_builder_;
 };
-
-}
 
 }  // namespace launchdarkly::config::detail

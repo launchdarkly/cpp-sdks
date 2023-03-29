@@ -11,7 +11,9 @@ namespace launchdarkly::config::detail {
  * @tparam SDK Type of SDK. See ClientSDK, ServerSDK.
  */
 template <typename SDK>
-struct Defaults {};
+struct Defaults {
+    static bool offline() { return false; }
+};
 
 template <>
 struct Defaults<ClientSDK> {

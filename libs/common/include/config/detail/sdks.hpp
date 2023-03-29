@@ -10,4 +10,9 @@ struct ClientSDK {};
  */
 struct ServerSDK {};
 
+/**
+ * Represents configuration not common to any particular SDK type.
+ */
+struct AnySDK {};
+
 }  // namespace launchdarkly::config::detail
