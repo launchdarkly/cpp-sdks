@@ -2,6 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/*.hpp"
         "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/config/*.hpp"
+        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/events/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
