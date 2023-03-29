@@ -2,6 +2,7 @@
 
 #include "config/service_endpoints.hpp"
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -52,6 +53,12 @@ class EndpointsBuilder {
      * @return Reference to this builder.
      */
     EndpointsBuilder& relay_proxy(std::string const& url);
+
+    /**
+     * Builds a ServiceEndpoints if the configuration is valid. If not,
+     * returns nullptr.
+     * @return Unique pointer to ServiceEndpoints, or nullptr.
+     */
     [[nodiscard]] std::unique_ptr<ServiceEndpoints> build();
 };
 

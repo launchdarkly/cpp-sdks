@@ -53,3 +53,55 @@ TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
     ASSERT_EQ(eps->polling_base_url(), "foo");
     ASSERT_EQ(eps->events_base_url(), "foo");
 }
+
+TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
+    {
+        ClientEndpointsBuilder b;
+        b.relay_proxy("foo/");
+        auto eps = b.build();
+        ASSERT_TRUE(eps);
+        ASSERT_EQ(eps->streaming_base_url(), "foo");
+    }
+
+    {
+        ClientEndpointsBuilder b;
+        b.relay_proxy("foo////////");
+        auto eps = b.build();
+        ASSERT_TRUE(eps);
+        ASSERT_EQ(eps->streaming_base_url(), "foo");
+    }
+
+    {
+        ClientEndpointsBuilder b;
+        b.relay_proxy("/");
+        auto eps = b.build();
+        ASSERT_TRUE(eps);
+        ASSERT_EQ(eps->streaming_base_url(), "");
+    }
+}
+
+TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
+    {
+        ClientEndpointsBuilder b;
+        b.relay_proxy("");
+        auto eps = b.build();
+        ASSERT_FALSE(eps);
+    }
+    {
+        ClientEndpointsBuilder b;
+        auto eps = b.streaming_base_url("")
+                       .events_base_url("foo")
+                       .polling_base_url("bar")
+                       .build();
+        ASSERT_FALSE(eps);
+    }
+
+    {
+        ClientEndpointsBuilder b;
+        auto eps = b.streaming_base_url("foo")
+                       .events_base_url("bar")
+                       .polling_base_url("")
+                       .build();
+        ASSERT_FALSE(eps);
+    }
+}
