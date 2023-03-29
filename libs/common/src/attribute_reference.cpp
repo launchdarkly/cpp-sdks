@@ -1,5 +1,9 @@
 #include "attribute_reference.hpp"
+<<<<<<< HEAD
 #include <tuple>
+=======
+#include <utility>
+>>>>>>> main
 
 namespace launchdarkly {
 
@@ -33,7 +37,11 @@ enum class ParseEvent {
  * The algorithm proceeds as a single-pass over the input string, performed by
  * a state machine.
  */
+<<<<<<< HEAD
 std::tuple<ParseState, ParseEvent> ParseChar(ParseState state, char input) {
+=======
+std::pair<ParseState, ParseEvent> ParseChar(ParseState state, char input) {
+>>>>>>> main
     switch (state) {
         case ParseState::kBegin: {
             switch (input) {
@@ -215,10 +223,13 @@ std::string const& AttributeReference::redaction_name() const {
     return redaction_name_;
 }
 
+<<<<<<< HEAD
 AttributeReference::AttributeReference(std::string ref_str)
     : AttributeReference(std::move(ref_str), false) {}
 
 AttributeReference::AttributeReference(char const* refStr)
     : AttributeReference(std::move(std::string(refStr))) {}
 
+=======
+>>>>>>> main
 }  // namespace launchdarkly

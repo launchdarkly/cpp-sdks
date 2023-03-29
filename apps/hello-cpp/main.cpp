@@ -1,9 +1,13 @@
-#include <iostream>
 #include <launchdarkly/api.hpp>
-#include <launchdarkly/sse/sse.hpp>
-#include <thread>
+#include <launchdarkly/sse/client.hpp>
+
+#include <boost/asio/io_context.hpp>
+
 #include "console_backend.hpp"
 #include "logger.hpp"
+
+#include <iostream>
+#include <utility>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
@@ -22,12 +26,23 @@ int main() {
 
     net::io_context ioc;
 
-    // curl "https://stream-stg.launchdarkly.com/all?filter=even-flags-2" -H
-    // "Authorization: sdk-66a5dbe0-8b26-445a-9313-761e7e3d381b" -v
+    char const* key = std::getenv("STG_SDK_KEY");
+    if (!key) {
+        std::cout << "Set environment variable STG_SDK_KEY to the sdk key\n";
+        return 1;
+    }
     auto client =
-        launchdarkly::sse::builder(ioc,
+        launchdarkly::sse::Builder(ioc.get_executor(),
                                    "https://stream-stg.launchdarkly.com/all")
-            .header("Authorization", "sdk-66a5dbe0-8b26-445a-9313-761e7e3d381b")
+            .header("Authorization", key)
+            .receiver([&](launchdarkly::sse::Event ev) {
+                LD_LOG(logger, LogLevel::kInfo) << "event: " << ev.type();
+                LD_LOG(logger, LogLevel::kInfo)
+                    << "data: " << std::move(ev).take();
+            })
+            .logger([&](std::string msg) {
+                LD_LOG(logger, LogLevel::kDebug) << std::move(msg);
+            })
             .build();
 
     if (!client) {
@@ -35,7 +50,6 @@ int main() {
         return 1;
     }
 
-    std::thread t([&]() { ioc.run(); });
-
     client->run();
+    ioc.run();
 }

@@ -40,6 +40,9 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.80 REQUIRED)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
+include(${CMAKE_FILES}/certify.cmake)
+
+
 
 add_subdirectory(src)
 

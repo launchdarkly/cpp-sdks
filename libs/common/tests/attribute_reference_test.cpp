@@ -1,9 +1,16 @@
+<<<<<<< HEAD
+=======
+#include "attribute_reference.hpp"
+>>>>>>> main
 #include <gtest/gtest.h>
 #include <string>
 #include <tuple>
 
+<<<<<<< HEAD
 #include "attribute_reference.hpp"
 
+=======
+>>>>>>> main
 using launchdarkly::AttributeReference;
 
 class BadReferencesTestFixture : public ::testing::TestWithParam<std::string> {
@@ -84,6 +91,7 @@ TEST(AttributeReferenceTests, OstreamOperator) {
     stream << AttributeReference::from_reference_str("/~");
     EXPECT_EQ("invalid(/~)", stream.str());
 }
+<<<<<<< HEAD
 
 TEST(AttributeReferenceTests, FromString) {
     AttributeReference ref("/a");
@@ -92,3 +100,5 @@ TEST(AttributeReferenceTests, FromString) {
     EXPECT_EQ("a", ref.component(0));
     EXPECT_EQ("b", ref_b.component(0));
 }
+=======
+>>>>>>> main
