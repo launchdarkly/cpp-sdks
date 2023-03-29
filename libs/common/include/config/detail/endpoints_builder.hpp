@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config/service_endpoints.hpp"
+#include "service_endpoints.hpp"
 
 #include <memory>
 #include <optional>

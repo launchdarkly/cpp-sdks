@@ -1,17 +1,9 @@
 #pragma once
 
-#include "config/service_endpoints.hpp"
+#include "config/detail/sdks.hpp"
+#include "service_endpoints.hpp"
 
 namespace launchdarkly::config::detail {
-
-/**
- * Represents a client-side SDK configured for production services.
- */
-struct ClientSDK {};
-/**
- * Represents a server-side SDK configured for production services.
- */
-struct ServerSDK {};
 
 /**
  * Struct templated over an SDK type, which makes available SDK-specific

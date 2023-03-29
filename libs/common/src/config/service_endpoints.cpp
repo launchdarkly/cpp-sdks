@@ -1,4 +1,4 @@
-#include "config/service_endpoints.hpp"
+#include "config/detail/service_endpoints.hpp"
 
 namespace launchdarkly::config {
 
