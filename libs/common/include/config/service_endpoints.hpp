@@ -16,11 +16,12 @@ class ServiceEndpoints {
 
    public:
     /**
-     * Constructs a ServiceEndpoints from individual polling, streaming, and events
-     * URLs.
+     * Constructs a ServiceEndpoints from individual polling, streaming, and
+     * events URLs.
      *
-     * Meant for internal usage only; see ClientEndpointsBuilder or ServerEndpointsBuilder
-     * to safely construct a ServiceEndpoints with default URLs.
+     * Meant for internal usage only; see ClientEndpointsBuilder or
+     * ServerEndpointsBuilder to safely construct a ServiceEndpoints with
+     * default URLs.
      *
      * @param polling Polling URL.
      * @param streaming Streaming URL.

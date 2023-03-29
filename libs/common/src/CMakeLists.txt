@@ -12,7 +12,7 @@ add_library(${LIBNAME}
         log_level.cpp
         attribute_reference.cpp
         config/service_endpoints.cpp
-        config/endpoints_builder_base.cpp
+        config/endpoints_builder.cpp
         )
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

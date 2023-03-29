@@ -24,7 +24,7 @@ class EndpointsBuilder {
     /**
      * Constructs an EndpointsBuilder.
      */
-    EndpointsBuilder();
+    EndpointsBuilder() = default;
 
     /**
      * Sets a custom URL for the polling service.

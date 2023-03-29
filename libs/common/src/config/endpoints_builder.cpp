@@ -1,13 +1,9 @@
-#include "config/detail/defaults.hpp"
 #include "config/detail/endpoints_builder.hpp"
+#include "config/detail/defaults.hpp"
 
 #include <utility>
 
 namespace launchdarkly::config::detail {
-
-template <typename SDK>
-EndpointsBuilder<SDK>::EndpointsBuilder()
-    : polling_base_url_(), streaming_base_url_(), events_base_url_() {}
 
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::polling_base_url(
@@ -34,8 +30,8 @@ EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::relay_proxy(
 }
 
 std::string trim_right_matches(std::string const& input, char match) {
-    size_t end;
-    for (end = input.size(); end > 0; end--) {
+    size_t end = input.size();
+    for (; end > 0; end--) {
         if (input.at(end - 1) != match) {
             break;
         }
@@ -64,8 +60,8 @@ std::unique_ptr<ServiceEndpoints> EndpointsBuilder<SDK>::build() {
     // If all URLs were set, trim any trailing slashes and construct custom
     // ServiceEndpoints.
     if (polling_base_url_ && streaming_base_url_ && events_base_url_) {
-        auto trim_trailing_slashes = [](std::string const& s) -> std::string {
-            return trim_right_matches(s, '/');
+        auto trim_trailing_slashes = [](std::string const& url) -> std::string {
+            return trim_right_matches(url, '/');
         };
         return std::make_unique<ServiceEndpoints>(
             trim_trailing_slashes(*polling_base_url_),
