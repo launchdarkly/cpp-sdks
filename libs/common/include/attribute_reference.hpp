@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/functional/hash/hash.hpp>
 
 namespace launchdarkly {
 
