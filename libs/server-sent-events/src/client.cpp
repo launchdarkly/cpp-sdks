@@ -42,6 +42,7 @@ const std::chrono::milliseconds kDefaultConnectTimeout =
 const std::chrono::milliseconds kDefaultResponseTimeout =
     std::chrono::seconds(15);
 
+// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 template <class Derived>
 class Session {
    private:
@@ -177,6 +178,7 @@ class Session {
         beast::get_lowest_layer(derived().stream()).cancel();
     }
 };
+// NOLINTEND(misc-non-private-member-variables-in-classes)
 
 class EncryptedClient : public Client,
                         public Session<EncryptedClient>,
