@@ -138,7 +138,7 @@ class AttributeReference {
    private:
     AttributeReference(std::string str, bool is_literal);
 
-    bool valid_;
+    bool valid_ = false;
 
     std::string redaction_name_;
     std::vector<std::string> components_;
