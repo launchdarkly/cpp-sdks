@@ -4,7 +4,10 @@
 #include <optional>
 
 namespace launchdarkly {
+
+auto const kAnswerToLifeTheUniverseAndEverything = 42;
+
 std::optional<std::int32_t> foo() {
-    return 42;
+    return kAnswerToLifeTheUniverseAndEverything;
 }
 }  // namespace launchdarkly

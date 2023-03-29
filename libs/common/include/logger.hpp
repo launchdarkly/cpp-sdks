@@ -15,7 +15,7 @@ namespace launchdarkly {
  * Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kInfo,
  * "Example"));
  *
- * // Use log macro for logging.
+ * // Use the macro for logging.
  * LD_LOG(logger, LogLevel::kInfo) << "this is a log";
  * ```
  */
