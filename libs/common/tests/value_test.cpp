@@ -122,7 +122,7 @@ void map_assertions(Value const& attrMap) {
     EXPECT_TRUE(attrMap.as_object()["bool"].as_bool());
 
     EXPECT_TRUE(attrMap.is_object());
-    //Can index.
+    // Can index.
     EXPECT_EQ(3.14, attrMap.as_object()["double"].as_double());
     // Can use find.
     EXPECT_EQ(42, attrMap.as_object().find("int")->second.as_int());
@@ -173,7 +173,7 @@ TEST(ValueTests, AssignToExistingValue) {
     EXPECT_EQ("test", strValue.as_string());
     auto secondStr = Value("second");
     strValue = std::move(secondStr);
-    //Move assignment.
+    // Move assignment.
     EXPECT_EQ("second", strValue.as_string());
 
     auto thirdValue = Value("third");

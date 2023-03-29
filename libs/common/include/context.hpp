@@ -32,7 +32,7 @@ class Context {
      * @param kind The kind to get attributes for.
      * @return The attributes if they exist.
      */
-    Attributes const& attributes(std::string const& kind) const;
+    [[nodiscard]] Attributes const& attributes(std::string const& kind) const;
 
     /**
      * Get an attribute value by kind and attribute reference. If the kind is

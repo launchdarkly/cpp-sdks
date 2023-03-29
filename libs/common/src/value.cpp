@@ -1,3 +1,6 @@
+#pragma clang diagnostic push
+// Boost::variant isn't a direct drop-in for the scenario we have
+// here.
 #include "value.hpp"
 
 #include <cstring>
@@ -48,8 +51,8 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
             break;
         case Type::kArray:
             auto vec = std::vector<Value>();
-            auto const& otherVec = other.storage_.array_;
-            for (auto const& index : otherVec)
+            auto const& other_vec = other.storage_.array_;
+            for (auto const& index : other_vec)
                 vec.push_back(index);
             new (&storage_.array_) std::vector(std::move(vec));
             break;
@@ -328,3 +331,5 @@ Value::Object::Iterator Value::Object::find(std::string const& key) const {
     return Iterator(map_.find(key));
 }
 }  // namespace launchdarkly
+
+#pragma clang diagnostic pop

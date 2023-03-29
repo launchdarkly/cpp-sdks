@@ -40,7 +40,8 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
     EXPECT_EQ("bobby-bobberson", context.attributes("user").key());
     EXPECT_TRUE(context.attributes("user").anonymous());
     EXPECT_EQ(1, context.attributes("user").private_attributes().size());
-    EXPECT_EQ(1, context.attributes("user").private_attributes().count("email"));
+    EXPECT_EQ(1,
+              context.attributes("user").private_attributes().count("email"));
 }
 
 TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
