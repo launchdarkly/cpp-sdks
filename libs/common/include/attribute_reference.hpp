@@ -2,16 +2,11 @@
 
 #include <ostream>
 #include <string>
-<<<<<<< HEAD
 #include <unordered_set>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
 
-=======
-#include <vector>
-
->>>>>>> main
 namespace launchdarkly {
 
 /**
@@ -37,7 +32,6 @@ namespace launchdarkly {
 class AttributeReference {
    public:
     /**
-<<<<<<< HEAD
      * Provides a hashing function for use with unordered sets.
      */
     struct HashFunction {
@@ -51,8 +45,6 @@ class AttributeReference {
                                        AttributeReference::HashFunction>;
 
     /**
-=======
->>>>>>> main
      * Get the component of the attribute reference at the specified depth.
      *
      * For example, component(1) on the reference `/a/b/c` would return
@@ -118,18 +110,17 @@ class AttributeReference {
         return os;
     }
 
-<<<<<<< HEAD
     /**
      * Construct an attribute reference from a string.
      * @param refStr The string to make an attribute reference from.
      */
-    AttributeReference(std::string refStr);
+    AttributeReference(std::string ref_str);
 
     /**
      * Construct an attribute reference from a constant string.
      * @param refStr The string to make an attribute reference from.
      */
-    AttributeReference(char const* refStr);
+    AttributeReference(char const* ref_str);
 
     bool operator==(AttributeReference const& other) const {
         return components_ == other.components_;
@@ -143,8 +134,6 @@ class AttributeReference {
         return components_ < rhs.components_;
     }
 
-=======
->>>>>>> main
    private:
     AttributeReference(std::string str, bool is_literal);
 
