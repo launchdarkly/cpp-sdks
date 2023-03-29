@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 
 #include "attribute_reference.hpp"
 #include "value.hpp"
@@ -13,11 +14,33 @@ namespace launchdarkly {
  */
 class Attributes {
    public:
+    /**
+     * Get the key for the context.
+     * @return A reference to the context key.
+     */
     std::string const& key() const;
 
+    /**
+     * Get the name for the context.
+     *
+     * @return A reference to the context name, or an empty string if no name
+     * is set.
+     */
     std::string const& name() const;
 
+    /**
+     * Is the context anonymous or not. Defaults to false.
+     * @return True if the context is anonymous.
+     */
     bool anonymous() const;
+
+    /**
+     * Get a set of the private attributes for the context.
+     * @return The set of private attributes for the context.
+     */
+    AttributeReference::SetType const& private_attributes() const {
+        return private_attributes_;
+    }
 
     /**
      * Gets the item by the specified attribute reference, or returns a null
@@ -73,21 +96,34 @@ class Attributes {
         }
     }
 
+    /**
+     * Construct a set of attributes. This is used internally by the SDK
+     * but is not intended to used by consumers of the SDK.
+     *
+     * @param key The key for the context.
+     * @param name The name of the context.
+     * @param anonymous If the context is anonymous.
+     * @param attributes Additional attributes for the context.
+     * @param private_attributes A list of attributes that should be private.
+     */
     Attributes(std::string key,
                std::optional<std::string> name,
                bool anonymous,
-               launchdarkly::Value attributes)
+               launchdarkly::Value attributes,
+               AttributeReference::SetType private_attributes =
+                   AttributeReference::SetType())
         : key_(std::move(key)),
           name_(std::move(name)),
           anonymous_(anonymous),
-          custom_attributes_(std::move(attributes)) {}
+          custom_attributes_(std::move(attributes)),
+          private_attributes_(std::move(private_attributes)) {}
 
    private:
     // Built-in attributes.
     launchdarkly::Value key_;
     launchdarkly::Value name_;
     launchdarkly::Value anonymous_;
-    std::vector<launchdarkly::AttributeReference> private_attributes_;
+    AttributeReference::SetType private_attributes_;
 
     launchdarkly::Value custom_attributes_;
 

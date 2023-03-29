@@ -2,7 +2,10 @@
 
 #include <ostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
+
+#include <boost/functional/hash.hpp>
 
 namespace launchdarkly {
 
@@ -28,6 +31,19 @@ namespace launchdarkly {
  */
 class AttributeReference {
    public:
+    /**
+     * Provides a hashing function for use with unordered sets.
+     */
+    struct HashFunction {
+        size_t operator()(AttributeReference const& ref) const {
+            return boost::hash_range(ref.components_.begin(),
+                                     ref.components_.end());
+        }
+    };
+
+    using SetType = std::unordered_set<AttributeReference,
+                                       AttributeReference::HashFunction>;
+
     /**
      * Get the component of the attribute reference at the specified depth.
      *
@@ -92,6 +108,30 @@ class AttributeReference {
         os << (ref.valid() ? "valid" : "invalid") << "(" << ref.redaction_name()
            << ")";
         return os;
+    }
+
+    /**
+     * Construct an attribute reference from a string.
+     * @param refStr The string to make an attribute reference from.
+     */
+    AttributeReference(std::string refStr);
+
+    /**
+     * Construct an attribute reference from a constant string.
+     * @param refStr The string to make an attribute reference from.
+     */
+    AttributeReference(char const* refStr);
+
+    bool operator==(AttributeReference const& other) const {
+        return components_ == other.components_;
+    }
+
+    bool operator!=(AttributeReference const& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(AttributeReference const& rhs) const {
+        return components_ < rhs.components_;
     }
 
    private:

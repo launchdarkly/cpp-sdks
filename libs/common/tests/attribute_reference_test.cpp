@@ -84,3 +84,11 @@ TEST(AttributeReferenceTests, OstreamOperator) {
     stream << AttributeReference::from_reference_str("/~");
     EXPECT_EQ("invalid(/~)", stream.str());
 }
+
+TEST(AttributeReferenceTests, FromString) {
+    AttributeReference ref("/a");
+    AttributeReference ref_b(std::string("/b"));
+
+    EXPECT_EQ("a", ref.component(0));
+    EXPECT_EQ("b", ref_b.component(0));
+}

@@ -76,6 +76,7 @@ class Value {
          * @param vec The vector to base the array on.
          */
         Array(std::vector<Value> vec);
+        Array(std::initializer_list<Value> values) : vec_(values) {}
         Array() = default;
 
         Value const& operator[](size_t i) const;
@@ -126,6 +127,11 @@ class Value {
          */
         Object(std::map<std::string, Value> map) : map_(std::move(map)) {}
         Object() = default;
+        Object(std::initializer_list<std::pair<std::string, Value>> values) {
+            for (auto pair : values) {
+                map_[std::move(pair.first)] = std::move(pair.second);
+            }
+        }
 
         /*
          * Get the Value with the specified key.
@@ -148,9 +154,7 @@ class Value {
          * @param key The key to get a count for.
          * @return The count of items with the given key.
          */
-        size_t count(std::string const& key) const {
-            return map_.count(key);
-        }
+        size_t count(std::string const& key) const { return map_.count(key); }
 
         Iterator begin() const;
 
@@ -215,6 +219,10 @@ class Value {
      * @param arr
      */
     Value(std::vector<Value> arr);
+
+    Value(Array arr) : storage_(std::move(arr)), type_(Type::kArray) {}
+
+    Value(Object obj) : storage_(std::move(obj)), type_(Type::kObject) {}
 
     /**
      * Construct an object value from a map of Value.
@@ -354,6 +362,8 @@ class Value {
         Storage(std::string str);
         Storage(std::vector<Value> arr);
         Storage(std::map<std::string, Value> obj);
+        Storage(Array arr);
+        Storage(Object obj);
 
         bool boolean_;
         double number_;
