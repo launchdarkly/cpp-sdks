@@ -113,13 +113,13 @@ class AttributeReference {
 
     /**
      * Construct an attribute reference from a string.
-     * @param refStr The string to make an attribute reference from.
+     * @param ref_str The string to make an attribute reference from.
      */
     AttributeReference(std::string ref_str);
 
     /**
      * Construct an attribute reference from a constant string.
-     * @param refStr The string to make an attribute reference from.
+     * @param ref_str The string to make an attribute reference from.
      */
     AttributeReference(char const* ref_str);
 

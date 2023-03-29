@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace launchdarkly {
 
@@ -252,9 +253,9 @@ class Value {
 
     /**
      * Create either a value string, or null value, from an optional string.
-     * @param optString
+     * @param opt_string
      */
-    Value(std::optional<std::string> optString);
+    Value(std::optional<std::string> opt_string);
 
     Value& operator=(Value const& other);
     Value& operator=(Value&& other);

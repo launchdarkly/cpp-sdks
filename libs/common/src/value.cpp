@@ -201,10 +201,10 @@ Value& Value::operator=(Value&& other) {
     return *this;
 }
 
-Value::Value(std::optional<std::string> optString) : storage_{0} {
-    if (optString.has_value()) {
+Value::Value(std::optional<std::string> opt_str) : storage_{0} {
+    if (opt_str.has_value()) {
         type_ = Type::kString;
-        new (&storage_.string_) std::string(std::move(optString.value()));
+        new (&storage_.string_) std::string(std::move(opt_str.value()));
     } else {
         type_ = Type::kNull;
     }
