@@ -14,16 +14,17 @@ project(
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
     # Affects robustness of timestamp checking on FetchContent dependencies.
     cmake_policy(SET CMP0135 NEW)
-endif()
+endif ()
 
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
 
+
 option(BUILD_TESTING "Enable C++ unit tests." ON)
 
-if(BUILD_TESTING)
+if (BUILD_TESTING)
     include(FetchContent)
     FetchContent_Declare(
             googletest
@@ -34,7 +35,7 @@ if(BUILD_TESTING)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
-endif()
+endif ()
 
 
 add_subdirectory(libs/common)
