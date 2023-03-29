@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/variant.hpp>
+
 namespace launchdarkly {
 
 /**
@@ -216,12 +218,6 @@ class Value {
     Value(std::string str);
 
     /**
-     * Construct a string value from a constant string.
-     * @param str
-     */
-    Value(Value&& other);
-
-    /**
      * Construct an array value from a vector of Value.
      * @param arr
      */
@@ -238,12 +234,6 @@ class Value {
     Value(std::map<std::string, Value> obj);
 
     /**
-     * Construct a copy of an existing value.
-     * @param val
-     */
-    Value(Value const& val);
-
-    /**
      * Create an array type value from the given list.
      *
      * Cannot be used to create object type values.
@@ -256,9 +246,6 @@ class Value {
      * @param opt_string
      */
     Value(std::optional<std::string> opt_string);
-
-    Value& operator=(Value const& other);
-    Value& operator=(Value&& other);
 
     /**
      * Get the type of the attribute.
@@ -353,7 +340,7 @@ class Value {
      */
     Object const& as_object() const;
 
-    ~Value();
+    ~Value() = default;
 
     /**
      * Get a null value.
@@ -362,25 +349,7 @@ class Value {
     static Value const& Null();
 
    private:
-    union Storage {
-        Storage(bool boolean);
-        Storage(double num);
-        Storage(int num);
-        Storage(std::string str);
-        Storage(std::vector<Value> arr);
-        Storage(std::map<std::string, Value> obj);
-        Storage(Array arr);
-        Storage(Object obj);
-
-        bool boolean_;
-        double number_;
-        std::string string_;
-        Array array_;
-        Object object_;
-        ~Storage(){};
-    };
-
-    Storage storage_;
+    boost::variant<bool, double, std::string, Array, Object> storage_;
     Type type_;
 
     // Empty constants used when accessing the wrong type.
@@ -388,9 +357,6 @@ class Value {
     inline static const Array empty_vector_;
     inline static const Object empty_map_;
     static const Value null_value_;
-
-    void move_storage(Value&& other);
-    void destruct_storage();
 };
 
 }  // namespace launchdarkly
