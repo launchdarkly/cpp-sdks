@@ -151,7 +151,7 @@ class AttributesBuilder {
     std::string kind_;
     std::string key_;
     std::string name_;
-    bool anonymous_;
+    bool anonymous_ = false;
 
     std::map<std::string, launchdarkly::Value> values_;
     AttributeReference::SetType private_attributes_;

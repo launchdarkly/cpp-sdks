@@ -49,8 +49,8 @@ Value::Value(Value const& other) : type_(other.type_), storage_(0) {
         case Type::kArray:
             auto vec = std::vector<Value>();
             auto const& otherVec = other.storage_.array_;
-            for (int index = 0; index < otherVec.size(); index++)
-                vec.push_back(otherVec[index]);
+            for (auto const& index : otherVec)
+                vec.push_back(index);
             new (&storage_.array_) std::vector(std::move(vec));
             break;
     }

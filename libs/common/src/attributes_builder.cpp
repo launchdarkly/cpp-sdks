@@ -38,14 +38,14 @@ template <>
 AttributesBuilder<ContextBuilder, Context>&
 AttributesBuilder<ContextBuilder, Context>::add_private_attribute(
     AttributeReference ref) {
-    private_attributes_.insert(ref);
+    private_attributes_.insert(std::move(ref));
     return *this;
 }
 
 template <>
 Attributes AttributesBuilder<ContextBuilder, Context>::build_attributes() {
-    return Attributes(std::move(key_), std::move(name_), anonymous_,
-                      std::move(values_), std::move(private_attributes_));
+    return {std::move(key_), std::move(name_), anonymous_, std::move(values_),
+            std::move(private_attributes_)};
 }
 
 }  // namespace launchdarkly

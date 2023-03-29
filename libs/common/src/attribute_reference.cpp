@@ -215,8 +215,8 @@ std::string const& AttributeReference::redaction_name() const {
     return redaction_name_;
 }
 
-AttributeReference::AttributeReference(std::string refStr)
-    : AttributeReference(refStr, false) {}
+AttributeReference::AttributeReference(std::string ref_str)
+    : AttributeReference(std::move(ref_str), false) {}
 
 AttributeReference::AttributeReference(char const* refStr)
     : AttributeReference(std::move(std::string(refStr))) {}
