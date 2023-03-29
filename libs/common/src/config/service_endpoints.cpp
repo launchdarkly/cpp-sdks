@@ -20,4 +20,11 @@ std::string const& ServiceEndpoints::streaming_base_url() const {
 std::string const& ServiceEndpoints::events_base_url() const {
     return events_base_url_;
 }
+
+bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs) {
+    return lhs.polling_base_url() == rhs.polling_base_url() &&
+           lhs.streaming_base_url() == rhs.streaming_base_url() &&
+           lhs.events_base_url() == rhs.events_base_url();
+}
+
 }  // namespace launchdarkly::config

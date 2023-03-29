@@ -5,11 +5,9 @@
 
 class ServiceEndpointTest : public testing::Test {};
 
-using ClientEndpointsBuilder =
-    launchdarkly::client::ConfigBuilder::EndpointsBuilder;
+using ClientEndpointsBuilder = launchdarkly::client::EndpointsBuilder;
 
-using ServerEndpointsBuilder =
-    launchdarkly::server::ConfigBuilder::EndpointsBuilder;
+using ServerEndpointsBuilder = launchdarkly::server::EndpointsBuilder;
 
 TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
     ClientEndpointsBuilder builder;
@@ -22,7 +20,7 @@ TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
 }
 
 TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
-    launchdarkly::server::ConfigBuilder::EndpointsBuilder builder;
+    ServerEndpointsBuilder builder;
     auto eps = builder.build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->polling_base_url(), "https://sdk.launchdarkly.com");

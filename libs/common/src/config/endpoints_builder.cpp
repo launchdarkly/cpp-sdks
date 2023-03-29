@@ -73,7 +73,21 @@ std::unique_ptr<ServiceEndpoints> EndpointsBuilder<SDK>::build() {
     return nullptr;
 }
 
+template <typename SDK>
+bool operator==(EndpointsBuilder<SDK> const& lhs,
+                EndpointsBuilder<SDK> const& rhs) {
+    return lhs.events_base_url_ == rhs.events_base_url_ &&
+           lhs.streaming_base_url_ == rhs.streaming_base_url_ &&
+           lhs.polling_base_url_ == rhs.polling_base_url_;
+}
+
 template class EndpointsBuilder<detail::ClientSDK>;
 template class EndpointsBuilder<detail::ServerSDK>;
+
+template bool operator==(EndpointsBuilder<detail::ClientSDK> const&,
+                         EndpointsBuilder<detail::ClientSDK> const&);
+
+template bool operator==(EndpointsBuilder<detail::ServerSDK> const&,
+                         EndpointsBuilder<detail::ServerSDK> const&);
 
 }  // namespace launchdarkly::config::detail

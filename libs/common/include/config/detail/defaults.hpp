@@ -12,6 +12,10 @@ namespace launchdarkly::config::detail {
  */
 template <typename SDK>
 struct Defaults {
+    /**
+     * Offline mode is disabled in SDKs by default.
+     * @return
+     */
     static bool offline() { return false; }
 };
 
