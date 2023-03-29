@@ -42,9 +42,9 @@ const std::chrono::milliseconds kDefaultConnectTimeout =
 const std::chrono::milliseconds kDefaultResponseTimeout =
     std::chrono::seconds(15);
 
-// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 template <class Derived>
-class Session {
+class
+    Session {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    private:
     Derived& derived() { return static_cast<Derived&>(*this); }
     http::request<http::string_body> req_;
@@ -178,7 +178,6 @@ class Session {
         beast::get_lowest_layer(derived().stream()).cancel();
     }
 };
-// NOLINTEND(misc-non-private-member-variables-in-classes)
 
 class EncryptedClient : public Client,
                         public Session<EncryptedClient>,
