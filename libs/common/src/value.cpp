@@ -271,11 +271,11 @@ const Value::Array::Iterator Value::Array::Iterator::operator++(int) {
     return tmp;
 }
 
-Value const& Value::Array::operator[](size_t i) const {
+Value const& Value::Array::operator[](std::size_t i) const {
     return vec_[i];
 }
 
-size_t Value::Array::size() const {
+std::size_t Value::Array::size() const {
     return vec_.size();
 }
 
@@ -312,7 +312,7 @@ Value::Object::Iterator Value::Object::Iterator::operator++(int) {
     return tmp;
 }
 
-size_t Value::Object::size() const {
+std::size_t Value::Object::size() const {
     return map_.size();
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <ostream>
 #include <string>
 #include <unordered_set>
@@ -35,7 +36,7 @@ class AttributeReference {
      * Provides a hashing function for use with unordered sets.
      */
     struct HashFunction {
-        size_t operator()(AttributeReference const& ref) const {
+        std::size_t operator()(AttributeReference const& ref) const {
             return boost::hash_range(ref.components_.begin(),
                                      ref.components_.end());
         }
@@ -54,7 +55,7 @@ class AttributeReference {
      * @return The component at the specified depth or an empty string if the
      * depth is out of bounds.
      */
-    std::string const& component(size_t depth) const;
+    std::string const& component(std::size_t depth) const;
 
     /**
      * Get the total depth of the reference.
@@ -62,7 +63,7 @@ class AttributeReference {
      * For example, depth() on the reference `/a/b/c` would return 3.
      * @return
      */
-    size_t depth() const;
+    std::size_t depth() const;
 
     /**
      * Check if the reference is a "kind" reference. Either `/kind` or `kind`.

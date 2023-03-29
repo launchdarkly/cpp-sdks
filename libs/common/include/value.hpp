@@ -1,4 +1,6 @@
 #pragma once
+
+#include <cstddef>
 #include <map>
 #include <vector>
 
@@ -79,9 +81,9 @@ class Value {
         Array(std::initializer_list<Value> values) : vec_(values) {}
         Array() = default;
 
-        Value const& operator[](size_t i) const;
+        Value const& operator[](std::size_t i) const;
 
-        size_t size() const;
+        std::size_t size() const;
 
         Iterator begin() const;
 
@@ -147,14 +149,16 @@ class Value {
          * The number of items in the Object.
          * @return The number of items in the Object.
          */
-        size_t size() const;
+        std::size_t size() const;
 
         /**
          * Get the number of items with the given key. Will be 1 or 0.
          * @param key The key to get a count for.
          * @return The count of items with the given key.
          */
-        size_t count(std::string const& key) const { return map_.count(key); }
+        std::size_t count(std::string const& key) const {
+            return map_.count(key);
+        }
 
         Iterator begin() const;
 

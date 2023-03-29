@@ -192,14 +192,14 @@ AttributeReference AttributeReference::from_reference_str(std::string ref_str) {
     return {std::move(ref_str), false};
 }
 
-std::string const& AttributeReference::component(size_t depth) const {
+std::string const& AttributeReference::component(std::size_t depth) const {
     if (depth < components_.size()) {
         return components_[depth];
     }
     return empty_;
 }
 
-size_t AttributeReference::depth() const {
+std::size_t AttributeReference::depth() const {
     return components_.size();
 }
 
