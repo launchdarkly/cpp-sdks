@@ -21,11 +21,14 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif ()
 
-#set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_FILES})
-
 # Needed to fetch external dependencies. 
 include(FetchContent)
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.80 REQUIRED)
+message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 # Add main SDK sources.
 add_subdirectory(src)

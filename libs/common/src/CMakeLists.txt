@@ -6,6 +6,8 @@ add_library(${LIBNAME} logger.cpp ${HEADER_LIST} console_backend.cpp log_level.c
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
+target_link_libraries(${LIBNAME} Boost::headers)
+
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
 
