@@ -98,10 +98,12 @@ class Value {
      */
     class Object {
        public:
+        using StdString = const std::string;
         struct Iterator {
             using iterator_category = std::forward_iterator_tag;
             using difference_type = std::ptrdiff_t;
-            using value_type = std::pair<const std::string, Value>;
+
+            using value_type = std::pair<StdString, Value>;
             using pointer = value_type const*;
             using reference = value_type const&;
 
