@@ -1,8 +1,22 @@
 
-file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/*.hpp")
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS
+        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/*.hpp"
+        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/config/*.hpp"
+        )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} logger.cpp ${HEADER_LIST} console_backend.cpp log_level.cpp attribute_reference.cpp)
+add_library(${LIBNAME}
+        ${HEADER_LIST}
+        logger.cpp
+        console_backend.cpp
+        log_level.cpp
+        attribute_reference.cpp
+        config/service_endpoints.cpp
+        config/endpoints_builder.cpp
+        config/config_builder.cpp
+        config/config.cpp
+        )
+
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
