@@ -76,7 +76,7 @@ TEST(AttributesTests, CanGetSomethingThatDoesNotExist) {
             .is_null());
 }
 
-std::string ProduceString(Attributes attrs) {
+std::string ProduceString(Attributes const& attrs) {
     std::stringstream stream;
     stream << attrs;
     stream.flush();

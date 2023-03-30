@@ -43,7 +43,7 @@ TEST(ContextTests, CanGetKeysAndKinds) {
     EXPECT_EQ("org-key", context.keys_and_kinds().find("org")->second);
 }
 
-std::string ProduceString(Context ctx) {
+std::string ProduceString(Context const& ctx) {
     std::stringstream stream;
     stream << ctx;
     stream.flush();
@@ -57,13 +57,13 @@ TEST(ContextTests, OstreamOperatorValidContext) {
         "string() anonymous: bool(false) private: []  custom: object({})}]",
         ProduceString(context));
 
-    auto context2 = ContextBuilder()
-                        .kind("user", "user-key")
-                        .kind("org", "org-key")
-                        .name("Sam")
-                        .set_private("test", true)
-                        .set("string", "potato")
-                        .build();
+    auto context_2 = ContextBuilder()
+                         .kind("user", "user-key")
+                         .kind("org", "org-key")
+                         .name("Sam")
+                         .set_private("test", true)
+                         .set("string", "potato")
+                         .build();
 
     EXPECT_EQ(
         "{contexts: [kind: org attributes: {key: string(org-key),  name: "
@@ -71,7 +71,7 @@ TEST(ContextTests, OstreamOperatorValidContext) {
         "object({{string, string(potato)}, {test, bool(true)}})}, kind: user "
         "attributes: {key: string(user-key),  name: string() anonymous: "
         "bool(false) private: []  custom: object({})}]",
-        ProduceString(context2));
+        ProduceString(context_2));
 }
 
 TEST(ContextTests, OstreamOperatorInvalidContext) {
