@@ -56,13 +56,17 @@ std::string const& Context::canonical_key() const {
     return canonical_key_;
 }
 
-std::map<std::string_view, std::string_view> Context::keys_and_kinds() const {
+std::map<std::string_view, std::string_view> const& Context::keys_and_kinds()
+    const {
     return keys_and_kinds_;
 }
 
 std::string Context::make_canonical_key() {
-    if (keys_and_kinds_.size() == 1 && keys_and_kinds_.count("user") == 1) {
-        return std::string(keys_and_kinds_["user"]);
+    if (keys_and_kinds_.size() == 1) {
+        if (auto it = keys_and_kinds_.find("user");
+            it != keys_and_kinds_.end()) {
+            return std::string(it->second);
+        }
     }
     std::stringstream stream;
     bool first = true;
