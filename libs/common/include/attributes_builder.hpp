@@ -8,6 +8,8 @@
 
 namespace launchdarkly {
 
+class ContextBuilder;
+
 /**
  * This is used in the implementation of the context builder for setting
  * attributes for a single context. This is not intended to be directly
@@ -18,6 +20,7 @@ namespace launchdarkly {
  */
 template <class BuilderReturn, class BuildType>
 class AttributesBuilder {
+    friend class ContextBuilder;
    public:
     /**
      * Create an attributes builder with the given key.
@@ -25,6 +28,13 @@ class AttributesBuilder {
      */
     AttributesBuilder(BuilderReturn& builder, std::string kind, std::string key)
         : key_(std::move(key)), kind_(std::move(kind)), builder_(builder) {}
+
+    /**
+     * The attributes builder should never be copied. We depend on a stable
+     * reference stored in the context builder.
+     */
+    AttributesBuilder(AttributesBuilder const& builder) = delete;
+    AttributesBuilder(AttributesBuilder&& builder) = default;
 
     /**
      * The context's name.
@@ -146,8 +156,7 @@ class AttributesBuilder {
         return *this;
     }
 
-    AttributesBuilder kind(std::string kind, std::string key) {
-        builder_.internal_add_kind(kind_, build_attributes());
+    AttributesBuilder& kind(std::string kind, std::string key) {
         return builder_.kind(kind, key);
     }
 
@@ -158,12 +167,20 @@ class AttributesBuilder {
      * @return The built context.
      */
     [[nodiscard]] BuildType build() {
-        builder_.internal_add_kind(kind_, build_attributes());
         return builder_.build();
     }
 
    private:
     BuilderReturn& builder_;
+
+    /**
+     * Used internally for updating the attributes key.
+     * @param key The key to replace the existing key.
+     * @return A reference to this builder.
+     */
+    void key(std::string key) {
+        key_ = std::move(key);
+    }
 
     Attributes build_attributes();
 

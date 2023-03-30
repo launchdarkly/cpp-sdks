@@ -17,6 +17,8 @@ struct ContextErrors {
     // generation and persistence is added.
     inline static const std::string kInvalidKey =
         "\"The key for a context may not be empty.\"";
+    inline static const std::string kMissingKinds =
+        "\"The context must contain at least 1 kind.\"";
 };
 
 class ContextBuilder;

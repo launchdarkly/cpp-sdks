@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <map>
+#include <vector>
+
 #include "context_builder.hpp"
 
 using launchdarkly::ContextBuilder;
@@ -126,4 +129,47 @@ TEST(ContextBuilderTests, HandlesMultipleErrors) {
         "for "
         "a context may not be empty.\"",
         context.errors());
+}
+
+TEST(ContextBuilderTests, HandlesEmptyContext) {
+    auto context = ContextBuilder().build();
+    EXPECT_FALSE(context.valid());
+    EXPECT_EQ("\"The context must contain at least 1 kind.\"",
+              context.errors());
+}
+
+TEST(ContextBuilderTests, UseWithLoops) {
+    auto kinds = std::vector<std::string>{"user", "org"};
+    auto props = std::map<std::string, Value>{{"a", "b"}, {"c", "d"}};
+
+    auto builder = ContextBuilder();
+
+    for (auto const& kind : kinds) {
+        auto& kind_builder = builder.kind(kind, kind + "-key");
+        for (auto const& prop : props) {
+            kind_builder.set(prop.first, prop.second);
+        }
+    }
+
+    auto context = builder.build();
+
+    EXPECT_EQ("b", context.get("user", "/a").as_string());
+    EXPECT_EQ("d", context.get("user", "/c").as_string());
+
+    EXPECT_EQ("b", context.get("org", "/a").as_string());
+    EXPECT_EQ("d", context.get("org", "/c").as_string());
+}
+
+TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
+    auto builder = ContextBuilder();
+
+    builder.kind("user", "potato").name("Bob").set("city", "Reno");
+    builder.kind("user", "ham").set("isCat", true);
+
+    auto context = builder.build();
+
+    EXPECT_EQ("ham", context.get("user", "key").as_string());
+    EXPECT_EQ("Bob", context.get("user", "name").as_string());
+    EXPECT_EQ("Reno", context.get("user", "city").as_string());
+    EXPECT_TRUE(context.get("user", "isCat").as_bool());
 }
