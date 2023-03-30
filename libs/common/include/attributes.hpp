@@ -53,11 +53,11 @@ class Attributes {
         launchdarkly::AttributeReference const& ref) const {
         if (!ref.valid()) {
             // Cannot index by invalid references.
-            return launchdarkly::Value::Null();
+            return launchdarkly::Value::null();
         }
         if (ref.is_kind()) {
             // Cannot access kind.
-            return launchdarkly::Value::Null();
+            return launchdarkly::Value::null();
         }
 
         if (ref.depth() == 1) {
@@ -90,7 +90,7 @@ class Attributes {
             }
         }
         if (!found) {
-            return launchdarkly::Value::Null();
+            return launchdarkly::Value::null();
         } else {
             return *node;
         }

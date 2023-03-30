@@ -37,14 +37,14 @@ class Context {
     /**
      * Get an attribute value by kind and attribute reference. If the kind is
      * not present, or the attribute not present in the kind, then
-     * Value::Null() will be returned.
+     * Value::null() will be returned.
      *
      * @param kind The kind to get the value for.
      * @param ref The reference to the desired attribute.
      * @return The attribute Value or a Value representing null.
      */
     Value const& get(std::string const& kind,
-                                   launchdarkly::AttributeReference const& ref);
+                     launchdarkly::AttributeReference const& ref);
 
    private:
     Context(std::map<std::string, Attributes> attributes);

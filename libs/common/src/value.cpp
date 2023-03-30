@@ -4,7 +4,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <iterator>
 
 namespace launchdarkly {
 
@@ -58,7 +57,7 @@ bool Value::is_object() const {
     return type_ == Type::kObject;
 }
 
-Value const& Value::Null() {
+Value const& Value::null() {
     // This still just constructs a value, but it may be more discoverable
     // for people using the API.
     return null_value_;
@@ -73,7 +72,7 @@ bool Value::as_bool() const {
 
 int Value::as_int() const {
     if (type_ == Type::kNumber) {
-        return boost::get<double>(storage_);
+        return static_cast<int>(boost::get<double>(storage_));
     }
     return 0;
 }
@@ -117,8 +116,8 @@ Value::Value(std::optional<std::string> opt_str) : storage_{0.0} {
 Value::Value(std::initializer_list<Value> values)
     : type_(Type::kArray), storage_(std::vector<Value>(values)) {}
 
-Value::Array::Iterator::Iterator(std::vector<Value>::const_iterator it)
-    : it_(it) {}
+Value::Array::Iterator::Iterator(std::vector<Value>::const_iterator iterator)
+    : it_(iterator) {}
 
 Value::Array::Iterator::reference Value::Array::Iterator::operator*() const {
     return *it_;
@@ -133,14 +132,14 @@ Value::Array::Iterator& Value::Array::Iterator::operator++() {
     return *this;
 }
 
-const Value::Array::Iterator Value::Array::Iterator::operator++(int) {
+Value::Array::Iterator Value::Array::Iterator::operator++(int) {
     Iterator tmp = *this;
     ++(*this);
     return tmp;
 }
 
-Value const& Value::Array::operator[](std::size_t i) const {
-    return vec_[i];
+Value const& Value::Array::operator[](std::size_t index) const {
+    return vec_[index];
 }
 
 std::size_t Value::Array::size() const {
@@ -148,18 +147,18 @@ std::size_t Value::Array::size() const {
 }
 
 Value::Array::Iterator Value::Array::begin() const {
-    return Iterator(vec_.begin());
+    return {vec_.begin()};
 }
 
 Value::Array::Iterator Value::Array::end() const {
-    return Iterator(vec_.end());
+    return {vec_.end()};
 }
 
 Value::Array::Array(std::vector<Value> vec) : vec_(std::move(vec)) {}
 
 Value::Object::Iterator::Iterator(
-    std::map<std::string, Value>::const_iterator it)
-    : it_(it) {}
+    std::map<std::string, Value>::const_iterator iterator)
+    : it_(iterator) {}
 
 Value::Object::Iterator::reference Value::Object::Iterator::operator*() const {
     return *it_;
@@ -185,14 +184,14 @@ std::size_t Value::Object::size() const {
 }
 
 Value::Object::Iterator Value::Object::begin() const {
-    return Iterator(map_.begin());
+    return {map_.begin()};
 }
 
 Value::Object::Iterator Value::Object::end() const {
-    return Iterator(map_.end());
+    return {map_.end()};
 }
 
 Value::Object::Iterator Value::Object::find(std::string const& key) const {
-    return Iterator(map_.find(key));
+    return {map_.find(key)};
 }
 }  // namespace launchdarkly

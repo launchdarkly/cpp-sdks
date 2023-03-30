@@ -1,14 +1,13 @@
 #include <gtest/gtest.h>
 
 #include "attributes.hpp"
-#include "value.hpp"
 
 using launchdarkly::AttributeReference;
 using launchdarkly::Attributes;
 using launchdarkly::Value;
 
 TEST(AttributesTests, CanGetBuiltInAttributesByReference) {
-    Attributes attributes("the-key", "the-name", true, Value::Null());
+    Attributes attributes("the-key", "the-name", true, Value::null());
 
     EXPECT_EQ("the-key",
               attributes.get(AttributeReference::from_reference_str("/key"))

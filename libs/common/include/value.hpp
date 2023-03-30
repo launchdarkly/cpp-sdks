@@ -58,12 +58,12 @@ class Value {
             using pointer = value_type const*;
             using reference = value_type const&;
 
-            Iterator(std::vector<Value>::const_iterator it);
+            Iterator(std::vector<Value>::const_iterator iterator);
 
             reference operator*() const;
             pointer operator->();
             Iterator& operator++();
-            const Iterator operator++(int);
+            Iterator operator++(int);
 
             friend bool operator==(Iterator const& a, Iterator const& b) {
                 return a.it_ == b.it_;
@@ -110,7 +110,7 @@ class Value {
             using pointer = value_type const*;
             using reference = value_type const&;
 
-            Iterator(std::map<std::string, Value>::const_iterator it);
+            Iterator(std::map<std::string, Value>::const_iterator iterator);
 
             reference operator*() const;
             pointer operator->();
@@ -346,7 +346,7 @@ class Value {
      * Get a null value.
      * @return The null value.
      */
-    static Value const& Null();
+    static Value const& null();
 
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
