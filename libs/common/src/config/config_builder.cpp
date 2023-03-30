@@ -16,6 +16,13 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::service_endpoints(
 }
 
 template <typename SDK>
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::application_info(
+    detail::ApplicationInfo builder) {
+    application_info_builder_ = std::move(builder);
+    return *this;
+}
+
+template <typename SDK>
 ConfigBuilder<SDK>& ConfigBuilder<SDK>::offline(bool offline) {
     offline_ = offline;
     return *this;
@@ -23,9 +30,15 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::offline(bool offline) {
 
 template <typename SDK>
 typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build() const {
-    return {sdk_key_, offline_.value_or(Defaults<detail::AnySDK>::offline()),
-            service_endpoints_builder_.value_or(
-                ConfigBuilder<SDK>::EndpointsBuilder())};
+    auto key = sdk_key_;
+    auto offline = offline_.value_or(Defaults<detail::AnySDK>::offline());
+    auto endpoints = service_endpoints_builder_.value_or(
+        ConfigBuilder<SDK>::EndpointsBuilder());
+    std::optional<std::string> app_tag;
+    if (application_info_builder_) {
+        app_tag = application_info_builder_->build();
+    }
+    return {std::move(key), offline, std::move(endpoints), std::move(app_tag)};
 }
 
 template class ConfigBuilder<detail::ClientSDK>;

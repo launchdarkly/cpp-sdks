@@ -1,8 +1,8 @@
 
-#include "config/detail/application_tags.hpp"
 #include <gtest/gtest.h>
 #include <ostream>
 #include <tuple>
+#include "config/detail/application_info.hpp"
 
 using namespace launchdarkly::config::detail;
 

@@ -1,4 +1,4 @@
-#include "config/detail/application_tags.hpp"
+#include "config/detail/application_info.hpp"
 
 #include <boost/algorithm/string.hpp>
 

@@ -34,15 +34,20 @@ TEST(ConfigBuilderTest,
     ASSERT_FALSE(cfg.offline);
 }
 
+// This test should exercise all of the config options.
 TEST(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     using namespace launchdarkly::client;
-    auto config = ConfigBuilder("sdk-123")
-                      .offline(true)
-                      .service_endpoints(EndpointsBuilder().relay_proxy("foo"))
-                      .build();
+    auto config =
+        ConfigBuilder("sdk-123")
+            .offline(true)
+            .service_endpoints(Endpoints().relay_proxy("foo"))
+            .application_info(
+                ApplicationInfo().app_identifier("bar").app_version("baz"))
+            .build();
 
     ASSERT_EQ(config.sdk_key, "sdk-123");
     ASSERT_TRUE(config.offline);
-    ASSERT_EQ(config.service_endpoints_builder,
-              EndpointsBuilder().relay_proxy("foo"));
+    ASSERT_EQ(config.service_endpoints_builder, Endpoints().relay_proxy("foo"));
+    ASSERT_EQ(config.application_tag,
+              "application-id/bar application-version/baz");
 }

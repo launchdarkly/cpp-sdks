@@ -14,9 +14,11 @@ struct Config {
     std::string sdk_key;
     bool offline;
     detail::EndpointsBuilder<SDK> service_endpoints_builder;
+    std::optional<std::string> application_tag;
     Config(std::string sdk_key,
            bool offline,
-           detail::EndpointsBuilder<SDK> service_endpoints_builder);
+           detail::EndpointsBuilder<SDK> service_endpoints_builder,
+           std::optional<std::string> application_tag);
 };
 
 }  // namespace launchdarkly::config::detail
