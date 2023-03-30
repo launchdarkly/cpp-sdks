@@ -25,7 +25,7 @@ add_library(${LIBNAME}
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-target_link_libraries(${LIBNAME} Boost::headers)
+target_link_libraries(${LIBNAME} Boost::headers tl::expected)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
