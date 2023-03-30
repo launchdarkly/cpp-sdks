@@ -29,7 +29,7 @@ std::vector<std::string_view> const& Context::kinds() {
 Context::Context(std::string error_message)
     : errors_(std::move(error_message)) {}
 
-Context::Context(std::map<std::string, Attributes>&& attributes)
+Context::Context(std::map<std::string, Attributes> attributes)
     : attributes_(std::move(attributes)), valid_(true) {
     for (auto& pair : attributes_) {
         kinds_.push_back(pair.first);
@@ -63,9 +63,9 @@ std::map<std::string_view, std::string_view> const& Context::keys_and_kinds()
 
 std::string Context::make_canonical_key() {
     if (keys_and_kinds_.size() == 1) {
-        if (auto it = keys_and_kinds_.find("user");
-            it != keys_and_kinds_.end()) {
-            return std::string(it->second);
+        if (auto iterator = keys_and_kinds_.find("user");
+            iterator != keys_and_kinds_.end()) {
+            return std::string(iterator->second);
         }
     }
     std::stringstream stream;

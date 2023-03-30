@@ -116,7 +116,7 @@ class Context {
      * Create a valid context with the given attributes.
      * @param attributes
      */
-    Context(std::map<std::string, Attributes>&& attributes);
+    Context(std::map<std::string, Attributes> attributes);
     std::map<std::string, Attributes> attributes_;
     std::vector<std::string_view> kinds_;
     std::map<std::string_view, std::string_view> keys_and_kinds_;

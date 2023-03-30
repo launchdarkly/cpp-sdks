@@ -108,7 +108,7 @@ class Attributes {
     Attributes(std::string key,
                std::optional<std::string> name,
                bool anonymous,
-               launchdarkly::Value&& attributes,
+               launchdarkly::Value attributes,
                AttributeReference::SetType private_attributes =
                    AttributeReference::SetType())
         : key_(std::move(key)),
