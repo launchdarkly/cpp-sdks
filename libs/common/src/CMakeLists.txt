@@ -20,6 +20,7 @@ add_library(${LIBNAME}
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
+        config/application_tags.cpp
         )
 
 
