@@ -118,6 +118,25 @@ class Attributes {
           custom_attributes_(std::move(attributes)),
           private_attributes_(std::move(private_attributes)) {}
 
+    friend std::ostream& operator<<(std::ostream& os, Attributes const& attrs) {
+        os << "{key: " << attrs.key_ << ", "
+           << " name: " << attrs.name_ << " anonymous: " << attrs.anonymous_
+           << " private: [";
+        bool first = true;
+        for (auto const& private_attribute : attrs.private_attributes_) {
+            if (first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+            os << private_attribute;
+        }
+        os << "] "
+           << " custom: " << attrs.custom_attributes_ << "}";
+
+        return os;
+    }
+
    private:
     // Built-in attributes.
     launchdarkly::Value key_;

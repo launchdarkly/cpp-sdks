@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -180,4 +181,32 @@ TEST(ValueTests, AssignToExistingValue) {
     // Copy assignment
     strValue = thirdValue;
     EXPECT_EQ("third", strValue.as_string());
+}
+
+std::string ProduceString(Value val) {
+    std::stringstream stream;
+    stream << val;
+    stream.flush();
+    return stream.str();
+}
+
+TEST(ValueTests, OstreamOperator) {
+    EXPECT_EQ("null()", ProduceString(Value()));
+
+    EXPECT_EQ("bool(false)", ProduceString(Value(false)));
+    EXPECT_EQ("bool(true)", ProduceString(Value(true)));
+
+    EXPECT_EQ("number(3.14)", ProduceString(Value(3.14)));
+    EXPECT_EQ("number(42)", ProduceString(Value(42)));
+
+    EXPECT_EQ("string(potato)", ProduceString(Value("potato")));
+
+    EXPECT_EQ("string(potato)", ProduceString(Value("potato")));
+
+    EXPECT_EQ("array([string(ham), string(cheese)])",
+              ProduceString(Value{"ham", "cheese"}));
+
+    EXPECT_EQ(
+        "object({{first, string(cheese)}, {second, number(42)}})",
+        ProduceString(Value::Object{{"first", "cheese"}, {"second", 42}}));
 }

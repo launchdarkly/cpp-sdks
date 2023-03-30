@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <map>
 #include <optional>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -77,6 +78,21 @@ class Value {
             std::vector<Value>::const_iterator it_;
         };
 
+        friend std::ostream& operator<<(std::ostream& os, Array const& arr) {
+            os << "[";
+            bool first = true;
+            for (auto item : arr.vec_) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                os << item;
+            }
+            os << "]";
+            return os;
+        }
+
         /**
          * Create an array from a vector of Value.
          * @param vec The vector to base the array on.
@@ -127,6 +143,21 @@ class Value {
            private:
             std::map<std::string, Value>::const_iterator it_;
         };
+
+        friend std::ostream& operator<<(std::ostream& os, Object const& obj) {
+            os << "{";
+            bool first = true;
+            for (auto pair : obj.map_) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                os << "{" << pair.first << ", " << pair.second << "}";
+            }
+            os << "}";
+            return os;
+        }
 
         /**
          * Create an Object from a map of Values.
@@ -347,6 +378,33 @@ class Value {
      * @return The null value.
      */
     static Value const& null();
+
+    friend std::ostream& operator<<(std::ostream& os, Value const& value) {
+        switch (value.type_) {
+            case Type::kNull:
+                os << "null()";
+                break;
+            case Type::kBool:
+                os << "bool("
+                   << (boost::get<bool>(value.storage_) ? "true" : "false")
+                   << ")";
+                break;
+            case Type::kNumber:
+                os << "number(" << boost::get<double>(value.storage_) << ")";
+                break;
+            case Type::kString:
+                os << "string(" << boost::get<std::string>(value.storage_)
+                   << ")";
+                break;
+            case Type::kObject:
+                os << "object(" << boost::get<Object>(value.storage_) << ")";
+                break;
+            case Type::kArray:
+                os << "array(" << boost::get<Array>(value.storage_) << ")";
+                break;
+        }
+        return os;
+    }
 
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;

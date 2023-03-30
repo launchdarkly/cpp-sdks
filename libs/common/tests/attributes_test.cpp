@@ -75,3 +75,29 @@ TEST(AttributesTests, CanGetSomethingThatDoesNotExist) {
         attributes.get(AttributeReference::from_reference_str("/missing"))
             .is_null());
 }
+
+std::string ProduceString(Attributes attrs) {
+    std::stringstream stream;
+    stream << attrs;
+    stream.flush();
+    return stream.str();
+}
+
+TEST(AttributesTests, OStreamOperator) {
+    Attributes attributes("the-key", std::nullopt, true,
+                          Value(std::map<std::string, Value>({{"int", 42}})));
+    EXPECT_EQ(
+        "{key: string(the-key),  name: null() anonymous: bool(true) private: "
+        "[]  custom: object({{int, number(42)}})}",
+        ProduceString(attributes));
+
+    Attributes attributes2("the-key", "the-name", true,
+                           Value(std::map<std::string, Value>({{"int", 42}})),
+                           AttributeReference::SetType{"/potato", "/bacon"});
+
+    EXPECT_EQ(
+        "{key: string(the-key),  name: string(the-name) anonymous: bool(true) "
+        "private: [valid(/bacon), valid(/potato)]  custom: object({{int, "
+        "number(42)}})}",
+        ProduceString(attributes2));
+}

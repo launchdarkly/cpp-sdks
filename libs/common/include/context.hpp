@@ -46,6 +46,22 @@ class Context {
     Value const& get(std::string const& kind,
                      launchdarkly::AttributeReference const& ref);
 
+    friend std::ostream& operator<<(std::ostream& os, Context const& context) {
+        os << "{contexts: [";
+        bool first = true;
+        for (auto const& kind : context.attributes_) {
+            if (first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+            os << "kind: " << kind.first << " attributes: " << kind.second;
+        }
+        os << "]";
+
+        return os;
+    }
+
    private:
     Context(std::map<std::string, Attributes> attributes);
     std::map<std::string, Attributes> attributes_;
