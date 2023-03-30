@@ -138,7 +138,7 @@ class AttributesBuilder {
      * Build the context.
      * @return The built context.
      */
-    BuildType build() {
+    [[nodiscard]] BuildType build() {
         builder_.internal_add_kind(kind_, build_attributes());
         return builder_.build();
     }

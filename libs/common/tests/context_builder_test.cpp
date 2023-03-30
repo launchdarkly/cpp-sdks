@@ -11,6 +11,9 @@ using launchdarkly::AttributeReference;
 
 TEST(ContextBuilderTests, CanMakeBasicContext) {
     auto context = ContextBuilder().kind("user", "user-key").build();
+
+    EXPECT_TRUE(context.valid());
+
     EXPECT_EQ(1, context.kinds().size());
     EXPECT_EQ("user", context.kinds()[0]);
     EXPECT_EQ("user-key", context.get("user", "/key").as_string());
@@ -29,6 +32,8 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
                        // Set a private custom attribute.
                        .set("email", "email@email.email", true)
                        .build();
+
+    EXPECT_TRUE(context.valid());
 
     EXPECT_EQ("user", context.kinds()[0]);
     EXPECT_EQ("bobby-bobberson", context.get("user", "/key").as_string());
@@ -67,6 +72,8 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
             .set("object", Object{{"string", "bacon"}, {"boolean", false}})
             .build();
 
+    EXPECT_TRUE(context.valid());
+
     EXPECT_TRUE(context.get("user", "/anonymous").as_bool());
     EXPECT_EQ("test", context.get("user", "/name").as_string());
     EXPECT_EQ("potato", context.get("user", "/string").as_string());
@@ -89,4 +96,33 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
     EXPECT_EQ(1,
               context.attributes("user").private_attributes().count("private"));
     EXPECT_EQ("Macdonwalds", context.get("org", "/name").as_string());
+}
+
+TEST(ContextBuilderTests, HandlesInvalidKinds) {
+    auto context_bad_kind = ContextBuilder().kind("#$#*(", "valid-key").build();
+    EXPECT_FALSE(context_bad_kind.valid());
+
+    EXPECT_EQ(
+        "#$#*(: \"Kind contained invalid characters. A kind may contain ASCII "
+        "letters or numbers, as well as '.', '-', and '_'.\"",
+        context_bad_kind.errors());
+}
+
+TEST(ContextBuilderTests, HandlesInvalidKeys) {
+    auto context_bad_key = ContextBuilder().kind("user", "").build();
+    EXPECT_FALSE(context_bad_key.valid());
+
+    EXPECT_EQ("user: \"The key for a context may not be empty.\"",
+              context_bad_key.errors());
+}
+
+TEST(ContextBuilderTests, HandlesMultipleErrors) {
+    auto context = ContextBuilder().kind("#$#*(", "").build();
+    EXPECT_FALSE(context.valid());
+
+    EXPECT_EQ(
+        "#$#*(: \"Kind contained invalid characters. A kind may contain ASCII "
+        "letters or numbers, as well as '.', '-', and '_'.\", #$#*(: \"The key for "
+        "a context may not be empty.\"",
+        context.errors());
 }

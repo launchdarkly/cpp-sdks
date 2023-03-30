@@ -60,6 +60,8 @@ class ContextBuilder {
     void internal_add_kind(std::string kind, Attributes attrs);
 
     std::map<std::string, Attributes> kinds_;
+    bool valid_ = true;
+    std::string errors_;
 };
 
 }  // namespace launchdarkly
