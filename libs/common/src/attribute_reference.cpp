@@ -175,6 +175,7 @@ AttributeReference::AttributeReference(std::string str, bool literal) {
         } else {
             redaction_name_ = str;
         }
+        valid_ = true;
     } else {
         valid_ = ParseRef(str, components_);
         redaction_name_ = std::move(str);
@@ -192,14 +193,14 @@ AttributeReference AttributeReference::from_reference_str(std::string ref_str) {
     return {std::move(ref_str), false};
 }
 
-std::string const& AttributeReference::component(size_t depth) const {
+std::string const& AttributeReference::component(std::size_t depth) const {
     if (depth < components_.size()) {
         return components_[depth];
     }
     return empty_;
 }
 
-size_t AttributeReference::depth() const {
+std::size_t AttributeReference::depth() const {
     return components_.size();
 }
 
@@ -214,5 +215,11 @@ bool AttributeReference::valid() const {
 std::string const& AttributeReference::redaction_name() const {
     return redaction_name_;
 }
+
+AttributeReference::AttributeReference(std::string ref_str)
+    : AttributeReference(std::move(ref_str), false) {}
+
+AttributeReference::AttributeReference(char const* ref_str)
+    : AttributeReference(std::string(ref_str)) {}
 
 }  // namespace launchdarkly

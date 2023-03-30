@@ -11,6 +11,11 @@ add_library(${LIBNAME}
         console_backend.cpp
         log_level.cpp
         attribute_reference.cpp
+        context.cpp
+        context_builder.cpp
+        attributes.cpp
+        value.cpp
+        attributes_builder.cpp
         config/service_endpoints.cpp
         config/endpoints_builder.cpp
         config/config_builder.cpp
@@ -19,6 +24,8 @@ add_library(${LIBNAME}
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
+
+target_link_libraries(${LIBNAME} Boost::headers)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

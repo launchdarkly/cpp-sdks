@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cstddef>
 #include <ostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
+
+#include <boost/container_hash/hash.hpp>
 
 namespace launchdarkly {
 
@@ -29,6 +33,19 @@ namespace launchdarkly {
 class AttributeReference {
    public:
     /**
+     * Provides a hashing function for use with unordered sets.
+     */
+    struct HashFunction {
+        std::size_t operator()(AttributeReference const& ref) const {
+            return boost::hash_range(ref.components_.begin(),
+                                     ref.components_.end());
+        }
+    };
+
+    using SetType = std::unordered_set<AttributeReference,
+                                       AttributeReference::HashFunction>;
+
+    /**
      * Get the component of the attribute reference at the specified depth.
      *
      * For example, component(1) on the reference `/a/b/c` would return
@@ -38,7 +55,7 @@ class AttributeReference {
      * @return The component at the specified depth or an empty string if the
      * depth is out of bounds.
      */
-    std::string const& component(size_t depth) const;
+    std::string const& component(std::size_t depth) const;
 
     /**
      * Get the total depth of the reference.
@@ -46,7 +63,7 @@ class AttributeReference {
      * For example, depth() on the reference `/a/b/c` would return 3.
      * @return
      */
-    size_t depth() const;
+    std::size_t depth() const;
 
     /**
      * Check if the reference is a "kind" reference. Either `/kind` or `kind`.
@@ -94,10 +111,34 @@ class AttributeReference {
         return os;
     }
 
+    /**
+     * Construct an attribute reference from a string.
+     * @param ref_str The string to make an attribute reference from.
+     */
+    AttributeReference(std::string ref_str);
+
+    /**
+     * Construct an attribute reference from a constant string.
+     * @param ref_str The string to make an attribute reference from.
+     */
+    AttributeReference(char const* ref_str);
+
+    bool operator==(AttributeReference const& other) const {
+        return components_ == other.components_;
+    }
+
+    bool operator!=(AttributeReference const& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(AttributeReference const& rhs) const {
+        return components_ < rhs.components_;
+    }
+
    private:
     AttributeReference(std::string str, bool is_literal);
 
-    bool valid_;
+    bool valid_ = false;
 
     std::string redaction_name_;
     std::vector<std::string> components_;
