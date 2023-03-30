@@ -47,4 +47,5 @@ class ServiceEndpoints {
     [[nodiscard]] std::string const& events_base_url() const;
 };
 
+bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs);
 }  // namespace launchdarkly::config

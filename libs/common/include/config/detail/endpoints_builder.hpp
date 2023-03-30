@@ -1,12 +1,19 @@
 #pragma once
 
-#include "config/service_endpoints.hpp"
+#include "service_endpoints.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 
 namespace launchdarkly::config::detail {
+
+template <typename SDK>
+class EndpointsBuilder;
+
+template <typename SDK>
+bool operator==(EndpointsBuilder<SDK> const& lhs,
+                EndpointsBuilder<SDK> const& rhs);
 
 /**
  * EndpointsBuilder allows for specification of LaunchDarkly service endpoints.
@@ -21,6 +28,8 @@ class EndpointsBuilder {
     std::optional<std::string> events_base_url_;
 
    public:
+    friend bool operator==<SDK>(EndpointsBuilder<SDK> const& lhs,
+                                EndpointsBuilder<SDK> const& rhs);
     /**
      * Constructs an EndpointsBuilder.
      */

@@ -13,7 +13,10 @@ add_library(${LIBNAME}
         attribute_reference.cpp
         config/service_endpoints.cpp
         config/endpoints_builder.cpp
+        config/config_builder.cpp
+        config/config.cpp
         )
+
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 

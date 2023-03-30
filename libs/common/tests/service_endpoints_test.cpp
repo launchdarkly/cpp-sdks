@@ -1,15 +1,17 @@
 #include <gtest/gtest.h>
 
-#include "config/client_endpoints_builder.hpp"
-#include "config/server_endpoints_builder.hpp"
-
-using namespace launchdarkly::config;
+#include "config/client.hpp"
+#include "config/server.hpp"
 
 class ServiceEndpointTest : public testing::Test {};
 
+using ClientEndpointsBuilder = launchdarkly::client::EndpointsBuilder;
+
+using ServerEndpointsBuilder = launchdarkly::server::EndpointsBuilder;
+
 TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
     ClientEndpointsBuilder builder;
-    std::unique_ptr<ServiceEndpoints> eps = builder.build();
+    auto eps = builder.build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->polling_base_url(), "https://clientsdk.launchdarkly.com");
     ASSERT_EQ(eps->streaming_base_url(),
@@ -19,7 +21,7 @@ TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
 
 TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
     ServerEndpointsBuilder builder;
-    std::unique_ptr<ServiceEndpoints> eps = builder.build();
+    auto eps = builder.build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->polling_base_url(), "https://sdk.launchdarkly.com");
     ASSERT_EQ(eps->streaming_base_url(), "https://stream.launchdarkly.com");
@@ -47,7 +49,7 @@ TEST(ServiceEndpointTest, ModifySingleURLCausesError_Events) {
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
     ClientEndpointsBuilder builder;
     builder.relay_proxy("foo");
-    std::unique_ptr<ServiceEndpoints> eps = builder.build();
+    auto eps = builder.build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->streaming_base_url(), "foo");
     ASSERT_EQ(eps->polling_base_url(), "foo");
