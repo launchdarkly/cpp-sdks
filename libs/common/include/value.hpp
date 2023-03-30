@@ -166,9 +166,8 @@ class Value {
         Object(std::map<std::string, Value> map) : map_(std::move(map)) {}
         Object() = default;
         Object(std::initializer_list<std::pair<std::string, Value>> values) {
-            for (auto const& pair : values) {
-                map_[pair.first] = pair.second;
-            }
+            map_.insert(std::make_move_iterator(values.begin()),
+                        std::make_move_iterator(values.end()));
         }
 
         /*

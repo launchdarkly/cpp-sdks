@@ -220,6 +220,6 @@ AttributeReference::AttributeReference(std::string ref_str)
     : AttributeReference(std::move(ref_str), false) {}
 
 AttributeReference::AttributeReference(char const* ref_str)
-    : AttributeReference(std::move(std::string(ref_str))) {}
+    : AttributeReference(std::string(ref_str)) {}
 
 }  // namespace launchdarkly

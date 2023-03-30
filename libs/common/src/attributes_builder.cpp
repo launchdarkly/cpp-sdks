@@ -36,6 +36,19 @@ AttributesBuilder<ContextBuilder, Context>::set(std::string name,
 
 template <>
 AttributesBuilder<ContextBuilder, Context>&
+AttributesBuilder<ContextBuilder, Context>::set(std::string name, Value value) {
+    return set(std::move(name), std::move(value), false);
+}
+
+template <>
+AttributesBuilder<ContextBuilder, Context>&
+AttributesBuilder<ContextBuilder, Context>::set_private(std::string name,
+                                                        Value value) {
+    return set(std::move(name), std::move(value), true);
+}
+
+template <>
+AttributesBuilder<ContextBuilder, Context>&
 AttributesBuilder<ContextBuilder, Context>::add_private_attribute(
     AttributeReference ref) {
     private_attributes_.insert(std::move(ref));

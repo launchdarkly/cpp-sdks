@@ -82,7 +82,7 @@ std::string Context::make_canonical_key() {
         }
     }
     stream.flush();
-    return std::move(stream.str());
+    return stream.str();
 }
 
 }  // namespace launchdarkly

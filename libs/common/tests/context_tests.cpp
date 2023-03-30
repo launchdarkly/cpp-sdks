@@ -61,7 +61,7 @@ TEST(ContextTests, OstreamOperatorValidContext) {
                         .kind("user", "user-key")
                         .kind("org", "org-key")
                         .name("Sam")
-                        .set("test", true, true)
+                        .set_private("test", true)
                         .set("string", "potato")
                         .build();
 

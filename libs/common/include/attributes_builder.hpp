@@ -58,9 +58,26 @@ class AttributesBuilder {
      * that is, the value will not be sent to LaunchDarkly in analytics events.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& set(std::string name,
-                           launchdarkly::Value value,
-                           bool private_attribute = false);
+    AttributesBuilder& set(std::string name, launchdarkly::Value value);
+
+    /**
+     * Add or update a private attribute in the context.
+     *
+     * This method cannot be used to set the key, kind, name, or anonymous
+     * property of a context. The specific methods on the context builder, or
+     * attributes builder, should be used.
+     *
+     * Once you have set an attribute private it will remain in the private
+     * list even if you call `set` afterward. This method is just a convenience
+     * which also adds the attribute to the `private_attributes`.
+     *
+     * @param name The name of the attribute.
+     * @param value The value for the attribute.
+     * @param private_attribute If the attribute should be considered private:
+     * that is, the value will not be sent to LaunchDarkly in analytics events.
+     * @return A reference to the current builder.
+     */
+    AttributesBuilder& set_private(std::string name, launchdarkly::Value value);
 
     /**
      * Designate a context attribute, or properties within them, as private:
@@ -135,7 +152,9 @@ class AttributesBuilder {
     }
 
     /**
-     * Build the context.
+     * Build the context. This method should not be called more than once.
+     * It moves the builder content into the built context.
+     *
      * @return The built context.
      */
     [[nodiscard]] BuildType build() {
@@ -147,6 +166,10 @@ class AttributesBuilder {
     BuilderReturn& builder_;
 
     Attributes build_attributes();
+
+    AttributesBuilder& set(std::string name,
+                           launchdarkly::Value value,
+                           bool private_attribute);
 
     std::string kind_;
     std::string key_;

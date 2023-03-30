@@ -9,7 +9,7 @@ namespace launchdarkly {
  * @param kind The kind to validate.
  * @return True if the kind is valid.
  */
-static bool ValidKind(std::string const& kind) {
+static bool ValidKind(std::string_view kind) {
     if (kind.length() == 0) {
         return false;
     }
@@ -25,8 +25,8 @@ static bool ValidKind(std::string const& kind) {
 AttributesBuilder<ContextBuilder, Context> ContextBuilder::kind(
     std::string kind,
     std::string key) {
-    auto kind_valid = ValidKind(kind);
-    auto key_valid = !key.empty();
+    bool kind_valid = ValidKind(kind);
+    bool key_valid = !key.empty();
     if (!kind_valid || !key_valid) {
         valid_ = false;
         auto append = errors_.length() != 0;

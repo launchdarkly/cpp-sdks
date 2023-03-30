@@ -30,7 +30,7 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
                        // Set a custom attribute.
                        .set("likesCats", true)
                        // Set a private custom attribute.
-                       .set("email", "email@email.email", true)
+                       .set_private("email", "email@email.email")
                        .build();
 
     EXPECT_TRUE(context.valid());
@@ -60,7 +60,7 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
             .set("double", 3.14)
             .set("array", {false, true, 42})
 
-            .set("private", "this is private", true)
+            .set_private("private", "this is private")
             .add_private_attribute("double")
             .add_private_attributes(std::vector<std::string>{"string", "int"})
             .add_private_attributes(

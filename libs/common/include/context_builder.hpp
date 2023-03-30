@@ -20,7 +20,7 @@ namespace launchdarkly {
  *      // Set a custom attribute.
  *      .set("likesCats", true)
  *      // Set a private custom attribute.
- *      .set("email", "email@email.email", true)
+ *      .set_private("email", "email@email.email")
  *      .build();
  * @endcode
  *
@@ -33,7 +33,7 @@ namespace launchdarkly {
  *      // Set a custom attribute.
  *      .set("likesCats", true)
  *      // Set a private custom attribute.
- *      .set("email", "email@email.email", true)
+ *      .set_private("email", "email@email.email")
  *      // Add another kind to the context.
  *      .kind("org", "org-key")
  *      .anonymous(true)
@@ -55,6 +55,11 @@ class ContextBuilder {
                                                     std::string key);
 
    private:
+    /**
+     * Build a context. This should only be called once, because
+     * the contents of the builder are moved.
+     * @return The built context.
+     */
     Context build();
 
     void internal_add_kind(std::string kind, Attributes attrs);
