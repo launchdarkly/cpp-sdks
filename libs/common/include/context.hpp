@@ -74,7 +74,8 @@ class Context {
      *
      * @return Returns a map of kinds to keys.
      */
-    [[nodiscard]] std::map<std::string_view, std::string_view> keys_and_kinds() const;
+    [[nodiscard]] std::map<std::string_view, std::string_view> keys_and_kinds()
+        const;
 
     /**
      * Get a string containing errors the context encountered during

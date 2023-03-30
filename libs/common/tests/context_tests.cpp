@@ -80,7 +80,8 @@ TEST(ContextTests, OstreamOperatorInvalidContext) {
 
     EXPECT_EQ(
         "{invalid: errors: [#$#*(: \"Kind contained invalid characters. A kind "
-        "may contain ASCII letters or numbers, as well as '.', '-', and '_'.\", "
+        "may contain ASCII letters or numbers, as well as '.', '-', and "
+        "'_'.\", "
         "#$#*(: \"The key for a context may not be empty.\"]",
         ProduceString(context));
 }
