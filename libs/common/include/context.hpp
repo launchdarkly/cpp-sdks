@@ -9,13 +9,13 @@
 namespace launchdarkly {
 
 struct ContextErrors {
-    inline static char const* kInvalidKind =
+    inline static const std::string kInvalidKind =
         "\"Kind contained invalid characters. A kind may contain ASCII letters "
         "or "
         "numbers, as well as '.', '-', and '_'.\"";
     // For now disallow an empty key. This may need changed if anonymous key
     // generation and persistence is added.
-    inline static char const* kInvalidKey =
+    inline static const std::string kInvalidKey =
         "\"The key for a context may not be empty.\"";
 };
 
@@ -62,19 +62,19 @@ class Context {
      *
      * @return Returns true if the context is valid.
      */
-    bool valid() { return valid_; }
+    [[nodiscard]] bool valid() const { return valid_; }
 
     /**
      * Get the canonical key for this context.
      */
-    std::string const& canonical_key() const;
+    [[nodiscard]] std::string const& canonical_key() const;
 
     /**
      * Get a collection containing the kinds and their associated keys.
      *
      * @return Returns a map of kinds to keys.
      */
-    std::map<std::string_view, std::string_view> keys_and_kinds() const;
+    [[nodiscard]] std::map<std::string_view, std::string_view> keys_and_kinds() const;
 
     /**
      * Get a string containing errors the context encountered during
@@ -85,24 +85,24 @@ class Context {
      */
     std::string const& errors() { return errors_; }
 
-    friend std::ostream& operator<<(std::ostream& os, Context const& context) {
+    friend std::ostream& operator<<(std::ostream& out, Context const& context) {
         if (context.valid_) {
-            os << "{contexts: [";
+            out << "{contexts: [";
             bool first = true;
             for (auto const& kind : context.attributes_) {
                 if (first) {
                     first = false;
                 } else {
-                    os << ", ";
+                    out << ", ";
                 }
-                os << "kind: " << kind.first << " attributes: " << kind.second;
+                out << "kind: " << kind.first << " attributes: " << kind.second;
             }
-            os << "]";
+            out << "]";
         } else {
-            os << "{invalid: errors: [" << context.errors_ << "]";
+            out << "{invalid: errors: [" << context.errors_ << "]";
         }
 
-        return os;
+        return out;
     }
 
    private:
@@ -115,7 +115,7 @@ class Context {
      * Create a valid context with the given attributes.
      * @param attributes
      */
-    Context(std::map<std::string, Attributes> attributes);
+    Context(std::map<std::string, Attributes>&& attributes);
     std::map<std::string, Attributes> attributes_;
     std::vector<std::string_view> kinds_;
     std::map<std::string_view, std::string_view> keys_and_kinds_;

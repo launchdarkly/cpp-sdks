@@ -5,12 +5,12 @@
 namespace launchdarkly {
 
 static bool NeedsEscape(std::string_view const& to_check) {
-    return to_check.find_first_of("%:") != to_check.npos;
+    return to_check.find_first_of("%:") != std::string_view::npos;
 }
 
 static std::string EscapeKey(std::string_view const& to_escape) {
     std::string escaped;
-    for (auto& character : to_escape) {
+    for (auto const& character : to_escape) {
         if (character == '%') {
             escaped.append("%3A");
         } else if (character == ':') {
@@ -27,9 +27,9 @@ std::vector<std::string_view> const& Context::kinds() {
 }
 
 Context::Context(std::string error_message)
-    : errors_(error_message), valid_(false) {}
+    : errors_(std::move(error_message)) {}
 
-Context::Context(std::map<std::string, Attributes> attributes)
+Context::Context(std::map<std::string, Attributes>&& attributes)
     : attributes_(std::move(attributes)), valid_(true) {
     for (auto& pair : attributes_) {
         kinds_.push_back(pair.first);
@@ -63,27 +63,26 @@ std::map<std::string_view, std::string_view> Context::keys_and_kinds() const {
 std::string Context::make_canonical_key() {
     if (keys_and_kinds_.size() == 1 && keys_and_kinds_.count("user") == 1) {
         return std::string(keys_and_kinds_["user"]);
-    } else {
-        std::stringstream stream;
-        bool first = true;
-        // Maps are ordered, so keys and kinds will be in the correct order for
-        // the canonical key.
-        for (auto& pair : keys_and_kinds_) {
-            if (first) {
-                first = false;
-            } else {
-                stream << ":";
-            }
-            if (NeedsEscape(pair.second)) {
-                std::string escaped = EscapeKey(pair.second);
-                stream << pair.first << ":" << escaped;
-            } else {
-                stream << pair.first << ":" << pair.second;
-            }
-        }
-        stream.flush();
-        return std::move(stream.str());
     }
+    std::stringstream stream;
+    bool first = true;
+    // Maps are ordered, so keys and kinds will be in the correct order for
+    // the canonical key.
+    for (auto& pair : keys_and_kinds_) {
+        if (first) {
+            first = false;
+        } else {
+            stream << ":";
+        }
+        if (NeedsEscape(pair.second)) {
+            std::string escaped = EscapeKey(pair.second);
+            stream << pair.first << ":" << escaped;
+        } else {
+            stream << pair.first << ":" << pair.second;
+        }
+    }
+    stream.flush();
+    return std::move(stream.str());
 }
 
 }  // namespace launchdarkly

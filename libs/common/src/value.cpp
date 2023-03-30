@@ -117,18 +117,18 @@ Value::Value(std::initializer_list<Value> values)
     : type_(Type::kArray), storage_(std::vector<Value>(values)) {}
 
 Value::Array::Iterator::Iterator(std::vector<Value>::const_iterator iterator)
-    : it_(iterator) {}
+    : iterator_(iterator) {}
 
 Value::Array::Iterator::reference Value::Array::Iterator::operator*() const {
-    return *it_;
+    return *iterator_;
 }
 
 Value::Array::Iterator::pointer Value::Array::Iterator::operator->() {
-    return &*it_;
+    return &*iterator_;
 }
 
 Value::Array::Iterator& Value::Array::Iterator::operator++() {
-    it_++;
+    iterator_++;
     return *this;
 }
 

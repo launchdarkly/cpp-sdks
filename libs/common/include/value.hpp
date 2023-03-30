@@ -66,31 +66,31 @@ class Value {
             Iterator& operator++();
             Iterator operator++(int);
 
-            friend bool operator==(Iterator const& a, Iterator const& b) {
-                return a.it_ == b.it_;
+            friend bool operator==(Iterator const& lhs, Iterator const& rhs) {
+                return lhs.iterator_ == rhs.iterator_;
             };
 
-            friend bool operator!=(Iterator const& a, Iterator const& b) {
-                return a.it_ != b.it_;
+            friend bool operator!=(Iterator const& lhs, Iterator const& rhs) {
+                return lhs.iterator_ != rhs.iterator_;
             };
 
            private:
-            std::vector<Value>::const_iterator it_;
+            std::vector<Value>::const_iterator iterator_;
         };
 
-        friend std::ostream& operator<<(std::ostream& os, Array const& arr) {
-            os << "[";
+        friend std::ostream& operator<<(std::ostream& out, Array const& arr) {
+            out << "[";
             bool first = true;
-            for (auto item : arr.vec_) {
+            for (auto const& item : arr.vec_) {
                 if (first) {
                     first = false;
                 } else {
-                    os << ", ";
+                    out << ", ";
                 }
-                os << item;
+                out << item;
             }
-            os << "]";
-            return os;
+            out << "]";
+            return out;
         }
 
         /**
@@ -101,13 +101,13 @@ class Value {
         Array(std::initializer_list<Value> values) : vec_(values) {}
         Array() = default;
 
-        Value const& operator[](std::size_t i) const;
+        Value const& operator[](std::size_t index) const;
 
-        std::size_t size() const;
+        [[nodiscard]] std::size_t size() const;
 
-        Iterator begin() const;
+        [[nodiscard]] Iterator begin() const;
 
-        Iterator end() const;
+        [[nodiscard]] Iterator end() const;
 
        private:
         std::vector<Value> vec_;
@@ -133,30 +133,30 @@ class Value {
             Iterator& operator++();
             Iterator operator++(int);
 
-            friend bool operator==(Iterator const& a, Iterator const& b) {
-                return a.it_ == b.it_;
+            friend bool operator==(Iterator const& lhs, Iterator const& rhs) {
+                return rhs.it_ == lhs.it_;
             };
-            friend bool operator!=(Iterator const& a, Iterator const& b) {
-                return a.it_ != b.it_;
+            friend bool operator!=(Iterator const& lhs, Iterator const& rhs) {
+                return lhs.it_ != rhs.it_;
             };
 
            private:
             std::map<std::string, Value>::const_iterator it_;
         };
 
-        friend std::ostream& operator<<(std::ostream& os, Object const& obj) {
-            os << "{";
+        friend std::ostream& operator<<(std::ostream& out, Object const& obj) {
+            out << "{";
             bool first = true;
-            for (auto pair : obj.map_) {
+            for (auto const& pair : obj.map_) {
                 if (first) {
                     first = false;
                 } else {
-                    os << ", ";
+                    out << ", ";
                 }
-                os << "{" << pair.first << ", " << pair.second << "}";
+                out << "{" << pair.first << ", " << pair.second << "}";
             }
-            os << "}";
-            return os;
+            out << "}";
+            return out;
         }
 
         /**
@@ -166,8 +166,8 @@ class Value {
         Object(std::map<std::string, Value> map) : map_(std::move(map)) {}
         Object() = default;
         Object(std::initializer_list<std::pair<std::string, Value>> values) {
-            for (auto pair : values) {
-                map_[std::move(pair.first)] = std::move(pair.second);
+            for (auto const& pair : values) {
+                map_[pair.first] = pair.second;
             }
         }
 
@@ -185,27 +185,27 @@ class Value {
          * The number of items in the Object.
          * @return The number of items in the Object.
          */
-        std::size_t size() const;
+        [[nodiscard]] std::size_t size() const;
 
         /**
          * Get the number of items with the given key. Will be 1 or 0.
          * @param key The key to get a count for.
          * @return The count of items with the given key.
          */
-        std::size_t count(std::string const& key) const {
+        [[nodiscard]] std::size_t count(std::string const& key) const {
             return map_.count(key);
         }
 
-        Iterator begin() const;
+        [[nodiscard]] Iterator begin() const;
 
-        Iterator end() const;
+        [[nodiscard]] Iterator end() const;
 
         /**
          * Find a Value by key. Operates like `find` on a std::map.
          * @param key The key to find a value for.
          * @return The value, or the end iterator.
          */
-        Iterator find(std::string const& key) const;
+        [[nodiscard]] Iterator find(std::string const& key) const;
 
        private:
         std::map<std::string, Value> map_;
@@ -223,6 +223,11 @@ class Value {
      * Construct a value representing null.
      */
     Value();
+
+    Value(Value const& val) = default;
+    Value(Value&&) = default;
+    Value& operator=(Value const&) = default;
+    Value& operator=(Value&&) = default;
 
     /**
      * Construct a boolean value.
@@ -281,7 +286,7 @@ class Value {
     /**
      * Get the type of the attribute.
      */
-    Type type() const;
+    [[nodiscard]] Type type() const;
 
     /**
      * Returns true if the value is a null.
@@ -290,14 +295,14 @@ class Value {
      * value from this function as a marker.
      * @return True if the value is null.
      */
-    bool is_null() const;
+    [[nodiscard]] bool is_null() const;
 
     /**
      * Returns true if the value is a boolean.
      *
      * @return
      */
-    bool is_bool() const;
+    [[nodiscard]] bool is_bool() const;
 
     /**
      * Returns true if the value is a number.
@@ -306,28 +311,28 @@ class Value {
      * an int or double for convenience.
      * @return True if the value is a number.
      */
-    bool is_number() const;
+    [[nodiscard]] bool is_number() const;
 
     /**
      * Returns true if the value is a string.
      *
      * @return True if the value is a string.
      */
-    bool is_string() const;
+    [[nodiscard]] bool is_string() const;
 
     /**
      * Returns true if the value is an array.
      *
      * @return True if the value is an array.
      */
-    bool is_array() const;
+    [[nodiscard]] bool is_array() const;
 
     /**
      * Returns true if the value is an object.
      *
      * @return True if the value is an object.
      */
-    bool is_object() const;
+    [[nodiscard]] bool is_object() const;
 
     /**
      * If the value is a boolean, then return the boolean, otherwise return
@@ -335,7 +340,7 @@ class Value {
      *
      * @return The value of the boolean, or false.
      */
-    bool as_bool() const;
+    [[nodiscard]] bool as_bool() const;
 
     /**
      * If the value is a number, then return the internal double value as an
@@ -343,9 +348,9 @@ class Value {
      *
      * @return The value as an integer, or 0.
      */
-    int as_int() const;
+    [[nodiscard]] int as_int() const;
 
-    double as_double() const;
+    [[nodiscard]] double as_double() const;
 
     /**
      * If the value is a string, then return a reference to that string,
@@ -353,7 +358,7 @@ class Value {
      *
      * @return The value as a string, or an empty string.
      */
-    std::string const& as_string() const;
+    [[nodiscard]] std::string const& as_string() const;
 
     /**
      * If the value is an array type, then return a reference to that array as a
@@ -361,7 +366,7 @@ class Value {
      *
      * @return The value as a vector, or an empty vector.
      */
-    Array const& as_array() const;
+    [[nodiscard]] Array const& as_array() const;
 
     /**
      * if the value is an object type, then return a reference to that object
@@ -369,7 +374,7 @@ class Value {
      *
      * @return The value as a map, or an empty map.
      */
-    Object const& as_object() const;
+    [[nodiscard]] Object const& as_object() const;
 
     ~Value() = default;
 
@@ -379,31 +384,31 @@ class Value {
      */
     static Value const& null();
 
-    friend std::ostream& operator<<(std::ostream& os, Value const& value) {
+    friend std::ostream& operator<<(std::ostream& out, Value const& value) {
         switch (value.type_) {
             case Type::kNull:
-                os << "null()";
+                out << "null()";
                 break;
             case Type::kBool:
-                os << "bool("
-                   << (boost::get<bool>(value.storage_) ? "true" : "false")
-                   << ")";
+                out << "bool("
+                    << (boost::get<bool>(value.storage_) ? "true" : "false")
+                    << ")";
                 break;
             case Type::kNumber:
-                os << "number(" << boost::get<double>(value.storage_) << ")";
+                out << "number(" << boost::get<double>(value.storage_) << ")";
                 break;
             case Type::kString:
-                os << "string(" << boost::get<std::string>(value.storage_)
-                   << ")";
+                out << "string(" << boost::get<std::string>(value.storage_)
+                    << ")";
                 break;
             case Type::kObject:
-                os << "object(" << boost::get<Object>(value.storage_) << ")";
+                out << "object(" << boost::get<Object>(value.storage_) << ")";
                 break;
             case Type::kArray:
-                os << "array(" << boost::get<Array>(value.storage_) << ")";
+                out << "array(" << boost::get<Array>(value.storage_) << ")";
                 break;
         }
-        return os;
+        return out;
     }
 
    private:

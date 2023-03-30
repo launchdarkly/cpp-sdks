@@ -9,28 +9,24 @@ namespace launchdarkly {
  * @param kind The kind to validate.
  * @return True if the kind is valid.
  */
-static bool ValidKind(std::string kind) {
+static bool ValidKind(std::string const& kind) {
     if (kind.length() == 0) {
         return false;
     }
-    for (auto const& character : kind) {
-        auto valid = character == '.' || character == '-' || character == '_' ||
-                     (character >= '0' && character <= '9') ||
-                     (character >= 'A' && character <= 'Z') ||
-                     (character >= 'a' && character <= 'z');
-        if (!valid) {
-            return false;
-        }
-    }
-    // Did not encounter any validation errors.
-    return true;
+
+    return std::all_of(kind.begin(), kind.end(), [](auto character) {
+        return character == '.' || character == '-' || character == '_' ||
+               (character >= '0' && character <= '9') ||
+               (character >= 'A' && character <= 'Z') ||
+               (character >= 'a' && character <= 'z');
+    });
 }
 
 AttributesBuilder<ContextBuilder, Context> ContextBuilder::kind(
     std::string kind,
     std::string key) {
     auto kind_valid = ValidKind(kind);
-    auto key_valid = key != "";
+    auto key_valid = !key.empty();
     if (!kind_valid || !key_valid) {
         valid_ = false;
         auto append = errors_.length() != 0;
@@ -55,10 +51,9 @@ AttributesBuilder<ContextBuilder, Context> ContextBuilder::kind(
 
 Context ContextBuilder::build() {
     if (valid_) {
-        return {kinds_};
-    } else {
-        return {errors_};
+        return {std::move(kinds_)};
     }
+    return {std::move(errors_)};
 }
 
 void ContextBuilder::internal_add_kind(std::string kind, Attributes attrs) {

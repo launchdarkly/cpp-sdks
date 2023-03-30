@@ -7,7 +7,7 @@ using launchdarkly::Attributes;
 using launchdarkly::Value;
 
 TEST(AttributesTests, CanGetBuiltInAttributesByReference) {
-    Attributes attributes("the-key", "the-name", true, Value::null());
+    Attributes attributes("the-key", "the-name", true, Value());
 
     EXPECT_EQ("the-key",
               attributes.get(AttributeReference::from_reference_str("/key"))

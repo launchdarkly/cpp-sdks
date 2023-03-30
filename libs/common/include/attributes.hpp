@@ -91,9 +91,8 @@ class Attributes {
         }
         if (!found) {
             return launchdarkly::Value::null();
-        } else {
-            return *node;
         }
+        return *node;
     }
 
     /**
@@ -109,7 +108,7 @@ class Attributes {
     Attributes(std::string key,
                std::optional<std::string> name,
                bool anonymous,
-               launchdarkly::Value attributes,
+               launchdarkly::Value&& attributes,
                AttributeReference::SetType private_attributes =
                    AttributeReference::SetType())
         : key_(std::move(key)),
@@ -118,23 +117,24 @@ class Attributes {
           custom_attributes_(std::move(attributes)),
           private_attributes_(std::move(private_attributes)) {}
 
-    friend std::ostream& operator<<(std::ostream& os, Attributes const& attrs) {
-        os << "{key: " << attrs.key_ << ", "
-           << " name: " << attrs.name_ << " anonymous: " << attrs.anonymous_
-           << " private: [";
+    friend std::ostream& operator<<(std::ostream& out,
+                                    Attributes const& attrs) {
+        out << "{key: " << attrs.key_ << ", "
+            << " name: " << attrs.name_ << " anonymous: " << attrs.anonymous_
+            << " private: [";
         bool first = true;
         for (auto const& private_attribute : attrs.private_attributes_) {
             if (first) {
                 first = false;
             } else {
-                os << ", ";
+                out << ", ";
             }
-            os << private_attribute;
+            out << private_attribute;
         }
-        os << "] "
-           << " custom: " << attrs.custom_attributes_ << "}";
+        out << "] "
+            << " custom: " << attrs.custom_attributes_ << "}";
 
-        return os;
+        return out;
     }
 
    private:
