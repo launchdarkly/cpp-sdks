@@ -122,7 +122,8 @@ TEST(ContextBuilderTests, HandlesMultipleErrors) {
 
     EXPECT_EQ(
         "#$#*(: \"Kind contained invalid characters. A kind may contain ASCII "
-        "letters or numbers, as well as '.', '-', and '_'.\", #$#*(: \"The key for "
+        "letters or numbers, as well as '.', '-', and '_'.\", #$#*(: \"The key "
+        "for "
         "a context may not be empty.\"",
         context.errors());
 }

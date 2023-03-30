@@ -4,7 +4,11 @@
 
 namespace launchdarkly {
 
-std::string EscapeKey(std::string_view const& to_escape) {
+static bool NeedsEscape(std::string_view const& to_check) {
+    return to_check.find_first_of("%:") != to_check.npos;
+}
+
+static std::string EscapeKey(std::string_view const& to_escape) {
     std::string escaped;
     for (auto& character : to_escape) {
         if (character == '%') {
@@ -32,29 +36,7 @@ Context::Context(std::map<std::string, Attributes> attributes)
         keys_and_kinds_[pair.first] = pair.second.key();
     }
 
-    if (keys_and_kinds_.size() == 1 && keys_and_kinds_.count("user") == 1) {
-        canonical_key_ = keys_and_kinds_["user"];
-    } else {
-        std::stringstream stream;
-        bool first = true;
-        // Maps are ordered, so keys and kinds will be in the correct order for
-        // the canonical key.
-        for (auto& pair : keys_and_kinds_) {
-            if (first) {
-                first = false;
-            } else {
-                stream << ":";
-            }
-            if (pair.second.find_first_of("%:") != pair.second.npos) {
-                std::string escaped = EscapeKey(pair.second);
-                stream << pair.first << ":" << escaped;
-            } else {
-                stream << pair.first << ":" << pair.second;
-            }
-        }
-        stream.flush();
-        canonical_key_ = stream.str();
-    }
+    canonical_key_ = make_canonical_key();
 }
 
 Value const& Context::get(std::string const& kind,
@@ -76,6 +58,32 @@ std::string const& Context::canonical_key() const {
 
 std::map<std::string_view, std::string_view> Context::keys_and_kinds() const {
     return keys_and_kinds_;
+}
+
+std::string Context::make_canonical_key() {
+    if (keys_and_kinds_.size() == 1 && keys_and_kinds_.count("user") == 1) {
+        return std::string(keys_and_kinds_["user"]);
+    } else {
+        std::stringstream stream;
+        bool first = true;
+        // Maps are ordered, so keys and kinds will be in the correct order for
+        // the canonical key.
+        for (auto& pair : keys_and_kinds_) {
+            if (first) {
+                first = false;
+            } else {
+                stream << ":";
+            }
+            if (NeedsEscape(pair.second)) {
+                std::string escaped = EscapeKey(pair.second);
+                stream << pair.first << ":" << escaped;
+            } else {
+                stream << pair.first << ":" << pair.second;
+            }
+        }
+        stream.flush();
+        return std::move(stream.str());
+    }
 }
 
 }  // namespace launchdarkly

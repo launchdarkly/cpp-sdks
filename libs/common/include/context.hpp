@@ -122,6 +122,8 @@ class Context {
     bool valid_ = false;
     std::string errors_;
     std::string canonical_key_;
+
+    std::string make_canonical_key();
 };
 
 }  // namespace launchdarkly
