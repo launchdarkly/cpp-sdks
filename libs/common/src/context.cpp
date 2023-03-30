@@ -4,7 +4,7 @@
 
 namespace launchdarkly {
 
-static bool NeedsEscape(std::string_view const& to_check) {
+static bool NeedsEscape(std::string_view to_check) {
     return to_check.find_first_of("%:") != std::string_view::npos;
 }
 
