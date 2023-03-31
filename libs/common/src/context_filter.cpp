@@ -117,7 +117,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 // An item in an array cannot be marked private.
                 stack.push_back(StackItem{
                     *rev_from, std::vector<std::string_view>{}, *nested});
-                *rev_from++;
+                rev_from++;
             }
         } else {
             append_simple_type(item);
