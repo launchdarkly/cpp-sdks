@@ -20,7 +20,7 @@ add_library(${LIBNAME}
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
-        )
+        context_filter.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
