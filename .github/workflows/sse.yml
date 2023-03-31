@@ -26,6 +26,7 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: sse-tests
+          run_tests: false
       - uses: ./.github/workflows/sse-contract-tests.yml
         with:
           test-service-port: 8123
