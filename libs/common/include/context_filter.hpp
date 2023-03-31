@@ -60,7 +60,8 @@ class ContextFilter {
      * If the path needs redacted, then redact it and add it to the redactions.
      * @param redactions The list of redacted items.
      * @param path The path to check.
-     * @param attributes Attributes which may contain additional private attribues.
+     * @param attributes Attributes which may contain additional private
+     * attribues.
      * @return True if the item was redacted.
      */
     bool redact(std::vector<std::string>& redactions,
