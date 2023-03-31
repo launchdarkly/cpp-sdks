@@ -156,8 +156,8 @@ TEST(ContextFilterTests, AllAttributesPrivateMultiContext) {
             .set_private("isCat", false)
             .add_private_attribute("/object/test")
             .kind("org", "org-key")
-            .set("isCat", true)           // Not filtered in this context.
-            .set("email", "cat@cat.cat")  // Filtered globally.
+            .set("isCat", true)
+            .set("email", "cat@cat.cat")
             .build());
 
     auto expected = parse(
