@@ -11,13 +11,16 @@ using launchdarkly::Value;
 using Object = launchdarkly::Value::Object;
 
 TEST(ContextFilterTests, BasicContext) {
-    ContextFilter filter(false, AttributeReference::SetType());
+    auto global_private_attributes = AttributeReference::SetType{"email"};
+    ContextFilter filter(false, global_private_attributes);
 
     auto filtered = filter.filter(ContextBuilder()
                                       .kind("user", "user-key")
                                       .set("email", "email.email@email")
                                       .set("array", {false, true, "bacon"})
-                                      .set("object", Object{{"test", true}})
+                                      .set("object", Object{{"test", true}, {"second", false}})
+                                      .set_private("isCat", false)
+                                      .add_private_attribute("/object/test")
                                       .build());
     std::cout << filtered << std::endl;
     EXPECT_EQ(true, false);

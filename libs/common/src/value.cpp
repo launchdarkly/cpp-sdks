@@ -138,6 +138,16 @@ Value::Array::Iterator Value::Array::Iterator::operator++(int) {
     return tmp;
 }
 
+Value::Array::Iterator& Value::Array::Iterator::operator--() {
+    iterator_--;
+    return *this;
+}
+Value::Array::Iterator Value::Array::Iterator::operator--(int) {
+    Iterator tmp = *this;
+    --(*this);
+    return tmp;
+}
+
 Value const& Value::Array::operator[](std::size_t index) const {
     return vec_[index];
 }

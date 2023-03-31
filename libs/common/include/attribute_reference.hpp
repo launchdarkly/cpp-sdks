@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -127,8 +128,17 @@ class AttributeReference {
         return components_ == other.components_;
     }
 
+    bool operator==(std::vector<std::string_view> const& path) const {
+        return components_.size() == path.size() &&
+               std::equal(components_.begin(), components_.end(), path.begin());
+    }
+
     bool operator!=(AttributeReference const& other) const {
         return !(*this == other);
+    }
+
+    bool operator!=(std::vector<std::string_view> const& path) const {
+        return !(*this == path);
     }
 
     bool operator<(AttributeReference const& rhs) const {

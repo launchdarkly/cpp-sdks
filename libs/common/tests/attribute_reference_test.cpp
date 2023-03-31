@@ -93,3 +93,15 @@ TEST(AttributeReferenceTests, FromString) {
     EXPECT_EQ("a", ref.component(0));
     EXPECT_EQ("b", ref_b.component(0));
 }
+
+TEST(AttributeReferenceTest, CompareToPath) {
+    EXPECT_TRUE(AttributeReference("/a") == std::vector<std::string_view>{"a"});
+
+    auto path = std::vector<std::string_view>{"a", "b"};
+    EXPECT_TRUE(AttributeReference("/a/b") == path);
+
+    EXPECT_FALSE(AttributeReference("/a/c") == path);
+    EXPECT_TRUE(AttributeReference("/a/c") != path);
+
+    EXPECT_FALSE(AttributeReference("/a/b") != path);
+}
