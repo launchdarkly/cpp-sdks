@@ -26,12 +26,22 @@ class ContextFilter {
 
     /**
      * Filter the given context and produce a JSON value.
+     *
+     * Only call this method for valid contexts.
+     *
      * @param context The context to redact.
      * @return JSON suitable for an analytics event.
      */
     JsonValue filter(Context const& context);
 
    private:
+    /**
+     * The filtering and JSON conversion algorithm is stack based
+     * instead of recursive. Each node is visited, and if that node is a basic
+     * type bool, number, string, then it is processed immediately, being
+     * added to the output object. If the node is complex, then each of its
+     * immediately children is added to the stack to be processed.
+     */
     struct StackItem {
         Value const& value;
         std::vector<std::string_view> path;
@@ -52,6 +62,8 @@ class ContextFilter {
 
     bool all_attributes_private_;
     AttributeReference::SetType const& global_private_attributes_;
+    static JsonValue* append_container(StackItem& item, JsonValue&& value);
+    static void append_simple_type(StackItem& item);
 };
 
 }  // namespace launchdarkly

@@ -62,20 +62,26 @@ TEST(ContextFilterTests, BasicContext) {
         ContextBuilder()
             .kind("user", "user-key")
             .set("email", "email.email@email")
-            .set("array", {false, true, "bacon"})
-            .set("object", Object{{"test", true}, {"second", false}})
+            .set("array", {false, true, "bacon", {"first", "second"}})
+            .set("object",
+                 Object{{"test", true}, {"second", false}, {"arr", {1, 2}}})
+            .set("arrayWithObject", {true, Object{{"a", "b"}}, "c"})
             .set_private("isCat", false)
             .add_private_attribute("/object/test")
             .build());
 
     auto expected = parse(
         "{"
-        "\"key\":\"user-key\","
-        "\"kind\":\"user\","
-        "\"object\":{\"second\":false},"
-        "\"array\":[false,true,\"bacon\"],"
-        "\"_meta\":{\"redactedAttributes\":["
-        "\"/object/test\",\"isCat\",\"email\"]}"
+        "\"key\":\"user-key\""
+        ",\"kind\":\"user\","
+        "\"object\":"
+        "{"
+        "\"second\":false,\"arr\":[1E0,2E0]"
+        "},"
+        "\"arrayWithObject\":[true,{\"a\":\"b\"},\"c\"],"
+        "\"array\":[false,true,\"bacon\",[\"first\",\"second\"]],"
+        "\"_meta\":{"
+        "\"redactedAttributes\":[\"/object/test\",\"isCat\",\"email\"]}"
         "}");
 
     EXPECT_EQ(expected, filtered);

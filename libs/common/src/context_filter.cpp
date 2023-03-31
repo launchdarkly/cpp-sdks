@@ -11,18 +11,14 @@ ContextFilter::ContextFilter(
       global_private_attributes_(global_private_attributes) {}
 
 ContextFilter::JsonValue ContextFilter::filter(Context const& context) {
-    if (!context.valid()) {
-        // Should not happen.
-        // TODO: Maybe assert.
-        return {};
-    }
+    // Context should be validated before calling this method.
+    assert(context.valid());
     if (context.kinds().size() == 1) {
         auto kind = context.kinds()[0];
         return filter_single_context(kind, true,
                                      context.attributes(kind.data()));
-    } else {
-        return filter_multi_context(context);
     }
+    return filter_multi_context(context);
 }
 
 void ContextFilter::emplace(ContextFilter::StackItem& item,
@@ -70,13 +66,12 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
     JsonValue filtered = JsonObject();
     std::vector<std::string> redactions;
 
-    filtered.as_object().insert_or_assign("key", attributes.key());
+    filtered.as_object().emplace("key", attributes.key());
     if (include_kind) {
-        filtered.as_object().insert_or_assign("kind", kind);
+        filtered.as_object().emplace("kind", kind);
     }
     if (attributes.anonymous()) {
-        filtered.as_object().insert_or_assign("anonymous",
-                                              attributes.anonymous());
+        filtered.as_object().emplace("anonymous", attributes.anonymous());
     }
 
     if (!attributes.name().empty() &&
@@ -102,14 +97,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         }
 
         if (item.value.is_object()) {
-            JsonValue* nested;
-            if (item.parent.is_object()) {
-                item.parent.as_object().emplace(item.path.back(), JsonObject());
-                nested = &item.parent.as_object().at(item.path.back());
-            } else {
-                item.parent.as_array().emplace(0, JsonObject());
-                nested = &item.parent.as_array().at(0);
-            }
+            JsonValue* nested = append_container(item, JsonObject());
 
             for (auto const& pair : item.value.as_object()) {
                 auto new_path = std::vector<std::string_view>(item.path);
@@ -117,14 +105,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 stack.push_back(StackItem{pair.second, new_path, *nested});
             }
         } else if (item.value.is_array()) {
-            JsonValue* nested;
-            if (item.parent.is_object()) {
-                item.parent.as_object().emplace(item.path.back(), JsonArray());
-                nested = &item.parent.as_object().at(item.path.back());
-            } else {
-                item.parent.as_array().emplace(0, JsonArray());
-                nested = &item.parent.as_array().at(0);
-            }
+            JsonValue* nested = append_container(item, JsonArray());
 
             // Array contents are added in reverse, this is a recursive
             // algorithm so they will get reversed again when the stack
@@ -141,39 +122,52 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 *rev_from++;
             }
         } else {
-            switch (item.value.type()) {
-                case Value::Type::kNull:
-                    emplace(item, JsonValue());
-                    break;
-                case Value::Type::kBool:
-                    emplace(item, JsonValue(item.value.as_bool()));
-                    break;
-                case Value::Type::kNumber:
-                    emplace(item, JsonValue(item.value.as_double()));
-                    break;
-                case Value::Type::kString:
-                    emplace(item, JsonValue(item.value.as_string()));
-                    break;
-                case Value::Type::kObject:
-                    // Cannot happen.
-                    break;
-                case Value::Type::kArray:
-                    // Cannot happen.
-                    break;
-            }
+            append_simple_type(item);
         }
     }
 
     if (!redactions.empty()) {
         auto obj = JsonObject();
         auto arr = JsonArray();
-        for (auto redaction : redactions) {
+        for (auto const& redaction : redactions) {
             arr.push_back(JsonValue(redaction));
         }
         obj.emplace("redactedAttributes", std::move(arr));
         filtered.as_object().emplace("_meta", std::move(obj));
     }
     return filtered;
+}
+
+void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
+    switch (item.value.type()) {
+        case Value::Type::kNull:
+            emplace(item, JsonValue());
+            break;
+        case Value::Type::kBool:
+            emplace(item, item.value.as_bool());
+            break;
+        case Value::Type::kNumber:
+            emplace(item, item.value.as_double());
+            break;
+        case Value::Type::kString:
+            emplace(item, item.value.as_string().c_str());
+            break;
+        case Value::Type::kObject:
+        case Value::Type::kArray:
+            // Cannot happen.
+            break;
+    }
+}
+
+ContextFilter::JsonValue* ContextFilter::append_container(
+    ContextFilter::StackItem& item,
+    JsonValue&& value) {
+    if (item.parent.is_object()) {
+        item.parent.as_object().emplace(item.path.back(), std::move(value));
+        return &item.parent.as_object().at(item.path.back());
+    }
+    item.parent.as_array().emplace_back(std::move(value));
+    return &item.parent.as_array().back();
 }
 
 ContextFilter::JsonValue ContextFilter::filter_multi_context(
