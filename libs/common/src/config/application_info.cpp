@@ -7,6 +7,9 @@
 
 namespace launchdarkly::config::detail {
 
+// Defines the maximum character length for an Application Tag value.
+constexpr std::size_t kMaxTagValueLength = 64;
+
 ApplicationInfo::Tag::Tag(std::string key, std::string value)
     : key(std::move(key)), value(std::move(value)) {}
 
@@ -15,14 +18,14 @@ std::string ApplicationInfo::Tag::build() const {
 }
 
 bool valid_char(char c) {
-    return std::isalnum(c) || c == '-' || c == '.' || c == '_';
+    return std::isalnum(c) != 0 || c == '-' || c == '.' || c == '_';
 }
 
 bool is_valid_tag(std::string const& key, std::string const& value) {
     if (value.empty() || key.empty()) {
         return false;
     }
-    if (value.length() > 64) {
+    if (value.length() > kMaxTagValueLength) {
         return false;
     }
     if (!std::all_of(key.begin(), key.end(), valid_char)) {
