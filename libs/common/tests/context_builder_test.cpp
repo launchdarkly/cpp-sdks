@@ -12,6 +12,8 @@ using Object = launchdarkly::Value::Object;
 using Array = launchdarkly::Value::Array;
 using launchdarkly::AttributeReference;
 
+// NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
+
 TEST(ContextBuilderTests, CanMakeBasicContext) {
     auto context = ContextBuilder().kind("user", "user-key").build();
 
@@ -173,3 +175,5 @@ TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
     EXPECT_EQ("Reno", context.get("user", "city").as_string());
     EXPECT_TRUE(context.get("user", "isCat").as_bool());
 }
+
+// NOLINTEND cppcoreguidelines-avoid-magic-numbers

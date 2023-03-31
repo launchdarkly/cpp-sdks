@@ -21,6 +21,7 @@ class ContextBuilder;
 template <class BuilderReturn, class BuildType>
 class AttributesBuilder {
     friend class ContextBuilder;
+
    public:
     /**
      * Create an attributes builder with the given key.
@@ -34,7 +35,11 @@ class AttributesBuilder {
      * reference stored in the context builder.
      */
     AttributesBuilder(AttributesBuilder const& builder) = delete;
-    AttributesBuilder(AttributesBuilder&& builder) = default;
+    AttributesBuilder& operator=(AttributesBuilder const&) = delete;
+    AttributesBuilder& operator=(AttributesBuilder&&) = delete;
+
+    AttributesBuilder(AttributesBuilder&& builder) noexcept = default;
+    ~AttributesBuilder() = default;
 
     /**
      * The context's name.
@@ -166,9 +171,7 @@ class AttributesBuilder {
      *
      * @return The built context.
      */
-    [[nodiscard]] BuildType build() {
-        return builder_.build();
-    }
+    [[nodiscard]] BuildType build() { return builder_.build(); }
 
    private:
     BuilderReturn& builder_;
@@ -178,9 +181,7 @@ class AttributesBuilder {
      * @param key The key to replace the existing key.
      * @return A reference to this builder.
      */
-    void key(std::string key) {
-        key_ = std::move(key);
-    }
+    void key(std::string key) { key_ = std::move(key); }
 
     Attributes build_attributes();
 
