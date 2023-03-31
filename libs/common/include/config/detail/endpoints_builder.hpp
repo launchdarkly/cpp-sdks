@@ -1,6 +1,9 @@
 #pragma once
 
-#include "service_endpoints.hpp"
+#include "config/detail/service_endpoints.hpp"
+#include "error.hpp"
+
+#include <tl/expected.hpp>
 
 #include <memory>
 #include <optional>
@@ -68,7 +71,7 @@ class EndpointsBuilder {
      * returns nullptr.
      * @return Unique pointer to ServiceEndpoints, or nullptr.
      */
-    [[nodiscard]] std::unique_ptr<ServiceEndpoints> build();
+    [[nodiscard]] tl::expected<ServiceEndpoints, Error> build();
 };
 
 }  // namespace launchdarkly::config::detail

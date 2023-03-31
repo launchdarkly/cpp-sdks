@@ -44,17 +44,16 @@ bool empty_string(std::optional<std::string> const& opt_string) {
 }
 
 template <typename SDK>
-std::unique_ptr<ServiceEndpoints> EndpointsBuilder<SDK>::build() {
+tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::build() {
     // Empty URLs are not allowed.
     if (empty_string(polling_base_url_) || empty_string(streaming_base_url_) ||
         empty_string(events_base_url_)) {
-        return nullptr;
+        return tl::unexpected(Error::kConfig_Endpoints_EmptyURL);
     }
 
     // If no URLs were set, return the default endpoints for this SDK.
     if (!polling_base_url_ && !streaming_base_url_ && !events_base_url_) {
-        return std::make_unique<ServiceEndpoints>(
-            detail::Defaults<SDK>::endpoints());
+        return detail::Defaults<SDK>::endpoints();
     }
 
     // If all URLs were set, trim any trailing slashes and construct custom
@@ -63,14 +62,13 @@ std::unique_ptr<ServiceEndpoints> EndpointsBuilder<SDK>::build() {
         auto trim_trailing_slashes = [](std::string const& url) -> std::string {
             return trim_right_matches(url, '/');
         };
-        return std::make_unique<ServiceEndpoints>(
-            trim_trailing_slashes(*polling_base_url_),
-            trim_trailing_slashes(*streaming_base_url_),
-            trim_trailing_slashes(*events_base_url_));
+        return ServiceEndpoints(trim_trailing_slashes(*polling_base_url_),
+                                trim_trailing_slashes(*streaming_base_url_),
+                                trim_trailing_slashes(*events_base_url_));
     }
 
     // Otherwise if a subset of URLs were set, this is an error.
-    return nullptr;
+    return tl::unexpected(Error::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 template <typename SDK>
