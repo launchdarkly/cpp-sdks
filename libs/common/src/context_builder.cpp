@@ -32,9 +32,8 @@ AttributesBuilder<ContextBuilder, Context>& ContextBuilder::kind(
         return kind_builder;
     }
 
-    builders_.emplace(kind,
-                      std::move(AttributesBuilder<ContextBuilder, Context>(
-                          *this, kind, std::move(key))));
+    builders_.emplace(kind, AttributesBuilder<ContextBuilder, Context>(
+                                *this, kind, std::move(key)));
     return builders_.at(kind);
 }
 
