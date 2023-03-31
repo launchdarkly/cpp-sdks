@@ -142,6 +142,7 @@ Value::Array::Iterator& Value::Array::Iterator::operator--() {
     iterator_--;
     return *this;
 }
+
 Value::Array::Iterator Value::Array::Iterator::operator--(int) {
     Iterator tmp = *this;
     --(*this);
