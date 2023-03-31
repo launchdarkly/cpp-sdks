@@ -5,16 +5,17 @@ inputs:
     required: true
     description: "Port of the component under test."
     default: '8123'
-  test_harness_port:
-    description: "Port of the test harness."
-    required: false
   debug_logging:
     description: "Whether the test harness should print debug logs for failed tests."
     required: false
+    default: 'false'
 
 runs:
   using: composite
   steps:
-    - name: 'Hello world'
+    - name: 'Run Test Harness'
       shell: bash
-      run: echo "hello world!"
+      run: curl -s https://raw.githubusercontent.com/launchdarkly/sse-contract-tests/v2.0.0/downloader/run.sh | bash
+      env:
+        VERSION: v2
+        PARAMS: -url http://localhost:${{ inputs.test_service_port }} ${{ inputs.debug_logging == 'true' && '-debug' }} -stop-service-at-end
