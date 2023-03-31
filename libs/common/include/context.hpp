@@ -35,7 +35,7 @@ class Context {
      *
      * @return A vector of kinds.
      */
-    std::vector<std::string_view> const& kinds() const;
+    [[nodiscard]] std::vector<std::string_view> const& kinds() const;
 
     /**
      * Get a set of attributes associated with a kind.
