@@ -152,8 +152,9 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
  * Literal starting with a '/' needs to be converted to an attribute
  * reference string.
  */
-std::string EscapeLiteral(std::string const& literal) {
-    std::string escaped = "/";
+std::string EscapeLiteral(std::string const& literal,
+                          bool prepend_slash = true) {
+    std::string escaped = prepend_slash ? "/" : "";
     for (auto const& character : literal) {
         if (character == '~') {
             escaped.append("~0");
@@ -242,8 +243,10 @@ std::string AttributeReference::path_to_string_reference(
         } else {
             redaction_name.push_back('/');
         }
-        if (component[0] == '/') {
-            redaction_name.append(EscapeLiteral(component.data()));
+        // Unlike legacy literals we need to escape each part of the
+        // path.
+        if (component.find_first_of("/~") != std::string_view::npos) {
+            redaction_name.append(EscapeLiteral(component.data(), false));
         } else {
             redaction_name.append(component);
         }

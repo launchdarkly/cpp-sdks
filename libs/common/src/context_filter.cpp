@@ -184,3 +184,4 @@ ContextFilter::JsonValue ContextFilter::filter_multi_context(
     return filtered;
 }
 }  // namespace launchdarkly
+

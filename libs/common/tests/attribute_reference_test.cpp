@@ -105,3 +105,11 @@ TEST(AttributeReferenceTest, CompareToPath) {
 
     EXPECT_FALSE(AttributeReference("/a/b") != path);
 }
+
+TEST(AttributeReferenceTests, CanProduceRefStringsFromPaths) {
+    EXPECT_EQ("/a/b", AttributeReference::path_to_string_reference(
+                          std::vector<std::string_view>{"a", "b"}));
+
+    EXPECT_EQ("/~1a/~0b", AttributeReference::path_to_string_reference(
+                              std::vector<std::string_view>{"/a", "~b"}));
+}
