@@ -86,14 +86,14 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 TEST_P(TagBuildFixture, BuiltTags) {
-    auto p = GetParam();
+    auto params = GetParam();
 
     ApplicationInfo info;
-    if (p.app_id) {
-        info.app_identifier(*p.app_id);
+    if (params.app_id) {
+        info.app_identifier(*params.app_id);
     }
-    if (p.app_version) {
-        info.app_version(*p.app_version);
+    if (params.app_version) {
+        info.app_version(*params.app_version);
     }
-    ASSERT_EQ(info.build(), p.concat);
+    ASSERT_EQ(info.build(), params.concat);
 }

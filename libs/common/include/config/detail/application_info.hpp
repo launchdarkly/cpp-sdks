@@ -23,7 +23,7 @@ class ApplicationInfo {
     [[nodiscard]] std::optional<std::string> build() const;
 };
 
-bool valid_char(char c);  // NOLINT(readability-identifier-length)
+bool valid_char(char c);
 bool is_valid_tag(std::string const& key, std::string const& value);
 
 }  // namespace launchdarkly::config::detail

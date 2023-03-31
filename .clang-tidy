@@ -1,0 +1,3 @@
+---
+CheckOptions:
+  - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c' }
