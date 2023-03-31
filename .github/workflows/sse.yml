@@ -19,7 +19,6 @@ jobs:
         with:
           cmake_target: launchdarkly-sse-client
   contract-tests:
-    needs: build-test
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -27,6 +26,6 @@ jobs:
         with:
           cmake_target: sse-tests
           run_tests: false
-      - uses: ./.github/workflows/sse-contract-tests.yml
+      - uses: ./.github/workflows/sse-contract-tests
         with:
           test-service-port: 8123
