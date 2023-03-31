@@ -90,10 +90,8 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         stack.pop_back();
 
         // Check if the attribute needs redacted.
-        if (!item.path.empty()) {
-            if (redact(redactions, item.path, attributes)) {
-                continue;
-            }
+        if (!item.path.empty() && redact(redactions, item.path, attributes)) {
+            continue;
         }
 
         if (item.value.is_object()) {
@@ -126,6 +124,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         }
     }
 
+    // There were redactions, so we need to add _meta.
     if (!redactions.empty()) {
         auto obj = JsonObject();
         auto arr = JsonArray();
@@ -184,4 +183,3 @@ ContextFilter::JsonValue ContextFilter::filter_multi_context(
     return filtered;
 }
 }  // namespace launchdarkly
-

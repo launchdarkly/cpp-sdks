@@ -48,8 +48,21 @@ class ContextFilter {
         JsonValue& parent;
     };
 
+    /**
+     * Put an item into its parent. Either as a pair in a map,
+     * or pushed onto an array.
+     * @param item The stack item denoting placement information.
+     * @param addition The item to add.
+     */
     static void emplace(StackItem& item, JsonValue&& addition);
 
+    /**
+     * If the path needs redacted, then redact it and add it to the redactions.
+     * @param redactions The list of redacted items.
+     * @param path The path to check.
+     * @param attributes Attributes which may contain additional private attribues.
+     * @return True if the item was redacted.
+     */
     bool redact(std::vector<std::string>& redactions,
                 std::vector<std::string_view> path,
                 Attributes const& attributes);
