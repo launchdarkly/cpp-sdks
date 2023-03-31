@@ -1,4 +1,5 @@
 #include "attribute_reference.hpp"
+#include <numeric>
 #include <utility>
 
 namespace launchdarkly {
@@ -221,5 +222,33 @@ AttributeReference::AttributeReference(std::string ref_str)
 
 AttributeReference::AttributeReference(char const* ref_str)
     : AttributeReference(std::string(ref_str)) {}
+
+std::string AttributeReference::path_to_string_reference(
+    std::vector<std::string_view> path) {
+    // Approximate size to reduce resizes.
+    auto size = std::accumulate(path.begin(), path.end(), 0,
+                                [](auto sum, auto const& component) {
+                                    return sum + component.size() + 1;
+                                });
+
+    std::string redaction_name;
+    redaction_name.reserve(size);
+
+    redaction_name.push_back('/');
+    bool first = true;
+    for (auto const& component : path) {
+        if (first) {
+            first = false;
+        } else {
+            redaction_name.push_back('/');
+        }
+        if (component[0] == '/') {
+            redaction_name.append(EscapeLiteral(component.data()));
+        } else {
+            redaction_name.append(component);
+        }
+    }
+    return redaction_name;
+}
 
 }  // namespace launchdarkly

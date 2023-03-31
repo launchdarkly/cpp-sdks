@@ -105,6 +105,8 @@ class AttributeReference {
      */
     static AttributeReference from_literal_str(std::string lit_str);
 
+    static std::string path_to_string_reference(std::vector<std::string_view> path);
+
     friend std::ostream& operator<<(std::ostream& os,
                                     AttributeReference const& ref) {
         os << (ref.valid() ? "valid" : "invalid") << "(" << ref.redaction_name()

@@ -12,6 +12,7 @@
 
 namespace launchdarkly {
 
+
 class ContextFilter {
    public:
     using JsonValue = boost::json::value;
@@ -54,11 +55,40 @@ class ContextFilter {
         }
     }
 
+    bool redact(std::vector<std::string>& redactions,
+                std::vector<std::string_view> path,
+                Attributes const& attributes) {
+        if(all_attributes_private_) {
+            redactions.push_back(AttributeReference::path_to_string_reference(path));
+            return true;
+        }
+        auto global = std::find_if(
+            global_private_attributes_.begin(),
+            global_private_attributes_.end(),
+            [&path](auto const& ref) { return ref.valid() && (ref == path); });
+        if (global != global_private_attributes_.end()) {
+            redactions.push_back(global->redaction_name());
+            return true;
+        }
+
+        auto local = std::find_if(
+            attributes.private_attributes().begin(),
+            attributes.private_attributes().end(),
+            [&path](auto const& ref) { return ref.valid() && (ref == path); });
+
+        if (local != attributes.private_attributes().end()) {
+            redactions.push_back(local->redaction_name());
+            return true;
+        }
+        return false;
+    }
+
     JsonValue filter_single_context(std::string_view kind,
                                     bool include_kind,
                                     Attributes const& attributes) {
         std::vector<StackItem> stack;
         JsonValue filtered = JsonObject();
+        std::vector<std::string> redactions;
 
         filtered.as_object().insert_or_assign("key", attributes.key());
         if (include_kind) {
@@ -68,7 +98,10 @@ class ContextFilter {
             filtered.as_object().insert_or_assign("anonymous",
                                                   attributes.anonymous());
         }
-        if (!attributes.name().empty()) {
+
+        if (!attributes.name().empty() &&
+            !redact(redactions, std::vector<std::string_view>{"name"},
+                    attributes)) {
             filtered.as_object().insert_or_assign("name", attributes.name());
         }
 
@@ -78,33 +111,13 @@ class ContextFilter {
                           std::vector<std::string_view>{pair.first}, filtered});
         }
 
-        std::vector<std::string_view> redactions;
-
         while (!stack.empty()) {
             auto item = std::move(stack.back());
             stack.pop_back();
 
             // Check if the attribute needs redacted.
             if (!item.path.empty()) {
-                auto global = std::find_if(
-                    global_private_attributes_.begin(),
-                    global_private_attributes_.end(), [&item](auto const& ref) {
-                        return ref.valid() && (ref == item.path);
-                    });
-                if (global != global_private_attributes_.end()) {
-                    redactions.push_back(global->redaction_name());
-                    continue;
-                }
-
-                auto local =
-                    std::find_if(attributes.private_attributes().begin(),
-                                 attributes.private_attributes().end(),
-                                 [&item](auto const& ref) {
-                                     return ref.valid() && (ref == item.path);
-                                 });
-
-                if (local != attributes.private_attributes().end()) {
-                    redactions.push_back(local->redaction_name());
+                if (redact(redactions, item.path, attributes)) {
                     continue;
                 }
             }
