@@ -150,7 +150,9 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
 
 /**
  * Literal starting with a '/' needs to be converted to an attribute
- * reference string.
+ * reference string. Additionally when making redaction names fields
+ * which contain special characters may also need to be escaped even
+ * when they do not start with a '/'.
  */
 std::string EscapeLiteral(std::string const& literal,
                           bool prepend_slash = true) {
