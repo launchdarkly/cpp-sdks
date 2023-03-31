@@ -67,6 +67,20 @@ class ContextFilter {
                 std::vector<std::string_view> path,
                 Attributes const& attributes);
 
+    /**
+     * Append a container to the parent.
+     * @param item The stack item containing the parent.
+     * @param value The container to append.
+     * @return The appended container.
+     */
+    static JsonValue* append_container(StackItem& item, JsonValue&& value);
+
+    /**
+     * Put a simple value into the parent specified by its stack item.
+     * @param item The stack item with value information and the parent.
+     */
+    static void append_simple_type(StackItem& item);
+
     JsonValue filter_single_context(std::string_view kind,
                                     bool include_kind,
                                     Attributes const& attributes);
@@ -75,8 +89,6 @@ class ContextFilter {
 
     bool all_attributes_private_;
     AttributeReference::SetType const& global_private_attributes_;
-    static JsonValue* append_container(StackItem& item, JsonValue&& value);
-    static void append_simple_type(StackItem& item);
 };
 
 }  // namespace launchdarkly
