@@ -46,7 +46,8 @@ namespace launchdarkly {
  * auto builder = ContextBuilder();
  * // The data in this sample is not realistic, but it is intended to show
  * // how to use the builder with loops.
- * for (auto const& kind : kinds) { // Some collection we are using to make kinds.
+ * for (auto const& kind : kinds) { // Some collection we are using to make
+ * kinds.
  *     // The `kind` method returns a reference, always store it in a reference.
  *     auto& kind_builder = builder.kind(kind, kind + "-key");
  *     for (auto const& prop : props) { // A collection of props we want to add.
