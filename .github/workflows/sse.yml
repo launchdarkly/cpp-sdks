@@ -27,7 +27,7 @@ jobs:
           cmake_target: sse-tests
           run_tests: false
       - name: 'Launch test service as background task'
-        run: ./build/apps/sse-contract-tests/sse-tests 2>&1 &
+        run: ./build/apps/sse-contract-tests/sse-tests 8123 2>&1 &
       - uses: ./.github/actions/sse-contract-tests
         with:
-          test_service_port: 8111
+          test_service_port: 8123
