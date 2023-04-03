@@ -23,7 +23,7 @@ class ApplicationInfo {
     ApplicationInfo& add_tag(std::string key, std::string value);
 };
 
-bool valid_char(char c);
-bool is_valid_tag(std::string const& key, std::string const& value);
+bool ValidChar(char c);
+bool IsValidTag(std::string const& key, std::string const& value);
 
 }  // namespace launchdarkly::config::detail

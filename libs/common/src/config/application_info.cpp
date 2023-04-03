@@ -17,25 +17,25 @@ std::string ApplicationInfo::Tag::build() const {
     return key + '/' + value;
 }
 
-bool valid_char(char c) {
+bool ValidChar(char c) {
     return std::isalnum(c) != 0 || c == '-' || c == '.' || c == '_';
 }
 
-bool is_valid_tag(std::string const& key, std::string const& value) {
+bool IsValidTag(std::string const& key, std::string const& value) {
     if (value.empty() || key.empty()) {
         return false;
     }
     if (value.length() > kMaxTagValueLength) {
         return false;
     }
-    if (!std::all_of(key.begin(), key.end(), valid_char)) {
+    if (!std::all_of(key.begin(), key.end(), ValidChar)) {
         return false;
     }
-    return std::all_of(value.begin(), value.end(), valid_char);
+    return std::all_of(value.begin(), value.end(), ValidChar);
 }
 
 ApplicationInfo& ApplicationInfo::add_tag(std::string key, std::string value) {
-    if (is_valid_tag(key, value)) {
+    if (IsValidTag(key, value)) {
         tags_.emplace_back(std::move(key), std::move(value));
     }
     // todo: error handling if not valid

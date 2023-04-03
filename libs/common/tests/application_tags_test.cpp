@@ -42,7 +42,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(TagValidityFixture, ValidTagValues) {
     auto param = GetParam();
     bool valid =
-        launchdarkly::config::detail::is_valid_tag(param.key, param.value);
+        launchdarkly::config::detail::IsValidTag(param.key, param.value);
     ASSERT_EQ(valid, param.valid);
 }
 

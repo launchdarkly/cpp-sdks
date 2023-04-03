@@ -1,4 +1,4 @@
 ---
 CheckOptions:
-  - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c' }
+  - { key: readability-identifier-length.IgnoredParameterNames,   value: 'i|j|k|c|os|it' }
   - { key: readability-identifier-length.IgnoredLoopCounterNames,   value: 'i|j|k|c|os|it' }
