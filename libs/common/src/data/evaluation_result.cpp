@@ -1,40 +1,47 @@
-#include "data/flag_meta.hpp"
+#include "data/evaluation_result.hpp"
 
 namespace launchdarkly {
 
-uint64_t FlagMeta::version() const {
+uint64_t EvaluationResult::version() const {
     return version_;
 }
 
-bool FlagMeta::track_events() const {
+std::optional<uint64_t> EvaluationResult::flag_version() const {
+    return flag_version_;
+}
+
+bool EvaluationResult::track_events() const {
     return track_events_;
 }
 
-bool FlagMeta::track_reason() const {
+bool EvaluationResult::track_reason() const {
     return track_reason_;
 }
 
-std::optional<uint64_t> FlagMeta::debug_events_until_date() const {
+std::optional<uint64_t> EvaluationResult::debug_events_until_date() const {
     return debug_events_until_date_;
 }
 
-EvaluationDetail const& FlagMeta::detail() const {
+EvaluationDetail const& EvaluationResult::detail() const {
     return detail_;
 }
 
-FlagMeta::FlagMeta(uint64_t version,
-                   bool track_events,
-                   bool track_reason,
-                   std::optional<long> debug_events_until_date,
-                   EvaluationDetail detail)
+EvaluationResult::EvaluationResult(uint64_t version,
+                                   std::optional<uint64_t> flag_version,
+                                   bool track_events,
+                                   bool track_reason,
+                                   std::optional<long> debug_events_until_date,
+                                   EvaluationDetail detail)
     : version_(version),
+      flag_version_(flag_version),
       track_events_(track_events),
       track_reason_(track_reason),
       debug_events_until_date_(std::move(debug_events_until_date)),
       detail_(std::move(detail)) {}
 
-FlagMeta tag_invoke(boost::json::value_to_tag<FlagMeta> const& unused,
-                    boost::json::value const& json_value) {
+EvaluationResult tag_invoke(
+    boost::json::value_to_tag<EvaluationResult> const& unused,
+    boost::json::value const& json_value) {
     if (json_value.is_object()) {
         auto json_obj = json_value.as_object();
 
@@ -43,6 +50,14 @@ FlagMeta tag_invoke(boost::json::value_to_tag<FlagMeta> const& unused,
             version_iter != json_obj.end() && version_iter->value().is_number()
                 ? version_iter->value().to_number<uint64_t>()
                 : 0;
+
+        auto flag_version_iter = json_obj.find("flagVersion");
+        auto flag_version =
+            flag_version_iter != json_obj.end() &&
+                    flag_version_iter->value().is_number()
+                ? std::make_optional(
+                      flag_version_iter->value().to_number<uint64_t>())
+                : std::nullopt;
 
         auto track_events_iter = json_obj.find("trackEvents");
         auto track_events = track_events_iter != json_obj.end() &&
@@ -88,11 +103,19 @@ FlagMeta tag_invoke(boost::json::value_to_tag<FlagMeta> const& unused,
                       reason_iter->value()))
                 : std::nullopt;
 
-        return {version, track_events, track_reason, debug_events_until_date,
+        return {version,
+                flag_version,
+                track_events,
+                track_reason,
+                debug_events_until_date,
                 EvaluationDetail(value, variation, reason)};
     }
     // This would represent malformed JSON.
-    return {0, false, false, std::nullopt,
+    return {0,
+            0,
+            false,
+            false,
+            std::nullopt,
             EvaluationDetail(Value(), std::nullopt, std::nullopt)};
 }
 }  // namespace launchdarkly

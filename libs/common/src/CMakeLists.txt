@@ -20,7 +20,7 @@ add_library(${LIBNAME}
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
-        data/evaluation_reason.cpp data/evaluation_detail.cpp data/flag_meta.cpp)
+        data/evaluation_reason.cpp data/evaluation_detail.cpp data/evaluation_result.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
