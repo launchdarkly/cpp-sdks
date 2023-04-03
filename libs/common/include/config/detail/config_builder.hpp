@@ -5,6 +5,7 @@
 #include "config/detail/application_info.hpp"
 #include "config/detail/config.hpp"
 #include "config/detail/endpoints_builder.hpp"
+#include "logger.hpp"
 
 namespace launchdarkly::config::detail {
 
@@ -52,7 +53,7 @@ class ConfigBuilder {
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
-    ConfigType build() const;
+    ConfigType build(Logger& logger) const;
 
    private:
     std::string sdk_key_;

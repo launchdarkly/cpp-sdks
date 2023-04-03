@@ -3,13 +3,18 @@
 #include <ostream>
 #include <tuple>
 #include "config/detail/application_info.hpp"
+#include "error.hpp"
+#include "null_logger.hpp"
 
 using namespace launchdarkly::config::detail;
+using launchdarkly::Error;
+using launchdarkly::Logger;
+using launchdarkly::LogLevel;
 
 struct TagValidity {
     std::string key;
     std::string value;
-    bool valid;
+    std::optional<launchdarkly::Error> error;
 };
 
 class TagValidityFixture : public ::testing::TestWithParam<TagValidity> {};
@@ -18,32 +23,38 @@ INSTANTIATE_TEST_SUITE_P(
     AppTagsTest,
     TagValidityFixture,
     testing::Values(
-        TagValidity{"", "abc", false},
-        TagValidity{" ", "abc", false},
-        TagValidity{"/", "abc", false},
-        TagValidity{":", "abcs", false},
-        TagValidity{"abcABC123.-_", "abc", true},
-        TagValidity{"abc", "", false},
-        TagValidity{"abc", " ", false},
-        TagValidity{"abc", "/", false},
-        TagValidity{"abc", ":", false},
-        TagValidity{"abc", "abcABC123.-_", true},
+        TagValidity{"", "abc", Error::kConfig_ApplicationInfo_EmptyKeyOrValue},
+        TagValidity{" ", "abc",
+                    Error::kConfig_ApplicationInfo_InvalidKeyCharacters},
+        TagValidity{"/", "abc",
+                    Error::kConfig_ApplicationInfo_InvalidKeyCharacters},
+        TagValidity{":", "abc",
+                    Error::kConfig_ApplicationInfo_InvalidKeyCharacters},
+        TagValidity{"abcABC123.-_", "abc", std::nullopt},
+        TagValidity{"abc", "", Error::kConfig_ApplicationInfo_EmptyKeyOrValue},
+        TagValidity{"abc", " ",
+                    Error::kConfig_ApplicationInfo_InvalidValueCharacters},
+        TagValidity{"abc", "/",
+                    Error::kConfig_ApplicationInfo_InvalidValueCharacters},
+        TagValidity{"abc", ":",
+                    Error::kConfig_ApplicationInfo_InvalidValueCharacters},
+        TagValidity{"abc", "abcABC123.-_", std::nullopt},
         TagValidity{
             "abc",
             "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl",
-            true,
+            std::nullopt,
         },
         TagValidity{
             "abc",
             "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghij"
             "klm",  // > 64 chars
-            false}));
+            Error::kConfig_ApplicationInfo_ValueTooLong}));
 
 TEST_P(TagValidityFixture, ValidTagValues) {
     auto param = GetParam();
-    bool valid =
+    std::optional<launchdarkly::Error> maybe_error =
         launchdarkly::config::detail::IsValidTag(param.key, param.value);
-    ASSERT_EQ(valid, param.valid);
+    ASSERT_EQ(maybe_error, param.error);
 }
 
 struct TagBuild {
@@ -88,6 +99,8 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(TagBuildFixture, BuiltTags) {
     auto params = GetParam();
 
+    auto logger = NullLogger();
+
     ApplicationInfo info;
     if (params.app_id) {
         info.app_identifier(*params.app_id);
@@ -95,5 +108,5 @@ TEST_P(TagBuildFixture, BuiltTags) {
     if (params.app_version) {
         info.app_version(*params.app_version);
     }
-    ASSERT_EQ(info.build(), params.concat);
+    ASSERT_EQ(info.build(logger), params.concat);
 }

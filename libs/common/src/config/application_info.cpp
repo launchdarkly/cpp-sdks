@@ -13,7 +13,10 @@ constexpr std::size_t kMaxTagValueLength = 64;
 ApplicationInfo::Tag::Tag(std::string key, std::string value)
     : key(std::move(key)), value(std::move(value)) {}
 
-std::string ApplicationInfo::Tag::build() const {
+tl::expected<std::string, Error> ApplicationInfo::Tag::build() const {
+    if (auto err = IsValidTag(key, value)) {
+        return tl::unexpected(*err);
+    }
     return key + '/' + value;
 }
 
@@ -21,24 +24,25 @@ bool ValidChar(char c) {
     return std::isalnum(c) != 0 || c == '-' || c == '.' || c == '_';
 }
 
-bool IsValidTag(std::string const& key, std::string const& value) {
+std::optional<Error> IsValidTag(std::string const& key,
+                                std::string const& value) {
     if (value.empty() || key.empty()) {
-        return false;
+        return Error::kConfig_ApplicationInfo_EmptyKeyOrValue;
     }
     if (value.length() > kMaxTagValueLength) {
-        return false;
+        return Error::kConfig_ApplicationInfo_ValueTooLong;
     }
     if (!std::all_of(key.begin(), key.end(), ValidChar)) {
-        return false;
+        return Error::kConfig_ApplicationInfo_InvalidKeyCharacters;
     }
-    return std::all_of(value.begin(), value.end(), ValidChar);
+    if (!std::all_of(value.begin(), value.end(), ValidChar)) {
+        return Error::kConfig_ApplicationInfo_InvalidValueCharacters;
+    }
+    return std::nullopt;
 }
 
 ApplicationInfo& ApplicationInfo::add_tag(std::string key, std::string value) {
-    if (IsValidTag(key, value)) {
-        tags_.emplace_back(std::move(key), std::move(value));
-    }
-    // todo: error handling if not valid
+    tags_.emplace_back(std::move(key), std::move(value));
     return *this;
 }
 ApplicationInfo& ApplicationInfo::app_identifier(std::string app_id) {
@@ -49,24 +53,44 @@ ApplicationInfo& ApplicationInfo::app_version(std::string version) {
     return add_tag("application-version", std::move(version));
 }
 
-std::optional<std::string> ApplicationInfo::build() const {
+std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
     if (tags_.empty()) {
+        LD_LOG(logger, LogLevel::kDebug) << "no application tags configured";
         return std::nullopt;
     }
 
-    // Insert all tags into 'pairs' formatted as 'key/value'.
-    std::vector<std::string> pairs(tags_.size());
-    std::transform(tags_.cbegin(), tags_.cend(), pairs.begin(),
-                   [](auto tag) { return tag.build(); });
+    // Build all the tags, which results in pairs of (tag key, value | error).
+    std::vector<std::pair<std::string, tl::expected<std::string, Error>>>
+        unvalidated(tags_.size());
+
+    std::transform(
+        tags_.cbegin(), tags_.cend(), unvalidated.begin(),
+        [](auto tag) { return std::make_pair(tag.key, tag.build()); });
+
+    std::vector<std::string> validated;
+
+    for (auto const& t : unvalidated) {
+        if (!t.second) {
+            LD_LOG(logger, LogLevel::kWarn)
+                << t.second.error() << " for tag '" << t.first << "'";
+        } else {
+            validated.push_back(t.second.value());
+        }
+    }
+
+    if (validated.empty()) {
+        return std::nullopt;
+    }
 
     // Sort so the result is deterministic.
-    std::sort(pairs.begin(), pairs.end());
+    std::sort(validated.begin(), validated.end());
 
     // Remove any duplicate tags.
-    pairs.erase(std::unique(pairs.begin(), pairs.end()), pairs.end());
+    validated.erase(std::unique(validated.begin(), validated.end()),
+                    validated.end());
 
     // Concatenate with space as the delimiter.
-    return boost::algorithm::join(pairs, " ");
+    return boost::algorithm::join(validated, " ");
 }
 
 }  // namespace launchdarkly::config::detail
