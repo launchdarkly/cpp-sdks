@@ -10,6 +10,7 @@ namespace launchdarkly {
  * Describes the reason that a flag evaluation produced a particular value.
  */
 class EvaluationReason {
+   public:
     /**
      * The general category of the reason:
      *
@@ -75,5 +76,14 @@ class EvaluationReason {
      * failed, for instance due to a database error.
      */
     std::optional<std::string_view> big_segment_status() const;
+
+   private:
+    std::string kind_;
+    std::optional<std::string> error_kind_;
+    std::optional<std::size_t> rule_index_;
+    std::optional<std::string> rule_id_;
+    std::optional<std::string> prerequisite_key_;
+    bool in_experiment_;
+    std::optional<std::string> big_segment_status_;
 };
 }  // namespace launchdarkly
