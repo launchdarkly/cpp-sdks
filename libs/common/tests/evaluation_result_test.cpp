@@ -6,6 +6,9 @@
 
 using launchdarkly::EvaluationResult;
 
+// NOLINTBEGIN bugprone-unchecked-optional-access
+// In the tests I do not care to check it.
+
 TEST(EvaluationResultTests, FromJsonAllFields) {
     auto evaluation_result = boost::json::value_to<EvaluationResult>(
         boost::json::parse("{"
@@ -82,3 +85,5 @@ TEST(EvaluationResultTests, FromMapOfResults) {
     EXPECT_TRUE(results.at("flagA").detail().value().as_bool());
     EXPECT_FALSE(results.at("flagB").detail().value().as_bool());
 }
+
+// NOLINTEND bugprone-unchecked-optional-access
