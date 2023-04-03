@@ -197,6 +197,7 @@ Value::Object::Iterator Value::Object::find(std::string const& key) const {
 
 Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
                  boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
     // The name of the function needs to be tag_invoke for boost::json.
 
     // The conditions in these switches explicitly use the constructors, because
