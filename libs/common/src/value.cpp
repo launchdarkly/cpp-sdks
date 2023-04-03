@@ -195,6 +195,12 @@ Value::Object::Iterator Value::Object::find(std::string const& key) const {
     return {map_.find(key)};
 }
 
+// NOLINTBEGIN modernize-return-braced-init-list
+
+// Braced initializer list is not the same for a single item as the
+// constructors. Replacing them with braced init lists would result in all types
+// being lists.
+
 Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
                  boost::json::value const& json_value) {
     boost::ignore_unused(unused);
@@ -236,5 +242,7 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
     // Cannot happen.
     return Value();
 }
+
+// NOLINTEND modernize-return-braced-init-list
 
 }  // namespace launchdarkly
