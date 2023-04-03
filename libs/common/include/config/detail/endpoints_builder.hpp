@@ -1,6 +1,9 @@
 #pragma once
 
-#include "service_endpoints.hpp"
+#include "config/detail/service_endpoints.hpp"
+#include "error.hpp"
+
+#include <tl/expected.hpp>
 
 #include <memory>
 #include <optional>
@@ -22,11 +25,6 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
  */
 template <typename SDK>
 class EndpointsBuilder {
-   private:
-    std::optional<std::string> polling_base_url_;
-    std::optional<std::string> streaming_base_url_;
-    std::optional<std::string> events_base_url_;
-
    public:
     friend bool operator==<SDK>(EndpointsBuilder<SDK> const& lhs,
                                 EndpointsBuilder<SDK> const& rhs);
@@ -68,7 +66,12 @@ class EndpointsBuilder {
      * returns nullptr.
      * @return Unique pointer to ServiceEndpoints, or nullptr.
      */
-    [[nodiscard]] std::unique_ptr<ServiceEndpoints> build();
+    [[nodiscard]] tl::expected<ServiceEndpoints, Error> build();
+
+   private:
+    std::optional<std::string> polling_base_url_;
+    std::optional<std::string> streaming_base_url_;
+    std::optional<std::string> events_base_url_;
 };
 
 }  // namespace launchdarkly::config::detail

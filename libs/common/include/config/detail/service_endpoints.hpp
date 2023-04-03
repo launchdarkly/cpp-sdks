@@ -9,11 +9,6 @@ namespace launchdarkly::config {
  * service or a Relay Proxy instance.
  */
 class ServiceEndpoints {
-   private:
-    std::string polling_base_url_;
-    std::string streaming_base_url_;
-    std::string events_base_url_;
-
    public:
     /**
      * Constructs a ServiceEndpoints from individual polling, streaming, and
@@ -45,6 +40,11 @@ class ServiceEndpoints {
      * @return Base events URL.
      */
     [[nodiscard]] std::string const& events_base_url() const;
+
+   private:
+    std::string polling_base_url_;
+    std::string streaming_base_url_;
+    std::string events_base_url_;
 };
 
 bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs);
