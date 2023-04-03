@@ -11,7 +11,7 @@ inputs:
     description: 'The name of the CMake target. i.e. launchdarkly-cpp-common'
     required: true
   run_tests:
-    description: 'Whether gtest targets should be build & run.'
+    description: 'Whether gtest targets should be built & run.'
     required: false
     default: 'true'
 
