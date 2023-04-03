@@ -194,4 +194,46 @@ Value::Object::Iterator Value::Object::end() const {
 Value::Object::Iterator Value::Object::find(std::string const& key) const {
     return {map_.find(key)};
 }
+
+Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
+                 boost::json::value const& json_value) {
+    // The name of the function needs to be tag_invoke for boost::json.
+
+    // The conditions in these switches explicitly use the constructors, because
+    // otherwise it is an init list, which is an array.
+    switch (json_value.kind()) {
+        case boost::json::kind::null:
+            return Value();
+        case boost::json::kind::bool_:
+            return Value(json_value.as_bool());
+        case boost::json::kind::int64:
+            return Value((double)json_value.as_int64());
+        case boost::json::kind::uint64:
+            return Value((double)json_value.as_uint64());
+        case boost::json::kind::double_:
+            return Value(json_value.as_double());
+        case boost::json::kind::string:
+            return Value(std::string(json_value.as_string()));
+        case boost::json::kind::array: {
+            auto vec = json_value.as_array();
+            std::vector<Value> values;
+            for (auto const& item : vec) {
+                values.push_back(boost::json::value_to<Value>(item));
+            }
+            return Value(values);
+        }
+        case boost::json::kind::object: {
+            auto map = json_value.as_object();
+            std::map<std::string, Value> values;
+            for (auto const& pair : map) {
+                auto value = boost::json::value_to<Value>(pair.value());
+                values.emplace(pair.key().data(), std::move(value));
+            }
+            return Value(std::move(values));
+        }
+    }
+    // Cannot happen.
+    return Value();
+}
+
 }  // namespace launchdarkly

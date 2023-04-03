@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 
+#include <boost/json/value.hpp>
+
 namespace launchdarkly {
 
 /**
@@ -14,41 +16,41 @@ class EvaluationReason {
     /**
      * The general category of the reason:
      *
-     * - `'OFF'`: The flag was off and therefore returned its configured off
+     * - `"OFF"`: The flag was off and therefore returned its configured off
      * value.
-     * - `'FALLTHROUGH'`: The flag was on but the context did not match any
+     * - `"FALLTHROUGH"`: The flag was on but the context did not match any
      * targets or rules.
-     * - `'TARGET_MATCH'`: The context key was specifically targeted for this
+     * - `"TARGET_MATCH"`: The context key was specifically targeted for this
      * flag.
-     * - `'RULE_MATCH'`: the context matched one of the flag's rules.
-     * - `'PREREQUISITE_FAILED'`: The flag was considered off because it had at
+     * - `"RULE_MATCH"`: the context matched one of the flag"s rules.
+     * - `"PREREQUISITE_FAILED"`: The flag was considered off because it had at
      * least one prerequisite flag that either was off or did not return the
      * desired variation.
-     * - `'ERROR'`: The flag could not be evaluated, e.g. because it does not
+     * - `"ERROR"`: The flag could not be evaluated, e.g. because it does not
      * exist or due to an unexpected error.
      */
     std::string const& kind() const;
 
     /**
-     * A further description of the error condition, if the kind was `'ERROR'`.
+     * A further description of the error condition, if the kind was `"ERROR"`.
      */
     std::optional<std::string_view> error_kind() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
-     * `'RULE_MATCH'`.
+     * `"RULE_MATCH"`.
      */
     std::optional<std::size_t> rule_index() const;
 
     /**
      * The unique identifier of the matched rule, if the kind was
-     * `'RULE_MATCH'`.
+     * `"RULE_MATCH"`.
      */
     std::optional<std::string_view> rule_id() const;
 
     /**
      * The key of the failed prerequisite flag, if the kind was
-     * `'PREREQUISITE_FAILED'`.
+     * `"PREREQUISITE_FAILED"`.
      */
     std::optional<std::string_view> prerequisite_key() const;
 
@@ -65,17 +67,25 @@ class EvaluationReason {
      * Describes the validity of Big Segment information, if and only if the
      * flag evaluation required querying at least one Big Segment.
      *
-     * - `'HEALTHY'`: The Big Segment query involved in the flag evaluation was
+     * - `"HEALTHY"`: The Big Segment query involved in the flag evaluation was
      * successful, and the segment state is considered up to date.
-     * - `'STALE'`: The Big Segment query involved in the flag evaluation was
+     * - `"STALE"`: The Big Segment query involved in the flag evaluation was
      * successful, but the segment state may not be up to date
-     * - `'NOT_CONFIGURED'`: Big Segments could not be queried for the flag
+     * - `"NOT_CONFIGURED"`: Big Segments could not be queried for the flag
      * evaluation because the SDK configuration did not include a Big Segment
      * store.
-     * - `'STORE_ERROR'`: The Big Segment query involved in the flag evaluation
+     * - `"STORE_ERROR"`: The Big Segment query involved in the flag evaluation
      * failed, for instance due to a database error.
      */
     std::optional<std::string_view> big_segment_status() const;
+
+    EvaluationReason(std::string kind,
+                     std::optional<std::string> error_kind,
+                     std::optional<std::size_t> rule_index,
+                     std::optional<std::string> rule_id,
+                     std::optional<std::string> prerequisite_key,
+                     bool in_experiment,
+                     std::optional<std::string> big_segment_status);
 
    private:
     std::string kind_;
@@ -86,4 +96,9 @@ class EvaluationReason {
     bool in_experiment_;
     std::optional<std::string> big_segment_status_;
 };
+
+EvaluationReason tag_invoke(
+    boost::json::value_to_tag<EvaluationReason> const& unused,
+    boost::json::value const& json_value);
+
 }  // namespace launchdarkly

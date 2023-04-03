@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include <boost/json/value.hpp>
 #include <boost/variant.hpp>
 
 namespace launchdarkly {
@@ -420,5 +421,13 @@ class Value {
     inline static const Object empty_map_;
     static const Value null_value_;
 };
+
+/**
+ * Method used by boost::json for converting a boost::json::value into a
+ * launchdarkly::Value.
+ * @return A Value representation of the boost::json::value.
+ */
+Value tag_invoke(boost::json::value_to_tag<Value> const&,
+                 boost::json::value const&);
 
 }  // namespace launchdarkly

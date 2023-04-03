@@ -2,16 +2,16 @@
 
 #include <cstddef>
 #include <optional>
-#include <refwrap>
+#include <utility>
 
-#include "value.hpp"
 #include "data/evaluation_reason.hpp"
+#include "value.hpp"
 
 namespace launchdarkly {
 
 /**
- * An object that combines the result of a feature flag evaluation with information about
- * how it was calculated.
+ * An object that combines the result of a feature flag evaluation with
+ * information about how it was calculated.
  *
  * This is the result of calling [TODO: Evaluate detail].
  *
@@ -21,26 +21,38 @@ namespace launchdarkly {
 class EvaluationDetail {
    public:
     /**
-    * The result of the flag evaluation. This will be either one of the flag's variations or
-    * the default value that was passed to [TODO: Evaluate detail].
-    */
+     * The result of the flag evaluation. This will be either one of the flag's
+     * variations or the default value that was passed to [TODO: Evaluate
+     * detail].
+     */
     Value const& value() const;
 
     /**
-    * The index of the returned value within the flag's list of variations, e.g. 0 for the
-    * first variation-- or `nullopt` if the default value was returned.
-    */
+     * The index of the returned value within the flag's list of variations,
+     * e.g. 0 for the first variation-- or `nullopt` if the default value was
+     * returned.
+     */
     std::optional<std::size_t> variation_index() const;
 
     /**
-    * An object describing the main factor that influenced the flag evaluation value.
-    */
-    [[nodiscard]] std::optional<std::reference_wrapper<const EvaluationReason>> reason() const;
+     * An object describing the main factor that influenced the flag evaluation
+     * value.
+     */
+    [[nodiscard]] std::optional<std::reference_wrapper<EvaluationReason const>>
+    reason() const;
+
+    EvaluationDetail(Value value,
+                     std::optional<std::size_t> variation_index,
+                     std::optional<EvaluationReason> reason);
 
    private:
     Value value_;
     std::optional<std::size_t> variation_index_;
     std::optional<EvaluationReason> reason_;
 };
+
+EvaluationDetail tag_invoke(
+    boost::json::value_to_tag<EvaluationDetail> const& unused,
+    boost::json::value const& json_value);
 
 }  // namespace launchdarkly

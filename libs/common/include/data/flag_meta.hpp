@@ -2,6 +2,8 @@
 
 #include <optional>
 
+#include <boost/json/value.hpp>
+
 #include "evaluation_detail.hpp"
 
 namespace launchdarkly {
@@ -15,7 +17,7 @@ class FlagMeta {
     /**
      * The version of the flag.
      */
-    long version() const;
+    uint64_t version() const;
 
     /**
      * True if a client SDK should track events for this flag.
@@ -29,22 +31,31 @@ class FlagMeta {
 
     /**
      * A timestamp, which if the current time is before, a client SDK
-     * should send events for the flag.
+     * should send debug events for the flag.
      * @return
      */
-    std::optional<long> track_events_until_date() const;
+    std::optional<uint64_t> debug_events_until_date() const;
 
     /**
      * Details of the flags evaluation.
      */
     EvaluationDetail const& detail() const;
 
+    FlagMeta(uint64_t version,
+             bool track_events,
+             bool track_reason,
+             std::optional<long> debug_events_until_date,
+             EvaluationDetail detail);
+
    private:
-    long version_;
+    uint64_t version_;
     bool track_events_;
     bool track_reason_;
-    std::optional<long> track_events_until_date_;
+    std::optional<uint64_t> debug_events_until_date_;
     EvaluationDetail detail_;
 };
+
+FlagMeta tag_invoke(boost::json::value_to_tag<FlagMeta> const& unused,
+                    boost::json::value const& json_value);
 
 }  // namespace launchdarkly
