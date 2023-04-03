@@ -20,6 +20,10 @@ jobs:
           cmake_target: launchdarkly-sse-client
   contract-tests:
     runs-on: ubuntu-22.04
+    env:
+      # Port the test service (implemented in this repo) should bind to.
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/apps/sse-contract-tests/sse-tests
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
@@ -27,8 +31,9 @@ jobs:
           cmake_target: sse-tests
           run_tests: false
       - name: 'Launch test service as background task'
-        run: ./build/apps/sse-contract-tests/sse-tests 8123 2>&1 &
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
       - uses: ./.github/actions/sse-contract-tests
         with:
-          test_service_port: 8123
+          # Inform the test harness of test service's port.
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
           extra_params: '-skip "HTTP behavior" -skip "reconnection"'
