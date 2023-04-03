@@ -24,8 +24,9 @@ add_library(${LIBNAME}
         data/evaluation_reason.cpp
         data/evaluation_detail.cpp
         data/evaluation_result.cpp
-        context_filter.cpp lib.cpp
+        context_filter.cpp
         config/application_info.cpp
+        lib.cpp
         )
 
 

@@ -225,9 +225,9 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
         case boost::json::kind::bool_:
             return Value(json_value.as_bool());
         case boost::json::kind::int64:
-            return Value((double)json_value.as_int64());
+            return Value(json_value.to_number<double>());
         case boost::json::kind::uint64:
-            return Value((double)json_value.as_uint64());
+            return Value(json_value.to_number<double>());
         case boost::json::kind::double_:
             return Value(json_value.as_double());
         case boost::json::kind::string:
