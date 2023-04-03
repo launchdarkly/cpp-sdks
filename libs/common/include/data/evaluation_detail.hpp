@@ -51,8 +51,4 @@ class EvaluationDetail {
     std::optional<EvaluationReason> reason_;
 };
 
-EvaluationDetail tag_invoke(
-    boost::json::value_to_tag<EvaluationDetail> const& unused,
-    boost::json::value const& json_value);
-
 }  // namespace launchdarkly
