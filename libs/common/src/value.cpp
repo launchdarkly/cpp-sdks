@@ -250,8 +250,9 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
             return Value(std::move(values));
         }
     }
-    // Cannot happen.
-    return Value();
+    // The above switch is exhaustive, so this can only happen if a new
+    // type is added to boost::json::value.
+    assert(!"All types need to be handled.");
 }
 
 // NOLINTEND modernize-return-braced-init-list
