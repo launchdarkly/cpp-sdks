@@ -2,6 +2,9 @@
 
 #include <boost/json/src.hpp>
 
+#define INCLUDE_KIND true
+#define EXCLUDE_KIND false
+
 namespace launchdarkly {
 
 ContextFilter::ContextFilter(
@@ -15,7 +18,7 @@ ContextFilter::JsonValue ContextFilter::filter(Context const& context) {
     assert(context.valid());
     if (context.kinds().size() == 1) {
         auto kind = context.kinds()[0];
-        return filter_single_context(kind, true,
+        return filter_single_context(kind, INCLUDE_KIND,
                                      context.attributes(kind.data()));
     }
     return filter_multi_context(context);
@@ -153,8 +156,8 @@ void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
             break;
         case Value::Type::kObject:
         case Value::Type::kArray:
-            // Cannot happen.
-            break;
+            // Will only happen if the code is extended incorrectly.
+            assert(!"Arrays and objects must be handled before simple types.");
     }
 }
 
@@ -176,7 +179,7 @@ ContextFilter::JsonValue ContextFilter::filter_multi_context(
 
     for (auto const& kind : context.kinds()) {
         filtered.as_object().emplace(
-            kind, filter_single_context(kind, false,
+            kind, filter_single_context(kind, EXCLUDE_KIND,
                                         context.attributes(kind.data())));
     }
 
