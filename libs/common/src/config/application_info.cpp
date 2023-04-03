@@ -69,12 +69,12 @@ std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
 
     std::vector<std::string> validated;
 
-    for (auto const& t : unvalidated) {
-        if (!t.second) {
+    for (auto const& tag : unvalidated) {
+        if (!tag.second) {
             LD_LOG(logger, LogLevel::kWarn)
-                << t.second.error() << " for tag '" << t.first << "'";
+                << tag.second.error() << " for tag '" << tag.first << "'";
         } else {
-            validated.push_back(t.second.value());
+            validated.push_back(tag.second.value());
         }
     }
 

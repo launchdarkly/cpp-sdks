@@ -2,13 +2,13 @@
 
 namespace launchdarkly {
 
-std::ostream& operator<<(std::ostream& os, Error const& e) {
-    os << ErrorToString(e);
+std::ostream& operator<<(std::ostream& os, Error const& err) {
+    os << ErrorToString(err);
     return os;
 }
 
-char const* ErrorToString(Error e) {
-    switch (e) {
+char const* ErrorToString(Error err) {
+    switch (err) {
         case Error::KReserved1:
             return "reserved1";
         case Error::KReserved2:

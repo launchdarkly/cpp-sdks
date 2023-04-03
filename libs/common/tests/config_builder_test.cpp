@@ -4,7 +4,9 @@
 #include "config/server.hpp"
 #include "null_logger.hpp"
 
-class ConfigBuilderTest : public ::testing::Test {
+class ConfigBuilderTest
+    : public ::testing::
+          Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    protected:
     launchdarkly::Logger logger;
     ConfigBuilderTest() : logger(NullLogger()) {}

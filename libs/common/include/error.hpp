@@ -24,7 +24,7 @@ enum class Error : std::uint32_t {
     kMax = std::numeric_limits<std::uint32_t>::max()
 };
 
-char const* ErrorToString(Error e);
-std::ostream& operator<<(std::ostream& os, Error const& e);
+char const* ErrorToString(Error err);
+std::ostream& operator<<(std::ostream& os, Error const& err);
 
 }  // namespace launchdarkly
