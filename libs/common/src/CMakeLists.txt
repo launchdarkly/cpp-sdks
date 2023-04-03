@@ -16,10 +16,12 @@ add_library(${LIBNAME}
         attributes.cpp
         value.cpp
         attributes_builder.cpp
+        error.cpp
         config/service_endpoints.cpp
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
+        config/application_info.cpp
         )
 
 

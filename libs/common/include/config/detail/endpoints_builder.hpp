@@ -25,11 +25,6 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
  */
 template <typename SDK>
 class EndpointsBuilder {
-   private:
-    std::optional<std::string> polling_base_url_;
-    std::optional<std::string> streaming_base_url_;
-    std::optional<std::string> events_base_url_;
-
    public:
     friend bool operator==<SDK>(EndpointsBuilder<SDK> const& lhs,
                                 EndpointsBuilder<SDK> const& rhs);
@@ -72,6 +67,11 @@ class EndpointsBuilder {
      * @return Unique pointer to ServiceEndpoints, or nullptr.
      */
     [[nodiscard]] tl::expected<ServiceEndpoints, Error> build();
+
+   private:
+    std::optional<std::string> polling_base_url_;
+    std::optional<std::string> streaming_base_url_;
+    std::optional<std::string> events_base_url_;
 };
 
 }  // namespace launchdarkly::config::detail
