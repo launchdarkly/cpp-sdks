@@ -13,6 +13,9 @@ inputs:
     description: "Whether the test harness should print debug logs for failed tests."
     required: false
     default: 'false'
+  extra_params:
+    description: "Any other params to be passed to the test harness."
+    required: false
 
 runs:
   using: composite
@@ -22,4 +25,7 @@ runs:
       run: curl -s https://raw.githubusercontent.com/launchdarkly/sse-contract-tests/v2.0.0/downloader/run.sh | bash
       env:
         VERSION: v2
-        PARAMS: -url http://localhost:${{ inputs.test_service_port }} -port ${{ inputs.test_harness_port }} ${{ inputs.debug_logging == 'true' && '-debug' }} -stop-service-at-end
+        PARAMS: -url http://localhost:${{ inputs.test_service_port }} \
+          -port ${{ inputs.test_harness_port }} \
+          ${{ inputs.debug_logging == 'true' && '-debug' }} \
+          -stop-service-at-end ${{ inputs.extra_params }}

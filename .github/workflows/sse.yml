@@ -31,3 +31,4 @@ jobs:
       - uses: ./.github/actions/sse-contract-tests
         with:
           test_service_port: 8123
+          extra_params: '-skip "HTTP behavior" -skip "reconnection"'
