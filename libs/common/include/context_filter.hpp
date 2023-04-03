@@ -57,7 +57,7 @@ class ContextFilter {
     static void emplace(StackItem& item, JsonValue&& addition);
 
     /**
-     * If the path needs redacted, then redact it and add it to the redactions.
+     * If the path needs to be redacted, then redact it and add it to the redactions.
      * @param redactions The list of redacted items.
      * @param path The path to check.
      * @param attributes Attributes which may contain additional private
