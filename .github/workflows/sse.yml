@@ -36,4 +36,4 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip "HTTP behavior" -skip "reconnection"'
+          extra_params: '-skip HTTP -skip reconnection'

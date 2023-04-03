@@ -25,4 +25,4 @@ runs:
       run: curl -s https://raw.githubusercontent.com/launchdarkly/sse-contract-tests/v2.0.0/downloader/run.sh | bash
       env:
         VERSION: v2
-        PARAMS: -url http://localhost:${{ inputs.test_service_port }} -port ${{ inputs.test_harness_port }} ${{ inputs.debug_logging == 'true' && '-debug' || '' }} -stop-service-at-end ${{ inputs.extra_params }}
+        PARAMS: -url http://localhost:${{ inputs.test_service_port }} -port ${{ inputs.test_harness_port }} ${{ inputs.extra_params }} ${{ inputs.debug_logging == 'true' && '-debug' || '' }} -stop-service-at-end
