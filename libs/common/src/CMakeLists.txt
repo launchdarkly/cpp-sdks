@@ -21,7 +21,7 @@ add_library(${LIBNAME}
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
-        context_filter.cpp lib.cpp)
+        context_filter.cpp lib.cpp
         config/application_info.cpp
         )
 
