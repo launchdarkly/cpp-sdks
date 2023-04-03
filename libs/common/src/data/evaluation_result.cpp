@@ -36,22 +36,23 @@ EvaluationResult::EvaluationResult(uint64_t version,
       flag_version_(flag_version),
       track_events_(track_events),
       track_reason_(track_reason),
-      debug_events_until_date_(std::move(debug_events_until_date)),
+      debug_events_until_date_(debug_events_until_date),
       detail_(std::move(detail)) {}
 
 EvaluationResult tag_invoke(
     boost::json::value_to_tag<EvaluationResult> const& unused,
     boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
     if (json_value.is_object()) {
         auto json_obj = json_value.as_object();
 
-        auto version_iter = json_obj.find("version");
+        auto* version_iter = json_obj.find("version");
         auto version =
             version_iter != json_obj.end() && version_iter->value().is_number()
                 ? version_iter->value().to_number<uint64_t>()
                 : 0;
 
-        auto flag_version_iter = json_obj.find("flagVersion");
+        auto* flag_version_iter = json_obj.find("flagVersion");
         auto flag_version =
             flag_version_iter != json_obj.end() &&
                     flag_version_iter->value().is_number()
@@ -59,17 +60,17 @@ EvaluationResult tag_invoke(
                       flag_version_iter->value().to_number<uint64_t>())
                 : std::nullopt;
 
-        auto track_events_iter = json_obj.find("trackEvents");
+        auto* track_events_iter = json_obj.find("trackEvents");
         auto track_events = track_events_iter != json_obj.end() &&
                             track_events_iter->value().is_bool() &&
                             track_events_iter->value().as_bool();
 
-        auto track_reason_iter = json_obj.find("trackReason");
+        auto* track_reason_iter = json_obj.find("trackReason");
         auto track_reason = track_events_iter != json_obj.end() &&
                             track_reason_iter->value().is_bool() &&
                             track_events_iter->value().as_bool();
 
-        auto debug_events_until_date_iter =
+        auto* debug_events_until_date_iter =
             json_obj.find("debugEventsUntilDate");
         std::optional<uint64_t> debug_events_until_date =
             debug_events_until_date_iter != json_obj.end() &&
@@ -83,12 +84,12 @@ EvaluationResult tag_invoke(
         // when deserializing FlagMeta. Primarily `variation` not
         // `variationIndex`.
 
-        auto value_iter = json_obj.find("value");
+        auto* value_iter = json_obj.find("value");
         auto value = value_iter != json_obj.end()
                          ? boost::json::value_to<Value>(value_iter->value())
                          : Value();
 
-        auto variation_iter = json_obj.find("variation");
+        auto* variation_iter = json_obj.find("variation");
         auto variation =
             variation_iter != json_obj.end() &&
                     variation_iter->value().is_number()
@@ -96,7 +97,7 @@ EvaluationResult tag_invoke(
                       variation_iter->value().to_number<uint64_t>())
                 : std::nullopt;
 
-        auto reason_iter = json_obj.find("reason");
+        auto* reason_iter = json_obj.find("reason");
         auto reason =
             reason_iter != json_obj.end()
                 ? std::make_optional(boost::json::value_to<EvaluationReason>(

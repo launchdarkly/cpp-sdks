@@ -29,30 +29,30 @@ class EvaluationReason {
      * - `"ERROR"`: The flag could not be evaluated, e.g. because it does not
      * exist or due to an unexpected error.
      */
-    std::string const& kind() const;
+    [[nodiscard]] std::string const& kind() const;
 
     /**
      * A further description of the error condition, if the kind was `"ERROR"`.
      */
-    std::optional<std::string_view> error_kind() const;
+    [[nodiscard]] std::optional<std::string_view> error_kind() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
      * `"RULE_MATCH"`.
      */
-    std::optional<std::size_t> rule_index() const;
+    [[nodiscard]] std::optional<std::size_t> rule_index() const;
 
     /**
      * The unique identifier of the matched rule, if the kind was
      * `"RULE_MATCH"`.
      */
-    std::optional<std::string_view> rule_id() const;
+    [[nodiscard]] std::optional<std::string_view> rule_id() const;
 
     /**
      * The key of the failed prerequisite flag, if the kind was
      * `"PREREQUISITE_FAILED"`.
      */
-    std::optional<std::string_view> prerequisite_key() const;
+    [[nodiscard]] std::optional<std::string_view> prerequisite_key() const;
 
     /**
      * Whether the evaluation was part of an experiment.
@@ -61,7 +61,7 @@ class EvaluationReason {
      * served one of the variations in the experiment. Otherwise it is false or
      * undefined.
      */
-    bool in_experiment() const;
+    [[nodiscard]] bool in_experiment() const;
 
     /**
      * Describes the validity of Big Segment information, if and only if the
@@ -77,7 +77,7 @@ class EvaluationReason {
      * - `"STORE_ERROR"`: The Big Segment query involved in the flag evaluation
      * failed, for instance due to a database error.
      */
-    std::optional<std::string_view> big_segment_status() const;
+    [[nodiscard]] std::optional<std::string_view> big_segment_status() const;
 
     EvaluationReason(std::string kind,
                      std::optional<std::string> error_kind,

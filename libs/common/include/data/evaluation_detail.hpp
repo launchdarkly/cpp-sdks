@@ -25,14 +25,14 @@ class EvaluationDetail {
      * variations or the default value that was passed to [TODO: Evaluate
      * detail].
      */
-    Value const& value() const;
+    [[nodiscard]] Value const& value() const;
 
     /**
      * The index of the returned value within the flag's list of variations,
      * e.g. 0 for the first variation-- or `nullopt` if the default value was
      * returned.
      */
-    std::optional<std::size_t> variation_index() const;
+    [[nodiscard]] std::optional<std::size_t> variation_index() const;
 
     /**
      * An object describing the main factor that influenced the flag evaluation
