@@ -16,16 +16,22 @@ add_library(${LIBNAME}
         attributes.cpp
         value.cpp
         attributes_builder.cpp
+        error.cpp
         config/service_endpoints.cpp
         config/endpoints_builder.cpp
         config/config_builder.cpp
         config/config.cpp
-        data/evaluation_reason.cpp data/evaluation_detail.cpp data/evaluation_result.cpp)
+        data/evaluation_reason.cpp
+        data/evaluation_detail.cpp
+        data/evaluation_result.cpp
+        context_filter.cpp lib.cpp
+        config/application_info.cpp
+        )
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-target_link_libraries(${LIBNAME} Boost::headers)
+target_link_libraries(${LIBNAME} Boost::headers tl::expected)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

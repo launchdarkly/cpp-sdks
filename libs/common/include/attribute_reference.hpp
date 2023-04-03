@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -104,6 +105,16 @@ class AttributeReference {
      */
     static AttributeReference from_literal_str(std::string lit_str);
 
+    /**
+     * For a path, a series of names to address an attribute, create a name
+     * suitable for including in event meta data.
+     *
+     * @param path The path to get a name for.
+     * @return The path as a reference string.
+     */
+    static std::string path_to_string_reference(
+        std::vector<std::string_view> path);
+
     friend std::ostream& operator<<(std::ostream& os,
                                     AttributeReference const& ref) {
         os << (ref.valid() ? "valid" : "invalid") << "(" << ref.redaction_name()
@@ -127,8 +138,17 @@ class AttributeReference {
         return components_ == other.components_;
     }
 
+    bool operator==(std::vector<std::string_view> const& path) const {
+        return components_.size() == path.size() &&
+               std::equal(components_.begin(), components_.end(), path.begin());
+    }
+
     bool operator!=(AttributeReference const& other) const {
         return !(*this == other);
+    }
+
+    bool operator!=(std::vector<std::string_view> const& path) const {
+        return !(*this == path);
     }
 
     bool operator<(AttributeReference const& rhs) const {

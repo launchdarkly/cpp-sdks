@@ -22,7 +22,7 @@ static std::string EscapeKey(std::string_view const& to_escape) {
     return escaped;
 }
 
-std::vector<std::string_view> const& Context::kinds() {
+std::vector<std::string_view> const& Context::kinds() const {
     return kinds_;
 }
 
