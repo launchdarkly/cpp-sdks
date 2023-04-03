@@ -1,4 +1,5 @@
 #include "attribute_reference.hpp"
+#include <numeric>
 #include <utility>
 
 namespace launchdarkly {
@@ -149,10 +150,13 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
 
 /**
  * Literal starting with a '/' needs to be converted to an attribute
- * reference string.
+ * reference string. Additionally when making redaction names fields
+ * which contain special characters may also need to be escaped even
+ * when they do not start with a '/'.
  */
-std::string EscapeLiteral(std::string const& literal) {
-    std::string escaped = "/";
+std::string EscapeLiteral(std::string const& literal,
+                          bool prepend_slash = true) {
+    std::string escaped = prepend_slash ? "/" : "";
     for (auto const& character : literal) {
         if (character == '~') {
             escaped.append("~0");
@@ -221,5 +225,35 @@ AttributeReference::AttributeReference(std::string ref_str)
 
 AttributeReference::AttributeReference(char const* ref_str)
     : AttributeReference(std::string(ref_str)) {}
+
+std::string AttributeReference::path_to_string_reference(
+    std::vector<std::string_view> path) {
+    // Approximate size to reduce resizes.
+    auto size = std::accumulate(path.begin(), path.end(), 0,
+                                [](auto sum, auto const& component) {
+                                    return sum + component.size() + 1;
+                                });
+
+    std::string redaction_name;
+    redaction_name.reserve(size);
+
+    redaction_name.push_back('/');
+    bool first = true;
+    for (auto const& component : path) {
+        if (first) {
+            first = false;
+        } else {
+            redaction_name.push_back('/');
+        }
+        // Unlike legacy literals we need to escape each part of the
+        // path.
+        if (component.find_first_of("/~") != std::string_view::npos) {
+            redaction_name.append(EscapeLiteral(component.data(), false));
+        } else {
+            redaction_name.append(component);
+        }
+    }
+    return redaction_name;
+}
 
 }  // namespace launchdarkly

@@ -35,12 +35,16 @@ class Attributes {
     bool anonymous() const;
 
     /**
+     * Get the custom attributes as a Value. This value is an kObject type.
+     * @return The custom attributes.
+     */
+    Value const& custom_attributes() const;
+
+    /**
      * Get a set of the private attributes for the context.
      * @return The set of private attributes for the context.
      */
-    AttributeReference::SetType const& private_attributes() const {
-        return private_attributes_;
-    }
+    AttributeReference::SetType const& private_attributes() const;
 
     /**
      * Gets the item by the specified attribute reference, or returns a null
