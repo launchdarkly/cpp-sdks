@@ -89,7 +89,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         auto item = std::move(stack.back());
         stack.pop_back();
 
-        // Check if the attribute needs redacted.
+        // Check if the attribute needs to be redacted.
         if (!item.path.empty() && redact(redactions, item.path, attributes)) {
             continue;
         }
