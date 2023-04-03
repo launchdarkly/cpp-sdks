@@ -1,7 +1,5 @@
 #include "context_filter.hpp"
 
-#include <boost/json/src.hpp>
-
 #define INCLUDE_KIND true
 #define EXCLUDE_KIND false
 
