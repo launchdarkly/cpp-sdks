@@ -27,7 +27,7 @@ add_library(${LIBNAME}
         context_filter.cpp
         config/application_info.cpp
         lib.cpp
-        )
+        value_mapping.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

@@ -1,4 +1,5 @@
 #include "data/evaluation_reason.hpp"
+#include "value_mapping.hpp"
 
 namespace launchdarkly {
 
@@ -6,7 +7,7 @@ std::string const& EvaluationReason::kind() const {
     return kind_;
 }
 
-std::optional<std::string_view> EvaluationReason::error_kind() const {
+std::optional<std::string> EvaluationReason::error_kind() const {
     return error_kind_;
 }
 
@@ -14,11 +15,11 @@ std::optional<std::size_t> EvaluationReason::rule_index() const {
     return rule_index_;
 }
 
-std::optional<std::string_view> EvaluationReason::rule_id() const {
+std::optional<std::string> EvaluationReason::rule_id() const {
     return rule_id_;
 }
 
-std::optional<std::string_view> EvaluationReason::prerequisite_key() const {
+std::optional<std::string> EvaluationReason::prerequisite_key() const {
     return prerequisite_key_;
 }
 
@@ -26,7 +27,7 @@ bool EvaluationReason::in_experiment() const {
     return in_experiment_;
 }
 
-std::optional<std::string_view> EvaluationReason::big_segment_status() const {
+std::optional<std::string> EvaluationReason::big_segment_status() const {
     return big_segment_status_;
 }
 
@@ -46,14 +47,6 @@ EvaluationReason::EvaluationReason(
       in_experiment_(in_experiment),
       big_segment_status_(std::move(big_segment_status)) {}
 
-static std::optional<std::string> IterToOptionalString(
-    boost::json::key_value_pair* iter,
-    boost::json::key_value_pair* end) {
-    return iter != end && iter->value().is_string()
-               ? std::make_optional(std::string(iter->value().as_string()))
-               : std::nullopt;
-}
-
 EvaluationReason tag_invoke(
     boost::json::value_to_tag<EvaluationReason> const& unused,
     boost::json::value const& json_value) {
@@ -63,36 +56,29 @@ EvaluationReason tag_invoke(
 
         auto* kind_iter = json_obj.find("kind");
         auto kind =
-            kind_iter != json_obj.end() && kind_iter->value().is_string()
-                ? kind_iter->value().as_string()
-                : "ERROR";
+            ValueOrDefault<std::string>(kind_iter, json_obj.end(), "ERROR");
 
         auto* error_kind_iter = json_obj.find("errorKind");
-        auto error_kind = IterToOptionalString(error_kind_iter, json_obj.end());
+        auto error_kind =
+            ValueAsOpt<std::string>(error_kind_iter, json_obj.end());
 
         auto* rule_index_iter = json_obj.find("ruleIndex");
-        auto rule_index =
-            rule_index_iter != json_obj.end() &&
-                    rule_index_iter->value().is_number()
-                ? std::make_optional(
-                      rule_index_iter->value().to_number<uint64_t>())
-                : std::nullopt;
+        auto rule_index = ValueAsOpt<uint64_t>(rule_index_iter, json_obj.end());
 
         auto* rule_id_iter = json_obj.find("ruleId");
-        auto rule_id = IterToOptionalString(rule_id_iter, json_obj.end());
+        auto rule_id = ValueAsOpt<std::string>(rule_id_iter, json_obj.end());
 
         auto* prerequisite_key_iter = json_obj.find("prerequisiteKey");
         auto prerequisite_key =
-            IterToOptionalString(prerequisite_key_iter, json_obj.end());
+            ValueAsOpt<std::string>(prerequisite_key_iter, json_obj.end());
 
         auto* in_experiment_iter = json_obj.find("inExperiment");
-        auto in_experiment = in_experiment_iter != json_obj.end() &&
-                             in_experiment_iter->value().is_bool() &&
-                             in_experiment_iter->value().as_bool();
+        auto in_experiment =
+            ValueOrDefault(in_experiment_iter, json_obj.end(), false);
 
         auto* big_segment_status_iter = json_obj.find("bigSegmentStatus");
         auto big_segment_status =
-            IterToOptionalString(big_segment_status_iter, json_obj.end());
+            ValueAsOpt<std::string>(big_segment_status_iter, json_obj.end());
 
         return {std::string(kind), error_kind,    rule_index,        rule_id,
                 prerequisite_key,  in_experiment, big_segment_status};

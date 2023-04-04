@@ -34,7 +34,9 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
     EXPECT_EQ(24, evaluation_result.flag_version());
     EXPECT_TRUE(evaluation_result.track_events());
     EXPECT_TRUE(evaluation_result.track_reason());
-    EXPECT_EQ(1680555761, evaluation_result.debug_events_until_date());
+    EXPECT_EQ(std::chrono::system_clock::time_point{std::chrono::milliseconds{
+                  1680555761}},
+              evaluation_result.debug_events_until_date());
     EXPECT_EQ(42,
               evaluation_result.detail().value().as_object()["item"].as_int());
     EXPECT_EQ(84, evaluation_result.detail().variation_index());
