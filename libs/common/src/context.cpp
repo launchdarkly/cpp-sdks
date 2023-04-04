@@ -89,4 +89,10 @@ std::string Context::make_canonical_key() {
     return stream.str();
 }
 
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Context const& ld_context) {
+
+}
+
 }  // namespace launchdarkly

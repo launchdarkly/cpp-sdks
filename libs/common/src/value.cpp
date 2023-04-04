@@ -5,6 +5,8 @@
 #include <cstring>
 #include <iostream>
 
+#include <boost/json.hpp>
+
 namespace launchdarkly {
 
 const Value Value::null_value_;
@@ -253,6 +255,38 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
     // The above switch is exhaustive, so this can only happen if a new
     // type is added to boost::json::value.
     assert(!"All types need to be handled.");
+}
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Value const& ld_value) {
+    switch (ld_value.type()) {
+        case Value::Type::kNull:
+            json_value.emplace_null();
+            break;
+        case Value::Type::kBool:
+            json_value.emplace_bool() = ld_value.as_bool();
+            break;
+        case Value::Type::kNumber:
+            json_value.emplace_double() = ld_value.as_double();
+            break;
+        case Value::Type::kString:
+            json_value.emplace_string() = ld_value.as_string();
+            break;
+        case Value::Type::kObject: {
+            auto& obj = json_value.emplace_object();
+            for (auto const& pair : ld_value.as_object()) {
+                obj.insert_or_assign(pair.first.c_str(),
+                                     boost::json::value_from(pair.second));
+            }
+        } break;
+        case Value::Type::kArray: {
+            auto& arr = json_value.emplace_array();
+            for (auto const& val : ld_value.as_array()) {
+                arr.push_back(boost::json::value_from(val));
+            }
+        } break;
+    }
 }
 
 // NOLINTEND modernize-return-braced-init-list

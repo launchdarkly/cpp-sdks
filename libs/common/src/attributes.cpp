@@ -1,5 +1,7 @@
 #include "attributes.hpp"
 
+#include <boost/json.hpp>
+
 namespace launchdarkly {
 
 std::string const& Attributes::key() const {
@@ -20,6 +22,23 @@ Value const& Attributes::custom_attributes() const {
 
 AttributeReference::SetType const& Attributes::private_attributes() const {
     return private_attributes_;
+}
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Attributes const& attributes) {
+    auto& obj = json_value.emplace_object();
+
+    obj.emplace("key", attributes.key());
+    if(!attributes.name().empty()) {
+        obj.emplace("name", attributes.name());
+    }
+    if(attributes.anonymous()) {
+        obj.emplace("anonymous", attributes.anonymous());
+    }
+    for(auto const& attr: attributes.custom_attributes().as_object()) {
+        obj.emplace(attr.first, boost::json::value_from(attr.second));
+    }
 }
 
 }  // namespace launchdarkly

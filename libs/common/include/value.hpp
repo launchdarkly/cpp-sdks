@@ -433,4 +433,8 @@ class Value {
 Value tag_invoke(boost::json::value_to_tag<Value> const&,
                  boost::json::value const&);
 
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Value const& ld_value);
+
 }  // namespace launchdarkly
