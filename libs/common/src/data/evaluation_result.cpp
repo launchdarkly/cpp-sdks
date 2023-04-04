@@ -1,4 +1,7 @@
 #include "data/evaluation_result.hpp"
+#include "value_mapping.hpp"
+
+#include <chrono>
 
 namespace launchdarkly {
 
@@ -18,7 +21,8 @@ bool EvaluationResult::track_reason() const {
     return track_reason_;
 }
 
-std::optional<uint64_t> EvaluationResult::debug_events_until_date() const {
+std::optional<std::chrono::time_point<std::chrono::system_clock>>
+EvaluationResult::debug_events_until_date() const {
     return debug_events_until_date_;
 }
 
@@ -26,12 +30,14 @@ EvaluationDetail const& EvaluationResult::detail() const {
     return detail_;
 }
 
-EvaluationResult::EvaluationResult(uint64_t version,
-                                   std::optional<uint64_t> flag_version,
-                                   bool track_events,
-                                   bool track_reason,
-                                   std::optional<uint64_t> debug_events_until_date,
-                                   EvaluationDetail detail)
+EvaluationResult::EvaluationResult(
+    uint64_t version,
+    std::optional<uint64_t> flag_version,
+    bool track_events,
+    bool track_reason,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        debug_events_until_date,
+    EvaluationDetail detail)
     : version_(version),
       flag_version_(flag_version),
       track_events_(track_events),
@@ -47,37 +53,31 @@ EvaluationResult tag_invoke(
         auto json_obj = json_value.as_object();
 
         auto* version_iter = json_obj.find("version");
-        auto version =
-            version_iter != json_obj.end() && version_iter->value().is_number()
-                ? version_iter->value().to_number<uint64_t>()
-                : 0;
+        auto version = ValueOrDefault(version_iter, json_obj.end(), 0UL);
 
         auto* flag_version_iter = json_obj.find("flagVersion");
         auto flag_version =
-            flag_version_iter != json_obj.end() &&
-                    flag_version_iter->value().is_number()
-                ? std::make_optional(
-                      flag_version_iter->value().to_number<uint64_t>())
-                : std::nullopt;
+            ValueAsOpt<uint64_t>(flag_version_iter, json_obj.end());
 
         auto* track_events_iter = json_obj.find("trackEvents");
-        auto track_events = track_events_iter != json_obj.end() &&
-                            track_events_iter->value().is_bool() &&
-                            track_events_iter->value().as_bool();
+        auto track_events =
+            ValueOrDefault(track_events_iter, json_obj.end(), false);
 
         auto* track_reason_iter = json_obj.find("trackReason");
-        auto track_reason = track_events_iter != json_obj.end() &&
-                            track_reason_iter->value().is_bool() &&
-                            track_events_iter->value().as_bool();
+        auto track_reason =
+            ValueOrDefault(track_reason_iter, json_obj.end(), false);
 
         auto* debug_events_until_date_iter =
             json_obj.find("debugEventsUntilDate");
-        std::optional<uint64_t> debug_events_until_date =
-            debug_events_until_date_iter != json_obj.end() &&
-                    debug_events_until_date_iter->value().is_number()
-                ? std::make_optional(debug_events_until_date_iter->value()
-                                         .to_number<uint64_t>())
-                : std::nullopt;
+
+        auto debug_events_until_date =
+            MapOpt<std::chrono::time_point<std::chrono::system_clock>,
+                   uint64_t>(ValueAsOpt<uint64_t>(debug_events_until_date_iter,
+                                                  json_obj.end()),
+                             [](auto value) {
+                                 return std::chrono::system_clock::time_point{
+                                     std::chrono::milliseconds{value}};
+                             });
 
         // Evaluation detail is directly de-serialized inline here.
         // This is because the shape of the evaluation detail is different
@@ -90,12 +90,7 @@ EvaluationResult tag_invoke(
                          : Value();
 
         auto* variation_iter = json_obj.find("variation");
-        auto variation =
-            variation_iter != json_obj.end() &&
-                    variation_iter->value().is_number()
-                ? std::make_optional(
-                      variation_iter->value().to_number<uint64_t>())
-                : std::nullopt;
+        auto variation = ValueAsOpt<uint64_t>(variation_iter, json_obj.end());
 
         auto* reason_iter = json_obj.find("reason");
         auto reason =

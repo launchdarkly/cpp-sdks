@@ -34,7 +34,7 @@ class EvaluationReason {
     /**
      * A further description of the error condition, if the kind was `"ERROR"`.
      */
-    [[nodiscard]] std::optional<std::string_view> error_kind() const;
+    [[nodiscard]] std::optional<std::string> error_kind() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
@@ -46,13 +46,13 @@ class EvaluationReason {
      * The unique identifier of the matched rule, if the kind was
      * `"RULE_MATCH"`.
      */
-    [[nodiscard]] std::optional<std::string_view> rule_id() const;
+    [[nodiscard]] std::optional<std::string> rule_id() const;
 
     /**
      * The key of the failed prerequisite flag, if the kind was
      * `"PREREQUISITE_FAILED"`.
      */
-    [[nodiscard]] std::optional<std::string_view> prerequisite_key() const;
+    [[nodiscard]] std::optional<std::string> prerequisite_key() const;
 
     /**
      * Whether the evaluation was part of an experiment.
@@ -77,7 +77,7 @@ class EvaluationReason {
      * - `"STORE_ERROR"`: The Big Segment query involved in the flag evaluation
      * failed, for instance due to a database error.
      */
-    [[nodiscard]] std::optional<std::string_view> big_segment_status() const;
+    [[nodiscard]] std::optional<std::string> big_segment_status() const;
 
     EvaluationReason(std::string kind,
                      std::optional<std::string> error_kind,
