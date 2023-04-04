@@ -30,7 +30,7 @@ EvaluationResult::EvaluationResult(uint64_t version,
                                    std::optional<uint64_t> flag_version,
                                    bool track_events,
                                    bool track_reason,
-                                   std::optional<long> debug_events_until_date,
+                                   std::optional<uint64_t> debug_events_until_date,
                                    EvaluationDetail detail)
     : version_(version),
       flag_version_(flag_version),
