@@ -50,7 +50,7 @@ class EvaluationResult {
                      std::optional<uint64_t> flag_version,
                      bool track_events,
                      bool track_reason,
-                     std::optional<long> debug_events_until_date,
+                     std::optional<uint64_t> debug_events_until_date,
                      EvaluationDetail detail);
 
    private:
