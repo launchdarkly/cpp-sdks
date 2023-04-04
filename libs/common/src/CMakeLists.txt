@@ -24,6 +24,7 @@ add_library(${LIBNAME}
         config/config.cpp
         context_filter.cpp lib.cpp
         config/application_info.cpp
+        events/event_processor.cpp
         )
 
 
