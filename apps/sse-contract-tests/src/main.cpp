@@ -19,16 +19,21 @@ int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{
         std::make_unique<ConsoleBackend>("sse-contract-tests")};
 
+    std::string port = "8123";
+    if (argc == 2) {
+        port =
+            argv[1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    }
     try {
         net::io_context ioc{1};
 
-        auto s = std::make_shared<server>(ioc, "0.0.0.0", "8111", logger);
-        s->add_capability("headers");
-        s->add_capability("comments");
-        s->add_capability("report");
-        s->add_capability("post");
-        s->add_capability("read-timeout");
-        s->run();
+        auto srv = std::make_shared<server>(ioc, "0.0.0.0", port, logger);
+        srv->add_capability("headers");
+        srv->add_capability("comments");
+        srv->add_capability("report");
+        srv->add_capability("post");
+        srv->add_capability("read-timeout");
+        srv->run();
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
         signals.async_wait([&](beast::error_code const&, int) {
