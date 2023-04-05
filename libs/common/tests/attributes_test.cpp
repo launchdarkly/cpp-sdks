@@ -3,10 +3,13 @@
 #include <boost/json.hpp>
 
 #include "attributes.hpp"
+#include "serialization/json_attributes.hpp"
 
 using launchdarkly::AttributeReference;
 using launchdarkly::Attributes;
 using launchdarkly::Value;
+
+// NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
 
 TEST(AttributesTests, CanGetBuiltInAttributesByReference) {
     Attributes attributes("the-key", "the-name", true, Value());
@@ -93,15 +96,15 @@ TEST(AttributesTests, OStreamOperator) {
         "[]  custom: object({{int, number(42)}})}",
         ProduceString(attributes));
 
-    Attributes attributes2("the-key", "the-name", true,
-                           Value(std::map<std::string, Value>({{"int", 42}})),
-                           AttributeReference::SetType{"/potato", "/bacon"});
+    Attributes attributes_2("the-key", "the-name", true,
+                            Value(std::map<std::string, Value>({{"int", 42}})),
+                            AttributeReference::SetType{"/potato", "/bacon"});
 
     EXPECT_EQ(
         "{key: string(the-key),  name: string(the-name) anonymous: bool(true) "
         "private: [valid(/bacon), valid(/potato)]  custom: object({{int, "
         "number(42)}})}",
-        ProduceString(attributes2));
+        ProduceString(attributes_2));
 }
 
 TEST(AttributesTests, JsonSerializationtest) {
@@ -150,3 +153,5 @@ TEST(AttributesTests, JsonSerializationOmitsMetaIfPrivateAttributesEmpty) {
 
     EXPECT_EQ(parsed_value, attributes_value);
 }
+
+// NOLINTEND cppcoreguidelines-avoid-magic-numbers

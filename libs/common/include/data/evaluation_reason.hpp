@@ -4,8 +4,6 @@
 #include <optional>
 #include <string>
 
-#include <boost/json/value.hpp>
-
 namespace launchdarkly {
 
 /**
@@ -96,14 +94,5 @@ class EvaluationReason {
     bool in_experiment_;
     std::optional<std::string> big_segment_status_;
 };
-
-/**
- * Method used by boost::json for converting a boost::json::value into a
- * launchdarkly::EvaluationReason.
- * @return A EvaluationReason representation of the boost::json::value.
- */
-EvaluationReason tag_invoke(
-    boost::json::value_to_tag<EvaluationReason> const& unused,
-    boost::json::value const& json_value);
 
 }  // namespace launchdarkly

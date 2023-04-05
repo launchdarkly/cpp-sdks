@@ -27,7 +27,12 @@ add_library(${LIBNAME}
         context_filter.cpp
         config/application_info.cpp
         lib.cpp
-        value_mapping.cpp)
+        value_mapping.cpp
+        serialization/json_attributes.cpp
+        serialization/json_context.cpp
+        serialization/json_evaluation_reason.cpp
+        serialization/json_evaluation_result.cpp
+        serialization/json_value.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

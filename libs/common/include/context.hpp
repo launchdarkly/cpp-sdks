@@ -129,8 +129,4 @@ class Context {
     std::string make_canonical_key();
 };
 
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                Context const& ld_context);
-
 }  // namespace launchdarkly

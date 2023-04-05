@@ -3,8 +3,6 @@
 #include <chrono>
 #include <optional>
 
-#include <boost/json/value.hpp>
-
 #include "evaluation_detail.hpp"
 
 namespace launchdarkly {
@@ -67,14 +65,5 @@ class EvaluationResult {
         debug_events_until_date_;
     EvaluationDetail detail_;
 };
-
-/**
- * Method used by boost::json for converting a boost::json::value into a
- * launchdarkly::EvaluationResult.
- * @return A EvaluationResult representation of the boost::json::value.
- */
-EvaluationResult tag_invoke(
-    boost::json::value_to_tag<EvaluationResult> const& unused,
-    boost::json::value const& json_value);
 
 }  // namespace launchdarkly

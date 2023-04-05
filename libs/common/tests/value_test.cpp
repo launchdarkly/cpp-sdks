@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "serialization/json_value.hpp"
 #include "value.hpp"
 
 #include <boost/json.hpp>

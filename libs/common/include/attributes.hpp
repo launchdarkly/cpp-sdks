@@ -3,7 +3,6 @@
 #include <string>
 #include <unordered_set>
 
-#include <boost/json/value.hpp>
 #include "attribute_reference.hpp"
 #include "value.hpp"
 
@@ -153,9 +152,5 @@ class Attributes {
 
     // Kinds are contained at the context level, not inside attributes.
 };
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                Attributes const& attributes);
 
 }  // namespace launchdarkly
