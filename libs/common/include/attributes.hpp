@@ -152,4 +152,5 @@ class Attributes {
 
     // Kinds are contained at the context level, not inside attributes.
 };
+
 }  // namespace launchdarkly

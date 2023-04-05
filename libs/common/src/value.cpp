@@ -205,4 +205,5 @@ Value::Object::Iterator Value::Object::end() const {
 Value::Object::Iterator Value::Object::find(std::string const& key) const {
     return {map_.find(key)};
 }
+
 }  // namespace launchdarkly

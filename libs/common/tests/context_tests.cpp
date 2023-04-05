@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <boost/json.hpp>
+
 #include "context_builder.hpp"
+#include "serialization/json_context.hpp"
 
 using launchdarkly::Context;
 using launchdarkly::ContextBuilder;
@@ -84,4 +87,52 @@ TEST(ContextTests, OstreamOperatorInvalidContext) {
         "'_'.\", "
         "#$#*(: \"The key for a context may not be empty.\"]",
         ProduceString(context));
+}
+
+// The attributes_test covers most serialization conditions.
+// So these tests are more for overall shape of single and multi-contexts.
+TEST(ContextTests, JsonSerializeSingleContext) {
+    auto context_value =
+        boost::json::value_from(ContextBuilder()
+                                    .kind("user", "user-key")
+                                    .set("isCat", true)
+                                    .set_private("email", "cat@email.email")
+                                    .build());
+
+    auto parsed_value = boost::json::parse(
+        "{"
+        "\"kind\":\"user\","
+        "\"key\":\"user-key\","
+        "\"isCat\":true,"
+        "\"email\":\"cat@email.email\","
+        "\"_meta\":{\"privateAttributes\": [\"email\"]}"
+        "}");
+
+    EXPECT_EQ(parsed_value, context_value);
+}
+
+TEST(ContextTests, JsonSerializeMultiContext) {
+    auto context_value =
+        boost::json::value_from(ContextBuilder()
+                                    .kind("user", "user-key")
+                                    .set("isCat", true)
+                                    .set_private("email", "cat@email.email")
+                                    .kind("org", "org-key")
+                                    .build());
+
+    auto parsed_value = boost::json::parse(
+        "{"
+        "\"kind\":\"multi\","
+        "\"user\":{"
+        "\"key\":\"user-key\","
+        "\"isCat\":true,"
+        "\"email\":\"cat@email.email\","
+        "\"_meta\":{\"privateAttributes\": [\"email\"]}"
+        "},"
+        "\"org\":{"
+        "\"key\":\"org-key\""
+        "}"
+        "}");
+
+    EXPECT_EQ(parsed_value, context_value);
 }
