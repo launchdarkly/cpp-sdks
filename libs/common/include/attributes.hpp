@@ -3,9 +3,9 @@
 #include <string>
 #include <unordered_set>
 
+#include <boost/json/value.hpp>
 #include "attribute_reference.hpp"
 #include "value.hpp"
-#include <boost/json/value.hpp>
 
 namespace launchdarkly {
 
