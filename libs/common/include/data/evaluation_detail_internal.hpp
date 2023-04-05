@@ -18,7 +18,7 @@ namespace launchdarkly {
  * For more information, see the [SDK reference guide]
  * (https://docs.launchdarkly.com/sdk/features/evaluation-reasons#TODO).
  */
-class EvaluationDetail {
+class EvaluationDetailInternal {
    public:
     /**
      * The result of the flag evaluation. This will be either one of the flag's
@@ -41,7 +41,7 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<std::reference_wrapper<EvaluationReason const>>
     reason() const;
 
-    EvaluationDetail(Value value,
+    EvaluationDetailInternal(Value value,
                      std::optional<std::size_t> variation_index,
                      std::optional<EvaluationReason> reason);
 

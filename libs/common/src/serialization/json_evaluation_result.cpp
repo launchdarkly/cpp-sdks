@@ -63,7 +63,7 @@ EvaluationResult tag_invoke(
                 track_events,
                 track_reason,
                 debug_events_until_date,
-                EvaluationDetail(value, variation, reason)};
+                EvaluationDetailInternal(value, variation, reason)};
     }
     // This would represent malformed JSON.
     return {0,
@@ -71,6 +71,6 @@ EvaluationResult tag_invoke(
             false,
             false,
             std::nullopt,
-            EvaluationDetail(Value(), std::nullopt, std::nullopt)};
+            EvaluationDetailInternal(Value(), std::nullopt, std::nullopt)};
 }
 }  // namespace launchdarkly

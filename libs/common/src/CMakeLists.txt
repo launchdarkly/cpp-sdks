@@ -22,7 +22,7 @@ add_library(${LIBNAME}
         config/config_builder.cpp
         config/config.cpp
         data/evaluation_reason.cpp
-        data/evaluation_detail.cpp
+        data/evaluation_detail_internal.cpp
         data/evaluation_result.cpp
         context_filter.cpp
         config/application_info.cpp

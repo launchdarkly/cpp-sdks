@@ -25,7 +25,7 @@ EvaluationResult::debug_events_until_date() const {
     return debug_events_until_date_;
 }
 
-EvaluationDetail const& EvaluationResult::detail() const {
+EvaluationDetailInternal const& EvaluationResult::detail() const {
     return detail_;
 }
 
@@ -36,7 +36,7 @@ EvaluationResult::EvaluationResult(
     bool track_reason,
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         debug_events_until_date,
-    EvaluationDetail detail)
+    EvaluationDetailInternal detail)
     : version_(version),
       flag_version_(flag_version),
       track_events_(track_events),
