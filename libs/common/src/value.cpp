@@ -5,8 +5,6 @@
 #include <cstring>
 #include <iostream>
 
-#include <boost/json.hpp>
-
 namespace launchdarkly {
 
 const Value Value::null_value_;

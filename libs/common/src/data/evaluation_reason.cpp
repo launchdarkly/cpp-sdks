@@ -1,5 +1,4 @@
 #include "data/evaluation_reason.hpp"
-#include "serialization/value_mapping.hpp"
 
 namespace launchdarkly {
 
