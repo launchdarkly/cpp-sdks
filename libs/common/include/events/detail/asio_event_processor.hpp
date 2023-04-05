@@ -12,7 +12,7 @@ namespace launchdarkly::events {
 
 class AsioEventProcessor : public IEventProcessor {
    public:
-    AsioEventProcessor(boost::asio::any_io_executor executor,
+    AsioEventProcessor(boost::asio::any_io_executor const& executor,
                        config::detail::Events config,
                        Logger& logger);
 
@@ -31,6 +31,7 @@ class AsioEventProcessor : public IEventProcessor {
     boost::asio::any_io_executor io_;
     boost::asio::steady_timer flush_timer_;
     Logger& logger_;
+    bool shutdown_;
 
     void flush(boost::system::error_code ec);
     void do_flush();
