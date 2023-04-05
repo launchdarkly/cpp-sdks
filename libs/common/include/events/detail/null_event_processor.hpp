@@ -9,6 +9,6 @@ class NullEventProcessor : public IEventProcessor {
     NullEventProcessor() = default;
     void async_send(InputEvent event) override;
     void async_flush() override;
-    void async_close() override;
+    void sync_close() override;
 };
 }  // namespace launchdarkly::events

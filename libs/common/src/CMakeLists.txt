@@ -25,6 +25,7 @@ add_library(${LIBNAME}
         context_filter.cpp lib.cpp
         config/application_info.cpp
         events/null_event_processor.cpp
+        events/asio_event_processor.cpp
         )
 
 

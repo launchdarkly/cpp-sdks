@@ -24,7 +24,7 @@ struct BaseEvent {
     std::chrono::milliseconds creation_date;
     bool inline_;
     bool all_attributes_private;
-    std::unordered_set<AttributeReference> global_private_attributes;
+    AttributeReference::SetType global_private_attributes;
     Context context;
 };
 
