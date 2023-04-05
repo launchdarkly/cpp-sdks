@@ -3,6 +3,7 @@
 #include <boost/json.hpp>
 
 #include "data/evaluation_result.hpp"
+#include "serialization/json_evaluation_result.hpp"
 
 using launchdarkly::EvaluationResult;
 

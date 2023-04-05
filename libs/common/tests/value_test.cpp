@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "serialization/json_value.hpp"
 #include "value.hpp"
 
 #include <boost/json.hpp>
@@ -244,6 +245,28 @@ TEST(ValueTests, FromBoostJson) {
     EXPECT_EQ("Bob", ld_obj.as_object()["name"].as_string());
     EXPECT_TRUE(ld_obj.as_object()["array"].as_array()[0].as_bool());
     EXPECT_FALSE(ld_obj.as_object()["array"].as_array()[1].as_bool());
+}
+
+TEST(ValueTests, ToBoostJson) {
+    Value bool_val(true);
+    auto boost_bool = boost::json::value_from(bool_val);
+    EXPECT_TRUE(boost_bool.as_bool());
+
+    Value string_val("potato");
+    auto boost_string = boost::json::value_from(string_val);
+    EXPECT_EQ("potato", boost_string.as_string());
+
+    Value number_val(3.14);
+    auto boost_number = boost::json::value_from(number_val);
+    EXPECT_EQ(3.14, boost_number.as_double());
+
+    Value arr_val{true, false, {"a", "b"}, Value::Object{{"string", "ham"}}};
+    auto boost_arr = boost::json::value_from(arr_val);
+    EXPECT_TRUE(boost_arr.as_array().at(0).as_bool());
+    EXPECT_FALSE(boost_arr.as_array().at(1).as_bool());
+    EXPECT_EQ("a", boost_arr.as_array().at(2).as_array().at(0));
+    EXPECT_EQ("b", boost_arr.as_array().at(2).as_array().at(1));
+    EXPECT_EQ("ham", boost_arr.as_array().at(3).as_object().at("string"));
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers

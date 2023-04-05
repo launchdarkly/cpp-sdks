@@ -1,4 +1,4 @@
-#include "value_mapping.hpp"
+#include "serialization/value_mapping.hpp"
 
 namespace launchdarkly {
 

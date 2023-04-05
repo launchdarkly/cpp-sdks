@@ -3,9 +3,7 @@
 #include <chrono>
 #include <optional>
 
-#include <boost/json/value.hpp>
-
-#include "evaluation_detail.hpp"
+#include "evaluation_detail_internal.hpp"
 
 namespace launchdarkly {
 
@@ -47,7 +45,7 @@ class EvaluationResult {
     /**
      * Details of the flags evaluation.
      */
-    [[nodiscard]] EvaluationDetail const& detail() const;
+    [[nodiscard]] EvaluationDetailInternal const& detail() const;
 
     EvaluationResult(
         uint64_t version,
@@ -56,7 +54,7 @@ class EvaluationResult {
         bool track_reason,
         std::optional<std::chrono::time_point<std::chrono::system_clock>>
             debug_events_until_date,
-        EvaluationDetail detail);
+        EvaluationDetailInternal detail);
 
    private:
     uint64_t version_;
@@ -65,16 +63,7 @@ class EvaluationResult {
     bool track_reason_;
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         debug_events_until_date_;
-    EvaluationDetail detail_;
+    EvaluationDetailInternal detail_;
 };
-
-/**
- * Method used by boost::json for converting a boost::json::value into a
- * launchdarkly::EvaluationResult.
- * @return A EvaluationResult representation of the boost::json::value.
- */
-EvaluationResult tag_invoke(
-    boost::json::value_to_tag<EvaluationResult> const& unused,
-    boost::json::value const& json_value);
 
 }  // namespace launchdarkly
