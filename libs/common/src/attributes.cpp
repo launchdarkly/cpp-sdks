@@ -1,7 +1,5 @@
 #include "attributes.hpp"
 
-#include <boost/json.hpp>
-
 namespace launchdarkly {
 
 std::string const& Attributes::key() const {

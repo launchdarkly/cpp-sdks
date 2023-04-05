@@ -1,7 +1,5 @@
 #include <sstream>
 
-#include <boost/json.hpp>
-
 #include "context.hpp"
 
 namespace launchdarkly {
