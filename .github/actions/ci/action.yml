@@ -10,6 +10,11 @@ inputs:
   cmake_target:
     description: 'The name of the CMake target. i.e. launchdarkly-cpp-common'
     required: true
+  run_tests:
+    description: 'Whether gtest targets should be built & run.'
+    required: false
+    default: 'true'
+
 
 runs:
   using: composite
@@ -27,11 +32,14 @@ runs:
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
     - name: Build Tests
+      id: build-tests
+      if: inputs.run_tests == 'true'
       shell: bash
       run: ./scripts/build.sh gtest_${{ inputs.cmake_target }} ON
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
     - name: Run Tests
+      if: steps.build-tests.outcome == 'success'
       shell: bash
       # This uses the binary, versus "make tests" because the binary
       # has better performance and output.

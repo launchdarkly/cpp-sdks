@@ -4,9 +4,16 @@
 #include <string>
 #include <vector>
 
+#include "serialization/json_value.hpp"
 #include "value.hpp"
 
+#include <boost/json.hpp>
+
 // NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
+
+using BoostValue = boost::json::value;
+using BoostObject = boost::json::object;
+using BoostArray = boost::json::array;
 
 using launchdarkly::Value;
 TEST(ValueTests, CanMakeNullValue) {
@@ -211,6 +218,55 @@ TEST(ValueTests, OstreamOperator) {
     EXPECT_EQ(
         "object({{first, string(cheese)}, {second, number(42)}})",
         ProduceString(Value::Object{{"first", "cheese"}, {"second", 42}}));
+}
+
+TEST(ValueTests, FromBoostJson) {
+    BoostValue bool_val(true);
+    auto ld_bool = boost::json::value_to<Value>(bool_val);
+    EXPECT_TRUE(ld_bool.as_bool());
+
+    BoostValue string_val("potato");
+    auto ld_string = boost::json::value_to<Value>(string_val);
+    EXPECT_EQ("potato", ld_string.as_string());
+
+    BoostValue number_val(3.14);
+    auto ld_number = boost::json::value_to<Value>(number_val);
+    EXPECT_EQ(3.14, ld_number.as_double());
+
+    BoostValue arr_val = BoostArray{true, false, BoostObject{{"name", "Bob"}}};
+    auto ld_array = boost::json::value_to<Value>(arr_val);
+    EXPECT_TRUE(ld_array.as_array()[0].as_bool());
+    EXPECT_FALSE(ld_array.as_array()[1].as_bool());
+    EXPECT_EQ("Bob", ld_array.as_array()[2].as_object()["name"].as_string());
+
+    BoostValue obj_val =
+        BoostObject{{"name", "Bob"}, {"array", BoostArray{true, false}}};
+    auto ld_obj = boost::json::value_to<Value>(obj_val);
+    EXPECT_EQ("Bob", ld_obj.as_object()["name"].as_string());
+    EXPECT_TRUE(ld_obj.as_object()["array"].as_array()[0].as_bool());
+    EXPECT_FALSE(ld_obj.as_object()["array"].as_array()[1].as_bool());
+}
+
+TEST(ValueTests, ToBoostJson) {
+    Value bool_val(true);
+    auto boost_bool = boost::json::value_from(bool_val);
+    EXPECT_TRUE(boost_bool.as_bool());
+
+    Value string_val("potato");
+    auto boost_string = boost::json::value_from(string_val);
+    EXPECT_EQ("potato", boost_string.as_string());
+
+    Value number_val(3.14);
+    auto boost_number = boost::json::value_from(number_val);
+    EXPECT_EQ(3.14, boost_number.as_double());
+
+    Value arr_val{true, false, {"a", "b"}, Value::Object{{"string", "ham"}}};
+    auto boost_arr = boost::json::value_from(arr_val);
+    EXPECT_TRUE(boost_arr.as_array().at(0).as_bool());
+    EXPECT_FALSE(boost_arr.as_array().at(1).as_bool());
+    EXPECT_EQ("a", boost_arr.as_array().at(2).as_array().at(0));
+    EXPECT_EQ("b", boost_arr.as_array().at(2).as_array().at(1));
+    EXPECT_EQ("ham", boost_arr.as_array().at(3).as_object().at("string"));
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers
