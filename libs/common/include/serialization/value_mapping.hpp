@@ -5,8 +5,8 @@
 namespace launchdarkly {
 
 template <typename Type>
-std::optional<Type> ValueAsOpt(boost::json::object::iterator iterator,
-                               boost::json::object::iterator end) {
+std::optional<Type> ValueAsOpt(boost::json::object::const_iterator iterator,
+                               boost::json::object::const_iterator end) {
     boost::ignore_unused(iterator);
     boost::ignore_unused(end);
 
@@ -14,8 +14,8 @@ std::optional<Type> ValueAsOpt(boost::json::object::iterator iterator,
 }
 
 template <typename Type>
-Type ValueOrDefault(boost::json::object::iterator iterator,
-                    boost::json::object::iterator end,
+Type ValueOrDefault(boost::json::object::const_iterator iterator,
+                    boost::json::object::const_iterator end,
                     Type default_value) {
     boost::ignore_unused(iterator);
     boost::ignore_unused(end);
@@ -35,25 +35,25 @@ std::optional<OutType> MapOpt(std::optional<InType> opt,
 }
 
 template <>
-std::optional<uint64_t> ValueAsOpt(boost::json::object::iterator iterator,
-                                   boost::json::object::iterator end);
+std::optional<uint64_t> ValueAsOpt(boost::json::object::const_iterator iterator,
+                                   boost::json::object::const_iterator end);
 
 template <>
-std::optional<std::string> ValueAsOpt(boost::json::object::iterator iterator,
-                                      boost::json::object::iterator end);
+std::optional<std::string> ValueAsOpt(boost::json::object::const_iterator iterator,
+                                      boost::json::object::const_iterator end);
 
 template <>
-bool ValueOrDefault(boost::json::object::iterator iterator,
-                    boost::json::object::iterator end,
+bool ValueOrDefault(boost::json::object::const_iterator iterator,
+                    boost::json::object::const_iterator end,
                     bool default_value);
 
 template <>
-uint64_t ValueOrDefault(boost::json::object::iterator iterator,
-                        boost::json::object::iterator end,
+uint64_t ValueOrDefault(boost::json::object::const_iterator iterator,
+                        boost::json::object::const_iterator end,
                         uint64_t default_value);
 
 template <>
-std::string ValueOrDefault(boost::json::object::iterator iterator,
-                           boost::json::object::iterator end,
+std::string ValueOrDefault(boost::json::object::const_iterator iterator,
+                           boost::json::object::const_iterator end,
                            std::string default_value);
 }  // namespace launchdarkly

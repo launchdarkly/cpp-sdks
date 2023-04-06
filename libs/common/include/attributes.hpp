@@ -12,7 +12,7 @@ namespace launchdarkly {
  * A collection of attributes that can be present within a context.
  * A multi-context has multiple sets of attributes keyed by their "kind".
  */
-class Attributes {
+class Attributes final {
    public:
     /**
      * Get the key for the context.

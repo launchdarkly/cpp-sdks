@@ -30,6 +30,8 @@ include(FetchContent)
 # Add main SDK sources.
 add_subdirectory(src)
 
+#target_link_libraries(${LIBNAME}, launchdarkly::common)
+
 if (BUILD_TESTING)
     add_subdirectory(tests)
 endif ()

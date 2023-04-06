@@ -26,7 +26,7 @@ class ContextBuilder;
 /**
  * A LaunchDarkly context.
  */
-class Context {
+class Context final {
     friend class ContextBuilder;
 
    public:

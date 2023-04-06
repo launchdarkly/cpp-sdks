@@ -45,7 +45,7 @@ namespace launchdarkly {
  * # Comparisons
  * [TODO]
  */
-class Value {
+class Value final {
    public:
     /**
      * Array type for values. Provides const iteration and indexing.

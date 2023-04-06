@@ -47,6 +47,11 @@ class EvaluationResult {
      */
     [[nodiscard]] EvaluationDetailInternal const& detail() const;
 
+    /**
+     * In the case where a result it deserialized from JSON it could be invalid.
+     */
+    [[nodiscard]] bool valid() const;
+
     EvaluationResult(
         uint64_t version,
         std::optional<uint64_t> flag_version,

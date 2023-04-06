@@ -2,7 +2,9 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} api.cpp ${HEADER_LIST})
+add_library(${LIBNAME} api.cpp ${HEADER_LIST} DataSources/streaming_data_source.cpp DataSources/base_64.cpp)
+
+target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 

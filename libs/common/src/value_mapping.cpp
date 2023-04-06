@@ -3,8 +3,8 @@
 namespace launchdarkly {
 
 template <>
-std::optional<uint64_t> ValueAsOpt(boost::json::object::iterator iterator,
-                                   boost::json::object::iterator end) {
+std::optional<uint64_t> ValueAsOpt(boost::json::object::const_iterator iterator,
+                                   boost::json::object::const_iterator end) {
     if (iterator != end && iterator->value().is_number()) {
         return iterator->value().to_number<uint64_t>();
     }
@@ -12,8 +12,8 @@ std::optional<uint64_t> ValueAsOpt(boost::json::object::iterator iterator,
 }
 
 template <>
-std::optional<std::string> ValueAsOpt(boost::json::object::iterator iterator,
-                                      boost::json::object::iterator end) {
+std::optional<std::string> ValueAsOpt(boost::json::object::const_iterator iterator,
+                                      boost::json::object::const_iterator end) {
     if (iterator != end && iterator->value().is_string()) {
         return std::string(iterator->value().as_string());
     }
@@ -21,8 +21,8 @@ std::optional<std::string> ValueAsOpt(boost::json::object::iterator iterator,
 }
 
 template <>
-bool ValueOrDefault(boost::json::object::iterator iterator,
-                    boost::json::object::iterator end,
+bool ValueOrDefault(boost::json::object::const_iterator iterator,
+                    boost::json::object::const_iterator end,
                     bool default_value) {
     if (iterator != end && iterator->value().is_bool()) {
         return iterator->value().as_bool();
@@ -31,8 +31,8 @@ bool ValueOrDefault(boost::json::object::iterator iterator,
 }
 
 template <>
-std::string ValueOrDefault(boost::json::object::iterator iterator,
-                           boost::json::object::iterator end,
+std::string ValueOrDefault(boost::json::object::const_iterator iterator,
+                           boost::json::object::const_iterator end,
                            std::string default_value) {
     if (iterator != end && iterator->value().is_string()) {
         return std::string(iterator->value().as_string());
@@ -41,8 +41,8 @@ std::string ValueOrDefault(boost::json::object::iterator iterator,
 }
 template <>
 
-uint64_t ValueOrDefault(boost::json::object::iterator iterator,
-                        boost::json::object::iterator end,
+uint64_t ValueOrDefault(boost::json::object::const_iterator iterator,
+                        boost::json::object::const_iterator end,
                         uint64_t default_value) {
     if (iterator != end && iterator->value().is_number()) {
         return iterator->value().to_number<uint64_t>();
