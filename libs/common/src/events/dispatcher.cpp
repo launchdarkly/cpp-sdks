@@ -21,6 +21,7 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
                        std::string authorization,
                        Logger& logger)
     : io_(std::move(io)),
+      work_guard_(io_),
       outbox_(outbox_capacity),
       summary_state_(std::chrono::system_clock::now()),
       min_flush_interval_(min_flush_interval),
@@ -33,9 +34,7 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
       logger_(logger) {}
 
 void Dispatcher::send(InputEvent input_event) {
-    boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
-        handle_send(std::move(e));
-    });
+    boost::asio::post(io_, [this, input_event]() { handle_send(input_event); });
 }
 
 void Dispatcher::handle_send(InputEvent input_event) {
@@ -63,11 +62,16 @@ void Dispatcher::flush(std::chrono::system_clock::time_point when) {
     last_flush_ = when;
 }
 
+void Dispatcher::shutdown() {
+    work_guard_.reset();
+}
+
 void Dispatcher::request_flush() {
     boost::asio::post(io_, [this] { flush(last_flush_); });
 }
 
 std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
+    LD_LOG(logger_, LogLevel::kDebug) << "generating http request";
     RequestType req;
 
     req.set(http::field::host, host_);
@@ -89,6 +93,7 @@ bool Dispatcher::flush_due() {
 }
 
 std::vector<OutputEvent> Dispatcher::process(InputEvent e) {
+    LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: processing an event";
     return {};
 }
 

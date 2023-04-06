@@ -20,7 +20,10 @@ TEST_F(EventProcessorTests, thing) {
 
     events::detail::AsioEventProcessor e(io.get_executor(), config, logger);
 
-    std::thread t([&]() { io.run(); });
+    std::thread t([&]() {
+        io.run();
+        std::cout << "exiting";
+    });
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
     auto c = launchdarkly::ContextBuilder().kind("org", "ld").build();
@@ -32,7 +35,7 @@ TEST_F(EventProcessorTests, thing) {
 
     e.async_send(ev);
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
-    t.join();
+    d t.join();
 }

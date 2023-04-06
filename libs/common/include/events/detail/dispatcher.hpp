@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -44,12 +45,14 @@ class Dispatcher {
     void request_flush();
 
     void send(InputEvent);
+    void shutdown();
 
    private:
     using RequestType =
         boost::beast::http::request<boost::beast::http::string_body>;
 
     boost::asio::any_io_executor io_;
+    boost::asio::executor_work_guard<boost::asio::any_io_executor> work_guard_;
     Outbox outbox_;
     SummaryState summary_state_;
 
