@@ -72,28 +72,24 @@ struct VariationSummary {
 };
 
 struct VariationKey {
-    std::optional<Version> version;
+    Version version;
     std::optional<VariationIndex> variation;
-};
 
-struct FlagSummary {
-    std::unordered_map<VariationKey, VariationSummary> counters;
-    Value default_;
-    std::unordered_set<std::string> context_kinds;
-};
-struct SummaryEvent {
-    std::chrono::milliseconds start_date;
-    std::chrono::milliseconds end_date;
-    std::unordered_map<std::string, FlagSummary> features;
+    struct Hash {
+        auto operator()(VariationKey const& p) const -> size_t {
+            if (p.variation) {
+                return std::hash<Version>{}(p.version) ^
+                       std::hash<VariationIndex>{}(*p.variation);
+            } else {
+                return std::hash<Version>{}(p.version);
+            }
+        }
+    };
 };
 
 using InputEvent = std::variant<FeatureEvent, IdentifyEvent, CustomEvent>;
 
-using OutputEvent = std::variant<IndexEvent,
-                                 DebugEvent,
-                                 FeatureEvent,
-                                 IdentifyEvent,
-                                 CustomEvent,
-                                 SummaryEvent>;
+using OutputEvent = std::
+    variant<IndexEvent, DebugEvent, FeatureEvent, IdentifyEvent, CustomEvent>;
 
 }  // namespace launchdarkly::events

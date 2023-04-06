@@ -2,13 +2,13 @@
 
 #include "events/event_processor.hpp"
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 class NullEventProcessor : public IEventProcessor {
    public:
     NullEventProcessor() = default;
     void async_send(InputEvent event) override;
     void async_flush() override;
-    void sync_close() override;
+    void async_close() override;
 };
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail
