@@ -107,7 +107,7 @@ TEST(EvaluationResultTests, FromMapOfResults) {
     EXPECT_FALSE(results.at("flagB").value().detail().value().as_bool());
 }
 
-TEST(EvaluationResultTests, InvalidJsonValue) {
+TEST(EvaluationResultTests, NoResultFieldsJson) {
     auto results = boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
         boost::json::parse("{}"));
 
@@ -115,5 +115,12 @@ TEST(EvaluationResultTests, InvalidJsonValue) {
     EXPECT_EQ(JsonError::kSchemaFailure, results.error());
 }
 
+TEST(EvaluationResultTests, VersionWrongTypeJson) {
+    auto results = boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
+        boost::json::parse("{\"version\": \"apple\"}"));
+
+    EXPECT_FALSE(results.has_value());
+    EXPECT_EQ(JsonError::kSchemaFailure, results.error());
+}
 
 // NOLINTEND bugprone-unchecked-optional-access
