@@ -12,7 +12,8 @@ EvaluationResult tag_invoke(
         auto json_obj = json_value.as_object();
 
         auto* version_iter = json_obj.find("version");
-        auto version = ValueOrDefault(version_iter, json_obj.end(), 0UL);
+        auto version =
+            ValueOrDefault<uint64_t>(version_iter, json_obj.end(), 0);
 
         auto* flag_version_iter = json_obj.find("flagVersion");
         auto flag_version =
