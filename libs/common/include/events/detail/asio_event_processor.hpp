@@ -5,7 +5,7 @@
 #include <queue>
 #include <variant>
 #include "config/detail/events.hpp"
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/service_hosts.hpp"
 #include "events/detail/dispatcher.hpp"
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
@@ -17,7 +17,7 @@ class AsioEventProcessor : public IEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& executor,
                        config::detail::Events const& config,
-                       config::ServiceEndpoints const& endpoints,
+                       config::ServiceHosts const& endpoints,
                        Logger& logger);
 
     void async_send(InputEvent event) override;

@@ -10,7 +10,7 @@ ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
 
 template <typename SDK>
 ConfigBuilder<SDK>& ConfigBuilder<SDK>::service_endpoints(
-    detail::EndpointsBuilder<SDK> builder) {
+    detail::HostsBuilder<SDK> builder) {
     service_endpoints_builder_ = std::move(builder);
     return *this;
 }

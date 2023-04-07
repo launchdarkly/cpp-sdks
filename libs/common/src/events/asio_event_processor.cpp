@@ -8,7 +8,7 @@ namespace launchdarkly::events::detail {
 AsioEventProcessor::AsioEventProcessor(
     boost::asio::any_io_executor const& executor,
     config::detail::Events const& config,
-    config::ServiceEndpoints const& endpoints,
+    config::ServiceHosts const& endpoints,
     Logger& logger)
     : logger_(logger),
       dispatcher_(boost::asio::make_strand(executor),

@@ -5,7 +5,7 @@ namespace launchdarkly::config::detail {
 template <typename SDK>
 Config<SDK>::Config(std::string sdk_key,
                     bool offline,
-                    detail::EndpointsBuilder<SDK> service_endpoints_builder,
+                    detail::HostsBuilder<SDK> service_endpoints_builder,
                     detail::EventsBuilder<SDK> events_builder,
                     std::optional<std::string> application_tag)
     : sdk_key(std::move(sdk_key)),

@@ -15,7 +15,7 @@ auto const kEventSchemaVersion = 4;
 
 Dispatcher::Dispatcher(boost::asio::any_io_executor io,
                        config::detail::Events const& config,
-                       config::ServiceEndpoints const& endpoints,
+                       config::ServiceHosts const& endpoints,
                        std::string authorization,
                        Logger& logger)
     : io_(std::move(io)),
@@ -24,7 +24,7 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
       summary_state_(std::chrono::system_clock::now()),
       min_flush_interval_(config.flush_interval()),
       last_flush_(std::chrono::system_clock::now()),
-      host_(endpoints.events_base_url()),
+      host_(endpoints.events_host()),
       path_(config.path()),
       authorization_(std::move(authorization)),
       uuids_(),

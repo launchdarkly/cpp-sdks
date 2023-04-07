@@ -8,7 +8,7 @@
 #include <chrono>
 #include <optional>
 #include "config/detail/events.hpp"
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/service_hosts.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summary_state.hpp"
@@ -21,7 +21,7 @@ class Dispatcher {
    public:
     Dispatcher(boost::asio::any_io_executor io,
                config::detail::Events const& config,
-               config::ServiceEndpoints const& endpoints,
+               config::ServiceHosts const& endpoints,
                std::string authorization,
                Logger& logger);
 

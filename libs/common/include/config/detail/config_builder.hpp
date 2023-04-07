@@ -4,8 +4,8 @@
 #include <string>
 #include "config/detail/application_info.hpp"
 #include "config/detail/config.hpp"
-#include "config/detail/endpoints_builder.hpp"
 #include "config/detail/events_builder.hpp"
+#include "config/detail/hosts_builder.hpp"
 #include "logger.hpp"
 
 namespace launchdarkly::config::detail {
@@ -18,7 +18,7 @@ namespace launchdarkly::config::detail {
 template <typename SDK>
 class ConfigBuilder {
    public:
-    using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
+    using EndpointsBuilder = detail::HostsBuilder<SDK>;
     using EventsBuilder = detail::EventsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
     /**
