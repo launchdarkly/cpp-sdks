@@ -14,12 +14,12 @@ template <typename SDK>
 struct Config {
     std::string sdk_key;
     bool offline;
-    detail::HostsBuilder<SDK> service_endpoints_builder;
+    detail::HostsBuilder<SDK> hosts_builder;
     std::optional<std::string> application_tag;
     detail::EventsBuilder<SDK> events_builder;
     Config(std::string sdk_key,
            bool offline,
-           detail::HostsBuilder<SDK> service_endpoints_builder,
+           detail::HostsBuilder<SDK> hosts_builder,
            detail::EventsBuilder<SDK> events_builder,
            std::optional<std::string> application_tag);
 };

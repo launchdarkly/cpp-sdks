@@ -32,6 +32,7 @@ struct Defaults<ClientSDK> {
             std::chrono::seconds(30),
             "/mobile",
             AttributePolicy::Default,
+            TransportSecurity::TLS,
         };
     }
 };
@@ -48,6 +49,7 @@ struct Defaults<ServerSDK> {
             std::chrono::seconds(5),
             "/bulk",
             AttributePolicy::Default,
+            TransportSecurity::TLS,
         };
     }
 };

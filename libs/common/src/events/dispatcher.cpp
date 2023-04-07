@@ -19,17 +19,18 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
                        std::string authorization,
                        Logger& logger)
     : io_(std::move(io)),
-      work_guard_(io_),
       outbox_(config.capacity()),
       summary_state_(std::chrono::system_clock::now()),
-      min_flush_interval_(config.flush_interval()),
-      last_flush_(std::chrono::system_clock::now()),
+      flush_interval_(config.flush_interval()),
+      timer_(io_),
       host_(endpoints.events_host()),
       path_(config.path()),
       authorization_(std::move(authorization)),
       uuids_(),
       full_outbox_encountered_(false),
-      logger_(logger) {}
+      logger_(logger) {
+    schedule_flush();
+}
 
 void Dispatcher::send(InputEvent input_event) {
     boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
@@ -49,28 +50,57 @@ void Dispatcher::handle_send(InputEvent input_event) {
                "capacity to avoid dropping events";
     }
     full_outbox_encountered_ = !inserted;
+}
 
-    if (flush_due()) {
-        flush(std::chrono::system_clock::now());
+void Dispatcher::flush(FlushTrigger flush_type) {
+    if (auto request = make_request()) {
+        conns_.async_write(*request);
+    } else {
+        LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: nothing to flush";
+    }
+    if (flush_type == FlushTrigger::Automatic) {
+        schedule_flush();
     }
 }
 
-void Dispatcher::flush(std::chrono::system_clock::time_point when) {
-    if (auto request = make_request()) {
-        conns_.async_write(*request);
-    }
-    last_flush_ = when;
+void Dispatcher::schedule_flush() {
+    LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: scheduling flush in "
+                                      << flush_interval_.count() << "ms";
+
+    timer_.expires_from_now(flush_interval_);
+    timer_.async_wait([this](boost::system::error_code ec) {
+        if (ec) {
+            LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: flush cancelled";
+            return;
+        }
+        LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: flush";
+        flush(FlushTrigger::Automatic);
+    });
 }
 
 void Dispatcher::shutdown() {
-    work_guard_.reset();
+    timer_.cancel();
 }
 
 void Dispatcher::request_flush() {
-    boost::asio::post(io_, [this] { flush(last_flush_); });
+    boost::asio::post(io_, [this] {
+        boost::system::error_code ec;
+        flush(FlushTrigger::Manual);
+    });
+}
+
+static boost::json serialize(std::vector<OutputEvent> events) {
+
 }
 
 std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
+
+    if (outbox_.empty()) {
+        return std::nullopt;
+    }
+
+    auto json = serialize(outbox_.consume());
+
     LD_LOG(logger_, LogLevel::kDebug) << "generating http request";
     RequestType req;
 
@@ -82,14 +112,9 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
     req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     req.target(host_ + path_);
 
-    req.body() = "[]";
+    req.body() = json;
     req.prepare_payload();
     return req;
-}
-
-bool Dispatcher::flush_due() {
-    return std::chrono::system_clock::now() - last_flush_ >=
-           min_flush_interval_;
 }
 
 std::vector<OutputEvent> Dispatcher::process(InputEvent e) {

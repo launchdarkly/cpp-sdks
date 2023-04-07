@@ -31,7 +31,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::client;
     ConfigBuilder builder("sdk-123");
     Config cfg = builder.build(logger);
-    ASSERT_EQ(cfg.service_endpoints_builder, ConfigBuilder::EndpointsBuilder());
+    ASSERT_EQ(cfg.hosts_builder, ConfigBuilder::EndpointsBuilder());
 }
 
 TEST_F(ConfigBuilderTest,
@@ -48,14 +48,14 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     auto config =
         ConfigBuilder("sdk-123")
             .offline(true)
-            .service_endpoints(Endpoints().relay_proxy("foo"))
+            .service_endpoints(HostsBuilder().relay_proxy("foo"))
             .application_info(
                 ApplicationInfo().app_identifier("bar").app_version("baz"))
             .build(logger);
 
     ASSERT_EQ(config.sdk_key, "sdk-123");
     ASSERT_TRUE(config.offline);
-    ASSERT_EQ(config.service_endpoints_builder, Endpoints().relay_proxy("foo"));
+    ASSERT_EQ(config.hosts_builder, HostsBuilder().relay_proxy("foo"));
     ASSERT_EQ(config.application_tag,
               "application-id/bar application-version/baz");
 }

@@ -28,20 +28,24 @@ class Dispatcher {
     void request_flush();
 
     void send(InputEvent);
+    
     void shutdown();
 
    private:
+    enum class FlushTrigger {
+        Automatic = 0,
+        Manual = 1,
+    };
     using RequestType =
         boost::beast::http::request<boost::beast::http::string_body>;
 
     boost::asio::any_io_executor io_;
-    boost::asio::executor_work_guard<boost::asio::any_io_executor> work_guard_;
     Outbox outbox_;
     SummaryState summary_state_;
 
     std::chrono::milliseconds reaction_time_;
-    std::chrono::milliseconds min_flush_interval_;
-    std::chrono::system_clock::time_point last_flush_;
+    std::chrono::milliseconds flush_interval_;
+    boost::asio::steady_timer timer_;
 
     std::string host_;
     std::string path_;
@@ -59,8 +63,9 @@ class Dispatcher {
 
     std::optional<RequestType> make_request();
 
-    void flush(std::chrono::system_clock::time_point when);
-    bool flush_due();
+    void flush(FlushTrigger flush_type);
+
+    void schedule_flush();
 
     std::vector<OutputEvent> process(InputEvent e);
 };

@@ -19,7 +19,7 @@ TEST_F(EventProcessorTests, thing) {
                       .flush_interval(std::chrono::seconds(1))
                       .build();
 
-    auto endpoints = client::Endpoints().build();
+    auto endpoints = client::HostsBuilder().build();
 
     events::detail::AsioEventProcessor ep(io.get_executor(), *config,
                                           *endpoints, logger);

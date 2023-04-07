@@ -10,7 +10,7 @@ namespace launchdarkly::client {
 using SDK = config::detail::ClientSDK;
 
 using ApplicationInfo = config::detail::ApplicationInfo;
-using Endpoints = config::detail::HostsBuilder<SDK>;
+using HostsBuilder = config::detail::HostsBuilder<SDK>;
 using ConfigBuilder = config::detail::ConfigBuilder<SDK>;
 using EventsBuilder = config::detail::EventsBuilder<SDK>;
 using Config = config::detail::Config<SDK>;

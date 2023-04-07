@@ -6,9 +6,9 @@
 
 class ServiceEndpointTest : public testing::Test {};
 
-using ClientEndpointsBuilder = launchdarkly::client::Endpoints;
+using ClientEndpointsBuilder = launchdarkly::client::HostsBuilder;
 
-using ServerEndpointsBuilder = launchdarkly::server::Endpoints;
+using ServerEndpointsBuilder = launchdarkly::server::HostsBuilder;
 
 using launchdarkly::Error;
 

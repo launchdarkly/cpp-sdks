@@ -9,6 +9,12 @@ enum class AttributePolicy {
     Default = 0,
     AllPrivate = 1,
 };
+
+enum class TransportSecurity {
+    None = 0,
+    TLS = 1,
+};
+
 struct Events {
    public:
     template <typename SDK>
@@ -16,17 +22,20 @@ struct Events {
     Events(std::size_t capacity,
            std::chrono::milliseconds flush_interval,
            std::string path,
-           AttributePolicy policy);
+           AttributePolicy policy,
+           TransportSecurity security);
     std::size_t capacity() const;
     std::chrono::milliseconds flush_interval() const;
     std::string const& path() const;
     AttributePolicy attribute_policy() const;
+    TransportSecurity transport_security() const;
 
    private:
     std::size_t capacity_;
     std::chrono::milliseconds flush_interval_;
     std::string path_;
     AttributePolicy attribute_policy_;
+    TransportSecurity transport_security_;
 };
 
 bool operator==(Events const& lhs, Events const& rhs);
