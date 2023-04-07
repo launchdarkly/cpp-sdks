@@ -14,27 +14,27 @@ auto const kPayloadIdHeader = "X-LaunchDarkly-Payload-Id";
 auto const kEventSchemaVersion = 4;
 
 Dispatcher::Dispatcher(boost::asio::any_io_executor io,
-                       std::size_t outbox_capacity,
-                       std::chrono::milliseconds min_flush_interval,
-                       std::string endpoint_host,
-                       std::string endpoint_path,
+                       config::detail::Events const& config,
+                       config::ServiceEndpoints const& endpoints,
                        std::string authorization,
                        Logger& logger)
     : io_(std::move(io)),
       work_guard_(io_),
-      outbox_(outbox_capacity),
+      outbox_(config.capacity()),
       summary_state_(std::chrono::system_clock::now()),
-      min_flush_interval_(min_flush_interval),
+      min_flush_interval_(config.flush_interval()),
       last_flush_(std::chrono::system_clock::now()),
-      host_(endpoint_host),
-      path_(endpoint_path),
-      authorization_(authorization),
+      host_(endpoints.events_base_url()),
+      path_(config.path()),
+      authorization_(std::move(authorization)),
       uuids_(),
       full_outbox_encountered_(false),
       logger_(logger) {}
 
 void Dispatcher::send(InputEvent input_event) {
-    boost::asio::post(io_, [this, input_event]() { handle_send(input_event); });
+    boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
+        handle_send(std::move(e));
+    });
 }
 
 void Dispatcher::handle_send(InputEvent input_event) {
@@ -42,13 +42,13 @@ void Dispatcher::handle_send(InputEvent input_event) {
 
     std::vector<OutputEvent> output_events = process(std::move(input_event));
 
-    bool full = outbox_.push_discard_overflow(std::move(output_events));
-    if (full && !full_outbox_encountered_) {
+    bool inserted = outbox_.push_discard_overflow(std::move(output_events));
+    if (!inserted && !full_outbox_encountered_) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "event-processor: exceeded event queue capacity; increase "
                "capacity to avoid dropping events";
     }
-    full_outbox_encountered_ = full;
+    full_outbox_encountered_ = !inserted;
 
     if (flush_due()) {
         flush(std::chrono::system_clock::now());

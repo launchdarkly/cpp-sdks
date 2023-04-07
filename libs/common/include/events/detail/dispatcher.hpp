@@ -7,6 +7,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <chrono>
 #include <optional>
+#include "config/detail/events.hpp"
+#include "config/detail/service_endpoints.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summary_state.hpp"
@@ -17,28 +19,9 @@ namespace launchdarkly::events::detail {
 
 class Dispatcher {
    public:
-    /**
-     *
-     * Capacity and interval are related. Capacity is the amount of events that
-     * can accumulate between flushes. If the application is producing events
-     * faster than flushing, then the outbox will become full and be unable
-     * to accept new items. At that point, events will be dropped. To guard
-     * against this, lower the flush interval to the point where events are no
-     * longer dropped.
-     * @param io
-     * @param capacity
-     * @param reaction_time
-     * @param flush_interval
-     * @param endpoint_host
-     * @param endpoint_path
-     * @param authorization
-     * @param logger
-     */
     Dispatcher(boost::asio::any_io_executor io,
-               std::size_t outbox_capacity,
-               std::chrono::milliseconds flush_interval,
-               std::string endpoint_host,
-               std::string endpoint_path,
+               config::detail::Events const& config,
+               config::ServiceEndpoints const& endpoints,
                std::string authorization,
                Logger& logger);
 

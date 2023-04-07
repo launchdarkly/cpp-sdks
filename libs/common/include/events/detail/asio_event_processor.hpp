@@ -5,6 +5,7 @@
 #include <queue>
 #include <variant>
 #include "config/detail/events.hpp"
+#include "config/detail/service_endpoints.hpp"
 #include "events/detail/dispatcher.hpp"
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
@@ -15,10 +16,9 @@ namespace launchdarkly::events::detail {
 class AsioEventProcessor : public IEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& executor,
-                       config::detail::Events config,
+                       config::detail::Events const& config,
+                       config::ServiceEndpoints const& endpoints,
                        Logger& logger);
-
-    ~AsioEventProcessor();
 
     void async_send(InputEvent event) override;
     void async_flush() override;

@@ -19,7 +19,9 @@ add_library(${LIBNAME}
         attributes_builder.cpp
         error.cpp
         config/service_endpoints.cpp
+        config/events.cpp
         config/endpoints_builder.cpp
+        config/events_builder.cpp
         config/config_builder.cpp
         config/config.cpp
         data/evaluation_reason.cpp

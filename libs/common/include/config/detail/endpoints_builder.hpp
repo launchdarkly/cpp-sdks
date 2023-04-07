@@ -63,8 +63,8 @@ class EndpointsBuilder {
 
     /**
      * Builds a ServiceEndpoints if the configuration is valid. If not,
-     * returns nullptr.
-     * @return Unique pointer to ServiceEndpoints, or nullptr.
+     * returns an error.
+     * @return Unique pointer to ServiceEndpoints, or error.
      */
     [[nodiscard]] tl::expected<ServiceEndpoints, Error> build();
 
