@@ -77,7 +77,7 @@ class Context {
      * @return Returns a map of kinds to keys.
      */
     [[nodiscard]] std::map<std::string_view, std::string_view> const&
-    keys_and_kinds() const;
+    kinds_to_keys() const;
 
     /**
      * Get a string containing errors the context encountered during
@@ -121,7 +121,7 @@ class Context {
     Context(std::map<std::string, Attributes> attributes);
     std::map<std::string, Attributes> attributes_;
     std::vector<std::string_view> kinds_;
-    std::map<std::string_view, std::string_view> keys_and_kinds_;
+    std::map<std::string_view, std::string_view> kinds_to_keys_;
     bool valid_ = false;
     std::string errors_;
     std::string canonical_key_;

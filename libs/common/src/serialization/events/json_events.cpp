@@ -9,6 +9,11 @@ void tag_invoke(boost::json::value_from_tag const&,
                 FeatureEvent const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "feature");
+    obj.emplace("creationDate",
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    event.creation_date.time_since_epoch())
+                    .count());
+    obj.emplace("contextKeys", boost::json::value_from(event.context_keys));
     obj.emplace("key", event.key);
     obj.emplace("version", event.version);
     if (event.variation) {

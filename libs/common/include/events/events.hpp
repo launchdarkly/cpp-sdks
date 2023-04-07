@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/json/value.hpp>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>
@@ -30,8 +31,9 @@ struct BaseEvent {
 };
 
 struct FeatureEvent {
-    BaseEvent base;
     std::string key;
+    std::chrono::system_clock::time_point creation_date;
+    std::map<std::string, std::string> context_keys;
     Value value;
     std::optional<VariationIndex> variation;
     Value default_;
