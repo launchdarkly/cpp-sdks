@@ -1,4 +1,4 @@
-#include "streaming_data_source.hpp"
+#include "launchdarkly/detail/streaming_data_source.hpp"
 #include <gtest/gtest.h>
 #include "console_backend.hpp"
 #include "context_builder.hpp"

@@ -3,11 +3,11 @@
 
 #include <utility>
 
-#include "base_64.hpp"
+#include "launchdarkly/detail/base_64.hpp"
+#include "launchdarkly/detail/streaming_data_source.hpp"
 #include "serialization/json_context.hpp"
 #include "serialization/json_evaluation_result.hpp"
 #include "serialization/value_mapping.hpp"
-#include "streaming_data_source.hpp"
 
 namespace launchdarkly::client_side {
 

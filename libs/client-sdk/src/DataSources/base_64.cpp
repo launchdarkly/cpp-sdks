@@ -1,4 +1,4 @@
-#include "base_64.hpp"
+#include "launchdarkly/detail/base_64.hpp"
 
 #include <bitset>
 #include <climits>
