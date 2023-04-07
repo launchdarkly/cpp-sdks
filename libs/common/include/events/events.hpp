@@ -30,15 +30,25 @@ struct BaseEvent {
     Context context;
 };
 
-struct FeatureEvent {
+struct FeatureEventFields {
     std::string key;
     std::chrono::system_clock::time_point creation_date;
-    std::map<std::string, std::string> context_keys;
     Value value;
     std::optional<VariationIndex> variation;
     Value default_;
     std::optional<Reason> reason;
     Version version;
+    std::optional<std::string> prereq_of;
+};
+
+struct FeatureEvent {
+    FeatureEventFields base;
+    std::map<std::string, std::string> context_keys;
+};
+
+struct DebugEvent {
+    FeatureEventFields base;
+    Context context;
 };
 
 struct PrerequisiteEvent {
@@ -63,10 +73,6 @@ struct CustomEvent {
     std::string key;
     std::optional<Json> data;
     std::optional<double> metric_value;
-};
-
-struct DebugEvent {
-    FeatureEvent feature;
 };
 
 struct VariationSummary {
