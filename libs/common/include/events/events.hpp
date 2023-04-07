@@ -6,6 +6,7 @@
 #include <variant>
 #include "attribute_reference.hpp"
 #include "context.hpp"
+#include "data/evaluation_reason.hpp"
 #include "value.hpp"
 
 #include <cstdint>
@@ -15,7 +16,7 @@ namespace launchdarkly::events {
 // TODO: Replace with actual types when available.
 using Value = launchdarkly::Value;
 using VariationIndex = size_t;
-using Reason = std::string;
+using Reason = EvaluationReason;
 using Context = launchdarkly::Context;
 using Json = boost::json::value;
 using Version = std::uint64_t;

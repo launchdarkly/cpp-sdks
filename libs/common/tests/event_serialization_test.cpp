@@ -5,7 +5,7 @@
 #include "context_builder.hpp"
 #include "events/events.hpp"
 
-#include "serialization/json_events.hpp"
+#include "serialization/events/json_events.hpp"
 
 namespace launchdarkly::events {
 
@@ -18,12 +18,16 @@ TEST(EventSerialization, Basic) {
         "value",
         2,
         "default",
-        events::Reason{"reason"},
+        EvaluationReason("foo", std::nullopt, std::nullopt, std::nullopt,
+                         std::nullopt, false, std::nullopt),
         17};
 
     auto event = boost::json::value_from(e);
 
-    auto result = boost::json::parse("{}");
+    auto result = boost::json::parse(
+        "{\"kind\":\"feature\",\"key\":\"key\",\"version\":17,\"variation\":2,"
+        "\"value\":\"value\",\"reason\":{\"kind\":\"foo\"},\"default\":"
+        "\"default\"}");
 
     ASSERT_EQ(result, event);
 }
