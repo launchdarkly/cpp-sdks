@@ -35,7 +35,7 @@ struct FeatureEvent {
     std::optional<VariationIndex> variation;
     Value default_;
     std::optional<Reason> reason;
-    std::optional<Version> version;
+    Version version;
 };
 
 struct PrerequisiteEvent {

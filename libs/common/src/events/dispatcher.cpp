@@ -89,17 +89,12 @@ void Dispatcher::request_flush() {
     });
 }
 
-static boost::json serialize(std::vector<OutputEvent> events) {
-
-}
-
 std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
-
     if (outbox_.empty()) {
         return std::nullopt;
     }
 
-    auto json = serialize(outbox_.consume());
+    // auto json = serialize(outbox_.consume());
 
     LD_LOG(logger_, LogLevel::kDebug) << "generating http request";
     RequestType req;
@@ -112,7 +107,7 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
     req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     req.target(host_ + path_);
 
-    req.body() = json;
+    req.body() = "foo";
     req.prepare_payload();
     return req;
 }

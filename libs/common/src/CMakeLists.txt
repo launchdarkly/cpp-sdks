@@ -36,6 +36,7 @@ add_library(${LIBNAME}
         serialization/json_evaluation_reason.cpp
         serialization/json_evaluation_result.cpp
         serialization/json_value.cpp
+        serialization/json_events.cpp
         events/null_event_processor.cpp
         events/asio_event_processor.cpp
         events/dispatcher.cpp
