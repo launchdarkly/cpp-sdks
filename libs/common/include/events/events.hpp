@@ -21,6 +21,7 @@ using Reason = EvaluationReason;
 using Context = launchdarkly::Context;
 using Json = boost::json::value;
 using Version = std::uint64_t;
+using Date = std::chrono::system_clock::time_point;
 
 struct BaseEvent {
     std::chrono::milliseconds creation_date;
@@ -32,7 +33,7 @@ struct BaseEvent {
 
 struct FeatureEventFields {
     std::string key;
-    std::chrono::system_clock::time_point creation_date;
+    Date creation_date;
     Value value;
     std::optional<VariationIndex> variation;
     Value default_;
@@ -64,8 +65,8 @@ struct PrerequisiteEvent {
 using IndexEvent = BaseEvent;
 
 struct IdentifyEvent {
-    BaseEvent base;
-    std::string key;
+    Date creation_date;
+    Context context;
 };
 
 struct CustomEvent {

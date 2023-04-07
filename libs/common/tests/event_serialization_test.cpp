@@ -40,10 +40,24 @@ TEST(EventSerialization, DebugEvent) {
     auto event = boost::json::value_from(e);
 
     auto result = boost::json::parse(
-        "{\"kind\":\"feature\",\"creationDate\":0,\"key\":\"key\",\"version\":"
+        "{\"kind\":\"debug\",\"creationDate\":0,\"key\":\"key\",\"version\":"
         "17,\"variation\":2,\"value\":\"value\",\"reason\":{\"kind\":\"foo\"},"
         "\"default\":\"default\",\"context\":{\"key\":\"bar\",\"kind\":\"foo\"}"
         "}");
+
+    ASSERT_EQ(result, event);
+}
+
+TEST(EventSerialization, IdentifyEvent) {
+    auto creation_date = std::chrono::system_clock::from_time_t({});
+    auto e = events::IdentifyEvent{creation_date,
+                                   ContextBuilder().kind("foo", "bar").build()};
+
+    auto event = boost::json::value_from(e);
+
+    auto result = boost::json::parse(
+        "{\"kind\":\"identify\",\"creationDate\":0,\"context\":{\"key\":"
+        "\"bar\",\"kind\":\"foo\"}}");
 
     ASSERT_EQ(result, event);
 }
