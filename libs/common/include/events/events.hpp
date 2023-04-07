@@ -21,7 +21,10 @@ using Reason = EvaluationReason;
 using Context = launchdarkly::Context;
 using Json = boost::json::value;
 using Version = std::uint64_t;
-using Date = std::chrono::system_clock::time_point;
+
+struct Date {
+    std::chrono::system_clock::time_point t;
+};
 
 struct BaseEvent {
     std::chrono::milliseconds creation_date;

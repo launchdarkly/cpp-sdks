@@ -5,6 +5,15 @@
 
 namespace launchdarkly::events {
 
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Date const& date) {
+    json_value.emplace_int64() =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            date.t.time_since_epoch())
+            .count();
+}
+
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEvent const& event) {
@@ -27,10 +36,7 @@ void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 FeatureEventFields const& event) {
     auto& obj = json_value.emplace_object();
-    obj.emplace("creationDate",
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    event.creation_date.time_since_epoch())
-                    .count());
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("key", event.key);
     obj.emplace("version", event.version);
     if (event.variation) {
@@ -51,10 +57,7 @@ void tag_invoke(boost::json::value_from_tag const&,
                 IdentifyEvent const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "identify");
-    obj.emplace("creationDate",
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    event.creation_date.time_since_epoch())
-                    .count());
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", boost::json::value_from(event.context));
 }
 // void tag_invoke(boost::json::value_from_tag const& tag,
