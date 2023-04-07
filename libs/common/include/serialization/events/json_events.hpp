@@ -12,7 +12,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                OutputEvent const& event);
+                IndexEvent const& date);
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -29,4 +29,13 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 DebugEvent const& event);
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                CustomEvent const& event);
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                OutputEvent const& event);
+
 }  // namespace launchdarkly::events

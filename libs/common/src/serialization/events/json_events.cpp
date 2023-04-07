@@ -60,10 +60,36 @@ void tag_invoke(boost::json::value_from_tag const&,
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", boost::json::value_from(event.context));
 }
-// void tag_invoke(boost::json::value_from_tag const& tag,
-//                 boost::json::value& json_value,
-//                 events::OutputEvent const& event) {
-//     std::visit([&](auto const& e) mutable { tag_invoke(tag, json_value, e);
-//     })
-// }
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IndexEvent const& event) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "index");
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
+    obj.emplace("context", boost::json::value_from(event.context));
+}
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                CustomEvent const& event) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "custom");
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
+    obj.emplace("key", event.key);
+    obj.emplace("contextKeys", boost::json::value_from(event.context_keys));
+    if (event.data) {
+        obj.emplace("data", boost::json::value_from(*event.data));
+    }
+    if (event.metric_value) {
+        obj.emplace("metricValue", *event.metric_value);
+    }
+}
+
+void tag_invoke(boost::json::value_from_tag const& tag,
+                boost::json::value& json_value,
+                events::OutputEvent const& event) {
+    std::visit([&](auto const& e) mutable { tag_invoke(tag, json_value, e); },
+               event);
+}
 }  // namespace launchdarkly::events

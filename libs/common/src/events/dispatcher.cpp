@@ -5,6 +5,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include "serialization/events/json_events.hpp"
+
 namespace http = boost::beast::http;
 namespace launchdarkly::events::detail {
 
@@ -94,8 +96,6 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
         return std::nullopt;
     }
 
-    // auto json = serialize(outbox_.consume());
-
     LD_LOG(logger_, LogLevel::kDebug) << "generating http request";
     RequestType req;
 
@@ -107,14 +107,28 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
     req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     req.target(host_ + path_);
 
-    req.body() = "foo";
+    req.body() =
+        boost::json::serialize(boost::json::value_from(outbox_.consume()));
     req.prepare_payload();
     return req;
 }
+// helper type for the visitor #4
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
-std::vector<OutputEvent> Dispatcher::process(InputEvent e) {
-    LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: processing an event";
-    return {};
+std::vector<OutputEvent> Dispatcher::process(InputEvent event) {
+    std::vector<OutputEvent> out;
+    std::visit(
+        overloaded{[&](FeatureEvent&& e) { out.emplace_back(std::move(e)); },
+                   [&](IdentifyEvent&& e) { out.emplace_back(std::move(e)); },
+                   [&](CustomEvent&& e) { out.emplace_back(std::move(e)); }},
+        std::move(event));
+
+    return out;
 }
-
 }  // namespace launchdarkly::events::detail
