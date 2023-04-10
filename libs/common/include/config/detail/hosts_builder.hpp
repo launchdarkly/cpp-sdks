@@ -18,7 +18,7 @@ template <typename SDK>
 bool operator==(HostsBuilder<SDK> const& lhs, HostsBuilder<SDK> const& rhs);
 
 /**
- * EndpointsBuilder allows for specification of LaunchDarkly service endpoints.
+ * HostsBuilder allows for specification of LaunchDarkly service hosts.
  *
  * @tparam SDK Type of SDK, such as ClientSDK or ServerSDK.
  */
@@ -28,7 +28,7 @@ class HostsBuilder {
     friend bool operator==
         <SDK>(HostsBuilder<SDK> const& lhs, HostsBuilder<SDK> const& rhs);
     /**
-     * Constructs an EndpointsBuilder.
+     * Constructs an HostsBuilder.
      */
     HostsBuilder() = default;
 
