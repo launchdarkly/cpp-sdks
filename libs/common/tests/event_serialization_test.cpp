@@ -53,4 +53,21 @@ TEST(EventSerialization, DebugEvent) {
     ASSERT_EQ(result, event);
 }
 
+TEST(EventSerialization, IdentifyEvent) {
+    auto creation_date = std::chrono::system_clock::from_time_t({});
+    AttributeReference::SetType attrs;
+    ContextFilter filter(false, attrs);
+    auto e = events::client::IdentifyEvent{
+        creation_date,
+        filter.filter(ContextBuilder().kind("foo", "bar").build())};
+
+    auto event = boost::json::value_from(e);
+
+    auto result = boost::json::parse(
+        "{\"kind\":\"identify\",\"creationDate\":0,\"context\":{\"key\":"
+        "\"bar\",\"kind\":\"foo\"}}");
+
+    ASSERT_EQ(result, event);
+}
+
 }  // namespace launchdarkly::events
