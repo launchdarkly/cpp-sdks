@@ -31,22 +31,17 @@ TEST_F(EventProcessorTests, thing) {
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
     auto c = launchdarkly::ContextBuilder().kind("org", "ld").build();
-    auto ev = events::CustomEvent{
+    ASSERT_TRUE(c.valid());
+    auto ev = events::IdentifyEvent{
         std::chrono::system_clock::now(),
+        c,
     };
-    ev.data = Value({"foo", "bar", "baz"});
-    ev.metric_value = 30;
 
-    for (std::size_t i = 0; i < 10; i++) {
+    for (std::size_t i = 0; i < 3; i++) {
         ep.async_send(ev);
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    ev.data = Value("qux");
-    ev.metric_value = 42;
-
-    ep.async_send(ev);
 
     ep.async_close();
     t.join();

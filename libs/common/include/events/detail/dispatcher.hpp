@@ -14,6 +14,8 @@
 #include "events/detail/summary_state.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
+#include "context_filter.hpp"
+
 
 namespace launchdarkly::events::detail {
 
@@ -28,7 +30,7 @@ class Dispatcher {
     void request_flush();
 
     void send(InputEvent);
-    
+
     void shutdown();
 
    private:
@@ -56,6 +58,8 @@ class Dispatcher {
     ConnPool conns_;
 
     bool full_outbox_encountered_;
+
+    launchdarkly::ContextFilter filter_;
 
     Logger& logger_;
 

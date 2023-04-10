@@ -5,7 +5,9 @@
 #include "context_builder.hpp"
 #include "events/events.hpp"
 
+#include "context_filter.hpp"
 #include "serialization/events/json_events.hpp"
+#include "value.hpp"
 
 namespace launchdarkly::events {
 
@@ -50,14 +52,22 @@ TEST(EventSerialization, DebugEvent) {
 
 TEST(EventSerialization, IdentifyEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
-    auto e = events::IdentifyEvent{creation_date,
-                                   ContextBuilder().kind("foo", "bar").build()};
+    auto attrs = AttributeReference::SetType({"/redact_me"});
+    ContextFilter filter(false, attrs);
+
+    auto e = events::OutIdentifyEvent{creation_date,
+                                      filter.filter(ContextBuilder()
+                                                        .kind("foo", "org")
+                                                        .set("bar", "baz")
+                                                        .set("redact_me", 3)
+                                                        .build())};
 
     auto event = boost::json::value_from(e);
 
     auto result = boost::json::parse(
         "{\"kind\":\"identify\",\"creationDate\":0,\"context\":{\"key\":"
-        "\"bar\",\"kind\":\"foo\"}}");
+        "\"org\",\"kind\":\"foo\",\"bar\":\"baz\",\"_meta\":{"
+        "\"redactedAttributes\":[\"/redact_me\"]}}}");
 
     ASSERT_EQ(result, event);
 }

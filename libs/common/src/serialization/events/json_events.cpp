@@ -54,11 +54,11 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                IdentifyEvent const& event) {
+                OutIdentifyEvent const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "identify");
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
-    obj.emplace("context", boost::json::value_from(event.context));
+    obj.emplace("context", event.context);
 }
 
 void tag_invoke(boost::json::value_from_tag const&,

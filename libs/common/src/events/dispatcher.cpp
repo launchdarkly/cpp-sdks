@@ -30,6 +30,7 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
       authorization_(std::move(authorization)),
       uuids_(),
       full_outbox_encountered_(false),
+      filter_(config.all_attributes_private(), config.private_attributes()),
       logger_(logger) {
     schedule_flush();
 }
@@ -126,7 +127,13 @@ std::vector<OutputEvent> Dispatcher::process(InputEvent event) {
     std::vector<OutputEvent> out;
     std::visit(
         overloaded{[&](FeatureEvent&& e) { out.emplace_back(std::move(e)); },
-                   [&](IdentifyEvent&& e) { out.emplace_back(std::move(e)); },
+                   [&](IdentifyEvent&& e) {
+                       // Contexts should already have been checked for validity
+                       // by this point.
+                       assert(e.context.valid());
+                       out.emplace_back(OutIdentifyEvent{
+                           e.creation_date, filter_.filter(e.context)});
+                   },
                    [&](CustomEvent&& e) { out.emplace_back(std::move(e)); }},
         std::move(event));
 

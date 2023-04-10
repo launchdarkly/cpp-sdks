@@ -19,7 +19,7 @@ using Value = launchdarkly::Value;
 using VariationIndex = size_t;
 using Reason = EvaluationReason;
 using Context = launchdarkly::Context;
-using Json = boost::json::value;
+using EventContext = boost::json::value;
 using Version = std::uint64_t;
 using ContextKeys = std::map<std::string, std::string>;
 
@@ -53,7 +53,12 @@ struct IdentifyEvent {
     Context context;
 };
 
-struct IndexEvent : public IdentifyEvent {};
+struct OutIdentifyEvent {
+    Date creation_date;
+    EventContext context;
+};
+
+struct IndexEvent : public OutIdentifyEvent {};
 
 struct CustomEvent {
     Date creation_date;
@@ -86,7 +91,10 @@ struct VariationKey {
 
 using InputEvent = std::variant<FeatureEvent, IdentifyEvent, CustomEvent>;
 
-using OutputEvent = std::
-    variant<IndexEvent, DebugEvent, FeatureEvent, IdentifyEvent, CustomEvent>;
+using OutputEvent = std::variant<IndexEvent,
+                                 DebugEvent,
+                                 FeatureEvent,
+                                 OutIdentifyEvent,
+                                 CustomEvent>;
 
 }  // namespace launchdarkly::events
