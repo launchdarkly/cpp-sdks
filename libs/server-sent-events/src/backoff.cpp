@@ -6,20 +6,17 @@ static const std::chrono::milliseconds kDefaultResetInterval =
 
 namespace launchdarkly::sse::detail {
 
-std::chrono::milliseconds Backoff::CalculateBackoff() {
-    return initial_ * (2 ^ (attempt_ - 1));
+std::chrono::milliseconds Backoff::calculate_backoff() {
+    return initial_ * static_cast<uint64_t>(std::pow(2, attempt_ - 1));
 }
 
-std::chrono::milliseconds Backoff::Jitter(std::chrono::milliseconds base) {
-    std::uniform_real_distribution<double> distribution(0.0, jitter_ratio_);
+std::chrono::milliseconds Backoff::jitter(std::chrono::milliseconds base) {
     return std::chrono::milliseconds(static_cast<uint64_t>(
-        base.count() - (distribution(random_gen_) * base.count())));
+        base.count() - (random_(jitter_ratio_) * base.count())));
 }
 
-std::chrono::milliseconds Backoff::Delay(uint64_t attempt,
-                                         std::chrono::milliseconds initial,
-                                         std::chrono::milliseconds max) {
-    return Jitter(std::min(CalculateBackoff(), max));
+std::chrono::milliseconds Backoff::delay() {
+    return jitter(std::min(calculate_backoff(), max_));
 }
 
 void Backoff::fail() {
@@ -40,8 +37,6 @@ void Backoff::fail() {
     } else {
         attempt_ += 1;
     }
-    // Calculate a new delay based on the updated attempt count.
-    current_ = Delay(attempt_, initial_, max_);
     // There has been a failure, so the connection is no longer active.
     active_since_ = std::nullopt;
 }
@@ -50,28 +45,28 @@ void Backoff::succeed() {
     active_since_ = std::chrono::system_clock::now();
 }
 
-std::chrono::milliseconds Backoff::delay() const {
-    return current_;
-}
-
-Backoff::Backoff(std::chrono::duration<uint64_t, std::milli> initial,
-                 std::chrono::duration<uint64_t, std::milli> max,
+Backoff::Backoff(std::chrono::milliseconds initial,
+                 std::chrono::milliseconds max,
                  double jitter_ratio,
                  std::chrono::milliseconds reset_interval,
-                 std::default_random_engine gen)
-    : initial_(initial),
+                 std::function<double(double ratio)> random)
+    : attempt_(1),
+      initial_(initial),
       max_(max),
-      current_(initial),
       jitter_ratio_(jitter_ratio),
       reset_interval_(reset_interval),
-      random_gen_(gen) {}
+      random_(random) {}
 
-Backoff::Backoff(std::chrono::duration<uint64_t, std::milli> initial,
-                 std::chrono::duration<uint64_t, std::milli> max)
+Backoff::Backoff(std::chrono::milliseconds initial,
+                 std::chrono::milliseconds max)
     : Backoff(initial,
               max,
               kDefaultJitterRatio,
               kDefaultResetInterval,
-              std::default_random_engine()) {}
+              [this](auto ratio) {
+                  std::uniform_real_distribution<double> distribution(
+                      0.0, kDefaultJitterRatio);
+                  return distribution(this->random_gen_);
+              }) {}
 
 }  // namespace launchdarkly::sse::detail

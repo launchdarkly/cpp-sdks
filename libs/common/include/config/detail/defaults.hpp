@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/detail/http_properties.hpp"
 #include "config/detail/sdks.hpp"
 #include "service_endpoints.hpp"
 
@@ -21,19 +22,43 @@ struct Defaults {
 
 template <>
 struct Defaults<ClientSDK> {
+    static std::string sdk_name() {
+        return "CppClient";
+    }
+    static std::string sdk_version() {
+        return "TODO";
+    }
     static ServiceEndpoints endpoints() {
         return {"https://clientsdk.launchdarkly.com",
                 "https://clientstream.launchdarkly.com",
                 "https://mobile.launchdarkly.com"};
     }
+
+    static HttpProperties http_properties() {
+        return {std::chrono::milliseconds{10000},
+                std::chrono::milliseconds{10000}, sdk_name() +"/" + sdk_version(),
+                std::map<std::string, std::string>()};
+    }
 };
 
 template <>
 struct Defaults<ServerSDK> {
+    static std::string sdk_name() {
+        return "CppServer";
+    }
+    static std::string sdk_version() {
+        return "TODO";
+    }
     static ServiceEndpoints endpoints() {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",
                 "https://events.launchdarkly.com"};
+    }
+
+    static HttpProperties http_properties() {
+        return {std::chrono::milliseconds{2000},
+                std::chrono::milliseconds{10000}, sdk_name() +"/" + sdk_version(),
+                std::map<std::string, std::string>()};
     }
 };
 

@@ -13,18 +13,30 @@ namespace launchdarkly::sse::detail {
 class Backoff {
    public:
     /**
-     *
+     * Construct a backoff instance with customized behavior.
+     * @param initial Initial delay for the first failed connection.
+     * @param max The maximum delay between retries.
+     * @param jitter_ratio The ratio to use when jittering. The jitter
+     * is of the form `CalculdatedBackoff - (rand(ratio) * CalculatedBackoff)`
+     * with `rand` producing a uniform distrubution between 0 and the
+     * jitter_ratio.
+     * @param reset_interval The milliseconds interval to reset the backoff
+     * attempts after a successful connection.
+     * @param random A random method which produces a value between 0 and
+     * jitter_ratio. Primarily intended for testing.
+     */
+    Backoff(std::chrono::milliseconds initial,
+            std::chrono::milliseconds max,
+            double jitter_ratio,
+            std::chrono::milliseconds reset_interval,
+            std::function<double(double ratio)> random);
+
+    /**
+     * Construct a backoff instance with default behavior.
      * @param initial Initial delay for the first failed connection.
      * @param max The maximum delay between retries.
      */
-    Backoff(std::chrono::duration<uint64_t, std::milli> initial,
-            std::chrono::duration<uint64_t, std::milli> max,
-            double jitter_ratio,
-            std::chrono::milliseconds reset_interval,
-            std::default_random_engine gen);
-
-    Backoff(std::chrono::duration<uint64_t, std::milli> initial,
-            std::chrono::duration<uint64_t, std::milli> max);
+    Backoff(std::chrono::milliseconds initial, std::chrono::milliseconds max);
 
     /**
      * Report to the backoff that their was a connection failure.
@@ -39,7 +51,7 @@ class Backoff {
     /**
      * Get the current reconnect delay.
      */
-    std::chrono::milliseconds delay() const;
+    std::chrono::milliseconds delay();
 
    private:
     /**
@@ -50,7 +62,7 @@ class Backoff {
      * @param initial The initial retry delay.
      * @return The current backoff based on the number of attempts.
      */
-    std::chrono::milliseconds CalculateBackoff();
+    std::chrono::milliseconds calculate_backoff();
 
     /**
      * Produce a jittered version of the base value. This value will be adjusted
@@ -59,26 +71,17 @@ class Backoff {
      * @param base The base duration to jitter.
      * @return The jittered duration.
      */
-    std::chrono::milliseconds Jitter(std::chrono::milliseconds base);
-
-    /**
-     * Given an attempt count, the initial delay, and the maximum delay produce
-     * the current delay.
-     *
-     * @return A new delay incorporating jitter and backoff.
-     */
-    std::chrono::milliseconds Delay(uint64_t attempt,
-                                    std::chrono::milliseconds initial,
-                                    std::chrono::milliseconds max);
+    std::chrono::milliseconds jitter(std::chrono::milliseconds base);
 
     std::chrono::milliseconds initial_;
-    std::chrono::milliseconds current_;
     std::chrono::milliseconds max_;
     uint64_t attempt_;
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         active_since_;
-    std::default_random_engine random_gen_;
     double const jitter_ratio_;
     const std::chrono::milliseconds reset_interval_;
+    // Default random generator. Used when random method not specified.
+    std::function<double(double ratio)> random_;
+    std::default_random_engine random_gen_;
 };
 }  // namespace launchdarkly::sse::detail

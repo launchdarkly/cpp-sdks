@@ -3,8 +3,8 @@
 
 #include <utility>
 
-#include "launchdarkly/detail/base_64.hpp"
-#include "launchdarkly/detail/streaming_data_source.hpp"
+#include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
+#include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 #include "serialization/json_context.hpp"
 #include "serialization/json_evaluation_result.hpp"
 #include "serialization/value_mapping.hpp"
@@ -81,53 +81,55 @@ tl::expected<std::map<std::string, ItemDescriptor>, JsonError> tag_invoke(
 }
 
 StreamingDataSource::StreamingDataSource(
-    boost::asio::any_io_executor executor,
     Context const& context,
-    bool use_report,
-    bool with_reasons,
-    std::chrono::duration<int, std::milli> initial_retry_delay,
-    config::ServiceEndpoints const& endpoints,
-    HttpProperties const& http_properties,
+    std::function<std::shared_ptr<launchdarkly::sse::Client>(
+        Context const& context,
+        std::function<void(launchdarkly::sse::Event)> receiver)> client_factory,
     std::shared_ptr<IDataSourceUpdateSink> handler,
     Logger const& logger)
-    : executor_(std::move(std::move(executor))),
-      handler_(std::move(std::move(handler))),
-      logger_(logger) {
-    // TODO: Use boost to build the URL.
-    auto string_context =
-        boost::json::serialize(boost::json::value_from(context));
-    if (use_report) {
-        string_context_ = string_context;
-        streaming_endpoint_ = endpoints.streaming_base_url() + streaming_path_;
-    } else {
-        // When not using 'REPORT' we need to base64 encode the context
-        // so that we can safely put it in a url.
-        string_context_ = Base64UrlEncode(string_context);
-        streaming_endpoint_ = endpoints.streaming_base_url() + streaming_path_ +
-                              "/" + string_context_;
-    }
-    if (with_reasons) {
-        streaming_endpoint_ += "?withReasons=true";
-    }
-
-    auto client_builder =
-        launchdarkly::sse::Builder(executor_, streaming_endpoint_);
-
-    client_builder.method(use_report ? boost::beast::http::verb::report
-                                     : boost::beast::http::verb::get);
-
-    client_builder.receiver([this](launchdarkly::sse::Event const& event) {
-        handle_message(event);
-    });
-
-    client_builder.logger(
-        [this](auto msg) { LD_LOG(logger_, LogLevel::kInfo) << msg; });
-
-    if (use_report) {
-        client_builder.body(string_context_);
-    }
-    client_builder.header("authorization", std::getenv("STG_SDK_KEY"));
-    client_ = client_builder.build();
+    : handler_(std::move(std::move(handler))), logger_(logger) {
+    client_ =
+        client_factory(context, [this](launchdarkly::sse::Event const& event) {
+            handle_message(event);
+        });
+    //    // TODO: Use boost to build the URL.
+    //    auto string_context =
+    //        boost::json::serialize(boost::json::value_from(context));
+    //    if (use_report) {
+    //        string_context_ = string_context;
+    //        streaming_endpoint_ = endpoints.streaming_base_url() +
+    //        streaming_path_;
+    //    } else {
+    //        // When not using 'REPORT' we need to base64 encode the context
+    //        // so that we can safely put it in a url.
+    //        string_context_ = Base64UrlEncode(string_context);
+    //        streaming_endpoint_ = endpoints.streaming_base_url() +
+    //        streaming_path_ +
+    //                              "/" + string_context_;
+    //    }
+    //    if (with_reasons) {
+    //        streaming_endpoint_ += "?withReasons=true";
+    //    }
+    //
+    //    auto client_builder =
+    //        launchdarkly::sse::Builder(executor_, streaming_endpoint_);
+    //
+    //    client_builder.method(use_report ? boost::beast::http::verb::report
+    //                                     : boost::beast::http::verb::get);
+    //
+    //    client_builder.receiver([this](launchdarkly::sse::Event const& event)
+    //    {
+    //        handle_message(event);
+    //    });
+    //
+    //    client_builder.logger(
+    //        [this](auto msg) { LD_LOG(logger_, LogLevel::kInfo) << msg; });
+    //
+    //    if (use_report) {
+    //        client_builder.body(string_context_);
+    //    }
+    //    client_builder.header("authorization", std::getenv("STG_SDK_KEY"));
+    //    client_ = client_builder.build();
 }
 
 void StreamingDataSource::start() {

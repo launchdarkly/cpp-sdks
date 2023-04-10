@@ -27,6 +27,6 @@ class IDataSourceUpdateSink {
     virtual void upsert(std::string key, ItemDescriptor) = 0;
 
     // We could add this if we want to support data source status.
-    // virtual void status()
+    // virtual void status(<something>)
 };
 }  // namespace launchdarkly::client_side
