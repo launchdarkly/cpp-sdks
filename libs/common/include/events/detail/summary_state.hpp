@@ -19,11 +19,5 @@ class SummaryState {
     Value default_;
     std::unordered_set<std::string> context_kinds_;
 };
-//
-// struct SummaryEvent {
-//    std::chrono::milliseconds start_date;
-//    std::chrono::milliseconds end_date;
-//    std::unordered_map<std::string, FlagSummary> features;
-//};
 
 }  // namespace launchdarkly::events::detail

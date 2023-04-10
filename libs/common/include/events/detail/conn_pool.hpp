@@ -9,6 +9,6 @@ class ConnPool {
     using RequestType =
         boost::beast::http::request<boost::beast::http::string_body>;
     ConnPool();
-    void async_write(RequestType request);
+    void Deliver(RequestType request);
 };
 }  // namespace launchdarkly::events::detail

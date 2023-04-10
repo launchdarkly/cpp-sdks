@@ -64,9 +64,8 @@ class EventsBuilder {
      * with true as the parameter.
      *
      * (2) To specify that a specific set of attributes should be considered
-     * private
-     * - in addition to those designated private on a per-context basis -
-     * call @ref private_attributes.
+     * private - in addition to those designated private on a per-context basis
+     * - call @ref private_attributes.
      *
      * (3) To specify private attributes on a per-context basis, it is not
      * necessary to call either of these methods, as the default behavior is to

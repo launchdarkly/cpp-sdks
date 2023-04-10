@@ -46,7 +46,7 @@ void AsioEventProcessor::HandleSend(InputEvent e) {
 
     std::vector<OutputEvent> output_events = Process(std::move(e));
 
-    bool inserted = outbox_.push_discard_overflow(std::move(output_events));
+    bool inserted = outbox_.PushDiscardingOverflow(std::move(output_events));
     if (!inserted && !full_outbox_encountered_) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "event-processor: exceeded event queue capacity; increase "
@@ -57,7 +57,7 @@ void AsioEventProcessor::HandleSend(InputEvent e) {
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
     if (auto request = MakeRequest()) {
-        conns_.async_write(*request);
+        conns_.Deliver(*request);
     } else {
         LD_LOG(logger_, LogLevel::kDebug)
             << "event-processor: nothing to flush";
@@ -96,7 +96,7 @@ void AsioEventProcessor::AsyncFlush() {
 
 std::optional<AsioEventProcessor::RequestType>
 AsioEventProcessor::MakeRequest() {
-    if (outbox_.empty()) {
+    if (outbox_.Empty()) {
         return std::nullopt;
     }
 
@@ -112,7 +112,7 @@ AsioEventProcessor::MakeRequest() {
     req.target(host_ + path_);
 
     req.body() =
-        boost::json::serialize(boost::json::value_from(outbox_.consume()));
+        boost::json::serialize(boost::json::value_from(outbox_.Consume()));
     req.prepare_payload();
     return req;
 }

@@ -3,7 +3,7 @@
 namespace launchdarkly::events::detail {
 ConnPool::ConnPool() {}
 
-void ConnPool::async_write(RequestType request) {
+void ConnPool::Deliver(RequestType request) {
     std::cout << "making an HTTP request with body" << request.body().data()
               << "\n";
 }
