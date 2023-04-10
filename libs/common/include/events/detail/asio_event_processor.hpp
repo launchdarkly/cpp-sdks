@@ -8,7 +8,7 @@
 #include <chrono>
 #include <optional>
 #include "config/detail/events.hpp"
-#include "config/detail/service_hosts.hpp"
+#include "config/detail/service_endpoints.hpp"
 #include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
@@ -21,9 +21,9 @@ namespace launchdarkly::events::detail {
 
 class AsioEventProcessor : public IEventProcessor {
    public:
-    AsioEventProcessor(boost::asio::any_io_executor io,
+    AsioEventProcessor(boost::asio::any_io_executor const& io,
                        config::detail::Events const& config,
-                       config::ServiceHosts const& endpoints,
+                       config::ServiceEndpoints const& endpoints,
                        std::string authorization,
                        Logger& logger);
 

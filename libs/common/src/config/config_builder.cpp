@@ -6,12 +6,12 @@ template <typename SDK>
 ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
     : sdk_key_(std::move(sdk_key)),
       offline_(std::nullopt),
-      service_hosts_builder_(std::nullopt) {}
+      service_endpoints_builder_(std::nullopt) {}
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::service_hosts(
-    detail::HostsBuilder<SDK> builder) {
-    service_hosts_builder_ = std::move(builder);
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::service_endpoints(
+    detail::EndpointsBuilder<SDK> builder) {
+    service_endpoints_builder_ = std::move(builder);
     return *this;
 }
 
@@ -40,7 +40,7 @@ typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     Logger& logger) const {
     auto key = sdk_key_;
     auto offline = offline_.value_or(Defaults<detail::AnySDK>::offline());
-    auto endpoints = service_hosts_builder_.value_or(HostsBuilder());
+    auto endpoints = service_endpoints_builder_.value_or(EndpointsBuilder());
     auto events = events_builder_.value_or(EventsBuilder());
     std::optional<std::string> app_tag;
     if (application_info_builder_) {

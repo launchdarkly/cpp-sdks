@@ -2,7 +2,7 @@
 
 #include "config/detail/events.hpp"
 #include "config/detail/sdks.hpp"
-#include "config/detail/service_hosts.hpp"
+#include "config/detail/service_endpoints.hpp"
 
 namespace launchdarkly::config::detail {
 
@@ -22,9 +22,10 @@ struct Defaults {
 
 template <>
 struct Defaults<ClientSDK> {
-    static ServiceHosts endpoints() {
-        return {"clientsdk.launchdarkly.com", "clientstream.launchdarkly.com",
-                "mobile.launchdarkly.com"};
+    static ServiceEndpoints endpoints() {
+        return {"https://clientsdk.launchdarkly.com",
+                "https://clientstream.launchdarkly.com",
+                "https://mobile.launchdarkly.com"};
     }
     static Events events() {
         return {
@@ -36,9 +37,10 @@ struct Defaults<ClientSDK> {
 
 template <>
 struct Defaults<ServerSDK> {
-    static ServiceHosts endpoints() {
-        return {"sdk.launchdarkly.com", "stream.launchdarkly.com",
-                "events.launchdarkly.com"};
+    static ServiceEndpoints endpoints() {
+        return {"https://sdk.launchdarkly.com",
+                "https://stream.launchdarkly.com",
+                "https://events.launchdarkly.com"};
     }
     static Events events() {
         return {

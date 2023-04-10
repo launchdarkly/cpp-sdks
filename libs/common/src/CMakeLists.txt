@@ -18,9 +18,9 @@ add_library(${LIBNAME}
         value.cpp
         attributes_builder.cpp
         error.cpp
-        config/service_hosts.cpp
+        config/service_endpoints.cpp
         config/events.cpp
-        config/hosts_builder.cpp
+        config/endpoints_builder.cpp
         config/events_builder.cpp
         config/config_builder.cpp
         config/config.cpp

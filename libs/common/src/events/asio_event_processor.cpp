@@ -1,5 +1,6 @@
 #include "events/detail/asio_event_processor.hpp"
 #include <boost/asio/post.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast/http.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -12,20 +13,20 @@ namespace launchdarkly::events::detail {
 
 auto const kEventSchemaHeader = "X-LaunchDarkly-Event-Schema";
 auto const kPayloadIdHeader = "X-LaunchDarkly-Payload-Id";
-
 auto const kEventSchemaVersion = 4;
 
-AsioEventProcessor::AsioEventProcessor(boost::asio::any_io_executor io,
-                                       config::detail::Events const& config,
-                                       config::ServiceHosts const& endpoints,
-                                       std::string authorization,
-                                       Logger& logger)
-    : io_(std::move(io)),
+AsioEventProcessor::AsioEventProcessor(
+    boost::asio::any_io_executor const& io,
+    config::detail::Events const& config,
+    config::ServiceEndpoints const& endpoints,
+    std::string authorization,
+    Logger& logger)
+    : io_(boost::asio::make_strand(std::move(io))),
       outbox_(config.capacity()),
       summary_state_(std::chrono::system_clock::now()),
       flush_interval_(config.flush_interval()),
       timer_(io_),
-      host_(endpoints.events_host()),
+      host_(endpoints.events_base_url()),  // TODO: parse and use host
       path_(config.path()),
       authorization_(std::move(authorization)),
       uuids_(),
