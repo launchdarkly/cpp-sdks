@@ -39,7 +39,6 @@ add_library(${LIBNAME}
         serialization/events/json_events.cpp
         events/null_event_processor.cpp
         events/asio_event_processor.cpp
-        events/dispatcher.cpp
         events/outbox.cpp
         events/conn_pool.cpp
         events/summary_state.cpp

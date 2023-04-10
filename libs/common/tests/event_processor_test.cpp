@@ -22,7 +22,7 @@ TEST_F(EventProcessorTests, thing) {
     auto endpoints = client::HostsBuilder().build();
 
     events::detail::AsioEventProcessor ep(io.get_executor(), *config,
-                                          *endpoints, logger);
+                                          *endpoints, "password", logger);
 
     std::thread t([&]() {
         io.run();
