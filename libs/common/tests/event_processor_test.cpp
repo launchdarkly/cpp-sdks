@@ -16,7 +16,7 @@ TEST_F(EventProcessorTests, thing) {
 
     auto config = client::EventsBuilder()
                       .capacity(10)
-                      .flush_interval(std::chrono::seconds(1))
+                      .flush_interval(std::chrono::seconds(3))
                       .build();
 
     auto endpoints = client::HostsBuilder().build();
@@ -37,7 +37,9 @@ TEST_F(EventProcessorTests, thing) {
     ev.data = Value({"foo", "bar", "baz"});
     ev.metric_value = 30;
 
-    ep.async_send(ev);
+    for (std::size_t i = 0; i < 10; i++) {
+        ep.async_send(ev);
+    }
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 

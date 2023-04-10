@@ -21,6 +21,19 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::flush_interval(
 }
 
 template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::all_attributes_private(bool value) {
+    config_.all_attributes_private_ = value;
+    return *this;
+}
+
+template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::private_attributes(
+    AttributeReference::SetType attributes) {
+    config_.private_attributes_ = std::move(attributes);
+    return *this;
+}
+
+template <typename SDK>
 tl::expected<Events, Error> EventsBuilder<SDK>::build() {
     if (config_.capacity() == 0) {
         return tl::unexpected(Error::kConfig_Events_ZeroCapacity);

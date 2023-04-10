@@ -1,13 +1,14 @@
 #pragma once
 
+#include <tl/expected.hpp>
+#include "attribute_reference.hpp"
 #include "config/detail/events.hpp"
 #include "error.hpp"
-
-#include <tl/expected.hpp>
 
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace launchdarkly::config::detail {
 
@@ -50,6 +51,39 @@ class EventsBuilder {
      * @return Reference to this builder.
      */
     EventsBuilder& flush_interval(std::chrono::milliseconds interval);
+
+    /**
+     * Attribute privacy indicates whether or not attributes should be
+     * retained by LaunchDarkly after being sent upon initialization,
+     * and if attributes should later be sent in events.
+     *
+     * Attribute privacy may be specified in 3 ways:
+     *
+     * (1) To specify that all attributes should be considered private - not
+     * just those designated private on a per-context basis - call this method
+     * with true as the parameter.
+     *
+     * (2) To specify that a specific set of attributes should be considered
+     * private
+     * - in addition to those designated private on a per-context basis -
+     * call @ref private_attributes.
+     *
+     * (3) To specify private attributes on a per-context basis, it is not
+     * necessary to call either of these methods, as the default behavior is to
+     * treat all attributes as non-private unless otherwise specified.
+     *
+     * @param value True for behavior of (1), false for default behavior of (2)
+     * or (3).
+     * @return Reference to this builder.
+     */
+    EventsBuilder& all_attributes_private(bool);
+
+    /**
+     * Specify an AttributePolicy for individual attributes.
+     * @return
+     */
+    EventsBuilder& private_attributes(
+        AttributeReference::SetType private_attrs);
 
     /**
      * Builds Events configuration, if the configuration is valid. If not,

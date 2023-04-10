@@ -28,11 +28,8 @@ struct Defaults<ClientSDK> {
     }
     static Events events() {
         return {
-            100,
-            std::chrono::seconds(30),
-            "/mobile",
-            AttributePolicy::Default,
-            TransportSecurity::TLS,
+            100,   std::chrono::seconds(30),      "/mobile",
+            false, AttributeReference::SetType(), TransportSecurity::TLS,
         };
     }
 };
@@ -45,11 +42,8 @@ struct Defaults<ServerSDK> {
     }
     static Events events() {
         return {
-            10000,
-            std::chrono::seconds(5),
-            "/bulk",
-            AttributePolicy::Default,
-            TransportSecurity::TLS,
+            10000, std::chrono::seconds(5),       "/bulk",
+            false, AttributeReference::SetType(), TransportSecurity::TLS,
         };
     }
 };

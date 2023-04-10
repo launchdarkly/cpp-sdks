@@ -3,12 +3,9 @@
 #include <chrono>
 #include <cstddef>
 #include <string>
+#include <unordered_map>
+#include "attribute_reference.hpp"
 namespace launchdarkly::config::detail {
-
-enum class AttributePolicy {
-    Default = 0,
-    AllPrivate = 1,
-};
 
 enum class TransportSecurity {
     None = 0,
@@ -22,19 +19,23 @@ struct Events {
     Events(std::size_t capacity,
            std::chrono::milliseconds flush_interval,
            std::string path,
-           AttributePolicy policy,
+           bool all_attributes_private,
+           AttributeReference::SetType private_attrs,
            TransportSecurity security);
     std::size_t capacity() const;
     std::chrono::milliseconds flush_interval() const;
     std::string const& path() const;
-    AttributePolicy attribute_policy() const;
+    bool all_attributes_private() const;
+    AttributeReference::SetType const& private_attributes() const;
     TransportSecurity transport_security() const;
 
    private:
     std::size_t capacity_;
     std::chrono::milliseconds flush_interval_;
     std::string path_;
-    AttributePolicy attribute_policy_;
+    bool all_attributes_private_;
+    AttributeReference::SetType private_attributes_;
+
     TransportSecurity transport_security_;
 };
 

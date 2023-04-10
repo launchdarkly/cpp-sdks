@@ -112,7 +112,8 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
     req.prepare_payload();
     return req;
 }
-// helper type for the visitor #4
+
+// These helpers are for the std::visit within Dispatcher::process.
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
