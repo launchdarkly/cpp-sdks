@@ -104,7 +104,7 @@ class Logger {
     /**
      * Push the record to the back-end.
      *
-     * @param record The record to Push. Should be written to before this point.
+     * @param record The record to push. Should be written to before this point.
      */
     void push_record(LogRecord record) const;
 

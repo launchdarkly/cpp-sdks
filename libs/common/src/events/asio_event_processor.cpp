@@ -83,15 +83,15 @@ void AsioEventProcessor::ScheduleFlush() {
     });
 }
 
-void AsioEventProcessor::AsyncClose() {
-    timer_.cancel();
-}
-
 void AsioEventProcessor::AsyncFlush() {
     boost::asio::post(io_, [this] {
         boost::system::error_code ec;
         Flush(FlushTrigger::Manual);
     });
+}
+
+void AsioEventProcessor::AsyncClose() {
+    timer_.cancel();
 }
 
 std::optional<AsioEventProcessor::RequestType>
@@ -100,7 +100,8 @@ AsioEventProcessor::MakeRequest() {
         return std::nullopt;
     }
 
-    LD_LOG(logger_, LogLevel::kDebug) << "generating http request";
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "event-processor: generating http request";
     RequestType req;
 
     req.set(http::field::host, host_);
@@ -126,7 +127,7 @@ static std::map<std::string, std::string> CopyContextKeys(
     return copied_keys;
 }
 
-// These helpers are for the std::visit within Dispatcher::process.
+// These helpers are for the std::visit within AsioEventProcessor::Process.
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;

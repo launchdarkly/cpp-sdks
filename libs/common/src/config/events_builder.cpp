@@ -13,6 +13,7 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::capacity(std::size_t capacity) {
     config_.capacity_ = capacity;
     return *this;
 }
+
 template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::flush_interval(
     std::chrono::milliseconds interval) {

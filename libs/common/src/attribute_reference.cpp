@@ -112,8 +112,8 @@ bool ParseRef(std::string str, std::vector<std::string>& components) {
     auto p_state = ParseState::kBegin;
 
     std::string tmp_token;
-    // The loop here extends to the size of the string, so we can AsyncSend a
-    // null into the parsing logic to terminate the parsing.
+    // The loop here extends to the size of the string, so we can send a null
+    // into the parsing logic to terminate the parsing.
     for (auto index = 0; index <= str.size(); index++) {
         // The character in the string, or null if we go out of bounds of the
         // string.

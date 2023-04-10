@@ -37,8 +37,8 @@ auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 // any TLS handshake, if necessary.
 const std::chrono::milliseconds kDefaultConnectTimeout =
     std::chrono::seconds(15);
-// Once connected, the amount of time to AsyncSend a request and receive the
-// first batch of bytes back.
+// Once connected, the amount of time to send a request and receive the first
+// batch of bytes back.
 const std::chrono::milliseconds kDefaultResponseTimeout =
     std::chrono::seconds(15);
 
@@ -259,8 +259,7 @@ class PlaintextClient : public Client,
     virtual void run() override { do_resolve(); }
 
     void do_handshake() {
-        // No handshake for plaintext; immediately AsyncSend the request
-        // instead.
+        // No handshake for plaintext; immediately send the request instead.
         do_write();
     }
 
@@ -321,7 +320,7 @@ std::shared_ptr<Client> Builder::build() {
         return nullptr;
     }
 
-    // Don't AsyncSend a body unless the method is POST or REPORT
+    // Don't send a body unless the method is POST or REPORT
     if (!(request_.method() == http::verb::post ||
           request_.method() == http::verb::report)) {
         request_.body() = "";

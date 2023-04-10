@@ -8,20 +8,20 @@ class IEventProcessor {
    public:
     virtual ~IEventProcessor() = default;
     /**
-     * Asynchronously delivers an event to the processor's inbox, returning as
-     * soon as possible. The event may be dropped if the inbox lacks capacity.
+     * Asynchronously delivers an event to the processor, returning as
+     * soon as possible. The event may be dropped if the processor lacks
+     * capacity.
      * @param event InputEvent to deliver.
      */
     virtual void AsyncSend(InputEvent event) = 0;
     /**
-     * Asynchronously on_flush the processor's outbox, returning as soon as
-     * possible. Flushing may be a no-op if a on_flush is already in progress.
+     * Asynchronously flush's the processor's events, returning as soon as
+     * possible. Flushing may be a no-op if a flush is ongoing.
      */
     virtual void AsyncFlush() = 0;
     /**
-     * Synchronously close the processor. The processor should attempt to
-     * on_flush all events in the outbox before shutting down. All asynchronous
-     * operations MUST be completed before sync_close returns.
+     * Asynchronously shutdown the processor. The processor should attempt to
+     * flush all events before shutting down.
      */
     virtual void AsyncClose() = 0;
 };

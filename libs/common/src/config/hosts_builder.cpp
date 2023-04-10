@@ -10,11 +10,13 @@ HostsBuilder<SDK>& HostsBuilder<SDK>::polling_host(std::string url) {
     polling_host_ = std::move(url);
     return *this;
 }
+
 template <typename SDK>
 HostsBuilder<SDK>& HostsBuilder<SDK>::streaming_host(std::string url) {
     streaming_host_ = std::move(url);
     return *this;
 }
+
 template <typename SDK>
 HostsBuilder<SDK>& HostsBuilder<SDK>::events_host(std::string url) {
     events_host_ = std::move(url);

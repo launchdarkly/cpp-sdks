@@ -18,9 +18,11 @@ Events::Events(std::size_t capacity,
 std::size_t Events::capacity() const {
     return capacity_;
 }
+
 std::chrono::milliseconds Events::flush_interval() const {
     return flush_interval_;
 }
+
 std::string const& Events::path() const {
     return path_;
 }
