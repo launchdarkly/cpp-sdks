@@ -13,62 +13,44 @@ namespace launchdarkly::events {
 
 TEST(EventSerialization, FeatureEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
-    auto e = events::FeatureEvent{
-        {"key", creation_date, "value", 2, "default",
+    auto e = events::client::FeatureEvent{
+        {creation_date, "key", 17, 2, "value",
          EvaluationReason("foo", std::nullopt, std::nullopt, std::nullopt,
                           std::nullopt, false, std::nullopt),
+
          17},
         std::map<std::string, std::string>{{"foo", "bar"}}};
 
     auto event = boost::json::value_from(e);
 
     auto result = boost::json::parse(
-        "{\"kind\":\"feature\",\"creationDate\":0,\"contextKeys\":{\"foo\":"
-        "\"bar\"},\"key\":\"key\",\"version\":17,\"variation\":2,\"value\":"
-        "\"value\",\"reason\":{\"kind\":\"foo\"},\"default\":\"default\"}");
+        "{\"creationDate\":0,\"key\":\"key\",\"version\":17,\"variation\":2,"
+        "\"value\":\"value\",\"reason\":{\"kind\":\"foo\"},\"default\":1.7E1,"
+        "\"kind\":\"feature\",\"contextKeys\":{\"foo\":\"bar\"}}");
 
     ASSERT_EQ(result, event);
 }
 
 TEST(EventSerialization, DebugEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
-    auto e = events::DebugEvent{
-        {"key", creation_date, "value", 2, "default",
+    AttributeReference::SetType attrs;
+    ContextFilter filter(false, attrs);
+    auto e = events::client::DebugEvent{
+        {creation_date, "key", 17, 2, "value",
          EvaluationReason("foo", std::nullopt, std::nullopt, std::nullopt,
                           std::nullopt, false, std::nullopt),
+
          17},
-        ContextBuilder().kind("foo", "bar").build()};
+        filter.filter(ContextBuilder().kind("foo", "bar").build())};
 
     auto event = boost::json::value_from(e);
 
     auto result = boost::json::parse(
-        "{\"kind\":\"debug\",\"creationDate\":0,\"key\":\"key\",\"version\":"
-        "17,\"variation\":2,\"value\":\"value\",\"reason\":{\"kind\":\"foo\"},"
-        "\"default\":\"default\",\"context\":{\"key\":\"bar\",\"kind\":\"foo\"}"
-        "}");
+        "{\"creationDate\":0,\"key\":\"key\",\"version\":17,\"variation\":2,"
+        "\"value\":\"value\",\"reason\":{\"kind\":\"foo\"},\"default\":1.7E1,"
+        "\"kind\":\"debug\",\"context\":{\"key\":\"bar\",\"kind\":\"foo\"}}");
 
     ASSERT_EQ(result, event);
 }
 
-TEST(EventSerialization, IdentifyEvent) {
-    auto creation_date = std::chrono::system_clock::from_time_t({});
-    auto attrs = AttributeReference::SetType({"/redact_me"});
-    ContextFilter filter(false, attrs);
-
-    auto e = events::OutIdentifyEvent{creation_date,
-                                      filter.filter(ContextBuilder()
-                                                        .kind("foo", "org")
-                                                        .set("bar", "baz")
-                                                        .set("redact_me", 3)
-                                                        .build())};
-
-    auto event = boost::json::value_from(e);
-
-    auto result = boost::json::parse(
-        "{\"kind\":\"identify\",\"creationDate\":0,\"context\":{\"key\":"
-        "\"org\",\"kind\":\"foo\",\"bar\":\"baz\",\"_meta\":{"
-        "\"redactedAttributes\":[\"/redact_me\"]}}}");
-
-    ASSERT_EQ(result, event);
-}
 }  // namespace launchdarkly::events

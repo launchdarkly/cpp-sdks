@@ -9,13 +9,12 @@
 #include <optional>
 #include "config/detail/events.hpp"
 #include "config/detail/service_hosts.hpp"
+#include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summary_state.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
-#include "context_filter.hpp"
-
 
 namespace launchdarkly::events::detail {
 
@@ -27,11 +26,11 @@ class Dispatcher {
                std::string authorization,
                Logger& logger);
 
-    void request_flush();
+    void AsyncFlush();
 
-    void send(InputEvent);
+    void AsyncSend(InputEvent);
 
-    void shutdown();
+    void AsyncClose();
 
    private:
     enum class FlushTrigger {
@@ -63,15 +62,15 @@ class Dispatcher {
 
     Logger& logger_;
 
-    void handle_send(InputEvent e);
+    void HandleSend(InputEvent e);
 
-    std::optional<RequestType> make_request();
+    std::optional<RequestType> MakeRequest();
 
-    void flush(FlushTrigger flush_type);
+    void Flush(FlushTrigger flush_type);
 
-    void schedule_flush();
+    void ScheduleFlush();
 
-    std::vector<OutputEvent> process(InputEvent e);
+    std::vector<OutputEvent> Process(InputEvent e);
 };
 
 }  // namespace launchdarkly::events::detail

@@ -17,21 +17,21 @@ AsioEventProcessor::AsioEventProcessor(
                   "password",
                   logger) {}
 
-void AsioEventProcessor::async_send(InputEvent in_event) {
+void AsioEventProcessor::AsyncSend(InputEvent in_event) {
     LD_LOG(logger_, LogLevel::kDebug) << "processor: pushing event into inbox";
-    dispatcher_.send(std::move(in_event));
+    dispatcher_.AsyncSend(std::move(in_event));
 }
 
-void AsioEventProcessor::async_flush() {
+void AsioEventProcessor::AsyncFlush() {
     LD_LOG(logger_, LogLevel::kDebug)
         << "processor: requesting unscheduled flush";
-    dispatcher_.request_flush();
+    dispatcher_.AsyncFlush();
 }
 
-void AsioEventProcessor::async_close() {
+void AsioEventProcessor::AsyncClose() {
     LD_LOG(logger_, LogLevel::kDebug) << "processor: request shutdown";
-    dispatcher_.request_flush();
-    dispatcher_.shutdown();
+    dispatcher_.AsyncFlush();
+    dispatcher_.AsyncClose();
 }
 
 }  // namespace launchdarkly::events::detail

@@ -4,6 +4,24 @@
 
 #include "events/events.hpp"
 
+namespace launchdarkly::events::client {
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                FeatureEvent const& event);
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                FeatureEventBase const& event);
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IdentifyEvent const& event);
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                DebugEvent const& event);
+}  // namespace launchdarkly::events::client
+
 namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const&,
@@ -12,27 +30,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                IndexEvent const& date);
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                FeatureEvent const& event);
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                FeatureEventFields const& event);
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                OutIdentifyEvent const& event);
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                DebugEvent const& event);
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                CustomEvent const& event);
+                TrackEvent const& event);
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,

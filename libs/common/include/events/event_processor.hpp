@@ -12,18 +12,18 @@ class IEventProcessor {
      * soon as possible. The event may be dropped if the inbox lacks capacity.
      * @param event InputEvent to deliver.
      */
-    virtual void async_send(InputEvent event) = 0;
+    virtual void AsyncSend(InputEvent event) = 0;
     /**
      * Asynchronously on_flush the processor's outbox, returning as soon as
      * possible. Flushing may be a no-op if a on_flush is already in progress.
      */
-    virtual void async_flush() = 0;
+    virtual void AsyncFlush() = 0;
     /**
      * Synchronously close the processor. The processor should attempt to
      * on_flush all events in the outbox before shutting down. All asynchronous
      * operations MUST be completed before sync_close returns.
      */
-    virtual void async_close() = 0;
+    virtual void AsyncClose() = 0;
 };
 
 }  // namespace launchdarkly::events

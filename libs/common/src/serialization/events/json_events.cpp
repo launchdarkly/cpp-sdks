@@ -3,17 +3,7 @@
 #include "serialization/json_evaluation_reason.hpp"
 #include "serialization/json_value.hpp"
 
-namespace launchdarkly::events {
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                Date const& date) {
-    json_value.emplace_int64() =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            date.t.time_since_epoch())
-            .count();
-}
-
+namespace launchdarkly::events::client {
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEvent const& event) {
@@ -34,7 +24,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                FeatureEventFields const& event) {
+                FeatureEventBase const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("key", event.key);
@@ -47,32 +37,32 @@ void tag_invoke(boost::json::value_from_tag const&,
         obj.emplace("reason", boost::json::value_from(*event.reason));
     }
     obj.emplace("default", boost::json::value_from(event.default_));
-    if (event.prereq_of) {
-        obj.emplace("prereqOf", *event.prereq_of);
-    }
 }
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                OutIdentifyEvent const& event) {
+                IdentifyEvent const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "identify");
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", event.context);
 }
+}  // namespace launchdarkly::events::client
+
+namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                IndexEvent const& event) {
-    auto& obj = json_value.emplace_object();
-    obj.emplace("kind", "index");
-    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
-    obj.emplace("context", boost::json::value_from(event.context));
+                Date const& date) {
+    json_value.emplace_int64() =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            date.t.time_since_epoch())
+            .count();
 }
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                CustomEvent const& event) {
+                TrackEvent const& event) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "custom");
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
@@ -92,4 +82,5 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     std::visit([&](auto const& e) mutable { tag_invoke(tag, json_value, e); },
                event);
 }
+
 }  // namespace launchdarkly::events

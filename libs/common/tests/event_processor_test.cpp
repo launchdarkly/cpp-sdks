@@ -32,17 +32,17 @@ TEST_F(EventProcessorTests, thing) {
 
     auto c = launchdarkly::ContextBuilder().kind("org", "ld").build();
     ASSERT_TRUE(c.valid());
-    auto ev = events::IdentifyEvent{
+    auto ev = events::client::IdentifyEventParams{
         std::chrono::system_clock::now(),
         c,
     };
 
     for (std::size_t i = 0; i < 3; i++) {
-        ep.async_send(ev);
+        ep.AsyncSend(ev);
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    ep.async_close();
+    ep.AsyncClose();
     t.join();
 }

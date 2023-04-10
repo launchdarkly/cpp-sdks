@@ -1,100 +1,18 @@
 #pragma once
 
-#include <boost/json/value.hpp>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include <variant>
-#include "attribute_reference.hpp"
-#include "context.hpp"
-#include "data/evaluation_reason.hpp"
-#include "value.hpp"
-
-#include <cstdint>
+#include "events/client_events.hpp"
+// #include "events/server_events.hpp"
+// Server-side events would be added to the Input/Output event variants.
 
 namespace launchdarkly::events {
 
-// TODO: Replace with actual types when available.
-using Value = launchdarkly::Value;
-using VariationIndex = size_t;
-using Reason = EvaluationReason;
-using Context = launchdarkly::Context;
-using EventContext = boost::json::value;
-using Version = std::uint64_t;
-using ContextKeys = std::map<std::string, std::string>;
+using InputEvent = std::variant<client::FeatureEventParams,
+                                client::IdentifyEventParams,
+                                TrackEventParams>;
 
-struct Date {
-    std::chrono::system_clock::time_point t;
-};
-
-struct FeatureEventFields {
-    std::string key;
-    Date creation_date;
-    Value value;
-    std::optional<VariationIndex> variation;
-    Value default_;
-    std::optional<Reason> reason;
-    Version version;
-    std::optional<std::string> prereq_of;
-};
-
-struct FeatureEvent {
-    FeatureEventFields base;
-    ContextKeys context_keys;
-};
-
-struct DebugEvent {
-    FeatureEventFields base;
-    Context context;
-};
-
-struct IdentifyEvent {
-    Date creation_date;
-    Context context;
-};
-
-struct OutIdentifyEvent {
-    Date creation_date;
-    EventContext context;
-};
-
-struct IndexEvent : public OutIdentifyEvent {};
-
-struct CustomEvent {
-    Date creation_date;
-    std::string key;
-    ContextKeys context_keys;
-    std::optional<Value> data;
-    std::optional<double> metric_value;
-};
-
-struct VariationSummary {
-    std::size_t count;
-    Value value;
-};
-
-struct VariationKey {
-    Version version;
-    std::optional<VariationIndex> variation;
-
-    struct Hash {
-        auto operator()(VariationKey const& p) const -> size_t {
-            if (p.variation) {
-                return std::hash<Version>{}(p.version) ^
-                       std::hash<VariationIndex>{}(*p.variation);
-            } else {
-                return std::hash<Version>{}(p.version);
-            }
-        }
-    };
-};
-
-using InputEvent = std::variant<FeatureEvent, IdentifyEvent, CustomEvent>;
-
-using OutputEvent = std::variant<IndexEvent,
-                                 DebugEvent,
-                                 FeatureEvent,
-                                 OutIdentifyEvent,
-                                 CustomEvent>;
+using OutputEvent = std::variant<client::FeatureEvent,
+                                 client::DebugEvent,
+                                 client::IdentifyEvent,
+                                 TrackEvent>;
 
 }  // namespace launchdarkly::events

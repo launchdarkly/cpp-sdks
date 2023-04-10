@@ -35,7 +35,7 @@ class EvaluationResult {
 
     /**
      * A timestamp, which if the current time is before, a client SDK
-     * should send debug events for the flag.
+     * should AsyncSend debug events for the flag.
      * @return
      */
     [[nodiscard]] std::optional<

@@ -32,19 +32,19 @@ Dispatcher::Dispatcher(boost::asio::any_io_executor io,
       full_outbox_encountered_(false),
       filter_(config.all_attributes_private(), config.private_attributes()),
       logger_(logger) {
-    schedule_flush();
+    ScheduleFlush();
 }
 
-void Dispatcher::send(InputEvent input_event) {
+void Dispatcher::AsyncSend(InputEvent input_event) {
     boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
-        handle_send(std::move(e));
+        HandleSend(std::move(e));
     });
 }
 
-void Dispatcher::handle_send(InputEvent input_event) {
-    summary_state_.update(input_event);
+void Dispatcher::HandleSend(InputEvent e) {
+    summary_state_.update(e);
 
-    std::vector<OutputEvent> output_events = process(std::move(input_event));
+    std::vector<OutputEvent> output_events = Process(std::move(e));
 
     bool inserted = outbox_.push_discard_overflow(std::move(output_events));
     if (!inserted && !full_outbox_encountered_) {
@@ -55,18 +55,18 @@ void Dispatcher::handle_send(InputEvent input_event) {
     full_outbox_encountered_ = !inserted;
 }
 
-void Dispatcher::flush(FlushTrigger flush_type) {
-    if (auto request = make_request()) {
+void Dispatcher::Flush(FlushTrigger flush_type) {
+    if (auto request = MakeRequest()) {
         conns_.async_write(*request);
     } else {
         LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: nothing to flush";
     }
     if (flush_type == FlushTrigger::Automatic) {
-        schedule_flush();
+        ScheduleFlush();
     }
 }
 
-void Dispatcher::schedule_flush() {
+void Dispatcher::ScheduleFlush() {
     LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: scheduling flush in "
                                       << flush_interval_.count() << "ms";
 
@@ -77,22 +77,22 @@ void Dispatcher::schedule_flush() {
             return;
         }
         LD_LOG(logger_, LogLevel::kDebug) << "dispatcher: flush";
-        flush(FlushTrigger::Automatic);
+        Flush(FlushTrigger::Automatic);
     });
 }
 
-void Dispatcher::shutdown() {
+void Dispatcher::AsyncClose() {
     timer_.cancel();
 }
 
-void Dispatcher::request_flush() {
+void Dispatcher::AsyncFlush() {
     boost::asio::post(io_, [this] {
         boost::system::error_code ec;
-        flush(FlushTrigger::Manual);
+        Flush(FlushTrigger::Manual);
     });
 }
 
-std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
+std::optional<Dispatcher::RequestType> Dispatcher::MakeRequest() {
     if (outbox_.empty()) {
         return std::nullopt;
     }
@@ -114,6 +114,15 @@ std::optional<Dispatcher::RequestType> Dispatcher::make_request() {
     return req;
 }
 
+static std::map<std::string, std::string> CopyContextKeys(
+    std::map<std::string_view, std::string_view> const& refs) {
+    std::map<std::string, std::string> copied_keys;
+    for (auto kv : refs) {
+        copied_keys.insert(kv);
+    }
+    return copied_keys;
+}
+
 // These helpers are for the std::visit within Dispatcher::process.
 template <class... Ts>
 struct overloaded : Ts... {
@@ -123,18 +132,52 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-std::vector<OutputEvent> Dispatcher::process(InputEvent event) {
+std::vector<OutputEvent> Dispatcher::Process(InputEvent event) {
     std::vector<OutputEvent> out;
     std::visit(
-        overloaded{[&](FeatureEvent&& e) { out.emplace_back(std::move(e)); },
-                   [&](IdentifyEvent&& e) {
-                       // Contexts should already have been checked for validity
-                       // by this point.
-                       assert(e.context.valid());
-                       out.emplace_back(OutIdentifyEvent{
-                           e.creation_date, filter_.filter(e.context)});
-                   },
-                   [&](CustomEvent&& e) { out.emplace_back(std::move(e)); }},
+        overloaded{
+            [&](client::FeatureEventParams&& e) {
+                if (!e.eval_result.track_events()) {
+                    return;
+                }
+                std::optional<Reason> reason;
+
+                // TODO(cwaldren): should also add the reason if the variation
+                // method was VariationDetail().
+                if (e.eval_result.track_reason()) {
+                    reason = e.eval_result.detail().reason();
+                }
+
+                client::FeatureEventBase b = {
+                    e.creation_date, std::move(e.key), e.eval_result.version(),
+                    e.eval_result.detail().variation_index(),
+                    e.eval_result.detail().value(), reason,
+                    // TODO(cwaldren): change to actual default; figure out
+                    // where this should be plumbed through.
+                    Value::null()};
+
+                auto debug_until_date = e.eval_result.debug_events_until_date();
+                bool emit_debug_event =
+                    debug_until_date &&
+                    debug_until_date.value() > std::chrono::system_clock::now();
+
+                if (emit_debug_event) {
+                    out.emplace_back(
+                        client::DebugEvent{b, filter_.filter(e.context)});
+                }
+                // TODO(cwaldren): see about not copying the keys / having the
+                // getter return a value.
+                out.emplace_back(client::FeatureEvent{
+                    std::move(b), CopyContextKeys(e.context.kinds_to_keys())});
+            },
+            [&](client::IdentifyEventParams&& e) {
+                // Contexts should already have been checked for
+                // validity by this point.
+                assert(e.context.valid());
+                out.emplace_back(client::IdentifyEvent{
+                    e.creation_date, filter_.filter(e.context)});
+            },
+            [&](TrackEventParams&& e) { out.emplace_back(std::move(e)); }},
         std::move(event));
 
     return out;

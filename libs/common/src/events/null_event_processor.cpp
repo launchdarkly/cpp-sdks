@@ -1,9 +1,9 @@
 #include "events/detail/null_event_processor.hpp"
 
 namespace launchdarkly::events::detail {
-void NullEventProcessor::async_send(InputEvent event) {}
+void NullEventProcessor::AsyncSend(InputEvent event) {}
 
-void NullEventProcessor::async_flush() {}
+void NullEventProcessor::AsyncFlush() {}
 
-void NullEventProcessor::async_close() {}
+void NullEventProcessor::AsyncClose() {}
 }  // namespace launchdarkly::events::detail
