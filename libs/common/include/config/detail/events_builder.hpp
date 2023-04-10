@@ -38,7 +38,7 @@ class EventsBuilder {
      * Sets the capacity of the event processor. When more events are generated
      * within the processor's flush interval than this value, events will be
      * dropped.
-     * @param capacity Event capacity.
+     * @param capacity Event queue capacity.
      * @return Reference to this builder.
      */
     EventsBuilder& capacity(std::size_t capacity);
@@ -79,15 +79,22 @@ class EventsBuilder {
     EventsBuilder& all_attributes_private(bool);
 
     /**
-     * Specify an AttributePolicy for individual attributes.
-     * @return
+     * Specify that a set of attributes are private.
+     * @return Reference to this builder.
      */
     EventsBuilder& private_attributes(
         AttributeReference::SetType private_attrs);
 
     /**
-     * Builds Events configuration, if the configuration is valid. If not,
-     * returns an error.
+     * Specify the transport security regime for event delivery. By default,
+     * events are delivered using TLS.
+     * @param regime Security regime.
+     * @return Reference to this builder.
+     */
+    EventsBuilder& transport_security(TransportSecurity regime);
+
+    /**
+     * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */
     [[nodiscard]] tl::expected<Events, Error> build();

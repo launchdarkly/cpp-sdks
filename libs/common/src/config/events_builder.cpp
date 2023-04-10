@@ -34,6 +34,13 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::private_attributes(
 }
 
 template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::transport_security(
+    TransportSecurity regime) {
+    config_.transport_security_ = regime;
+    return *this;
+}
+
+template <typename SDK>
 tl::expected<Events, Error> EventsBuilder<SDK>::build() {
     if (config_.capacity() == 0) {
         return tl::unexpected(Error::kConfig_Events_ZeroCapacity);

@@ -18,7 +18,7 @@ namespace launchdarkly::config::detail {
 template <typename SDK>
 class ConfigBuilder {
    public:
-    using EndpointsBuilder = detail::HostsBuilder<SDK>;
+    using HostsBuilder = detail::HostsBuilder<SDK>;
     using EventsBuilder = detail::EventsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
     /**
@@ -28,12 +28,12 @@ class ConfigBuilder {
     ConfigBuilder(std::string sdk_key);
 
     /**
-     * To customize the endpoints the SDK uses for streaming, polling, and
-     * events, pass in an EndpointsBuilder.
-     * @param builder An EndpointsBuilder.
+     * To customize the hosts the SDK uses for streaming, polling, and
+     * events, pass in an HostsBuilder.
+     * @param builder A HostsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& service_endpoints(EndpointsBuilder builder);
+    ConfigBuilder& service_hosts(HostsBuilder builder);
 
     /**
      * To include metadata about the application that is utilizing the SDK,
@@ -68,7 +68,7 @@ class ConfigBuilder {
    private:
     std::string sdk_key_;
     std::optional<bool> offline_;
-    std::optional<EndpointsBuilder> service_endpoints_builder_;
+    std::optional<HostsBuilder> service_hosts_builder_;
     std::optional<ApplicationInfo> application_info_builder_;
     std::optional<EventsBuilder> events_builder_;
 };
