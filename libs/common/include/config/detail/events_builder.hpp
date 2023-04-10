@@ -85,14 +85,6 @@ class EventsBuilder {
         AttributeReference::SetType private_attrs);
 
     /**
-     * Specify the transport security regime for event delivery. By default,
-     * events are delivered using TLS.
-     * @param regime Security regime.
-     * @return Reference to this builder.
-     */
-    EventsBuilder& transport_security(TransportSecurity regime);
-
-    /**
      * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */

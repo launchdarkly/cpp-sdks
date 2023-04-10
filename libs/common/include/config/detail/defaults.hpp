@@ -28,10 +28,8 @@ struct Defaults<ClientSDK> {
                 "https://mobile.launchdarkly.com"};
     }
     static Events events() {
-        return {
-            100,   std::chrono::seconds(30),      "/mobile",
-            false, AttributeReference::SetType(), TransportSecurity::TLS,
-        };
+        return {100, std::chrono::seconds(30), "/mobile", false,
+                AttributeReference::SetType()};
     }
 };
 
@@ -43,10 +41,8 @@ struct Defaults<ServerSDK> {
                 "https://events.launchdarkly.com"};
     }
     static Events events() {
-        return {
-            10000, std::chrono::seconds(5),       "/bulk",
-            false, AttributeReference::SetType(), TransportSecurity::TLS,
-        };
+        return {10000, std::chrono::seconds(5), "/bulk", false,
+                AttributeReference::SetType()};
     }
 };
 
