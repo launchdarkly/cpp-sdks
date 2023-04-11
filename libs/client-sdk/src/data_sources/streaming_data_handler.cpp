@@ -35,10 +35,9 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
         if (!eval_result.has_value()) {
             return tl::unexpected(JsonError::kSchemaFailure);
         }
-        descriptors.emplace(
-            pair.key(),
-            launchdarkly::client_side::ItemDescriptor{
-                eval_result.value().version(), std::move(eval_result.value())});
+        descriptors.emplace(pair.key(),
+                            launchdarkly::client_side::ItemDescriptor(
+                                std::move(eval_result.value())));
     }
     return descriptors;
 }
@@ -126,9 +125,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
         auto res = boost::json::value_to<
             tl::expected<StreamingDataHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_->upsert(res.value().key,
-                             launchdarkly::client_side::ItemDescriptor{
-                                 res.value().flag.version(), res.value().flag});
+            handler_->upsert(
+                res.value().key,
+                launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError)
@@ -148,7 +147,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             boost::json::parse(event.data()));
         if (res.has_value()) {
             handler_->upsert(res.value().key,
-                             ItemDescriptor{res.value().version, std::nullopt});
+                             ItemDescriptor(res.value().version));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError)

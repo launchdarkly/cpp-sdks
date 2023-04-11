@@ -49,7 +49,7 @@ tl::expected<EvaluationResult, JsonError> tag_invoke(
         // `variationIndex`.
 
         auto* value_iter = json_obj.find("value");
-        if(value_iter == json_obj.end()) {
+        if (value_iter == json_obj.end()) {
             return tl::unexpected(JsonError::kSchemaFailure);
         }
         auto value = boost::json::value_to<Value>(value_iter->value());

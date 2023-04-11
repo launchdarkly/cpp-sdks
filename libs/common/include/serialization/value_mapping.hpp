@@ -39,8 +39,9 @@ std::optional<uint64_t> ValueAsOpt(boost::json::object::const_iterator iterator,
                                    boost::json::object::const_iterator end);
 
 template <>
-std::optional<std::string> ValueAsOpt(boost::json::object::const_iterator iterator,
-                                      boost::json::object::const_iterator end);
+std::optional<std::string> ValueAsOpt(
+    boost::json::object::const_iterator iterator,
+    boost::json::object::const_iterator end);
 
 template <>
 bool ValueOrDefault(boost::json::object::const_iterator iterator,

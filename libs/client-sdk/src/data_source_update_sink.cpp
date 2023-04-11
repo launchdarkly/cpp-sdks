@@ -16,4 +16,8 @@ std::ostream& operator<<(std::ostream& out, ItemDescriptor const& descriptor) {
     }
     return out;
 }
+ItemDescriptor::ItemDescriptor(uint64_t version) : version(version) {}
+
+ItemDescriptor::ItemDescriptor(EvaluationResult flag)
+    : version(flag.version()), flag(std::move(flag)) {}
 }  // namespace launchdarkly::client_side

@@ -37,12 +37,10 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put = std::map<std::string, ItemDescriptor>{
-        {"flagA",
-         ItemDescriptor{
-             1, std::make_optional(EvaluationResult(
-                    1, std::nullopt, false, false, std::nullopt,
-                    EvaluationDetailInternal(Value("test"), std::nullopt,
-                                             std::nullopt)))}}};
+        {"flagA", ItemDescriptor(EvaluationResult(
+                      1, std::nullopt, false, false, std::nullopt,
+                      EvaluationDetailInternal(Value("test"), std::nullopt,
+                                               std::nullopt)))}};
     EXPECT_EQ(expected_put, test_handler->init_data_[0]);
 }
 
@@ -95,11 +93,10 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put = std::pair<std::string, ItemDescriptor>{
-        "flagA", ItemDescriptor{
-                     1, std::make_optional(EvaluationResult(
-                            1, std::nullopt, false, false, std::nullopt,
-                            EvaluationDetailInternal(
-                                Value("test"), std::nullopt, std::nullopt)))}};
+        "flagA", ItemDescriptor(EvaluationResult(
+                     1, std::nullopt, false, false, std::nullopt,
+                     EvaluationDetailInternal(Value("test"), std::nullopt,
+                                              std::nullopt)))};
     EXPECT_EQ(expected_put, test_handler->upsert_data_[0]);
 }
 
@@ -137,8 +134,8 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
-    auto expected_put = std::pair<std::string, ItemDescriptor>{
-        "flagA", ItemDescriptor{1, std::nullopt}};
+    auto expected_put =
+        std::pair<std::string, ItemDescriptor>{"flagA", ItemDescriptor(1)};
     EXPECT_EQ(expected_put, test_handler->upsert_data_[0]);
 }
 

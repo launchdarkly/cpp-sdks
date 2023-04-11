@@ -24,6 +24,16 @@ struct ItemDescriptor {
      */
     std::optional<EvaluationResult> flag;
 
+    ItemDescriptor(uint64_t version);
+
+    ItemDescriptor(EvaluationResult flag);
+
+    ItemDescriptor(ItemDescriptor const& item) = default;
+    ItemDescriptor(ItemDescriptor&& item) = default;
+    ItemDescriptor& operator=(ItemDescriptor const&) = default;
+    ItemDescriptor& operator=(ItemDescriptor&&) = default;
+    ~ItemDescriptor() = default;
+
     friend std::ostream& operator<<(std::ostream& out,
                                     ItemDescriptor const& descriptor);
 };
@@ -39,7 +49,14 @@ class IDataSourceUpdateSink {
     // We could add this if we want to support data source status.
     // virtual void status(<something>)
 
-    virtual ~IDataSourceUpdateSink() {}
+    IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
+    IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;
+    IDataSourceUpdateSink& operator=(IDataSourceUpdateSink const&) = delete;
+    IDataSourceUpdateSink& operator=(IDataSourceUpdateSink&&) = delete;
+    virtual ~IDataSourceUpdateSink() = default;
+
+   protected:
+    IDataSourceUpdateSink() = default;
 };
 
 bool operator==(ItemDescriptor const& lhs, ItemDescriptor const& rhs);

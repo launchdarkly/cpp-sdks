@@ -3,7 +3,8 @@
 
 namespace launchdarkly {
 tl::expected<EvaluationReason, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const& unused,
+    boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const&
+        unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
     if (json_value.is_object()) {
