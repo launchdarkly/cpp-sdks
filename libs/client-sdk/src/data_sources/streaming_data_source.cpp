@@ -16,7 +16,7 @@
 namespace launchdarkly::client_side::data_sources::detail {
 
 StreamingDataSource::StreamingDataSource(
-    std::string sdk_key,
+    std::string const& sdk_key,
     boost::asio::any_io_executor ioc,
     Context const& context,
     config::ServiceEndpoints const& endpoints,
@@ -48,7 +48,8 @@ StreamingDataSource::StreamingDataSource(
         url.params().set("withReasons", "true");
     }
 
-    auto client_builder = launchdarkly::sse::Builder(ioc, url.buffer());
+    auto client_builder =
+        launchdarkly::sse::Builder(std::move(ioc), url.buffer());
 
     client_builder.method(use_report ? boost::beast::http::verb::report
                                      : boost::beast::http::verb::get);
@@ -60,13 +61,13 @@ StreamingDataSource::StreamingDataSource(
     });
 
     client_builder.logger(
-        [&logger](auto msg) { LD_LOG((logger), LogLevel::kInfo) << msg; });
+        [this](auto msg) { LD_LOG((logger_), LogLevel::kInfo) << msg; });
 
     if (use_report) {
         client_builder.body(string_context);
     }
     client_builder.header("authorization", sdk_key);
-    for (auto& header : http_properties.base_headers()) {
+    for (auto const& header : http_properties.base_headers()) {
         client_builder.header(header.first, header.second);
     }
     client_builder.header("user-agent", http_properties.user_agent());

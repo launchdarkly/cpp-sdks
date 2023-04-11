@@ -3,7 +3,6 @@
 #include "console_backend.hpp"
 #include "context_builder.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
-#include "logger.hpp"
 
 #include <memory>
 
@@ -13,14 +12,12 @@ using namespace launchdarkly::client_side::data_sources::detail;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    TestHandler() {}
-
-    virtual void init(std::map<std::string, ItemDescriptor> data) {
+    void init(std::map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
-    virtual void upsert(std::string key, ItemDescriptor data) {
-        upsert_data_.push_back(std::make_pair(key, data));
+    void upsert(std::string key, ItemDescriptor data) override {
+        upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
 
@@ -35,10 +32,7 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     StreamingDataHandler stream_handler(test_handler, logger);
 
     auto res = stream_handler.handle_message(launchdarkly::sse::Event(
-        "put",
-        "{"
-        "\"flagA\": {\"version\":1, \"value\": \"test\"}"
-        "}"));
+        "put", R"({"flagA": {"version":1, "value":"test"}})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
@@ -96,7 +90,7 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     StreamingDataHandler stream_handler(test_handler, logger);
 
     auto res = stream_handler.handle_message(launchdarkly::sse::Event(
-        "patch", "{\"key\": \"flagA\", \"version\":1, \"value\": \"test\"}"));
+        "patch", R"({"key": "flagA", "version":1, "value": "test"})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
@@ -127,7 +121,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     StreamingDataHandler stream_handler(test_handler, logger);
 
     auto res = stream_handler.handle_message(
-        launchdarkly::sse::Event("patch", "{\"potato\": {}}"));
+        launchdarkly::sse::Event("patch", R"({"potato": {}})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
@@ -138,8 +132,8 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto test_handler = std::make_shared<TestHandler>();
     StreamingDataHandler stream_handler(test_handler, logger);
 
-    auto res = stream_handler.handle_message(launchdarkly::sse::Event(
-        "delete", "{\"key\": \"flagA\", \"version\":1}"));
+    auto res = stream_handler.handle_message(
+        launchdarkly::sse::Event("delete", R"({"key": "flagA", "version":1})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
@@ -166,7 +160,7 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     StreamingDataHandler stream_handler(test_handler, logger);
 
     auto res = stream_handler.handle_message(
-        launchdarkly::sse::Event("delete", "{\"potato\": {}}"));
+        launchdarkly::sse::Event("delete", R"({"potato": {}})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
@@ -178,7 +172,7 @@ TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     StreamingDataHandler stream_handler(test_handler, logger);
 
     auto res = stream_handler.handle_message(
-        launchdarkly::sse::Event("potato", "{\"potato\": {}}"));
+        launchdarkly::sse::Event("potato", R"({"potato": {}})"));
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kUnhandledVerb, res);
     EXPECT_EQ(0, test_handler->count_);

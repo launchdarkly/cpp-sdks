@@ -5,6 +5,7 @@ using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include "config/detail/http_properties.hpp"
 #include "config/detail/service_endpoints.hpp"
 #include "context.hpp"
 #include "data/evaluation_result.hpp"
@@ -18,7 +19,7 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 class StreamingDataSource final : public IDataSource {
    public:
-    StreamingDataSource(std::string sdk_key,
+    StreamingDataSource(std::string const& sdk_key,
                         boost::asio::any_io_executor ioc,
                         Context const& context,
                         config::ServiceEndpoints const& endpoints,

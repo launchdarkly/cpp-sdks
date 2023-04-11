@@ -5,6 +5,7 @@
 #include "serialization/value_mapping.hpp"
 
 #include <boost/json.hpp>
+#include <utility>
 
 #include "tl/expected.hpp"
 
@@ -91,7 +92,7 @@ static tl::expected<StreamingDataHandler::DeleteData, JsonError> tag_invoke(
 StreamingDataHandler::StreamingDataHandler(
     std::shared_ptr<IDataSourceUpdateSink> handler,
     Logger const& logger)
-    : handler_(handler), logger_(logger) {}
+    : handler_(std::move(std::move(std::move(handler)))), logger_(logger) {}
 
 StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
     launchdarkly::sse::Event const& event) {
@@ -109,13 +110,12 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
         if (res.has_value()) {
             handler_->init(res.value());
             return StreamingDataHandler::MessageStatus::kMessageHandled;
-        } else {
-            LD_LOG(logger_, LogLevel::kError)
-                << "PUT message contained invalid data";
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
-
-    } else if (event.type() == "patch") {
+        LD_LOG(logger_, LogLevel::kError)
+            << "PUT message contained invalid data";
+        return StreamingDataHandler::MessageStatus::kInvalidMessage;
+    }
+    if (event.type() == "patch") {
         boost::json::error_code error_code;
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
@@ -130,13 +130,12 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
                              launchdarkly::client_side::ItemDescriptor{
                                  res.value().flag.version(), res.value().flag});
             return StreamingDataHandler::MessageStatus::kMessageHandled;
-        } else {
-            LD_LOG(logger_, LogLevel::kError)
-                << "PATCH message contained invalid data";
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
-
-    } else if (event.type() == "delete") {
+        LD_LOG(logger_, LogLevel::kError)
+            << "PATCH message contained invalid data";
+        return StreamingDataHandler::MessageStatus::kInvalidMessage;
+    }
+    if (event.type() == "delete") {
         boost::json::error_code error_code;
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
@@ -151,11 +150,10 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             handler_->upsert(res.value().key,
                              ItemDescriptor{res.value().version, std::nullopt});
             return StreamingDataHandler::MessageStatus::kMessageHandled;
-        } else {
-            LD_LOG(logger_, LogLevel::kError)
-                << "DELETE message contained invalid data";
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
+        LD_LOG(logger_, LogLevel::kError)
+            << "DELETE message contained invalid data";
+        return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     return StreamingDataHandler::MessageStatus::kUnhandledVerb;
 }
