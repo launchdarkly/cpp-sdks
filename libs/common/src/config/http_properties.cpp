@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "config/detail/http_properties.hpp"
 
 namespace launchdarkly::config::detail {
@@ -8,8 +10,8 @@ HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
                                std::map<std::string, std::string> base_headers)
     : connect_timeout_(connect_timeout),
       read_timeout_(read_timeout),
-      user_agent_(user_agent),
-      base_headers_(base_headers) {}
+      user_agent_(std::move(user_agent)),
+      base_headers_(std::move(base_headers)) {}
 
 std::chrono::milliseconds HttpProperties::connect_timeout() const {
     return connect_timeout_;

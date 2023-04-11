@@ -14,10 +14,11 @@ class HttpProperties final {
                    std::string user_agent,
                    std::map<std::string, std::string> base_headers);
 
-    std::chrono::milliseconds connect_timeout() const;
-    std::chrono::milliseconds read_timeout() const;
-    std::string const& user_agent() const;
-    std::map<std::string, std::string> const& base_headers() const;
+    [[nodiscard]] std::chrono::milliseconds connect_timeout() const;
+    [[nodiscard]] std::chrono::milliseconds read_timeout() const;
+    [[nodiscard]] std::string const& user_agent() const;
+    [[nodiscard]] std::map<std::string, std::string> const& base_headers()
+        const;
 
    private:
     std::chrono::milliseconds connect_timeout_;
