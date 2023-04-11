@@ -108,16 +108,18 @@ TEST(EvaluationResultTests, FromMapOfResults) {
 }
 
 TEST(EvaluationResultTests, NoResultFieldsJson) {
-    auto results = boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-        boost::json::parse("{}"));
+    auto results =
+        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
+            boost::json::parse("{}"));
 
     EXPECT_FALSE(results.has_value());
     EXPECT_EQ(JsonError::kSchemaFailure, results.error());
 }
 
 TEST(EvaluationResultTests, VersionWrongTypeJson) {
-    auto results = boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-        boost::json::parse("{\"version\": \"apple\"}"));
+    auto results =
+        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
+            boost::json::parse("{\"version\": \"apple\"}"));
 
     EXPECT_FALSE(results.has_value());
     EXPECT_EQ(JsonError::kSchemaFailure, results.error());

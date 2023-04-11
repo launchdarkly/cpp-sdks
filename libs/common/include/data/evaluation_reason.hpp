@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <optional>
+#include <ostream>
 #include <string>
 
 namespace launchdarkly {
@@ -85,6 +86,9 @@ class EvaluationReason {
                      bool in_experiment,
                      std::optional<std::string> big_segment_status);
 
+    friend std::ostream& operator<<(std::ostream& out,
+                                    EvaluationReason const& reason);
+
    private:
     std::string kind_;
     std::optional<std::string> error_kind_;
@@ -94,5 +98,8 @@ class EvaluationReason {
     bool in_experiment_;
     std::optional<std::string> big_segment_status_;
 };
+
+bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs);
+bool operator!=(EvaluationReason const& lhs, EvaluationReason const& rhs);
 
 }  // namespace launchdarkly

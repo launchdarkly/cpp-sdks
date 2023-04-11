@@ -8,7 +8,7 @@ file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_executable(gtest_${LIBNAME}
-        ${tests})
+        ${tests} streaming_data_handler.cpp)
 target_link_libraries(gtest_${LIBNAME} launchdarkly::client GTest::gtest_main)
 
 gtest_discover_tests(gtest_${LIBNAME})
