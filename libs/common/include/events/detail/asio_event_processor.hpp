@@ -29,7 +29,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     void AsyncFlush() override;
 
-    void AsyncSend(InputEvent) override;
+    void AsyncSend(InputEvent event) override;
 
     void AsyncClose() override;
 
@@ -67,7 +67,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     Logger& logger_;
 
-    void HandleSend(InputEvent e);
+    void HandleSend(InputEvent event);
 
     std::optional<RequestType> MakeRequest();
 
@@ -75,7 +75,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     void ScheduleFlush();
 
-    std::vector<OutputEvent> Process(InputEvent e);
+    std::vector<OutputEvent> Process(InputEvent event);
 
     bool InboxIncrement();
     void InboxDecrement();
