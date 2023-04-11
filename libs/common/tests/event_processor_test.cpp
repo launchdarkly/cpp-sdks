@@ -38,7 +38,6 @@ TEST_F(EventProcessorTests, ProcessorCompiles) {
     for (std::size_t i = 0; i < 10; i++) {
         ep.AsyncSend(ev);
     }
-
     ep.AsyncClose();
     t.join();
 }

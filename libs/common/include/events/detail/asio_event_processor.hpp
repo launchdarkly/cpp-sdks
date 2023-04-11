@@ -27,11 +27,11 @@ class AsioEventProcessor : public IEventProcessor {
                        std::string authorization,
                        Logger& logger);
 
-    virtual void AsyncFlush() override;
+    void AsyncFlush() override;
 
-    virtual void AsyncSend(InputEvent) override;
+    void AsyncSend(InputEvent) override;
 
-    virtual void AsyncClose() override;
+    void AsyncClose() override;
 
    private:
     enum class FlushTrigger {
@@ -45,7 +45,6 @@ class AsioEventProcessor : public IEventProcessor {
     Outbox outbox_;
     SummaryState summary_state_;
 
-    std::chrono::milliseconds reaction_time_;
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;
 
@@ -57,7 +56,12 @@ class AsioEventProcessor : public IEventProcessor {
 
     ConnPool conns_;
 
+    std::size_t inbox_capacity_;
+    std::size_t inbox_size_;
+    std::mutex inbox_mutex_;
+
     bool full_outbox_encountered_;
+    bool full_inbox_encountered_;
 
     launchdarkly::ContextFilter filter_;
 
@@ -72,6 +76,9 @@ class AsioEventProcessor : public IEventProcessor {
     void ScheduleFlush();
 
     std::vector<OutputEvent> Process(InputEvent e);
+
+    bool InboxIncrement();
+    void InboxDecrement();
 };
 
 }  // namespace launchdarkly::events::detail

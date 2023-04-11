@@ -21,7 +21,7 @@ AsioEventProcessor::AsioEventProcessor(
     config::ServiceEndpoints const& endpoints,
     std::string authorization,
     Logger& logger)
-    : io_(boost::asio::make_strand(std::move(io))),
+    : io_(boost::asio::make_strand(io)),
       outbox_(config.capacity()),
       summary_state_(std::chrono::system_clock::now()),
       flush_interval_(config.flush_interval()),
@@ -30,14 +30,46 @@ AsioEventProcessor::AsioEventProcessor(
       path_(config.path()),
       authorization_(std::move(authorization)),
       uuids_(),
+      conns_(),
+      inbox_capacity_(config.capacity()),
+      inbox_size_(0),
+      inbox_mutex_(),
       full_outbox_encountered_(false),
+      full_inbox_encountered_(false),
       filter_(config.all_attributes_private(), config.private_attributes()),
       logger_(logger) {
     ScheduleFlush();
 }
 
+bool AsioEventProcessor::InboxIncrement() {
+    std::lock_guard<std::mutex> guard{inbox_mutex_};
+    if (inbox_size_ < inbox_capacity_) {
+        inbox_size_++;
+        return true;
+    }
+    if (!full_inbox_encountered_) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "event-processor: events are being produced faster than they "
+               "can be "
+               "processed; some events will be dropped";
+        full_inbox_encountered_ = true;
+    }
+    return false;
+}
+
+void AsioEventProcessor::InboxDecrement() {
+    std::lock_guard<std::mutex> guard{inbox_mutex_};
+    if (inbox_size_ > 0) {
+        inbox_size_--;
+    }
+}
+
 void AsioEventProcessor::AsyncSend(InputEvent input_event) {
+    if (!InboxIncrement()) {
+        return;
+    }
     boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
+        InboxDecrement();
         HandleSend(std::move(e));
     });
 }
