@@ -29,6 +29,13 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::offline(bool offline) {
 }
 
 template <typename SDK>
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::data_source(
+    detail::DataSourceBuilder<SDK> builder) {
+    data_source_builder_ = builder;
+    return *this;
+}
+
+template <typename SDK>
 typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     Logger& logger) const {
     auto key = sdk_key_;
@@ -39,7 +46,11 @@ typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     if (application_info_builder_) {
         app_tag = application_info_builder_->build(logger);
     }
-    return {std::move(key), offline, std::move(endpoints), std::move(app_tag)};
+    auto data_source_config = data_source_builder_
+                                  ? data_source_builder_.value().build()
+                                  : Defaults<SDK>::data_source_config();
+    return {std::move(key), offline, std::move(endpoints), std::move(app_tag),
+            std::move(data_source_config)};
 }
 
 template class ConfigBuilder<detail::ClientSDK>;

@@ -32,7 +32,10 @@ add_library(${LIBNAME}
         serialization/json_context.cpp
         serialization/json_evaluation_reason.cpp
         serialization/json_evaluation_result.cpp
-        serialization/json_value.cpp config/http_properties.cpp config/http_properties_builder.cpp config/data_source_builder.cpp)
+        serialization/json_value.cpp
+        config/http_properties.cpp
+        config/http_properties_builder.cpp
+        config/data_source_builder.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

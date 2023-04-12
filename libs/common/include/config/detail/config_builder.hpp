@@ -4,6 +4,7 @@
 #include <string>
 #include "config/detail/application_info.hpp"
 #include "config/detail/config.hpp"
+#include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
 #include "logger.hpp"
 
@@ -19,6 +20,7 @@ class ConfigBuilder {
    public:
     using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
+    using DataSourceBuilder = detail::DataSourceBuilder<SDK>;
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.
@@ -50,6 +52,14 @@ class ConfigBuilder {
     ConfigBuilder& offline(bool offline);
 
     /**
+     * Sets the configuration of the component that receives feature flag data
+     * from LaunchDarkly.
+     * @param builder A DataSourceConfig builder.
+     * @return Reference to this builder.
+     */
+    ConfigBuilder& data_source(detail::DataSourceBuilder<SDK> builder);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -60,6 +70,7 @@ class ConfigBuilder {
     std::optional<bool> offline_;
     std::optional<EndpointsBuilder> service_endpoints_builder_;
     std::optional<ApplicationInfo> application_info_builder_;
+    std::optional<DataSourceBuilder> data_source_builder_;
 };
 
 }  // namespace launchdarkly::config::detail

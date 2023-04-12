@@ -59,3 +59,69 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     ASSERT_EQ(config.application_tag,
               "application-id/bar application-version/baz");
 }
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ClientConfig_UsesDefaulDataSourceConfig) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    EXPECT_FALSE(cfg.data_source_config.with_reasons);
+    EXPECT_FALSE(cfg.data_source_config.use_report);
+    // Should be streaming with a 1 second initial retry;
+    EXPECT_EQ(std::chrono::milliseconds{1000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ServerConfig_UsesDefaulDataSourceConfig) {
+    using namespace launchdarkly::server;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    // Should be streaming with a 1 second initial retry;
+    EXPECT_EQ(std::chrono::milliseconds{1000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
+    using namespace launchdarkly::server;
+    ConfigBuilder builder("sdk-123");
+
+    builder.data_source(ConfigBuilder::DataSourceBuilder().method(
+        ConfigBuilder::DataSourceBuilder::Streaming().initial_reconnect_delay(
+            std::chrono::milliseconds{5000})));
+
+    Config cfg = builder.build(logger);
+
+    EXPECT_EQ(std::chrono::milliseconds{5000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+
+    builder.data_source(
+        ConfigBuilder::DataSourceBuilder()
+            .method(
+                ConfigBuilder::DataSourceBuilder::Streaming()
+                    .initial_reconnect_delay(std::chrono::milliseconds{5000}))
+            .use_report(true)
+            .with_reasons(true));
+
+    Config cfg = builder.build(logger);
+
+    EXPECT_TRUE(cfg.data_source_config.use_report);
+    EXPECT_TRUE(cfg.data_source_config.with_reasons);
+    EXPECT_EQ(std::chrono::milliseconds{5000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
