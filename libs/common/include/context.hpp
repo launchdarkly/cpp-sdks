@@ -26,7 +26,7 @@ class ContextBuilder;
 /**
  * A LaunchDarkly context.
  */
-class Context {
+class Context final {
     friend class ContextBuilder;
 
    public:
@@ -35,7 +35,7 @@ class Context {
      *
      * @return A vector of kinds.
      */
-    [[nodiscard]] std::vector<std::string_view> const& kinds() const;
+    [[nodiscard]] std::vector<std::string> const& kinds() const;
 
     /**
      * Get a set of attributes associated with a kind.
@@ -76,7 +76,7 @@ class Context {
      *
      * @return Returns a map of kinds to keys.
      */
-    [[nodiscard]] std::map<std::string_view, std::string_view> const&
+    [[nodiscard]] std::map<std::string, std::string> const&
     keys_and_kinds() const;
 
     /**
@@ -108,6 +108,13 @@ class Context {
         return out;
     }
 
+    ~Context() = default;
+    Context(Context const& context) = default;
+    Context(Context&& context) = default;
+    Context& operator=(Context const&) = default;
+    Context& operator=(Context&&) = default;
+
+
    private:
     /**
      * Create an invalid context with the given error message.
@@ -119,9 +126,10 @@ class Context {
      * @param attributes
      */
     Context(std::map<std::string, Attributes> attributes);
+
     std::map<std::string, Attributes> attributes_;
-    std::vector<std::string_view> kinds_;
-    std::map<std::string_view, std::string_view> keys_and_kinds_;
+    std::vector<std::string> kinds_;
+    std::map<std::string, std::string> keys_and_kinds_;
     bool valid_ = false;
     std::string errors_;
     std::string canonical_key_;

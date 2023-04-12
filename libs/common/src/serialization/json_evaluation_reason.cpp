@@ -2,16 +2,19 @@
 #include "serialization/value_mapping.hpp"
 
 namespace launchdarkly {
-EvaluationReason tag_invoke(
-    boost::json::value_to_tag<EvaluationReason> const& unused,
+tl::expected<EvaluationReason, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const&
+        unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
     if (json_value.is_object()) {
-        auto json_obj = json_value.as_object();
+        auto& json_obj = json_value.as_object();
 
-        auto* kind_iter = json_obj.find("kind");
-        auto kind =
-            ValueOrDefault<std::string>(kind_iter, json_obj.end(), "ERROR");
+        auto kind_iter = json_obj.find("kind");
+        auto kind = ValueAsOpt<std::string>(kind_iter, json_obj.end());
+        if (!kind.has_value()) {
+            return tl::unexpected(JsonError::kSchemaFailure);
+        }
 
         auto* error_kind_iter = json_obj.find("errorKind");
         auto error_kind =
@@ -35,10 +38,14 @@ EvaluationReason tag_invoke(
         auto big_segment_status =
             ValueAsOpt<std::string>(big_segment_status_iter, json_obj.end());
 
-        return {std::string(kind), error_kind,    rule_index,        rule_id,
-                prerequisite_key,  in_experiment, big_segment_status};
+        return EvaluationReason{std::string(kind.value()),
+                                error_kind,
+                                rule_index,
+                                rule_id,
+                                prerequisite_key,
+                                in_experiment,
+                                big_segment_status};
     }
-    return {"ERROR",      std::nullopt, 0,           std::nullopt,
-            std::nullopt, false,        std::nullopt};
+    return tl::unexpected(JsonError::kSchemaFailure);
 }
 }  // namespace launchdarkly

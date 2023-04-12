@@ -206,4 +206,23 @@ Value::Object::Iterator Value::Object::find(std::string const& key) const {
     return {map_.find(key)};
 }
 
+bool operator==(Value const& lhs, Value const& rhs) {
+    if (lhs.type() == rhs.type()) {
+        switch (lhs.type()) {
+            case Value::Type::kNull:
+                return true;
+            case Value::Type::kBool:
+                return lhs.as_bool() == rhs.as_bool();
+            case Value::Type::kNumber:
+                return lhs.as_double() == rhs.as_double();
+            case Value::Type::kString:
+                return lhs.as_string() == rhs.as_string();
+            case Value::Type::kObject:
+                return lhs.as_object() == rhs.as_object();
+            case Value::Type::kArray:
+                return lhs.as_array() == rhs.as_array();
+        }
+    }
+    return false;
+}
 }  // namespace launchdarkly

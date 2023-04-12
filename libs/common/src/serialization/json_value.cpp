@@ -37,7 +37,7 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
             return Value(values);
         }
         case boost::json::kind::object: {
-            auto map = json_value.as_object();
+            auto& map = json_value.as_object();
             std::map<std::string, Value> values;
             for (auto const& pair : map) {
                 auto value = boost::json::value_to<Value>(pair.value());

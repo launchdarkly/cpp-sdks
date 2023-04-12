@@ -348,6 +348,8 @@ std::shared_ptr<Client> Builder::build() {
 
         ssl_ctx.set_verify_mode(ssl::verify_peer |
                                 ssl::verify_fail_if_no_peer_cert);
+
+        ssl_ctx.set_default_verify_paths();
         boost::certify::enable_native_https_server_verification(ssl_ctx);
 
         return std::make_shared<EncryptedClient>(

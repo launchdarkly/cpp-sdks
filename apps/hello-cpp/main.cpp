@@ -1,5 +1,5 @@
-#include <launchdarkly/api.hpp>
 #include <launchdarkly/sse/client.hpp>
+#include "launchdarkly/client_side/api.hpp"
 
 #include <boost/asio/io_context.hpp>
 
