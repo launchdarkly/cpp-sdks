@@ -6,6 +6,7 @@
 #include "config/detail/config.hpp"
 #include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
+#include "config/detail/http_properties_builder.hpp"
 #include "logger.hpp"
 
 namespace launchdarkly::config::detail {
@@ -21,6 +22,7 @@ class ConfigBuilder {
     using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
     using DataSourceBuilder = detail::DataSourceBuilder<SDK>;
+    using HttpPropertiesBuilder = detail::HttpPropertiesBuilder<SDK>;
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.
@@ -60,6 +62,14 @@ class ConfigBuilder {
     ConfigBuilder& data_source(detail::DataSourceBuilder<SDK> builder);
 
     /**
+     * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
+     * The builder has methods for setting individual HTTP-related properties.
+     * @param builder A HttpPropertiesBuilder builder.
+     * @return Reference to this builder.
+     */
+    ConfigBuilder& http_properties(detail::HttpPropertiesBuilder<SDK> builder);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -71,6 +81,7 @@ class ConfigBuilder {
     std::optional<EndpointsBuilder> service_endpoints_builder_;
     std::optional<ApplicationInfo> application_info_builder_;
     std::optional<DataSourceBuilder> data_source_builder_;
+    std::optional<HttpPropertiesBuilder> http_properties_builder_;
 };
 
 }  // namespace launchdarkly::config::detail
