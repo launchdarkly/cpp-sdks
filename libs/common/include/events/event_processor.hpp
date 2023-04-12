@@ -6,7 +6,6 @@ namespace launchdarkly::events {
 
 class IEventProcessor {
    public:
-    virtual ~IEventProcessor() = default;
     /**
      * Asynchronously delivers an event to the processor, returning as
      * soon as possible. The event may be dropped if the processor lacks
@@ -24,6 +23,15 @@ class IEventProcessor {
      * flush all events before shutting down.
      */
     virtual void AsyncClose() = 0;
+
+    virtual ~IEventProcessor() = default;
+    IEventProcessor(IEventProcessor const& item) = delete;
+    IEventProcessor(IEventProcessor&& item) = delete;
+    IEventProcessor& operator=(IEventProcessor const&) = delete;
+    IEventProcessor& operator=(IEventProcessor&&) = delete;
+
+   protected:
+    IEventProcessor() = default;
 };
 
 }  // namespace launchdarkly::events
