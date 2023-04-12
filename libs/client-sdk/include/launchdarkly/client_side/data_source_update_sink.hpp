@@ -24,9 +24,9 @@ struct ItemDescriptor {
      */
     std::optional<EvaluationResult> flag;
 
-    ItemDescriptor(uint64_t version);
+    explicit ItemDescriptor(uint64_t version);
 
-    ItemDescriptor(EvaluationResult flag);
+    explicit ItemDescriptor(EvaluationResult flag);
 
     ItemDescriptor(ItemDescriptor const& item) = default;
     ItemDescriptor(ItemDescriptor&& item) = default;

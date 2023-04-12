@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace launchdarkly::client_side {
+namespace launchdarkly::client_side::data_sources::detail {
 
 /**
  * Return a base64 encoded version of the input string.
