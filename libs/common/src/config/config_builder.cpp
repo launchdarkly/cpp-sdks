@@ -1,5 +1,4 @@
 #include "config/detail/config_builder.hpp"
-#include "config/detail/defaults.hpp"
 
 namespace launchdarkly::config::detail {
 template <typename SDK>

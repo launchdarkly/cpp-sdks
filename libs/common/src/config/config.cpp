@@ -1,5 +1,7 @@
+#include <utility>
+
 #include "config/detail/config.hpp"
-#include "config/detail/sdks.hpp"
+
 namespace launchdarkly::config::detail {
 template <typename SDK>
 Config<SDK>::Config(std::string sdk_key,
@@ -13,7 +15,7 @@ Config<SDK>::Config(std::string sdk_key,
       service_endpoints_builder(std::move(service_endpoints_builder)),
       application_tag(std::move(application_tag)),
       data_source_config(std::move(data_source_config)),
-      http_properties(http_properties) {}
+      http_properties(std::move(http_properties)) {}
 
 template class Config<detail::ClientSDK>;
 template class Config<detail::ServerSDK>;

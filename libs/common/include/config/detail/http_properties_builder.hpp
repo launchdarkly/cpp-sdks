@@ -27,7 +27,7 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& custom_headers(
         std::map<std::string, std::string> base_headers);
 
-    HttpProperties build() const;
+    [[nodiscard]] HttpProperties build() const;
 
    private:
     std::chrono::milliseconds connect_timeout_{};
