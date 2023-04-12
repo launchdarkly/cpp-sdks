@@ -31,13 +31,11 @@ struct FeatureEventBase {
     Value default_;
 };
 
-struct FeatureEvent {
-    FeatureEventBase base;
+struct FeatureEvent : public FeatureEventBase {
     ContextKeys context_keys;
 };
 
-struct DebugEvent {
-    FeatureEventBase base;
+struct DebugEvent : public FeatureEventBase {
     EventContext context;
 };
 

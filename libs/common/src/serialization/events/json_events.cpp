@@ -7,19 +7,20 @@ namespace launchdarkly::events::client {
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEvent const& event) {
-    tag_invoke(tag, json_value, event.base);
-    json_value.as_object().emplace("kind", "feature");
-    json_value.as_object().emplace("contextKeys",
-                                   boost::json::value_from(event.context_keys));
+    auto base = boost::json::value_from<FeatureEventBase const&>(event);
+    base.as_object().emplace("kind", "feature");
+    base.as_object().emplace("contextKeys",
+                             boost::json::value_from(event.context_keys));
+    json_value = std::move(base);
 }
 
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 DebugEvent const& event) {
-    tag_invoke(tag, json_value, event.base);
-    json_value.as_object().emplace("kind", "debug");
-    json_value.as_object().emplace("context",
-                                   boost::json::value_from(event.context));
+    auto base = boost::json::value_from<FeatureEventBase const&>(event);
+    base.as_object().emplace("kind", "debug");
+    base.as_object().emplace("context", boost::json::value_from(event.context));
+    json_value = std::move(base);
 }
 
 void tag_invoke(boost::json::value_from_tag const&,
