@@ -75,7 +75,6 @@ void AsioEventProcessor::AsyncSend(InputEvent input_event) {
 }
 
 void AsioEventProcessor::HandleSend(InputEvent e) {
-    summary_state_.update(e);
 
     std::vector<OutputEvent> output_events = Process(std::move(e));
 
@@ -165,6 +164,9 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent event) {
     std::visit(
         overloaded{
             [&](client::FeatureEventParams&& e) {
+
+                summary_state_.update(e);
+
                 if (!e.eval_result.track_events()) {
                     return;
                 }

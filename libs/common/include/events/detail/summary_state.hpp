@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 #include "events/events.hpp"
@@ -15,22 +16,26 @@ class Summarizer {
     struct VariationSummary {
         std::size_t count;
         Value value;
-        VariationSummary() = default;
+        explicit VariationSummary(Value value);
+        void Increment();
     };
 
     struct VariationKey {
-        Version version;
+        VariationKey(VariationKey const& key);
+        std::optional<Version> version;
         std::optional<VariationIndex> variation;
         VariationKey(Version version, std::optional<VariationIndex> variation);
 
+        VariationKey();
+
+        bool operator==(VariationKey const& k) const {
+            return k.variation == variation && k.version == version;
+        }
+
         struct Hash {
             auto operator()(VariationKey const& p) const -> size_t {
-                if (p.variation) {
-                    return std::hash<Version>{}(p.version) ^
-                           std::hash<VariationIndex>{}(*p.variation);
-                } else {
-                    return std::hash<Version>{}(p.version);
-                }
+                return std::hash<decltype(p.version)>{}(p.version) ^
+                       std::hash<decltype(p.variation)>{}(p.variation);
             }
         };
     };
@@ -38,10 +43,12 @@ class Summarizer {
     struct State {
         Value default_;
         std::unordered_set<std::string> context_kinds_;
-        std::unordered_map<VariationKey, VariationSummary, VariationKey::Hash>
+        std::unordered_map<Summarizer::VariationKey,
+                           Summarizer::VariationSummary,
+                           Summarizer::VariationKey::Hash>
             counters_;
 
-        State(Value defaultVal, std::unordered_set<std::string> contextKinds);
+        State(Value defaultVal);
     };
 
     using FlagKey = std::string;
