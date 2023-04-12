@@ -75,7 +75,6 @@ void AsioEventProcessor::AsyncSend(InputEvent input_event) {
 }
 
 void AsioEventProcessor::HandleSend(InputEvent e) {
-
     std::vector<OutputEvent> output_events = Process(std::move(e));
 
     bool inserted = outbox_.PushDiscardingOverflow(std::move(output_events));
@@ -94,6 +93,7 @@ void AsioEventProcessor::Flush(FlushTrigger flush_type) {
         LD_LOG(logger_, LogLevel::kDebug)
             << "event-processor: nothing to flush";
     }
+    summary_state_ = Summarizer(std::chrono::system_clock::now());
     if (flush_type == FlushTrigger::Automatic) {
         ScheduleFlush();
     }
@@ -132,6 +132,12 @@ AsioEventProcessor::MakeRequest() {
         return std::nullopt;
     }
 
+    boost::json::value summary_event;
+    if (!summary_state_.empty()) {
+        summary_event = boost::json::value_from(
+            Summary{summary_state_, std::chrono::system_clock::now()});
+    }
+
     LD_LOG(logger_, LogLevel::kDebug)
         << "event-processor: generating http request";
     RequestType req;
@@ -144,8 +150,12 @@ AsioEventProcessor::MakeRequest() {
     req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     req.target(host_ + path_);
 
-    req.body() =
-        boost::json::serialize(boost::json::value_from(outbox_.Consume()));
+    auto events = boost::json::value_from(outbox_.Consume());
+    if (!summary_event.is_null()) {
+        events.as_array().push_back(summary_event);
+    }
+
+    req.body() = boost::json::serialize(events);
     req.prepare_payload();
     return req;
 }
@@ -164,7 +174,6 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent event) {
     std::visit(
         overloaded{
             [&](client::FeatureEventParams&& e) {
-
                 summary_state_.update(e);
 
                 if (!e.eval_result.track_events()) {

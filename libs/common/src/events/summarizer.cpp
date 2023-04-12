@@ -1,15 +1,19 @@
-#include "events/detail/summary_state.hpp"
+#include "events/detail/summarizer.hpp"
 
 namespace launchdarkly::events::detail {
 
 Summarizer::Summarizer(std::chrono::system_clock::time_point start)
     : start_time_(start), features_() {}
 
-static std::unordered_set<std::string> CopyKinds(
-    std::vector<std::string_view> const& kinds) {
-    std::unordered_set<std::string> kind_set;
-    kind_set.insert(kinds.begin(), kinds.end());
-    return kind_set;
+Summarizer::Summarizer() : start_time_(), features_() {}
+
+bool Summarizer::empty() const {
+    return features_.empty();
+}
+
+std::unordered_map<Summarizer::FlagKey, Summarizer::State> const&
+Summarizer::features() const {
+    return features_;
 }
 
 static bool FlagNotFound(client::FeatureEventParams const& event) {
@@ -33,14 +37,16 @@ void Summarizer::update(client::FeatureEventParams const& event) {
     feature_state_iterator->second.context_kinds_.insert(kinds.begin(),
                                                          kinds.end());
 
-    decltype(std::begin(feature_state_iterator->second.counters_)) summary_counter;
+    decltype(std::begin(
+        feature_state_iterator->second.counters_)) summary_counter;
 
     if (FlagNotFound(event)) {
         auto key = VariationKey();
-        summary_counter = feature_state_iterator->second.counters_
-                      .try_emplace(std::move(key),
-                                   feature_state_iterator->second.default_)
-                      .first;
+        summary_counter =
+            feature_state_iterator->second.counters_
+                .try_emplace(std::move(key),
+                             feature_state_iterator->second.default_)
+                .first;
 
     } else {
         auto key = VariationKey(event.eval_result.version(),
@@ -53,14 +59,15 @@ void Summarizer::update(client::FeatureEventParams const& event) {
 
     summary_counter->second.Increment();
 }
+Summarizer::Date Summarizer::start_time() const {
+    return start_time_;
+}
 Summarizer::VariationKey::VariationKey(Version version,
                                        std::optional<VariationIndex> variation)
     : version(version), variation(variation) {}
 
 Summarizer::VariationKey::VariationKey()
     : version(std::nullopt), variation(std::nullopt) {}
-
-Summarizer::VariationKey::VariationKey(Summarizer::VariationKey const& key) {}
 
 Summarizer::VariationSummary::VariationSummary(Value value)
     : count(0), value(std::move(value)) {}

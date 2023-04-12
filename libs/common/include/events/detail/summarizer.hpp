@@ -1,4 +1,5 @@
 #pragma once
+#include <boost/container_hash/hash.hpp>
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -10,8 +11,16 @@ namespace launchdarkly::events::detail {
 
 class Summarizer {
    public:
-    Summarizer(std::chrono::system_clock::time_point start);
+    using Date = std::chrono::system_clock::time_point;
+    using FlagKey = std::string;
+
+    explicit Summarizer(Date start);
+    Summarizer();
     void update(client::FeatureEventParams const& event);
+
+    bool empty() const;
+
+    Date start_time() const;
 
     struct VariationSummary {
         std::size_t count;
@@ -21,7 +30,6 @@ class Summarizer {
     };
 
     struct VariationKey {
-        VariationKey(VariationKey const& key);
         std::optional<Version> version;
         std::optional<VariationIndex> variation;
         VariationKey(Version version, std::optional<VariationIndex> variation);
@@ -34,8 +42,10 @@ class Summarizer {
 
         struct Hash {
             auto operator()(VariationKey const& p) const -> size_t {
-                return std::hash<decltype(p.version)>{}(p.version) ^
-                       std::hash<decltype(p.variation)>{}(p.variation);
+                std::size_t seed = 0;
+                boost::hash_combine(seed, p.version);
+                boost::hash_combine(seed, p.variation);
+                return seed;
             }
         };
     };
@@ -51,10 +61,16 @@ class Summarizer {
         State(Value defaultVal);
     };
 
-    using FlagKey = std::string;
-    std::chrono::system_clock::time_point start_time_;
-    std::chrono::system_clock::time_point end_time_;
+    std::unordered_map<FlagKey, State> const& features() const;
+
+   private:
+    Date start_time_;
     std::unordered_map<FlagKey, State> features_;
+};
+
+struct Summary {
+    Summarizer const& summarizer;
+    Summarizer::Date end_time;
 };
 
 }  // namespace launchdarkly::events::detail

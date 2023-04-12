@@ -12,7 +12,7 @@
 #include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
-#include "events/detail/summary_state.hpp"
+#include "events/detail/summarizer.hpp"
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
