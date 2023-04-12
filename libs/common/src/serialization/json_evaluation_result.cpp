@@ -4,16 +4,20 @@
 #include "serialization/value_mapping.hpp"
 
 namespace launchdarkly {
-EvaluationResult tag_invoke(
-    boost::json::value_to_tag<EvaluationResult> const& unused,
+tl::expected<EvaluationResult, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<EvaluationResult, JsonError>> const&
+        unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
     if (json_value.is_object()) {
-        auto json_obj = json_value.as_object();
+        auto& json_obj = json_value.as_object();
 
         auto* version_iter = json_obj.find("version");
-        auto version =
-            ValueOrDefault<uint64_t>(version_iter, json_obj.end(), 0);
+        auto version_opt = ValueAsOpt<uint64_t>(version_iter, json_obj.end());
+        if (!version_opt.has_value()) {
+            return tl::unexpected(JsonError::kSchemaFailure);
+        }
+        auto version = version_opt.value();
 
         auto* flag_version_iter = json_obj.find("flagVersion");
         auto flag_version =
@@ -45,33 +49,46 @@ EvaluationResult tag_invoke(
         // `variationIndex`.
 
         auto* value_iter = json_obj.find("value");
-        auto value = value_iter != json_obj.end()
-                         ? boost::json::value_to<Value>(value_iter->value())
-                         : Value();
+        if (value_iter == json_obj.end()) {
+            return tl::unexpected(JsonError::kSchemaFailure);
+        }
+        auto value = boost::json::value_to<Value>(value_iter->value());
 
         auto* variation_iter = json_obj.find("variation");
         auto variation = ValueAsOpt<uint64_t>(variation_iter, json_obj.end());
 
         auto* reason_iter = json_obj.find("reason");
-        auto reason =
-            reason_iter != json_obj.end()
-                ? std::make_optional(boost::json::value_to<EvaluationReason>(
-                      reason_iter->value()))
-                : std::nullopt;
 
-        return {version,
-                flag_version,
-                track_events,
-                track_reason,
-                debug_events_until_date,
-                EvaluationDetailInternal(value, variation, reason)};
+        // There is a reason.
+        if (reason_iter != json_obj.end()) {
+            auto reason = boost::json::value_to<
+                tl::expected<EvaluationReason, JsonError>>(
+                reason_iter->value());
+
+            if (reason.has_value()) {
+                return EvaluationResult{
+                    version,
+                    flag_version,
+                    track_events,
+                    track_reason,
+                    debug_events_until_date,
+                    EvaluationDetailInternal(
+                        value, variation, std::make_optional(reason.value()))};
+            }
+            // We could not parse the reason.
+            return tl::unexpected(JsonError::kSchemaFailure);
+        }
+
+        // There was no reason.
+        return EvaluationResult{
+            version,
+            flag_version,
+            track_events,
+            track_reason,
+            debug_events_until_date,
+            EvaluationDetailInternal(value, variation, std::nullopt)};
     }
-    // This would represent malformed JSON.
-    return {0,
-            0,
-            false,
-            false,
-            std::nullopt,
-            EvaluationDetailInternal(Value(), std::nullopt, std::nullopt)};
+
+    return tl::unexpected(JsonError::kSchemaFailure);
 }
 }  // namespace launchdarkly

@@ -58,7 +58,7 @@ namespace launchdarkly {
  * auto context = builder.build();
  * @endcode
  */
-class ContextBuilder {
+class ContextBuilder final {
     friend AttributesBuilder<ContextBuilder, Context>;
 
    public:

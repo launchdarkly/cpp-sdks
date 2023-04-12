@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <optional>
+#include <ostream>
 
 #include "evaluation_detail_internal.hpp"
 
@@ -56,6 +57,9 @@ class EvaluationResult {
             debug_events_until_date,
         EvaluationDetailInternal detail);
 
+    friend std::ostream& operator<<(std::ostream& out,
+                                    EvaluationResult const& result);
+
    private:
     uint64_t version_;
     std::optional<uint64_t> flag_version_;
@@ -65,5 +69,8 @@ class EvaluationResult {
         debug_events_until_date_;
     EvaluationDetailInternal detail_;
 };
+
+bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs);
+bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs);
 
 }  // namespace launchdarkly

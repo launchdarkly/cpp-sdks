@@ -1,4 +1,4 @@
-#include "launchdarkly/api.hpp"
+#include "launchdarkly/client_side/api.hpp"
 
 #include <cstdint>
 #include <optional>

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <optional>
+#include <ostream>
 #include <utility>
 
 #include "data/evaluation_reason.hpp"
@@ -42,13 +43,21 @@ class EvaluationDetailInternal {
     reason() const;
 
     EvaluationDetailInternal(Value value,
-                     std::optional<std::size_t> variation_index,
-                     std::optional<EvaluationReason> reason);
+                             std::optional<std::size_t> variation_index,
+                             std::optional<EvaluationReason> reason);
+
+    friend std::ostream& operator<<(std::ostream& out,
+                                    EvaluationDetailInternal const& detail);
 
    private:
     Value value_;
     std::optional<std::size_t> variation_index_;
     std::optional<EvaluationReason> reason_;
 };
+
+bool operator==(EvaluationDetailInternal const& lhs,
+                EvaluationDetailInternal const& rhs);
+bool operator!=(EvaluationDetailInternal const& lhs,
+                EvaluationDetailInternal const& rhs);
 
 }  // namespace launchdarkly

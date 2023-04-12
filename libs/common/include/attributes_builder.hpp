@@ -19,7 +19,7 @@ class ContextBuilder;
  * @tparam BuildType The type of object being built.
  */
 template <class BuilderReturn, class BuildType>
-class AttributesBuilder {
+class AttributesBuilder final {
     friend class ContextBuilder;
 
    public:

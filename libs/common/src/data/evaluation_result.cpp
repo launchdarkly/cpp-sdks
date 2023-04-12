@@ -44,4 +44,32 @@ EvaluationResult::EvaluationResult(
       debug_events_until_date_(debug_events_until_date),
       detail_(std::move(detail)) {}
 
+std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
+    out << "{";
+    out << " version: " << result.version_;
+    out << " trackEvents: " << result.track_events_;
+    out << " trackReason: " << result.track_reason_;
+
+    if (result.debug_events_until_date_.has_value()) {
+        std::time_t as_time_t = std::chrono::system_clock::to_time_t(
+            result.debug_events_until_date_.value());
+        out << " debugEventsUntilDate: " << std::ctime(&as_time_t);
+    }
+    out << " detail: " << result.detail_;
+    out << "}";
+    return out;
+}
+
+bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs) {
+    return lhs.version() == rhs.version() &&
+           lhs.track_reason() == rhs.track_reason() &&
+           lhs.track_events() == rhs.track_events() &&
+           lhs.detail() == rhs.detail() &&
+           lhs.debug_events_until_date() == rhs.debug_events_until_date() &&
+           lhs.flag_version() == rhs.flag_version();
+}
+
+bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs) {
+    return !(lhs == rhs);
+}
 }  // namespace launchdarkly

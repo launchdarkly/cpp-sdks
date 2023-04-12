@@ -22,7 +22,7 @@ static std::string EscapeKey(std::string_view const& to_escape) {
     return escaped;
 }
 
-std::vector<std::string_view> const& Context::kinds() const {
+std::vector<std::string> const& Context::kinds() const {
     return kinds_;
 }
 
@@ -56,8 +56,7 @@ std::string const& Context::canonical_key() const {
     return canonical_key_;
 }
 
-std::map<std::string_view, std::string_view> const& Context::kinds_to_keys()
-    const {
+std::map<std::string, std::string> const& Context::kinds_to_keys() const {
     return kinds_to_keys_;
 }
 

@@ -42,7 +42,9 @@ add_library(${LIBNAME}
         events/outbox.cpp
         events/conn_pool.cpp
         events/summary_state.cpp
-        )
+        config/http_properties.cpp
+        config/http_properties_builder.cpp)
+
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 

@@ -45,7 +45,7 @@ namespace launchdarkly {
  * # Comparisons
  * [TODO]
  */
-class Value {
+class Value final {
    public:
     /**
      * Array type for values. Provides const iteration and indexing.
@@ -423,5 +423,7 @@ class Value {
     inline static const Object empty_map_;
     static const Value null_value_;
 };
+
+bool operator==(Value const& lhs, Value const& rhs);
 
 }  // namespace launchdarkly
