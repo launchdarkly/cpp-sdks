@@ -45,7 +45,7 @@ class StreamingBuilder {
      * Build the streaming config. Used internal to the SDK.
      * @return The built config.
      */
-    StreamingConfig build() const;
+    [[nodiscard]] StreamingConfig build() const;
 
    private:
     StreamingConfig config_;
@@ -69,7 +69,7 @@ class PollingBuilder {
      * Build the polling config. Used internal to the SDK.
      * @return The built config.
      */
-    PollingConfig build() const;
+    [[nodiscard]] PollingConfig build() const;
 
    private:
     PollingConfig config_;
@@ -155,7 +155,7 @@ class DataSourceBuilder<ClientSDK> {
      *
      * @return The built config.
      */
-    DataSourceConfig<ClientSDK> build() const;
+    [[nodiscard]] DataSourceConfig<ClientSDK> build() const;
 
    private:
     boost::variant<Streaming, Polling> method_;
@@ -200,7 +200,7 @@ class DataSourceBuilder<ServerSDK> {
      *
      * @return The built config.
      */
-    DataSourceConfig<ServerSDK> build() const;
+    [[nodiscard]] DataSourceConfig<ServerSDK> build() const;
 
    private:
     boost::variant<Streaming, Polling> method_;
