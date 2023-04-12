@@ -85,3 +85,27 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 }
 
 }  // namespace launchdarkly::events
+
+namespace launchdarkly::events::detail {
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Summarizer::VariationSummary const& state) {}
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Summarizer::State const& state) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("default", boost::json::value_from(state.default_));
+    obj.emplace("contextKinds", boost::json::value_from(state.context_kinds_));
+}
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                Summarizer const& summarizer) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "summary");
+    obj.emplace("startDate",
+                boost::json::value_from(Date{summarizer.start_time_}));
+    obj.emplace("endDate", boost::json::value_from(Date{summarizer.end_time_}));
+    obj.emplace("features", boost::json::value_from(summarizer.features_));
+}
+}  // namespace launchdarkly::events::detail
