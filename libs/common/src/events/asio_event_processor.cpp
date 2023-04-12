@@ -151,15 +151,6 @@ AsioEventProcessor::MakeRequest() {
     return req;
 }
 
-static std::map<std::string, std::string> CopyContextKeys(
-    std::map<std::string_view, std::string_view> const& refs) {
-    std::map<std::string, std::string> copied_keys;
-    for (auto kv : refs) {
-        copied_keys.insert(kv);
-    }
-    return copied_keys;
-}
-
 // These helpers are for the std::visit within AsioEventProcessor::Process.
 template <class... Ts>
 struct overloaded : Ts... {
@@ -205,7 +196,7 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent event) {
                 // TODO(cwaldren): see about not copying the keys / having the
                 // getter return a value.
                 out.emplace_back(client::FeatureEvent{
-                    std::move(b), CopyContextKeys(e.context.kinds_to_keys())});
+                    std::move(b), e.context.kinds_to_keys()});
             },
             [&](client::IdentifyEventParams&& e) {
                 // Contexts should already have been checked for
