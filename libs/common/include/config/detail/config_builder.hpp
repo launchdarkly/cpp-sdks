@@ -6,6 +6,7 @@
 #include "config/detail/config.hpp"
 #include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
+#include "config/detail/events_builder.hpp"
 #include "config/detail/http_properties_builder.hpp"
 #include "logger.hpp"
 
@@ -20,6 +21,7 @@ template <typename SDK>
 class ConfigBuilder {
    public:
     using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
+    using EventsBuilder = detail::EventsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
     using DataSourceBuilder = detail::DataSourceBuilder<SDK>;
     using HttpPropertiesBuilder = detail::HttpPropertiesBuilder<SDK>;
@@ -35,7 +37,7 @@ class ConfigBuilder {
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& service_endpoints(detail::EndpointsBuilder<SDK> builder);
+    ConfigBuilder& service_endpoints(EndpointsBuilder builder);
 
     /**
      * To include metadata about the application that is utilizing the SDK,
@@ -52,6 +54,14 @@ class ConfigBuilder {
      * @return Reference to this builder.
      */
     ConfigBuilder& offline(bool offline);
+
+    /**
+     * To tune settings related to event generation and delivery, pass an
+     * EventsBuilder.
+     * @param builder An EventsBuilder.
+     * @return Reference to this builder.
+     */
+    ConfigBuilder& events(EventsBuilder builder);
 
     /**
      * Sets the configuration of the component that receives feature flag data
@@ -80,6 +90,7 @@ class ConfigBuilder {
     std::optional<bool> offline_;
     std::optional<EndpointsBuilder> service_endpoints_builder_;
     std::optional<ApplicationInfo> application_info_builder_;
+    std::optional<EventsBuilder> events_builder_;
     std::optional<DataSourceBuilder> data_source_builder_;
     std::optional<HttpPropertiesBuilder> http_properties_builder_;
 };

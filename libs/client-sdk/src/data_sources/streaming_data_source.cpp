@@ -71,7 +71,6 @@ StreamingDataSource::StreamingDataSource(
         client_builder.header(header.first, header.second);
     }
     client_builder.header("user-agent", http_properties.user_agent());
-
     // TODO: Handle proxy support.
     client_ = client_builder.build();
 }

@@ -41,9 +41,9 @@ TEST(ContextTests, CanGetKeysAndKinds) {
                        .kind("user", "user-key")
                        .kind("org", "org-key")
                        .build();
-    EXPECT_EQ(2, context.keys_and_kinds().size());
-    EXPECT_EQ("user-key", context.keys_and_kinds().find("user")->second);
-    EXPECT_EQ("org-key", context.keys_and_kinds().find("org")->second);
+    EXPECT_EQ(2, context.kinds_to_keys().size());
+    EXPECT_EQ("user-key", context.kinds_to_keys().find("user")->second);
+    EXPECT_EQ("org-key", context.kinds_to_keys().find("org")->second);
 }
 
 std::string ProduceString(Context const& ctx) {

@@ -1,5 +1,5 @@
 #pragma once
 
-enum JsonError {
+enum class JsonError {
     kSchemaFailure  // The JSON was valid, but didn't match our expected values.
 };

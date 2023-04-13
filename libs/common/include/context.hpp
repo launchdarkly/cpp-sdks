@@ -76,8 +76,8 @@ class Context final {
      *
      * @return Returns a map of kinds to keys.
      */
-    [[nodiscard]] std::map<std::string, std::string> const&
-    keys_and_kinds() const;
+    [[nodiscard]] std::map<std::string, std::string> const& kinds_to_keys()
+        const;
 
     /**
      * Get a string containing errors the context encountered during
@@ -114,7 +114,6 @@ class Context final {
     Context& operator=(Context const&) = default;
     Context& operator=(Context&&) = default;
 
-
    private:
     /**
      * Create an invalid context with the given error message.
@@ -129,7 +128,7 @@ class Context final {
 
     std::map<std::string, Attributes> attributes_;
     std::vector<std::string> kinds_;
-    std::map<std::string, std::string> keys_and_kinds_;
+    std::map<std::string, std::string> kinds_to_keys_;
     bool valid_ = false;
     std::string errors_;
     std::string canonical_key_;

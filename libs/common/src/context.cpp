@@ -33,7 +33,7 @@ Context::Context(std::map<std::string, Attributes> attributes)
     : attributes_(std::move(attributes)), valid_(true) {
     for (auto& pair : attributes_) {
         kinds_.push_back(pair.first);
-        keys_and_kinds_[pair.first] = pair.second.key();
+        kinds_to_keys_[pair.first] = pair.second.key();
     }
 
     canonical_key_ = make_canonical_key();
@@ -56,14 +56,14 @@ std::string const& Context::canonical_key() const {
     return canonical_key_;
 }
 
-std::map<std::string, std::string> const& Context::keys_and_kinds() const {
-    return keys_and_kinds_;
+std::map<std::string, std::string> const& Context::kinds_to_keys() const {
+    return kinds_to_keys_;
 }
 
 std::string Context::make_canonical_key() {
-    if (keys_and_kinds_.size() == 1) {
-        if (auto iterator = keys_and_kinds_.find("user");
-            iterator != keys_and_kinds_.end()) {
+    if (kinds_to_keys_.size() == 1) {
+        if (auto iterator = kinds_to_keys_.find("user");
+            iterator != kinds_to_keys_.end()) {
             return std::string(iterator->second);
         }
     }
@@ -71,7 +71,7 @@ std::string Context::make_canonical_key() {
     bool first = true;
     // Maps are ordered, so keys and kinds will be in the correct order for
     // the canonical key.
-    for (auto& pair : keys_and_kinds_) {
+    for (auto& pair : kinds_to_keys_) {
         if (first) {
             first = false;
         } else {

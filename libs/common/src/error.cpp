@@ -26,6 +26,8 @@ char const* ErrorToString(Error err) {
             return "application info: the key contains invalid characters";
         case Error::kConfig_ApplicationInfo_InvalidValueCharacters:
             return "application info: the value contains invalid characters";
+        case Error::kConfig_Events_ZeroCapacity:
+            return "events: capacity must be non-zero";
         case Error::kMax:
             break;
     }

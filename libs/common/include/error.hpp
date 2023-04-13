@@ -18,6 +18,8 @@ enum class Error : std::uint32_t {
     kConfig_ApplicationInfo_InvalidKeyCharacters = 202,
     kConfig_ApplicationInfo_InvalidValueCharacters = 203,
 
+    kConfig_Events_ZeroCapacity = 300,
+
     /* Client-side errors: 10000-19999 */
     /* Server-side errors: 20000-29999 */
 

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "config/detail/data_source_config.hpp"
+#include "config/detail/events.hpp"
 #include "config/detail/http_properties.hpp"
 #include "config/detail/sdks.hpp"
-#include "service_endpoints.hpp"
+#include "config/detail/service_endpoints.hpp"
+#include "config/detail/data_source_config.hpp"
 
 namespace launchdarkly::config::detail {
 
@@ -40,6 +41,11 @@ struct Defaults<ClientSDK> {
                 "https://mobile.launchdarkly.com"};
     }
 
+    static Events events() {
+        return {100, std::chrono::seconds(30), "/mobile", false,
+                AttributeReference::SetType()};
+    }
+
     static HttpProperties http_properties() {
         return {std::chrono::milliseconds{10000},
                 std::chrono::milliseconds{10000},
@@ -71,6 +77,11 @@ struct Defaults<ServerSDK> {
 
     static DataSourceConfig<ServerSDK> data_source_config() {
         return {Defaults<AnySDK>::streaming_config()};
+    }
+
+    static Events events() {
+        return {10000, std::chrono::seconds(5), "/bulk", false,
+                AttributeReference::SetType()};
     }
 };
 
