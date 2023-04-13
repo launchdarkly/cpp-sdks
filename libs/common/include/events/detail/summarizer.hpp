@@ -30,7 +30,7 @@ class Summarizer {
      * Construct a Summarizer at time zero.
      */
     Summarizer() = default;
-
+    
     /**
      * Updates the summary with a feature event.
      * @param event Feature event.
@@ -40,7 +40,7 @@ class Summarizer {
     /**
      * Returns true if the summary is empty.
      */
-    bool Empty() const;
+    [[nodiscard]] bool Empty() const;
 
     /**
      * Returns the summary's start time as given in the constructor.
@@ -51,20 +51,20 @@ class Summarizer {
        public:
         explicit VariationSummary(Value value);
         void Increment();
-        std::size_t count() const;
-        Value const& value() const;
+        [[nodiscard]] std::int32_t count() const;
+        [[nodiscard]] Value const& value() const;
 
        private:
-        std::size_t count_;
+        std::int32_t count_;
         Value value_;
     };
 
     struct VariationKey {
         std::optional<Version> version;
         std::optional<VariationIndex> variation;
-        VariationKey(Version version, std::optional<VariationIndex> variation);
 
         VariationKey();
+        VariationKey(Version version, std::optional<VariationIndex> variation);
 
         bool operator==(VariationKey const& k) const {
             return k.variation == variation && k.version == version;

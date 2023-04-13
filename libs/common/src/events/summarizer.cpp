@@ -68,7 +68,6 @@ Summarizer::VariationSummary::VariationSummary(Value value)
     : count_(0), value_(std::move(value)) {}
 
 void Summarizer::VariationSummary::Increment() {
-    // todo(cwaldren): prevent overflow?
     count_++;
 }
 
@@ -76,10 +75,10 @@ Value const& Summarizer::VariationSummary::value() const {
     return value_;
 }
 
-std::size_t Summarizer::VariationSummary::count() const {
+std::int32_t Summarizer::VariationSummary::count() const {
     return count_;
 }
 
 Summarizer::State::State(Value default_value)
-    : default_(std::move(default_value)), context_kinds() {}
+    : default_(std::move(default_value)) {}
 }  // namespace launchdarkly::events::detail
