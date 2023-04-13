@@ -105,7 +105,8 @@ class DataSourceBuilder<ClientSDK> {
      *
      * The additional information will then be available through the client's
      * {TODO variation detail} method. Since this increases the size of network
-     * requests, such information is not sent unless you set this option to true.
+     * requests, such information is not sent unless you set this option to
+     * true.
      * @param value True to enable reasons.
      * @return Reference to this builder.
      */
