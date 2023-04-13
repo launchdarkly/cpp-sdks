@@ -18,7 +18,7 @@ static std::chrono::system_clock::time_point ZeroTime() {
 
 TEST(SummarizerTests, IsEmptyOnConstruction) {
     Summarizer summarizer;
-    ASSERT_TRUE(summarizer.empty());
+    ASSERT_TRUE(summarizer.Empty());
 }
 
 TEST(SummarizerTests, DefaultConstructionUsesZeroStartTime) {
@@ -60,7 +60,7 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
 
     auto const num_events = 10;
     for (size_t i = 0; i < num_events; i++) {
-        summarizer.update(event);
+        summarizer.Update(event);
     }
 
     auto const& features = summarizer.features();
@@ -71,8 +71,8 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
         Summarizer::VariationKey(feature_version, feature_variation));
     ASSERT_TRUE(counter != cat_food->second.counters.end());
 
-    ASSERT_EQ(counter->second.value.as_double(), feature_value.as_double());
-    ASSERT_EQ(counter->second.count, num_events);
+    ASSERT_EQ(counter->second.value().as_double(), feature_value.as_double());
+    ASSERT_EQ(counter->second.count(), num_events);
 }
 
 TEST(SummarizerTests, JsonSerialization) {
@@ -103,7 +103,7 @@ TEST(SummarizerTests, JsonSerialization) {
 
     auto const num_events = 10;
     for (size_t i = 0; i < num_events; i++) {
-        summarizer.update(event);
+        summarizer.Update(event);
     }
 
     auto json = boost::json::value_from(Summary{summarizer, ZeroTime()});

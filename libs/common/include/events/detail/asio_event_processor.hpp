@@ -43,7 +43,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     boost::asio::any_io_executor io_;
     Outbox outbox_;
-    Summarizer summary_state_;
+    Summarizer summarizer_;
 
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;

@@ -23,7 +23,7 @@ AsioEventProcessor::AsioEventProcessor(
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
       outbox_(config.capacity()),
-      summary_state_(std::chrono::system_clock::now()),
+      summarizer_(std::chrono::system_clock::now()),
       flush_interval_(config.flush_interval()),
       timer_(io_),
       host_(endpoints.events_base_url()),  // TODO: parse and use host
@@ -68,14 +68,14 @@ void AsioEventProcessor::AsyncSend(InputEvent input_event) {
     if (!InboxIncrement()) {
         return;
     }
-    boost::asio::post(io_, [this, e = std::move(input_event)]() mutable {
+    boost::asio::post(io_, [this, event = std::move(input_event)]() mutable {
         InboxDecrement();
-        HandleSend(std::move(e));
+        HandleSend(std::move(event));
     });
 }
 
-void AsioEventProcessor::HandleSend(InputEvent e) {
-    std::vector<OutputEvent> output_events = Process(std::move(e));
+void AsioEventProcessor::HandleSend(InputEvent event) {
+    std::vector<OutputEvent> output_events = Process(std::move(event));
 
     bool inserted = outbox_.PushDiscardingOverflow(std::move(output_events));
     if (!inserted && !full_outbox_encountered_) {
@@ -93,7 +93,7 @@ void AsioEventProcessor::Flush(FlushTrigger flush_type) {
         LD_LOG(logger_, LogLevel::kDebug)
             << "event-processor: nothing to flush";
     }
-    summary_state_ = Summarizer(std::chrono::system_clock::now());
+    summarizer_ = Summarizer(std::chrono::system_clock::now());
     if (flush_type == FlushTrigger::Automatic) {
         ScheduleFlush();
     }
@@ -132,14 +132,16 @@ AsioEventProcessor::MakeRequest() {
         return std::nullopt;
     }
 
-    boost::json::value summary_event;
-    if (!summary_state_.empty()) {
-        summary_event = boost::json::value_from(
-            Summary{summary_state_, std::chrono::system_clock::now()});
+    auto events = boost::json::value_from(outbox_.Consume());
+
+    if (!summarizer_.Empty()) {
+        events.as_array().push_back(boost::json::value_from(
+            Summary{summarizer_, std::chrono::system_clock::now()}));
     }
 
     LD_LOG(logger_, LogLevel::kDebug)
         << "event-processor: generating http request";
+
     RequestType req;
 
     req.set(http::field::host, host_);
@@ -149,11 +151,6 @@ AsioEventProcessor::MakeRequest() {
     req.set(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
     req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     req.target(host_ + path_);
-
-    auto events = boost::json::value_from(outbox_.Consume());
-    if (!summary_event.is_null()) {
-        events.as_array().push_back(summary_event);
-    }
 
     req.body() = boost::json::serialize(events);
     req.prepare_payload();
@@ -169,55 +166,57 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent event) {
+std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
     std::vector<OutputEvent> out;
     std::visit(
-        overloaded{
-            [&](client::FeatureEventParams&& e) {
-                summary_state_.update(e);
+        overloaded{[&](client::FeatureEventParams&& event) {
+                       summarizer_.Update(event);
 
-                if (!e.eval_result.track_events()) {
-                    return;
-                }
-                std::optional<Reason> reason;
+                       if (!event.eval_result.track_events()) {
+                           return;
+                       }
+                       std::optional<Reason> reason;
 
-                // TODO(cwaldren): should also add the reason if the variation
-                // method was VariationDetail().
-                if (e.eval_result.track_reason()) {
-                    reason = e.eval_result.detail().reason();
-                }
+                       // TODO(cwaldren): should also add the reason if the
+                       // variation method was VariationDetail().
+                       if (event.eval_result.track_reason()) {
+                           reason = event.eval_result.detail().reason();
+                       }
 
-                client::FeatureEventBase b = {
-                    e.creation_date, std::move(e.key), e.eval_result.version(),
-                    e.eval_result.detail().variation_index(),
-                    e.eval_result.detail().value(), reason,
-                    // TODO(cwaldren): change to actual default; figure out
-                    // where this should be plumbed through.
-                    Value::null()};
+                       client::FeatureEventBase base = {
+                           event.creation_date, std::move(event.key),
+                           event.eval_result.version(),
+                           event.eval_result.detail().variation_index(),
+                           event.eval_result.detail().value(), reason,
+                           // TODO(cwaldren): change to actual default; figure
+                           // out where this should be plumbed through.
+                           Value::null()};
 
-                auto debug_until_date = e.eval_result.debug_events_until_date();
-                bool emit_debug_event =
-                    debug_until_date &&
-                    debug_until_date.value() > std::chrono::system_clock::now();
+                       auto debug_until_date =
+                           event.eval_result.debug_events_until_date();
+                       bool emit_debug_event =
+                           debug_until_date &&
+                           debug_until_date.value() >
+                               std::chrono::system_clock::now();
 
-                if (emit_debug_event) {
-                    out.emplace_back(
-                        client::DebugEvent{b, filter_.filter(e.context)});
-                }
-                // TODO(cwaldren): see about not copying the keys / having the
-                // getter return a value.
-                out.emplace_back(client::FeatureEvent{
-                    std::move(b), e.context.kinds_to_keys()});
-            },
-            [&](client::IdentifyEventParams&& e) {
-                // Contexts should already have been checked for
-                // validity by this point.
-                assert(e.context.valid());
-                out.emplace_back(client::IdentifyEvent{
-                    e.creation_date, filter_.filter(e.context)});
-            },
-            [&](TrackEventParams&& e) { out.emplace_back(std::move(e)); }},
-        std::move(event));
+                       if (emit_debug_event) {
+                           out.emplace_back(client::DebugEvent{
+                               base, filter_.filter(event.context)});
+                       }
+                       out.emplace_back(client::FeatureEvent{
+                           std::move(base), event.context.kinds_to_keys()});
+                   },
+                   [&](client::IdentifyEventParams&& event) {
+                       // Contexts should already have been checked for
+                       // validity by this point.
+                       assert(event.context.valid());
+                       out.emplace_back(client::IdentifyEvent{
+                           event.creation_date, filter_.filter(event.context)});
+                   },
+                   [&](TrackEventParams&& event) {
+                       out.emplace_back(std::move(event));
+                   }},
+        std::move(input_event));
 
     return out;
 }

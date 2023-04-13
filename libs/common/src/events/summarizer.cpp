@@ -7,7 +7,7 @@ Summarizer::Summarizer(std::chrono::system_clock::time_point start)
 
 Summarizer::Summarizer() : start_time_(), features_() {}
 
-bool Summarizer::empty() const {
+bool Summarizer::Empty() const {
     return features_.empty();
 }
 
@@ -24,11 +24,8 @@ static bool FlagNotFound(client::FeatureEventParams const& event) {
     return false;
 }
 
-void Summarizer::update(client::FeatureEventParams const& event) {
+void Summarizer::Update(client::FeatureEventParams const& event) {
     auto const& kinds = event.context.kinds();
-
-    // TODO(cwaldren): Value::null() should be replaced with the default value
-    // from the evaluation.
 
     auto feature_state_iterator =
         features_.try_emplace(event.key, event.default_).first;
@@ -57,9 +54,11 @@ void Summarizer::update(client::FeatureEventParams const& event) {
 
     summary_counter->second.Increment();
 }
-Summarizer::Date Summarizer::start_time() const {
+
+Summarizer::Time Summarizer::start_time() const {
     return start_time_;
 }
+
 Summarizer::VariationKey::VariationKey(Version version,
                                        std::optional<VariationIndex> variation)
     : version(version), variation(variation) {}
@@ -68,13 +67,21 @@ Summarizer::VariationKey::VariationKey()
     : version(std::nullopt), variation(std::nullopt) {}
 
 Summarizer::VariationSummary::VariationSummary(Value value)
-    : count(0), value(std::move(value)) {}
+    : count_(0), value_(std::move(value)) {}
 
 void Summarizer::VariationSummary::Increment() {
     // todo(cwaldren): prevent overflow?
-    count++;
+    count_++;
 }
 
-Summarizer::State::State(Value defaultVal)
-    : default_(std::move(defaultVal)), context_kinds() {}
+Value const& Summarizer::VariationSummary::value() const {
+    return value_;
+}
+
+std::size_t Summarizer::VariationSummary::count() const {
+    return count_;
+}
+
+Summarizer::State::State(Value default_value)
+    : default_(std::move(default_value)), context_kinds() {}
 }  // namespace launchdarkly::events::detail

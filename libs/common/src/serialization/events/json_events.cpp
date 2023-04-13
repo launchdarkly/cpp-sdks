@@ -124,8 +124,8 @@ void tag_invoke(boost::json::value_from_tag const&,
         if (kvp.first.variation) {
             counter.emplace("variation", *kvp.first.variation);
         }
-        counter.emplace("value", boost::json::value_from(kvp.second.value));
-        counter.emplace("count", kvp.second.count);
+        counter.emplace("value", boost::json::value_from(kvp.second.value()));
+        counter.emplace("count", kvp.second.count());
         counters.push_back(std::move(counter));
     }
     obj.emplace("counters", std::move(counters));

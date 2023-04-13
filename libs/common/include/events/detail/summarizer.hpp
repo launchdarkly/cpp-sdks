@@ -9,24 +9,54 @@
 
 namespace launchdarkly::events::detail {
 
+/**
+ * Summarizer is responsible for accepting FeatureEventParams (the context
+ * related to a feature evaluation) and outputting summary events (which
+ * essentially condenses the various evaluation results into a single
+ * structure).
+ */
 class Summarizer {
    public:
-    using Date = std::chrono::system_clock::time_point;
+    using Time = std::chrono::system_clock::time_point;
     using FlagKey = std::string;
 
-    explicit Summarizer(Date start);
+    /**
+     * Construct a Summarizer starting at the given time.
+     * @param start Start time of the summary.
+     */
+    explicit Summarizer(Time start_time);
+
+    /**
+     * Construct a Summarizer at time zero.
+     */
     Summarizer();
-    void update(client::FeatureEventParams const& event);
 
-    bool empty() const;
+    /**
+     * Updates the summary with a feature event.
+     * @param event Feature event.
+     */
+    void Update(client::FeatureEventParams const& event);
 
-    Date start_time() const;
+    /**
+     * Returns true if the summary is empty.
+     */
+    bool Empty() const;
+
+    /**
+     * Returns the summary's start time as given in the constructor.
+     */
+    [[nodiscard]] Time start_time() const;
 
     struct VariationSummary {
-        std::size_t count;
-        Value value;
+       public:
         explicit VariationSummary(Value value);
         void Increment();
+        std::size_t count() const;
+        Value const& value() const;
+
+       private:
+        std::size_t count_;
+        Value value_;
     };
 
     struct VariationKey {
@@ -58,19 +88,19 @@ class Summarizer {
                            Summarizer::VariationKey::Hash>
             counters;
 
-        State(Value defaultVal);
+        explicit State(Value defaultVal);
     };
 
-    std::unordered_map<FlagKey, State> const& features() const;
+    [[nodiscard]] std::unordered_map<FlagKey, State> const& features() const;
 
    private:
-    Date start_time_;
+    Time start_time_;
     std::unordered_map<FlagKey, State> features_;
 };
 
 struct Summary {
     Summarizer const& summarizer;
-    Summarizer::Date end_time;
+    Summarizer::Time end_time;
 };
 
 }  // namespace launchdarkly::events::detail
