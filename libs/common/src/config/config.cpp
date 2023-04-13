@@ -6,10 +6,12 @@ template <typename SDK>
 Config<SDK>::Config(std::string sdk_key,
                     bool offline,
                     detail::EndpointsBuilder<SDK> service_endpoints_builder,
+                    detail::EventsBuilder<SDK> events_builder,
                     std::optional<std::string> application_tag)
     : sdk_key(std::move(sdk_key)),
       offline(offline),
       service_endpoints_builder(std::move(service_endpoints_builder)),
+      events_builder(std::move(events_builder)),
       application_tag(std::move(application_tag)) {}
 
 template class Config<detail::ClientSDK>;

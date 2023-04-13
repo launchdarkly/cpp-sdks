@@ -2,6 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/*.hpp"
         "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/config/*.hpp"
+        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/events/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -18,7 +19,9 @@ add_library(${LIBNAME}
         attributes_builder.cpp
         error.cpp
         config/service_endpoints.cpp
+        config/events.cpp
         config/endpoints_builder.cpp
+        config/events_builder.cpp
         config/config_builder.cpp
         config/config.cpp
         data/evaluation_reason.cpp
@@ -32,7 +35,15 @@ add_library(${LIBNAME}
         serialization/json_context.cpp
         serialization/json_evaluation_reason.cpp
         serialization/json_evaluation_result.cpp
-        serialization/json_value.cpp config/http_properties.cpp config/http_properties_builder.cpp)
+        serialization/json_value.cpp
+        serialization/events/json_events.cpp
+        events/null_event_processor.cpp
+        events/asio_event_processor.cpp
+        events/outbox.cpp
+        events/conn_pool.cpp
+        events/summary_state.cpp
+        config/http_properties.cpp
+        config/http_properties_builder.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

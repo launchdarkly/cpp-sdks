@@ -48,4 +48,29 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason const& reason) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", reason.kind());
+    if (auto error_kind = reason.error_kind()) {
+        obj.emplace("errorKind", *error_kind);
+    }
+    if (auto big_segment_status = reason.big_segment_status()) {
+        obj.emplace("bigSegmentStatus", *big_segment_status);
+    }
+    if (auto rule_id = reason.rule_id()) {
+        obj.emplace("ruleId", *rule_id);
+    }
+    if (auto rule_index = reason.rule_index()) {
+        obj.emplace("ruleIndex", *rule_index);
+    }
+    if (reason.in_experiment()) {
+        obj.emplace("inExperiment", true);
+    }
+    if (auto prereq_key = reason.prerequisite_key()) {
+        obj.emplace("prerequisiteKey", *prereq_key);
+    }
+}
 }  // namespace launchdarkly

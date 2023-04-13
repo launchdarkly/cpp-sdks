@@ -5,6 +5,7 @@
 #include "config/detail/application_info.hpp"
 #include "config/detail/config.hpp"
 #include "config/detail/endpoints_builder.hpp"
+#include "config/detail/events_builder.hpp"
 #include "logger.hpp"
 
 namespace launchdarkly::config::detail {
@@ -18,6 +19,7 @@ template <typename SDK>
 class ConfigBuilder {
    public:
     using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
+    using EventsBuilder = detail::EventsBuilder<SDK>;
     using ConfigType = detail::Config<SDK>;
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
@@ -31,7 +33,7 @@ class ConfigBuilder {
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& service_endpoints(detail::EndpointsBuilder<SDK> builder);
+    ConfigBuilder& service_endpoints(EndpointsBuilder builder);
 
     /**
      * To include metadata about the application that is utilizing the SDK,
@@ -50,6 +52,14 @@ class ConfigBuilder {
     ConfigBuilder& offline(bool offline);
 
     /**
+     * To tune settings related to event generation and delivery, pass an
+     * EventsBuilder.
+     * @param builder An EventsBuilder.
+     * @return Reference to this builder.
+     */
+    ConfigBuilder& events(EventsBuilder builder);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -60,6 +70,7 @@ class ConfigBuilder {
     std::optional<bool> offline_;
     std::optional<EndpointsBuilder> service_endpoints_builder_;
     std::optional<ApplicationInfo> application_info_builder_;
+    std::optional<EventsBuilder> events_builder_;
 };
 
 }  // namespace launchdarkly::config::detail

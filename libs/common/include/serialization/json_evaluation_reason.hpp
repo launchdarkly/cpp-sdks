@@ -17,4 +17,8 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const&
         unused,
     boost::json::value const& json_value);
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason const& reason);
 }  // namespace launchdarkly
