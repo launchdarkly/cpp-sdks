@@ -19,6 +19,7 @@ struct FeatureEventParams {
     std::string key;
     Context context;
     EvaluationResult eval_result;
+    Value default_;
 };
 
 struct FeatureEventBase {

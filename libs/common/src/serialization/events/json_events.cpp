@@ -91,12 +91,44 @@ void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer::VariationSummary const& state) {}
 
+/*
+ * version (number, optional): the value of version for the counter; if version
+has no value, this property should be omitted entirely rather than writing a
+null value.
+
+variation (number, optional): the value of variation for the counter; if
+variation has no value, this property should be omitted entirely rather than
+writing a null value.
+
+value (any JSON type): the value of value for the counter.
+
+count (number, required): the value of count for the counter.
+
+unknown (boolean, optional): this should be true if version has no value;
+otherwise it should be omitted (do not write an explicit false).
+ */
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer::State const& state) {
     auto& obj = json_value.emplace_object();
     obj.emplace("default", boost::json::value_from(state.default_));
-    obj.emplace("contextKinds", boost::json::value_from(state.context_kinds_));
+    obj.emplace("contextKinds", boost::json::value_from(state.context_kinds));
+    boost::json::array counters;
+    for (auto const& kvp : state.counters) {
+        boost::json::object counter;
+        if (kvp.first.version) {
+            counter.emplace("version", *kvp.first.version);
+        } else {
+            counter.emplace("unknown", true);
+        }
+        if (kvp.first.variation) {
+            counter.emplace("variation", *kvp.first.variation);
+        }
+        counter.emplace("value", boost::json::value_from(kvp.second.value));
+        counter.emplace("count", kvp.second.count);
+        counters.push_back(std::move(counter));
+    }
+    obj.emplace("counters", std::move(counters));
 }
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,

@@ -30,21 +30,19 @@ void Summarizer::update(client::FeatureEventParams const& event) {
     // TODO(cwaldren): Value::null() should be replaced with the default value
     // from the evaluation.
 
-    auto default_value = Value::null();
     auto feature_state_iterator =
-        features_.try_emplace(event.key, std::move(default_value)).first;
+        features_.try_emplace(event.key, event.default_).first;
 
-    feature_state_iterator->second.context_kinds_.insert(kinds.begin(),
-                                                         kinds.end());
+    feature_state_iterator->second.context_kinds.insert(kinds.begin(),
+                                                        kinds.end());
 
     decltype(std::begin(
-        feature_state_iterator->second.counters_)) summary_counter;
+        feature_state_iterator->second.counters)) summary_counter;
 
     if (FlagNotFound(event)) {
-        auto key = VariationKey();
         summary_counter =
-            feature_state_iterator->second.counters_
-                .try_emplace(std::move(key),
+            feature_state_iterator->second.counters
+                .try_emplace(VariationKey(),
                              feature_state_iterator->second.default_)
                 .first;
 
@@ -52,8 +50,8 @@ void Summarizer::update(client::FeatureEventParams const& event) {
         auto key = VariationKey(event.eval_result.version(),
                                 event.eval_result.detail().variation_index());
         summary_counter =
-            feature_state_iterator->second.counters_
-                .try_emplace(std::move(key), event.eval_result.detail().value())
+            feature_state_iterator->second.counters
+                .try_emplace(key, event.eval_result.detail().value())
                 .first;
     }
 
@@ -78,5 +76,5 @@ void Summarizer::VariationSummary::Increment() {
 }
 
 Summarizer::State::State(Value defaultVal)
-    : default_(std::move(defaultVal)), context_kinds_() {}
+    : default_(std::move(defaultVal)), context_kinds() {}
 }  // namespace launchdarkly::events::detail

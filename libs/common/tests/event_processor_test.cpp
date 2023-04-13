@@ -8,9 +8,9 @@
 #include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
 #include "events/detail/summarizer.hpp"
+#include "serialization/events/json_events.hpp"
 
 using namespace launchdarkly::events::detail;
-// class EventProcessorTests : public ::testing::Test {};
 
 static std::chrono::system_clock::time_point ZeroTime() {
     return std::chrono::system_clock::time_point{};
@@ -41,6 +41,7 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
     auto const feature_version = 1;
     auto const context = ContextBuilder().kind("cat", "shadow").build();
     auto const feature_value = Value(3);
+    auto const feature_default = Value(1);
     auto const feature_variation = 0;
 
     auto const event = FeatureEventParams{
@@ -54,6 +55,7 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
                 EvaluationReason("FALLTHROUGH", std::nullopt, std::nullopt,
                                  std::nullopt, std::nullopt, false,
                                  std::nullopt))),
+        feature_default,
     };
 
     auto const num_events = 10;
@@ -65,12 +67,49 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
     auto const& cat_food = features.find(feature_key);
     ASSERT_TRUE(cat_food != features.end());
 
-    auto const& counter = cat_food->second.counters_.find(
+    auto const& counter = cat_food->second.counters.find(
         Summarizer::VariationKey(feature_version, feature_variation));
-    ASSERT_TRUE(counter != cat_food->second.counters_.end());
+    ASSERT_TRUE(counter != cat_food->second.counters.end());
 
     ASSERT_EQ(counter->second.value.as_double(), feature_value.as_double());
     ASSERT_EQ(counter->second.count, num_events);
+}
+
+TEST(SummarizerTests, JsonSerialization) {
+    using namespace launchdarkly::events::client;
+    using namespace launchdarkly;
+    Summarizer summarizer;
+
+    auto const feature_key = "cat-food-amount";
+    auto const feature_version = 1;
+    auto const context = ContextBuilder().kind("cat", "shadow").build();
+    auto const feature_value = Value(3);
+    auto const feature_default = Value(1);
+    auto const feature_variation = 0;
+
+    auto const event = FeatureEventParams{
+        ZeroTime(),
+        feature_key,
+        context,
+        EvaluationResult(
+            feature_version, std::nullopt, false, false, std::nullopt,
+            EvaluationDetailInternal(
+                feature_value, feature_variation,
+                EvaluationReason("FALLTHROUGH", std::nullopt, std::nullopt,
+                                 std::nullopt, std::nullopt, false,
+                                 std::nullopt))),
+        feature_default,
+    };
+
+    auto const num_events = 10;
+    for (size_t i = 0; i < num_events; i++) {
+        summarizer.update(event);
+    }
+
+    auto json = boost::json::value_from(Summary{summarizer, ZeroTime()});
+    auto expected = boost::json::parse(
+        R"({"kind":"summary","startDate":0,"endDate":0,"features":{"cat-food-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":10}]}}})");
+    ASSERT_EQ(json, expected);
 }
 
 // This test is a temporary test that exists only to ensure the event processor

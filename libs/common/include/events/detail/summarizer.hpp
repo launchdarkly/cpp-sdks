@@ -52,11 +52,11 @@ class Summarizer {
 
     struct State {
         Value default_;
-        std::unordered_set<std::string> context_kinds_;
+        std::unordered_set<std::string> context_kinds;
         std::unordered_map<Summarizer::VariationKey,
                            Summarizer::VariationSummary,
                            Summarizer::VariationKey::Hash>
-            counters_;
+            counters;
 
         State(Value defaultVal);
     };
