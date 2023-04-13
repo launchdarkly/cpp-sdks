@@ -12,8 +12,12 @@
 
 using namespace launchdarkly::events::detail;
 
-static std::chrono::system_clock::time_point ZeroTime() {
+static std::chrono::system_clock::time_point TimeZero() {
     return std::chrono::system_clock::time_point{};
+}
+
+static std::chrono::system_clock::time_point Time1000() {
+    return std::chrono::system_clock::from_time_t(1);
 }
 
 TEST(SummarizerTests, IsEmptyOnConstruction) {
@@ -23,7 +27,7 @@ TEST(SummarizerTests, IsEmptyOnConstruction) {
 
 TEST(SummarizerTests, DefaultConstructionUsesZeroStartTime) {
     Summarizer summarizer;
-    ASSERT_EQ(summarizer.start_time(), ZeroTime());
+    ASSERT_EQ(summarizer.start_time(), TimeZero());
 }
 
 TEST(SummarizerTests, ExplicitStartTimeIsCorrect) {
@@ -45,7 +49,7 @@ TEST(SummarizerTests, SummaryCounterUpdates) {
     auto const feature_variation = 0;
 
     auto const event = FeatureEventParams{
-        ZeroTime(),
+        TimeZero(),
         feature_key,
         context,
         EvaluationResult(
@@ -88,7 +92,7 @@ TEST(SummarizerTests, JsonSerialization) {
     auto const feature_variation = 0;
 
     auto const event = FeatureEventParams{
-        ZeroTime(),
+        TimeZero(),
         feature_key,
         context,
         EvaluationResult(
@@ -105,10 +109,9 @@ TEST(SummarizerTests, JsonSerialization) {
     for (size_t i = 0; i < num_events; i++) {
         summarizer.Update(event);
     }
-
-    auto json = boost::json::value_from(Summary{summarizer, ZeroTime()});
+    auto json = boost::json::value_from(summarizer.Finish(Time1000()));
     auto expected = boost::json::parse(
-        R"({"kind":"summary","startDate":0,"endDate":0,"features":{"cat-food-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":10}]}}})");
+        R"({"kind":"summary","startDate":0,"endDate":1000,"features":{"cat-food-amount":{"default":1E0,"contextKinds":["cat"],"counters":[{"version":1,"variation":0,"value":3E0,"count":10}]}}})");
     ASSERT_EQ(json, expected);
 }
 

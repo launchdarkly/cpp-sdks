@@ -30,12 +30,18 @@ class Summarizer {
      * Construct a Summarizer at time zero.
      */
     Summarizer() = default;
-    
+
     /**
      * Updates the summary with a feature event.
      * @param event Feature event.
      */
     void Update(client::FeatureEventParams const& event);
+
+    /**
+     * Marks the summary as finished at a given timestamp.
+     * @param end_time End time of the summary.
+     */
+    Summarizer& Finish(Time end_time);
 
     /**
      * Returns true if the summary is empty.
@@ -46,6 +52,11 @@ class Summarizer {
      * Returns the summary's start time as given in the constructor.
      */
     [[nodiscard]] Time start_time() const;
+
+    /**
+     * Returns the summary's end time as specified using Finish.
+     */
+    [[nodiscard]] Time end_time() const;
 
     struct VariationSummary {
        public:
@@ -95,12 +106,8 @@ class Summarizer {
 
    private:
     Time start_time_;
+    Summarizer::Time end_time_;
     std::unordered_map<FlagKey, State> features_;
-};
-
-struct Summary {
-    Summarizer const& summarizer;
-    Summarizer::Time end_time;
 };
 
 }  // namespace launchdarkly::events::detail

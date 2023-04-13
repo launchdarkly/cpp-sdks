@@ -53,8 +53,17 @@ void Summarizer::Update(client::FeatureEventParams const& event) {
     summary_counter->second.Increment();
 }
 
+Summarizer& Summarizer::Finish(Time end_time) {
+    end_time_ = end_time;
+    return *this;
+}
+
 Summarizer::Time Summarizer::start_time() const {
     return start_time_;
+}
+
+Summarizer::Time Summarizer::end_time() const {
+    return end_time_;
 }
 
 Summarizer::VariationKey::VariationKey(Version version,

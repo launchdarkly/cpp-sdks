@@ -132,9 +132,8 @@ AsioEventProcessor::MakeRequest() {
 
     auto events = boost::json::value_from(outbox_.Consume());
 
-    if (!summarizer_.Empty()) {
-        events.as_array().push_back(boost::json::value_from(
-            Summary{summarizer_, std::chrono::system_clock::now()}));
+    if (!summarizer_.Finish(std::chrono::system_clock::now()).Empty()) {
+        events.as_array().push_back(boost::json::value_from(summarizer_));
     }
 
     LD_LOG(logger_, LogLevel::kDebug)

@@ -113,13 +113,12 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 }
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
-                Summary const& summary) {
+                Summarizer const& summary) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "summary");
     obj.emplace("startDate",
-                boost::json::value_from(Date{summary.summarizer.start_time()}));
-    obj.emplace("endDate", boost::json::value_from(Date{summary.end_time}));
-    obj.emplace("features",
-                boost::json::value_from(summary.summarizer.features()));
+                boost::json::value_from(Date{summary.start_time()}));
+    obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
+    obj.emplace("features", boost::json::value_from(summary.features()));
 }
 }  // namespace launchdarkly::events::detail
