@@ -175,25 +175,26 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
                        if (!event.eval_result.track_events()) {
                            return;
                        }
-                       std::optional<Reason> reason;
 
                        // TODO(cwaldren): should also add the reason if the
                        // variation method was VariationDetail().
+                       std::optional<Reason> reason;
                        if (event.eval_result.track_reason()) {
                            reason = event.eval_result.detail().reason();
                        }
 
                        client::FeatureEventBase base = {
-                           event.creation_date, std::move(event.key),
+                           event.creation_date,
+                           std::move(event.key),
                            event.eval_result.version(),
                            event.eval_result.detail().variation_index(),
-                           event.eval_result.detail().value(), reason,
-                           // TODO(cwaldren): change to actual default; figure
-                           // out where this should be plumbed through.
-                           Value::null()};
+                           event.eval_result.detail().value(),
+                           reason,
+                           std::move(event.default_)};
 
                        auto debug_until_date =
                            event.eval_result.debug_events_until_date();
+
                        bool emit_debug_event =
                            debug_until_date &&
                            debug_until_date.value() >

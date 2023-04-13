@@ -89,24 +89,11 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 namespace launchdarkly::events::detail {
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
-                Summarizer::VariationSummary const& state) {}
+                Summarizer::VariationSummary const& state) {
+    // todo(cwaldren): refactor the serialization out of the Summarizer:State
+    // into here.
+}
 
-/*
- * version (number, optional): the value of version for the counter; if version
-has no value, this property should be omitted entirely rather than writing a
-null value.
-
-variation (number, optional): the value of variation for the counter; if
-variation has no value, this property should be omitted entirely rather than
-writing a null value.
-
-value (any JSON type): the value of value for the counter.
-
-count (number, required): the value of count for the counter.
-
-unknown (boolean, optional): this should be true if version has no value;
-otherwise it should be omitted (do not write an explicit false).
- */
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer::State const& state) {
