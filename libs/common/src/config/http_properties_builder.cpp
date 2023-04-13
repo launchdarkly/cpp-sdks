@@ -1,5 +1,6 @@
 #include <utility>
 
+#include "config/detail/defaults.hpp"
 #include "config/detail/http_properties_builder.hpp"
 #include "config/detail/sdks.hpp"
 
@@ -46,7 +47,9 @@ HttpProperties HttpPropertiesBuilder<SDK>::build() const {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
-        return {connect_timeout_, read_timeout_, "", headers_with_wrapper};
+        return {connect_timeout_, read_timeout_,
+                detail::Defaults<SDK>::http_properties().user_agent(),
+                headers_with_wrapper};
     }
     return {connect_timeout_, read_timeout_, "", base_headers_};
 }

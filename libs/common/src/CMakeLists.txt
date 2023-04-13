@@ -43,6 +43,7 @@ add_library(${LIBNAME}
         events/conn_pool.cpp
         events/summary_state.cpp
         config/http_properties.cpp
+        config/data_source_builder.cpp
         config/http_properties_builder.cpp)
 
 

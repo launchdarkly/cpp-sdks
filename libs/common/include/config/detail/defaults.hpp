@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config/detail/data_source_config.hpp"
 #include "config/detail/events.hpp"
 #include "config/detail/http_properties.hpp"
 #include "config/detail/sdks.hpp"
@@ -19,6 +20,15 @@ struct Defaults {
      * @return
      */
     static bool offline() { return false; }
+
+    static StreamingConfig streaming_config() {
+        return {std::chrono::milliseconds{1000}};
+    }
+
+    static PollingConfig polling_config() {
+        // Default to 5 minutes;
+        return {std::chrono::seconds{5 * 60}};
+    }
 };
 
 template <>
@@ -42,6 +52,10 @@ struct Defaults<ClientSDK> {
                 sdk_name() + "/" + sdk_version(),
                 std::map<std::string, std::string>()};
     }
+
+    static DataSourceConfig<ClientSDK> data_source_config() {
+        return {Defaults<AnySDK>::streaming_config(), false, false};
+    }
 };
 
 template <>
@@ -64,6 +78,10 @@ struct Defaults<ServerSDK> {
                 std::chrono::milliseconds{10000},
                 sdk_name() + "/" + sdk_version(),
                 std::map<std::string, std::string>()};
+    }
+
+    static DataSourceConfig<ServerSDK> data_source_config() {
+        return {Defaults<AnySDK>::streaming_config()};
     }
 };
 

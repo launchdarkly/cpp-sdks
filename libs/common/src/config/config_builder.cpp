@@ -36,6 +36,20 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::offline(bool offline) {
 }
 
 template <typename SDK>
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::data_source(
+    detail::DataSourceBuilder<SDK> builder) {
+    data_source_builder_ = builder;
+    return *this;
+}
+
+template <typename SDK>
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::http_properties(
+    detail::HttpPropertiesBuilder<SDK> builder) {
+    http_properties_builder_ = builder;
+    return *this;
+}
+
+template <typename SDK>
 typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     Logger& logger) const {
     auto key = sdk_key_;
@@ -46,7 +60,20 @@ typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     if (application_info_builder_) {
         app_tag = application_info_builder_->build(logger);
     }
-    return {key, offline, endpoints, events, app_tag};
+    auto data_source_config = data_source_builder_
+                                  ? data_source_builder_.value().build()
+                                  : Defaults<SDK>::data_source_config();
+
+    auto http_properties = http_properties_builder_
+                               ? http_properties_builder_.value().build()
+                               : Defaults<SDK>::http_properties();
+    return {std::move(key),
+            offline,
+            std::move(endpoints),
+            std::move(events),
+            std::move(app_tag),
+            std::move(data_source_config),
+            std::move(http_properties)};
 }
 
 template class ConfigBuilder<detail::ClientSDK>;

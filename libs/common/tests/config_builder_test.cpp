@@ -59,3 +59,115 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     ASSERT_EQ(config.application_tag,
               "application-id/bar application-version/baz");
 }
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ClientConfig_UsesDefaulDataSourceConfig) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    EXPECT_FALSE(cfg.data_source_config.with_reasons);
+    EXPECT_FALSE(cfg.data_source_config.use_report);
+    // Should be streaming with a 1 second initial retry;
+    EXPECT_EQ(std::chrono::milliseconds{1000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ServerConfig_UsesDefaulDataSourceConfig) {
+    using namespace launchdarkly::server;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    // Should be streaming with a 1 second initial retry;
+    EXPECT_EQ(std::chrono::milliseconds{1000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
+    using namespace launchdarkly::server;
+    ConfigBuilder builder("sdk-123");
+
+    builder.data_source(ConfigBuilder::DataSourceBuilder().method(
+        ConfigBuilder::DataSourceBuilder::Streaming().initial_reconnect_delay(
+            std::chrono::milliseconds{5000})));
+
+    Config cfg = builder.build(logger);
+
+    EXPECT_EQ(std::chrono::milliseconds{5000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+
+    builder.data_source(
+        ConfigBuilder::DataSourceBuilder()
+            .method(
+                ConfigBuilder::DataSourceBuilder::Streaming()
+                    .initial_reconnect_delay(std::chrono::milliseconds{5000}))
+            .use_report(true)
+            .with_reasons(true));
+
+    Config cfg = builder.build(logger);
+
+    EXPECT_TRUE(cfg.data_source_config.use_report);
+    EXPECT_TRUE(cfg.data_source_config.with_reasons);
+    EXPECT_EQ(std::chrono::milliseconds{5000},
+              boost::get<launchdarkly::config::detail::StreamingConfig>(
+                  cfg.data_source_config.method)
+                  .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ClientConfig_UsesDefaultHttpProperties) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    EXPECT_EQ("CppClient/TODO", cfg.http_properties.user_agent());
+    EXPECT_EQ(10000, cfg.http_properties.read_timeout().count());
+    EXPECT_EQ(10000, cfg.http_properties.connect_timeout().count());
+    EXPECT_TRUE(cfg.http_properties.base_headers().empty());
+}
+
+TEST_F(ConfigBuilderTest,
+       DefaultConstruction_ServerConfig_UsesDefaultHttpProperties) {
+    using namespace launchdarkly::server;
+    ConfigBuilder builder("sdk-123");
+    Config cfg = builder.build(logger);
+
+    EXPECT_EQ("CppServer/TODO", cfg.http_properties.user_agent());
+    EXPECT_EQ(10000, cfg.http_properties.read_timeout().count());
+    EXPECT_EQ(2000, cfg.http_properties.connect_timeout().count());
+    EXPECT_TRUE(cfg.http_properties.base_headers().empty());
+}
+
+TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
+    using namespace launchdarkly::client;
+    ConfigBuilder builder("sdk-123");
+    builder.http_properties(
+        ConfigBuilder::HttpPropertiesBuilder()
+            .connect_timeout(std::chrono::milliseconds{1234})
+            .read_timeout(std::chrono::milliseconds{123456})
+            .wrapper_name("potato")
+            .wrapper_version("2.0-chip")
+            .custom_headers(
+                std::map<std::string, std::string>{{"color", "green"}}));
+
+    Config cfg = builder.build(logger);
+
+    EXPECT_EQ("CppClient/TODO", cfg.http_properties.user_agent());
+    EXPECT_EQ(123456, cfg.http_properties.read_timeout().count());
+    EXPECT_EQ(1234, cfg.http_properties.connect_timeout().count());
+    EXPECT_EQ("potato/2.0-chip",
+              cfg.http_properties.base_headers().at("X-LaunchDarkly-Wrapper"));
+    EXPECT_EQ("green", cfg.http_properties.base_headers().at("color"));
+}
