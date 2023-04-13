@@ -3,9 +3,7 @@
 namespace launchdarkly::events::detail {
 
 Summarizer::Summarizer(std::chrono::system_clock::time_point start)
-    : start_time_(start), features_() {}
-
-Summarizer::Summarizer() : start_time_(), features_() {}
+    : start_time_(start) {}
 
 bool Summarizer::Empty() const {
     return features_.empty();

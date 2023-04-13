@@ -29,7 +29,7 @@ class Summarizer {
     /**
      * Construct a Summarizer at time zero.
      */
-    Summarizer();
+    Summarizer() = default;
 
     /**
      * Updates the summary with a feature event.
@@ -71,10 +71,10 @@ class Summarizer {
         }
 
         struct Hash {
-            auto operator()(VariationKey const& p) const -> size_t {
+            auto operator()(VariationKey const& key) const -> size_t {
                 std::size_t seed = 0;
-                boost::hash_combine(seed, p.version);
-                boost::hash_combine(seed, p.variation);
+                boost::hash_combine(seed, key.version);
+                boost::hash_combine(seed, key.variation);
                 return seed;
             }
         };
