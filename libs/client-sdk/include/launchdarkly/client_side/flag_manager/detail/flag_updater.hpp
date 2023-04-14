@@ -44,6 +44,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
         signals_;
 
     mutable std::recursive_mutex signal_mutex_;
+    void dispatch_event(FlagValueChangeEvent event);
 };
 
 }  // namespace launchdarkly::client_side::flag_manager::detail

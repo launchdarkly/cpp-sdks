@@ -66,23 +66,46 @@ void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
 
     for (auto& event : change_events) {
         // Send the event.
-        auto handler = signals_.find(event.flag_name());
-        if (handler != signals_.end()) {
-            if (handler->second.empty()) {
-                // Empty, remove it from the map so it doesn't count toward
-                // future calculations.
-                signals_.erase(event.flag_name());
-            } else {
-                (handler->second)(
-                    std::make_shared<FlagValueChangeEvent>(std::move(event)));
-            }
+        dispatch_event(std::move(event));
+    }
+}
+void FlagUpdater::dispatch_event(FlagValueChangeEvent event) {
+    auto handler = signals_.find(event.flag_name());
+    if (handler != signals_.end()) {
+        if (handler->second.empty()) {
+            // Empty, remove it from the map so it doesn't count toward
+            // future calculations.
+            signals_.erase(event.flag_name());
+        } else {
+            (handler->second)(
+                std::make_shared<FlagValueChangeEvent>(std::move(event)));
         }
     }
 }
 
 void FlagUpdater::upsert(std::string key, ItemDescriptor item) {
     // Check the version.
-    // Check if the value changed.
+    auto existing = flag_manager_.get(key);
+    if (existing && (existing->version > item.version)) {
+        // Out of order update, ignore it.
+        return;
+    }
+
+    // Existed and updated.
+    if (existing && item.flag) {
+        dispatch_event(
+            FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
+    } else if (item.flag) {
+        dispatch_event(
+            FlagValueChangeEvent(key, item.flag.value().detail().value()));
+        // new flag
+    } else if (existing) {
+        // Existed and deleted.
+        dispatch_event(FlagValueChangeEvent(key, Value()));
+    } else {
+        // Was deleted and is still deleted.
+        // Do nothing.
+    }
     flag_manager_.upsert(key, item);
 }
 
