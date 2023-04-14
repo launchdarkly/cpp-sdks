@@ -56,6 +56,7 @@ class FlagValueChangeEvent {
     Value new_value_;
     Value old_value_;
     bool deleted_;
+    std::string flag_name_;
 };
 
 }  // namespace launchdarkly::client_side::flag_manager::detail

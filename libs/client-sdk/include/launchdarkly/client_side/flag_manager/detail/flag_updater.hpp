@@ -31,7 +31,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
     template <typename F>
     Connection flag_change(std::string const& key, F&& handler) {
         std::lock_guard{signal_mutex_};
-        signals_[key].connect(std::forward(handler));
+        return signals_[key].connect(std::forward(handler));
     }
 
    private:

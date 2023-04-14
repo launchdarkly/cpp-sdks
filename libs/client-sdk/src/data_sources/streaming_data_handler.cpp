@@ -14,10 +14,10 @@ namespace launchdarkly::client_side {
 // ItemDescriptor.
 
 static tl::expected<
-    std::map<std::string, launchdarkly::client_side::ItemDescriptor>,
+    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
     JsonError>
 tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::map<std::string, launchdarkly::client_side::ItemDescriptor>,
+               std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
                JsonError>> const& unused,
            boost::json::value const& json_value) {
     boost::ignore_unused(unused);
@@ -26,7 +26,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
         return tl::unexpected(JsonError::kSchemaFailure);
     }
     auto const& obj = json_value.as_object();
-    std::map<std::string, launchdarkly::client_side::ItemDescriptor>
+    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>
         descriptors;
     for (auto const& pair : obj) {
         auto eval_result =
