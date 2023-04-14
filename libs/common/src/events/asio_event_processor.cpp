@@ -173,21 +173,7 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
                            return;
                        }
 
-                       // TODO(cwaldren): should also add the reason if the
-                       // variation method was VariationDetail().
-                       std::optional<Reason> reason;
-                       if (event.eval_result.track_reason()) {
-                           reason = event.eval_result.detail().reason();
-                       }
-
-                       client::FeatureEventBase base = {
-                           event.creation_date,
-                           std::move(event.key),
-                           event.eval_result.version(),
-                           event.eval_result.detail().variation_index(),
-                           event.eval_result.detail().value(),
-                           reason,
-                           std::move(event.default_)};
+                       client::FeatureEventBase base{event};
 
                        auto debug_until_date =
                            event.eval_result.debug_events_until_date();
