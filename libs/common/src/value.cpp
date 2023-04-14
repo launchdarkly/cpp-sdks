@@ -225,4 +225,9 @@ bool operator==(Value const& lhs, Value const& rhs) {
     }
     return false;
 }
+
+bool operator!=(Value const& lhs, Value const& rhs) {
+    return !(lhs == rhs);
+}
+
 }  // namespace launchdarkly

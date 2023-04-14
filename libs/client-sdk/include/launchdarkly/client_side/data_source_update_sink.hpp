@@ -43,7 +43,7 @@ struct ItemDescriptor {
  */
 class IDataSourceUpdateSink {
    public:
-    virtual void init(std::map<std::string, ItemDescriptor> data) = 0;
+    virtual void init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
     virtual void upsert(std::string key, ItemDescriptor) = 0;
 
     // We could add this if we want to support data source status.

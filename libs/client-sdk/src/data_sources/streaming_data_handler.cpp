@@ -103,7 +103,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
-            tl::expected<std::map<std::string, ItemDescriptor>, JsonError>>(
+            tl::expected<std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
             parsed);
 
         if (res.has_value()) {
