@@ -80,8 +80,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 events::OutputEvent const& event) {
-    std::visit([&](auto const& e) mutable { tag_invoke(tag, json_value, e); },
-               event);
+    std::visit(
+        [&](auto const& event) mutable { tag_invoke(tag, json_value, event); },
+        event);
 }
 
 }  // namespace launchdarkly::events

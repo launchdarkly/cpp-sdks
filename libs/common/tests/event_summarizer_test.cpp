@@ -107,7 +107,7 @@ TEST_P(SummaryCounterTestsFixture, EventsAreCounted) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SummaryCounterTests,
     SummaryCounterTestsFixture,
     ::testing::Values(

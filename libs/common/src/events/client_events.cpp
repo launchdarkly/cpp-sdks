@@ -8,7 +8,6 @@ FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)
       variation(params.eval_result.detail().variation_index()),
       value(params.eval_result.detail().value()),
       default_(params.default_) {
-
     // TODO(cwaldren): should also add the reason if the
     // variation method was VariationDetail().
     if (params.eval_result.track_reason()) {

@@ -24,7 +24,7 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     using namespace launchdarkly;
 
     Logger logger{std::make_unique<ConsoleBackend>(LogLevel::kDebug, "test")};
-    boost::asio::io_context io;
+    boost::asio::io_context ioc;
 
     auto config = client::EventsBuilder()
                       .capacity(10)
@@ -33,21 +33,21 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     auto endpoints = client::Endpoints().build();
 
-    events::detail::AsioEventProcessor ep(io.get_executor(), *config,
-                                          *endpoints, "password", logger);
-    std::thread t([&]() { io.run(); });
+    events::detail::AsioEventProcessor processor(
+        ioc.get_executor(), *config, *endpoints, "password", logger);
+    std::thread ioc_thread([&]() { ioc.run(); });
 
-    auto c = launchdarkly::ContextBuilder().kind("org", "ld").build();
-    ASSERT_TRUE(c.valid());
+    auto context = launchdarkly::ContextBuilder().kind("org", "ld").build();
+    ASSERT_TRUE(context.valid());
 
-    auto ev = events::client::IdentifyEventParams{
+    auto identify_event = events::client::IdentifyEventParams{
         std::chrono::system_clock::now(),
-        c,
+        context,
     };
 
     for (std::size_t i = 0; i < 10; i++) {
-        ep.AsyncSend(ev);
+        processor.AsyncSend(identify_event);
     }
-    ep.AsyncClose();
-    t.join();
+    processor.AsyncClose();
+    ioc_thread.join();
 }
