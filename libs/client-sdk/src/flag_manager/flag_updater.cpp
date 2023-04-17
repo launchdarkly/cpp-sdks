@@ -9,10 +9,9 @@ FlagUpdater::FlagUpdater(FlagManager& flag_manager)
 
 Value GetValue(ItemDescriptor& descriptor) {
     if (descriptor.flag) {
-        // The First `value()` is an optional, we already know
-        // it is present. The second `value()` is not an
-        // optional.
-        return descriptor.flag.value().detail().value();
+        // `flag->` unwraps the first optional we know is present.
+        // The second `value()` is not an optional.
+        return descriptor.flag->detail().value();
     }
     return {};
 }

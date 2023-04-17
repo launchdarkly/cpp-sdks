@@ -32,7 +32,7 @@ TEST(FlagManagerTests, HandlesInitWithData) {
                                                 std::nullopt}}}}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag->detail().value());
 }
 
 TEST(FlagManagerTests, HandlesSecondInit) {
@@ -53,7 +53,7 @@ TEST(FlagManagerTests, HandlesSecondInit) {
                                                 std::nullopt}}}}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagB")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagB")->flag->detail().value());
     EXPECT_FALSE(manager.Get("flagA"));
 }
 
@@ -74,8 +74,8 @@ TEST(FlagManagerTests, HandlePatchNewFlag) {
                                                 std::nullopt}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
-    EXPECT_EQ("second", manager.Get("flagB")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag->detail().value());
+    EXPECT_EQ("second", manager.Get("flagB")->flag->detail().value());
 }
 
 TEST(FlagManagerTests, HandlePatchUpdateFlag) {
@@ -95,7 +95,7 @@ TEST(FlagManagerTests, HandlePatchUpdateFlag) {
                                                 std::nullopt}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("second", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("second", manager.Get("flagA")->flag->detail().value());
 }
 
 TEST(FlagManagerTests, HandleDelete) {
