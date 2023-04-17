@@ -17,7 +17,8 @@ static tl::expected<
     std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
     JsonError>
 tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
+               std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>,
                JsonError>> const& unused,
            boost::json::value const& json_value) {
     boost::ignore_unused(unused);
@@ -102,8 +103,8 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             LD_LOG(logger_, LogLevel::kError) << "Could not parse PUT message";
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
+        auto res = boost::json::value_to<tl::expected<
+            std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
             parsed);
 
         if (res.has_value()) {

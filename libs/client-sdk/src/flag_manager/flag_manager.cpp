@@ -7,7 +7,8 @@ namespace launchdarkly::client_side::flag_manager::detail {
 // accessed, and which it is being used init is called, then we want the
 // flag being processed to be valid.
 
-void FlagManager::init(const std::unordered_map<std::string, ItemDescriptor>& data) {
+void FlagManager::init(
+    std::unordered_map<std::string, ItemDescriptor> const& data) {
     std::lock_guard lock{data_mutex_};
 
     data_.clear();
@@ -17,13 +18,14 @@ void FlagManager::init(const std::unordered_map<std::string, ItemDescriptor>& da
     }
 }
 
-void FlagManager::upsert(const std::string& key, ItemDescriptor item) {
+void FlagManager::upsert(std::string const& key, ItemDescriptor item) {
     std::lock_guard lock{data_mutex_};
 
     data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
 }
 
-std::shared_ptr<ItemDescriptor> FlagManager::get(const std::string& flag_key) const {
+std::shared_ptr<ItemDescriptor> FlagManager::get(
+    std::string const& flag_key) const {
     std::lock_guard lock{data_mutex_};
 
     auto found = data_.find(flag_key);
