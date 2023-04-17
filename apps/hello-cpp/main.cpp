@@ -18,11 +18,6 @@ using launchdarkly::LogLevel;
 int main() {
     Logger logger(std::make_unique<ConsoleBackend>("Hello"));
 
-    if (auto num = launchdarkly::foo()) {
-        LD_LOG(logger, LogLevel::kInfo) << "Got: " << *num << '\n';
-    } else {
-        LD_LOG(logger, LogLevel::kInfo) << "Got nothing\n";
-    }
 
     net::io_context ioc;
 
