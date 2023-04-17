@@ -61,10 +61,7 @@ struct SummaryTestCase {
     //  "other_feature_key" => {
     //      (version, variation) => 1,
     //      ...
-    std::unordered_map<std::string,
-                       std::unordered_map<Summarizer::VariationKey,
-                                          int32_t,
-                                          Summarizer::VariationKey::Hash>>
+    std::unordered_map<std::string, std::map<Summarizer::VariationKey, int32_t>>
         expected;
 };
 

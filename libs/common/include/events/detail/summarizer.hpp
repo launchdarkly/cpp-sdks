@@ -2,6 +2,7 @@
 #include <boost/container_hash/hash.hpp>
 #include <chrono>
 #include <functional>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include "events/events.hpp"
@@ -81,22 +82,18 @@ class Summarizer {
             return k.variation == variation && k.version == version;
         }
 
-        struct Hash {
-            auto operator()(VariationKey const& key) const -> size_t {
-                std::size_t seed = 0;
-                boost::hash_combine(seed, key.version);
-                boost::hash_combine(seed, key.variation);
-                return seed;
+        bool operator<(VariationKey const& k) const {
+            if (variation < k.variation) {
+                return true;
             }
-        };
+            return version < k.version;
+        }
     };
 
     struct State {
         Value default_;
-        std::unordered_set<std::string> context_kinds;
-        std::unordered_map<Summarizer::VariationKey,
-                           Summarizer::VariationSummary,
-                           Summarizer::VariationKey::Hash>
+        std::set<std::string> context_kinds;
+        std::map<Summarizer::VariationKey, Summarizer::VariationSummary>
             counters;
 
         explicit State(Value defaultVal);
