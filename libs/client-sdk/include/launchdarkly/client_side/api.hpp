@@ -16,11 +16,7 @@
 namespace launchdarkly::client_side {
 class Client {
    public:
-    Client(std::unique_ptr<ILogBackend> log_backend,
-           std::string sdk_key,
-           Context context,
-           config::detail::Events const& event_config,
-           config::ServiceEndpoints const& endpoints_config);
+    Client(client::Config config, Context context);
 
     using FlagKey = std::string;
     std::unordered_map<FlagKey, Value> AllFlags() const;
@@ -31,7 +27,7 @@ class Client {
 
     void AsyncFlush();
 
-    void AsyncIdentify();
+    void AsyncIdentify(Context context);
 
     bool BoolVariation(FlagKey key, bool default_value);
     std::string StringVariation(FlagKey key, std::string default_value);
@@ -40,14 +36,15 @@ class Client {
     Value JsonVariation(FlagKey key, Value default_value);
 
    private:
+    void TrackInternal(std::string event_name,
+                       std::optional<Value> data,
+                       std::optional<double> metric_value);
+
     Logger logger_;
     std::thread thread_;
     boost::asio::io_context ioc_;
     Context context_;
     std::unique_ptr<events::IEventProcessor> event_processor_;
 };
-
-static tl::expected<Client, Error> Create(client::Config config,
-                                          Context context);
 
 }  // namespace launchdarkly::client_side

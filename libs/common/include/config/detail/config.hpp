@@ -4,6 +4,7 @@
 #include "config/detail/endpoints_builder.hpp"
 #include "config/detail/events_builder.hpp"
 #include "config/detail/http_properties.hpp"
+#include "logger.hpp"
 
 namespace launchdarkly::config::detail {
 
@@ -14,20 +15,35 @@ namespace launchdarkly::config::detail {
  */
 template <typename SDK>
 struct Config {
-    std::string sdk_key;
-    bool offline;
-    detail::EndpointsBuilder<SDK> service_endpoints_builder;
-    std::optional<std::string> application_tag;
-    detail::EventsBuilder<SDK> events_builder;
-    DataSourceConfig<SDK> data_source_config;
-    detail::HttpProperties http_properties;
+   public:
     Config(std::string sdk_key,
            bool offline,
-           detail::EndpointsBuilder<SDK> service_endpoints_builder,
-           detail::EventsBuilder<SDK> events_builder,
+           launchdarkly::Logger logger,
+           ServiceEndpoints endpoints,
+           Events events,
            std::optional<std::string> application_tag,
            DataSourceConfig<SDK> data_source_config,
            detail::HttpProperties http_properties);
+
+    std::string const& sdk_key() const;
+
+    ServiceEndpoints const& service_endpoints() const;
+    Events const& events_config() const;
+    std::optional<std::string> const& application_tag() const;
+    DataSourceConfig<SDK> const& data_source_config() const;
+    HttpProperties const& http_properties() const;
+    bool offline() const;
+    Logger take_logger();
+
+   private:
+    std::string sdk_key_;
+    bool offline_;
+    launchdarkly::Logger logger_;
+    ServiceEndpoints service_endpoints_;
+    std::optional<std::string> application_tag_;
+    Events events_;
+    DataSourceConfig<SDK> data_source_config_;
+    detail::HttpProperties http_properties_;
 };
 
 }  // namespace launchdarkly::config::detail
