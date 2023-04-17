@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
 #include <chrono>
 #include <thread>
+#include <unordered_map>
 #include "config/client.hpp"
 #include "context_builder.hpp"
 #include "events/client_events.hpp"
-#include "events/common_events.hpp"
 #include "events/detail/summarizer.hpp"
 #include "serialization/events/json_events.hpp"
 
 using namespace launchdarkly::events;
+using namespace launchdarkly::events::client;
 using namespace launchdarkly::events::detail;
 
 static std::chrono::system_clock::time_point TimeZero() {
@@ -42,68 +43,88 @@ struct EvaluationParams {
     Value feature_value;
     Value feature_default;
 };
+
 struct SummaryTestCase {
-    // The pair is (parameters of the eval, number of times evaluated).
     std::string test_name;
+
+    // Each pair represents the params for a feature event, and how many
+    // events should be created.
     std::vector<std::pair<EvaluationParams, int32_t>> evaluations;
+
+    // The test assertions check the expected summary counters, which are
+    // represented by a map from feature key to map of VariationKeys to counter
+    // value. Example:
+    //
+    //  "some_feature_key"  => {
+    //      (version, variation) => 12,
+    //      ...                  => 1,
+    //  "other_feature_key" => {
+    //      (version, variation) => 1,
+    //      ...
+    std::unordered_map<std::string,
+                       std::unordered_map<Summarizer::VariationKey,
+                                          int32_t,
+                                          Summarizer::VariationKey::Hash>>
+        expected;
 };
+
+// Creates a FeatureEventParams from the test parameters - a convenience, since
+// there are some FeatureEventParams that can be held constant throughout the
+// tests and don't need to be specified for each case.
+static FeatureEventParams FeatureEventFromParams(EvaluationParams params,
+                                                 Context context) {
+    return FeatureEventParams{
+        TimeZero(),
+        params.feature_key,
+        std::move(context),
+        launchdarkly::EvaluationResult(
+            params.feature_version, std::nullopt, false, false, std::nullopt,
+            launchdarkly::EvaluationDetailInternal(
+                params.feature_value, params.feature_variation,
+                launchdarkly::EvaluationReason(
+                    "FALLTHROUGH", std::nullopt, std::nullopt, std::nullopt,
+                    std::nullopt, false, std::nullopt))),
+        params.feature_default,
+    };
+}
 
 class SummaryCounterTestsFixture
     : public ::testing::TestWithParam<SummaryTestCase> {};
 
 TEST_P(SummaryCounterTestsFixture, EventsAreCounted) {
-    using namespace launchdarkly::events::client;
     using namespace launchdarkly;
     Summarizer summarizer;
 
     auto test_params = GetParam();
 
+    auto test_cases = test_params.evaluations;
+
     auto const context = ContextBuilder().kind("cat", "shadow").build();
 
-    for (auto const& eval : test_params.evaluations) {
+    // For each event in a test case, inject it into the summarizer N number of
+    // times (where N = the second value in the pair).
+    for (auto const& eval : test_cases) {
         auto params = eval.first;
         auto count = eval.second;
 
-        auto const event = FeatureEventParams{
-            TimeZero(),
-            params.feature_key,
-            context,
-            EvaluationResult(
-                params.feature_version, std::nullopt, false, false,
-                std::nullopt,
-                EvaluationDetailInternal(
-                    params.feature_value, params.feature_variation,
-                    EvaluationReason("FALLTHROUGH", std::nullopt, std::nullopt,
-                                     std::nullopt, std::nullopt, false,
-                                     std::nullopt))),
-            params.feature_default,
-        };
+        auto const event = FeatureEventFromParams(params, context);
 
         for (size_t i = 0; i < count; i++) {
             summarizer.Update(event);
         }
     }
 
-    for (auto const& eval : test_params.evaluations) {
-        auto params = eval.first;
-        auto count = eval.second;
+    // Then, for each recorded feature, ensure it was expected to be recorded,
+    // and then ensure the expected count is correct.
+    for (auto kvp : summarizer.features()) {
+        auto expected_count = test_params.expected.find(kvp.first);
+        ASSERT_TRUE(expected_count != test_params.expected.end());
 
-        auto const& features = summarizer.features();
-        auto const& feature = features.find(params.feature_key);
-        if (count == 0) {
-            ASSERT_TRUE(feature == features.end());
-            continue;
-        } else {
-            ASSERT_TRUE(feature != features.end());
+        for (auto variation : expected_count->second) {
+            auto const& counter = kvp.second.counters.find(variation.first);
+            ASSERT_TRUE(counter != kvp.second.counters.end());
+            ASSERT_EQ(counter->second.count(), variation.second);
         }
-
-        auto const& counter =
-            feature->second.counters.find(Summarizer::VariationKey(
-                params.feature_version, params.feature_variation));
-        ASSERT_TRUE(counter != feature->second.counters.end());
-
-        ASSERT_EQ(counter->second.value(), params.feature_value);
-        ASSERT_EQ(counter->second.count(), count);
     }
 }
 
@@ -113,58 +134,68 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         SummaryTestCase{"no evaluations means no counter updates",
                         {{EvaluationParams{}, 0}}},
-        SummaryTestCase{"single evaluation of a feature",
-                        {{EvaluationParams{
-                              "cat-food-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(150.0),
-                              Value(100.0),
-                          },
-                          1}}},
-        SummaryTestCase{"100,000 evaluations of same feature",
-                        {{EvaluationParams{
-                              "cat-food-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(150.0),
-                              Value(100.0),
-                          },
-                          100000}}},
-        SummaryTestCase{"two features, one evaluation each",
-                        {{EvaluationParams{
-                              "cat-food-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(150.0),
-                              Value(100.0),
-                          },
-                          1},
-                         {EvaluationParams{
-                              "cat-water-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(500.0),
-                              Value(250.0),
-                          },
-                          1}}},
-        SummaryTestCase{"two features, 100,000 evaluations each",
-                        {{EvaluationParams{
-                              "cat-food-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(150.0),
-                              Value(100.0),
-                          },
-                          100000},
-                         {EvaluationParams{
-                              "cat-water-amount",
-                              Version(1),
-                              VariationIndex(0),
-                              Value(500.0),
-                              Value(250.0),
-                          },
-                          100000}}},
+        SummaryTestCase{
+            "single evaluation of a feature",
+            {{EvaluationParams{
+                  "cat-food-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(150.0),
+                  Value(100.0),
+              },
+              1}},
+            {{"cat-food-amount", {{Summarizer::VariationKey(1, 0), 1}}}}},
+        SummaryTestCase{
+            "100,000 evaluations of same feature",
+            {{EvaluationParams{
+                  "cat-food-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(150.0),
+                  Value(100.0),
+              },
+              100000}},
+            {{"cat-food-amount", {{Summarizer::VariationKey(1, 0), 100000}}}}},
+        SummaryTestCase{
+            "two features, one evaluation each",
+            {{EvaluationParams{
+                  "cat-food-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(150.0),
+                  Value(100.0),
+              },
+              1},
+             {EvaluationParams{
+                  "cat-water-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(500.0),
+                  Value(250.0),
+              },
+              1}},
+            {{"cat-food-amount", {{Summarizer::VariationKey(1, 0), 1}}},
+             {"cat-water-amount", {{Summarizer::VariationKey(1, 0), 1}}}}},
+        SummaryTestCase{
+            "two features, 100,000 evaluations each",
+            {{EvaluationParams{
+                  "cat-food-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(150.0),
+                  Value(100.0),
+              },
+              100000},
+             {EvaluationParams{
+                  "cat-water-amount",
+                  Version(1),
+                  VariationIndex(0),
+                  Value(500.0),
+                  Value(250.0),
+              },
+              100000}},
+            {{"cat-food-amount", {{Summarizer::VariationKey(1, 0), 100000}}},
+             {"cat-water-amount", {{Summarizer::VariationKey(1, 0), 100000}}}}},
         SummaryTestCase{"one feature, different variations",
                         {{EvaluationParams{
                               "cat-food-amount",
@@ -189,7 +220,11 @@ INSTANTIATE_TEST_SUITE_P(
                               Value(300.0),
                               Value(100.0),
                           },
-                          1}}},
+                          1}},
+                        {{"cat-food-amount",
+                          {{Summarizer::VariationKey(1, 0), 1},
+                           {Summarizer::VariationKey(1, 1), 1},
+                           {Summarizer::VariationKey(1, 2), 1}}}}},
         SummaryTestCase{"one feature, same variation but different versions",
                         {{EvaluationParams{
                               "cat-food-amount",
@@ -214,7 +249,11 @@ INSTANTIATE_TEST_SUITE_P(
                               Value(300.0),
                               Value(100.0),
                           },
-                          1}}},
+                          1}},
+                        {{"cat-food-amount",
+                          {{Summarizer::VariationKey(1, 0), 1},
+                           {Summarizer::VariationKey(2, 0), 1},
+                           {Summarizer::VariationKey(3, 0), 1}}}}},
         SummaryTestCase{"one feature, different variation/version combos",
                         {{EvaluationParams{
                               "cat-food-amount",
@@ -247,7 +286,12 @@ INSTANTIATE_TEST_SUITE_P(
                               Value(3),
                               Value(3),
                           },
-                          1}}}));
+                          1}},
+                        {{"cat-food-amount",
+                          {{Summarizer::VariationKey(0, 0), 1},
+                           {Summarizer::VariationKey(1, 0), 1},
+                           {Summarizer::VariationKey(0, 1), 1},
+                           {Summarizer::VariationKey(1, 1), 1}}}}}));
 
 TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
     using namespace launchdarkly::events::client;
@@ -277,13 +321,18 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
     auto const& features = summarizer.features();
     auto const& feature = features.find(feature_key);
 
+    // There should be an entry for this feature, even though the result was
+    // FLAG_NOT_FOUND.
     ASSERT_TRUE(feature != features.end());
 
+    // The entry will be keyed on an empty (variation, version) pair, which is
+    // represented by a default-constructed VariationKey.
     auto const& default_counter =
         feature->second.counters.find(Summarizer::VariationKey());
 
     ASSERT_TRUE(default_counter != feature->second.counters.end());
 
+    // The counter should contain the default value given in the evaluation.
     ASSERT_EQ(default_counter->second.value(), feature_default);
     ASSERT_EQ(default_counter->second.count(), 1);
 }
@@ -294,25 +343,10 @@ TEST(SummarizerTests, JsonSerialization) {
     Summarizer summarizer;
 
     auto evaluate = [&](char const* feature_key, std::int32_t count) {
-        auto const feature_version = 1;
-        auto const context = ContextBuilder().kind("cat", "shadow").build();
-        auto const feature_value = Value(3);
-        auto const feature_default = Value(1);
-        auto const feature_variation = 0;
+        EvaluationParams params{feature_key, 1, 0, Value(3), Value(1)};
 
-        auto const event = FeatureEventParams{
-            TimeZero(),
-            feature_key,
-            context,
-            EvaluationResult(
-                feature_version, std::nullopt, false, false, std::nullopt,
-                EvaluationDetailInternal(
-                    feature_value, feature_variation,
-                    EvaluationReason("FALLTHROUGH", std::nullopt, std::nullopt,
-                                     std::nullopt, std::nullopt, false,
-                                     std::nullopt))),
-            feature_default,
-        };
+        auto const event = FeatureEventFromParams(
+            params, ContextBuilder().kind("cat", "shadow").build());
 
         for (size_t i = 0; i < count; i++) {
             summarizer.Update(event);
