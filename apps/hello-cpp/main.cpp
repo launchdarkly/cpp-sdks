@@ -18,7 +18,6 @@ using launchdarkly::LogLevel;
 int main() {
     Logger logger(std::make_unique<ConsoleBackend>("Hello"));
 
-
     net::io_context ioc;
 
     char const* key = std::getenv("STG_SDK_KEY");

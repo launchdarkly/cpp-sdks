@@ -19,21 +19,27 @@ class Client {
     Client(client::Config config, Context context);
 
     using FlagKey = std::string;
-    std::unordered_map<FlagKey, Value> AllFlags() const;
+    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const;
 
     void Track(std::string event_name, Value data, double metric_value);
+
     void Track(std::string event_name, Value data);
+
     void Track(std::string event_name);
 
     void AsyncFlush();
 
     void AsyncIdentify(Context context);
 
-    bool BoolVariation(FlagKey key, bool default_value);
-    std::string StringVariation(FlagKey key, std::string default_value);
-    double DoubleVariation(FlagKey key, double default_value);
-    int IntVariation(FlagKey key, int default_value);
-    Value JsonVariation(FlagKey key, Value default_value);
+    bool BoolVariation(FlagKey const& key, bool default_value);
+
+    std::string StringVariation(FlagKey const& key, std::string default_value);
+
+    double DoubleVariation(FlagKey const& key, double default_value);
+
+    int IntVariation(FlagKey const& key, int default_value);
+
+    Value JsonVariation(FlagKey const& key, Value default_value);
 
    private:
     void TrackInternal(std::string event_name,

@@ -28,11 +28,17 @@ struct Config {
     std::string const& sdk_key() const;
 
     ServiceEndpoints const& service_endpoints() const;
+
     Events const& events_config() const;
+
     std::optional<std::string> const& application_tag() const;
+
     DataSourceConfig<SDK> const& data_source_config() const;
+
     HttpProperties const& http_properties() const;
+
     bool offline() const;
+
     Logger take_logger();
 
    private:

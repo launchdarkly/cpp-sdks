@@ -4,13 +4,13 @@
 #include <utility>
 
 #include "console_backend.hpp"
+#include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
 
 namespace launchdarkly::client_side {
 
 Client::Client(client::Config config, Context context)
     : logger_(config.take_logger()),
-      ioc_(),
       context_(std::move(context)),
       event_processor_(
           std::make_unique<launchdarkly::events::detail::AsioEventProcessor>(
@@ -21,7 +21,6 @@ Client::Client(client::Config config, Context context)
               logger_)) {}
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
-    // TODO: implement!
     return {};
 }
 
@@ -49,26 +48,30 @@ void Client::AsyncFlush() {
     event_processor_->AsyncFlush();
 }
 
-void Client::AsyncIdentify(Context context) {}
+void Client::AsyncIdentify(Context context) {
+    event_processor_->AsyncSend(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), std::move(context)});
+}
 
-bool Client::BoolVariation(Client::FlagKey key, bool default_value) {
+bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
     return default_value;
 }
 
-std::string Client::StringVariation(Client::FlagKey key,
+std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
     return default_value;
 }
 
-double Client::DoubleVariation(Client::FlagKey key, double default_value) {
+double Client::DoubleVariation(Client::FlagKey const& key,
+                               double default_value) {
     return default_value;
 }
 
-int Client::IntVariation(Client::FlagKey key, int default_value) {
+int Client::IntVariation(Client::FlagKey const& key, int default_value) {
     return default_value;
 }
 
-Value Client::JsonVariation(Client::FlagKey key, Value default_value) {
+Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
     return default_value;
 }
 
