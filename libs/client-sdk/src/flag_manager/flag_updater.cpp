@@ -17,16 +17,16 @@ Value GetValue(ItemDescriptor& descriptor) {
     return {};
 }
 
-void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
+void FlagUpdater::Init(std::unordered_map<std::string, ItemDescriptor> data) {
     std::lock_guard lock{signal_mutex_};
 
     // Calculate what flags changed.
     std::list<FlagValueChangeEvent> change_events;
 
-    auto old_flags = flag_manager_.get_all();
+    auto old_flags = flag_manager_.GetAll();
 
     // No need to calculate any changes if nobody is listening to them.
-    if (!old_flags.empty() && has_listeners()) {
+    if (!old_flags.empty() && HasListeners()) {
         // TODO: Should we send events for ALL of the flags when they
         // are first added?
         for (auto& new_pair : data) {
@@ -65,20 +65,20 @@ void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
         }
     }
 
-    flag_manager_.init(data);
+    flag_manager_.Init(data);
 
     for (auto& event : change_events) {
         // Send the event.
-        dispatch_event(std::move(event));
+        DispatchEvent(std::move(event));
     }
 }
-void FlagUpdater::dispatch_event(FlagValueChangeEvent event) {
-    auto handler = signals_.find(event.flag_name());
+void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
+    auto handler = signals_.find(event.FlagName());
     if (handler != signals_.end()) {
         if (handler->second.empty()) {
             // Empty, remove it from the map so it doesn't count toward
             // future calculations.
-            signals_.erase(event.flag_name());
+            signals_.erase(event.FlagName());
         } else {
             (handler->second)(
                 std::make_shared<FlagValueChangeEvent>(std::move(event)));
@@ -86,42 +86,42 @@ void FlagUpdater::dispatch_event(FlagValueChangeEvent event) {
     }
 }
 
-void FlagUpdater::upsert(std::string key, ItemDescriptor item) {
+void FlagUpdater::Upsert(std::string key, ItemDescriptor item) {
     // Check the version.
-    auto existing = flag_manager_.get(key);
+    auto existing = flag_manager_.Get(key);
     if (existing && (existing->version > item.version)) {
         // Out of order update, ignore it.
         return;
     }
 
-    if (has_listeners()) {
+    if (HasListeners()) {
         // Existed and updated.
         if (existing && item.flag) {
-            dispatch_event(
+            DispatchEvent(
                 FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
         } else if (item.flag) {
-            dispatch_event(FlagValueChangeEvent(
+            DispatchEvent(FlagValueChangeEvent(
                 key, item.flag.value().detail().value(), Value()));
             // new flag
         } else if (existing && existing->flag.has_value()) {
             // Existed and deleted.
-            dispatch_event(FlagValueChangeEvent(key, GetValue(*existing)));
+            DispatchEvent(FlagValueChangeEvent(key, GetValue(*existing)));
         } else {
             // Was deleted and is still deleted.
             // Do nothing.
         }
     }
-    flag_manager_.upsert(key, item);
+    flag_manager_.Upsert(key, item);
 }
 
-bool FlagUpdater::has_listeners() const {
+bool FlagUpdater::HasListeners() const {
     std::lock_guard lock{signal_mutex_};
     return !signals_.empty();
 }
 
-std::unique_ptr<IConnection> FlagUpdater::flag_change(
+std::unique_ptr<IConnection> FlagUpdater::OnFlagChange(
     std::string const& key,
-    std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const& handler) {
+    std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler) {
     std::lock_guard lock{signal_mutex_};
     return std::make_unique<Connection>(signals_[key].connect(handler));
 }
@@ -129,7 +129,7 @@ std::unique_ptr<IConnection> FlagUpdater::flag_change(
 FlagUpdater::Connection::Connection(boost::signals2::connection connection)
     : connection_(std::move(connection)) {}
 
-void FlagUpdater::Connection::disconnect() {
+void FlagUpdater::Connection::Disconnect() {
     connection_.disconnect();
 }
 

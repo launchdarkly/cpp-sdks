@@ -8,8 +8,8 @@ namespace launchdarkly::client_side::flag_manager::detail {
 
 class FlagManager {
    public:
-    void init(const std::unordered_map<std::string, ItemDescriptor>& data);
-    void upsert(const std::string& key, ItemDescriptor item);
+    void Init(const std::unordered_map<std::string, ItemDescriptor>& data);
+    void Upsert(const std::string& key, ItemDescriptor item);
 
     /**
      * Attempts to get a flag by key from the current flags.
@@ -18,14 +18,14 @@ class FlagManager {
      * @return A shared_ptr to the value if present. A null shared_ptr if the
      * item is not present.
      */
-    std::shared_ptr<ItemDescriptor> get(const std::string& flag_key) const;
+    std::shared_ptr<ItemDescriptor> Get(const std::string& flag_key) const;
 
     /**
      * Gets all the current flags.
      *
      * @return All of the current flags.
      */
-    std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>> get_all()
+    std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>> GetAll()
         const;
 
    private:

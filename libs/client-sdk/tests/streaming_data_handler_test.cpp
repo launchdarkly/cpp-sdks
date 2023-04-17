@@ -12,11 +12,11 @@ using namespace launchdarkly::client_side::data_sources::detail;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    void init(std::unordered_map<std::string, ItemDescriptor> data) override {
+    void Init(std::unordered_map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
-    void upsert(std::string key, ItemDescriptor data) override {
+    void Upsert(std::string key, ItemDescriptor data) override {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }

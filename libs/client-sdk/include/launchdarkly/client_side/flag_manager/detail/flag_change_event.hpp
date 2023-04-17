@@ -14,16 +14,16 @@ class FlagValueChangeEvent {
      * The name of the flag that changed.
      * @return The name of the flag.
      */
-    [[nodiscard]] std::string const& flag_name() const;
+    [[nodiscard]] std::string const& FlagName() const;
 
     /**
      * Get the new value. If there was not an new value, because the flag was
-     * deleted, then the Value will be of a null type. Check the deleted method
+     * deleted, then the Value will be of a null type. Check the Deleted method
      * to see if a flag was deleted.
      *
      * @return The new value.
      */
-    [[nodiscard]] Value const& new_value() const;
+    [[nodiscard]] Value const& NewValue() const;
 
     /**
      * Get the old value. If there was not an old value, for instance a newly
@@ -31,20 +31,20 @@ class FlagValueChangeEvent {
      *
      * @return The new value.
      */
-    [[nodiscard]] Value const& old_value() const;
+    [[nodiscard]] Value const& OldValue() const;
 
     /**
-     * Will be true if the flag was deleted. In which case the new_value will
+     * Will be true if the flag was deleted. In which case the NewValue will
      * be of a null type.
      *
      * @return True if the flag was deleted.
      */
-    [[nodiscard]] bool deleted() const;
+    [[nodiscard]] bool Deleted() const;
 
     /**
      * Construct a flag changed event with a new and old value.
      *
-     * This is a change event for a flag that has not been deleted.
+     * This is a change event for a flag that has not been Deleted.
      *
      * @param new_value The new value.
      * @param old_value The old value.

@@ -20,7 +20,7 @@ struct ItemDescriptor {
     uint64_t version;
 
     /**
-     * The data item, or nullopt if this is a deleted item placeholder.
+     * The data item, or nullopt if this is a Deleted item placeholder.
      */
     std::optional<EvaluationResult> flag;
 
@@ -43,8 +43,8 @@ struct ItemDescriptor {
  */
 class IDataSourceUpdateSink {
    public:
-    virtual void init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
-    virtual void upsert(std::string key, ItemDescriptor) = 0;
+    virtual void Init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
+    virtual void Upsert(std::string key, ItemDescriptor item) = 0;
 
     // We could add this if we want to support data source status.
     // virtual void status(<something>)

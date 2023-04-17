@@ -15,8 +15,8 @@ namespace launchdarkly::client_side::flag_manager::detail {
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
     FlagUpdater(FlagManager& flag_manager);
-    void init(std::unordered_map<std::string, ItemDescriptor> data) override;
-    void upsert(std::string key, ItemDescriptor item) override;
+    void Init(std::unordered_map<std::string, ItemDescriptor> data) override;
+    void Upsert(std::string key, ItemDescriptor item) override;
 
     /**
      * Listen for changes for the specific flag.
@@ -25,23 +25,23 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
      * @return A Connection which can be used to stop listening for changes
      * to the flag using this handler.
      */
-    std::unique_ptr<IConnection> flag_change(
+    std::unique_ptr<IConnection> OnFlagChange(
         std::string const& key,
-        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const&
-            handler) override;
+        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler)
+        override;
 
    private:
     class Connection : public IConnection {
        public:
         friend class FlagUpdater;
         Connection(boost::signals2::connection connection);
-        void disconnect() override;
+        void Disconnect() override;
 
        private:
         boost::signals2::connection connection_;
     };
 
-    bool has_listeners() const;
+    bool HasListeners() const;
 
     FlagManager& flag_manager_;
     std::unordered_map<
@@ -54,7 +54,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
     // the mutex, which is more difficult to keep consistent over the code
     // lifetime.
     mutable std::recursive_mutex signal_mutex_;
-    void dispatch_event(FlagValueChangeEvent event);
+    void DispatchEvent(FlagValueChangeEvent event);
 };
 
 }  // namespace launchdarkly::client_side::flag_manager::detail

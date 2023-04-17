@@ -7,7 +7,7 @@ namespace launchdarkly::client_side::flag_manager::detail {
 // accessed, and which it is being used init is called, then we want the
 // flag being processed to be valid.
 
-void FlagManager::init(
+void FlagManager::Init(
     std::unordered_map<std::string, ItemDescriptor> const& data) {
     std::lock_guard lock{data_mutex_};
 
@@ -18,13 +18,13 @@ void FlagManager::init(
     }
 }
 
-void FlagManager::upsert(std::string const& key, ItemDescriptor item) {
+void FlagManager::Upsert(std::string const& key, ItemDescriptor item) {
     std::lock_guard lock{data_mutex_};
 
     data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
 }
 
-std::shared_ptr<ItemDescriptor> FlagManager::get(
+std::shared_ptr<ItemDescriptor> FlagManager::Get(
     std::string const& flag_key) const {
     std::lock_guard lock{data_mutex_};
 
@@ -36,7 +36,7 @@ std::shared_ptr<ItemDescriptor> FlagManager::get(
 }
 
 std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>>
-FlagManager::get_all() const {
+FlagManager::GetAll() const {
     std::lock_guard lock{data_mutex_};
 
     // Returns a copy of the map. (The descriptors are pointers and not shared).

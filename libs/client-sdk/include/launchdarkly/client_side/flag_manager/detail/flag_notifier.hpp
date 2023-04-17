@@ -2,8 +2,8 @@
 
 #include <boost/signals2.hpp>
 
-#include "value.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_change_event.hpp"
+#include "value.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
 
@@ -14,7 +14,7 @@ namespace launchdarkly::client_side::flag_manager::detail {
  */
 class IConnection {
    public:
-    virtual void disconnect() = 0;
+    virtual void Disconnect() = 0;
 
     virtual ~IConnection() = default;
     IConnection(IConnection const& item) = delete;
@@ -38,7 +38,7 @@ class IFlagNotifier {
     // can use the same instance, and the lifetime is tied to how the consumer
     // uses the event.
     using ChangeHandler =
-        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const&;
+        std::function<void(std::shared_ptr<FlagValueChangeEvent>)>;
 
     /**
      * Listen for changes for the specific flag.
@@ -46,8 +46,9 @@ class IFlagNotifier {
      * @param signal The handler for the changes.
      * @return A connection which can be used to stop listening.
      */
-    virtual std::unique_ptr<IConnection> flag_change(std::string const& key,
-                                                     ChangeHandler handler) = 0;
+    virtual std::unique_ptr<IConnection> OnFlagChange(
+        std::string const& key,
+        ChangeHandler handler) = 0;
 
     virtual ~IFlagNotifier() = default;
     IFlagNotifier(IFlagNotifier const& item) = delete;

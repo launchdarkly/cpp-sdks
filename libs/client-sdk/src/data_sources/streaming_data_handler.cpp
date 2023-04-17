@@ -108,7 +108,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             parsed);
 
         if (res.has_value()) {
-            handler_->init(res.value());
+            handler_->Init(res.value());
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError)
@@ -126,7 +126,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
         auto res = boost::json::value_to<
             tl::expected<StreamingDataHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_->upsert(
+            handler_->Upsert(
                 res.value().key,
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
@@ -147,7 +147,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             tl::expected<StreamingDataHandler::DeleteData, JsonError>>(
             boost::json::parse(event.data()));
         if (res.has_value()) {
-            handler_->upsert(res.value().key,
+            handler_->Upsert(res.value().key,
                              ItemDescriptor(res.value().version));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }

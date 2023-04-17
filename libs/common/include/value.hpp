@@ -22,7 +22,7 @@ namespace launchdarkly {
  * null. If you want to evaluate a feature flag in a general way that does not
  * have expectations about the variation type, or if the variation value is a
  * complex data structure such as an array or object, you can use the SDK method
- * [TODO] to get the value and then use Value methods to examine it.
+ * [TODO] to Get the value and then use Value methods to examine it.
  *
  * Similarly, attributes of an evaluation context ([TODO])
  * can have variations of any JSON type other than null. If you want to set a
@@ -191,7 +191,7 @@ class Value final {
 
         /**
          * Get the number of items with the given key. Will be 1 or 0.
-         * @param key The key to get a count for.
+         * @param key The key to Get a count for.
          * @return The count of items with the given key.
          */
         [[nodiscard]] std::size_t count(std::string const& key) const {

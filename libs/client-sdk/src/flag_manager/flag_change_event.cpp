@@ -2,19 +2,19 @@
 
 namespace launchdarkly::client_side::flag_manager::detail {
 
-std::string const& FlagValueChangeEvent::flag_name() const {
+std::string const& FlagValueChangeEvent::FlagName() const {
     return flag_name_;
 }
 
-Value const& FlagValueChangeEvent::new_value() const {
+Value const& FlagValueChangeEvent::NewValue() const {
     return new_value_;
 }
 
-Value const& FlagValueChangeEvent::old_value() const {
+Value const& FlagValueChangeEvent::OldValue() const {
     return old_value_;
 }
 
-bool FlagValueChangeEvent::deleted() const {
+bool FlagValueChangeEvent::Deleted() const {
     return deleted_;
 }
 

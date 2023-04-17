@@ -34,6 +34,16 @@ class BarBaz;
 DoTheFoo();
 Bar();
 ```
+
+**Methods**
+```c++
+struct Thing {
+    uint64_t Size(); // Getter
+    void DoTheFoo();
+};
+
+```
+
 **Constants**
 ```c++
 const int kFooBarBaz = 1;
@@ -58,6 +68,19 @@ In C++:
 file_name.cpp
 file_name.hpp
 ```
+
+**Divergence: getters**
+
+```c++
+struct Thing {
+    // Good
+    uint64_t Size();
+
+    //Bad
+    uint64_t size();
+};
+```
+
 ### C++ Standard
 
 C++17.

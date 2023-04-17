@@ -52,7 +52,7 @@ class AttributeReference {
      * For example, component(1) on the reference `/a/b/c` would return
      * `b`.
      *
-     * @param depth The depth to get a component for.
+     * @param depth The depth to Get a component for.
      * @return The component at the specified depth or an empty string if the
      * depth is out of bounds.
      */
@@ -109,7 +109,7 @@ class AttributeReference {
      * For a path, a series of names to address an attribute, create a name
      * suitable for including in event meta data.
      *
-     * @param path The path to get a name for.
+     * @param path The path to Get a name for.
      * @return The path as a reference string.
      */
     static std::string path_to_string_reference(
