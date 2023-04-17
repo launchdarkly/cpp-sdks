@@ -42,7 +42,7 @@ class Context final {
      *
      * Only call this function if you have checked that the kind is present.
      *
-     * @param kind The kind to Get attributes for.
+     * @param kind The kind to get attributes for.
      * @return The attributes if they exist.
      */
     [[nodiscard]] Attributes const& attributes(std::string const& kind) const;
@@ -52,7 +52,7 @@ class Context final {
      * not present, or the attribute not present in the kind, then
      * Value::null() will be returned.
      *
-     * @param kind The kind to Get the value for.
+     * @param kind The kind to get the value for.
      * @param ref The reference to the desired attribute.
      * @return The attribute Value or a Value representing null.
      */

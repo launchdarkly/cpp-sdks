@@ -49,7 +49,7 @@ class Attributes final {
     /**
      * Gets the item by the specified attribute reference, or returns a null
      * Value.
-     * @param ref The reference to Get an attribute by.
+     * @param ref The reference to get an attribute by.
      * @return A Value containing the requested field, or a Value representing
      * null.
      */
