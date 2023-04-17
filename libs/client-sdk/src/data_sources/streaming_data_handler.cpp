@@ -5,6 +5,7 @@
 #include "serialization/value_mapping.hpp"
 
 #include <boost/json.hpp>
+#include <unordered_map>
 #include <utility>
 
 #include "tl/expected.hpp"
