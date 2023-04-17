@@ -6,6 +6,11 @@
 
 namespace launchdarkly::client_side::flag_manager::detail {
 
+/**
+ * Represents the connection of a listener to a IFlagNotifier.
+ * Disconnecting the connection will cause the listener to stop receiving
+ * events.
+ */
 class IConnection {
    public:
     virtual void disconnect() = 0;
@@ -20,13 +25,19 @@ class IConnection {
     IConnection() = default;
 };
 
+/**
+ * Interface to allow listening for flag changes. Notification events should
+ * be distributed after the store has been updated. Meaning that the "new"
+ * value will correspond to the current value in the store, and the "old" value
+ * will be what the value was before the update.
+ */
 class IFlagNotifier {
    public:
     // The FlagValueChangeEvent is in a shared pointer so that all handlers
     // can use the same instance, and the lifetime is tied to how the consumer
     // uses the event.
     using ChangeHandler =
-        const std::function<void(std::shared_ptr<FlagValueChangeEvent>)>&;
+        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const&;
 
     /**
      * Listen for changes for the specific flag.
@@ -35,7 +46,7 @@ class IFlagNotifier {
      * @return A connection which can be used to stop listening.
      */
     virtual std::unique_ptr<IConnection> flag_change(std::string const& key,
-                                    ChangeHandler handler) = 0;
+                                                     ChangeHandler handler) = 0;
 
     virtual ~IFlagNotifier() = default;
     IFlagNotifier(IFlagNotifier const& item) = delete;
