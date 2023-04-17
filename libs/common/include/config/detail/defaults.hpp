@@ -56,6 +56,10 @@ struct Defaults<ClientSDK> {
     static DataSourceConfig<ClientSDK> data_source_config() {
         return {Defaults<AnySDK>::streaming_config(), false, false};
     }
+
+    static bool offline() {
+        return Defaults<AnySDK>::offline();
+    }
 };
 
 template <>
@@ -82,6 +86,10 @@ struct Defaults<ServerSDK> {
 
     static DataSourceConfig<ServerSDK> data_source_config() {
         return {Defaults<AnySDK>::streaming_config()};
+    }
+
+    static bool offline() {
+        return Defaults<AnySDK>::offline();
     }
 };
 

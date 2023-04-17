@@ -54,7 +54,7 @@ HttpProperties const& Config<SDK>::http_properties() const {
 
 template <typename SDK>
 bool Config<SDK>::offline() const {
-    return false;
+    return offline_;
 }
 
 template <typename SDK>
