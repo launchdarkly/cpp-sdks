@@ -89,7 +89,7 @@ void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
 void FlagUpdater::Upsert(std::string key, ItemDescriptor item) {
     // Check the version.
     auto existing = flag_manager_.Get(key);
-    if (existing && (existing->version > item.version)) {
+    if (existing && (existing->version >= item.version)) {
         // Out of order update, ignore it.
         return;
     }
