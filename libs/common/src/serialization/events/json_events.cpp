@@ -23,7 +23,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     json_value = std::move(base);
 }
 
-void tag_invoke(boost::json::value_from_tag const&,
+void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEventBase const& event) {
     auto& obj = json_value.emplace_object();
@@ -40,7 +40,7 @@ void tag_invoke(boost::json::value_from_tag const&,
     obj.emplace("default", boost::json::value_from(event.default_));
 }
 
-void tag_invoke(boost::json::value_from_tag const&,
+void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 IdentifyEvent const& event) {
     auto& obj = json_value.emplace_object();
@@ -52,7 +52,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 namespace launchdarkly::events {
 
-void tag_invoke(boost::json::value_from_tag const&,
+void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 Date const& date) {
     json_value.emplace_int64() =
@@ -61,7 +61,7 @@ void tag_invoke(boost::json::value_from_tag const&,
             .count();
 }
 
-void tag_invoke(boost::json::value_from_tag const&,
+void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 TrackEvent const& event) {
     auto& obj = json_value.emplace_object();
@@ -80,8 +80,46 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 events::OutputEvent const& event) {
-    std::visit([&](auto const& e) mutable { tag_invoke(tag, json_value, e); },
-               event);
+    std::visit(
+        [&](auto const& event) mutable { tag_invoke(tag, json_value, event); },
+        event);
 }
 
 }  // namespace launchdarkly::events
+
+namespace launchdarkly::events::detail {
+
+void tag_invoke(boost::json::value_from_tag const& tag,
+                boost::json::value& json_value,
+                Summarizer::State const& state) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("default", boost::json::value_from(state.default_));
+    obj.emplace("contextKinds", boost::json::value_from(state.context_kinds));
+    boost::json::array counters;
+    for (auto const& kvp : state.counters) {
+        boost::json::object counter;
+        if (kvp.first.version) {
+            counter.emplace("version", *kvp.first.version);
+        } else {
+            counter.emplace("unknown", true);
+        }
+        if (kvp.first.variation) {
+            counter.emplace("variation", *kvp.first.variation);
+        }
+        counter.emplace("value", boost::json::value_from(kvp.second.value()));
+        counter.emplace("count", kvp.second.count());
+        counters.push_back(std::move(counter));
+    }
+    obj.emplace("counters", std::move(counters));
+}
+void tag_invoke(boost::json::value_from_tag const& tag,
+                boost::json::value& json_value,
+                Summarizer const& summary) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "summary");
+    obj.emplace("startDate",
+                boost::json::value_from(Date{summary.start_time()}));
+    obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
+    obj.emplace("features", boost::json::value_from(summary.features()));
+}
+}  // namespace launchdarkly::events::detail

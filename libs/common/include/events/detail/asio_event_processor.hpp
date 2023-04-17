@@ -12,7 +12,7 @@
 #include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
-#include "events/detail/summary_state.hpp"
+#include "events/detail/summarizer.hpp"
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
@@ -43,7 +43,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     boost::asio::any_io_executor io_;
     Outbox outbox_;
-    SummaryState summary_state_;
+    Summarizer summarizer_;
 
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;

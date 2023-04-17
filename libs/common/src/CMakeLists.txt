@@ -41,7 +41,8 @@ add_library(${LIBNAME}
         events/asio_event_processor.cpp
         events/outbox.cpp
         events/conn_pool.cpp
-        events/summary_state.cpp
+        events/summarizer.cpp
+        events/client_events.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp)

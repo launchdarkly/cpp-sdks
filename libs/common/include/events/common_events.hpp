@@ -24,27 +24,6 @@ struct Date {
     std::chrono::system_clock::time_point t;
 };
 
-struct VariationSummary {
-    std::size_t count;
-    Value value;
-};
-
-struct VariationKey {
-    Version version;
-    std::optional<VariationIndex> variation;
-
-    struct Hash {
-        auto operator()(VariationKey const& p) const -> size_t {
-            if (p.variation) {
-                return std::hash<Version>{}(p.version) ^
-                       std::hash<VariationIndex>{}(*p.variation);
-            } else {
-                return std::hash<Version>{}(p.version);
-            }
-        }
-    };
-};
-
 struct TrackEventParams {
     Date creation_date;
     std::string key;
