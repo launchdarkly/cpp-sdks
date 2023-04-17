@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <ostream>
+#include <set>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
@@ -33,18 +33,7 @@ namespace launchdarkly {
  */
 class AttributeReference {
    public:
-    /**
-     * Provides a hashing function for use with unordered sets.
-     */
-    struct HashFunction {
-        std::size_t operator()(AttributeReference const& ref) const {
-            return boost::hash_range(ref.components_.begin(),
-                                     ref.components_.end());
-        }
-    };
-
-    using SetType = std::unordered_set<AttributeReference,
-                                       AttributeReference::HashFunction>;
+    using SetType = std::set<AttributeReference>;
 
     /**
      * Get the component of the attribute reference at the specified depth.
@@ -56,7 +45,7 @@ class AttributeReference {
      * @return The component at the specified depth or an empty string if the
      * depth is out of bounds.
      */
-    std::string const& component(std::size_t depth) const;
+    [[nodiscard]] std::string const& component(std::size_t depth) const;
 
     /**
      * Get the total depth of the reference.
@@ -64,20 +53,20 @@ class AttributeReference {
      * For example, depth() on the reference `/a/b/c` would return 3.
      * @return
      */
-    std::size_t depth() const;
+    [[nodiscard]] std::size_t depth() const;
 
     /**
      * Check if the reference is a "kind" reference. Either `/kind` or `kind`.
      *
      * @return True if it is a kind reference.
      */
-    bool is_kind() const;
+    [[nodiscard]] bool is_kind() const;
 
     /** Check if the reference is valid.
      *
      * @return True if the reference is valid.
      */
-    bool valid() const;
+    [[nodiscard]] bool valid() const;
 
     /**
      * The redaction name will always be an attribute reference compatible
@@ -85,7 +74,7 @@ class AttributeReference {
      * converted to `/~1attr`.
      * @return String to use in redacted attributes.
      */
-    std::string const& redaction_name() const;
+    [[nodiscard]] std::string const& redaction_name() const;
 
     /**
      * Create an attribute from a string that is known to be an attribute
