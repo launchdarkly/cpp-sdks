@@ -122,14 +122,14 @@ bool FlagUpdater::has_listeners() const {
 std::unique_ptr<IConnection> FlagUpdater::flag_change(
     std::string const& key,
     std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const& handler) {
-    std::lock_guard{signal_mutex_};
+    std::lock_guard lock{signal_mutex_};
     return std::make_unique<Connection>(signals_[key].connect(handler));
 }
 
-Connection::Connection(boost::signals2::connection connection)
+FlagUpdater::Connection::Connection(boost::signals2::connection connection)
     : connection_(std::move(connection)) {}
 
-void Connection::disconnect() {
+void FlagUpdater::Connection::disconnect() {
     connection_.disconnect();
 }
 

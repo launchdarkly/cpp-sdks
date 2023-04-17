@@ -12,15 +12,6 @@
 
 namespace launchdarkly::client_side::flag_manager::detail {
 
-class Connection : public IConnection {
-   public:
-    Connection(boost::signals2::connection connection);
-    void disconnect() override;
-
-   private:
-    boost::signals2::connection connection_;
-};
-
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
     FlagUpdater(FlagManager& flag_manager);
@@ -40,6 +31,16 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
             handler) override;
 
    private:
+    class Connection : public IConnection {
+       public:
+        friend class FlagUpdater;
+        Connection(boost::signals2::connection connection);
+        void disconnect() override;
+
+       private:
+        boost::signals2::connection connection_;
+    };
+
     bool has_listeners() const;
 
     FlagManager& flag_manager_;
