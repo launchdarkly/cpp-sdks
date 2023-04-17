@@ -50,7 +50,7 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
             .offline(true)
             .service_endpoints(Endpoints().relay_proxy("foo"))
             .application_info(
-                ApplicationInfo().app_identifier("bar").app_version("baz"))
+                ApplicationInfo().AppIdentifier("bar").AppVersion("baz"))
             .build(logger);
 
     ASSERT_EQ(config.sdk_key, "sdk-123");

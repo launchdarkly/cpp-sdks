@@ -103,10 +103,10 @@ TEST_P(TagBuildFixture, BuiltTags) {
 
     ApplicationInfo info;
     if (params.app_id) {
-        info.app_identifier(*params.app_id);
+        info.AppIdentifier(*params.app_id);
     }
     if (params.app_version) {
-        info.app_version(*params.app_version);
+        info.AppVersion(*params.app_version);
     }
-    ASSERT_EQ(info.build(logger), params.concat);
+    ASSERT_EQ(info.Build(logger), params.concat);
 }

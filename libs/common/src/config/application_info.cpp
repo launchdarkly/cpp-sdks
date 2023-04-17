@@ -13,7 +13,7 @@ constexpr std::size_t kMaxTagValueLength = 64;
 ApplicationInfo::Tag::Tag(std::string key, std::string value)
     : key(std::move(key)), value(std::move(value)) {}
 
-tl::expected<std::string, Error> ApplicationInfo::Tag::build() const {
+tl::expected<std::string, Error> ApplicationInfo::Tag::Build() const {
     if (auto err = IsValidTag(key, value)) {
         return tl::unexpected(*err);
     }
@@ -41,19 +41,19 @@ std::optional<Error> IsValidTag(std::string const& key,
     return std::nullopt;
 }
 
-ApplicationInfo& ApplicationInfo::add_tag(std::string key, std::string value) {
+ApplicationInfo& ApplicationInfo::AddTag(std::string key, std::string value) {
     tags_.emplace_back(std::move(key), std::move(value));
     return *this;
 }
-ApplicationInfo& ApplicationInfo::app_identifier(std::string app_id) {
-    return add_tag("application-id", std::move(app_id));
+ApplicationInfo& ApplicationInfo::AppIdentifier(std::string app_id) {
+    return AddTag("application-id", std::move(app_id));
 }
 
-ApplicationInfo& ApplicationInfo::app_version(std::string version) {
-    return add_tag("application-version", std::move(version));
+ApplicationInfo& ApplicationInfo::AppVersion(std::string version) {
+    return AddTag("application-version", std::move(version));
 }
 
-std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
+std::optional<std::string> ApplicationInfo::Build(Logger& logger) const {
     if (tags_.empty()) {
         LD_LOG(logger, LogLevel::kDebug) << "no application tags configured";
         return std::nullopt;
@@ -65,7 +65,7 @@ std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
 
     std::transform(
         tags_.cbegin(), tags_.cend(), unvalidated.begin(),
-        [](auto tag) { return std::make_pair(tag.key, tag.build()); });
+        [](auto tag) { return std::make_pair(tag.key, tag.Build()); });
 
     std::vector<std::string> validated;
 

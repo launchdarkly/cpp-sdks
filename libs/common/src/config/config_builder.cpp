@@ -58,7 +58,7 @@ typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
     auto events = events_builder_.value_or(EventsBuilder());
     std::optional<std::string> app_tag;
     if (application_info_builder_) {
-        app_tag = application_info_builder_->build(logger);
+        app_tag = application_info_builder_->Build(logger);
     }
     auto data_source_config = data_source_builder_
                                   ? data_source_builder_.value().build()
