@@ -42,6 +42,7 @@ void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
                                                    GetValue(*existing->second));
                     }
                 } else {
+                    // Deleted.
                     change_events.emplace_back(existing->first,
                                                GetValue(*existing->second));
                 }
@@ -91,20 +92,22 @@ void FlagUpdater::upsert(std::string key, ItemDescriptor item) {
         return;
     }
 
-    // Existed and updated.
-    if (existing && item.flag) {
-        dispatch_event(
-            FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
-    } else if (item.flag) {
-        dispatch_event(
-            FlagValueChangeEvent(key, item.flag.value().detail().value()));
-        // new flag
-    } else if (existing) {
-        // Existed and deleted.
-        dispatch_event(FlagValueChangeEvent(key, Value()));
-    } else {
-        // Was deleted and is still deleted.
-        // Do nothing.
+    if (has_listeners()) {
+        // Existed and updated.
+        if (existing && item.flag) {
+            dispatch_event(
+                FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
+        } else if (item.flag) {
+            dispatch_event(FlagValueChangeEvent(
+                key, item.flag.value().detail().value(), Value()));
+            // new flag
+        } else if (existing && existing->flag.has_value()) {
+            // Existed and deleted.
+            dispatch_event(FlagValueChangeEvent(key, GetValue(*existing)));
+        } else {
+            // Was deleted and is still deleted.
+            // Do nothing.
+        }
     }
     flag_manager_.upsert(key, item);
 }
@@ -115,6 +118,13 @@ bool FlagUpdater::has_listeners() const {
         return false;
     }
     return true;
+}
+
+Connection::Connection(boost::signals2::connection connection)
+    : connection_(connection) {}
+
+void Connection::disconnect() {
+    connection_.disconnect();
 }
 
 }  // namespace launchdarkly::client_side::flag_manager::detail

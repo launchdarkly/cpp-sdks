@@ -12,26 +12,33 @@
 
 namespace launchdarkly::client_side::flag_manager::detail {
 
+class Connection : public IConnection {
+   public:
+    Connection(boost::signals2::connection connection);
+    void disconnect() override;
+
+   private:
+    boost::signals2::connection connection_;
+};
+
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
-    using Connection = boost::signals2::connection;
-
     FlagUpdater(FlagManager& flag_manager);
     void init(std::unordered_map<std::string, ItemDescriptor> data) override;
     void upsert(std::string key, ItemDescriptor) override;
 
     /**
      * Listen for changes for the specific flag.
-     * @tparam F The type of handler.
      * @param key The flag to listen to.
      * @param handler The handler to signal when the flag changes.
      * @return A Connection which can be used to stop listening for changes
      * to the flag using this handler.
      */
-    template <typename F>
-    Connection flag_change(std::string const& key, F&& handler) {
+    std::unique_ptr<IConnection> flag_change(
+        std::string const& key,
+        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler) {
         std::lock_guard{signal_mutex_};
-        return signals_[key].connect(std::forward(handler));
+        return std::make_unique<Connection>(signals_[key].connect(handler));
     }
 
    private:
@@ -43,6 +50,10 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
         boost::signals2::signal<void(std::shared_ptr<FlagValueChangeEvent>)>>
         signals_;
 
+    // Recursive mutex so that has_listeners can non-conditionally lock
+    // the mutex. Otherwise a pre-condition for the call would be holding
+    // the mutex, which is more difficult to keep consistent over the code
+    // lifetime.
     mutable std::recursive_mutex signal_mutex_;
     void dispatch_event(FlagValueChangeEvent event);
 };
