@@ -5,9 +5,9 @@
 #include <string>
 #include <unordered_map>
 
-#include "flag_manager.hpp"
 #include "launchdarkly/client_side/data_source_update_sink.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_change_event.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_notifier.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
@@ -25,7 +25,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
     FlagUpdater(FlagManager& flag_manager);
     void init(std::unordered_map<std::string, ItemDescriptor> data) override;
-    void upsert(std::string key, ItemDescriptor) override;
+    void upsert(std::string key, ItemDescriptor item) override;
 
     /**
      * Listen for changes for the specific flag.
@@ -36,10 +36,8 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
      */
     std::unique_ptr<IConnection> flag_change(
         std::string const& key,
-        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler) {
-        std::lock_guard{signal_mutex_};
-        return std::make_unique<Connection>(signals_[key].connect(handler));
-    }
+        std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const&
+            handler) override;
 
    private:
     bool has_listeners() const;

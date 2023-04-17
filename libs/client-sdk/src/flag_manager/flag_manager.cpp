@@ -7,8 +7,8 @@ namespace launchdarkly::client_side::flag_manager::detail {
 // accessed, and which it is being used init is called, then we want the
 // flag being processed to be valid.
 
-void FlagManager::init(std::unordered_map<std::string, ItemDescriptor> data) {
-    std::lock_guard{data_mutex_};
+void FlagManager::init(const std::unordered_map<std::string, ItemDescriptor>& data) {
+    std::lock_guard lock{data_mutex_};
 
     data_.clear();
     for (auto item : data) {
@@ -17,14 +17,14 @@ void FlagManager::init(std::unordered_map<std::string, ItemDescriptor> data) {
     }
 }
 
-void FlagManager::upsert(std::string key, ItemDescriptor item) {
-    std::lock_guard{data_mutex_};
+void FlagManager::upsert(const std::string& key, ItemDescriptor item) {
+    std::lock_guard lock{data_mutex_};
 
     data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
 }
 
-std::shared_ptr<ItemDescriptor> FlagManager::get(std::string flag_key) const {
-    std::lock_guard{data_mutex_};
+std::shared_ptr<ItemDescriptor> FlagManager::get(const std::string& flag_key) const {
+    std::lock_guard lock{data_mutex_};
 
     auto found = data_.find(flag_key);
     if (found != data_.end()) {
@@ -35,7 +35,7 @@ std::shared_ptr<ItemDescriptor> FlagManager::get(std::string flag_key) const {
 
 std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>>
 FlagManager::get_all() const {
-    std::lock_guard{data_mutex_};
+    std::lock_guard lock{data_mutex_};
 
     // Returns a copy of the map. (The descriptors are pointers and not shared).
     return data_;

@@ -14,7 +14,7 @@ class FlagValueChangeEvent {
      * The name of the flag that changed.
      * @return The name of the flag.
      */
-    std::string const& flag_name() const;
+    [[nodiscard]] std::string const& flag_name() const;
 
     /**
      * Get the new value. If there was not an new value, because the flag was
@@ -23,7 +23,7 @@ class FlagValueChangeEvent {
      *
      * @return The new value.
      */
-    Value const& new_value() const;
+    [[nodiscard]] Value const& new_value() const;
 
     /**
      * Get the old value. If there was not an old value, for instance a newly
@@ -31,7 +31,7 @@ class FlagValueChangeEvent {
      *
      * @return The new value.
      */
-    Value const& old_value() const;
+    [[nodiscard]] Value const& old_value() const;
 
     /**
      * Will be true if the flag was deleted. In which case the new_value will
@@ -39,7 +39,7 @@ class FlagValueChangeEvent {
      *
      * @return True if the flag was deleted.
      */
-    bool deleted() const;
+    [[nodiscard]] bool deleted() const;
 
     /**
      * Construct a flag changed event with a new and old value.

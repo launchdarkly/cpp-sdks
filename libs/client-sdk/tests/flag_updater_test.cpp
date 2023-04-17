@@ -170,7 +170,7 @@ TEST(FlagUpdaterEventTests, InitialInitProducesNoEvents) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
         });
 
@@ -193,7 +193,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->old_value().as_string());
@@ -228,7 +228,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithNewFlagProducesEvents) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_TRUE(event->old_value().is_null());
@@ -263,7 +263,7 @@ TEST(FlagUpdaterDataTests, PatchWithUpdateProducesEvent) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->old_value().as_string());
@@ -296,7 +296,7 @@ TEST(FlagUpdaterEventTests, PatchWithNewFlagProducesEvent) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_TRUE(event->old_value().is_null());
@@ -330,7 +330,7 @@ TEST(FlagUpdaterEventTests, OutOfOrderPatchProducesNoEvent) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
         });
 
@@ -358,7 +358,7 @@ TEST(FlagUpdaterEventTests, DeleteProducesAnEvent) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->old_value().as_string());
@@ -387,7 +387,7 @@ TEST(FlagUpdaterEventTests, FlagMissingFromSecondInitTreatedAsDelete) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->old_value().as_string());
@@ -427,7 +427,7 @@ TEST(FlagUpdaterEventTests, InitWithoutEvaluationResultTreatedAsDelete) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->old_value().as_string());
@@ -466,7 +466,7 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->old_value().as_string());
@@ -514,7 +514,7 @@ TEST(FlagUpdaterEventTests, SecondDeleteNoEventPatch) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->old_value().as_string());
@@ -547,7 +547,7 @@ TEST(FlagUpdaterDataTests, CanDisconnectEventAndStopGettingEvents) {
 
     std::atomic_bool got_event(false);
     auto connection = notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->old_value().as_string());
@@ -589,7 +589,7 @@ TEST(FlagUpdaterEventTests, UndeletedFlagProducesEvent) {
 
     std::atomic_bool got_event(false);
     notifier->flag_change(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event](const std::shared_ptr<FlagValueChangeEvent>& event) {
             got_event.store(true);
 
             if (event->deleted()) {

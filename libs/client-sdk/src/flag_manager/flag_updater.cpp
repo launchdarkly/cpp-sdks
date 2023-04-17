@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
@@ -12,11 +14,11 @@ Value GetValue(ItemDescriptor& descriptor) {
         // optional.
         return descriptor.flag.value().detail().value();
     }
-    return Value();
+    return {};
 }
 
 void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
-    std::lock_guard{signal_mutex_};
+    std::lock_guard lock{signal_mutex_};
 
     // Calculate what flags changed.
     std::list<FlagValueChangeEvent> change_events;
@@ -24,7 +26,7 @@ void FlagUpdater::init(std::unordered_map<std::string, ItemDescriptor> data) {
     auto old_flags = flag_manager_.get_all();
 
     // No need to calculate any changes if nobody is listening to them.
-    if (old_flags.size() && has_listeners()) {
+    if (!old_flags.empty() && has_listeners()) {
         // TODO: Should we send events for ALL of the flags when they
         // are first added?
         for (auto& new_pair : data) {
@@ -113,15 +115,19 @@ void FlagUpdater::upsert(std::string key, ItemDescriptor item) {
 }
 
 bool FlagUpdater::has_listeners() const {
+    std::lock_guard lock{signal_mutex_};
+    return !signals_.empty();
+}
+
+std::unique_ptr<IConnection> FlagUpdater::flag_change(
+    std::string const& key,
+    std::function<void(std::shared_ptr<FlagValueChangeEvent>)> const& handler) {
     std::lock_guard{signal_mutex_};
-    if (signals_.empty()) {
-        return false;
-    }
-    return true;
+    return std::make_unique<Connection>(signals_[key].connect(handler));
 }
 
 Connection::Connection(boost::signals2::connection connection)
-    : connection_(connection) {}
+    : connection_(std::move(connection)) {}
 
 void Connection::disconnect() {
     connection_.disconnect();

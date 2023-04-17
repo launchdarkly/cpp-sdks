@@ -26,7 +26,7 @@ class IFlagNotifier {
     // can use the same instance, and the lifetime is tied to how the consumer
     // uses the event.
     using ChangeHandler =
-        std::function<void(std::shared_ptr<FlagValueChangeEvent>)>;
+        const std::function<void(std::shared_ptr<FlagValueChangeEvent>)>&;
 
     /**
      * Listen for changes for the specific flag.
