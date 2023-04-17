@@ -10,11 +10,11 @@
 
 namespace launchdarkly::config::detail {
 
-class ApplicationInfo {
+class AppInfoBuilder {
    public:
-    ApplicationInfo() = default;
-    ApplicationInfo& AppIdentifier(std::string app_id);
-    ApplicationInfo& AppVersion(std::string version);
+    AppInfoBuilder() = default;
+    AppInfoBuilder& Identifier(std::string app_id);
+    AppInfoBuilder& Version(std::string version);
     [[nodiscard]] std::optional<std::string> Build(Logger& logger) const;
 
    private:
@@ -26,7 +26,7 @@ class ApplicationInfo {
         [[nodiscard]] tl::expected<std::string, Error> Build() const;
     };
     std::vector<Tag> tags_;
-    ApplicationInfo& AddTag(std::string key, std::string value);
+    AppInfoBuilder& AddTag(std::string key, std::string value);
 };
 
 bool ValidChar(char c);

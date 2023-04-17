@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include <ostream>
 #include <tuple>
-#include "config/detail/application_info.hpp"
+#include "config/detail/app_info_builder.hpp"
 #include "error.hpp"
 #include "null_logger.hpp"
 
@@ -101,12 +101,12 @@ TEST_P(TagBuildFixture, BuiltTags) {
 
     auto logger = NullLogger();
 
-    ApplicationInfo info;
+    AppInfoBuilder info;
     if (params.app_id) {
-        info.AppIdentifier(*params.app_id);
+        info.Identifier(*params.app_id);
     }
     if (params.app_version) {
-        info.AppVersion(*params.app_version);
+        info.Version(*params.app_version);
     }
     ASSERT_EQ(info.Build(logger), params.concat);
 }

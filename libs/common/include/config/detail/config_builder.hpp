@@ -2,7 +2,7 @@
 
 #include <optional>
 #include <string>
-#include "config/detail/application_info.hpp"
+#include "config/detail/app_info_builder.hpp"
 #include "config/detail/config.hpp"
 #include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
@@ -29,7 +29,7 @@ class ConfigBuilder {
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.
      */
-    ConfigBuilder(std::string sdk_key);
+    explicit ConfigBuilder(std::string sdk_key);
 
     /**
      * To customize the endpoints the SDK uses for streaming, polling, and
@@ -37,23 +37,23 @@ class ConfigBuilder {
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& service_endpoints(EndpointsBuilder builder);
+    ConfigBuilder& ServiceEndpoints(EndpointsBuilder builder);
 
     /**
      * To include metadata about the application that is utilizing the SDK,
-     * pass in an ApplicationInfo builder.
-     * @param builder An ApplicationInfo builder.
+     * pass in an AppInfoBuilder.
+     * @param builder An AppInfoBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& application_info(detail::ApplicationInfo builder);
+    ConfigBuilder& AppInfo(detail::AppInfoBuilder builder);
 
     /**
-     * To enable or disable "offline" mode, pass a boolean value. True means
-     * offline mode is enabled.
-     * @param offline True if the SDK should operate in offline mode.
+     * To enable or disable "Offline" mode, pass a boolean value. True means
+     * Offline mode is enabled.
+     * @param offline True if the SDK should operate in Offline mode.
      * @return Reference to this builder.
      */
-    ConfigBuilder& offline(bool offline);
+    ConfigBuilder& Offline(bool offline);
 
     /**
      * To tune settings related to event generation and delivery, pass an
@@ -61,7 +61,7 @@ class ConfigBuilder {
      * @param builder An EventsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& events(EventsBuilder builder);
+    ConfigBuilder& Events(EventsBuilder builder);
 
     /**
      * Sets the configuration of the component that receives feature flag data
@@ -69,7 +69,7 @@ class ConfigBuilder {
      * @param builder A DataSourceConfig builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& data_source(detail::DataSourceBuilder<SDK> builder);
+    ConfigBuilder& DataSource(detail::DataSourceBuilder<SDK> builder);
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -77,19 +77,19 @@ class ConfigBuilder {
      * @param builder A HttpPropertiesBuilder builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& http_properties(detail::HttpPropertiesBuilder<SDK> builder);
+    ConfigBuilder& HttpProperties(detail::HttpPropertiesBuilder<SDK> builder);
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
-    ConfigType build(Logger& logger) const;
+    ConfigType Build(Logger& logger) const;
 
    private:
     std::string sdk_key_;
     std::optional<bool> offline_;
     std::optional<EndpointsBuilder> service_endpoints_builder_;
-    std::optional<ApplicationInfo> application_info_builder_;
+    std::optional<AppInfoBuilder> app_info_builder_;
     std::optional<EventsBuilder> events_builder_;
     std::optional<DataSourceBuilder> data_source_builder_;
     std::optional<HttpPropertiesBuilder> http_properties_builder_;

@@ -1,4 +1,4 @@
-#include "config/detail/application_info.hpp"
+#include "config/detail/app_info_builder.hpp"
 
 #include <boost/algorithm/string.hpp>
 
@@ -10,10 +10,10 @@ namespace launchdarkly::config::detail {
 // Defines the maximum character length for an Application Tag value.
 constexpr std::size_t kMaxTagValueLength = 64;
 
-ApplicationInfo::Tag::Tag(std::string key, std::string value)
+AppInfoBuilder::Tag::Tag(std::string key, std::string value)
     : key(std::move(key)), value(std::move(value)) {}
 
-tl::expected<std::string, Error> ApplicationInfo::Tag::Build() const {
+tl::expected<std::string, Error> AppInfoBuilder::Tag::Build() const {
     if (auto err = IsValidTag(key, value)) {
         return tl::unexpected(*err);
     }
@@ -41,19 +41,19 @@ std::optional<Error> IsValidTag(std::string const& key,
     return std::nullopt;
 }
 
-ApplicationInfo& ApplicationInfo::AddTag(std::string key, std::string value) {
+AppInfoBuilder& AppInfoBuilder::AddTag(std::string key, std::string value) {
     tags_.emplace_back(std::move(key), std::move(value));
     return *this;
 }
-ApplicationInfo& ApplicationInfo::AppIdentifier(std::string app_id) {
+AppInfoBuilder& AppInfoBuilder::Identifier(std::string app_id) {
     return AddTag("application-id", std::move(app_id));
 }
 
-ApplicationInfo& ApplicationInfo::AppVersion(std::string version) {
+AppInfoBuilder& AppInfoBuilder::Version(std::string version) {
     return AddTag("application-version", std::move(version));
 }
 
-std::optional<std::string> ApplicationInfo::Build(Logger& logger) const {
+std::optional<std::string> AppInfoBuilder::Build(Logger& logger) const {
     if (tags_.empty()) {
         LD_LOG(logger, LogLevel::kDebug) << "no application tags configured";
         return std::nullopt;

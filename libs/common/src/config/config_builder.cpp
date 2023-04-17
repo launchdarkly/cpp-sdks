@@ -9,56 +9,56 @@ ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
       service_endpoints_builder_(std::nullopt) {}
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::service_endpoints(
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::ServiceEndpoints(
     detail::EndpointsBuilder<SDK> builder) {
     service_endpoints_builder_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::events(
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::Events(
     detail::EventsBuilder<SDK> builder) {
     events_builder_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::application_info(
-    detail::ApplicationInfo builder) {
-    application_info_builder_ = std::move(builder);
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::AppInfo(
+    detail::AppInfoBuilder builder) {
+    app_info_builder_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::offline(bool offline) {
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::Offline(bool offline) {
     offline_ = offline;
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::data_source(
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::DataSource(
     detail::DataSourceBuilder<SDK> builder) {
     data_source_builder_ = builder;
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::http_properties(
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::HttpProperties(
     detail::HttpPropertiesBuilder<SDK> builder) {
     http_properties_builder_ = builder;
     return *this;
 }
 
 template <typename SDK>
-typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::build(
+typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::Build(
     Logger& logger) const {
     auto key = sdk_key_;
     auto offline = offline_.value_or(Defaults<detail::AnySDK>::offline());
     auto endpoints = service_endpoints_builder_.value_or(EndpointsBuilder());
     auto events = events_builder_.value_or(EventsBuilder());
     std::optional<std::string> app_tag;
-    if (application_info_builder_) {
-        app_tag = application_info_builder_->Build(logger);
+    if (app_info_builder_) {
+        app_tag = app_info_builder_->Build(logger);
     }
     auto data_source_config = data_source_builder_
                                   ? data_source_builder_.value().build()
