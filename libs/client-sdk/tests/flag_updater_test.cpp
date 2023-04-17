@@ -350,6 +350,34 @@ TEST(FlagUpdaterEventTests, OutOfOrderPatchProducesNoEvent) {
     EXPECT_FALSE(got_event);
 }
 
+TEST(FlagUpdaterEventTests, EqualVersionProducesNoEvent) {
+    FlagManager manager;
+    FlagUpdater updater(manager);
+
+    IFlagNotifier* notifier = &updater;
+
+    std::atomic_bool got_event(false);
+    notifier->OnFlagChange(
+        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+            got_event.store(true);
+        });
+
+    updater.Init(std::unordered_map<std::string,
+                                    launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       1, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
+
+    updater.Upsert("flagA",
+                   ItemDescriptor{EvaluationResult{
+                       1, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("second"), std::nullopt,
+                                                std::nullopt}}});
+
+    EXPECT_FALSE(got_event);
+}
+
 TEST(FlagUpdaterEventTests, DeleteProducesAnEvent) {
     FlagManager manager;
     FlagUpdater updater(manager);
