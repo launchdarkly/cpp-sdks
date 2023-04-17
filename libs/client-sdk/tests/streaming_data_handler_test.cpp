@@ -5,6 +5,7 @@
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
 
 #include <memory>
+#include <unordered_map>
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
