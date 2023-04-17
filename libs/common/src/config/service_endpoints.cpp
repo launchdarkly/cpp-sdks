@@ -9,22 +9,22 @@ ServiceEndpoints::ServiceEndpoints(std::string polling,
       streaming_base_url_(std::move(streaming)),
       events_base_url_(std::move(events)) {}
 
-std::string const& ServiceEndpoints::polling_base_url() const {
+std::string const& ServiceEndpoints::PollingBaseUrl() const {
     return polling_base_url_;
 }
 
-std::string const& ServiceEndpoints::streaming_base_url() const {
+std::string const& ServiceEndpoints::StreamingBaseUrl() const {
     return streaming_base_url_;
 }
 
-std::string const& ServiceEndpoints::events_base_url() const {
+std::string const& ServiceEndpoints::EventsBaseUrl() const {
     return events_base_url_;
 }
 
 bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs) {
-    return lhs.polling_base_url() == rhs.polling_base_url() &&
-           lhs.streaming_base_url() == rhs.streaming_base_url() &&
-           lhs.events_base_url() == rhs.events_base_url();
+    return lhs.PollingBaseUrl() == rhs.PollingBaseUrl() &&
+           lhs.StreamingBaseUrl() == rhs.StreamingBaseUrl() &&
+           lhs.EventsBaseUrl() == rhs.EventsBaseUrl();
 }
 
 }  // namespace launchdarkly::config

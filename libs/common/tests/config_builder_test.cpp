@@ -48,14 +48,14 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     auto config =
         ConfigBuilder("sdk-123")
             .Offline(true)
-            .ServiceEndpoints(EndpointsBuilder().relay_proxy("foo"))
+            .ServiceEndpoints(EndpointsBuilder().RelayProxy("foo"))
             .AppInfo(AppInfoBuilder().Identifier("bar").Version("baz"))
             .Build(logger);
 
     ASSERT_EQ(config.sdk_key, "sdk-123");
     ASSERT_TRUE(config.offline);
     ASSERT_EQ(config.service_endpoints_builder,
-              EndpointsBuilder().relay_proxy("foo"));
+              EndpointsBuilder().RelayProxy("foo"));
     ASSERT_EQ(config.application_tag,
               "application-id/bar application-version/baz");
 }

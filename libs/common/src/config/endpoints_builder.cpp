@@ -6,27 +6,26 @@
 namespace launchdarkly::config::detail {
 
 template <typename SDK>
-EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::polling_base_url(
-    std::string url) {
+EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::PollingBaseUrl(std::string url) {
     polling_base_url_ = std::move(url);
     return *this;
 }
 template <typename SDK>
-EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::streaming_base_url(
+EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::StreamingBaseUrl(
     std::string url) {
     streaming_base_url_ = std::move(url);
     return *this;
 }
 template <typename SDK>
-EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::events_base_url(std::string url) {
+EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::EventsBaseUrl(std::string url) {
     events_base_url_ = std::move(url);
     return *this;
 }
 
 template <typename SDK>
-EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::relay_proxy(
+EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::RelayProxy(
     std::string const& url) {
-    return polling_base_url(url).streaming_base_url(url).events_base_url(url);
+    return PollingBaseUrl(url).StreamingBaseUrl(url).EventsBaseUrl(url);
 }
 
 std::string trim_right_matches(std::string const& input, char match) {
@@ -44,7 +43,7 @@ bool empty_string(std::optional<std::string> const& opt_string) {
 }
 
 template <typename SDK>
-tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::build() {
+tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
     // Empty URLs are not allowed.
     if (empty_string(polling_base_url_) || empty_string(streaming_base_url_) ||
         empty_string(events_base_url_)) {

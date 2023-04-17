@@ -31,7 +31,7 @@ TEST(EventProcessorTests, ProcessorCompiles) {
                       .flush_interval(std::chrono::seconds(1))
                       .build();
 
-    auto endpoints = client::EndpointsBuilder().build();
+    auto endpoints = client::EndpointsBuilder().Build();
 
     events::detail::AsioEventProcessor processor(
         ioc.get_executor(), *config, *endpoints, "password", logger);

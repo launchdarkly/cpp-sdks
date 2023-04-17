@@ -29,17 +29,17 @@ class ServiceEndpoints {
      * Returns the configured base polling URL.
      * @return Base polling URL.
      */
-    [[nodiscard]] std::string const& polling_base_url() const;
+    [[nodiscard]] std::string const& PollingBaseUrl() const;
     /**
      * Returns the configured base streaming URL.
      * @return Base streaming URL.
      */
-    [[nodiscard]] std::string const& streaming_base_url() const;
+    [[nodiscard]] std::string const& StreamingBaseUrl() const;
     /**
      * Returns the configured base events URL.
      * @return Base events URL.
      */
-    [[nodiscard]] std::string const& events_base_url() const;
+    [[nodiscard]] std::string const& EventsBaseUrl() const;
 
    private:
     std::string polling_base_url_;

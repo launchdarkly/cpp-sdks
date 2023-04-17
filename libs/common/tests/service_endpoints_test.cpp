@@ -14,91 +14,90 @@ using launchdarkly::Error;
 
 TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
     ClientEndpointsBuilder builder;
-    auto eps = builder.build();
+    auto eps = builder.Build();
     ASSERT_TRUE(eps);
-    ASSERT_EQ(eps->polling_base_url(), "https://clientsdk.launchdarkly.com");
-    ASSERT_EQ(eps->streaming_base_url(),
-              "https://clientstream.launchdarkly.com");
-    ASSERT_EQ(eps->events_base_url(), "https://mobile.launchdarkly.com");
+    ASSERT_EQ(eps->PollingBaseUrl(), "https://clientsdk.launchdarkly.com");
+    ASSERT_EQ(eps->StreamingBaseUrl(), "https://clientstream.launchdarkly.com");
+    ASSERT_EQ(eps->EventsBaseUrl(), "https://mobile.launchdarkly.com");
 }
 
 TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
     ServerEndpointsBuilder builder;
-    auto eps = builder.build();
+    auto eps = builder.Build();
     ASSERT_TRUE(eps);
-    ASSERT_EQ(eps->polling_base_url(), "https://sdk.launchdarkly.com");
-    ASSERT_EQ(eps->streaming_base_url(), "https://stream.launchdarkly.com");
-    ASSERT_EQ(eps->events_base_url(), "https://events.launchdarkly.com");
+    ASSERT_EQ(eps->PollingBaseUrl(), "https://sdk.launchdarkly.com");
+    ASSERT_EQ(eps->StreamingBaseUrl(), "https://stream.launchdarkly.com");
+    ASSERT_EQ(eps->EventsBaseUrl(), "https://events.launchdarkly.com");
 }
 
 TEST(ServiceEndpointTest, ModifySingleURLCausesError) {
-    auto result = ClientEndpointsBuilder().polling_base_url("foo").build();
+    auto result = ClientEndpointsBuilder().PollingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = ClientEndpointsBuilder().streaming_base_url("foo").build();
+    result = ClientEndpointsBuilder().StreamingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = ClientEndpointsBuilder().events_base_url("foo").build();
+    result = ClientEndpointsBuilder().EventsBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
-    auto eps = ClientEndpointsBuilder().relay_proxy("foo").build();
+    auto eps = ClientEndpointsBuilder().RelayProxy("foo").Build();
     ASSERT_TRUE(eps);
-    ASSERT_EQ(eps->streaming_base_url(), "foo");
-    ASSERT_EQ(eps->polling_base_url(), "foo");
-    ASSERT_EQ(eps->events_base_url(), "foo");
+    ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
+    ASSERT_EQ(eps->PollingBaseUrl(), "foo");
+    ASSERT_EQ(eps->EventsBaseUrl(), "foo");
 }
 
 TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
     {
-        auto eps = ClientEndpointsBuilder().relay_proxy("foo/").build();
+        auto eps = ClientEndpointsBuilder().RelayProxy("foo/").Build();
         ASSERT_TRUE(eps);
-        ASSERT_EQ(eps->streaming_base_url(), "foo");
+        ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps = ClientEndpointsBuilder().relay_proxy("foo////////").build();
+        auto eps = ClientEndpointsBuilder().RelayProxy("foo////////").Build();
         ASSERT_TRUE(eps);
-        ASSERT_EQ(eps->streaming_base_url(), "foo");
+        ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps = ClientEndpointsBuilder().relay_proxy("/").build();
+        auto eps = ClientEndpointsBuilder().RelayProxy("/").Build();
         ASSERT_TRUE(eps);
-        ASSERT_EQ(eps->streaming_base_url(), "");
+        ASSERT_EQ(eps->StreamingBaseUrl(), "");
     }
 }
 
 TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
-    auto result = ClientEndpointsBuilder().relay_proxy("").build();
+    auto result = ClientEndpointsBuilder().RelayProxy("").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
     result = ClientEndpointsBuilder()
-                 .streaming_base_url("")
-                 .events_base_url("foo")
-                 .polling_base_url("bar")
-                 .build();
+                 .StreamingBaseUrl("")
+                 .EventsBaseUrl("foo")
+                 .PollingBaseUrl("bar")
+                 .Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
     result = ClientEndpointsBuilder()
-                 .streaming_base_url("foo")
-                 .events_base_url("")
-                 .polling_base_url("bar")
-                 .build();
+                 .StreamingBaseUrl("foo")
+                 .EventsBaseUrl("")
+                 .PollingBaseUrl("bar")
+                 .Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
     result = ClientEndpointsBuilder()
-                 .streaming_base_url("foo")
-                 .events_base_url("bar")
-                 .polling_base_url("")
-                 .build();
+                 .StreamingBaseUrl("foo")
+                 .EventsBaseUrl("bar")
+                 .PollingBaseUrl("")
+                 .Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 }

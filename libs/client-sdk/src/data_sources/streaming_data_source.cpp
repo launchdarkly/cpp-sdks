@@ -27,8 +27,7 @@ StreamingDataSource::StreamingDataSource(
     Logger const& logger)
     : logger_(logger),
       data_source_handler_(StreamingDataHandler(std::move(handler), logger)) {
-    auto uri_components =
-        boost::urls::parse_uri(endpoints.streaming_base_url());
+    auto uri_components = boost::urls::parse_uri(endpoints.StreamingBaseUrl());
     // TODO: Handle parsing error?
     boost::urls::url url = uri_components.value();
 

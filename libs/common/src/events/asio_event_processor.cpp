@@ -26,7 +26,7 @@ AsioEventProcessor::AsioEventProcessor(
       summarizer_(std::chrono::system_clock::now()),
       flush_interval_(config.flush_interval()),
       timer_(io_),
-      host_(endpoints.events_base_url()),  // TODO: parse and use host
+      host_(endpoints.EventsBaseUrl()),  // TODO: parse and use host
       path_(config.path()),
       authorization_(std::move(authorization)),
       uuids_(),
