@@ -22,7 +22,7 @@ struct ItemDescriptor {
     uint64_t version;
 
     /**
-     * The data item, or nullopt if this is a Deleted item placeholder.
+     * The data item, or nullopt if this is a deleted item placeholder.
      */
     std::optional<EvaluationResult> flag;
 
