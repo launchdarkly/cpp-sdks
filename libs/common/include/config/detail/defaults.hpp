@@ -57,9 +57,7 @@ struct Defaults<ClientSDK> {
         return {Defaults<AnySDK>::streaming_config(), false, false};
     }
 
-    static bool offline() {
-        return Defaults<AnySDK>::offline();
-    }
+    static bool offline() { return Defaults<AnySDK>::offline(); }
 };
 
 template <>
@@ -88,9 +86,7 @@ struct Defaults<ServerSDK> {
         return {Defaults<AnySDK>::streaming_config()};
     }
 
-    static bool offline() {
-        return Defaults<AnySDK>::offline();
-    }
+    static bool offline() { return Defaults<AnySDK>::offline(); }
 };
 
 }  // namespace launchdarkly::config::detail
