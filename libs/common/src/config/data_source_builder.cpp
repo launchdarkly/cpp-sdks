@@ -3,7 +3,7 @@
 namespace launchdarkly::config::detail {
 
 StreamingBuilder::StreamingBuilder()
-    : config_(Defaults<AnySDK>::streaming_config()) {}
+    : config_(Defaults<AnySDK>::StreamingConfig()) {}
 
 StreamingBuilder& StreamingBuilder::initial_reconnect_delay(
     std::chrono::milliseconds initial_reconnect_delay) {
@@ -15,8 +15,7 @@ StreamingConfig StreamingBuilder::build() const {
     return config_;
 }
 
-PollingBuilder::PollingBuilder()
-    : config_(Defaults<AnySDK>::polling_config()) {}
+PollingBuilder::PollingBuilder() : config_(Defaults<AnySDK>::PollingConfig()) {}
 
 PollingBuilder& PollingBuilder::poll_interval(
     std::chrono::seconds poll_interval) {

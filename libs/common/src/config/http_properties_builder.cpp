@@ -48,7 +48,7 @@ HttpProperties HttpPropertiesBuilder<SDK>::build() const {
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
         return {connect_timeout_, read_timeout_,
-                detail::Defaults<SDK>::http_properties().user_agent(),
+                detail::Defaults<SDK>::HttpProperties().user_agent(),
                 headers_with_wrapper};
     }
     return {connect_timeout_, read_timeout_, "", base_headers_};

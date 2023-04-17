@@ -5,7 +5,7 @@
 namespace launchdarkly::config {
 
 /**
- * ServiceEndpoints contains configured endpoints for the LaunchDarkly
+ * ServiceEndpoints contains configured Endpoints for the LaunchDarkly
  * service or a Relay Proxy instance.
  */
 class ServiceEndpoints {
