@@ -66,10 +66,10 @@ StreamingDataSource::StreamingDataSource(
         client_builder.body(string_context);
     }
     client_builder.header("authorization", sdk_key);
-    for (auto const& header : http_properties.base_headers()) {
+    for (auto const& header : http_properties.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }
-    client_builder.header("user-agent", http_properties.user_agent());
+    client_builder.header("user-agent", http_properties.UserAgent());
     // TODO: Handle proxy support.
     client_ = client_builder.build();
 }

@@ -106,8 +106,8 @@ void tag_invoke(boost::json::value_from_tag const& tag,
         if (kvp.first.variation) {
             counter.emplace("variation", *kvp.first.variation);
         }
-        counter.emplace("value", boost::json::value_from(kvp.second.value()));
-        counter.emplace("count", kvp.second.count());
+        counter.emplace("value", boost::json::value_from(kvp.second.Value()));
+        counter.emplace("count", kvp.second.Count());
         counters.push_back(std::move(counter));
     }
     obj.emplace("counters", std::move(counters));
@@ -120,6 +120,6 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     obj.emplace("startDate",
                 boost::json::value_from(Date{summary.start_time()}));
     obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
-    obj.emplace("features", boost::json::value_from(summary.features()));
+    obj.emplace("features", boost::json::value_from(summary.Features()));
 }
 }  // namespace launchdarkly::events::detail

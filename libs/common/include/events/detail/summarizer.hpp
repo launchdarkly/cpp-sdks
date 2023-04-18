@@ -61,14 +61,14 @@ class Summarizer {
 
     struct VariationSummary {
        public:
-        explicit VariationSummary(Value value);
+        explicit VariationSummary(::launchdarkly::Value value);
         void Increment();
-        [[nodiscard]] std::int32_t count() const;
-        [[nodiscard]] Value const& value() const;
+        [[nodiscard]] std::int32_t Count() const;
+        [[nodiscard]] Value const& Value() const;
 
        private:
         std::int32_t count_;
-        Value value_;
+        ::launchdarkly::Value value_;
     };
 
     struct VariationKey {
@@ -99,7 +99,7 @@ class Summarizer {
         explicit State(Value defaultVal);
     };
 
-    [[nodiscard]] std::unordered_map<FlagKey, State> const& features() const;
+    [[nodiscard]] std::unordered_map<FlagKey, State> const& Features() const;
 
    private:
     Time start_time_;

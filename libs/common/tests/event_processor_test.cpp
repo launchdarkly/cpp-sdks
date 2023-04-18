@@ -27,9 +27,9 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     boost::asio::io_context ioc;
 
     auto config = client::EventsBuilder()
-                      .capacity(10)
-                      .flush_interval(std::chrono::seconds(1))
-                      .build();
+                      .Capacity(10)
+                      .FlushInterval(std::chrono::seconds(1))
+                      .Build();
 
     auto endpoints = client::EndpointsBuilder().Build();
 

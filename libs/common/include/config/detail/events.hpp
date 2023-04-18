@@ -22,7 +22,7 @@ struct Events {
      * @param all_attributes_private Whether all attributes should be treated as
      * private or not.
      * @param private_attrs Which attributes should be treated as private, if
-     * all_attributes_private is false.
+     * AllAttributesPrivate is false.
      * @param security Whether a plaintext or encrypted client should be used
      * for event delivery.
      */
@@ -35,27 +35,27 @@ struct Events {
     /**
      * Capacity of the event processor.
      */
-    [[nodiscard]] std::size_t capacity() const;
+    [[nodiscard]] std::size_t Capacity() const;
 
     /**
      * Flush interval of the event processor, in milliseconds.
      */
-    [[nodiscard]] std::chrono::milliseconds flush_interval() const;
+    [[nodiscard]] std::chrono::milliseconds FlushInterval() const;
 
     /**
      * Path component of the LaunchDarkly event delivery endpoint.
      */
-    [[nodiscard]] std::string const& path() const;
+    [[nodiscard]] std::string const& Path() const;
 
     /**
      * Whether all attributes should be considered private or not.
      */
-    [[nodiscard]] bool all_attributes_private() const;
+    [[nodiscard]] bool AllAttributesPrivate() const;
 
     /**
      * Set of individual attributes that should be considered private.
      */
-    [[nodiscard]] AttributeReference::SetType const& private_attributes() const;
+    [[nodiscard]] AttributeReference::SetType const& PrivateAttributes() const;
 
    private:
     std::size_t capacity_;

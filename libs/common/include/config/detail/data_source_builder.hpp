@@ -38,14 +38,14 @@ class StreamingBuilder {
      * attempt.
      * @return Reference to this builder.
      */
-    StreamingBuilder& initial_reconnect_delay(
+    StreamingBuilder& InitialReconnectDelay(
         std::chrono::milliseconds initial_reconnect_delay);
 
     /**
      * Build the streaming config. Used internal to the SDK.
      * @return The built config.
      */
-    [[nodiscard]] StreamingConfig build() const;
+    [[nodiscard]] StreamingConfig Build() const;
 
    private:
     StreamingConfig config_;
@@ -82,7 +82,7 @@ namespace {
 struct MethodVisitor {
     boost::variant<StreamingConfig, PollingConfig> operator()(
         StreamingBuilder streaming) {
-        return streaming.build();
+        return streaming.Build();
     }
     boost::variant<StreamingConfig, PollingConfig> operator()(
         PollingBuilder polling) {

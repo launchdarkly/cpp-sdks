@@ -5,13 +5,13 @@ namespace launchdarkly::config::detail {
 StreamingBuilder::StreamingBuilder()
     : config_(Defaults<AnySDK>::StreamingConfig()) {}
 
-StreamingBuilder& StreamingBuilder::initial_reconnect_delay(
+StreamingBuilder& StreamingBuilder::InitialReconnectDelay(
     std::chrono::milliseconds initial_reconnect_delay) {
     config_.initial_reconnect_delay = initial_reconnect_delay;
     return *this;
 }
 
-StreamingConfig StreamingBuilder::build() const {
+StreamingConfig StreamingBuilder::Build() const {
     return config_;
 }
 

@@ -18,7 +18,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
         ClientDataSource()
             .with_reasons(true)
             .use_report(true)
-            .method(ClientDataSource::Streaming().initial_reconnect_delay(
+            .method(ClientDataSource::Streaming().InitialReconnectDelay(
                 std::chrono::milliseconds{1500}))
             .build();
 
@@ -46,7 +46,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
 TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
     auto server_config =
         ServerDataSource()
-            .method(ServerDataSource::Streaming().initial_reconnect_delay(
+            .method(ServerDataSource::Streaming().InitialReconnectDelay(
                 std::chrono::milliseconds{1500}))
             .build();
 

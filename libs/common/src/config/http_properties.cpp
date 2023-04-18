@@ -13,19 +13,19 @@ HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
       user_agent_(std::move(user_agent)),
       base_headers_(std::move(base_headers)) {}
 
-std::chrono::milliseconds HttpProperties::connect_timeout() const {
+std::chrono::milliseconds HttpProperties::ConnectTimeout() const {
     return connect_timeout_;
 }
 
-std::chrono::milliseconds HttpProperties::read_timeout() const {
+std::chrono::milliseconds HttpProperties::ReadTimeout() const {
     return read_timeout_;
 }
 
-std::string const& HttpProperties::user_agent() const {
+std::string const& HttpProperties::UserAgent() const {
     return user_agent_;
 }
 
-std::map<std::string, std::string> const& HttpProperties::base_headers() const {
+std::map<std::string, std::string> const& HttpProperties::BaseHeaders() const {
     return base_headers_;
 }
 

@@ -84,7 +84,7 @@ class AttributesBuilder final {
      *
      * Once you have set an attribute private it will remain in the private
      * list even if you call `set` afterward. This method is just a convenience
-     * which also adds the attribute to the `private_attributes`.
+     * which also adds the attribute to the `PrivateAttributes`.
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.

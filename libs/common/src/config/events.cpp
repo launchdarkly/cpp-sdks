@@ -13,31 +13,31 @@ Events::Events(std::size_t capacity,
       all_attributes_private_(all_attributes_private),
       private_attributes_(std::move(private_attrs)) {}
 
-std::size_t Events::capacity() const {
+std::size_t Events::Capacity() const {
     return capacity_;
 }
 
-std::chrono::milliseconds Events::flush_interval() const {
+std::chrono::milliseconds Events::FlushInterval() const {
     return flush_interval_;
 }
 
-std::string const& Events::path() const {
+std::string const& Events::Path() const {
     return path_;
 }
 
-bool Events::all_attributes_private() const {
+bool Events::AllAttributesPrivate() const {
     return all_attributes_private_;
 }
 
-AttributeReference::SetType const& Events::private_attributes() const {
+AttributeReference::SetType const& Events::PrivateAttributes() const {
     return private_attributes_;
 }
 
 bool operator==(Events const& lhs, Events const& rhs) {
-    return lhs.path() == rhs.path() &&
-           lhs.flush_interval() == rhs.flush_interval() &&
-           lhs.capacity() == rhs.capacity() &&
-           lhs.all_attributes_private() == rhs.all_attributes_private() &&
-           lhs.private_attributes() == rhs.private_attributes();
+    return lhs.Path() == rhs.Path() &&
+           lhs.FlushInterval() == rhs.FlushInterval() &&
+           lhs.Capacity() == rhs.Capacity() &&
+           lhs.AllAttributesPrivate() == rhs.AllAttributesPrivate() &&
+           lhs.PrivateAttributes() == rhs.PrivateAttributes();
 }
 }  // namespace launchdarkly::config::detail

@@ -65,7 +65,7 @@ typename ConfigBuilder<SDK>::ConfigType ConfigBuilder<SDK>::Build(
                                   : Defaults<SDK>::DataSource();
 
     auto http_properties = http_properties_builder_
-                               ? http_properties_builder_.value().build()
+                               ? http_properties_builder_.value().Build()
                                : Defaults<SDK>::HttpProperties();
     return {std::move(key),
             offline,

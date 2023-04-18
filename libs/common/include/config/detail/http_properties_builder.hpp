@@ -15,19 +15,19 @@ class HttpPropertiesBuilder {
    public:
     HttpPropertiesBuilder() = default;
 
-    HttpPropertiesBuilder& connect_timeout(
+    HttpPropertiesBuilder& ConnectTimeout(
         std::chrono::milliseconds connect_timeout);
 
-    HttpPropertiesBuilder& read_timeout(std::chrono::milliseconds read_timeout);
+    HttpPropertiesBuilder& ReadTimeout(std::chrono::milliseconds read_timeout);
 
-    HttpPropertiesBuilder& wrapper_name(std::string wrapper_name);
+    HttpPropertiesBuilder& WrapperName(std::string wrapper_name);
 
-    HttpPropertiesBuilder& wrapper_version(std::string wrapper_version);
+    HttpPropertiesBuilder& WrapperVersion(std::string wrapper_version);
 
-    HttpPropertiesBuilder& custom_headers(
+    HttpPropertiesBuilder& CustomHeaders(
         std::map<std::string, std::string> base_headers);
 
-    [[nodiscard]] HttpProperties build() const;
+    [[nodiscard]] HttpProperties Build() const;
 
    private:
     std::chrono::milliseconds connect_timeout_{};

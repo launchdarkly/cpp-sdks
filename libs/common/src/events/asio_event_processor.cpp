@@ -22,19 +22,19 @@ AsioEventProcessor::AsioEventProcessor(
     std::string authorization,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
-      outbox_(config.capacity()),
+      outbox_(config.Capacity()),
       summarizer_(std::chrono::system_clock::now()),
-      flush_interval_(config.flush_interval()),
+      flush_interval_(config.FlushInterval()),
       timer_(io_),
       host_(endpoints.EventsBaseUrl()),  // TODO: parse and use host
-      path_(config.path()),
+      path_(config.Path()),
       authorization_(std::move(authorization)),
       uuids_(),
-      inbox_capacity_(config.capacity()),
+      inbox_capacity_(config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
       full_inbox_encountered_(false),
-      filter_(config.all_attributes_private(), config.private_attributes()),
+      filter_(config.AllAttributesPrivate(), config.PrivateAttributes()),
       logger_(logger) {
     ScheduleFlush();
 }
