@@ -23,12 +23,15 @@ HttpResult::HttpResult(HttpResult::StatusCode status,
       body_(std::move(body)),
       headers_(std::move(headers)),
       error_(false) {}
+
 bool HttpResult::IsError() const {
     return error_;
 }
+
 std::optional<std::string> const& HttpResult::ErrorMessage() const {
     return error_message_;
 }
+
 HttpResult::HttpResult(std::optional<std::string> error_message)
     : error_message_(error_message), error_(true) {}
 
