@@ -33,7 +33,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::client;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->service_endpoints(), Defaults::Endpoints());
+    ASSERT_EQ(cfg->service_endpoints(), Defaults::EndpointsConfig());
 }
 
 TEST_F(ConfigBuilderTest,
@@ -41,7 +41,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::client;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->offline(), Defaults::offline());
+    ASSERT_EQ(cfg->offline(), Defaults::Offline());
 }
 
 // This test should exercise all of the config options.
@@ -135,7 +135,7 @@ TEST_F(ConfigBuilderTest,
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
-    ASSERT_EQ(cfg->http_properties(), Defaults::HttpProperties());
+    ASSERT_EQ(cfg->http_properties(), Defaults::HttpConfig());
 }
 
 TEST_F(ConfigBuilderTest,
@@ -143,7 +143,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::server;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->http_properties(), Defaults::HttpProperties());
+    ASSERT_EQ(cfg->http_properties(), Defaults::HttpConfig());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {

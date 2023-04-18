@@ -52,7 +52,7 @@ tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
 
     // If no URLs were set, return the default endpoints for this SDK.
     if (!polling_base_url_ && !streaming_base_url_ && !events_base_url_) {
-        return detail::Defaults<SDK>::Endpoints();
+        return detail::Defaults<SDK>::EndpointsConfig();
     }
 
     // If all URLs were set, trim any trailing slashes and construct custom

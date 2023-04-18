@@ -3,8 +3,8 @@
 #include <optional>
 #include <string>
 #include <tl/expected.hpp>
-#include "config/detail/config.hpp"
 #include "config/detail/app_info_builder.hpp"
+#include "config/detail/config.hpp"
 #include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
 #include "config/detail/events_builder.hpp"
@@ -34,7 +34,7 @@ class ConfigBuilder {
     explicit ConfigBuilder(std::string sdk_key);
 
     /**
-     * To customize the Endpoints the SDK uses for streaming, polling, and
+     * To customize the EndpointsConfig the SDK uses for streaming, polling, and
      * events, pass in an EndpointsBuilder.
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.

@@ -55,7 +55,7 @@ ConfigBuilder<SDK>::Build() const {
     if (sdk_key.empty()) {
         return tl::make_unexpected(Error::kConfig_SDKKey_Empty);
     }
-    auto offline = offline_.value_or(Defaults<SDK>::offline());
+    auto offline = offline_.value_or(Defaults<SDK>::Offline());
     auto endpoints_config =
         service_endpoints_builder_.value_or(EndpointsBuilder()).Build();
     if (!endpoints_config) {
@@ -75,11 +75,11 @@ ConfigBuilder<SDK>::Build() const {
 
     auto data_source_config = data_source_builder_
                                   ? data_source_builder_.value().build()
-                                  : Defaults<SDK>::DataSource();
+                                  : Defaults<SDK>::DataSourceConfig();
 
     auto http_properties = http_properties_builder_
                                ? http_properties_builder_.value().Build()
-                               : Defaults<SDK>::HttpProperties();
+                               : Defaults<SDK>::HttpConfig();
 
     return {tl::in_place,
             sdk_key,

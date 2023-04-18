@@ -20,10 +20,10 @@ class Outbox {
     explicit Outbox(std::size_t capacity);
 
     /**
-     * Pushes a collection of events into the outbox. Events will be
+     * Pushes a collection of events into the outbox. EventConfig will be
      * individually pushed one-by-one until there are no more events or the
      * outbox is full; additional events will be dropped.
-     * @param events Events to push.
+     * @param events EventConfig to push.
      * @return True if all events were accepted; false if >= 1 events were
      * dropped.
      */

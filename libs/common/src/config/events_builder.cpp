@@ -6,7 +6,7 @@
 namespace launchdarkly::config::detail {
 
 template <typename SDK>
-EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
+EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::EventConfig()) {}
 
 template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::Capacity(std::size_t capacity) {

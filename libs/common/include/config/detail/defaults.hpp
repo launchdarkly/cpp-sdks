@@ -35,58 +35,58 @@ template <>
 struct Defaults<ClientSDK> {
     static std::string SdkName() { return "CppClient"; }
     static std::string SdkVersion() { return "TODO"; }
-    static ServiceEndpoints Endpoints() {
+    static bool Offline() { return Defaults<AnySDK>::Offline(); }
+
+    static ServiceEndpoints EndpointsConfig() {
         return {"https://clientsdk.launchdarkly.com",
                 "https://clientstream.launchdarkly.com",
                 "https://mobile.launchdarkly.com"};
     }
 
-    static Events Events() {
+    static Events EventConfig() {
         return {100, std::chrono::seconds(30), "/mobile", false,
                 AttributeReference::SetType()};
     }
 
-    static HttpProperties HttpProperties() {
+    static HttpProperties HttpConfig() {
         return {std::chrono::milliseconds{10000},
                 std::chrono::milliseconds{10000},
                 SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 
-    static DataSourceConfig<ClientSDK> DataSource() {
+    static DataSourceConfig<ClientSDK> DataSourceConfig() {
         return {Defaults<AnySDK>::StreamingConfig(), false, false};
     }
-
-    static bool offline() { return Defaults<AnySDK>::Offline(); }
 };
 
 template <>
 struct Defaults<ServerSDK> {
     static std::string SdkName() { return "CppServer"; }
     static std::string SdkVersion() { return "TODO"; }
-    static ServiceEndpoints Endpoints() {
+    static bool Offline() { return Defaults<AnySDK>::Offline(); }
+
+    static ServiceEndpoints EndpointsConfig() {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",
                 "https://events.launchdarkly.com"};
     }
 
-    static Events Events() {
+    static Events EventConfig() {
         return {10000, std::chrono::seconds(5), "/bulk", false,
                 AttributeReference::SetType()};
     }
 
-    static HttpProperties HttpProperties() {
+    static HttpProperties HttpConfig() {
         return {std::chrono::milliseconds{2000},
                 std::chrono::milliseconds{10000},
                 SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 
-    static DataSourceConfig<ServerSDK> DataSource() {
+    static DataSourceConfig<ServerSDK> DataSourceConfig() {
         return {Defaults<AnySDK>::StreamingConfig()};
     }
-
-    static bool offline() { return Defaults<AnySDK>::Offline(); }
 };
 
 }  // namespace launchdarkly::config::detail

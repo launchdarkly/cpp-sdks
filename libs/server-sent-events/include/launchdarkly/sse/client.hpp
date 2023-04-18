@@ -38,7 +38,7 @@ class Builder {
      * Example: https://example.com:8123/endpoint
      *
      * @param ioc Executor for the Client.
-     * @param url Server-Sent-Events server URL.
+     * @param url Server-Sent-EventConfig server URL.
      */
     Builder(net::any_io_executor ioc, std::string url);
 
@@ -117,7 +117,7 @@ class Builder {
 };
 
 /**
- * Client is a long-lived Server-Sent-Events (EventSource) client which
+ * Client is a long-lived Server-Sent-EventConfig (EventSource) client which
  * reads from an event stream and dispatches events to a user-specified
  * receiver.
  */
