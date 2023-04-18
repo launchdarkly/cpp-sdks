@@ -2,7 +2,20 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} api.cpp ${HEADER_LIST} data_sources/streaming_data_source.cpp data_sources/base_64.cpp data_sources/streaming_data_handler.cpp data_source_update_sink.cpp data_sources/polling_data_source.cpp)
+
+add_library(${LIBNAME}
+        api.cpp
+        ${HEADER_LIST}
+        data_sources/streaming_data_source.cpp
+        data_sources/base_64.cpp
+        data_sources/streaming_data_handler.cpp
+        data_source_update_sink.cpp
+        flag_manager/flag_manager.cpp
+        flag_manager/flag_updater.cpp
+        flag_manager/flag_change_event.cpp
+        data_sources/polling_data_source.cpp
+        )
+
 
 target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)
 

@@ -1,7 +1,9 @@
 #pragma once
 
-#include <map>
+#include <optional>
+#include <ostream>
 #include <string>
+#include <unordered_map>
 
 #include "config/detail/service_endpoints.hpp"
 #include "context.hpp"
@@ -43,8 +45,8 @@ struct ItemDescriptor {
  */
 class IDataSourceUpdateSink {
    public:
-    virtual void init(std::map<std::string, ItemDescriptor> data) = 0;
-    virtual void upsert(std::string key, ItemDescriptor) = 0;
+    virtual void Init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
+    virtual void Upsert(std::string key, ItemDescriptor item) = 0;
 
     // We could add this if we want to support data source status.
     // virtual void status(<something>)
