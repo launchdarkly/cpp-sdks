@@ -56,6 +56,8 @@ struct Defaults<ClientSDK> {
     static DataSourceConfig<ClientSDK> DataSource() {
         return {Defaults<AnySDK>::StreamingConfig(), false, false};
     }
+
+    static bool offline() { return Defaults<AnySDK>::Offline(); }
 };
 
 template <>
@@ -83,6 +85,8 @@ struct Defaults<ServerSDK> {
     static DataSourceConfig<ServerSDK> DataSource() {
         return {Defaults<AnySDK>::StreamingConfig()};
     }
+
+    static bool offline() { return Defaults<AnySDK>::Offline(); }
 };
 
 }  // namespace launchdarkly::config::detail

@@ -9,6 +9,7 @@ namespace launchdarkly::server {
 
 using SDK = config::detail::ServerSDK;
 
+using Defaults = config::detail::Defaults<SDK>;
 using AppInfoBuilder = config::detail::AppInfoBuilder;
 using EndpointsBuilder = config::detail::EndpointsBuilder<SDK>;
 using ConfigBuilder = config::detail::ConfigBuilder<SDK>;

@@ -5,6 +5,7 @@
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
 
 #include <memory>
+#include <unordered_map>
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
@@ -12,17 +13,17 @@ using namespace launchdarkly::client_side::data_sources::detail;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    void init(std::map<std::string, ItemDescriptor> data) override {
+    void Init(std::unordered_map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
-    void upsert(std::string key, ItemDescriptor data) override {
+    void Upsert(std::string key, ItemDescriptor data) override {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
 
     uint64_t count_ = 0;
-    std::vector<std::map<std::string, ItemDescriptor>> init_data_;
+    std::vector<std::unordered_map<std::string, ItemDescriptor>> init_data_;
     std::vector<std::pair<std::string, ItemDescriptor>> upsert_data_;
 };
 
@@ -36,7 +37,7 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
-    auto expected_put = std::map<std::string, ItemDescriptor>{
+    auto expected_put = std::unordered_map<std::string, ItemDescriptor>{
         {"flagA", ItemDescriptor(EvaluationResult(
                       1, std::nullopt, false, false, std::nullopt,
                       EvaluationDetailInternal(Value("test"), std::nullopt,
@@ -54,7 +55,7 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
 
     EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
-    auto expected_put = std::map<std::string, ItemDescriptor>();
+    auto expected_put = std::unordered_map<std::string, ItemDescriptor>();
     EXPECT_EQ(expected_put, test_handler->init_data_[0]);
 }
 

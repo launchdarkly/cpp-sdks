@@ -425,5 +425,6 @@ class Value final {
 };
 
 bool operator==(Value const& lhs, Value const& rhs);
+bool operator!=(Value const& lhs, Value const& rhs);
 
 }  // namespace launchdarkly

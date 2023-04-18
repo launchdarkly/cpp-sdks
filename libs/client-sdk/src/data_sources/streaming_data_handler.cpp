@@ -5,6 +5,7 @@
 #include "serialization/value_mapping.hpp"
 
 #include <boost/json.hpp>
+#include <unordered_map>
 #include <utility>
 
 #include "tl/expected.hpp"
@@ -14,10 +15,11 @@ namespace launchdarkly::client_side {
 // ItemDescriptor.
 
 static tl::expected<
-    std::map<std::string, launchdarkly::client_side::ItemDescriptor>,
+    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
     JsonError>
 tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::map<std::string, launchdarkly::client_side::ItemDescriptor>,
+               std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>,
                JsonError>> const& unused,
            boost::json::value const& json_value) {
     boost::ignore_unused(unused);
@@ -26,7 +28,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
         return tl::unexpected(JsonError::kSchemaFailure);
     }
     auto const& obj = json_value.as_object();
-    std::map<std::string, launchdarkly::client_side::ItemDescriptor>
+    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>
         descriptors;
     for (auto const& pair : obj) {
         auto eval_result =
@@ -102,12 +104,12 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             LD_LOG(logger_, LogLevel::kError) << "Could not parse PUT message";
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<std::map<std::string, ItemDescriptor>, JsonError>>(
+        auto res = boost::json::value_to<tl::expected<
+            std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
             parsed);
 
         if (res.has_value()) {
-            handler_->init(res.value());
+            handler_->Init(res.value());
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError)
@@ -125,7 +127,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
         auto res = boost::json::value_to<
             tl::expected<StreamingDataHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_->upsert(
+            handler_->Upsert(
                 res.value().key,
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
@@ -146,7 +148,7 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
             tl::expected<StreamingDataHandler::DeleteData, JsonError>>(
             boost::json::parse(event.data()));
         if (res.has_value()) {
-            handler_->upsert(res.value().key,
+            handler_->Upsert(res.value().key,
                              ItemDescriptor(res.value().version));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
