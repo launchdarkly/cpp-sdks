@@ -29,4 +29,11 @@ std::map<std::string, std::string> const& HttpProperties::base_headers() const {
     return base_headers_;
 }
 
+bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
+    return lhs.read_timeout() == rhs.read_timeout() &&
+           lhs.connect_timeout() == rhs.connect_timeout() &&
+           lhs.base_headers() == rhs.base_headers() &&
+           lhs.user_agent() == rhs.user_agent();
+}
+
 }  // namespace launchdarkly::config::detail

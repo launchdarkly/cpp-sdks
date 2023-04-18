@@ -2,12 +2,14 @@
 
 #include <optional>
 #include <string>
+#include <tl/expected.hpp>
 #include "config/detail/application_info.hpp"
 #include "config/detail/config.hpp"
 #include "config/detail/data_source_builder.hpp"
 #include "config/detail/endpoints_builder.hpp"
 #include "config/detail/events_builder.hpp"
 #include "config/detail/http_properties_builder.hpp"
+
 #include "logger.hpp"
 
 namespace launchdarkly::config::detail {
@@ -22,7 +24,7 @@ class ConfigBuilder {
    public:
     using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
     using EventsBuilder = detail::EventsBuilder<SDK>;
-    using ConfigType = detail::Config<SDK>;
+    using ConfigResult = tl::expected<detail::Config<SDK>, Error>;
     using DataSourceBuilder = detail::DataSourceBuilder<SDK>;
     using HttpPropertiesBuilder = detail::HttpPropertiesBuilder<SDK>;
     /**
@@ -30,7 +32,6 @@ class ConfigBuilder {
      * @param sdk_key SDK Key.
      */
     ConfigBuilder(std::string sdk_key);
-
     /**
      * To customize the endpoints the SDK uses for streaming, polling, and
      * events, pass in an EndpointsBuilder.
@@ -83,7 +84,7 @@ class ConfigBuilder {
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
-    ConfigType build(Logger& logger) const;
+    ConfigResult build() const;
 
    private:
     std::string sdk_key_;

@@ -28,6 +28,8 @@ char const* ErrorToString(Error err) {
             return "application info: the value contains invalid characters";
         case Error::kConfig_Events_ZeroCapacity:
             return "events: capacity must be non-zero";
+        case Error::kConfig_SDKKey_Empty:
+            return "sdk key: cannot be empty";
         case Error::kMax:
             break;
     }

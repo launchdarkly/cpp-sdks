@@ -29,4 +29,6 @@ class HttpProperties final {
     // TODO: Proxy.
 };
 
+bool operator==(HttpProperties const& lhs, HttpProperties const& rhs);
+
 }  // namespace launchdarkly::config::detail
