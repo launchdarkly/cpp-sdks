@@ -14,10 +14,10 @@ char const* ErrorToString(Error err) {
         case Error::KReserved2:
             return "reserved2";
         case Error::kConfig_Endpoints_EmptyURL:
-            return "Endpoints: cannot specify empty URL";
+            return "endpoints: cannot specify empty URL";
         case Error::kConfig_Endpoints_AllURLsMustBeSet:
-            return "Endpoints: if any endpoint is specified, then all "
-                   "Endpoints must be specified";
+            return "endpoints: if any endpoint is specified, then all "
+                   "endpoints must be specified";
         case Error::kConfig_ApplicationInfo_EmptyKeyOrValue:
             return "application info: cannot specify an empty key or value";
         case Error::kConfig_ApplicationInfo_ValueTooLong:
