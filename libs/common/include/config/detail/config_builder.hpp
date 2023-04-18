@@ -34,8 +34,8 @@ class ConfigBuilder {
     explicit ConfigBuilder(std::string sdk_key);
 
     /**
-     * To customize the EndpointsConfig the SDK uses for streaming, polling, and
-     * events, pass in an EndpointsBuilder.
+     * To customize the ServiceEndpoints the SDK uses for streaming, polling,
+     * and events, pass in an EndpointsBuilder.
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */
@@ -50,9 +50,9 @@ class ConfigBuilder {
     ConfigBuilder& AppInfo(detail::AppInfoBuilder builder);
 
     /**
-     * To enable or disable "offline" mode, pass a boolean value. True means
-     * offline mode is enabled.
-     * @param offline True if the SDK should operate in offline mode.
+     * To enable or disable "Offline" mode, pass a boolean value. True means
+     * Offline mode is enabled.
+     * @param offline True if the SDK should operate in Offline mode.
      * @return Reference to this builder.
      */
     ConfigBuilder& Offline(bool offline);

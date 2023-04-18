@@ -17,7 +17,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ClientConfig) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
-    ASSERT_EQ(cfg->sdk_key(), "sdk-123");
+    ASSERT_EQ(cfg->SdkKey(), "sdk-123");
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
@@ -25,7 +25,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
-    ASSERT_EQ(cfg->sdk_key(), "sdk-123");
+    ASSERT_EQ(cfg->SdkKey(), "sdk-123");
 }
 
 TEST_F(ConfigBuilderTest,
@@ -33,7 +33,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::client;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->service_endpoints(), Defaults::EndpointsConfig());
+    ASSERT_EQ(cfg->ServiceEndpoints(), Defaults::ServiceEndpoints());
 }
 
 TEST_F(ConfigBuilderTest,
@@ -41,7 +41,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::client;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->offline(), Defaults::Offline());
+    ASSERT_EQ(cfg->Offline(), Defaults::Offline());
 }
 
 // This test should exercise all of the config options.
@@ -55,11 +55,11 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
             .Build();
 
     ASSERT_TRUE(config);
-    ASSERT_EQ(config->sdk_key(), "sdk-123");
-    ASSERT_TRUE(config->offline());
-    ASSERT_EQ(config->service_endpoints(),
+    ASSERT_EQ(config->SdkKey(), "sdk-123");
+    ASSERT_TRUE(config->Offline());
+    ASSERT_EQ(config->ServiceEndpoints(),
               EndpointsBuilder().RelayProxy("foo").Build());
-    ASSERT_EQ(config->application_tag(),
+    ASSERT_EQ(config->ApplicationTag(),
               "application-id/bar application-version/baz");
 }
 
@@ -69,12 +69,12 @@ TEST_F(ConfigBuilderTest,
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
-    EXPECT_FALSE(cfg->data_source_config().with_reasons);
-    EXPECT_FALSE(cfg->data_source_config().use_report);
+    EXPECT_FALSE(cfg->DataSourceConfig().with_reasons);
+    EXPECT_FALSE(cfg->DataSourceConfig().use_report);
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
               boost::get<launchdarkly::config::detail::StreamingConfig>(
-                  cfg->data_source_config().method)
+                  cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
 
@@ -87,7 +87,7 @@ TEST_F(ConfigBuilderTest,
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
               boost::get<launchdarkly::config::detail::StreamingConfig>(
-                  cfg->data_source_config().method)
+                  cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
 
@@ -103,7 +103,7 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
 
     EXPECT_EQ(std::chrono::milliseconds{5000},
               boost::get<launchdarkly::config::detail::StreamingConfig>(
-                  cfg->data_source_config().method)
+                  cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
 
@@ -121,11 +121,11 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
 
-    EXPECT_TRUE(cfg->data_source_config().use_report);
-    EXPECT_TRUE(cfg->data_source_config().with_reasons);
+    EXPECT_TRUE(cfg->DataSourceConfig().use_report);
+    EXPECT_TRUE(cfg->DataSourceConfig().with_reasons);
     EXPECT_EQ(std::chrono::milliseconds{5000},
               boost::get<launchdarkly::config::detail::StreamingConfig>(
-                  cfg->data_source_config().method)
+                  cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
 
@@ -135,7 +135,7 @@ TEST_F(ConfigBuilderTest,
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
-    ASSERT_EQ(cfg->http_properties(), Defaults::HttpConfig());
+    ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
 }
 
 TEST_F(ConfigBuilderTest,
@@ -143,7 +143,7 @@ TEST_F(ConfigBuilderTest,
     using namespace launchdarkly::server;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->http_properties(), Defaults::HttpConfig());
+    ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
@@ -161,10 +161,10 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
 
-    EXPECT_EQ("CppClient/TODO", cfg->http_properties().UserAgent());
-    EXPECT_EQ(123456, cfg->http_properties().ReadTimeout().count());
-    EXPECT_EQ(1234, cfg->http_properties().ConnectTimeout().count());
-    EXPECT_EQ("potato/2.0-chip", cfg->http_properties().BaseHeaders().at(
-                                     "X-LaunchDarkly-Wrapper"));
-    EXPECT_EQ("green", cfg->http_properties().BaseHeaders().at("color"));
+    EXPECT_EQ("CppClient/TODO", cfg->HttpProperties().UserAgent());
+    EXPECT_EQ(123456, cfg->HttpProperties().ReadTimeout().count());
+    EXPECT_EQ(1234, cfg->HttpProperties().ConnectTimeout().count());
+    EXPECT_EQ("potato/2.0-chip",
+              cfg->HttpProperties().BaseHeaders().at("X-LaunchDarkly-Wrapper"));
+    EXPECT_EQ("green", cfg->HttpProperties().BaseHeaders().at("color"));
 }

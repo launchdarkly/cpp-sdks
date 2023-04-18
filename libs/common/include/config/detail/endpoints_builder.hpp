@@ -20,7 +20,7 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
 
 /**
  * EndpointsBuilder allows for specification of LaunchDarkly service
- * EndpointsConfig.
+ * ServiceEndpoints.
  *
  * @tparam SDK Type of SDK, such as ClientSDK or ServerSDK.
  */

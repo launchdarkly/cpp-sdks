@@ -5,7 +5,7 @@
 namespace launchdarkly::config {
 
 /**
- * ServiceEndpoints contains configured EndpointsConfig for the LaunchDarkly
+ * ServiceEndpoints contains configured ServiceEndpoints for the LaunchDarkly
  * service or a Relay Proxy instance.
  */
 class ServiceEndpoints {
@@ -20,7 +20,7 @@ class ServiceEndpoints {
      *
      * @param polling Polling URL.
      * @param streaming Streaming URL.
-     * @param events EventConfig URL.
+     * @param events Events URL.
      */
     ServiceEndpoints(std::string polling,
                      std::string streaming,

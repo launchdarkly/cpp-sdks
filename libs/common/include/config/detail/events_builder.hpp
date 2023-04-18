@@ -84,8 +84,8 @@ class EventsBuilder {
     EventsBuilder& PrivateAttributes(AttributeReference::SetType private_attrs);
 
     /**
-     * Builds EventConfig configuration, if the configuration is valid.
-     * @return EventConfig config, or error.
+     * Builds Events configuration, if the configuration is valid.
+     * @return Events config, or error.
      */
     [[nodiscard]] tl::expected<Events, Error> Build();
 

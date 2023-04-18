@@ -25,30 +25,30 @@ struct Config {
            DataSourceConfig<SDK> data_source_config,
            detail::HttpProperties http_properties);
 
-    std::string const& sdk_key() const;
+    [[nodiscard]] std::string const& SdkKey() const;
 
-    ServiceEndpoints const& service_endpoints() const;
+    [[nodiscard]] ServiceEndpoints const& ServiceEndpoints() const;
 
-    Events const& events_config() const;
+    [[nodiscard]] Events const& Events() const;
 
-    std::optional<std::string> const& application_tag() const;
+    [[nodiscard]] std::optional<std::string> const& ApplicationTag() const;
 
-    DataSourceConfig<SDK> const& data_source_config() const;
+    DataSourceConfig<SDK> const& DataSourceConfig() const;
 
-    HttpProperties const& http_properties() const;
+    [[nodiscard]] HttpProperties const& HttpProperties() const;
 
-    bool offline() const;
+    [[nodiscard]] bool Offline() const;
 
-    Logger take_logger();
+    launchdarkly::Logger Logger();
 
    private:
     std::string sdk_key_;
     bool offline_;
     launchdarkly::Logger logger_;
-    ServiceEndpoints service_endpoints_;
+    class ServiceEndpoints service_endpoints_;
     std::optional<std::string> application_tag_;
-    Events events_;
-    DataSourceConfig<SDK> data_source_config_;
+    class Events events_;
+    ::launchdarkly::config::detail::DataSourceConfig<SDK> data_source_config_;
     detail::HttpProperties http_properties_;
 };
 

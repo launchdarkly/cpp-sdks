@@ -79,7 +79,7 @@ ConfigBuilder<SDK>::Build() const {
 
     auto http_properties = http_properties_builder_
                                ? http_properties_builder_.value().Build()
-                               : Defaults<SDK>::HttpConfig();
+                               : Defaults<SDK>::HttpProperties();
 
     return {tl::in_place,
             sdk_key,
