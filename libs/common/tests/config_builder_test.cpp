@@ -95,7 +95,7 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
-    builder.DataSource(ConfigBuilder::DataSourceBuilder().method(
+    builder.DataSource(ConfigBuilder::DataSourceBuilder().Method(
         ConfigBuilder::DataSourceBuilder::Streaming().InitialReconnectDelay(
             std::chrono::milliseconds{5000})));
 
@@ -113,10 +113,10 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
 
     builder.DataSource(
         ConfigBuilder::DataSourceBuilder()
-            .method(ConfigBuilder::DataSourceBuilder::Streaming()
+            .Method(ConfigBuilder::DataSourceBuilder::Streaming()
                         .InitialReconnectDelay(std::chrono::milliseconds{5000}))
-            .use_report(true)
-            .with_reasons(true));
+            .UseReport(true)
+            .WithReasons(true));
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);

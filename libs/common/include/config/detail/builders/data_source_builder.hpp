@@ -63,7 +63,7 @@ class PollingBuilder {
      * @param poll_interval The polling interval.
      * @return Reference to this builder.
      */
-    PollingBuilder& poll_interval(std::chrono::seconds poll_interval);
+    PollingBuilder& PollInterval(std::chrono::seconds poll_interval);
 
     /**
      * Build the polling config. Used internal to the SDK.
@@ -110,7 +110,7 @@ class DataSourceBuilder<ClientSDK> {
      * @param value True to enable reasons.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& with_reasons(bool value);
+    DataSourceBuilder& WithReasons(bool value);
 
     /**
      * Whether or not to use the REPORT verb to fetch flag settings.
@@ -125,7 +125,7 @@ class DataSourceBuilder<ClientSDK> {
      * @param value True to enable using the REPORT verb.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& use_report(bool value);
+    DataSourceBuilder& UseReport(bool value);
 
     /**
      * Set the streaming configuration for the builder.
@@ -137,7 +137,7 @@ class DataSourceBuilder<ClientSDK> {
      * @param stream_builder The streaming builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& method(Streaming stream_builder);
+    DataSourceBuilder& Method(Streaming stream_builder);
 
     /**
      * Set the polling configuration for the builder.
@@ -149,7 +149,7 @@ class DataSourceBuilder<ClientSDK> {
      * @param polling_builder The polling builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& method(Polling polling_builder);
+    DataSourceBuilder& Method(Polling polling_builder);
 
     /**
      * Build a data source config. This is used internal to the SDK.
@@ -182,7 +182,7 @@ class DataSourceBuilder<ServerSDK> {
      * @param stream_builder The streaming builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& method(Streaming builder);
+    DataSourceBuilder& Method(Streaming builder);
 
     /**
      * Set the polling configuration for the builder.
@@ -194,7 +194,7 @@ class DataSourceBuilder<ServerSDK> {
      * @param polling_builder The polling builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& method(Polling builder);
+    DataSourceBuilder& Method(Polling builder);
 
     /**
      * Build a data source config. This is used internal to the SDK.

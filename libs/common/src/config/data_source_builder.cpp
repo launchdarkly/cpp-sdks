@@ -17,7 +17,7 @@ built::StreamingConfig StreamingBuilder::Build() const {
 
 PollingBuilder::PollingBuilder() : config_(Defaults<AnySDK>::PollingConfig()) {}
 
-PollingBuilder& PollingBuilder::poll_interval(
+PollingBuilder& PollingBuilder::PollInterval(
     std::chrono::seconds poll_interval) {
     config_.poll_interval = poll_interval;
     return *this;
@@ -30,25 +30,25 @@ built::PollingConfig PollingBuilder::Build() const {
 DataSourceBuilder<ClientSDK>::DataSourceBuilder()
     : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::with_reasons(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::WithReasons(
     bool value) {
     with_reasons_ = value;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::use_report(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::UseReport(
     bool value) {
     use_report_ = value;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::method(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     StreamingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::method(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     PollingBuilder builder) {
     method_ = builder;
     return *this;
@@ -62,13 +62,13 @@ built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
 DataSourceBuilder<ServerSDK>::DataSourceBuilder()
     : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::method(
+DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
     StreamingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::method(
+DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
     PollingBuilder builder) {
     method_ = builder;
     return *this;

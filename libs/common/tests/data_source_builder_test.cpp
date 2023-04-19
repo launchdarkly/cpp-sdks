@@ -10,9 +10,9 @@ using namespace launchdarkly;
 TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     auto client_config =
         client_side::DataSourceBuilder()
-            .with_reasons(true)
-            .use_report(true)
-            .method(client_side::DataSourceBuilder::Streaming()
+            .WithReasons(true)
+            .UseReport(true)
+            .Method(client_side::DataSourceBuilder::Streaming()
                         .InitialReconnectDelay(std::chrono::milliseconds{1500}))
             .Build();
 
@@ -27,9 +27,9 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
 TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
     auto client_config =
         client_side::DataSourceBuilder()
-            .with_reasons(false)
-            .use_report(false)
-            .method(client_side::DataSourceBuilder::Polling().poll_interval(
+            .WithReasons(false)
+            .UseReport(false)
+            .Method(client_side::DataSourceBuilder::Polling().PollInterval(
                 std::chrono::seconds{88000}))
             .Build();
 
@@ -44,7 +44,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
 TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
     auto server_config =
         server_side::DataSourceBuilder()
-            .method(server_side::DataSourceBuilder::Streaming()
+            .Method(server_side::DataSourceBuilder::Streaming()
                         .InitialReconnectDelay(std::chrono::milliseconds{1500}))
             .Build();
 
@@ -57,7 +57,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
     auto server_config =
         server_side::DataSourceBuilder()
-            .method(server_side::DataSourceBuilder::Polling().poll_interval(
+            .Method(server_side::DataSourceBuilder::Polling().PollInterval(
                 std::chrono::seconds{30000}))
             .Build();
 
