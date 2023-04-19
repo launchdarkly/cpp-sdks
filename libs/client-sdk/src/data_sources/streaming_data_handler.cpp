@@ -1,6 +1,5 @@
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
 #include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
-#include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 #include "serialization/json_evaluation_result.hpp"
 #include "serialization/value_mapping.hpp"
 
