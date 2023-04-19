@@ -19,7 +19,6 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 class StreamingDataSource final : public IDataSource {
    public:
-    using InitCompleteHandler = std::function<void(bool initialized)>;
     StreamingDataSource(std::string const& sdk_key,
                         boost::asio::any_io_executor ioc,
                         Context const& context,
