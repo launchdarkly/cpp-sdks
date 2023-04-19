@@ -1,10 +1,10 @@
 #include <utility>
 
+#include "config/detail/builders/http_properties_builder.hpp"
 #include "config/detail/defaults.hpp"
-#include "config/detail/http_properties_builder.hpp"
 #include "config/detail/sdks.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::ConnectTimeout(
@@ -42,7 +42,7 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::CustomHeaders(
 }
 
 template <typename SDK>
-HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
+built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
     if (!wrapper_name_.empty()) {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
@@ -56,4 +56,4 @@ HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
 
 template class HttpPropertiesBuilder<detail::ClientSDK>;
 template class HttpPropertiesBuilder<detail::ServerSDK>;
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

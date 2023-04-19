@@ -17,8 +17,8 @@ auto const kEventSchemaVersion = 4;
 
 AsioEventProcessor::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
-    config::detail::Events const& config,
-    config::ServiceEndpoints const& endpoints,
+    config::detail::built::Events const& config,
+    config::detail::built::ServiceEndpoints const& endpoints,
     std::string authorization,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),

@@ -1,6 +1,6 @@
-#include "config/detail/data_source_builder.hpp"
+#include "config/detail/builders/data_source_builder.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 StreamingBuilder::StreamingBuilder()
     : config_(Defaults<AnySDK>::StreamingConfig()) {}
@@ -11,7 +11,7 @@ StreamingBuilder& StreamingBuilder::InitialReconnectDelay(
     return *this;
 }
 
-StreamingConfig StreamingBuilder::Build() const {
+built::StreamingConfig StreamingBuilder::Build() const {
     return config_;
 }
 
@@ -23,7 +23,7 @@ PollingBuilder& PollingBuilder::poll_interval(
     return *this;
 }
 
-PollingConfig PollingBuilder::build() const {
+built::PollingConfig PollingBuilder::Build() const {
     return config_;
 }
 
@@ -54,7 +54,7 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::method(
     return *this;
 }
 
-DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::build() const {
+built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
     auto method = boost::apply_visitor(MethodVisitor(), method_);
     return {method, with_reasons_, use_report_};
 }
@@ -74,9 +74,9 @@ DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::method(
     return *this;
 }
 
-DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::build() const {
+built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
     auto method = boost::apply_visitor(MethodVisitor(), method_);
     return {method};
 }
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

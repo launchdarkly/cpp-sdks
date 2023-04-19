@@ -6,7 +6,7 @@
 #include <type_traits>
 #include "config/detail/sdks.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::built {
 
 struct StreamingConfig {
     std::chrono::milliseconds initial_reconnect_delay;
@@ -32,4 +32,4 @@ struct DataSourceConfig<ServerSDK> {
     boost::variant<StreamingConfig, PollingConfig> method;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

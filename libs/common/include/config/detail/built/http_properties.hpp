@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::built {
 
 class HttpProperties final {
    public:
@@ -30,4 +30,4 @@ class HttpProperties final {
 
 bool operator==(HttpProperties const& lhs, HttpProperties const& rhs);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

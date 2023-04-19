@@ -64,7 +64,7 @@ class Summarizer {
         explicit VariationSummary(::launchdarkly::Value value);
         void Increment();
         [[nodiscard]] std::int32_t Count() const;
-        [[nodiscard]] Value const& Value() const;
+        [[nodiscard]] ::launchdarkly::Value const& Value() const;
 
        private:
         std::int32_t count_;

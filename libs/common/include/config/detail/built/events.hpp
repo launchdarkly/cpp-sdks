@@ -5,12 +5,18 @@
 #include <string>
 #include <unordered_map>
 #include "attribute_reference.hpp"
-namespace launchdarkly::config::detail {
 
-struct Events {
+namespace launchdarkly::config::detail::builders {
+template <typename T>
+class EventsBuilder;
+}
+
+namespace launchdarkly::config::detail::built {
+
+class Events final {
    public:
     template <typename SDK>
-    friend class EventsBuilder;
+    friend class builders::EventsBuilder;
     /**
      * Constructs configuration for the event subsystem.
      * @param capacity How many events can queue in memory before new events
@@ -67,4 +73,4 @@ struct Events {
 
 bool operator==(Events const& lhs, Events const& rhs);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

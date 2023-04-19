@@ -2,18 +2,16 @@
 
 #include "config/detail/config.hpp"
 
-#include "config/detail/sdks.hpp"
 namespace launchdarkly::config::detail {
 template <typename SDK>
-Config<SDK>::Config(
-    std::string sdk_key,
-    bool offline,
-    launchdarkly::Logger logger,
-    class ServiceEndpoints service_endpoints,
-    class Events events,
-    std::optional<std::string> application_tag,
-    ::launchdarkly::config::detail::DataSourceConfig<SDK> data_source_config,
-    detail::HttpProperties http_properties)
+Config<SDK>::Config(std::string sdk_key,
+                    bool offline,
+                    launchdarkly::Logger logger,
+                    built::ServiceEndpoints service_endpoints,
+                    built::Events events,
+                    std::optional<std::string> application_tag,
+                    built::DataSourceConfig<SDK> data_source_config,
+                    built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
       logger_(std::move(logger)),
       offline_(offline),
@@ -29,12 +27,12 @@ std::string const& Config<SDK>::SdkKey() const {
 }
 
 template <typename SDK>
-ServiceEndpoints const& Config<SDK>::ServiceEndpoints() const {
+built::ServiceEndpoints const& Config<SDK>::ServiceEndpoints() const {
     return service_endpoints_;
 }
 
 template <typename SDK>
-Events const& Config<SDK>::Events() const {
+built::Events const& Config<SDK>::Events() const {
     return events_;
 }
 
@@ -44,12 +42,12 @@ std::optional<std::string> const& Config<SDK>::ApplicationTag() const {
 }
 
 template <typename SDK>
-DataSourceConfig<SDK> const& Config<SDK>::DataSourceConfig() const {
+built::DataSourceConfig<SDK> const& Config<SDK>::DataSourceConfig() const {
     return data_source_config_;
 }
 
 template <typename SDK>
-HttpProperties const& Config<SDK>::HttpProperties() const {
+built::HttpProperties const& Config<SDK>::HttpProperties() const {
     return http_properties_;
 }
 

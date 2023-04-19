@@ -1,9 +1,9 @@
-#include "config/detail/events_builder.hpp"
+#include "config/detail/builders/events_builder.hpp"
 #include "config/detail/defaults.hpp"
 
 #include <utility>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
@@ -35,7 +35,7 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttributes(
 }
 
 template <typename SDK>
-tl::expected<Events, Error> EventsBuilder<SDK>::Build() {
+tl::expected<built::Events, Error> EventsBuilder<SDK>::Build() {
     if (config_.Capacity() == 0) {
         return tl::unexpected(Error::kConfig_Events_ZeroCapacity);
     }
@@ -56,4 +56,4 @@ template bool operator==(EventsBuilder<detail::ClientSDK> const&,
 template bool operator==(EventsBuilder<detail::ServerSDK> const&,
                          EventsBuilder<detail::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

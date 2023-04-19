@@ -1,6 +1,6 @@
-#include "config/detail/events.hpp"
+#include "config/detail/built/events.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::built {
 
 Events::Events(std::size_t capacity,
                std::chrono::milliseconds flush_interval,
@@ -40,4 +40,4 @@ bool operator==(Events const& lhs, Events const& rhs) {
            lhs.AllAttributesPrivate() == rhs.AllAttributesPrivate() &&
            lhs.PrivateAttributes() == rhs.PrivateAttributes();
 }
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

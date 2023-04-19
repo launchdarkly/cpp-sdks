@@ -2,17 +2,17 @@
 
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
-#include "config/detail/app_info_builder.hpp"
+#include "config/detail/builders/app_info_builder.hpp"
+#include "config/detail/builders/data_source_builder.hpp"
+#include "config/detail/builders/endpoints_builder.hpp"
+#include "config/detail/builders/events_builder.hpp"
+#include "config/detail/builders/http_properties_builder.hpp"
 #include "config/detail/config.hpp"
-#include "config/detail/data_source_builder.hpp"
-#include "config/detail/endpoints_builder.hpp"
-#include "config/detail/events_builder.hpp"
-#include "config/detail/http_properties_builder.hpp"
+#include "tl/expected.hpp"
 
 #include "logger.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 /**
  * ConfigBuilder allows for creation of a Configuration object for use
@@ -22,11 +22,11 @@ namespace launchdarkly::config::detail {
 template <typename SDK>
 class ConfigBuilder {
    public:
-    using EndpointsBuilder = detail::EndpointsBuilder<SDK>;
-    using EventsBuilder = detail::EventsBuilder<SDK>;
+    using EndpointsBuilder = detail::builders::EndpointsBuilder<SDK>;
+    using EventsBuilder = detail::builders::EventsBuilder<SDK>;
     using ConfigResult = tl::expected<detail::Config<SDK>, Error>;
-    using DataSourceBuilder = detail::DataSourceBuilder<SDK>;
-    using HttpPropertiesBuilder = detail::HttpPropertiesBuilder<SDK>;
+    using DataSourceBuilder = detail::builders::DataSourceBuilder<SDK>;
+    using HttpPropertiesBuilder = detail::builders::HttpPropertiesBuilder<SDK>;
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.
@@ -47,7 +47,7 @@ class ConfigBuilder {
      * @param builder An AppInfoBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& AppInfo(detail::AppInfoBuilder builder);
+    ConfigBuilder& AppInfo(AppInfoBuilder builder);
 
     /**
      * To enable or disable "Offline" mode, pass a boolean value. True means
@@ -71,7 +71,7 @@ class ConfigBuilder {
      * @param builder A DataSourceConfig builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& DataSource(detail::DataSourceBuilder<SDK> builder);
+    ConfigBuilder& DataSource(DataSourceBuilder builder);
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -79,7 +79,7 @@ class ConfigBuilder {
      * @param builder A HttpPropertiesBuilder builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& HttpProperties(detail::HttpPropertiesBuilder<SDK> builder);
+    ConfigBuilder& HttpProperties(HttpPropertiesBuilder builder);
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
@@ -97,4 +97,4 @@ class ConfigBuilder {
     std::optional<HttpPropertiesBuilder> http_properties_builder_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

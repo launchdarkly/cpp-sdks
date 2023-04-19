@@ -4,13 +4,13 @@
 #include <optional>
 #include <type_traits>
 
-#include "config/detail/data_source_config.hpp"
+#include "config/detail/built/data_source_config.hpp"
 #include "config/detail/defaults.hpp"
 #include "config/detail/sdks.hpp"
 
 #include <boost/variant.hpp>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 /**
  * Used to construct a DataSourceConfiguration for the specified SDK type.
@@ -45,10 +45,10 @@ class StreamingBuilder {
      * Build the streaming config. Used internal to the SDK.
      * @return The built config.
      */
-    [[nodiscard]] StreamingConfig Build() const;
+    [[nodiscard]] built::StreamingConfig Build() const;
 
    private:
-    StreamingConfig config_;
+    built::StreamingConfig config_;
 };
 
 /**
@@ -69,10 +69,10 @@ class PollingBuilder {
      * Build the polling config. Used internal to the SDK.
      * @return The built config.
      */
-    [[nodiscard]] PollingConfig build() const;
+    [[nodiscard]] built::PollingConfig Build() const;
 
    private:
-    PollingConfig config_;
+    built::PollingConfig config_;
 };
 
 /**
@@ -80,13 +80,13 @@ class PollingBuilder {
  */
 namespace {
 struct MethodVisitor {
-    boost::variant<StreamingConfig, PollingConfig> operator()(
+    boost::variant<built::StreamingConfig, built::PollingConfig> operator()(
         StreamingBuilder streaming) {
         return streaming.Build();
     }
-    boost::variant<StreamingConfig, PollingConfig> operator()(
+    boost::variant<built::StreamingConfig, built::PollingConfig> operator()(
         PollingBuilder polling) {
-        return polling.build();
+        return polling.Build();
     }
 };
 }  // namespace
@@ -156,7 +156,7 @@ class DataSourceBuilder<ClientSDK> {
      *
      * @return The built config.
      */
-    [[nodiscard]] DataSourceConfig<ClientSDK> build() const;
+    [[nodiscard]] built::DataSourceConfig<ClientSDK> Build() const;
 
    private:
     boost::variant<Streaming, Polling> method_;
@@ -201,7 +201,7 @@ class DataSourceBuilder<ServerSDK> {
      *
      * @return The built config.
      */
-    [[nodiscard]] DataSourceConfig<ServerSDK> build() const;
+    [[nodiscard]] built::DataSourceConfig<ServerSDK> Build() const;
 
    private:
     boost::variant<Streaming, Polling> method_;
@@ -209,4 +209,4 @@ class DataSourceBuilder<ServerSDK> {
     bool use_report_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

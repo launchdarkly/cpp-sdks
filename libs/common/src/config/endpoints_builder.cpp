@@ -1,9 +1,9 @@
-#include "config/detail/endpoints_builder.hpp"
+#include "config/detail/builders/endpoints_builder.hpp"
 #include "config/detail/defaults.hpp"
 
 #include <utility>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::PollingBaseUrl(std::string url) {
@@ -43,7 +43,7 @@ bool empty_string(std::optional<std::string> const& opt_string) {
 }
 
 template <typename SDK>
-tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
+tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
     // Empty URLs are not allowed.
     if (empty_string(polling_base_url_) || empty_string(streaming_base_url_) ||
         empty_string(events_base_url_)) {
@@ -61,9 +61,10 @@ tl::expected<ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
         auto trim_trailing_slashes = [](std::string const& url) -> std::string {
             return trim_right_matches(url, '/');
         };
-        return ServiceEndpoints(trim_trailing_slashes(*polling_base_url_),
-                                trim_trailing_slashes(*streaming_base_url_),
-                                trim_trailing_slashes(*events_base_url_));
+        return built::ServiceEndpoints(
+            trim_trailing_slashes(*polling_base_url_),
+            trim_trailing_slashes(*streaming_base_url_),
+            trim_trailing_slashes(*events_base_url_));
     }
 
     // Otherwise if a subset of URLs were set, this is an error.
@@ -87,4 +88,4 @@ template bool operator==(EndpointsBuilder<detail::ClientSDK> const&,
 template bool operator==(EndpointsBuilder<detail::ServerSDK> const&,
                          EndpointsBuilder<detail::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

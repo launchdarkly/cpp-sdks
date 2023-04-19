@@ -6,14 +6,11 @@
 
 class ServiceEndpointTest : public testing::Test {};
 
-using ClientEndpointsBuilder = launchdarkly::client::EndpointsBuilder;
-
-using ServerEndpointsBuilder = launchdarkly::server::EndpointsBuilder;
-
+using namespace launchdarkly;
 using launchdarkly::Error;
 
 TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
-    ClientEndpointsBuilder builder;
+    client_side::EndpointsBuilder builder;
     auto eps = builder.Build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->PollingBaseUrl(), "https://clientsdk.launchdarkly.com");
@@ -22,7 +19,7 @@ TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
 }
 
 TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
-    ServerEndpointsBuilder builder;
+    server_side::EndpointsBuilder builder;
     auto eps = builder.Build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->PollingBaseUrl(), "https://sdk.launchdarkly.com");
@@ -31,21 +28,21 @@ TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
 }
 
 TEST(ServiceEndpointTest, ModifySingleURLCausesError) {
-    auto result = ClientEndpointsBuilder().PollingBaseUrl("foo").Build();
+    auto result = client_side::EndpointsBuilder().PollingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = ClientEndpointsBuilder().StreamingBaseUrl("foo").Build();
+    result = client_side::EndpointsBuilder().StreamingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = ClientEndpointsBuilder().EventsBaseUrl("foo").Build();
+    result = client_side::EndpointsBuilder().EventsBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
-    auto eps = ClientEndpointsBuilder().RelayProxy("foo").Build();
+    auto eps = client_side::EndpointsBuilder().RelayProxy("foo").Build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     ASSERT_EQ(eps->PollingBaseUrl(), "foo");
@@ -54,30 +51,31 @@ TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
 
 TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
     {
-        auto eps = ClientEndpointsBuilder().RelayProxy("foo/").Build();
+        auto eps = client_side::EndpointsBuilder().RelayProxy("foo/").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps = ClientEndpointsBuilder().RelayProxy("foo////////").Build();
+        auto eps =
+            client_side::EndpointsBuilder().RelayProxy("foo////////").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps = ClientEndpointsBuilder().RelayProxy("/").Build();
+        auto eps = client_side::EndpointsBuilder().RelayProxy("/").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "");
     }
 }
 
 TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
-    auto result = ClientEndpointsBuilder().RelayProxy("").Build();
+    auto result = client_side::EndpointsBuilder().RelayProxy("").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = ClientEndpointsBuilder()
+    result = client_side::EndpointsBuilder()
                  .StreamingBaseUrl("")
                  .EventsBaseUrl("foo")
                  .PollingBaseUrl("bar")
@@ -85,7 +83,7 @@ TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = ClientEndpointsBuilder()
+    result = client_side::EndpointsBuilder()
                  .StreamingBaseUrl("foo")
                  .EventsBaseUrl("")
                  .PollingBaseUrl("bar")
@@ -93,7 +91,7 @@ TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = ClientEndpointsBuilder()
+    result = client_side::EndpointsBuilder()
                  .StreamingBaseUrl("foo")
                  .EventsBaseUrl("bar")
                  .PollingBaseUrl("")

@@ -26,12 +26,12 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     Logger logger{std::make_unique<ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
-    auto config = client::EventsBuilder()
+    auto config = client_side::EventsBuilder()
                       .Capacity(10)
                       .FlushInterval(std::chrono::seconds(1))
                       .Build();
 
-    auto endpoints = client::EndpointsBuilder().Build();
+    auto endpoints = client_side::EndpointsBuilder().Build();
 
     events::detail::AsioEventProcessor processor(
         ioc.get_executor(), *config, *endpoints, "password", logger);

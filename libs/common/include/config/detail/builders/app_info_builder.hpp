@@ -4,11 +4,11 @@
 
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
 #include <vector>
 #include "error.hpp"
+#include "tl/expected.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 class AppInfoBuilder {
    public:
@@ -33,4 +33,4 @@ bool ValidChar(char c);
 std::optional<Error> IsValidTag(std::string const& key,
                                 std::string const& value);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

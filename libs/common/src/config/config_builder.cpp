@@ -1,29 +1,28 @@
-#include "config/detail/config_builder.hpp"
+#include "config/detail/builders/config_builder.hpp"
 #include "config/detail/defaults.hpp"
 #include "console_backend.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
+
 template <typename SDK>
 ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
     : sdk_key_(std::move(sdk_key)) {}
 
 template <typename SDK>
 ConfigBuilder<SDK>& ConfigBuilder<SDK>::ServiceEndpoints(
-    detail::EndpointsBuilder<SDK> builder) {
+    EndpointsBuilder builder) {
     service_endpoints_builder_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::Events(
-    detail::EventsBuilder<SDK> builder) {
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::Events(EventsBuilder builder) {
     events_builder_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::AppInfo(
-    detail::AppInfoBuilder builder) {
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::AppInfo(AppInfoBuilder builder) {
     app_info_builder_ = std::move(builder);
     return *this;
 }
@@ -35,15 +34,14 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::Offline(bool offline) {
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::DataSource(
-    detail::DataSourceBuilder<SDK> builder) {
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::DataSource(DataSourceBuilder builder) {
     data_source_builder_ = builder;
     return *this;
 }
 
 template <typename SDK>
 ConfigBuilder<SDK>& ConfigBuilder<SDK>::HttpProperties(
-    detail::HttpPropertiesBuilder<SDK> builder) {
+    HttpPropertiesBuilder builder) {
     http_properties_builder_ = builder;
     return *this;
 }
@@ -74,7 +72,7 @@ ConfigBuilder<SDK>::Build() const {
     }
 
     auto data_source_config = data_source_builder_
-                                  ? data_source_builder_.value().build()
+                                  ? data_source_builder_.value().Build()
                                   : Defaults<SDK>::DataSourceConfig();
 
     auto http_properties = http_properties_builder_
@@ -95,4 +93,4 @@ ConfigBuilder<SDK>::Build() const {
 template class ConfigBuilder<detail::ClientSDK>;
 template class ConfigBuilder<detail::ServerSDK>;
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

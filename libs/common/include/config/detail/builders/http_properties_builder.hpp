@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "config/detail/http_properties_builder.hpp"
-#include "http_properties.hpp"
+#include "config/detail/built/http_properties.hpp"
+#include "http_properties_builder.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 class HttpPropertiesBuilder {
@@ -27,7 +27,7 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& CustomHeaders(
         std::map<std::string, std::string> base_headers);
 
-    [[nodiscard]] HttpProperties Build() const;
+    [[nodiscard]] built::HttpProperties Build() const;
 
    private:
     std::chrono::milliseconds connect_timeout_{};
@@ -37,4 +37,4 @@ class HttpPropertiesBuilder {
     std::map<std::string, std::string> base_headers_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

@@ -9,7 +9,7 @@
 
 namespace launchdarkly::client_side {
 
-Client::Client(client::Config config, Context context)
+Client::Client(Config config, Context context)
     : logger_(config.Logger()),
       context_(std::move(context)),
       event_processor_(

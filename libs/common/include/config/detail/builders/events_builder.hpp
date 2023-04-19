@@ -1,16 +1,16 @@
 #pragma once
 
-#include <tl/expected.hpp>
 #include "attribute_reference.hpp"
-#include "config/detail/events.hpp"
+#include "config/detail/built/events.hpp"
 #include "error.hpp"
+#include "tl/expected.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 class EventsBuilder;
@@ -87,10 +87,10 @@ class EventsBuilder {
      * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */
-    [[nodiscard]] tl::expected<Events, Error> Build();
+    [[nodiscard]] tl::expected<built::Events, Error> Build();
 
    private:
-    Events config_;
+    built::Events config_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

@@ -2,13 +2,13 @@
 
 #include <string>
 
-namespace launchdarkly::config {
+namespace launchdarkly::config::detail::built {
 
 /**
  * ServiceEndpoints contains configured ServiceEndpoints for the LaunchDarkly
  * service or a Relay Proxy instance.
  */
-class ServiceEndpoints {
+class ServiceEndpoints final {
    public:
     /**
      * Constructs a ServiceEndpoints from individual polling, streaming, and
@@ -48,4 +48,4 @@ class ServiceEndpoints {
 };
 
 bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs);
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::detail::built

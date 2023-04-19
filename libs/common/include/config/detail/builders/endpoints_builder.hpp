@@ -1,15 +1,15 @@
 #pragma once
 
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/built/service_endpoints.hpp"
 #include "error.hpp"
 
-#include <tl/expected.hpp>
+#include "tl/expected.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 class EndpointsBuilder;
@@ -67,7 +67,7 @@ class EndpointsBuilder {
      * returns an error.
      * @return Unique pointer to ServiceEndpoints, or error.
      */
-    [[nodiscard]] tl::expected<ServiceEndpoints, Error> Build();
+    [[nodiscard]] tl::expected<built::ServiceEndpoints, Error> Build();
 
    private:
     std::optional<std::string> polling_base_url_;
@@ -75,4 +75,4 @@ class EndpointsBuilder {
     std::optional<std::string> events_base_url_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders
