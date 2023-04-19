@@ -97,7 +97,7 @@ bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
 
 std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
-    return VariationInternal(key, default_value).as_string();
+    return VariationInternal(key, std::move(default_value)).as_string();
 }
 
 double Client::DoubleVariation(Client::FlagKey const& key,
@@ -110,7 +110,7 @@ int Client::IntVariation(Client::FlagKey const& key, int default_value) {
 }
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
-    return VariationInternal(key, default_value);
+    return VariationInternal(key, std::move(default_value));
 }
 
 data_sources::IDataSourceStatus* Client::DataSourceStatus() {
