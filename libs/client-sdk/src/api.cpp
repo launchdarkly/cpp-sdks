@@ -3,9 +3,7 @@
 #include <optional>
 #include <utility>
 
-#include "console_backend.hpp"
 #include "events/client_events.hpp"
-#include "events/detail/asio_event_processor.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 
 namespace launchdarkly::client_side {
@@ -36,9 +34,7 @@ Client::Client(client::Config config, Context context)
     data_source_->Start();
 
     // TODO: This isn't a long-term solution.
-    std::thread([&](){
-        ioc_.run();
-    }).detach();
+    std::thread([&]() { ioc_.run(); }).detach();
 }
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
@@ -88,7 +84,7 @@ bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
 
 std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
-    return VariationInternal(key, default_value).as_string();
+    return VariationInternal(key, std::move(default_value)).as_string();
 }
 
 double Client::DoubleVariation(Client::FlagKey const& key,
@@ -101,7 +97,7 @@ int Client::IntVariation(Client::FlagKey const& key, int default_value) {
 }
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
-    return VariationInternal(key, default_value);
+    return VariationInternal(key, std::move(default_value));
 }
 
 }  // namespace launchdarkly::client_side
