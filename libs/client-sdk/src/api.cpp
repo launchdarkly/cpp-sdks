@@ -3,8 +3,6 @@
 #include <optional>
 #include <utility>
 
-#include "console_backend.hpp"
-#include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 
@@ -32,13 +30,24 @@ Client::Client(client::Config config, Context context)
           config.data_source_config().use_report,
           config.data_source_config().with_reasons,
           &flag_updater_,
-          logger_)) {
+          status_manager_,
+          logger_)),
+      initialized_(false) {
     data_source_->Start();
 
-    // TODO: This isn't a long-term solution.
-    std::thread([&](){
-        ioc_.run();
-    }).detach();
+    status_manager_.OnDataSourceStatusChange([this](auto status) {
+        if (status.State() == data_sources::DataSourceState::kValid ||
+            status.State() == data_sources::DataSourceState::kShutdown ||
+            status.State() == data_sources::DataSourceState::kSetOffline) {
+            {
+                std::unique_lock lk(init_mutex_);
+                initialized_ = true;
+            }
+            init_waiter_.notify_all();
+        }
+    });
+
+    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
@@ -102,6 +111,22 @@ int Client::IntVariation(Client::FlagKey const& key, int default_value) {
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
     return VariationInternal(key, default_value);
+}
+
+data_sources::IDataSourceStatus* Client::DataSourceStatus() {
+    return &status_manager_;
+}
+
+void Client::WaitForReadySync(std::chrono::seconds timeout) {
+    std::unique_lock lk(init_mutex_);
+    init_waiter_.wait_for(lk, timeout, [this] { return initialized_; });
+}
+
+Client::~Client() {
+    data_source_->Close();
+    ioc_.stop();
+    // TODO: Probably not the best.
+    run_thread_.join();
 }
 
 }  // namespace launchdarkly::client_side

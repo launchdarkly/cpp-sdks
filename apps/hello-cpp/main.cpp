@@ -36,16 +36,11 @@ int main() {
         return 1;
     }
 
-            Client client(ConfigBuilder(key).build().value(),
-                          ContextBuilder().kind("user", "ryan").build());
+    Client client(ConfigBuilder(key).build().value(),
+                  ContextBuilder().kind("user", "ryan").build());
 
-            std::thread doing_stuff([&]() {
-                while (true) {
-                    auto value = client.BoolVariation("my-boolean-flag", false);
-                    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
-                    sleep(10);
-                }
-            });
+    client.WaitForReadySync(std::chrono::seconds(30));
 
-    while (true) {    }
+    auto value = client.BoolVariation("my-boolean-flag", false);
+    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
 }

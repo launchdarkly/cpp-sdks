@@ -19,6 +19,7 @@ add_library(${LIBNAME} api.cpp ${HEADER_LIST}
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
         data_sources/data_source_status_manager.cpp
+        boost_signal_connection.cpp
         )
 
 target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)

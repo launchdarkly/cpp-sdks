@@ -5,6 +5,11 @@
 #include <optional>
 #include <string>
 
+#include <boost/signals2.hpp>
+
+#include "launchdarkly/client_side/connection.hpp"
+#include "launchdarkly/client_side/data_sources/data_source_status.hpp"
+
 namespace launchdarkly::client_side::data_sources {
 
 /**
@@ -195,4 +200,24 @@ class DataSourceStatus {
     std::optional<ErrorInfo> last_error_;
 };
 
-}
+/**
+ * Interface for accessing and listening to the data source status.
+ */
+class IDataSourceStatus {
+    /**
+     * The current status of the data source. Suitable for broadcast to
+     * data source status listeners.
+     */
+    virtual DataSourceStatus Status() = 0;
+
+    /**
+     * Listen to changes to the data source status.
+     *
+     * @param handler Function which will be called with the new status.
+     * @return A IConnection which can be used to stop listening to the status.
+     */
+    virtual std::unique_ptr<IConnection> OnDataSourceStatusChange(
+        std::function<void(data_sources::DataSourceStatus status)> handler) = 0;
+};
+
+}  // namespace launchdarkly::client_side::data_sources

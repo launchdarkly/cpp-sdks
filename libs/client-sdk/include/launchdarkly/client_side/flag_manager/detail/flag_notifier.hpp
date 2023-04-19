@@ -1,30 +1,10 @@
 #pragma once
 
-#include <boost/signals2.hpp>
-
 #include "launchdarkly/client_side/flag_manager/detail/flag_change_event.hpp"
 #include "value.hpp"
+#include "launchdarkly/client_side/connection.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
-
-/**
- * Represents the connection of a listener to a IFlagNotifier.
- * Disconnecting the connection will cause the listener to stop receiving
- * events.
- */
-class IConnection {
-   public:
-    virtual void Disconnect() = 0;
-
-    virtual ~IConnection() = default;
-    IConnection(IConnection const& item) = delete;
-    IConnection(IConnection&& item) = delete;
-    IConnection& operator=(IConnection const&) = delete;
-    IConnection& operator=(IConnection&&) = delete;
-
-   protected:
-    IConnection() = default;
-};
 
 /**
  * Interface to allow listening for flag changes. Notification events should

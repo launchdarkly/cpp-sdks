@@ -13,6 +13,14 @@ namespace launchdarkly::client_side {
 // This tag_invoke needs to be in the same namespace as the
 // ItemDescriptor.
 
+static char const* kErrorParsingPut = "Could not parse PUT message";
+static char const* kErrorPutInvalid = "PUT message contained invalid data";
+static char const* kErrorParsingPatch = "Could not parse PATCH message";
+static char const* kErrorPatchInvalid = "PATCH message contained invalid data";
+static char const* kErrorParsingDelete = "Could not parse DELETE message";
+static char const* kErrorDeleteInvalid =
+    "DELETE message contained invalid data\"";
+
 static tl::expected<
     std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
     JsonError>
@@ -89,17 +97,21 @@ static tl::expected<StreamingDataHandler::DeleteData, JsonError> tag_invoke(
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-StreamingDataHandler::StreamingDataHandler(IDataSourceUpdateSink* handler,
-                                           Logger const& logger)
-    : handler_(handler), logger_(logger) {}
+StreamingDataHandler::StreamingDataHandler(
+    IDataSourceUpdateSink* handler,
+    Logger const& logger,
+    DataSourceStatusManager& status_manager)
+    : handler_(handler), logger_(logger), status_manager_(status_manager) {}
 
-StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
+StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
     launchdarkly::sse::Event const& event) {
     if (event.type() == "put") {
         boost::json::error_code error_code;
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
-            LD_LOG(logger_, LogLevel::kError) << "Could not parse PUT message";
+            LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
+            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                     kErrorParsingPut);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
@@ -108,18 +120,21 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
 
         if (res.has_value()) {
             handler_->Init(res.value());
+            status_manager_.SetState(DataSourceState::kValid);
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
-        LD_LOG(logger_, LogLevel::kError)
-            << "PUT message contained invalid data";
+        LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
+        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                 kErrorPutInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     if (event.type() == "patch") {
         boost::json::error_code error_code;
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
-            LD_LOG(logger_, LogLevel::kError)
-                << "Could not parse PATCH message";
+            LD_LOG(logger_, LogLevel::kError) << kErrorParsingPatch;
+            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                     kErrorParsingPatch);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
@@ -130,16 +145,18 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
-        LD_LOG(logger_, LogLevel::kError)
-            << "PATCH message contained invalid data";
+        LD_LOG(logger_, LogLevel::kError) << kErrorPatchInvalid;
+        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                 kErrorPatchInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     if (event.type() == "delete") {
         boost::json::error_code error_code;
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
-            LD_LOG(logger_, LogLevel::kError)
-                << "Could not parse DELETE message";
+            LD_LOG(logger_, LogLevel::kError) << kErrorParsingDelete;
+            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                     kErrorParsingDelete);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
@@ -150,8 +167,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
                              ItemDescriptor(res.value().version));
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
-        LD_LOG(logger_, LogLevel::kError)
-            << "DELETE message contained invalid data";
+        LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;
+        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
+                                 kErrorDeleteInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     return StreamingDataHandler::MessageStatus::kUnhandledVerb;

@@ -8,6 +8,7 @@
 #include "config/detail/service_endpoints.hpp"
 #include "context.hpp"
 #include "data/evaluation_result.hpp"
+#include "launchdarkly/client_side/data_sources/data_source_status.hpp"
 
 namespace launchdarkly::client_side {
 
@@ -47,9 +48,6 @@ class IDataSourceUpdateSink {
    public:
     virtual void Init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
     virtual void Upsert(std::string key, ItemDescriptor item) = 0;
-
-    // We could add this if we want to support data source status.
-    // virtual void status(<something>)
 
     IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
     IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;

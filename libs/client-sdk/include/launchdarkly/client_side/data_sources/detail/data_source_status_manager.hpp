@@ -2,11 +2,18 @@
 
 #include <functional>
 
+#include <boost/signals2.hpp>
+
+#include "launchdarkly/client_side/connection.hpp"
 #include "launchdarkly/client_side/data_sources/data_source_status.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-class DataSourceStateManager {
+/**
+ * Class that manages updates to the data source status and implements an
+ * interface to get the current status and listen to status changes.
+ */
+class DataSourceStatusManager : public IDataSourceStatus {
    public:
     using DataSourceStatusHandler =
         std::function<void(DataSourceStatus status)>;
@@ -19,25 +26,40 @@ class DataSourceStateManager {
     void SetState(DataSourceState state);
 
     /**
-     * Set the current error.
+     * Set an error with the given kind and message.
      *
-     * @param error The error to set.
+     * For ErrorInfo::ErrorKind::kErrorResponse use the
+     * SetError(ErrorInfo::StatusCodeType) method.
+     * @param kind The kind of the error.
+     * @param message A message for the error.
      */
-    void SetError(std::optional<ErrorInfo> error);
+    void SetError(ErrorInfo::ErrorKind kind, std::string message);
+    // TODO: Handle interrupted and other error states when they are
+    // propagated from the event source.
 
     /**
-     * The current status of the data source. Suitable for broadcast to
-     * data source status listeners.
+     * Set an error based on the given status code.
+     * @param code The status code of the error.
      */
-    DataSourceStatus Status();
+    void SetError(ErrorInfo::StatusCodeType code);
+    // TODO: Handle error codes once the EventSource supports it.
 
-    DataSourceStateManager(DataSourceStatusHandler handler);
+    DataSourceStatus Status() override;
+
+    std::unique_ptr<IConnection> OnDataSourceStatusChange(
+        std::function<void(data_sources::DataSourceStatus status)> handler)
+        override;
+
+    DataSourceStatusManager();
 
    private:
     DataSourceState state_;
     DataSourceStatus::DateTime state_since_;
     std::optional<ErrorInfo> last_error_;
-    DataSourceStatusHandler handler_;
+
+    boost::signals2::signal<void(data_sources::DataSourceStatus status)>
+        data_source_status_signal_;
+    mutable std::mutex status_mutex_;
 };
 
 }  // namespace launchdarkly::client_side::data_sources::detail
