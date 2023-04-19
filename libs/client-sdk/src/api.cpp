@@ -3,7 +3,7 @@
 #include <optional>
 #include <utility>
 
-#include "events/client_events.hpp"
+#include "events/detail/asio_event_processor.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 
 namespace launchdarkly::client_side {

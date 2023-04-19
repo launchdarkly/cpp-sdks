@@ -11,8 +11,8 @@
 #include "error.hpp"
 #include "events/event_processor.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
-#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "logger.hpp"
 #include "value.hpp"
 
