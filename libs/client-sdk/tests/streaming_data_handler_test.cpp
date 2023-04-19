@@ -29,8 +29,8 @@ class TestHandler : public IDataSourceUpdateSink {
 
 TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(launchdarkly::sse::Event(
         "put", R"({"flagA": {"version":1, "value":"test"}})"));
@@ -47,8 +47,8 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
 
 TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res =
         stream_handler.handle_message(launchdarkly::sse::Event("put", "{}"));
@@ -61,8 +61,8 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
 
 TEST(StreamingDataHandlerTests, BadJsonPut) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("put", "{sorry"));
@@ -73,8 +73,8 @@ TEST(StreamingDataHandlerTests, BadJsonPut) {
 
 TEST(StreamingDataHandlerTests, BadSchemaPut) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("put", "{\"potato\": {}}"));
@@ -85,8 +85,8 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
 
 TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(launchdarkly::sse::Event(
         "patch", R"({"key": "flagA", "version":1, "value": "test"})"));
@@ -103,8 +103,8 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
 
 TEST(StreamingDataHandlerTests, BadJsonPatch) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("patch", "{sorry"));
@@ -115,8 +115,8 @@ TEST(StreamingDataHandlerTests, BadJsonPatch) {
 
 TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("patch", R"({"potato": {}})"));
@@ -127,8 +127,8 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
 
 TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("delete", R"({"key": "flagA", "version":1})"));
@@ -142,8 +142,8 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
 
 TEST(StreamingDataHandlerTests, BadJsonDelete) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("delete", "{sorry"));
@@ -154,8 +154,8 @@ TEST(StreamingDataHandlerTests, BadJsonDelete) {
 
 TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("delete", R"({"potato": {}})"));
@@ -166,8 +166,8 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
 
 TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
-    auto test_handler = std::make_shared<TestHandler>();
-    StreamingDataHandler stream_handler(test_handler, logger);
+    auto test_handler = std::make_unique<TestHandler>();
+    StreamingDataHandler stream_handler(test_handler.get(), logger);
 
     auto res = stream_handler.handle_message(
         launchdarkly::sse::Event("potato", R"({"potato": {}})"));

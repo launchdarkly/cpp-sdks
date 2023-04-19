@@ -10,6 +10,9 @@
 #include "context.hpp"
 #include "error.hpp"
 #include "events/event_processor.hpp"
+#include "launchdarkly/client_side/data_source.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
 #include "logger.hpp"
 #include "value.hpp"
 
@@ -42,6 +45,7 @@ class Client {
     Value JsonVariation(FlagKey const& key, Value default_value);
 
    private:
+    Value VariationInternal(FlagKey const& key, Value default_value);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);
@@ -51,6 +55,9 @@ class Client {
     boost::asio::io_context ioc_;
     Context context_;
     std::unique_ptr<events::IEventProcessor> event_processor_;
+    std::unique_ptr<IDataSource> data_source_;
+    flag_manager::detail::FlagUpdater flag_updater_;
+    flag_manager::detail::FlagManager flag_manager_;
 };
 
 }  // namespace launchdarkly::client_side

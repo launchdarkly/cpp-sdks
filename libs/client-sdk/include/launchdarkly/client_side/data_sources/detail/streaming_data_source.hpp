@@ -19,6 +19,7 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 class StreamingDataSource final : public IDataSource {
    public:
+    using InitCompleteHandler = std::function<void(bool initialized)>;
     StreamingDataSource(std::string const& sdk_key,
                         boost::asio::any_io_executor ioc,
                         Context const& context,
@@ -26,11 +27,11 @@ class StreamingDataSource final : public IDataSource {
                         config::detail::HttpProperties const& http_properties,
                         bool use_report,
                         bool with_reasons,
-                        std::shared_ptr<IDataSourceUpdateSink> handler,
+                        IDataSourceUpdateSink* handler,
                         Logger const& logger);
 
-    void start() override;
-    void close() override;
+    void Start() override;
+    void Close() override;
 
    private:
     StreamingDataHandler data_source_handler_;

@@ -44,8 +44,7 @@ class StreamingDataHandler {
         uint64_t version;
     };
 
-    StreamingDataHandler(std::shared_ptr<IDataSourceUpdateSink> handler,
-                         Logger const& logger);
+    StreamingDataHandler(IDataSourceUpdateSink* handler, Logger const& logger);
 
     /**
      * Handle an SSE event.
@@ -55,7 +54,7 @@ class StreamingDataHandler {
     MessageStatus handle_message(launchdarkly::sse::Event const& event);
 
    private:
-    std::shared_ptr<IDataSourceUpdateSink> handler_;
+    IDataSourceUpdateSink* handler_;
     Logger const& logger_;
 };
 }  // namespace launchdarkly::client_side::data_sources::detail

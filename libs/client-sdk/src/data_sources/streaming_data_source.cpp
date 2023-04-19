@@ -23,10 +23,10 @@ StreamingDataSource::StreamingDataSource(
     config::detail::HttpProperties const& http_properties,
     bool use_report,
     bool with_reasons,
-    std::shared_ptr<IDataSourceUpdateSink> handler,
+    IDataSourceUpdateSink* handler,
     Logger const& logger)
     : logger_(logger),
-      data_source_handler_(StreamingDataHandler(std::move(handler), logger)) {
+      data_source_handler_(StreamingDataHandler(handler, logger)) {
     auto uri_components =
         boost::urls::parse_uri(endpoints.streaming_base_url());
     // TODO: Handle parsing error?
@@ -75,11 +75,11 @@ StreamingDataSource::StreamingDataSource(
     client_ = client_builder.build();
 }
 
-void StreamingDataSource::start() {
+void StreamingDataSource::Start() {
     client_->run();
 }
 
-void StreamingDataSource::close() {
+void StreamingDataSource::Close() {
     client_->close();
 }
 

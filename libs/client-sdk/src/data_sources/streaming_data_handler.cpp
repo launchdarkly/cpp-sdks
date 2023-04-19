@@ -90,10 +90,9 @@ static tl::expected<StreamingDataHandler::DeleteData, JsonError> tag_invoke(
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-StreamingDataHandler::StreamingDataHandler(
-    std::shared_ptr<IDataSourceUpdateSink> handler,
-    Logger const& logger)
-    : handler_(std::move(std::move(std::move(handler)))), logger_(logger) {}
+StreamingDataHandler::StreamingDataHandler(IDataSourceUpdateSink* handler,
+                                           Logger const& logger)
+    : handler_(handler), logger_(logger) {}
 
 StreamingDataHandler::MessageStatus StreamingDataHandler::handle_message(
     launchdarkly::sse::Event const& event) {

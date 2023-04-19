@@ -4,6 +4,11 @@
 #include <boost/asio/io_context.hpp>
 
 #include "console_backend.hpp"
+#include "context_builder.hpp"
+#include "launchdarkly/client_side/api.hpp"
+#include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -12,38 +17,35 @@
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
 using launchdarkly::ConsoleBackend;
+using launchdarkly::ContextBuilder;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
+using launchdarkly::client::ConfigBuilder;
+using launchdarkly::client_side::Client;
+using launchdarkly::client_side::flag_manager::detail::FlagManager;
+using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
+    Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kDebug, "Hello"));
 
     net::io_context ioc;
 
     char const* key = std::getenv("STG_SDK_KEY");
     if (!key) {
-        std::cout << "Set environment variable STG_SDK_KEY to the sdk key\n";
-        return 1;
-    }
-    auto client =
-        launchdarkly::sse::Builder(ioc.get_executor(),
-                                   "https://stream-stg.launchdarkly.com/all")
-            .header("Authorization", key)
-            .receiver([&](launchdarkly::sse::Event ev) {
-                LD_LOG(logger, LogLevel::kInfo) << "event: " << ev.type();
-                LD_LOG(logger, LogLevel::kInfo)
-                    << "data: " << std::move(ev).take();
-            })
-            .logger([&](std::string msg) {
-                LD_LOG(logger, LogLevel::kDebug) << std::move(msg);
-            })
-            .build();
-
-    if (!client) {
-        LD_LOG(logger, LogLevel::kError) << "Failed to build client";
+        std::cout << "Set environment variable STG_SDK_KEY to the sdk key";
         return 1;
     }
 
-    client->run();
-    ioc.run();
+            Client client(ConfigBuilder(key).build().value(),
+                          ContextBuilder().kind("user", "ryan").build());
+
+            std::thread doing_stuff([&]() {
+                while (true) {
+                    auto value = client.BoolVariation("my-boolean-flag", false);
+                    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
+                    sleep(10);
+                }
+            });
+
+    while (true) {    }
 }
