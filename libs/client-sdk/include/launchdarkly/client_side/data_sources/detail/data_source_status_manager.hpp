@@ -13,7 +13,7 @@ namespace launchdarkly::client_side::data_sources::detail {
  * Class that manages updates to the data source status and implements an
  * interface to get the current status and listen to status changes.
  */
-class DataSourceStatusManager : public IDataSourceStatus {
+class DataSourceStatusManager : public IDataSourceStatusProvider {
    public:
     using DataSourceStatusHandler =
         std::function<void(DataSourceStatus status)>;
@@ -23,7 +23,7 @@ class DataSourceStatusManager : public IDataSourceStatus {
      *
      * @param state The new state.
      */
-    void SetState(DataSourceState state);
+    void SetState(DataSourceStatus::DataSourceState state);
 
     /**
      * Set an error with the given kind and message.
@@ -33,7 +33,8 @@ class DataSourceStatusManager : public IDataSourceStatus {
      * @param kind The kind of the error.
      * @param message A message for the error.
      */
-    void SetError(ErrorInfo::ErrorKind kind, std::string message);
+    void SetError(DataSourceStatus::ErrorInfo::ErrorKind kind,
+                  std::string message);
     // TODO: Handle interrupted and other error states when they are
     // propagated from the event source.
 
@@ -41,7 +42,7 @@ class DataSourceStatusManager : public IDataSourceStatus {
      * Set an error based on the given status code.
      * @param code The status code of the error.
      */
-    void SetError(ErrorInfo::StatusCodeType code);
+    void SetError(DataSourceStatus::ErrorInfo::StatusCodeType code);
     // TODO: Handle error codes once the EventSource supports it.
 
     DataSourceStatus Status() override;
@@ -53,9 +54,9 @@ class DataSourceStatusManager : public IDataSourceStatus {
     DataSourceStatusManager();
 
    private:
-    DataSourceState state_;
+    DataSourceStatus::DataSourceState state_;
     DataSourceStatus::DateTime state_since_;
-    std::optional<ErrorInfo> last_error_;
+    std::optional<DataSourceStatus::ErrorInfo> last_error_;
 
     boost::signals2::signal<void(data_sources::DataSourceStatus status)>
         data_source_status_signal_;

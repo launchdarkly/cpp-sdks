@@ -3,7 +3,6 @@
 #include <boost/json.hpp>
 #include <boost/url.hpp>
 
-#include <memory>
 #include <utility>
 
 #include "config/detail/defaults.hpp"
@@ -83,7 +82,7 @@ void StreamingDataSource::Start() {
 }
 
 void StreamingDataSource::Close() {
-    status_manager_.SetState(DataSourceState::kShutdown);
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
     client_->close();
 }
 

@@ -1,5 +1,6 @@
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include "launchdarkly/client_side/connection.hpp"
 #include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
@@ -7,8 +8,9 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-void DataSourceStatusManager::SetState(DataSourceState state) {
-    bool changed;
+void DataSourceStatusManager::SetState(
+    DataSourceStatus::DataSourceState state) {
+    bool changed = false;
     {
         std::lock_guard lock(status_mutex_);
         changed = state_ != state;
@@ -22,24 +24,27 @@ void DataSourceStatusManager::SetState(DataSourceState state) {
     }
 }
 
-void DataSourceStatusManager::SetError(ErrorInfo::ErrorKind kind,
-                                      std::string message) {
+void DataSourceStatusManager::SetError(
+    DataSourceStatus::ErrorInfo::ErrorKind kind,
+    std::string message) {
     {
         std::lock_guard lock(status_mutex_);
-        last_error_ =
-            ErrorInfo(kind, 0, message, std::chrono::system_clock::now());
+        last_error_ = DataSourceStatus::ErrorInfo(
+            kind, 0, std::move(message), std::chrono::system_clock::now());
         state_since_ = std::chrono::system_clock::now();
     }
 
     data_source_status_signal_(Status());
 }
 
-void DataSourceStatusManager::SetError(ErrorInfo::StatusCodeType code) {
+void DataSourceStatusManager::SetError(
+    DataSourceStatus::ErrorInfo::StatusCodeType code) {
     // TODO: String message.
     {
         std::lock_guard lock(status_mutex_);
-        last_error_ = ErrorInfo(ErrorInfo::ErrorKind::kErrorResponse, code, "",
-                                std::chrono::system_clock::now());
+        last_error_ = DataSourceStatus::ErrorInfo(
+            DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, code, "",
+            std::chrono::system_clock::now());
         state_since_ = std::chrono::system_clock::now();
     }
     data_source_status_signal_(Status());
@@ -47,7 +52,7 @@ void DataSourceStatusManager::SetError(ErrorInfo::StatusCodeType code) {
 
 DataSourceStatus DataSourceStatusManager::Status() {
     std::lock_guard lock(status_mutex_);
-    return DataSourceStatus(state_, state_since_, last_error_);
+    return {state_, state_since_, last_error_};
 }
 
 std::unique_ptr<IConnection> DataSourceStatusManager::OnDataSourceStatusChange(
@@ -59,7 +64,7 @@ std::unique_ptr<IConnection> DataSourceStatusManager::OnDataSourceStatusChange(
 }
 
 DataSourceStatusManager::DataSourceStatusManager()
-    : state_(DataSourceState::kInitializing),
+    : state_(DataSourceStatus::DataSourceState::kInitializing),
       state_since_(std::chrono::system_clock::now()) {}
 
 }  // namespace launchdarkly::client_side::data_sources::detail

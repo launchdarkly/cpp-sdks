@@ -8,6 +8,8 @@
 
 namespace launchdarkly::client_side {
 
+using launchdarkly::client_side::data_sources::DataSourceStatus;
+
 Client::Client(client::Config config, Context context)
     : logger_(config.take_logger()),
       context_(std::move(context)),
@@ -36,11 +38,11 @@ Client::Client(client::Config config, Context context)
     data_source_->Start();
 
     status_manager_.OnDataSourceStatusChange([this](auto status) {
-        if (status.State() == data_sources::DataSourceState::kValid ||
-            status.State() == data_sources::DataSourceState::kShutdown ||
-            status.State() == data_sources::DataSourceState::kSetOffline) {
+        if (status.State() == DataSourceStatus::DataSourceState::kValid ||
+            status.State() == DataSourceStatus::DataSourceState::kShutdown ||
+            status.State() == DataSourceStatus::DataSourceState::kSetOffline) {
             {
-                std::unique_lock lk(init_mutex_);
+                std::unique_lock lock(init_mutex_);
                 initialized_ = true;
             }
             init_waiter_.notify_all();
@@ -113,13 +115,13 @@ Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
     return VariationInternal(key, std::move(default_value));
 }
 
-data_sources::IDataSourceStatus* Client::DataSourceStatus() {
+data_sources::IDataSourceStatusProvider* Client::DataSourceStatus() {
     return &status_manager_;
 }
 
 void Client::WaitForReadySync(std::chrono::seconds timeout) {
-    std::unique_lock lk(init_mutex_);
-    init_waiter_.wait_for(lk, timeout, [this] { return initialized_; });
+    std::unique_lock lock(init_mutex_);
+    init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
 
 Client::~Client() {

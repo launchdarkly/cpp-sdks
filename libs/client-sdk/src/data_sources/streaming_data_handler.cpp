@@ -13,12 +13,14 @@ namespace launchdarkly::client_side {
 // This tag_invoke needs to be in the same namespace as the
 // ItemDescriptor.
 
-static char const* kErrorParsingPut = "Could not parse PUT message";
-static char const* kErrorPutInvalid = "PUT message contained invalid data";
-static char const* kErrorParsingPatch = "Could not parse PATCH message";
-static char const* kErrorPatchInvalid = "PATCH message contained invalid data";
-static char const* kErrorParsingDelete = "Could not parse DELETE message";
-static char const* kErrorDeleteInvalid =
+static char const* const kErrorParsingPut = "Could not parse PUT message";
+static char const* const kErrorPutInvalid =
+    "PUT message contained invalid data";
+static char const* const kErrorParsingPatch = "Could not parse PATCH message";
+static char const* const kErrorPatchInvalid =
+    "PATCH message contained invalid data";
+static char const* const kErrorParsingDelete = "Could not parse DELETE message";
+static char const* const kErrorDeleteInvalid =
     "DELETE message contained invalid data\"";
 
 static tl::expected<
@@ -110,8 +112,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
-            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                     kErrorParsingPut);
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorParsingPut);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
@@ -120,12 +123,13 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
 
         if (res.has_value()) {
             handler_->Init(res.value());
-            status_manager_.SetState(DataSourceState::kValid);
+            status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
-        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                 kErrorPutInvalid);
+        status_manager_.SetError(
+            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+            kErrorPutInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     if (event.type() == "patch") {
@@ -133,8 +137,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPatch;
-            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                     kErrorParsingPatch);
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorParsingPatch);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
@@ -146,8 +151,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPatchInvalid;
-        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                 kErrorPatchInvalid);
+        status_manager_.SetError(
+            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+            kErrorPatchInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     if (event.type() == "delete") {
@@ -155,8 +161,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
         auto parsed = boost::json::parse(event.data(), error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingDelete;
-            status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                     kErrorParsingDelete);
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorParsingDelete);
             return StreamingDataHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
@@ -168,8 +175,9 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
             return StreamingDataHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;
-        status_manager_.SetError(ErrorInfo::ErrorKind::kInvalidData,
-                                 kErrorDeleteInvalid);
+        status_manager_.SetError(
+            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+            kErrorDeleteInvalid);
         return StreamingDataHandler::MessageStatus::kInvalidMessage;
     }
     return StreamingDataHandler::MessageStatus::kUnhandledVerb;

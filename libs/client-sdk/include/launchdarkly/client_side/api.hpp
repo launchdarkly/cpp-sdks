@@ -48,7 +48,7 @@ class Client {
 
     Value JsonVariation(FlagKey const& key, Value default_value);
 
-    data_sources::IDataSourceStatus* DataSourceStatus();
+    data_sources::IDataSourceStatusProvider* DataSourceStatus();
 
     void WaitForReadySync(std::chrono::seconds timeout);
 
