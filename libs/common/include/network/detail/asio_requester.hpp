@@ -2,6 +2,7 @@
 
 #include "network/detail/http_requester.hpp"
 
+#include <boost/asio.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -202,9 +203,31 @@ class AsioRequester : public IHttpRequester {
    public:
     AsioRequester(net::any_io_executor ctx) : ctx_(ctx) {}
 
-    std::shared_ptr<IRequestState> Request(
-        HttpRequest request,
-        ResponseHandler handler) override {
+    template <typename CompletionToken>
+    typename boost::asio::async_result<CompletionToken,
+                                       void(HttpResult result)>::return_type
+    Request(boost::asio::io_service& ios,
+            HttpRequest request,
+            CompletionToken&& token) {
+        namespace asio = boost::asio;
+        namespace system = boost::system;
+
+        using Sig = void(HttpResult result);
+        using Result = asio::async_result<CompletionToken, Sig>;
+        using Handler = typename Result::completion_handler_type;
+
+        Handler handler(std::forward<decltype(token)>(token));
+        Result result(handler);
+
+        ios.post([handler, request]() mutable {
+            handler(system::error_code(), request);
+        });
+
+        return result.get();
+    }
+
+    std::shared_ptr<IRequestState> Request(HttpRequest request,
+                                           ResponseHandler handler) override {
         // TODO: Determine http/https.
         http::request<http::string_body> beast_request;
         beast_request.method(http::verb::get);  // TODO: Get from request.

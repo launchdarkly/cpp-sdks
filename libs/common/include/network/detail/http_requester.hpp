@@ -82,8 +82,8 @@ class HttpRequest {
     std::optional<std::string> body_;
     config::detail::HttpProperties properties_;
     std::string host_;
-    std::string port_ = "8080";
-    std::string path_ = "/";
+    std::string port_;
+    std::string path_;
     bool is_https_;
 };
 
@@ -107,6 +107,8 @@ class IHttpRequester {
     virtual std::shared_ptr<IRequestState> Request(
         HttpRequest request,
         ResponseHandler handler) = 0;
+
+
 
     virtual ~IHttpRequester() = default;
     IHttpRequester(IHttpRequester const& item) = delete;
