@@ -5,12 +5,18 @@
 #include <string>
 #include <unordered_map>
 #include "attribute_reference.hpp"
-namespace launchdarkly::config::detail {
 
-struct Events {
+namespace launchdarkly::config::detail::builders {
+template <typename T>
+class EventsBuilder;
+}
+
+namespace launchdarkly::config::detail::built {
+
+class Events final {
    public:
     template <typename SDK>
-    friend class EventsBuilder;
+    friend class builders::EventsBuilder;
     /**
      * Constructs configuration for the event subsystem.
      * @param capacity How many events can queue in memory before new events
@@ -22,7 +28,7 @@ struct Events {
      * @param all_attributes_private Whether all attributes should be treated as
      * private or not.
      * @param private_attrs Which attributes should be treated as private, if
-     * all_attributes_private is false.
+     * AllAttributesPrivate is false.
      * @param security Whether a plaintext or encrypted client should be used
      * for event delivery.
      */
@@ -35,27 +41,27 @@ struct Events {
     /**
      * Capacity of the event processor.
      */
-    [[nodiscard]] std::size_t capacity() const;
+    [[nodiscard]] std::size_t Capacity() const;
 
     /**
      * Flush interval of the event processor, in milliseconds.
      */
-    [[nodiscard]] std::chrono::milliseconds flush_interval() const;
+    [[nodiscard]] std::chrono::milliseconds FlushInterval() const;
 
     /**
      * Path component of the LaunchDarkly event delivery endpoint.
      */
-    [[nodiscard]] std::string const& path() const;
+    [[nodiscard]] std::string const& Path() const;
 
     /**
      * Whether all attributes should be considered private or not.
      */
-    [[nodiscard]] bool all_attributes_private() const;
+    [[nodiscard]] bool AllAttributesPrivate() const;
 
     /**
      * Set of individual attributes that should be considered private.
      */
-    [[nodiscard]] AttributeReference::SetType const& private_attributes() const;
+    [[nodiscard]] AttributeReference::SetType const& PrivateAttributes() const;
 
    private:
     std::size_t capacity_;
@@ -67,4 +73,4 @@ struct Events {
 
 bool operator==(Events const& lhs, Events const& rhs);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

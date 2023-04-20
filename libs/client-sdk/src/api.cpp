@@ -3,22 +3,54 @@
 #include <optional>
 #include <utility>
 
-#include "console_backend.hpp"
-#include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
+#include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 
 namespace launchdarkly::client_side {
 
-Client::Client(client::Config config, Context context)
-    : logger_(config.take_logger()),
+using launchdarkly::client_side::data_sources::DataSourceStatus;
+
+Client::Client(Config config, Context context)
+    : logger_(config.Logger()),
       context_(std::move(context)),
       event_processor_(
           std::make_unique<launchdarkly::events::detail::AsioEventProcessor>(
               ioc_.get_executor(),
-              config.events_config(),
-              config.service_endpoints(),
-              config.sdk_key(),
-              logger_)) {}
+              config.Events(),
+              config.ServiceEndpoints(),
+              config.SdkKey(),
+              logger_)),
+      flag_updater_(flag_manager_),
+      // TODO: Support polling.
+      data_source_(std::make_unique<launchdarkly::client_side::data_sources::
+                                        detail::StreamingDataSource>(
+          config.SdkKey(),
+          ioc_.get_executor(),
+          context_,
+          config.ServiceEndpoints(),
+          config.HttpProperties(),
+          config.DataSourceConfig().use_report,
+          config.DataSourceConfig().with_reasons,
+          &flag_updater_,
+          status_manager_,
+          logger_)),
+      initialized_(false) {
+    data_source_->Start();
+
+    status_manager_.OnDataSourceStatusChange([this](auto status) {
+        if (status.State() == DataSourceStatus::DataSourceState::kValid ||
+            status.State() == DataSourceStatus::DataSourceState::kShutdown ||
+            status.State() == DataSourceStatus::DataSourceState::kSetOffline) {
+            {
+                std::unique_lock lock(init_mutex_);
+                initialized_ = true;
+            }
+            init_waiter_.notify_all();
+        }
+    });
+
+    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+}
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
     return {};
@@ -53,26 +85,50 @@ void Client::AsyncIdentify(Context context) {
         std::chrono::system_clock::now(), std::move(context)});
 }
 
-bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
+Value Client::VariationInternal(FlagKey const& key, Value default_value) {
+    auto res = flag_manager_.Get(key);
+    if (res && res->flag) {
+        return res->flag->detail().value();
+    }
     return default_value;
+}
+
+bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
+    return VariationInternal(key, default_value).as_bool();
 }
 
 std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
-    return default_value;
+    return VariationInternal(key, std::move(default_value)).as_string();
 }
 
 double Client::DoubleVariation(Client::FlagKey const& key,
                                double default_value) {
-    return default_value;
+    return VariationInternal(key, default_value).as_double();
 }
 
 int Client::IntVariation(Client::FlagKey const& key, int default_value) {
-    return default_value;
+    return VariationInternal(key, default_value).as_int();
 }
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
-    return default_value;
+    return VariationInternal(key, std::move(default_value));
+}
+
+data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
+    return status_manager_;
+}
+
+void Client::WaitForReadySync(std::chrono::seconds timeout) {
+    std::unique_lock lock(init_mutex_);
+    init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
+}
+
+Client::~Client() {
+    data_source_->Close();
+    ioc_.stop();
+    // TODO: Probably not the best.
+    run_thread_.join();
 }
 
 }  // namespace launchdarkly::client_side

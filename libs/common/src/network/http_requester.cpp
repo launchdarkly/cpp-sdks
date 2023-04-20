@@ -43,7 +43,7 @@ HttpRequest::BodyType const& HttpRequest::Body() const {
     return body_;
 }
 
-config::detail::HttpProperties const& HttpRequest::Properties() const {
+config::detail::built::HttpProperties const& HttpRequest::Properties() const {
     return properties_;
 }
 
@@ -57,7 +57,7 @@ std::string const& HttpRequest::Path() const {
 
 HttpRequest::HttpRequest(std::string url,
                          HttpMethod method,
-                         config::detail::HttpProperties properties,
+                         config::detail::built::HttpProperties properties,
                          BodyType body)
     : properties_(properties), method_(method), body_(body) {
     auto uri_components = boost::urls::parse_uri(url);

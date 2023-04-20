@@ -6,7 +6,7 @@
 #include <ostream>
 #include <string>
 
-#include "config/detail/http_properties.hpp"
+#include "config/detail/built/http_properties.hpp"
 
 namespace launchdarkly::network::detail {
 
@@ -66,7 +66,7 @@ class HttpRequest {
 
     HttpMethod Method() const;
     BodyType const& Body() const;
-    config::detail::HttpProperties const& Properties() const;
+    config::detail::built::HttpProperties const& Properties() const;
     std::string const& Host() const;
     std::string const& Port() const;
     std::string const& Path() const;
@@ -74,13 +74,13 @@ class HttpRequest {
 
     HttpRequest(std::string url,
                 HttpMethod method,
-                config::detail::HttpProperties properties,
+                config::detail::built::HttpProperties properties,
                 BodyType body);
 
    private:
     HttpMethod method_;
     std::optional<std::string> body_;
-    config::detail::HttpProperties properties_;
+    config::detail::built::HttpProperties properties_;
     std::string host_;
     std::string port_;
     std::string path_;
@@ -104,11 +104,8 @@ class IRequestState {
 class IHttpRequester {
    public:
     using ResponseHandler = std::function<void(HttpResult result)>;
-    virtual std::shared_ptr<IRequestState> Request(
-        HttpRequest request,
-        ResponseHandler handler) = 0;
-
-
+    virtual std::shared_ptr<IRequestState> Request(HttpRequest request,
+                                                   ResponseHandler handler) = 0;
 
     virtual ~IHttpRequester() = default;
     IHttpRequester(IHttpRequester const& item) = delete;

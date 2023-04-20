@@ -1,8 +1,8 @@
 #include <utility>
 
-#include "config/detail/http_properties.hpp"
+#include "config/detail/built/http_properties.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::built {
 
 HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
                                std::chrono::milliseconds read_timeout,
@@ -13,27 +13,27 @@ HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
       user_agent_(std::move(user_agent)),
       base_headers_(std::move(base_headers)) {}
 
-std::chrono::milliseconds HttpProperties::connect_timeout() const {
+std::chrono::milliseconds HttpProperties::ConnectTimeout() const {
     return connect_timeout_;
 }
 
-std::chrono::milliseconds HttpProperties::read_timeout() const {
+std::chrono::milliseconds HttpProperties::ReadTimeout() const {
     return read_timeout_;
 }
 
-std::string const& HttpProperties::user_agent() const {
+std::string const& HttpProperties::UserAgent() const {
     return user_agent_;
 }
 
-std::map<std::string, std::string> const& HttpProperties::base_headers() const {
+std::map<std::string, std::string> const& HttpProperties::BaseHeaders() const {
     return base_headers_;
 }
 
 bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
-    return lhs.read_timeout() == rhs.read_timeout() &&
-           lhs.connect_timeout() == rhs.connect_timeout() &&
-           lhs.base_headers() == rhs.base_headers() &&
-           lhs.user_agent() == rhs.user_agent();
+    return lhs.ReadTimeout() == rhs.ReadTimeout() &&
+           lhs.ConnectTimeout() == rhs.ConnectTimeout() &&
+           lhs.BaseHeaders() == rhs.BaseHeaders() &&
+           lhs.UserAgent() == rhs.UserAgent();
 }
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::built

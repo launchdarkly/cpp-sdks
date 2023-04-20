@@ -1,19 +1,19 @@
-#include "config/detail/application_info.hpp"
+#include "config/detail/builders/app_info_builder.hpp"
 
 #include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <cctype>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 // Defines the maximum character length for an Application Tag value.
 constexpr std::size_t kMaxTagValueLength = 64;
 
-ApplicationInfo::Tag::Tag(std::string key, std::string value)
+AppInfoBuilder::Tag::Tag(std::string key, std::string value)
     : key(std::move(key)), value(std::move(value)) {}
 
-tl::expected<std::string, Error> ApplicationInfo::Tag::build() const {
+tl::expected<std::string, Error> AppInfoBuilder::Tag::Build() const {
     if (auto err = IsValidTag(key, value)) {
         return tl::unexpected(*err);
     }
@@ -41,19 +41,19 @@ std::optional<Error> IsValidTag(std::string const& key,
     return std::nullopt;
 }
 
-ApplicationInfo& ApplicationInfo::add_tag(std::string key, std::string value) {
+AppInfoBuilder& AppInfoBuilder::AddTag(std::string key, std::string value) {
     tags_.emplace_back(std::move(key), std::move(value));
     return *this;
 }
-ApplicationInfo& ApplicationInfo::app_identifier(std::string app_id) {
-    return add_tag("application-id", std::move(app_id));
+AppInfoBuilder& AppInfoBuilder::Identifier(std::string app_id) {
+    return AddTag("application-id", std::move(app_id));
 }
 
-ApplicationInfo& ApplicationInfo::app_version(std::string version) {
-    return add_tag("application-version", std::move(version));
+AppInfoBuilder& AppInfoBuilder::Version(std::string version) {
+    return AddTag("application-version", std::move(version));
 }
 
-std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
+std::optional<std::string> AppInfoBuilder::Build(Logger& logger) const {
     if (tags_.empty()) {
         LD_LOG(logger, LogLevel::kDebug) << "no application tags configured";
         return std::nullopt;
@@ -65,7 +65,7 @@ std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
 
     std::transform(
         tags_.cbegin(), tags_.cend(), unvalidated.begin(),
-        [](auto tag) { return std::make_pair(tag.key, tag.build()); });
+        [](auto tag) { return std::make_pair(tag.key, tag.Build()); });
 
     std::vector<std::string> validated;
 
@@ -93,4 +93,4 @@ std::optional<std::string> ApplicationInfo::build(Logger& logger) const {
     return boost::algorithm::join(validated, " ");
 }
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

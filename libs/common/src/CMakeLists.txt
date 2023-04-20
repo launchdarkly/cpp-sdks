@@ -28,7 +28,7 @@ add_library(${LIBNAME}
         data/evaluation_detail_internal.cpp
         data/evaluation_result.cpp
         context_filter.cpp
-        config/application_info.cpp
+        config/app_info_builder.cpp
         lib.cpp
         value_mapping.cpp
         serialization/json_attributes.cpp
