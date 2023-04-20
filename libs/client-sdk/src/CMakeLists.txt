@@ -1,8 +1,26 @@
 
-file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/data_sources/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/data_sources/detail/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/detail/*.hpp"
+        )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} api.cpp ${HEADER_LIST} data_sources/streaming_data_source.cpp data_sources/base_64.cpp data_sources/streaming_data_handler.cpp data_source_update_sink.cpp flag_manager/flag_manager.cpp flag_manager/flag_updater.cpp flag_manager/flag_change_event.cpp)
+add_library(${LIBNAME} api.cpp ${HEADER_LIST}
+        data_sources/streaming_data_source.cpp
+        data_sources/base_64.cpp
+        data_sources/streaming_data_handler.cpp
+        data_source_update_sink.cpp
+        flag_manager/flag_manager.cpp
+        flag_manager/flag_updater.cpp
+        flag_manager/flag_change_event.cpp
+        data_sources/data_source_status.cpp
+        data_sources/data_source_status_manager.cpp
+        boost_signal_connection.cpp
+        )
 
 target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)
 

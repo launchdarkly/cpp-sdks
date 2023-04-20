@@ -1,15 +1,22 @@
 #pragma once
 
 #include <boost/asio/io_context.hpp>
+
+#include <condition_variable>
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <thread>
+
 #include <tl/expected.hpp>
 #include "config/client.hpp"
 #include "context.hpp"
 #include "error.hpp"
 #include "events/event_processor.hpp"
+#include "launchdarkly/client_side/data_source.hpp"
+#include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "logger.hpp"
 #include "value.hpp"
 
@@ -41,16 +48,33 @@ class Client {
 
     Value JsonVariation(FlagKey const& key, Value default_value);
 
+    data_sources::IDataSourceStatusProvider& DataSourceStatus();
+
+    void WaitForReadySync(std::chrono::seconds timeout);
+
+    ~Client();
+
    private:
+    Value VariationInternal(FlagKey const& key, Value default_value);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);
+
+    bool initialized_;
+    std::mutex init_mutex_;
+    std::condition_variable init_waiter_;
+
+    data_sources::detail::DataSourceStatusManager status_manager_;
+    flag_manager::detail::FlagManager flag_manager_;
+    flag_manager::detail::FlagUpdater flag_updater_;
 
     Logger logger_;
     std::thread thread_;
     boost::asio::io_context ioc_;
     Context context_;
     std::unique_ptr<events::IEventProcessor> event_processor_;
+    std::unique_ptr<IDataSource> data_source_;
+    std::thread run_thread_;
 };
 
 }  // namespace launchdarkly::client_side

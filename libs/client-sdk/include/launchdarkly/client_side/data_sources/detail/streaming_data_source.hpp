@@ -11,6 +11,7 @@ using namespace std::chrono_literals;
 #include "data/evaluation_result.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
 #include "launchdarkly/client_side/data_source_update_sink.hpp"
+#include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
 #include "launchdarkly/sse/client.hpp"
 #include "logger.hpp"
@@ -27,13 +28,15 @@ class StreamingDataSource final : public IDataSource {
         config::detail::built::HttpProperties const& http_properties,
         bool use_report,
         bool with_reasons,
-        std::shared_ptr<IDataSourceUpdateSink> handler,
+        IDataSourceUpdateSink* handler,
+        DataSourceStatusManager& status_manager,
         Logger const& logger);
 
-    void start() override;
-    void close() override;
+    void Start() override;
+    void Close() override;
 
    private:
+    DataSourceStatusManager& status_manager_;
     StreamingDataHandler data_source_handler_;
     std::string streaming_endpoint_;
     std::string string_context_;
