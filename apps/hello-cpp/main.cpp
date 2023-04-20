@@ -5,14 +5,9 @@
 
 #include "console_backend.hpp"
 #include "context_builder.hpp"
-#include "launchdarkly/client_side/api.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
-#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
-#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
-#include "logger.hpp"
 
 #include <iostream>
-#include <utility>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
