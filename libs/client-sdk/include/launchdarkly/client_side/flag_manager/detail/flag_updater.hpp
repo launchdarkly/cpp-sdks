@@ -31,16 +31,6 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
         override;
 
    private:
-    class Connection : public IConnection {
-       public:
-        friend class FlagUpdater;
-        Connection(boost::signals2::connection connection);
-        void Disconnect() override;
-
-       private:
-        boost::signals2::connection connection_;
-    };
-
     bool HasListeners() const;
 
     FlagManager& flag_manager_;
@@ -54,6 +44,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
     // the mutex, which is more difficult to keep consistent over the code
     // lifetime.
     mutable std::recursive_mutex signal_mutex_;
+
     void DispatchEvent(FlagValueChangeEvent event);
 };
 

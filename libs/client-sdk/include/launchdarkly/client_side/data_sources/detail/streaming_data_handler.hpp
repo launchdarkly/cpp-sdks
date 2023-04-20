@@ -7,6 +7,7 @@
 #include "data/evaluation_result.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
 #include "launchdarkly/client_side/data_source_update_sink.hpp"
+#include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
 #include "launchdarkly/sse/client.hpp"
 #include "logger.hpp"
 
@@ -44,17 +45,20 @@ class StreamingDataHandler {
         uint64_t version;
     };
 
-    StreamingDataHandler(IDataSourceUpdateSink* handler, Logger const& logger);
+    StreamingDataHandler(IDataSourceUpdateSink* handler,
+                         Logger const& logger,
+                         DataSourceStatusManager& status_manager);
 
     /**
      * Handle an SSE event.
      * @param event The event to handle.
      * @return A status indicating if the message could be handled.
      */
-    MessageStatus handle_message(launchdarkly::sse::Event const& event);
+    MessageStatus HandleMessage(launchdarkly::sse::Event const& event);
 
    private:
     IDataSourceUpdateSink* handler_;
     Logger const& logger_;
+    DataSourceStatusManager& status_manager_;
 };
 }  // namespace launchdarkly::client_side::data_sources::detail

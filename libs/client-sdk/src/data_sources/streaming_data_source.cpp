@@ -3,7 +3,6 @@
 #include <boost/json.hpp>
 #include <boost/url.hpp>
 
-#include <memory>
 #include <utility>
 
 #include "config/detail/defaults.hpp"
@@ -24,9 +23,12 @@ StreamingDataSource::StreamingDataSource(
     bool use_report,
     bool with_reasons,
     IDataSourceUpdateSink* handler,
+    DataSourceStatusManager& status_manager,
     Logger const& logger)
     : logger_(logger),
-      data_source_handler_(StreamingDataHandler(handler, logger)) {
+      status_manager_(status_manager),
+      data_source_handler_(
+          StreamingDataHandler(handler, logger, status_manager_)) {
     auto uri_components = boost::urls::parse_uri(endpoints.StreamingBaseUrl());
 
     // TODO: Handle parsing error?
@@ -55,7 +57,7 @@ StreamingDataSource::StreamingDataSource(
                                      : boost::beast::http::verb::get);
 
     client_builder.receiver([this](launchdarkly::sse::Event const& event) {
-        data_source_handler_.handle_message(event);
+        data_source_handler_.HandleMessage(event);
         // TODO: Use the result of handle message to restart the
         // event source if we got bad data.
     });
@@ -80,6 +82,7 @@ void StreamingDataSource::Start() {
 }
 
 void StreamingDataSource::Close() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
     client_->close();
 }
 
