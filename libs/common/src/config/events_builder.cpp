@@ -1,42 +1,42 @@
-#include "config/detail/events_builder.hpp"
+#include "config/detail/builders/events_builder.hpp"
 #include "config/detail/defaults.hpp"
 
 #include <utility>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
-EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::events()) {}
+EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
 
 template <typename SDK>
-EventsBuilder<SDK>& EventsBuilder<SDK>::capacity(std::size_t capacity) {
+EventsBuilder<SDK>& EventsBuilder<SDK>::Capacity(std::size_t capacity) {
     config_.capacity_ = capacity;
     return *this;
 }
 
 template <typename SDK>
-EventsBuilder<SDK>& EventsBuilder<SDK>::flush_interval(
+EventsBuilder<SDK>& EventsBuilder<SDK>::FlushInterval(
     std::chrono::milliseconds interval) {
     config_.flush_interval_ = interval;
     return *this;
 }
 
 template <typename SDK>
-EventsBuilder<SDK>& EventsBuilder<SDK>::all_attributes_private(bool value) {
+EventsBuilder<SDK>& EventsBuilder<SDK>::AllAttributesPrivate(bool value) {
     config_.all_attributes_private_ = value;
     return *this;
 }
 
 template <typename SDK>
-EventsBuilder<SDK>& EventsBuilder<SDK>::private_attributes(
+EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttributes(
     AttributeReference::SetType attributes) {
     config_.private_attributes_ = std::move(attributes);
     return *this;
 }
 
 template <typename SDK>
-tl::expected<Events, Error> EventsBuilder<SDK>::build() {
-    if (config_.capacity() == 0) {
+tl::expected<built::Events, Error> EventsBuilder<SDK>::Build() {
+    if (config_.Capacity() == 0) {
         return tl::unexpected(Error::kConfig_Events_ZeroCapacity);
     }
     return config_;
@@ -56,4 +56,4 @@ template bool operator==(EventsBuilder<detail::ClientSDK> const&,
 template bool operator==(EventsBuilder<detail::ServerSDK> const&,
                          EventsBuilder<detail::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

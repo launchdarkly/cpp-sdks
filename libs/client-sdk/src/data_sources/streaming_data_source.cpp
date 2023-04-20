@@ -18,8 +18,8 @@ StreamingDataSource::StreamingDataSource(
     std::string const& sdk_key,
     boost::asio::any_io_executor ioc,
     Context const& context,
-    config::ServiceEndpoints const& endpoints,
-    config::detail::HttpProperties const& http_properties,
+    config::detail::built::ServiceEndpoints const& endpoints,
+    config::detail::built::HttpProperties const& http_properties,
     bool use_report,
     bool with_reasons,
     IDataSourceUpdateSink* handler,
@@ -29,8 +29,8 @@ StreamingDataSource::StreamingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           StreamingDataHandler(handler, logger, status_manager_)) {
-    auto uri_components =
-        boost::urls::parse_uri(endpoints.streaming_base_url());
+    auto uri_components = boost::urls::parse_uri(endpoints.StreamingBaseUrl());
+
     // TODO: Handle parsing error?
     boost::urls::url url = uri_components.value();
 
@@ -69,10 +69,10 @@ StreamingDataSource::StreamingDataSource(
         client_builder.body(string_context);
     }
     client_builder.header("authorization", sdk_key);
-    for (auto const& header : http_properties.base_headers()) {
+    for (auto const& header : http_properties.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }
-    client_builder.header("user-agent", http_properties.user_agent());
+    client_builder.header("user-agent", http_properties.UserAgent());
     // TODO: Handle proxy support.
     client_ = client_builder.build();
 }

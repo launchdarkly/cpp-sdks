@@ -1,61 +1,60 @@
-#include "config/detail/data_source_builder.hpp"
+#include "config/detail/builders/data_source_builder.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 StreamingBuilder::StreamingBuilder()
-    : config_(Defaults<AnySDK>::streaming_config()) {}
+    : config_(Defaults<AnySDK>::StreamingConfig()) {}
 
-StreamingBuilder& StreamingBuilder::initial_reconnect_delay(
+StreamingBuilder& StreamingBuilder::InitialReconnectDelay(
     std::chrono::milliseconds initial_reconnect_delay) {
     config_.initial_reconnect_delay = initial_reconnect_delay;
     return *this;
 }
 
-StreamingConfig StreamingBuilder::build() const {
+built::StreamingConfig StreamingBuilder::Build() const {
     return config_;
 }
 
-PollingBuilder::PollingBuilder()
-    : config_(Defaults<AnySDK>::polling_config()) {}
+PollingBuilder::PollingBuilder() : config_(Defaults<AnySDK>::PollingConfig()) {}
 
-PollingBuilder& PollingBuilder::poll_interval(
+PollingBuilder& PollingBuilder::PollInterval(
     std::chrono::seconds poll_interval) {
     config_.poll_interval = poll_interval;
     return *this;
 }
 
-PollingConfig PollingBuilder::build() const {
+built::PollingConfig PollingBuilder::Build() const {
     return config_;
 }
 
 DataSourceBuilder<ClientSDK>::DataSourceBuilder()
     : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::with_reasons(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::WithReasons(
     bool value) {
     with_reasons_ = value;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::use_report(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::UseReport(
     bool value) {
     use_report_ = value;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::method(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     StreamingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::method(
+DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     PollingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::build() const {
+built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
     auto method = boost::apply_visitor(MethodVisitor(), method_);
     return {method, with_reasons_, use_report_};
 }
@@ -63,21 +62,21 @@ DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::build() const {
 DataSourceBuilder<ServerSDK>::DataSourceBuilder()
     : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::method(
+DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
     StreamingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::method(
+DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
     PollingBuilder builder) {
     method_ = builder;
     return *this;
 }
 
-DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::build() const {
+built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
     auto method = boost::apply_visitor(MethodVisitor(), method_);
     return {method};
 }
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

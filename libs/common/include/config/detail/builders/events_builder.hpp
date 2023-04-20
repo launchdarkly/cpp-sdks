@@ -1,16 +1,16 @@
 #pragma once
 
-#include <tl/expected.hpp>
 #include "attribute_reference.hpp"
-#include "config/detail/events.hpp"
+#include "config/detail/built/events.hpp"
 #include "error.hpp"
+#include "tl/expected.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config::detail::builders {
 
 template <typename SDK>
 class EventsBuilder;
@@ -41,7 +41,7 @@ class EventsBuilder {
      * @param capacity Event queue capacity.
      * @return Reference to this builder.
      */
-    EventsBuilder& capacity(std::size_t capacity);
+    EventsBuilder& Capacity(std::size_t capacity);
 
     /**
      * Sets the flush interval of the event processor. The processor queues
@@ -50,7 +50,7 @@ class EventsBuilder {
      * @param interval Interval between automatic flushes.
      * @return Reference to this builder.
      */
-    EventsBuilder& flush_interval(std::chrono::milliseconds interval);
+    EventsBuilder& FlushInterval(std::chrono::milliseconds interval);
 
     /**
      * Attribute privacy indicates whether or not attributes should be
@@ -65,7 +65,7 @@ class EventsBuilder {
      *
      * (2) To specify that a specific set of attributes should be considered
      * private - in addition to those designated private on a per-context basis
-     * - call @ref private_attributes.
+     * - call @ref PrivateAttributes.
      *
      * (3) To specify private attributes on a per-context basis, it is not
      * necessary to call either of these methods, as the default behavior is to
@@ -75,23 +75,22 @@ class EventsBuilder {
      * or (3).
      * @return Reference to this builder.
      */
-    EventsBuilder& all_attributes_private(bool);
+    EventsBuilder& AllAttributesPrivate(bool all_attributes_private);
 
     /**
      * Specify that a set of attributes are private.
      * @return Reference to this builder.
      */
-    EventsBuilder& private_attributes(
-        AttributeReference::SetType private_attrs);
+    EventsBuilder& PrivateAttributes(AttributeReference::SetType private_attrs);
 
     /**
      * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */
-    [[nodiscard]] tl::expected<Events, Error> build();
+    [[nodiscard]] tl::expected<built::Events, Error> Build();
 
    private:
-    Events config_;
+    built::Events config_;
 };
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config::detail::builders

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "config/detail/data_source_config.hpp"
-#include "config/detail/events.hpp"
-#include "config/detail/http_properties.hpp"
+#include "config/detail/built/data_source_config.hpp"
+#include "config/detail/built/events.hpp"
+#include "config/detail/built/http_properties.hpp"
+#include "config/detail/built/service_endpoints.hpp"
 #include "config/detail/sdks.hpp"
-#include "config/detail/service_endpoints.hpp"
 
 namespace launchdarkly::config::detail {
 
@@ -19,13 +19,13 @@ struct Defaults {
      * Offline mode is disabled in SDKs by default.
      * @return
      */
-    static bool offline() { return false; }
+    static bool Offline() { return false; }
 
-    static StreamingConfig streaming_config() {
+    static auto StreamingConfig() -> built::StreamingConfig {
         return {std::chrono::milliseconds{1000}};
     }
 
-    static PollingConfig polling_config() {
+    static auto PollingConfig() -> built::PollingConfig {
         // Default to 5 minutes;
         return {std::chrono::seconds{5 * 60}};
     }
@@ -33,60 +33,60 @@ struct Defaults {
 
 template <>
 struct Defaults<ClientSDK> {
-    static std::string sdk_name() { return "CppClient"; }
-    static std::string sdk_version() { return "TODO"; }
-    static ServiceEndpoints endpoints() {
+    static std::string SdkName() { return "CppClient"; }
+    static std::string SdkVersion() { return "TODO"; }
+    static bool Offline() { return Defaults<AnySDK>::Offline(); }
+
+    static auto ServiceEndpoints() -> built::ServiceEndpoints {
         return {"https://clientsdk.launchdarkly.com",
                 "https://clientstream.launchdarkly.com",
                 "https://mobile.launchdarkly.com"};
     }
 
-    static Events events() {
+    static auto Events() -> built::Events {
         return {100, std::chrono::seconds(30), "/mobile", false,
                 AttributeReference::SetType()};
     }
 
-    static HttpProperties http_properties() {
+    static auto HttpProperties() -> built::HttpProperties {
         return {std::chrono::milliseconds{10000},
                 std::chrono::milliseconds{10000},
-                sdk_name() + "/" + sdk_version(),
+                SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 
-    static DataSourceConfig<ClientSDK> data_source_config() {
-        return {Defaults<AnySDK>::streaming_config(), false, false};
+    static auto DataSourceConfig() -> built::DataSourceConfig<ClientSDK> {
+        return {Defaults<AnySDK>::StreamingConfig(), false, false};
     }
-
-    static bool offline() { return Defaults<AnySDK>::offline(); }
 };
 
 template <>
 struct Defaults<ServerSDK> {
-    static std::string sdk_name() { return "CppServer"; }
-    static std::string sdk_version() { return "TODO"; }
-    static ServiceEndpoints endpoints() {
+    static std::string SdkName() { return "CppServer"; }
+    static std::string SdkVersion() { return "TODO"; }
+    static bool Offline() { return Defaults<AnySDK>::Offline(); }
+
+    static auto ServiceEndpoints() -> built::ServiceEndpoints {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",
                 "https://events.launchdarkly.com"};
     }
 
-    static Events events() {
+    static auto Events() -> built::Events {
         return {10000, std::chrono::seconds(5), "/bulk", false,
                 AttributeReference::SetType()};
     }
 
-    static HttpProperties http_properties() {
+    static auto HttpProperties() -> built::HttpProperties {
         return {std::chrono::milliseconds{2000},
                 std::chrono::milliseconds{10000},
-                sdk_name() + "/" + sdk_version(),
+                SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 
-    static DataSourceConfig<ServerSDK> data_source_config() {
-        return {Defaults<AnySDK>::streaming_config()};
+    static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {
+        return {Defaults<AnySDK>::StreamingConfig()};
     }
-
-    static bool offline() { return Defaults<AnySDK>::offline(); }
 };
 
 }  // namespace launchdarkly::config::detail

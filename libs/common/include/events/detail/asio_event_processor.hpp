@@ -7,8 +7,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <chrono>
 #include <optional>
-#include "config/detail/events.hpp"
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/built/events.hpp"
+#include "config/detail/built/service_endpoints.hpp"
 #include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
@@ -22,8 +22,8 @@ namespace launchdarkly::events::detail {
 class AsioEventProcessor : public IEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& io,
-                       config::detail::Events const& config,
-                       config::ServiceEndpoints const& endpoints,
+                       config::detail::built::Events const& config,
+                       config::detail::built::ServiceEndpoints const& endpoints,
                        std::string authorization,
                        Logger& logger);
 

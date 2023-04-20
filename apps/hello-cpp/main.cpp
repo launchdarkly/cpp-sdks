@@ -20,8 +20,8 @@ using launchdarkly::ConsoleBackend;
 using launchdarkly::ContextBuilder;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
-using launchdarkly::client::ConfigBuilder;
 using launchdarkly::client_side::Client;
+using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::flag_manager::detail::FlagManager;
 using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
@@ -36,7 +36,7 @@ int main() {
         return 1;
     }
 
-    Client client(ConfigBuilder(key).build().value(),
+    Client client(ConfigBuilder(key).Build().value(),
                   ContextBuilder().kind("user", "ryan").build());
 
     client.WaitForReadySync(std::chrono::seconds(30));
