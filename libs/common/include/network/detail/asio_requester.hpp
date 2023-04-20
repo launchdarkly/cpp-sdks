@@ -28,9 +28,9 @@ class
    private:
     Derived& derived() { return static_cast<Derived&>(*this); }
     http::request<http::string_body> req_;
-    //    std::chrono::milliseconds connect_timeout_;
-    //    std::chrono::milliseconds response_timeout_;
-    //    std::optional<std::chrono::milliseconds> read_timeout_;
+    std::chrono::milliseconds connect_timeout_;
+    std::chrono::milliseconds response_timeout_;
+    std::optional<std::chrono::milliseconds> read_timeout_;
 
    protected:
     beast::flat_buffer buffer_;
@@ -48,26 +48,23 @@ class
             std::string host,
             std::string port,
             http::request<http::string_body> req,
-            //            std::chrono::milliseconds connect_timeout,
-            //            std::chrono::milliseconds response_timeout,
-            //            std::optional<std::chrono::milliseconds> read_timeout,
+            std::chrono::milliseconds connect_timeout,
+            std::chrono::milliseconds response_timeout,
+            std::optional<std::chrono::milliseconds> read_timeout,
             IHttpRequester::ResponseHandler handler)
         : req_(std::move(req)),
           resolver_(exec),
           host_(std::move(host)),
           port_(std::move(port)),
           handler_(std::move(handler)) {
-        //        parser_.get().body().on_event(std::move(receiver));
         parser_.get();
     }
 
     void fail(beast::error_code ec, char const* what) {
         handler_(HttpResult(std::string(what) + ": " + ec.message()));
-        //        logger_(std::string(what) + ": " + ec.message());
     }
 
     void do_resolve() {
-        //        logger_("resolving " + host_ + ":" + port_);
         resolver_.async_resolve(
             host_, port_,
             beast::bind_front_handler(&Session::on_resolve,
@@ -78,12 +75,8 @@ class
         if (ec)
             return fail(ec, "resolve");
 
-        //        logger_("connecting (" +
-        //        std::to_string(connect_timeout_.count()) +
-        //                " sec timeout)");
-
-        //        beast::get_lowest_layer(derived().stream())
-        //            .expires_after(connect_timeout_);
+        beast::get_lowest_layer(derived().stream())
+            .expires_after(connect_timeout_);
 
         beast::get_lowest_layer(derived().stream())
             .async_connect(results, beast::bind_front_handler(
@@ -108,12 +101,8 @@ class
     }
 
     void do_write() {
-        //        logger_("making request (" +
-        //        std::to_string(response_timeout_.count()) +
-        //                " sec timeout)");
-
-        //        beast::get_lowest_layer(derived().stream())
-        //            .expires_after(response_timeout_);
+        beast::get_lowest_layer(derived().stream())
+            .expires_after(response_timeout_);
 
         http::async_write(
             derived().stream(), req_,
@@ -146,12 +135,12 @@ class
             return;
         }
 
-        //        if (read_timeout_) {
-        //            beast::get_lowest_layer(derived().stream())
-        //                .expires_after(*read_timeout_);
-        //        } else {
-        beast::get_lowest_layer(derived().stream()).expires_never();
-        //        };
+        if (read_timeout_) {
+            beast::get_lowest_layer(derived().stream())
+                .expires_after(*read_timeout_);
+        } else {
+            beast::get_lowest_layer(derived().stream()).expires_never();
+        };
 
         http::async_read_some(
             derived().stream(), buffer_, parser_,
@@ -159,31 +148,30 @@ class
                                       derived().shared_from_this()));
     }
 
-    void do_close() {
-        //        logger_("closing");
-        beast::get_lowest_layer(derived().stream()).cancel();
-    }
+    void do_close() { beast::get_lowest_layer(derived().stream()).cancel(); }
 };
 
-class PlaintextClient : public IRequestState,
-                        public Session<PlaintextClient>,
+class PlaintextClient : public Session<PlaintextClient>,
                         public std::enable_shared_from_this<PlaintextClient> {
    public:
-    PlaintextClient(
-        net::any_io_executor ex,
-        http::request<http::string_body> req,
-        std::string host,
-        std::string port,
-        //                    std::optional<std::chrono::milliseconds>
-        //                    read_timeout,
-        IHttpRequester::ResponseHandler handler)
-        : Session<PlaintextClient>(
-              ex,
-              std::move(host),
-              std::move(port),
-              std::move(req),
-              //                                   read_timeout,
-              std::move(handler)),
+    using ResponseHandler = std::function<void(HttpResult result)>;
+
+    PlaintextClient(net::any_io_executor ex,
+                    http::request<http::string_body> req,
+                    std::string host,
+                    std::string port,
+                    std::chrono::milliseconds connect_timeout,
+                    std::chrono::milliseconds response_timeout,
+                    std::optional<std::chrono::milliseconds> read_timeout,
+                    ResponseHandler handler)
+        : Session<PlaintextClient>(ex,
+                                   std::move(host),
+                                   std::move(port),
+                                   std::move(req),
+                                   connect_timeout,
+                                   response_timeout,
+                                   read_timeout,
+                                   std::move(handler)),
           stream_{ex} {}
 
     void do_handshake() {
@@ -215,7 +203,8 @@ class AsioRequester /*: public IHttpRequester*/ {
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        ctx_.execute([handler, request, this]() mutable {
+        auto strand = net::make_strand(ctx_);
+        boost::asio::post(strand, [strand, handler, request, this]() mutable {
             // TODO: Determine http/https.
             http::request<http::string_body> beast_request;
             beast_request.method(http::verb::get);  // TODO: Get from request.
@@ -224,9 +213,13 @@ class AsioRequester /*: public IHttpRequester*/ {
             beast_request.prepare_payload();
             beast_request.set(http::field::host, request.Host());
 
+            // TODO: Transcribe headers.
+
+            auto& properties = request.Properties();
             std::make_shared<PlaintextClient>(
-                net::make_strand(ctx_), beast_request, request.Host(),
-                request.Port(), std::move(handler))
+                strand, beast_request, request.Host(), request.Port(),
+                properties.ConnectTimeout(), properties.ResponseTimeout(),
+                properties.ReadTimeout(), std::move(handler))
                 ->run();
         });
 

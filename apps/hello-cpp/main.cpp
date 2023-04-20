@@ -36,6 +36,7 @@ int main() {
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
+
     auto value = client.BoolVariation("my-boolean-flag", false);
     LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
 }

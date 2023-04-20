@@ -21,6 +21,13 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::ReadTimeout(
 }
 
 template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::ResponseTimeout(
+    std::chrono::milliseconds response_timeout) {
+    response_timeout_ = response_timeout;
+    return *this;
+}
+
+template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::WrapperName(
     std::string wrapper_name) {
     wrapper_name_ = std::move(wrapper_name);
@@ -47,11 +54,12 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
-        return {connect_timeout_, read_timeout_,
+        return {connect_timeout_, read_timeout_, read_timeout_,
                 detail::Defaults<SDK>::HttpProperties().UserAgent(),
                 headers_with_wrapper};
     }
-    return {connect_timeout_, read_timeout_, "", base_headers_};
+    return {connect_timeout_, read_timeout_, response_timeout_, "",
+            base_headers_};
 }
 
 template class HttpPropertiesBuilder<detail::ClientSDK>;

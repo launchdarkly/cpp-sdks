@@ -14,6 +14,14 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
+//class IFeatureRequester {
+//    Request(std::function<void(FlagData)> handle);
+//};
+//
+//class FeatureRequester: public IFeatureRequester {
+//
+//};
+
 class PollingDataSource final : public IDataSource {
     void Start() override;
     void Close() override;
