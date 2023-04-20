@@ -115,8 +115,8 @@ Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
     return VariationInternal(key, std::move(default_value));
 }
 
-data_sources::IDataSourceStatusProvider* Client::DataSourceStatus() {
-    return &status_manager_;
+data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
+    return status_manager_;
 }
 
 void Client::WaitForReadySync(std::chrono::seconds timeout) {
