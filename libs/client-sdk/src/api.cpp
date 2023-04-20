@@ -8,27 +8,27 @@
 
 namespace launchdarkly::client_side {
 
-Client::Client(client::Config config, Context context)
-    : logger_(config.take_logger()),
+Client::Client(Config config, Context context)
+    : logger_(config.Logger()),
       context_(std::move(context)),
       event_processor_(
           std::make_unique<launchdarkly::events::detail::AsioEventProcessor>(
               ioc_.get_executor(),
-              config.events_config(),
-              config.service_endpoints(),
-              config.sdk_key(),
+              config.Events(),
+              config.ServiceEndpoints(),
+              config.SdkKey(),
               logger_)),
       flag_updater_(flag_manager_),
       // TODO: Support polling.
       data_source_(std::make_unique<launchdarkly::client_side::data_sources::
                                         detail::StreamingDataSource>(
-          config.sdk_key(),
+          config.SdkKey(),
           ioc_.get_executor(),
           context_,
-          config.service_endpoints(),
-          config.http_properties(),
-          config.data_source_config().use_report,
-          config.data_source_config().with_reasons,
+          config.ServiceEndpoints(),
+          config.HttpProperties(),
+          config.DataSourceConfig().use_report,
+          config.DataSourceConfig().with_reasons,
           &flag_updater_,
           logger_)) {
     data_source_->Start();

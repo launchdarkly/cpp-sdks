@@ -2,13 +2,13 @@
 
 #include <string>
 
-namespace launchdarkly::config {
+namespace launchdarkly::config::detail::built {
 
 /**
- * ServiceEndpoints contains configured endpoints for the LaunchDarkly
+ * ServiceEndpoints contains configured ServiceEndpoints for the LaunchDarkly
  * service or a Relay Proxy instance.
  */
-class ServiceEndpoints {
+class ServiceEndpoints final {
    public:
     /**
      * Constructs a ServiceEndpoints from individual polling, streaming, and
@@ -29,17 +29,17 @@ class ServiceEndpoints {
      * Returns the configured base polling URL.
      * @return Base polling URL.
      */
-    [[nodiscard]] std::string const& polling_base_url() const;
+    [[nodiscard]] std::string const& PollingBaseUrl() const;
     /**
      * Returns the configured base streaming URL.
      * @return Base streaming URL.
      */
-    [[nodiscard]] std::string const& streaming_base_url() const;
+    [[nodiscard]] std::string const& StreamingBaseUrl() const;
     /**
      * Returns the configured base events URL.
      * @return Base events URL.
      */
-    [[nodiscard]] std::string const& events_base_url() const;
+    [[nodiscard]] std::string const& EventsBaseUrl() const;
 
    private:
     std::string polling_base_url_;
@@ -48,4 +48,4 @@ class ServiceEndpoints {
 };
 
 bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs);
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::detail::built

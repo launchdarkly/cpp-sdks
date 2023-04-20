@@ -10,7 +10,7 @@ bool Summarizer::Empty() const {
 }
 
 std::unordered_map<Summarizer::FlagKey, Summarizer::State> const&
-Summarizer::features() const {
+Summarizer::Features() const {
     return features_;
 }
 
@@ -73,18 +73,18 @@ Summarizer::VariationKey::VariationKey(Version version,
 Summarizer::VariationKey::VariationKey()
     : version(std::nullopt), variation(std::nullopt) {}
 
-Summarizer::VariationSummary::VariationSummary(Value value)
+Summarizer::VariationSummary::VariationSummary(::launchdarkly::Value value)
     : count_(0), value_(std::move(value)) {}
 
 void Summarizer::VariationSummary::Increment() {
     count_++;
 }
 
-Value const& Summarizer::VariationSummary::value() const {
+Value const& Summarizer::VariationSummary::Value() const {
     return value_;
 }
 
-std::int32_t Summarizer::VariationSummary::count() const {
+std::int32_t Summarizer::VariationSummary::Count() const {
     return count_;
 }
 

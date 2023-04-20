@@ -2,7 +2,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/built/service_endpoints.hpp"
 #include "context.hpp"
 #include "data/evaluation_result.hpp"
 #include "launchdarkly/client_side/data_source.hpp"

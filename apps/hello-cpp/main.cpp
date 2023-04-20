@@ -20,8 +20,8 @@ using launchdarkly::ConsoleBackend;
 using launchdarkly::ContextBuilder;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
-using launchdarkly::client::ConfigBuilder;
 using launchdarkly::client_side::Client;
+using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::flag_manager::detail::FlagManager;
 using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
@@ -36,16 +36,17 @@ int main() {
         return 1;
     }
 
-            Client client(ConfigBuilder(key).build().value(),
-                          ContextBuilder().kind("user", "ryan").build());
+    Client client(ConfigBuilder(key).Build().value(),
+                  ContextBuilder().kind("user", "ryan").build());
 
-            std::thread doing_stuff([&]() {
-                while (true) {
-                    auto value = client.BoolVariation("my-boolean-flag", false);
-                    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
-                    sleep(10);
-                }
-            });
+    std::thread doing_stuff([&]() {
+        while (true) {
+            auto value = client.BoolVariation("my-boolean-flag", false);
+            LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
+            sleep(10);
+        }
+    });
 
-    while (true) {    }
+    while (true) {
+    }
 }
