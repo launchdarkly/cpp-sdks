@@ -199,47 +199,38 @@ class PlaintextClient : public IRequestState,
     beast::tcp_stream stream_;
 };
 
-class AsioRequester : public IHttpRequester {
+class AsioRequester /*: public IHttpRequester*/ {
    public:
     AsioRequester(net::any_io_executor ctx) : ctx_(ctx) {}
 
     template <typename CompletionToken>
-    typename boost::asio::async_result<CompletionToken,
-                                       void(HttpResult result)>::return_type
-    Request(boost::asio::io_service& ios,
-            HttpRequest request,
-            CompletionToken&& token) {
+    auto Request(HttpRequest request, CompletionToken&& token) {
         namespace asio = boost::asio;
         namespace system = boost::system;
 
         using Sig = void(HttpResult result);
-        using Result = asio::async_result<CompletionToken, Sig>;
+        using Result = asio::async_result<std::decay_t<CompletionToken>, Sig>;
         using Handler = typename Result::completion_handler_type;
 
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        ios.post([handler, request]() mutable {
-            handler(system::error_code(), request);
+        ctx_.execute([handler, request, this]() mutable {
+            // TODO: Determine http/https.
+            http::request<http::string_body> beast_request;
+            beast_request.method(http::verb::get);  // TODO: Get from request.
+            beast_request.body() = "";
+            beast_request.target(request.Path());
+            beast_request.prepare_payload();
+            beast_request.set(http::field::host, request.Host());
+
+            std::make_shared<PlaintextClient>(
+                net::make_strand(ctx_), beast_request, request.Host(),
+                request.Port(), std::move(handler))
+                ->run();
         });
 
         return result.get();
-    }
-
-    std::shared_ptr<IRequestState> Request(HttpRequest request,
-                                           ResponseHandler handler) override {
-        // TODO: Determine http/https.
-        http::request<http::string_body> beast_request;
-        beast_request.method(http::verb::get);  // TODO: Get from request.
-        beast_request.body() = "";
-        beast_request.target(request.Path());
-        beast_request.prepare_payload();
-        beast_request.set(http::field::host, request.Host());
-        //        PlaintextClient plain()
-
-        return std::make_shared<PlaintextClient>(
-            net::make_strand(ctx_), beast_request, request.Host(),
-            request.Port(), std::move(handler));
     }
 
    private:
