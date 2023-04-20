@@ -16,7 +16,7 @@
 namespace launchdarkly::client_side {
 class Client {
    public:
-    Client(client::Config config, Context context);
+    Client(Config config, Context context);
 
     using FlagKey = std::string;
     [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const;

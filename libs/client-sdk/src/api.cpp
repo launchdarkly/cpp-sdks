@@ -9,15 +9,15 @@
 
 namespace launchdarkly::client_side {
 
-Client::Client(client::Config config, Context context)
-    : logger_(config.take_logger()),
+Client::Client(Config config, Context context)
+    : logger_(config.Logger()),
       context_(std::move(context)),
       event_processor_(
           std::make_unique<launchdarkly::events::detail::AsioEventProcessor>(
               ioc_.get_executor(),
-              config.events_config(),
-              config.service_endpoints(),
-              config.sdk_key(),
+              config.Events(),
+              config.ServiceEndpoints(),
+              config.SdkKey(),
               logger_)) {}
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {

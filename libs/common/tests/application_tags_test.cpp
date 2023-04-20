@@ -2,11 +2,10 @@
 #include <gtest/gtest.h>
 #include <ostream>
 #include <tuple>
-#include "config/detail/application_info.hpp"
+#include "config/detail/builders/app_info_builder.hpp"
 #include "error.hpp"
 #include "null_logger.hpp"
 
-using namespace launchdarkly::config::detail;
 using launchdarkly::Error;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
@@ -51,9 +50,10 @@ INSTANTIATE_TEST_SUITE_P(
             Error::kConfig_ApplicationInfo_ValueTooLong}));
 
 TEST_P(TagValidityFixture, ValidTagValues) {
+    using namespace launchdarkly::config::detail::builders;
     auto param = GetParam();
     std::optional<launchdarkly::Error> maybe_error =
-        launchdarkly::config::detail::IsValidTag(param.key, param.value);
+        IsValidTag(param.key, param.value);
     ASSERT_EQ(maybe_error, param.error);
 }
 
@@ -97,16 +97,17 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 TEST_P(TagBuildFixture, BuiltTags) {
+    using namespace launchdarkly::config::detail::builders;
     auto params = GetParam();
 
     auto logger = NullLogger();
 
-    ApplicationInfo info;
+    AppInfoBuilder info;
     if (params.app_id) {
-        info.app_identifier(*params.app_id);
+        info.Identifier(*params.app_id);
     }
     if (params.app_version) {
-        info.app_version(*params.app_version);
+        info.Version(*params.app_version);
     }
-    ASSERT_EQ(info.build(logger), params.concat);
+    ASSERT_EQ(info.Build(logger), params.concat);
 }

@@ -113,14 +113,14 @@ TEST_P(SummaryCounterTestsFixture, EventsAreCounted) {
 
     // Then, for each recorded feature, ensure it was expected to be recorded,
     // and then ensure the expected count is correct.
-    for (auto kvp : summarizer.features()) {
+    for (auto kvp : summarizer.Features()) {
         auto expected_count = test_params.expected.find(kvp.first);
         ASSERT_TRUE(expected_count != test_params.expected.end());
 
         for (auto variation : expected_count->second) {
             auto const& counter = kvp.second.counters.find(variation.first);
             ASSERT_TRUE(counter != kvp.second.counters.end());
-            ASSERT_EQ(counter->second.count(), variation.second);
+            ASSERT_EQ(counter->second.Count(), variation.second);
         }
     }
 }
@@ -315,7 +315,7 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
 
     summarizer.Update(event);
 
-    auto const& features = summarizer.features();
+    auto const& features = summarizer.Features();
     auto const& feature = features.find(feature_key);
 
     // There should be an entry for this feature, even though the result was
@@ -330,8 +330,8 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
     ASSERT_TRUE(default_counter != feature->second.counters.end());
 
     // The counter should contain the default value given in the evaluation.
-    ASSERT_EQ(default_counter->second.value(), feature_default);
-    ASSERT_EQ(default_counter->second.count(), 1);
+    ASSERT_EQ(default_counter->second.Value(), feature_default);
+    ASSERT_EQ(default_counter->second.Count(), 1);
 }
 
 TEST(SummarizerTests, JsonSerialization) {

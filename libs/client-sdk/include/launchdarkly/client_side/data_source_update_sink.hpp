@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "config/detail/service_endpoints.hpp"
+#include "config/detail/built/service_endpoints.hpp"
 #include "context.hpp"
 #include "data/evaluation_result.hpp"
 
