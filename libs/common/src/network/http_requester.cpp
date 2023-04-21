@@ -64,7 +64,7 @@ HttpRequest::HttpRequest(std::string url,
 
     host_ = uri_components->host();
     path_ = uri_components->path();
-    if(path_ == "") {
+    if (path_ == "") {
         path_ = "/";
     }
 
