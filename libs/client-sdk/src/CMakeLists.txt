@@ -20,7 +20,6 @@ add_library(${LIBNAME}
         flag_manager/flag_manager.cpp
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp
-        data_sources/polling_data_source.cpp
         data_sources/data_source_status.cpp
         data_sources/data_source_status_manager.cpp
         boost_signal_connection.cpp
