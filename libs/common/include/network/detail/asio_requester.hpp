@@ -8,6 +8,10 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
+
+#include <boost/certify/extensions.hpp>
+#include <boost/certify/https_verification.hpp>
+
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -156,7 +160,7 @@ class
 class PlaintextClient : public Session<PlaintextClient>,
                         public std::enable_shared_from_this<PlaintextClient> {
    public:
-    using ResponseHandler = std::function<void(HttpResult result)>;
+    using ResponseHandler = Session<PlaintextClient>::ResponseHandler;
 
     PlaintextClient(net::any_io_executor ex,
                     http::request<http::string_body> req,
@@ -189,9 +193,85 @@ class PlaintextClient : public Session<PlaintextClient>,
     beast::tcp_stream stream_;
 };
 
-class AsioRequester {
+class EncryptedClient : public Session<EncryptedClient>,
+                        public std::enable_shared_from_this<EncryptedClient> {
    public:
-    AsioRequester(net::any_io_executor ctx) : ctx_(ctx) {}
+    using ResponseHandler = Session<EncryptedClient>::ResponseHandler;
+
+    EncryptedClient(net::any_io_executor ex,
+                    std::shared_ptr<ssl::context> ssl_ctx,
+                    http::request<http::string_body> req,
+                    std::string host,
+                    std::string port,
+                    std::chrono::milliseconds connect_timeout,
+                    std::chrono::milliseconds response_timeout,
+                    std::chrono::milliseconds read_timeout,
+                    ResponseHandler handler)
+        : Session<EncryptedClient>(ex,
+                                   std::move(host),
+                                   std::move(port),
+                                   std::move(req),
+                                   connect_timeout,
+                                   response_timeout,
+                                   read_timeout,
+                                   std::move(handler)),
+          ssl_ctx_(ssl_ctx),
+          stream_{ex, *ssl_ctx} {}
+
+    virtual void run() {
+        // Set SNI Hostname (many hosts need this to handshake successfully)
+        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
+            beast::error_code ec{static_cast<int>(::ERR_get_error()),
+                                 net::error::get_ssl_category()};
+
+            // TODO: Should this be treated as a terminal error for the request.
+            handler_(HttpResult("failed to set TLS host name extension: " +
+                                ec.message()));
+            return;
+        }
+
+        do_resolve();
+    }
+
+    virtual void close() { do_close(); }
+
+    void do_handshake() {
+        stream_.async_handshake(ssl::stream_base::client,
+                                beast::bind_front_handler(
+                                    &EncryptedClient::on_handshake, shared()));
+    }
+
+    beast::ssl_stream<beast::tcp_stream>& stream() { return stream_; }
+
+   private:
+    std::shared_ptr<ssl::context> ssl_ctx_;
+    beast::ssl_stream<beast::tcp_stream> stream_;
+
+    std::shared_ptr<EncryptedClient> shared() {
+        return std::static_pointer_cast<EncryptedClient>(shared_from_this());
+    }
+};
+
+class AsioRequester {
+    /**
+     * Each request is currently its own strand. If the TCP stream was to be
+     * re-used between requests, then each request to the same stream would
+     * need to be using the same strand.
+     *
+     * If this code is refactored to allow re-use of TCP streams, then that
+     * must be accounted for.
+     */
+   public:
+    AsioRequester(net::any_io_executor ctx)
+        : ctx_(ctx),
+          ssl_ctx_(
+              std::make_shared<ssl::context>(ssl::context::tlsv12_client)) {
+        ssl_ctx_->set_verify_mode(ssl::verify_peer |
+                                  ssl::verify_fail_if_no_peer_cert);
+
+        ssl_ctx_->set_default_verify_paths();
+        boost::certify::enable_native_https_server_verification(*ssl_ctx_);
+    }
 
     template <typename CompletionToken>
     auto Request(HttpRequest request, CompletionToken&& token) {
@@ -207,7 +287,6 @@ class AsioRequester {
 
         auto strand = net::make_strand(ctx_);
         boost::asio::post(strand, [strand, handler, request, this]() mutable {
-            // TODO: Determine http/https.
             http::request<http::string_body> beast_request;
             beast_request.method(http::verb::get);  // TODO: Get from request.
             beast_request.body() = "";
@@ -218,11 +297,20 @@ class AsioRequester {
             // TODO: Transcribe headers.
 
             auto& properties = request.Properties();
-            std::make_shared<PlaintextClient>(
-                strand, beast_request, request.Host(), request.Port(),
-                properties.ConnectTimeout(), properties.ResponseTimeout(),
-                properties.ReadTimeout(), std::move(handler))
-                ->run();
+            if (request.Https()) {
+                std::make_shared<EncryptedClient>(
+                    strand, ssl_ctx_, beast_request, request.Host(),
+                    request.Port(), properties.ConnectTimeout(),
+                    properties.ResponseTimeout(), properties.ReadTimeout(),
+                    std::move(handler))
+                    ->run();
+            } else {
+                std::make_shared<PlaintextClient>(
+                    strand, beast_request, request.Host(), request.Port(),
+                    properties.ConnectTimeout(), properties.ResponseTimeout(),
+                    properties.ReadTimeout(), std::move(handler))
+                    ->run();
+            }
         });
 
         return result.get();
@@ -230,6 +318,12 @@ class AsioRequester {
 
    private:
     net::any_io_executor ctx_;
+    /**
+     * The SSL context is a shared pointer to reduce the complexity of the
+     * relationship between a requests lifetime and the lifetime of the
+     * requester.
+     */
+    std::shared_ptr<ssl::context> ssl_ctx_;
 };
 
 }  // namespace launchdarkly::network::detail

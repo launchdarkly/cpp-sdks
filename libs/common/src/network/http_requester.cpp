@@ -64,6 +64,9 @@ HttpRequest::HttpRequest(std::string url,
 
     host_ = uri_components->host();
     path_ = uri_components->path();
+    if(path_ == "") {
+        path_ = "/";
+    }
 
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
     if (uri_components->has_port()) {

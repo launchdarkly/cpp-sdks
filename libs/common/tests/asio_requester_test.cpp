@@ -22,16 +22,24 @@ TEST(AsioRequesterTests, CanMakeRequest) {
     std::thread io_thread([&ios]() { ios.run(); });
     AsioRequester requester(ios.get_executor());
 
-    requester.Request(
-        HttpRequest("http://localhost:8080/", HttpMethod::kGet,
-                    HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt),
-        [](auto response) {
-            std::cout << "Response1: " << response << std::endl;
-        });
+//    requester.Request(
+//        HttpRequest("http://localhost:8080/", HttpMethod::kGet,
+//                    HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt),
+//        [](auto response) {
+//            std::cout << "Response1: " << response << std::endl;
+//        });
+//
+//        requester.Request(
+//            HttpRequest("https://www.google.com", HttpMethod::kGet,
+//                        HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt),
+//            [](auto response) {
+//                std::cout << "Response1: " << response << std::endl;
+//            });
+
 
     auto res =
         requester
-            .Request(HttpRequest("http://localhost:8080/", HttpMethod::kGet,
+            .Request(HttpRequest("https://www.google.com", HttpMethod::kGet,
                                  HttpPropertiesBuilder<ClientSDK>().Build(),
                                  std::nullopt),
                      boost::asio::use_future)
