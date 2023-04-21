@@ -108,7 +108,7 @@ class
 
     void Fail(beast::error_code ec, char const* what) {
         // TODO: Is it safe to cancel this if it has already failed?
-        beast::get_lowest_layer(GetDerived().Stream()).cancel();
+        DoClose();
         handler_(HttpResult(std::string(what) + ": " + ec.message()));
     }
 
@@ -176,12 +176,13 @@ class
         }
         if (parser_.is_done()) {
             DoClose();
-            handler_(HttpResult(parser_.get().result_int(),
-                                parser_.get().body(),
-                                HttpResult::HeadersType()));
+
+            handler_(MakeResult());
             return;
         }
 
+        // TODO: Does this refresh the timeout? We want it to be a total
+        // timeout.
         beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(read_timeout_);
 
@@ -189,6 +190,21 @@ class
             GetDerived().Stream(), buffer_, parser_,
             beast::bind_front_handler(&Session::OnRead,
                                       GetDerived().shared_from_this()));
+    }
+
+    /**
+     * Produce an HttpResult from the parser_. Should be called if the parser
+     * is done.
+     * @return The created HttpResult.
+     */
+    HttpResult MakeResult() const {
+        auto headers = HttpResult::HeadersType();
+        for (auto& field : parser_.get().base()) {
+            headers.insert_or_assign(field.name_string(), field.value());
+        }
+        auto result = HttpResult(parser_.get().result_int(),
+                                 parser_.get().body(), std::move(headers));
+        return result;
     }
 
     void DoClose() { beast::get_lowest_layer(GetDerived().Stream()).cancel(); }
@@ -274,7 +290,8 @@ class EncryptedClient : public Session<EncryptedClient>,
     void DoHandshake() {
         stream_.async_handshake(
             ssl::stream_base::client,
-            beast::bind_front_handler(&EncryptedClient::OnHandshake, shared()));
+            beast::bind_front_handler(&EncryptedClient::OnHandshake,
+                                      shared_from_this()));
     }
 
     beast::ssl_stream<beast::tcp_stream>& Stream() { return stream_; }
@@ -282,12 +299,42 @@ class EncryptedClient : public Session<EncryptedClient>,
    private:
     std::shared_ptr<ssl::context> ssl_ctx_;
     beast::ssl_stream<beast::tcp_stream> stream_;
-
-    std::shared_ptr<EncryptedClient> shared() {
-        return std::static_pointer_cast<EncryptedClient>(shared_from_this());
-    }
 };
 
+/**
+ * Class which allows making requests using boost::beast. A requester should be
+ * created once, and then used for many requests. This class supports both
+ * http and https requests.
+ *
+ * Requests complete asynchronously and use completion tokens. This allows
+ * for the request to be handled with futures or callbacks. If C++20 was in
+ * use, then coroutines would also be usable.
+ *
+ * In these examples HttpProperties are built, but in most SDK use cases
+ * the properties should be used from the built configuration object.
+ *
+ * Futures:
+ * ```
+ * auto res =
+ * requester
+ *   .Request(HttpRequest("http://localhost:8080",
+ *   HttpMethod::kGet,
+ *                        HttpPropertiesBuilder<ClientSDK>().Build(),
+ *                        std::nullopt),
+ *            boost::asio::use_future)
+ *   .get();
+ * ```
+ *
+ * Callbacks:
+ * requester.Request(
+ * HttpRequest("http://localhost:8080/", HttpMethod::kGet,
+ *             HttpPropertiesBuilder<ClientSDK>().Build(),
+ *             std::nullopt),
+ * [](auto response) {
+ *     std::cout << "Response1: " << response << std::endl;
+ * });
+ * ```
+ */
 class AsioRequester {
     /**
      * Each request is currently its own strand. If the TCP Stream was to be

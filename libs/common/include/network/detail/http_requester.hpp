@@ -38,10 +38,20 @@ class HttpResult {
         } else {
             out << "Success(" << res.status_;
             if (res.body_) {
-                out << "," << res.body_.value();
+                out << ", " << res.body_.value();
             }
             if (!res.headers_.empty()) {
-                // TODO: Headers
+                out << ", {";
+                bool first = true;
+                for (auto& pair : res.headers_) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        out << ", ";
+                    }
+                    out << pair.first << " : " << pair.second;
+                }
+                out << "}";
             }
         }
         out << ")";
@@ -86,35 +96,5 @@ class HttpRequest {
     std::string path_;
     bool is_https_;
 };
-
-//class IRequestState {
-//   public:
-//    virtual void run() = 0;
-//
-//    virtual ~IRequestState() = default;
-//    IRequestState(IRequestState const& item) = delete;
-//    IRequestState(IRequestState&& item) = delete;
-//    IRequestState& operator=(IRequestState const&) = delete;
-//    IRequestState& operator=(IRequestState&&) = delete;
-//
-//   protected:
-//    IRequestState() = default;
-//};
-
-//class IHttpRequester {
-//   public:
-//    using ResponseHandler = std::function<void(HttpResult result)>;
-//    virtual std::shared_ptr<IRequestState> Request(HttpRequest request,
-//                                                   ResponseHandler handler) = 0;
-//
-//    virtual ~IHttpRequester() = default;
-//    IHttpRequester(IHttpRequester const& item) = delete;
-//    IHttpRequester(IHttpRequester&& item) = delete;
-//    IHttpRequester& operator=(IHttpRequester const&) = delete;
-//    IHttpRequester& operator=(IHttpRequester&&) = delete;
-//
-//   protected:
-//    IHttpRequester() = default;
-//};
 
 }  // namespace launchdarkly::network::detail
