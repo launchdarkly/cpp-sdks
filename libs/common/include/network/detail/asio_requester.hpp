@@ -26,6 +26,45 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network::detail {
 
+static http::verb ConvertMethod(HttpMethod method) {
+    switch (method) {
+        case HttpMethod::kPost:
+            return http::verb::post;
+        case HttpMethod::kGet:
+            return http::verb::get;
+        case HttpMethod::kReport:
+            return http::verb::report;
+        case HttpMethod::kPut:
+            return http::verb::put;
+    }
+    assert(!"Method not found. Ensure all method cases covered.");
+}
+
+static http::request<http::string_body> MakeBeastRequest(HttpRequest request) {
+    http::request<http::string_body> beast_request;
+
+    beast_request.method(ConvertMethod(request.Method()));
+    auto body = request.Body();
+    if (body) {
+        beast_request.body() = body.value();
+    } else {
+        beast_request.body() = "";
+    }
+    beast_request.target(request.Path());
+    beast_request.prepare_payload();
+    beast_request.set(http::field::host, request.Host());
+
+    auto& properties = request.Properties();
+
+    for (auto& pair : request.Properties().BaseHeaders()) {
+        beast_request.set(pair.first, pair.second);
+    }
+
+    beast_request.set(http::field::user_agent, properties.UserAgent());
+
+    return beast_request;
+}
+
 template <class Derived>
 class
     Session {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -46,9 +85,6 @@ class
     tcp::resolver resolver_;
     http::response_parser<http::string_body> parser_;
     ResponseHandler handler_;
-
-    using cb = std::function<void(ResponseHandler handler)>;
-    using body = http::string_body;
 
    public:
     Session(net::any_io_executor const& exec,
@@ -97,8 +133,7 @@ class
     }
 
     void OnConnect(beast::error_code ec,
-                    tcp::resolver::results_type::endpoint_type eps) {
-
+                   tcp::resolver::results_type::endpoint_type eps) {
         if (ec) {
             return Fail(ec, "connect");
         }
@@ -117,17 +152,16 @@ class
         beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(response_timeout_);
 
-        http::async_write(GetDerived().Stream(), req_,
-            beast::bind_front_handler(
-                              &Session::OnWrite,
-                              GetDerived().shared_from_this()));
+        http::async_write(
+            GetDerived().Stream(), req_,
+            beast::bind_front_handler(&Session::OnWrite,
+                                      GetDerived().shared_from_this()));
     }
 
     void OnWrite(beast::error_code ec, std::size_t) {
-        if (ec)
+        if (ec) {
             return Fail(ec, "write");
-
-        //        logger_("reading response");
+        }
 
         http::async_read_some(
             GetDerived().Stream(), buffer_, parser_,
@@ -238,8 +272,9 @@ class EncryptedClient : public Session<EncryptedClient>,
     }
 
     void DoHandshake() {
-        stream_.async_handshake(ssl::stream_base::client,
-                                beast::bind_front_handler(&EncryptedClient::OnHandshake, shared()));
+        stream_.async_handshake(
+            ssl::stream_base::client,
+            beast::bind_front_handler(&EncryptedClient::OnHandshake, shared()));
     }
 
     beast::ssl_stream<beast::tcp_stream>& Stream() { return stream_; }
@@ -288,16 +323,10 @@ class AsioRequester {
 
         auto strand = net::make_strand(ctx_);
         boost::asio::post(strand, [strand, handler, request, this]() mutable {
-            http::request<http::string_body> beast_request;
-            beast_request.method(http::verb::get);  // TODO: Get from request.
-            beast_request.body() = "";
-            beast_request.target(request.Path());
-            beast_request.prepare_payload();
-            beast_request.set(http::field::host, request.Host());
-
-            // TODO: Transcribe headers.
+            auto beast_request = MakeBeastRequest(request);
 
             auto& properties = request.Properties();
+
             if (request.Https()) {
                 std::make_shared<EncryptedClient>(
                     strand, ssl_ctx_, beast_request, request.Host(),
