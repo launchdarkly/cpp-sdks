@@ -1,4 +1,5 @@
 #include <boost/url/parse.hpp>
+#include <utility>
 
 #include "network/detail/http_requester.hpp"
 
@@ -33,7 +34,7 @@ std::optional<std::string> const& HttpResult::ErrorMessage() const {
 }
 
 HttpResult::HttpResult(std::optional<std::string> error_message)
-    : error_message_(error_message), error_(true) {}
+    : error_message_(std::move(error_message)), error_(true), status_(0) {}
 
 HttpMethod HttpRequest::Method() const {
     return method_;
@@ -55,16 +56,18 @@ std::string const& HttpRequest::Path() const {
     return path_;
 }
 
-HttpRequest::HttpRequest(std::string url,
+HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
                          config::detail::built::HttpProperties properties,
                          BodyType body)
-    : properties_(properties), method_(method), body_(body) {
+    : properties_(std::move(properties)),
+      method_(method),
+      body_(std::move(body)) {
     auto uri_components = boost::urls::parse_uri(url);
 
     host_ = uri_components->host();
     path_ = uri_components->path();
-    if (path_ == "") {
+    if (path_.empty()) {
         path_ = "/";
     }
 

@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -40,7 +41,8 @@ static http::verb ConvertMethod(HttpMethod method) {
     assert(!"Method not found. Ensure all method cases covered.");
 }
 
-static http::request<http::string_body> MakeBeastRequest(HttpRequest request) {
+static http::request<http::string_body> MakeBeastRequest(
+    HttpRequest const& request) {
     http::request<http::string_body> beast_request;
 
     beast_request.method(ConvertMethod(request.Method()));
@@ -54,9 +56,9 @@ static http::request<http::string_body> MakeBeastRequest(HttpRequest request) {
     beast_request.prepare_payload();
     beast_request.set(http::field::host, request.Host());
 
-    auto& properties = request.Properties();
+    auto const& properties = request.Properties();
 
-    for (auto& pair : request.Properties().BaseHeaders()) {
+    for (auto const& pair : request.Properties().BaseHeaders()) {
         beast_request.set(pair.first, pair.second);
     }
 
@@ -134,6 +136,7 @@ class
 
     void OnConnect(beast::error_code ec,
                    tcp::resolver::results_type::endpoint_type eps) {
+        boost::ignore_unused(eps);
         if (ec) {
             return Fail(ec, "connect");
         }
@@ -158,7 +161,8 @@ class
                                       GetDerived().shared_from_this()));
     }
 
-    void OnWrite(beast::error_code ec, std::size_t) {
+    void OnWrite(beast::error_code ec, std::size_t unused) {
+        boost::ignore_unused(unused);
         if (ec) {
             return Fail(ec, "write");
         }
@@ -346,7 +350,7 @@ class AsioRequester {
      */
    public:
     AsioRequester(net::any_io_executor ctx)
-        : ctx_(ctx),
+        : ctx_(std::move(ctx)),
           ssl_ctx_(
               std::make_shared<ssl::context>(ssl::context::tlsv12_client)) {
         ssl_ctx_->set_verify_mode(ssl::verify_peer |
@@ -358,6 +362,8 @@ class AsioRequester {
 
     template <typename CompletionToken>
     auto Request(HttpRequest request, CompletionToken&& token) {
+        // TODO: Clang-tidy wants to pass the request by reference, but I am not
+        // confident that lifetime would make sense.
         namespace asio = boost::asio;
         namespace system = boost::system;
 
@@ -372,7 +378,7 @@ class AsioRequester {
         boost::asio::post(strand, [strand, handler, request, this]() mutable {
             auto beast_request = MakeBeastRequest(request);
 
-            auto& properties = request.Properties();
+            const auto& properties = request.Properties();
 
             if (request.Https()) {
                 std::make_shared<EncryptedClient>(
