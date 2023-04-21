@@ -87,34 +87,34 @@ class HttpRequest {
     bool is_https_;
 };
 
-class IRequestState {
-   public:
-    virtual void run() = 0;
+//class IRequestState {
+//   public:
+//    virtual void run() = 0;
+//
+//    virtual ~IRequestState() = default;
+//    IRequestState(IRequestState const& item) = delete;
+//    IRequestState(IRequestState&& item) = delete;
+//    IRequestState& operator=(IRequestState const&) = delete;
+//    IRequestState& operator=(IRequestState&&) = delete;
+//
+//   protected:
+//    IRequestState() = default;
+//};
 
-    virtual ~IRequestState() = default;
-    IRequestState(IRequestState const& item) = delete;
-    IRequestState(IRequestState&& item) = delete;
-    IRequestState& operator=(IRequestState const&) = delete;
-    IRequestState& operator=(IRequestState&&) = delete;
-
-   protected:
-    IRequestState() = default;
-};
-
-class IHttpRequester {
-   public:
-    using ResponseHandler = std::function<void(HttpResult result)>;
-    virtual std::shared_ptr<IRequestState> Request(HttpRequest request,
-                                                   ResponseHandler handler) = 0;
-
-    virtual ~IHttpRequester() = default;
-    IHttpRequester(IHttpRequester const& item) = delete;
-    IHttpRequester(IHttpRequester&& item) = delete;
-    IHttpRequester& operator=(IHttpRequester const&) = delete;
-    IHttpRequester& operator=(IHttpRequester&&) = delete;
-
-   protected:
-    IHttpRequester() = default;
-};
+//class IHttpRequester {
+//   public:
+//    using ResponseHandler = std::function<void(HttpResult result)>;
+//    virtual std::shared_ptr<IRequestState> Request(HttpRequest request,
+//                                                   ResponseHandler handler) = 0;
+//
+//    virtual ~IHttpRequester() = default;
+//    IHttpRequester(IHttpRequester const& item) = delete;
+//    IHttpRequester(IHttpRequester&& item) = delete;
+//    IHttpRequester& operator=(IHttpRequester const&) = delete;
+//    IHttpRequester& operator=(IHttpRequester&&) = delete;
+//
+//   protected:
+//    IHttpRequester() = default;
+//};
 
 }  // namespace launchdarkly::network::detail

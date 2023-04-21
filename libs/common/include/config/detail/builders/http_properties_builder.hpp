@@ -33,9 +33,9 @@ class HttpPropertiesBuilder {
     [[nodiscard]] built::HttpProperties Build() const;
 
    private:
-    std::chrono::milliseconds connect_timeout_{};
-    std::chrono::milliseconds read_timeout_{};
-    std::chrono::milliseconds response_timeout_{};
+    std::chrono::milliseconds connect_timeout_{0};
+    std::chrono::milliseconds read_timeout_{0};
+    std::chrono::milliseconds response_timeout_{0};
     std::string wrapper_name_;
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;

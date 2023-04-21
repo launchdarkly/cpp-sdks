@@ -15,30 +15,30 @@ using launchdarkly::network::detail::HttpRequest;
 using launchdarkly::config::detail::ClientSDK;
 using launchdarkly::config::detail::builders::HttpPropertiesBuilder;
 
-//TEST(AsioRequesterTests, CanMakeRequest) {
-//    boost::asio::io_service ios;
-//    boost::asio::io_service::work work(ios);
-//
-//    std::thread io_thread([&ios]() { ios.run(); });
-//    AsioRequester requester(ios.get_executor());
-//
-//    requester.Request(
-//        HttpRequest("http://localhost:8080/", HttpMethod::kGet,
-//                    HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt),
-//        [](auto response) {
-//            std::cout << "Response1: " << response << std::endl;
-//        });
-//
-//    auto res =
-//        requester
-//            .Request(HttpRequest("http://localhost:8080/", HttpMethod::kGet,
-//                                 HttpPropertiesBuilder<ClientSDK>().Build(),
-//                                 std::nullopt),
-//                     boost::asio::use_future)
-//            .get();
-//
-//    std::cout << "Response2:" << res << std::endl;
-//
-//    ios.stop();
-//    io_thread.join();
-//}
+TEST(AsioRequesterTests, CanMakeRequest) {
+    boost::asio::io_service ios;
+    boost::asio::io_service::work work(ios);
+
+    std::thread io_thread([&ios]() { ios.run(); });
+    AsioRequester requester(ios.get_executor());
+
+    requester.Request(
+        HttpRequest("http://localhost:8080/", HttpMethod::kGet,
+                    HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt),
+        [](auto response) {
+            std::cout << "Response1: " << response << std::endl;
+        });
+
+    auto res =
+        requester
+            .Request(HttpRequest("http://localhost:8080/", HttpMethod::kGet,
+                                 HttpPropertiesBuilder<ClientSDK>().Build(),
+                                 std::nullopt),
+                     boost::asio::use_future)
+            .get();
+
+    std::cout << "Response2:" << res << std::endl;
+
+    ios.stop();
+    io_thread.join();
+}

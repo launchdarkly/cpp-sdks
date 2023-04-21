@@ -25,12 +25,15 @@ namespace launchdarkly::network::detail {
 template <class Derived>
 class
     Session {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+   public:
+    using ResponseHandler = std::function<void(HttpResult result)>;
+
    private:
     Derived& derived() { return static_cast<Derived&>(*this); }
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
-    std::optional<std::chrono::milliseconds> read_timeout_;
+    std::chrono::milliseconds read_timeout_;
 
    protected:
     beast::flat_buffer buffer_;
@@ -38,9 +41,9 @@ class
     std::string port_;
     tcp::resolver resolver_;
     http::response_parser<http::string_body> parser_;
-    IHttpRequester::ResponseHandler handler_;
+    ResponseHandler handler_;
 
-    using cb = std::function<void(IHttpRequester::ResponseHandler handler)>;
+    using cb = std::function<void(ResponseHandler handler)>;
     using body = http::string_body;
 
    public:
@@ -50,12 +53,15 @@ class
             http::request<http::string_body> req,
             std::chrono::milliseconds connect_timeout,
             std::chrono::milliseconds response_timeout,
-            std::optional<std::chrono::milliseconds> read_timeout,
-            IHttpRequester::ResponseHandler handler)
+            std::chrono::milliseconds read_timeout,
+            ResponseHandler handler)
         : req_(std::move(req)),
           resolver_(exec),
           host_(std::move(host)),
           port_(std::move(port)),
+          connect_timeout_(connect_timeout),
+          response_timeout_(response_timeout),
+          read_timeout_(read_timeout),
           handler_(std::move(handler)) {
         parser_.get();
     }
@@ -135,12 +141,8 @@ class
             return;
         }
 
-        if (read_timeout_) {
-            beast::get_lowest_layer(derived().stream())
-                .expires_after(*read_timeout_);
-        } else {
-            beast::get_lowest_layer(derived().stream()).expires_never();
-        };
+        beast::get_lowest_layer(derived().stream())
+            .expires_after(read_timeout_);
 
         http::async_read_some(
             derived().stream(), buffer_, parser_,
@@ -162,7 +164,7 @@ class PlaintextClient : public Session<PlaintextClient>,
                     std::string port,
                     std::chrono::milliseconds connect_timeout,
                     std::chrono::milliseconds response_timeout,
-                    std::optional<std::chrono::milliseconds> read_timeout,
+                    std::chrono::milliseconds read_timeout,
                     ResponseHandler handler)
         : Session<PlaintextClient>(ex,
                                    std::move(host),
@@ -187,7 +189,7 @@ class PlaintextClient : public Session<PlaintextClient>,
     beast::tcp_stream stream_;
 };
 
-class AsioRequester /*: public IHttpRequester*/ {
+class AsioRequester {
    public:
     AsioRequester(net::any_io_executor ctx) : ctx_(ctx) {}
 
