@@ -33,7 +33,7 @@ class
     using ResponseHandler = std::function<void(HttpResult result)>;
 
    private:
-    Derived& derived() { return static_cast<Derived&>(*this); }
+    Derived& GetDerived() { return static_cast<Derived&>(*this); }
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
@@ -70,91 +70,94 @@ class
         parser_.get();
     }
 
-    void fail(beast::error_code ec, char const* what) {
+    void Fail(beast::error_code ec, char const* what) {
+        // TODO: Is it safe to cancel this if it has already failed?
+        beast::get_lowest_layer(GetDerived().Stream()).cancel();
         handler_(HttpResult(std::string(what) + ": " + ec.message()));
     }
 
-    void do_resolve() {
+    void DoResolve() {
         resolver_.async_resolve(
             host_, port_,
-            beast::bind_front_handler(&Session::on_resolve,
-                                      derived().shared_from_this()));
+            beast::bind_front_handler(&Session::OnResolve,
+                                      GetDerived().shared_from_this()));
     }
 
-    void on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
+    void OnResolve(beast::error_code ec, tcp::resolver::results_type results) {
         if (ec)
-            return fail(ec, "resolve");
+            return Fail(ec, "resolve");
 
-        beast::get_lowest_layer(derived().stream())
+        beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(connect_timeout_);
 
-        beast::get_lowest_layer(derived().stream())
+        beast::get_lowest_layer(GetDerived().Stream())
             .async_connect(results, beast::bind_front_handler(
-                                        &Session::on_connect,
-                                        derived().shared_from_this()));
+                                        &Session::OnConnect,
+                                        GetDerived().shared_from_this()));
     }
 
-    void on_connect(beast::error_code ec,
+    void OnConnect(beast::error_code ec,
                     tcp::resolver::results_type::endpoint_type eps) {
+
         if (ec) {
-            return fail(ec, "connect");
+            return Fail(ec, "connect");
         }
 
-        derived().do_handshake();
+        GetDerived().DoHandshake();
     }
 
-    void on_handshake(beast::error_code ec) {
+    void OnHandshake(beast::error_code ec) {
         if (ec)
-            return fail(ec, "handshake");
+            return Fail(ec, "handshake");
 
-        do_write();
+        DoWrite();
     }
 
-    void do_write() {
-        beast::get_lowest_layer(derived().stream())
+    void DoWrite() {
+        beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(response_timeout_);
 
-        http::async_write(
-            derived().stream(), req_,
-            beast::bind_front_handler(&Session::on_write,
-                                      derived().shared_from_this()));
+        http::async_write(GetDerived().Stream(), req_,
+            beast::bind_front_handler(
+                              &Session::OnWrite,
+                              GetDerived().shared_from_this()));
     }
 
-    void on_write(beast::error_code ec, std::size_t) {
+    void OnWrite(beast::error_code ec, std::size_t) {
         if (ec)
-            return fail(ec, "write");
+            return Fail(ec, "write");
 
         //        logger_("reading response");
 
         http::async_read_some(
-            derived().stream(), buffer_, parser_,
-            beast::bind_front_handler(&Session::on_read,
-                                      derived().shared_from_this()));
+            GetDerived().Stream(), buffer_, parser_,
+            beast::bind_front_handler(&Session::OnRead,
+                                      GetDerived().shared_from_this()));
     }
 
-    void on_read(beast::error_code ec, std::size_t bytes_transferred) {
+    void OnRead(beast::error_code ec, std::size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
         if (ec) {
-            return fail(ec, "read");
+            return Fail(ec, "read");
         }
         if (parser_.is_done()) {
+            DoClose();
             handler_(HttpResult(parser_.get().result_int(),
                                 parser_.get().body(),
                                 HttpResult::HeadersType()));
-            // TODO: Shutdown.
             return;
         }
 
-        beast::get_lowest_layer(derived().stream())
+        beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(read_timeout_);
 
         http::async_read_some(
-            derived().stream(), buffer_, parser_,
-            beast::bind_front_handler(&Session::on_read,
-                                      derived().shared_from_this()));
+            GetDerived().Stream(), buffer_, parser_,
+            beast::bind_front_handler(&Session::OnRead,
+                                      GetDerived().shared_from_this()));
     }
 
-    void do_close() { beast::get_lowest_layer(derived().stream()).cancel(); }
+    void DoClose() { beast::get_lowest_layer(GetDerived().Stream()).cancel(); }
 };
 
 class PlaintextClient : public Session<PlaintextClient>,
@@ -180,14 +183,14 @@ class PlaintextClient : public Session<PlaintextClient>,
                                    std::move(handler)),
           stream_{ex} {}
 
-    void do_handshake() {
+    void DoHandshake() {
         // No handshake for plaintext; immediately send the request instead.
-        do_write();
+        DoWrite();
     }
 
-    void run() { do_resolve(); }
+    void Run() { DoResolve(); }
 
-    beast::tcp_stream& stream() { return stream_; }
+    beast::tcp_stream& Stream() { return stream_; }
 
    private:
     beast::tcp_stream stream_;
@@ -218,30 +221,28 @@ class EncryptedClient : public Session<EncryptedClient>,
           ssl_ctx_(ssl_ctx),
           stream_{ex, *ssl_ctx} {}
 
-    virtual void run() {
+    virtual void Run() {
         // Set SNI Hostname (many hosts need this to handshake successfully)
         if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
             beast::error_code ec{static_cast<int>(::ERR_get_error()),
                                  net::error::get_ssl_category()};
 
+            DoClose();
             // TODO: Should this be treated as a terminal error for the request.
             handler_(HttpResult("failed to set TLS host name extension: " +
                                 ec.message()));
             return;
         }
 
-        do_resolve();
+        DoResolve();
     }
 
-    virtual void close() { do_close(); }
-
-    void do_handshake() {
+    void DoHandshake() {
         stream_.async_handshake(ssl::stream_base::client,
-                                beast::bind_front_handler(
-                                    &EncryptedClient::on_handshake, shared()));
+                                beast::bind_front_handler(&EncryptedClient::OnHandshake, shared()));
     }
 
-    beast::ssl_stream<beast::tcp_stream>& stream() { return stream_; }
+    beast::ssl_stream<beast::tcp_stream>& Stream() { return stream_; }
 
    private:
     std::shared_ptr<ssl::context> ssl_ctx_;
@@ -254,8 +255,8 @@ class EncryptedClient : public Session<EncryptedClient>,
 
 class AsioRequester {
     /**
-     * Each request is currently its own strand. If the TCP stream was to be
-     * re-used between requests, then each request to the same stream would
+     * Each request is currently its own strand. If the TCP Stream was to be
+     * re-used between requests, then each request to the same Stream would
      * need to be using the same strand.
      *
      * If this code is refactored to allow re-use of TCP streams, then that
@@ -303,13 +304,13 @@ class AsioRequester {
                     request.Port(), properties.ConnectTimeout(),
                     properties.ResponseTimeout(), properties.ReadTimeout(),
                     std::move(handler))
-                    ->run();
+                    ->Run();
             } else {
                 std::make_shared<PlaintextClient>(
                     strand, beast_request, request.Host(), request.Port(),
                     properties.ConnectTimeout(), properties.ResponseTimeout(),
                     properties.ReadTimeout(), std::move(handler))
-                    ->run();
+                    ->Run();
             }
         });
 
