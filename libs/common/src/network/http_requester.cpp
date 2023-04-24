@@ -1,5 +1,6 @@
 #include <boost/url/parse.hpp>
 #include <utility>
+#include <optional>
 
 #include "network/detail/http_requester.hpp"
 
