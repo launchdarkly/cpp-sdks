@@ -82,7 +82,7 @@ class HttpRequest {
     std::string const& Path() const;
     bool Https() const;
 
-    HttpRequest(const std::string& url,
+    HttpRequest(std::string const& url,
                 HttpMethod method,
                 config::detail::built::HttpProperties properties,
                 BodyType body);
