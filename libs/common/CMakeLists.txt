@@ -24,13 +24,20 @@ endif ()
 # Needed to fetch external dependencies. 
 include(FetchContent)
 
+set(OPENSSL_USE_STATIC_LIBS OFF)
+set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
+find_package(OpenSSL REQUIRED)
+message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
+
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.80 REQUIRED)
+find_package(Boost 1.80 REQUIRED COMPONENTS json url)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
+
 include(${CMAKE_FILES}/expected.cmake)
+include(${CMAKE_FILES}/certify.cmake)
 
 # Add main SDK sources.
 add_subdirectory(src)

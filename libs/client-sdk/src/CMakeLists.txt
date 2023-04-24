@@ -9,7 +9,10 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} api.cpp ${HEADER_LIST}
+
+add_library(${LIBNAME}
+        api.cpp
+        ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/base_64.cpp
         data_sources/streaming_data_handler.cpp

@@ -49,10 +49,10 @@ struct Defaults<ClientSDK> {
     }
 
     static auto HttpProperties() -> built::HttpProperties {
-        return {std::chrono::milliseconds{10000},
-                std::chrono::milliseconds{10000},
-                SdkName() + "/" + SdkVersion(),
-                std::map<std::string, std::string>()};
+        return {
+            std::chrono::milliseconds{10000}, std::chrono::milliseconds{10000},
+            std::chrono::milliseconds{10000}, SdkName() + "/" + SdkVersion(),
+            std::map<std::string, std::string>()};
     }
 
     static auto DataSourceConfig() -> built::DataSourceConfig<ClientSDK> {
@@ -78,10 +78,10 @@ struct Defaults<ServerSDK> {
     }
 
     static auto HttpProperties() -> built::HttpProperties {
-        return {std::chrono::milliseconds{2000},
-                std::chrono::milliseconds{10000},
-                SdkName() + "/" + SdkVersion(),
-                std::map<std::string, std::string>()};
+        return {
+            std::chrono::milliseconds{2000}, std::chrono::milliseconds{10000},
+            std::chrono::milliseconds{10000}, SdkName() + "/" + SdkVersion(),
+            std::map<std::string, std::string>()};
     }
 
     static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {

@@ -29,7 +29,6 @@ add_library(${LIBNAME}
         data/evaluation_result.cpp
         context_filter.cpp
         config/app_info_builder.cpp
-        lib.cpp
         value_mapping.cpp
         serialization/json_attributes.cpp
         serialization/json_context.cpp
@@ -45,12 +44,15 @@ add_library(${LIBNAME}
         events/client_events.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
-        config/http_properties_builder.cpp)
+        config/http_properties_builder.cpp
+        network/http_requester.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-target_link_libraries(${LIBNAME} Boost::headers tl::expected)
+target_link_libraries(${LIBNAME}
+        PUBLIC Boost::headers tl::expected OpenSSL::SSL certify::core
+        PRIVATE Boost::url Boost::json)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
