@@ -59,7 +59,7 @@ std::string const& HttpRequest::Path() const {
 HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
                          config::detail::built::HttpProperties properties,
-                         BodyType body)
+                         HttpRequest::BodyType body)
     : properties_(std::move(properties)),
       method_(method),
       body_(std::move(body)) {
