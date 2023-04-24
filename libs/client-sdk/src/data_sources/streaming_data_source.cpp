@@ -28,7 +28,7 @@ StreamingDataSource::StreamingDataSource(
     : logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
-          StreamingDataHandler(handler, logger, status_manager_)) {
+          DataSourceEventHandler(handler, logger, status_manager_)) {
     auto uri_components = boost::urls::parse_uri(endpoints.StreamingBaseUrl());
 
     // TODO: Handle parsing error?
@@ -57,7 +57,7 @@ StreamingDataSource::StreamingDataSource(
                                      : boost::beast::http::verb::get);
 
     client_builder.receiver([this](launchdarkly::sse::Event const& event) {
-        data_source_handler_.HandleMessage(event);
+        data_source_handler_.HandleMessage(event.type(), event.data());
         // TODO: Use the result of handle message to restart the
         // event source if we got bad data.
     });

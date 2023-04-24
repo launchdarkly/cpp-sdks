@@ -57,6 +57,10 @@ std::string const& HttpRequest::Path() const {
     return path_;
 }
 
+std::map<std::string, std::string> const& HttpRequest::Params() const {
+    return params_;
+}
+
 HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
                          config::detail::built::HttpProperties properties,
@@ -67,7 +71,8 @@ HttpRequest::HttpRequest(std::string const& url,
     auto uri_components = boost::urls::parse_uri(url);
 
     host_ = uri_components->host();
-    path_ = uri_components->path();
+    // For a boost beast request we need the query string in the path.
+    path_ = uri_components->path() + "?" + uri_components->query();
     if (path_.empty()) {
         path_ = "/";
     }
@@ -78,6 +83,10 @@ HttpRequest::HttpRequest(std::string const& url,
     } else {
         port_ = is_https_ ? "443" : "80";
     }
+
+//    for (auto const& param : uri_components->params()) {
+//        params_.insert_or_assign(param.key, param.value);
+//    }
 }
 
 std::string const& HttpRequest::Port() const {

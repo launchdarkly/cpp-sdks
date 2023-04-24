@@ -38,7 +38,7 @@ class HttpPropertiesBuilder {
      *
      * @param properties The properties to start with.
      */
-    HttpPropertiesBuilder(built::HttpProperties properties);
+    HttpPropertiesBuilder(built::HttpProperties const& properties);
 
     /**
      * The network connection timeout.

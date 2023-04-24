@@ -2,7 +2,7 @@
 
 #include "console_backend.hpp"
 #include "context_builder.hpp"
-#include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
+#include "launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp"
 
 #include <memory>
 #include <unordered_map>
@@ -31,13 +31,13 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(launchdarkly::sse::Event(
-        "put", R"({"flagA": {"version":1, "value":"test"}})"));
+    auto res = stream_handler.HandleMessage(
+        "put", R"({"flagA": {"version":1, "value":"test"}})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put = std::unordered_map<std::string, ItemDescriptor>{
         {"flagA", ItemDescriptor(EvaluationResult(
@@ -51,13 +51,12 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res =
-        stream_handler.HandleMessage(launchdarkly::sse::Event("put", "{}"));
+    auto res = stream_handler.HandleMessage("put", "{}");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put = std::unordered_map<std::string, ItemDescriptor>();
     EXPECT_EQ(expected_put, test_handler->init_data_[0]);
@@ -67,13 +66,12 @@ TEST(StreamingDataHandlerTests, BadJsonPut) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res =
-        stream_handler.HandleMessage(launchdarkly::sse::Event("put", "{sorry"));
+    auto res = stream_handler.HandleMessage("put", "{sorry");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -81,13 +79,12 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("put", "{\"potato\": {}}"));
+    auto res = stream_handler.HandleMessage("put", "{\"potato\": {}}");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -95,13 +92,13 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(launchdarkly::sse::Event(
-        "patch", R"({"key": "flagA", "version":1, "value": "test"})"));
+    auto res = stream_handler.HandleMessage(
+        "patch", R"({"key": "flagA", "version":1, "value": "test"})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put = std::pair<std::string, ItemDescriptor>{
         "flagA", ItemDescriptor(EvaluationResult(
@@ -115,13 +112,12 @@ TEST(StreamingDataHandlerTests, BadJsonPatch) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("patch", "{sorry"));
+    auto res = stream_handler.HandleMessage("patch", "{sorry");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -129,13 +125,12 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("patch", R"({"potato": {}})"));
+    auto res = stream_handler.HandleMessage("patch", R"({"potato": {}})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -143,13 +138,13 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("delete", R"({"key": "flagA", "version":1})"));
+    auto res = stream_handler.HandleMessage("delete",
+                                            R"({"key": "flagA", "version":1})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler->count_);
     auto expected_put =
         std::pair<std::string, ItemDescriptor>{"flagA", ItemDescriptor(1)};
@@ -160,13 +155,12 @@ TEST(StreamingDataHandlerTests, BadJsonDelete) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("delete", "{sorry"));
+    auto res = stream_handler.HandleMessage("delete", "{sorry");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -174,13 +168,12 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("delete", R"({"potato": {}})"));
+    auto res = stream_handler.HandleMessage("delete", R"({"potato": {}})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kInvalidMessage, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler->count_);
 }
 
@@ -188,12 +181,11 @@ TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     auto logger = Logger(std::make_unique<ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    StreamingDataHandler stream_handler(test_handler.get(), logger,
-                                        status_manager);
+    DataSourceEventHandler stream_handler(test_handler.get(), logger,
+                                          status_manager);
 
-    auto res = stream_handler.HandleMessage(
-        launchdarkly::sse::Event("potato", R"({"potato": {}})"));
+    auto res = stream_handler.HandleMessage("potato", R"({"potato": {}})");
 
-    EXPECT_EQ(StreamingDataHandler::MessageStatus::kUnhandledVerb, res);
+    EXPECT_EQ(DataSourceEventHandler::MessageStatus::kUnhandledVerb, res);
     EXPECT_EQ(0, test_handler->count_);
 }

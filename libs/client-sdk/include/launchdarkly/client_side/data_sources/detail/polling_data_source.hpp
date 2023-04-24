@@ -1,31 +1,31 @@
 #pragma once
 
 #include <chrono>
-using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
 #include "config/detail/built/http_properties.hpp"
-#include "config/detail/built/service_endpoints.hpp"
-#include "context.hpp"
-#include "data/evaluation_result.hpp"
+#include "data_source_status_manager.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
 #include "launchdarkly/client_side/data_source_update_sink.hpp"
 #include "launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp"
-#include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
-#include "launchdarkly/sse/client.hpp"
 #include "logger.hpp"
+#include "network/detail/asio_requester.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-class StreamingDataSource final : public IDataSource {
+const static std::chrono::seconds kMinPollingInterval =
+    std::chrono::seconds{30};
+
+class PollingDataSource : public IDataSource {
    public:
-    StreamingDataSource(
+    PollingDataSource(
         std::string const& sdk_key,
         boost::asio::any_io_executor ioc,
         Context const& context,
         config::detail::built::ServiceEndpoints const& endpoints,
         config::detail::built::HttpProperties const& http_properties,
+        std::chrono::seconds polling_interval,
         bool use_report,
         bool with_reasons,
         IDataSourceUpdateSink* handler,
@@ -36,14 +36,26 @@ class StreamingDataSource final : public IDataSource {
     void Close() override;
 
    private:
+    void DoPoll();
+
+    std::string string_context_;
     DataSourceStatusManager& status_manager_;
     DataSourceEventHandler data_source_handler_;
-    std::string streaming_endpoint_;
-    std::string string_context_;
+    std::string polling_endpoint_;
 
+    network::detail::AsioRequester requester_;
     Logger const& logger_;
-    std::shared_ptr<launchdarkly::sse::Client> client_;
+    boost::asio::any_io_executor ioc_;
+    std::chrono::seconds polling_interval_;
+    network::detail::HttpRequest request_;
 
-    inline static const std::string streaming_path_ = "/meval";
+    // TODO: Unique/Shared ptr.
+    boost::asio::deadline_timer* timer_;
+
+    inline const static std::string polling_get_path_ = "/msdk/evalx/contexts";
+
+    inline const static std::string polling_report_path_ =
+        "/msdk/evalx/context";
 };
+
 }  // namespace launchdarkly::client_side::data_sources::detail

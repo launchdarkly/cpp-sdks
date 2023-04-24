@@ -80,6 +80,7 @@ class HttpRequest {
     std::string const& Host() const;
     std::string const& Port() const;
     std::string const& Path() const;
+    std::map<std::string, std::string> const& Params() const;
     bool Https() const;
 
     HttpRequest(std::string const& url,
@@ -94,6 +95,7 @@ class HttpRequest {
     std::string host_;
     std::string port_;
     std::string path_;
+    std::map<std::string, std::string> params_;
     bool is_https_;
 };
 
