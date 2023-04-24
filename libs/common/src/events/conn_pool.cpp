@@ -1,10 +1,11 @@
 #include "events/detail/conn_pool.hpp"
 #include <iostream>
+#include "network/detail/asio_requester.hpp"
 namespace launchdarkly::events::detail {
-ConnPool::ConnPool() {}
+ConnPool::ConnPool(boost::asio::any_io_executor io)
+    : requester_(std::move(io)) {}
 
 void ConnPool::Deliver(RequestType request) {
-    std::cout << "making an HTTP request with body" << request.body().data()
-              << "\n";
+    requester_.Request(std::move(request), []() {});
 }
 }  // namespace launchdarkly::events::detail

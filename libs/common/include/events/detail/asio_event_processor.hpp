@@ -8,6 +8,7 @@
 #include <chrono>
 #include <optional>
 #include "config/detail/built/events.hpp"
+#include "config/detail/built/http_properties.hpp"
 #include "config/detail/built/service_endpoints.hpp"
 #include "context_filter.hpp"
 #include "events/detail/conn_pool.hpp"
@@ -16,6 +17,7 @@
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
+#include "network/detail/http_requester.hpp"
 
 namespace launchdarkly::events::detail {
 
@@ -24,6 +26,7 @@ class AsioEventProcessor : public IEventProcessor {
     AsioEventProcessor(boost::asio::any_io_executor const& io,
                        config::detail::built::Events const& config,
                        config::detail::built::ServiceEndpoints const& endpoints,
+                       config::detail::built::HttpProperties const& http_props,
                        std::string authorization,
                        Logger& logger);
 
@@ -38,8 +41,7 @@ class AsioEventProcessor : public IEventProcessor {
         Automatic = 0,
         Manual = 1,
     };
-    using RequestType =
-        boost::beast::http::request<boost::beast::http::string_body>;
+    using RequestType = network::detail::HttpRequest;
 
     boost::asio::any_io_executor io_;
     Outbox outbox_;
@@ -51,6 +53,8 @@ class AsioEventProcessor : public IEventProcessor {
     std::string host_;
     std::string path_;
     std::string authorization_;
+
+    config::detail::built::HttpProperties http_props_;
 
     boost::uuids::random_generator uuids_;
 
@@ -69,7 +73,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     void HandleSend(InputEvent event);
 
-    std::optional<RequestType> MakeRequest();
+    std::optional<RequestType> BuildRequest();
 
     void Flush(FlushTrigger flush_type);
 

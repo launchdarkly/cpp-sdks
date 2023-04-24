@@ -2,6 +2,9 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/http.hpp>
+#include "config/detail/builders/http_properties_builder.hpp"
+#include "config/detail/sdks.hpp"
+#include "network/detail/asio_requester.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -19,6 +22,7 @@ AsioEventProcessor::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
     config::detail::built::Events const& config,
     config::detail::built::ServiceEndpoints const& endpoints,
+    config::detail::built::HttpProperties const& http_props,
     std::string authorization,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
@@ -28,8 +32,10 @@ AsioEventProcessor::AsioEventProcessor(
       timer_(io_),
       host_(endpoints.EventsBaseUrl()),  // TODO: parse and use host
       path_(config.Path()),
+      http_props_(http_props),
       authorization_(std::move(authorization)),
       uuids_(),
+      conns_(io),
       inbox_capacity_(config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
@@ -85,7 +91,7 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
 }
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
-    if (auto request = MakeRequest()) {
+    if (auto request = BuildRequest()) {
         conns_.Deliver(*request);
     } else {
         LD_LOG(logger_, LogLevel::kDebug)
@@ -125,7 +131,7 @@ void AsioEventProcessor::AsyncClose() {
 }
 
 std::optional<AsioEventProcessor::RequestType>
-AsioEventProcessor::MakeRequest() {
+AsioEventProcessor::BuildRequest() {
     if (outbox_.Empty()) {
         return std::nullopt;
     }
@@ -139,19 +145,20 @@ AsioEventProcessor::MakeRequest() {
     LD_LOG(logger_, LogLevel::kDebug)
         << "event-processor: generating http request";
 
-    RequestType req;
+    using namespace launchdarkly::network::detail;
 
-    req.set(http::field::host, host_);
-    req.method(http::verb::post);
-    req.set(http::field::content_type, "application/json");
-    req.set(http::field::authorization, authorization_);
-    req.set(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
-    req.set(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
-    req.target(host_ + path_);
+    config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
+        http_props(http_props_);
 
-    req.body() = boost::json::serialize(events);
-    req.prepare_payload();
-    return req;
+    http_props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
+    http_props.Header(kPayloadIdHeader,
+                      boost::lexical_cast<std::string>(uuids_()));
+    http_props.Header(to_string(http::field::authorization), authorization_);
+    http_props.Header(to_string(http::field::content_type), "application/json");
+
+    return AsioEventProcessor::RequestType{host_ + path_, HttpMethod::kPost,
+                                           http_props.Build(),
+                                           boost::json::serialize(events)};
 }
 
 // These helpers are for the std::visit within AsioEventProcessor::Process.

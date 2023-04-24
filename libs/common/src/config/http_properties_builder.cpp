@@ -71,6 +71,13 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
 }
 
 template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
+    boost::htt std::string value) {
+    base_headers_.insert_or_assign(key, value);
+    return *this;
+}
+
+template <typename SDK>
 built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
     if (!wrapper_name_.empty()) {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
