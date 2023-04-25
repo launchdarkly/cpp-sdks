@@ -18,6 +18,7 @@ Client::Client(Config config, Context context)
               ioc_.get_executor(),
               config.Events(),
               config.ServiceEndpoints(),
+              config.HttpProperties(),
               config.SdkKey(),
               logger_)),
       flag_updater_(flag_manager_),

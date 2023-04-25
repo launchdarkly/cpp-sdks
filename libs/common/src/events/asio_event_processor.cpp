@@ -35,7 +35,7 @@ AsioEventProcessor::AsioEventProcessor(
       http_props_(http_props),
       authorization_(std::move(authorization)),
       uuids_(),
-      conns_(io),
+      conns_(io, logger),
       inbox_capacity_(config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
@@ -69,6 +69,9 @@ void AsioEventProcessor::InboxDecrement() {
 }
 
 void AsioEventProcessor::AsyncSend(InputEvent input_event) {
+    if (conns_.PermanentFailure()) {
+        return;
+    }
     if (!InboxIncrement()) {
         return;
     }
@@ -185,15 +188,20 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
                        auto debug_until_date =
                            event.eval_result.debug_events_until_date();
 
+                       auto max_time = std::max(
+                           std::chrono::system_clock::now(),
+                           conns_.LastKnownPastTime().value_or(
+                               std::chrono::system_clock::time_point{}));
+
                        bool emit_debug_event =
                            debug_until_date &&
-                           debug_until_date.value() >
-                               std::chrono::system_clock::now();
+                           debug_until_date.value() > max_time;
 
                        if (emit_debug_event) {
                            out.emplace_back(client::DebugEvent{
                                base, filter_.filter(event.context)});
                        }
+
                        out.emplace_back(client::FeatureEvent{
                            std::move(base), event.context.kinds_to_keys()});
                    },
