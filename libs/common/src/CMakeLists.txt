@@ -42,6 +42,7 @@ add_library(${LIBNAME}
         events/conn_pool.cpp
         events/summarizer.cpp
         events/client_events.cpp
+        events/request_worker.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp

@@ -66,6 +66,9 @@ class AsioEventProcessor : public IEventProcessor {
 
     bool full_outbox_encountered_;
     bool full_inbox_encountered_;
+    bool permanent_delivery_failure_;
+
+    std::optional<std::chrono::system_clock::time_point> last_known_past_time_;
 
     launchdarkly::ContextFilter filter_;
 

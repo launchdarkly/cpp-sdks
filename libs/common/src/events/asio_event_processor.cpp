@@ -35,11 +35,28 @@ AsioEventProcessor::AsioEventProcessor(
       http_props_(http_props),
       authorization_(std::move(authorization)),
       uuids_(),
-      conns_(io, logger),
+      conns_(
+          io,
+          logger,
+          5,
+          config.DeliveryRetryDelay(),
+          [this](std::chrono::system_clock::time_point server_time) {
+              boost::asio::post(io_, [this, server_time]() {
+                  last_known_past_time_ = server_time;
+              });
+          },
+          [this]() {
+              boost::asio::post(io_, [this]() {
+                  timer_.cancel();
+                  permanent_delivery_failure_ = true;
+              });
+          }),
       inbox_capacity_(config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
       full_inbox_encountered_(false),
+      permanent_delivery_failure_(false),
+      last_known_past_time_(std::nullopt),
       filter_(config.AllAttributesPrivate(), config.PrivateAttributes()),
       logger_(logger) {
     ScheduleFlush();
@@ -47,6 +64,9 @@ AsioEventProcessor::AsioEventProcessor(
 
 bool AsioEventProcessor::InboxIncrement() {
     std::lock_guard<std::mutex> guard{inbox_mutex_};
+    if (permanent_delivery_failure_) {
+        return false;
+    }
     if (inbox_size_ < inbox_capacity_) {
         inbox_size_++;
         return true;
@@ -69,9 +89,6 @@ void AsioEventProcessor::InboxDecrement() {
 }
 
 void AsioEventProcessor::AsyncSend(InputEvent input_event) {
-    if (conns_.PermanentFailure()) {
-        return;
-    }
     if (!InboxIncrement()) {
         return;
     }
@@ -94,13 +111,20 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
 }
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
-    if (auto request = BuildRequest()) {
-        conns_.Deliver(*request);
+    RequestWorker* worker = conns_.AcquireWorker();
+    if (worker) {
+        if (auto request = BuildRequest()) {
+            worker->AsyncDeliver(*request);
+        } else {
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "event-processor: nothing to flush";
+        }
+        summarizer_ = Summarizer(std::chrono::system_clock::now());
     } else {
         LD_LOG(logger_, LogLevel::kDebug)
-            << "event-processor: nothing to flush";
+            << "event-processor: no flush workers available; skipping flush";
     }
-    summarizer_ = Summarizer(std::chrono::system_clock::now());
+
     if (flush_type == FlushTrigger::Automatic) {
         ScheduleFlush();
     }
@@ -190,7 +214,7 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
 
                        auto max_time = std::max(
                            std::chrono::system_clock::now(),
-                           conns_.LastKnownPastTime().value_or(
+                           last_known_past_time_.value_or(
                                std::chrono::system_clock::time_point{}));
 
                        bool emit_debug_event =
