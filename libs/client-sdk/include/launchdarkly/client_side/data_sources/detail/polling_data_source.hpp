@@ -48,14 +48,17 @@ class PollingDataSource : public IDataSource {
     boost::asio::any_io_executor ioc_;
     std::chrono::seconds polling_interval_;
     network::detail::HttpRequest request_;
+    std::optional<std::string> etag_;
 
     // TODO: Unique/Shared ptr.
-    boost::asio::deadline_timer* timer_;
+    boost::asio::steady_timer timer_;
 
     inline const static std::string polling_get_path_ = "/msdk/evalx/contexts";
 
     inline const static std::string polling_report_path_ =
         "/msdk/evalx/context";
+
+    void StartPollingTimer();
 };
 
 }  // namespace launchdarkly::client_side::data_sources::detail

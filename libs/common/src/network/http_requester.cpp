@@ -24,7 +24,9 @@ HttpResult::HttpResult(HttpResult::StatusCode status,
     : status_(status),
       body_(std::move(body)),
       headers_(std::move(headers)),
-      error_(false) {}
+      error_(false) {
+
+}
 
 bool HttpResult::IsError() const {
     return error_;
@@ -83,10 +85,17 @@ HttpRequest::HttpRequest(std::string const& url,
     } else {
         port_ = is_https_ ? "443" : "80";
     }
+}
 
-//    for (auto const& param : uri_components->params()) {
-//        params_.insert_or_assign(param.key, param.value);
-//    }
+HttpRequest::HttpRequest(HttpRequest& base_request,
+                         config::detail::built::HttpProperties properties)
+    : properties_(std::move(properties)),
+      method_(base_request.method_),
+      body_(std::move(base_request.body_)) {
+    path_ = base_request.path_;
+    host_ = base_request.host_;
+    port_ = base_request.port_;
+    is_https_ = base_request.is_https_;
 }
 
 std::string const& HttpRequest::Port() const {

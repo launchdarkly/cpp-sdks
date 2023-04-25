@@ -70,7 +70,7 @@ PollingDataSource::PollingDataSource(
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)),
       requester_(ioc),
-      timer_(nullptr),
+      timer_(ioc),
       polling_interval_(polling_interval),
       request_(MakeRequest(sdk_key,
                            context,
@@ -84,9 +84,45 @@ PollingDataSource::PollingDataSource(
 void PollingDataSource::DoPoll() {
     LD_LOG(logger_, LogLevel::kInfo) << "Starting poll";
     requester_.Request(request_, [this](network::detail::HttpResult res) {
-        LD_LOG(logger_, LogLevel::kInfo) << "Poll complete";
+        LD_LOG(logger_, LogLevel::kInfo) << "Poll complete: " << res;
+        // TODO: Retry support.
+
+        auto header_etag = res.Headers().find("etag");
+        bool has_etag = header_etag != res.Headers().end();
+
+        LD_LOG(logger_, LogLevel::kInfo) << "has_etag: " << has_etag;
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "has local etag: " << etag_.has_value();
+
+        if (etag_ && has_etag) {
+            LD_LOG(logger_, LogLevel::kInfo) << "Comparing Etag.";
+            if (etag_.value() == header_etag->second) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << "Etag matched. Start next poll";
+                // Got the same etag, we know the content has not changed.
+                // So we can just start the next timer.
+
+                // We don't need to update the "request_" because it would have
+                // the same Etag.
+                StartPollingTimer();
+                return;
+            }
+        }
+
+        if (has_etag) {
+            LD_LOG(logger_, LogLevel::kInfo) << "Updating Etag" << res.Status();
+            config::detail::builders::HttpPropertiesBuilder<
+                config::detail::ClientSDK>
+                builder(request_.Properties());
+            builder.Header("If-None-Match", header_etag->second);
+            request_ = network::detail::HttpRequest(request_, builder.Build());
+
+            etag_ = header_etag->second;
+        }
+
         if (res.IsError()) {
             // TODO: Do something
+            LD_LOG(logger_, LogLevel::kError) << "Got error result" << res;
         }
         if (res.Status() == 200 || res.Status() == 304) {
             data_source_handler_.HandleMessage("put", res.Body().value());
@@ -94,22 +130,21 @@ void PollingDataSource::DoPoll() {
             // TODO: Do something
         }
 
-        if (timer_) {
-            delete timer_;
-            timer_ = nullptr;
-        }
-        // TODO: Calculate interval based on request time.
-        timer_ = new boost::asio::deadline_timer(
-            ioc_, boost::posix_time::seconds{polling_interval_.count()});
+        StartPollingTimer();
+    });
+}
+void PollingDataSource::StartPollingTimer() {
+    // TODO: Calculate interval based on request time.
+    timer_.cancel();
+    timer_.expires_after(polling_interval_);
 
-        timer_->async_wait([this](const boost::system::error_code& ec) {
-            if (ec) {
-                // TODO: Something;
-                return;
-            }
-            LD_LOG(logger_, LogLevel::kInfo) << "Timer elapsed";
-            DoPoll();
-        });
+    timer_.async_wait([this](boost::system::error_code const& ec) {
+        if (ec) {
+            // TODO: Something;
+            return;
+        }
+        LD_LOG(logger_, LogLevel::kInfo) << "Timer elapsed";
+        DoPoll();
     });
 }
 
@@ -118,8 +153,6 @@ void PollingDataSource::Start() {
 }
 
 void PollingDataSource::Close() {
-    if (timer_) {
-        timer_->cancel();
-    }
+    timer_.cancel();
 }
 }  // namespace launchdarkly::client_side::data_sources::detail
