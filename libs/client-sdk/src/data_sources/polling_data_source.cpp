@@ -183,6 +183,7 @@ void PollingDataSource::StartPollingTimer() {
             // polling.
             LD_LOG(logger_, LogLevel::kError)
                 << "Unexpected error in polling timer: " << ec.message();
+            Close();
         }
         DoPoll();
     });
