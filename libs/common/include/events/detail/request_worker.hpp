@@ -39,9 +39,9 @@ class RequestWorker {
      */
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
-                  Logger& logger,
                   ServerTimeCallback server_time_cb,
-                  PermanentFailureCallback permanent_failure_cb);
+                  PermanentFailureCallback permanent_failure_cb,
+                  Logger& logger);
 
     /**
      * Returns true if the worker is available for delivery.
@@ -89,15 +89,16 @@ class RequestWorker {
     /* Current state of the RequestWorker. */
     State state_;
 
+    /* Protects state_ from concurrent access by callers of Available()
+     * and internal updates. */
+    mutable std::mutex state_lock_;
+
     /* Component used to perform HTTP operations. */
     network::detail::AsioRequester requester_;
 
     /* Current request; only present if AsyncDeliver was called and
      * request is in-flight or a retry is taking place. */
     std::optional<network::detail::HttpRequest> request_;
-
-    /* Used for debug logging. */
-    Logger& logger_;
 
     /* Invoked after parsing the Date header on HTTP responses, which
      * may or may not be present. */
@@ -106,8 +107,12 @@ class RequestWorker {
     /* Invoked after determining that an HTTP failure is permanent. */
     PermanentFailureCallback permanent_failure_cb_;
 
+    /* Used for debug logging. */
+    Logger& logger_;
+
     /* Completion handler invoked from the AsioRequester. */
     void OnDeliveryAttempt(network::detail::HttpResult request);
+    void UpdateState(State new_state);
 };
 
 }  // namespace launchdarkly::events::detail

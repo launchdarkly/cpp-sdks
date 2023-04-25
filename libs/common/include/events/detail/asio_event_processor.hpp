@@ -11,9 +11,9 @@
 #include "config/detail/built/http_properties.hpp"
 #include "config/detail/built/service_endpoints.hpp"
 #include "context_filter.hpp"
-#include "events/detail/conn_pool.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summarizer.hpp"
+#include "events/detail/worker_pool.hpp"
 #include "events/event_processor.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
@@ -58,7 +58,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     boost::uuids::random_generator uuids_;
 
-    ConnPool conns_;
+    WorkerPool conns_;
 
     std::size_t inbox_capacity_;
     std::size_t inbox_size_;

@@ -2,21 +2,24 @@
 #include "events/detail/parse_date_header.hpp"
 
 namespace launchdarkly::events::detail {
+
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
-                             Logger& logger,
                              ServerTimeCallback server_time_cb,
-                             PermanentFailureCallback permanent_failure_cb)
-    : retry_delay_(retry_after),
+                             PermanentFailureCallback permanent_failure_cb,
+                             Logger& logger)
+    : timer_(boost::asio::make_strand(io)),
+      retry_delay_(retry_after),
       state_(State::Available),
-      timer_(io),
-      requester_(io),
+      state_lock_(),
+      requester_(timer_.get_executor()),
       request_(std::nullopt),
-      logger_(logger),
       server_time_cb_(std::move(server_time_cb)),
-      permanent_failure_cb_(std::move(permanent_failure_cb)) {}
+      permanent_failure_cb_(std::move(permanent_failure_cb)),
+      logger_(logger) {}
 
 bool RequestWorker::Available() const {
+    std::lock_guard<std::mutex> guard{state_lock_};
     return state_ == State::Available;
 }
 
@@ -119,7 +122,12 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
             break;
     }
 
-    state_ = next_state;
+    UpdateState(next_state);
+}
+
+void RequestWorker::UpdateState(State new_state) {
+    std::lock_guard<std::mutex> guard{state_lock_};
+    state_ = new_state;
 }
 
 }  // namespace launchdarkly::events::detail

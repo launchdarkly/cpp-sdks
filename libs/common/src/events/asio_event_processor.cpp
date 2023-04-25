@@ -111,6 +111,8 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
 }
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
+    // There should be no race between acquiring a worker and using it, since
+    // flush should only be executed from the Event Processor's strand.
     RequestWorker* worker = conns_.AcquireWorker();
     if (worker) {
         if (auto request = BuildRequest()) {

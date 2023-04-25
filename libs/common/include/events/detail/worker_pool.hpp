@@ -11,31 +11,26 @@
 #include "network/detail/http_requester.hpp"
 namespace launchdarkly::events::detail {
 
-class ConnPool {
+/**
+ * ConnPool
+ */
+class WorkerPool {
    public:
     using RequestType = network::detail::HttpRequest;
     using PermanentFailureCallback = std::function<void()>;
     using ServerTimeCallback =
         std::function<void(std::chrono::system_clock::time_point)>;
-    ConnPool(boost::asio::any_io_executor io,
-             Logger& logger,
-             std::size_t pool_size,
-             std::chrono::milliseconds delivery_retry_delay,
-             ServerTimeCallback server_time_cb,
-             PermanentFailureCallback permanent_failure_callback);
-    void Deliver(RequestType request);
-    using Clock = std::chrono::system_clock;
-
-    bool PermanentFailure() const;
+    WorkerPool(boost::asio::any_io_executor io,
+               Logger& logger,
+               std::size_t pool_size,
+               std::chrono::milliseconds delivery_retry_delay,
+               ServerTimeCallback server_time_cb,
+               PermanentFailureCallback permanent_failure_callback);
 
     RequestWorker* AcquireWorker();
 
-    std::optional<Clock::time_point> LastKnownPastTime() const;
-
    private:
-    Logger& logger_;
-
-    std::vector<RequestWorker> workers_;
+    std::vector<std::unique_ptr<RequestWorker>> workers_;
 };
 
 }  // namespace launchdarkly::events::detail

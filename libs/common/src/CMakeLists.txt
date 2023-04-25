@@ -39,7 +39,7 @@ add_library(${LIBNAME}
         events/null_event_processor.cpp
         events/asio_event_processor.cpp
         events/outbox.cpp
-        events/conn_pool.cpp
+        events/worker_pool.cpp
         events/summarizer.cpp
         events/client_events.cpp
         events/request_worker.cpp
