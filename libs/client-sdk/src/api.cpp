@@ -50,7 +50,6 @@ Client::Client(Config config, Context context)
               config.SdkKey(),
               logger_)),
       flag_updater_(flag_manager_),
-      // TODO: Support polling.
       data_source_(MakeDataSource(config,
                                   context_,
                                   ioc_.get_executor(),
