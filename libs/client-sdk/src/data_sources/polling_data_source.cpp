@@ -155,6 +155,7 @@ void PollingDataSource::DoPoll() {
         StartPollingTimer();
     });
 }
+
 void PollingDataSource::StartPollingTimer() {
     // TODO: Calculate interval based on request time.
     auto time_since_poll_seconds =
