@@ -57,10 +57,6 @@ std::string const& HttpRequest::Path() const {
     return path_;
 }
 
-std::map<std::string, std::string> const& HttpRequest::Params() const {
-    return params_;
-}
-
 HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
                          config::detail::built::HttpProperties properties,

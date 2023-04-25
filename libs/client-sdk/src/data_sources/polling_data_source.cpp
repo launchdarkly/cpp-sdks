@@ -1,5 +1,4 @@
 #include <boost/json.hpp>
-#include <boost/url.hpp>
 
 #include "config/detail/builders/http_properties_builder.hpp"
 #include "config/detail/sdks.hpp"
@@ -53,7 +52,7 @@ static network::detail::HttpRequest MakeRequest(
 
     builder.Header("authorization", sdk_key);
 
-    return network::detail::HttpRequest(url, method, builder.Build(), body);
+    return {url, method, builder.Build(), body};
 }
 
 PollingDataSource::PollingDataSource(
@@ -178,7 +177,8 @@ void PollingDataSource::StartPollingTimer() {
         if (ec == boost::asio::error::operation_aborted) {
             // The timer was cancelled. Stop polling.
             return;
-        } else if (ec) {
+        }
+        if (ec) {
             // Something unexpected happened. Log it and continue to try
             // polling.
             LD_LOG(logger_, LogLevel::kError)
