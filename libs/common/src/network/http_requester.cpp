@@ -24,9 +24,7 @@ HttpResult::HttpResult(HttpResult::StatusCode status,
     : status_(status),
       body_(std::move(body)),
       headers_(std::move(headers)),
-      error_(false) {
-
-}
+      error_(false) {}
 
 bool HttpResult::IsError() const {
     return error_;
@@ -105,4 +103,8 @@ bool HttpRequest::Https() const {
     return is_https_;
 }
 
+bool IsRecoverableStatus(HttpResult::StatusCode status) {
+    return status < 400 || status > 499 || status == 400 || status == 408 ||
+           status == 429;
+}
 }  // namespace launchdarkly::network::detail

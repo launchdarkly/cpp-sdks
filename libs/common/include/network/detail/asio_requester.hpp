@@ -62,10 +62,6 @@ static http::request<http::string_body> MakeBeastRequest(
         beast_request.set(pair.first, pair.second);
     }
 
-//    for(auto const& pair: request.Params()) {
-//        beast_request.
-//    }
-
     beast_request.set(http::field::user_agent, properties.UserAgent());
 
     return beast_request;

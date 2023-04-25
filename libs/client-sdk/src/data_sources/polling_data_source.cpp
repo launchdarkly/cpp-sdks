@@ -5,9 +5,13 @@
 #include "config/detail/sdks.hpp"
 #include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
 #include "launchdarkly/client_side/data_sources/detail/polling_data_source.hpp"
+#include "network/detail/http_error_messages.hpp"
 #include "serialization/json_context.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
+
+const static std::chrono::seconds kMinPollingInterval =
+    std::chrono::seconds{30};
 
 static network::detail::HttpRequest MakeRequest(
     std::string const& sdk_key,
@@ -79,12 +83,20 @@ PollingDataSource::PollingDataSource(
                            use_report,
                            with_reasons,
                            polling_report_path_,
-                           polling_get_path_)) {}
+                           polling_get_path_)) {
+    if (polling_interval_ < kMinPollingInterval) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling interval specified under minimum, defaulting to 30 "
+               "second polling interval";
+
+        polling_interval_ = kMinPollingInterval;
+    }
+}
 
 void PollingDataSource::DoPoll() {
-    requester_.Request(request_, [this](network::detail::HttpResult res) {
-        // TODO: Retry support.
+    last_poll_start_ = std::chrono::system_clock::now();
 
+    requester_.Request(request_, [this](network::detail::HttpResult res) {
         auto header_etag = res.Headers().find("etag");
         bool has_etag = header_etag != res.Headers().end();
 
@@ -111,13 +123,34 @@ void PollingDataSource::DoPoll() {
         }
 
         if (res.IsError()) {
-            // TODO: Do something
-            LD_LOG(logger_, LogLevel::kError) << "Got error result" << res;
-        }
-        if (res.Status() == 200 || res.Status() == 304) {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kInterrupted,
+                DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+                res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "Polling for feature flag updates failed:"
+                << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+        } else if (res.Status() == 200) {
             data_source_handler_.HandleMessage("put", res.Body().value());
+        } else if (res.Status() == 304) {
+            // This should be handled ahead of here, but if we get a 304,
+            // and it didn't have an etag, we still don't want to try to
+            // parse the body.
         } else {
-            // TODO: Do something
+            if (network::detail::IsRecoverableStatus(res.Status())) {
+                status_manager_.SetState(
+                    DataSourceStatus::DataSourceState::kInterrupted,
+                    res.Status(),
+                    launchdarkly::network::detail::ErrorForStatusCode(
+                        res.Status(), "polling request", "will retry"));
+            } else {
+                status_manager_.SetState(
+                    DataSourceStatus::DataSourceState::kShutdown, res.Status(),
+                    launchdarkly::network::detail::ErrorForStatusCode(
+                        res.Status(), "polling request", std::nullopt));
+                // We are giving up. Do not start a new polling request.
+                return;
+            }
         }
 
         StartPollingTimer();
@@ -125,13 +158,31 @@ void PollingDataSource::DoPoll() {
 }
 void PollingDataSource::StartPollingTimer() {
     // TODO: Calculate interval based on request time.
+    auto time_since_poll_seconds =
+        std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now() - last_poll_start_);
+
+    // Calculate a delay based on the polling interval and the duration elapsed
+    // since the last poll.
+
+    // Example: If the poll took 5 seconds, and the interval is 30 seconds, then
+    // we want to poll after 25 seconds. We do not want the interval to be
+    // negative, so we clamp it to 0.
+    auto delay = std::chrono::seconds(std::max(
+        polling_interval_ - time_since_poll_seconds, std::chrono::seconds(0)));
+
     timer_.cancel();
     timer_.expires_after(polling_interval_);
 
     timer_.async_wait([this](boost::system::error_code const& ec) {
-        if (ec) {
-            // TODO: Something;
+        if (ec == boost::asio::error::operation_aborted) {
+            // The timer was cancelled. Stop polling.
             return;
+        } else if (ec) {
+            // Something unexpected happened. Log it and continue to try
+            // polling.
+            LD_LOG(logger_, LogLevel::kError)
+                << "Unexpected error in polling timer: " << ec.message();
         }
         DoPoll();
     });

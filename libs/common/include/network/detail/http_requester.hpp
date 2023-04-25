@@ -118,4 +118,6 @@ class HttpRequest {
     bool is_https_;
 };
 
+bool IsRecoverableStatus(HttpResult::StatusCode status);
+
 }  // namespace launchdarkly::network::detail

@@ -14,9 +14,6 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-const static std::chrono::seconds kMinPollingInterval =
-    std::chrono::seconds{30};
-
 class PollingDataSource : public IDataSource {
    public:
     PollingDataSource(
@@ -50,8 +47,8 @@ class PollingDataSource : public IDataSource {
     network::detail::HttpRequest request_;
     std::optional<std::string> etag_;
 
-    // TODO: Unique/Shared ptr.
     boost::asio::steady_timer timer_;
+    std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
 
     inline const static std::string polling_get_path_ = "/msdk/evalx/contexts";
 
