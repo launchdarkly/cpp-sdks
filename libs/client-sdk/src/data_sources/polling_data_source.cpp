@@ -82,23 +82,14 @@ PollingDataSource::PollingDataSource(
                            polling_get_path_)) {}
 
 void PollingDataSource::DoPoll() {
-    LD_LOG(logger_, LogLevel::kInfo) << "Starting poll";
     requester_.Request(request_, [this](network::detail::HttpResult res) {
-        LD_LOG(logger_, LogLevel::kInfo) << "Poll complete: " << res;
         // TODO: Retry support.
 
         auto header_etag = res.Headers().find("etag");
         bool has_etag = header_etag != res.Headers().end();
 
-        LD_LOG(logger_, LogLevel::kInfo) << "has_etag: " << has_etag;
-        LD_LOG(logger_, LogLevel::kInfo)
-            << "has local etag: " << etag_.has_value();
-
         if (etag_ && has_etag) {
-            LD_LOG(logger_, LogLevel::kInfo) << "Comparing Etag.";
             if (etag_.value() == header_etag->second) {
-                LD_LOG(logger_, LogLevel::kInfo)
-                    << "Etag matched. Start next poll";
                 // Got the same etag, we know the content has not changed.
                 // So we can just start the next timer.
 
@@ -110,7 +101,6 @@ void PollingDataSource::DoPoll() {
         }
 
         if (has_etag) {
-            LD_LOG(logger_, LogLevel::kInfo) << "Updating Etag" << res.Status();
             config::detail::builders::HttpPropertiesBuilder<
                 config::detail::ClientSDK>
                 builder(request_.Properties());
@@ -143,7 +133,6 @@ void PollingDataSource::StartPollingTimer() {
             // TODO: Something;
             return;
         }
-        LD_LOG(logger_, LogLevel::kInfo) << "Timer elapsed";
         DoPoll();
     });
 }
