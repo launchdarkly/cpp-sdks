@@ -24,7 +24,7 @@ bool RequestWorker::Available() const {
 }
 
 void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
-    state_ = State::FirstChance;
+    UpdateState(State::FirstChance);
     request_ = request;
     requester_.Request(std::move(request),
                        [this](network::detail::HttpResult result) {
@@ -33,53 +33,26 @@ void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
 }
 
 static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
-    if (result.IsError()) {
-        // todo(cwaldren): determine how/why IsError is set
-        return false;
-    }
     auto status = http::status(result.Status());
+
+    if (result.IsError() ||
+        http::to_status_class(status) != http::status_class::client_error) {
+        return true;
+    }
+
     return status == http::status::bad_request ||
            status == http::status::request_timeout ||
            status == http::status::too_many_requests;
 }
 
 static bool IsSuccess(network::detail::HttpResult const& result) {
-    return !result.IsError() && http::status_class(result.Status()) ==
-                                    http::status_class::successful;
+    return !result.IsError() &&
+           http::to_status_class(http::status(result.Status())) ==
+               http::status_class::successful;
 }
 
 void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
-    Action action = Action::None;
-    State next_state = State::Unknown;
-    switch (state_) {
-        case State::FirstChance:
-            if (IsSuccess(result)) {
-                next_state = State::Available;
-                action = Action::ParseDateAndReset;
-            } else if (IsRecoverableFailure(result)) {
-                next_state = State::SecondChance;
-                action = Action::Retry;
-            } else {
-                next_state = State::PermanentlyFailed;
-                action = Action::NotifyPermanentFailure;
-            }
-            break;
-        case State::SecondChance:
-            if (IsSuccess(result)) {
-                next_state = State::Available;
-                action = Action::ParseDateAndReset;
-            } else if (IsRecoverableFailure(result)) {
-                // no more delivery attempts; payload is dropped.
-                next_state = State::Available;
-                action = Action::Reset;
-            } else {
-                next_state = State::PermanentlyFailed;
-                action = Action::NotifyPermanentFailure;
-            }
-            break;
-        default:
-            assert(0);
-    }
+    auto [next_state, action] = NextState(state_, result);
 
     LD_LOG(logger_, LogLevel::kDebug)
         << "request_worker: state [" << int(state_) << "] --> state ["
@@ -128,6 +101,84 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
 void RequestWorker::UpdateState(State new_state) {
     std::lock_guard<std::mutex> guard{state_lock_};
     state_ = new_state;
+}
+
+std::pair<State, Action> NextState(State state,
+                                   network::detail::HttpResult const& result) {
+    Action action = Action::None;
+    State next_state = State::Unknown;
+    switch (state) {
+        case State::FirstChance:
+            if (IsSuccess(result)) {
+                next_state = State::Available;
+                action = Action::ParseDateAndReset;
+            } else if (IsRecoverableFailure(result)) {
+                next_state = State::SecondChance;
+                action = Action::Retry;
+            } else {
+                next_state = State::PermanentlyFailed;
+                action = Action::NotifyPermanentFailure;
+            }
+            break;
+        case State::SecondChance:
+            if (IsSuccess(result)) {
+                next_state = State::Available;
+                action = Action::ParseDateAndReset;
+            } else if (IsRecoverableFailure(result)) {
+                // no more delivery attempts; payload is dropped.
+                next_state = State::Available;
+                action = Action::Reset;
+            } else {
+                next_state = State::PermanentlyFailed;
+                action = Action::NotifyPermanentFailure;
+            }
+            break;
+        default:
+            assert("impossible state reached" && 0);
+    }
+    return {next_state, action};
+}
+
+std::ostream& operator<<(std::ostream& out, State const& s) {
+    switch (s) {
+        case State::Unknown:
+            out << "State::Unknown";
+            break;
+        case State::Available:
+            out << "State::Available";
+            break;
+        case State::FirstChance:
+            out << "State::FirstChance";
+            break;
+        case State::SecondChance:
+            out << "State::SecondChance";
+            break;
+        case State::PermanentlyFailed:
+            out << "State::PermanentlyFailed";
+            break;
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, Action const& s) {
+    switch (s) {
+        case Action::None:
+            out << "Action::None";
+            break;
+        case Action::Reset:
+            out << "Action::Reset";
+            break;
+        case Action::ParseDateAndReset:
+            out << "Action::ParseDateAndReset";
+            break;
+        case Action::Retry:
+            out << "Action::Retry";
+            break;
+        case Action::NotifyPermanentFailure:
+            out << "Action::NotifyPermanentFailure";
+            break;
+    }
+    return out;
 }
 
 }  // namespace launchdarkly::events::detail

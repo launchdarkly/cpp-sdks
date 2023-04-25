@@ -3,10 +3,42 @@
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <chrono>
 #include <functional>
+#include <tuple>
 #include "logger.hpp"
 #include "network/detail/asio_requester.hpp"
 #include "network/detail/http_requester.hpp"
 namespace launchdarkly::events::detail {
+
+enum class State {
+    Unknown = 0,
+    /* Worker is ready for a new job. */
+    Available = 1,
+    /* Worker is performing the 1st delivery. */
+    FirstChance = 2,
+    /* Worker is performing the 2nd (final) delivery. */
+    SecondChance = 3,
+    /* Worker has encountered an error that cannot be recovered from. */
+    PermanentlyFailed = 4,
+};
+
+std::ostream& operator<<(std::ostream& out, State const& s);
+
+enum class Action {
+    None = 0,
+    /* Free the current request. */
+    Reset = 1,
+    /* Attempt to parse a Date header out of a request, and then free it. */
+    ParseDateAndReset = 2,
+    /* Wait and then retry delivery of the same request. */
+    Retry = 3,
+    /* Invoke the permanent failure callback; free current request. */
+    NotifyPermanentFailure = 4,
+};
+
+std::ostream& operator<<(std::ostream& out, Action const& s);
+
+std::pair<State, Action> NextState(State,
+                                   network::detail::HttpResult const& result);
 
 /**
  * RequestWorker is responsible for initiating HTTP requests to deliver
@@ -56,29 +88,6 @@ class RequestWorker {
     void AsyncDeliver(network::detail::HttpRequest request);
 
    private:
-    enum class State {
-        Unknown = 0,
-        /* Worker is ready for a new job. */
-        Available = 1,
-        /* Worker is performing the 1st delivery. */
-        FirstChance = 2,
-        /* Worker is performing the 2nd (final) delivery. */
-        SecondChance = 3,
-        /* Worker has encountered an error that cannot be recovered from. */
-        PermanentlyFailed = 4,
-    };
-    enum class Action {
-        None = 0,
-        /* Free the current request. */
-        Reset = 1,
-        /* Attempt to parse a Date header out of a request, and then free it. */
-        ParseDateAndReset = 2,
-        /* Wait and then retry delivery of the same request. */
-        Retry = 3,
-        /* Invoke the permanent failure callback; free current request. */
-        NotifyPermanentFailure = 4,
-    };
-
     /* Used to wait a specific amount of time after a failed request before
      * trying again. */
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
