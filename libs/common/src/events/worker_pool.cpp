@@ -16,8 +16,8 @@ WorkerPool::WorkerPool(boost::asio::any_io_executor io,
         server_time_cb ? server_time_cb : [](auto server_time) {};
 
     for (std::size_t i = 0; i < pool_size; i++) {
-        workers_.emplace_back(std::make_unique<RequestWorker>(
-            io_, delivery_retry_delay, server_time_callback, logger));
+        workers_.emplace_back(
+            std::make_unique<RequestWorker>(io_, delivery_retry_delay, logger));
     }
 }
 

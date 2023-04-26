@@ -5,28 +5,17 @@ namespace launchdarkly::events::detail {
 
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
-                             ServerTimeCallback server_time_cb,
                              Logger& logger)
     : timer_(io),
       retry_delay_(retry_after),
       state_(State::Available),
       requester_(timer_.get_executor()),
-      request_(std::nullopt),
-      server_time_cb_(std::move(server_time_cb)),
+      batch_(std::nullopt),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
     return state_ == State::Available;
 }
-
-// void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
-//     state_ = State::FirstChance;
-//     request_ = request;
-//     requester_.Request(std::move(request),
-//                        [this](network::detail::HttpResult result) {
-//                            OnDeliveryAttempt(std::move(result));
-//                        });
-// }
 
 static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
     auto status = http::status(result.Status());
@@ -47,49 +36,73 @@ static bool IsSuccess(network::detail::HttpResult const& result) {
                http::status_class::successful;
 }
 
-void RequestWorker::OnDeliveryAttempt(
-    network::detail::HttpResult result,
-    PermanentFailureCallback permanent_failure) {
+void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
+                                      ResultCallback callback) {
     auto [next_state, action] = NextState(state_, result);
 
-    LD_LOG(logger_, LogLevel::kDebug) << "request_worker: " << state_ << " -> "
+    LD_LOG(logger_, LogLevel::kDebug) << "flush-worker: " << state_ << " -> "
                                       << next_state << ", " << action << "";
 
     switch (action) {
         case Action::None:
             break;
         case Action::Reset:
-            request_.reset();
+            if (result.IsError()) {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "error posting " << batch_->Count()
+                    << " event(s) (some events were dropped): "
+                    << result.ErrorMessage().value_or("unknown IO error");
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "error posting " << batch_->Count()
+                    << " event(s) (some events were dropped): "
+                       "HTTP error "
+                    << result.Status();
+            }
+            batch_.reset();
             break;
         case Action::NotifyPermanentFailure:
-            request_.reset();
-            permanent_failure(result.Status());
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "error posting " << batch_->Count()
+                << " event(s) (giving up permanently): HTTP error "
+                << result.Status();
+            callback(batch_->Count(), result.Status());
+            batch_.reset();
             break;
         case Action::ParseDateAndReset: {
-            request_.reset();
             auto headers = result.Headers();
             if (auto date = headers.find("Date"); date != headers.end()) {
                 if (auto server_time =
                         ParseDateHeader<std::chrono::system_clock>(
                             date->second)) {
-                    server_time_cb_(*server_time);
+                    callback(batch_->Count(), *server_time);
                 }
             }
+            batch_.reset();
         } break;
         case Action::Retry:
+            if (result.IsError()) {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "error posting " << batch_->Count()
+                    << " event(s) (will retry): "
+                    << result.ErrorMessage().value_or("unknown IO error");
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "error posting " << batch_->Count()
+                    << " event(s) (will retry): HTTP error " << result.Status();
+            }
             timer_.expires_from_now(retry_delay_);
-            timer_.async_wait(
-                [this, permanent_failure](boost::system::error_code ec) {
-                    if (ec) {
-                        return;
-                    }
-                    requester_.Request(
-                        *request_, [this, permanent_failure](
-                                       network::detail::HttpResult result) {
-                            OnDeliveryAttempt(std::move(result),
-                                              std::move(permanent_failure));
-                        });
-                });
+            timer_.async_wait([this, callback](boost::system::error_code ec) {
+                if (ec) {
+                    return;
+                }
+                requester_.Request(
+                    batch_->Request(),
+                    [this, callback](network::detail::HttpResult result) {
+                        OnDeliveryAttempt(std::move(result),
+                                          std::move(callback));
+                    });
+            });
             break;
     }
 

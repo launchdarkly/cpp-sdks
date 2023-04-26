@@ -43,6 +43,7 @@ add_library(${LIBNAME}
         events/summarizer.cpp
         events/client_events.cpp
         events/request_worker.cpp
+        events/event_batch.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp

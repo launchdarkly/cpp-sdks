@@ -12,6 +12,7 @@
 #include "config/detail/built/http_properties.hpp"
 #include "config/detail/built/service_endpoints.hpp"
 #include "context_filter.hpp"
+#include "events/detail/event_batch.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summarizer.hpp"
 #include "events/detail/worker_pool.hpp"
@@ -38,11 +39,11 @@ class AsioEventProcessor : public IEventProcessor {
     void AsyncClose() override;
 
    private:
+    using Clock = std::chrono::system_clock;
     enum class FlushTrigger {
         Automatic = 0,
         Manual = 1,
     };
-    using RequestType = network::detail::HttpRequest;
 
     boost::asio::any_io_executor io_;
     Outbox outbox_;
@@ -69,7 +70,7 @@ class AsioEventProcessor : public IEventProcessor {
     bool full_inbox_encountered_;
     bool permanent_delivery_failure_;
 
-    std::optional<std::chrono::system_clock::time_point> last_known_past_time_;
+    std::optional<Clock::time_point> last_known_past_time_;
 
     launchdarkly::ContextFilter filter_;
 
@@ -77,9 +78,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     void HandleSend(InputEvent event);
 
-    // If events are available, returns a pair of [http request, number of
-    // events in request], otherwise returns returns std::nullopt.
-    std::optional<std::pair<RequestType, std::size_t>> BuildRequest();
+    std::optional<EventBatch> CreateBatch();
 
     void Flush(FlushTrigger flush_type);
 
@@ -90,9 +89,8 @@ class AsioEventProcessor : public IEventProcessor {
     bool InboxIncrement();
     void InboxDecrement();
 
-    void OnPermanentEventDeliveryFailure(
-        network::detail::HttpResult::StatusCode status,
-        std::size_t num_events);
+    void OnEventDeliveryResult(std::size_t count,
+                               RequestWorker::DeliveryResult);
 };
 
 }  // namespace launchdarkly::events::detail

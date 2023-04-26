@@ -18,6 +18,15 @@ auto const kEventSchemaHeader = "X-LaunchDarkly-Event-Schema";
 auto const kPayloadIdHeader = "X-LaunchDarkly-Payload-Id";
 auto const kEventSchemaVersion = 4;
 
+// These helpers are for usage with std::visit.
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+// explicit deduction guide (not needed as of C++20)
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
 AsioEventProcessor::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
     config::detail::built::Events const& config,
@@ -112,19 +121,18 @@ void AsioEventProcessor::Flush(FlushTrigger flush_type) {
                    "flush";
             return;
         }
-        auto request = BuildRequest();
-        if (!request) {
+        auto batch = CreateBatch();
+        if (!batch) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: nothing to flush";
             return;
         }
-        auto [payload, num_events] = *request;
         worker->AsyncDeliver(
-            payload,
-            [this, n = num_events](network::detail::HttpResult::StatusCode s) {
-                OnPermanentEventDeliveryFailure(s, n);
+            std::move(*batch),
+            [this](std::size_t count, RequestWorker::DeliveryResult result) {
+                OnEventDeliveryResult(count, result);
             });
-        summarizer_ = Summarizer(std::chrono::system_clock::now());
+        summarizer_ = Summarizer(Clock::now());
     });
 
     if (flush_type == FlushTrigger::Automatic) {
@@ -132,19 +140,19 @@ void AsioEventProcessor::Flush(FlushTrigger flush_type) {
     }
 }
 
-void AsioEventProcessor::OnPermanentEventDeliveryFailure(
-    network::detail::HttpResult::StatusCode status,
-    std::size_t num_events) {
-    if (!permanent_delivery_failure_) {
-        timer_.cancel();
-        permanent_delivery_failure_ = true;
-
-        LD_LOG(logger_, LogLevel::kError) << "Error posting " << num_events
-                                          << " event(s) "
-                                             "(giving "
-                                             "up permanently): HTTP error "
-                                          << status;
-    }
+void AsioEventProcessor::OnEventDeliveryResult(
+    std::size_t count,
+    RequestWorker::DeliveryResult result) {
+    std::visit(overloaded{[&](Clock::time_point&& server_time) {
+                              last_known_past_time_ = server_time;
+                          },
+                          [&](network::detail::HttpResult::StatusCode status) {
+                              if (!permanent_delivery_failure_) {
+                                  timer_.cancel();
+                                  permanent_delivery_failure_ = true;
+                              }
+                          }},
+               std::move(result));
 }
 
 void AsioEventProcessor::ScheduleFlush() {
@@ -174,8 +182,7 @@ void AsioEventProcessor::AsyncClose() {
     timer_.cancel();
 }
 
-std::optional<std::pair<AsioEventProcessor::RequestType, std::size_t>>
-AsioEventProcessor::BuildRequest() {
+std::optional<EventBatch> AsioEventProcessor::CreateBatch() {
     if (outbox_.Empty()) {
         return std::nullopt;
     }
@@ -186,37 +193,16 @@ AsioEventProcessor::BuildRequest() {
         events.as_array().push_back(boost::json::value_from(summarizer_));
     }
 
-    const std::size_t num_events = events.as_array().size();
-
-    LD_LOG(logger_, LogLevel::kDebug)
-        << "event-processor: generating http request";
-
-    using namespace launchdarkly::network::detail;
-
     config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
-        http_props(http_props_);
+        props(http_props_);
 
-    http_props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
-    http_props.Header(kPayloadIdHeader,
-                      boost::lexical_cast<std::string>(uuids_()));
-    http_props.Header(to_string(http::field::authorization), authorization_);
-    http_props.Header(to_string(http::field::content_type), "application/json");
+    props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
+    props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
+    props.Header(to_string(http::field::authorization), authorization_);
+    props.Header(to_string(http::field::content_type), "application/json");
 
-    return std::make_pair(
-        AsioEventProcessor::RequestType{host_ + path_, HttpMethod::kPost,
-                                        http_props.Build(),
-                                        boost::json::serialize(events)},
-        num_events);
+    return EventBatch(host_ + path_, props.Build(), events);
 }
-
-// These helpers are for the std::visit within AsioEventProcessor::Process.
-template <class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-// explicit deduction guide (not needed as of C++20)
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
 
 std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
     std::vector<OutputEvent> out;

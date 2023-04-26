@@ -90,6 +90,7 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         processor.AsyncSend(identify_event);
     }
 
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     processor.AsyncClose();
     ioc_thread.join();
 }
