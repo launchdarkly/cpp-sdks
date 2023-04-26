@@ -2,12 +2,11 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include "config/detail/builders/http_properties_builder.hpp"
 #include "config/detail/sdks.hpp"
 #include "network/detail/asio_requester.hpp"
-
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include "serialization/events/json_events.hpp"
 
@@ -27,45 +26,38 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-AsioEventProcessor::AsioEventProcessor(
+template <typename SDK>
+AsioEventProcessor<SDK>::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
-    config::detail::built::Events const& config,
-    config::detail::built::ServiceEndpoints const& endpoints,
-    config::detail::built::HttpProperties const& http_props,
-    std::string authorization,
+    config::detail::Config<SDK> const& config,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
-      outbox_(config.Capacity()),
+      outbox_(config.Events().Capacity()),
       summarizer_(std::chrono::system_clock::now()),
-      flush_interval_(config.FlushInterval()),
+      flush_interval_(config.Events().FlushInterval()),
       timer_(io_),
-      host_(endpoints.EventsBaseUrl()),  // TODO: parse and use host
-      path_(config.Path()),
-      http_props_(http_props),
-      authorization_(std::move(authorization)),
+      url_(config.ServiceEndpoints().EventsBaseUrl() + config.Events().Path()),
+      http_props_(config.HttpProperties()),
+      authorization_(config.SdkKey()),
       uuids_(),
-      conns_(
-          io,
-          config.FlushWorkers(),
-          config.DeliveryRetryDelay(),
-          [this](std::chrono::system_clock::time_point server_time) {
-              boost::asio::post(io_, [this, server_time]() {
-                  last_known_past_time_ = server_time;
-              });
-          },
-          logger),
-      inbox_capacity_(config.Capacity()),
+      workers_(io_,
+               config.Events().FlushWorkers(),
+               config.Events().DeliveryRetryDelay(),
+               logger),
+      inbox_capacity_(config.Events().Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
       full_inbox_encountered_(false),
       permanent_delivery_failure_(false),
       last_known_past_time_(std::nullopt),
-      filter_(config.AllAttributesPrivate(), config.PrivateAttributes()),
+      filter_(config.Events().AllAttributesPrivate(),
+              config.Events().PrivateAttributes()),
       logger_(logger) {
     ScheduleFlush();
 }
 
-bool AsioEventProcessor::InboxIncrement() {
+template <typename SDK>
+bool AsioEventProcessor<SDK>::InboxIncrement() {
     std::lock_guard<std::mutex> guard{inbox_mutex_};
     if (permanent_delivery_failure_) {
         return false;
@@ -84,14 +76,16 @@ bool AsioEventProcessor::InboxIncrement() {
     return false;
 }
 
-void AsioEventProcessor::InboxDecrement() {
+template <typename SDK>
+void AsioEventProcessor<SDK>::InboxDecrement() {
     std::lock_guard<std::mutex> guard{inbox_mutex_};
     if (inbox_size_ > 0) {
         inbox_size_--;
     }
 }
 
-void AsioEventProcessor::AsyncSend(InputEvent input_event) {
+template <typename SDK>
+void AsioEventProcessor<SDK>::AsyncSend(InputEvent input_event) {
     if (!InboxIncrement()) {
         return;
     }
@@ -101,7 +95,8 @@ void AsioEventProcessor::AsyncSend(InputEvent input_event) {
     });
 }
 
-void AsioEventProcessor::HandleSend(InputEvent event) {
+template <typename SDK>
+void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
     std::vector<OutputEvent> output_events = Process(std::move(event));
 
     bool inserted = outbox_.PushDiscardingOverflow(std::move(output_events));
@@ -113,8 +108,9 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
     full_outbox_encountered_ = !inserted;
 }
 
-void AsioEventProcessor::Flush(FlushTrigger flush_type) {
-    conns_.GetWorker([this](RequestWorker* worker) {
+template <typename SDK>
+void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
+    workers_.GetWorker([this](RequestWorker* worker) {
         if (!worker) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
@@ -140,22 +136,28 @@ void AsioEventProcessor::Flush(FlushTrigger flush_type) {
     }
 }
 
-void AsioEventProcessor::OnEventDeliveryResult(
-    std::size_t count,
+template <typename SDK>
+void AsioEventProcessor<SDK>::OnEventDeliveryResult(
+    std::size_t event_count,
     RequestWorker::DeliveryResult result) {
-    std::visit(overloaded{[&](Clock::time_point&& server_time) {
-                              last_known_past_time_ = server_time;
-                          },
-                          [&](network::detail::HttpResult::StatusCode status) {
-                              if (!permanent_delivery_failure_) {
-                                  timer_.cancel();
-                                  permanent_delivery_failure_ = true;
-                              }
-                          }},
-               std::move(result));
+    boost::ignore_unused(event_count);
+
+    std::visit(
+        overloaded{[&](Clock::time_point&& server_time) {
+                       last_known_past_time_ = std::move(server_time);
+                   },
+                   [&](network::detail::HttpResult::StatusCode status) {
+                       std::lock_guard<std::mutex> guard{this->inbox_mutex_};
+                       if (!permanent_delivery_failure_) {
+                           timer_.cancel();
+                           permanent_delivery_failure_ = true;
+                       }
+                   }},
+        std::move(result));
 }
 
-void AsioEventProcessor::ScheduleFlush() {
+template <typename SDK>
+void AsioEventProcessor<SDK>::ScheduleFlush() {
     LD_LOG(logger_, LogLevel::kDebug) << "event-processor: scheduling flush in "
                                       << flush_interval_.count() << "ms";
 
@@ -171,18 +173,21 @@ void AsioEventProcessor::ScheduleFlush() {
     });
 }
 
-void AsioEventProcessor::AsyncFlush() {
+template <typename SDK>
+void AsioEventProcessor<SDK>::AsyncFlush() {
     boost::asio::post(io_, [this] {
         boost::system::error_code ec;
         Flush(FlushTrigger::Manual);
     });
 }
 
-void AsioEventProcessor::AsyncClose() {
+template <typename SDK>
+void AsioEventProcessor<SDK>::AsyncClose() {
     timer_.cancel();
 }
 
-std::optional<EventBatch> AsioEventProcessor::CreateBatch() {
+template <typename SDK>
+std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     if (outbox_.Empty()) {
         return std::nullopt;
     }
@@ -193,6 +198,8 @@ std::optional<EventBatch> AsioEventProcessor::CreateBatch() {
         events.as_array().push_back(boost::json::value_from(summarizer_));
     }
 
+    // TODO(cwaldren): Template the event processor over SDK type? Add it into
+    // HttpProperties?
     config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
         props(http_props_);
 
@@ -201,10 +208,12 @@ std::optional<EventBatch> AsioEventProcessor::CreateBatch() {
     props.Header(to_string(http::field::authorization), authorization_);
     props.Header(to_string(http::field::content_type), "application/json");
 
-    return EventBatch(host_ + path_, props.Build(), events);
+    return EventBatch(url_, props.Build(), events);
 }
 
-std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
+template <typename SDK>
+std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
+    InputEvent input_event) {
     std::vector<OutputEvent> out;
     std::visit(
         overloaded{[&](client::FeatureEventParams&& event) {
@@ -250,4 +259,7 @@ std::vector<OutputEvent> AsioEventProcessor::Process(InputEvent input_event) {
 
     return out;
 }
+
+template class AsioEventProcessor<config::detail::ClientSDK>;
+
 }  // namespace launchdarkly::events::detail

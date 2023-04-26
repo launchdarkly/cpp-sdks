@@ -19,6 +19,8 @@ class Events final {
     friend class builders::EventsBuilder;
     /**
      * Constructs configuration for the event subsystem.
+     * @param enabled If event-sending is enabled. If false, no events will be
+     * sent to LaunchDarkly.
      * @param capacity How many events can queue in memory before new events
      * are dropped.
      * @param flush_interval How often events are automatically flushed to
@@ -34,13 +36,19 @@ class Events final {
      * @param flush_workers How many workers to use for concurrent event
      * delivery.
      */
-    Events(std::size_t capacity,
+    Events(bool enabled,
+           std::size_t capacity,
            std::chrono::milliseconds flush_interval,
            std::string path,
            bool all_attributes_private,
            AttributeReference::SetType private_attrs,
            std::chrono::milliseconds delivery_retry_delay,
            std::size_t flush_workers);
+
+    /**
+     * Returns true if event-sending is enabled.
+     */
+    [[nodiscard]] bool Enabled() const;
 
     /**
      * Capacity of the event processor.
@@ -79,6 +87,7 @@ class Events final {
     [[nodiscard]] std::size_t FlushWorkers() const;
 
    private:
+    bool enabled_;
     std::size_t capacity_;
     std::chrono::milliseconds flush_interval_;
     std::string path_;

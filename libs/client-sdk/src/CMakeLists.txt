@@ -6,6 +6,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/data_sources/detail/*.hpp"
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/*.hpp"
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/detail/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/event_processor/*.hpp"
+        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/event_processor/detail/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -23,6 +25,8 @@ add_library(${LIBNAME}
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
         data_sources/data_source_status_manager.cpp
+        event_processor/event_processor.cpp
+        event_processor/null_event_processor.cpp
         boost_signal_connection.cpp
         )
 

@@ -8,35 +8,30 @@
 #include <chrono>
 #include <optional>
 #include <tuple>
-#include "config/detail/built/events.hpp"
-#include "config/detail/built/http_properties.hpp"
-#include "config/detail/built/service_endpoints.hpp"
+#include "config/detail/config.hpp"
 #include "context_filter.hpp"
 #include "events/detail/event_batch.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summarizer.hpp"
 #include "events/detail/worker_pool.hpp"
-#include "events/event_processor.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
 #include "network/detail/http_requester.hpp"
 
 namespace launchdarkly::events::detail {
 
-class AsioEventProcessor : public IEventProcessor {
+template <typename SDK>
+class AsioEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& io,
-                       config::detail::built::Events const& config,
-                       config::detail::built::ServiceEndpoints const& endpoints,
-                       config::detail::built::HttpProperties const& http_props,
-                       std::string authorization,
+                       config::detail::Config<SDK> const& config,
                        Logger& logger);
 
-    void AsyncFlush() override;
+    void AsyncFlush();
 
-    void AsyncSend(InputEvent event) override;
+    void AsyncSend(InputEvent event);
 
-    void AsyncClose() override;
+    void AsyncClose();
 
    private:
     using Clock = std::chrono::system_clock;
@@ -52,15 +47,14 @@ class AsioEventProcessor : public IEventProcessor {
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;
 
-    std::string host_;
-    std::string path_;
+    std::string url_;
     std::string authorization_;
 
     config::detail::built::HttpProperties http_props_;
 
     boost::uuids::random_generator uuids_;
 
-    WorkerPool conns_;
+    WorkerPool workers_;
 
     std::size_t inbox_capacity_;
     std::size_t inbox_size_;

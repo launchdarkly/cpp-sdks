@@ -3,9 +3,10 @@
 #include <optional>
 #include <utility>
 
-#include "events/detail/asio_event_processor.hpp"
 #include "launchdarkly/client_side/data_sources/detail/polling_data_source.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
+#include "launchdarkly/client_side/event_processor/detail/event_processor.hpp"
+#include "launchdarkly/client_side/event_processor/detail/null_event_processor.hpp"
 
 namespace launchdarkly::client_side {
 
@@ -14,7 +15,7 @@ using launchdarkly::client_side::data_sources::DataSourceStatus;
 static std::unique_ptr<IDataSource> MakeDataSource(
     Config const& config,
     Context const& context,
-    boost::asio::any_io_executor executor,
+    boost::asio::any_io_executor const& executor,
     flag_manager::detail::FlagUpdater& flag_updater,
     data_sources::detail::DataSourceStatusManager& status_manager,
     Logger& logger) {
@@ -23,24 +24,16 @@ static std::unique_ptr<IDataSource> MakeDataSource(
         return std::make_unique<launchdarkly::client_side::data_sources::
                                     detail::StreamingDataSource>(
             config, executor, context, &flag_updater, status_manager, logger);
-    } else {
-        return std::make_unique<
-            launchdarkly::client_side::data_sources::detail::PollingDataSource>(
-            config, executor, context, &flag_updater, status_manager, logger);
     }
+    return std::make_unique<
+        launchdarkly::client_side::data_sources::detail::PollingDataSource>(
+        config, executor, context, &flag_updater, status_manager, logger);
 }
 
 Client::Client(Config config, Context context)
     : logger_(config.Logger()),
       context_(std::move(context)),
-      event_processor_(
-          std::make_unique<launchdarkly::events::detail::AsioEventProcessor>(
-              ioc_.get_executor(),
-              config.Events(),
-              config.ServiceEndpoints(),
-              config.HttpProperties(),
-              config.SdkKey(),
-              logger_)),
+      event_processor_(nullptr),
       flag_updater_(flag_manager_),
       data_source_(MakeDataSource(config,
                                   context_,
@@ -49,6 +42,13 @@ Client::Client(Config config, Context context)
                                   status_manager_,
                                   logger_)),
       initialized_(false) {
+    if (config.Events().Enabled()) {
+        event_processor_ = std::make_unique<detail::EventProcessor>(
+            ioc_.get_executor(), config, logger_);
+    } else {
+        event_processor_ = std::make_unique<detail::NullEventProcessor>();
+    }
+
     data_source_->Start();
 
     status_manager_.OnDataSourceStatusChange([this](auto status) {

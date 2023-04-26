@@ -12,9 +12,9 @@
 #include "config/client.hpp"
 #include "context.hpp"
 #include "error.hpp"
-#include "events/event_processor.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
 #include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
+#include "launchdarkly/client_side/event_processor.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "logger.hpp"
@@ -72,7 +72,7 @@ class Client {
     std::thread thread_;
     boost::asio::io_context ioc_;
     Context context_;
-    std::unique_ptr<events::IEventProcessor> event_processor_;
+    std::unique_ptr<IEventProcessor> event_processor_;
     std::unique_ptr<IDataSource> data_source_;
     std::thread run_thread_;
 };

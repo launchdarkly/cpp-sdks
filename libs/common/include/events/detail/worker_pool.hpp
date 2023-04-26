@@ -40,7 +40,6 @@ class WorkerPool {
     WorkerPool(boost::asio::any_io_executor io,
                std::size_t pool_size,
                std::chrono::milliseconds delivery_retry_delay,
-               ServerTimeCallback server_time_cb,
                Logger& logger);
 
     /**

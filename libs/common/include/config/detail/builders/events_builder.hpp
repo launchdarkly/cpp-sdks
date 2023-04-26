@@ -35,6 +35,20 @@ class EventsBuilder {
     EventsBuilder();
 
     /**
+     * Specify if event-sending should be enabled or not. By default,
+     * events are enabled.
+     * @param enabled True to enable.
+     * @return Reference to this builder.
+     */
+    EventsBuilder& Enabled(bool enabled);
+
+    /**
+     * Alias for Enabled(false).
+     * @return Reference to this builder.
+     */
+    EventsBuilder& Disable();
+
+    /**
      * Sets the capacity of the event processor. When more events are generated
      * within the processor's flush interval than this value, events will be
      * dropped.

@@ -2,20 +2,26 @@
 
 namespace launchdarkly::config::detail::built {
 
-Events::Events(std::size_t capacity,
+Events::Events(bool enabled,
+               std::size_t capacity,
                std::chrono::milliseconds flush_interval,
                std::string path,
                bool all_attributes_private,
                AttributeReference::SetType private_attrs,
                std::chrono::milliseconds delivery_retry_delay,
                std::size_t flush_workers)
-    : capacity_(capacity),
+    : enabled_(enabled),
+      capacity_(capacity),
       flush_interval_(flush_interval),
       path_(std::move(path)),
       all_attributes_private_(all_attributes_private),
       private_attributes_(std::move(private_attrs)),
       delivery_retry_delay_(delivery_retry_delay),
       flush_workers_(flush_workers) {}
+
+bool Events::Enabled() const {
+    return enabled_;
+}
 
 std::size_t Events::Capacity() const {
     return capacity_;

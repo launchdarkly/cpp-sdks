@@ -28,8 +28,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     auto work = boost::asio::make_work_guard(ioc);
     std::thread t([&]() { ioc.run(); });
 
-    WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), nullptr,
-                    logger);
+    WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), logger);
 
     RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
     ASSERT_TRUE(worker);
@@ -46,8 +45,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     auto work = boost::asio::make_work_guard(ioc);
     std::thread t([&]() { ioc.run(); });
 
-    WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), nullptr,
-                    logger);
+    WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), logger);
 
     RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
     ASSERT_FALSE(worker);
@@ -64,18 +62,16 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     Logger logger{std::make_unique<ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
-    auto config = client_side::EventsBuilder()
-                      .Capacity(10)
-                      .FlushInterval(std::chrono::seconds(1))
-                      .Build();
+    auto config =
+        client_side::ConfigBuilder("sdk-123")
+            .Events(client_side::EventsBuilder().Capacity(10).FlushInterval(
+                std::chrono::seconds(1)))
+            .Build();
 
-    auto endpoints = client_side::EndpointsBuilder().Build();
-
-    auto http_props = client_side::HttpPropertiesBuilder().Build();
+    ASSERT_TRUE(config);
 
     events::detail::AsioEventProcessor processor(ioc.get_executor(), *config,
-                                                 *endpoints, http_props,
-                                                 "password", logger);
+                                                 logger);
     std::thread ioc_thread([&]() { ioc.run(); });
 
     auto context = launchdarkly::ContextBuilder().kind("org", "ld").build();
