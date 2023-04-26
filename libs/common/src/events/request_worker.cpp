@@ -54,9 +54,8 @@ static bool IsSuccess(network::detail::HttpResult const& result) {
 void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
     auto [next_state, action] = NextState(state_, result);
 
-    LD_LOG(logger_, LogLevel::kDebug)
-        << "request_worker: state [" << int(state_) << "] --> state ["
-        << int(next_state) << "], action (" << int(action) << ")";
+    LD_LOG(logger_, LogLevel::kDebug) << "request_worker: " << state_ << " -> "
+                                      << next_state << ", " << action << "";
 
     switch (action) {
         case Action::None:
@@ -70,14 +69,12 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
             break;
         case Action::ParseDateAndReset: {
             request_.reset();
-            LD_LOG(logger_, LogLevel::kDebug)
-                << "successfully delivered events";
             auto headers = result.Headers();
-            if (auto date_header = headers.find("Date");
-                date_header != headers.end()) {
-                if (auto datetime = ParseDateHeader<std::chrono::system_clock>(
-                        date_header->second)) {
-                    server_time_cb_(*datetime);
+            if (auto date = headers.find("Date"); date != headers.end()) {
+                if (auto server_time =
+                        ParseDateHeader<std::chrono::system_clock>(
+                            date->second)) {
+                    server_time_cb_(*server_time);
                 }
             }
         } break;

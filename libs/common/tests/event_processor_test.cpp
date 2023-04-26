@@ -35,8 +35,9 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     auto http_props = client_side::HttpPropertiesBuilder().Build();
 
-    events::detail::AsioEventProcessor processor(
-        ioc.get_executor(), *config, *endpoints, http_props, "password", logger);
+    events::detail::AsioEventProcessor processor(ioc.get_executor(), *config,
+                                                 *endpoints, http_props,
+                                                 "password", logger);
     std::thread ioc_thread([&]() { ioc.run(); });
 
     auto context = launchdarkly::ContextBuilder().kind("org", "ld").build();
@@ -47,7 +48,19 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         context,
     };
 
-    for (std::size_t i = 0; i < 10; i++) {
+    for (std::size_t i = 0; i < 5; i++) {
+        processor.AsyncSend(identify_event);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    for (std::size_t i = 0; i < 5; i++) {
+        processor.AsyncSend(identify_event);
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    for (std::size_t i = 0; i < 5; i++) {
         processor.AsyncSend(identify_event);
     }
 
