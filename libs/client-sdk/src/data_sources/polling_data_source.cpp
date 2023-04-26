@@ -9,19 +9,15 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-const static std::chrono::seconds kMinPollingInterval =
-    std::chrono::seconds{30};
+static network::detail::HttpRequest MakeRequest(Config const& config,
+                                                Context const& context) {
+    std::string url = config.ServiceEndpoints().PollingBaseUrl();
 
-static network::detail::HttpRequest MakeRequest(
-    std::string const& sdk_key,
-    Context const& context,
-    config::detail::built::HttpProperties const& http_properties,
-    config::detail::built::ServiceEndpoints const& endpoints,
-    bool use_report,
-    bool with_reasons,
-    std::string const& polling_report_path,
-    std::string const& polling_get_path) {
-    std::string url = endpoints.PollingBaseUrl();
+    auto& data_source_config = config.DataSourceConfig();
+
+    auto& polling_config = boost::get<
+        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config.DataSourceConfig().method);
 
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
@@ -31,42 +27,36 @@ static network::detail::HttpRequest MakeRequest(
     network::detail::HttpRequest::BodyType body;
     network::detail::HttpMethod method = network::detail::HttpMethod::kGet;
 
-    if (use_report) {
-        url.append(polling_report_path);
+    if (data_source_config.use_report) {
+        url.append(polling_config.polling_report_path);
         method = network::detail::HttpMethod::kReport;
         body = string_context;
     } else {
-        url.append(polling_get_path);
+        url.append(polling_config.polling_get_path);
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
         url.append("/" + Base64UrlEncode(string_context));
     }
 
-    if (with_reasons) {
+    if (data_source_config.with_reasons) {
         url.append("?withReasons=true");
     }
 
     config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
-        builder(http_properties);
+        builder(config.HttpProperties());
 
-    builder.Header("authorization", sdk_key);
+    builder.Header("authorization", config.SdkKey());
 
     return {url, method, builder.Build(), body};
 }
 
-PollingDataSource::PollingDataSource(
-    std::string const& sdk_key,
-    boost::asio::any_io_executor ioc,
-    Context const& context,
-    config::detail::built::ServiceEndpoints const& endpoints,
-    config::detail::built::HttpProperties const& http_properties,
-    std::chrono::seconds polling_interval,
-    bool use_report,
-    bool with_reasons,
-    IDataSourceUpdateSink* handler,
-    DataSourceStatusManager& status_manager,
-    Logger const& logger)
+PollingDataSource::PollingDataSource(Config const& config,
+                                     boost::asio::any_io_executor ioc,
+                                     Context const& context,
+                                     IDataSourceUpdateSink* handler,
+                                     DataSourceStatusManager& status_manager,
+                                     Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
       status_manager_(status_manager),
@@ -74,21 +64,21 @@ PollingDataSource::PollingDataSource(
           DataSourceEventHandler(handler, logger, status_manager_)),
       requester_(ioc),
       timer_(ioc),
-      polling_interval_(polling_interval),
-      request_(MakeRequest(sdk_key,
-                           context,
-                           http_properties,
-                           endpoints,
-                           use_report,
-                           with_reasons,
-                           polling_report_path_,
-                           polling_get_path_)) {
-    if (polling_interval_ < kMinPollingInterval) {
+      polling_interval_(
+          boost::get<
+              config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+              config.DataSourceConfig().method)
+              .poll_interval),
+      request_(MakeRequest(config, context)) {
+    auto polling_config = boost::get<
+        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config.DataSourceConfig().method);
+    if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval specified under minimum, defaulting to 30 "
                "second polling interval";
 
-        polling_interval_ = kMinPollingInterval;
+        polling_interval_ = polling_config.min_polling_interval;
     }
 }
 

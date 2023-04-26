@@ -27,15 +27,9 @@ static std::unique_ptr<IDataSource> MakeDataSource(
             config.DataSourceConfig().with_reasons, &flag_updater,
             status_manager, logger);
     } else {
-        auto polling_config = boost::get<config::detail::built::PollingConfig>(
-            config.DataSourceConfig().method);
         return std::make_unique<
             launchdarkly::client_side::data_sources::detail::PollingDataSource>(
-            config.SdkKey(), executor, context, config.ServiceEndpoints(),
-            config.HttpProperties(), polling_config.poll_interval,
-            config.DataSourceConfig().use_report,
-            config.DataSourceConfig().with_reasons, &flag_updater,
-            status_manager, logger);
+            config, executor, context, &flag_updater, status_manager, logger);
     }
 }
 

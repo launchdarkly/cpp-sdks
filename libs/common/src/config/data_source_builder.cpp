@@ -15,15 +15,19 @@ built::StreamingConfig StreamingBuilder::Build() const {
     return config_;
 }
 
-PollingBuilder::PollingBuilder() : config_(Defaults<AnySDK>::PollingConfig()) {}
+template <typename SDK>
+PollingBuilder<SDK>::PollingBuilder()
+    : config_(Defaults<SDK>::PollingConfig()) {}
 
-PollingBuilder& PollingBuilder::PollInterval(
+template <typename SDK>
+PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
     std::chrono::seconds poll_interval) {
     config_.poll_interval = poll_interval;
     return *this;
 }
 
-built::PollingConfig PollingBuilder::Build() const {
+template <typename SDK>
+built::PollingConfig<SDK> PollingBuilder<SDK>::Build() const {
     return config_;
 }
 
@@ -49,13 +53,13 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
 }
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
-    PollingBuilder builder) {
+    PollingBuilder<ClientSDK> builder) {
     method_ = builder;
     return *this;
 }
 
 built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
-    auto method = boost::apply_visitor(MethodVisitor(), method_);
+    auto method = boost::apply_visitor(MethodVisitor<ClientSDK>(), method_);
     return {method, with_reasons_, use_report_};
 }
 
@@ -69,14 +73,17 @@ DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
 }
 
 DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
-    PollingBuilder builder) {
+    PollingBuilder<ServerSDK> builder) {
     method_ = builder;
     return *this;
 }
 
 built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
-    auto method = boost::apply_visitor(MethodVisitor(), method_);
+    auto method = boost::apply_visitor(MethodVisitor<ServerSDK>(), method_);
     return {method};
 }
+
+template class PollingBuilder<detail::ClientSDK>;
+template class PollingBuilder<detail::ServerSDK>;
 
 }  // namespace launchdarkly::config::detail::builders

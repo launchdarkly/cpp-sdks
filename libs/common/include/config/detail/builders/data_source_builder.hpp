@@ -54,6 +54,7 @@ class StreamingBuilder {
 /**
  * Contains methods for configuring the polling data source.
  */
+template <typename SDK>
 class PollingBuilder {
    public:
     PollingBuilder();
@@ -69,23 +70,24 @@ class PollingBuilder {
      * Build the polling config. Used internal to the SDK.
      * @return The built config.
      */
-    [[nodiscard]] built::PollingConfig Build() const;
+    [[nodiscard]] built::PollingConfig<SDK> Build() const;
 
    private:
-    built::PollingConfig config_;
+    built::PollingConfig<SDK> config_;
 };
 
 /**
  * The method visitor is only needed inside this file
  */
 namespace {
+template <typename SDK>
 struct MethodVisitor {
-    boost::variant<built::StreamingConfig, built::PollingConfig> operator()(
+    boost::variant<built::StreamingConfig, built::PollingConfig<SDK>> operator()(
         StreamingBuilder streaming) {
         return streaming.Build();
     }
-    boost::variant<built::StreamingConfig, built::PollingConfig> operator()(
-        PollingBuilder polling) {
+    boost::variant<built::StreamingConfig, built::PollingConfig<SDK>> operator()(
+        PollingBuilder<SDK> polling) {
         return polling.Build();
     }
 };
@@ -95,7 +97,7 @@ template <>
 class DataSourceBuilder<ClientSDK> {
    public:
     using Streaming = StreamingBuilder;
-    using Polling = PollingBuilder;
+    using Polling = PollingBuilder<ClientSDK>;
 
     DataSourceBuilder();
 
@@ -168,7 +170,7 @@ template <>
 class DataSourceBuilder<ServerSDK> {
    public:
     using Streaming = StreamingBuilder;
-    using Polling = PollingBuilder;
+    using Polling = PollingBuilder<ServerSDK>;
 
     DataSourceBuilder();
 

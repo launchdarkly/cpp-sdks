@@ -4,6 +4,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include "config/client.hpp"
 #include "config/detail/built/http_properties.hpp"
 #include "data_source_status_manager.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
@@ -16,18 +17,12 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 class PollingDataSource : public IDataSource {
    public:
-    PollingDataSource(
-        std::string const& sdk_key,
-        boost::asio::any_io_executor ioc,
-        Context const& context,
-        config::detail::built::ServiceEndpoints const& endpoints,
-        config::detail::built::HttpProperties const& http_properties,
-        std::chrono::seconds polling_interval,
-        bool use_report,
-        bool with_reasons,
-        IDataSourceUpdateSink* handler,
-        DataSourceStatusManager& status_manager,
-        Logger const& logger);
+    PollingDataSource(Config const& config,
+                      boost::asio::any_io_executor ioc,
+                      Context const& context,
+                      IDataSourceUpdateSink* handler,
+                      DataSourceStatusManager& status_manager,
+                      Logger const& logger);
 
     void Start() override;
     void Close() override;
@@ -49,11 +44,6 @@ class PollingDataSource : public IDataSource {
 
     boost::asio::steady_timer timer_;
     std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
-
-    inline const static std::string polling_get_path_ = "/msdk/evalx/contexts";
-
-    inline const static std::string polling_report_path_ =
-        "/msdk/evalx/context";
 
     void StartPollingTimer();
 };
