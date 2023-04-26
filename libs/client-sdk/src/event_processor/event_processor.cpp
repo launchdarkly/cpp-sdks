@@ -2,7 +2,7 @@
 
 namespace launchdarkly::client_side::detail {
 
-EventProcessor::EventProcessor(boost::asio::any_io_executor io,
+EventProcessor::EventProcessor(boost::asio::any_io_executor const& io,
                                Config const& config,
                                Logger& logger)
     : impl_(io, config, logger) {}

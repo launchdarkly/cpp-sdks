@@ -11,7 +11,7 @@ namespace launchdarkly::client_side::detail {
 
 class EventProcessor : public IEventProcessor {
    public:
-    EventProcessor(boost::asio::any_io_executor io,
+    EventProcessor(boost::asio::any_io_executor const& io,
                    Config const& config,
                    Logger& logger);
     void AsyncSend(events::InputEvent event) override;

@@ -25,6 +25,11 @@ class Client {
    public:
     Client(Config config, Context context);
 
+    Client(Client&&) = delete;
+    Client(Client const&) = delete;
+    Client& operator=(Client) = delete;
+    Client& operator=(Client&& other) = delete;
+
     using FlagKey = std::string;
     [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const;
 
