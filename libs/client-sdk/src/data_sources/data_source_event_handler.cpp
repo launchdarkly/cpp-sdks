@@ -1,4 +1,4 @@
-#include "launchdarkly/client_side/data_sources/detail/streaming_data_handler.hpp"
+#include "launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp"
 #include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
 #include "serialization/json_evaluation_result.hpp"
 #include "serialization/value_mapping.hpp"
@@ -56,9 +56,9 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-static tl::expected<StreamingDataHandler::PatchData, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<StreamingDataHandler::PatchData, JsonError>> const& unused,
+static tl::expected<DataSourceEventHandler::PatchData, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<DataSourceEventHandler::PatchData,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -71,14 +71,15 @@ static tl::expected<StreamingDataHandler::PatchData, JsonError> tag_invoke(
                 json_value);
 
         if (result.has_value() && key.has_value()) {
-            return StreamingDataHandler::PatchData{key.value(), result.value()};
+            return DataSourceEventHandler::PatchData{key.value(),
+                                                     result.value()};
         }
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-static tl::expected<StreamingDataHandler::DeleteData, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<StreamingDataHandler::DeleteData,
+static tl::expected<DataSourceEventHandler::DeleteData, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<DataSourceEventHandler::DeleteData,
                                            JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
@@ -92,30 +93,31 @@ static tl::expected<StreamingDataHandler::DeleteData, JsonError> tag_invoke(
             ValueAsOpt<uint64_t>(version_iter, obj.end());
 
         if (key.has_value() && version.has_value()) {
-            return StreamingDataHandler::DeleteData{key.value(),
-                                                    version.value()};
+            return DataSourceEventHandler::DeleteData{key.value(),
+                                                      version.value()};
         }
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-StreamingDataHandler::StreamingDataHandler(
+DataSourceEventHandler::DataSourceEventHandler(
     IDataSourceUpdateSink* handler,
     Logger const& logger,
     DataSourceStatusManager& status_manager)
     : handler_(handler), logger_(logger), status_manager_(status_manager) {}
 
-StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
-    launchdarkly::sse::Event const& event) {
-    if (event.type() == "put") {
+DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
+    std::string const& type,
+    std::string const& data) {
+    if (type == "put") {
         boost::json::error_code error_code;
-        auto parsed = boost::json::parse(event.data(), error_code);
+        auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPut);
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
             std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
@@ -124,62 +126,62 @@ StreamingDataHandler::MessageStatus StreamingDataHandler::HandleMessage(
         if (res.has_value()) {
             handler_->Init(res.value());
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
-            return StreamingDataHandler::MessageStatus::kMessageHandled;
+            return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorPutInvalid);
-        return StreamingDataHandler::MessageStatus::kInvalidMessage;
+        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
-    if (event.type() == "patch") {
+    if (type == "patch") {
         boost::json::error_code error_code;
-        auto parsed = boost::json::parse(event.data(), error_code);
+        auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPatch;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPatch);
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
-            tl::expected<StreamingDataHandler::PatchData, JsonError>>(parsed);
+            tl::expected<DataSourceEventHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
             handler_->Upsert(
                 res.value().key,
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
-            return StreamingDataHandler::MessageStatus::kMessageHandled;
+            return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPatchInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorPatchInvalid);
-        return StreamingDataHandler::MessageStatus::kInvalidMessage;
+        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
-    if (event.type() == "delete") {
+    if (type == "delete") {
         boost::json::error_code error_code;
-        auto parsed = boost::json::parse(event.data(), error_code);
+        auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingDelete;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingDelete);
-            return StreamingDataHandler::MessageStatus::kInvalidMessage;
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<
-            tl::expected<StreamingDataHandler::DeleteData, JsonError>>(
-            boost::json::parse(event.data()));
+            tl::expected<DataSourceEventHandler::DeleteData, JsonError>>(
+            boost::json::parse(data));
         if (res.has_value()) {
             handler_->Upsert(res.value().key,
                              ItemDescriptor(res.value().version));
-            return StreamingDataHandler::MessageStatus::kMessageHandled;
+            return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorDeleteInvalid);
-        return StreamingDataHandler::MessageStatus::kInvalidMessage;
+        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
-    return StreamingDataHandler::MessageStatus::kUnhandledVerb;
+    return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
 }  // namespace launchdarkly::client_side::data_sources::detail

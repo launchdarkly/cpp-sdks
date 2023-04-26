@@ -67,7 +67,8 @@ HttpRequest::HttpRequest(std::string const& url,
     auto uri_components = boost::urls::parse_uri(url);
 
     host_ = uri_components->host();
-    path_ = uri_components->path();
+    // For a boost beast request we need the query string in the path.
+    path_ = uri_components->path() + "?" + uri_components->query();
     if (path_.empty()) {
         path_ = "/";
     }
@@ -80,6 +81,17 @@ HttpRequest::HttpRequest(std::string const& url,
     }
 }
 
+HttpRequest::HttpRequest(HttpRequest& base_request,
+                         config::detail::built::HttpProperties properties)
+    : properties_(std::move(properties)),
+      method_(base_request.method_),
+      body_(std::move(base_request.body_)) {
+    path_ = base_request.path_;
+    host_ = base_request.host_;
+    port_ = base_request.port_;
+    is_https_ = base_request.is_https_;
+}
+
 std::string const& HttpRequest::Port() const {
     return port_;
 }
@@ -87,4 +99,8 @@ bool HttpRequest::Https() const {
     return is_https_;
 }
 
+bool IsRecoverableStatus(HttpResult::StatusCode status) {
+    return status < 400 || status > 499 || status == 400 || status == 408 ||
+           status == 429;
+}
 }  // namespace launchdarkly::network::detail

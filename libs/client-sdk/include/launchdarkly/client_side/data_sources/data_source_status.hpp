@@ -10,6 +10,7 @@
 
 #include "launchdarkly/client_side/connection.hpp"
 #include "launchdarkly/client_side/data_sources/data_source_status.hpp"
+#include "network/detail/http_requester.hpp"
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -79,7 +80,7 @@ class DataSourceStatus {
      */
     class ErrorInfo {
        public:
-        using StatusCodeType = int32_t;
+        using StatusCodeType = network::detail::HttpResult::StatusCode;
 
         /**
          * An enumeration describing the general type of an error.

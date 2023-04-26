@@ -26,6 +26,30 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
     void SetState(DataSourceStatus::DataSourceState state);
 
     /**
+     * If an error and state change happen simultaneously, then they should
+     * be updated simultaneously.
+     *
+     * @param state The new state.
+     * @param code Status code for an http error.
+     * @param message The message to associate with the error.
+     */
+    void SetState(DataSourceStatus::DataSourceState state,
+                  DataSourceStatus::ErrorInfo::StatusCodeType code,
+                  std::string message);
+
+    /**
+     * If an error and state change happen simultaneously, then they should
+     * be updated simultaneously.
+     *
+     * @param state The new state.
+     * @param kind The error kind.
+     * @param message The message to associate with the error.
+     */
+    void SetState(DataSourceStatus::DataSourceState state,
+                  DataSourceStatus::ErrorInfo::ErrorKind kind,
+                  std::string message);
+
+    /**
      * Set an error with the given kind and message.
      *
      * For ErrorInfo::ErrorKind::kErrorResponse use the
@@ -42,7 +66,8 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
      * Set an error based on the given status code.
      * @param code The status code of the error.
      */
-    void SetError(DataSourceStatus::ErrorInfo::StatusCodeType code);
+    void SetError(DataSourceStatus::ErrorInfo::StatusCodeType code,
+                  std::string message);
     // TODO: Handle error codes once the EventSource supports it.
 
     DataSourceStatus Status() override;
@@ -61,6 +86,7 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
     boost::signals2::signal<void(data_sources::DataSourceStatus status)>
         data_source_status_signal_;
     mutable std::mutex status_mutex_;
+    bool UpdateState(DataSourceStatus::DataSourceState const& requested_state);
 };
 
 }  // namespace launchdarkly::client_side::data_sources::detail

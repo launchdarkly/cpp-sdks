@@ -12,7 +12,7 @@ HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder()
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
-    built::HttpProperties properties) {
+    built::HttpProperties const& properties) {
     connect_timeout_ = properties.ConnectTimeout();
     read_timeout_ = properties.ReadTimeout();
     response_timeout_ = properties.ResponseTimeout();

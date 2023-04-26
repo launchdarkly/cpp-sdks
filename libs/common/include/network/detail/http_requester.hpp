@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/algorithm/string/compare.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <cstdint>
 #include <future>
 #include <map>
@@ -10,10 +12,17 @@
 
 namespace launchdarkly::network::detail {
 
+struct CaseInsensitiveComparator {
+    bool operator()(std::string const& a, std::string const& b) const noexcept {
+        return ::strcasecmp(a.c_str(), b.c_str()) < 0;
+    }
+};
+
 class HttpResult {
    public:
     using StatusCode = uint64_t;
-    using HeadersType = std::map<std::string, std::string>;
+    using HeadersType =
+        std::map<std::string, std::string, CaseInsensitiveComparator>;
     using BodyType = std::optional<std::string>;
 
     bool IsError() const;
@@ -71,7 +80,8 @@ enum class HttpMethod { kPost, kGet, kReport, kPut };
 
 class HttpRequest {
    public:
-    using HeadersType = std::map<std::string, std::string>;
+    using HeadersType =
+        std::map<std::string, std::string, CaseInsensitiveComparator>;
     using BodyType = std::optional<std::string>;
 
     HttpMethod Method() const;
@@ -87,6 +97,15 @@ class HttpRequest {
                 config::detail::built::HttpProperties properties,
                 BodyType body);
 
+    /**
+     * Move the contents of the base request and create a new request
+     * incorporating the provided properties.
+     * @param base_request The base request.
+     * @param properties The properties for the request.
+     */
+    HttpRequest(HttpRequest& base_request,
+                config::detail::built::HttpProperties properties);
+
    private:
     HttpMethod method_;
     std::optional<std::string> body_;
@@ -94,7 +113,10 @@ class HttpRequest {
     std::string host_;
     std::string port_;
     std::string path_;
+    std::map<std::string, std::string> params_;
     bool is_https_;
 };
+
+bool IsRecoverableStatus(HttpResult::StatusCode status);
 
 }  // namespace launchdarkly::network::detail

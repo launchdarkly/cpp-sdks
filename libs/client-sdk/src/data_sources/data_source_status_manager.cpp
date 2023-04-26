@@ -1,5 +1,6 @@
 #include <memory>
 #include <mutex>
+#include <sstream>
 #include <utility>
 
 #include "launchdarkly/client_side/connection.hpp"
@@ -10,18 +11,62 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 void DataSourceStatusManager::SetState(
     DataSourceStatus::DataSourceState state) {
-    bool changed = false;
-    {
-        std::lock_guard lock(status_mutex_);
-        changed = state_ != state;
-        state_ = state;
-        if (changed) {
-            state_since_ = std::chrono::system_clock::now();
-        }
-    }
+    bool changed = UpdateState(state);
     if (changed) {
         data_source_status_signal_(std::move(Status()));
     }
+}
+
+void DataSourceStatusManager::SetState(
+    DataSourceStatus::DataSourceState state,
+    DataSourceStatus::ErrorInfo::StatusCodeType code,
+    std::string message) {
+    {
+        std::lock_guard lock(status_mutex_);
+
+        UpdateState(state);
+
+        last_error_ = DataSourceStatus::ErrorInfo(
+            DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, code,
+            message, std::chrono::system_clock::now());
+    }
+
+    data_source_status_signal_(std::move(Status()));
+}
+bool DataSourceStatusManager::UpdateState(
+    DataSourceStatus::DataSourceState const& requested_state) {
+    std::lock_guard lock(status_mutex_);
+
+    // If initializing, then interruptions remain initializing.
+    auto new_state =
+        (requested_state == DataSourceStatus::DataSourceState::kInterrupted &&
+         state_ == DataSourceStatus::DataSourceState::kInitializing)
+            ? DataSourceStatus::DataSourceState::
+                  kInitializing  // see comment on
+                                 // IDataSourceUpdateSink.UpdateStatus
+            : requested_state;
+    auto changed = state_ != new_state;
+    if (changed) {
+        state_ = new_state;
+        state_since_ = std::chrono::system_clock::now();
+    }
+    return changed;
+}
+
+void DataSourceStatusManager::SetState(
+    DataSourceStatus::DataSourceState state,
+    DataSourceStatus::ErrorInfo::ErrorKind kind,
+    std::string message) {
+    {
+        std::lock_guard lock(status_mutex_);
+
+        UpdateState(state);
+
+        last_error_ = DataSourceStatus::ErrorInfo(
+            kind, 0, std::move(message), std::chrono::system_clock::now());
+    }
+
+    data_source_status_signal_(Status());
 }
 
 void DataSourceStatusManager::SetError(
@@ -38,13 +83,13 @@ void DataSourceStatusManager::SetError(
 }
 
 void DataSourceStatusManager::SetError(
-    DataSourceStatus::ErrorInfo::StatusCodeType code) {
-    // TODO: String message.
+    DataSourceStatus::ErrorInfo::StatusCodeType code,
+    std::string message) {
     {
         std::lock_guard lock(status_mutex_);
         last_error_ = DataSourceStatus::ErrorInfo(
-            DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, code, "",
-            std::chrono::system_clock::now());
+            DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, code,
+            message, std::chrono::system_clock::now());
         state_since_ = std::chrono::system_clock::now();
     }
     data_source_status_signal_(Status());
