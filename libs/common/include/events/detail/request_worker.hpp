@@ -12,9 +12,8 @@
 namespace launchdarkly::events::detail {
 
 enum class State {
-    Unknown = 0,
     /* Worker is ready for a new job. */
-    Available = 1,
+    Idle = 1,
     /* Worker is performing the 1st delivery. */
     FirstChance = 2,
     /* Worker is performing the 2nd (final) delivery. */
@@ -26,6 +25,7 @@ enum class State {
 std::ostream& operator<<(std::ostream& out, State const& s);
 
 enum class Action {
+    /* No action necessary. */
     None = 0,
     /* Free the current request. */
     Reset = 1,
@@ -39,6 +39,13 @@ enum class Action {
 
 std::ostream& operator<<(std::ostream& out, Action const& s);
 
+/**
+ * Computes the next (state, action) pair from an existing state and an HTTP
+ * result.
+ * @param state Current state.
+ * @param result HTTP result.
+ * @return Next state + action to take.
+ */
 std::pair<State, Action> NextState(State,
                                    network::detail::HttpResult const& result);
 
@@ -52,14 +59,31 @@ std::pair<State, Action> NextState(State,
  */
 class RequestWorker {
    public:
-    using Clock = std::chrono::system_clock;
-
+    /*
+     * A delivery request can resolve as a PermanentFailureResult,
+     * meaning the request could not be delivered at all. In this case, the HTTP
+     * status code is made available for inspection.
+     */
     using PermanentFailureResult = network::detail::HttpResult::StatusCode;
-    using ServerTimeResult = Clock::time_point;
+
+    /*
+     * A delivery request can resolve as a ServerTimeResult, meaning the request
+     * succeeded *and* a valid server timestamp was received.
+     */
+    using ServerTimeResult = std::chrono::system_clock::time_point;
 
     using DeliveryResult =
         std::variant<PermanentFailureResult, ServerTimeResult>;
 
+    /*
+     * A request made with AsyncDeliver may result in invocation of the
+     * provided ResultCallback in exactly two cases:
+     * - The delivery permanently failed. The callback will be invoked
+     *   with the number of events in the batch, and a PermanentFailureResult.
+     * - The delivery succeeded and the server returned a valid timestamp. The
+     * callback will be invoked with the number of events in the batch, and a
+     * ServerTimeResult.
+     */
     using ResultCallback = std::function<void(std::size_t, DeliveryResult)>;
 
     /**
@@ -68,7 +92,7 @@ class RequestWorker {
      * operations.
      * @param retry_after How long to wait after a recoverable failure before
      * trying to deliver events again.
-     * @param logger Logger for debug messages.
+     * @param logger Logger.
      */
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
@@ -80,12 +104,13 @@ class RequestWorker {
     bool Available() const;
 
     /**
-     * Passes an HttpRequest to the worker for delivery. The delivery may be
+     * Passes an EventBatch to the worker for delivery. The delivery may be
      * retried exactly once if the failure is recoverable.
      *
-     * Not thread-safe.
+     * Completion is not guaranteed; see documentation on ResultCallback for
+     * info.
      *
-     * @param request Request to deliver.
+     * @param batch The events to deliver.
      */
     template <typename CompletionToken>
     auto AsyncDeliver(EventBatch batch, CompletionToken&& token) {
@@ -123,7 +148,7 @@ class RequestWorker {
     /* How long to wait before trying again. */
     std::chrono::milliseconds retry_delay_;
 
-    /* Current state of the RequestWorker. */
+    /* Current state of the worker. */
     State state_;
 
     /* Component used to perform HTTP operations. */
@@ -133,7 +158,6 @@ class RequestWorker {
      * request is in-flight or a retry is taking place. */
     std::optional<EventBatch> batch_;
 
-    /* Used for debug logging. */
     Logger& logger_;
 
     void OnDeliveryAttempt(network::detail::HttpResult request,

@@ -8,13 +8,13 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              Logger& logger)
     : timer_(io),
       retry_delay_(retry_after),
-      state_(State::Available),
+      state_(State::Idle),
       requester_(timer_.get_executor()),
       batch_(std::nullopt),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
-    return state_ == State::Available;
+    return state_ == State::Idle;
 }
 
 static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
@@ -111,12 +111,17 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
 
 std::pair<State, Action> NextState(State state,
                                    network::detail::HttpResult const& result) {
-    Action action = Action::None;
-    State next_state = State::Unknown;
+    std::optional<Action> action;
+    std::optional<State> next_state;
+
     switch (state) {
+        case State::Idle:
+            return {state, Action::None};
+        case State::PermanentlyFailed:
+            return {state, Action::None};
         case State::FirstChance:
             if (IsSuccess(result)) {
-                next_state = State::Available;
+                next_state = State::Idle;
                 action = Action::ParseDateAndReset;
             } else if (IsRecoverableFailure(result)) {
                 next_state = State::SecondChance;
@@ -128,30 +133,29 @@ std::pair<State, Action> NextState(State state,
             break;
         case State::SecondChance:
             if (IsSuccess(result)) {
-                next_state = State::Available;
+                next_state = State::Idle;
                 action = Action::ParseDateAndReset;
             } else if (IsRecoverableFailure(result)) {
                 // no more delivery attempts; payload is dropped.
-                next_state = State::Available;
+                next_state = State::Idle;
                 action = Action::Reset;
             } else {
                 next_state = State::PermanentlyFailed;
                 action = Action::NotifyPermanentFailure;
             }
             break;
-        default:
-            assert("impossible state reached" && 0);
     }
-    return {next_state, action};
+
+    assert(action.has_value() && "NextState must generate an action");
+    assert(next_state.has_value() && "NextState must generate a new state");
+
+    return {*next_state, *action};
 }
 
 std::ostream& operator<<(std::ostream& out, State const& s) {
     switch (s) {
-        case State::Unknown:
-            out << "State::Unknown";
-            break;
-        case State::Available:
-            out << "State::Available";
+        case State::Idle:
+            out << "State::Idle";
             break;
         case State::FirstChance:
             out << "State::FirstChance";

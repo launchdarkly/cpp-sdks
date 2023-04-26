@@ -27,13 +27,13 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         TestCase{State::FirstChance,
                  HttpResult(200, "200 ok!", HttpResult::HeadersType{}),
-                 State::Available, Action::ParseDateAndReset},
+                 State::Idle, Action::ParseDateAndReset},
         TestCase{State::FirstChance,
                  HttpResult(201, "201 created!", HttpResult::HeadersType{}),
-                 State::Available, Action::ParseDateAndReset},
+                 State::Idle, Action::ParseDateAndReset},
         TestCase{State::FirstChance,
                  HttpResult(202, "202 accepted!", HttpResult::HeadersType{}),
-                 State::Available, Action::ParseDateAndReset}));
+                 State::Idle, Action::ParseDateAndReset}));
 
 INSTANTIATE_TEST_SUITE_P(
     RecoverableErrors,
@@ -84,16 +84,16 @@ INSTANTIATE_TEST_SUITE_P(
                  State::PermanentlyFailed, Action::NotifyPermanentFailure},
         TestCase{State::SecondChance,
                  HttpResult(400, "400 bad request!", HttpResult::HeadersType{}),
-                 State::Available, Action::Reset},
+                 State::Idle, Action::Reset},
         TestCase{
             State::SecondChance,
             HttpResult(408, "408 request timeout!", HttpResult::HeadersType{}),
-            State::Available, Action::Reset},
+            State::Idle, Action::Reset},
         TestCase{State::SecondChance,
                  HttpResult(429,
                             "429 too many requests!",
                             HttpResult::HeadersType{}),
-                 State::Available, Action::Reset},
+                 State::Idle, Action::Reset},
         TestCase{State::SecondChance,
                  HttpResult(200, "200 ok!", HttpResult::HeadersType{}),
-                 State::Available, Action::ParseDateAndReset}));
+                 State::Idle, Action::ParseDateAndReset}));
