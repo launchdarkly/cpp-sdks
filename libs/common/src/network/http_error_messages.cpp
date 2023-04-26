@@ -10,6 +10,7 @@ std::string ErrorForStatusCode(HttpResult::StatusCode code,
                   << (IsInvalidSdkKeyStatus(code) ? "(invalid SDK key) " : " ")
                   << "for: " << context << " - "
                   << (retry_message ? *retry_message : "giving up permanently");
+    return error_message.str();
 }
 
 bool IsInvalidSdkKeyStatus(HttpResult::StatusCode code) {

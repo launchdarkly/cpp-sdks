@@ -5,6 +5,7 @@ using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include "config/client.hpp"
 #include "config/detail/built/http_properties.hpp"
 #include "config/detail/built/service_endpoints.hpp"
 #include "context.hpp"
@@ -20,17 +21,12 @@ namespace launchdarkly::client_side::data_sources::detail {
 
 class StreamingDataSource final : public IDataSource {
    public:
-    StreamingDataSource(
-        std::string const& sdk_key,
-        boost::asio::any_io_executor ioc,
-        Context const& context,
-        config::detail::built::ServiceEndpoints const& endpoints,
-        config::detail::built::HttpProperties const& http_properties,
-        bool use_report,
-        bool with_reasons,
-        IDataSourceUpdateSink* handler,
-        DataSourceStatusManager& status_manager,
-        Logger const& logger);
+    StreamingDataSource(Config const& config,
+                        boost::asio::any_io_executor ioc,
+                        Context const& context,
+                        IDataSourceUpdateSink* handler,
+                        DataSourceStatusManager& status_manager,
+                        Logger const& logger);
 
     void Start() override;
     void Close() override;
@@ -43,7 +39,5 @@ class StreamingDataSource final : public IDataSource {
 
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;
-
-    inline static const std::string streaming_path_ = "/meval";
 };
 }  // namespace launchdarkly::client_side::data_sources::detail

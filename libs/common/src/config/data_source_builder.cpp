@@ -2,16 +2,19 @@
 
 namespace launchdarkly::config::detail::builders {
 
-StreamingBuilder::StreamingBuilder()
-    : config_(Defaults<AnySDK>::StreamingConfig()) {}
+template <typename SDK>
+StreamingBuilder<SDK>::StreamingBuilder()
+    : config_(Defaults<SDK>::StreamingConfig()) {}
 
-StreamingBuilder& StreamingBuilder::InitialReconnectDelay(
+template <typename SDK>
+StreamingBuilder<SDK>& StreamingBuilder<SDK>::InitialReconnectDelay(
     std::chrono::milliseconds initial_reconnect_delay) {
     config_.initial_reconnect_delay = initial_reconnect_delay;
     return *this;
 }
 
-built::StreamingConfig StreamingBuilder::Build() const {
+template <typename SDK>
+built::StreamingConfig<SDK> StreamingBuilder<SDK>::Build() const {
     return config_;
 }
 
@@ -47,7 +50,7 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::UseReport(
 }
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
-    StreamingBuilder builder) {
+    StreamingBuilder<ClientSDK> builder) {
     method_ = builder;
     return *this;
 }
@@ -67,7 +70,7 @@ DataSourceBuilder<ServerSDK>::DataSourceBuilder()
     : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
 DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
-    StreamingBuilder builder) {
+    StreamingBuilder<ServerSDK> builder) {
     method_ = builder;
     return *this;
 }
@@ -85,5 +88,8 @@ built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
 
 template class PollingBuilder<detail::ClientSDK>;
 template class PollingBuilder<detail::ServerSDK>;
+
+template class StreamingBuilder<detail::ClientSDK>;
+template class StreamingBuilder<detail::ServerSDK>;
 
 }  // namespace launchdarkly::config::detail::builders

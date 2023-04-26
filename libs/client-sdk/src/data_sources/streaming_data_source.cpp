@@ -15,13 +15,9 @@
 namespace launchdarkly::client_side::data_sources::detail {
 
 StreamingDataSource::StreamingDataSource(
-    std::string const& sdk_key,
+    Config const& config,
     boost::asio::any_io_executor ioc,
     Context const& context,
-    config::detail::built::ServiceEndpoints const& endpoints,
-    config::detail::built::HttpProperties const& http_properties,
-    bool use_report,
-    bool with_reasons,
     IDataSourceUpdateSink* handler,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
@@ -29,32 +25,41 @@ StreamingDataSource::StreamingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)) {
-    auto uri_components = boost::urls::parse_uri(endpoints.StreamingBaseUrl());
+    auto uri_components =
+        boost::urls::parse_uri(config.ServiceEndpoints().StreamingBaseUrl());
 
     // TODO: Handle parsing error?
+    // TODO: Initial reconnect delay.
     boost::urls::url url = uri_components.value();
 
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
 
-    // Add the eval endpoint.
-    url.set_path(url.path().append(streaming_path_));
+    auto& data_source_config = config.DataSourceConfig();
 
-    if (!use_report) {
+    auto& streaming_config = boost::get<
+        config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
+        data_source_config.method);
+
+    // Add the eval endpoint.
+    url.set_path(url.path().append(streaming_config.streaming_path));
+
+    if (!data_source_config.use_report) {
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
         url.set_path(url.path().append("/" + Base64UrlEncode(string_context)));
     }
-    if (with_reasons) {
+    if (data_source_config.with_reasons) {
         url.params().set("withReasons", "true");
     }
 
     auto client_builder =
         launchdarkly::sse::Builder(std::move(ioc), url.buffer());
 
-    client_builder.method(use_report ? boost::beast::http::verb::report
-                                     : boost::beast::http::verb::get);
+    client_builder.method(data_source_config.use_report
+                              ? boost::beast::http::verb::report
+                              : boost::beast::http::verb::get);
 
     client_builder.receiver([this](launchdarkly::sse::Event const& event) {
         data_source_handler_.HandleMessage(event.type(), event.data());
@@ -65,10 +70,13 @@ StreamingDataSource::StreamingDataSource(
     client_builder.logger(
         [this](auto msg) { LD_LOG((logger_), LogLevel::kInfo) << msg; });
 
-    if (use_report) {
+    if (data_source_config.use_report) {
         client_builder.body(string_context);
     }
-    client_builder.header("authorization", sdk_key);
+
+    auto& http_properties = config.HttpProperties();
+
+    client_builder.header("authorization", config.SdkKey());
     for (auto const& header : http_properties.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }

@@ -21,7 +21,9 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<config::detail::built::StreamingConfig>(client_config.method)
+        boost::get<
+            config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
+            client_config.method)
             .initial_reconnect_delay);
 }
 
@@ -53,7 +55,9 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<config::detail::built::StreamingConfig>(server_config.method)
+        boost::get<
+            config::detail::built::StreamingConfig<config::detail::ServerSDK>>(
+            server_config.method)
             .initial_reconnect_delay);
 }
 

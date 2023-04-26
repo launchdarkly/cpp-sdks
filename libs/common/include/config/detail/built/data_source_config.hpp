@@ -8,7 +8,18 @@
 
 namespace launchdarkly::config::detail::built {
 
-struct StreamingConfig {
+template <typename SDK>
+struct StreamingConfig;
+
+template <>
+struct StreamingConfig<ClientSDK> {
+    std::chrono::milliseconds initial_reconnect_delay;
+
+    inline static const std::string streaming_path = "/meval";
+};
+
+template <>
+struct StreamingConfig<ServerSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
 };
 
@@ -37,7 +48,7 @@ struct DataSourceConfig;
 
 template <>
 struct DataSourceConfig<ClientSDK> {
-    boost::variant<StreamingConfig, PollingConfig<ClientSDK>> method;
+    boost::variant<StreamingConfig<ClientSDK>, PollingConfig<ClientSDK>> method;
 
     bool with_reasons;
     bool use_report;
@@ -45,7 +56,7 @@ struct DataSourceConfig<ClientSDK> {
 
 template <>
 struct DataSourceConfig<ServerSDK> {
-    boost::variant<StreamingConfig, PollingConfig<ServerSDK>> method;
+    boost::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
 };
 
 }  // namespace launchdarkly::config::detail::built

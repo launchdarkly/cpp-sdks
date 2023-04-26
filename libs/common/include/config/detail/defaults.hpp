@@ -20,10 +20,6 @@ struct Defaults {
      * @return
      */
     static bool Offline() { return false; }
-
-    static auto StreamingConfig() -> built::StreamingConfig {
-        return {std::chrono::milliseconds{1000}};
-    }
 };
 
 template <>
@@ -50,8 +46,12 @@ struct Defaults<ClientSDK> {
             std::map<std::string, std::string>()};
     }
 
+    static auto StreamingConfig() -> built::StreamingConfig<ClientSDK> {
+        return {std::chrono::milliseconds{1000}};
+    }
+
     static auto DataSourceConfig() -> built::DataSourceConfig<ClientSDK> {
-        return {Defaults<AnySDK>::StreamingConfig(), false, false};
+        return {Defaults<ClientSDK>::StreamingConfig(), false, false};
     }
 
     static auto PollingConfig() -> built::PollingConfig<ClientSDK> {
@@ -84,8 +84,12 @@ struct Defaults<ServerSDK> {
             std::map<std::string, std::string>()};
     }
 
+    static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {
+        return {std::chrono::milliseconds{1000}};
+    }
+
     static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {
-        return {Defaults<AnySDK>::StreamingConfig()};
+        return {Defaults<ServerSDK>::StreamingConfig()};
     }
 
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {

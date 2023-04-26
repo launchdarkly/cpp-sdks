@@ -70,7 +70,7 @@ PollingDataSource::PollingDataSource(Config const& config,
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
-    auto polling_config = boost::get<
+    auto& polling_config = boost::get<
         config::detail::built::PollingConfig<config::detail::ClientSDK>>(
         config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {

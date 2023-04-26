@@ -22,10 +22,7 @@ static std::unique_ptr<IDataSource> MakeDataSource(
         // TODO: use initial reconnect delay.
         return std::make_unique<launchdarkly::client_side::data_sources::
                                     detail::StreamingDataSource>(
-            config.SdkKey(), executor, context, config.ServiceEndpoints(),
-            config.HttpProperties(), config.DataSourceConfig().use_report,
-            config.DataSourceConfig().with_reasons, &flag_updater,
-            status_manager, logger);
+            config, executor, context, &flag_updater, status_manager, logger);
     } else {
         return std::make_unique<
             launchdarkly::client_side::data_sources::detail::PollingDataSource>(
