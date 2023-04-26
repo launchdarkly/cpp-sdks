@@ -9,29 +9,56 @@ using launchdarkly::client_side::data_sources::detail::DataSourceStatusManager;
 class DataSourceStateParameterizedTestFixture
     : public ::testing::TestWithParam<DataSourceStatus::DataSourceState> {};
 
-TEST_P(DataSourceStateParameterizedTestFixture, HandlesSettingState) {
+TEST(DataSourceStatusManagerTests,
+     WhenInitializingInterruptedDoesNotChangeState) {
     DataSourceStatusManager status_manager;
 
-    status_manager.SetState(GetParam());
+    status_manager.SetState(DataSourceStatus::DataSourceState::kInterrupted);
 
-    EXPECT_EQ(GetParam(), status_manager.Status().State());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              status_manager.Status().State());
 }
 
-TEST_P(DataSourceStateParameterizedTestFixture, ProducesEventOnStateChange) {
+TEST(DataSourceStatusManagerTests,
+     WhenInitializingInterruptedDoesNotProduceEvent) {
     DataSourceStatusManager status_manager;
 
-    // We start in initializing, so it doesn't produce an event.
-    if (GetParam() != DataSourceStatus::DataSourceState::kInitializing) {
-        std::atomic<bool> got_event(false);
-        status_manager.OnDataSourceStatusChange([&got_event](auto status) {
-            got_event.store(true);
-            EXPECT_EQ(GetParam(), status.State());
-        });
+    std::atomic<bool> got_event(false);
+    status_manager.OnDataSourceStatusChange(
+        [&got_event](auto status) { got_event.store(true); });
 
-        status_manager.SetState(GetParam());
+    status_manager.SetState(DataSourceStatus::DataSourceState::kInterrupted);
 
-        EXPECT_TRUE(got_event);
-    }
+    EXPECT_FALSE(got_event);
+}
+
+TEST(DataSourceStatusManagerTests, CanTransitionToValidFromInitializing) {
+    DataSourceStatusManager status_manager;
+
+    status_manager.SetState(DataSourceStatus::DataSourceState::kValid);
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
+              status_manager.Status().State());
+}
+
+TEST(DataSourceStatusManagerTests, CanTransitionFromValidToInterrupted) {
+    DataSourceStatusManager status_manager;
+
+    status_manager.SetState(DataSourceStatus::DataSourceState::kValid);
+
+    status_manager.SetState(DataSourceStatus::DataSourceState::kInterrupted);
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInterrupted,
+              status_manager.Status().State());
+}
+
+TEST(DataSourceStatusManagerTests, CanTransitionToShutdownFromInitializing) {
+    DataSourceStatusManager status_manager;
+
+    status_manager.SetState(DataSourceStatus::DataSourceState::kShutdown);
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kShutdown,
+              status_manager.Status().State());
 }
 
 TEST_P(DataSourceStateParameterizedTestFixture, SameStateProducesNoEvent) {
@@ -99,10 +126,12 @@ INSTANTIATE_TEST_SUITE_P(
 TEST(DataSourceStatusManagerTests, CanSetErrorViaStatusCode) {
     DataSourceStatusManager status_manager;
 
-    status_manager.SetError(404);
+    status_manager.SetError(404, "Bad times");
     EXPECT_EQ(DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse,
               status_manager.Status().LastError()->Kind());
     EXPECT_EQ(404, status_manager.Status().LastError()->StatusCode());
+
+    EXPECT_EQ("Bad times", status_manager.Status().LastError()->Message());
 }
 
 TEST(DataSourceStatusManagerTests, NoErrorIfNoErrorHasHappened) {
@@ -137,7 +166,7 @@ TEST(DataSourceStatusManagerTests, ErrorHasTimeStamp) {
     DataSourceStatusManager status_manager;
     auto before_error_set = std::chrono::system_clock::now();
 
-    status_manager.SetError(404);
+    status_manager.SetError(404, "Bad news");
 
     auto after_error_set = std::chrono::system_clock::now();
 

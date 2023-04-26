@@ -15,8 +15,9 @@ add_library(${LIBNAME}
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/base_64.cpp
-        data_sources/streaming_data_handler.cpp
+        data_sources/data_source_event_handler.cpp
         data_source_update_sink.cpp
+        data_sources/polling_data_source.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "config/client.hpp"
+#include "config/detail/sdks.hpp"
 #include "config/server.hpp"
 #include "value.hpp"
 
@@ -20,7 +21,9 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<config::detail::built::StreamingConfig>(client_config.method)
+        boost::get<
+            config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
+            client_config.method)
             .initial_reconnect_delay);
 }
 
@@ -37,7 +40,9 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
     EXPECT_FALSE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::seconds{88000},
-        boost::get<config::detail::built::PollingConfig>(client_config.method)
+        boost::get<
+            config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+            client_config.method)
             .poll_interval);
 }
 
@@ -50,7 +55,9 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<config::detail::built::StreamingConfig>(server_config.method)
+        boost::get<
+            config::detail::built::StreamingConfig<config::detail::ServerSDK>>(
+            server_config.method)
             .initial_reconnect_delay);
 }
 
@@ -63,6 +70,8 @@ TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::seconds{30000},
-        boost::get<config::detail::built::PollingConfig>(server_config.method)
+        boost::get<
+            config::detail::built::PollingConfig<config::detail::ServerSDK>>(
+            server_config.method)
             .poll_interval);
 }

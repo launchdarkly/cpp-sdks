@@ -4,11 +4,31 @@
 #include <utility>
 
 #include "events/detail/asio_event_processor.hpp"
+#include "launchdarkly/client_side/data_sources/detail/polling_data_source.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
 
 namespace launchdarkly::client_side {
 
 using launchdarkly::client_side::data_sources::DataSourceStatus;
+
+static std::unique_ptr<IDataSource> MakeDataSource(
+    Config const& config,
+    Context const& context,
+    boost::asio::any_io_executor executor,
+    flag_manager::detail::FlagUpdater& flag_updater,
+    data_sources::detail::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    if (config.DataSourceConfig().method.which() == 0) {
+        // TODO: use initial reconnect delay.
+        return std::make_unique<launchdarkly::client_side::data_sources::
+                                    detail::StreamingDataSource>(
+            config, executor, context, &flag_updater, status_manager, logger);
+    } else {
+        return std::make_unique<
+            launchdarkly::client_side::data_sources::detail::PollingDataSource>(
+            config, executor, context, &flag_updater, status_manager, logger);
+    }
+}
 
 Client::Client(Config config, Context context)
     : logger_(config.Logger()),
@@ -21,19 +41,12 @@ Client::Client(Config config, Context context)
               config.SdkKey(),
               logger_)),
       flag_updater_(flag_manager_),
-      // TODO: Support polling.
-      data_source_(std::make_unique<launchdarkly::client_side::data_sources::
-                                        detail::StreamingDataSource>(
-          config.SdkKey(),
-          ioc_.get_executor(),
-          context_,
-          config.ServiceEndpoints(),
-          config.HttpProperties(),
-          config.DataSourceConfig().use_report,
-          config.DataSourceConfig().with_reasons,
-          &flag_updater_,
-          status_manager_,
-          logger_)),
+      data_source_(MakeDataSource(config,
+                                  context_,
+                                  ioc_.get_executor(),
+                                  flag_updater_,
+                                  status_manager_,
+                                  logger_)),
       initialized_(false) {
     data_source_->Start();
 
