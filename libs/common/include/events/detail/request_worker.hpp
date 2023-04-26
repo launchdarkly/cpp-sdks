@@ -53,7 +53,8 @@ class RequestWorker {
     using ServerTimeCallback =
         std::function<void(std::chrono::system_clock::time_point server_time)>;
 
-    using PermanentFailureCallback = std::function<void()>;
+    using PermanentFailureCallback =
+        std::function<void(network::detail::HttpResult::StatusCode)>;
 
     /**
      * Constructs a new RequestWorker.
@@ -72,7 +73,6 @@ class RequestWorker {
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
                   ServerTimeCallback server_time_cb,
-                  PermanentFailureCallback permanent_failure_cb,
                   Logger& logger);
 
     /**
@@ -88,7 +88,27 @@ class RequestWorker {
      *
      * @param request Request to deliver.
      */
-    void AsyncDeliver(network::detail::HttpRequest request);
+    template <typename CompletionToken>
+    auto AsyncDeliver(network::detail::HttpRequest request,
+                      CompletionToken&& token) {
+        namespace asio = boost::asio;
+        namespace system = boost::system;
+
+        using Sig = void(network::detail::HttpResult::StatusCode);
+        using Result = asio::async_result<std::decay_t<CompletionToken>, Sig>;
+        using Handler = typename Result::completion_handler_type;
+
+        Handler handler(std::forward<decltype(token)>(token));
+        Result result(handler);
+
+        state_ = State::FirstChance;
+        request_ = std::move(request);
+        requester_.Request(
+            *request_, [this, handler](network::detail::HttpResult result) {
+                OnDeliveryAttempt(std::move(result), std::move(handler));
+            });
+        return result.get();
+    }
 
    private:
     /* Used to wait a specific amount of time after a failed request before
@@ -119,7 +139,8 @@ class RequestWorker {
     Logger& logger_;
 
     /* Completion handler invoked from the AsioRequester. */
-    void OnDeliveryAttempt(network::detail::HttpResult request);
+    void OnDeliveryAttempt(network::detail::HttpResult request,
+                           PermanentFailureCallback cb);
 };
 
 }  // namespace launchdarkly::events::detail

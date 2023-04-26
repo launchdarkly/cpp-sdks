@@ -44,12 +44,6 @@ AsioEventProcessor::AsioEventProcessor(
                   last_known_past_time_ = server_time;
               });
           },
-          [this]() {
-              boost::asio::post(io_, [this]() {
-                  timer_.cancel();
-                  permanent_delivery_failure_ = true;
-              });
-          },
           logger),
       inbox_capacity_(config.Capacity()),
       inbox_size_(0),
@@ -112,23 +106,44 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
     conns_.GetWorker([this](RequestWorker* worker) {
-        if (worker) {
-            if (auto request = BuildRequest()) {
-                worker->AsyncDeliver(*request);
-            } else {
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << "event-processor: nothing to flush";
-            }
-            summarizer_ = Summarizer(std::chrono::system_clock::now());
-        } else {
+        if (!worker) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
                    "flush";
+            return;
         }
+        auto request = BuildRequest();
+        if (!request) {
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "event-processor: nothing to flush";
+            return;
+        }
+        auto [payload, num_events] = *request;
+        worker->AsyncDeliver(
+            payload,
+            [this, n = num_events](network::detail::HttpResult::StatusCode s) {
+                OnPermanentEventDeliveryFailure(s, n);
+            });
+        summarizer_ = Summarizer(std::chrono::system_clock::now());
     });
 
     if (flush_type == FlushTrigger::Automatic) {
         ScheduleFlush();
+    }
+}
+
+void AsioEventProcessor::OnPermanentEventDeliveryFailure(
+    network::detail::HttpResult::StatusCode status,
+    std::size_t num_events) {
+    if (!permanent_delivery_failure_) {
+        timer_.cancel();
+        permanent_delivery_failure_ = true;
+
+        LD_LOG(logger_, LogLevel::kError) << "Error posting " << num_events
+                                          << " event(s) "
+                                             "(giving "
+                                             "up permanently): HTTP error "
+                                          << status;
     }
 }
 
@@ -159,7 +174,7 @@ void AsioEventProcessor::AsyncClose() {
     timer_.cancel();
 }
 
-std::optional<AsioEventProcessor::RequestType>
+std::optional<std::pair<AsioEventProcessor::RequestType, std::size_t>>
 AsioEventProcessor::BuildRequest() {
     if (outbox_.Empty()) {
         return std::nullopt;
@@ -170,6 +185,8 @@ AsioEventProcessor::BuildRequest() {
     if (!summarizer_.Finish(std::chrono::system_clock::now()).Empty()) {
         events.as_array().push_back(boost::json::value_from(summarizer_));
     }
+
+    const std::size_t num_events = events.as_array().size();
 
     LD_LOG(logger_, LogLevel::kDebug)
         << "event-processor: generating http request";
@@ -185,9 +202,11 @@ AsioEventProcessor::BuildRequest() {
     http_props.Header(to_string(http::field::authorization), authorization_);
     http_props.Header(to_string(http::field::content_type), "application/json");
 
-    return AsioEventProcessor::RequestType{host_ + path_, HttpMethod::kPost,
-                                           http_props.Build(),
-                                           boost::json::serialize(events)};
+    return std::make_pair(
+        AsioEventProcessor::RequestType{host_ + path_, HttpMethod::kPost,
+                                        http_props.Build(),
+                                        boost::json::serialize(events)},
+        num_events);
 }
 
 // These helpers are for the std::visit within AsioEventProcessor::Process.

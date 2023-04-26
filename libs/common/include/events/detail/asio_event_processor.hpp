@@ -7,6 +7,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <chrono>
 #include <optional>
+#include <tuple>
 #include "config/detail/built/events.hpp"
 #include "config/detail/built/http_properties.hpp"
 #include "config/detail/built/service_endpoints.hpp"
@@ -76,7 +77,9 @@ class AsioEventProcessor : public IEventProcessor {
 
     void HandleSend(InputEvent event);
 
-    std::optional<RequestType> BuildRequest();
+    // If events are available, returns a pair of [http request, number of
+    // events in request], otherwise returns returns std::nullopt.
+    std::optional<std::pair<RequestType, std::size_t>> BuildRequest();
 
     void Flush(FlushTrigger flush_type);
 
@@ -86,6 +89,10 @@ class AsioEventProcessor : public IEventProcessor {
 
     bool InboxIncrement();
     void InboxDecrement();
+
+    void OnPermanentEventDeliveryFailure(
+        network::detail::HttpResult::StatusCode status,
+        std::size_t num_events);
 };
 
 }  // namespace launchdarkly::events::detail

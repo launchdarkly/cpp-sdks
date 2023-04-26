@@ -6,7 +6,6 @@ namespace launchdarkly::events::detail {
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
                              ServerTimeCallback server_time_cb,
-                             PermanentFailureCallback permanent_failure_cb,
                              Logger& logger)
     : timer_(io),
       retry_delay_(retry_after),
@@ -14,21 +13,20 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
       requester_(timer_.get_executor()),
       request_(std::nullopt),
       server_time_cb_(std::move(server_time_cb)),
-      permanent_failure_cb_(std::move(permanent_failure_cb)),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
     return state_ == State::Available;
 }
 
-void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
-    state_ = State::FirstChance;
-    request_ = request;
-    requester_.Request(std::move(request),
-                       [this](network::detail::HttpResult result) {
-                           OnDeliveryAttempt(std::move(result));
-                       });
-}
+// void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
+//     state_ = State::FirstChance;
+//     request_ = request;
+//     requester_.Request(std::move(request),
+//                        [this](network::detail::HttpResult result) {
+//                            OnDeliveryAttempt(std::move(result));
+//                        });
+// }
 
 static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
     auto status = http::status(result.Status());
@@ -49,7 +47,9 @@ static bool IsSuccess(network::detail::HttpResult const& result) {
                http::status_class::successful;
 }
 
-void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
+void RequestWorker::OnDeliveryAttempt(
+    network::detail::HttpResult result,
+    PermanentFailureCallback permanent_failure) {
     auto [next_state, action] = NextState(state_, result);
 
     LD_LOG(logger_, LogLevel::kDebug) << "request_worker: " << state_ << " -> "
@@ -63,7 +63,7 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
             break;
         case Action::NotifyPermanentFailure:
             request_.reset();
-            permanent_failure_cb_();
+            permanent_failure(result.Status());
             break;
         case Action::ParseDateAndReset: {
             request_.reset();
@@ -78,15 +78,18 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
         } break;
         case Action::Retry:
             timer_.expires_from_now(retry_delay_);
-            timer_.async_wait([this](boost::system::error_code ec) {
-                if (ec) {
-                    return;
-                }
-                requester_.Request(*request_,
-                                   [this](network::detail::HttpResult result) {
-                                       OnDeliveryAttempt(std::move(result));
-                                   });
-            });
+            timer_.async_wait(
+                [this, permanent_failure](boost::system::error_code ec) {
+                    if (ec) {
+                        return;
+                    }
+                    requester_.Request(
+                        *request_, [this, permanent_failure](
+                                       network::detail::HttpResult result) {
+                            OnDeliveryAttempt(std::move(result),
+                                              std::move(permanent_failure));
+                        });
+                });
             break;
     }
 

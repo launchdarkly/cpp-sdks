@@ -20,7 +20,6 @@ namespace launchdarkly::events::detail {
  */
 class WorkerPool {
    public:
-    using PermanentFailureCallback = std::function<void()>;
     using ServerTimeCallback =
         std::function<void(std::chrono::system_clock::time_point)>;
     /**
@@ -42,7 +41,6 @@ class WorkerPool {
                std::size_t pool_size,
                std::chrono::milliseconds delivery_retry_delay,
                ServerTimeCallback server_time_cb,
-               PermanentFailureCallback permanent_failure_callback,
                Logger& logger);
 
     /**
@@ -76,10 +74,8 @@ class WorkerPool {
     }
 
    private:
-    Logger const& logger_;
     boost::asio::any_io_executor io_;
     std::vector<std::unique_ptr<RequestWorker>> workers_;
-    bool permanent_failure_;
 };
 
 }  // namespace launchdarkly::events::detail
