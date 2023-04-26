@@ -50,7 +50,6 @@ int main() {
     LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
 
     // Sit around.
-    std::string t;
     std::cout << "Press enter to exit" << std::endl;
-    std::cin >> t;
+    std::cin.get();
 }
