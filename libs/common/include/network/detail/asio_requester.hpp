@@ -364,6 +364,7 @@ class AsioRequester {
     auto Request(HttpRequest request, CompletionToken&& token) {
         // TODO: Clang-tidy wants to pass the request by reference, but I am not
         // confident that lifetime would make sense.
+
         namespace asio = boost::asio;
         namespace system = boost::system;
 
@@ -375,6 +376,18 @@ class AsioRequester {
         Result result(handler);
 
         auto strand = net::make_strand(ctx_);
+
+        // The request is invalid and cannot be made, so produce an error
+        // result.
+        if (!request.Valid()) {
+            boost::asio::post(
+                strand, [strand, handler, request, this]() mutable {
+                    handler(HttpResult(
+                        "The request was malformed and could not be made."));
+                });
+            return;
+        }
+
         boost::asio::post(strand, [strand, handler, request, this]() mutable {
             auto beast_request = MakeBeastRequest(request);
 

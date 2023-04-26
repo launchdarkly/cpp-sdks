@@ -117,7 +117,7 @@ void PollingDataSource::DoPoll() {
                 DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
                 res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
             LD_LOG(logger_, LogLevel::kWarn)
-                << "Polling for feature flag updates failed:"
+                << "Polling for feature flag updates failed: "
                 << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
         } else if (res.Status() == 200) {
             data_source_handler_.HandleMessage("put", res.Body().value());

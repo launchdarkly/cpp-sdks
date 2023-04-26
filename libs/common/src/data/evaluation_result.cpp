@@ -1,6 +1,8 @@
 #include "data/evaluation_result.hpp"
 
 #include <chrono>
+#include <iomanip>
+#include <utility>
 
 namespace launchdarkly {
 
@@ -53,7 +55,8 @@ std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
     if (result.debug_events_until_date_.has_value()) {
         std::time_t as_time_t = std::chrono::system_clock::to_time_t(
             result.debug_events_until_date_.value());
-        out << " debugEventsUntilDate: " << std::ctime(&as_time_t);
+        out << " debugEventsUntilDate: "
+            << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S");
     }
     out << " detail: " << result.detail_;
     out << "}";

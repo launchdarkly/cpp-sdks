@@ -66,6 +66,12 @@ HttpRequest::HttpRequest(std::string const& url,
       body_(std::move(body)) {
     auto uri_components = boost::urls::parse_uri(url);
 
+    // If the URI cannot be parsed, then the request is not valid.
+    if (!uri_components) {
+        valid_ = false;
+        return;
+    }
+
     host_ = uri_components->host();
     // For a boost beast request we need the query string in the path.
     path_ = uri_components->path() + "?" + uri_components->query();
@@ -79,6 +85,7 @@ HttpRequest::HttpRequest(std::string const& url,
     } else {
         port_ = is_https_ ? "443" : "80";
     }
+    valid_ = true;
 }
 
 HttpRequest::HttpRequest(HttpRequest& base_request,
@@ -97,6 +104,10 @@ std::string const& HttpRequest::Port() const {
 }
 bool HttpRequest::Https() const {
     return is_https_;
+}
+
+bool HttpRequest::Valid() const {
+    return valid_;
 }
 
 bool IsRecoverableStatus(HttpResult::StatusCode status) {

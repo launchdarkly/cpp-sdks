@@ -85,7 +85,7 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
 
     boost::signals2::signal<void(data_sources::DataSourceStatus status)>
         data_source_status_signal_;
-    mutable std::mutex status_mutex_;
+    mutable std::recursive_mutex status_mutex_;
     bool UpdateState(DataSourceStatus::DataSourceState const& requested_state);
 };
 

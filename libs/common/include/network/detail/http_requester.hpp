@@ -92,6 +92,14 @@ class HttpRequest {
     std::string const& Path() const;
     bool Https() const;
 
+    /**
+     * Indicates if a request is valid. Meaning that it has correctly formed
+     * data that can be used to make an http request.
+     *
+     * @return True if the request is valid.
+     */
+    bool Valid() const;
+
     HttpRequest(std::string const& url,
                 HttpMethod method,
                 config::detail::built::HttpProperties properties,
@@ -115,6 +123,7 @@ class HttpRequest {
     std::string path_;
     std::map<std::string, std::string> params_;
     bool is_https_;
+    bool valid_;
 };
 
 bool IsRecoverableStatus(HttpResult::StatusCode status);
