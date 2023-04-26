@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <future>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 
