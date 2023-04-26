@@ -110,7 +110,7 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 
 template <typename SDK>
 void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
-    workers_.GetWorker([this](RequestWorker* worker) {
+    workers_.Get([this](RequestWorker* worker) {
         if (!worker) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "

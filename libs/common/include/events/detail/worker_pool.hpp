@@ -24,17 +24,10 @@ class WorkerPool {
         std::function<void(std::chrono::system_clock::time_point)>;
     /**
      * Constructs a new WorkerPool.
-     * @param io The executor used for all workers. Only safe for execution from
-     * one thread.
-     * @param pool_size How many workers are available.
+     * @param io The executor used for all workers.
+     * @param pool_size How many workers to make available.
      * @param delivery_retry_delay How long a worker should wait after a failed
      * delivery before trying again.
-     * @param server_time_cb Invoked when a worker obtains a timestamp from the
-     * server. May be null.
-     * @param permanent_failure_callback Invoked once when any worker
-     * experiences a permanent failure. Workers cannot be used after permanent
-     * failure, so the pool should be regarded as unavailable after that point.
-     * If null, permanent failures will be logged.
      * @param logger Logger.
      */
     WorkerPool(boost::asio::any_io_executor io,
@@ -43,12 +36,11 @@ class WorkerPool {
                Logger& logger);
 
     /**
-     * Attempts to acquire a free worker from the pool. If none
-     * are available, the completion handler is invoked with nullptr.
-     * @return
+     * Attempts to find a free worker. If none are available, the completion
+     * handler is invoked with nullptr.
      */
     template <typename CompletionToken>
-    auto GetWorker(CompletionToken&& token) {
+    auto Get(CompletionToken&& token) {
         namespace asio = boost::asio;
         namespace system = boost::system;
 

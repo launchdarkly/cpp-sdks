@@ -30,7 +30,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
 
     WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), logger);
 
-    RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
+    RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_TRUE(worker);
 
     work.reset();
@@ -47,7 +47,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
 
     WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), logger);
 
-    RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
+    RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_FALSE(worker);
 
     work.reset();
@@ -82,11 +82,10 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         context,
     };
 
-    for (std::size_t i = 0; i < 5; i++) {
+    for (std::size_t i = 0; i < 10; i++) {
         processor.AsyncSend(identify_event);
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
     processor.AsyncClose();
     ioc_thread.join();
 }
