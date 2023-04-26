@@ -31,11 +31,12 @@ class WorkerPool {
      * @param delivery_retry_delay How long a worker should wait after a failed
      * delivery before trying again.
      * @param server_time_cb Invoked when a worker obtains a timestamp from the
-     * server.
+     * server. May be null.
      * @param permanent_failure_callback Invoked once when any worker
      * experiences a permanent failure. Workers cannot be used after permanent
      * failure, so the pool should be regarded as unavailable after that point.
-     * @param logger Logger for debug information.
+     * If null, permanent failures will be logged.
+     * @param logger Logger.
      */
     WorkerPool(boost::asio::any_io_executor io,
                std::size_t pool_size,
@@ -45,14 +46,38 @@ class WorkerPool {
                Logger& logger);
 
     /**
-     * Attempts to acquire a free worker from the pool (non-owning). If none
-     * are available, returns nullptr. Only safe to call from the same thread
-     * running the executor passed in the constructor.
+     * Attempts to acquire a free worker from the pool. If none
+     * are available, the completion handler is invoked with nullptr.
      * @return
      */
-    RequestWorker* AcquireWorker();
+    template <typename CompletionToken>
+    auto GetWorker(CompletionToken&& token) {
+        namespace asio = boost::asio;
+        namespace system = boost::system;
+
+        using Sig = void(RequestWorker*);
+        using Result = asio::async_result<std::decay_t<CompletionToken>, Sig>;
+        using Handler = typename Result::completion_handler_type;
+
+        Handler handler(std::forward<decltype(token)>(token));
+        Result result(handler);
+
+        boost::asio::dispatch(io_, [this, handler]() mutable {
+            for (auto& worker : workers_) {
+                if (worker->Available()) {
+                    handler(worker.get());
+                    return;
+                }
+            }
+            handler(nullptr);
+        });
+
+        return result.get();
+    }
 
    private:
+    Logger const& logger_;
+    boost::asio::any_io_executor io_;
     std::vector<std::unique_ptr<RequestWorker>> workers_;
     bool permanent_failure_;
 };

@@ -111,21 +111,21 @@ void AsioEventProcessor::HandleSend(InputEvent event) {
 }
 
 void AsioEventProcessor::Flush(FlushTrigger flush_type) {
-    // There should be no race between acquiring a worker and using it, since
-    // flush should only be executed from the Event Processor's strand.
-    RequestWorker* worker = conns_.AcquireWorker();
-    if (worker) {
-        if (auto request = BuildRequest()) {
-            worker->AsyncDeliver(*request);
+    conns_.GetWorker([this](RequestWorker* worker) {
+        if (worker) {
+            if (auto request = BuildRequest()) {
+                worker->AsyncDeliver(*request);
+            } else {
+                LD_LOG(logger_, LogLevel::kDebug)
+                    << "event-processor: nothing to flush";
+            }
+            summarizer_ = Summarizer(std::chrono::system_clock::now());
         } else {
             LD_LOG(logger_, LogLevel::kDebug)
-                << "event-processor: nothing to flush";
+                << "event-processor: no flush workers available; skipping "
+                   "flush";
         }
-        summarizer_ = Summarizer(std::chrono::system_clock::now());
-    } else {
-        LD_LOG(logger_, LogLevel::kDebug)
-            << "event-processor: no flush workers available; skipping flush";
-    }
+    });
 
     if (flush_type == FlushTrigger::Automatic) {
         ScheduleFlush();

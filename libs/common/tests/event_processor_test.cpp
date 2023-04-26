@@ -7,8 +7,10 @@
 #include "context_builder.hpp"
 #include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
+#include "events/detail/worker_pool.hpp"
 
 using namespace launchdarkly::events::detail;
+using namespace launchdarkly::network::detail;
 
 static std::chrono::system_clock::time_point TimeZero() {
     return std::chrono::system_clock::time_point{};
@@ -16,6 +18,42 @@ static std::chrono::system_clock::time_point TimeZero() {
 
 static std::chrono::system_clock::time_point Time1000() {
     return std::chrono::system_clock::from_time_t(1);
+}
+
+TEST(WorkerPool, PoolReturnsAvailableWorker) {
+    using namespace launchdarkly;
+    Logger logger{std::make_unique<ConsoleBackend>(LogLevel::kDebug, "test")};
+    boost::asio::io_context ioc;
+
+    auto work = boost::asio::make_work_guard(ioc);
+    std::thread t([&]() { ioc.run(); });
+
+    WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), nullptr,
+                    nullptr, logger);
+
+    RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
+    ASSERT_TRUE(worker);
+
+    work.reset();
+    t.join();
+}
+
+TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
+    using namespace launchdarkly;
+    Logger logger{std::make_unique<ConsoleBackend>(LogLevel::kDebug, "test")};
+    boost::asio::io_context ioc;
+
+    auto work = boost::asio::make_work_guard(ioc);
+    std::thread t([&]() { ioc.run(); });
+
+    WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), nullptr,
+                    nullptr, logger);
+
+    RequestWorker* worker = pool.GetWorker(boost::asio::use_future).get();
+    ASSERT_FALSE(worker);
+
+    work.reset();
+    t.join();
 }
 
 // This test is a temporary test that exists only to ensure the event processor
@@ -52,19 +90,6 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         processor.AsyncSend(identify_event);
     }
 
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    for (std::size_t i = 0; i < 5; i++) {
-        processor.AsyncSend(identify_event);
-    }
-
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-
-    for (std::size_t i = 0; i < 5; i++) {
-        processor.AsyncSend(identify_event);
-    }
-
-    std::this_thread::sleep_for(std::chrono::seconds(10));
     processor.AsyncClose();
     ioc_thread.join();
 }
