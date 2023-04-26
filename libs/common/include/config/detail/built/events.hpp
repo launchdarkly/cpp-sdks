@@ -31,13 +31,16 @@ class Events final {
      * AllAttributesPrivate is false.
      * @param security Whether a plaintext or encrypted client should be used
      * for event delivery.
+     * @param flush_workers How many workers to use for concurrent event
+     * delivery.
      */
     Events(std::size_t capacity,
            std::chrono::milliseconds flush_interval,
            std::string path,
            bool all_attributes_private,
            AttributeReference::SetType private_attrs,
-           std::chrono::milliseconds delivery_retry_delay);
+           std::chrono::milliseconds delivery_retry_delay,
+           std::size_t flush_workers);
 
     /**
      * Capacity of the event processor.
@@ -70,6 +73,11 @@ class Events final {
      */
     [[nodiscard]] AttributeReference::SetType const& PrivateAttributes() const;
 
+    /**
+     * Number of flush workers used for concurrent event delivery.
+     */
+    [[nodiscard]] std::size_t FlushWorkers() const;
+
    private:
     std::size_t capacity_;
     std::chrono::milliseconds flush_interval_;
@@ -77,6 +85,7 @@ class Events final {
     bool all_attributes_private_;
     AttributeReference::SetType private_attributes_;
     std::chrono::milliseconds delivery_retry_delay_;
+    std::size_t flush_workers_;
 };
 
 bool operator==(Events const& lhs, Events const& rhs);

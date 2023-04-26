@@ -45,7 +45,8 @@ struct Defaults<ClientSDK> {
 
     static auto Events() -> built::Events {
         return {100,   std::chrono::seconds(30),      "/mobile",
-                false, AttributeReference::SetType(), std::chrono::seconds(1)};
+                false, AttributeReference::SetType(), std::chrono::seconds(1),
+                5};
     }
 
     static auto HttpProperties() -> built::HttpProperties {
@@ -74,7 +75,8 @@ struct Defaults<ServerSDK> {
 
     static auto Events() -> built::Events {
         return {10000, std::chrono::seconds(5),       "/bulk",
-                false, AttributeReference::SetType(), std::chrono::seconds(1)};
+                false, AttributeReference::SetType(), std::chrono::seconds(1),
+                5};
     }
 
     static auto HttpProperties() -> built::HttpProperties {

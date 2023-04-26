@@ -37,8 +37,7 @@ AsioEventProcessor::AsioEventProcessor(
       uuids_(),
       conns_(
           io,
-          logger,
-          5,
+          config.FlushWorkers(),
           config.DeliveryRetryDelay(),
           [this](std::chrono::system_clock::time_point server_time) {
               boost::asio::post(io_, [this, server_time]() {
@@ -50,7 +49,8 @@ AsioEventProcessor::AsioEventProcessor(
                   timer_.cancel();
                   permanent_delivery_failure_ = true;
               });
-          }),
+          },
+          logger),
       inbox_capacity_(config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),

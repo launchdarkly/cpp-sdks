@@ -1,6 +1,6 @@
 #pragma once
 #include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/basic_waitable_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <chrono>
 #include <functional>
 #include <tuple>
@@ -57,7 +57,7 @@ class RequestWorker {
 
     /**
      * Constructs a new RequestWorker.
-     * @param io The IO service used to perform HTTP requests and retry
+     * @param io The executor used to perform HTTP requests and retry
      * operations.
      * @param retry_after How long to wait after a recoverable failure before
      * trying to deliver events again.
@@ -76,13 +76,16 @@ class RequestWorker {
                   Logger& logger);
 
     /**
-     * Returns true if the worker is available for delivery.
+     * Returns true if the worker is available for delivery. Not thread-safe.
      */
     bool Available() const;
 
     /**
      * Passes an HttpRequest to the worker for delivery. The delivery may be
      * retried exactly once if the failure is recoverable.
+     *
+     * Not thread-safe.
+     *
      * @param request Request to deliver.
      */
     void AsyncDeliver(network::detail::HttpRequest request);
@@ -90,17 +93,13 @@ class RequestWorker {
    private:
     /* Used to wait a specific amount of time after a failed request before
      * trying again. */
-    boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
+    boost::asio::steady_timer timer_;
 
     /* How long to wait before trying again. */
     std::chrono::milliseconds retry_delay_;
 
     /* Current state of the RequestWorker. */
     State state_;
-
-    /* Protects state_ from concurrent access by callers of Available()
-     * and internal updates. */
-    mutable std::mutex state_lock_;
 
     /* Component used to perform HTTP operations. */
     network::detail::AsioRequester requester_;
@@ -121,7 +120,6 @@ class RequestWorker {
 
     /* Completion handler invoked from the AsioRequester. */
     void OnDeliveryAttempt(network::detail::HttpResult request);
-    void UpdateState(State new_state);
 };
 
 }  // namespace launchdarkly::events::detail

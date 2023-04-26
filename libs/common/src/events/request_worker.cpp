@@ -8,10 +8,9 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              ServerTimeCallback server_time_cb,
                              PermanentFailureCallback permanent_failure_cb,
                              Logger& logger)
-    : timer_(boost::asio::make_strand(io)),
+    : timer_(io),
       retry_delay_(retry_after),
       state_(State::Available),
-      state_lock_(),
       requester_(timer_.get_executor()),
       request_(std::nullopt),
       server_time_cb_(std::move(server_time_cb)),
@@ -19,12 +18,11 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
-    std::lock_guard<std::mutex> guard{state_lock_};
     return state_ == State::Available;
 }
 
 void RequestWorker::AsyncDeliver(network::detail::HttpRequest request) {
-    UpdateState(State::FirstChance);
+    state_ = State::FirstChance;
     request_ = request;
     requester_.Request(std::move(request),
                        [this](network::detail::HttpResult result) {
@@ -92,12 +90,7 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result) {
             break;
     }
 
-    UpdateState(next_state);
-}
-
-void RequestWorker::UpdateState(State new_state) {
-    std::lock_guard<std::mutex> guard{state_lock_};
-    state_ = new_state;
+    state_ = next_state;
 }
 
 std::pair<State, Action> NextState(State state,
