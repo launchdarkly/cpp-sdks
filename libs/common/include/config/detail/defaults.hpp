@@ -90,7 +90,7 @@ struct Defaults<ServerSDK> {
 
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
         // Default to 5 minutes;
-        return {std::chrono::seconds{5 * 60}};
+        return {std::chrono::seconds{30}};
     }
 };
 
