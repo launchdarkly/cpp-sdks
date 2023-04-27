@@ -27,6 +27,34 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network::detail {
 
+static unsigned char const kRedirectLimit = 20;
+
+static bool IsAbsolute(std::string_view str) {
+    return str.find("://") != std::string::npos || str.find("//") == 0;
+}
+
+static bool NeedsRedirect(HttpResult const& res) {
+    return res.Status() == 301 ||
+           res.Status() == 308 && res.Headers().count("location") != 0;
+}
+
+static HttpRequest MakeRedirectRequest(HttpRequest const& req,
+                                       HttpResult const& res) {
+    auto location = res.Headers().find("location");
+    // Location should be verified to be present before attempting to
+    // make the redirect request.
+    assert(location != res.Headers().end());
+    // Start the request over with the new URL.
+    if (IsAbsolute(location->second)) {
+        return HttpRequest(location->second, req.Method(), req.Properties(),
+                           req.Body());
+    } else {
+        // TODO: Build relative URL.
+        return HttpRequest(location->second, req.Method(), req.Properties(),
+                           req.Body());
+    }
+}
+
 static http::verb ConvertMethod(HttpMethod method) {
     switch (method) {
         case HttpMethod::kPost:
@@ -39,6 +67,22 @@ static http::verb ConvertMethod(HttpMethod method) {
             return http::verb::put;
     }
     assert(!"Method not found. Ensure all method cases covered.");
+}
+
+static HttpMethod ConvertVerb(http::verb verb) {
+    switch (verb) {
+        case http::verb::get:
+            return HttpMethod::kGet;
+        case http::verb::post:
+            return HttpMethod::kPost;
+        case http::verb::put:
+            return HttpMethod::kPut;
+        case http::verb::report:
+            return HttpMethod::kReport;
+    }
+
+    // Should only happen when extending code.
+    assert(!"Verb not supported.");
 }
 
 static http::request<http::string_body> MakeBeastRequest(
@@ -104,9 +148,7 @@ class
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
           read_timeout_(read_timeout),
-          handler_(std::move(handler)) {
-        parser_.get();
-    }
+          handler_(std::move(handler)) {}
 
     void Fail(beast::error_code ec, char const* what) {
         // TODO: Is it safe to cancel this if it has already failed?
@@ -375,39 +417,7 @@ class AsioRequester {
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        auto strand = net::make_strand(ctx_);
-
-        // The request is invalid and cannot be made, so produce an error
-        // result.
-        if (!request.Valid()) {
-            boost::asio::post(
-                strand, [strand, handler, request, this]() mutable {
-                    handler(HttpResult(
-                        "The request was malformed and could not be made."));
-                });
-            return;
-        }
-
-        boost::asio::post(strand, [strand, handler, request, this]() mutable {
-            auto beast_request = MakeBeastRequest(request);
-
-            const auto& properties = request.Properties();
-
-            if (request.Https()) {
-                std::make_shared<EncryptedClient>(
-                    strand, ssl_ctx_, beast_request, request.Host(),
-                    request.Port(), properties.ConnectTimeout(),
-                    properties.ResponseTimeout(), properties.ReadTimeout(),
-                    std::move(handler))
-                    ->Run();
-            } else {
-                std::make_shared<PlaintextClient>(
-                    strand, beast_request, request.Host(), request.Port(),
-                    properties.ConnectTimeout(), properties.ResponseTimeout(),
-                    properties.ReadTimeout(), std::move(handler))
-                    ->Run();
-            }
-        });
+        InnerRequest(request, std::move(handler));
 
         return result.get();
     }
@@ -420,6 +430,53 @@ class AsioRequester {
      * requester.
      */
     std::shared_ptr<ssl::context> ssl_ctx_;
+
+    void InnerRequest(HttpRequest request,
+                      std::function<void(HttpResult)> callback) {
+        auto strand = net::make_strand(ctx_);
+
+        // The request is invalid and cannot be made, so produce an error
+        // result.
+        if (!request.Valid()) {
+            boost::asio::post(strand, [callback, request]() mutable {
+                callback(HttpResult(
+                    "The request was malformed and could not be made."));
+            });
+            return;
+        }
+
+        boost::asio::post(strand, [strand, callback, request, this]() mutable {
+            auto beast_request = MakeBeastRequest(request);
+
+            const auto& properties = request.Properties();
+
+            if (request.Https()) {
+                std::make_shared<EncryptedClient>(
+                    strand, ssl_ctx_, beast_request, request.Host(),
+                    request.Port(), properties.ConnectTimeout(),
+                    properties.ResponseTimeout(), properties.ReadTimeout(),
+                    [callback, request, this](auto res) {
+                        NeedsRedirect(res)
+                            ? InnerRequest(MakeRedirectRequest(request, res),
+                                           callback)
+                            : callback(res);
+                    })
+                    ->Run();
+            } else {
+                std::make_shared<PlaintextClient>(
+                    strand, beast_request, request.Host(), request.Port(),
+                    properties.ConnectTimeout(), properties.ResponseTimeout(),
+                    properties.ReadTimeout(),
+                    [callback, request, this](auto res) {
+                        NeedsRedirect(res)
+                            ? InnerRequest(MakeRedirectRequest(request, res),
+                                           callback)
+                            : callback(res);
+                    })
+                    ->Run();
+            }
+        });
+    }
 };
 
 }  // namespace launchdarkly::network::detail

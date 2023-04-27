@@ -35,6 +35,11 @@ int main() {
 
     Client client(
         ConfigBuilder(key)
+            .ServiceEndpoints(
+                launchdarkly::client_side::EndpointsBuilder()
+                    .PollingBaseUrl("http://sdk.launchdarkly.com")
+                    .StreamingBaseUrl("https://stream.launchdarkly.com")
+                    .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
                             .Method(DataSourceBuilder::Polling().PollInterval(
                                 std::chrono::seconds{30}))
