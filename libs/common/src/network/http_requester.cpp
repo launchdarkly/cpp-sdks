@@ -97,6 +97,7 @@ HttpRequest::HttpRequest(HttpRequest& base_request,
     host_ = base_request.host_;
     port_ = base_request.port_;
     is_https_ = base_request.is_https_;
+    valid_ = base_request.valid_;
 }
 
 std::string const& HttpRequest::Port() const {
