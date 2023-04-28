@@ -38,23 +38,6 @@ static bool NeedsRedirect(HttpResult const& res) {
            res.Status() == 308 && res.Headers().count("location") != 0;
 }
 
-static HttpRequest MakeRedirectRequest(HttpRequest const& req,
-                                       HttpResult const& res) {
-    auto location = res.Headers().find("location");
-    // Location should be verified to be present before attempting to
-    // make the redirect request.
-    assert(location != res.Headers().end());
-    // Start the request over with the new URL.
-    if (IsAbsolute(location->second)) {
-        return HttpRequest(location->second, req.Method(), req.Properties(),
-                           req.Body());
-    } else {
-        // TODO: Build relative URL.
-        return HttpRequest(location->second, req.Method(), req.Properties(),
-                           req.Body());
-    }
-}
-
 static http::verb ConvertMethod(HttpMethod method) {
     switch (method) {
         case HttpMethod::kPost:
@@ -69,22 +52,6 @@ static http::verb ConvertMethod(HttpMethod method) {
     assert(!"Method not found. Ensure all method cases covered.");
 }
 
-static HttpMethod ConvertVerb(http::verb verb) {
-    switch (verb) {
-        case http::verb::get:
-            return HttpMethod::kGet;
-        case http::verb::post:
-            return HttpMethod::kPost;
-        case http::verb::put:
-            return HttpMethod::kPut;
-        case http::verb::report:
-            return HttpMethod::kReport;
-    }
-
-    // Should only happen when extending code.
-    assert(!"Verb not supported.");
-}
-
 static http::request<http::string_body> MakeBeastRequest(
     HttpRequest const& request) {
     http::request<http::string_body> beast_request;
@@ -96,7 +63,11 @@ static http::request<http::string_body> MakeBeastRequest(
     } else {
         beast_request.body() = "";
     }
-    beast_request.target(request.Path());
+    if (request.Path().empty()) {
+        beast_request.target("/");
+    } else {
+        beast_request.target(request.Path());
+    }
     beast_request.prepare_payload();
     beast_request.set(http::field::host, request.Host());
 
@@ -109,6 +80,26 @@ static http::request<http::string_body> MakeBeastRequest(
     beast_request.set(http::field::user_agent, properties.UserAgent());
 
     return beast_request;
+}
+
+static std::optional<HttpRequest> MakeRedirectRequest(HttpRequest const& req,
+                                                      HttpResult const& res) {
+    auto location = res.Headers().find("location");
+    // Location should be verified to be present before attempting to
+    // make the redirect request.
+    assert(location != res.Headers().end());
+    // Start the request over with the new URL.
+    if (IsAbsolute(location->second)) {
+        return HttpRequest(location->second, req.Method(), req.Properties(),
+                           req.Body());
+    }
+    auto new_url = AppendUrl(req.Url(), location->second);
+    if (new_url) {
+        return HttpRequest(*new_url, req.Method(), req.Properties(),
+                           req.Body());
+    }
+
+    return std::nullopt;
 }
 
 template <class Derived>
@@ -164,8 +155,9 @@ class
     }
 
     void OnResolve(beast::error_code ec, tcp::resolver::results_type results) {
-        if (ec)
+        if (ec) {
             return Fail(ec, "resolve");
+        }
 
         beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(connect_timeout_);
@@ -187,8 +179,9 @@ class
     }
 
     void OnHandshake(beast::error_code ec) {
-        if (ec)
+        if (ec) {
             return Fail(ec, "handshake");
+        }
 
         DoWrite();
     }
@@ -243,9 +236,9 @@ class
      * is done.
      * @return The created HttpResult.
      */
-    HttpResult MakeResult() const {
+    [[nodiscard]] HttpResult MakeResult() const {
         auto headers = HttpResult::HeadersType();
-        for (auto& field : parser_.get().base()) {
+        for (auto const& field : parser_.get().base()) {
             headers.insert_or_assign(field.name_string(), field.value());
         }
         auto result = HttpResult(parser_.get().result_int(),
@@ -259,6 +252,7 @@ class
 class PlaintextClient : public Session<PlaintextClient>,
                         public std::enable_shared_from_this<PlaintextClient> {
    public:
+    virtual ~PlaintextClient() = default;
     using ResponseHandler = Session<PlaintextClient>::ResponseHandler;
 
     PlaintextClient(net::any_io_executor ex,
@@ -295,6 +289,7 @@ class PlaintextClient : public Session<PlaintextClient>,
 class EncryptedClient : public Session<EncryptedClient>,
                         public std::enable_shared_from_this<EncryptedClient> {
    public:
+    virtual ~EncryptedClient() = default;
     using ResponseHandler = Session<EncryptedClient>::ResponseHandler;
 
     EncryptedClient(net::any_io_executor ex,
@@ -417,7 +412,7 @@ class AsioRequester {
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        InnerRequest(request, std::move(handler));
+        InnerRequest(request, std::move(handler), 0);
 
         return result.get();
     }
@@ -431,13 +426,22 @@ class AsioRequester {
      */
     std::shared_ptr<ssl::context> ssl_ctx_;
 
-    void InnerRequest(HttpRequest request,
-                      std::function<void(HttpResult)> callback) {
+    void InnerRequest(std::optional<HttpRequest> request,
+                      std::function<void(HttpResult)> callback,
+                      unsigned char redirect_count) {
         auto strand = net::make_strand(ctx_);
+
+        if (redirect_count > kRedirectLimit) {
+            boost::asio::post(strand, [callback, request]() mutable {
+                callback(
+                    HttpResult("Redirects exceeded 20, cancelling request."));
+            });
+            return;
+        }
 
         // The request is invalid and cannot be made, so produce an error
         // result.
-        if (!request.Valid()) {
+        if (!request || !request->Valid()) {
             boost::asio::post(strand, [callback, request]() mutable {
                 callback(HttpResult(
                     "The request was malformed and could not be made."));
@@ -445,32 +449,33 @@ class AsioRequester {
             return;
         }
 
-        boost::asio::post(strand, [strand, callback, request, this]() mutable {
-            auto beast_request = MakeBeastRequest(request);
+        boost::asio::post(strand, [strand, callback, request, this,
+                                   redirect_count]() mutable {
+            auto beast_request = MakeBeastRequest(*request);
 
-            const auto& properties = request.Properties();
+            const auto& properties = request->Properties();
 
-            if (request.Https()) {
+            if (request->Https()) {
                 std::make_shared<EncryptedClient>(
-                    strand, ssl_ctx_, beast_request, request.Host(),
-                    request.Port(), properties.ConnectTimeout(),
+                    strand, ssl_ctx_, beast_request, request->Host(),
+                    request->Port(), properties.ConnectTimeout(),
                     properties.ResponseTimeout(), properties.ReadTimeout(),
-                    [callback, request, this](auto res) {
+                    [callback, request, this, redirect_count](auto res) {
                         NeedsRedirect(res)
-                            ? InnerRequest(MakeRedirectRequest(request, res),
-                                           callback)
+                            ? InnerRequest(MakeRedirectRequest(*request, res),
+                                           callback, redirect_count + 1)
                             : callback(res);
                     })
                     ->Run();
             } else {
                 std::make_shared<PlaintextClient>(
-                    strand, beast_request, request.Host(), request.Port(),
+                    strand, beast_request, request->Host(), request->Port(),
                     properties.ConnectTimeout(), properties.ResponseTimeout(),
                     properties.ReadTimeout(),
-                    [callback, request, this](auto res) {
+                    [callback, request, this, redirect_count](auto res) {
                         NeedsRedirect(res)
-                            ? InnerRequest(MakeRedirectRequest(request, res),
-                                           callback)
+                            ? InnerRequest(MakeRedirectRequest(*request, res),
+                                           callback, redirect_count + 1)
                             : callback(res);
                     })
                     ->Run();
