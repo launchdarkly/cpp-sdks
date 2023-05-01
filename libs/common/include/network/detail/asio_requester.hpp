@@ -111,7 +111,9 @@ class
     void Fail(beast::error_code ec, char const* what) {
         // TODO: Is it safe to cancel this if it has already failed?
         DoClose();
-        handler_(HttpResult(std::string(what) + ": " + ec.message()));
+        std::optional<std::string> error_string =
+            std::string(what) + ": " + ec.message();
+        handler_(HttpResult(error_string));
     }
 
     void DoResolve() {
@@ -122,8 +124,9 @@ class
     }
 
     void OnResolve(beast::error_code ec, tcp::resolver::results_type results) {
-        if (ec)
+        if (ec) {
             return Fail(ec, "resolve");
+        }
 
         beast::get_lowest_layer(GetDerived().Stream())
             .expires_after(connect_timeout_);
@@ -207,7 +210,8 @@ class
             headers.insert_or_assign(field.name_string(), field.value());
         }
         auto result = HttpResult(parser_.get().result_int(),
-                                 parser_.get().body(), std::move(headers));
+                                 std::make_optional(parser_.get().body()),
+                                 std::move(headers));
         return result;
     }
 
@@ -283,8 +287,9 @@ class EncryptedClient : public Session<EncryptedClient>,
 
             DoClose();
             // TODO: Should this be treated as a terminal error for the request.
-            handler_(HttpResult("failed to set TLS host name extension: " +
-                                ec.message()));
+            std::optional<std::string> error_string =
+                "failed to set TLS host name extension: " + ec.message();
+            handler_(HttpResult(error_string));
             return;
         }
 
@@ -382,8 +387,9 @@ class AsioRequester {
         if (!request.Valid()) {
             boost::asio::post(
                 strand, [strand, handler, request, this]() mutable {
-                    handler(HttpResult(
-                        "The request was malformed and could not be made."));
+                    std::optional<std::string> error_string =
+                        "The request was malformed and could not be made.";
+                    handler(HttpResult(error_string));
                 });
             return;
         }
