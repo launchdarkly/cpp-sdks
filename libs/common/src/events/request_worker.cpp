@@ -17,7 +17,9 @@ bool RequestWorker::Available() const {
     return state_ == State::Idle;
 }
 
-static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
+// Returns true if the result is considered transient - meaning it should
+// not stop the event processor from processing future events.
+static bool IsTransientFailure(network::detail::HttpResult const& result) {
     auto status = http::status(result.Status());
 
     if (result.IsError() ||
@@ -27,7 +29,14 @@ static bool IsRecoverableFailure(network::detail::HttpResult const& result) {
 
     return status == http::status::bad_request ||
            status == http::status::request_timeout ||
-           status == http::status::too_many_requests;
+           status == http::status::too_many_requests ||
+           status == http::status::payload_too_large;
+}
+
+// Returns true if the request should be retried or not. Meant to be called
+// when IsTransientFailure returns true.
+static bool IsRetryable(network::detail::HttpResult::StatusCode status) {
+    return http::status(status) != http::status::payload_too_large;
 }
 
 static bool IsSuccess(network::detail::HttpResult const& result) {
@@ -123,9 +132,14 @@ std::pair<State, Action> NextState(State state,
             if (IsSuccess(result)) {
                 next_state = State::Idle;
                 action = Action::ParseDateAndReset;
-            } else if (IsRecoverableFailure(result)) {
-                next_state = State::SecondChance;
-                action = Action::Retry;
+            } else if (IsTransientFailure(result)) {
+                if (IsRetryable(result.Status())) {
+                    next_state = State::SecondChance;
+                    action = Action::Retry;
+                } else {
+                    next_state = State::Idle;
+                    action = Action::Reset;
+                }
             } else {
                 next_state = State::PermanentlyFailed;
                 action = Action::NotifyPermanentFailure;
@@ -135,7 +149,7 @@ std::pair<State, Action> NextState(State state,
             if (IsSuccess(result)) {
                 next_state = State::Idle;
                 action = Action::ParseDateAndReset;
-            } else if (IsRecoverableFailure(result)) {
+            } else if (IsTransientFailure(result)) {
                 // no more delivery attempts; payload is dropped.
                 next_state = State::Idle;
                 action = Action::Reset;
