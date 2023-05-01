@@ -18,24 +18,25 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
 
     auto const& data_source_config = config.DataSourceConfig();
 
+    auto const& polling_config = boost::get<
+        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config.DataSourceConfig().method);
+
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
+
+    // TODO: Handle slashes.
 
     network::detail::HttpRequest::BodyType body;
     network::detail::HttpMethod method = network::detail::HttpMethod::kGet;
 
     if (data_source_config.use_report) {
-        url = network::detail::AppendUrl(
-            url,
-            launchdarkly::config::detail::built::PollingConfig<
-                launchdarkly::config::detail::ClientSDK>::polling_report_path);
+        url =
+            network::detail::AppendUrl(url, polling_config.polling_report_path);
         method = network::detail::HttpMethod::kReport;
         body = string_context;
     } else {
-        url = network::detail::AppendUrl(
-            url,
-            launchdarkly::config::detail::built::PollingConfig<
-                launchdarkly::config::detail::ClientSDK>::polling_get_path);
+        url = network::detail::AppendUrl(url, polling_config.polling_get_path);
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
@@ -77,15 +78,15 @@ PollingDataSource::PollingDataSource(Config const& config,
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
-    if (polling_interval_ <
-        launchdarkly::config::detail::built::PollingConfig<
-            launchdarkly::config::detail::ClientSDK>::min_polling_interval) {
+    auto const& polling_config = boost::get<
+        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config.DataSourceConfig().method);
+    if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval specified under minimum, defaulting to 30 "
                "second polling interval";
 
-        polling_interval_ = launchdarkly::config::detail::built::PollingConfig<
-            launchdarkly::config::detail::ClientSDK>::min_polling_interval;
+        polling_interval_ = polling_config.min_polling_interval;
     }
 }
 

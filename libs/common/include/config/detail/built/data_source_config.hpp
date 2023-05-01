@@ -14,8 +14,7 @@ struct StreamingConfig;
 template <>
 struct StreamingConfig<ClientSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
-
-    inline static const std::string streaming_path = "/meval";
+    std::string streaming_path;
 };
 
 template <>
@@ -29,13 +28,9 @@ struct PollingConfig;
 template <>
 struct PollingConfig<ClientSDK> {
     std::chrono::seconds poll_interval;
-
-    inline const static std::string polling_get_path = "/msdk/evalx/contexts";
-
-    inline const static std::string polling_report_path = "/msdk/evalx/context";
-
-    inline const static std::chrono::seconds min_polling_interval =
-        std::chrono::seconds{30};
+    std::string polling_get_path;
+    std::string polling_report_path;
+    std::chrono::seconds min_polling_interval;
 };
 
 template <>
