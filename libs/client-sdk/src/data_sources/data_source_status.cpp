@@ -97,8 +97,8 @@ std::ostream& operator<<(std::ostream& out,
 std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
     std::time_t as_time_t =
         std::chrono::system_clock::to_time_t(status.StateSince());
-    out << "Status(" << status.State() << ", Since(" << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S")
-        << ")";
+    out << "Status(" << status.State() << ", Since("
+        << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S") << ")";
     if (status.LastError()) {
         out << ", " << status.LastError().value();
     }

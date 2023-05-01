@@ -194,10 +194,11 @@ void PollingDataSource::Start() {
             DataSourceStatus::DataSourceState::kShutdown,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
             kCouldNotParseEndpoint);
+
+        // No need to attempt to poll if the URL is not valid.
         return;
     }
 
-    // No need to attempt to poll if the URL is not valid.
     DoPoll();
 }
 
