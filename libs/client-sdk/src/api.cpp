@@ -63,6 +63,9 @@ Client::Client(Config config, Context context)
         }
     });
 
+    // Should listen to status before attempting to start.
+    data_source_->Start();
+
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 

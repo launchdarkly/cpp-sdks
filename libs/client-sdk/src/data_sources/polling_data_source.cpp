@@ -9,13 +9,16 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
+static char const* const kCouldNotParseEndpoint =
+    "Could not parse polling endpoint URL.";
+
 static network::detail::HttpRequest MakeRequest(Config const& config,
                                                 Context const& context) {
-    std::string url = config.ServiceEndpoints().PollingBaseUrl();
+    auto url = std::make_optional(config.ServiceEndpoints().PollingBaseUrl());
 
-    auto& data_source_config = config.DataSourceConfig();
+    auto const& data_source_config = config.DataSourceConfig();
 
-    auto& polling_config = boost::get<
+    auto const& polling_config = boost::get<
         config::detail::built::PollingConfig<config::detail::ClientSDK>>(
         config.DataSourceConfig().method);
 
@@ -28,19 +31,23 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
     network::detail::HttpMethod method = network::detail::HttpMethod::kGet;
 
     if (data_source_config.use_report) {
-        url.append(polling_config.polling_report_path);
+        url =
+            network::detail::AppendUrl(url, polling_config.polling_report_path);
         method = network::detail::HttpMethod::kReport;
         body = string_context;
     } else {
-        url.append(polling_config.polling_get_path);
+        url = network::detail::AppendUrl(url, polling_config.polling_get_path);
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url.append("/" + Base64UrlEncode(string_context));
+        url = network::detail::AppendUrl(url, Base64UrlEncode(string_context));
     }
 
     if (data_source_config.with_reasons) {
-        url.append("?withReasons=true");
+        // TODO: Handle better.
+        if (url) {
+            url->append("?withReasons=true");
+        }
     }
 
     config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
@@ -48,7 +55,8 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
 
     builder.Header("authorization", config.SdkKey());
 
-    return {url, method, builder.Build(), body};
+    // If no URL is set, then we will fail the request.
+    return {url.value_or(""), method, builder.Build(), body};
 }
 
 PollingDataSource::PollingDataSource(Config const& config,
@@ -70,7 +78,7 @@ PollingDataSource::PollingDataSource(Config const& config,
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
-    auto& polling_config = boost::get<
+    auto const& polling_config = boost::get<
         config::detail::built::PollingConfig<config::detail::ClientSDK>>(
         config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {
@@ -117,7 +125,7 @@ void PollingDataSource::DoPoll() {
                 DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
                 res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
             LD_LOG(logger_, LogLevel::kWarn)
-                << "Polling for feature flag updates failed:"
+                << "Polling for feature flag updates failed: "
                 << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
         } else if (res.Status() == 200) {
             data_source_handler_.HandleMessage("put", res.Body().value());
@@ -147,7 +155,6 @@ void PollingDataSource::DoPoll() {
 }
 
 void PollingDataSource::StartPollingTimer() {
-    // TODO: Calculate interval based on request time.
     auto time_since_poll_seconds =
         std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::now() - last_poll_start_);
@@ -181,6 +188,17 @@ void PollingDataSource::StartPollingTimer() {
 }
 
 void PollingDataSource::Start() {
+    if (!request_.Valid()) {
+        LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kShutdown,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            kCouldNotParseEndpoint);
+
+        // No need to attempt to poll if the URL is not valid.
+        return;
+    }
+
     DoPoll();
 }
 

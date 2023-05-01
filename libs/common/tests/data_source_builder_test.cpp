@@ -5,6 +5,7 @@
 #include "value.hpp"
 
 #include <boost/json.hpp>
+#include <boost/url.hpp>
 
 using namespace launchdarkly;
 

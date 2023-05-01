@@ -53,7 +53,7 @@ struct Defaults<ClientSDK> {
     }
 
     static auto StreamingConfig() -> built::StreamingConfig<ClientSDK> {
-        return {std::chrono::milliseconds{1000}};
+        return {std::chrono::milliseconds{1000}, "/meval"};
     }
 
     static auto DataSourceConfig() -> built::DataSourceConfig<ClientSDK> {
@@ -62,7 +62,8 @@ struct Defaults<ClientSDK> {
 
     static auto PollingConfig() -> built::PollingConfig<ClientSDK> {
         // Default to 5 minutes;
-        return {std::chrono::seconds{5 * 60}};
+        return {std::chrono::seconds{5 * 60}, "/msdk/evalx/contexts",
+                "/msdk/evalx/context", std::chrono::seconds{30}};
     }
 };
 

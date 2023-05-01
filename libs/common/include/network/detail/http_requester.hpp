@@ -14,8 +14,9 @@
 namespace launchdarkly::network::detail {
 
 struct CaseInsensitiveComparator {
-    bool operator()(std::string const& a, std::string const& b) const noexcept {
-        return ::strcasecmp(a.c_str(), b.c_str()) < 0;
+    bool operator()(std::string const& lhs,
+                    std::string const& rhs) const noexcept {
+        return ::strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
     }
 };
 
@@ -26,15 +27,15 @@ class HttpResult {
         std::map<std::string, std::string, CaseInsensitiveComparator>;
     using BodyType = std::optional<std::string>;
 
-    bool IsError() const;
+    [[nodiscard]] bool IsError() const;
 
-    std::optional<std::string> const& ErrorMessage() const;
+    [[nodiscard]] std::optional<std::string> const& ErrorMessage() const;
 
-    StatusCode Status() const;
+    [[nodiscard]] StatusCode Status() const;
 
-    BodyType const& Body() const;
+    [[nodiscard]] BodyType const& Body() const;
 
-    HeadersType const& Headers() const;
+    [[nodiscard]] HeadersType const& Headers() const;
 
     HttpResult(StatusCode status, BodyType body, HeadersType headers);
 
@@ -53,7 +54,7 @@ class HttpResult {
             if (!res.headers_.empty()) {
                 out << ", {";
                 bool first = true;
-                for (auto& pair : res.headers_) {
+                for (auto const& pair : res.headers_) {
                     if (first) {
                         first = false;
                     } else {
@@ -81,17 +82,27 @@ enum class HttpMethod { kPost, kGet, kReport, kPut };
 
 class HttpRequest {
    public:
-    using HeadersType =
-        std::map<std::string, std::string, CaseInsensitiveComparator>;
     using BodyType = std::optional<std::string>;
 
-    HttpMethod Method() const;
-    BodyType const& Body() const;
-    config::detail::built::HttpProperties const& Properties() const;
-    std::string const& Host() const;
-    std::string const& Port() const;
-    std::string const& Path() const;
-    bool Https() const;
+    [[nodiscard]] HttpMethod Method() const;
+    [[nodiscard]] BodyType const& Body() const;
+    [[nodiscard]] config::detail::built::HttpProperties const& Properties()
+        const;
+    [[nodiscard]] std::string const& Host() const;
+    [[nodiscard]] std::string const& Port() const;
+    [[nodiscard]] std::string const& Path() const;
+
+    [[nodiscard]] std::string const& Url() const;
+
+    [[nodiscard]] bool Https() const;
+
+    /**
+     * Indicates if a request is valid. Meaning that it has correctly formed
+     * data that can be used to make an http request.
+     *
+     * @return True if the request is valid.
+     */
+    [[nodiscard]] bool Valid() const;
 
     HttpRequest(std::string const& url,
                 HttpMethod method,
@@ -108,6 +119,7 @@ class HttpRequest {
                 config::detail::built::HttpProperties properties);
 
    private:
+    std::string url_;
     HttpMethod method_;
     std::optional<std::string> body_;
     config::detail::built::HttpProperties properties_;
@@ -116,8 +128,25 @@ class HttpRequest {
     std::string path_;
     std::map<std::string, std::string> params_;
     bool is_https_;
+    bool valid_;
 };
 
 bool IsRecoverableStatus(HttpResult::StatusCode status);
+
+/**
+ * Append a path to a URL. This will account for query parameters on the
+ * original URL. This will also normalize the URL.
+ *
+ * If the input URL doesn't parse, then std::nullopt will be returned.
+ *
+ * @param url_in Input URL, if std::nullopt, the method will return
+ * std::nullopt. This is to facilitate multiple appends without having to check
+ * intermediate results.
+ *
+ * @param to_append Path to append to the URL.
+ * @return The appended URL, or std::nullopt if the URL could not be parsed.
+ */
+std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
+                                     std::string const& to_append);
 
 }  // namespace launchdarkly::network::detail
