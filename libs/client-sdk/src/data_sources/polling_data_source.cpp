@@ -56,7 +56,7 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
     builder.Header("authorization", config.SdkKey());
 
     // If no URL is set, then we will fail the request.
-    return {url ? *url : "", method, builder.Build(), body};
+    return {url.value_or(""), method, builder.Build(), body};
 }
 
 PollingDataSource::PollingDataSource(Config const& config,
