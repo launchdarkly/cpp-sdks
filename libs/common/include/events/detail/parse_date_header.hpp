@@ -10,7 +10,7 @@ namespace launchdarkly::events::detail {
 template <typename Clock>
 static std::optional<typename Clock::time_point> ParseDateHeader(
     std::string const& datetime) {
-    // todo(cwaldren): replace with boost date_time parse_from_string?
+    // TODO: SC-199582
     std::tm t = {};
     std::istringstream ss(datetime);
     ss.imbue(std::locale("en_US.utf-8"));
