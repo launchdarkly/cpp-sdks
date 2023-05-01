@@ -34,6 +34,12 @@ static bool IsAbsolute(std::string_view str) {
 }
 
 static bool NeedsRedirect(HttpResult const& res) {
+    // 300, multiple choices. Not actionable.
+    // 302, found, but not available for unforeseen reasons is not actionable.
+    // 303, attempting to change the method. We only want the original method.
+    // Redirect from a PUT to a GET for instance.
+    // 304, for use with etags, needs to be handled by the caller.
+    // 307, same as 303, but for non-GET operations.
     return res.Status() == 301 ||
            res.Status() == 308 && res.Headers().count("location") != 0;
 }
