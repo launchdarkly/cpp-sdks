@@ -57,7 +57,10 @@ INSTANTIATE_TEST_SUITE_P(
                             HttpResult::HeadersType{}),
                  State::SecondChance, Action::Retry},
         TestCase{State::FirstChance, HttpResult("generic connection error!"),
-                 State::SecondChance, Action::Retry}));
+                 State::SecondChance, Action::Retry},
+        TestCase{State::FirstChance,
+                 HttpResult(413, "413 too large!", HttpResult::HeadersType{}),
+                 State::Idle, Action::Reset}));
 
 INSTANTIATE_TEST_SUITE_P(
     PermanentErrors,
