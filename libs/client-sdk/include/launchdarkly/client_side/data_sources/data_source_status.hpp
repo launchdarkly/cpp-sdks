@@ -238,4 +238,10 @@ std::ostream& operator<<(std::ostream& out,
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::ErrorInfo::ErrorKind const& kind);
 
+std::ostream& operator<<(std::ostream& out,
+                         DataSourceStatus const& status);
+
+std::ostream& operator<<(std::ostream& out,
+                         DataSourceStatus::ErrorInfo const& error);
+
 }  // namespace launchdarkly::client_side::data_sources

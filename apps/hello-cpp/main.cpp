@@ -44,6 +44,13 @@ int main() {
             .value(),
         ContextBuilder().kind("user", "ryan").build());
 
+    LD_LOG(logger, LogLevel::kInfo)
+        << "Initial Status: " << client.DataSourceStatus().Status();
+
+    client.DataSourceStatus().OnDataSourceStatusChange([&logger](auto status) {
+        LD_LOG(logger, LogLevel::kInfo) << "Got status: " << status;
+    });
+
     client.WaitForReadySync(std::chrono::seconds(30));
 
     auto value = client.BoolVariation("my-boolean-flag", false);

@@ -1,7 +1,9 @@
 
+#include <iomanip>
 #include <utility>
 
 #include "launchdarkly/client_side/data_sources/data_source_status.hpp"
+
 namespace launchdarkly::client_side::data_sources {
 
 DataSourceStatus::ErrorInfo::ErrorKind DataSourceStatus::ErrorInfo::Kind()
@@ -89,6 +91,27 @@ std::ostream& operator<<(std::ostream& out,
             out << "STORE_ERROR";
             break;
     }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
+    std::time_t as_time_t =
+        std::chrono::system_clock::to_time_t(status.StateSince());
+    out << "Status(" << status.State() << ", Since("
+        << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S") << ")";
+    if (status.LastError()) {
+        out << ", " << status.LastError().value();
+    }
+    out << ")";
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out,
+                         DataSourceStatus::ErrorInfo const& error) {
+    std::time_t as_time_t = std::chrono::system_clock::to_time_t(error.Time());
+    out << "Error(" << error.Kind() << ", " << error.Message()
+        << ", StatusCode(" << error.StatusCode() << "), Since("
+        << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S") << "))";
     return out;
 }
 
