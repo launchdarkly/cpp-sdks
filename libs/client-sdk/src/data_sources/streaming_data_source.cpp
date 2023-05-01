@@ -10,9 +10,13 @@
 #include "context_builder.hpp"
 #include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
+#include "network/detail/http_requester.hpp"
 #include "serialization/json_context.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
+
+static char const* const kCouldNotParseEndpoint =
+    "Could not parse streaming endpoint URL.";
 
 StreamingDataSource::StreamingDataSource(
     Config const& config,
@@ -25,13 +29,6 @@ StreamingDataSource::StreamingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)) {
-    auto uri_components =
-        boost::urls::parse_uri(config.ServiceEndpoints().StreamingBaseUrl());
-
-    // TODO: Handle parsing error?
-    // TODO: Initial reconnect delay.
-    boost::urls::url url = uri_components.value();
-
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
 
@@ -41,15 +38,32 @@ StreamingDataSource::StreamingDataSource(
         config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
         data_source_config.method);
 
-    // Add the eval endpoint.
-    url.set_path(url.path().append(streaming_config.streaming_path));
+    auto updated_url =
+        network::detail::AppendUrl(config.ServiceEndpoints().StreamingBaseUrl(),
+                                   streaming_config.streaming_path);
 
     if (!data_source_config.use_report) {
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url.set_path(url.path().append("/" + Base64UrlEncode(string_context)));
+        updated_url = network::detail::AppendUrl(
+            updated_url, Base64UrlEncode(string_context));
     }
+    // Bad URL, don't set the client. Start will then report the bad status.
+    if (!updated_url) {
+        return;
+    }
+
+    auto uri_components = boost::urls::parse_uri(*updated_url);
+
+    // Unlikely that it could be parsed earlier and it cannot be parsed now.
+    if (!uri_components) {
+        return;
+    }
+
+    // TODO: Initial reconnect delay.
+    boost::urls::url url = uri_components.value();
+
     if (data_source_config.with_reasons) {
         url.params().set("withReasons", "true");
     }
@@ -86,12 +100,22 @@ StreamingDataSource::StreamingDataSource(
 }
 
 void StreamingDataSource::Start() {
+    if (!client_) {
+        LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kShutdown,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            kCouldNotParseEndpoint);
+        return;
+    }
     client_->run();
 }
 
 void StreamingDataSource::Close() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
-    client_->close();
+    if (client_) {
+        client_->close();
+    }
 }
 
 }  // namespace launchdarkly::client_side::data_sources::detail

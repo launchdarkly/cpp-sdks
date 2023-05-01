@@ -3,7 +3,6 @@
 
 #include <boost/asio/io_context.hpp>
 
-#include "config/detail/builders/data_source_builder.hpp"
 #include "console_backend.hpp"
 #include "context_builder.hpp"
 #include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
@@ -35,6 +34,12 @@ int main() {
 
     Client client(
         ConfigBuilder(key)
+            .ServiceEndpoints(
+                launchdarkly::client_side::EndpointsBuilder()
+                    // Set to http to demonstrate redirect to https.
+                    .PollingBaseUrl("http://sdk.launchdarkly.com")
+                    .StreamingBaseUrl("https://stream.launchdarkly.com")
+                    .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
                             .Method(DataSourceBuilder::Polling().PollInterval(
                                 std::chrono::seconds{30}))

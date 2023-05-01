@@ -27,6 +27,23 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network::detail {
 
+static unsigned char const kRedirectLimit = 20;
+
+static bool IsAbsolute(std::string_view str) {
+    return str.find("://") != std::string::npos || str.find("//") == 0;
+}
+
+static bool NeedsRedirect(HttpResult const& res) {
+    // 300, multiple choices. Not actionable.
+    // 302, found, but not available for unforeseen reasons is not actionable.
+    // 303, attempting to change the method. We only want the original method.
+    // Redirect from a PUT to a GET for instance.
+    // 304, for use with etags, needs to be handled by the caller.
+    // 307, same as 303, but for non-GET operations.
+    return res.Status() == 301 ||
+           res.Status() == 308 && res.Headers().count("location") != 0;
+}
+
 static http::verb ConvertMethod(HttpMethod method) {
     switch (method) {
         case HttpMethod::kPost:
@@ -52,7 +69,11 @@ static http::request<http::string_body> MakeBeastRequest(
     } else {
         beast_request.body() = "";
     }
-    beast_request.target(request.Path());
+    if (request.Path().empty()) {
+        beast_request.target("/");
+    } else {
+        beast_request.target(request.Path());
+    }
     beast_request.prepare_payload();
     beast_request.set(http::field::host, request.Host());
 
@@ -65,6 +86,26 @@ static http::request<http::string_body> MakeBeastRequest(
     beast_request.set(http::field::user_agent, properties.UserAgent());
 
     return beast_request;
+}
+
+static std::optional<HttpRequest> MakeRedirectRequest(HttpRequest const& req,
+                                                      HttpResult const& res) {
+    auto location = res.Headers().find("location");
+    // Location should be verified to be present before attempting to
+    // make the redirect request.
+    assert(location != res.Headers().end());
+    // Start the request over with the new URL.
+    if (IsAbsolute(location->second)) {
+        return HttpRequest(location->second, req.Method(), req.Properties(),
+                           req.Body());
+    }
+    auto new_url = AppendUrl(req.Url(), location->second);
+    if (new_url) {
+        return HttpRequest(*new_url, req.Method(), req.Properties(),
+                           req.Body());
+    }
+
+    return std::nullopt;
 }
 
 template <class Derived>
@@ -104,9 +145,7 @@ class
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
           read_timeout_(read_timeout),
-          handler_(std::move(handler)) {
-        parser_.get();
-    }
+          handler_(std::move(handler)) {}
 
     void Fail(beast::error_code ec, char const* what) {
         // TODO: Is it safe to cancel this if it has already failed?
@@ -148,8 +187,9 @@ class
     }
 
     void OnHandshake(beast::error_code ec) {
-        if (ec)
+        if (ec) {
             return Fail(ec, "handshake");
+        }
 
         DoWrite();
     }
@@ -204,9 +244,9 @@ class
      * is done.
      * @return The created HttpResult.
      */
-    HttpResult MakeResult() const {
+    [[nodiscard]] HttpResult MakeResult() const {
         auto headers = HttpResult::HeadersType();
-        for (auto& field : parser_.get().base()) {
+        for (auto const& field : parser_.get().base()) {
             headers.insert_or_assign(field.name_string(), field.value());
         }
         auto result = HttpResult(parser_.get().result_int(),
@@ -221,6 +261,7 @@ class
 class PlaintextClient : public Session<PlaintextClient>,
                         public std::enable_shared_from_this<PlaintextClient> {
    public:
+    virtual ~PlaintextClient() = default;
     using ResponseHandler = Session<PlaintextClient>::ResponseHandler;
 
     PlaintextClient(net::any_io_executor ex,
@@ -257,6 +298,7 @@ class PlaintextClient : public Session<PlaintextClient>,
 class EncryptedClient : public Session<EncryptedClient>,
                         public std::enable_shared_from_this<EncryptedClient> {
    public:
+    virtual ~EncryptedClient() = default;
     using ResponseHandler = Session<EncryptedClient>::ResponseHandler;
 
     EncryptedClient(net::any_io_executor ex,
@@ -380,40 +422,7 @@ class AsioRequester {
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        auto strand = net::make_strand(ctx_);
-
-        // The request is invalid and cannot be made, so produce an error
-        // result.
-        if (!request.Valid()) {
-            boost::asio::post(
-                strand, [strand, handler, request, this]() mutable {
-                    std::optional<std::string> error_string =
-                        "The request was malformed and could not be made.";
-                    handler(HttpResult(error_string));
-                });
-            return;
-        }
-
-        boost::asio::post(strand, [strand, handler, request, this]() mutable {
-            auto beast_request = MakeBeastRequest(request);
-
-            const auto& properties = request.Properties();
-
-            if (request.Https()) {
-                std::make_shared<EncryptedClient>(
-                    strand, ssl_ctx_, beast_request, request.Host(),
-                    request.Port(), properties.ConnectTimeout(),
-                    properties.ResponseTimeout(), properties.ReadTimeout(),
-                    std::move(handler))
-                    ->Run();
-            } else {
-                std::make_shared<PlaintextClient>(
-                    strand, beast_request, request.Host(), request.Port(),
-                    properties.ConnectTimeout(), properties.ResponseTimeout(),
-                    properties.ReadTimeout(), std::move(handler))
-                    ->Run();
-            }
-        });
+        InnerRequest(request, std::move(handler), 0);
 
         return result.get();
     }
@@ -426,6 +435,63 @@ class AsioRequester {
      * requester.
      */
     std::shared_ptr<ssl::context> ssl_ctx_;
+
+    void InnerRequest(std::optional<HttpRequest> request,
+                      std::function<void(HttpResult)> callback,
+                      unsigned char redirect_count) {
+        auto strand = net::make_strand(ctx_);
+
+        if (redirect_count > kRedirectLimit) {
+            boost::asio::post(strand, [callback, request]() mutable {
+                callback(
+                    HttpResult("Redirects exceeded 20, cancelling request."));
+            });
+            return;
+        }
+
+        // The request is invalid and cannot be made, so produce an error
+        // result.
+        if (!request || !request->Valid()) {
+            boost::asio::post(strand, [callback, request]() mutable {
+                callback(HttpResult(
+                    "The request was malformed and could not be made."));
+            });
+            return;
+        }
+
+        boost::asio::post(strand, [strand, callback, request, this,
+                                   redirect_count]() mutable {
+            auto beast_request = MakeBeastRequest(*request);
+
+            const auto& properties = request->Properties();
+
+            if (request->Https()) {
+                std::make_shared<EncryptedClient>(
+                    strand, ssl_ctx_, beast_request, request->Host(),
+                    request->Port(), properties.ConnectTimeout(),
+                    properties.ResponseTimeout(), properties.ReadTimeout(),
+                    [callback, request, this, redirect_count](auto res) {
+                        NeedsRedirect(res)
+                            ? InnerRequest(MakeRedirectRequest(*request, res),
+                                           callback, redirect_count + 1)
+                            : callback(res);
+                    })
+                    ->Run();
+            } else {
+                std::make_shared<PlaintextClient>(
+                    strand, beast_request, request->Host(), request->Port(),
+                    properties.ConnectTimeout(), properties.ResponseTimeout(),
+                    properties.ReadTimeout(),
+                    [callback, request, this, redirect_count](auto res) {
+                        NeedsRedirect(res)
+                            ? InnerRequest(MakeRedirectRequest(*request, res),
+                                           callback, redirect_count + 1)
+                            : callback(res);
+                    })
+                    ->Run();
+            }
+        });
+    }
 };
 
 }  // namespace launchdarkly::network::detail

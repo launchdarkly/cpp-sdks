@@ -23,11 +23,10 @@ static std::unique_ptr<IDataSource> MakeDataSource(
         return std::make_unique<launchdarkly::client_side::data_sources::
                                     detail::StreamingDataSource>(
             config, executor, context, &flag_updater, status_manager, logger);
-    } else {
-        return std::make_unique<
-            launchdarkly::client_side::data_sources::detail::PollingDataSource>(
-            config, executor, context, &flag_updater, status_manager, logger);
     }
+    return std::make_unique<
+        launchdarkly::client_side::data_sources::detail::PollingDataSource>(
+        config, executor, context, &flag_updater, status_manager, logger);
 }
 
 Client::Client(Config config, Context context)
@@ -48,8 +47,6 @@ Client::Client(Config config, Context context)
                                   status_manager_,
                                   logger_)),
       initialized_(false) {
-    data_source_->Start();
-
     status_manager_.OnDataSourceStatusChange([this](auto status) {
         if (status.State() == DataSourceStatus::DataSourceState::kValid ||
             status.State() == DataSourceStatus::DataSourceState::kShutdown ||
@@ -61,6 +58,9 @@ Client::Client(Config config, Context context)
             init_waiter_.notify_all();
         }
     });
+
+    // Should listen to status before attempting to start.
+    data_source_->Start();
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
