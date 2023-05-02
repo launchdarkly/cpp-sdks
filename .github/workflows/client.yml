@@ -18,3 +18,10 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
+  build-test-mac:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: launchdarkly-cpp-client
