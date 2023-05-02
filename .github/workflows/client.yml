@@ -25,3 +25,4 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
+          platform_version: 12
