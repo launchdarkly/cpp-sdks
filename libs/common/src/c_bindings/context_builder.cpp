@@ -28,7 +28,9 @@ LD_EXPORT(void) LDContextBuilder_Free(LDContextBuilder builder) {
 
 LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder) {
     auto built = AS_BUILDER(builder)->builder.build();
-    return new Context(built);
+    auto context = new Context(std::move(built));
+    LDContextBuilder_Free(builder);
+    return context;
 }
 
 LD_EXPORT(void)
@@ -36,6 +38,7 @@ LDContextBuilder_AddKind(LDContextBuilder builder,
                          char const* kind,
                          char const* key) {
     auto* binding = AS_BUILDER(builder);
+    binding->kind_to_key[kind] = key;
     binding->builder.kind(kind, key);
 }
 
@@ -47,7 +50,7 @@ LDContextBuilder_Attributes_Set(LDContextBuilder builder,
     auto* binding = AS_BUILDER(builder);
     auto existing = binding->kind_to_key.find(kind);
     if (existing != binding->kind_to_key.end()) {
-        auto& attributes = binding->builder.kind(kind, existing->first);
+        auto& attributes = binding->builder.kind(kind, existing->second);
         attributes.set(attr_key, std::move(*AS_VALUE(val)));
         delete AS_VALUE(val);
 
@@ -64,7 +67,7 @@ LDContextBuilder_Attributes_SetPrivate(LDContextBuilder builder,
     auto* binding = AS_BUILDER(builder);
     auto existing = binding->kind_to_key.find(kind);
     if (existing != binding->kind_to_key.end()) {
-        auto& attributes = binding->builder.kind(kind, existing->first);
+        auto& attributes = binding->builder.kind(kind, existing->second);
         attributes.set_private(attr_key, std::move(*AS_VALUE(val)));
         delete AS_VALUE(val);
 
@@ -80,7 +83,7 @@ LDContextBuilder_Attributes_SetName(LDContextBuilder builder,
     auto* binding = AS_BUILDER(builder);
     auto existing = binding->kind_to_key.find(kind);
     if (existing != binding->kind_to_key.end()) {
-        auto& attributes = binding->builder.kind(kind, existing->first);
+        auto& attributes = binding->builder.kind(kind, existing->second);
         attributes.name(name);
 
         return true;
@@ -95,7 +98,7 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
     auto* binding = AS_BUILDER(builder);
     auto existing = binding->kind_to_key.find(kind);
     if (existing != binding->kind_to_key.end()) {
-        auto& attributes = binding->builder.kind(kind, existing->first);
+        auto& attributes = binding->builder.kind(kind, existing->second);
         attributes.anonymous(anonymous);
 
         return true;
@@ -110,7 +113,7 @@ LDContextBuilder_Attributes_AddPrivateAttribute(LDContextBuilder builder,
     auto* binding = AS_BUILDER(builder);
     auto existing = binding->kind_to_key.find(kind);
     if (existing != binding->kind_to_key.end()) {
-        auto& attributes = binding->builder.kind(kind, existing->first);
+        auto& attributes = binding->builder.kind(kind, existing->second);
         attributes.add_private_attribute(attr_key);
 
         return true;

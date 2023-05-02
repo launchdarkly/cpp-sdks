@@ -13,13 +13,22 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef void* LDContext;
+typedef void* LDContext_PrivateAttributesIter;
 
 /**
  * Check if the context is valid.
+ *
  * @param context The context to check.
  * @return True if the context is valid.
  */
-LD_EXPORT(bool) valid(LDContext context);
+LD_EXPORT(bool) LDContext_Valid(LDContext context);
+
+/**
+ * Free the context.
+ *
+ * @param context The context to free.
+ */
+LD_EXPORT(void) LDContext_Free(LDContext context);
 
 /**
  * Get an attribute value by kind and attribute reference. If the kind is
@@ -35,7 +44,8 @@ LD_EXPORT(bool) valid(LDContext context);
  * @param ref An attribute reference representing the attribute to get.
  * @return The attribute value or a null pointer.
  */
-LD_EXPORT(LDValue) get(LDContext context, char const* kind, char const* ref);
+LD_EXPORT(LDValue)
+LDContext_Get(LDContext context, char const* kind, char const* ref);
 
 /**
  * If the context is not valid, then get a string containing the reason the
@@ -46,7 +56,22 @@ LD_EXPORT(LDValue) get(LDContext context, char const* kind, char const* ref);
  * @param context The context to check for validity.
  * @return A string explaining why the context is not valid.
  */
-LD_EXPORT(char const*) errors(LDContext context);
+LD_EXPORT(char const*) LDContext_Errors(LDContext context);
+
+LD_EXPORT(LDContext_PrivateAttributesIter)
+LDContext_CreatePrivateAttributesIter(LDContext context, const char* kind);
+
+LD_EXPORT(void)
+LDContext_DestroyPrivateAttributesIter(LDContext_PrivateAttributesIter iter);
+
+LD_EXPORT(void)
+LDContext_PrivateAttributesIter_Next(LDContext_PrivateAttributesIter iter);
+
+LD_EXPORT(bool)
+LDContext_PrivateAttributesIter_End(LDContext_PrivateAttributesIter iter);
+
+LD_EXPORT(char const*)
+LDContext_PrivateAttributesIter_Value(LDContext_PrivateAttributesIter iter);
 
 #ifdef __cplusplus
 }
