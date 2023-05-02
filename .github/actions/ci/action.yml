@@ -27,7 +27,8 @@ runs:
       with:
         boost_version: 1.81.0
         platform_version: ${{ inputs.platform_version }}
-        boost_install_dir: ~/runner/boost
+#        boost_install_dir: ~/runner/boost
+
     - name: Build Library
       shell: bash
       run: ./scripts/build.sh ${{ inputs.cmake_target }} ON
