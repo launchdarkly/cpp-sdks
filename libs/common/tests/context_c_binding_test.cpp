@@ -12,6 +12,8 @@ TEST(ContextCBindingTests, CanBuildBasicContext) {
     EXPECT_EQ(std::string("user-key"),
               LDValue_GetString(LDContext_Get(context, "user", "key")));
 
+    EXPECT_TRUE(LDContext_Valid(context));
+
     LDContext_Free(context);
 }
 
@@ -103,6 +105,21 @@ TEST(ContextCBindingTests, CanMakeMultiKindContext) {
 
     EXPECT_EQ(std::string("SDK"),
               LDValue_GetString(LDContext_Get(context, "org", "name")));
+
+    LDContext_Free(context);
+}
+
+TEST(ContextCBindingTests, CanCreateInvalidContext) {
+    LDContextBuilder builder = LDContextBuilder_New();
+    LDContextBuilder_AddKind(builder, "#)(#$@*(#^@&*", "user-key");
+    LDContext context = LDContextBuilder_Build(builder);
+
+    EXPECT_FALSE(LDContext_Valid(context));
+
+    EXPECT_EQ(std::string("#)(#$@*(#^@&*: \"Kind contained invalid characters. "
+                          "A kind may contain ASCII letters or numbers, as "
+                          "well as '.', '-', and '_'.\""),
+              LDContext_Errors(context));
 
     LDContext_Free(context);
 }

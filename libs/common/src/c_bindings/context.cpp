@@ -15,11 +15,6 @@ using launchdarkly::Value;
     reinterpret_cast<                     \
         IteratorBinding<AttributeReference::SetType::const_iterator>*>(x)
 
-struct PrivateAttributesIter {
-    AttributeReference::SetType::const_iterator iter;
-    AttributeReference::SetType::const_iterator end;
-};
-
 LD_EXPORT(void) LDContext_Free(LDContext context) {
     delete AS_CONTEXT(context);
 }
