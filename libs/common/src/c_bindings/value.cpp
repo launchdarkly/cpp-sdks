@@ -16,20 +16,6 @@ using launchdarkly::Value;
 #define AS_ARR_ITER(x) \
     reinterpret_cast<IteratorBinding<Value::Array::Iterator>*>(x)
 
-// struct ArrayIter {
-//     ArrayIter(Value* val)
-//         : iter(val->as_array().begin()), end(val->as_array().end()) {}
-//     Value::Array::Iterator iter;
-//     Value::Array::Iterator end;
-// };
-//
-// struct ObjectIter {
-//     ObjectIter(Value* val)
-//         : iter(val->as_object().begin()), end(val->as_object().end()) {}
-//     Value::Object::Iterator iter;
-//     Value::Object::Iterator end;
-// };
-
 LD_EXPORT(LDValue) LDValue_NewNull() {
     return new Value();
 }
