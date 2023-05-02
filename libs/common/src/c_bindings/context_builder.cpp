@@ -3,7 +3,6 @@
 
 #include "c_bindings/context_builder.h"
 #include "context_builder.hpp"
-#include "value.hpp"
 
 #define AS_BUILDER(x) reinterpret_cast<BindingContextBuilder*>(x)
 

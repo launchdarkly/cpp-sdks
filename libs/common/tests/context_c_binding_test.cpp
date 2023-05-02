@@ -2,7 +2,6 @@
 
 #include "c_bindings/context.h"
 #include "c_bindings/context_builder.h"
-#include "c_bindings/value.h"
 
 TEST(ContextCBindingTests, CanBuildBasicContext) {
     LDContextBuilder builder = LDContextBuilder_New();
