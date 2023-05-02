@@ -35,7 +35,8 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
 
     if (params.readTimeoutMs) {
         client_builder.read_timeout(
-            std::chrono::milliseconds(*params.readTimeoutMs));
+            std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::milliseconds(*params.readTimeoutMs)));
     }
 
     client_builder.logger([this](std::string msg) {

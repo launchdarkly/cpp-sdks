@@ -71,7 +71,7 @@ class Builder {
      * @param timeout
      * @return Reference to this builder.
      */
-    Builder& read_timeout(std::chrono::milliseconds timeout);
+    Builder& read_timeout(std::chrono::seconds timeout);
 
     /**
      * Specify the method for the initial request. The default method is GET.
@@ -111,7 +111,7 @@ class Builder {
     std::string url_;
     net::any_io_executor executor_;
     http::request<http::string_body> request_;
-    std::optional<std::chrono::milliseconds> read_timeout_;
+    std::optional<std::chrono::seconds> read_timeout_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
 };
