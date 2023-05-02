@@ -14,6 +14,7 @@ using launchdarkly::Value;
 LD_EXPORT(LDArrayBuilder) LDArrayBuilder_New() {
     return new std::vector<Value>();
 }
+
 LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder) {
     delete AS_VECTOR(array_builder);
 }

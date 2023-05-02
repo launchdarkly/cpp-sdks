@@ -15,6 +15,7 @@ using launchdarkly::Value;
 LD_EXPORT(LDObjectBuilder) LDObjectBuilder_New() {
     return new std::map<std::string, Value>();
 }
+
 LD_EXPORT(void) LDObjectBuilder_Free(LDObjectBuilder builder) {
     delete AS_MAP(builder);
 }
