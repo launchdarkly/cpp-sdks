@@ -74,6 +74,20 @@ class Builder {
     Builder& read_timeout(std::chrono::seconds timeout);
 
     /**
+     * Specifies the maximum time duration to establish the connection.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& connect_timeout(std::chrono::seconds timeout);
+
+    /**
+     * Specifies the maximum time duration to write the initial request.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& write_timeout(std::chrono::seconds timeout);
+
+    /**
      * Specify the method for the initial request. The default method is GET.
      * @param verb The HTTP method.
      * @return Reference to this builder.
@@ -112,6 +126,8 @@ class Builder {
     net::any_io_executor executor_;
     http::request<http::string_body> request_;
     std::optional<std::chrono::seconds> read_timeout_;
+    std::optional<std::chrono::seconds> write_timeout_;
+    std::optional<std::chrono::seconds> connect_timeout_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
 };

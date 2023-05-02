@@ -59,6 +59,16 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& ReadTimeout(std::chrono::milliseconds read_timeout);
 
     /**
+     * Set a write timeout. This is how long it takes to perform a write
+     * operation.
+     *
+     * @param read_timeout The write timeout.
+     * @return A reference to this builder.
+     */
+    HttpPropertiesBuilder& WriteTimeout(
+        std::chrono::milliseconds write_timeout);
+
+    /**
      * The time for the first byte to be received during a read. If a byte
      * is not received within this time, then the request will be cancelled.
      *
@@ -115,6 +125,7 @@ class HttpPropertiesBuilder {
    private:
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds read_timeout_;
+    std::chrono::milliseconds write_timeout_;
     std::chrono::milliseconds response_timeout_;
     std::string wrapper_name_;
     std::string wrapper_version_;

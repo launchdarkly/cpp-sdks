@@ -15,6 +15,7 @@ HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
     built::HttpProperties const& properties) {
     connect_timeout_ = properties.ConnectTimeout();
     read_timeout_ = properties.ReadTimeout();
+    write_timeout_ = properties.WriteTimeout();
     response_timeout_ = properties.ResponseTimeout();
     base_headers_ = properties.BaseHeaders();
     user_agent_ = properties.UserAgent();
@@ -76,11 +77,11 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
-        return {connect_timeout_, read_timeout_, response_timeout_, user_agent_,
-                headers_with_wrapper};
+        return {connect_timeout_,  read_timeout_, write_timeout_,
+                response_timeout_, user_agent_,   headers_with_wrapper};
     }
-    return {connect_timeout_, read_timeout_, response_timeout_, user_agent_,
-            base_headers_};
+    return {connect_timeout_,  read_timeout_, write_timeout_,
+            response_timeout_, user_agent_,   base_headers_};
 }
 
 template class HttpPropertiesBuilder<detail::ClientSDK>;

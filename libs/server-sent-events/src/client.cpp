@@ -1,5 +1,4 @@
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/use_future.hpp>
 #include <foxy/client_session.hpp>
@@ -10,7 +9,6 @@
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/read.hpp>
-#include <boost/beast/http/write.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/version.hpp>
 
@@ -19,7 +17,6 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
-#include <tuple>
 
 namespace launchdarkly::sse {
 
@@ -31,16 +28,8 @@ using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 
-// The allowed amount of time to connect the socket and perform
-// any TLS handshake, if necessary.
-auto const kDefaultConnectTimeout = std::chrono::seconds(15);
-
-// The allowed amount of time to send the initial request.
-auto const kDefaultReqTimeout = std::chrono::seconds(15);
-
-// Once the request has been sent, the amount of time between subsequent reads
-// of the stream.
-auto const kDefaultReadTimeout = std::chrono::minutes(5);
+// Time duration used when no timeout is specified (1 year).
+auto const kNoTimeout = std::chrono::hours(8760);
 
 class FoxyClient : public Client,
                    public std::enable_shared_from_this<FoxyClient> {
@@ -49,19 +38,24 @@ class FoxyClient : public Client,
                http::request<http::string_body> req,
                std::string host,
                std::string port,
+               std::optional<std::chrono::seconds> connect_timeout,
                std::optional<std::chrono::seconds> read_timeout,
+               std::optional<std::chrono::seconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
                net::ssl::context ssl_context)
         : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
           port_(std::move(port)),
+          connect_timeout_(connect_timeout),
           read_timeout_(read_timeout),
+          write_timeout_(read_timeout),
           req_(std::move(req)),
           parser_(),
           session_(executor,
-                   foxy::session_opts{.ssl_ctx = *ssl_context_,
-                                      .timeout = kDefaultConnectTimeout}),
+                   foxy::session_opts{
+                       .ssl_ctx = *ssl_context_,
+                       .timeout = connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
         parser_.get().body().on_event(std::move(receiver));
     }
@@ -70,24 +64,29 @@ class FoxyClient : public Client,
                http::request<http::string_body> req,
                std::string host,
                std::string port,
+               std::optional<std::chrono::seconds> connect_timeout,
                std::optional<std::chrono::seconds> read_timeout,
+               std::optional<std::chrono::seconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger)
         : ssl_context_(std::nullopt),
           buffer_(),
           host_(std::move(host)),
           port_(std::move(port)),
+          connect_timeout_(connect_timeout),
           read_timeout_(read_timeout),
+          write_timeout_(write_timeout),
           req_(std::move(req)),
           parser_(),
           session_(executor,
-                   foxy::session_opts{.timeout = kDefaultConnectTimeout}),
+                   foxy::session_opts{
+                       .timeout = connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
         parser_.get().body().on_event(std::move(receiver));
     }
 
     void fail(boost::system::error_code ec, std::string what) {
-        logger_(what + ":" + ec.message());
+        logger_("sse-client: " + what + ": " + ec.message());
     }
 
     virtual void run() override {
@@ -102,7 +101,7 @@ class FoxyClient : public Client,
             return fail(ec, "connect");
         }
 
-        session_.opts.timeout = kDefaultReqTimeout;
+        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
         session_.async_write(req_,
                              beast::bind_front_handler(&FoxyClient::on_write,
                                                        shared_from_this()));
@@ -114,7 +113,7 @@ class FoxyClient : public Client,
             return fail(ec, "write");
         }
 
-        session_.opts.timeout = read_timeout_.value_or(kDefaultReadTimeout);
+        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
         session_.async_read_some(parser_,
                                  beast::bind_front_handler(&FoxyClient::on_read,
                                                            shared_from_this()));
@@ -138,7 +137,9 @@ class FoxyClient : public Client,
     beast::flat_buffer buffer_;
     std::string host_;
     std::string port_;
+    std::optional<std::chrono::seconds> connect_timeout_;
     std::optional<std::chrono::seconds> read_timeout_;
+    std::optional<std::chrono::seconds> write_timeout_;
     http::request<http::string_body> req_;
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
@@ -151,6 +152,8 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)},
       executor_{std::move(ctx)},
       read_timeout_{std::nullopt},
+      write_timeout_{std::nullopt},
+      connect_timeout_{std::nullopt},
       logging_cb_([](auto msg) {}) {
     receiver_ = [](launchdarkly::sse::Event const&) {};
 
@@ -171,8 +174,18 @@ Builder& Builder::body(std::string data) {
     return *this;
 }
 
+Builder& Builder::connect_timeout(std::chrono::seconds timeout) {
+    connect_timeout_ = timeout;
+    return *this;
+}
+
 Builder& Builder::read_timeout(std::chrono::seconds timeout) {
     read_timeout_ = timeout;
+    return *this;
+}
+
+Builder& Builder::write_timeout(std::chrono::seconds timeout) {
+    write_timeout_ = timeout;
     return *this;
 }
 
@@ -228,15 +241,16 @@ std::shared_ptr<Client> Builder::build() {
         ssl_ctx.set_default_verify_paths();
 
         return std::make_shared<FoxyClient>(
-            net::make_strand(executor_), request, host, port, read_timeout_,
-            receiver_, logging_cb_, std::move(ssl_ctx));
+            net::make_strand(executor_), request, host, port, connect_timeout_,
+            read_timeout_, write_timeout_, receiver_, logging_cb_,
+            std::move(ssl_ctx));
     } else {
         std::string port =
             uri_components->has_port() ? uri_components->port() : "80";
 
-        return std::make_shared<FoxyClient>(net::make_strand(executor_),
-                                            request, host, port, read_timeout_,
-                                            receiver_, logging_cb_);
+        return std::make_shared<FoxyClient>(
+            net::make_strand(executor_), request, host, port, connect_timeout_,
+            read_timeout_, write_timeout_, receiver_, logging_cb_);
     }
 }
 

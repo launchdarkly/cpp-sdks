@@ -90,6 +90,19 @@ StreamingDataSource::StreamingDataSource(
 
     auto& http_properties = config.HttpProperties();
 
+    // TODO: can the read timeout be shared with *all* http requests? Or should
+    // it have a default in defaults.hpp? This must be greater than the
+    // heartbeat interval of the streaming service.
+    client_builder.read_timeout(std::chrono::minutes(5));
+
+    client_builder.write_timeout(
+        std::chrono::duration_cast<std::chrono::seconds>(
+            http_properties.WriteTimeout()));
+
+    client_builder.connect_timeout(
+        std::chrono::duration_cast<std::chrono::seconds>(
+            http_properties.ConnectTimeout()));
+
     client_builder.header("authorization", config.SdkKey());
     for (auto const& header : http_properties.BaseHeaders()) {
         client_builder.header(header.first, header.second);
