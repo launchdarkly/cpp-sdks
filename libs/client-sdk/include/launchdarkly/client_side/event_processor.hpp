@@ -2,7 +2,7 @@
 
 #include "events/events.hpp"
 
-namespace launchdarkly::events {
+namespace launchdarkly::client_side {
 
 class IEventProcessor {
    public:
@@ -12,7 +12,7 @@ class IEventProcessor {
      * capacity.
      * @param event InputEvent to deliver.
      */
-    virtual void AsyncSend(InputEvent event) = 0;
+    virtual void AsyncSend(events::InputEvent event) = 0;
     /**
      * Asynchronously flush's the processor's events, returning as soon as
      * possible. Flushing may be a no-op if a flush is ongoing.
@@ -34,4 +34,4 @@ class IEventProcessor {
     IEventProcessor() = default;
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::client_side

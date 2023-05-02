@@ -9,6 +9,17 @@ template <typename SDK>
 EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
 
 template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::Enabled(bool enabled) {
+    config_.enabled_ = enabled;
+    return *this;
+}
+
+template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::Disable() {
+    return Enabled(false);
+}
+
+template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::Capacity(std::size_t capacity) {
     config_.capacity_ = capacity;
     return *this;
