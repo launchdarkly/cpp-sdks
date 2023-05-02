@@ -16,7 +16,10 @@ using AppInfoBuilder = config::detail::builders::AppInfoBuilder;
 using EndpointsBuilder = config::detail::builders::EndpointsBuilder<SDK>;
 using ConfigBuilder = config::detail::builders::ConfigBuilder<SDK>;
 using EventsBuilder = config::detail::builders::EventsBuilder<SDK>;
+using HttpPropertiesBuilder =
+    config::detail::builders::HttpPropertiesBuilder<SDK>;
 using DataSourceBuilder = config::detail::builders::DataSourceBuilder<SDK>;
+
 using Config = config::detail::Config<SDK>;
 
 }  // namespace launchdarkly::client_side

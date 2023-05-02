@@ -19,6 +19,8 @@ class Events final {
     friend class builders::EventsBuilder;
     /**
      * Constructs configuration for the event subsystem.
+     * @param enabled If event-sending is enabled. If false, no events will be
+     * sent to LaunchDarkly.
      * @param capacity How many events can queue in memory before new events
      * are dropped.
      * @param flush_interval How often events are automatically flushed to
@@ -31,12 +33,22 @@ class Events final {
      * AllAttributesPrivate is false.
      * @param security Whether a plaintext or encrypted client should be used
      * for event delivery.
+     * @param flush_workers How many workers to use for concurrent event
+     * delivery.
      */
-    Events(std::size_t capacity,
+    Events(bool enabled,
+           std::size_t capacity,
            std::chrono::milliseconds flush_interval,
            std::string path,
            bool all_attributes_private,
-           AttributeReference::SetType private_attrs);
+           AttributeReference::SetType private_attrs,
+           std::chrono::milliseconds delivery_retry_delay,
+           std::size_t flush_workers);
+
+    /**
+     * Returns true if event-sending is enabled.
+     */
+    [[nodiscard]] bool Enabled() const;
 
     /**
      * Capacity of the event processor.
@@ -47,6 +59,12 @@ class Events final {
      * Flush interval of the event processor, in milliseconds.
      */
     [[nodiscard]] std::chrono::milliseconds FlushInterval() const;
+
+    /*
+     * If an event payload fails to be delivered and can be retried, how long
+     * to wait before retrying.
+     */
+    [[nodiscard]] std::chrono::milliseconds DeliveryRetryDelay() const;
 
     /**
      * Path component of the LaunchDarkly event delivery endpoint.
@@ -63,12 +81,20 @@ class Events final {
      */
     [[nodiscard]] AttributeReference::SetType const& PrivateAttributes() const;
 
+    /**
+     * Number of flush workers used for concurrent event delivery.
+     */
+    [[nodiscard]] std::size_t FlushWorkers() const;
+
    private:
+    bool enabled_;
     std::size_t capacity_;
     std::chrono::milliseconds flush_interval_;
     std::string path_;
     bool all_attributes_private_;
     AttributeReference::SetType private_attributes_;
+    std::chrono::milliseconds delivery_retry_delay_;
+    std::size_t flush_workers_;
 };
 
 bool operator==(Events const& lhs, Events const& rhs);
