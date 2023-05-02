@@ -58,18 +58,56 @@ LDContext_Get(LDContext context, char const* kind, char const* ref);
  */
 LD_EXPORT(char const*) LDContext_Errors(LDContext context);
 
+/**
+ * Create an iterator which iterates over the private attributes for the
+ * context kind. If there is no such context kind, then a null pointer will
+ * be returned.
+ *
+ * The iterator must be destroyed with LDContext_DestroyPrivateAttributesIter.
+ *
+ * An iterator must not be used after the associated Context has been
+ * freed.
+ *
+ * @param context The context containing the kind.
+ * @param kind The kind to iterate private attributes for.
+ * @return A private attributes iterator.
+ */
 LD_EXPORT(LDContext_PrivateAttributesIter)
 LDContext_CreatePrivateAttributesIter(LDContext context, const char* kind);
 
+/**
+ * Destroy the iterator.
+ *
+ * @param iter The iterator to destroy.
+ */
 LD_EXPORT(void)
 LDContext_DestroyPrivateAttributesIter(LDContext_PrivateAttributesIter iter);
 
+/**
+ * Move the iterator to the next item.
+ *
+ * @param iter The iterator to increment.
+ */
 LD_EXPORT(void)
 LDContext_PrivateAttributesIter_Next(LDContext_PrivateAttributesIter iter);
 
+/**
+ * Check if the iterator is at the end.
+ *
+ * @param iter The iterator to check.
+ * @return True if the iterator is at the end.
+ */
 LD_EXPORT(bool)
 LDContext_PrivateAttributesIter_End(LDContext_PrivateAttributesIter iter);
 
+/**
+ * Get the value pointed to by the iterator.
+ *
+ * The lifetime of the returned value is the same as the Context.
+ *
+ * @param iter The iterator to get a value for.
+ * @return The attribute reference as a string.
+ */
 LD_EXPORT(char const*)
 LDContext_PrivateAttributesIter_Value(LDContext_PrivateAttributesIter iter);
 

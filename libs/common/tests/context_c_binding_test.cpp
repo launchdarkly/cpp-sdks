@@ -87,5 +87,22 @@ TEST(ContextCBindingTests, CanMakeMultiKindContext) {
 
     LDContext context = LDContextBuilder_Build(builder);
 
+    EXPECT_EQ(std::string("user-key"),
+              LDValue_GetString(LDContext_Get(context, "user", "key")));
+
+    EXPECT_EQ(std::string("custom_value"),
+              LDValue_GetString(LDContext_Get(context, "user", "custom")));
+
+    EXPECT_EQ(std::string("Joe"),
+              LDValue_GetString(LDContext_Get(context, "user", "name")));
+
+    EXPECT_TRUE(LDValue_GetBool(LDContext_Get(context, "user", "anonymous")));
+
+    EXPECT_EQ(std::string("org-key"),
+              LDValue_GetString(LDContext_Get(context, "org", "key")));
+
+    EXPECT_EQ(std::string("SDK"),
+              LDValue_GetString(LDContext_Get(context, "org", "name")));
+
     LDContext_Free(context);
 }
