@@ -1,9 +1,8 @@
-#include <launchdarkly/sse/client.hpp>
-#include <launchdarkly/sse/detail/parser.hpp>
-
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/host_name_verification.hpp>
 #include <boost/asio/strand.hpp>
+#include <launchdarkly/sse/client.hpp>
+#include <launchdarkly/sse/detail/parser.hpp>
 
 #include <boost/certify/extensions.hpp>
 #include <boost/certify/https_verification.hpp>

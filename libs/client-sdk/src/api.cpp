@@ -41,6 +41,7 @@ Client::Client(Config config, Context context)
                                   flag_updater_,
                                   status_manager_,
                                   logger_)),
+<<<<<<< HEAD
       initialized_(false) {
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<detail::EventProcessor>(
@@ -51,6 +52,12 @@ Client::Client(Config config, Context context)
 
     data_source_->Start();
 
+||||||| parent of b4e9733 (feat: generate events from variation methods)
+      initialized_(false) {
+=======
+      initialized_(false),
+      eval_reasons_(config.DataSourceConfig().with_reasons) {
+>>>>>>> b4e9733 (feat: generate events from variation methods)
     status_manager_.OnDataSourceStatusChange([this](auto status) {
         if (status.State() == DataSourceStatus::DataSourceState::kValid ||
             status.State() == DataSourceStatus::DataSourceState::kShutdown ||
@@ -102,34 +109,97 @@ void Client::AsyncIdentify(Context context) {
         std::chrono::system_clock::now(), std::move(context)});
 }
 
-Value Client::VariationInternal(FlagKey const& key, Value default_value) {
-    auto res = flag_manager_.Get(key);
-    if (res && res->flag) {
-        return res->flag->detail().value();
+EvaluationDetail Client::VariationInternal(FlagKey const& key,
+                                           Value default_value,
+                                           bool check_type) {
+    auto desc = flag_manager_.Get(key);
+
+    events::client::FeatureEventParams event = {
+        std::chrono::system_clock::now(),
+        key,
+        context_,
+        default_value,
+        default_value,
+        std::nullopt,
+        std::nullopt,
+        std::nullopt,
+        false,
+        std::nullopt,
+    };
+
+    if (!desc || !desc->flag) {
+        auto error_reason = EvaluationReason("FLAG_NOT_FOUND");
+        if (eval_reasons_) {
+            event.reason = error_reason;
+        }
+        event_processor_->AsyncSend(std::move(event));
+        return EvaluationDetail(default_value, std::nullopt, error_reason);
     }
-    return default_value;
+
+    auto const& flag = *(desc->flag);
+    auto const& detail = flag.detail();
+
+    if (check_type && default_value.type() != Value::Type::kNull &&
+        detail.value().type() != default_value.type()) {
+        auto error_reason = EvaluationReason("WRONG_TYPE");
+        if (eval_reasons_) {
+            event.reason = error_reason;
+        }
+        event_processor_->AsyncSend(std::move(event));
+        return EvaluationDetail(default_value, std::nullopt, error_reason);
+    }
+
+    event.value = detail.value();
+    event.variation = detail.variation_index();
+
+    if (flag.track_reason()) {
+        event.reason = detail.reason();
+    }
+
+    event.version = flag.flag_version().value_or(flag.version());
+    event.require_full_event = flag.track_events();
+    if (auto date = flag.debug_events_until_date()) {
+        event.debug_events_until_date = events::Date{*date};
+    }
+
+    event_processor_->AsyncSend(std::move(event));
+
+    return EvaluationDetail(detail.value(), detail.variation_index(),
+                            detail.reason()->get());
 }
 
 bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
-    return VariationInternal(key, default_value).as_bool();
+    return VariationInternal(key, default_value, true).Value().as_bool();
+}
+
+std::pair<bool, EvaluationDetail> Client::BoolVariationDetail(
+    Client::FlagKey const& key,
+    bool default_value) {
+    auto detail = VariationInternal(key, default_value, true);
+    return {
+        detail.Value().as_bool(),
+        detail,
+    };
 }
 
 std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
-    return VariationInternal(key, std::move(default_value)).as_string();
+    return VariationInternal(key, std::move(default_value), true)
+        .Value()
+        .as_string();
 }
 
 double Client::DoubleVariation(Client::FlagKey const& key,
                                double default_value) {
-    return VariationInternal(key, default_value).as_double();
+    return VariationInternal(key, default_value, true).Value().as_double();
 }
 
 int Client::IntVariation(Client::FlagKey const& key, int default_value) {
-    return VariationInternal(key, default_value).as_int();
+    return VariationInternal(key, default_value, true).Value().as_int();
 }
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
-    return VariationInternal(key, std::move(default_value));
+    return VariationInternal(key, std::move(default_value), false).Value();
 }
 
 data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {

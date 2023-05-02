@@ -15,9 +15,9 @@ Summarizer::Features() const {
 }
 
 static bool FlagNotFound(client::FeatureEventParams const& event) {
-    if (auto reason = event.eval_result.detail().reason()) {
-        return reason->get().kind() == "ERROR" &&
-               reason->get().error_kind() == "FLAG_NOT_FOUND";
+    if (auto reason = event.reason) {
+        return reason->kind() == "ERROR" &&
+               reason->error_kind() == "FLAG_NOT_FOUND";
     }
     return false;
 }
@@ -42,12 +42,15 @@ void Summarizer::Update(client::FeatureEventParams const& event) {
                 .first;
 
     } else {
-        auto key = VariationKey(event.eval_result.version(),
-                                event.eval_result.detail().variation_index());
-        summary_counter =
-            feature_state_iterator->second.counters
-                .try_emplace(key, event.eval_result.detail().value())
-                .first;
+        assert(event.variation &&
+               "if flag is present then variation should be set ");
+        assert(event.version &&
+               "if flag is present then version should be set ");
+
+        auto key = VariationKey(*event.version, *event.variation);
+        summary_counter = feature_state_iterator->second.counters
+                              .try_emplace(key, event.value)
+                              .first;
     }
 
     summary_counter->second.Increment();

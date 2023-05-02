@@ -22,7 +22,7 @@ using launchdarkly::client_side::flag_manager::detail::FlagManager;
 using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kDebug, "Hello"));
+    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
 
     net::io_context ioc;
 
@@ -41,10 +41,11 @@ int main() {
                     .StreamingBaseUrl("https://stream.launchdarkly.com")
                     .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
-                            .Method(DataSourceBuilder::Polling().PollInterval(
-                                std::chrono::seconds{30}))
+                            .Method(DataSourceBuilder::Streaming())
                             .WithReasons(true)
                             .UseReport(true))
+            .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
+                std::chrono::seconds(5)))
             .Build()
             .value(),
         ContextBuilder().kind("user", "ryan").build());
@@ -58,8 +59,13 @@ int main() {
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
-    auto value = client.BoolVariation("my-boolean-flag", false);
-    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
+    for (int i = 0; i < 10; i++) {
+        auto detail_val = client.BoolVariationDetail("my-boolean-flag", false);
+        LD_LOG(logger, LogLevel::kInfo) << "Value was: " << detail_val.first;
+        LD_LOG(logger, LogLevel::kInfo)
+            << "Reason was: " << detail_val.second.Reason();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     // Sit around.
     std::cout << "Press enter to exit" << std::endl;

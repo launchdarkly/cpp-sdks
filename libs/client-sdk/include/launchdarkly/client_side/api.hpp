@@ -7,10 +7,11 @@
 #include <memory>
 #include <optional>
 #include <thread>
-
 #include <tl/expected.hpp>
+#include <tuple>
 #include "config/client.hpp"
 #include "context.hpp"
+#include "data/evaluation_detail.hpp"
 #include "error.hpp"
 #include "launchdarkly/client_side/data_source.hpp"
 #include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
@@ -45,6 +46,9 @@ class Client {
 
     bool BoolVariation(FlagKey const& key, bool default_value);
 
+    std::pair<bool, EvaluationDetail> BoolVariationDetail(FlagKey const& key,
+                                                          bool default_value);
+
     std::string StringVariation(FlagKey const& key, std::string default_value);
 
     double DoubleVariation(FlagKey const& key, double default_value);
@@ -60,7 +64,9 @@ class Client {
     ~Client();
 
    private:
-    Value VariationInternal(FlagKey const& key, Value default_value);
+    [[nodiscard]] EvaluationDetail VariationInternal(FlagKey const& key,
+                                                     Value default_value,
+                                                     bool check_type);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);
@@ -80,6 +86,8 @@ class Client {
     std::unique_ptr<IEventProcessor> event_processor_;
     std::unique_ptr<IDataSource> data_source_;
     std::thread run_thread_;
+
+    bool eval_reasons_;
 };
 
 }  // namespace launchdarkly::client_side
