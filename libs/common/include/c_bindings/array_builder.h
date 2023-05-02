@@ -1,3 +1,5 @@
+// NOLINTBEGIN modernize-use-using
+
 #pragma once
 
 #include "./export.h"
@@ -22,7 +24,7 @@ LD_EXPORT(LDArrayBuilder) LDArrayBuilder_New();
  * has not been built. Calling LDArrayBuilder_Build on an array builder
  * transfers consumes the array builder.
  *
- * @param array_builder
+ * @param array_builder The builder to free.
  */
 LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder);
 
@@ -51,3 +53,5 @@ LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder);
 #ifdef __cplusplus
 }
 #endif
+
+// NOLINTEND modernize-use-using

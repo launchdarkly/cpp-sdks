@@ -1,3 +1,6 @@
+// NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
+// NOLINTBEGIN OCInconsistentNamingInspection
+
 #include "c_bindings/value.h"
 #include "value.hpp"
 
@@ -39,7 +42,7 @@ LD_EXPORT(LDValue) LDValue_NewString(char const* val) {
 }
 
 LD_EXPORT(LDValue) LDValue_NewValue(LDValue val) {
-    return new Value(AS_VALUE(val));
+    return new Value(*AS_VALUE(val));
 }
 
 LD_EXPORT(void) LDValue_Free(LDValue val) {
@@ -96,18 +99,18 @@ LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
 }
 
 LD_EXPORT(void) LDValue_ArrayIter_Next(LDValue_ArrayIter iter) {
-    auto val_iter = AS_ARR_ITER(iter);
+    auto* val_iter = AS_ARR_ITER(iter);
     auto res = val_iter->iter++;
     boost::ignore_unused(res);
 }
 
 LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
-    auto val_iter = AS_ARR_ITER(iter);
+    auto* val_iter = AS_ARR_ITER(iter);
     return val_iter->iter == val_iter->val->as_array().end();
 }
 
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {
-    auto val_iter = AS_ARR_ITER(iter);
+    auto* val_iter = AS_ARR_ITER(iter);
     return const_cast<Value*>(&(*val_iter->iter));
 }
 
@@ -123,26 +126,29 @@ LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
 }
 
 LD_EXPORT(void) LDValue_ObjectIter_Next(LDValue_ObjectIter iter) {
-    auto val_iter = AS_OBJ_ITER(iter);
-    auto res = val_iter++;
+    auto* val_iter = AS_OBJ_ITER(iter);
+    auto res = val_iter->iter++;
     boost::ignore_unused(res);
 }
 
 LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter) {
-    auto val_iter = AS_OBJ_ITER(iter);
-    return val_iter->iter != val_iter->val->as_object().end();
+    auto* val_iter = AS_OBJ_ITER(iter);
+    return val_iter->iter == val_iter->val->as_object().end();
 }
 
 LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter) {
-    auto val_iter = AS_OBJ_ITER(iter);
+    auto* val_iter = AS_OBJ_ITER(iter);
     return const_cast<Value*>(&val_iter->iter->second);
 }
 
 LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter) {
-    auto val_iter = AS_OBJ_ITER(iter);
+    auto* val_iter = AS_OBJ_ITER(iter);
     return val_iter->iter->first.c_str();
 }
 
 LD_EXPORT(void) LDValue_DestroyObjectIter(LDValue_ObjectIter iter) {
     delete AS_OBJ_ITER(iter);
 }
+
+// NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
+// NOLINTEND OCInconsistentNamingInspection

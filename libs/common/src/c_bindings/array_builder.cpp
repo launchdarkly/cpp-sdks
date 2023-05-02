@@ -1,3 +1,6 @@
+// NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
+// NOLINTBEGIN OCInconsistentNamingInspection
+
 #include "c_bindings/array_builder.h"
 #include "value.hpp"
 
@@ -27,3 +30,6 @@ LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder) {
     delete vector;
     return value;
 }
+
+// NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
+// NOLINTEND OCInconsistentNamingInspection

@@ -1,3 +1,5 @@
+// NOLINTBEGIN modernize-use-using
+
 #pragma once
 
 #include <stdbool.h>
@@ -271,3 +273,5 @@ LD_EXPORT(void) LDValue_DestroyObjectIter(LDValue_ObjectIter iter);
 #ifdef __cplusplus
 }
 #endif
+
+// NOLINTEND modernize-use-using
