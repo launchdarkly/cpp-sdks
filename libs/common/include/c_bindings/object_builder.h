@@ -11,11 +11,12 @@ extern "C" {  // only need to export C interface if
 typedef void* LDObjectBuilder;
 
 LD_EXPORT(LDObjectBuilder) LDObjectBuilder_New();
-LD_EXPORT(void) LDObjectBuilder_Free();
+LD_EXPORT(void) LDObjectBuilder_Free(LDObjectBuilder builder);
 
-LD_EXPORT(void) LDObjectBuilder_Add(char const* key, LDValue val);
+LD_EXPORT(void)
+LDObjectBuilder_Add(LDObjectBuilder builder, char const* key, LDValue val);
 
-LD_EXPORT(LDValue) LDObjectBuilder_Build();
+LD_EXPORT(LDValue) LDObjectBuilder_Build(LDObjectBuilder builder);
 
 #ifdef __cplusplus
 }

@@ -65,11 +65,11 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {
-    AS_VALUE(val)->as_bool();
+    return AS_VALUE(val)->as_bool();
 }
 
 LD_EXPORT(double) LDValue_GetNumber(LDValue val) {
-    AS_VALUE(val)->as_double();
+    return AS_VALUE(val)->as_double();
 }
 
 LD_EXPORT(char const*) LDValue_GetString(LDValue val) {
@@ -97,13 +97,13 @@ LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
 
 LD_EXPORT(void) LDValue_ArrayIter_Next(LDValue_ArrayIter iter) {
     auto val_iter = AS_ARR_ITER(iter);
-    auto res = val_iter++;
+    auto res = val_iter->iter++;
     boost::ignore_unused(res);
 }
 
 LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
     auto val_iter = AS_ARR_ITER(iter);
-    return val_iter->iter != val_iter->val->as_array().end();
+    return val_iter->iter == val_iter->val->as_array().end();
 }
 
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {

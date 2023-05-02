@@ -24,7 +24,17 @@ set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTING "Enable C++ unit tests." ON)
 
+# If you want to run the unit tests with valgrind, then TESTING_SANITIZERS must of OFF.
+option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
+
 if (BUILD_TESTING)
+    if (TESTING_SANITIZERS)
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak")
+        elseif (CMAKE_CXX_COMPILER_ID STREQUAL " GNU")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak")
+        endif ()
+    endif ()
     include(FetchContent)
     FetchContent_Declare(
             googletest
