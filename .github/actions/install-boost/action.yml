@@ -25,12 +25,14 @@ runs:
     - name: Install boost using homebrew
       id: brew-action
       if: env.RUNNER_OS == "macOS"
+      shell: bash
       run: |
         brew install boost@1.81
         echo "BOOST_ROOT=$(boost --prefix boost@1.81)" >> $GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
+      shell: bash
       run: |
         if [ -z "ROOT_ACTION" ]; then
           echo "BOOST_ROOT=$BOOST_ACTION" >> $GITHUB_OUTPUT;
