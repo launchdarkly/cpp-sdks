@@ -18,13 +18,23 @@ runs:
   using: composite
   steps:
     - name: Install boost using action
-      if: runner.os != 'macOS'
+      if: runner.os == 'Linux'
       uses: MarkusJx/install-boost@v2.4.4
       id: boost-action
       with:
         boost_version: 1.81.0
         toolset: ${{ inputs.toolset }}
         platform_version: ${{ inputs.platform_version }}
+
+    - name: Download boost binaries from artifactory
+      if: runner.os == 'Windows'
+      id: boost-download
+      shell: bash
+      run: |
+        choco install boost-msvc-14.3 -y
+      outputs:
+        BOOST_ROOT: 'C:\local\boost_1_81_0'
+
 
     - name: Install boost using homebrew
       id: brew-action
@@ -38,12 +48,18 @@ runs:
       id: determine-root
       shell: bash
       run: |
-        if [ -z "ROOT_ACTION" ]; then
-          echo "BOOST_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT;
+        if [ ! -z "$ROOT_ACTION" ]; then
+          echo "BOOST_ROOT=$ROOT_ACTION" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_ACTION"
+        elif [ ! -z "$ROOT_DOWN" ]; then
+          echo "BOOST_ROOT=$ROOT_DOWN" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_DOWN"
         else
-          echo "BOOST_ROOT=$ROOT_ACTION" >> $GITHUB_OUTPUT;
+          echo "BOOST_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_BREW"
         fi
 
       env:
         ROOT_ACTION: ${{ steps.boost-action.outputs.BOOST_ROOT }}
         ROOT_BREW: ${{ steps.brew-action.outputs.BOOST_ROOT }}
+        ROOT_DOWN: ${{ steps.boost-download.outputs.BOOST_ROOT }}
