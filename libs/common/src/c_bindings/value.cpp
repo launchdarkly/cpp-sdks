@@ -12,6 +12,7 @@ using launchdarkly::Value;
 
 #define AS_OBJ_ITER(x) reinterpret_cast<ObjectIter*>(x)
 #define AS_ARR_ITER(x) reinterpret_cast<ArrayIter*>(x)
+#define AS_LDVALUE(x) reinterpret_cast<LDValue>(x)
 
 struct ArrayIter {
     ArrayIter(Value* val) : val(val), iter(val->as_array().begin()) {}
@@ -26,23 +27,23 @@ struct ObjectIter {
 };
 
 LD_EXPORT(LDValue) LDValue_NewNull() {
-    return new Value();
+    return AS_LDVALUE(new Value());
 }
 
 LD_EXPORT(LDValue) LDValue_NewBool(bool val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewNumber(double val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewString(char const* val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewValue(LDValue val) {
-    return new Value(*AS_VALUE(val));
+    return AS_LDVALUE(new Value(*AS_VALUE(val)));
 }
 
 LD_EXPORT(void) LDValue_Free(LDValue val) {
@@ -93,7 +94,8 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
     if (AS_VALUE(val)->is_array()) {
-        return new ArrayIter(AS_VALUE(val));
+        return reinterpret_cast<LDValue_ArrayIter>(
+            new ArrayIter(AS_VALUE(val)));
     }
     return nullptr;
 }
@@ -111,7 +113,7 @@ LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
 
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {
     auto* val_iter = AS_ARR_ITER(iter);
-    return const_cast<Value*>(&(*val_iter->iter));
+    return AS_LDVALUE(const_cast<Value*>(&(*val_iter->iter)));
 }
 
 LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
@@ -120,7 +122,8 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
     if (AS_VALUE(val)->is_object()) {
-        return new ObjectIter(AS_VALUE(val));
+        return reinterpret_cast<LDValue_ObjectIter>(
+            new ObjectIter(AS_VALUE(val)));
     }
     return nullptr;
 }
@@ -138,7 +141,7 @@ LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter) {
 
 LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter) {
     auto* val_iter = AS_OBJ_ITER(iter);
-    return const_cast<Value*>(&val_iter->iter->second);
+    return AS_LDVALUE(const_cast<Value*>(&val_iter->iter->second));
 }
 
 LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter) {

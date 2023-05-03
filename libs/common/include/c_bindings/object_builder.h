@@ -10,7 +10,7 @@ extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-typedef void* LDObjectBuilder;
+typedef struct _LDObjectBuilder* LDObjectBuilder;
 
 /**
  * Construct a new object builder.

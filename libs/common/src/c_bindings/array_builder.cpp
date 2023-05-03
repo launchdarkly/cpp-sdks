@@ -10,9 +10,10 @@ using launchdarkly::Value;
 
 #define AS_VECTOR(x) reinterpret_cast<std::vector<Value>*>(x)
 #define AS_VALUE(x) reinterpret_cast<Value*>(x)
+#define AS_LDVALUE(x) reinterpret_cast<LDValue>(x)
 
 LD_EXPORT(LDArrayBuilder) LDArrayBuilder_New() {
-    return new std::vector<Value>();
+    return reinterpret_cast<LDArrayBuilder>(new std::vector<Value>());
 }
 
 LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder) {
@@ -29,7 +30,7 @@ LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder) {
     auto vector = AS_VECTOR(array_builder);
     auto value = new Value(std::move(*vector));
     delete vector;
-    return value;
+    return AS_LDVALUE(value);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
