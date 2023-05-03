@@ -46,16 +46,29 @@ class Client {
 
     bool BoolVariation(FlagKey const& key, bool default_value);
 
-    EvaluationDetail BoolVariationDetail(FlagKey const& key,
-                                         bool default_value);
+    EvaluationDetail<bool> BoolVariationDetail(FlagKey const& key,
+                                               bool default_value);
 
     std::string StringVariation(FlagKey const& key, std::string default_value);
 
+    EvaluationDetail<std::string> StringVariationDetail(
+        FlagKey const& key,
+        std::string default_value);
+
     double DoubleVariation(FlagKey const& key, double default_value);
+
+    EvaluationDetail<double> DoubleVariationDetail(FlagKey const& key,
+                                                   double default_value);
 
     int IntVariation(FlagKey const& key, int default_value);
 
+    EvaluationDetail<int> IntVariationDetail(FlagKey const& key,
+                                             int default_value);
+
     Value JsonVariation(FlagKey const& key, Value default_value);
+
+    EvaluationDetail<Value> JsonVariationDetail(FlagKey const& key,
+                                                Value default_value);
 
     data_sources::IDataSourceStatusProvider& DataSourceStatus();
 
@@ -64,9 +77,10 @@ class Client {
     ~Client();
 
    private:
-    [[nodiscard]] EvaluationDetail VariationInternal(FlagKey const& key,
-                                                     Value default_value,
-                                                     bool check_type);
+    template <typename T>
+    [[nodiscard]] EvaluationDetail<T> VariationInternal(FlagKey const& key,
+                                                        Value default_value,
+                                                        bool check_type);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);

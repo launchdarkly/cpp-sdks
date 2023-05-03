@@ -1,32 +1,47 @@
 #include "data/evaluation_detail.hpp"
+#include <string>
+#include "value.hpp"
 
 namespace launchdarkly {
 
-EvaluationDetail::EvaluationDetail(launchdarkly::Value value,
-                                   std::optional<std::size_t> variation_index,
-                                   launchdarkly::EvaluationReason reason)
+template <typename T>
+EvaluationDetail<T>::EvaluationDetail(
+    T value,
+    std::optional<std::size_t> variation_index,
+    launchdarkly::EvaluationReason reason)
     : value_(std::move(value)),
       variation_index_(variation_index),
       reason_(std::move(reason)) {}
 
-EvaluationDetail::EvaluationDetail(std::string error_kind,
-                                   launchdarkly::Value default_value)
+template <typename T>
+EvaluationDetail<T>::EvaluationDetail(std::string error_kind, T default_value)
     : value_(std::move(default_value)),
       variation_index_(std::nullopt),
       reason_(error_kind) {}
 
-Value const& EvaluationDetail::Value() const {
+template <typename T>
+T const& EvaluationDetail<T>::Value() const {
     return value_;
 }
 
-EvaluationReason const& EvaluationDetail::Reason() const {
+template <typename T>
+EvaluationReason const& EvaluationDetail<T>::Reason() const {
     return reason_;
 }
 
-std::optional<std::size_t> EvaluationDetail::VariationIndex() const {
+template <typename T>
+std::optional<std::size_t> EvaluationDetail<T>::VariationIndex() const {
     return variation_index_;
 }
-class launchdarkly::Value const& EvaluationDetail::operator*() const {
+template <typename T>
+T const& EvaluationDetail<T>::operator*() const {
     return value_;
 }
+
+template class EvaluationDetail<bool>;
+template class EvaluationDetail<int>;
+template class EvaluationDetail<double>;
+template class EvaluationDetail<std::string>;
+template class EvaluationDetail<Value>;
+
 }  // namespace launchdarkly

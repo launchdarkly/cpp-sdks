@@ -2,30 +2,28 @@
 
 #include <cstddef>
 #include <optional>
-#include <ostream>
-#include <utility>
 
 #include "data/evaluation_reason.hpp"
-#include "value.hpp"
 
 namespace launchdarkly {
 
+template <typename T>
 class EvaluationDetail {
    public:
-    EvaluationDetail(Value value,
+    EvaluationDetail(T value,
                      std::optional<std::size_t> variation_index,
                      EvaluationReason reason);
 
-    EvaluationDetail(std::string error_kind, Value default_value);
+    EvaluationDetail(std::string error_kind, T default_value);
 
-    [[nodiscard]] class launchdarkly::Value const& Value() const;
+    [[nodiscard]] T const& Value() const;
     [[nodiscard]] std::optional<std::size_t> VariationIndex() const;
     [[nodiscard]] EvaluationReason const& Reason() const;
 
-    class launchdarkly::Value const& operator*() const;
+    T const& operator*() const;
 
    private:
-    class launchdarkly::Value value_;
+    T value_;
     std::optional<std::size_t> variation_index_;
     EvaluationReason reason_;
 };

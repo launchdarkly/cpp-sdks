@@ -29,7 +29,6 @@ include(FetchContent)
 
 
 set(OPENSSL_USE_STATIC_LIBS OFF)
-set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
@@ -41,7 +40,6 @@ find_package(Boost 1.80 REQUIRED COMPONENTS url)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 include(${CMAKE_FILES}/certify.cmake)
-
 
 
 add_subdirectory(src)

@@ -30,6 +30,14 @@ static std::unique_ptr<IDataSource> MakeDataSource(
         config, executor, context, &flag_updater, status_manager, logger);
 }
 
+// template <typename T>
+// T ValueAsType(Value  const& v);
+//
+// template <>
+// bool ValueAsType(Value const& v) {
+//     return v.as_bool();
+// }
+
 Client::Client(Config config, Context context)
     : logger_(config.Logger()),
       context_(std::move(context)),
@@ -103,9 +111,10 @@ void Client::AsyncIdentify(Context context) {
         std::chrono::system_clock::now(), std::move(context)});
 }
 
-EvaluationDetail Client::VariationInternal(FlagKey const& key,
-                                           Value default_value,
-                                           bool check_type) {
+template <typename T>
+EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
+                                              Value default_value,
+                                              bool check_type) {
     auto desc = flag_manager_.Get(key);
 
     events::client::FeatureEventParams event = {
@@ -127,8 +136,8 @@ EvaluationDetail Client::VariationInternal(FlagKey const& key,
             event.reason = error_reason;
         }
         event_processor_->AsyncSend(std::move(event));
-        return EvaluationDetail(default_value, std::nullopt,
-                                std::move(error_reason));
+        return EvaluationDetail<T>(default_value, std::nullopt,
+                                   std::move(error_reason));
     }
 
     auto const& flag = *(desc->flag);
@@ -141,7 +150,7 @@ EvaluationDetail Client::VariationInternal(FlagKey const& key,
             event.reason = error_reason;
         }
         event_processor_->AsyncSend(std::move(event));
-        return EvaluationDetail(default_value, std::nullopt, error_reason);
+        return EvaluationDetail<T>(default_value, std::nullopt, error_reason);
     }
 
     event.value = detail.value();
@@ -159,37 +168,56 @@ EvaluationDetail Client::VariationInternal(FlagKey const& key,
 
     event_processor_->AsyncSend(std::move(event));
 
-    return EvaluationDetail(detail.value(), detail.variation_index(),
-                            detail.reason()->get());
+    return EvaluationDetail<T>(detail.value(), detail.variation_index(),
+                               detail.reason()->get());
+}
+
+EvaluationDetail<bool> Client::BoolVariationDetail(Client::FlagKey const& key,
+                                                   bool default_value) {
+    return VariationInternal<bool>(key, default_value, true);
 }
 
 bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
-    return BoolVariationDetail(key, default_value).Value().as_bool();
+    return *BoolVariationDetail(key, default_value);
 }
 
-EvaluationDetail Client::BoolVariationDetail(Client::FlagKey const& key,
-                                             bool default_value) {
-    return VariationInternal(key, default_value, true);
+EvaluationDetail<std::string> Client::StringVariationDetail(
+    Client::FlagKey const& key,
+    std::string default_value) {
+    return VariationInternal<std::string>(key, std::move(default_value), true);
 }
 
 std::string Client::StringVariation(Client::FlagKey const& key,
                                     std::string default_value) {
-    return VariationInternal(key, std::move(default_value), true)
-        .Value()
-        .as_string();
+    return *StringVariationDetail(key, std::move(default_value));
+}
+
+EvaluationDetail<double> Client::DoubleVariationDetail(
+    Client::FlagKey const& key,
+    double default_value) {
+    return VariationInternal<double>(key, default_value, true);
 }
 
 double Client::DoubleVariation(Client::FlagKey const& key,
                                double default_value) {
-    return VariationInternal(key, default_value, true).Value().as_double();
+    return *DoubleVariationDetail(key, default_value);
 }
 
+EvaluationDetail<int> Client::IntVariationDetail(Client::FlagKey const& key,
+                                                 int default_value) {
+    return VariationInternal<int>(key, default_value, true);
+}
 int Client::IntVariation(Client::FlagKey const& key, int default_value) {
-    return VariationInternal(key, default_value, true).Value().as_int();
+    return *IntVariationDetail(key, default_value);
+}
+
+EvaluationDetail<Value> Client::JsonVariationDetail(Client::FlagKey const& key,
+                                                    Value default_value) {
+    return VariationInternal<Value>(key, std::move(default_value), false);
 }
 
 Value Client::JsonVariation(Client::FlagKey const& key, Value default_value) {
-    return VariationInternal(key, std::move(default_value), false).Value();
+    return *JsonVariationDetail(key, std::move(default_value));
 }
 
 data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {

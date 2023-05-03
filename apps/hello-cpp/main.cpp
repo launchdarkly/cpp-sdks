@@ -60,14 +60,9 @@ int main() {
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
-    for (int j = 0; j < 100; j++) {
-        for (int i = 0; i < 10; i++) {
-            auto detail_val = client.BoolVariationDetail("my-bool-flag", false);
-            LD_LOG(logger, LogLevel::kInfo)
-                << "Value was: " << detail_val.first;
-        }
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    auto value = client.BoolVariationDetail("my-bool-flag", false);
+    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
+    LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << value.Reason();
 
     // Sit around.
     std::cout << "Press enter to exit" << std::endl;
