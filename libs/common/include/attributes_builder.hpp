@@ -126,15 +126,7 @@ class AttributesBuilder final {
      * In this example, firstName is marked as private, but lastName is not:
      *
      * ```
-     * const context = {
-     *   kind: 'org',
-     *   key: 'my-key',
-     *   firstName: 'Pierre',
-     *   lastName: 'Menard',
-     *   _meta: {
-     *     privateAttributes: ['firstName'],
-     *   }
-     * };
+     * [TODO]
      * ```
      *
      * This is a metadata property, rather than an attribute that can be
