@@ -38,9 +38,9 @@ class FoxyClient : public Client,
                http::request<http::string_body> req,
                std::string host,
                std::string port,
-               std::optional<std::chrono::seconds> connect_timeout,
-               std::optional<std::chrono::seconds> read_timeout,
-               std::optional<std::chrono::seconds> write_timeout,
+               std::optional<std::chrono::milliseconds> connect_timeout,
+               std::optional<std::chrono::milliseconds> read_timeout,
+               std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
                net::ssl::context ssl_context)
@@ -64,13 +64,12 @@ class FoxyClient : public Client,
                http::request<http::string_body> req,
                std::string host,
                std::string port,
-               std::optional<std::chrono::seconds> connect_timeout,
-               std::optional<std::chrono::seconds> read_timeout,
-               std::optional<std::chrono::seconds> write_timeout,
+               std::optional<std::chrono::milliseconds> connect_timeout,
+               std::optional<std::chrono::milliseconds> read_timeout,
+               std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger)
         : ssl_context_(std::nullopt),
-          buffer_(),
           host_(std::move(host)),
           port_(std::move(port)),
           connect_timeout_(connect_timeout),
@@ -101,31 +100,17 @@ class FoxyClient : public Client,
             return fail(ec, "connect");
         }
 
-        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
-        session_.async_write(req_,
-                             beast::bind_front_handler(&FoxyClient::on_write,
-                                                       shared_from_this()));
-    }
-
-    void on_write(boost::system::error_code ec, std::size_t size) {
-        boost::ignore_unused(size);
-        if (ec) {
-            return fail(ec, "write");
-        }
-
         session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
-        session_.async_read_some(parser_,
-                                 beast::bind_front_handler(&FoxyClient::on_read,
-                                                           shared_from_this()));
+        session_.async_perpetual_request(
+            req_, parser_,
+            beast::bind_front_handler(&FoxyClient::on_error,
+                                      shared_from_this()));
     }
-    void on_read(boost::system::error_code ec, std::size_t size) {
-        boost::ignore_unused(size);
+
+    void on_error(boost::system::error_code ec) {
         if (ec) {
-            return fail(ec, "read");
+            return fail(ec, "perpetual request");
         }
-        session_.async_read_some(parser_,
-                                 beast::bind_front_handler(&FoxyClient::on_read,
-                                                           shared_from_this()));
     }
 
     virtual void close() override {
@@ -134,12 +119,11 @@ class FoxyClient : public Client,
 
    private:
     std::optional<net::ssl::context> ssl_context_;
-    beast::flat_buffer buffer_;
     std::string host_;
     std::string port_;
-    std::optional<std::chrono::seconds> connect_timeout_;
-    std::optional<std::chrono::seconds> read_timeout_;
-    std::optional<std::chrono::seconds> write_timeout_;
+    std::optional<std::chrono::milliseconds> connect_timeout_;
+    std::optional<std::chrono::milliseconds> read_timeout_;
+    std::optional<std::chrono::milliseconds> write_timeout_;
     http::request<http::string_body> req_;
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
@@ -174,17 +158,17 @@ Builder& Builder::body(std::string data) {
     return *this;
 }
 
-Builder& Builder::connect_timeout(std::chrono::seconds timeout) {
+Builder& Builder::connect_timeout(std::chrono::milliseconds timeout) {
     connect_timeout_ = timeout;
     return *this;
 }
 
-Builder& Builder::read_timeout(std::chrono::seconds timeout) {
+Builder& Builder::read_timeout(std::chrono::milliseconds timeout) {
     read_timeout_ = timeout;
     return *this;
 }
 
-Builder& Builder::write_timeout(std::chrono::seconds timeout) {
+Builder& Builder::write_timeout(std::chrono::milliseconds timeout) {
     write_timeout_ = timeout;
     return *this;
 }

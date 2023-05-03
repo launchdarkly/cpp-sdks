@@ -95,13 +95,9 @@ StreamingDataSource::StreamingDataSource(
     // heartbeat interval of the streaming service.
     client_builder.read_timeout(std::chrono::minutes(5));
 
-    client_builder.write_timeout(
-        std::chrono::duration_cast<std::chrono::seconds>(
-            http_properties.WriteTimeout()));
+    client_builder.write_timeout(http_properties.WriteTimeout());
 
-    client_builder.connect_timeout(
-        std::chrono::duration_cast<std::chrono::seconds>(
-            http_properties.ConnectTimeout()));
+    client_builder.connect_timeout(http_properties.ConnectTimeout());
 
     client_builder.header("authorization", config.SdkKey());
     for (auto const& header : http_properties.BaseHeaders()) {
