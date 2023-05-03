@@ -35,9 +35,9 @@ runs:
       shell: bash
       run: |
         if [ -z "ROOT_ACTION" ]; then
-          echo "BOOST_ROOT=$BOOST_ACTION" >> $GITHUB_OUTPUT;
-        else
           echo "BOOST_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT;
+        else
+          echo "BOOST_ROOT=$ROOT_ACTION" >> $GITHUB_OUTPUT;
         fi
 
       env:
