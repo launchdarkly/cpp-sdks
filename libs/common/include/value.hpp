@@ -427,4 +427,10 @@ class Value final {
 bool operator==(Value const& lhs, Value const& rhs);
 bool operator!=(Value const& lhs, Value const& rhs);
 
+bool operator==(Value::Array const& lhs, Value::Array const& rhs);
+bool operator!=(Value::Array const& lhs, Value::Array const& rhs);
+
+bool operator==(Value::Object const& lhs, Value::Object const& rhs);
+bool operator!=(Value::Object const& lhs, Value::Object const& rhs);
+
 }  // namespace launchdarkly
