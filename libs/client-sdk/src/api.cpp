@@ -49,8 +49,6 @@ Client::Client(Config config, Context context)
         event_processor_ = std::make_unique<detail::NullEventProcessor>();
     }
 
-    data_source_->Start();
-
     status_manager_.OnDataSourceStatusChange([this](auto status) {
         if (status.State() == DataSourceStatus::DataSourceState::kValid ||
             status.State() == DataSourceStatus::DataSourceState::kShutdown ||
