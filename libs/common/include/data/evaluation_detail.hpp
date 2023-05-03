@@ -18,12 +18,12 @@ class EvaluationDetail {
 
     EvaluationDetail(std::string error_kind, Value default_value);
 
-    [[nodiscard]] Value const& Value() const;
+    [[nodiscard]] launchdarkly::Value const& Value() const;
     [[nodiscard]] std::optional<std::size_t> VariationIndex() const;
     [[nodiscard]] EvaluationReason const& Reason() const;
 
    private:
-    class Value value_;
+    class launchdarkly::Value value_;
     std::optional<std::size_t> variation_index_;
     EvaluationReason reason_;
 };
