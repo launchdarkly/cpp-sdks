@@ -270,17 +270,11 @@ TEST(ValueTests, ToBoostJson) {
 }
 
 TEST(ValueTests, ConversionOperators) {
-    Value bool_val(true);
-    EXPECT_TRUE(bool_val);
-
-    Value string_val("potato");
-    EXPECT_EQ("potato", string_val);
-
-    Value number_val(3.14);
-    EXPECT_EQ(3.14, number_val.operator double());
-
-    Value int_val(1);
-    EXPECT_EQ(1, int_val.operator int());
+    EXPECT_TRUE(Value(true));
+    EXPECT_FALSE(Value(false));
+    EXPECT_EQ("potato", static_cast<std::string>(Value("potato")));
+    EXPECT_EQ(3.14, static_cast<double>(Value(3.14)));
+    EXPECT_EQ(1, static_cast<int>(Value(1)));
 }
 
 TEST(ValueTests, ArrayEquality) {
