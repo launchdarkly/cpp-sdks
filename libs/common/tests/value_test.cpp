@@ -283,7 +283,7 @@ TEST(ValueTests, ConversionOperators) {
     EXPECT_EQ(1, int_val.operator int());
 }
 
-TEST(ValueTests, ArrayIdentity) {
+TEST(ValueTests, ArrayEquality) {
     std::vector<Value::Array> arrays = {
         {"foo", "bar", "baz"},
         {1, 2, 3},
@@ -310,6 +310,44 @@ TEST(ValueTests, ArrayInequality) {
         {{"foo", "bar"}, {"bar", "foo"}}};
 
     for (auto const& pair : arrays) {
+        ASSERT_NE(pair.first, pair.second);
+    }
+}
+
+TEST(ValueTests, ObjectEqualityOrderDoesNotMatter) {
+    std::vector<Value::Object> objects = {
+        {{"foo", 1}, {"bar", 2}, {"baz", 3}},
+        {{"foo", 1}, {"baz", 3}, {"bar", 2}},
+        {{"bar", 2}, {"foo", 1}, {"baz", 3}},
+        {{"bar", 2}, {"baz", 3}, {"foo", 1}},
+        {{"baz", 3}, {"bar", 2}, {"foo", 1}},
+        {{"baz", 3}, {"foo", 1}, {"bar", 2}},
+    };
+
+    for (auto const& a : objects) {
+        for (auto const& b : objects) {
+            ASSERT_TRUE(a == b);
+            ASSERT_FALSE(a != b);
+        }
+    }
+}
+
+TEST(ValueTests, ObjectInequality) {
+    std::vector<std::pair<Value::Object, Value::Object>> objects = {
+        // Different keys, same values
+        {Value::Object({{"foo", true}}), Value::Object({{"bar", true}})},
+        // Same keys, different values
+        {Value::Object({{"foo", true}}), Value::Object({{"foo", false}})},
+        // Different number of keys
+        {Value::Object({{"foo", true}, {"bar", true}}),
+         Value::Object({{"foo", true}})},
+        // Same key, but values are arrays with different orderings
+        {Value::Object({{"foo", Value({"foo", "bar"})}}),
+         Value::Object({{"foo", Value({"bar", "foo"})}})},
+
+    };
+
+    for (auto const& pair : objects) {
         ASSERT_NE(pair.first, pair.second);
     }
 }
