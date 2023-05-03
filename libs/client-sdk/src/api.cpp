@@ -41,8 +41,8 @@ Client::Client(Config config, Context context)
                                   flag_updater_,
                                   status_manager_,
                                   logger_)),
-<<<<<<< HEAD
-      initialized_(false) {
+      initialized_(false),
+      eval_reasons_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<detail::EventProcessor>(
             ioc_.get_executor(), config, logger_);
@@ -52,12 +52,6 @@ Client::Client(Config config, Context context)
 
     data_source_->Start();
 
-||||||| parent of b4e9733 (feat: generate events from variation methods)
-      initialized_(false) {
-=======
-      initialized_(false),
-      eval_reasons_(config.DataSourceConfig().with_reasons) {
->>>>>>> b4e9733 (feat: generate events from variation methods)
     status_manager_.OnDataSourceStatusChange([this](auto status) {
         if (status.State() == DataSourceStatus::DataSourceState::kValid ||
             status.State() == DataSourceStatus::DataSourceState::kShutdown ||
@@ -133,7 +127,8 @@ EvaluationDetail Client::VariationInternal(FlagKey const& key,
             event.reason = error_reason;
         }
         event_processor_->AsyncSend(std::move(event));
-        return EvaluationDetail(default_value, std::nullopt, error_reason);
+        return EvaluationDetail(default_value, std::nullopt,
+                                std::move(error_reason));
     }
 
     auto const& flag = *(desc->flag);

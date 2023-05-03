@@ -14,14 +14,6 @@ Summarizer::Features() const {
     return features_;
 }
 
-static bool FlagNotFound(client::FeatureEventParams const& event) {
-    if (auto reason = event.reason) {
-        return reason->kind() == "ERROR" &&
-               reason->error_kind() == "FLAG_NOT_FOUND";
-    }
-    return false;
-}
-
 void Summarizer::Update(client::FeatureEventParams const& event) {
     auto const& kinds = event.context.kinds();
 
@@ -31,27 +23,11 @@ void Summarizer::Update(client::FeatureEventParams const& event) {
     feature_state_iterator->second.context_kinds.insert(kinds.begin(),
                                                         kinds.end());
 
-    decltype(std::begin(
-        feature_state_iterator->second.counters)) summary_counter;
-
-    if (FlagNotFound(event)) {
-        summary_counter =
-            feature_state_iterator->second.counters
-                .try_emplace(VariationKey(),
-                             feature_state_iterator->second.default_)
-                .first;
-
-    } else {
-        assert(event.variation &&
-               "if flag is present then variation should be set ");
-        assert(event.version &&
-               "if flag is present then version should be set ");
-
-        auto key = VariationKey(*event.version, *event.variation);
-        summary_counter = feature_state_iterator->second.counters
-                              .try_emplace(key, event.value)
-                              .first;
-    }
+    auto summary_counter =
+        feature_state_iterator->second.counters
+            .try_emplace(VariationKey(event.version, event.variation),
+                         event.value)
+            .first;
 
     summary_counter->second.Increment();
 }
@@ -69,7 +45,7 @@ Summarizer::Time Summarizer::end_time() const {
     return end_time_;
 }
 
-Summarizer::VariationKey::VariationKey(Version version,
+Summarizer::VariationKey::VariationKey(std::optional<Version> version,
                                        std::optional<VariationIndex> variation)
     : version(version), variation(variation) {}
 

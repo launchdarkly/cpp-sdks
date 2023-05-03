@@ -188,10 +188,6 @@ void AsioEventProcessor<SDK>::AsyncClose() {
 
 template <typename SDK>
 std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
-    if (outbox_.Empty()) {
-        return std::nullopt;
-    }
-
     auto events = boost::json::value_from(outbox_.Consume());
 
     bool has_summary =

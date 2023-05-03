@@ -7,7 +7,7 @@ FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)
       version(params.version),
       variation(params.variation),
       value(params.value),
-      default_(params.default_),
-      reason(params.reason) {}
+      reason(params.reason),
+      default_(params.default_) {}
 
 }  // namespace launchdarkly::events::client

@@ -41,7 +41,8 @@ int main() {
                     .StreamingBaseUrl("https://stream.launchdarkly.com")
                     .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
-                            .Method(DataSourceBuilder::Streaming())
+                            .Method(DataSourceBuilder::Polling().PollInterval(
+                                std::chrono::seconds(30)))
                             .WithReasons(true)
                             .UseReport(true))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
@@ -60,11 +61,8 @@ int main() {
     client.WaitForReadySync(std::chrono::seconds(30));
 
     for (int i = 0; i < 10; i++) {
-        auto detail_val = client.BoolVariationDetail("my-boolean-flag", false);
-        LD_LOG(logger, LogLevel::kInfo) << "Value was: " << detail_val.first;
-        LD_LOG(logger, LogLevel::kInfo)
-            << "Reason was: " << detail_val.second.Reason();
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        auto detail_val = client.BoolVariationDetail("my-bool-flag", false);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     // Sit around.
