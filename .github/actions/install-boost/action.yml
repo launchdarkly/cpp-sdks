@@ -15,7 +15,7 @@ runs:
   using: composite
   steps:
     - name: Install boost using action
-      if: env.RUNNER_OS != "macOS"
+      if: env.RUNNER_OS != 'macOS'
       uses: MarkusJx/install-boost@v2.4.4
       id: boost-action
       with:
@@ -24,7 +24,7 @@ runs:
 
     - name: Install boost using homebrew
       id: brew-action
-      if: env.RUNNER_OS == "macOS"
+      if: env.RUNNER_OS == 'macOS'
       shell: bash
       run: |
         brew install boost@1.81
