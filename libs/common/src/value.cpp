@@ -231,7 +231,7 @@ bool operator!=(Value const& lhs, Value const& rhs) {
 }
 
 bool operator==(Value::Array const& lhs, Value::Array const& rhs) {
-    return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.begin());
 }
 bool operator!=(Value::Array const& lhs, Value::Array const& rhs) {
     return !(lhs == rhs);

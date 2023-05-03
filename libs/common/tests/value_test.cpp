@@ -269,4 +269,49 @@ TEST(ValueTests, ToBoostJson) {
     EXPECT_EQ("ham", boost_arr.as_array().at(3).as_object().at("string"));
 }
 
+TEST(ValueTests, ConversionOperators) {
+    Value bool_val(true);
+    EXPECT_TRUE(bool_val);
+
+    Value string_val("potato");
+    EXPECT_EQ("potato", string_val);
+
+    Value number_val(3.14);
+    EXPECT_EQ(3.14L, number_val.operator double());
+
+    Value int_val(1);
+    EXPECT_EQ(1, int_val.operator int());
+}
+
+TEST(ValueTests, ArrayIdentity) {
+    std::vector<Value::Array> arrays = {
+        {"foo", "bar", "baz"},
+        {1, 2, 3},
+        {1.1, 2.2, 3.3},
+        {true, false},
+        {true, 1, 3.14, "qux", Value::Array({"foo", "bar"})}};
+
+    for (auto const& a : arrays) {
+        ASSERT_TRUE(a == a);
+        ASSERT_FALSE(a != a);
+    }
+}
+
+TEST(ValueTests, ArrayInequality) {
+    std::vector<std::pair<Value::Array, Value::Array>> arrays = {
+        {{"foo"}, {"bar"}},
+        {{"foo"}, {"foo", "foo"}},
+        {{1}, {"foo"}},
+        {
+            {3.14},
+            {3},
+        },
+        {{true}, {false}},
+        {{"foo", "bar"}, {"bar", "foo"}}};
+
+    for (auto const& pair : arrays) {
+        ASSERT_NE(pair.first, pair.second);
+    }
+}
+
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers

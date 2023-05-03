@@ -30,14 +30,6 @@ static std::unique_ptr<IDataSource> MakeDataSource(
         config, executor, context, &flag_updater, status_manager, logger);
 }
 
-// template <typename T>
-// T ValueAsType(Value  const& v);
-//
-// template <>
-// bool ValueAsType(Value const& v) {
-//     return v.as_bool();
-// }
-
 Client::Client(Config config, Context context)
     : logger_(config.Logger()),
       context_(std::move(context)),
@@ -131,6 +123,7 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
     };
 
     if (!desc || !desc->flag) {
+        // TODO: SC-199918
         auto error_reason = EvaluationReason("FLAG_NOT_FOUND");
         if (eval_reasons_) {
             event.reason = error_reason;
