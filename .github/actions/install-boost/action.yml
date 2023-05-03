@@ -1,0 +1,43 @@
+# This custom action is used because the MarkusJx/install-boost does
+# not include all built libraries for mac builds. Specifically it was
+# missing boost_json.
+name: Install Boost
+description: 'Install boost.'
+inputs:
+  platform_version:
+    required: false
+    default: "22.04"
+outputs:
+  BOOST_ROOT:
+    description: The location of the installed boost.
+    value: ${{ steps.determine-root.outputs.BOOST_ROOT }}
+runs:
+  using: composite
+  steps:
+    - name: Install boost using action
+      if: env.RUNNER_OS != "macOS"
+      uses: MarkusJx/install-boost@v2.4.4
+      id: boost-action
+      with:
+        boost_version: 1.81.0
+        platform_version: ${{ inputs.platform_version }}
+
+    - name: Install boost using homebrew
+      id: brew-action
+      if: env.RUNNER_OS == "macOS"
+      run: |
+        brew install boost@1.81
+        echo "BOOST_ROOT=$(boost --prefix boost@1.81)" >> $GITHUB_OUTPUT
+
+    - name: Determine root
+      id: determine-root
+      run: |
+        if [ -z "ROOT_ACTION" ]; then
+          echo "BOOST_ROOT=$BOOST_ACTION" >> $GITHUB_OUTPUT;
+        else
+          echo "BOOST_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT;
+        fi
+
+      env:
+        ROOT_ACTION: ${{ steps.boost-action.outputs.BOOST_ROOT }}
+        ROOT_BREW: ${{ steps.brew-action.outputs.BOOST_ROOT }}
