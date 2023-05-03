@@ -230,4 +230,20 @@ bool operator!=(Value const& lhs, Value const& rhs) {
     return !(lhs == rhs);
 }
 
+bool operator==(Value::Array const& lhs, Value::Array const& rhs) {
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+bool operator!=(Value::Array const& lhs, Value::Array const& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator==(Value::Object const& lhs, Value::Object const& rhs) {
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+bool operator!=(Value::Object const& lhs, Value::Object const& rhs) {
+    return !(lhs == rhs);
+}
+
 }  // namespace launchdarkly
