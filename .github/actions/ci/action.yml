@@ -17,6 +17,8 @@ inputs:
   platform_version:
     required: false
     default: "22.04"
+  toolset:
+    required: false
 
 runs:
   using: composite
@@ -24,6 +26,9 @@ runs:
     - name: Install boost
       uses: ./.github/actions/install-boost
       id: install-boost
+      with:
+        platform_version: ${{ inputs.platform_version }}
+        toolset: ${{ inputs.toolset }}
 
     - name: Build Library
       shell: bash

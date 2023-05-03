@@ -42,4 +42,4 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-client
           platform_version: 2022
-
+          toolset: msvc
