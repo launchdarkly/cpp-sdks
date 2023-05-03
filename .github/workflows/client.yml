@@ -32,3 +32,14 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-client
           platform_version: 12
+  build-test-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci
+        env:
+          OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
+        with:
+          cmake_target: launchdarkly-cpp-client
+          platform_version: 2022
+
