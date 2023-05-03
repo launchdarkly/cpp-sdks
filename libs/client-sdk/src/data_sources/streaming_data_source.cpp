@@ -122,9 +122,6 @@ void StreamingDataSource::Start() {
 
 void StreamingDataSource::Close() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
-    if (client_) {
-        client_->close();
-    }
 }
 
 }  // namespace launchdarkly::client_side::data_sources::detail

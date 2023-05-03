@@ -113,10 +113,6 @@ class FoxyClient : public Client,
         }
     }
 
-    virtual void close() override {
-        session_.async_shutdown(boost::asio::use_future).get();
-    }
-
    private:
     std::optional<net::ssl::context> ssl_context_;
     std::string host_;

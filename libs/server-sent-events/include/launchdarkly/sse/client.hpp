@@ -146,10 +146,6 @@ class Client {
      * the thread that is servicing the Client's executor.
      */
     virtual void run() = 0;
-    /**
-     * Closes the stream.
-     */
-    virtual void close() = 0;
 };
 
 }  // namespace launchdarkly::sse
