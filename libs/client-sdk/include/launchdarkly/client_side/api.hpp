@@ -31,6 +31,8 @@ class Client {
     Client& operator=(Client) = delete;
     Client& operator=(Client&& other) = delete;
 
+    bool Initialized() const;
+
     using FlagKey = std::string;
     [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const;
 
@@ -80,13 +82,14 @@ class Client {
     template <typename T>
     [[nodiscard]] EvaluationDetail<T> VariationInternal(FlagKey const& key,
                                                         Value default_value,
-                                                        bool check_type);
+                                                        bool check_type,
+                                                        bool detailed);
     void TrackInternal(std::string event_name,
                        std::optional<Value> data,
                        std::optional<double> metric_value);
 
     bool initialized_;
-    std::mutex init_mutex_;
+    mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
     data_sources::detail::DataSourceStatusManager status_manager_;
@@ -101,7 +104,7 @@ class Client {
     std::unique_ptr<IDataSource> data_source_;
     std::thread run_thread_;
 
-    bool eval_reasons_;
+    bool eval_reasons_available_;
 };
 
 }  // namespace launchdarkly::client_side
