@@ -46,7 +46,7 @@ int main() {
                             .WithReasons(true)
                             .UseReport(true))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
-                std::chrono::milliseconds(100)))
+                std::chrono::seconds(5)))
             .Build()
             .value(),
         ContextBuilder().kind("user", "ryan").build());
@@ -63,11 +63,10 @@ int main() {
     for (int j = 0; j < 100; j++) {
         for (int i = 0; i < 10; i++) {
             auto detail_val = client.BoolVariationDetail("my-bool-flag", false);
-            // LD_LOG(logger, LogLevel::kInfo) << "Value was: " <<
-            // detail_val.first;
-            //  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            LD_LOG(logger, LogLevel::kInfo)
+                << "Value was: " << detail_val.first;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     // Sit around.
