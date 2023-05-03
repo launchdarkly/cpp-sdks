@@ -32,9 +32,7 @@ runs:
       shell: bash
       run: |
         choco install boost-msvc-14.3 -y
-      outputs:
-        BOOST_ROOT: 'C:\local\boost_1_81_0'
-
+        echo "BOOST_ROOT=C:\local\boost_1_81_0" >> $GITHUB_OUTPUT
 
     - name: Install boost using homebrew
       id: brew-action
