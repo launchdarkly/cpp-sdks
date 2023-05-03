@@ -164,17 +164,12 @@ EvaluationDetail Client::VariationInternal(FlagKey const& key,
 }
 
 bool Client::BoolVariation(Client::FlagKey const& key, bool default_value) {
-    return VariationInternal(key, default_value, true).Value().as_bool();
+    return BoolVariationDetail(key, default_value).Value().as_bool();
 }
 
-std::pair<bool, EvaluationDetail> Client::BoolVariationDetail(
-    Client::FlagKey const& key,
-    bool default_value) {
-    auto detail = VariationInternal(key, default_value, true);
-    return {
-        detail.Value().as_bool(),
-        detail,
-    };
+EvaluationDetail Client::BoolVariationDetail(Client::FlagKey const& key,
+                                             bool default_value) {
+    return VariationInternal(key, default_value, true);
 }
 
 std::string Client::StringVariation(Client::FlagKey const& key,

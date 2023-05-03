@@ -46,8 +46,8 @@ class Client {
 
     bool BoolVariation(FlagKey const& key, bool default_value);
 
-    std::pair<bool, EvaluationDetail> BoolVariationDetail(FlagKey const& key,
-                                                          bool default_value);
+    EvaluationDetail BoolVariationDetail(FlagKey const& key,
+                                         bool default_value);
 
     std::string StringVariation(FlagKey const& key, std::string default_value);
 

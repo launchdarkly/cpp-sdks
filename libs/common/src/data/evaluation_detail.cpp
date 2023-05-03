@@ -26,4 +26,7 @@ EvaluationReason const& EvaluationDetail::Reason() const {
 std::optional<std::size_t> EvaluationDetail::VariationIndex() const {
     return variation_index_;
 }
+class launchdarkly::Value const& EvaluationDetail::operator*() const {
+    return value_;
+}
 }  // namespace launchdarkly

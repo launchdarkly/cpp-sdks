@@ -16,4 +16,6 @@ TEST(ClientTest, ConstructClientWithConfig) {
 
     ASSERT_TRUE(client.AllFlags().empty());
     ASSERT_TRUE(client.BoolVariation("cat-food", true));
+
+    ASSERT_TRUE((*client.BoolVariationDetail("cat-food", true)).as_bool());
 }
