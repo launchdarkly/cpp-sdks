@@ -10,7 +10,7 @@ extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-typedef void* LDArrayBuilder;
+typedef struct _LDArrayBuilder* LDArrayBuilder;
 
 /**
  * Construct a new array builder.

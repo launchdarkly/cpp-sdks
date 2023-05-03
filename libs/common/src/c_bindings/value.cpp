@@ -15,25 +15,26 @@ using launchdarkly::Value;
     reinterpret_cast<IteratorBinding<Value::Object::Iterator>*>(x)
 #define AS_ARR_ITER(x) \
     reinterpret_cast<IteratorBinding<Value::Array::Iterator>*>(x)
+#define AS_LDVALUE(x) reinterpret_cast<LDValue>(x)
 
 LD_EXPORT(LDValue) LDValue_NewNull() {
-    return new Value();
+    return AS_LDVALUE(new Value());
 }
 
 LD_EXPORT(LDValue) LDValue_NewBool(bool val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewNumber(double val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewString(char const* val) {
-    return new Value(val);
+    return AS_LDVALUE(new Value(val));
 }
 
 LD_EXPORT(LDValue) LDValue_NewValue(LDValue val) {
-    return new Value(*AS_VALUE(val));
+    return AS_LDVALUE(new Value(*AS_VALUE(val)));
 }
 
 LD_EXPORT(void) LDValue_Free(LDValue val) {
@@ -85,8 +86,9 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
     if (AS_VALUE(val)->is_array()) {
         auto& array = AS_VALUE(val)->as_array();
-        return new IteratorBinding<Value::Array::Iterator>{array.begin(),
-                                                           array.end()};
+        return reinterpret_cast<LDValue_ArrayIter>(
+            new IteratorBinding<Value::Array::Iterator>{array.begin(),
+                                                        array.end()});
     }
     return nullptr;
 }
@@ -102,7 +104,7 @@ LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
 
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {
     auto* val_iter = AS_ARR_ITER(iter);
-    return const_cast<Value*>(&(*val_iter->iter));
+    return AS_LDVALUE(const_cast<Value*>(&(*val_iter->iter)));
 }
 
 LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
@@ -112,8 +114,9 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
     if (AS_VALUE(val)->is_object()) {
         auto& obj = AS_VALUE(val)->as_object();
-        return new IteratorBinding<Value::Object::Iterator>{obj.begin(),
-                                                            obj.end()};
+        return reinterpret_cast<LDValue_ObjectIter>(
+            new IteratorBinding<Value::Object::Iterator>{obj.begin(),
+                                                         obj.end()});
     }
     return nullptr;
 }
@@ -129,7 +132,7 @@ LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter) {
 
 LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter) {
     auto* val_iter = AS_OBJ_ITER(iter);
-    return const_cast<Value*>(&val_iter->iter->second);
+    return AS_LDVALUE(const_cast<Value*>(&val_iter->iter->second));
 }
 
 LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter) {

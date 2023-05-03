@@ -12,8 +12,9 @@ extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-typedef void* LDContext;
-typedef void* LDContext_PrivateAttributesIter;
+typedef struct _LDContext* LDContext;
+typedef struct _LDContext_PrivateAttributesIter*
+    LDContext_PrivateAttributesIter;
 
 /**
  * Check if the context is valid.
@@ -73,7 +74,7 @@ LD_EXPORT(char const*) LDContext_Errors(LDContext context);
  * @return A private attributes iterator.
  */
 LD_EXPORT(LDContext_PrivateAttributesIter)
-LDContext_CreatePrivateAttributesIter(LDContext context, const char* kind);
+LDContext_CreatePrivateAttributesIter(LDContext context, char const* kind);
 
 /**
  * Destroy the iterator.

@@ -18,7 +18,7 @@ struct BindingContextBuilder {
 };
 
 LD_EXPORT(LDContextBuilder) LDContextBuilder_New() {
-    return new BindingContextBuilder();
+    return reinterpret_cast<LDContextBuilder>(new BindingContextBuilder());
 }
 
 LD_EXPORT(void) LDContextBuilder_Free(LDContextBuilder builder) {
@@ -29,7 +29,7 @@ LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder) {
     auto built = AS_BUILDER(builder)->builder.build();
     auto context = new Context(std::move(built));
     LDContextBuilder_Free(builder);
-    return context;
+    return reinterpret_cast<LDContext>(context);
 }
 
 LD_EXPORT(void)

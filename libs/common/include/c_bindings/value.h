@@ -60,7 +60,7 @@ enum LDValueType {
  * Accessing the members of object-type or array-type type must be done using
  * iteration.
  */
-typedef void* LDValue;
+typedef struct _LDValue* LDValue;
 
 /**
  * LDValue_ObjectIter is a handle to an iterator, bound to an LDValue.
@@ -69,7 +69,7 @@ typedef void* LDValue;
  * The iterator must be destroyed after use. An iterator for an LDValue
  * that has been freed should not be used.
  */
-typedef void* LDValue_ObjectIter;
+typedef struct _LDValue_ObjectIter* LDValue_ObjectIter;
 
 /**
  * LDValue_ArrayIter is a handle to an iterator, bound to an LDValue.
@@ -78,7 +78,7 @@ typedef void* LDValue_ObjectIter;
  * The iterator must be destroyed after use. An iterator for an LDValue
  * that has been freed should not be used.
  */
-typedef void* LDValue_ArrayIter;
+typedef struct _LDValue_ArrayIter* LDValue_ArrayIter;
 
 /**
  * Allocates a new null-type LDValue.

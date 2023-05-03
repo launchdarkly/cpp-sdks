@@ -10,7 +10,7 @@ extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-typedef void* LDObjectBuilder;
+typedef struct _LDObjectBuilder* LDObjectBuilder;
 
 /**
  * Construct a new object builder.
@@ -22,7 +22,7 @@ LD_EXPORT(LDObjectBuilder) LDObjectBuilder_New();
 /**
  * Free an object builder. This should only be done for a builder which
  * has not been built. Calling LDArrayBuilder_Build on an array builder
- * transfers consumes the array builder.
+ * consumes the array builder.
  *
  * @param builder The builder to free.
  */

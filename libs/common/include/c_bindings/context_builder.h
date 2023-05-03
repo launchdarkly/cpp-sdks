@@ -17,7 +17,7 @@ extern "C" {  // only need to export C interface if
 }
 #endif
 
-typedef void* LDContextBuilder;
+typedef struct _LDContextBuilder* LDContextBuilder;
 
 /**
  * Create a new context builder.

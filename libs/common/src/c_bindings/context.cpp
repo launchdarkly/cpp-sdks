@@ -25,7 +25,8 @@ LD_EXPORT(bool) LDContext_Valid(LDContext context) {
 
 LD_EXPORT(LDValue)
 LDContext_Get(LDContext context, char const* kind, char const* ref) {
-    return const_cast<Value*>(&(AS_CONTEXT(context)->get(kind, ref)));
+    return reinterpret_cast<LDValue>(
+        const_cast<Value*>(&(AS_CONTEXT(context)->get(kind, ref))));
 }
 
 LD_EXPORT(char const*) LDContext_Errors(LDContext context) {
@@ -39,9 +40,10 @@ LDContext_CreatePrivateAttributesIter(LDContext context, char const* kind) {
                            cpp_context->kinds().end(), kind);
     if (found != cpp_context->kinds().end()) {
         auto& attributes = cpp_context->attributes(kind);
-        return new IteratorBinding<AttributeReference::SetType::const_iterator>{
-            attributes.private_attributes().begin(),
-            attributes.private_attributes().end()};
+        return reinterpret_cast<LDContext_PrivateAttributesIter>(
+            new IteratorBinding<AttributeReference::SetType::const_iterator>{
+                attributes.private_attributes().begin(),
+                attributes.private_attributes().end()});
     }
 
     return nullptr;

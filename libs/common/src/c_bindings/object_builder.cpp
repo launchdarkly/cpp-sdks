@@ -11,9 +11,11 @@ using launchdarkly::Value;
 
 #define AS_MAP(x) reinterpret_cast<std::map<std::string, Value>*>(x)
 #define AS_VALUE(x) reinterpret_cast<Value*>(x)
+#define AS_LDVALUE(x) reinterpret_cast<LDValue>(x)
 
 LD_EXPORT(LDObjectBuilder) LDObjectBuilder_New() {
-    return new std::map<std::string, Value>();
+    return reinterpret_cast<LDObjectBuilder>(
+        new std::map<std::string, Value>());
 }
 
 LD_EXPORT(void) LDObjectBuilder_Free(LDObjectBuilder builder) {
@@ -31,7 +33,7 @@ LD_EXPORT(LDValue) LDObjectBuilder_Build(LDObjectBuilder builder) {
     auto map = AS_MAP(builder);
     auto value = new Value(std::move(*map));
     delete map;
-    return value;
+    return AS_LDVALUE(value);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
