@@ -22,7 +22,7 @@ LD_EXPORT(LDObjectBuilder) LDObjectBuilder_New();
 /**
  * Free an object builder. This should only be done for a builder which
  * has not been built. Calling LDArrayBuilder_Build on an array builder
- * transfers consumes the array builder.
+ * consumes the array builder.
  *
  * @param builder The builder to free.
  */
