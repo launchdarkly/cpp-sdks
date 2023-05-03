@@ -2,6 +2,7 @@
 // NOLINTBEGIN OCInconsistentNamingInspection
 
 #include "c_bindings/value.h"
+#include "c_bindings/iter.hpp"
 #include "value.hpp"
 
 #include <boost/core/ignore_unused.hpp>
@@ -10,21 +11,11 @@ using launchdarkly::Value;
 
 #define AS_VALUE(x) reinterpret_cast<Value*>(x)
 
-#define AS_OBJ_ITER(x) reinterpret_cast<ObjectIter*>(x)
-#define AS_ARR_ITER(x) reinterpret_cast<ArrayIter*>(x)
+#define AS_OBJ_ITER(x) \
+    reinterpret_cast<IteratorBinding<Value::Object::Iterator>*>(x)
+#define AS_ARR_ITER(x) \
+    reinterpret_cast<IteratorBinding<Value::Array::Iterator>*>(x)
 #define AS_LDVALUE(x) reinterpret_cast<LDValue>(x)
-
-struct ArrayIter {
-    ArrayIter(Value* val) : val(val), iter(val->as_array().begin()) {}
-    Value::Array::Iterator iter;
-    Value* val;
-};
-
-struct ObjectIter {
-    ObjectIter(Value* val) : val(val), iter(val->as_object().begin()) {}
-    Value::Object::Iterator iter;
-    Value* val;
-};
 
 LD_EXPORT(LDValue) LDValue_NewNull() {
     return AS_LDVALUE(new Value());
@@ -94,21 +85,21 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
     if (AS_VALUE(val)->is_array()) {
+        auto& array = AS_VALUE(val)->as_array();
         return reinterpret_cast<LDValue_ArrayIter>(
-            new ArrayIter(AS_VALUE(val)));
+            new IteratorBinding<Value::Array::Iterator>{array.begin(),
+                                                        array.end()});
     }
     return nullptr;
 }
 
 LD_EXPORT(void) LDValue_ArrayIter_Next(LDValue_ArrayIter iter) {
-    auto* val_iter = AS_ARR_ITER(iter);
-    auto res = val_iter->iter++;
-    boost::ignore_unused(res);
+    AS_ARR_ITER(iter)->Next();
 }
 
 LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
     auto* val_iter = AS_ARR_ITER(iter);
-    return val_iter->iter == val_iter->val->as_array().end();
+    return val_iter->End();
 }
 
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {
@@ -122,21 +113,21 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
     if (AS_VALUE(val)->is_object()) {
+        auto& obj = AS_VALUE(val)->as_object();
         return reinterpret_cast<LDValue_ObjectIter>(
-            new ObjectIter(AS_VALUE(val)));
+            new IteratorBinding<Value::Object::Iterator>{obj.begin(),
+                                                         obj.end()});
     }
     return nullptr;
 }
 
 LD_EXPORT(void) LDValue_ObjectIter_Next(LDValue_ObjectIter iter) {
-    auto* val_iter = AS_OBJ_ITER(iter);
-    auto res = val_iter->iter++;
-    boost::ignore_unused(res);
+    AS_OBJ_ITER(iter)->Next();
 }
 
 LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter) {
     auto* val_iter = AS_OBJ_ITER(iter);
-    return val_iter->iter == val_iter->val->as_object().end();
+    return val_iter->End();
 }
 
 LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter) {
