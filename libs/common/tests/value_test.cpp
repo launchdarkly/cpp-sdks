@@ -277,7 +277,7 @@ TEST(ValueTests, ConversionOperators) {
     EXPECT_EQ("potato", string_val);
 
     Value number_val(3.14);
-    EXPECT_EQ(3.14L, number_val.operator double());
+    EXPECT_EQ(3.14, number_val.operator double());
 
     Value int_val(1);
     EXPECT_EQ(1, int_val.operator int());
