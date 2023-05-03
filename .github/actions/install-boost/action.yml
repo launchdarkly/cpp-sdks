@@ -14,8 +14,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Debug RUNNER_OS
-      run:
     - name: Install boost using action
       if: runner.os != 'macOS'
       uses: MarkusJx/install-boost@v2.4.4
