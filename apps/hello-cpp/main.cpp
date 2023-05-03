@@ -41,8 +41,7 @@ int main() {
                     .StreamingBaseUrl("https://stream.launchdarkly.com")
                     .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
-                            .Method(DataSourceBuilder::Polling().PollInterval(
-                                std::chrono::seconds{30}))
+                            .Method(DataSourceBuilder::Polling())
                             .WithReasons(true)
                             .UseReport(true))
             .Build()

@@ -37,7 +37,7 @@ message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 
 include(${CMAKE_FILES}/expected.cmake)
-include(${CMAKE_FILES}/certify.cmake)
+include(${CMAKE_FILES}/foxy.cmake)
 
 # Add main SDK sources.
 add_subdirectory(src)
