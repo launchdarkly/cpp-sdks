@@ -21,7 +21,7 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif ()
 
-# Needed to fetch external dependencies. 
+# Needed to fetch external dependencies.
 include(FetchContent)
 
 set(OPENSSL_USE_STATIC_LIBS OFF)
