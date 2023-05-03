@@ -10,8 +10,8 @@ WorkerPool::WorkerPool(boost::asio::any_io_executor io,
                        Logger& logger)
     : io_(io), workers_() {
     for (std::size_t i = 0; i < pool_size; i++) {
-        workers_.emplace_back(
-            std::make_unique<RequestWorker>(io_, delivery_retry_delay, logger));
+        workers_.emplace_back(std::make_unique<RequestWorker>(
+            io_, delivery_retry_delay, i, logger));
     }
 }
 

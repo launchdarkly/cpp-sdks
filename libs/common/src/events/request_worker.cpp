@@ -5,12 +5,14 @@ namespace launchdarkly::events::detail {
 
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
+                             std::size_t id,
                              Logger& logger)
     : timer_(io),
       retry_delay_(retry_after),
       state_(State::Idle),
       requester_(timer_.get_executor()),
       batch_(std::nullopt),
+      tag_("flush-worker[" + std::to_string(id) + "]: "),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
@@ -49,8 +51,8 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
                                       ResultCallback callback) {
     auto [next_state, action] = NextState(state_, result);
 
-    LD_LOG(logger_, LogLevel::kDebug) << "flush-worker: " << state_ << " -> "
-                                      << next_state << ", " << action << "";
+    LD_LOG(logger_, LogLevel::kDebug)
+        << tag_ << state_ << " -> " << next_state << ", " << action << "";
 
     switch (action) {
         case Action::None:
@@ -58,12 +60,12 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
         case Action::Reset:
             if (result.IsError()) {
                 LD_LOG(logger_, LogLevel::kWarn)
-                    << "error posting " << batch_->Count()
+                    << tag_ << "error posting " << batch_->Count()
                     << " event(s) (some events were dropped): "
                     << result.ErrorMessage().value_or("unknown IO error");
             } else {
                 LD_LOG(logger_, LogLevel::kWarn)
-                    << "error posting " << batch_->Count()
+                    << tag_ << "error posting " << batch_->Count()
                     << " event(s) (some events were dropped): "
                        "HTTP error "
                     << result.Status();
@@ -72,7 +74,7 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
             break;
         case Action::NotifyPermanentFailure:
             LD_LOG(logger_, LogLevel::kWarn)
-                << "error posting " << batch_->Count()
+                << tag_ << "error posting " << batch_->Count()
                 << " event(s) (giving up permanently): HTTP error "
                 << result.Status();
             callback(batch_->Count(), result.Status());
@@ -92,12 +94,12 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
         case Action::Retry:
             if (result.IsError()) {
                 LD_LOG(logger_, LogLevel::kWarn)
-                    << "error posting " << batch_->Count()
+                    << tag_ << "error posting " << batch_->Count()
                     << " event(s) (will retry): "
                     << result.ErrorMessage().value_or("unknown IO error");
             } else {
                 LD_LOG(logger_, LogLevel::kWarn)
-                    << "error posting " << batch_->Count()
+                    << tag_ << "error posting " << batch_->Count()
                     << " event(s) (will retry): HTTP error " << result.Status();
             }
             timer_.expires_from_now(retry_delay_);
