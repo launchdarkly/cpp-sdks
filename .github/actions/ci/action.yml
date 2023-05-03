@@ -22,7 +22,7 @@ runs:
   using: composite
   steps:
     - name: Install boost
-      uses: ./actions/install-boost
+      uses: ./.github/actions/install-boost
       id: install-boost
 
     - name: Build Library
