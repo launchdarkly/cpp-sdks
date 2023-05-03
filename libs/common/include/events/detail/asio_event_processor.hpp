@@ -7,39 +7,38 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <chrono>
 #include <optional>
-#include "config/detail/built/events.hpp"
-#include "config/detail/built/service_endpoints.hpp"
+#include <tuple>
+#include "config/detail/config.hpp"
 #include "context_filter.hpp"
-#include "events/detail/conn_pool.hpp"
+#include "events/detail/event_batch.hpp"
 #include "events/detail/outbox.hpp"
 #include "events/detail/summarizer.hpp"
-#include "events/event_processor.hpp"
+#include "events/detail/worker_pool.hpp"
 #include "events/events.hpp"
 #include "logger.hpp"
+#include "network/detail/http_requester.hpp"
 
 namespace launchdarkly::events::detail {
 
-class AsioEventProcessor : public IEventProcessor {
+template <typename SDK>
+class AsioEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& io,
-                       config::detail::built::Events const& config,
-                       config::detail::built::ServiceEndpoints const& endpoints,
-                       std::string authorization,
+                       config::detail::Config<SDK> const& config,
                        Logger& logger);
 
-    void AsyncFlush() override;
+    void AsyncFlush();
 
-    void AsyncSend(InputEvent event) override;
+    void AsyncSend(InputEvent event);
 
-    void AsyncClose() override;
+    void AsyncClose();
 
    private:
+    using Clock = std::chrono::system_clock;
     enum class FlushTrigger {
         Automatic = 0,
         Manual = 1,
     };
-    using RequestType =
-        boost::beast::http::request<boost::beast::http::string_body>;
 
     boost::asio::any_io_executor io_;
     Outbox outbox_;
@@ -48,13 +47,14 @@ class AsioEventProcessor : public IEventProcessor {
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;
 
-    std::string host_;
-    std::string path_;
+    std::string url_;
     std::string authorization_;
+
+    config::detail::built::HttpProperties http_props_;
 
     boost::uuids::random_generator uuids_;
 
-    ConnPool conns_;
+    WorkerPool workers_;
 
     std::size_t inbox_capacity_;
     std::size_t inbox_size_;
@@ -62,6 +62,9 @@ class AsioEventProcessor : public IEventProcessor {
 
     bool full_outbox_encountered_;
     bool full_inbox_encountered_;
+    bool permanent_delivery_failure_;
+
+    std::optional<Clock::time_point> last_known_past_time_;
 
     launchdarkly::ContextFilter filter_;
 
@@ -69,7 +72,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     void HandleSend(InputEvent event);
 
-    std::optional<RequestType> MakeRequest();
+    std::optional<EventBatch> CreateBatch();
 
     void Flush(FlushTrigger flush_type);
 
@@ -79,6 +82,9 @@ class AsioEventProcessor : public IEventProcessor {
 
     bool InboxIncrement();
     void InboxDecrement();
+
+    void OnEventDeliveryResult(std::size_t count,
+                               RequestWorker::DeliveryResult);
 };
 
 }  // namespace launchdarkly::events::detail
