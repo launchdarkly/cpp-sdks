@@ -47,7 +47,12 @@ add_library(${LIBNAME}
         config/data_source_builder.cpp
         config/http_properties_builder.cpp
         network/http_requester.cpp
-        network/http_error_messages.cpp)
+        network/http_error_messages.cpp
+        c_bindings/value.cpp
+        c_bindings/array_builder.cpp
+        c_bindings/object_builder.cpp
+        c_bindings/context_builder.cpp
+        c_bindings/context.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
