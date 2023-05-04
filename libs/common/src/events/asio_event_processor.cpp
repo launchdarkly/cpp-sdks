@@ -188,14 +188,15 @@ void AsioEventProcessor<SDK>::AsyncClose() {
 
 template <typename SDK>
 std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
-    if (outbox_.Empty()) {
-        return std::nullopt;
-    }
-
     auto events = boost::json::value_from(outbox_.Consume());
 
-    if (!summarizer_.Finish(std::chrono::system_clock::now()).Empty()) {
+    bool has_summary =
+        !summarizer_.Finish(std::chrono::system_clock::now()).Empty();
+
+    if (has_summary) {
         events.as_array().push_back(boost::json::value_from(summarizer_));
+    } else if (outbox_.Empty()) {
+        return std::nullopt;
     }
 
     // TODO(cwaldren): Template the event processor over SDK type? Add it into
@@ -219,14 +220,13 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
         overloaded{[&](client::FeatureEventParams&& event) {
                        summarizer_.Update(event);
 
-                       if (!event.eval_result.track_events()) {
+                       if (!event.require_full_event) {
                            return;
                        }
 
                        client::FeatureEventBase base{event};
 
-                       auto debug_until_date =
-                           event.eval_result.debug_events_until_date();
+                       auto debug_until_date = event.debug_events_until_date;
 
                        auto max_time = std::max(
                            std::chrono::system_clock::now(),
@@ -234,8 +234,7 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                                std::chrono::system_clock::time_point{}));
 
                        bool emit_debug_event =
-                           debug_until_date &&
-                           debug_until_date.value() > max_time;
+                           debug_until_date && debug_until_date->t > max_time;
 
                        if (emit_debug_event) {
                            out.emplace_back(client::DebugEvent{

@@ -26,6 +26,7 @@ add_library(${LIBNAME}
         config/config.cpp
         data/evaluation_reason.cpp
         data/evaluation_detail_internal.cpp
+        data/evaluation_detail.cpp
         data/evaluation_result.cpp
         context_filter.cpp
         config/app_info_builder.cpp

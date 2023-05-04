@@ -18,13 +18,14 @@ TEST(EventSerialization, FeatureEvent) {
             creation_date,
             "key",
             ContextBuilder().kind("foo", "bar").build(),
-            EvaluationResult(
-                1, std::nullopt, false, false, std::nullopt,
-                EvaluationDetailInternal(
-                    Value(42), 2,
-                    Reason("error", std::nullopt, std::nullopt, std::nullopt,
-                           std::nullopt, false, std::nullopt))),
-            3,
+            Value(42),
+            Value(3),
+            1,
+            2,
+            std::nullopt,
+            false,
+            std::nullopt,
+
         }),
         std::map<std::string, std::string>{{"foo", "bar"}}};
 
@@ -42,18 +43,20 @@ TEST(EventSerialization, DebugEvent) {
     ContextFilter filter(false, attrs);
     auto context = ContextBuilder().kind("foo", "bar").build();
     auto event = events::client::DebugEvent{
-        client::FeatureEventBase(client::FeatureEventParams{
-            creation_date,
-            "key",
-            context,
-            EvaluationResult(
-                1, std::nullopt, false, false, std::nullopt,
-                EvaluationDetailInternal(
-                    Value(42), 2,
-                    Reason("error", std::nullopt, std::nullopt, std::nullopt,
-                           std::nullopt, false, std::nullopt))),
-            3,
-        }),
+        client::FeatureEventBase(
+            client::FeatureEventBase(client::FeatureEventParams{
+                creation_date,
+                "key",
+                ContextBuilder().kind("foo", "bar").build(),
+                Value(42),
+                Value(3),
+                1,
+                2,
+                std::nullopt,
+                false,
+                std::nullopt,
+
+            })),
         filter.filter(context)};
 
     auto event_json = boost::json::value_from(event);
