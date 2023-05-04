@@ -28,7 +28,7 @@ endif ()
 include(FetchContent)
 
 
-set(OPENSSL_USE_STATIC_LIBS OFF)
+set(OPENSSL_USE_STATIC_LIBS ON)
 set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
