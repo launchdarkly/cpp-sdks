@@ -4,6 +4,7 @@
 #include <bitset>
 #include <climits>
 #include <cstddef>
+#include <algorithm>
 
 static unsigned char const kEncodeSize = 4;
 static unsigned char const kInputBytesPerEncodeSize = 3;
