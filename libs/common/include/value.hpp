@@ -413,6 +413,14 @@ class Value final {
         return out;
     }
 
+    operator bool() const { return as_bool(); }
+
+    operator std::string() const { return as_string(); }
+
+    operator double() const { return as_double(); }
+
+    operator int() const { return as_int(); }
+
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
     Type type_;

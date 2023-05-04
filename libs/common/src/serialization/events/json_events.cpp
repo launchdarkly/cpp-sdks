@@ -29,7 +29,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     auto& obj = json_value.emplace_object();
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("key", event.key);
-    obj.emplace("version", event.version);
+    if (event.version) {
+        obj.emplace("version", *event.version);
+    }
     if (event.variation) {
         obj.emplace("variation", *event.variation);
     }

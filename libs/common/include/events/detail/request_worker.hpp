@@ -92,10 +92,12 @@ class RequestWorker {
      * operations.
      * @param retry_after How long to wait after a recoverable failure before
      * trying to deliver events again.
+     * @param id Unique identifier for the flush worker (used for logging).
      * @param logger Logger.
      */
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
+                  std::size_t id,
                   Logger& logger);
 
     /**
@@ -128,7 +130,7 @@ class RequestWorker {
         batch_ = std::move(batch);
 
         LD_LOG(logger_, LogLevel::kDebug)
-            << "posting " << batch_->Count() << " events(s) to "
+            << tag_ << "posting " << batch_->Count() << " events(s) to "
             << batch_->Target() << " with payload: "
             << batch_->Request().Body().value_or("(no body)");
 
@@ -157,6 +159,9 @@ class RequestWorker {
     /* Current event batch; only present if AsyncDeliver was called and
      * request is in-flight or a retry is taking place. */
     std::optional<EventBatch> batch_;
+
+    /* Tag used in logs. */
+    std::string tag_;
 
     Logger& logger_;
 

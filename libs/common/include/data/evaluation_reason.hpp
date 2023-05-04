@@ -86,6 +86,8 @@ class EvaluationReason {
                      bool in_experiment,
                      std::optional<std::string> big_segment_status);
 
+    explicit EvaluationReason(std::string error_kind);
+
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 

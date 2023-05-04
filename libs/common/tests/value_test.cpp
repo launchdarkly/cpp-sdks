@@ -269,6 +269,14 @@ TEST(ValueTests, ToBoostJson) {
     EXPECT_EQ("ham", boost_arr.as_array().at(3).as_object().at("string"));
 }
 
+TEST(ValueTests, ConversionOperators) {
+    EXPECT_TRUE(Value(true));
+    EXPECT_FALSE(Value(false));
+    EXPECT_EQ("potato", static_cast<std::string>(Value("potato")));
+    EXPECT_EQ(3.14, static_cast<double>(Value(3.14)));
+    EXPECT_EQ(1, static_cast<int>(Value(1)));
+}
+
 TEST(ValueTests, ArrayEquality) {
     std::vector<Value::Array> arrays = {
         {"foo", "bar", "baz"},
