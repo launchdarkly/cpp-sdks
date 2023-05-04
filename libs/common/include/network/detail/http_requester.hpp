@@ -8,6 +8,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <strings.h>
 
 #include "config/detail/built/http_properties.hpp"
 
