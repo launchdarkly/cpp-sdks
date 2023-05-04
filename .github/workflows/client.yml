@@ -39,7 +39,7 @@ jobs:
       - uses: ./.github/actions/ci
         env:
           OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
-          BOOST_LIBRARY_DIR: 'C:\\local\boost_1_81_0\\lib64-msvc-14.3'
+          BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:
           cmake_target: launchdarkly-cpp-client
           platform_version: 2022
