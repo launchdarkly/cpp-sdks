@@ -41,7 +41,8 @@ int main() {
                     .StreamingBaseUrl("https://stream.launchdarkly.com")
                     .EventsBaseUrl("https://events.launchdarkly.com"))
             .DataSource(DataSourceBuilder()
-                            .Method(DataSourceBuilder::Polling())
+                            .Method(DataSourceBuilder::Polling().PollInterval(
+                                std::chrono::seconds{30}))
                             .WithReasons(true)
                             .UseReport(true))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
