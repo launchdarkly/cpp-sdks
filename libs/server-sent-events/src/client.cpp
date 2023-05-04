@@ -43,21 +43,27 @@ class FoxyClient : public Client,
                std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
-               net::ssl::context ssl_context)
+               std::optional<net::ssl::context> ssl_context)
         : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
           port_(std::move(port)),
           connect_timeout_(connect_timeout),
           read_timeout_(read_timeout),
-          write_timeout_(read_timeout),
+          write_timeout_(write_timeout),
           req_(std::move(req)),
-          parser_(),
+          body_parser_(),
           session_(executor,
                    foxy::session_opts{
-                       .ssl_ctx = *ssl_context_,
                        .timeout = connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
-        parser_.get().body().on_event(std::move(receiver));
+        if (ssl_context_) {
+            session_.opts.ssl_ctx = *ssl_context_;
+        }
+
+        // SSE body will never end unless an error occurs, so we shouldn't set a
+        // size limit.
+        body_parser_.body_limit(boost::none);
+        body_parser_.get().body().on_event(std::move(receiver));
     }
 
     FoxyClient(boost::asio::any_io_executor executor,
@@ -69,20 +75,16 @@ class FoxyClient : public Client,
                std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger)
-        : ssl_context_(std::nullopt),
-          host_(std::move(host)),
-          port_(std::move(port)),
-          connect_timeout_(connect_timeout),
-          read_timeout_(read_timeout),
-          write_timeout_(write_timeout),
-          req_(std::move(req)),
-          parser_(),
-          session_(executor,
-                   foxy::session_opts{
-                       .timeout = connect_timeout.value_or(kNoTimeout)}),
-          logger_(std::move(logger)) {
-        parser_.get().body().on_event(std::move(receiver));
-    }
+        : FoxyClient(executor,
+                     req,
+                     host,
+                     port,
+                     connect_timeout,
+                     read_timeout,
+                     write_timeout,
+                     receiver,
+                     logger,
+                     std::nullopt) {}
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
@@ -100,16 +102,51 @@ class FoxyClient : public Client,
             return fail(ec, "connect");
         }
 
-        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
-        session_.async_perpetual_request(
-            req_, parser_,
-            beast::bind_front_handler(&FoxyClient::on_error,
-                                      shared_from_this()));
+        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
+        session_.async_write(req_,
+                             beast::bind_front_handler(&FoxyClient::on_write,
+                                                       shared_from_this()));
     }
 
-    void on_error(boost::system::error_code ec) {
+    void on_write(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
         if (ec) {
-            return fail(ec, "perpetual request");
+            return fail(ec, "send request");
+        }
+        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
+        session_.async_read_header(
+            body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
+                                                    shared_from_this()));
+    }
+
+    void on_headers(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
+        if (ec) {
+            return fail(ec, "read header");
+        }
+
+        if (!body_parser_.is_header_done()) {
+            session_.async_read_header(
+                body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
+                                                        shared_from_this()));
+            return;
+        }
+
+        auto response = body_parser_.get();
+        if (beast::http::to_status_class(response.result()) ==
+            beast::http::status_class::successful) {
+            session_.async_read(body_parser_,
+                                beast::bind_front_handler(&FoxyClient::on_error,
+                                                          shared_from_this()));
+        } else {
+            return fail(ec, "read response");
+        }
+    }
+
+    void on_error(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
+        if (ec) {
+            return fail(ec, "read body");
         }
     }
 
@@ -123,7 +160,7 @@ class FoxyClient : public Client,
     http::request<http::string_body> req_;
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
-    http::response_parser<body> parser_;
+    http::response_parser<body> body_parser_;
     foxy::client_session session_;
     Builder::LogCallback logger_;
 };
