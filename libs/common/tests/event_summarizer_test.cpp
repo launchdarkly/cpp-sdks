@@ -74,14 +74,15 @@ static FeatureEventParams FeatureEventFromParams(EvaluationParams params,
         TimeZero(),
         params.feature_key,
         std::move(context),
-        launchdarkly::EvaluationResult(
-            params.feature_version, std::nullopt, false, false, std::nullopt,
-            launchdarkly::EvaluationDetailInternal(
-                params.feature_value, params.feature_variation,
-                launchdarkly::EvaluationReason(
-                    "FALLTHROUGH", std::nullopt, std::nullopt, std::nullopt,
-                    std::nullopt, false, std::nullopt))),
+        params.feature_value,
         params.feature_default,
+        params.feature_version,
+        params.feature_variation,
+        launchdarkly::EvaluationReason("FALLTHROUGH", std::nullopt,
+                                       std::nullopt, std::nullopt, std::nullopt,
+                                       false, std::nullopt),
+        false,
+        std::nullopt,
     };
 }
 
@@ -303,14 +304,16 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
         TimeZero(),
         feature_key,
         context,
-        EvaluationResult(
-            0, std::nullopt, false, false, std::nullopt,
-            EvaluationDetailInternal(
-                Value(), std::nullopt,
-                EvaluationReason("ERROR", "FLAG_NOT_FOUND", std::nullopt,
-                                 std::nullopt, std::nullopt, false,
-                                 std::nullopt))),
         feature_default,
+        feature_default,
+        std::nullopt,
+        std::nullopt,
+
+        EvaluationReason("ERROR", "FLAG_NOT_FOUND", std::nullopt, std::nullopt,
+                         std::nullopt, false, std::nullopt),
+
+        false,
+        std::nullopt,
     };
 
     summarizer.Update(event);

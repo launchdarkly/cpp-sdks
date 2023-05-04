@@ -18,14 +18,19 @@ struct FeatureEventParams {
     Date creation_date;
     std::string key;
     Context context;
-    EvaluationResult eval_result;
+    Value value;
     Value default_;
+    std::optional<Version> version;
+    std::optional<VariationIndex> variation;
+    std::optional<Reason> reason;
+    bool require_full_event;
+    std::optional<Date> debug_events_until_date;
 };
 
 struct FeatureEventBase {
     Date creation_date;
     std::string key;
-    Version version;
+    std::optional<Version> version;
     std::optional<VariationIndex> variation;
     Value value;
     std::optional<Reason> reason;

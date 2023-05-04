@@ -413,6 +413,14 @@ class Value final {
         return out;
     }
 
+    operator bool() const { return as_bool(); }
+
+    operator std::string() const { return as_string(); }
+
+    operator double() const { return as_double(); }
+
+    operator int() const { return as_int(); }
+
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
     Type type_;
@@ -426,5 +434,11 @@ class Value final {
 
 bool operator==(Value const& lhs, Value const& rhs);
 bool operator!=(Value const& lhs, Value const& rhs);
+
+bool operator==(Value::Array const& lhs, Value::Array const& rhs);
+bool operator!=(Value::Array const& lhs, Value::Array const& rhs);
+
+bool operator==(Value::Object const& lhs, Value::Object const& rhs);
+bool operator!=(Value::Object const& lhs, Value::Object const& rhs);
 
 }  // namespace launchdarkly

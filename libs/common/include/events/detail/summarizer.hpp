@@ -76,7 +76,8 @@ class Summarizer {
         std::optional<VariationIndex> variation;
 
         VariationKey();
-        VariationKey(Version version, std::optional<VariationIndex> variation);
+        VariationKey(std::optional<Version> version,
+                     std::optional<VariationIndex> variation);
 
         bool operator==(VariationKey const& k) const {
             return k.variation == variation && k.version == version;

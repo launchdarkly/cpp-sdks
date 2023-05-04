@@ -46,6 +46,15 @@ EvaluationReason::EvaluationReason(
       in_experiment_(in_experiment),
       big_segment_status_(std::move(big_segment_status)) {}
 
+EvaluationReason::EvaluationReason(std::string error_kind)
+    : EvaluationReason("ERROR",
+                       error_kind,
+                       std::nullopt,
+                       std::nullopt,
+                       std::nullopt,
+                       false,
+                       std::nullopt) {}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;
