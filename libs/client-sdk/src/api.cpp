@@ -142,23 +142,26 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
             event_processor_->AsyncSend(std::move(event));
             return EvaluationDetail<T>(default_value, std::nullopt,
                                        std::move(error_reason));
-        } else {
-            LD_LOG(logger_, LogLevel::kInfo) << "Unknown feature flag " << key
-                                             << "; returning default value";
-
-            auto error_reason = EvaluationReason("FLAG_NOT_FOUND");
-            if (eval_reasons_available_) {
-                event.reason = error_reason;
-            }
-            event_processor_->AsyncSend(std::move(event));
-            return EvaluationDetail<T>(default_value, std::nullopt,
-                                       std::move(error_reason));
         }
+
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "Unknown feature flag " << key << "; returning default value";
+
+        auto error_reason = EvaluationReason("FLAG_NOT_FOUND");
+        if (eval_reasons_available_) {
+            event.reason = error_reason;
+        }
+        event_processor_->AsyncSend(std::move(event));
+        return EvaluationDetail<T>(default_value, std::nullopt,
+                                   std::move(error_reason));
+
     } else if (!Initialized()) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "LaunchDarkly client has not yet been initialized. "
                "Returning cached value";
     }
+
+    assert(desc->flag);
 
     auto const& flag = *(desc->flag);
     auto const& detail = flag.detail();
@@ -188,8 +191,14 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
 
     event_processor_->AsyncSend(std::move(event));
 
+    // TODO: this isn't a valid error, figure out how to handle if reason is
+    // missing.
+    EvaluationReason returned_reason("UNKNOWN");
+    if (detail.reason()) {
+        returned_reason = detail.reason()->get();
+    }
     return EvaluationDetail<T>(detail.value(), detail.variation_index(),
-                               detail.reason()->get());
+                               returned_reason);
 }
 
 EvaluationDetail<bool> Client::BoolVariationDetail(Client::FlagKey const& key,
