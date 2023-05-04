@@ -22,7 +22,7 @@ using launchdarkly::client_side::flag_manager::detail::FlagManager;
 using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kDebug, "Hello"));
+    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
 
     net::io_context ioc;
 
@@ -45,6 +45,8 @@ int main() {
                                 std::chrono::seconds{30}))
                             .WithReasons(true)
                             .UseReport(true))
+            .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
+                std::chrono::seconds(5)))
             .Build()
             .value(),
         ContextBuilder().kind("user", "ryan").build());
@@ -58,8 +60,9 @@ int main() {
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
-    auto value = client.BoolVariation("my-boolean-flag", false);
-    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << value;
+    auto value = client.BoolVariationDetail("my-bool-flag", false);
+    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
+    LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << value.Reason();
 
     // Sit around.
     std::cout << "Press enter to exit" << std::endl;
