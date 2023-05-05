@@ -246,15 +246,6 @@ std::shared_ptr<Client> Builder::build() {
     return std::make_shared<FoxyClient>(
         net::make_strand(executor_), request, host, service, connect_timeout_,
         read_timeout_, write_timeout_, receiver_, logging_cb_, std::move(ssl));
-    //    } else {
-    //        std::string port =
-    //            uri_components->has_port() ? uri_components->port() : "http";
-    //
-    //        return std::make_shared<FoxyClient>(
-    //            net::make_strand(executor_), request, host, port,
-    //            connect_timeout_, read_timeout_, write_timeout_, receiver_,
-    //            logging_cb_);
-    //    }
 }
 
 }  // namespace launchdarkly::sse
