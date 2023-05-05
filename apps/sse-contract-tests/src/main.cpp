@@ -21,11 +21,13 @@ int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{
         std::make_unique<ConsoleBackend>("sse-contract-tests")};
 
-    std::string port = "8123";
+    const std::string default_port = "8123";
+    std::string port = default_port;
     if (argc == 2) {
         port =
             argv[1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
+
     try {
         net::io_context ioc{1};
 
@@ -49,6 +51,13 @@ int main(int argc, char* argv[]) {
         ioc.run();
         LD_LOG(logger, LogLevel::kInfo) << "bye!";
 
+    } catch (boost::bad_lexical_cast&) {
+        LD_LOG(logger, LogLevel::kError)
+            << "invalid port (" << port
+            << "), provide a number (no arguments defaults "
+               "to port "
+            << default_port << ")";
+        return EXIT_FAILURE;
     } catch (std::exception const& e) {
         LD_LOG(logger, LogLevel::kError) << e.what();
         return EXIT_FAILURE;
