@@ -18,6 +18,7 @@
 #include "launchdarkly/client_side/event_processor.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_notifier.hpp"
 #include "logger.hpp"
 #include "value.hpp"
 
@@ -73,6 +74,8 @@ class Client {
                                                 Value default_value);
 
     data_sources::IDataSourceStatusProvider& DataSourceStatus();
+
+    flag_manager::detail::IFlagNotifier& FlagNotifier();
 
     void WaitForReadySync(std::chrono::seconds timeout);
 
