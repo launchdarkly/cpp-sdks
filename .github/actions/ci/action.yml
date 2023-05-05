@@ -14,18 +14,22 @@ inputs:
     description: 'Whether gtest targets should be built & run.'
     required: false
     default: 'true'
-
+  platform_version:
+    required: false
+    default: "22.04"
+  toolset:
+    required: false
 
 runs:
   using: composite
   steps:
     - name: Install boost
-      uses: MarkusJx/install-boost@v2.4.4
+      uses: ./.github/actions/install-boost
       id: install-boost
       with:
-        boost_version: 1.81.0
-        platform_version: 22.04
-        boost_install_dir: /home/runner/boost
+        platform_version: ${{ inputs.platform_version }}
+        toolset: ${{ inputs.toolset }}
+
     - name: Build Library
       shell: bash
       run: ./scripts/build.sh ${{ inputs.cmake_target }} ON
