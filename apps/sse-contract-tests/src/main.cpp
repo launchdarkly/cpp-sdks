@@ -5,6 +5,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/beast.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <memory>
 
@@ -27,7 +28,8 @@ int main(int argc, char* argv[]) {
     try {
         net::io_context ioc{1};
 
-        auto srv = std::make_shared<server>(ioc, "0.0.0.0", port, logger);
+        auto p = boost::lexical_cast<unsigned short>(port);
+        auto srv = std::make_shared<server>(ioc, "0.0.0.0", p, logger);
         srv->add_capability("headers");
         srv->add_capability("comments");
         srv->add_capability("report");

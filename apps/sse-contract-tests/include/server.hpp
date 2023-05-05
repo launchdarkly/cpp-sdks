@@ -7,6 +7,8 @@
 #include "entity_manager.hpp"
 #include "logger.hpp"
 
+#include <foxy/listener.hpp>
+
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
 #include <vector>
@@ -15,7 +17,7 @@ using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 class server : public std::enable_shared_from_this<server> {
     net::io_context& ioc_;
-    tcp::acceptor acceptor_;
+    foxy::listener listener_;
     EntityManager entity_manager_;
     std::vector<std::string> caps_;
     launchdarkly::Logger& logger_;
@@ -31,7 +33,7 @@ class server : public std::enable_shared_from_this<server> {
      */
     server(net::io_context& ioc,
            std::string const& address,
-           std::string const& port,
+           unsigned short port,
            launchdarkly::Logger& logger);
     /**
      * Advertise an optional test-harness capability, such as "comments".
@@ -45,6 +47,6 @@ class server : public std::enable_shared_from_this<server> {
 
    private:
     void do_accept();
-    void on_accept(boost::system::error_code const& ec, tcp::socket socket);
+    void on_accept(foxy::server_session& session);
     void fail(boost::beast::error_code ec, char const* what);
 };

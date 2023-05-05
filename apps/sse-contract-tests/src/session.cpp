@@ -9,16 +9,14 @@ namespace net = boost::asio;
 
 using launchdarkly::LogLevel;
 
-Session::Session(tcp::socket&& socket,
+Session::Session(foxy::server_session& session,
                  EntityManager& manager,
                  std::vector<std::string> caps,
                  launchdarkly::Logger& logger)
-    : stream_{std::move(socket)},
-      manager_{manager},
-      capabilities_{std::move(caps)},
-      on_shutdown_cb_{},
-      shutdown_requested_{false},
-      logger_{logger} {
+    : session_(session),
+      manager_(manager),
+      capabilities_(std::move(caps)),
+      logger_(logger) {
     LD_LOG(logger_, LogLevel::kDebug) << "session: created";
 }
 
@@ -28,78 +26,16 @@ Session::~Session() {
 
 void Session::start() {
     LD_LOG(logger_, LogLevel::kDebug) << "session: start";
-    net::dispatch(
-        stream_.get_executor(),
-        beast::bind_front_handler(&Session::do_read, shared_from_this()));
 }
 
 void Session::stop() {
     LD_LOG(logger_, LogLevel::kDebug) << "session: stop";
-    net::dispatch(stream_.get_executor(),
-                  beast::bind_front_handler(
-                      &Session::do_stop, shared_from_this(), "stop requested"));
+    //    session_.async_shutdown(
+    //        beast::bind_front_handler(&Session::on_stop, shared_from_this()));
 }
 
-void Session::do_stop(char const* reason) {
-    LD_LOG(logger_, LogLevel::kDebug)
-        << "session: closing socket (" << reason << ")";
-    stream_.close();
-}
-
-void Session::do_read() {
-    request_ = {};
-
-    LD_LOG(logger_, LogLevel::kDebug) << "session: awaiting request";
-    http::async_read(
-        stream_, buffer_, request_,
-        beast::bind_front_handler(&Session::on_read, shared_from_this()));
-}
-
-void Session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
-    boost::ignore_unused(bytes_transferred);
-
-    if (ec == http::error::end_of_stream) {
-        return do_stop("end of stream");
-    }
-
-    if (ec) {
-        return do_stop("read failed");
-    }
-
-    send_response(handle_request(std::move(request_)));
-}
-
-void Session::send_response(http::message_generator&& msg) {
-    beast::async_write(
-        stream_, std::move(msg),
-        beast::bind_front_handler(&Session::on_write, shared_from_this(),
-                                  request_.keep_alive()));
-}
-
-void Session::on_write(bool keep_alive,
-                       beast::error_code ec,
-                       std::size_t bytes_transferred) {
-    boost::ignore_unused(bytes_transferred);
-
-    if (shutdown_requested_ && on_shutdown_cb_) {
-        LD_LOG(logger_, LogLevel::kDebug)
-            << "session: client requested server termination";
-        on_shutdown_cb_();
-    }
-
-    if (ec) {
-        return do_stop("write failed");
-    }
-
-    if (!keep_alive) {
-        return do_stop("client dropped connection");
-    }
-
-    do_read();
-}
-
-http::message_generator Session::handle_request(
-    http::request<http::string_body>&& req) {
+http::response<http::string_body> Session::generate_response(
+    http::request<http::string_body>& req) {
     auto const bad_request = [&req](beast::string_view why) {
         http::response<http::string_body> res{http::status::bad_request,
                                               req.version()};
@@ -145,7 +81,7 @@ http::message_generator Session::handle_request(
     };
 
     auto const create_entity_response = [&req](std::string const& id) {
-        http::response<http::empty_body> res{http::status::ok, req.version()};
+        http::response<http::string_body> res{http::status::ok, req.version()};
         res.keep_alive(req.keep_alive());
         res.set("Location", kEntityPath + id);
         res.prepare_payload();
@@ -154,14 +90,14 @@ http::message_generator Session::handle_request(
 
     auto const destroy_entity_response = [&req](bool erased) {
         auto status = erased ? http::status::ok : http::status::not_found;
-        http::response<http::empty_body> res{status, req.version()};
+        http::response<http::string_body> res{status, req.version()};
         res.keep_alive(req.keep_alive());
         res.prepare_payload();
         return res;
     };
 
     auto const shutdown_server_response = [&req]() {
-        http::response<http::empty_body> res{http::status::ok, req.version()};
+        http::response<http::string_body> res{http::status::ok, req.version()};
         res.keep_alive(false);
         res.prepare_payload();
         return res;
@@ -172,8 +108,8 @@ http::message_generator Session::handle_request(
     }
 
     if (req.method() == http::verb::head && req.target() == "/") {
-        return http::response<http::empty_body>{http::status::ok,
-                                                req.version()};
+        return http::response<http::string_body>{http::status::ok,
+                                                 req.version()};
     }
 
     if (req.method() == http::verb::delete_ && req.target() == "/") {
