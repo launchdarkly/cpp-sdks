@@ -1,7 +1,39 @@
 #include "serialization/json_evaluation_reason.hpp"
 #include "serialization/value_mapping.hpp"
 
+#include <sstream>
+
 namespace launchdarkly {
+
+tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<EvaluationReason::Kind, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    if (!json_value.is_string()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+    auto const& str = json_value.as_string();
+    if (str == "OFF") {
+        return EvaluationReason::Kind::kOff;
+    }
+    if (str == "FALLTHROUGH") {
+        return EvaluationReason::Kind::kFallthrough;
+    }
+    if (str == "TARGET_MATCH") {
+        return EvaluationReason::Kind::kTargetMatch;
+    }
+    if (str == "RULE_MATCH") {
+        return EvaluationReason::Kind::kRuleMatch;
+    }
+    if (str == "PREREQUISITE_FAILED") {
+        return EvaluationReason::Kind::kPrerequisiteFailed;
+    }
+    if (str == "ERROR") {
+        return EvaluationReason::Kind::kError;
+    }
+    return tl::make_unexpected(JsonError::kSchemaFailure);
+}
+
 tl::expected<EvaluationReason, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const&
         unused,
@@ -11,9 +43,16 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         auto& json_obj = json_value.as_object();
 
         auto kind_iter = json_obj.find("kind");
-        auto kind = ValueAsOpt<std::string>(kind_iter, json_obj.end());
-        if (!kind.has_value()) {
-            return tl::unexpected(JsonError::kSchemaFailure);
+        if (kind_iter == json_obj.end()) {
+            return tl::make_unexpected(JsonError::kSchemaFailure);
+        }
+
+        auto kind = boost::json::value_to<
+            tl::expected<EvaluationReason::Kind, JsonError>>(
+            kind_iter->value());
+
+        if (!kind) {
+            return tl::make_unexpected(kind.error());
         }
 
         auto* error_kind_iter = json_obj.find("errorKind");
@@ -38,7 +77,7 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         auto big_segment_status =
             ValueAsOpt<std::string>(big_segment_status_iter, json_obj.end());
 
-        return EvaluationReason{std::string(kind.value()),
+        return EvaluationReason{*kind,
                                 error_kind,
                                 rule_index,
                                 rule_id,
@@ -48,12 +87,19 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
-
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason::Kind const& kind) {
+    auto& str = json_value.emplace_string();
+    std::ostringstream oss;
+    oss << kind;
+    str = oss.str();
+}
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 EvaluationReason const& reason) {
     auto& obj = json_value.emplace_object();
-    obj.emplace("kind", reason.kind());
+    obj.emplace("kind", boost::json::value_from(reason.kind()));
     if (auto error_kind = reason.error_kind()) {
         obj.emplace("errorKind", *error_kind);
     }

@@ -12,23 +12,28 @@ namespace launchdarkly {
  */
 class EvaluationReason {
    public:
+    enum class Kind {
+        // The flag was off and therefore returned its configured off value.
+        kOff = 0,
+        // The flag was on but the context did not match any targets or rules.
+        kFallthrough = 1,
+        // The context key was specifically targeted for this flag.
+        kTargetMatch = 2,
+        // The context matched one of the flag's rules.
+        kRuleMatch = 3,
+        // The flag was considered off because it had at least one prerequisite
+        // flag that either was off or did not return the desired variation.
+        kPrerequisiteFailed = 4,
+        // The flag could not be evaluated, e.g. because it does not exist or
+        // due to an unexpected error.
+        kError = 5
+    };
+    friend std::ostream& operator<<(std::ostream& out, Kind const& kind);
+
     /**
-     * The general category of the reason:
-     *
-     * - `"OFF"`: The flag was off and therefore returned its configured off
-     * value.
-     * - `"FALLTHROUGH"`: The flag was on but the context did not match any
-     * targets or rules.
-     * - `"TARGET_MATCH"`: The context key was specifically targeted for this
-     * flag.
-     * - `"RULE_MATCH"`: the context matched one of the flag"s rules.
-     * - `"PREREQUISITE_FAILED"`: The flag was considered off because it had at
-     * least one prerequisite flag that either was off or did not return the
-     * desired variation.
-     * - `"ERROR"`: The flag could not be evaluated, e.g. because it does not
-     * exist or due to an unexpected error.
+     * @return The general category of the reason.
      */
-    [[nodiscard]] std::string const& kind() const;
+    [[nodiscard]] Kind const& kind() const;
 
     /**
      * A further description of the error condition, if the kind was `"ERROR"`.
@@ -78,7 +83,7 @@ class EvaluationReason {
      */
     [[nodiscard]] std::optional<std::string> big_segment_status() const;
 
-    EvaluationReason(std::string kind,
+    EvaluationReason(Kind kind,
                      std::optional<std::string> error_kind,
                      std::optional<std::size_t> rule_index,
                      std::optional<std::string> rule_id,
@@ -92,7 +97,7 @@ class EvaluationReason {
                                     EvaluationReason const& reason);
 
    private:
-    std::string kind_;
+    Kind kind_;
     std::optional<std::string> error_kind_;
     std::optional<std::size_t> rule_index_;
     std::optional<std::string> rule_id_;

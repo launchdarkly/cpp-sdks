@@ -20,7 +20,7 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
                                "\"bigSegmentStatus\":\"STORE_ERROR\""
                                "}"));
 
-    EXPECT_EQ("OFF", reason.value().kind());
+    EXPECT_EQ(EvaluationReason::Kind::kOff, reason.value().kind());
     EXPECT_EQ("ERROR_KIND", reason.value().error_kind());
     EXPECT_EQ(12, reason.value().rule_index());
     EXPECT_EQ("RULE_ID", reason.value().rule_id());
@@ -36,7 +36,7 @@ TEST(EvaluationReasonsTests, FromMinimalJson) {
                                "\"kind\":\"RULE_MATCH\""
                                "}"));
 
-    EXPECT_EQ("RULE_MATCH", reason.value().kind());
+    EXPECT_EQ(EvaluationReason::Kind::kRuleMatch, reason.value().kind());
     EXPECT_EQ(std::nullopt, reason.value().error_kind());
     EXPECT_EQ(std::nullopt, reason.value().rule_index());
     EXPECT_EQ(std::nullopt, reason.value().rule_id());

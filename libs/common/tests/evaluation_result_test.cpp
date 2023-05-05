@@ -5,6 +5,7 @@
 #include "data/evaluation_result.hpp"
 #include "serialization/json_evaluation_result.hpp"
 
+using launchdarkly::EvaluationReason;
 using launchdarkly::EvaluationResult;
 
 // NOLINTBEGIN bugprone-unchecked-optional-access
@@ -46,7 +47,8 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
                       .as_object()["item"]
                       .as_int());
     EXPECT_EQ(84, evaluation_result.value().detail().variation_index());
-    EXPECT_EQ("OFF", evaluation_result.value().detail().reason()->get().kind());
+    EXPECT_EQ(EvaluationReason::Kind::kOff,
+              evaluation_result.value().detail().reason()->get().kind());
     EXPECT_EQ("ERROR_KIND",
               evaluation_result.value().detail().reason()->get().error_kind());
     EXPECT_EQ(12,

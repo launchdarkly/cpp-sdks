@@ -2,7 +2,32 @@
 
 namespace launchdarkly {
 
-std::string const& EvaluationReason::kind() const {
+std::ostream& operator<<(std::ostream& out,
+                         EvaluationReason::Kind const& kind) {
+    switch (kind) {
+        case EvaluationReason::Kind::kOff:
+            out << "OFF";
+            break;
+        case EvaluationReason::Kind::kFallthrough:
+            out << "FALLTHROUGH";
+            break;
+        case EvaluationReason::Kind::kTargetMatch:
+            out << "TARGET_MATCH";
+            break;
+        case EvaluationReason::Kind::kRuleMatch:
+            out << "RULE_MATCH";
+            break;
+        case EvaluationReason::Kind::kPrerequisiteFailed:
+            out << "PREREQUISITE_FAILED";
+            break;
+        case EvaluationReason::Kind::kError:
+            out << "ERROR";
+            break;
+    }
+    return out;
+}
+
+EvaluationReason::Kind const& EvaluationReason::kind() const {
     return kind_;
 }
 
@@ -31,14 +56,14 @@ std::optional<std::string> EvaluationReason::big_segment_status() const {
 }
 
 EvaluationReason::EvaluationReason(
-    std::string kind,
+    Kind kind,
     std::optional<std::string> error_kind,
     std::optional<std::size_t> rule_index,
     std::optional<std::string> rule_id,
     std::optional<std::string> prerequisite_key,
     bool in_experiment,
     std::optional<std::string> big_segment_status)
-    : kind_(std::move(kind)),
+    : kind_(kind),
       error_kind_(std::move(error_kind)),
       rule_index_(rule_index),
       rule_id_(std::move(rule_id)),
@@ -47,7 +72,7 @@ EvaluationReason::EvaluationReason(
       big_segment_status_(std::move(big_segment_status)) {}
 
 EvaluationReason::EvaluationReason(std::string error_kind)
-    : EvaluationReason("ERROR",
+    : EvaluationReason(Kind::kError,
                        error_kind,
                        std::nullopt,
                        std::nullopt,
