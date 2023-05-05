@@ -22,10 +22,6 @@ option(BUILD_TESTING "Enable C++ unit tests." ON)
 # If you want to run the unit tests with valgrind, then TESTING_SANITIZERS must of OFF.
 option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-endif ()
-
 if (BUILD_TESTING)
     if (TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
