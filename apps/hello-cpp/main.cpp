@@ -60,7 +60,7 @@ int main() {
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
-    auto value = client.BoolVariationDetail("my-bool-flag", false);
+    auto value = client.BoolVariationDetail("my-boolean-flag", false);
     LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
     LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << value.Reason();
 
