@@ -40,7 +40,7 @@ EvaluationReason::EvaluationReason(
     bool in_experiment,
     std::optional<std::string> big_segment_status)
     : kind_(kind),
-      error_kind_(std::move(error_kind)),
+      error_kind_(error_kind),
       rule_index_(rule_index),
       rule_id_(std::move(rule_id)),
       prerequisite_key_(std::move(prerequisite_key)),
