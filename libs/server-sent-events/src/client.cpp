@@ -73,6 +73,7 @@ class FoxyClient : public Client,
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
+        do_close();
     }
 
     virtual void run() override {
@@ -81,6 +82,19 @@ class FoxyClient : public Client,
             beast::bind_front_handler(&FoxyClient::on_connect,
                                       shared_from_this()));
     }
+
+    virtual void close() override {
+        boost::asio::post(session_.get_executor(),
+                          beast::bind_front_handler(&FoxyClient::do_close,
+                                                    shared_from_this()));
+    }
+
+    void do_close() {
+        session_.async_shutdown(beast::bind_front_handler(&FoxyClient::on_close,
+                                                          shared_from_this()));
+    }
+
+    void on_close(boost::system::error_code ec) { boost::ignore_unused(ec); }
 
     void on_connect(boost::system::error_code ec) {
         if (ec) {
@@ -120,17 +134,19 @@ class FoxyClient : public Client,
         auto response = body_parser_.get();
         if (beast::http::to_status_class(response.result()) ==
             beast::http::status_class::successful) {
-            session_.async_read(body_parser_,
-                                beast::bind_front_handler(&FoxyClient::on_error,
-                                                          shared_from_this()));
+            session_.async_read(body_parser_, beast::bind_front_handler(
+                                                  &FoxyClient::on_read_complete,
+                                                  shared_from_this()));
         } else {
             return fail(ec, "read response");
         }
     }
 
-    void on_error(boost::system::error_code ec, std::size_t amount) {
+    void on_read_complete(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
-        if (ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            do_close();
+        } else {
             return fail(ec, "read body");
         }
     }
