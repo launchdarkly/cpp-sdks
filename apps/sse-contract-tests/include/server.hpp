@@ -15,7 +15,7 @@ namespace net = boost::asio;  // from <boost/asio.hpp>
 
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-class server : public std::enable_shared_from_this<server> {
+class server {
     net::io_context& ioc_;
     foxy::listener listener_;
     EntityManager entity_manager_;
@@ -44,6 +44,8 @@ class server : public std::enable_shared_from_this<server> {
      * Begins an async operation to start accepting requests.
      */
     void run();
+
+    void shutdown();
 
    private:
     void do_accept();

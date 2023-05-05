@@ -36,9 +36,13 @@ void server::run() {
     //    LD_LOG(logger_, LogLevel::kInfo)
     //        << "server: listening on " << address << ":" << port
 
-    listener_.async_accept([this, self = shared_from_this()](auto& server) {
+    listener_.async_accept([this](auto& server) {
         return Session(server, entity_manager_, caps_, logger_);
     });
+}
+
+void server::shutdown() {
+    listener_.shutdown();
 }
 
 void server::on_accept(foxy::server_session& server_session) {

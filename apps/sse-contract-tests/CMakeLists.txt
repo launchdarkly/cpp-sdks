@@ -8,6 +8,7 @@ project(
         LANGUAGES CXX
 )
 
+
 include(${CMAKE_FILES}/json.cmake)
 include(${CMAKE_FILES}/foxy.cmake)
 
@@ -24,6 +25,7 @@ target_link_libraries(sse-tests PRIVATE
         launchdarkly::common
         foxy
         nlohmann_json::nlohmann_json
+        Boost::coroutine
         )
 
 target_include_directories(sse-tests PUBLIC include)

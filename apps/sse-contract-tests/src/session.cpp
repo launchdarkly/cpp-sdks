@@ -14,22 +14,23 @@ Session::Session(foxy::server_session& session,
                  std::vector<std::string> caps,
                  launchdarkly::Logger& logger)
     : session_(session),
+      frame_(std::make_unique<Frame>()),
       manager_(manager),
-      capabilities_(std::move(caps)),
+      caps_(std::move(caps)),
       logger_(logger) {
-    LD_LOG(logger_, LogLevel::kDebug) << "session: created";
+    // LD_LOG(logger_, LogLevel::kDebug) << "session: created";
 }
 
-Session::~Session() {
-    LD_LOG(logger_, LogLevel::kDebug) << "session: destroyed";
-}
+// Session::~Session() {
+//     // LD_LOG(logger_, LogLevel::kDebug) << "session: destroyed";
+// }
 
 void Session::start() {
-    LD_LOG(logger_, LogLevel::kDebug) << "session: start";
+    // LD_LOG(logger_, LogLevel::kDebug) << "session: start";
 }
 
 void Session::stop() {
-    LD_LOG(logger_, LogLevel::kDebug) << "session: stop";
+    // LD_LOG(logger_, LogLevel::kDebug) << "session: stop";
     //    session_.async_shutdown(
     //        beast::bind_front_handler(&Session::on_stop, shared_from_this()));
 }
@@ -104,7 +105,7 @@ http::response<http::string_body> Session::generate_response(
     };
 
     if (req.method() == http::verb::get && req.target() == "/") {
-        return capabilities_response(capabilities_);
+        return capabilities_response(caps_);
     }
 
     if (req.method() == http::verb::head && req.target() == "/") {
@@ -119,7 +120,7 @@ http::response<http::string_body> Session::generate_response(
 
     if (req.method() == http::verb::post && req.target() == "/") {
         try {
-            auto json = nlohmann::json::parse(request_.body());
+            auto json = nlohmann::json::parse(req.body());
             auto params = json.get<ConfigParams>();
             if (auto id = manager_.create(std::move(params))) {
                 return create_entity_response(*id);

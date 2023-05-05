@@ -4,6 +4,7 @@
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/spawn.hpp>
 #include <boost/beast.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -29,18 +30,21 @@ int main(int argc, char* argv[]) {
         net::io_context ioc{1};
 
         auto p = boost::lexical_cast<unsigned short>(port);
-        auto srv = std::make_shared<server>(ioc, "0.0.0.0", p, logger);
-        srv->add_capability("headers");
-        srv->add_capability("comments");
-        srv->add_capability("report");
-        srv->add_capability("post");
-        srv->add_capability("read-timeout");
-        srv->run();
+        server srv(ioc, "0.0.0.0", p, logger);
+        srv.run();
+
+        srv.add_capability("headers");
+        srv.add_capability("comments");
+        srv.add_capability("report");
+        srv.add_capability("post");
+        srv.add_capability("read-timeout");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
-        signals.async_wait([&](beast::error_code const&, int) {
+
+        boost::asio::spawn(ioc.get_executor(), [&](auto yield) mutable {
+            signals.async_wait(yield);
             LD_LOG(logger, LogLevel::kInfo) << "shutting down..";
-            ioc.stop();
+            srv.shutdown();
         });
 
         ioc.run();
