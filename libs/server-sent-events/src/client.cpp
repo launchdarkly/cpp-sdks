@@ -61,9 +61,8 @@ class FoxyClient : public Client,
           req_(std::move(req)),
           body_parser_(),
           session_(executor,
-                   foxy::session_opts{
-                       .ssl_ctx = ToOptRef(ssl_context_),
-                       .timeout = connect_timeout.value_or(kNoTimeout)}),
+                   foxy::session_opts{ToOptRef(ssl_context_),
+                                      connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
         // SSE body will never end unless an error occurs, so we shouldn't set a
         // size limit.
