@@ -1,7 +1,10 @@
 
 #include <gtest/gtest.h>
+
 #include <ostream>
 #include <tuple>
+#include <algorithm>
+
 #include "config/detail/builders/app_info_builder.hpp"
 #include "error.hpp"
 #include "null_logger.hpp"

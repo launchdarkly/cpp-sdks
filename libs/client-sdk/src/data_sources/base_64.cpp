@@ -1,5 +1,6 @@
 #include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bitset>
 #include <climits>
@@ -58,8 +59,11 @@ std::string Base64UrlEncode(std::string const& input) {
 
     while (bit_index < bit_count) {
         // Get either 6 bits, or the remaining number of bits.
-        auto bits = GetBits(bit_index,
-                            std::min(kIndexBits, bit_count - bit_index), input);
+        auto bits =
+            GetBits(bit_index,
+                    std::min(kIndexBits,
+                             static_cast<unsigned long>(bit_count - bit_index)),
+                    input);
         out.push_back(static_cast<char>(kBase64Table.at(bits.to_ulong())));
         bit_index += kIndexBits;
     }

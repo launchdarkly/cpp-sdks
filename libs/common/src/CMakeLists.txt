@@ -60,7 +60,7 @@ add_library(launchdarkly::common ALIAS ${LIBNAME})
 
 target_link_libraries(${LIBNAME}
         PUBLIC Boost::headers tl::expected OpenSSL::SSL foxy
-        PRIVATE Boost::url Boost::json)
+        PRIVATE Boost::url Boost::json Boost::disable_autolinking)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

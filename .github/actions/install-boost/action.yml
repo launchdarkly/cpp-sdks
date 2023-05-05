@@ -1,0 +1,63 @@
+# This custom action is used because the MarkusJx/install-boost does
+# not include all built libraries for mac or windows builds.
+# Specifically, it was missing boost_json.
+name: Install Boost
+description: 'Install boost.'
+inputs:
+  platform_version:
+    required: false
+    default: "22.04"
+  toolset:
+    required: false
+
+outputs:
+  BOOST_ROOT:
+    description: The location of the installed boost.
+    value: ${{ steps.determine-root.outputs.BOOST_ROOT }}
+runs:
+  using: composite
+  steps:
+    - name: Install boost using action
+      if: runner.os == 'Linux'
+      uses: MarkusJx/install-boost@v2.4.4
+      id: boost-action
+      with:
+        boost_version: 1.81.0
+        toolset: ${{ inputs.toolset }}
+        platform_version: ${{ inputs.platform_version }}
+
+    - name: Download boost binaries from artifactory
+      if: runner.os == 'Windows'
+      id: boost-download
+      shell: bash
+      run: |
+        choco install boost-msvc-14.3 -y
+        echo "BOOST_ROOT=C:\local\boost_1_81_0" >> $GITHUB_OUTPUT
+
+    - name: Install boost using homebrew
+      id: brew-action
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install boost@1.81
+        echo "BOOST_ROOT=$(boost --prefix boost@1.81)" >> $GITHUB_OUTPUT
+
+    - name: Determine root
+      id: determine-root
+      shell: bash
+      run: |
+        if [ ! -z "$ROOT_ACTION" ]; then
+          echo "BOOST_ROOT=$ROOT_ACTION" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_ACTION"
+        elif [ ! -z "$ROOT_DOWN" ]; then
+          echo "BOOST_ROOT=$ROOT_DOWN" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_DOWN"
+        else
+          echo "BOOST_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT
+          echo Setting BOOST_ROOT to "$ROOT_BREW"
+        fi
+
+      env:
+        ROOT_ACTION: ${{ steps.boost-action.outputs.BOOST_ROOT }}
+        ROOT_BREW: ${{ steps.brew-action.outputs.BOOST_ROOT }}
+        ROOT_DOWN: ${{ steps.boost-download.outputs.BOOST_ROOT }}

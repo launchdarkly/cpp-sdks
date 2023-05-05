@@ -11,7 +11,8 @@ add_library(${LIBNAME}
         backoff.cpp)
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers
-        PRIVATE Boost::url foxy)
+        PRIVATE Boost::url Boost::disable_autolinking foxy
+        )
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 
