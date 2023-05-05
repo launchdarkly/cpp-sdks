@@ -13,8 +13,7 @@ FetchContent_Declare(foxy
         GIT_TAG 7f4ac0495ad2ed9cd0eca5994743d677ac1d2636
         )
 
-# Disable testing for foxy; can be enabled if we bring in Catch2 dependency.
-get_property(ORIGINAL_BUILD_TESTING GLOBAL PROPERTY BUILD_TESTING)
-set(BUILD_TESTING OFF CACHE BOOL "Disable building tests for foxy" FORCE)
+
+set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(foxy)
-set_property(GLOBAL PROPERTY BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
+set(BUILD_TESTING ON)
