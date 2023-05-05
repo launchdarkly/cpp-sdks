@@ -1,12 +1,13 @@
 #include "data/evaluation_reason.hpp"
-
+#include "serialization/json_evaluation_reason.hpp"
 namespace launchdarkly {
 
-std::string const& EvaluationReason::kind() const {
+EvaluationReason::Kind const& EvaluationReason::kind() const {
     return kind_;
 }
 
-std::optional<std::string> EvaluationReason::error_kind() const {
+std::optional<EvaluationReason::ErrorKind> EvaluationReason::error_kind()
+    const {
     return error_kind_;
 }
 
@@ -31,23 +32,23 @@ std::optional<std::string> EvaluationReason::big_segment_status() const {
 }
 
 EvaluationReason::EvaluationReason(
-    std::string kind,
-    std::optional<std::string> error_kind,
+    Kind kind,
+    std::optional<ErrorKind> error_kind,
     std::optional<std::size_t> rule_index,
     std::optional<std::string> rule_id,
     std::optional<std::string> prerequisite_key,
     bool in_experiment,
     std::optional<std::string> big_segment_status)
-    : kind_(std::move(kind)),
-      error_kind_(std::move(error_kind)),
+    : kind_(kind),
+      error_kind_(error_kind),
       rule_index_(rule_index),
       rule_id_(std::move(rule_id)),
       prerequisite_key_(std::move(prerequisite_key)),
       in_experiment_(in_experiment),
       big_segment_status_(std::move(big_segment_status)) {}
 
-EvaluationReason::EvaluationReason(std::string error_kind)
-    : EvaluationReason("ERROR",
+EvaluationReason::EvaluationReason(ErrorKind error_kind)
+    : EvaluationReason(Kind::kError,
                        error_kind,
                        std::nullopt,
                        std::nullopt,
@@ -90,4 +91,17 @@ bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
 bool operator!=(EvaluationReason const& lhs, EvaluationReason const& rhs) {
     return !(lhs == rhs);
 }
+
+std::ostream& operator<<(std::ostream& out,
+                         EvaluationReason::Kind const& kind) {
+    out << boost::json::value_from(kind).as_string();
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out,
+                         EvaluationReason::ErrorKind const& kind) {
+    out << boost::json::value_from(kind).as_string();
+    return out;
+}
+
 }  // namespace launchdarkly

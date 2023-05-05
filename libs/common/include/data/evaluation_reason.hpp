@@ -12,28 +12,53 @@ namespace launchdarkly {
  */
 class EvaluationReason {
    public:
-    /**
-     * The general category of the reason:
-     *
-     * - `"OFF"`: The flag was off and therefore returned its configured off
-     * value.
-     * - `"FALLTHROUGH"`: The flag was on but the context did not match any
-     * targets or rules.
-     * - `"TARGET_MATCH"`: The context key was specifically targeted for this
-     * flag.
-     * - `"RULE_MATCH"`: the context matched one of the flag"s rules.
-     * - `"PREREQUISITE_FAILED"`: The flag was considered off because it had at
-     * least one prerequisite flag that either was off or did not return the
-     * desired variation.
-     * - `"ERROR"`: The flag could not be evaluated, e.g. because it does not
-     * exist or due to an unexpected error.
-     */
-    [[nodiscard]] std::string const& kind() const;
+    enum class Kind {
+        // The flag was off and therefore returned its configured off value.
+        kOff = 0,
+        // The flag was on but the context did not match any targets or rules.
+        kFallthrough = 1,
+        // The context key was specifically targeted for this flag.
+        kTargetMatch = 2,
+        // The context matched one of the flag's rules.
+        kRuleMatch = 3,
+        // The flag was considered off because it had at least one prerequisite
+        // flag that either was off or did not return the desired variation.
+        kPrerequisiteFailed = 4,
+        // The flag could not be evaluated, e.g. because it does not exist or
+        // due to an unexpected error.
+        kError = 5
+    };
+    friend std::ostream& operator<<(std::ostream& out, Kind const& kind);
+
+    enum class ErrorKind {
+        // The SDK was not yet fully initialized and cannot evaluate flags.
+        kClientNotReady = 0,
+        // The application did not pass valid context attributes to the SDK
+        // evaluation method.
+        kUserNotSpecified = 1,
+        // No flag existed with the specified flag key.
+        kFlagNotFound = 2,
+        // The application requested an evaluation result of one type but the
+        // resulting flag variation value was of a different type.
+        kWrongType = 3,
+        // The flag had invalid properties.
+        kMalformedFlag = 4,
+        // An unexpected error happened that stopped evaluation.
+        kException = 5,
+    };
+
+    friend std::ostream& operator<<(std::ostream& out, ErrorKind const& kind);
 
     /**
-     * A further description of the error condition, if the kind was `"ERROR"`.
+     * @return The general category of the reason.
      */
-    [[nodiscard]] std::optional<std::string> error_kind() const;
+    [[nodiscard]] Kind const& kind() const;
+
+    /**
+     * A further description of the error condition, if the Kind was
+     * Kind::kError.
+     */
+    [[nodiscard]] std::optional<ErrorKind> error_kind() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
@@ -78,22 +103,22 @@ class EvaluationReason {
      */
     [[nodiscard]] std::optional<std::string> big_segment_status() const;
 
-    EvaluationReason(std::string kind,
-                     std::optional<std::string> error_kind,
+    EvaluationReason(Kind kind,
+                     std::optional<ErrorKind> error_kind,
                      std::optional<std::size_t> rule_index,
                      std::optional<std::string> rule_id,
                      std::optional<std::string> prerequisite_key,
                      bool in_experiment,
                      std::optional<std::string> big_segment_status);
 
-    explicit EvaluationReason(std::string error_kind);
+    explicit EvaluationReason(ErrorKind error_kind);
 
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 
    private:
-    std::string kind_;
-    std::optional<std::string> error_kind_;
+    Kind kind_;
+    std::optional<ErrorKind> error_kind_;
     std::optional<std::size_t> rule_index_;
     std::optional<std::string> rule_id_;
     std::optional<std::string> prerequisite_key_;
