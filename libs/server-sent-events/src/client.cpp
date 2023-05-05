@@ -238,7 +238,7 @@ std::shared_ptr<Client> Builder::build() {
                                                      : uri_components->scheme();
 
     std::optional<ssl::context> ssl;
-    if (service == "https" || service == "443") {
+    if (service == "https") {
         ssl = foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
     }

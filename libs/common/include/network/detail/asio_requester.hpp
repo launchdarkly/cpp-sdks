@@ -129,7 +129,6 @@ class FoxyClient
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
-    std::chrono::milliseconds read_timeout_;
     ResponseHandler handler_;
     http::response<http::string_body> resp_;
     foxy::client_session session_;
@@ -142,7 +141,6 @@ class FoxyClient
                http::request<http::string_body> req,
                std::chrono::milliseconds connect_timeout,
                std::chrono::milliseconds response_timeout,
-               std::chrono::milliseconds read_timeout,
                ResponseHandler handler)
         : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
@@ -150,7 +148,6 @@ class FoxyClient
           req_(std::move(req)),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
-          read_timeout_(read_timeout),
           handler_(std::move(handler)),
           session_(exec,
                    foxy::session_opts{.ssl_ctx = ToOptRef(ssl_context_.get()),
@@ -321,14 +318,13 @@ class AsioRequester {
                 request->Port().value_or(request->Https() ? "https" : "http");
 
             std::shared_ptr<ssl::context> ssl;
-            if (service == "https" || service == "443") {
+            if (service == "https") {
                 ssl = this->ssl_ctx_;
             }
 
             std::make_shared<FoxyClient>(
                 exec, std::move(ssl), request->Host(), service, beast_request,
                 properties.ConnectTimeout(), properties.ResponseTimeout(),
-                properties.ReadTimeout(),
                 [exec, callback, request, this, redirect_count](auto res) {
                     NeedsRedirect(res)
                         ? InnerRequest(exec, MakeRedirectRequest(*request, res),
