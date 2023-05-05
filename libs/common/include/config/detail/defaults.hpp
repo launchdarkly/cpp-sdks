@@ -46,14 +46,16 @@ struct Defaults<ClientSDK> {
     }
 
     static auto HttpProperties() -> built::HttpProperties {
-        return {
-            std::chrono::milliseconds{10000}, std::chrono::milliseconds{10000},
-            std::chrono::milliseconds{10000}, SdkName() + "/" + SdkVersion(),
-            std::map<std::string, std::string>()};
+        return {std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                SdkName() + "/" + SdkVersion(),
+                std::map<std::string, std::string>()};
     }
 
     static auto StreamingConfig() -> built::StreamingConfig<ClientSDK> {
-        return {std::chrono::milliseconds{1000}, "/meval"};
+        return {std::chrono::seconds{1}, "/meval"};
     }
 
     static auto DataSourceConfig() -> built::DataSourceConfig<ClientSDK> {
@@ -91,14 +93,16 @@ struct Defaults<ServerSDK> {
     }
 
     static auto HttpProperties() -> built::HttpProperties {
-        return {
-            std::chrono::milliseconds{2000}, std::chrono::milliseconds{10000},
-            std::chrono::milliseconds{10000}, SdkName() + "/" + SdkVersion(),
-            std::map<std::string, std::string>()};
+        return {std::chrono::seconds{2},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                SdkName() + "/" + SdkVersion(),
+                std::map<std::string, std::string>()};
     }
 
     static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {
-        return {std::chrono::milliseconds{1000}};
+        return {std::chrono::seconds{1}};
     }
 
     static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {

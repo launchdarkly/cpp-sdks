@@ -11,11 +11,6 @@ project(
         LANGUAGES CXX C
 )
 
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
-    # Affects robustness of timestamp checking on FetchContent dependencies.
-    cmake_policy(SET CMP0135 NEW)
-endif ()
-
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -36,6 +31,10 @@ if (BUILD_TESTING)
         endif ()
     endif ()
     include(FetchContent)
+    if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+        # Affects robustness of timestamp checking on FetchContent dependencies.
+        cmake_policy(SET CMP0135 NEW)
+    endif ()
     FetchContent_Declare(
             googletest
             URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
