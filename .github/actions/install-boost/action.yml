@@ -1,5 +1,5 @@
 # This custom action is used because the MarkusJx/install-boost does
-# not include all built libraries for mac builds.
+# not include all built libraries for mac or windows builds.
 # Specifically, it was missing boost_json.
 name: Install Boost
 description: 'Install boost.'
