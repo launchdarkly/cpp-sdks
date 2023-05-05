@@ -9,8 +9,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 
-#include <boost/certify/extensions.hpp>
-#include <boost/certify/https_verification.hpp>
+#include <foxy/client_session.hpp>
 
 #include <cstdlib>
 #include <functional>
@@ -74,6 +73,7 @@ static http::request<http::string_body> MakeBeastRequest(
     } else {
         beast_request.target(request.Path());
     }
+
     beast_request.prepare_payload();
     beast_request.set(http::field::host, request.Host());
 
@@ -108,136 +108,89 @@ static std::optional<HttpRequest> MakeRedirectRequest(HttpRequest const& req,
     return std::nullopt;
 }
 
-template <class Derived>
-class
-    Session {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+static boost::optional<net::ssl::context&> ToOptRef(
+    net::ssl::context* maybe_val) {
+    if (maybe_val) {
+        return *maybe_val;
+    }
+    return boost::none;
+}
+
+class FoxyClient
+    : public std::enable_shared_from_this<
+          FoxyClient> {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    public:
     using ResponseHandler = std::function<void(HttpResult result)>;
 
    private:
-    Derived& GetDerived() { return static_cast<Derived&>(*this); }
+    std::shared_ptr<net::ssl::context> ssl_context_;
+    std::string host_;
+    std::string port_;
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
     std::chrono::milliseconds read_timeout_;
-
-   protected:
-    beast::flat_buffer buffer_;
-    std::string host_;
-    std::string port_;
-    tcp::resolver resolver_;
-    http::response_parser<http::string_body> parser_;
     ResponseHandler handler_;
+    http::response<http::string_body> resp_;
+    foxy::client_session session_;
 
    public:
-    Session(net::any_io_executor const& exec,
-            std::string host,
-            std::string port,
-            http::request<http::string_body> req,
-            std::chrono::milliseconds connect_timeout,
-            std::chrono::milliseconds response_timeout,
-            std::chrono::milliseconds read_timeout,
-            ResponseHandler handler)
-        : req_(std::move(req)),
-          resolver_(exec),
+    FoxyClient(net::any_io_executor const& exec,
+               std::shared_ptr<net::ssl::context> ssl_context,
+               std::string host,
+               std::string port,
+               http::request<http::string_body> req,
+               std::chrono::milliseconds connect_timeout,
+               std::chrono::milliseconds response_timeout,
+               std::chrono::milliseconds read_timeout,
+               ResponseHandler handler)
+        : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
           port_(std::move(port)),
+          req_(std::move(req)),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
           read_timeout_(read_timeout),
-          handler_(std::move(handler)) {}
+          handler_(std::move(handler)),
+          session_(exec,
+                   foxy::session_opts{.ssl_ctx = ToOptRef(ssl_context_.get()),
+                                      .timeout = connect_timeout_}),
+          resp_() {}
 
-    void Fail(beast::error_code ec, char const* what) {
-        // TODO: Is it safe to cancel this if it has already failed?
-        DoClose();
-        std::optional<std::string> error_string =
-            std::string(what) + ": " + ec.message();
-        handler_(HttpResult(error_string));
+    void Run() {
+        session_.async_connect(host_, port_,
+                               beast::bind_front_handler(&FoxyClient::OnConnect,
+                                                         shared_from_this()));
     }
 
-    void DoResolve() {
-        resolver_.async_resolve(
-            host_, port_,
-            beast::bind_front_handler(&Session::OnResolve,
-                                      GetDerived().shared_from_this()));
-    }
-
-    void OnResolve(beast::error_code ec, tcp::resolver::results_type results) {
-        if (ec) {
-            return Fail(ec, "resolve");
-        }
-
-        beast::get_lowest_layer(GetDerived().Stream())
-            .expires_after(connect_timeout_);
-
-        beast::get_lowest_layer(GetDerived().Stream())
-            .async_connect(results, beast::bind_front_handler(
-                                        &Session::OnConnect,
-                                        GetDerived().shared_from_this()));
-    }
-
-    void OnConnect(beast::error_code ec,
-                   tcp::resolver::results_type::endpoint_type eps) {
-        boost::ignore_unused(eps);
+    void OnConnect(boost::system::error_code ec) {
         if (ec) {
             return Fail(ec, "connect");
         }
-
-        GetDerived().DoHandshake();
+        session_.opts.timeout = response_timeout_;
+        session_.async_request(
+            req_, resp_,
+            beast::bind_front_handler(&FoxyClient::OnResponse,
+                                      shared_from_this()));
     }
 
-    void OnHandshake(beast::error_code ec) {
+    void OnResponse(boost::system::error_code ec) {
         if (ec) {
-            return Fail(ec, "handshake");
+            return Fail(ec, "request");
         }
-
-        DoWrite();
+        handler_(MakeResult());
+        session_.async_shutdown(beast::bind_front_handler(
+            &FoxyClient::OnShutdown, shared_from_this()));
     }
 
-    void DoWrite() {
-        beast::get_lowest_layer(GetDerived().Stream())
-            .expires_after(response_timeout_);
-
-        http::async_write(
-            GetDerived().Stream(), req_,
-            beast::bind_front_handler(&Session::OnWrite,
-                                      GetDerived().shared_from_this()));
+    void Fail(beast::error_code ec, char const* what) {
+        std::string error_string = std::string(what) + ": " + ec.message();
+        handler_(HttpResult(error_string));
+        session_.async_shutdown(beast::bind_front_handler(
+            &FoxyClient::OnShutdown, shared_from_this()));
     }
 
-    void OnWrite(beast::error_code ec, std::size_t unused) {
-        boost::ignore_unused(unused);
-        if (ec) {
-            return Fail(ec, "write");
-        }
-
-        http::async_read_some(
-            GetDerived().Stream(), buffer_, parser_,
-            beast::bind_front_handler(&Session::OnRead,
-                                      GetDerived().shared_from_this()));
-    }
-
-    void OnRead(beast::error_code ec, std::size_t bytes_transferred) {
-        boost::ignore_unused(bytes_transferred);
-        if (ec) {
-            return Fail(ec, "read");
-        }
-        if (parser_.is_done()) {
-            DoClose();
-
-            handler_(MakeResult());
-            return;
-        }
-
-        // TODO: Does this refresh the timeout? We want it to be a total
-        // timeout.
-        beast::get_lowest_layer(GetDerived().Stream())
-            .expires_after(read_timeout_);
-
-        http::async_read_some(
-            GetDerived().Stream(), buffer_, parser_,
-            beast::bind_front_handler(&Session::OnRead,
-                                      GetDerived().shared_from_this()));
-    }
+    void OnShutdown(boost::system::error_code ec) { boost::ignore_unused(ec); }
 
     /**
      * Produce an HttpResult from the parser_. Should be called if the parser
@@ -246,110 +199,14 @@ class
      */
     [[nodiscard]] HttpResult MakeResult() const {
         auto headers = HttpResult::HeadersType();
-        for (auto const& field : parser_.get().base()) {
+        for (auto const& field : resp_.base()) {
             headers.insert_or_assign(field.name_string(), field.value());
         }
-        auto result = HttpResult(parser_.get().result_int(),
-                                 std::make_optional(parser_.get().body()),
-                                 std::move(headers));
+        auto result =
+            HttpResult(resp_.result_int(), std::make_optional(resp_.body()),
+                       std::move(headers));
         return result;
     }
-
-    void DoClose() { beast::get_lowest_layer(GetDerived().Stream()).cancel(); }
-};
-
-class PlaintextClient : public Session<PlaintextClient>,
-                        public std::enable_shared_from_this<PlaintextClient> {
-   public:
-    virtual ~PlaintextClient() = default;
-    using ResponseHandler = Session<PlaintextClient>::ResponseHandler;
-
-    PlaintextClient(net::any_io_executor ex,
-                    http::request<http::string_body> req,
-                    std::string host,
-                    std::string port,
-                    std::chrono::milliseconds connect_timeout,
-                    std::chrono::milliseconds response_timeout,
-                    std::chrono::milliseconds read_timeout,
-                    ResponseHandler handler)
-        : Session<PlaintextClient>(ex,
-                                   std::move(host),
-                                   std::move(port),
-                                   std::move(req),
-                                   connect_timeout,
-                                   response_timeout,
-                                   read_timeout,
-                                   std::move(handler)),
-          stream_{ex} {}
-
-    void DoHandshake() {
-        // No handshake for plaintext; immediately send the request instead.
-        DoWrite();
-    }
-
-    void Run() { DoResolve(); }
-
-    beast::tcp_stream& Stream() { return stream_; }
-
-   private:
-    beast::tcp_stream stream_;
-};
-
-class EncryptedClient : public Session<EncryptedClient>,
-                        public std::enable_shared_from_this<EncryptedClient> {
-   public:
-    virtual ~EncryptedClient() = default;
-    using ResponseHandler = Session<EncryptedClient>::ResponseHandler;
-
-    EncryptedClient(net::any_io_executor ex,
-                    std::shared_ptr<ssl::context> ssl_ctx,
-                    http::request<http::string_body> req,
-                    std::string host,
-                    std::string port,
-                    std::chrono::milliseconds connect_timeout,
-                    std::chrono::milliseconds response_timeout,
-                    std::chrono::milliseconds read_timeout,
-                    ResponseHandler handler)
-        : Session<EncryptedClient>(ex,
-                                   std::move(host),
-                                   std::move(port),
-                                   std::move(req),
-                                   connect_timeout,
-                                   response_timeout,
-                                   read_timeout,
-                                   std::move(handler)),
-          ssl_ctx_(ssl_ctx),
-          stream_{ex, *ssl_ctx} {}
-
-    virtual void Run() {
-        // Set SNI Hostname (many hosts need this to handshake successfully)
-        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host_.c_str())) {
-            beast::error_code ec{static_cast<int>(::ERR_get_error()),
-                                 net::error::get_ssl_category()};
-
-            DoClose();
-            // TODO: Should this be treated as a terminal error for the request.
-            std::optional<std::string> error_string =
-                "failed to set TLS host name extension: " + ec.message();
-            handler_(HttpResult(error_string));
-            return;
-        }
-
-        DoResolve();
-    }
-
-    void DoHandshake() {
-        stream_.async_handshake(
-            ssl::stream_base::client,
-            beast::bind_front_handler(&EncryptedClient::OnHandshake,
-                                      shared_from_this()));
-    }
-
-    beast::ssl_stream<beast::tcp_stream>& Stream() { return stream_; }
-
-   private:
-    std::shared_ptr<ssl::context> ssl_ctx_;
-    beast::ssl_stream<beast::tcp_stream> stream_;
 };
 
 /**
@@ -398,13 +255,9 @@ class AsioRequester {
    public:
     AsioRequester(net::any_io_executor ctx)
         : ctx_(std::move(ctx)),
-          ssl_ctx_(
-              std::make_shared<ssl::context>(ssl::context::tlsv12_client)) {
-        ssl_ctx_->set_verify_mode(ssl::verify_peer |
-                                  ssl::verify_fail_if_no_peer_cert);
-
+          ssl_ctx_(std::make_shared<net::ssl::context>(
+              foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
         ssl_ctx_->set_default_verify_paths();
-        boost::certify::enable_native_https_server_verification(*ssl_ctx_);
     }
 
     template <typename CompletionToken>
@@ -422,7 +275,7 @@ class AsioRequester {
         Handler handler(std::forward<decltype(token)>(token));
         Result result(handler);
 
-        InnerRequest(request, std::move(handler), 0);
+        InnerRequest(net::make_strand(ctx_), request, std::move(handler), 0);
 
         return result.get();
     }
@@ -436,13 +289,12 @@ class AsioRequester {
      */
     std::shared_ptr<ssl::context> ssl_ctx_;
 
-    void InnerRequest(std::optional<HttpRequest> request,
+    void InnerRequest(boost::asio::any_io_executor exec,
+                      std::optional<HttpRequest> request,
                       std::function<void(HttpResult)> callback,
                       unsigned char redirect_count) {
-        auto strand = net::make_strand(ctx_);
-
         if (redirect_count > kRedirectLimit) {
-            boost::asio::post(strand, [callback, request]() mutable {
+            boost::asio::post(exec, [callback, request]() mutable {
                 callback(
                     HttpResult("Redirects exceeded 20, cancelling request."));
             });
@@ -452,44 +304,38 @@ class AsioRequester {
         // The request is invalid and cannot be made, so produce an error
         // result.
         if (!request || !request->Valid()) {
-            boost::asio::post(strand, [callback, request]() mutable {
+            boost::asio::post(exec, [callback, request]() mutable {
                 callback(HttpResult(
                     "The request was malformed and could not be made."));
             });
             return;
         }
 
-        boost::asio::post(strand, [strand, callback, request, this,
-                                   redirect_count]() mutable {
+        boost::asio::post(exec, [exec, callback, request, this,
+                                 redirect_count]() mutable {
             auto beast_request = MakeBeastRequest(*request);
 
             const auto& properties = request->Properties();
 
-            if (request->Https()) {
-                std::make_shared<EncryptedClient>(
-                    strand, ssl_ctx_, beast_request, request->Host(),
-                    request->Port(), properties.ConnectTimeout(),
-                    properties.ResponseTimeout(), properties.ReadTimeout(),
-                    [callback, request, this, redirect_count](auto res) {
-                        NeedsRedirect(res)
-                            ? InnerRequest(MakeRedirectRequest(*request, res),
-                                           callback, redirect_count + 1)
-                            : callback(res);
-                    })
-                    ->Run();
-            } else {
-                std::make_shared<PlaintextClient>(
-                    strand, beast_request, request->Host(), request->Port(),
-                    properties.ConnectTimeout(), properties.ResponseTimeout(),
-                    properties.ReadTimeout(),
-                    [callback, request, this, redirect_count](auto res) {
-                        NeedsRedirect(res)
-                            ? InnerRequest(MakeRedirectRequest(*request, res),
-                                           callback, redirect_count + 1)
-                            : callback(res);
-                    })
-                    ->Run();
+            std::string service =
+                request->Port().value_or(request->Https() ? "https" : "http");
+
+            std::shared_ptr<ssl::context> ssl;
+            if (service == "https" || service == "443") {
+                ssl = this->ssl_ctx_;
             }
+
+            std::make_shared<FoxyClient>(
+                exec, std::move(ssl), request->Host(), service, beast_request,
+                properties.ConnectTimeout(), properties.ResponseTimeout(),
+                properties.ReadTimeout(),
+                [exec, callback, request, this, redirect_count](auto res) {
+                    NeedsRedirect(res)
+                        ? InnerRequest(exec, MakeRedirectRequest(*request, res),
+                                       callback, redirect_count + 1)
+                        : callback(res);
+                })
+                ->Run();
         });
     }
 };

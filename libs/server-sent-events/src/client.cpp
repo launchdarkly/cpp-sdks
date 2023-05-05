@@ -31,6 +31,14 @@ auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 // Time duration used when no timeout is specified (1 year).
 auto const kNoTimeout = std::chrono::hours(8760);
 
+static boost::optional<net::ssl::context&> ToOptRef(
+    std::optional<net::ssl::context>& maybe_val) {
+    if (maybe_val) {
+        return maybe_val.value();
+    }
+    return boost::none;
+}
+
 class FoxyClient : public Client,
                    public std::enable_shared_from_this<FoxyClient> {
    public:
@@ -43,8 +51,8 @@ class FoxyClient : public Client,
                std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
-               std::optional<net::ssl::context> ssl_context)
-        : ssl_context_(std::move(ssl_context)),
+               std::optional<net::ssl::context> maybe_ssl)
+        : ssl_context_(std::move(maybe_ssl)),
           host_(std::move(host)),
           port_(std::move(port)),
           connect_timeout_(connect_timeout),
@@ -54,37 +62,14 @@ class FoxyClient : public Client,
           body_parser_(),
           session_(executor,
                    foxy::session_opts{
+                       .ssl_ctx = ToOptRef(ssl_context_),
                        .timeout = connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
-        if (ssl_context_) {
-            session_.opts.ssl_ctx = *ssl_context_;
-        }
-
         // SSE body will never end unless an error occurs, so we shouldn't set a
         // size limit.
         body_parser_.body_limit(boost::none);
         body_parser_.get().body().on_event(std::move(receiver));
     }
-
-    FoxyClient(boost::asio::any_io_executor executor,
-               http::request<http::string_body> req,
-               std::string host,
-               std::string port,
-               std::optional<std::chrono::milliseconds> connect_timeout,
-               std::optional<std::chrono::milliseconds> read_timeout,
-               std::optional<std::chrono::milliseconds> write_timeout,
-               Builder::EventReceiver receiver,
-               Builder::LogCallback logger)
-        : FoxyClient(executor,
-                     req,
-                     host,
-                     port,
-                     connect_timeout,
-                     read_timeout,
-                     write_timeout,
-                     receiver,
-                     logger,
-                     std::nullopt) {}
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
@@ -249,26 +234,27 @@ std::shared_ptr<Client> Builder::build() {
     request.set(http::field::host, host);
     request.target(uri_components->path());
 
-    if (uri_components->scheme_id() == boost::urls::scheme::https) {
-        std::string port =
-            uri_components->has_port() ? uri_components->port() : "443";
+    std::string service = uri_components->has_port() ? uri_components->port()
+                                                     : uri_components->scheme();
 
-        auto ssl_ctx = foxy::make_ssl_ctx(ssl::context::tlsv12_client);
-
-        ssl_ctx.set_default_verify_paths();
-
-        return std::make_shared<FoxyClient>(
-            net::make_strand(executor_), request, host, port, connect_timeout_,
-            read_timeout_, write_timeout_, receiver_, logging_cb_,
-            std::move(ssl_ctx));
-    } else {
-        std::string port =
-            uri_components->has_port() ? uri_components->port() : "80";
-
-        return std::make_shared<FoxyClient>(
-            net::make_strand(executor_), request, host, port, connect_timeout_,
-            read_timeout_, write_timeout_, receiver_, logging_cb_);
+    std::optional<ssl::context> ssl;
+    if (service == "https" || service == "443") {
+        ssl = foxy::make_ssl_ctx(ssl::context::tlsv12_client);
+        ssl->set_default_verify_paths();
     }
+
+    return std::make_shared<FoxyClient>(
+        net::make_strand(executor_), request, host, service, connect_timeout_,
+        read_timeout_, write_timeout_, receiver_, logging_cb_, std::move(ssl));
+    //    } else {
+    //        std::string port =
+    //            uri_components->has_port() ? uri_components->port() : "http";
+    //
+    //        return std::make_shared<FoxyClient>(
+    //            net::make_strand(executor_), request, host, port,
+    //            connect_timeout_, read_timeout_, write_timeout_, receiver_,
+    //            logging_cb_);
+    //    }
 }
 
 }  // namespace launchdarkly::sse

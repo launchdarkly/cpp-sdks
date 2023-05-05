@@ -20,8 +20,9 @@ network::detail::HttpRequest const& EventBatch::Request() const {
 }
 
 std::string EventBatch::Target() const {
-    return (request_.Https() ? "https://" : "http://") + request_.Host() + ":" +
-           request_.Port() + request_.Path();
+    return (request_.Https() ? "https://" : "http://") + request_.Host() +
+           (request_.Port() ? std::string(":") + *request_.Port() : "") +
+           request_.Path();
 }
 
 }  // namespace launchdarkly::events::detail
