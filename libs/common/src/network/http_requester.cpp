@@ -69,7 +69,8 @@ HttpRequest::HttpRequest(std::string const& url,
     : properties_(std::move(properties)),
       method_(method),
       body_(std::move(body)),
-      url_(url) {
+      url_(url),
+      port_(std::nullopt) {
     auto uri_components = boost::urls::parse_uri(url);
 
     // If the URI cannot be parsed, then the request is not valid.
@@ -95,8 +96,6 @@ HttpRequest::HttpRequest(std::string const& url,
     is_https_ = uri_components->scheme_id() == boost::urls::scheme::https;
     if (uri_components->has_port()) {
         port_ = uri_components->port();
-    } else {
-        port_ = is_https_ ? "443" : "80";
     }
     valid_ = true;
 }
@@ -113,7 +112,7 @@ HttpRequest::HttpRequest(HttpRequest& base_request,
       method_(base_request.method_),
       body_(std::move(base_request.body_)) {}
 
-std::string const& HttpRequest::Port() const {
+std::optional<std::string> const& HttpRequest::Port() const {
     return port_;
 }
 bool HttpRequest::Https() const {

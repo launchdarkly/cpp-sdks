@@ -59,4 +59,6 @@ class FlagValueChangeEvent {
     std::string flag_name_;
 };
 
+std::ostream& operator<<(std::ostream& out, FlagValueChangeEvent const& event);
+
 }  // namespace launchdarkly::client_side::flag_manager::detail

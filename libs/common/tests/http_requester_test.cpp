@@ -20,20 +20,40 @@ TEST(HttpRequestTests, NormalizesRelativeUrl) {
     EXPECT_EQ("/ham?egg=true&cheese=true", normalized.Path());
 }
 
-TEST(HttpRequestTests, UsesCorrectDefaultPortForSchemes) {
-    HttpRequest secure("https://some.domain.com/",
+TEST(HttpRequestTests, UsesCorrectPort) {
+    HttpRequest a("scheme://some.domain.com:123",
+                  launchdarkly::network::detail::HttpMethod::kGet,
+                  HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
+
+    EXPECT_EQ("123", a.Port());
+
+    HttpRequest b("scheme://some.domain.com:456",
+                  launchdarkly::network::detail::HttpMethod::kGet,
+                  HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
+
+    EXPECT_EQ("456", b.Port());
+
+    HttpRequest c("scheme://some.domain.com",
+                  launchdarkly::network::detail::HttpMethod::kGet,
+                  HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
+
+    EXPECT_FALSE(c.Port());
+}
+
+TEST(HttpRequestTests, DetectsHttpsFromScheme) {
+    HttpRequest secure("https://some.domain.com",
                        launchdarkly::network::detail::HttpMethod::kGet,
                        HttpPropertiesBuilder<ClientSDK>().Build(),
                        std::nullopt);
 
-    EXPECT_EQ("443", secure.Port());
+    EXPECT_TRUE(secure.Https());
 
-    HttpRequest insecure("http://some.domain.com/",
+    HttpRequest insecure("http://some.domain.com",
                          launchdarkly::network::detail::HttpMethod::kGet,
                          HttpPropertiesBuilder<ClientSDK>().Build(),
                          std::nullopt);
 
-    EXPECT_EQ("80", insecure.Port());
+    EXPECT_FALSE(insecure.Https());
 }
 
 TEST(HttpRequestTests, CanAppendBasicPath) {

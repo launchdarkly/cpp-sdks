@@ -74,6 +74,20 @@ class Builder {
     Builder& read_timeout(std::chrono::milliseconds timeout);
 
     /**
+     * Specifies the maximum time duration to establish the connection.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& connect_timeout(std::chrono::milliseconds timeout);
+
+    /**
+     * Specifies the maximum time duration to write the initial request.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& write_timeout(std::chrono::milliseconds timeout);
+
+    /**
      * Specify the method for the initial request. The default method is GET.
      * @param verb The HTTP method.
      * @return Reference to this builder.
@@ -112,6 +126,8 @@ class Builder {
     net::any_io_executor executor_;
     http::request<http::string_body> request_;
     std::optional<std::chrono::milliseconds> read_timeout_;
+    std::optional<std::chrono::milliseconds> write_timeout_;
+    std::optional<std::chrono::milliseconds> connect_timeout_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
 };
@@ -124,14 +140,14 @@ class Builder {
 class Client {
    public:
     virtual ~Client() = default;
+
     /**
-     * Kicks off a connection to the server and begins reading the event stream.
-     * The provided event receiver and logging callbacks will be invoked from
-     * the thread that is servicing the Client's executor.
-     */
+     * Asynchronously kicks off an SSE connection to the server and begins
+     * reading the event stream. */
     virtual void run() = 0;
+
     /**
-     * Closes the stream.
+     * Asynchronously closes the connection.
      */
     virtual void close() = 0;
 };

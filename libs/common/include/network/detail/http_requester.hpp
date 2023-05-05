@@ -94,7 +94,7 @@ class HttpRequest {
     [[nodiscard]] config::detail::built::HttpProperties const& Properties()
         const;
     [[nodiscard]] std::string const& Host() const;
-    [[nodiscard]] std::string const& Port() const;
+    [[nodiscard]] std::optional<std::string> const& Port() const;
     [[nodiscard]] std::string const& Path() const;
 
     [[nodiscard]] std::string const& Url() const;
@@ -129,7 +129,7 @@ class HttpRequest {
     std::optional<std::string> body_;
     config::detail::built::HttpProperties properties_;
     std::string host_;
-    std::string port_;
+    std::optional<std::string> port_;
     std::string path_;
     std::map<std::string, std::string> params_;
     bool is_https_;

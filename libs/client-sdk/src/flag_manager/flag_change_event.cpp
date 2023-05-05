@@ -31,4 +31,15 @@ FlagValueChangeEvent::FlagValueChangeEvent(std::string name, Value old_value)
       old_value_(std::move(old_value)),
       deleted_(true) {}
 
+std::ostream& operator<<(std::ostream& out, FlagValueChangeEvent const& event) {
+    if (event.Deleted()) {
+        out << "Event(name: " << event.FlagName() << " deleted)";
+    } else {
+        out << "Event(name: " << event.FlagName()
+            << ", old value: " << event.OldValue()
+            << ", new value: " << event.NewValue() << ")";
+    }
+    return out;
+}
+
 }  // namespace launchdarkly::client_side::flag_manager::detail
