@@ -25,7 +25,7 @@ class EvaluationDetail {
      */
     EvaluationDetail(T value,
                      std::optional<std::size_t> variation_index,
-                     EvaluationReason reason);
+                     std::optional<EvaluationReason> reason);
 
     /**
      * Constructs an EvaluationDetail representing an error and a default
@@ -33,7 +33,7 @@ class EvaluationDetail {
      * @param error_kind Kind of the error.
      * @param default_value Default value.
      */
-    EvaluationDetail(std::string error_kind, T default_value);
+    EvaluationDetail(EvaluationReason::ErrorKind error_kind, T default_value);
 
     /**
      * @return A reference to the variation value. For convenience, the *
@@ -50,7 +50,7 @@ class EvaluationDetail {
     /**
      * @return A reference to the reason for the results.
      */
-    [[nodiscard]] EvaluationReason const& Reason() const;
+    [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
      * @return A reference to the variation value.
@@ -60,6 +60,6 @@ class EvaluationDetail {
    private:
     T value_;
     std::optional<std::size_t> variation_index_;
-    EvaluationReason reason_;
+    std::optional<EvaluationReason> reason_;
 };
 }  // namespace launchdarkly

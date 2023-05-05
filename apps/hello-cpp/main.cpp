@@ -58,11 +58,18 @@ int main() {
         LD_LOG(logger, LogLevel::kInfo) << "Got status: " << status;
     });
 
+    client.FlagNotifier().OnFlagChange(
+        "my-boolean-flag", [&logger](auto event) {
+            LD_LOG(logger, LogLevel::kInfo) << "Got flag change: " << *event;
+        });
+
     client.WaitForReadySync(std::chrono::seconds(30));
 
-    auto value = client.BoolVariationDetail("my-bool-flag", false);
+    auto value = client.BoolVariationDetail("my-boolean-flag", false);
     LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
-    LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << value.Reason();
+    if (auto reason = value.Reason()) {
+        LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << *reason;
+    }
 
     // Sit around.
     std::cout << "Press enter to exit" << std::endl;

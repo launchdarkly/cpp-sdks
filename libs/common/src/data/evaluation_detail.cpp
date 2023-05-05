@@ -8,13 +8,14 @@ template <typename T>
 EvaluationDetail<T>::EvaluationDetail(
     T value,
     std::optional<std::size_t> variation_index,
-    launchdarkly::EvaluationReason reason)
+    std::optional<launchdarkly::EvaluationReason> reason)
     : value_(std::move(value)),
       variation_index_(variation_index),
       reason_(std::move(reason)) {}
 
 template <typename T>
-EvaluationDetail<T>::EvaluationDetail(std::string error_kind, T default_value)
+EvaluationDetail<T>::EvaluationDetail(EvaluationReason::ErrorKind error_kind,
+                                      T default_value)
     : value_(std::move(default_value)),
       variation_index_(std::nullopt),
       reason_(error_kind) {}
@@ -25,7 +26,7 @@ T const& EvaluationDetail<T>::Value() const {
 }
 
 template <typename T>
-EvaluationReason const& EvaluationDetail<T>::Reason() const {
+std::optional<EvaluationReason> const& EvaluationDetail<T>::Reason() const {
     return reason_;
 }
 
