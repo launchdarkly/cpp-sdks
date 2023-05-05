@@ -19,11 +19,12 @@ server::server(net::io_context& ioc,
                 tcp::endpoint(boost::asio::ip::make_address(address), port)},
       entity_manager_{ioc.get_executor(), logger},
       caps_{},
-      logger_{logger} {}
-
-void server::fail(beast::error_code ec, char const* what) {
-    LD_LOG(logger_, LogLevel::kError)
-        << "server: " << what << ": " << ec.message();
+      logger_{logger} {
+    LD_LOG(logger_, LogLevel::kInfo)
+        << "server: listening on " << address << ":" << port;
+    listener_.async_accept([this](auto& server) {
+        return Session(server, entity_manager_, caps_, logger_);
+    });
 }
 
 void server::add_capability(std::string cap) {
@@ -32,28 +33,6 @@ void server::add_capability(std::string cap) {
     caps_.push_back(std::move(cap));
 }
 
-void server::run() {
-    //    LD_LOG(logger_, LogLevel::kInfo)
-    //        << "server: listening on " << address << ":" << port
-
-    listener_.async_accept([this](auto& server) {
-        return Session(server, entity_manager_, caps_, logger_);
-    });
-}
-
 void server::shutdown() {
     listener_.shutdown();
-}
-
-void server::on_accept(foxy::server_session& server_session) {
-    //    auto session = std::make_shared<Session>(server_session,
-    //    entity_manager_,
-    //                                             caps_, logger_);
-    //
-    //    session->on_shutdown([this]() {
-    //        LD_LOG(logger_, LogLevel::kDebug) << "server: terminating";
-    //        ioc_.stop();
-    //    });
-    //
-    //    session->start();
 }

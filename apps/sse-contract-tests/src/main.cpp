@@ -31,7 +31,6 @@ int main(int argc, char* argv[]) {
 
         auto p = boost::lexical_cast<unsigned short>(port);
         server srv(ioc, "0.0.0.0", p, logger);
-        srv.run();
 
         srv.add_capability("headers");
         srv.add_capability("comments");
