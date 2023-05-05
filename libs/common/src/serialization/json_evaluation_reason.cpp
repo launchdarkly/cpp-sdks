@@ -34,6 +34,32 @@ tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
     return tl::make_unexpected(JsonError::kSchemaFailure);
 }
 
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason::Kind const& kind) {
+    auto& str = json_value.emplace_string();
+    switch (kind) {
+        case EvaluationReason::Kind::kOff:
+            str = "OFF";
+            break;
+        case EvaluationReason::Kind::kFallthrough:
+            str = "FALLTHROUGH";
+            break;
+        case EvaluationReason::Kind::kTargetMatch:
+            str = "TARGET_MATCH";
+            break;
+        case EvaluationReason::Kind::kRuleMatch:
+            str = "RULE_MATCH";
+            break;
+        case EvaluationReason::Kind::kPrerequisiteFailed:
+            str = "PREREQUISITE_FAILED";
+            break;
+        case EvaluationReason::Kind::kError:
+            str = "ERROR";
+            break;
+    }
+}
+
 tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<EvaluationReason::ErrorKind, JsonError>> const& unused,
@@ -61,6 +87,32 @@ tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
         return EvaluationReason::ErrorKind::kException;
     }
     return tl::make_unexpected(JsonError::kSchemaFailure);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason::ErrorKind const& kind) {
+    auto& str = json_value.emplace_string();
+    switch (kind) {
+        case EvaluationReason::ErrorKind::kClientNotReady:
+            str = "CLIENT_NOT_READY";
+            break;
+        case EvaluationReason::ErrorKind::kUserNotSpecified:
+            str = "USER_NOT_SPECIFIED";
+            break;
+        case EvaluationReason::ErrorKind::kFlagNotFound:
+            str = "FLAG_NOT_FOUND";
+            break;
+        case EvaluationReason::ErrorKind::kWrongType:
+            str = "WRONG_TYPE";
+            break;
+        case EvaluationReason::ErrorKind::kMalformedFlag:
+            str = "MALFORMED_FLAG";
+            break;
+        case EvaluationReason::ErrorKind::kException:
+            str = "EXCEPTION";
+            break;
+    }
 }
 
 tl::expected<EvaluationReason, JsonError> tag_invoke(
@@ -123,23 +175,6 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
                                 big_segment_status};
     }
     return tl::unexpected(JsonError::kSchemaFailure);
-}
-void tag_invoke(boost::json::value_from_tag const& unused,
-                boost::json::value& json_value,
-                EvaluationReason::Kind const& kind) {
-    auto& str = json_value.emplace_string();
-    std::ostringstream oss;
-    oss << kind;
-    str = oss.str();
-}
-
-void tag_invoke(boost::json::value_from_tag const& unused,
-                boost::json::value& json_value,
-                EvaluationReason::ErrorKind const& kind) {
-    auto& str = json_value.emplace_string();
-    std::ostringstream oss;
-    oss << kind;
-    str = oss.str();
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
