@@ -135,7 +135,8 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
                    "Returning default value";
 
             // TODO: SC-199918
-            auto error_reason = EvaluationReason("CLIENT_NOT_READY");
+            auto error_reason =
+                EvaluationReason(EvaluationReason::ErrorKind::kClientNotReady);
             if (eval_reasons_available_) {
                 event.reason = error_reason;
             }
@@ -147,7 +148,8 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
         LD_LOG(logger_, LogLevel::kInfo)
             << "Unknown feature flag " << key << "; returning default value";
 
-        auto error_reason = EvaluationReason("FLAG_NOT_FOUND");
+        auto error_reason =
+            EvaluationReason(EvaluationReason::ErrorKind::kFlagNotFound);
         if (eval_reasons_available_) {
             event.reason = error_reason;
         }
@@ -168,7 +170,8 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
 
     if (check_type && default_value.type() != Value::Type::kNull &&
         detail.value().type() != default_value.type()) {
-        auto error_reason = EvaluationReason("WRONG_TYPE");
+        auto error_reason =
+            EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
         if (eval_reasons_available_) {
             event.reason = error_reason;
         }
@@ -191,14 +194,8 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
 
     event_processor_->AsyncSend(std::move(event));
 
-    // TODO: this isn't a valid error, figure out how to handle if reason is
-    // missing.
-    EvaluationReason returned_reason("UNKNOWN");
-    if (detail.reason()) {
-        returned_reason = detail.reason()->get();
-    }
     return EvaluationDetail<T>(detail.value(), detail.variation_index(),
-                               returned_reason);
+                               detail.reason());
 }
 
 EvaluationDetail<bool> Client::BoolVariationDetail(Client::FlagKey const& key,

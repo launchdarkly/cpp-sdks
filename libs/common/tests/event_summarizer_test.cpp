@@ -78,9 +78,9 @@ static FeatureEventParams FeatureEventFromParams(EvaluationParams params,
         params.feature_default,
         params.feature_version,
         params.feature_variation,
-        launchdarkly::EvaluationReason("FALLTHROUGH", std::nullopt,
-                                       std::nullopt, std::nullopt, std::nullopt,
-                                       false, std::nullopt),
+        launchdarkly::EvaluationReason(
+            launchdarkly::EvaluationReason::Kind::kFallthrough, std::nullopt,
+            std::nullopt, std::nullopt, std::nullopt, false, std::nullopt),
         false,
         std::nullopt,
     };
@@ -309,8 +309,10 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
         std::nullopt,
         std::nullopt,
 
-        EvaluationReason("ERROR", "FLAG_NOT_FOUND", std::nullopt, std::nullopt,
-                         std::nullopt, false, std::nullopt),
+        EvaluationReason(EvaluationReason::Kind::kError,
+                         EvaluationReason::ErrorKind::kFlagNotFound,
+                         std::nullopt, std::nullopt, std::nullopt, false,
+                         std::nullopt),
 
         false,
         std::nullopt,

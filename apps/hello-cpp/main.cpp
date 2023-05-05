@@ -62,7 +62,9 @@ int main() {
 
     auto value = client.BoolVariationDetail("my-bool-flag", false);
     LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
-    LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << value.Reason();
+    if (auto reason = value.Reason()) {
+        LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << *reason;
+    }
 
     // Sit around.
     std::cout << "Press enter to exit" << std::endl;
