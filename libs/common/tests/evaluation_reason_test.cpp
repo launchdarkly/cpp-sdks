@@ -12,7 +12,7 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
         boost::json::value_to<tl::expected<EvaluationReason, JsonError>>(
             boost::json::parse("{"
                                "\"kind\":\"OFF\","
-                               "\"errorKind\":\"ERROR_KIND\","
+                               "\"errorKind\":\"MALFORMED_FLAG\","
                                "\"ruleIndex\":12,"
                                "\"ruleId\":\"RULE_ID\","
                                "\"prerequisiteKey\":\"PREREQ_KEY\","
@@ -21,7 +21,8 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
                                "}"));
 
     EXPECT_EQ(EvaluationReason::Kind::kOff, reason.value().kind());
-    EXPECT_EQ("ERROR_KIND", reason.value().error_kind());
+    EXPECT_EQ(EvaluationReason::ErrorKind::kMalformedFlag,
+              reason.value().error_kind());
     EXPECT_EQ(12, reason.value().rule_index());
     EXPECT_EQ("RULE_ID", reason.value().rule_id());
     EXPECT_EQ("PREREQ_KEY", reason.value().prerequisite_key());

@@ -34,6 +34,35 @@ tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
     return tl::make_unexpected(JsonError::kSchemaFailure);
 }
 
+tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<EvaluationReason::ErrorKind, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    if (!json_value.is_string()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+    auto const& str = json_value.as_string();
+    if (str == "CLIENT_NOT_READY") {
+        return EvaluationReason::ErrorKind::kClientNotReady;
+    }
+    if (str == "USER_NOT_SPECIFIED") {
+        return EvaluationReason::ErrorKind::kUserNotSpecified;
+    }
+    if (str == "FLAG_NOT_FOUND") {
+        return EvaluationReason::ErrorKind::kFlagNotFound;
+    }
+    if (str == "WRONG_TYPE") {
+        return EvaluationReason::ErrorKind::kWrongType;
+    }
+    if (str == "MALFORMED_FLAG") {
+        return EvaluationReason::ErrorKind::kMalformedFlag;
+    }
+    if (str == "EXCEPTION") {
+        return EvaluationReason::ErrorKind::kException;
+    }
+    return tl::make_unexpected(JsonError::kSchemaFailure);
+}
+
 tl::expected<EvaluationReason, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<EvaluationReason, JsonError>> const&
         unused,
@@ -56,8 +85,16 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         }
 
         auto* error_kind_iter = json_obj.find("errorKind");
-        auto error_kind =
-            ValueAsOpt<std::string>(error_kind_iter, json_obj.end());
+        std::optional<EvaluationReason::ErrorKind> error_kind;
+        if (error_kind_iter != json_obj.end()) {
+            auto parsed = boost::json::value_to<
+                tl::expected<EvaluationReason::ErrorKind, JsonError>>(
+                error_kind_iter->value());
+            if (!parsed) {
+                return tl::make_unexpected(parsed.error());
+            }
+            error_kind = parsed.value();
+        }
 
         auto* rule_index_iter = json_obj.find("ruleIndex");
         auto rule_index = ValueAsOpt<uint64_t>(rule_index_iter, json_obj.end());
@@ -95,13 +132,23 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     oss << kind;
     str = oss.str();
 }
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationReason::ErrorKind const& kind) {
+    auto& str = json_value.emplace_string();
+    std::ostringstream oss;
+    oss << kind;
+    str = oss.str();
+}
+
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 EvaluationReason const& reason) {
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", boost::json::value_from(reason.kind()));
     if (auto error_kind = reason.error_kind()) {
-        obj.emplace("errorKind", *error_kind);
+        obj.emplace("errorKind", boost::json::value_from(*error_kind));
     }
     if (auto big_segment_status = reason.big_segment_status()) {
         obj.emplace("bigSegmentStatus", *big_segment_status);

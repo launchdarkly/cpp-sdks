@@ -309,7 +309,8 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
         std::nullopt,
         std::nullopt,
 
-        EvaluationReason(EvaluationReason::Kind::kError, "FLAG_NOT_FOUND",
+        EvaluationReason(EvaluationReason::Kind::kError,
+                         EvaluationReason::ErrorKind::kFlagNotFound,
                          std::nullopt, std::nullopt, std::nullopt, false,
                          std::nullopt),
 

@@ -2,36 +2,12 @@
 
 namespace launchdarkly {
 
-std::ostream& operator<<(std::ostream& out,
-                         EvaluationReason::Kind const& kind) {
-    switch (kind) {
-        case EvaluationReason::Kind::kOff:
-            out << "OFF";
-            break;
-        case EvaluationReason::Kind::kFallthrough:
-            out << "FALLTHROUGH";
-            break;
-        case EvaluationReason::Kind::kTargetMatch:
-            out << "TARGET_MATCH";
-            break;
-        case EvaluationReason::Kind::kRuleMatch:
-            out << "RULE_MATCH";
-            break;
-        case EvaluationReason::Kind::kPrerequisiteFailed:
-            out << "PREREQUISITE_FAILED";
-            break;
-        case EvaluationReason::Kind::kError:
-            out << "ERROR";
-            break;
-    }
-    return out;
-}
-
 EvaluationReason::Kind const& EvaluationReason::kind() const {
     return kind_;
 }
 
-std::optional<std::string> EvaluationReason::error_kind() const {
+std::optional<EvaluationReason::ErrorKind> EvaluationReason::error_kind()
+    const {
     return error_kind_;
 }
 
@@ -57,7 +33,7 @@ std::optional<std::string> EvaluationReason::big_segment_status() const {
 
 EvaluationReason::EvaluationReason(
     Kind kind,
-    std::optional<std::string> error_kind,
+    std::optional<ErrorKind> error_kind,
     std::optional<std::size_t> rule_index,
     std::optional<std::string> rule_id,
     std::optional<std::string> prerequisite_key,
@@ -71,7 +47,7 @@ EvaluationReason::EvaluationReason(
       in_experiment_(in_experiment),
       big_segment_status_(std::move(big_segment_status)) {}
 
-EvaluationReason::EvaluationReason(std::string error_kind)
+EvaluationReason::EvaluationReason(ErrorKind error_kind)
     : EvaluationReason(Kind::kError,
                        error_kind,
                        std::nullopt,
@@ -115,4 +91,55 @@ bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
 bool operator!=(EvaluationReason const& lhs, EvaluationReason const& rhs) {
     return !(lhs == rhs);
 }
+
+std::ostream& operator<<(std::ostream& out,
+                         EvaluationReason::Kind const& kind) {
+    switch (kind) {
+        case EvaluationReason::Kind::kOff:
+            out << "OFF";
+            break;
+        case EvaluationReason::Kind::kFallthrough:
+            out << "FALLTHROUGH";
+            break;
+        case EvaluationReason::Kind::kTargetMatch:
+            out << "TARGET_MATCH";
+            break;
+        case EvaluationReason::Kind::kRuleMatch:
+            out << "RULE_MATCH";
+            break;
+        case EvaluationReason::Kind::kPrerequisiteFailed:
+            out << "PREREQUISITE_FAILED";
+            break;
+        case EvaluationReason::Kind::kError:
+            out << "ERROR";
+            break;
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out,
+                         EvaluationReason::ErrorKind const& kind) {
+    switch (kind) {
+        case EvaluationReason::ErrorKind::kClientNotReady:
+            out << "CLIENT_NOT_READY";
+            break;
+        case EvaluationReason::ErrorKind::kUserNotSpecified:
+            out << "USER_NOT_SPECIFIED";
+            break;
+        case EvaluationReason::ErrorKind::kFlagNotFound:
+            out << "FLAG_NOT_FOUND";
+            break;
+        case EvaluationReason::ErrorKind::kWrongType:
+            out << "WRONG_TYPE";
+            break;
+        case EvaluationReason::ErrorKind::kMalformedFlag:
+            out << "MALFORMED_FLAG";
+            break;
+        case EvaluationReason::ErrorKind::kException:
+            out << "EXCEPTION";
+            break;
+    }
+    return out;
+}
+
 }  // namespace launchdarkly
