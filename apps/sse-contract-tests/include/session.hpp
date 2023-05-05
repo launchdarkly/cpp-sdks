@@ -66,6 +66,10 @@ class Session : boost::asio::coroutine {
 
                 f.resp_ = generate_response(f.request_);
 
+                if (shutdown_requested_) {
+                    break;
+                }
+
                 yield session_.async_write(f.resp_, std::move(self));
 
                 if (ec) {
