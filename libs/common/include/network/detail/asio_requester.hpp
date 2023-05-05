@@ -150,8 +150,8 @@ class FoxyClient
           response_timeout_(response_timeout),
           handler_(std::move(handler)),
           session_(exec,
-                   foxy::session_opts{.ssl_ctx = ToOptRef(ssl_context_.get()),
-                                      .timeout = connect_timeout_}),
+                   foxy::session_opts{ToOptRef(ssl_context_.get()),
+                                      connect_timeout_}),
           resp_() {}
 
     void Run() {
