@@ -140,13 +140,15 @@ class Builder {
 class Client {
    public:
     virtual ~Client() = default;
+
     /**
-     * Kicks off a connection to the server and begins reading the event stream.
-     * The provided event receiver and logging callbacks will be invoked from
-     * the thread that is servicing the Client's executor.
-     */
+     * Asynchronously kicks off an SSE connection to the server and begins
+     * reading the event stream. */
     virtual void run() = 0;
 
+    /**
+     * Asynchronously closes the connection.
+     */
     virtual void close() = 0;
 };
 
