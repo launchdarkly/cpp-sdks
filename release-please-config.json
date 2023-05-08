@@ -1,4 +1,5 @@
 {
+  "release-type": "maven",
   "plugins": ["maven-workspace"],
   "packages": {
     "libs/client-sdk": {
