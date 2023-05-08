@@ -41,3 +41,7 @@ cmake-build-*
 
 # For Macs..
 .DS_Store
+
+# Documentation
+**/docs/html/
+**/docs/latex/
