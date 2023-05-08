@@ -8,9 +8,9 @@ TEST(ClientConfigBindings, ConfigBuilderNewFree) {
 }
 
 TEST(ClientConfigBindings, ConfigBuilderEmptyResultsInError) {
-    LDClientConfigBuilder builder = LDClientConfigBuilder_New(NULL);
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New(nullptr);
 
-    LDClientConfig config;
+    LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
 
     ASSERT_FALSE(config);
@@ -24,7 +24,7 @@ TEST(ClientConfigBindings, ConfigBuilderEmptyResultsInError) {
 TEST(ClientConfigBindings, MinimalValidConfig) {
     LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
 
-    LDClientConfig config;
+    LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
     ASSERT_TRUE(config);

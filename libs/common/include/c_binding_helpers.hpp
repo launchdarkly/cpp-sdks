@@ -20,6 +20,8 @@ struct has_build_method<T,
           bool,
           std::is_same_v<decltype(std::declval<T>().Build()), ReturnType>> {};
 
+// NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
+
 /*
  * Given a Builder, calls the Build() method and converts it into an
  * OpaqueResult if successful, or an LDError if unsuccessful.
@@ -29,7 +31,8 @@ struct has_build_method<T,
  * In all cases, the given builder is freed.
  */
 template <typename Builder, typename OpaqueBuilder, typename OpaqueResult>
-LDStatus ConsumeBuilder(OpaqueBuilder b, OpaqueResult* out_result) {
+LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
+                        OpaqueResult* out_result) {
     using ReturnType =
         tl::expected<typename Builder::Result, launchdarkly::Error>;
 
@@ -41,7 +44,7 @@ LDStatus ConsumeBuilder(OpaqueBuilder b, OpaqueResult* out_result) {
         "Builder must have a Build method that returns "
         "tl::expected<typename Builder::Result, launchdarkly::Error>");
 
-    Builder* builder = reinterpret_cast<Builder*>(b);
+    auto builder = reinterpret_cast<Builder*>(opaque_builder);
 
     tl::expected<typename Builder::Result, launchdarkly::Error> res =
         builder->Build();
@@ -58,3 +61,5 @@ LDStatus ConsumeBuilder(OpaqueBuilder b, OpaqueResult* out_result) {
 
     return LDStatus_Success();
 }
+
+// NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
