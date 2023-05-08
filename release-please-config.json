@@ -1,8 +1,13 @@
 {
-  "plugins": ["node-workspace"],
+  "plugins": [
+    "node-workspace"
+  ],
   "packages": {
     "libs/client-sdk": {
-      "initial-version":"0.1.0",
+      "initial-version": "0.1.0",
+      "extra-files": [
+        "libs/client-sdk/include/launchdarkly/client_side/api.hpp"
+      ],
       "skip-snapshot": true
     },
     "libs/server-sent-events": {
