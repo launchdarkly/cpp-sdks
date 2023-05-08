@@ -92,11 +92,10 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
         try {
             auto json = nlohmann::json::parse(req.body());
             auto params = json.get<ConfigParams>();
-            if (auto id = manager_.create(std::move(params))) {
-                return create_entity_response(*id);
-            } else {
-                return server_error("couldn't create client entity");
+            if (auto entity_id = manager_.create(std::move(params))) {
+                return create_entity_response(*entity_id);
             }
+            return server_error("couldn't create client entity");
         } catch (nlohmann::json::exception& e) {
             return bad_request("unable to parse config JSON");
         }
@@ -104,9 +103,9 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
 
     if (req.method() == http::verb::delete_ &&
         req.target().starts_with(kEntityPath)) {
-        std::string id = req.target();
-        boost::erase_first(id, kEntityPath);
-        bool erased = manager_.destroy(id);
+        std::string entity_id = req.target();
+        boost::erase_first(entity_id, kEntityPath);
+        bool erased = manager_.destroy(entity_id);
         return destroy_entity_response(erased);
     }
 

@@ -17,7 +17,6 @@ server::server(net::io_context& ioc,
     : listener_{ioc.get_executor(),
                 tcp::endpoint(boost::asio::ip::make_address(address), port)},
       entity_manager_{ioc.get_executor(), logger},
-      caps_{},
       logger_{logger} {
     LD_LOG(logger_, LogLevel::kInfo)
         << "server: listening on " << address << ":" << port;
