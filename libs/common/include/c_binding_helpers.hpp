@@ -1,6 +1,6 @@
 #include <functional>
 #include <tl/expected.hpp>
-#include "c_bindings/error.h"
+#include "c_bindings/status.h"
 #include "error.hpp"
 
 template <typename T, typename = void>
@@ -25,26 +25,36 @@ struct has_build_method<T,
  * OpaqueResult if successful, or an LDError if unsuccessful.
  *
  * In the case of an error, out_result is set to nullptr.
+ *
+ * In all cases, the given builder is freed.
  */
 template <typename Builder, typename OpaqueBuilder, typename OpaqueResult>
-LDError ConvertError(OpaqueBuilder b, OpaqueResult* out_result) {
+LDStatus ConsumeBuilder(OpaqueBuilder b, OpaqueResult* out_result) {
     using ReturnType =
         tl::expected<typename Builder::Result, launchdarkly::Error>;
 
     static_assert(has_result_type<Builder>::value,
                   "Builder must have an associated type named Result");
+
     static_assert(
         has_build_method<Builder, ReturnType>::value,
         "Builder must have a Build method that returns "
         "tl::expected<typename Builder::Result, launchdarkly::Error>");
 
+    Builder* builder = reinterpret_cast<Builder*>(b);
+
     tl::expected<typename Builder::Result, launchdarkly::Error> res =
-        reinterpret_cast<Builder*>(b)->Build();
+        builder->Build();
+
+    delete builder;
+
     if (!res) {
         *out_result = nullptr;
-        return reinterpret_cast<LDError>(new launchdarkly::Error(res.error()));
+        return reinterpret_cast<LDStatus>(new launchdarkly::Error(res.error()));
     }
+
     *out_result = reinterpret_cast<OpaqueResult>(
         new typename Builder::Result(std::move(res.value())));
-    return nullptr;
+
+    return LDStatus_Success();
 }
