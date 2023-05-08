@@ -19,5 +19,5 @@
       - name: Install for Windows
         if: runner.os == 'Windows'
         id: install-ninja-windows
-        shell: bash
+        shell: pwsh
         run: choco install ninja
