@@ -3,13 +3,16 @@
   "plugins": ["maven-workspace"],
   "packages": {
     "libs/client-sdk": {
-      "initial-version":"0.1.0"
+      "initial-version":"0.1.0",
+      "skip-snapshot": true
     },
     "libs/server-sent-events": {
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "skip-snapshot": true
     },
     "libs/common": {
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "skip-snapshot": true
     }
   }
 }
