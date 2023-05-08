@@ -1,5 +1,5 @@
 {
-  "release-type": "simple",
+  "plugins": ["maven-workspace"],
   "packages": {
     "libs/client-sdk": {
       "initial-version":"0.1.0"
