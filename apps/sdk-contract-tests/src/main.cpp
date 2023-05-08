@@ -5,6 +5,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/spawn.hpp>
+#include <boost/beast.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <memory>
@@ -33,11 +34,12 @@ int main(int argc, char* argv[]) {
         auto p = boost::lexical_cast<unsigned short>(port);
         server srv(ioc, "0.0.0.0", p, logger);
 
-        srv.add_capability("headers");
-        srv.add_capability("comments");
-        srv.add_capability("report");
-        srv.add_capability("post");
-        srv.add_capability("read-timeout");
+        srv.add_capability("client-side");
+        srv.add_capability("mobile");
+        srv.add_capability("strongly-typed");
+        srv.add_capability("context-type");
+        srv.add_capability("service-endpoints");
+        srv.add_capability("tags");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

@@ -2,9 +2,9 @@
 cmake_minimum_required(VERSION 3.19)
 
 project(
-        LaunchDarklyCPPSSETestHarness
+        LaunchDarklyCPPSDKTestHarness
         VERSION 0.1
-        DESCRIPTION "LaunchDarkly CPP SSE Test Harness"
+        DESCRIPTION "LaunchDarkly CPP SDK Test Harness"
         LANGUAGES CXX
 )
 
@@ -17,20 +17,19 @@ find_package(Boost 1.80 REQUIRED COMPONENTS coroutine)
 include(${CMAKE_FILES}/json.cmake)
 include(${CMAKE_FILES}/foxy.cmake)
 
-add_executable(sse-tests
+add_executable(sdk-tests
         src/main.cpp
         src/server.cpp
-        src/entity_manager.cpp
         src/session.cpp
-        src/event_outbox.cpp
+        src/definitions.cpp
+        src/entity_manager.cpp
         )
 
-target_link_libraries(sse-tests PRIVATE
-        launchdarkly::sse
-        launchdarkly::common
+target_link_libraries(sdk-tests PRIVATE
+        launchdarkly::client
         foxy
         nlohmann_json::nlohmann_json
         Boost::coroutine
         )
 
-target_include_directories(sse-tests PUBLIC include)
+target_include_directories(sdk-tests PUBLIC include)
