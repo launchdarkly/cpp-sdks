@@ -1,6 +1,5 @@
 {
-  "release-type": "maven",
-  "plugins": ["maven-workspace"],
+  "plugins": ["node-workspace"],
   "packages": {
     "libs/client-sdk": {
       "initial-version":"0.1.0",

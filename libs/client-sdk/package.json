@@ -1,0 +1,7 @@
+{
+  "name": "launchdarkly-cpp-client",
+  "version": "0.1.0",
+  "dependencies": {
+    "launchdarkly-cpp-common": "0.1.0"
+  }
+}
