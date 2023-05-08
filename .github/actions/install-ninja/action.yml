@@ -18,6 +18,6 @@
 
       - name: Install for Windows
         if: runner.os == 'Windows'
-        id: install-ninja-mac
+        id: install-ninja-windows
         shell: bash
         run: choco install ninja
