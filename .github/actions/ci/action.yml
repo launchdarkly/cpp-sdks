@@ -23,6 +23,8 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install Ninja
+      uses: ./.github/actions/install-ninja
     - name: Install boost
       uses: ./.github/actions/install-boost
       id: install-boost
