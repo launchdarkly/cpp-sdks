@@ -6,7 +6,7 @@
     "libs/client-sdk": {
       "initial-version": "0.1.0",
       "extra-files": [
-        "libs/client-sdk/include/launchdarkly/client_side/api.hpp"
+        "include/launchdarkly/client_side/api.hpp"
       ],
       "skip-snapshot": true
     },
