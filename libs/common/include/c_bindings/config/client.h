@@ -2,8 +2,8 @@
 
 #pragma once
 
+#include "../error.h"
 #include "../export.h"
-#include "../value.h"
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -15,7 +15,9 @@ typedef struct _LDClientConfig* LDClientConfig;
 
 LD_EXPORT(LDClientConfigBuilder) LDClientConfigBuilder_New(char const* sdk_key);
 
-LD_EXPORT(LDClientConfig) LDClientConfigBuilder_Build();
+LD_EXPORT(LDError)
+LDClientConfigBuilder_Build(LDClientConfigBuilder builder,
+                            LDClientConfig* out_config);
 
 #ifdef __cplusplus
 }
