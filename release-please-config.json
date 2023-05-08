@@ -1,0 +1,14 @@
+{
+  "release-type": "simple",
+  "packages": {
+    "libs/client-sdk": {
+      "initial-version":"0.1.0"
+    },
+    "libs/server-sent-events": {
+      "initial-version": "0.1.0"
+    },
+    "libs/common": {
+      "initial-version": "0.1.0"
+    }
+  }
+}
