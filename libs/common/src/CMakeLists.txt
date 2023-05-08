@@ -53,7 +53,8 @@ add_library(${LIBNAME}
         c_bindings/array_builder.cpp
         c_bindings/object_builder.cpp
         c_bindings/context_builder.cpp
-        c_bindings/context.cpp)
+        c_bindings/context.cpp
+        c_bindings/config/client.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
