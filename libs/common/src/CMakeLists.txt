@@ -55,7 +55,8 @@ add_library(${LIBNAME}
         c_bindings/context_builder.cpp
         c_bindings/status.cpp
         c_bindings/context.cpp
-        c_bindings/config/client.cpp
+        c_bindings/config/builder.cpp
+        c_bindings/config/config.cpp
         )
 
 
