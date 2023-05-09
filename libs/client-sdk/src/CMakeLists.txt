@@ -43,10 +43,7 @@ install (TARGETS ${LIBNAME})
 
 install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
         DESTINATION "include"
-        FILES_MATCHING
-        PATTERN "*.h*"
         )
-
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

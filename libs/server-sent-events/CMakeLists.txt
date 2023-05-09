@@ -27,22 +27,6 @@ endif ()
 # Needed to fetch external dependencies.
 include(FetchContent)
 
-set(OPENSSL_USE_STATIC_LIBS ON)
-find_package(OpenSSL REQUIRED)
-message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
-
-
-if (BUILD_SHARED_LIBS)
-    set(Boost_USE_STATIC_LIBS OFF)
-else ()
-    set(Boost_USE_STATIC_LIBS ON)
-endif ()
-
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.80 REQUIRED COMPONENTS url)
-message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
-
 include(${CMAKE_FILES}/foxy.cmake)
 
 add_subdirectory(src)

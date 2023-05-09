@@ -11,6 +11,8 @@ project(
         LANGUAGES CXX C
 )
 
+include(GNUInstallDirs)
+
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -48,6 +50,22 @@ if (BUILD_TESTING)
 endif ()
 
 add_subdirectory(libs/client-sdk)
+
+set(OPENSSL_USE_STATIC_LIBS ON)
+set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
+find_package(OpenSSL REQUIRED)
+message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
+
+if (BUILD_SHARED_LIBS)
+    set(Boost_USE_STATIC_LIBS OFF)
+else ()
+    set(Boost_USE_STATIC_LIBS ON)
+endif ()
+
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.80 REQUIRED COMPONENTS json url coroutine)
+message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)

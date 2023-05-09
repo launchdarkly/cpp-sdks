@@ -1,8 +1,15 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
-        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/*.hpp"
-        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/config/*.hpp"
-        "${LaunchDarklyCPPCommon_SOURCE_DIR}/include/events/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/c_bindings/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/detail/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/data/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/events/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/network/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/network/detail/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/serialization/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/serialization/events/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -58,15 +65,17 @@ add_library(${LIBNAME}
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-install (TARGETS ${LIBNAME})
+set_target_properties(${LIBNAME} PROPERTIES PUBLIC_HEADER "${HEADER_LIST}")
+
+install(TARGETS ${LIBNAME} PUBLIC_HEADER)
 
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
-install (DIRECTORY "${LaunchDarklyCPPCommon_SOURCE_DIR}/include"
+install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include"
         DESTINATION "include"
-        FILES_MATCHING
-        PATTERN "*.hpp"
         )
+
+message(STATUS "LaunchDarklyCommonSdk_SOURCE_DIR=${LaunchDarklyCommonSdk_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
         PUBLIC Boost::headers tl::expected foxy

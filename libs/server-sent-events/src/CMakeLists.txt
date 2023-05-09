@@ -16,7 +16,7 @@ target_link_libraries(${LIBNAME}
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 
-install(TARGETS ${LIBNAME})
+install (TARGETS ${LIBNAME})
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
