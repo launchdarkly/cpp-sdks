@@ -1,5 +1,9 @@
 name: C++ Client Release
 description: C++ Client Release Process
+inputs:
+  tag_name:
+    description: 'The tag name of the release to upload artifacts to.'
+    required: true
 
 runs:
   using: composite

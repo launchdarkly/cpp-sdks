@@ -14,6 +14,10 @@ FetchContent_Declare(foxy
         )
 
 
-set(BUILD_TESTING OFF)
-FetchContent_MakeAvailable(foxy)
-set(BUILD_TESTING ON)
+if (BUILD_TESTING)
+    set(BUILD_TESTING OFF)
+    FetchContent_MakeAvailable(foxy)
+    set(BUILD_TESTING ON)
+else ()
+    FetchContent_MakeAvailable(foxy)
+endif ()

@@ -16,6 +16,8 @@ project(
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 
 option(BUILD_TESTING "Enable C++ unit tests." ON)
 
@@ -45,7 +47,6 @@ if (BUILD_TESTING)
 
     enable_testing()
 endif ()
-
 
 add_subdirectory(libs/common)
 add_subdirectory(libs/server-sent-events)
