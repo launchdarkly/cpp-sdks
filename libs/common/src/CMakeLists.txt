@@ -65,9 +65,7 @@ add_library(${LIBNAME}
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-set_target_properties(${LIBNAME} PROPERTIES PUBLIC_HEADER "${HEADER_LIST}")
-
-install(TARGETS ${LIBNAME} PUBLIC_HEADER)
+install(TARGETS ${LIBNAME})
 
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
