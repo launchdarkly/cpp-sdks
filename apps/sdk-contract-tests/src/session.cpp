@@ -106,6 +106,30 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
         }
     }
 
+    if (req.method() == http::verb::post &&
+        req.target().starts_with(kEntityPath)) {
+        std::string entity_id = req.target();
+        boost::erase_first(entity_id, kEntityPath);
+
+        try {
+            auto json = nlohmann::json::parse(req.body());
+            auto params = json.get<CommandParams>();
+            tl::expected<nlohmann::json, std::string> res =
+                manager_.command(entity_id, params);
+            if (res.has_value()) {
+                auto response = http::response<http::string_body>{
+                    http::status::ok, req.version()};
+                response.body() = res->dump();
+                response.prepare_payload();
+                return response;
+            } else {
+                return bad_request(res.error());
+            }
+        } catch (nlohmann::json::exception& e) {
+            return bad_request("unable to parse config JSON");
+        }
+    }
+
     if (req.method() == http::verb::delete_ &&
         req.target().starts_with(kEntityPath)) {
         std::string entity_id = req.target();

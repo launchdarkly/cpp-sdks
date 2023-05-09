@@ -23,6 +23,7 @@ add_executable(sdk-tests
         src/session.cpp
         src/definitions.cpp
         src/entity_manager.cpp
+        src/client_entity.cpp
         )
 
 target_link_libraries(sdk-tests PRIVATE

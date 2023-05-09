@@ -77,7 +77,7 @@ class Client {
 
     flag_manager::detail::IFlagNotifier& FlagNotifier();
 
-    void WaitForReadySync(std::chrono::seconds timeout);
+    void WaitForReadySync(std::chrono::milliseconds timeout);
 
     ~Client();
 

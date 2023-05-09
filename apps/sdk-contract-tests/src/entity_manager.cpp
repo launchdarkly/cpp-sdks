@@ -31,7 +31,7 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
             .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
 
     auto datasource = DataSourceBuilder();
-    
+
     if (in.serviceEndpoints) {
         if (in.serviceEndpoints->streaming) {
             endpoints.StreamingBaseUrl(*in.serviceEndpoints->streaming);
@@ -117,9 +117,17 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         return std::nullopt;
     }
 
-    entities_.try_emplace(id, std::make_unique<Client>(
-                                  std::move(*config),
-                                  MakeContext(in.clientSide->initialContext)));
+    auto client = std::make_unique<Client>(
+        std::move(*config), MakeContext(in.clientSide->initialContext));
+
+    std::chrono::milliseconds waitForClient = std::chrono::seconds(5);
+    if (in.startWaitTimeMs) {
+        waitForClient = std::chrono::milliseconds(*in.startWaitTimeMs);
+    }
+    client->WaitForReadySync(waitForClient);
+
+    entities_.try_emplace(id, std::move(client));
+
     return id;
 }
 
@@ -131,4 +139,14 @@ bool EntityManager::destroy(std::string const& id) {
 
     entities_.erase(it);
     return true;
+}
+
+tl::expected<nlohmann::json, std::string> EntityManager::command(
+    std::string const& id,
+    CommandParams params) {
+    auto it = entities_.find(id);
+    if (it == entities_.end()) {
+        return tl::make_unexpected("entity not found");
+    }
+    return it->second.Command(params);
 }

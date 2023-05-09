@@ -2,10 +2,10 @@
 
 #include <launchdarkly/client_side/api.hpp>
 
+#include <boost/asio/any_io_executor.hpp>
+#include "client_entity.hpp"
 #include "definitions.hpp"
 #include "logger.hpp"
-
-#include <boost/asio/any_io_executor.hpp>
 
 #include <memory>
 #include <mutex>
@@ -16,9 +16,7 @@
 class EventOutbox;
 
 class EntityManager {
-    using Entity = launchdarkly::client_side::Client;
-
-    std::unordered_map<std::string, std::unique_ptr<Entity>> entities_;
+    std::unordered_map<std::string, ClientEntity> entities_;
 
     std::size_t counter_;
     boost::asio::any_io_executor executor_;
@@ -47,4 +45,7 @@ class EntityManager {
      * @return True if the entity was found and destroyed.
      */
     bool destroy(std::string const& id);
+
+    tl::expected<nlohmann::json, std::string> command(std::string const& id,
+                                                      CommandParams params);
 };

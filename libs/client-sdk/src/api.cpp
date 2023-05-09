@@ -257,7 +257,7 @@ flag_manager::detail::IFlagNotifier& Client::FlagNotifier() {
     return flag_updater_;
 }
 
-void Client::WaitForReadySync(std::chrono::seconds timeout) {
+void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
     std::unique_lock lock(init_mutex_);
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
