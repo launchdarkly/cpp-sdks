@@ -50,11 +50,16 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
     };
 
     auto const capabilities_response =
-        [&req](std::vector<std::string> const& caps) {
+        [&req](std::vector<std::string> const& caps, std::string const& name,
+               std::string const& version) {
             Response res{http::status::ok, req.version()};
             res.set(http::field::content_type, "application/json");
             res.keep_alive(req.keep_alive());
-            res.body() = nlohmann::json{{"capabilities", caps}}.dump();
+            res.body() = nlohmann::json{
+                {"capabilities", caps},
+                {"name", name},
+                {"clientVersion",
+                 version}}.dump();
             res.prepare_payload();
             return res;
         };
@@ -76,7 +81,7 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
     };
 
     if (req.method() == http::verb::get && req.target() == "/") {
-        return capabilities_response(caps_);
+        return capabilities_response(caps_, "c-client-sdk", "0.0.0");
     }
 
     if (req.method() == http::verb::head && req.target() == "/") {
@@ -91,8 +96,8 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
     if (req.method() == http::verb::post && req.target() == "/") {
         try {
             auto json = nlohmann::json::parse(req.body());
-            auto params = json.get<ConfigParams>();
-            if (auto entity_id = manager_.create(std::move(params))) {
+            auto params = json.get<CreateInstanceParams>();
+            if (auto entity_id = manager_.create(params.configuration)) {
                 return create_entity_response(*entity_id);
             }
             return server_error("couldn't create client entity");

@@ -18,7 +18,7 @@ class EventOutbox;
 class EntityManager {
     using Entity = launchdarkly::client_side::Client;
 
-    std::unordered_map<std::string, Entity> entities_;
+    std::unordered_map<std::string, std::unique_ptr<Entity>> entities_;
 
     std::size_t counter_;
     boost::asio::any_io_executor executor_;

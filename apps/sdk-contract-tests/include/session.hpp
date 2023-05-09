@@ -1,5 +1,6 @@
 #pragma once
 
+#include "entity_manager.hpp"
 #include "logger.hpp"
 
 #include <boost/beast.hpp>
@@ -84,6 +85,7 @@ class Session : boost::asio::coroutine {
 
    private:
     foxy::server_session& session_;
+    EntityManager manager_;
     std::unique_ptr<Frame> frame_;
     std::vector<std::string>& caps_;
     launchdarkly::Logger& logger_;

@@ -100,6 +100,38 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 serviceEndpoints,
                                                 clientSide);
 
+struct ContextSingleParams {
+    std::optional<std::string> kind;
+    std::optional<std::string> key;
+    std::optional<std::string> name;
+    std::optional<bool> anonymous;
+    std::optional<std::vector<std::string>> _private;
+    std::optional<std::unordered_map<std::string, nlohmann::json>> custom;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextSingleParams,
+                                                kind,
+                                                key,
+                                                name,
+                                                anonymous,
+                                                _private,
+                                                custom);
+
+struct ContextBuildParams {
+    std::optional<ContextSingleParams> single;
+    std::optional<nlohmann::json> multi;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextBuildParams,
+                                                single,
+                                                multi);
+
+struct ContextConvertParams {
+    std::string foo;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextConvertParams, foo);
+
 struct CreateInstanceParams {
     ConfigParams configuration;
     std::string tag;

@@ -109,8 +109,12 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         return std::nullopt;
     }
 
-    entities_.try_emplace(id, std::move(*config),
-                          MakeContext(in.clientSide->initialContext));
+    auto client =
+        Client(std::move(*config), MakeContext(in.clientSide->initialContext));
+
+    //    entities_.try_emplace(id, std::make_unique<Client>(
+    //                                  std::move(*config),
+    //                                  MakeContext(in.clientSide->initialContext)));
     return id;
 }
 
