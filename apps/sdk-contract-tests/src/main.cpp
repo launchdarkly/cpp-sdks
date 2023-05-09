@@ -19,7 +19,7 @@ using launchdarkly::LogLevel;
 
 int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{
-        std::make_unique<ConsoleBackend>("sse-contract-tests")};
+        std::make_unique<ConsoleBackend>("sdk-contract-tests")};
 
     const std::string default_port = "8123";
     std::string port = default_port;
