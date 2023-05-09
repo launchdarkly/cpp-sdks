@@ -37,7 +37,8 @@
 
 # For cmake
 build
-build-*
+build-static
+build-dynamic
 cmake-build-*
 
 # For Macs..
