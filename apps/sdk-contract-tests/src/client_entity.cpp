@@ -36,9 +36,16 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
     EvaluateAllFlagParams params) {
-    EvaluateAllFlagsResponse resp;
+    EvaluateAllFlagsResponse resp{};
 
-    return tl::make_unexpected("not yet supported");
+    boost::ignore_unused(params);
+
+    for (auto& [key, value] : client_->AllFlags()) {
+        resp.state[key] = nlohmann::json::parse(
+            boost::json::serialize(boost::json::value_from(value)));
+    }
+
+    return resp;
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
