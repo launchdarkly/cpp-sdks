@@ -17,6 +17,6 @@ runs:
       shell: bash
       run: |
         echo "Publishing docs for: $WORKSPACE"
-        ./scripts/publish-doc.sh
+        ./scripts/publish-doc.sh $WORKSPACE
       env:
         WORKSPACE: ${{ inputs.workspace_path }}
