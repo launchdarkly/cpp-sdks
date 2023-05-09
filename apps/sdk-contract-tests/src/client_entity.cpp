@@ -8,12 +8,39 @@ ClientEntity::ClientEntity(
     std::unique_ptr<launchdarkly::client_side::Client> client)
     : client_(std::move(client)) {}
 
+tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
+    IdentifyEventParams params) {
+    return tl::make_unexpected("identify not yet supported");
+}
+
+tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
+    CustomEventParams params) {
+    auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
+                                  boost::json::parse(params.data->dump()))
+                            : launchdarkly::Value::null();
+
+    if (params.omitNullData.value_or(false) && !params.metricValue &&
+        !params.data) {
+        client_->Track(params.eventKey);
+        return nlohmann::json{};
+    }
+
+    if (!params.metricValue) {
+        client_->Track(params.eventKey, std::move(data));
+        return nlohmann::json{};
+    }
+
+    client_->Track(params.eventKey, std::move(data), *params.metricValue);
+    return nlohmann::json{};
+}
+
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
     EvaluateAllFlagParams params) {
     EvaluateAllFlagsResponse resp;
 
     return tl::make_unexpected("not yet supported");
 }
+
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
     EvaluateFlagParams params) {
     auto const& key = params.flagKey;
@@ -157,11 +184,18 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             }
             return EvaluateAll(*params.evaluateAll);
         case Command::IdentifyEvent:
-            break;
+            if (!params.identifyEvent) {
+                return tl::make_unexpected("identifyEvent params must be set");
+            }
+            return Identify(*params.identifyEvent);
         case Command::CustomEvent:
-            break;
+            if (!params.customEvent) {
+                return tl::make_unexpected("customEvent params must be set");
+            }
+            return Custom(*params.customEvent);
         case Command::FlushEvents:
-            break;
+            client_->AsyncFlush();
+            return nlohmann::json{};
         case Command::ContextBuild:
             break;
         case Command::ContextConvert:

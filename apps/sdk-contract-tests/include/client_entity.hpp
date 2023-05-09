@@ -20,5 +20,10 @@ class ClientEntity {
 
     tl::expected<nlohmann::json, std::string> EvaluateAll(
         EvaluateAllFlagParams params);
+
+    tl::expected<nlohmann::json, std::string> Identify(
+        IdentifyEventParams params);
+
+    tl::expected<nlohmann::json, std::string> Custom(CustomEventParams params);
     std::unique_ptr<launchdarkly::client_side::Client> client_;
 };

@@ -11,6 +11,25 @@ on:
       - '**.md'
 
 jobs:
+  contract-tests:
+    runs-on: ubuntu-22.04
+    env:
+      # Port the test service (implemented in this repo) should bind to.
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/apps/sdk-contract-tests/sdk-tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: sdk-tests
+          run_tests: false
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      - uses: ./.github/actions/sdk-contract-tests
+        with:
+          # Inform the test harness of test service's port.
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          extra_params: '-skip-from ./apps/sdk-contract-tests/test-suppressions.txt'
   build-test:
     runs-on: ubuntu-22.04
     steps:
