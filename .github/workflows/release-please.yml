@@ -16,3 +16,18 @@ jobs:
           command: manifest
           token: ${{secrets.GITHUB_TOKEN}}
           default-branch: rlamb/add-release-please
+
+  release-client:
+    strategy:
+      matrix:
+        version: [10, 12, 14]
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ubuntu-latest, windows-2022, macos-12]
+        runs-on: ${{ matrix.os }}
+    needs: ['release-please']
+    if: ${{ needs.release-please.outputs.package-client-released }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: release-client
+        name: Full release of libs/client-sdk
+        uses: ./actions/client-release

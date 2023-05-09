@@ -37,6 +37,7 @@
 
 # For cmake
 build
+build-*
 cmake-build-*
 
 # For Macs..
