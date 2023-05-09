@@ -1,6 +1,14 @@
-name: "SDK Contract Tests"
-description: 'Runs the SDK Contract Test harness against a specified test service.'
+name: "Server-Sent-Events Contract Tests"
+description: 'Runs the SSE test harness against a specified test service.'
 inputs:
+  repo:
+    required: false
+    description: "Name of the test harness repo"
+    default: 'sdk-test-harness'
+  version:
+    required: false
+    description: "Version of the test harness"
+    default: 'v2'
   test_service_port:
     required: true
     description: "Port of the component under test."
@@ -22,7 +30,7 @@ runs:
   steps:
     - name: 'Run Test Harness'
       shell: bash
-      run: curl -s https://raw.githubusercontent.com/launchdarkly/sdk-test-harness/v2/downloader/run.sh | bash
+      run: curl -s https://raw.githubusercontent.com/launchdarkly/${{ inputs.repo }}/main/downloader/run.sh | bash
       env:
-        VERSION: v2
+        VERSION: ${{ inputs.version }}
         PARAMS: -url http://localhost:${{ inputs.test_service_port }} -port ${{ inputs.test_harness_port }} ${{ inputs.extra_params }} ${{ inputs.debug_logging == 'true' && '-debug' || '' }} -stop-service-at-end
