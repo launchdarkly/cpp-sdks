@@ -1,4 +1,5 @@
 #include "entity_manager.hpp"
+#include "config/client.hpp"
 #include "context_builder.hpp"
 
 using launchdarkly::LogLevel;
@@ -20,10 +21,17 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
 
     auto config_builder = ConfigBuilder(in.credential);
 
-    auto endpoints = EndpointsBuilder();
+    auto default_endpoints =
+        launchdarkly::client_side::Defaults::ServiceEndpoints();
+
+    auto endpoints =
+        EndpointsBuilder()
+            .EventsBaseUrl(default_endpoints.EventsBaseUrl())
+            .PollingBaseUrl(default_endpoints.PollingBaseUrl())
+            .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
 
     auto datasource = DataSourceBuilder();
-
+    
     if (in.serviceEndpoints) {
         if (in.serviceEndpoints->streaming) {
             endpoints.StreamingBaseUrl(*in.serviceEndpoints->streaming);
@@ -105,16 +113,13 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
     auto config = config_builder.Build();
     if (!config) {
         LD_LOG(logger_, LogLevel::kWarn)
-            << "entity_manager: couldn't build config";
+            << "entity_manager: couldn't build config: " << config.error();
         return std::nullopt;
     }
 
-    auto client =
-        Client(std::move(*config), MakeContext(in.clientSide->initialContext));
-
-    //    entities_.try_emplace(id, std::make_unique<Client>(
-    //                                  std::move(*config),
-    //                                  MakeContext(in.clientSide->initialContext)));
+    entities_.try_emplace(id, std::make_unique<Client>(
+                                  std::move(*config),
+                                  MakeContext(in.clientSide->initialContext)));
     return id;
 }
 

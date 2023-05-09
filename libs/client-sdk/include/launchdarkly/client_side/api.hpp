@@ -27,6 +27,11 @@ class Client {
    public:
     Client(Config config, Context context);
 
+    Client(Client&&) = delete;
+    Client(Client const&) = delete;
+    Client& operator=(Client) = delete;
+    Client& operator=(Client&& other) = delete;
+
     bool Initialized() const;
 
     using FlagKey = std::string;
