@@ -1,0 +1,23 @@
+  name: Install Ninja
+  description: 'Install the Ninja build system.'
+
+  runs:
+    using: composite
+    steps:
+      - name: Install for Ubuntu.
+        if: runner.os == 'Linux'
+        id: install-ninja-ubuntu
+        shell: bash
+        run: sudo apt install ninja-build
+
+      - name: Install for Mac
+        if: runner.os == 'macOS'
+        id: install-ninja-mac
+        shell: bash
+        run: brew install ninja
+
+      - name: Install for Windows
+        if: runner.os == 'Windows'
+        id: install-ninja-windows
+        shell: pwsh
+        run: choco install ninja
