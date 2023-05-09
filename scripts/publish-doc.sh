@@ -1,4 +1,4 @@
-# Run this script like:
+./sc# Run this script like:
 # ./scripts/build-doc.sh libs/client-sdk
 
 set -e
@@ -7,6 +7,8 @@ set -x
 # Get the script location so we can run adjacent scripts.
 script_path=$(readlink -f "$0")
 base_name=$(dirname $script_path)
+
+WORKSPACE="$1"
 
 # Move the built docs so switching branches doesn't conflict.
 mv $WORKSPACE/docs $RUNNER_TEMP/doc-temp
@@ -42,7 +44,7 @@ mv $RUNNER_TEMP/doc-temp/* $WORKSPACE/docs
 mkdir -p $WORKSPACE
 git add $WORKSPACE/docs
 
-git commit -m "chore: Updating docs for $0"
+git commit -m "chore: Updating docs for $1"
 
 # Update the local copy in case there have been any interim changes.
 # If this works inconsistently, then additional checks should be done.
