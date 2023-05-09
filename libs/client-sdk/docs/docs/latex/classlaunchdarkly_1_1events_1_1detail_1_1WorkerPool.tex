@@ -1,0 +1,60 @@
+\hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool}{}\doxysection{launchdarkly\+::events\+::detail\+::Worker\+Pool Class Reference}
+\label{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool}\index{launchdarkly::events::detail::WorkerPool@{launchdarkly::events::detail::WorkerPool}}
+
+
+{\ttfamily \#include $<$worker\+\_\+pool.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a95f7cf8b9dfb4b4a63dd39b8758e5e4d}\label{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a95f7cf8b9dfb4b4a63dd39b8758e5e4d}} 
+using {\bfseries Server\+Time\+Callback} = std\+::function$<$ void(std\+::chrono\+::system\+\_\+clock\+::time\+\_\+point)$>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a99cb00ba93a7fba230929161c9568c01}{Worker\+Pool}} (boost\+::asio\+::any\+\_\+io\+\_\+executor io, std\+::size\+\_\+t pool\+\_\+size, std\+::chrono\+::milliseconds delivery\+\_\+retry\+\_\+delay, \mbox{\hyperlink{classlaunchdarkly_1_1Logger}{Logger}} \&logger)
+\item 
+{\footnotesize template$<$typename Completion\+Token $>$ }\\auto \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a5af0376a1d8283581129fb79f3dd464c}{Get}} (Completion\+Token \&\&token)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool}{Worker\+Pool}} represents a pool of workers capable of delivering event payloads to Launch\+Darkly. In practice, this means initiating overlapping H\+T\+TP P\+O\+S\+Ts, assuming more than one worker is active.
+
+A \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool}{Worker\+Pool}}\textquotesingle{}s executor is meant to be executed from a single thread. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a99cb00ba93a7fba230929161c9568c01}\label{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a99cb00ba93a7fba230929161c9568c01}} 
+\index{launchdarkly::events::detail::WorkerPool@{launchdarkly::events::detail::WorkerPool}!WorkerPool@{WorkerPool}}
+\index{WorkerPool@{WorkerPool}!launchdarkly::events::detail::WorkerPool@{launchdarkly::events::detail::WorkerPool}}
+\doxysubsubsection{\texorpdfstring{WorkerPool()}{WorkerPool()}}
+{\footnotesize\ttfamily launchdarkly\+::events\+::detail\+::\+Worker\+Pool\+::\+Worker\+Pool (\begin{DoxyParamCaption}\item[{boost\+::asio\+::any\+\_\+io\+\_\+executor}]{io,  }\item[{std\+::size\+\_\+t}]{pool\+\_\+size,  }\item[{std\+::chrono\+::milliseconds}]{delivery\+\_\+retry\+\_\+delay,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Logger}{Logger}} \&}]{logger }\end{DoxyParamCaption})}
+
+Constructs a new \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool}{Worker\+Pool}}. 
+\begin{DoxyParams}{Parameters}
+{\em io} & The executor used for all workers. \\
+\hline
+{\em pool\+\_\+size} & How many workers to make available. \\
+\hline
+{\em delivery\+\_\+retry\+\_\+delay} & How long a worker should wait after a failed delivery before trying again. \\
+\hline
+{\em logger} & \mbox{\hyperlink{classlaunchdarkly_1_1Logger}{Logger}}. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a5af0376a1d8283581129fb79f3dd464c}\label{classlaunchdarkly_1_1events_1_1detail_1_1WorkerPool_a5af0376a1d8283581129fb79f3dd464c}} 
+\index{launchdarkly::events::detail::WorkerPool@{launchdarkly::events::detail::WorkerPool}!Get@{Get}}
+\index{Get@{Get}!launchdarkly::events::detail::WorkerPool@{launchdarkly::events::detail::WorkerPool}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily template$<$typename Completion\+Token $>$ \\
+auto launchdarkly\+::events\+::detail\+::\+Worker\+Pool\+::\+Get (\begin{DoxyParamCaption}\item[{Completion\+Token \&\&}]{token }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Attempts to find a free worker. If none are available, the completion handler is invoked with nullptr. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/events/detail/worker\+\_\+pool.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/events/worker\+\_\+pool.\+cpp\end{DoxyCompactItemize}

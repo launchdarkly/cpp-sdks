@@ -1,0 +1,103 @@
+\hypertarget{classlaunchdarkly_1_1Value_1_1Object}{}\doxysection{launchdarkly\+::Value\+::Object Class Reference}
+\label{classlaunchdarkly_1_1Value_1_1Object}\index{launchdarkly::Value::Object@{launchdarkly::Value::Object}}
+
+
+{\ttfamily \#include $<$value.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1Value_1_1Object_1_1Iterator}{Iterator}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object_a5f3873312292070b0e991e7911909b5a}{Object}} (std\+::map$<$ std\+::string, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ map)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_ac9c8f9fd176617f9670e99eeb857c8ce}\label{classlaunchdarkly_1_1Value_1_1Object_ac9c8f9fd176617f9670e99eeb857c8ce}} 
+{\bfseries Object} (std\+::initializer\+\_\+list$<$ std\+::pair$<$ std\+::string, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$$>$ values)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_a11987c5f6605dc9c293f02060a2e7a13}\label{classlaunchdarkly_1_1Value_1_1Object_a11987c5f6605dc9c293f02060a2e7a13}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} const  \& {\bfseries operator\mbox{[}$\,$\mbox{]}} (std\+::string const \&key) const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object_ab8fe29a85aecdba48a367c7ce3187bb1}{size}} () const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object_a792be6e239397c4176e541fcdc153641}{count}} (std\+::string const \&key) const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_a9147d4752d967434a1df01d32055e90a}\label{classlaunchdarkly_1_1Value_1_1Object_a9147d4752d967434a1df01d32055e90a}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1Value_1_1Object_1_1Iterator}{Iterator}} {\bfseries begin} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_aaac45f570046728796835edb72d88252}\label{classlaunchdarkly_1_1Value_1_1Object_aaac45f570046728796835edb72d88252}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1Value_1_1Object_1_1Iterator}{Iterator}} {\bfseries end} () const
+\item 
+\mbox{\hyperlink{structlaunchdarkly_1_1Value_1_1Object_1_1Iterator}{Iterator}} \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object_ade366967dc2372da1b9a463549896784}{find}} (std\+::string const \&key) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_a4af11a1a0de41afed13f09f3b29ba50f}\label{classlaunchdarkly_1_1Value_1_1Object_a4af11a1a0de41afed13f09f3b29ba50f}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object}{Object}} const \&obj)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object}{Object}} type for values. Provides const iteration and indexing. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_a5f3873312292070b0e991e7911909b5a}\label{classlaunchdarkly_1_1Value_1_1Object_a5f3873312292070b0e991e7911909b5a}} 
+\index{launchdarkly::Value::Object@{launchdarkly::Value::Object}!Object@{Object}}
+\index{Object@{Object}!launchdarkly::Value::Object@{launchdarkly::Value::Object}}
+\doxysubsubsection{\texorpdfstring{Object()}{Object()}}
+{\footnotesize\ttfamily launchdarkly\+::\+Value\+::\+Object\+::\+Object (\begin{DoxyParamCaption}\item[{std\+::map$<$ std\+::string, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$}]{map }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Create an \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object}{Object}} from a map of Values. 
+\begin{DoxyParams}{Parameters}
+{\em map} & The map to base the object on. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_a792be6e239397c4176e541fcdc153641}\label{classlaunchdarkly_1_1Value_1_1Object_a792be6e239397c4176e541fcdc153641}} 
+\index{launchdarkly::Value::Object@{launchdarkly::Value::Object}!count@{count}}
+\index{count@{count}!launchdarkly::Value::Object@{launchdarkly::Value::Object}}
+\doxysubsubsection{\texorpdfstring{count()}{count()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::\+Value\+::\+Object\+::count (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get the number of items with the given key. Will be 1 or 0. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to get a count for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The count of items with the given key. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_ade366967dc2372da1b9a463549896784}\label{classlaunchdarkly_1_1Value_1_1Object_ade366967dc2372da1b9a463549896784}} 
+\index{launchdarkly::Value::Object@{launchdarkly::Value::Object}!find@{find}}
+\index{find@{find}!launchdarkly::Value::Object@{launchdarkly::Value::Object}}
+\doxysubsubsection{\texorpdfstring{find()}{find()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1Value_1_1Object_1_1Iterator}{Value\+::\+Object\+::\+Iterator}} launchdarkly\+::\+Value\+::\+Object\+::find (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Find a \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} by key. Operates like {\ttfamily find} on a std\+::map. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to find a value for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The value, or the end iterator. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Value_1_1Object_ab8fe29a85aecdba48a367c7ce3187bb1}\label{classlaunchdarkly_1_1Value_1_1Object_ab8fe29a85aecdba48a367c7ce3187bb1}} 
+\index{launchdarkly::Value::Object@{launchdarkly::Value::Object}!size@{size}}
+\index{size@{size}!launchdarkly::Value::Object@{launchdarkly::Value::Object}}
+\doxysubsubsection{\texorpdfstring{size()}{size()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::\+Value\+::\+Object\+::size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The number of items in the \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object}{Object}}. \begin{DoxyReturn}{Returns}
+The number of items in the \mbox{\hyperlink{classlaunchdarkly_1_1Value_1_1Object}{Object}}. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/value.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/value.\+cpp\end{DoxyCompactItemize}

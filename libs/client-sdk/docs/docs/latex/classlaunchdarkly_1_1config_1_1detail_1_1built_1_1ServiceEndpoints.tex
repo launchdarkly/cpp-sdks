@@ -1,0 +1,78 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}{}\doxysection{launchdarkly\+::config\+::detail\+::built\+::Service\+Endpoints Class Reference}
+\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}\index{launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}}
+
+
+{\ttfamily \#include $<$service\+\_\+endpoints.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a0c93ab177a99569916c8e754ed81da9d}{Service\+Endpoints}} (std\+::string polling, std\+::string streaming, std\+::string events)
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_adcfd18843787b50b693c32c030d4ea11}{Polling\+Base\+Url}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a324cf581010cd88652d935bf2ce79543}{Streaming\+Base\+Url}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a9b89d3824ba3a4855dc76dd58fdb60ee}{Events\+Base\+Url}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}{Service\+Endpoints}} contains configured \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}{Service\+Endpoints}} for the Launch\+Darkly service or a Relay Proxy instance. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a0c93ab177a99569916c8e754ed81da9d}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a0c93ab177a99569916c8e754ed81da9d}} 
+\index{launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}!ServiceEndpoints@{ServiceEndpoints}}
+\index{ServiceEndpoints@{ServiceEndpoints}!launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}}
+\doxysubsubsection{\texorpdfstring{ServiceEndpoints()}{ServiceEndpoints()}}
+{\footnotesize\ttfamily launchdarkly\+::config\+::detail\+::built\+::\+Service\+Endpoints\+::\+Service\+Endpoints (\begin{DoxyParamCaption}\item[{std\+::string}]{polling,  }\item[{std\+::string}]{streaming,  }\item[{std\+::string}]{events }\end{DoxyParamCaption})}
+
+Constructs a \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}{Service\+Endpoints}} from individual polling, streaming, and events U\+R\+Ls.
+
+Meant for internal usage only; see Client\+Endpoints\+Builder or Server\+Endpoints\+Builder to safely construct a \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints}{Service\+Endpoints}} with default U\+R\+Ls.
+
+
+\begin{DoxyParams}{Parameters}
+{\em polling} & Polling U\+RL. \\
+\hline
+{\em streaming} & Streaming U\+RL. \\
+\hline
+{\em events} & \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events}{Events}} U\+RL. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a9b89d3824ba3a4855dc76dd58fdb60ee}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a9b89d3824ba3a4855dc76dd58fdb60ee}} 
+\index{launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}!EventsBaseUrl@{EventsBaseUrl}}
+\index{EventsBaseUrl@{EventsBaseUrl}!launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}}
+\doxysubsubsection{\texorpdfstring{EventsBaseUrl()}{EventsBaseUrl()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::config\+::detail\+::built\+::\+Service\+Endpoints\+::\+Events\+Base\+Url (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the configured base events U\+RL. \begin{DoxyReturn}{Returns}
+Base events U\+RL. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_adcfd18843787b50b693c32c030d4ea11}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_adcfd18843787b50b693c32c030d4ea11}} 
+\index{launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}!PollingBaseUrl@{PollingBaseUrl}}
+\index{PollingBaseUrl@{PollingBaseUrl}!launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}}
+\doxysubsubsection{\texorpdfstring{PollingBaseUrl()}{PollingBaseUrl()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::config\+::detail\+::built\+::\+Service\+Endpoints\+::\+Polling\+Base\+Url (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the configured base polling U\+RL. \begin{DoxyReturn}{Returns}
+Base polling U\+RL. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a324cf581010cd88652d935bf2ce79543}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1ServiceEndpoints_a324cf581010cd88652d935bf2ce79543}} 
+\index{launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}!StreamingBaseUrl@{StreamingBaseUrl}}
+\index{StreamingBaseUrl@{StreamingBaseUrl}!launchdarkly::config::detail::built::ServiceEndpoints@{launchdarkly::config::detail::built::ServiceEndpoints}}
+\doxysubsubsection{\texorpdfstring{StreamingBaseUrl()}{StreamingBaseUrl()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::config\+::detail\+::built\+::\+Service\+Endpoints\+::\+Streaming\+Base\+Url (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the configured base streaming U\+RL. \begin{DoxyReturn}{Returns}
+Base streaming U\+RL. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/config/detail/built/service\+\_\+endpoints.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/config/service\+\_\+endpoints.\+cpp\end{DoxyCompactItemize}

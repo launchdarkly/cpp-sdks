@@ -1,0 +1,116 @@
+\hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{}\doxysection{launchdarkly\+::events\+::detail\+::Summarizer Class Reference}
+\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+
+
+{\ttfamily \#include $<$summarizer.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1events_1_1detail_1_1Summarizer_1_1State}{State}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1events_1_1detail_1_1Summarizer_1_1VariationKey}{Variation\+Key}}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1events_1_1detail_1_1Summarizer_1_1VariationSummary}{Variation\+Summary}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_ae960bd59574b3832c743ed44c68a0d5c}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_ae960bd59574b3832c743ed44c68a0d5c}} 
+using {\bfseries Time} = std\+::chrono\+::system\+\_\+clock\+::time\+\_\+point
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a3f1d11077a9311a72557075564062433}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a3f1d11077a9311a72557075564062433}} 
+using {\bfseries Flag\+Key} = std\+::string
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a507ef18514063cff12b5ce0de5dab5e3}{Summarizer}} (Time \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a117ec9bed4230ee0ab57d4689ab7c173}{start\+\_\+time}})
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_ae0b59fd364b64a16c47528fef1c7d5cb}{Summarizer}} ()=default
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a666ac640302be51813e740f22ea8fdb1}{Update}} (\mbox{\hyperlink{structlaunchdarkly_1_1events_1_1client_1_1FeatureEventParams}{client\+::\+Feature\+Event\+Params}} const \&event)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{Summarizer}} \& \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a9fcf959cdee0b9a3006a04e3e918768a}{Finish}} (Time \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a7c99069c0c0d5e76650880a9dfff7da0}{end\+\_\+time}})
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a67563c48e4eb7943095dbfb083c311d8}{Empty}} () const
+\item 
+Time \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a117ec9bed4230ee0ab57d4689ab7c173}{start\+\_\+time}} () const
+\item 
+Time \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a7c99069c0c0d5e76650880a9dfff7da0}{end\+\_\+time}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_aab1ac1dd8eeed61695f61df6560ce843}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_aab1ac1dd8eeed61695f61df6560ce843}} 
+std\+::unordered\+\_\+map$<$ Flag\+Key, \mbox{\hyperlink{structlaunchdarkly_1_1events_1_1detail_1_1Summarizer_1_1State}{State}} $>$ const  \& {\bfseries Features} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{Summarizer}} is responsible for accepting Feature\+Event\+Params (the context related to a feature evaluation) and outputting summary events (which essentially condenses the various evaluation results into a single structure). 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a507ef18514063cff12b5ce0de5dab5e3}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a507ef18514063cff12b5ce0de5dab5e3}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!Summarizer@{Summarizer}}
+\index{Summarizer@{Summarizer}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{Summarizer()}{Summarizer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily launchdarkly\+::events\+::detail\+::\+Summarizer\+::\+Summarizer (\begin{DoxyParamCaption}\item[{Time}]{start\+\_\+time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Construct a \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{Summarizer}} starting at the given time. 
+\begin{DoxyParams}{Parameters}
+{\em start} & Start time of the summary. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_ae0b59fd364b64a16c47528fef1c7d5cb}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_ae0b59fd364b64a16c47528fef1c7d5cb}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!Summarizer@{Summarizer}}
+\index{Summarizer@{Summarizer}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{Summarizer()}{Summarizer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily launchdarkly\+::events\+::detail\+::\+Summarizer\+::\+Summarizer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Construct a \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{Summarizer}} at time zero. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a67563c48e4eb7943095dbfb083c311d8}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a67563c48e4eb7943095dbfb083c311d8}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!Empty@{Empty}}
+\index{Empty@{Empty}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{Empty()}{Empty()}}
+{\footnotesize\ttfamily bool launchdarkly\+::events\+::detail\+::\+Summarizer\+::\+Empty (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns true if the summary is empty. \mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a7c99069c0c0d5e76650880a9dfff7da0}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a7c99069c0c0d5e76650880a9dfff7da0}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!end\_time@{end\_time}}
+\index{end\_time@{end\_time}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{end\_time()}{end\_time()}}
+{\footnotesize\ttfamily Summarizer\+::\+Time launchdarkly\+::events\+::detail\+::\+Summarizer\+::end\+\_\+time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the summary\textquotesingle{}s end time as specified using Finish. \mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a9fcf959cdee0b9a3006a04e3e918768a}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a9fcf959cdee0b9a3006a04e3e918768a}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!Finish@{Finish}}
+\index{Finish@{Finish}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{Finish()}{Finish()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer}{Summarizer}} \& launchdarkly\+::events\+::detail\+::\+Summarizer\+::\+Finish (\begin{DoxyParamCaption}\item[{Time}]{end\+\_\+time }\end{DoxyParamCaption})}
+
+Marks the summary as finished at a given timestamp. 
+\begin{DoxyParams}{Parameters}
+{\em end\+\_\+time} & End time of the summary. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a117ec9bed4230ee0ab57d4689ab7c173}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a117ec9bed4230ee0ab57d4689ab7c173}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!start\_time@{start\_time}}
+\index{start\_time@{start\_time}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{start\_time()}{start\_time()}}
+{\footnotesize\ttfamily Summarizer\+::\+Time launchdarkly\+::events\+::detail\+::\+Summarizer\+::start\+\_\+time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the summary\textquotesingle{}s start time as given in the constructor. \mbox{\Hypertarget{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a666ac640302be51813e740f22ea8fdb1}\label{classlaunchdarkly_1_1events_1_1detail_1_1Summarizer_a666ac640302be51813e740f22ea8fdb1}} 
+\index{launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}!Update@{Update}}
+\index{Update@{Update}!launchdarkly::events::detail::Summarizer@{launchdarkly::events::detail::Summarizer}}
+\doxysubsubsection{\texorpdfstring{Update()}{Update()}}
+{\footnotesize\ttfamily void launchdarkly\+::events\+::detail\+::\+Summarizer\+::\+Update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structlaunchdarkly_1_1events_1_1client_1_1FeatureEventParams}{client\+::\+Feature\+Event\+Params}} const \&}]{event }\end{DoxyParamCaption})}
+
+Updates the summary with a feature event. 
+\begin{DoxyParams}{Parameters}
+{\em event} & Feature event. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/events/detail/summarizer.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/events/summarizer.\+cpp\end{DoxyCompactItemize}

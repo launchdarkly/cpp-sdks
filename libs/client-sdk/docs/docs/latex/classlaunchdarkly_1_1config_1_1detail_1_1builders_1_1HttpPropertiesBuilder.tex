@@ -1,0 +1,229 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{}\doxysection{launchdarkly\+::config\+::detail\+::builders\+::Http\+Properties\+Builder$<$ S\+DK $>$ Class Template Reference}
+\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+
+
+{\ttfamily \#include $<$http\+\_\+properties\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a38f0dfcefa203f6f3be387dcf888109e}{Http\+Properties\+Builder}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a71f9900d2b29c0d8e919e6689f6d9cc7}{Http\+Properties\+Builder}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1HttpProperties}{built\+::\+Http\+Properties}} const \&properties)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aa7355f2dbf0d9b8e5a3e606ef198bf68}{Connect\+Timeout}} (std\+::chrono\+::milliseconds connect\+\_\+timeout)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a677a8941f3ed3436fd966a472402c4c0}{Read\+Timeout}} (std\+::chrono\+::milliseconds read\+\_\+timeout)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a81456a8eed3864193ccbbf32c9fa8cee}{Write\+Timeout}} (std\+::chrono\+::milliseconds write\+\_\+timeout)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a5baf981df9745aac681842b4ccb670f6}{Response\+Timeout}} (std\+::chrono\+::milliseconds response\+\_\+timeout)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aecbcf3acc32118d5b41853090f1be2d1}{Wrapper\+Name}} (std\+::string wrapper\+\_\+name)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a959eef8a1cfa9129e8dd1ad02f04fd9a}{Wrapper\+Version}} (std\+::string wrapper\+\_\+version)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a1431f151062ff2aa6324a58619942350}{Custom\+Headers}} (std\+::map$<$ std\+::string, std\+::string $>$ base\+\_\+headers)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a47b19474d1727598afd97a9ecdee81ed}{Header}} (std\+::string key, std\+::string value)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1HttpProperties}{built\+::\+Http\+Properties}} \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_ad7a67fad464f4598707324b8c36f4d3d}{Build}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename S\+DK$>$\newline
+class launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder$<$ S\+D\+K $>$}
+
+Class used for building a set of Http\+Properties. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em S\+DK} & The S\+DK type to build properties for. This affects the default values of the built properties. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a38f0dfcefa203f6f3be387dcf888109e}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a38f0dfcefa203f6f3be387dcf888109e}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!HttpPropertiesBuilder@{HttpPropertiesBuilder}}
+\index{HttpPropertiesBuilder@{HttpPropertiesBuilder}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{HttpPropertiesBuilder()}{HttpPropertiesBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}}
+
+Construct a new \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}. The builder will use the default properties based on the S\+DK type. Setting a property will override the default value. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a71f9900d2b29c0d8e919e6689f6d9cc7}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a71f9900d2b29c0d8e919e6689f6d9cc7}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!HttpPropertiesBuilder@{HttpPropertiesBuilder}}
+\index{HttpPropertiesBuilder@{HttpPropertiesBuilder}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{HttpPropertiesBuilder()}{HttpPropertiesBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1HttpProperties}{built\+::\+Http\+Properties}} const \&}]{properties }\end{DoxyParamCaption})}
+
+Create a properties builder from an initial set of properties. This can be useful when extending a set of properties for a request. For instance to add extra headers.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a38f0dfcefa203f6f3be387dcf888109e}{HttpPropertiesBuilder}}(my\_properties)}
+\DoxyCodeLine{  .Header(\textcolor{stringliteral}{"authorization"}, \textcolor{stringliteral}{"my-\/key"})}
+\DoxyCodeLine{  .Build();}
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em properties} & The properties to start with. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_ad7a67fad464f4598707324b8c36f4d3d}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_ad7a67fad464f4598707324b8c36f4d3d}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!Build@{Build}}
+\index{Build@{Build}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Build()}{Build()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1HttpProperties}{built\+::\+Http\+Properties}} \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Build}
+
+Build a set of Http\+Properties. \begin{DoxyReturn}{Returns}
+The built properties. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aa7355f2dbf0d9b8e5a3e606ef198bf68}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aa7355f2dbf0d9b8e5a3e606ef198bf68}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!ConnectTimeout@{ConnectTimeout}}
+\index{ConnectTimeout@{ConnectTimeout}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ConnectTimeout()}{ConnectTimeout()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Connect\+Timeout (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{connect\+\_\+timeout }\end{DoxyParamCaption})}
+
+The network connection timeout.
+
+
+\begin{DoxyParams}{Parameters}
+{\em connect\+\_\+timeout} & The connect timeout. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a1431f151062ff2aa6324a58619942350}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a1431f151062ff2aa6324a58619942350}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!CustomHeaders@{CustomHeaders}}
+\index{CustomHeaders@{CustomHeaders}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{CustomHeaders()}{CustomHeaders()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Custom\+Headers (\begin{DoxyParamCaption}\item[{std\+::map$<$ std\+::string, std\+::string $>$}]{base\+\_\+headers }\end{DoxyParamCaption})}
+
+Set all custom headers. This will replace any other customer headers that were set with the Header method, or any previously set headers using the Custom\+Headers method. 
+\begin{DoxyParams}{Parameters}
+{\em base\+\_\+headers} & The custom headers. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a47b19474d1727598afd97a9ecdee81ed}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a47b19474d1727598afd97a9ecdee81ed}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!Header@{Header}}
+\index{Header@{Header}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Header()}{Header()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Header (\begin{DoxyParamCaption}\item[{std\+::string}]{key,  }\item[{std\+::string}]{value }\end{DoxyParamCaption})}
+
+Set a custom header value.
+
+Calling Custom\+Headers will replace any previously set values. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key for the header. \\
+\hline
+{\em value} & The header value. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a677a8941f3ed3436fd966a472402c4c0}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a677a8941f3ed3436fd966a472402c4c0}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!ReadTimeout@{ReadTimeout}}
+\index{ReadTimeout@{ReadTimeout}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ReadTimeout()}{ReadTimeout()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Read\+Timeout (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{read\+\_\+timeout }\end{DoxyParamCaption})}
+
+Set a read timeout. This is the time after the first byte has been received that a read has to complete.
+
+
+\begin{DoxyParams}{Parameters}
+{\em read\+\_\+timeout} & The read timeout. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a5baf981df9745aac681842b4ccb670f6}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a5baf981df9745aac681842b4ccb670f6}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!ResponseTimeout@{ResponseTimeout}}
+\index{ResponseTimeout@{ResponseTimeout}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ResponseTimeout()}{ResponseTimeout()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Response\+Timeout (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{response\+\_\+timeout }\end{DoxyParamCaption})}
+
+The time for the first byte to be received during a read. If a byte is not received within this time, then the request will be cancelled.
+
+
+\begin{DoxyParams}{Parameters}
+{\em response\+\_\+timeout} & The response timeout. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aecbcf3acc32118d5b41853090f1be2d1}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_aecbcf3acc32118d5b41853090f1be2d1}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!WrapperName@{WrapperName}}
+\index{WrapperName@{WrapperName}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{WrapperName()}{WrapperName()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Wrapper\+Name (\begin{DoxyParamCaption}\item[{std\+::string}]{wrapper\+\_\+name }\end{DoxyParamCaption})}
+
+This should be used for wrapper S\+D\+Ks to set the wrapper name.
+
+Wrapper information will be included in request headers. 
+\begin{DoxyParams}{Parameters}
+{\em wrapper\+\_\+name} & The name of the wrapper. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a959eef8a1cfa9129e8dd1ad02f04fd9a}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a959eef8a1cfa9129e8dd1ad02f04fd9a}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!WrapperVersion@{WrapperVersion}}
+\index{WrapperVersion@{WrapperVersion}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{WrapperVersion()}{WrapperVersion()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Wrapper\+Version (\begin{DoxyParamCaption}\item[{std\+::string}]{wrapper\+\_\+version }\end{DoxyParamCaption})}
+
+This should be used for wrapper S\+D\+Ks to set the wrapper version.
+
+Wrapper information will be included in request headers. 
+\begin{DoxyParams}{Parameters}
+{\em wrapper\+\_\+version} & The version of the wrapper. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a81456a8eed3864193ccbbf32c9fa8cee}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder_a81456a8eed3864193ccbbf32c9fa8cee}} 
+\index{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}!WriteTimeout@{WriteTimeout}}
+\index{WriteTimeout@{WriteTimeout}!launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::HttpPropertiesBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{WriteTimeout()}{WriteTimeout()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$\+::Write\+Timeout (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{write\+\_\+timeout }\end{DoxyParamCaption})}
+
+Set a write timeout. This is how long it takes to perform a write operation.
+
+
+\begin{DoxyParams}{Parameters}
+{\em read\+\_\+timeout} & The write timeout. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to this builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/config/detail/builders/http\+\_\+properties\+\_\+builder.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/config/http\+\_\+properties\+\_\+builder.\+cpp\end{DoxyCompactItemize}

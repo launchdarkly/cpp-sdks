@@ -1,0 +1,112 @@
+\hypertarget{classlaunchdarkly_1_1ContextBuilder}{}\doxysection{launchdarkly\+::Context\+Builder Class Reference}
+\label{classlaunchdarkly_1_1ContextBuilder}\index{launchdarkly::ContextBuilder@{launchdarkly::ContextBuilder}}
+
+
+{\ttfamily \#include $<$context\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}{kind}} (std\+::string const \&kind, std\+::string key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ac9b43be701b06bd4eeb8257373908f8c}{build}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class for building Launch\+Darkly contexts.
+
+You cannot build a context until you have added at least one kind.
+
+Building a context with a single kind. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto} context = ContextBuilder()}
+\DoxyCodeLine{     .kind(\textcolor{stringliteral}{"user"}, \textcolor{stringliteral}{"bobby-\/bobberson"})}
+\DoxyCodeLine{     .name(\textcolor{stringliteral}{"Bob"})}
+\DoxyCodeLine{     .anonymous(\textcolor{keyword}{false})}
+\DoxyCodeLine{     \textcolor{comment}{// Set a custom attribute.}}
+\DoxyCodeLine{     .set(\textcolor{stringliteral}{"likesCats"}, \textcolor{keyword}{true})}
+\DoxyCodeLine{     \textcolor{comment}{// Set a private custom attribute.}}
+\DoxyCodeLine{     .set\_private(\textcolor{stringliteral}{"email"}, \textcolor{stringliteral}{"email@email.email"})}
+\DoxyCodeLine{     .build();}
+\end{DoxyCode}
+
+
+Building a context with multiple kinds. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto} context = ContextBuilder()}
+\DoxyCodeLine{     .kind(\textcolor{stringliteral}{"user"}, \textcolor{stringliteral}{"bobby-\/bobberson"})}
+\DoxyCodeLine{     .name(\textcolor{stringliteral}{"Bob"})}
+\DoxyCodeLine{     .anonymous(\textcolor{keyword}{false})}
+\DoxyCodeLine{     \textcolor{comment}{// Set a custom attribute.}}
+\DoxyCodeLine{     .set(\textcolor{stringliteral}{"likesCats"}, \textcolor{keyword}{true})}
+\DoxyCodeLine{     \textcolor{comment}{// Set a private custom attribute.}}
+\DoxyCodeLine{     .set\_private(\textcolor{stringliteral}{"email"}, \textcolor{stringliteral}{"email@email.email"})}
+\DoxyCodeLine{     \textcolor{comment}{// Add another kind to the context.}}
+\DoxyCodeLine{     .kind(\textcolor{stringliteral}{"org"}, \textcolor{stringliteral}{"org-\/key"})}
+\DoxyCodeLine{     .anonymous(\textcolor{keyword}{true})}
+\DoxyCodeLine{     .set(\textcolor{stringliteral}{"goal"}, \textcolor{stringliteral}{"money"})}
+\DoxyCodeLine{     .build();}
+\end{DoxyCode}
+
+
+Using the builder with loops. 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto} builder = ContextBuilder();}
+\DoxyCodeLine{\textcolor{comment}{// The data in this sample is not realistic, but it is intended to show}}
+\DoxyCodeLine{\textcolor{comment}{// how to use the builder with loops.}}
+\DoxyCodeLine{\textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \textcolor{keyword}{const}\& \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}{kind}} : kinds) \{ \textcolor{comment}{// Some collection we are using to make}}
+\DoxyCodeLine{kinds.}
+\DoxyCodeLine{    \textcolor{comment}{// The `kind` method returns a reference, always store it in a reference.}}
+\DoxyCodeLine{    \textcolor{keyword}{auto}\& kind\_builder = builder.kind(\mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}{kind}}, \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}{kind}} + \textcolor{stringliteral}{"-\/key"});}
+\DoxyCodeLine{    \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \textcolor{keyword}{const}\& prop : props) \{ \textcolor{comment}{// A collection of props we want to add.}}
+\DoxyCodeLine{        kind\_builder.set(prop.first, prop.second);}
+\DoxyCodeLine{    \}}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{keyword}{auto} context = builder.build();}
+\end{DoxyCode}
+ 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ContextBuilder_ac9b43be701b06bd4eeb8257373908f8c}\label{classlaunchdarkly_1_1ContextBuilder_ac9b43be701b06bd4eeb8257373908f8c}} 
+\index{launchdarkly::ContextBuilder@{launchdarkly::ContextBuilder}!build@{build}}
+\index{build@{build}!launchdarkly::ContextBuilder@{launchdarkly::ContextBuilder}}
+\doxysubsubsection{\texorpdfstring{build()}{build()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} launchdarkly\+::\+Context\+Builder\+::build (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Build a context. This should only be called once, because the contents of the builder are moved into the created context.
+
+After the context is build, then this builder, and any kind builders associated with it, should no longer be used.
+
+You M\+U\+ST add at least one kind before building a context. Not doing so will result in an invalid context.
+
+\begin{DoxyReturn}{Returns}
+The built context. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}\label{classlaunchdarkly_1_1ContextBuilder_ad4c3ad902c8ada94e481e64c43754d4c}} 
+\index{launchdarkly::ContextBuilder@{launchdarkly::ContextBuilder}!kind@{kind}}
+\index{kind@{kind}!launchdarkly::ContextBuilder@{launchdarkly::ContextBuilder}}
+\doxysubsubsection{\texorpdfstring{kind()}{kind()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& launchdarkly\+::\+Context\+Builder\+::kind (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{kind,  }\item[{std\+::string}]{key }\end{DoxyParamCaption})}
+
+Start adding a kind to the context.
+
+If you call this function multiple times with the same kind, then the same builder will be returned each time. If you previously called the function with the same kind, but different key, then the key will be updated.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind being added. \\
+\hline
+{\em key} & The key for the kind. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A builder which allows adding attributes for the kind. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/context\+\_\+builder.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/context\+\_\+builder.\+cpp\end{DoxyCompactItemize}

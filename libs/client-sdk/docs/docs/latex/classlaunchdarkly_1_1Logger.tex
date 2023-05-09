@@ -1,0 +1,114 @@
+\hypertarget{classlaunchdarkly_1_1Logger}{}\doxysection{launchdarkly\+::Logger Class Reference}
+\label{classlaunchdarkly_1_1Logger}\index{launchdarkly::Logger@{launchdarkly::Logger}}
+
+
+{\ttfamily \#include $<$logger.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecord}{Log\+Record}}
+\item 
+class \mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecordStream}{Log\+Record\+Stream}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Logger_ac79dc40017ccac7c7c5f0d21f2e88768}{Logger}} (std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend}{I\+Log\+Backend}} $>$ backend)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecord}{Log\+Record}} \mbox{\hyperlink{classlaunchdarkly_1_1Logger_a7ce1c3c2b7574b0e3b611462539abd92}{open\+\_\+record}} (Log\+Level level) const
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1Logger_aba44ab71c4df65e82f838fb32f789cc5}{push\+\_\+record}} (\mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecord}{Log\+Record}} record) const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1Logger_a05b85cdb211cbc255c181b82fa3d08f4}{enabled}} (Log\+Level level) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1Logger}{Logger}} to be used in S\+DK implementation.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classlaunchdarkly_1_1Logger_ac79dc40017ccac7c7c5f0d21f2e88768}{Logger}} logger(std::make\_unique<ConsoleBackend>(LogLevel::kInfo,}
+\DoxyCodeLine{\textcolor{stringliteral}{"Example"}));}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Use the macro for logging.}}
+\DoxyCodeLine{LD\_LOG(logger, LogLevel::kInfo) << \textcolor{stringliteral}{"this is a log"};}
+\end{DoxyCode}
+ 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Logger_ac79dc40017ccac7c7c5f0d21f2e88768}\label{classlaunchdarkly_1_1Logger_ac79dc40017ccac7c7c5f0d21f2e88768}} 
+\index{launchdarkly::Logger@{launchdarkly::Logger}!Logger@{Logger}}
+\index{Logger@{Logger}!launchdarkly::Logger@{launchdarkly::Logger}}
+\doxysubsubsection{\texorpdfstring{Logger()}{Logger()}}
+{\footnotesize\ttfamily launchdarkly\+::\+Logger\+::\+Logger (\begin{DoxyParamCaption}\item[{std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend}{I\+Log\+Backend}} $>$}]{backend }\end{DoxyParamCaption})}
+
+Construct a logger with the specified back-\/end.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{classlaunchdarkly_1_1Logger_ac79dc40017ccac7c7c5f0d21f2e88768}{Logger}} logger(std::make\_unique<ConsoleBackend>(LogLevel::kInfo,}
+\DoxyCodeLine{\textcolor{stringliteral}{"Example"}));}
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em backend} & The back-\/end to use for the logger. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Logger_a05b85cdb211cbc255c181b82fa3d08f4}\label{classlaunchdarkly_1_1Logger_a05b85cdb211cbc255c181b82fa3d08f4}} 
+\index{launchdarkly::Logger@{launchdarkly::Logger}!enabled@{enabled}}
+\index{enabled@{enabled}!launchdarkly::Logger@{launchdarkly::Logger}}
+\doxysubsubsection{\texorpdfstring{enabled()}{enabled()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Logger\+::enabled (\begin{DoxyParamCaption}\item[{Log\+Level}]{level }\end{DoxyParamCaption}) const}
+
+Check if a given log level is enabled. This is useful if you want to do some expensive operation only when logging is enabled.
+
+
+\begin{DoxyParams}{Parameters}
+{\em level} & The level to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the level is enabled. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Logger_a7ce1c3c2b7574b0e3b611462539abd92}\label{classlaunchdarkly_1_1Logger_a7ce1c3c2b7574b0e3b611462539abd92}} 
+\index{launchdarkly::Logger@{launchdarkly::Logger}!open\_record@{open\_record}}
+\index{open\_record@{open\_record}!launchdarkly::Logger@{launchdarkly::Logger}}
+\doxysubsubsection{\texorpdfstring{open\_record()}{open\_record()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecord}{Logger\+::\+Log\+Record}} launchdarkly\+::\+Logger\+::open\+\_\+record (\begin{DoxyParamCaption}\item[{Log\+Level}]{level }\end{DoxyParamCaption}) const}
+
+Open a logging record.
+
+
+\begin{DoxyParams}{Parameters}
+{\em level} & The level for the record. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A new record, or null-\/opt if there are no sinks for the severity level. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Logger_aba44ab71c4df65e82f838fb32f789cc5}\label{classlaunchdarkly_1_1Logger_aba44ab71c4df65e82f838fb32f789cc5}} 
+\index{launchdarkly::Logger@{launchdarkly::Logger}!push\_record@{push\_record}}
+\index{push\_record@{push\_record}!launchdarkly::Logger@{launchdarkly::Logger}}
+\doxysubsubsection{\texorpdfstring{push\_record()}{push\_record()}}
+{\footnotesize\ttfamily void launchdarkly\+::\+Logger\+::push\+\_\+record (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Logger_1_1LogRecord}{Log\+Record}}}]{record }\end{DoxyParamCaption}) const}
+
+Push the record to the back-\/end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em record} & The record to push. Should be written to before this point. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/logger.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/logger.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,109 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events}{}\doxysection{launchdarkly\+::config\+::detail\+::built\+::Events Class Reference}
+\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events}\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a6aad4408b868fb3b74dcd3cf4b1c5782}{Events}} (bool enabled, std\+::size\+\_\+t capacity, std\+::chrono\+::milliseconds flush\+\_\+interval, std\+::string path, bool all\+\_\+attributes\+\_\+private, Attribute\+Reference\+::\+Set\+Type private\+\_\+attrs, std\+::chrono\+::milliseconds delivery\+\_\+retry\+\_\+delay, std\+::size\+\_\+t flush\+\_\+workers)
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a93fc1322cd2d4a460c6f0cbc4b88fad6}{Enabled}} () const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a9ddadde09e9a8350c76d16307c02c035}{Capacity}} () const
+\item 
+std\+::chrono\+::milliseconds \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a54925b48e1e954611dac8a839d785414}{Flush\+Interval}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a14fc07bc634f4003d8dd6c3fec737e7a}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a14fc07bc634f4003d8dd6c3fec737e7a}} 
+std\+::chrono\+::milliseconds {\bfseries Delivery\+Retry\+Delay} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_abf504f8dd2ecbda69fdc6004e7876511}{Path}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_af6b9d488b4cd74e2b7449ac666d338ee}{All\+Attributes\+Private}} () const
+\item 
+Attribute\+Reference\+::\+Set\+Type const  \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a39495e0628fba576eea4c329a348de36}{Private\+Attributes}} () const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_afec72ff9ff80c50baa5468f33a28a689}{Flush\+Workers}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a00ac627cd79df1fa5e9836822159ff3b}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a00ac627cd79df1fa5e9836822159ff3b}} 
+{\footnotesize template$<$typename S\+DK $>$ }\\class {\bfseries builders\+::\+Events\+Builder}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a6aad4408b868fb3b74dcd3cf4b1c5782}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a6aad4408b868fb3b74dcd3cf4b1c5782}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!Events@{Events}}
+\index{Events@{Events}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{Events()}{Events()}}
+{\footnotesize\ttfamily launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Events (\begin{DoxyParamCaption}\item[{bool}]{enabled,  }\item[{std\+::size\+\_\+t}]{capacity,  }\item[{std\+::chrono\+::milliseconds}]{flush\+\_\+interval,  }\item[{std\+::string}]{path,  }\item[{bool}]{all\+\_\+attributes\+\_\+private,  }\item[{Attribute\+Reference\+::\+Set\+Type}]{private\+\_\+attrs,  }\item[{std\+::chrono\+::milliseconds}]{delivery\+\_\+retry\+\_\+delay,  }\item[{std\+::size\+\_\+t}]{flush\+\_\+workers }\end{DoxyParamCaption})}
+
+Constructs configuration for the event subsystem. 
+\begin{DoxyParams}{Parameters}
+{\em enabled} & If event-\/sending is enabled. If false, no events will be sent to Launch\+Darkly. \\
+\hline
+{\em capacity} & How many events can queue in memory before new events are dropped. \\
+\hline
+{\em flush\+\_\+interval} & How often events are automatically flushed to Launch\+Darkly. \\
+\hline
+{\em path} & The path component of the Launch\+Darkly event delivery endpoint. \\
+\hline
+{\em all\+\_\+attributes\+\_\+private} & Whether all attributes should be treated as private or not. \\
+\hline
+{\em private\+\_\+attrs} & Which attributes should be treated as private, if All\+Attributes\+Private is false. \\
+\hline
+{\em security} & Whether a plaintext or encrypted client should be used for event delivery. \\
+\hline
+{\em flush\+\_\+workers} & How many workers to use for concurrent event delivery. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_af6b9d488b4cd74e2b7449ac666d338ee}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_af6b9d488b4cd74e2b7449ac666d338ee}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!AllAttributesPrivate@{AllAttributesPrivate}}
+\index{AllAttributesPrivate@{AllAttributesPrivate}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{AllAttributesPrivate()}{AllAttributesPrivate()}}
+{\footnotesize\ttfamily bool launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+All\+Attributes\+Private (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Whether all attributes should be considered private or not. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a9ddadde09e9a8350c76d16307c02c035}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a9ddadde09e9a8350c76d16307c02c035}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!Capacity@{Capacity}}
+\index{Capacity@{Capacity}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{Capacity()}{Capacity()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Capacity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Capacity of the event processor. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a93fc1322cd2d4a460c6f0cbc4b88fad6}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a93fc1322cd2d4a460c6f0cbc4b88fad6}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!Enabled@{Enabled}}
+\index{Enabled@{Enabled}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{Enabled()}{Enabled()}}
+{\footnotesize\ttfamily bool launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Enabled (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns true if event-\/sending is enabled. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a54925b48e1e954611dac8a839d785414}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a54925b48e1e954611dac8a839d785414}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!FlushInterval@{FlushInterval}}
+\index{FlushInterval@{FlushInterval}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{FlushInterval()}{FlushInterval()}}
+{\footnotesize\ttfamily std\+::chrono\+::milliseconds launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Flush\+Interval (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Flush interval of the event processor, in milliseconds. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_afec72ff9ff80c50baa5468f33a28a689}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_afec72ff9ff80c50baa5468f33a28a689}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!FlushWorkers@{FlushWorkers}}
+\index{FlushWorkers@{FlushWorkers}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{FlushWorkers()}{FlushWorkers()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Flush\+Workers (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Number of flush workers used for concurrent event delivery. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_abf504f8dd2ecbda69fdc6004e7876511}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_abf504f8dd2ecbda69fdc6004e7876511}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!Path@{Path}}
+\index{Path@{Path}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{Path()}{Path()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Path (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Path component of the Launch\+Darkly event delivery endpoint. \mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a39495e0628fba576eea4c329a348de36}\label{classlaunchdarkly_1_1config_1_1detail_1_1built_1_1Events_a39495e0628fba576eea4c329a348de36}} 
+\index{launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}!PrivateAttributes@{PrivateAttributes}}
+\index{PrivateAttributes@{PrivateAttributes}!launchdarkly::config::detail::built::Events@{launchdarkly::config::detail::built::Events}}
+\doxysubsubsection{\texorpdfstring{PrivateAttributes()}{PrivateAttributes()}}
+{\footnotesize\ttfamily Attribute\+Reference\+::\+Set\+Type const  \& launchdarkly\+::config\+::detail\+::built\+::\+Events\+::\+Private\+Attributes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Set of individual attributes that should be considered private. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/config/detail/built/events.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/config/events.\+cpp\end{DoxyCompactItemize}

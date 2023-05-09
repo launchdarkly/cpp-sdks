@@ -1,0 +1,64 @@
+\hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{}\doxysection{launchdarkly\+::client\+\_\+side\+::Item\+Descriptor Struct Reference}
+\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}\index{launchdarkly::client\_side::ItemDescriptor@{launchdarkly::client\_side::ItemDescriptor}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+update\+\_\+sink.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ac787b7666d1eb9f00b69b83069824218}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ac787b7666d1eb9f00b69b83069824218}} 
+{\bfseries Item\+Descriptor} (uint64\+\_\+t \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a1b9a8068acf36cf9ea2796e8d07124da}{version}})
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a48483ae3474188118ada58e6e9738f1b}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a48483ae3474188118ada58e6e9738f1b}} 
+{\bfseries Item\+Descriptor} (\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{Evaluation\+Result}} \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a99e982d6d0ac4bf706ce4bf4b195824d}{flag}})
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ad5678938439dba1127c8a7e93ec5b548}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ad5678938439dba1127c8a7e93ec5b548}} 
+{\bfseries Item\+Descriptor} (\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} const \&item)=default
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a17a5e8cd0e76d5d6e9b87b31e4c2ed34}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a17a5e8cd0e76d5d6e9b87b31e4c2ed34}} 
+{\bfseries Item\+Descriptor} (\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} \&\&item)=default
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ae39ba2f01f4b27635c9c2d46eb2e0384}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_ae39ba2f01f4b27635c9c2d46eb2e0384}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} \& {\bfseries operator=} (\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} const \&)=default
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a234839f0840348834ce9650e92b548c4}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a234839f0840348834ce9650e92b548c4}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} \& {\bfseries operator=} (\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} \&\&)=default
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+uint64\+\_\+t \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a1b9a8068acf36cf9ea2796e8d07124da}{version}}
+\item 
+std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{Evaluation\+Result}} $>$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a99e982d6d0ac4bf706ce4bf4b195824d}{flag}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a0def849319a126c2944dea79c7a83ebb}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a0def849319a126c2944dea79c7a83ebb}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} const \&descriptor)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+An item descriptor is an abstraction that allows for Flag data to be handled using the same type in both a put or a patch. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a99e982d6d0ac4bf706ce4bf4b195824d}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a99e982d6d0ac4bf706ce4bf4b195824d}} 
+\index{launchdarkly::client\_side::ItemDescriptor@{launchdarkly::client\_side::ItemDescriptor}!flag@{flag}}
+\index{flag@{flag}!launchdarkly::client\_side::ItemDescriptor@{launchdarkly::client\_side::ItemDescriptor}}
+\doxysubsubsection{\texorpdfstring{flag}{flag}}
+{\footnotesize\ttfamily std\+::optional$<$\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{Evaluation\+Result}}$>$ launchdarkly\+::client\+\_\+side\+::\+Item\+Descriptor\+::flag}
+
+The data item, or nullopt if this is a deleted item placeholder. \mbox{\Hypertarget{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a1b9a8068acf36cf9ea2796e8d07124da}\label{structlaunchdarkly_1_1client__side_1_1ItemDescriptor_a1b9a8068acf36cf9ea2796e8d07124da}} 
+\index{launchdarkly::client\_side::ItemDescriptor@{launchdarkly::client\_side::ItemDescriptor}!version@{version}}
+\index{version@{version}!launchdarkly::client\_side::ItemDescriptor@{launchdarkly::client\_side::ItemDescriptor}}
+\doxysubsubsection{\texorpdfstring{version}{version}}
+{\footnotesize\ttfamily uint64\+\_\+t launchdarkly\+::client\+\_\+side\+::\+Item\+Descriptor\+::version}
+
+The version number of this data, provided by the S\+DK. 
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/client\+\_\+side/data\+\_\+source\+\_\+update\+\_\+sink.\+hpp\item 
+src/data\+\_\+source\+\_\+update\+\_\+sink.\+cpp\end{DoxyCompactItemize}

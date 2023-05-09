@@ -1,0 +1,178 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{}\doxysection{launchdarkly\+::config\+::detail\+::builders\+::Config\+Builder$<$ S\+DK $>$ Class Template Reference}
+\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+
+
+{\ttfamily \#include $<$config\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_adb24f2e8b3dad95b706788e5bb72cd86}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_adb24f2e8b3dad95b706788e5bb72cd86}} 
+using {\bfseries Endpoints\+Builder} = \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EndpointsBuilder}{detail\+::builders\+::\+Endpoints\+Builder}}$<$ S\+DK $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_aec7fefedca9407009696bcb31df23b78}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_aec7fefedca9407009696bcb31df23b78}} 
+using {\bfseries Events\+Builder} = \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EventsBuilder}{detail\+::builders\+::\+Events\+Builder}}$<$ S\+DK $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a700724e404721dda54cf67038bd612aa}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a700724e404721dda54cf67038bd612aa}} 
+using {\bfseries Config\+Result} = tl\+::expected$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1detail_1_1Config}{detail\+::\+Config}}$<$ S\+DK $>$, Error $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a397e48f2197dad5576fdfd5c0b0755dc}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a397e48f2197dad5576fdfd5c0b0755dc}} 
+using {\bfseries Data\+Source\+Builder} = \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1DataSourceBuilder}{detail\+::builders\+::\+Data\+Source\+Builder}}$<$ S\+DK $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a4bf0728a8f0cf8c55966603e2dc52f1a}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a4bf0728a8f0cf8c55966603e2dc52f1a}} 
+using {\bfseries Http\+Properties\+Builder} = \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{detail\+::builders\+::\+Http\+Properties\+Builder}}$<$ S\+DK $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab21cd469505ce97c8ea17edbe4973746}{Config\+Builder}} (std\+::string sdk\+\_\+key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a10a42f2f9369f0246be3a94161723fa8}{Service\+Endpoints}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EndpointsBuilder}{Endpoints\+Builder}} builder)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab4a356fb58e9ce87c067e450f7c45713}{App\+Info}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1AppInfoBuilder}{App\+Info\+Builder}} builder)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a01abe09b15099a9554f68ead233f27de}{Offline}} (bool offline)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_abaf9eb6ff87b69816d1c86e86d4966ac}{Events}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EventsBuilder}{Events\+Builder}} builder)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a7233fbe269bf5a4723464029a4da8164}{Data\+Source}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1DataSourceBuilder}{Data\+Source\+Builder}} builder)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab9ead71294b9ce87068e0198b6ca7aab}{Http\+Properties}} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} builder)
+\item 
+Config\+Result \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a2e962eb9d18f8b699ad5e75a125df919}{Build}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename S\+DK$>$\newline
+class launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder$<$ S\+D\+K $>$}
+
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} allows for creation of a Configuration object for use in a Client. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em S\+DK} & Type of S\+DK. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab21cd469505ce97c8ea17edbe4973746}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab21cd469505ce97c8ea17edbe4973746}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!ConfigBuilder@{ConfigBuilder}}
+\index{ConfigBuilder@{ConfigBuilder}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ConfigBuilder()}{ConfigBuilder()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}} (\begin{DoxyParamCaption}\item[{std\+::string}]{sdk\+\_\+key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+A minimal configuration consists of a Launch\+Darkly S\+DK Key. 
+\begin{DoxyParams}{Parameters}
+{\em sdk\+\_\+key} & S\+DK Key. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab4a356fb58e9ce87c067e450f7c45713}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab4a356fb58e9ce87c067e450f7c45713}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!AppInfo@{AppInfo}}
+\index{AppInfo@{AppInfo}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{AppInfo()}{AppInfo()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::App\+Info (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1AppInfoBuilder}{App\+Info\+Builder}}}]{builder }\end{DoxyParamCaption})}
+
+To include metadata about the application that is utilizing the S\+DK, pass in an \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1AppInfoBuilder}{App\+Info\+Builder}}. 
+\begin{DoxyParams}{Parameters}
+{\em builder} & An \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1AppInfoBuilder}{App\+Info\+Builder}}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a2e962eb9d18f8b699ad5e75a125df919}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a2e962eb9d18f8b699ad5e75a125df919}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!Build@{Build}}
+\index{Build@{Build}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Build()}{Build()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$\+::Config\+Result \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Build}
+
+Builds a Configuration, suitable for passing into an instance of Client. \begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a7233fbe269bf5a4723464029a4da8164}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a7233fbe269bf5a4723464029a4da8164}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!DataSource@{DataSource}}
+\index{DataSource@{DataSource}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{DataSource()}{DataSource()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Data\+Source (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1DataSourceBuilder}{Data\+Source\+Builder}}}]{builder }\end{DoxyParamCaption})}
+
+Sets the configuration of the component that receives feature flag data from Launch\+Darkly. 
+\begin{DoxyParams}{Parameters}
+{\em builder} & A Data\+Source\+Config builder. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_abaf9eb6ff87b69816d1c86e86d4966ac}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_abaf9eb6ff87b69816d1c86e86d4966ac}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!Events@{Events}}
+\index{Events@{Events}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Events()}{Events()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Events (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EventsBuilder}{Events\+Builder}}}]{builder }\end{DoxyParamCaption})}
+
+To tune settings related to event generation and delivery, pass an \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EventsBuilder}{Events\+Builder}}. 
+\begin{DoxyParams}{Parameters}
+{\em builder} & An \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EventsBuilder}{Events\+Builder}}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab9ead71294b9ce87068e0198b6ca7aab}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_ab9ead71294b9ce87068e0198b6ca7aab}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!HttpProperties@{HttpProperties}}
+\index{HttpProperties@{HttpProperties}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{HttpProperties()}{HttpProperties()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Http\+Properties (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}}]{builder }\end{DoxyParamCaption})}
+
+Sets the S\+DK\textquotesingle{}s networking configuration, using an \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}}. The builder has methods for setting individual H\+T\+T\+P-\/related properties. 
+\begin{DoxyParams}{Parameters}
+{\em builder} & A \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1HttpPropertiesBuilder}{Http\+Properties\+Builder}} builder. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a01abe09b15099a9554f68ead233f27de}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a01abe09b15099a9554f68ead233f27de}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!Offline@{Offline}}
+\index{Offline@{Offline}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Offline()}{Offline()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Offline (\begin{DoxyParamCaption}\item[{bool}]{offline }\end{DoxyParamCaption})}
+
+To enable or disable \char`\"{}\+Offline\char`\"{} mode, pass a boolean value. True means Offline mode is enabled. 
+\begin{DoxyParams}{Parameters}
+{\em offline} & True if the S\+DK should operate in Offline mode. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a10a42f2f9369f0246be3a94161723fa8}\label{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder_a10a42f2f9369f0246be3a94161723fa8}} 
+\index{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}!ServiceEndpoints@{ServiceEndpoints}}
+\index{ServiceEndpoints@{ServiceEndpoints}!launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$@{launchdarkly::config::detail::builders::ConfigBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ServiceEndpoints()}{ServiceEndpoints()}}
+{\footnotesize\ttfamily template$<$typename S\+DK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{Config\+Builder}}$<$ S\+DK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1ConfigBuilder}{launchdarkly\+::config\+::detail\+::builders\+::\+Config\+Builder}}$<$ S\+DK $>$\+::Service\+Endpoints (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EndpointsBuilder}{Endpoints\+Builder}}}]{builder }\end{DoxyParamCaption})}
+
+To customize the Service\+Endpoints the S\+DK uses for streaming, polling, and events, pass in an \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EndpointsBuilder}{Endpoints\+Builder}}. 
+\begin{DoxyParams}{Parameters}
+{\em builder} & An \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1detail_1_1builders_1_1EndpointsBuilder}{Endpoints\+Builder}}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/config/detail/builders/config\+\_\+builder.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/config/config\+\_\+builder.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,111 @@
+\hypertarget{classlaunchdarkly_1_1ConsoleBackend}{}\doxysection{launchdarkly\+::Console\+Backend Class Reference}
+\label{classlaunchdarkly_1_1ConsoleBackend}\index{launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}}
+
+
+{\ttfamily \#include $<$console\+\_\+backend.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::Console\+Backend\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=245pt]{classlaunchdarkly_1_1ConsoleBackend__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::Console\+Backend\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=245pt]{classlaunchdarkly_1_1ConsoleBackend__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_af6bf917cbb395e81ec38365f26267e85}{Console\+Backend}} (Log\+Level level, std\+::string name)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_a16605f9eb3b18b18ed47c341d3fde6fb}{Console\+Backend}} (std\+::string name)
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_a5a5a086c7ab45af4b735ff171f747e48}{enabled}} (Log\+Level level) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_a750af588efc4bd9018f9ab6a266f3a58}{write}} (Log\+Level level, std\+::string message) override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Basic console back-\/end. Writes {\ttfamily k\+Error} level to stderr and others to stdout. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ConsoleBackend_af6bf917cbb395e81ec38365f26267e85}\label{classlaunchdarkly_1_1ConsoleBackend_af6bf917cbb395e81ec38365f26267e85}} 
+\index{launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}!ConsoleBackend@{ConsoleBackend}}
+\index{ConsoleBackend@{ConsoleBackend}!launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}}
+\doxysubsubsection{\texorpdfstring{ConsoleBackend()}{ConsoleBackend()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily launchdarkly\+::\+Console\+Backend\+::\+Console\+Backend (\begin{DoxyParamCaption}\item[{Log\+Level}]{level,  }\item[{std\+::string}]{name }\end{DoxyParamCaption})}
+
+Constructs a \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend}{Console\+Backend}} which logs at the given level or above. 
+\begin{DoxyParams}{Parameters}
+{\em level} & Emit logs at this level or above. \\
+\hline
+{\em name} & Log tag. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ConsoleBackend_a16605f9eb3b18b18ed47c341d3fde6fb}\label{classlaunchdarkly_1_1ConsoleBackend_a16605f9eb3b18b18ed47c341d3fde6fb}} 
+\index{launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}!ConsoleBackend@{ConsoleBackend}}
+\index{ConsoleBackend@{ConsoleBackend}!launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}}
+\doxysubsubsection{\texorpdfstring{ConsoleBackend()}{ConsoleBackend()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily launchdarkly\+::\+Console\+Backend\+::\+Console\+Backend (\begin{DoxyParamCaption}\item[{std\+::string}]{name }\end{DoxyParamCaption})}
+
+Constructs a \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend}{Console\+Backend}} which logs at the level given by the L\+D\+\_\+\+L\+O\+G\+\_\+\+L\+E\+V\+EL environment variable, or info level by default. 
+\begin{DoxyParams}{Parameters}
+{\em name} & Log tag. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ConsoleBackend_a5a5a086c7ab45af4b735ff171f747e48}\label{classlaunchdarkly_1_1ConsoleBackend_a5a5a086c7ab45af4b735ff171f747e48}} 
+\index{launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}!enabled@{enabled}}
+\index{enabled@{enabled}!launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}}
+\doxysubsubsection{\texorpdfstring{enabled()}{enabled()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Console\+Backend\+::enabled (\begin{DoxyParamCaption}\item[{Log\+Level}]{level }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Check if the specified log level is enabled. 
+\begin{DoxyParams}{Parameters}
+{\em level} & The log level to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the level is enabled. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend_a983a6f483b947cfc3bc6b32074197005}{launchdarkly\+::\+I\+Log\+Backend}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1ConsoleBackend_a750af588efc4bd9018f9ab6a266f3a58}\label{classlaunchdarkly_1_1ConsoleBackend_a750af588efc4bd9018f9ab6a266f3a58}} 
+\index{launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}!write@{write}}
+\index{write@{write}!launchdarkly::ConsoleBackend@{launchdarkly::ConsoleBackend}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily void launchdarkly\+::\+Console\+Backend\+::write (\begin{DoxyParamCaption}\item[{Log\+Level}]{level,  }\item[{std\+::string}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Write a message to the specified level. 
+\begin{DoxyParams}{Parameters}
+{\em level} & The level to write the message for. \\
+\hline
+{\em message} & The message to write. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend_aa39ba05ff83818e6329fa9d1e98becde}{launchdarkly\+::\+I\+Log\+Backend}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/include/console\+\_\+backend.\+hpp\item 
+/home/rlamb/code/launchdarkly/cpp-\/client-\/sdk-\/private/libs/common/src/console\+\_\+backend.\+cpp\end{DoxyCompactItemize}
