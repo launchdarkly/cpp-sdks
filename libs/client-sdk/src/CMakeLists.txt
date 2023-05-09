@@ -30,9 +30,23 @@ add_library(${LIBNAME}
         boost_signal_connection.cpp
         )
 
-target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)
+
+target_link_libraries(${LIBNAME}
+        PUBLIC launchdarkly::common
+        PRIVATE launchdarkly::sse)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
+
+install (TARGETS ${LIBNAME})
+# Using PUBLIC_HEADERS would flatten the include.
+# This will preserve it, but dependencies must do the same.
+
+install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
+        DESTINATION "include"
+        FILES_MATCHING
+        PATTERN "*.h*"
+        )
+
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

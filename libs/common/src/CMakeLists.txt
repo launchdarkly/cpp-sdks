@@ -58,9 +58,19 @@ add_library(${LIBNAME}
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
+install (TARGETS ${LIBNAME})
+
+# Using PUBLIC_HEADERS would flatten the include.
+# This will preserve it, but dependencies must do the same.
+install (DIRECTORY "${LaunchDarklyCPPCommon_SOURCE_DIR}/include"
+        DESTINATION "include"
+        FILES_MATCHING
+        PATTERN "*.hpp"
+        )
+
 target_link_libraries(${LIBNAME}
-        PUBLIC Boost::headers tl::expected OpenSSL::SSL foxy
-        PRIVATE Boost::url Boost::json Boost::disable_autolinking)
+        PUBLIC Boost::headers tl::expected foxy
+        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
