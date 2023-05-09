@@ -14,10 +14,12 @@ FetchContent_Declare(foxy
         )
 
 
-if (BUILD_TESTING)
-    set(BUILD_TESTING OFF)
-    FetchContent_MakeAvailable(foxy)
-    set(BUILD_TESTING ON)
-else ()
-    FetchContent_MakeAvailable(foxy)
-endif ()
+set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+set(ORIGINAL_BUILD_TESTING "${BUILD_TESTING}")
+
+set(BUILD_TESTING OFF)
+set(BUILD_SHARED_LIBS OFF)
+FetchContent_MakeAvailable(foxy)
+
+set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
+set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")

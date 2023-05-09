@@ -47,8 +47,16 @@ if (BUILD_TESTING)
     enable_testing()
 endif ()
 
+add_subdirectory(libs/client-sdk)
+
+set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+
+# Always build the common libraries as shared libs.
 add_subdirectory(libs/common)
 add_subdirectory(libs/server-sent-events)
-add_subdirectory(libs/client-sdk)
 add_subdirectory(bindings/c)
+
+set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")
+
 add_subdirectory(apps)

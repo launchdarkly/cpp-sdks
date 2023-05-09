@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 # Build documentation.
 # The target directory should contain a Doxyfile.
 # Call this script with the directory containing the Doxyfile
