@@ -20,6 +20,7 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        sudo apt install doxygen
         ./scripts/build-release.sh launchdarkly-cpp-client
         ./scripts/build-docs.sh libs/client-sdk
       env:
