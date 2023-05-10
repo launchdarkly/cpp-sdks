@@ -39,6 +39,8 @@
 build
 build-static
 build-dynamic
+build-static-debug
+build-dynamic-debug
 cmake-build-*
 
 # For Macs..
@@ -47,3 +49,6 @@ cmake-build-*
 # Documentation
 **/docs/html/
 **/docs/latex/
+
+# Release Process
+release_artifacts

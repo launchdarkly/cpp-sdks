@@ -6,7 +6,6 @@
 set -e
 
 # Build a static release.
-
 mkdir -p build-static && cd build-static
 mkdir -p release
 cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTING=OFF -D CMAKE_INSTALL_PREFIX=./release ..

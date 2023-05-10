@@ -20,8 +20,21 @@ runs:
       env:
         WORKSPACE: libs/client-sdk
 
-      # Build docs.
-      # Attach artifacts to release.
+    - name: Archive Release Linux - GCC/x64/Static
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-static.zip'
+
+    - name: Archive Release Linux - GCC/x64/Dynamic
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-dynamic.zip'
 
     - name: Build Windows Artifacts
       if: runner.os == 'Windows'
@@ -30,6 +43,38 @@ runs:
         BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
       run: ./scripts/build-windows.sh launchdarkly-cpp-client
+
+    - name: Archive Release Windows - MSVC/x64/Static
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Static/Debug
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-debug/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static-debug.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic/Debug
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-debug/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic-debug.zip'
 
       # Attach artifacts to release.
 
@@ -43,4 +88,26 @@ runs:
       env:
         WORKSPACE: libs/client-sdk
 
-      # Attach artifacts to release.
+    - name: Archive Release Mac - AppleClang/x64/Static
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-static.zip'
+
+    - name: Archive Release Mac - AppleClang/x64/Dynamic
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-dynamic.zip'
+
+    - name: Upload Release Artifacts
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: '*.zip'
+        file_glob: true
+        tag: ${{ inputs.tag_name }}
