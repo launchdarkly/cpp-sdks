@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - rlamb/add-release-please
+      - main
 name: release-please
 
 jobs:
