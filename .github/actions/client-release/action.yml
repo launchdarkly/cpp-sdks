@@ -59,6 +59,10 @@ runs:
       with:
         workspace_path: libs/client-sdk
 
+    - name: Configure MSVC
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Build Windows Artifacts
       if: runner.os == 'Windows'
       shell: bash
