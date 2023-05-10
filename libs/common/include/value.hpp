@@ -313,7 +313,7 @@ class Value final {
      * an int or double for convenience.
      * @return True if the value is a number.
      */
-    [[nodiscard]] bool is_number() const;
+    [[nodiscard]] bool IsNumber() const;
 
     /**
      * Returns true if the value is a string.

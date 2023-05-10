@@ -44,7 +44,7 @@ TEST(ValueTests, CanMoveBoolValue) {
 
 TEST(ValueTests, CanMakeDoubleValue) {
     Value attr_double(3.14159);
-    EXPECT_TRUE(attr_double.is_number());
+    EXPECT_TRUE(attr_double.IsNumber());
     EXPECT_EQ(3.14159, attr_double.as_double());
     EXPECT_EQ(3, attr_double.as_int());
     EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
@@ -53,7 +53,7 @@ TEST(ValueTests, CanMakeDoubleValue) {
 TEST(ValueTests, CanMoveDoubleValue) {
     // Not repeated for int, as they use the same data type.
     Value attr_double(std::move(Value(3.14159)));
-    EXPECT_TRUE(attr_double.is_number());
+    EXPECT_TRUE(attr_double.IsNumber());
     EXPECT_EQ(3.14159, attr_double.as_double());
     EXPECT_EQ(3, attr_double.as_int());
     EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
@@ -61,7 +61,7 @@ TEST(ValueTests, CanMoveDoubleValue) {
 
 TEST(ValueTests, CanMakeIntValue) {
     Value attr_int(42);
-    EXPECT_TRUE(attr_int.is_number());
+    EXPECT_TRUE(attr_int.IsNumber());
     EXPECT_EQ(42, attr_int.as_double());
     EXPECT_EQ(42, attr_int.as_int());
     EXPECT_EQ(Value::Type::kNumber, attr_int.Type());

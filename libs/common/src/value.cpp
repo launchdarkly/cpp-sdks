@@ -41,7 +41,7 @@ bool Value::IsBool() const {
     return type_ == Type::kBool;
 }
 
-bool Value::is_number() const {
+bool Value::IsNumber() const {
     return type_ == Type::kNumber;
 }
 
