@@ -37,9 +37,9 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
     if (!key_iter->value().is_string()) {
         return JsonError::kContextInvalidKeyField;
     }
-    auto& attrs =
-        builder.kind(std::string(kind),
-                     boost::json::value_to<std::string>(key_iter->value()));
+    std::string key = boost::json::value_to<std::string>(key_iter->value());
+
+    auto& attrs = builder.kind(std::string(kind), key);
 
     auto* name_iter = context.find("name");
     if (name_iter != context.end() && !name_iter->value().is_null()) {
@@ -61,44 +61,43 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
 
     auto* meta_iter = context.find("_meta");
     if (meta_iter != context.end() && !meta_iter->value().is_null()) {
-        if (meta_iter->value().is_object()) {
-            auto const& meta = meta_iter->value().as_object();
-
-            auto secondary_iter = meta.find("secondary");
-            if (secondary_iter != meta.end() &&
-                !secondary_iter->value().is_null()) {
-                if (secondary_iter->value().is_string()) {
-                    // TODO: how to set secondary, without exposing in public
-                    // interface of builder
-                } else {
-                    return JsonError::kContextInvalidSecondaryField;
-                }
-            }
-
-            auto private_attrs_iter = meta.find("privateAttributes");
-            if (private_attrs_iter != meta.end() &&
-                !private_attrs_iter->value().is_null()) {
-                if (private_attrs_iter->value().is_array()) {
-                    for (auto const& attr :
-                         private_attrs_iter->value().as_array()) {
-                        if (!attr.is_string()) {
-                            return JsonError::kContextInvalidAttributeReference;
-                        }
-                        attrs.add_private_attribute(
-                            boost::json::value_to<std::string>(attr));
-                    }
-                } else {
-                    return JsonError::kContextInvalidPrivateAttributesField;
-                }
-            }
-        } else {
+        if (!meta_iter->value().is_object()) {
             return JsonError::kContextInvalidMetaField;
+        }
+
+        auto const& meta = meta_iter->value().as_object();
+
+        auto secondary_iter = meta.find("secondary");
+        if (secondary_iter != meta.end() &&
+            !secondary_iter->value().is_null()) {
+            if (secondary_iter->value().is_string()) {
+                // TODO: how to set secondary, without exposing in public
+                // interface of builder
+            } else {
+                return JsonError::kContextInvalidSecondaryField;
+            }
+        }
+
+        auto private_attrs_iter = meta.find("privateAttributes");
+        if (private_attrs_iter != meta.end() &&
+            !private_attrs_iter->value().is_null()) {
+            if (!private_attrs_iter->value().is_array()) {
+                return JsonError::kContextInvalidPrivateAttributesField;
+            }
+            auto const& private_attrs = private_attrs_iter->value().as_array();
+            for (auto const& attr : private_attrs) {
+                if (!attr.is_string()) {
+                    return JsonError::kContextInvalidAttributeReference;
+                }
+                attrs.add_private_attribute(
+                    boost::json::value_to<std::string>(attr));
+            }
         }
     }
 
     for (auto attr = context.begin(); attr != context.end(); attr++) {
         if (attr == key_iter || attr == name_iter || attr == anon_iter ||
-            attr->key() == "kind" || attr->value().is_null()) {
+            attr == meta_iter || attr->value().is_null()) {
             continue;
         }
         attrs.set(attr->key(), boost::json::value_to<Value>(attr->value()));
@@ -106,6 +105,7 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
 
     return std::nullopt;
 }
+
 tl::expected<Context, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<Context, JsonError>> const& unused,
     boost::json::value const& json_value) {
@@ -140,17 +140,13 @@ tl::expected<Context, JsonError> tag_invoke(
             if (!single_kind->value().is_object()) {
                 return tl::make_unexpected(JsonError::kContextMustBeObject);
             }
-            auto err = ParseSingle(builder, single_kind->value().as_object(),
-                                   single_kind->key());
-            if (err) {
+            if (auto err =
+                    ParseSingle(builder, single_kind->value().as_object(),
+                                single_kind->key())) {
                 return tl::make_unexpected(*err);
             }
         }
-        return builder.build();
-    }
-
-    auto err = ParseSingle(builder, context, kind);
-    if (err) {
+    } else if (auto err = ParseSingle(builder, context, kind)) {
         return tl::make_unexpected(*err);
     }
 
