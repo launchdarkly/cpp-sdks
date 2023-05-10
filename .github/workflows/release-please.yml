@@ -21,8 +21,9 @@ jobs:
   release-client:
     strategy:
       matrix:
-        # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-latest, windows-2022, macos-12 ]
+      # Each of the platforms for which release-artifacts need generated.
+      #os: [ ubuntu-latest, windows-2022, macos-12 ]
+      os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released }}
