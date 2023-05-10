@@ -1,5 +1,6 @@
 #pragma once
-
+#include <ostream>
+namespace launchdarkly {
 enum class JsonError {
     kSchemaFailure =
         0,  // Generic catchall for JSON not matching our expected values.
@@ -15,3 +16,9 @@ enum class JsonError {
     kContextInvalidAttributeReference = 109,
     kContextInvalidPrivateAttributesField = 110,
 };
+
+std::ostream& operator<<(std::ostream& os, JsonError const& err);
+
+char const* ErrorToString(JsonError err);
+
+}  // namespace launchdarkly

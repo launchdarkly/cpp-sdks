@@ -72,12 +72,12 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
         return resp;
     }
 
-    auto maybe_ctx =
-        boost::json::value_to<tl::expected<launchdarkly::Context, JsonError>>(
-            json_value);
+    auto maybe_ctx = boost::json::value_to<
+        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+        json_value);
 
     if (!maybe_ctx) {
-        resp.error = "error parsing context JSON";
+        resp.error = launchdarkly::ErrorToString(maybe_ctx.error());
         return resp;
     }
 

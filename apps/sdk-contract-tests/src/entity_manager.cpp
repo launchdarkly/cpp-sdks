@@ -14,11 +14,12 @@ EntityManager::EntityManager(boost::asio::any_io_executor executor,
       executor_{std::move(executor)},
       logger_{logger} {}
 
-static tl::expected<launchdarkly::Context, JsonError> ParseContext(
-    nlohmann::json value) {
+static tl::expected<launchdarkly::Context, launchdarkly::JsonError>
+ParseContext(nlohmann::json value) {
     auto boost_json_val = boost::json::parse(value.dump());
     return boost::json::value_to<
-        tl::expected<launchdarkly::Context, JsonError>>(boost_json_val);
+        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+        boost_json_val);
 }
 
 std::optional<std::string> EntityManager::create(ConfigParams in) {
