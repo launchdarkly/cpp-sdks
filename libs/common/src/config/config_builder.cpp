@@ -47,7 +47,7 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::HttpProperties(
 }
 
 template <typename SDK>
-[[nodiscard]] typename ConfigBuilder<SDK>::ConfigResult
+[[nodiscard]] tl::expected<typename ConfigBuilder<SDK>::Result, Error>
 ConfigBuilder<SDK>::Build() const {
     auto sdk_key = sdk_key_;
     if (sdk_key.empty()) {

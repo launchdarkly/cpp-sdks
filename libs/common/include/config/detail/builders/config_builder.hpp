@@ -22,9 +22,9 @@ namespace launchdarkly::config::detail::builders {
 template <typename SDK>
 class ConfigBuilder {
    public:
+    using Result = detail::Config<SDK>;
     using EndpointsBuilder = detail::builders::EndpointsBuilder<SDK>;
     using EventsBuilder = detail::builders::EventsBuilder<SDK>;
-    using ConfigResult = tl::expected<detail::Config<SDK>, Error>;
     using DataSourceBuilder = detail::builders::DataSourceBuilder<SDK>;
     using HttpPropertiesBuilder = detail::builders::HttpPropertiesBuilder<SDK>;
     /**
@@ -85,7 +85,7 @@ class ConfigBuilder {
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
-    ConfigResult Build() const;
+    tl::expected<Result, Error> Build() const;
 
    private:
     std::string sdk_key_;
