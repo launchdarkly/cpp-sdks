@@ -1,41 +1,3 @@
-evaluation/parameterized/evaluationReasons=false/basic values - bool/flag1-bool/flag1-bool/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - bool/flag2-bool/flag2-bool/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - int/flag1-int/flag1-int/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - int/flag2-int/flag2-int/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - double/flag1-double/flag1-double/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - double/flag2-double/flag2-double/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - string/flag1-string/flag1-string/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - string/flag2-string/flag2-string/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - any/flag1-any/flag1-any/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/basic values - any/flag2-any/flag2-any/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - off/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - fallthrough/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - fallthrough experiment/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - target match/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - rule match/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - rule match experiment/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - prerequisite failed/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - error MALFORMED_FLAG/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=false/evaluation reasons - error MALFORMED_FLAG/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - bool/flag1-bool/flag1-bool/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - bool/flag2-bool/flag2-bool/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - int/flag1-int/flag1-int/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - int/flag2-int/flag2-int/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - double/flag1-double/flag1-double/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - double/flag2-double/flag2-double/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - string/flag1-string/flag1-string/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - string/flag2-string/flag2-string/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - any/flag1-any/flag1-any/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/basic values - any/flag2-any/flag2-any/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - off/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - fallthrough/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - fallthrough experiment/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - target match/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - rule match/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - rule match experiment/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - prerequisite failed/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - error MALFORMED_FLAG/flag-key/evaluate all flags
-evaluation/parameterized/evaluationReasons=true/evaluation reasons - error MALFORMED_FLAG/flag-key/evaluate all flags
 events/summary events/basic counter behavior
 events/summary events/context kinds
 events/summary events/unknown flag
@@ -50,7 +12,6 @@ events/feature events/full feature event for tracked flag/with reason/type: int
 events/feature events/full feature event for tracked flag/with reason/type: double
 events/feature events/full feature event for tracked flag/with reason/type: string
 events/feature events/full feature event for tracked flag/with reason/type: any
-events/feature events/evaluating all flags generates no events
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: bool
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: int
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: double
@@ -150,12 +111,6 @@ streaming/requests/context properties/single kind with all attributes/GET
 streaming/requests/context properties/single kind with all attributes/REPORT
 streaming/requests/context properties/multi-kind/GET
 streaming/requests/context properties/multi-kind/REPORT
-streaming/updates/flag patch with higher version is applied
-streaming/updates/flag patch with same version is not applied
-streaming/updates/flag patch with lower version is not applied
-streaming/updates/flag delete with higher version is applied
-streaming/updates/flag delete with same version is not applied
-streaming/updates/flag delete with lower version is not applied
 polling/requests/context properties/single kind minimal/GET
 polling/requests/context properties/single kind minimal/REPORT
 polling/requests/context properties/single kind with all attributes/GET
