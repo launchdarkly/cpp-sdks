@@ -1,52 +1,108 @@
-events/requests/method and headers
-events/requests/URL path is computed correctly/base URI has no trailing slash
-events/requests/URL path is computed correctly/base URI has a trailing slash
-events/requests/new payload ID for each post
 events/summary events/basic counter behavior
 events/summary events/context kinds
 events/summary events/unknown flag
 events/summary events/reset after each flush
-events/feature events
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate
-events/debug events/should not see debug event/debugEventsUntilDate is before SDK time/SDK does not know LD time
-events/debug events/should not see debug event/debugEventsUntilDate is before SDK time/SDK knows LD time is before debugEventsUntilDate
-events/debug events/should not see debug event/debugEventsUntilDate is before SDK time/SDK knows LD time is after debugEventsUntilDate
-events/debug events/should not see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is after debugEventsUntilDate
+events/feature events/full feature event for tracked flag/without reason/type: bool
+events/feature events/full feature event for tracked flag/without reason/type: int
+events/feature events/full feature event for tracked flag/without reason/type: double
+events/feature events/full feature event for tracked flag/without reason/type: string
+events/feature events/full feature event for tracked flag/without reason/type: any
+events/feature events/full feature event for tracked flag/with reason/type: bool
+events/feature events/full feature event for tracked flag/with reason/type: int
+events/feature events/full feature event for tracked flag/with reason/type: double
+events/feature events/full feature event for tracked flag/with reason/type: string
+events/feature events/full feature event for tracked flag/with reason/type: any
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: bool
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: int
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: double
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: string
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: any
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: bool
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: int
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: double
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: string
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: any
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: bool
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: int
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: double
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: string
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: any
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: bool
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: int
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: double
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: string
+events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: any
 events/experimentation/FALLTHROUGH
 events/experimentation/RULE_MATCH
 events/identify events/basic properties/single kind default
 events/identify events/basic properties/single kind non-default
 events/identify events/basic properties/multi-kind
-events/custom events/data and metricValue parameters
 events/custom events/basic properties/single kind default
 events/custom events/basic properties/single kind non-default
 events/custom events/basic properties/multi-kind
-events/context properties/single-kind minimal
-events/context properties/multi-kind minimal
-events/context properties/single-kind with attributes, nothing private
-events/context properties/single-kind, allAttributesPrivate
-events/context properties/single-kind, specific private attributes
-events/context properties/single-kind, private attribute nested property
-events/context properties/custom attribute with value false
-events/context properties/custom attribute with value true
-events/context properties/custom attribute with value -1000
-events/context properties/custom attribute with value 0
-events/context properties/custom attribute with value 1000
-events/context properties/custom attribute with value -1000.5
-events/context properties/custom attribute with value 1000.5
-events/context properties/custom attribute with value ""
-events/context properties/custom attribute with value "abc"
-events/context properties/custom attribute with value "has \"escaped\" characters"
-events/context properties/custom attribute with value []
-events/context properties/custom attribute with value ["a","b"]
-events/context properties/custom attribute with value {}
-events/context properties/custom attribute with value {"a":1}
-events/event capacity/capacity is enforced
-events/event capacity/buffer is reset after flush
-events/event capacity/summary event is still included even if buffer was full
+events/context properties/single-kind minimal/initial identify event
+events/context properties/single-kind minimal/debug event
+events/context properties/single-kind minimal/identify event
+events/context properties/multi-kind minimal/initial identify event
+events/context properties/multi-kind minimal/debug event
+events/context properties/multi-kind minimal/identify event
+events/context properties/single-kind with attributes, nothing private/initial identify event
+events/context properties/single-kind with attributes, nothing private/debug event
+events/context properties/single-kind with attributes, nothing private/identify event
+events/context properties/single-kind, allAttributesPrivate/initial identify event
+events/context properties/single-kind, allAttributesPrivate/debug event
+events/context properties/single-kind, allAttributesPrivate/identify event
+events/context properties/single-kind, specific private attributes/initial identify event
+events/context properties/single-kind, specific private attributes/debug event
+events/context properties/single-kind, specific private attributes/identify event
+events/context properties/single-kind, private attribute nested property/initial identify event
+events/context properties/single-kind, private attribute nested property/debug event
+events/context properties/single-kind, private attribute nested property/identify event
+events/context properties/custom attribute with value false/initial identify event
+events/context properties/custom attribute with value false/debug event
+events/context properties/custom attribute with value false/identify event
+events/context properties/custom attribute with value true/initial identify event
+events/context properties/custom attribute with value true/debug event
+events/context properties/custom attribute with value true/identify event
+events/context properties/custom attribute with value -1000/initial identify event
+events/context properties/custom attribute with value -1000/debug event
+events/context properties/custom attribute with value -1000/identify event
+events/context properties/custom attribute with value 0/initial identify event
+events/context properties/custom attribute with value 0/debug event
+events/context properties/custom attribute with value 0/identify event
+events/context properties/custom attribute with value 1000/initial identify event
+events/context properties/custom attribute with value 1000/debug event
+events/context properties/custom attribute with value 1000/identify event
+events/context properties/custom attribute with value -1000.5/initial identify event
+events/context properties/custom attribute with value -1000.5/debug event
+events/context properties/custom attribute with value -1000.5/identify event
+events/context properties/custom attribute with value 1000.5/initial identify event
+events/context properties/custom attribute with value 1000.5/debug event
+events/context properties/custom attribute with value 1000.5/identify event
+events/context properties/custom attribute with value ""/initial identify event
+events/context properties/custom attribute with value ""/debug event
+events/context properties/custom attribute with value ""/identify event
+events/context properties/custom attribute with value "abc"/initial identify event
+events/context properties/custom attribute with value "abc"/debug event
+events/context properties/custom attribute with value "abc"/identify event
+events/context properties/custom attribute with value "has \"escaped\" characters"/initial identify event
+events/context properties/custom attribute with value "has \"escaped\" characters"/debug event
+events/context properties/custom attribute with value "has \"escaped\" characters"/identify event
+events/context properties/custom attribute with value []/initial identify event
+events/context properties/custom attribute with value []/debug event
+events/context properties/custom attribute with value []/identify event
+events/context properties/custom attribute with value ["a","b"]/initial identify event
+events/context properties/custom attribute with value ["a","b"]/debug event
+events/context properties/custom attribute with value ["a","b"]/identify event
+events/context properties/custom attribute with value {}/initial identify event
+events/context properties/custom attribute with value {}/debug event
+events/context properties/custom attribute with value {}/identify event
+events/context properties/custom attribute with value {"a":1}/initial identify event
+events/context properties/custom attribute with value {"a":1}/debug event
+events/context properties/custom attribute with value {"a":1}/identify event
 events/disabling/evaluation
 events/disabling/identify event
+events/disabling/custom event
 streaming/requests/query parameters/evaluationReasons set to true/GET
 streaming/requests/query parameters/evaluationReasons set to true/REPORT
 streaming/requests/context properties/single kind minimal/GET
@@ -55,34 +111,12 @@ streaming/requests/context properties/single kind with all attributes/GET
 streaming/requests/context properties/single kind with all attributes/REPORT
 streaming/requests/context properties/multi-kind/GET
 streaming/requests/context properties/multi-kind/REPORT
-streaming/updates/flag patch with higher version is applied
-streaming/updates/flag patch with same version is not applied
-streaming/updates/flag patch with lower version is not applied
-streaming/updates/flag delete with higher version is applied
-streaming/updates/flag delete with same version is not applied
-streaming/updates/flag delete with lower version is not applied
 polling/requests/context properties/single kind minimal/GET
 polling/requests/context properties/single kind minimal/REPORT
 polling/requests/context properties/single kind with all attributes/GET
 polling/requests/context properties/single kind with all attributes/REPORT
 polling/requests/context properties/multi-kind/GET
 polling/requests/context properties/multi-kind/REPORT
-tags/event posts/{"applicationId":null,"applicationVersion":null}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
 tags/disallowed characters
 context type/build/valid/{"single":{"key":"a"}}
 context type/build/valid/{"single":{"kind":"org","key":"a"}}
