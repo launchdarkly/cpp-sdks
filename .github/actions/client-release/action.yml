@@ -126,6 +126,6 @@ runs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ inputs.github_token }}
-        file: '*.zip'
+        file: 'build-*/release/*.zip'
         file_glob: true
         tag: ${{ inputs.tag_name }}
