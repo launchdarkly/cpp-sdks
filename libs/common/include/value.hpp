@@ -297,7 +297,7 @@ class Value final {
      * value from this function as a marker.
      * @return True if the value is null.
      */
-    [[nodiscard]] bool is_null() const;
+    [[nodiscard]] bool IsNull() const;
 
     /**
      * Returns true if the value is a boolean.

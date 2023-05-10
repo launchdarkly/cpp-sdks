@@ -78,7 +78,7 @@ TEST(AttributesTests, CanGetSomethingThatDoesNotExist) {
 
     EXPECT_TRUE(
         attributes.get(AttributeReference::from_reference_str("/missing"))
-            .is_null());
+            .IsNull());
 }
 
 std::string ProduceString(Attributes const& attrs) {

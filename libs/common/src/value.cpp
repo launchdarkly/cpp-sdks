@@ -33,7 +33,7 @@ enum Value::Type Value::Type() const {
     return type_;
 }
 
-bool Value::is_null() const {
+bool Value::IsNull() const {
     return type_ == Type::kNull;
 }
 

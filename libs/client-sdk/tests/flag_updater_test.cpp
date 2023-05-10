@@ -231,7 +231,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithNewFlagProducesEvents) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_TRUE(event->OldValue().is_null());
+            EXPECT_TRUE(event->OldValue().IsNull());
             EXPECT_EQ("potato", event->NewValue().as_string());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_FALSE(event->Deleted());
@@ -299,7 +299,7 @@ TEST(FlagUpdaterEventTests, PatchWithNewFlagProducesEvent) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_TRUE(event->OldValue().is_null());
+            EXPECT_TRUE(event->OldValue().IsNull());
             EXPECT_EQ("second", event->NewValue().as_string());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_FALSE(event->Deleted());
@@ -390,7 +390,7 @@ TEST(FlagUpdaterEventTests, DeleteProducesAnEvent) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -419,7 +419,7 @@ TEST(FlagUpdaterEventTests, FlagMissingFromSecondInitTreatedAsDelete) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -459,7 +459,7 @@ TEST(FlagUpdaterEventTests, InitWithoutEvaluationResultTreatedAsDelete) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -498,7 +498,7 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
             got_event.store(true);
 
             EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -546,7 +546,7 @@ TEST(FlagUpdaterEventTests, SecondDeleteNoEventPatch) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -622,11 +622,11 @@ TEST(FlagUpdaterEventTests, UndeletedFlagProducesEvent) {
 
             if (event->Deleted()) {
                 EXPECT_EQ("test", event->OldValue().as_string());
-                EXPECT_TRUE(event->NewValue().is_null());
+                EXPECT_TRUE(event->NewValue().IsNull());
                 EXPECT_EQ("flagA", event->FlagName());
             } else {
                 EXPECT_EQ("second", event->NewValue().as_string());
-                EXPECT_TRUE(event->OldValue().is_null());
+                EXPECT_TRUE(event->OldValue().IsNull());
                 EXPECT_EQ("flagA", event->FlagName());
             }
         });

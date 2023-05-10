@@ -18,13 +18,13 @@ using BoostArray = boost::json::array;
 using launchdarkly::Value;
 TEST(ValueTests, CanMakeNullValue) {
     Value null_val;
-    EXPECT_TRUE(null_val.is_null());
+    EXPECT_TRUE(null_val.IsNull());
     EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
 TEST(ValueTests, CanMoveNullValue) {
     Value null_val(std::move(Value()));
-    EXPECT_TRUE(null_val.is_null());
+    EXPECT_TRUE(null_val.IsNull());
     EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
