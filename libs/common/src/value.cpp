@@ -29,7 +29,7 @@ Value::Value(std::vector<Value> arr)
 Value::Value(std::map<std::string, Value> obj)
     : type_(Value::Type::kObject), storage_{std::move(obj)} {}
 
-Value::Type Value::type() const {
+enum Value::Type Value::Type() const {
     return type_;
 }
 
@@ -207,8 +207,8 @@ Value::Object::Iterator Value::Object::find(std::string const& key) const {
 }
 
 bool operator==(Value const& lhs, Value const& rhs) {
-    if (lhs.type() == rhs.type()) {
-        switch (lhs.type()) {
+    if (lhs.Type() == rhs.Type()) {
+        switch (lhs.Type()) {
             case Value::Type::kNull:
                 return true;
             case Value::Type::kBool:

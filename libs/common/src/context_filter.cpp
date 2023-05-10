@@ -139,7 +139,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
 }
 
 void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
-    switch (item.value.type()) {
+    switch (item.value.Type()) {
         case Value::Type::kNull:
             emplace(item, JsonValue());
             break;

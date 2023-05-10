@@ -19,27 +19,27 @@ using launchdarkly::Value;
 TEST(ValueTests, CanMakeNullValue) {
     Value null_val;
     EXPECT_TRUE(null_val.is_null());
-    EXPECT_EQ(Value::Type::kNull, null_val.type());
+    EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
 TEST(ValueTests, CanMoveNullValue) {
     Value null_val(std::move(Value()));
     EXPECT_TRUE(null_val.is_null());
-    EXPECT_EQ(Value::Type::kNull, null_val.type());
+    EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
 TEST(ValueTests, CanMakeBoolValue) {
     Value attr_bool(false);
     EXPECT_TRUE(attr_bool.is_bool());
     EXPECT_FALSE(attr_bool.as_bool());
-    EXPECT_EQ(Value::Type::kBool, attr_bool.type());
+    EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }
 
 TEST(ValueTests, CanMoveBoolValue) {
     Value attr_bool(std::move(Value(false)));
     EXPECT_TRUE(attr_bool.is_bool());
     EXPECT_FALSE(attr_bool.as_bool());
-    EXPECT_EQ(Value::Type::kBool, attr_bool.type());
+    EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }
 
 TEST(ValueTests, CanMakeDoubleValue) {
@@ -47,7 +47,7 @@ TEST(ValueTests, CanMakeDoubleValue) {
     EXPECT_TRUE(attr_double.is_number());
     EXPECT_EQ(3.14159, attr_double.as_double());
     EXPECT_EQ(3, attr_double.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_double.type());
+    EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
 }
 
 TEST(ValueTests, CanMoveDoubleValue) {
@@ -56,7 +56,7 @@ TEST(ValueTests, CanMoveDoubleValue) {
     EXPECT_TRUE(attr_double.is_number());
     EXPECT_EQ(3.14159, attr_double.as_double());
     EXPECT_EQ(3, attr_double.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_double.type());
+    EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
 }
 
 TEST(ValueTests, CanMakeIntValue) {
@@ -64,21 +64,21 @@ TEST(ValueTests, CanMakeIntValue) {
     EXPECT_TRUE(attr_int.is_number());
     EXPECT_EQ(42, attr_int.as_double());
     EXPECT_EQ(42, attr_int.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_int.type());
+    EXPECT_EQ(Value::Type::kNumber, attr_int.Type());
 }
 
 TEST(ValueTests, CanMakeStringValue) {
     Value attr_str(std::string("potato"));
     EXPECT_TRUE(attr_str.is_string());
     EXPECT_EQ("potato", attr_str.as_string());
-    EXPECT_EQ(Value::Type::kString, attr_str.type());
+    EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }
 
 TEST(ValueTests, CanMoveStringValue) {
     Value attr_str(std::move(Value(std::string("potato"))));
     EXPECT_TRUE(attr_str.is_string());
     EXPECT_EQ("potato", attr_str.as_string());
-    EXPECT_EQ(Value::Type::kString, attr_str.type());
+    EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }
 
 void VectorAssertions(Value attr_arr) {
@@ -96,7 +96,7 @@ void VectorAssertions(Value attr_arr) {
         "bacon",
         attr_arr.as_array()[6].as_object().find("string")->second.as_string());
 
-    EXPECT_EQ(Value::Type::kArray, attr_arr.type());
+    EXPECT_EQ(Value::Type::kArray, attr_arr.Type());
 }
 
 TEST(ValueTests, CanMakeFromVector) {

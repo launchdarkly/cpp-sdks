@@ -288,7 +288,7 @@ class Value final {
     /**
      * Get the type of the attribute.
      */
-    [[nodiscard]] Type type() const;
+    [[nodiscard]] Type Type() const;
 
     /**
      * Returns true if the value is a null.
@@ -423,7 +423,7 @@ class Value final {
 
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
-    Type type_;
+    enum Type type_;
 
     // Empty constants used when accessing the wrong type.
     inline static const std::string empty_string_;

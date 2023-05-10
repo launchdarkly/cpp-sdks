@@ -42,7 +42,7 @@ LD_EXPORT(void) LDValue_Free(LDValue val) {
 }
 
 LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
-    switch (AS_VALUE(val)->type()) {
+    switch (AS_VALUE(val)->Type()) {
         case Value::Type::kNull:
             return LDValueType_Null;
         case Value::Type::kBool:
@@ -73,7 +73,7 @@ LD_EXPORT(char const*) LDValue_GetString(LDValue val) {
 
 LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
     auto* value = AS_VALUE(val);
-    switch (value->type()) {
+    switch (value->Type()) {
         case Value::Type::kObject:
             return value->as_object().size();
         case Value::Type::kArray:

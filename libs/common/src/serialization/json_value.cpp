@@ -54,7 +54,7 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Value const& ld_value) {
-    switch (ld_value.type()) {
+    switch (ld_value.Type()) {
         case Value::Type::kNull:
             json_value.emplace_null();
             break;
