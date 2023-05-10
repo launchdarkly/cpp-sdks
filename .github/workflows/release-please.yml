@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v3
       - id: release-client
         name: Full release of libs/client-sdk
-        uses: ./actions/client-release
+        uses: ./.github/actions/client-release
         with:
           # The tag of the release to upload artifacts to.
           tag_name: ${{ steps.release-please.outputs.package-client-tag }}

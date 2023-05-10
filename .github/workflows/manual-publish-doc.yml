@@ -29,6 +29,6 @@ jobs:
           WORKSPACE_PATH: ${{ inputs.workspace_path }}
       - id: publish
         name: Publish Documentation
-        uses: ./actions/publish-docs
+        uses: ./.github/actions/publish-docs
         with:
           workspace_path: ${{ inputs.workspace_path }}
