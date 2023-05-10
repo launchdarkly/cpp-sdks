@@ -153,7 +153,7 @@ Value const& Value::Array::operator[](std::size_t index) const {
     return vec_[index];
 }
 
-std::size_t Value::Array::size() const {
+std::size_t Value::Array::Size() const {
     return vec_.size();
 }
 

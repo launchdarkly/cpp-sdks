@@ -106,7 +106,7 @@ class Value final {
 
         Value const& operator[](std::size_t index) const;
 
-        [[nodiscard]] std::size_t size() const;
+        [[nodiscard]] std::size_t Size() const;
 
         [[nodiscard]] Iterator begin() const;
 
