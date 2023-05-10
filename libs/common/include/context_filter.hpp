@@ -22,7 +22,7 @@ class ContextFilter {
     using JsonArray = boost::json::array;
 
     ContextFilter(bool all_attributes_private,
-                  AttributeReference::SetType const& global_private_attributes);
+                  AttributeReference::SetType global_private_attributes);
 
     /**
      * Filter the given context and produce a JSON value.
@@ -57,7 +57,8 @@ class ContextFilter {
     static void emplace(StackItem& item, JsonValue&& addition);
 
     /**
-     * If the path needs to be redacted, then redact it and add it to the redactions.
+     * If the path needs to be redacted, then redact it and add it to the
+     * redactions.
      * @param redactions The list of redacted items.
      * @param path The path to check.
      * @param attributes Attributes which may contain additional private
@@ -89,7 +90,7 @@ class ContextFilter {
     JsonValue filter_multi_context(Context const& context);
 
     bool all_attributes_private_;
-    AttributeReference::SetType const& global_private_attributes_;
+    AttributeReference::SetType const global_private_attributes_;
 };
 
 }  // namespace launchdarkly
