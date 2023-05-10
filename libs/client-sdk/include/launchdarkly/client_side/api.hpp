@@ -25,7 +25,7 @@
 namespace launchdarkly::client_side {
 class Client {
    public:
-    inline static const char* kVersion = "0.2.0";  // {x-release-please-version}
+    inline static const char* kVersion = "0.0.0";  // {x-release-please-version}
 
     Client(Config config, Context context);
 

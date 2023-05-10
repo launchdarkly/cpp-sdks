@@ -1,5 +1,5 @@
 {
-  "libs/client-sdk": "0.2.0",
-  "libs/server-sent-events": "0.2.0",
-  "libs/common": "0.2.0"
+  "libs/client-sdk": "0.0.0",
+  "libs/server-sent-events": "0.0.0",
+  "libs/common": "0.0.0"
 }
