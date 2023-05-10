@@ -14,6 +14,10 @@ static bool ValidKind(std::string_view kind) {
         return false;
     }
 
+    if (kind == "multi" || kind == "kind") {
+        return false;
+    }
+
     return std::all_of(kind.begin(), kind.end(), [](auto character) {
         return character == '.' || character == '-' || character == '_' ||
                (character >= '0' && character <= '9') ||

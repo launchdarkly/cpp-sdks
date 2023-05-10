@@ -9,5 +9,9 @@ enum class JsonError {
     kContextMissingKeyField = 103,
     kContextInvalidKeyField = 104,
     kContextInvalidNameField = 105,
-    kContextInvalidAnonymousField = 106
+    kContextInvalidAnonymousField = 106,
+    kContextInvalidMetaField = 107,
+    kContextInvalidSecondaryField = 108,
+    kContextInvalidAttributeReference = 109,
+    kContextInvalidPrivateAttributesField = 110,
 };

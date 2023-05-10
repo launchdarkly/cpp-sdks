@@ -147,10 +147,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextBuildParams,
                                                 multi);
 
 struct ContextConvertParams {
-    std::string foo;
+    std::string input;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextConvertParams, foo);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextConvertParams, input);
 
 struct ContextResponse {
     std::optional<std::string> output;

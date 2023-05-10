@@ -2,6 +2,7 @@
 #include <optional>
 #include "context_builder.hpp"
 #include "serialization/json_attributes.hpp"
+#include "serialization/json_value.hpp"
 
 namespace launchdarkly {
 void tag_invoke(boost::json::value_from_tag const&,
@@ -41,7 +42,7 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
                      boost::json::value_to<std::string>(key_iter->value()));
 
     auto* name_iter = context.find("name");
-    if (name_iter != context.end()) {
+    if (name_iter != context.end() && !name_iter->value().is_null()) {
         if (name_iter->value().is_string()) {
             attrs.name(boost::json::value_to<std::string>(name_iter->value()));
         } else {
@@ -50,12 +51,57 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
     }
 
     auto* anon_iter = context.find("anonymous");
-    if (anon_iter != context.end()) {
+    if (anon_iter != context.end() && !anon_iter->value().is_null()) {
         if (anon_iter->value().is_bool()) {
             attrs.anonymous(boost::json::value_to<bool>(anon_iter->value()));
         } else {
             return JsonError::kContextInvalidAnonymousField;
         }
+    }
+
+    auto* meta_iter = context.find("_meta");
+    if (meta_iter != context.end() && !meta_iter->value().is_null()) {
+        if (meta_iter->value().is_object()) {
+            auto const& meta = meta_iter->value().as_object();
+
+            auto secondary_iter = meta.find("secondary");
+            if (secondary_iter != meta.end() &&
+                !secondary_iter->value().is_null()) {
+                if (secondary_iter->value().is_string()) {
+                    // TODO: how to set secondary, without exposing in public
+                    // interface of builder
+                } else {
+                    return JsonError::kContextInvalidSecondaryField;
+                }
+            }
+
+            auto private_attrs_iter = meta.find("privateAttributes");
+            if (private_attrs_iter != meta.end() &&
+                !private_attrs_iter->value().is_null()) {
+                if (private_attrs_iter->value().is_array()) {
+                    for (auto const& attr :
+                         private_attrs_iter->value().as_array()) {
+                        if (!attr.is_string()) {
+                            return JsonError::kContextInvalidAttributeReference;
+                        }
+                        attrs.add_private_attribute(
+                            boost::json::value_to<std::string>(attr));
+                    }
+                } else {
+                    return JsonError::kContextInvalidPrivateAttributesField;
+                }
+            }
+        } else {
+            return JsonError::kContextInvalidMetaField;
+        }
+    }
+
+    for (auto attr = context.begin(); attr != context.end(); attr++) {
+        if (attr == key_iter || attr == name_iter || attr == anon_iter ||
+            attr->key() == "kind" || attr->value().is_null()) {
+            continue;
+        }
+        attrs.set(attr->key(), boost::json::value_to<Value>(attr->value()));
     }
 
     return std::nullopt;

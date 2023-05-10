@@ -61,6 +61,35 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
     return resp;
 }
 
+tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
+    ContextConvertParams params) {
+    ContextResponse resp{};
+
+    boost::system::error_code ec;
+    auto json_value = boost::json::parse(params.input, ec);
+    if (ec) {
+        resp.error = ec.what();
+        return resp;
+    }
+
+    auto maybe_ctx =
+        boost::json::value_to<tl::expected<launchdarkly::Context, JsonError>>(
+            json_value);
+
+    if (!maybe_ctx) {
+        resp.error = "error parsing context JSON";
+        return resp;
+    }
+
+    if (!maybe_ctx->valid()) {
+        resp.error = maybe_ctx->errors();
+        return resp;
+    }
+
+    resp.output = boost::json::serialize(boost::json::value_from(*maybe_ctx));
+    return resp;
+}
+
 tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
     CustomEventParams params) {
     auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
@@ -257,7 +286,10 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             }
             return ContextBuild(*params.contextBuild);
         case Command::ContextConvert:
-            break;
+            if (!params.contextConvert) {
+                return tl::make_unexpected("contextConvert params must be set");
+            }
+            return ContextConvert(*params.contextConvert);
     }
     return tl::make_unexpected("unrecognized command");
 }
