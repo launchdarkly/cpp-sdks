@@ -66,6 +66,8 @@ Client::Client(Config config, Context context)
     data_source_->Start();
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+
+    AsyncIdentify(context_);
 }
 
 bool Client::Initialized() const {
