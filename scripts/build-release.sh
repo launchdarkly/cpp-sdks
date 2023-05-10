@@ -22,5 +22,3 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTING=OFF -D BUILD_SHARED_
 cmake --build . --target "$1"
 cmake --install .
 cd ..
-
-
