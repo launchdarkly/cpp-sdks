@@ -43,6 +43,14 @@ runs:
         type: 'zip'
         filename: 'linux-gcc-x64-dynamic.zip'
 
+
+    - name: Upload Linux Build Artifacts
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip
+
     - name: Publish Documentation
       if: runner.os == 'Linux'
       uses: ./.github/actions/publish-docs
@@ -91,7 +99,12 @@ runs:
         type: 'zip'
         filename: 'windows-msvc-x64-dynamic-debug.zip'
 
-      # Attach artifacts to release.
+    - name: Upload Windows Build Artifacts
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip
 
     - name: Build Mac Artifacts
       id: brew-action
@@ -122,20 +135,9 @@ runs:
         type: 'zip'
         filename: 'mac-clang-x64-dynamic.zip'
 
-    - name: Upload Release Artifacts - Linux Static
-      if: runner.os == 'Linux'
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: linux-gcc-x64-static.zip
-        tag: ${{ inputs.tag_name }}
-        overwrite: true
-
-    - name: Upload Release Artifacts - Linux Dynamic
-      if: runner.os == 'Linux'
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: linux-gcc-x64-dynamic.zip
-        tag: ${{ inputs.tag_name }}
-        overwrite: true
+    - name: Upload Mac Build Artifacts
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip
