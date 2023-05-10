@@ -1,0 +1,266 @@
+\hypertarget{classlaunchdarkly_1_1AttributesBuilder}{}\doxysection{launchdarkly\+::Attributes\+Builder$<$ Builder\+Return, Build\+Type $>$ Class Template Reference}
+\label{classlaunchdarkly_1_1AttributesBuilder}\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+
+
+{\ttfamily \#include $<$attributes\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a3538a8524f386085d596c4cd1cc1c257}{Attributes\+Builder}} (Builder\+Return \&builder, std\+::string kind, std\+::string key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_ac1630fdd1af83e0a90c1f3fea9707505}{Attributes\+Builder}} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} const \&builder)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_ab3beea7488fcaabb66c930b343966bea}\label{classlaunchdarkly_1_1AttributesBuilder_ab3beea7488fcaabb66c930b343966bea}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_ad02b4abc08f6b3cd2c278522a4abe2e3}\label{classlaunchdarkly_1_1AttributesBuilder_ad02b4abc08f6b3cd2c278522a4abe2e3}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a0cc0c6e96ba5d6ef5ecb00bb8dbb073c}\label{classlaunchdarkly_1_1AttributesBuilder_a0cc0c6e96ba5d6ef5ecb00bb8dbb073c}} 
+{\bfseries Attributes\+Builder} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \&\&builder) noexcept=default
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}} (std\+::string name)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a052cb0f52f04f96fdc5abb8ebd5e735b}{anonymous}} (bool anonymous)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a0cbed49e517341ee09c1e8a32db67fd3}{set}} (std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}}, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly\+::\+Value}} value)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a60a00c1b649224757fe4ff351269c44f}{set\+\_\+private}} (std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}}, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly\+::\+Value}} value)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_aa9a35e24f103313dfa0f69cd64e569cb}{add\+\_\+private\+\_\+attribute}} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} ref)
+\item 
+{\footnotesize template$<$typename Iter\+Type $>$ }\\\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a42c6f7a70769c9ec834b7e85d832ac5f}{add\+\_\+private\+\_\+attributes}} (Iter\+Type attributes)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_aa9cc0a4132effe01e461845a64360121}\label{classlaunchdarkly_1_1AttributesBuilder_aa9cc0a4132effe01e461845a64360121}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} \& {\bfseries kind} (std\+::string kind, std\+::string key)
+\item 
+Build\+Type \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a97eaba21d417a8ba7a54dbd17e29306a}{build}} ()
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_abfa35897491b63bc620f04fb0ac3ae0a}\label{classlaunchdarkly_1_1AttributesBuilder_abfa35897491b63bc620f04fb0ac3ae0a}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries name} (std\+::string name)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a48261be0d15cc9d05571cc5c4e094983}\label{classlaunchdarkly_1_1AttributesBuilder_a48261be0d15cc9d05571cc5c4e094983}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries anonymous} (bool anonymous)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a23ff98110d4ae9bf7e29f2a946434981}\label{classlaunchdarkly_1_1AttributesBuilder_a23ff98110d4ae9bf7e29f2a946434981}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries set} (std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}}, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} value, bool private\+\_\+attribute)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a69776f23af38b56ed39c7b37c5ef86ae}\label{classlaunchdarkly_1_1AttributesBuilder_a69776f23af38b56ed39c7b37c5ef86ae}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries set} (std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}}, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} value)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a7101da863abd58db7f6bd48f4241285f}\label{classlaunchdarkly_1_1AttributesBuilder_a7101da863abd58db7f6bd48f4241285f}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries set\+\_\+private} (std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}{name}}, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} value)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a8189b70814cafdbc3b58a743fcd5bbee}\label{classlaunchdarkly_1_1AttributesBuilder_a8189b70814cafdbc3b58a743fcd5bbee}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{Context\+Builder}}, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} $>$ \& {\bfseries add\+\_\+private\+\_\+attribute} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} ref)
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a528d730eed168c7dd3a6f53bce42cbcf}\label{classlaunchdarkly_1_1AttributesBuilder_a528d730eed168c7dd3a6f53bce42cbcf}} 
+class {\bfseries Context\+Builder}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$class Builder\+Return, class Build\+Type$>$\newline
+class launchdarkly\+::\+Attributes\+Builder$<$ Builder\+Return, Build\+Type $>$}
+
+This is used in the implementation of the context builder for setting attributes for a single context. This is not intended to be directly used by an SDK consumer.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Builder\+Return} & The type of builder using the \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}. \\
+\hline
+{\em Build\+Type} & The type of object being built. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a3538a8524f386085d596c4cd1cc1c257}\label{classlaunchdarkly_1_1AttributesBuilder_a3538a8524f386085d596c4cd1cc1c257}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!AttributesBuilder@{AttributesBuilder}}
+\index{AttributesBuilder@{AttributesBuilder}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{AttributesBuilder()}{AttributesBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} (\begin{DoxyParamCaption}\item[{Builder\+Return \&}]{builder,  }\item[{std\+::string}]{kind,  }\item[{std\+::string}]{key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Create an attributes builder with the given key. 
+\begin{DoxyParams}{Parameters}
+{\em key} & A unique string identifying a context. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_ac1630fdd1af83e0a90c1f3fea9707505}\label{classlaunchdarkly_1_1AttributesBuilder_ac1630fdd1af83e0a90c1f3fea9707505}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!AttributesBuilder@{AttributesBuilder}}
+\index{AttributesBuilder@{AttributesBuilder}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{AttributesBuilder()}{AttributesBuilder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}} (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$ const \&}]{builder }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+The attributes builder should never be copied. We depend on a stable reference stored in the context builder. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_aa9a35e24f103313dfa0f69cd64e569cb}\label{classlaunchdarkly_1_1AttributesBuilder_aa9a35e24f103313dfa0f69cd64e569cb}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!add\_private\_attribute@{add\_private\_attribute}}
+\index{add\_private\_attribute@{add\_private\_attribute}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{add\_private\_attribute()}{add\_private\_attribute()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::add\+\_\+private\+\_\+attribute (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}}}]{ref }\end{DoxyParamCaption})}
+
+Designate a context attribute, or properties within them, as private\+: that is, their values will not be sent to Launch\+Darkly in analytics events.
+
+Each parameter can be a simple attribute name, such as \char`\"{}email\char`\"{}. Or, if the first character is a slash, the parameter is interpreted as a slash-\/delimited path to a property within a JSON object, where the first path component is a \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} attribute name and each following component is a nested property name\+: for example, suppose the attribute \char`\"{}address\char`\"{} had the following JSON object value\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\{\textcolor{stringliteral}{"{}street"{}}: \{\textcolor{stringliteral}{"{}line1"{}}: \textcolor{stringliteral}{"{}abc"{}}, \textcolor{stringliteral}{"{}line2"{}}: \textcolor{stringliteral}{"{}def"{}}\}\}}
+
+\end{DoxyCode}
+
+
+Using \mbox{[}\char`\"{}/address/street/line1\char`\"{}\mbox{]} in this case would cause the \char`\"{}line1\char`\"{} property to be marked as private. This syntax deliberately resembles JSON Pointer, but other JSON Pointer features such as array indexing are not supported for Private.
+
+This action only affects analytics events that involve this particular \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}. To mark some (or all) \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} attributes as private for all contexts, use the overall configuration for the SDK. See \mbox{[}TODO\mbox{]} and \mbox{[}TODO\mbox{]}.
+
+The attributes \char`\"{}kind\char`\"{} and \char`\"{}key\char`\"{}, and the \char`\"{}\+\_\+meta\char`\"{} attributes cannot be made private.
+
+In this example, first\+Name is marked as private, but last\+Name is not\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[TODO]}
+
+\end{DoxyCode}
+
+
+This is a metadata property, rather than an attribute that can be addressed in evaluations\+: that is, a rule clause that references the attribute name \char`\"{}private\+Attributes\char`\"{}, will not use this value, but would use a \char`\"{}private\+Attributes\char`\"{} attribute set on the context. 
+\begin{DoxyParams}{Parameters}
+{\em ref} & The reference to set private. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a42c6f7a70769c9ec834b7e85d832ac5f}\label{classlaunchdarkly_1_1AttributesBuilder_a42c6f7a70769c9ec834b7e85d832ac5f}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!add\_private\_attributes@{add\_private\_attributes}}
+\index{add\_private\_attributes@{add\_private\_attributes}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{add\_private\_attributes()}{add\_private\_attributes()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+template$<$typename Iter\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::add\+\_\+private\+\_\+attributes (\begin{DoxyParamCaption}\item[{Iter\+Type}]{attributes }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Add items from an iterable collection. One that provides a begin/end iterator and iterates over Attribute\+References or a convertible type. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em Iter\+Type} & The type of iterable. \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Parameters}
+{\em attributes} & The attributes to add as private. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a052cb0f52f04f96fdc5abb8ebd5e735b}\label{classlaunchdarkly_1_1AttributesBuilder_a052cb0f52f04f96fdc5abb8ebd5e735b}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!anonymous@{anonymous}}
+\index{anonymous@{anonymous}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{anonymous()}{anonymous()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::anonymous (\begin{DoxyParamCaption}\item[{bool}]{anonymous }\end{DoxyParamCaption})}
+
+If true, the context will {\itshape not} appear on the Contexts page in the Launch\+Darkly dashboard.
+
+
+\begin{DoxyParams}{Parameters}
+{\em anonymous} & The value to set. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a97eaba21d417a8ba7a54dbd17e29306a}\label{classlaunchdarkly_1_1AttributesBuilder_a97eaba21d417a8ba7a54dbd17e29306a}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!build@{build}}
+\index{build@{build}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{build()}{build()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+Build\+Type \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::build (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Build the context. This method should not be called more than once. It moves the builder content into the built context.
+
+\begin{DoxyReturn}{Returns}
+The built context. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}\label{classlaunchdarkly_1_1AttributesBuilder_adbdf151bbf48d77b10948faaf7375e71}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!name@{name}}
+\index{name@{name}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{name()}{name()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::name (\begin{DoxyParamCaption}\item[{std\+::string}]{name }\end{DoxyParamCaption})}
+
+The context\textquotesingle{}s name.
+
+You can search for contexts on the Contexts page by name.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a0cbed49e517341ee09c1e8a32db67fd3}\label{classlaunchdarkly_1_1AttributesBuilder_a0cbed49e517341ee09c1e8a32db67fd3}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!set@{set}}
+\index{set@{set}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{set()}{set()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::set (\begin{DoxyParamCaption}\item[{std\+::string}]{name,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly\+::\+Value}}}]{value }\end{DoxyParamCaption})}
+
+Add or update an attribute in the context.
+
+This method cannot be used to set the key, kind, name, or anonymous property of a context. The specific methods on the context builder, or attributes builder, should be used.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & The name of the attribute. \\
+\hline
+{\em value} & The value for the attribute. \\
+\hline
+{\em private\+\_\+attribute} & If the attribute should be considered private\+: that is, the value will not be sent to Launch\+Darkly in analytics events. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributesBuilder_a60a00c1b649224757fe4ff351269c44f}\label{classlaunchdarkly_1_1AttributesBuilder_a60a00c1b649224757fe4ff351269c44f}} 
+\index{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}!set\_private@{set\_private}}
+\index{set\_private@{set\_private}!launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$@{launchdarkly::AttributesBuilder$<$ BuilderReturn, BuildType $>$}}
+\doxysubsubsection{\texorpdfstring{set\_private()}{set\_private()}}
+{\footnotesize\ttfamily template$<$class Builder\+Return , class Build\+Type $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{Attributes\+Builder}}\& \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{launchdarkly\+::\+Attributes\+Builder}}$<$ Builder\+Return, Build\+Type $>$\+::set\+\_\+private (\begin{DoxyParamCaption}\item[{std\+::string}]{name,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly\+::\+Value}}}]{value }\end{DoxyParamCaption})}
+
+Add or update a private attribute in the context.
+
+This method cannot be used to set the key, kind, name, or anonymous property of a context. The specific methods on the context builder, or attributes builder, should be used.
+
+Once you have set an attribute private it will remain in the private list even if you call {\ttfamily set} afterward. This method is just a convenience which also adds the attribute to the {\ttfamily private\+\_\+attributes}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & The name of the attribute. \\
+\hline
+{\em value} & The value for the attribute. \\
+\hline
+{\em private\+\_\+attribute} & If the attribute should be considered private\+: that is, the value will not be sent to Launch\+Darkly in analytics events. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the current builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks-\/private/cpp-\/sdks-\/private/libs/common/include/attributes\+\_\+builder.\+hpp\end{DoxyCompactItemize}
