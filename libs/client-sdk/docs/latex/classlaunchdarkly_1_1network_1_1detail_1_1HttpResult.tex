@@ -1,0 +1,50 @@
+\hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult}{}\doxysection{launchdarkly\+::network\+::detail\+::Http\+Result Class Reference}
+\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult}\index{launchdarkly::network::detail::HttpResult@{launchdarkly::network::detail::HttpResult}}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae1ffa5ebcafba446b5c84bf72799eb48}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae1ffa5ebcafba446b5c84bf72799eb48}} 
+using {\bfseries Status\+Code} = uint64\+\_\+t
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a5757a6fbe8a8e171c2e0b7accab3e47b}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a5757a6fbe8a8e171c2e0b7accab3e47b}} 
+using {\bfseries Headers\+Type} = std\+::map$<$ std\+::string, std\+::string, \mbox{\hyperlink{structlaunchdarkly_1_1network_1_1detail_1_1CaseInsensitiveComparator}{Case\+Insensitive\+Comparator}} $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae0d96c6438b95235f9ecfd091c8ae3d8}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae0d96c6438b95235f9ecfd091c8ae3d8}} 
+using {\bfseries Body\+Type} = std\+::optional$<$ std\+::string $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a06bb73f486107e044f94c51fb9efbc21}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a06bb73f486107e044f94c51fb9efbc21}} 
+bool {\bfseries Is\+Error} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ac2f26031eb2063c0a3b352ee17501e0e}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ac2f26031eb2063c0a3b352ee17501e0e}} 
+std\+::optional$<$ std\+::string $>$ const  \& {\bfseries Error\+Message} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_acc6da84f87a05956fcf2dc4361824025}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_acc6da84f87a05956fcf2dc4361824025}} 
+Status\+Code {\bfseries Status} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a02b9ac8dbd7e3373308e047d76b842c3}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a02b9ac8dbd7e3373308e047d76b842c3}} 
+Body\+Type const  \& {\bfseries Body} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a09e4037d6e01dfcaad7a34d4c86ce257}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a09e4037d6e01dfcaad7a34d4c86ce257}} 
+Headers\+Type const  \& {\bfseries Headers} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae44b8c002667d137e3b06258069817df}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_ae44b8c002667d137e3b06258069817df}} 
+{\bfseries Http\+Result} (Status\+Code status, Body\+Type body, Headers\+Type headers)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a7dadd80bdeca2a6075811d61c6edcef7}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a7dadd80bdeca2a6075811d61c6edcef7}} 
+{\bfseries Http\+Result} (std\+::optional$<$ std\+::string $>$ error\+\_\+message)
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a407776a8c3b4c963e4ae44374092e5c4}\label{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult_a407776a8c3b4c963e4ae44374092e5c4}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1network_1_1detail_1_1HttpResult}{Http\+Result}} const \&res)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks-\/private/cpp-\/sdks-\/private/libs/common/include/network/detail/http\+\_\+requester.\+hpp\item 
+/home/runner/work/cpp-\/sdks-\/private/cpp-\/sdks-\/private/libs/common/src/network/http\+\_\+requester.\+cpp\end{DoxyCompactItemize}
