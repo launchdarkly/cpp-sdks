@@ -74,7 +74,13 @@ bool Client::Initialized() const {
 }
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
-    return {};
+    std::unordered_map<Client::FlagKey, Value> result;
+    for (auto& [key, descriptor] : flag_manager_.GetAll()) {
+        if (descriptor->flag) {
+            result.try_emplace(key, descriptor->flag->detail().value());
+        }
+    }
+    return result;
 }
 
 void Client::TrackInternal(std::string event_name,
