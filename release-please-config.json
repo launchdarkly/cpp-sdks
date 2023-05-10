@@ -4,19 +4,16 @@
   ],
   "packages": {
     "libs/client-sdk": {
-      "initial-version": "0.0.0",
+      "initial-version": "0.1.0",
       "extra-files": [
         "include/launchdarkly/client_side/api.hpp"
-      ],
-      "skip-snapshot": true
+      ]
     },
     "libs/server-sent-events": {
-      "initial-version": "0.0.0",
-      "skip-snapshot": true
+      "initial-version": "0.1.0"
     },
     "libs/common": {
-      "initial-version": "0.0.0",
-      "skip-snapshot": true
+      "initial-version": "0.1.0"
     }
   }
 }
