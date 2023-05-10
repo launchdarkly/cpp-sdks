@@ -84,7 +84,7 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
 }
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
-    if (AS_VALUE(val)->is_array()) {
+    if (AS_VALUE(val)->IsArray()) {
         auto& array = AS_VALUE(val)->as_array();
         return reinterpret_cast<LDValue_ArrayIter>(
             new IteratorBinding<Value::Array::Iterator>{array.begin(),

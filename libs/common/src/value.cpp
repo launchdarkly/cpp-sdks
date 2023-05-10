@@ -49,7 +49,7 @@ bool Value::IsString() const {
     return type_ == Type::kString;
 }
 
-bool Value::is_array() const {
+bool Value::IsArray() const {
     return type_ == Type::kArray;
 }
 

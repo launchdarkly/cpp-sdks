@@ -103,7 +103,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 new_path.push_back(pair.first);
                 stack.push_back(StackItem{pair.second, new_path, *nested});
             }
-        } else if (item.value.is_array()) {
+        } else if (item.value.IsArray()) {
             JsonValue* nested = append_container(item, JsonArray());
 
             // Array contents are added in reverse, this is a recursive

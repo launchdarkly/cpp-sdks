@@ -82,7 +82,7 @@ TEST(ValueTests, CanMoveStringValue) {
 }
 
 void VectorAssertions(Value attr_arr) {
-    EXPECT_TRUE(attr_arr.is_array());
+    EXPECT_TRUE(attr_arr.IsArray());
     EXPECT_FALSE(attr_arr.as_array()[0].as_bool());
     EXPECT_TRUE(attr_arr.as_array()[1].as_bool());
     EXPECT_EQ("potato", attr_arr.as_array()[2].as_string());

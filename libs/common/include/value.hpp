@@ -327,7 +327,7 @@ class Value final {
      *
      * @return True if the value is an array.
      */
-    [[nodiscard]] bool is_array() const;
+    [[nodiscard]] bool IsArray() const;
 
     /**
      * Returns true if the value is an object.
