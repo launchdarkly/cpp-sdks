@@ -30,14 +30,14 @@ TEST(ValueTests, CanMoveNullValue) {
 
 TEST(ValueTests, CanMakeBoolValue) {
     Value attr_bool(false);
-    EXPECT_TRUE(attr_bool.is_bool());
+    EXPECT_TRUE(attr_bool.IsBool());
     EXPECT_FALSE(attr_bool.as_bool());
     EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }
 
 TEST(ValueTests, CanMoveBoolValue) {
     Value attr_bool(std::move(Value(false)));
-    EXPECT_TRUE(attr_bool.is_bool());
+    EXPECT_TRUE(attr_bool.IsBool());
     EXPECT_FALSE(attr_bool.as_bool());
     EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }

@@ -37,7 +37,7 @@ bool Value::IsNull() const {
     return type_ == Type::kNull;
 }
 
-bool Value::is_bool() const {
+bool Value::IsBool() const {
     return type_ == Type::kBool;
 }
 

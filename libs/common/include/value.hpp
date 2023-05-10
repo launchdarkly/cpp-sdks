@@ -304,7 +304,7 @@ class Value final {
      *
      * @return
      */
-    [[nodiscard]] bool is_bool() const;
+    [[nodiscard]] bool IsBool() const;
 
     /**
      * Returns true if the value is a number.
