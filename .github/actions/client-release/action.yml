@@ -1,3 +1,9 @@
+# This is a composite workflow that an generate all the release artifacts
+# for the C++ client SDK.
+
+# This can be ran automatically with the tag_name output from release-please,
+# or ran triggered manually with a user provided tag.
+
 name: C++ Client Release
 description: C++ Client Release Process
 inputs:
