@@ -7,9 +7,9 @@ namespace launchdarkly {
 
 ContextFilter::ContextFilter(
     bool all_attributes_private,
-    AttributeReference::SetType const& global_private_attributes)
+    AttributeReference::SetType global_private_attributes)
     : all_attributes_private_(all_attributes_private),
-      global_private_attributes_(global_private_attributes) {}
+      global_private_attributes_(std::move(global_private_attributes)) {}
 
 ContextFilter::JsonValue ContextFilter::filter(Context const& context) {
     // Context should be validated before calling this method.
