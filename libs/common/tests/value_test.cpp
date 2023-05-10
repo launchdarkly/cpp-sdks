@@ -127,10 +127,10 @@ TEST(ValueTests, CanMakeFromInitListVector) {
 }
 
 void MapAssertions(Value const& attr_map) {
-    EXPECT_TRUE(attr_map.is_object());
+    EXPECT_TRUE(attr_map.IsObject());
     EXPECT_TRUE(attr_map.as_object()["bool"].as_bool());
 
-    EXPECT_TRUE(attr_map.is_object());
+    EXPECT_TRUE(attr_map.IsObject());
     // Can index.
     EXPECT_EQ(3.14, attr_map.as_object()["double"].as_double());
     // Can use find.

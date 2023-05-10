@@ -95,7 +95,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
             continue;
         }
 
-        if (item.value.is_object()) {
+        if (item.value.IsObject()) {
             JsonValue* nested = append_container(item, JsonObject());
 
             for (auto const& pair : item.value.as_object()) {

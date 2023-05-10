@@ -112,7 +112,7 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 }
 
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
-    if (AS_VALUE(val)->is_object()) {
+    if (AS_VALUE(val)->IsObject()) {
         auto& obj = AS_VALUE(val)->as_object();
         return reinterpret_cast<LDValue_ObjectIter>(
             new IteratorBinding<Value::Object::Iterator>{obj.begin(),

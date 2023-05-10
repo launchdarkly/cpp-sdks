@@ -81,7 +81,7 @@ class Attributes final {
         bool found = true;
         for (size_t index = 0; index < ref.depth(); index++) {
             auto const& component = ref.component(index);
-            if (node->is_object()) {
+            if (node->IsObject()) {
                 auto const& map = node->as_object();
                 if (auto search = map.find(component); search != map.end()) {
                     node = &search->second;

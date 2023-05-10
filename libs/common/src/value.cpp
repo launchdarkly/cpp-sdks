@@ -53,7 +53,7 @@ bool Value::IsArray() const {
     return type_ == Type::kArray;
 }
 
-bool Value::is_object() const {
+bool Value::IsObject() const {
     return type_ == Type::kObject;
 }
 

@@ -334,7 +334,7 @@ class Value final {
      *
      * @return True if the value is an object.
      */
-    [[nodiscard]] bool is_object() const;
+    [[nodiscard]] bool IsObject() const;
 
     /**
      * If the value is a boolean, then return the boolean, otherwise return
