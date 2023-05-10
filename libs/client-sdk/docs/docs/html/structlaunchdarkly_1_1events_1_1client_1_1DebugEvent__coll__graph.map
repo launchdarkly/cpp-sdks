@@ -1,6 +1,0 @@
-<map id="launchdarkly::events::client::DebugEvent" name="launchdarkly::events::client::DebugEvent">
-<area shape="rect" id="node1" title=" " alt="" coords="93,215,251,256"/>
-<area shape="rect" id="node2" href="$structlaunchdarkly_1_1events_1_1client_1_1FeatureEventBase.html" title=" " alt="" coords="76,124,268,165"/>
-<area shape="rect" id="node3" href="$structlaunchdarkly_1_1events_1_1Date.html" title=" " alt="" coords="5,5,163,47"/>
-<area shape="rect" id="node4" href="$classlaunchdarkly_1_1Value.html" title=" " alt="" coords="187,13,336,39"/>
-</map>
