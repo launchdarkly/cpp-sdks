@@ -1,5 +1,7 @@
 #include "client_entity.hpp"
 #include <boost/json.hpp>
+#include "context_builder.hpp"
+#include "serialization/json_context.hpp"
 #include "serialization/json_evaluation_reason.hpp"
 #include "serialization/json_value.hpp"
 #include "value.hpp"
@@ -11,6 +13,52 @@ ClientEntity::ClientEntity(
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
     IdentifyEventParams params) {
     return tl::make_unexpected("identify not yet supported");
+}
+
+static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
+                                   ContextSingleParams const& single) {
+    auto& attrs = builder.kind(single.kind.value_or("user"), single.key);
+    if (single.anonymous) {
+        attrs.anonymous(*single.anonymous);
+    }
+    if (single.name) {
+        attrs.name(*single.name);
+    }
+
+    if (single._private) {
+        attrs.add_private_attributes(*single._private);
+    }
+
+    if (single.custom) {
+        for (auto const& [key, value] : *single.custom) {
+            attrs.set(key, boost::json::value_to<launchdarkly::Value>(
+                               boost::json::parse(value.dump())));
+        }
+    }
+}
+
+tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
+    ContextBuildParams params) {
+    ContextResponse resp{};
+
+    auto builder = launchdarkly::ContextBuilder();
+
+    if (params.multi) {
+        for (auto const& single : *params.multi) {
+            BuildContextFromParams(builder, single);
+        }
+    } else {
+        BuildContextFromParams(builder, *params.single);
+    }
+
+    auto ctx = builder.build();
+    if (!ctx.valid()) {
+        resp.error = ctx.errors();
+        return resp;
+    }
+
+    resp.output = boost::json::serialize(boost::json::value_from(ctx));
+    return resp;
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
@@ -204,7 +252,10 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             client_->AsyncFlush();
             return nlohmann::json{};
         case Command::ContextBuild:
-            break;
+            if (!params.contextBuild) {
+                return tl::make_unexpected("contextBuild params must be set");
+            }
+            return ContextBuild(*params.contextBuild);
         case Command::ContextConvert:
             break;
     }

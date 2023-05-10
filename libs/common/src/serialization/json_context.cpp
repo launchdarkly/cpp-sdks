@@ -1,4 +1,6 @@
 #include "serialization/json_context.hpp"
+#include <optional>
+#include "context_builder.hpp"
 #include "serialization/json_attributes.hpp"
 
 namespace launchdarkly {
@@ -22,5 +24,90 @@ void tag_invoke(boost::json::value_from_tag const&,
             }
         }
     }
+}
+
+std::optional<JsonError> ParseSingle(ContextBuilder& builder,
+                                     boost::json::object const& context,
+                                     boost::json::string const& kind) {
+    auto* key_iter = context.find("key");
+    if (key_iter == context.end()) {
+        return JsonError::kContextMissingKeyField;
+    }
+    if (!key_iter->value().is_string()) {
+        return JsonError::kContextInvalidKeyField;
+    }
+    auto& attrs =
+        builder.kind(std::string(kind),
+                     boost::json::value_to<std::string>(key_iter->value()));
+
+    auto* name_iter = context.find("name");
+    if (name_iter != context.end()) {
+        if (name_iter->value().is_string()) {
+            attrs.name(boost::json::value_to<std::string>(name_iter->value()));
+        } else {
+            return JsonError::kContextInvalidNameField;
+        }
+    }
+
+    auto* anon_iter = context.find("anonymous");
+    if (anon_iter != context.end()) {
+        if (anon_iter->value().is_bool()) {
+            attrs.anonymous(boost::json::value_to<bool>(anon_iter->value()));
+        } else {
+            return JsonError::kContextInvalidAnonymousField;
+        }
+    }
+
+    return std::nullopt;
+}
+tl::expected<Context, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<Context, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
+    if (!json_value.is_object()) {
+        return tl::make_unexpected(JsonError::kContextMustBeObject);
+    }
+
+    auto const& context = json_value.as_object();
+
+    auto* kind_iter = context.find("kind");
+
+    if (kind_iter == context.end()) {
+        return tl::make_unexpected(JsonError::kContextMissingKindField);
+    }
+
+    if (!kind_iter->value().is_string()) {
+        return tl::make_unexpected(JsonError::kContextInvalidKindField);
+    }
+
+    auto const& kind = kind_iter->value().as_string();
+
+    auto builder = ContextBuilder();
+
+    if (kind == "multi") {
+        for (auto single_kind = context.begin(); single_kind != context.end();
+             single_kind++) {
+            if (single_kind == kind_iter) {
+                continue;
+            }
+            if (!single_kind->value().is_object()) {
+                return tl::make_unexpected(JsonError::kContextMustBeObject);
+            }
+            auto err = ParseSingle(builder, single_kind->value().as_object(),
+                                   single_kind->key());
+            if (err) {
+                return tl::make_unexpected(*err);
+            }
+        }
+        return builder.build();
+    }
+
+    auto err = ParseSingle(builder, context, kind);
+    if (err) {
+        return tl::make_unexpected(*err);
+    }
+
+    return builder.build();
 }
 }  // namespace launchdarkly
