@@ -33,5 +33,5 @@ jobs:
         uses: ./.github/actions/client-release
         with:
           # The tag of the release to upload artifacts to.
-          tag_name: ${{ steps.release-please.outputs.package-client-tag }}
+          tag_name: ${{ needs.release-please.outputs.package-client-tag }}
           github_token: ${{secrets.GITHUB_TOKEN}}
