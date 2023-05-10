@@ -24,6 +24,7 @@ runs:
         ./scripts/build-docs.sh libs/client-sdk
       env:
         WORKSPACE: libs/client-sdk
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
     - name: Archive Release Linux - GCC/x64/Static
       if: runner.os == 'Linux'
@@ -48,6 +49,7 @@ runs:
         OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
         BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       run: ./scripts/build-windows.sh launchdarkly-cpp-client
 
     - name: Archive Release Windows - MSVC/x64/Static
@@ -94,6 +96,7 @@ runs:
         ./scripts/build-release.sh launchdarkly-cpp-client
       env:
         WORKSPACE: libs/client-sdk
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
     - name: Archive Release Mac - AppleClang/x64/Static
       if: runner.os == 'Linux'
