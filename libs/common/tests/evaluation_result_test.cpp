@@ -41,11 +41,8 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
     EXPECT_EQ(std::chrono::system_clock::time_point{std::chrono::milliseconds{
                   1680555761}},
               evaluation_result.value().debug_events_until_date());
-    EXPECT_EQ(42, evaluation_result.value()
-                      .detail()
-                      .value()
-                      .as_object()["item"]
-                      .as_int());
+    EXPECT_EQ(42,
+        evaluation_result.value().detail().value().AsObject()["item"].AsInt());
     EXPECT_EQ(84, evaluation_result.value().detail().variation_index());
     EXPECT_EQ(EvaluationReason::Kind::kOff,
               evaluation_result.value().detail().reason()->get().kind());
@@ -81,11 +78,8 @@ TEST(EvaluationResultTests, FromJsonMinimalFields) {
     EXPECT_FALSE(evaluation_result.value().track_reason());
     EXPECT_EQ(std::nullopt,
               evaluation_result.value().debug_events_until_date());
-    EXPECT_EQ(42, evaluation_result.value()
-                      .detail()
-                      .value()
-                      .as_object()["item"]
-                      .as_int());
+    EXPECT_EQ(42,
+        evaluation_result.value().detail().value().AsObject()["item"].AsInt());
     EXPECT_EQ(std::nullopt,
               evaluation_result.value().detail().variation_index());
     EXPECT_EQ(std::nullopt, evaluation_result.value().detail().reason());
@@ -105,8 +99,8 @@ TEST(EvaluationResultTests, FromMapOfResults) {
                            "}"
                            "}"));
 
-    EXPECT_TRUE(results.at("flagA").value().detail().value().as_bool());
-    EXPECT_FALSE(results.at("flagB").value().detail().value().as_bool());
+    EXPECT_TRUE(results.at("flagA").value().detail().value().AsBool());
+    EXPECT_FALSE(results.at("flagB").value().detail().value().AsBool());
 }
 
 TEST(EvaluationResultTests, NoResultFieldsJson) {

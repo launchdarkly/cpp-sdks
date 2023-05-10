@@ -18,85 +18,85 @@ using BoostArray = boost::json::array;
 using launchdarkly::Value;
 TEST(ValueTests, CanMakeNullValue) {
     Value null_val;
-    EXPECT_TRUE(null_val.is_null());
-    EXPECT_EQ(Value::Type::kNull, null_val.type());
+    EXPECT_TRUE(null_val.IsNull());
+    EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
 TEST(ValueTests, CanMoveNullValue) {
     Value null_val(std::move(Value()));
-    EXPECT_TRUE(null_val.is_null());
-    EXPECT_EQ(Value::Type::kNull, null_val.type());
+    EXPECT_TRUE(null_val.IsNull());
+    EXPECT_EQ(Value::Type::kNull, null_val.Type());
 }
 
 TEST(ValueTests, CanMakeBoolValue) {
     Value attr_bool(false);
-    EXPECT_TRUE(attr_bool.is_bool());
-    EXPECT_FALSE(attr_bool.as_bool());
-    EXPECT_EQ(Value::Type::kBool, attr_bool.type());
+    EXPECT_TRUE(attr_bool.IsBool());
+    EXPECT_FALSE(attr_bool.AsBool());
+    EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }
 
 TEST(ValueTests, CanMoveBoolValue) {
     Value attr_bool(std::move(Value(false)));
-    EXPECT_TRUE(attr_bool.is_bool());
-    EXPECT_FALSE(attr_bool.as_bool());
-    EXPECT_EQ(Value::Type::kBool, attr_bool.type());
+    EXPECT_TRUE(attr_bool.IsBool());
+    EXPECT_FALSE(attr_bool.AsBool());
+    EXPECT_EQ(Value::Type::kBool, attr_bool.Type());
 }
 
 TEST(ValueTests, CanMakeDoubleValue) {
     Value attr_double(3.14159);
-    EXPECT_TRUE(attr_double.is_number());
-    EXPECT_EQ(3.14159, attr_double.as_double());
-    EXPECT_EQ(3, attr_double.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_double.type());
+    EXPECT_TRUE(attr_double.IsNumber());
+    EXPECT_EQ(3.14159, attr_double.AsDouble());
+    EXPECT_EQ(3, attr_double.AsInt());
+    EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
 }
 
 TEST(ValueTests, CanMoveDoubleValue) {
     // Not repeated for int, as they use the same data type.
     Value attr_double(std::move(Value(3.14159)));
-    EXPECT_TRUE(attr_double.is_number());
-    EXPECT_EQ(3.14159, attr_double.as_double());
-    EXPECT_EQ(3, attr_double.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_double.type());
+    EXPECT_TRUE(attr_double.IsNumber());
+    EXPECT_EQ(3.14159, attr_double.AsDouble());
+    EXPECT_EQ(3, attr_double.AsInt());
+    EXPECT_EQ(Value::Type::kNumber, attr_double.Type());
 }
 
 TEST(ValueTests, CanMakeIntValue) {
     Value attr_int(42);
-    EXPECT_TRUE(attr_int.is_number());
-    EXPECT_EQ(42, attr_int.as_double());
-    EXPECT_EQ(42, attr_int.as_int());
-    EXPECT_EQ(Value::Type::kNumber, attr_int.type());
+    EXPECT_TRUE(attr_int.IsNumber());
+    EXPECT_EQ(42, attr_int.AsDouble());
+    EXPECT_EQ(42, attr_int.AsInt());
+    EXPECT_EQ(Value::Type::kNumber, attr_int.Type());
 }
 
 TEST(ValueTests, CanMakeStringValue) {
     Value attr_str(std::string("potato"));
-    EXPECT_TRUE(attr_str.is_string());
-    EXPECT_EQ("potato", attr_str.as_string());
-    EXPECT_EQ(Value::Type::kString, attr_str.type());
+    EXPECT_TRUE(attr_str.IsString());
+    EXPECT_EQ("potato", attr_str.AsString());
+    EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }
 
 TEST(ValueTests, CanMoveStringValue) {
     Value attr_str(std::move(Value(std::string("potato"))));
-    EXPECT_TRUE(attr_str.is_string());
-    EXPECT_EQ("potato", attr_str.as_string());
-    EXPECT_EQ(Value::Type::kString, attr_str.type());
+    EXPECT_TRUE(attr_str.IsString());
+    EXPECT_EQ("potato", attr_str.AsString());
+    EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }
 
 void VectorAssertions(Value attr_arr) {
-    EXPECT_TRUE(attr_arr.is_array());
-    EXPECT_FALSE(attr_arr.as_array()[0].as_bool());
-    EXPECT_TRUE(attr_arr.as_array()[1].as_bool());
-    EXPECT_EQ("potato", attr_arr.as_array()[2].as_string());
-    EXPECT_EQ(42, attr_arr.as_array()[3].as_int());
-    EXPECT_EQ(3.14, attr_arr.as_array()[4].as_double());
+    EXPECT_TRUE(attr_arr.IsArray());
+    EXPECT_FALSE(attr_arr.AsArray()[0].AsBool());
+    EXPECT_TRUE(attr_arr.AsArray()[1].AsBool());
+    EXPECT_EQ("potato", attr_arr.AsArray()[2].AsString());
+    EXPECT_EQ(42, attr_arr.AsArray()[3].AsInt());
+    EXPECT_EQ(3.14, attr_arr.AsArray()[4].AsDouble());
 
-    EXPECT_EQ("a", attr_arr.as_array()[5].as_array()[0].as_string());
-    EXPECT_EQ(21, attr_arr.as_array()[5].as_array()[1].as_int());
+    EXPECT_EQ("a", attr_arr.AsArray()[5].AsArray()[0].AsString());
+    EXPECT_EQ(21, attr_arr.AsArray()[5].AsArray()[1].AsInt());
 
     EXPECT_EQ(
         "bacon",
-        attr_arr.as_array()[6].as_object().find("string")->second.as_string());
+        attr_arr.AsArray()[6].AsObject().Find("string")->second.AsString());
 
-    EXPECT_EQ(Value::Type::kArray, attr_arr.type());
+    EXPECT_EQ(Value::Type::kArray, attr_arr.Type());
 }
 
 TEST(ValueTests, CanMakeFromVector) {
@@ -127,29 +127,28 @@ TEST(ValueTests, CanMakeFromInitListVector) {
 }
 
 void MapAssertions(Value const& attr_map) {
-    EXPECT_TRUE(attr_map.is_object());
-    EXPECT_TRUE(attr_map.as_object()["bool"].as_bool());
+    EXPECT_TRUE(attr_map.IsObject());
+    EXPECT_TRUE(attr_map.AsObject()["bool"].AsBool());
 
-    EXPECT_TRUE(attr_map.is_object());
+    EXPECT_TRUE(attr_map.IsObject());
     // Can index.
-    EXPECT_EQ(3.14, attr_map.as_object()["double"].as_double());
+    EXPECT_EQ(3.14, attr_map.AsObject()["double"].AsDouble());
     // Can use find.
-    EXPECT_EQ(42, attr_map.as_object().find("int")->second.as_int());
-    EXPECT_EQ("potato",
-              attr_map.as_object().find("string")->second.as_string());
+    EXPECT_EQ(42, attr_map.AsObject().Find("int")->second.AsInt());
+    EXPECT_EQ("potato", attr_map.AsObject().Find("string")->second.AsString());
     EXPECT_TRUE(
-        attr_map.as_object().find("array")->second.as_array()[0].as_bool());
+        attr_map.AsObject().Find("array")->second.AsArray()[0].AsBool());
     EXPECT_FALSE(
-        attr_map.as_object().find("array")->second.as_array()[1].as_bool());
+        attr_map.AsObject().Find("array")->second.AsArray()[1].AsBool());
     EXPECT_EQ(
         "bacon",
-        attr_map.as_object().find("array")->second.as_array()[2].as_string());
+        attr_map.AsObject().Find("array")->second.AsArray()[2].AsString());
 
-    EXPECT_EQ("eggs", attr_map.as_object()
-                          .find("obj")
-                          ->second.as_object()
-                          .find("string")
-                          ->second.as_string());
+    EXPECT_EQ("eggs", attr_map.AsObject()
+                          .Find("obj")
+                          ->second.AsObject()
+                          .Find("string")
+                          ->second.AsString());
 }
 
 TEST(ValueTests, CanMakeFromMap) {
@@ -180,16 +179,16 @@ TEST(ValueTests, AssignToExistingValue) {
     // Running this test with valgrind should being to light any issues with
     // cleaning things up during moves and copies.
     auto str_value = Value("test");
-    EXPECT_EQ("test", str_value.as_string());
+    EXPECT_EQ("test", str_value.AsString());
     auto second_str = Value("second");
     str_value = std::move(second_str);
     // Move assignment.
-    EXPECT_EQ("second", str_value.as_string());
+    EXPECT_EQ("second", str_value.AsString());
 
     auto third_str = Value("third");
     // Copy assignment
     str_value = third_str;
-    EXPECT_EQ("third", str_value.as_string());
+    EXPECT_EQ("third", str_value.AsString());
 }
 
 std::string ProduceString(Value val) {
@@ -223,28 +222,28 @@ TEST(ValueTests, OstreamOperator) {
 TEST(ValueTests, FromBoostJson) {
     BoostValue bool_val(true);
     auto ld_bool = boost::json::value_to<Value>(bool_val);
-    EXPECT_TRUE(ld_bool.as_bool());
+    EXPECT_TRUE(ld_bool.AsBool());
 
     BoostValue string_val("potato");
     auto ld_string = boost::json::value_to<Value>(string_val);
-    EXPECT_EQ("potato", ld_string.as_string());
+    EXPECT_EQ("potato", ld_string.AsString());
 
     BoostValue number_val(3.14);
     auto ld_number = boost::json::value_to<Value>(number_val);
-    EXPECT_EQ(3.14, ld_number.as_double());
+    EXPECT_EQ(3.14, ld_number.AsDouble());
 
     BoostValue arr_val = BoostArray{true, false, BoostObject{{"name", "Bob"}}};
     auto ld_array = boost::json::value_to<Value>(arr_val);
-    EXPECT_TRUE(ld_array.as_array()[0].as_bool());
-    EXPECT_FALSE(ld_array.as_array()[1].as_bool());
-    EXPECT_EQ("Bob", ld_array.as_array()[2].as_object()["name"].as_string());
+    EXPECT_TRUE(ld_array.AsArray()[0].AsBool());
+    EXPECT_FALSE(ld_array.AsArray()[1].AsBool());
+    EXPECT_EQ("Bob", ld_array.AsArray()[2].AsObject()["name"].AsString());
 
     BoostValue obj_val =
         BoostObject{{"name", "Bob"}, {"array", BoostArray{true, false}}};
     auto ld_obj = boost::json::value_to<Value>(obj_val);
-    EXPECT_EQ("Bob", ld_obj.as_object()["name"].as_string());
-    EXPECT_TRUE(ld_obj.as_object()["array"].as_array()[0].as_bool());
-    EXPECT_FALSE(ld_obj.as_object()["array"].as_array()[1].as_bool());
+    EXPECT_EQ("Bob", ld_obj.AsObject()["name"].AsString());
+    EXPECT_TRUE(ld_obj.AsObject()["array"].AsArray()[0].AsBool());
+    EXPECT_FALSE(ld_obj.AsObject()["array"].AsArray()[1].AsBool());
 }
 
 TEST(ValueTests, ToBoostJson) {
