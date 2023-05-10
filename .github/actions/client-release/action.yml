@@ -123,9 +123,8 @@ runs:
         filename: 'mac-clang-x64-dynamic.zip'
 
     - name: Upload Release Artifacts
-      uses: svenstaro/upload-release-action@v2
+      uses: ncipollo/release-action@v1
       with:
-        repo_token: ${{ inputs.github_token }}
-        file: 'build-*/release/*.zip'
-        file_glob: true
+        token: ${{ inputs.github_token }}
+        artifacts: '*.zip'
         tag: ${{ inputs.tag_name }}
