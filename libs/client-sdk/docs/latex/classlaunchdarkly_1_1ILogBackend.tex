@@ -1,0 +1,56 @@
+\hypertarget{classlaunchdarkly_1_1ILogBackend}{}\doxysection{launchdarkly\+::ILog\+Backend Class Reference}
+\label{classlaunchdarkly_1_1ILogBackend}\index{launchdarkly::ILogBackend@{launchdarkly::ILogBackend}}
+
+
+Inheritance diagram for launchdarkly\+::ILog\+Backend\+:
+% FIG 0
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend_a983a6f483b947cfc3bc6b32074197005}{enabled}} (Log\+Level level)=0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend_aa39ba05ff83818e6329fa9d1e98becde}{write}} (Log\+Level level, std\+::string message)=0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1ILogBackend_a983a6f483b947cfc3bc6b32074197005}\label{classlaunchdarkly_1_1ILogBackend_a983a6f483b947cfc3bc6b32074197005}} 
+\index{launchdarkly::ILogBackend@{launchdarkly::ILogBackend}!enabled@{enabled}}
+\index{enabled@{enabled}!launchdarkly::ILogBackend@{launchdarkly::ILogBackend}}
+\doxysubsubsection{\texorpdfstring{enabled()}{enabled()}}
+{\footnotesize\ttfamily virtual bool launchdarkly\+::\+ILog\+Backend\+::enabled (\begin{DoxyParamCaption}\item[{Log\+Level}]{level }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Check if the specified log level is enabled. 
+\begin{DoxyParams}{Parameters}
+{\em level} & The log level to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Returns true if the level is enabled. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_a5a5a086c7ab45af4b735ff171f747e48}{launchdarkly\+::\+Console\+Backend}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1ILogBackend_aa39ba05ff83818e6329fa9d1e98becde}\label{classlaunchdarkly_1_1ILogBackend_aa39ba05ff83818e6329fa9d1e98becde}} 
+\index{launchdarkly::ILogBackend@{launchdarkly::ILogBackend}!write@{write}}
+\index{write@{write}!launchdarkly::ILogBackend@{launchdarkly::ILogBackend}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::\+ILog\+Backend\+::write (\begin{DoxyParamCaption}\item[{Log\+Level}]{level,  }\item[{std\+::string}]{message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Write a message to the specified level. 
+\begin{DoxyParams}{Parameters}
+{\em level} & The level to write the message for. \\
+\hline
+{\em message} & The message to write. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1ConsoleBackend_a750af588efc4bd9018f9ab6a266f3a58}{launchdarkly\+::\+Console\+Backend}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks-\/private/cpp-\/sdks-\/private/libs/common/include/log\+\_\+backend.\+hpp\end{DoxyCompactItemize}
