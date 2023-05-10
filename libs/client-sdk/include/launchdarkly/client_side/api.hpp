@@ -17,15 +17,16 @@
 #include "launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp"
 #include "launchdarkly/client_side/event_processor.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
-#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_notifier.hpp"
+#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
 #include "logger.hpp"
 #include "value.hpp"
 
 namespace launchdarkly::client_side {
 class Client {
    public:
-    inline static const char* kVersion = "0.0.0";  // {x-release-please-version}
+    inline static char const* const kVersion =
+        "0.0.0";  // {x-release-please-version}
 
     Client(Config config, Context context);
 
