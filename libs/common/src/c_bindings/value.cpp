@@ -75,7 +75,7 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
     auto* value = AS_VALUE(val);
     switch (value->Type()) {
         case Value::Type::kObject:
-            return value->AsObject().size();
+            return value->AsObject().Size();
         case Value::Type::kArray:
             return value->AsArray().Size();
         default:

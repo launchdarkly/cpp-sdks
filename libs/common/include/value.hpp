@@ -187,7 +187,7 @@ class Value final {
          * The number of items in the Object.
          * @return The number of items in the Object.
          */
-        [[nodiscard]] std::size_t size() const;
+        [[nodiscard]] std::size_t Size() const;
 
         /**
          * Get the number of items with the given key. Will be 1 or 0.

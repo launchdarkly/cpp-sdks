@@ -190,7 +190,7 @@ Value::Object::Iterator Value::Object::Iterator::operator++(int) {
     return tmp;
 }
 
-std::size_t Value::Object::size() const {
+std::size_t Value::Object::Size() const {
     return map_.size();
 }
 

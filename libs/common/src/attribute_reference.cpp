@@ -231,7 +231,7 @@ std::string AttributeReference::path_to_string_reference(
     // Approximate size to reduce resizes.
     auto size = std::accumulate(path.begin(), path.end(), 0,
                                 [](auto sum, auto const& component) {
-                                    return sum + component.Size() + 1;
+                                    return sum + component.size() + 1;
                                 });
 
     std::string redaction_name;
