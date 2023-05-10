@@ -122,9 +122,20 @@ runs:
         type: 'zip'
         filename: 'mac-clang-x64-dynamic.zip'
 
-    - name: Upload Release Artifacts
-      uses: ncipollo/release-action@v1
+    - name: Upload Release Artifacts - Linux Static
+      if: runner.os == 'Linux'
+      uses: svenstaro/upload-release-action@v2
       with:
-        token: ${{ inputs.github_token }}
-        artifacts: '*.zip'
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: linux-gcc-x64-static.zip
         tag: ${{ inputs.tag_name }}
+        overwrite: true
+
+    - name: Upload Release Artifacts - Linux Dynamic
+      if: runner.os == 'Linux'
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: linux-gcc-x64-dynamic.zip
+        tag: ${{ inputs.tag_name }}
+        overwrite: true
