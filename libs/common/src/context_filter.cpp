@@ -81,7 +81,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         filtered.as_object().insert_or_assign("name", attributes.name());
     }
 
-    for (auto const& pair : attributes.custom_attributes().as_object()) {
+    for (auto const& pair : attributes.custom_attributes().AsObject()) {
         stack.emplace_back(StackItem{
             pair.second, std::vector<std::string_view>{pair.first}, filtered});
     }
@@ -98,7 +98,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         if (item.value.IsObject()) {
             JsonValue* nested = append_container(item, JsonObject());
 
-            for (auto const& pair : item.value.as_object()) {
+            for (auto const& pair : item.value.AsObject()) {
                 auto new_path = std::vector<std::string_view>(item.path);
                 new_path.push_back(pair.first);
                 stack.push_back(StackItem{pair.second, new_path, *nested});
@@ -110,9 +110,9 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
             // algorithm so they will get reversed again when the stack
             // is processed.
             auto rev_until = std::reverse_iterator<Value::Array::Iterator>(
-                item.value.as_array().begin());
+                item.value.AsArray().begin());
             auto rev_from = std::reverse_iterator<Value::Array::Iterator>(
-                item.value.as_array().end());
+                item.value.AsArray().end());
             while (rev_from != rev_until) {
                 // Once inside an array the path doesn't matter anymore.
                 // An item in an array cannot be marked private.
@@ -144,13 +144,13 @@ void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
             emplace(item, JsonValue());
             break;
         case Value::Type::kBool:
-            emplace(item, item.value.as_bool());
+            emplace(item, item.value.AsBool());
             break;
         case Value::Type::kNumber:
-            emplace(item, item.value.as_double());
+            emplace(item, item.value.AsDouble());
             break;
         case Value::Type::kString:
-            emplace(item, item.value.as_string().c_str());
+            emplace(item, item.value.AsString().c_str());
             break;
         case Value::Type::kObject:
         case Value::Type::kArray:

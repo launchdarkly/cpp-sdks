@@ -60,24 +60,24 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {
-    return AS_VALUE(val)->as_bool();
+    return AS_VALUE(val)->AsBool();
 }
 
 LD_EXPORT(double) LDValue_GetNumber(LDValue val) {
-    return AS_VALUE(val)->as_double();
+    return AS_VALUE(val)->AsDouble();
 }
 
 LD_EXPORT(char const*) LDValue_GetString(LDValue val) {
-    return AS_VALUE(val)->as_string().c_str();
+    return AS_VALUE(val)->AsString().c_str();
 }
 
 LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
     auto* value = AS_VALUE(val);
     switch (value->Type()) {
         case Value::Type::kObject:
-            return value->as_object().size();
+            return value->AsObject().size();
         case Value::Type::kArray:
-            return value->as_array().size();
+            return value->AsArray().size();
         default:
             return 0;
     }
@@ -85,7 +85,7 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
     if (AS_VALUE(val)->IsArray()) {
-        auto& array = AS_VALUE(val)->as_array();
+        auto& array = AS_VALUE(val)->AsArray();
         return reinterpret_cast<LDValue_ArrayIter>(
             new IteratorBinding<Value::Array::Iterator>{array.begin(),
                                                         array.end()});
@@ -113,7 +113,7 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
     if (AS_VALUE(val)->IsObject()) {
-        auto& obj = AS_VALUE(val)->as_object();
+        auto& obj = AS_VALUE(val)->AsObject();
         return reinterpret_cast<LDValue_ObjectIter>(
             new IteratorBinding<Value::Object::Iterator>{obj.begin(),
                                                          obj.end()});

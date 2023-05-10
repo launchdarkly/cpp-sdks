@@ -16,15 +16,15 @@ TEST(AttributesTests, CanGetBuiltInAttributesByReference) {
 
     EXPECT_EQ("the-key",
               attributes.get(AttributeReference::from_reference_str("/key"))
-                  .as_string());
+                  .AsString());
 
     EXPECT_EQ("the-name",
               attributes.get(AttributeReference::from_reference_str("/name"))
-                  .as_string());
+                  .AsString());
 
     EXPECT_TRUE(
         attributes.get(AttributeReference::from_reference_str("/anonymous"))
-            .as_bool());
+            .AsBool());
 }
 
 TEST(AttributesTests, CanGetCustomAttributesByReference) {
@@ -38,38 +38,38 @@ TEST(AttributesTests, CanGetCustomAttributesByReference) {
              {"array", {true, false, "bacon"}},
              {"obj", std::map<std::string, Value>{{"string", "eggs"}}}})));
 
-    EXPECT_EQ(42, attributes.get(AttributeReference::from_reference_str("/int"))
-                      .as_int());
+    EXPECT_EQ(42,
+        attributes.get(AttributeReference::from_reference_str("/int")).AsInt());
 
     EXPECT_EQ(3.14,
               attributes.get(AttributeReference::from_reference_str("/double"))
-                  .as_double());
+                  .AsDouble());
 
     EXPECT_EQ("potato",
               attributes.get(AttributeReference::from_reference_str("/string"))
-                  .as_string());
+                  .AsString());
 
     EXPECT_TRUE(attributes.get(AttributeReference::from_reference_str("/bool"))
-                    .as_bool());
+                    .AsBool());
 
     EXPECT_TRUE(attributes.get(AttributeReference::from_reference_str("/array"))
-                    .as_array()[0]
-                    .as_bool());
+                    .AsArray()[0]
+                    .AsBool());
 
     EXPECT_FALSE(
         attributes.get(AttributeReference::from_reference_str("/array"))
-            .as_array()[1]
-            .as_bool());
+            .AsArray()[1]
+            .AsBool());
 
     EXPECT_EQ("bacon",
               attributes.get(AttributeReference::from_reference_str("/array"))
-                  .as_array()[2]
-                  .as_string());
+                  .AsArray()[2]
+                  .AsString());
 
     EXPECT_EQ(
         "eggs",
         attributes.get(AttributeReference::from_reference_str("/obj/string"))
-            .as_string());
+            .AsString());
 }
 
 TEST(AttributesTests, CanGetSomethingThatDoesNotExist) {

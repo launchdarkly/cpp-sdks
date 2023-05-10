@@ -57,48 +57,48 @@ bool Value::IsObject() const {
     return type_ == Type::kObject;
 }
 
-Value const& Value::null() {
+Value const& Value::Null() {
     // This still just constructs a value, but it may be more discoverable
     // for people using the API.
     return null_value_;
 }
 
-bool Value::as_bool() const {
+bool Value::AsBool() const {
     if (type_ == Type::kBool) {
         return boost::get<bool>(storage_);
     }
     return false;
 }
 
-int Value::as_int() const {
+int Value::AsInt() const {
     if (type_ == Type::kNumber) {
         return static_cast<int>(boost::get<double>(storage_));
     }
     return 0;
 }
 
-double Value::as_double() const {
+double Value::AsDouble() const {
     if (type_ == Type::kNumber) {
         return boost::get<double>(storage_);
     }
     return 0.0;
 }
 
-std::string const& Value::as_string() const {
+std::string const& Value::AsString() const {
     if (type_ == Type::kString) {
         return boost::get<std::string>(storage_);
     }
     return empty_string_;
 }
 
-Value::Array const& Value::as_array() const {
+Value::Array const& Value::AsArray() const {
     if (type_ == Type::kArray) {
         return boost::get<Array>(storage_);
     }
     return empty_vector_;
 }
 
-Value::Object const& Value::as_object() const {
+Value::Object const& Value::AsObject() const {
     if (type_ == Type::kObject) {
         return boost::get<Object>(storage_);
     }
@@ -212,15 +212,15 @@ bool operator==(Value const& lhs, Value const& rhs) {
             case Value::Type::kNull:
                 return true;
             case Value::Type::kBool:
-                return lhs.as_bool() == rhs.as_bool();
+                return lhs.AsBool() == rhs.AsBool();
             case Value::Type::kNumber:
-                return lhs.as_double() == rhs.as_double();
+                return lhs.AsDouble() == rhs.AsDouble();
             case Value::Type::kString:
-                return lhs.as_string() == rhs.as_string();
+                return lhs.AsString() == rhs.AsString();
             case Value::Type::kObject:
-                return lhs.as_object() == rhs.as_object();
+                return lhs.AsObject() == rhs.AsObject();
             case Value::Type::kArray:
-                return lhs.as_array() == rhs.as_array();
+                return lhs.AsArray() == rhs.AsArray();
         }
     }
     return false;

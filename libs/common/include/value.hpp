@@ -342,7 +342,7 @@ class Value final {
      *
      * @return The value of the boolean, or false.
      */
-    [[nodiscard]] bool as_bool() const;
+    [[nodiscard]] bool AsBool() const;
 
     /**
      * If the value is a number, then return the internal double value as an
@@ -350,9 +350,9 @@ class Value final {
      *
      * @return The value as an integer, or 0.
      */
-    [[nodiscard]] int as_int() const;
+    [[nodiscard]] int AsInt() const;
 
-    [[nodiscard]] double as_double() const;
+    [[nodiscard]] double AsDouble() const;
 
     /**
      * If the value is a string, then return a reference to that string,
@@ -360,7 +360,7 @@ class Value final {
      *
      * @return The value as a string, or an empty string.
      */
-    [[nodiscard]] std::string const& as_string() const;
+    [[nodiscard]] std::string const& AsString() const;
 
     /**
      * If the value is an array type, then return a reference to that array as a
@@ -368,7 +368,7 @@ class Value final {
      *
      * @return The value as a vector, or an empty vector.
      */
-    [[nodiscard]] Array const& as_array() const;
+    [[nodiscard]] Array const& AsArray() const;
 
     /**
      * if the value is an object type, then return a reference to that object
@@ -376,7 +376,7 @@ class Value final {
      *
      * @return The value as a map, or an empty map.
      */
-    [[nodiscard]] Object const& as_object() const;
+    [[nodiscard]] Object const& AsObject() const;
 
     ~Value() = default;
 
@@ -384,7 +384,7 @@ class Value final {
      * Get a null value.
      * @return The null value.
      */
-    static Value const& null();
+    static Value const& Null();
 
     friend std::ostream& operator<<(std::ostream& out, Value const& value) {
         switch (value.type_) {
@@ -413,13 +413,13 @@ class Value final {
         return out;
     }
 
-    operator bool() const { return as_bool(); }
+    operator bool() const { return AsBool(); }
 
-    operator std::string() const { return as_string(); }
+    operator std::string() const { return AsString(); }
 
-    operator double() const { return as_double(); }
+    operator double() const { return AsDouble(); }
 
-    operator int() const { return as_int(); }
+    operator int() const { return AsInt(); }
 
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
