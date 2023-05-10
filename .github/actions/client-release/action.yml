@@ -60,7 +60,7 @@ runs:
       run: ./scripts/build-windows.sh launchdarkly-cpp-client
 
     - name: Archive Release Windows - MSVC/x64/Static
-      if: runner.os == 'Linux'
+      if: runner.os == 'Windows'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-static/release'
@@ -68,7 +68,7 @@ runs:
         filename: 'windows-msvc-x64-static.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic
-      if: runner.os == 'Linux'
+      if: runner.os == 'Windows'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-dynamic/release'
@@ -76,7 +76,7 @@ runs:
         filename: 'windows-msvc-x64-dynamic.zip'
 
     - name: Archive Release Windows - MSVC/x64/Static/Debug
-      if: runner.os == 'Linux'
+      if: runner.os == 'Windows'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-static-debug/release'
@@ -84,7 +84,7 @@ runs:
         filename: 'windows-msvc-x64-static-debug.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/Debug
-      if: runner.os == 'Linux'
+      if: runner.os == 'Windows'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-dynamic-debug/release'
@@ -107,7 +107,7 @@ runs:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
     - name: Archive Release Mac - AppleClang/x64/Static
-      if: runner.os == 'Linux'
+      if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-static/release'
@@ -115,7 +115,7 @@ runs:
         filename: 'mac-clang-x64-static.zip'
 
     - name: Archive Release Mac - AppleClang/x64/Dynamic
-      if: runner.os == 'Linux'
+      if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-dynamic/release'
