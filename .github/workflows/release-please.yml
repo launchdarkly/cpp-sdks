@@ -21,7 +21,6 @@ jobs:
   release-client:
     strategy:
       matrix:
-        version: [ 10, 12, 14 ]
         # Each of the platforms for which release-artifacts need generated.
         os: [ ubuntu-latest, windows-2022, macos-12 ]
     runs-on: ${{ matrix.os }}
@@ -35,3 +34,4 @@ jobs:
         with:
           # The tag of the release to upload artifacts to.
           tag_name: ${{ steps.release-please.outputs.package-client-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}

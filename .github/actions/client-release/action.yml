@@ -4,6 +4,8 @@ inputs:
   tag_name:
     description: 'The tag name of the release to upload artifacts to.'
     required: true
+  github_token:
+    required: true
 
 runs:
   using: composite
@@ -110,7 +112,7 @@ runs:
     - name: Upload Release Artifacts
       uses: svenstaro/upload-release-action@v2
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        repo_token: ${{ inputs.github_token }}
         file: '*.zip'
         file_glob: true
         tag: ${{ inputs.tag_name }}
