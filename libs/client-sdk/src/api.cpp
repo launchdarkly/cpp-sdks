@@ -77,7 +77,7 @@ std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.GetAll()) {
         if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag.value().detail().value());
+            result.try_emplace(key, descriptor->flag->detail().value());
         }
     }
     return result;
