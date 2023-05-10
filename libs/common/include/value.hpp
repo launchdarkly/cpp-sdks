@@ -320,7 +320,7 @@ class Value final {
      *
      * @return True if the value is a string.
      */
-    [[nodiscard]] bool is_string() const;
+    [[nodiscard]] bool IsString() const;
 
     /**
      * Returns true if the value is an array.

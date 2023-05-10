@@ -69,14 +69,14 @@ TEST(ValueTests, CanMakeIntValue) {
 
 TEST(ValueTests, CanMakeStringValue) {
     Value attr_str(std::string("potato"));
-    EXPECT_TRUE(attr_str.is_string());
+    EXPECT_TRUE(attr_str.IsString());
     EXPECT_EQ("potato", attr_str.as_string());
     EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }
 
 TEST(ValueTests, CanMoveStringValue) {
     Value attr_str(std::move(Value(std::string("potato"))));
-    EXPECT_TRUE(attr_str.is_string());
+    EXPECT_TRUE(attr_str.IsString());
     EXPECT_EQ("potato", attr_str.as_string());
     EXPECT_EQ(Value::Type::kString, attr_str.Type());
 }

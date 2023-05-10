@@ -45,7 +45,7 @@ bool Value::IsNumber() const {
     return type_ == Type::kNumber;
 }
 
-bool Value::is_string() const {
+bool Value::IsString() const {
     return type_ == Type::kString;
 }
 
