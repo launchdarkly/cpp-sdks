@@ -49,7 +49,7 @@ runs:
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip
+        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
 
@@ -110,7 +110,7 @@ runs:
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip
+        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
 
@@ -148,6 +148,6 @@ runs:
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip
+        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
