@@ -43,6 +43,10 @@ runs:
         type: 'zip'
         filename: 'linux-gcc-x64-dynamic.zip'
 
+    - name: Publish Documentation
+      if: runner.os == 'Linux'
+      uses: ./.github/actions/publish-docs
+
     - name: Build Windows Artifacts
       if: runner.os == 'Windows'
       shell: bash
