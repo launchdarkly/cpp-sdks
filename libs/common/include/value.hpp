@@ -194,9 +194,7 @@ class Value final {
          * @param key The key to get a count for.
          * @return The count of items with the given key.
          */
-        [[nodiscard]] std::size_t count(std::string const& key) const {
-            return map_.count(key);
-        }
+        [[nodiscard]] std::size_t Count(std::string const& key) const;
 
         [[nodiscard]] Iterator begin() const;
 
@@ -207,7 +205,7 @@ class Value final {
          * @param key The key to find a value for.
          * @return The value, or the end iterator.
          */
-        [[nodiscard]] Iterator find(std::string const& key) const;
+        [[nodiscard]] Iterator Find(std::string const& key) const;
 
        private:
         std::map<std::string, Value> map_;

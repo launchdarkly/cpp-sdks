@@ -83,7 +83,7 @@ class Attributes final {
             auto const& component = ref.component(index);
             if (node->IsObject()) {
                 auto const& map = node->AsObject();
-                if (auto search = map.find(component); search != map.end()) {
+                if (auto search = map.Find(component); search != map.end()) {
                     node = &search->second;
                 } else {
                     found = false;

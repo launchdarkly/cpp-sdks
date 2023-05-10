@@ -94,7 +94,7 @@ void VectorAssertions(Value attr_arr) {
 
     EXPECT_EQ(
         "bacon",
-        attr_arr.AsArray()[6].AsObject().find("string")->second.AsString());
+        attr_arr.AsArray()[6].AsObject().Find("string")->second.AsString());
 
     EXPECT_EQ(Value::Type::kArray, attr_arr.Type());
 }
@@ -134,20 +134,20 @@ void MapAssertions(Value const& attr_map) {
     // Can index.
     EXPECT_EQ(3.14, attr_map.AsObject()["double"].AsDouble());
     // Can use find.
-    EXPECT_EQ(42, attr_map.AsObject().find("int")->second.AsInt());
-    EXPECT_EQ("potato", attr_map.AsObject().find("string")->second.AsString());
+    EXPECT_EQ(42, attr_map.AsObject().Find("int")->second.AsInt());
+    EXPECT_EQ("potato", attr_map.AsObject().Find("string")->second.AsString());
     EXPECT_TRUE(
-        attr_map.AsObject().find("array")->second.AsArray()[0].AsBool());
+        attr_map.AsObject().Find("array")->second.AsArray()[0].AsBool());
     EXPECT_FALSE(
-        attr_map.AsObject().find("array")->second.AsArray()[1].AsBool());
+        attr_map.AsObject().Find("array")->second.AsArray()[1].AsBool());
     EXPECT_EQ(
         "bacon",
-        attr_map.AsObject().find("array")->second.AsArray()[2].AsString());
+        attr_map.AsObject().Find("array")->second.AsArray()[2].AsString());
 
     EXPECT_EQ("eggs", attr_map.AsObject()
-                          .find("obj")
+                          .Find("obj")
                           ->second.AsObject()
-                          .find("string")
+                          .Find("string")
                           ->second.AsString());
 }
 

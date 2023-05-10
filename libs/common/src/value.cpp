@@ -202,8 +202,12 @@ Value::Object::Iterator Value::Object::end() const {
     return {map_.end()};
 }
 
-Value::Object::Iterator Value::Object::find(std::string const& key) const {
+Value::Object::Iterator Value::Object::Find(std::string const& key) const {
     return {map_.find(key)};
+}
+
+std::size_t Value::Object::Count(std::string const& key) const {
+    return map_.count(key);
 }
 
 bool operator==(Value const& lhs, Value const& rhs) {
