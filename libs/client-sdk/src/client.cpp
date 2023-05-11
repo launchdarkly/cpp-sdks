@@ -16,8 +16,7 @@ using FlagKey = std::string;
 }
 
 void Client::Track(std::string event_name, Value data, double metric_value) {
-    client->Track(std::move(event_name), std::move(data),
-                  metric_value);
+    client->Track(std::move(event_name), std::move(data), metric_value);
 }
 
 void Client::Track(std::string event_name, Value data) {
@@ -53,8 +52,7 @@ std::string Client::StringVariation(FlagKey const& key,
 EvaluationDetail<std::string> Client::StringVariationDetail(
     FlagKey const& key,
     std::string default_value) {
-    return client->StringVariationDetail(key,
-                                         std::move(default_value));
+    return client->StringVariationDetail(key, std::move(default_value));
 }
 
 double Client::DoubleVariation(FlagKey const& key, double default_value) {
@@ -81,8 +79,7 @@ Value Client::JsonVariation(FlagKey const& key, Value default_value) {
 
 EvaluationDetail<Value> Client::JsonVariationDetail(FlagKey const& key,
                                                     Value default_value) {
-    return client->JsonVariationDetail(key,
-                                       std::move(default_value));
+    return client->JsonVariationDetail(key, std::move(default_value));
 }
 
 data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {

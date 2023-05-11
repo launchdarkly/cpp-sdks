@@ -153,7 +153,6 @@ class IClient {
     virtual double DoubleVariation(FlagKey const& key,
                                    double default_value) = 0;
 
-
     /**
      * Returns the double value of a feature flag for a given flag key, in an
      * object that also describes the way the value was determined.

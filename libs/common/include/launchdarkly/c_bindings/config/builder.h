@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "./config.h"
 #include <launchdarkly/c_bindings/export.h>
 #include <launchdarkly/c_bindings/status.h>
+#include "./config.h"
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
