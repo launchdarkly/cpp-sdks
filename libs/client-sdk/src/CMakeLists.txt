@@ -30,7 +30,12 @@ add_library(${LIBNAME}
         boost_signal_connection.cpp
         )
 
-target_link_libraries(${LIBNAME} launchdarkly::common launchdarkly::sse)
+target_link_libraries(${LIBNAME}
+        PUBLIC
+        launchdarkly::common
+        PRIVATE
+        launchdarkly::sse
+        )
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 

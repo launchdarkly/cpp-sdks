@@ -66,6 +66,8 @@ Client::Client(Config config, Context context)
     data_source_->Start();
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+
+    AsyncIdentify(context_);
 }
 
 bool Client::Initialized() const {
@@ -74,7 +76,13 @@ bool Client::Initialized() const {
 }
 
 std::unordered_map<Client::FlagKey, Value> Client::AllFlags() const {
-    return {};
+    std::unordered_map<Client::FlagKey, Value> result;
+    for (auto& [key, descriptor] : flag_manager_.GetAll()) {
+        if (descriptor->flag) {
+            result.try_emplace(key, descriptor->flag->detail().value());
+        }
+    }
+    return result;
 }
 
 void Client::TrackInternal(std::string event_name,
@@ -257,7 +265,7 @@ flag_manager::detail::IFlagNotifier& Client::FlagNotifier() {
     return flag_updater_;
 }
 
-void Client::WaitForReadySync(std::chrono::seconds timeout) {
+void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
     std::unique_lock lock(init_mutex_);
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
