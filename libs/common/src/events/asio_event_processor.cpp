@@ -4,10 +4,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <iomanip>
 #include "config/detail/builders/http_properties_builder.hpp"
-#include "config/detail/sdks.hpp"
-#include "network/detail/asio_requester.hpp"
 #include "serialization/events/json_events.hpp"
 
 namespace http = boost::beast::http;
