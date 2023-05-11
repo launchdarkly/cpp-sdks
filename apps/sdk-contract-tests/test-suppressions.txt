@@ -1,26 +1,6 @@
 events/summary events/basic counter behavior
 events/summary events/context kinds
 events/summary events/reset after each flush
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: bool
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: int
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: double
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: string
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: any
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: bool
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: int
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: double
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: string
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/with reasons/type: any
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: bool
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: int
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: double
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: string
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/without reasons/type: any
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: bool
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: int
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: double
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: string
-events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: any
 events/identify events/basic properties/single kind default
 events/identify events/basic properties/single kind non-default
 events/identify events/basic properties/multi-kind
