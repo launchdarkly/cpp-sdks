@@ -90,13 +90,34 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     ioc_thread.join();
 }
 
-TEST(EventProcessorTests, ParseDateHeader) {
+TEST(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
-    
+
     auto date = events::detail::ParseDateHeader<std::chrono::system_clock>(
         "Wed, 21 Oct 2015 07:28:00 GMT");
 
     ASSERT_TRUE(date);
 
     ASSERT_EQ(date->time_since_epoch().count(), 1445412480000000);
+}
+
+TEST(EventProcessorTests, ParseInvalidDateHeader) {
+    using namespace launchdarkly;
+
+    auto not_a_date =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "this is definitely not a date");
+
+    ASSERT_FALSE(not_a_date);
+
+    auto not_gmt = events::detail::ParseDateHeader<std::chrono::system_clock>(
+        "Wed, 21 Oct 2015 07:28:00 PST");
+
+    ASSERT_FALSE(not_gmt);
+
+    auto missing_year =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "Wed, 21 Oct 07:28:00 GMT");
+
+    ASSERT_FALSE(missing_year);
 }
