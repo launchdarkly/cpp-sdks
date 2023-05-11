@@ -7,6 +7,7 @@
 
 using launchdarkly::EvaluationReason;
 using launchdarkly::EvaluationResult;
+using launchdarkly::JsonError;
 
 // NOLINTBEGIN bugprone-unchecked-optional-access
 // In the tests I do not care to check it.
@@ -41,7 +42,8 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
     EXPECT_EQ(std::chrono::system_clock::time_point{std::chrono::milliseconds{
                   1680555761}},
               evaluation_result.value().debug_events_until_date());
-    EXPECT_EQ(42,
+    EXPECT_EQ(
+        42,
         evaluation_result.value().detail().value().AsObject()["item"].AsInt());
     EXPECT_EQ(84, evaluation_result.value().detail().variation_index());
     EXPECT_EQ(EvaluationReason::Kind::kOff,
@@ -78,7 +80,8 @@ TEST(EvaluationResultTests, FromJsonMinimalFields) {
     EXPECT_FALSE(evaluation_result.value().track_reason());
     EXPECT_EQ(std::nullopt,
               evaluation_result.value().debug_events_until_date());
-    EXPECT_EQ(42,
+    EXPECT_EQ(
+        42,
         evaluation_result.value().detail().value().AsObject()["item"].AsInt());
     EXPECT_EQ(std::nullopt,
               evaluation_result.value().detail().variation_index());
