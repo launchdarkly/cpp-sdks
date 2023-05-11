@@ -94,7 +94,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
     CustomEventParams params) {
     auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
                                   boost::json::parse(params.data->dump()))
-                            : launchdarkly::Value::null();
+                            : launchdarkly::Value::Null();
 
     if (params.omitNullData.value_or(false) && !params.metricValue &&
         !params.data) {

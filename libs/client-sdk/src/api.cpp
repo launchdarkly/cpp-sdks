@@ -176,8 +176,8 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
     auto const& flag = *(desc->flag);
     auto const& detail = flag.detail();
 
-    if (check_type && default_value.type() != Value::Type::kNull &&
-        detail.value().type() != default_value.type()) {
+    if (check_type && default_value.Type() != Value::Type::kNull &&
+        detail.value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
         if (eval_reasons_available_) {
