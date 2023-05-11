@@ -93,12 +93,14 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 TEST(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
 
-    auto date = events::detail::ParseDateHeader<std::chrono::system_clock>(
-        "Wed, 21 Oct 2015 07:28:00 GMT");
+    using Clock = std::chrono::system_clock;
+    auto date =
+        events::detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
 
     ASSERT_TRUE(date);
 
-    ASSERT_EQ(date->time_since_epoch().count(), 1445412480000000);
+    ASSERT_EQ(date->time_since_epoch(),
+              std::chrono::microseconds(1445412480000000));
 }
 
 TEST(EventProcessorTests, ParseInvalidDateHeader) {
@@ -120,4 +122,6 @@ TEST(EventProcessorTests, ParseInvalidDateHeader) {
             "Wed, 21 Oct 07:28:00 GMT");
 
     ASSERT_FALSE(missing_year);
+
+    auto x = std::chrono::system_clock::time_point::min();
 }
