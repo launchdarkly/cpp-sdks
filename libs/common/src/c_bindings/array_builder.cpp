@@ -1,8 +1,8 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include "launchdarkly/c_bindings/array_builder.h"
-#include "launchdarkly/value.hpp"
+#include <launchdarkly/c_bindings/array_builder.h>
+#include <launchdarkly/value.hpp>
 
 #include <vector>
 

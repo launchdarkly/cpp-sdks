@@ -1,9 +1,9 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include "launchdarkly/c_bindings/status.h"
+#include <launchdarkly/c_bindings/status.h>
 
-#include "launchdarkly/error.hpp"
+#include <launchdarkly/error.hpp>
 
 using namespace launchdarkly;
 

@@ -5,9 +5,9 @@
 #include <functional>
 #include <optional>
 #include <vector>
-#include "launchdarkly/logger.hpp"
-#include "launchdarkly/network/detail/asio_requester.hpp"
-#include "launchdarkly/network/detail/http_requester.hpp"
+#include <launchdarkly/logger.hpp>
+#include <launchdarkly/network/detail/asio_requester.hpp>
+#include <launchdarkly/network/detail/http_requester.hpp>
 #include "request_worker.hpp"
 namespace launchdarkly::events::detail {
 

@@ -5,7 +5,7 @@
 #include <boost/json.hpp>
 
 #include "json_errors.hpp"
-#include "launchdarkly/data/evaluation_reason.hpp"
+#include <launchdarkly/data/evaluation_reason.hpp>
 
 namespace launchdarkly {
 /**

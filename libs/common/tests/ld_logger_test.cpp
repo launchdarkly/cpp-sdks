@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include "launchdarkly/console_backend.hpp"
-#include "launchdarkly/log_backend.hpp"
-#include "launchdarkly/logger.hpp"
+#include <launchdarkly/console_backend.hpp>
+#include <launchdarkly/log_backend.hpp>
+#include <launchdarkly/logger.hpp>
 #include "ostream_tester.hpp"
 
 using launchdarkly::ConsoleBackend;

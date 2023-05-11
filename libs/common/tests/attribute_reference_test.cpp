@@ -3,7 +3,7 @@
 #include <string>
 #include <tuple>
 
-#include "launchdarkly/attribute_reference.hpp"
+#include <launchdarkly/attribute_reference.hpp>
 
 using launchdarkly::AttributeReference;
 

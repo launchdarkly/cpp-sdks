@@ -1,4 +1,4 @@
-#include "launchdarkly/events/detail/outbox.hpp"
+#include <launchdarkly/events/detail/outbox.hpp>
 
 namespace launchdarkly::events::detail {
 

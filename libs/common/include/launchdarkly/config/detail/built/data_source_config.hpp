@@ -4,7 +4,7 @@
 #include <chrono>
 #include <optional>
 #include <type_traits>
-#include "launchdarkly/config/detail/sdks.hpp"
+#include <launchdarkly/config/detail/sdks.hpp>
 
 namespace launchdarkly::config::detail::built {
 

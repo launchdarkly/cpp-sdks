@@ -5,9 +5,9 @@
 #include <functional>
 #include <tuple>
 #include "event_batch.hpp"
-#include "launchdarkly/logger.hpp"
-#include "launchdarkly/network/detail/asio_requester.hpp"
-#include "launchdarkly/network/detail/http_requester.hpp"
+#include <launchdarkly/logger.hpp>
+#include <launchdarkly/network/detail/asio_requester.hpp>
+#include <launchdarkly/network/detail/http_requester.hpp>
 
 namespace launchdarkly::events::detail {
 

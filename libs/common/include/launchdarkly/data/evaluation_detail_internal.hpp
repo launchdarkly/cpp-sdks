@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "evaluation_reason.hpp"
-#include "launchdarkly/value.hpp"
+#include <launchdarkly/value.hpp>
 
 namespace launchdarkly {
 

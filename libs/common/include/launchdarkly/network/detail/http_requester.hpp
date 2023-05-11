@@ -9,7 +9,7 @@
 #include <ostream>
 #include <string>
 
-#include "launchdarkly/config/detail/built/http_properties.hpp"
+#include <launchdarkly/config/detail/built/http_properties.hpp>
 
 #ifdef _MSC_VER
 // MSVC doesn't support strcasecmp.

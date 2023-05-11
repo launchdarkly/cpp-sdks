@@ -1,12 +1,12 @@
 #pragma once
 
-#include "launchdarkly/config/detail/builders/endpoints_builder.hpp"
-#include "launchdarkly/config/detail/builders/events_builder.hpp"
-#include "launchdarkly/config/detail/built/data_source_config.hpp"
-#include "launchdarkly/config/detail/built/events.hpp"
-#include "launchdarkly/config/detail/built/http_properties.hpp"
-#include "launchdarkly/config/detail/built/service_endpoints.hpp"
-#include "launchdarkly/logger.hpp"
+#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/detail/builders/events_builder.hpp>
+#include <launchdarkly/config/detail/built/data_source_config.hpp>
+#include <launchdarkly/config/detail/built/events.hpp>
+#include <launchdarkly/config/detail/built/http_properties.hpp>
+#include <launchdarkly/config/detail/built/service_endpoints.hpp>
+#include <launchdarkly/logger.hpp>
 
 namespace launchdarkly::config::detail {
 

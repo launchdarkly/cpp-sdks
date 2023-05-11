@@ -4,14 +4,14 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "launchdarkly/config/client.hpp"
-#include "launchdarkly/config/detail/built/http_properties.hpp"
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/detail/built/http_properties.hpp>
 #include "data_source_status_manager.hpp"
-#include "launchdarkly/client_side/data_source.hpp"
-#include "launchdarkly/client_side/data_source_update_sink.hpp"
-#include "launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp"
-#include "launchdarkly/logger.hpp"
-#include "launchdarkly/network/detail/asio_requester.hpp"
+#include <launchdarkly/client_side/data_source.hpp>
+#include <launchdarkly/client_side/data_source_update_sink.hpp>
+#include <launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp>
+#include <launchdarkly/logger.hpp>
+#include <launchdarkly/network/detail/asio_requester.hpp>
 
 namespace launchdarkly::client_side::data_sources::detail {
 

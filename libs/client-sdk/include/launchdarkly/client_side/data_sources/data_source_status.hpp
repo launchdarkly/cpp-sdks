@@ -8,9 +8,9 @@
 
 #include <boost/signals2.hpp>
 
-#include "launchdarkly/client_side/connection.hpp"
-#include "launchdarkly/client_side/data_sources/data_source_status.hpp"
-#include "launchdarkly/network/detail/http_requester.hpp"
+#include <launchdarkly/client_side/connection.hpp>
+#include <launchdarkly/client_side/data_sources/data_source_status.hpp>
+#include <launchdarkly/network/detail/http_requester.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 

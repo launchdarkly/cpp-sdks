@@ -1,5 +1,5 @@
-#include "launchdarkly/config/detail/builders/endpoints_builder.hpp"
-#include "launchdarkly/config/detail/defaults.hpp"
+#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/detail/defaults.hpp>
 
 #include <utility>
 

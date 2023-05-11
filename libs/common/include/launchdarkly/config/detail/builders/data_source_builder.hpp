@@ -4,9 +4,9 @@
 #include <optional>
 #include <type_traits>
 
-#include "launchdarkly/config/detail/built/data_source_config.hpp"
-#include "launchdarkly/config/detail/defaults.hpp"
-#include "launchdarkly/config/detail/sdks.hpp"
+#include <launchdarkly/config/detail/built/data_source_config.hpp>
+#include <launchdarkly/config/detail/defaults.hpp>
+#include <launchdarkly/config/detail/sdks.hpp>
 
 #include <boost/variant.hpp>
 

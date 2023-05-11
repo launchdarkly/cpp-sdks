@@ -1,4 +1,4 @@
-#include "launchdarkly/client_side/event_processor/detail/event_processor.hpp"
+#include <launchdarkly/client_side/event_processor/detail/event_processor.hpp>
 
 namespace launchdarkly::client_side::detail {
 

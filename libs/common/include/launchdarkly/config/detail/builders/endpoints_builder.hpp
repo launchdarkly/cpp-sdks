@@ -1,7 +1,7 @@
 #pragma once
 
-#include "launchdarkly/config/detail/built/service_endpoints.hpp"
-#include "launchdarkly/error.hpp"
+#include <launchdarkly/config/detail/built/service_endpoints.hpp>
+#include <launchdarkly/error.hpp>
 
 #include "tl/expected.hpp"
 

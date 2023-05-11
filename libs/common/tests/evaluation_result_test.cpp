@@ -2,8 +2,8 @@
 
 #include <boost/json.hpp>
 
-#include "launchdarkly/data/evaluation_result.hpp"
-#include "launchdarkly/serialization/json_evaluation_result.hpp"
+#include <launchdarkly/data/evaluation_result.hpp>
+#include <launchdarkly/serialization/json_evaluation_result.hpp>
 
 using launchdarkly::EvaluationReason;
 using launchdarkly::EvaluationResult;

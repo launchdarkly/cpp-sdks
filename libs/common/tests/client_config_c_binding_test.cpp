@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "launchdarkly/c_bindings/config/builder.h"
+#include <launchdarkly/c_bindings/config/builder.h>
 
 TEST(ClientConfigBindings, ConfigBuilderNewFree) {
     LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");

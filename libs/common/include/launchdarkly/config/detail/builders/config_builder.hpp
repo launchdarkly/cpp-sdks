@@ -7,10 +7,10 @@
 #include "endpoints_builder.hpp"
 #include "events_builder.hpp"
 #include "http_properties_builder.hpp"
-#include "launchdarkly/config/detail/config.hpp"
+#include <launchdarkly/config/detail/config.hpp>
 #include "tl/expected.hpp"
 
-#include "launchdarkly/logger.hpp"
+#include <launchdarkly/logger.hpp>
 
 namespace launchdarkly::config::detail::builders {
 

@@ -1,6 +1,6 @@
-#include "launchdarkly/events/detail/request_worker.hpp"
+#include <launchdarkly/events/detail/request_worker.hpp>
 #include <gtest/gtest.h>
-#include "launchdarkly/network/detail/http_requester.hpp"
+#include <launchdarkly/network/detail/http_requester.hpp>
 
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network::detail;

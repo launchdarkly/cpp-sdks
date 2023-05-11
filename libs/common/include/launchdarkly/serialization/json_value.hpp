@@ -2,7 +2,7 @@
 
 #include <boost/json.hpp>
 
-#include "launchdarkly/value.hpp"
+#include <launchdarkly/value.hpp>
 
 namespace launchdarkly {
 /**
