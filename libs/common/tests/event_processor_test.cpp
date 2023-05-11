@@ -7,7 +7,7 @@
 #include "context_builder.hpp"
 #include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
-#include "events/detail/worker_pool.hpp"
+#include "events/detail/parse_date_header.hpp"
 
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network::detail;
@@ -88,4 +88,15 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     processor.AsyncClose();
     ioc_thread.join();
+}
+
+TEST(EventProcessorTests, ParseDateHeader) {
+    using namespace launchdarkly;
+    
+    auto date = events::detail::ParseDateHeader<std::chrono::system_clock>(
+        "Wed, 21 Oct 2015 07:28:00 GMT");
+
+    ASSERT_TRUE(date);
+
+    ASSERT_EQ(date->time_since_epoch().count(), 1445412480000000);
 }

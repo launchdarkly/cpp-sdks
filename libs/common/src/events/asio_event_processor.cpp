@@ -4,10 +4,10 @@
 #include <boost/beast/http.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <iomanip>
 #include "config/detail/builders/http_properties_builder.hpp"
 #include "config/detail/sdks.hpp"
 #include "network/detail/asio_requester.hpp"
-
 #include "serialization/events/json_events.hpp"
 
 namespace http = boost::beast::http;
@@ -143,7 +143,7 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
     boost::ignore_unused(event_count);
 
     std::visit(
-        overloaded{[&](Clock::time_point&& server_time) {
+        overloaded{[&](auto&& server_time) {
                        last_known_past_time_ = std::move(server_time);
                    },
                    [&](network::detail::HttpResult::StatusCode status) {
@@ -212,48 +212,68 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     return EventBatch(url_, props.Build(), events);
 }
 
+using time_point = std::chrono::system_clock::time_point;
+std::string toString(time_point const& time) {
+    std::time_t tt = std::chrono::system_clock::to_time_t(time);
+    std::tm tm = *std::gmtime(&tt);  // GMT (UTC)
+    // std::tm tm = *std::localtime(&tt); //Locale time-zone, usually UTC by
+    // default.
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return ss.str();
+}
+
 template <typename SDK>
 std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     InputEvent input_event) {
     std::vector<OutputEvent> out;
     std::visit(
-        overloaded{[&](client::FeatureEventParams&& event) {
-                       summarizer_.Update(event);
+        overloaded{
+            [&](client::FeatureEventParams&& event) {
+                summarizer_.Update(event);
 
-                       if (!event.require_full_event) {
-                           return;
-                       }
+                client::FeatureEventBase base{event};
 
-                       client::FeatureEventBase base{event};
+                auto debug_until_date = event.debug_events_until_date;
 
-                       auto debug_until_date = event.debug_events_until_date;
+                std::string debug_until_date_str = "none";
+                if (debug_until_date) {
+                    debug_until_date_str = toString(debug_until_date.value().t);
+                }
+                // To be conservative, set the cutoff time (after which
+                // debug events should not be emitted) to the maximum of
+                // the current time and the time from the server. This
+                // way if the current host is running behind, we won't
+                // accidentally keep emitting events.
 
-                       auto max_time = std::max(
-                           std::chrono::system_clock::now(),
-                           last_known_past_time_.value_or(
-                               std::chrono::system_clock::time_point{}));
+                auto conservative_now =
+                    std::max(std::chrono::system_clock::now(),
+                             last_known_past_time_.value_or(
+                                 std::chrono::system_clock::from_time_t(0)));
 
-                       bool emit_debug_event =
-                           debug_until_date && debug_until_date->t > max_time;
+                bool emit_debug_event =
+                    debug_until_date && conservative_now < debug_until_date->t;
 
-                       if (emit_debug_event) {
-                           out.emplace_back(client::DebugEvent{
-                               base, filter_.filter(event.context)});
-                       }
+                if (emit_debug_event) {
+                    out.emplace_back(client::DebugEvent{
+                        base, filter_.filter(event.context)});
+                }
 
-                       out.emplace_back(client::FeatureEvent{
-                           std::move(base), event.context.kinds_to_keys()});
-                   },
-                   [&](client::IdentifyEventParams&& event) {
-                       // Contexts should already have been checked for
-                       // validity by this point.
-                       assert(event.context.valid());
-                       out.emplace_back(client::IdentifyEvent{
-                           event.creation_date, filter_.filter(event.context)});
-                   },
-                   [&](TrackEventParams&& event) {
-                       out.emplace_back(std::move(event));
-                   }},
+                if (event.require_full_event) {
+                    out.emplace_back(client::FeatureEvent{
+                        std::move(base), event.context.kinds_to_keys()});
+                }
+            },
+            [&](client::IdentifyEventParams&& event) {
+                // Contexts should already have been checked for
+                // validity by this point.
+                assert(event.context.valid());
+                out.emplace_back(client::IdentifyEvent{
+                    event.creation_date, filter_.filter(event.context)});
+            },
+            [&](TrackEventParams&& event) {
+                out.emplace_back(std::move(event));
+            }},
         std::move(input_event));
 
     return out;

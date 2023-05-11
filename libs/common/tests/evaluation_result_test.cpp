@@ -7,6 +7,7 @@
 
 using launchdarkly::EvaluationReason;
 using launchdarkly::EvaluationResult;
+using launchdarkly::JsonError;
 
 // NOLINTBEGIN bugprone-unchecked-optional-access
 // In the tests I do not care to check it.
