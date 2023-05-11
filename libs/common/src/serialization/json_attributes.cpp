@@ -19,7 +19,9 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     }
 
     for (auto const& attr : attributes.custom_attributes().as_object()) {
-        obj.emplace(attr.first, boost::json::value_from(attr.second));
+        if (!attr.second.is_null()) {
+            obj.emplace(attr.first, boost::json::value_from(attr.second));
+        }
     }
 
     auto private_attributes = attributes.private_attributes();

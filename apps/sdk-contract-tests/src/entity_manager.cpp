@@ -1,6 +1,8 @@
 #include "entity_manager.hpp"
+#include <boost/json/parse.hpp>
 #include "config/client.hpp"
 #include "context_builder.hpp"
+#include "serialization/json_context.hpp"
 
 using launchdarkly::LogLevel;
 using namespace launchdarkly::client_side;
@@ -12,8 +14,12 @@ EntityManager::EntityManager(boost::asio::any_io_executor executor,
       executor_{std::move(executor)},
       logger_{logger} {}
 
-static launchdarkly::Context MakeContext(nlohmann::json value) {
-    return launchdarkly::ContextBuilder().kind("bob", "foo").build();
+static tl::expected<launchdarkly::Context, launchdarkly::JsonError>
+ParseContext(nlohmann::json value) {
+    auto boost_json_val = boost::json::parse(value.dump());
+    return boost::json::value_to<
+        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+        boost_json_val);
 }
 
 std::optional<std::string> EntityManager::create(ConfigParams in) {
@@ -117,8 +123,14 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         return std::nullopt;
     }
 
-    auto client = std::make_unique<Client>(
-        std::move(*config), MakeContext(in.clientSide->initialContext));
+    auto maybe_context = ParseContext(in.clientSide->initialContext);
+    if (!maybe_context) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "entity_manager: initial context provided was invalid";
+        return std::nullopt;
+    }
+
+    auto client = std::make_unique<Client>(std::move(*config), *maybe_context);
 
     std::chrono::milliseconds waitForClient = std::chrono::seconds(5);
     if (in.startWaitTimeMs) {

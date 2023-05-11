@@ -25,5 +25,12 @@ class ClientEntity {
         IdentifyEventParams params);
 
     tl::expected<nlohmann::json, std::string> Custom(CustomEventParams params);
+
+    tl::expected<nlohmann::json, std::string> ContextBuild(
+        ContextBuildParams params);
+
+    tl::expected<nlohmann::json, std::string> ContextConvert(
+        ContextConvertParams params);
+
     std::unique_ptr<launchdarkly::client_side::Client> client_;
 };

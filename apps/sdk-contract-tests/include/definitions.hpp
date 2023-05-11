@@ -102,24 +102,44 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
-    std::optional<std::string> key;
+    std::string key;
     std::optional<std::string> name;
     std::optional<bool> anonymous;
     std::optional<std::vector<std::string>> _private;
     std::optional<std::unordered_map<std::string, nlohmann::json>> custom;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextSingleParams,
-                                                kind,
-                                                key,
-                                                name,
-                                                anonymous,
-                                                _private,
-                                                custom);
+// These are defined manually because of the 'private' field, which is a
+// reserved keyword in C++.
+inline void to_json(nlohmann::json& nlohmann_json_j,
+                    ContextSingleParams const& nlohmann_json_t) {
+    nlohmann_json_j["kind"] = nlohmann_json_t.kind;
+    nlohmann_json_j["key"] = nlohmann_json_t.key;
+    nlohmann_json_j["name"] = nlohmann_json_t.name;
+    nlohmann_json_j["anonymous"] = nlohmann_json_t.anonymous;
+    nlohmann_json_j["private"] = nlohmann_json_t._private;
+    nlohmann_json_j["custom"] = nlohmann_json_t.custom;
+}
+inline void from_json(nlohmann::json const& nlohmann_json_j,
+                      ContextSingleParams& nlohmann_json_t) {
+    ContextSingleParams nlohmann_json_default_obj;
+    nlohmann_json_t.kind =
+        nlohmann_json_j.value("kind", nlohmann_json_default_obj.kind);
+    nlohmann_json_t.key =
+        nlohmann_json_j.value("key", nlohmann_json_default_obj.key);
+    nlohmann_json_t.name =
+        nlohmann_json_j.value("name", nlohmann_json_default_obj.name);
+    nlohmann_json_t.anonymous =
+        nlohmann_json_j.value("anonymous", nlohmann_json_default_obj.anonymous);
+    nlohmann_json_t._private =
+        nlohmann_json_j.value("private", nlohmann_json_default_obj._private);
+    nlohmann_json_t.custom =
+        nlohmann_json_j.value("custom", nlohmann_json_default_obj.custom);
+}
 
 struct ContextBuildParams {
     std::optional<ContextSingleParams> single;
-    std::optional<nlohmann::json> multi;
+    std::optional<std::vector<ContextSingleParams>> multi;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextBuildParams,
@@ -127,10 +147,17 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextBuildParams,
                                                 multi);
 
 struct ContextConvertParams {
-    std::string foo;
+    std::string input;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextConvertParams, foo);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextConvertParams, input);
+
+struct ContextResponse {
+    std::optional<std::string> output;
+    std::optional<std::string> error;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ContextResponse, output, error);
 
 struct CreateInstanceParams {
     ConfigParams configuration;

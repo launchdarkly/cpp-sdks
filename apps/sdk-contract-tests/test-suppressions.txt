@@ -1,17 +1,6 @@
 events/summary events/basic counter behavior
 events/summary events/context kinds
-events/summary events/unknown flag
 events/summary events/reset after each flush
-events/feature events/full feature event for tracked flag/without reason/type: bool
-events/feature events/full feature event for tracked flag/without reason/type: int
-events/feature events/full feature event for tracked flag/without reason/type: double
-events/feature events/full feature event for tracked flag/without reason/type: string
-events/feature events/full feature event for tracked flag/without reason/type: any
-events/feature events/full feature event for tracked flag/with reason/type: bool
-events/feature events/full feature event for tracked flag/with reason/type: int
-events/feature events/full feature event for tracked flag/with reason/type: double
-events/feature events/full feature event for tracked flag/with reason/type: string
-events/feature events/full feature event for tracked flag/with reason/type: any
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: bool
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: int
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK does not know LD time/without reasons/type: double
@@ -32,72 +21,50 @@ events/debug events/should see debug event/debugEventsUntilDate is after SDK tim
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: double
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: string
 events/debug events/should see debug event/debugEventsUntilDate is after SDK time/SDK knows LD time is before debugEventsUntilDate/with reasons/type: any
-events/experimentation/FALLTHROUGH
-events/experimentation/RULE_MATCH
 events/identify events/basic properties/single kind default
 events/identify events/basic properties/single kind non-default
 events/identify events/basic properties/multi-kind
 events/custom events/basic properties/single kind default
 events/custom events/basic properties/single kind non-default
 events/custom events/basic properties/multi-kind
-events/context properties/single-kind minimal/initial identify event
 events/context properties/single-kind minimal/debug event
 events/context properties/single-kind minimal/identify event
-events/context properties/multi-kind minimal/initial identify event
 events/context properties/multi-kind minimal/debug event
 events/context properties/multi-kind minimal/identify event
-events/context properties/single-kind with attributes, nothing private/initial identify event
 events/context properties/single-kind with attributes, nothing private/debug event
 events/context properties/single-kind with attributes, nothing private/identify event
-events/context properties/single-kind, allAttributesPrivate/initial identify event
 events/context properties/single-kind, allAttributesPrivate/debug event
 events/context properties/single-kind, allAttributesPrivate/identify event
-events/context properties/single-kind, specific private attributes/initial identify event
 events/context properties/single-kind, specific private attributes/debug event
 events/context properties/single-kind, specific private attributes/identify event
-events/context properties/single-kind, private attribute nested property/initial identify event
 events/context properties/single-kind, private attribute nested property/debug event
 events/context properties/single-kind, private attribute nested property/identify event
-events/context properties/custom attribute with value false/initial identify event
 events/context properties/custom attribute with value false/debug event
 events/context properties/custom attribute with value false/identify event
-events/context properties/custom attribute with value true/initial identify event
 events/context properties/custom attribute with value true/debug event
 events/context properties/custom attribute with value true/identify event
-events/context properties/custom attribute with value -1000/initial identify event
 events/context properties/custom attribute with value -1000/debug event
 events/context properties/custom attribute with value -1000/identify event
-events/context properties/custom attribute with value 0/initial identify event
 events/context properties/custom attribute with value 0/debug event
 events/context properties/custom attribute with value 0/identify event
-events/context properties/custom attribute with value 1000/initial identify event
 events/context properties/custom attribute with value 1000/debug event
 events/context properties/custom attribute with value 1000/identify event
-events/context properties/custom attribute with value -1000.5/initial identify event
 events/context properties/custom attribute with value -1000.5/debug event
 events/context properties/custom attribute with value -1000.5/identify event
-events/context properties/custom attribute with value 1000.5/initial identify event
 events/context properties/custom attribute with value 1000.5/debug event
 events/context properties/custom attribute with value 1000.5/identify event
-events/context properties/custom attribute with value ""/initial identify event
 events/context properties/custom attribute with value ""/debug event
 events/context properties/custom attribute with value ""/identify event
-events/context properties/custom attribute with value "abc"/initial identify event
 events/context properties/custom attribute with value "abc"/debug event
 events/context properties/custom attribute with value "abc"/identify event
-events/context properties/custom attribute with value "has \"escaped\" characters"/initial identify event
 events/context properties/custom attribute with value "has \"escaped\" characters"/debug event
 events/context properties/custom attribute with value "has \"escaped\" characters"/identify event
-events/context properties/custom attribute with value []/initial identify event
 events/context properties/custom attribute with value []/debug event
 events/context properties/custom attribute with value []/identify event
-events/context properties/custom attribute with value ["a","b"]/initial identify event
 events/context properties/custom attribute with value ["a","b"]/debug event
 events/context properties/custom attribute with value ["a","b"]/identify event
-events/context properties/custom attribute with value {}/initial identify event
 events/context properties/custom attribute with value {}/debug event
 events/context properties/custom attribute with value {}/identify event
-events/context properties/custom attribute with value {"a":1}/initial identify event
 events/context properties/custom attribute with value {"a":1}/debug event
 events/context properties/custom attribute with value {"a":1}/identify event
 events/disabling/evaluation
@@ -105,72 +72,7 @@ events/disabling/identify event
 events/disabling/custom event
 streaming/requests/query parameters/evaluationReasons set to true/GET
 streaming/requests/query parameters/evaluationReasons set to true/REPORT
-streaming/requests/context properties/single kind minimal/GET
-streaming/requests/context properties/single kind minimal/REPORT
-streaming/requests/context properties/single kind with all attributes/GET
-streaming/requests/context properties/single kind with all attributes/REPORT
-streaming/requests/context properties/multi-kind/GET
-streaming/requests/context properties/multi-kind/REPORT
-polling/requests/context properties/single kind minimal/GET
-polling/requests/context properties/single kind minimal/REPORT
-polling/requests/context properties/single kind with all attributes/GET
-polling/requests/context properties/single kind with all attributes/REPORT
-polling/requests/context properties/multi-kind/GET
-polling/requests/context properties/multi-kind/REPORT
 tags/disallowed characters
-context type/build/valid/{"single":{"key":"a"}}
-context type/build/valid/{"single":{"kind":"org","key":"a"}}
-context type/build/valid/{"single":{"key":"a","name":"b"}}
-context type/build/valid/{"single":{"key":"a","anonymous":false}}
-context type/build/valid/{"single":{"key":"a","anonymous":true}}
-context type/build/valid/{"single":{"key":"a","private":["b"]}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":null}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":false}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":true}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":-1000}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":0}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":1000}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":-1000.5}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":1000.5}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":""}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":"abc"}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":"has \"escaped\" characters"}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":[]}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":["a","b"]}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":{}}}}
-context type/build/valid/{"single":{"key":"a","custom":{"attr":{"a":1}}}}
-context type/build/valid/{"multi":[{"kind":"org","key":"a"},{"key":"b"}]}
-context type/build/valid/{"multi":[{"kind":"org","key":"a"}]}
-context type/convert/valid, no changes/{"kind": "org", "key": "x"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "name": "b"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "anonymous": true}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": "first"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": "first", "attr2": "second"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "_meta": {"privateAttributes": ["x"]}}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "_meta": {"privateAttributes": ["x", "y"]}}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": false}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": true}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": -1000}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": 0}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": 1000}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": -1000.5}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": 1000.5}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": ""}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": "abc"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": "has \"escaped\" characters"}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": []}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": ["a","b"]}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": {}}
-context type/convert/valid, no changes/{"kind": "org", "key": "x", "attr1": {"a":1}}
-context type/convert/valid, no changes/{"kind": "multi", "org": {"key": "org-key", "name": "org-name"}, "user": {"key": "user-key", "name": "user-name"}}
-context type/convert/valid, no changes/{"kind": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ013456789-_.", "key": "x"}
-context type/convert/valid, no changes/{"kind": "multi", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ013456789-_.": {"key": "x"}, "other": {"key": "y"}}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "name": null}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "attr1": null}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "_meta": null}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "_meta": {}}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "_meta": {"privateAttributes": null}}
-context type/convert/unnecessary properties are dropped/{"kind": "org", "key": "x", "_meta": {"privateAttributes": []}}
 context type/convert/old user to context/{"key": ""}
 context type/convert/old user to context/{"key": "a"}
 context type/convert/old user to context/{"key": "a"}
@@ -203,32 +105,3 @@ context type/convert/old user to context/{"key": "a", "avatar": "b"}
 context type/convert/old user to context/{"key": "a", "avatar": null}
 context type/convert/old user to context/{"key": "a", "ip": "b"}
 context type/convert/old user to context/{"key": "a", "ip": null}
-context type/convert/multi-kind with only one kind becomes single-kind
-context type/convert/invalid context/
-context type/convert/invalid context/{
-context type/convert/invalid context/true
-context type/convert/invalid context/{"kind": null, "key": "x"}
-context type/convert/invalid context/{"kind": true, "key": "x"}
-context type/convert/invalid context/{"kind": "org", "key": null}
-context type/convert/invalid context/{"kind": "org", "key": 3}
-context type/convert/invalid context/{"kind": "org", "name": 3}
-context type/convert/invalid context/{"kind": "org", "anonymous": null}
-context type/convert/invalid context/{"kind": "org", "anonymous": "yes"}
-context type/convert/invalid context/{"kind": "org", "_meta": {"privateAttributes": 3}}
-context type/convert/invalid context/{"kind": "org", "_meta": {"privateAttributes": {}}}
-context type/convert/invalid context/{"kind": "kind", "key": "x"}
-context type/convert/invalid context/{"kind": "multi"}
-context type/convert/invalid context/{"kind": "", "key" : "x"}
-context type/convert/invalid context/bad characters in kind
-context type/convert/invalid old user/{}
-context type/convert/invalid old user/{"key": true}
-context type/convert/invalid old user/{"key": "a", "custom": 3}
-context type/convert/invalid old user/{"key": "a", "anonymous": 3}
-context type/convert/invalid old user/{"key": "a", "privateAttributeNames": 3"}
-context type/convert/invalid old user/{"key": "a", "name": 3}
-context type/convert/invalid old user/{"key": "a", "firstName": 3}
-context type/convert/invalid old user/{"key": "a", "lastName": 3}
-context type/convert/invalid old user/{"key": "a", "email": 3}
-context type/convert/invalid old user/{"key": "a", "country": 3}
-context type/convert/invalid old user/{"key": "a", "avatar": 3}
-context type/convert/invalid old user/{"key": "a", "ip": 3}
