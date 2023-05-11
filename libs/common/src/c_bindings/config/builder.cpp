@@ -3,8 +3,8 @@
 
 #include <launchdarkly/c_bindings/config/builder.h>
 
-#include <launchdarkly/config/client.hpp>
 #include <launchdarkly/c_binding_helpers.hpp>
+#include <launchdarkly/config/client.hpp>
 
 using namespace launchdarkly::client_side;
 

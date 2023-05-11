@@ -140,7 +140,7 @@ class Attributes final {
 
         return out;
     }
-    
+
     Attributes(Attributes const& context) = default;
     Attributes(Attributes&& context) = default;
     ~Attributes() = default;

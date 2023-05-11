@@ -1,9 +1,9 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <ostream>
 #include <tuple>
-#include <algorithm>
 
 #include <launchdarkly/config/detail/builders/app_info_builder.hpp>
 #include <launchdarkly/error.hpp>

@@ -12,9 +12,7 @@ struct IteratorBinding {
 
     bool End() { return iter == end; }
 
-    void Next() {
-        iter++;
-    }
+    void Next() { iter++; }
 };
 
 #endif

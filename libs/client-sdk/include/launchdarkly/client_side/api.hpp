@@ -4,23 +4,23 @@
 
 #include <condition_variable>
 #include <cstdint>
-#include <memory>
-#include <optional>
-#include <thread>
-#include <tl/expected.hpp>
-#include <tuple>
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/client_side/data_source.hpp>
 #include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
 #include <launchdarkly/client_side/event_processor.hpp>
 #include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
 #include <launchdarkly/client_side/flag_manager/detail/flag_notifier.hpp>
 #include <launchdarkly/client_side/flag_manager/detail/flag_updater.hpp>
+#include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
+#include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/error.hpp>
 #include <launchdarkly/logger.hpp>
 #include <launchdarkly/value.hpp>
+#include <memory>
+#include <optional>
+#include <thread>
+#include <tl/expected.hpp>
+#include <tuple>
 
 namespace launchdarkly::client_side {
 class Client {

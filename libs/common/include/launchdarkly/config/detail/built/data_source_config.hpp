@@ -2,9 +2,9 @@
 
 #include <boost/variant.hpp>
 #include <chrono>
+#include <launchdarkly/config/detail/sdks.hpp>
 #include <optional>
 #include <type_traits>
-#include <launchdarkly/config/detail/sdks.hpp>
 
 namespace launchdarkly::config::detail::built {
 

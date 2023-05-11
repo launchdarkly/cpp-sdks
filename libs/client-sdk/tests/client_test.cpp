@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/client_side/api.hpp>
-#include <map>
 #include <launchdarkly/context_builder.hpp>
+#include <map>
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;

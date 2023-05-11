@@ -5,15 +5,15 @@ using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/config/detail/built/http_properties.hpp>
-#include <launchdarkly/config/detail/built/service_endpoints.hpp>
-#include <launchdarkly/data/evaluation_result.hpp>
 #include <launchdarkly/client_side/data_source.hpp>
 #include <launchdarkly/client_side/data_source_update_sink.hpp>
 #include <launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp>
 #include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/detail/built/http_properties.hpp>
+#include <launchdarkly/config/detail/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
+#include <launchdarkly/data/evaluation_result.hpp>
 #include <launchdarkly/logger.hpp>
 #include <launchdarkly/sse/client.hpp>
 

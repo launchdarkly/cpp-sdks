@@ -1,5 +1,5 @@
-#include <launchdarkly/events/detail/event_batch.hpp>
 #include <boost/json/serialize.hpp>
+#include <launchdarkly/events/detail/event_batch.hpp>
 
 namespace launchdarkly::events::detail {
 EventBatch::EventBatch(std::string url,

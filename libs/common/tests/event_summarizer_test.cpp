@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include <chrono>
-#include <thread>
-#include <unordered_map>
 #include <launchdarkly/config/client.hpp>
+#include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/events/client_events.hpp>
 #include <launchdarkly/events/detail/summarizer.hpp>
-#include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
+#include <thread>
+#include <unordered_map>
 
 using namespace launchdarkly::events;
 using namespace launchdarkly::events::client;

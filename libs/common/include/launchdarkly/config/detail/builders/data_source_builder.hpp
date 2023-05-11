@@ -83,12 +83,12 @@ class PollingBuilder {
 namespace {
 template <typename SDK>
 struct MethodVisitor {
-    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>> operator()(
-        StreamingBuilder<SDK> streaming) {
+    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
+    operator()(StreamingBuilder<SDK> streaming) {
         return streaming.Build();
     }
-    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>> operator()(
-        PollingBuilder<SDK> polling) {
+    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
+    operator()(PollingBuilder<SDK> polling) {
         return polling.Build();
     }
 };

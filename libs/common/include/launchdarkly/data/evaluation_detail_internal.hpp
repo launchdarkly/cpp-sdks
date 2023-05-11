@@ -5,8 +5,8 @@
 #include <ostream>
 #include <utility>
 
-#include "evaluation_reason.hpp"
 #include <launchdarkly/value.hpp>
+#include "evaluation_reason.hpp"
 
 namespace launchdarkly {
 

@@ -3,11 +3,11 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <chrono>
 #include <functional>
-#include <optional>
-#include <vector>
 #include <launchdarkly/logger.hpp>
 #include <launchdarkly/network/detail/asio_requester.hpp>
 #include <launchdarkly/network/detail/http_requester.hpp>
+#include <optional>
+#include <vector>
 #include "request_worker.hpp"
 namespace launchdarkly::events::detail {
 

@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include <launchdarkly/value.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/value.hpp>
 
 #include <boost/json.hpp>
 

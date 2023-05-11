@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/config/detail/config.hpp>
 #include <optional>
 #include <string>
 #include "app_info_builder.hpp"
@@ -7,7 +8,6 @@
 #include "endpoints_builder.hpp"
 #include "events_builder.hpp"
 #include "http_properties_builder.hpp"
-#include <launchdarkly/config/detail/config.hpp>
 #include "tl/expected.hpp"
 
 #include <launchdarkly/logger.hpp>

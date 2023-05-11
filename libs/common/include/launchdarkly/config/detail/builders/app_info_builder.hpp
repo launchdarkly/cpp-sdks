@@ -2,10 +2,10 @@
 
 #include <launchdarkly/logger.hpp>
 
+#include <launchdarkly/error.hpp>
 #include <optional>
 #include <string>
 #include <vector>
-#include <launchdarkly/error.hpp>
 #include "tl/expected.hpp"
 
 namespace launchdarkly::config::detail::builders {

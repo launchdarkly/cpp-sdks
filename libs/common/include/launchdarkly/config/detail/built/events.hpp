@@ -2,9 +2,9 @@
 
 #include <chrono>
 #include <cstddef>
+#include <launchdarkly/attribute_reference.hpp>
 #include <string>
 #include <unordered_map>
-#include <launchdarkly/attribute_reference.hpp>
 
 namespace launchdarkly::config::detail::builders {
 template <typename T>

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <launchdarkly/events/events.hpp>
 #include <mutex>
 #include <queue>
 #include <string>
-#include <launchdarkly/events/events.hpp>
 
 namespace launchdarkly::events::detail {
 

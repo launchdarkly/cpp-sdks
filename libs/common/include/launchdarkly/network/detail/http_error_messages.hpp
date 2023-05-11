@@ -2,8 +2,8 @@
 
 #include <sstream>
 
-#include "http_requester.hpp"
 #include <launchdarkly/context.hpp>
+#include "http_requester.hpp"
 
 namespace launchdarkly::network::detail {
 
@@ -17,7 +17,7 @@ static bool IsInvalidSdkKeyStatus(HttpResult::StatusCode code);
  * @return The error message.
  */
 std::string ErrorForStatusCode(HttpResult::StatusCode code,
-                         std::string context,
-                         std::optional<std::string> retry_message);
+                               std::string context,
+                               std::optional<std::string> retry_message);
 
 }  // namespace launchdarkly::network::detail

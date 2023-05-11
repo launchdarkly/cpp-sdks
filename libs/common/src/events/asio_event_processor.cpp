@@ -1,4 +1,3 @@
-#include <launchdarkly/events/detail/asio_event_processor.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/http.hpp>
@@ -6,6 +5,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <launchdarkly/config/detail/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/events/detail/asio_event_processor.hpp>
 #include <launchdarkly/network/detail/asio_requester.hpp>
 
 #include <launchdarkly/serialization/events/json_events.hpp>

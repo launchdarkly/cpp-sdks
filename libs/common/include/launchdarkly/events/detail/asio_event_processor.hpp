@@ -6,14 +6,14 @@
 #include <boost/beast/http.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <chrono>
-#include <optional>
-#include <tuple>
-#include "event_batch.hpp"
 #include <launchdarkly/config/detail/config.hpp>
 #include <launchdarkly/context_filter.hpp>
 #include <launchdarkly/events/events.hpp>
 #include <launchdarkly/logger.hpp>
 #include <launchdarkly/network/detail/http_requester.hpp>
+#include <optional>
+#include <tuple>
+#include "event_batch.hpp"
 #include "outbox.hpp"
 #include "summarizer.hpp"
 #include "worker_pool.hpp"

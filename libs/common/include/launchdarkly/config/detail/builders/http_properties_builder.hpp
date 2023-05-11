@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "http_properties_builder.hpp"
 #include <launchdarkly/config/detail/built/http_properties.hpp>
+#include "http_properties_builder.hpp"
 
 namespace launchdarkly::config::detail::builders {
 

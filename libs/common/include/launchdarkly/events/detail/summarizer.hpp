@@ -2,11 +2,11 @@
 #include <boost/container_hash/hash.hpp>
 #include <chrono>
 #include <functional>
+#include <launchdarkly/events/events.hpp>
+#include <launchdarkly/value.hpp>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <launchdarkly/events/events.hpp>
-#include <launchdarkly/value.hpp>
 
 namespace launchdarkly::events::detail {
 
