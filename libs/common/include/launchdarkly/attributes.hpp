@@ -57,11 +57,11 @@ class Attributes final {
         launchdarkly::AttributeReference const& ref) const {
         if (!ref.valid()) {
             // Cannot index by invalid references.
-            return launchdarkly::Value::null();
+            return launchdarkly::Value::Null();
         }
         if (ref.is_kind()) {
             // Cannot access kind.
-            return launchdarkly::Value::null();
+            return launchdarkly::Value::Null();
         }
 
         if (ref.depth() == 1) {
@@ -81,9 +81,9 @@ class Attributes final {
         bool found = true;
         for (size_t index = 0; index < ref.depth(); index++) {
             auto const& component = ref.component(index);
-            if (node->is_object()) {
-                auto const& map = node->as_object();
-                if (auto search = map.find(component); search != map.end()) {
+            if (node->IsObject()) {
+                auto const& map = node->AsObject();
+                if (auto search = map.Find(component); search != map.end()) {
                     node = &search->second;
                 } else {
                     found = false;
@@ -94,7 +94,7 @@ class Attributes final {
             }
         }
         if (!found) {
-            return launchdarkly::Value::null();
+            return launchdarkly::Value::Null();
         }
         return *node;
     }

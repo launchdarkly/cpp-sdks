@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/json.hpp>
+
 #include <launchdarkly/attributes.hpp>
 
 namespace launchdarkly {

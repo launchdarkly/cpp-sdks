@@ -3,15 +3,15 @@
 namespace launchdarkly {
 
 std::string const& Attributes::key() const {
-    return key_.as_string();
+    return key_.AsString();
 }
 
 std::string const& Attributes::name() const {
-    return name_.as_string();
+    return name_.AsString();
 }
 
 bool Attributes::anonymous() const {
-    return anonymous_.as_bool();
+    return anonymous_.AsBool();
 }
 
 Value const& Attributes::custom_attributes() const {

@@ -6,6 +6,7 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 
 using launchdarkly::EvaluationReason;
+using launchdarkly::JsonError;
 
 TEST(EvaluationReasonsTests, FromJsonAllFields) {
     auto reason =

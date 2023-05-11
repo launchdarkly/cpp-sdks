@@ -42,7 +42,7 @@ LD_EXPORT(void) LDValue_Free(LDValue val) {
 }
 
 LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
-    switch (AS_VALUE(val)->type()) {
+    switch (AS_VALUE(val)->Type()) {
         case Value::Type::kNull:
             return LDValueType_Null;
         case Value::Type::kBool:
@@ -60,32 +60,32 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {
-    return AS_VALUE(val)->as_bool();
+    return AS_VALUE(val)->AsBool();
 }
 
 LD_EXPORT(double) LDValue_GetNumber(LDValue val) {
-    return AS_VALUE(val)->as_double();
+    return AS_VALUE(val)->AsDouble();
 }
 
 LD_EXPORT(char const*) LDValue_GetString(LDValue val) {
-    return AS_VALUE(val)->as_string().c_str();
+    return AS_VALUE(val)->AsString().c_str();
 }
 
 LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
     auto* value = AS_VALUE(val);
-    switch (value->type()) {
+    switch (value->Type()) {
         case Value::Type::kObject:
-            return value->as_object().size();
+            return value->AsObject().Size();
         case Value::Type::kArray:
-            return value->as_array().size();
+            return value->AsArray().Size();
         default:
             return 0;
     }
 }
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
-    if (AS_VALUE(val)->is_array()) {
-        auto& array = AS_VALUE(val)->as_array();
+    if (AS_VALUE(val)->IsArray()) {
+        auto& array = AS_VALUE(val)->AsArray();
         return reinterpret_cast<LDValue_ArrayIter>(
             new IteratorBinding<Value::Array::Iterator>{array.begin(),
                                                         array.end()});
@@ -112,8 +112,8 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
 }
 
 LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
-    if (AS_VALUE(val)->is_object()) {
-        auto& obj = AS_VALUE(val)->as_object();
+    if (AS_VALUE(val)->IsObject()) {
+        auto& obj = AS_VALUE(val)->AsObject();
         return reinterpret_cast<LDValue_ObjectIter>(
             new IteratorBinding<Value::Object::Iterator>{obj.begin(),
                                                          obj.end()});

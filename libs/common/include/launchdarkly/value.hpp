@@ -106,7 +106,7 @@ class Value final {
 
         Value const& operator[](std::size_t index) const;
 
-        [[nodiscard]] std::size_t size() const;
+        [[nodiscard]] std::size_t Size() const;
 
         [[nodiscard]] Iterator begin() const;
 
@@ -187,16 +187,14 @@ class Value final {
          * The number of items in the Object.
          * @return The number of items in the Object.
          */
-        [[nodiscard]] std::size_t size() const;
+        [[nodiscard]] std::size_t Size() const;
 
         /**
          * Get the number of items with the given key. Will be 1 or 0.
          * @param key The key to get a count for.
          * @return The count of items with the given key.
          */
-        [[nodiscard]] std::size_t count(std::string const& key) const {
-            return map_.count(key);
-        }
+        [[nodiscard]] std::size_t Count(std::string const& key) const;
 
         [[nodiscard]] Iterator begin() const;
 
@@ -207,7 +205,7 @@ class Value final {
          * @param key The key to find a value for.
          * @return The value, or the end iterator.
          */
-        [[nodiscard]] Iterator find(std::string const& key) const;
+        [[nodiscard]] Iterator Find(std::string const& key) const;
 
        private:
         std::map<std::string, Value> map_;
@@ -288,7 +286,7 @@ class Value final {
     /**
      * Get the type of the attribute.
      */
-    [[nodiscard]] Type type() const;
+    [[nodiscard]] Type Type() const;
 
     /**
      * Returns true if the value is a null.
@@ -297,14 +295,14 @@ class Value final {
      * value from this function as a marker.
      * @return True if the value is null.
      */
-    [[nodiscard]] bool is_null() const;
+    [[nodiscard]] bool IsNull() const;
 
     /**
      * Returns true if the value is a boolean.
      *
      * @return
      */
-    [[nodiscard]] bool is_bool() const;
+    [[nodiscard]] bool IsBool() const;
 
     /**
      * Returns true if the value is a number.
@@ -313,28 +311,28 @@ class Value final {
      * an int or double for convenience.
      * @return True if the value is a number.
      */
-    [[nodiscard]] bool is_number() const;
+    [[nodiscard]] bool IsNumber() const;
 
     /**
      * Returns true if the value is a string.
      *
      * @return True if the value is a string.
      */
-    [[nodiscard]] bool is_string() const;
+    [[nodiscard]] bool IsString() const;
 
     /**
      * Returns true if the value is an array.
      *
      * @return True if the value is an array.
      */
-    [[nodiscard]] bool is_array() const;
+    [[nodiscard]] bool IsArray() const;
 
     /**
      * Returns true if the value is an object.
      *
      * @return True if the value is an object.
      */
-    [[nodiscard]] bool is_object() const;
+    [[nodiscard]] bool IsObject() const;
 
     /**
      * If the value is a boolean, then return the boolean, otherwise return
@@ -342,7 +340,7 @@ class Value final {
      *
      * @return The value of the boolean, or false.
      */
-    [[nodiscard]] bool as_bool() const;
+    [[nodiscard]] bool AsBool() const;
 
     /**
      * If the value is a number, then return the internal double value as an
@@ -350,9 +348,9 @@ class Value final {
      *
      * @return The value as an integer, or 0.
      */
-    [[nodiscard]] int as_int() const;
+    [[nodiscard]] int AsInt() const;
 
-    [[nodiscard]] double as_double() const;
+    [[nodiscard]] double AsDouble() const;
 
     /**
      * If the value is a string, then return a reference to that string,
@@ -360,7 +358,7 @@ class Value final {
      *
      * @return The value as a string, or an empty string.
      */
-    [[nodiscard]] std::string const& as_string() const;
+    [[nodiscard]] std::string const& AsString() const;
 
     /**
      * If the value is an array type, then return a reference to that array as a
@@ -368,7 +366,7 @@ class Value final {
      *
      * @return The value as a vector, or an empty vector.
      */
-    [[nodiscard]] Array const& as_array() const;
+    [[nodiscard]] Array const& AsArray() const;
 
     /**
      * if the value is an object type, then return a reference to that object
@@ -376,7 +374,7 @@ class Value final {
      *
      * @return The value as a map, or an empty map.
      */
-    [[nodiscard]] Object const& as_object() const;
+    [[nodiscard]] Object const& AsObject() const;
 
     ~Value() = default;
 
@@ -384,7 +382,7 @@ class Value final {
      * Get a null value.
      * @return The null value.
      */
-    static Value const& null();
+    static Value const& Null();
 
     friend std::ostream& operator<<(std::ostream& out, Value const& value) {
         switch (value.type_) {
@@ -413,17 +411,17 @@ class Value final {
         return out;
     }
 
-    operator bool() const { return as_bool(); }
+    operator bool() const { return AsBool(); }
 
-    operator std::string() const { return as_string(); }
+    operator std::string() const { return AsString(); }
 
-    operator double() const { return as_double(); }
+    operator double() const { return AsDouble(); }
 
-    operator int() const { return as_int(); }
+    operator int() const { return AsInt(); }
 
    private:
     boost::variant<bool, double, std::string, Array, Object> storage_;
-    Type type_;
+    enum Type type_;
 
     // Empty constants used when accessing the wrong type.
     inline static const std::string empty_string_;
