@@ -108,7 +108,7 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 template <typename SDK>
 void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
     workers_.Get([this](RequestWorker* worker) {
-        if (!worker) {
+        if (worker == nullptr) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
                    "flush";
@@ -140,8 +140,8 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
     boost::ignore_unused(event_count);
 
     std::visit(
-        overloaded{[&](auto&& server_time) {
-                       last_known_past_time_ = std::move(server_time);
+        overloaded{[&](Clock::time_point server_time) {
+                       last_known_past_time_ = server_time;
                    },
                    [&](network::detail::HttpResult::StatusCode status) {
                        std::lock_guard<std::mutex> guard{this->inbox_mutex_};
@@ -150,7 +150,7 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
                            permanent_delivery_failure_ = true;
                        }
                    }},
-        std::move(result));
+        result);
 }
 
 template <typename SDK>

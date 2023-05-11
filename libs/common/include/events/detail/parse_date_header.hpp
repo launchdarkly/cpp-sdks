@@ -14,10 +14,10 @@ static std::optional<typename Clock::time_point> ParseDateHeader(
     // TODO: There must be a better way.
 
     std::tm gmt_tm = {};
-    std::istringstream ss(datetime);
-    ss.imbue(std::locale("en_US.utf-8"));
-    ss >> std::get_time(&gmt_tm, "%a, %d %b %Y %H:%M:%S GMT");
-    if (ss.fail()) {
+    std::istringstream string_stream(datetime);
+    string_stream.imbue(std::locale("en_US.utf-8"));
+    string_stream >> std::get_time(&gmt_tm, "%a, %d %b %Y %H:%M:%S GMT");
+    if (string_stream.fail()) {
         return std::nullopt;
     }
     // Obtain a time_t. Caveat: mktime will interpret the tm as a local time,

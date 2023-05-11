@@ -26,7 +26,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
-    std::thread t([&]() { ioc.run(); });
+    std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), logger);
 
@@ -34,7 +34,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     ASSERT_TRUE(worker);
 
     work.reset();
-    t.join();
+    ioc_thread.join();
 }
 
 TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
@@ -43,7 +43,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
-    std::thread t([&]() { ioc.run(); });
+    std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), logger);
 
@@ -51,7 +51,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     ASSERT_FALSE(worker);
 
     work.reset();
-    t.join();
+    ioc_thread.join();
 }
 
 // This test is a temporary test that exists only to ensure the event processor
@@ -122,6 +122,4 @@ TEST(EventProcessorTests, ParseInvalidDateHeader) {
             "Wed, 21 Oct 07:28:00 GMT");
 
     ASSERT_FALSE(missing_year);
-
-    auto x = std::chrono::system_clock::time_point::min();
 }
