@@ -44,6 +44,7 @@ add_library(${LIBNAME}
         serialization/json_evaluation_result.cpp
         serialization/json_value.cpp
         serialization/events/json_events.cpp
+        serialization/json_errors.cpp
         events/asio_event_processor.cpp
         events/outbox.cpp
         events/worker_pool.cpp

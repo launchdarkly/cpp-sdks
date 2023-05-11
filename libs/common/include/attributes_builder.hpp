@@ -63,9 +63,9 @@ class AttributesBuilder final {
     /**
      * Add or update an attribute in the context.
      *
-     * This method cannot be used to set the key, kind, name, or anonymous
-     * property of a context. The specific methods on the context builder, or
-     * attributes builder, should be used.
+     * This method cannot be used to set the key, kind, name, anonymous, or
+     * _meta property of a context. The specific methods on the context builder,
+     * or attributes builder, should be used.
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.

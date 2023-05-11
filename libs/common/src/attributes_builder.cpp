@@ -23,7 +23,7 @@ AttributesBuilder<ContextBuilder, Context>::set(std::string name,
                                                 Value value,
                                                 bool private_attribute) {
     if (name == "key" || name == "kind" || name == "anonymous" ||
-        name == "name") {
+        name == "name" || name == "_meta") {
         return *this;
     }
 

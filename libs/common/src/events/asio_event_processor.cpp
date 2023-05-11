@@ -188,14 +188,14 @@ void AsioEventProcessor<SDK>::AsyncClose() {
 
 template <typename SDK>
 std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
-    auto events = boost::json::value_from(outbox_.Consume());
+    auto events = boost::json::value_from(outbox_.Consume()).as_array();
 
     bool has_summary =
         !summarizer_.Finish(std::chrono::system_clock::now()).Empty();
 
     if (has_summary) {
-        events.as_array().push_back(boost::json::value_from(summarizer_));
-    } else if (outbox_.Empty()) {
+        events.push_back(boost::json::value_from(summarizer_));
+    } else if (events.empty()) {
         return std::nullopt;
     }
 
