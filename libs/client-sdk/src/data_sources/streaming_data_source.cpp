@@ -34,7 +34,7 @@ StreamingDataSource::StreamingDataSource(
 
     auto& data_source_config = config.DataSourceConfig();
 
-    auto& streaming_config = boost::get<
+    auto& streaming_config = std::get<
         config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
         data_source_config.method);
 

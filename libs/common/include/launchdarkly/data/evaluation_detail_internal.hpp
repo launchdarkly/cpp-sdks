@@ -4,6 +4,7 @@
 #include <optional>
 #include <ostream>
 #include <utility>
+#include <functional>
 
 #include <launchdarkly/value.hpp>
 #include "evaluation_reason.hpp"

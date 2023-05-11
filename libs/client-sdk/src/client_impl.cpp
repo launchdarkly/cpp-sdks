@@ -20,7 +20,7 @@ static std::unique_ptr<IDataSource> MakeDataSource(
     flag_manager::detail::FlagUpdater& flag_updater,
     data_sources::detail::DataSourceStatusManager& status_manager,
     Logger& logger) {
-    if (config.DataSourceConfig().method.which() == 0) {
+    if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
         return std::make_unique<launchdarkly::client_side::data_sources::
                                     detail::StreamingDataSource>(

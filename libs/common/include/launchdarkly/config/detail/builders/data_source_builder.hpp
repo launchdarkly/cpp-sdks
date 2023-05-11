@@ -3,12 +3,11 @@
 #include <chrono>
 #include <optional>
 #include <type_traits>
+#include <variant>
 
 #include <launchdarkly/config/detail/built/data_source_config.hpp>
 #include <launchdarkly/config/detail/defaults.hpp>
 #include <launchdarkly/config/detail/sdks.hpp>
-
-#include <boost/variant.hpp>
 
 namespace launchdarkly::config::detail::builders {
 
@@ -83,11 +82,11 @@ class PollingBuilder {
 namespace {
 template <typename SDK>
 struct MethodVisitor {
-    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
+    std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
     operator()(StreamingBuilder<SDK> streaming) {
         return streaming.Build();
     }
-    boost::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
+    std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>
     operator()(PollingBuilder<SDK> polling) {
         return polling.Build();
     }
@@ -162,7 +161,7 @@ class DataSourceBuilder<ClientSDK> {
     [[nodiscard]] built::DataSourceConfig<ClientSDK> Build() const;
 
    private:
-    boost::variant<Streaming, Polling> method_;
+    std::variant<Streaming, Polling> method_;
     bool with_reasons_;
     bool use_report_;
 };
@@ -207,7 +206,7 @@ class DataSourceBuilder<ServerSDK> {
     [[nodiscard]] built::DataSourceConfig<ServerSDK> Build() const;
 
    private:
-    boost::variant<Streaming, Polling> method_;
+    std::variant<Streaming, Polling> method_;
     bool with_reasons_;
     bool use_report_;
 };

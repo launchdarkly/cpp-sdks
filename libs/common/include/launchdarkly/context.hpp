@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "attributes.hpp"
-#include "value.hpp"
+#include <launchdarkly/attributes.hpp>
+#include <launchdarkly/value.hpp>
 
 namespace launchdarkly {
 
