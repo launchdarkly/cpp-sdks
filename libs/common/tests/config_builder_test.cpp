@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "config/client.hpp"
-#include "config/server.hpp"
+#include "launchdarkly/config/client.hpp"
+#include "launchdarkly/config/server.hpp"
 #include "null_logger.hpp"
 
 class ConfigBuilderTest

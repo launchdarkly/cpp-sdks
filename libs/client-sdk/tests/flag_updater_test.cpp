@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "data/evaluation_detail_internal.hpp"
-#include "data/evaluation_result.hpp"
+#include "launchdarkly/data/evaluation_detail_internal.hpp"
+#include "launchdarkly/data/evaluation_result.hpp"
 #include "launchdarkly/client_side/data_source_update_sink.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"

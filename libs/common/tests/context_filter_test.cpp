@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
 #include <boost/json.hpp>
-#include "attribute_reference.hpp"
-#include "context_builder.hpp"
-#include "context_filter.hpp"
+#include "launchdarkly/attribute_reference.hpp"
+#include "launchdarkly/context_builder.hpp"
+#include "launchdarkly/context_filter.hpp"
 
 using launchdarkly::AttributeReference;
 using launchdarkly::ContextBuilder;

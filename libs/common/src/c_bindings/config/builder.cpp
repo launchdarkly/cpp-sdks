@@ -1,10 +1,10 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include "c_bindings/config/builder.h"
+#include "launchdarkly/c_bindings/config/builder.h"
 
-#include "c_binding_helpers.hpp"
-#include "config/client.hpp"
+#include "launchdarkly/config/client.hpp"
+#include "launchdarkly/c_binding_helpers.hpp"
 
 using namespace launchdarkly::client_side;
 

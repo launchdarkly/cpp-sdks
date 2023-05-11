@@ -2,8 +2,8 @@
 
 #include <boost/json.hpp>
 
-#include "attributes.hpp"
-#include "serialization/json_attributes.hpp"
+#include "launchdarkly/attributes.hpp"
+#include "launchdarkly/serialization/json_attributes.hpp"
 
 using launchdarkly::AttributeReference;
 using launchdarkly::Attributes;

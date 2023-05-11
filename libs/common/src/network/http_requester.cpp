@@ -3,7 +3,7 @@
 #include <optional>
 #include <utility>
 
-#include "network/detail/http_requester.hpp"
+#include "launchdarkly/network/detail/http_requester.hpp"
 
 namespace launchdarkly::network::detail {
 

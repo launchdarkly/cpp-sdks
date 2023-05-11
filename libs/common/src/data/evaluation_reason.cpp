@@ -1,5 +1,5 @@
-#include "data/evaluation_reason.hpp"
-#include "serialization/json_evaluation_reason.hpp"
+#include "launchdarkly/data/evaluation_reason.hpp"
+#include "launchdarkly/serialization/json_evaluation_reason.hpp"
 namespace launchdarkly {
 
 EvaluationReason::Kind const& EvaluationReason::kind() const {

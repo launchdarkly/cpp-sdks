@@ -1,8 +1,8 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include "c_bindings/config/config.h"
-#include "config/client.hpp"
+#include "launchdarkly/c_bindings/config/config.h"
+#include "launchdarkly/config/client.hpp"
 
 #define TO_CONFIG(ptr) (reinterpret_cast<Config*>(ptr))
 #define FROM_CONFIG(ptr) (reinterpret_cast<LDClientConfig>(ptr))

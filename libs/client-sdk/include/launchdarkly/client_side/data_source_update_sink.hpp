@@ -5,10 +5,10 @@
 #include <string>
 #include <unordered_map>
 
-#include "config/detail/built/service_endpoints.hpp"
-#include "context.hpp"
-#include "data/evaluation_result.hpp"
+#include "launchdarkly/config/detail/built/service_endpoints.hpp"
+#include "launchdarkly/data/evaluation_result.hpp"
 #include "launchdarkly/client_side/data_sources/data_source_status.hpp"
+#include "launchdarkly/context.hpp"
 
 namespace launchdarkly::client_side {
 

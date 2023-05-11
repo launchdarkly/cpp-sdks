@@ -1,6 +1,6 @@
 #include <utility>
 
-#include "config/detail/config.hpp"
+#include "launchdarkly/config/detail/config.hpp"
 
 namespace launchdarkly::config::detail {
 template <typename SDK>

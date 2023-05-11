@@ -1,5 +1,5 @@
-#include "serialization/json_value.hpp"
-#include "serialization/value_mapping.hpp"
+#include "launchdarkly/serialization/json_value.hpp"
+#include "launchdarkly/serialization/value_mapping.hpp"
 
 namespace launchdarkly {
 // NOLINTBEGIN modernize-return-braced-init-list

@@ -2,7 +2,7 @@
 
 #include "launchdarkly/client_side/connection.hpp"
 #include "launchdarkly/client_side/flag_manager/detail/flag_change_event.hpp"
-#include "value.hpp"
+#include "launchdarkly/value.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
 

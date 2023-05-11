@@ -5,8 +5,8 @@
 #include <tuple>
 #include <algorithm>
 
-#include "config/detail/builders/app_info_builder.hpp"
-#include "error.hpp"
+#include "launchdarkly/config/detail/builders/app_info_builder.hpp"
+#include "launchdarkly/error.hpp"
 #include "null_logger.hpp"
 
 using launchdarkly::Error;

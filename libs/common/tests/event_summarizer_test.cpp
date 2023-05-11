@@ -2,11 +2,11 @@
 #include <chrono>
 #include <thread>
 #include <unordered_map>
-#include "config/client.hpp"
-#include "context_builder.hpp"
-#include "events/client_events.hpp"
-#include "events/detail/summarizer.hpp"
-#include "serialization/events/json_events.hpp"
+#include "launchdarkly/config/client.hpp"
+#include "launchdarkly/events/client_events.hpp"
+#include "launchdarkly/events/detail/summarizer.hpp"
+#include "launchdarkly/context_builder.hpp"
+#include "launchdarkly/serialization/events/json_events.hpp"
 
 using namespace launchdarkly::events;
 using namespace launchdarkly::events::client;

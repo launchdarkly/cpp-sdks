@@ -1,4 +1,4 @@
-#include "config/detail/builders/app_info_builder.hpp"
+#include "launchdarkly/config/detail/builders/app_info_builder.hpp"
 
 #include <boost/algorithm/string.hpp>
 
