@@ -45,7 +45,7 @@ Value const& Context::get(std::string const& kind,
     if (found != attributes_.end()) {
         return found->second.get(ref);
     }
-    return Value::null();
+    return Value::Null();
 }
 
 Attributes const& Context::attributes(std::string const& kind) const {

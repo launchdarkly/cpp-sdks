@@ -21,7 +21,7 @@ TEST(ContextBuilderTests, CanMakeBasicContext) {
 
     EXPECT_EQ(1, context.kinds().size());
     EXPECT_EQ("user", context.kinds()[0]);
-    EXPECT_EQ("user-key", context.get("user", "/key").as_string());
+    EXPECT_EQ("user-key", context.get("user", "/key").AsString());
 
     EXPECT_EQ("user-key", context.attributes("user").key());
     EXPECT_FALSE(context.attributes("user").anonymous());
@@ -41,11 +41,11 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
     EXPECT_TRUE(context.valid());
 
     EXPECT_EQ("user", context.kinds()[0]);
-    EXPECT_EQ("bobby-bobberson", context.get("user", "/key").as_string());
-    EXPECT_EQ("Bob", context.get("user", "name").as_string());
+    EXPECT_EQ("bobby-bobberson", context.get("user", "/key").AsString());
+    EXPECT_EQ("Bob", context.get("user", "name").AsString());
 
-    EXPECT_EQ("email@email.email", context.get("user", "email").as_string());
-    EXPECT_TRUE(context.get("user", "likesCats").as_bool());
+    EXPECT_EQ("email@email.email", context.get("user", "email").AsString());
+    EXPECT_TRUE(context.get("user", "likesCats").AsBool());
 
     EXPECT_EQ("bobby-bobberson", context.attributes("user").key());
     EXPECT_TRUE(context.attributes("user").anonymous());
@@ -79,16 +79,16 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
 
     EXPECT_TRUE(context.valid());
 
-    EXPECT_TRUE(context.get("user", "/anonymous").as_bool());
-    EXPECT_EQ("test", context.get("user", "/name").as_string());
-    EXPECT_EQ("potato", context.get("user", "/string").as_string());
-    EXPECT_EQ(42, context.get("user", "int").as_int());
-    EXPECT_EQ(3.14, context.get("user", "double").as_double());
-    EXPECT_EQ(42, context.get("user", "array").as_array()[2].as_int());
+    EXPECT_TRUE(context.get("user", "/anonymous").AsBool());
+    EXPECT_EQ("test", context.get("user", "/name").AsString());
+    EXPECT_EQ("potato", context.get("user", "/string").AsString());
+    EXPECT_EQ(42, context.get("user", "int").AsInt());
+    EXPECT_EQ(3.14, context.get("user", "double").AsDouble());
+    EXPECT_EQ(42, context.get("user", "array").AsArray()[2].AsInt());
     EXPECT_EQ("ham",
-              context.get("org", "explicitArray").as_array()[1].as_string());
+              context.get("org", "explicitArray").AsArray()[1].AsString());
     EXPECT_EQ("bacon",
-              context.get("org", "object").as_object()["string"].as_string());
+              context.get("org", "object").AsObject()["string"].AsString());
 
     EXPECT_EQ(5, context.attributes("user").private_attributes().size());
     EXPECT_EQ(1, context.attributes("user").private_attributes().count("int"));
@@ -100,7 +100,7 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
               context.attributes("user").private_attributes().count("string"));
     EXPECT_EQ(1,
               context.attributes("user").private_attributes().count("private"));
-    EXPECT_EQ("Macdonwalds", context.get("org", "/name").as_string());
+    EXPECT_EQ("Macdonwalds", context.get("org", "/name").AsString());
 }
 
 TEST(ContextBuilderTests, HandlesInvalidKinds) {
@@ -155,11 +155,11 @@ TEST(ContextBuilderTests, UseWithLoops) {
 
     auto context = builder.build();
 
-    EXPECT_EQ("b", context.get("user", "/a").as_string());
-    EXPECT_EQ("d", context.get("user", "/c").as_string());
+    EXPECT_EQ("b", context.get("user", "/a").AsString());
+    EXPECT_EQ("d", context.get("user", "/c").AsString());
 
-    EXPECT_EQ("b", context.get("org", "/a").as_string());
-    EXPECT_EQ("d", context.get("org", "/c").as_string());
+    EXPECT_EQ("b", context.get("org", "/a").AsString());
+    EXPECT_EQ("d", context.get("org", "/c").AsString());
 }
 
 TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
@@ -170,10 +170,10 @@ TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
 
     auto context = builder.build();
 
-    EXPECT_EQ("ham", context.get("user", "key").as_string());
-    EXPECT_EQ("Bob", context.get("user", "name").as_string());
-    EXPECT_EQ("Reno", context.get("user", "city").as_string());
-    EXPECT_TRUE(context.get("user", "isCat").as_bool());
+    EXPECT_EQ("ham", context.get("user", "key").AsString());
+    EXPECT_EQ("Bob", context.get("user", "name").AsString());
+    EXPECT_EQ("Reno", context.get("user", "city").AsString());
+    EXPECT_TRUE(context.get("user", "isCat").AsBool());
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers
