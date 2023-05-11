@@ -54,29 +54,29 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Value const& ld_value) {
-    switch (ld_value.type()) {
+    switch (ld_value.Type()) {
         case Value::Type::kNull:
             json_value.emplace_null();
             break;
         case Value::Type::kBool:
-            json_value.emplace_bool() = ld_value.as_bool();
+            json_value.emplace_bool() = ld_value.AsBool();
             break;
         case Value::Type::kNumber:
-            json_value.emplace_double() = ld_value.as_double();
+            json_value.emplace_double() = ld_value.AsDouble();
             break;
         case Value::Type::kString:
-            json_value.emplace_string() = ld_value.as_string();
+            json_value.emplace_string() = ld_value.AsString();
             break;
         case Value::Type::kObject: {
             auto& obj = json_value.emplace_object();
-            for (auto const& pair : ld_value.as_object()) {
+            for (auto const& pair : ld_value.AsObject()) {
                 obj.insert_or_assign(pair.first.c_str(),
                                      boost::json::value_from(pair.second));
             }
         } break;
         case Value::Type::kArray: {
             auto& arr = json_value.emplace_array();
-            for (auto const& val : ld_value.as_array()) {
+            for (auto const& val : ld_value.AsArray()) {
                 arr.push_back(boost::json::value_from(val));
             }
         } break;

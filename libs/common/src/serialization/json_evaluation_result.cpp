@@ -60,7 +60,7 @@ tl::expected<EvaluationResult, JsonError> tag_invoke(
         auto* reason_iter = json_obj.find("reason");
 
         // There is a reason.
-        if (reason_iter != json_obj.end()) {
+        if (reason_iter != json_obj.end() && !reason_iter->value().is_null()) {
             auto reason = boost::json::value_to<
                 tl::expected<EvaluationReason, JsonError>>(
                 reason_iter->value());

@@ -196,8 +196,8 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
         "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_EQ("potato", event->NewValue().as_string());
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_EQ("potato", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_FALSE(event->Deleted());
         });
@@ -231,8 +231,8 @@ TEST(FlagUpdaterEventTests, SecondInitWithNewFlagProducesEvents) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_TRUE(event->OldValue().is_null());
-            EXPECT_EQ("potato", event->NewValue().as_string());
+            EXPECT_TRUE(event->OldValue().IsNull());
+            EXPECT_EQ("potato", event->NewValue().AsString());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_FALSE(event->Deleted());
         });
@@ -266,8 +266,8 @@ TEST(FlagUpdaterDataTests, PatchWithUpdateProducesEvent) {
         "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_EQ("second", event->NewValue().as_string());
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_EQ("second", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_FALSE(event->Deleted());
         });
@@ -299,8 +299,8 @@ TEST(FlagUpdaterEventTests, PatchWithNewFlagProducesEvent) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_TRUE(event->OldValue().is_null());
-            EXPECT_EQ("second", event->NewValue().as_string());
+            EXPECT_TRUE(event->OldValue().IsNull());
+            EXPECT_EQ("second", event->NewValue().AsString());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_FALSE(event->Deleted());
         });
@@ -389,8 +389,8 @@ TEST(FlagUpdaterEventTests, DeleteProducesAnEvent) {
         "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -418,8 +418,8 @@ TEST(FlagUpdaterEventTests, FlagMissingFromSecondInitTreatedAsDelete) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_EQ("test-b", event->OldValue().AsString());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -458,8 +458,8 @@ TEST(FlagUpdaterEventTests, InitWithoutEvaluationResultTreatedAsDelete) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_EQ("test-b", event->OldValue().AsString());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -497,8 +497,8 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
         "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_EQ("test-b", event->OldValue().AsString());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -545,8 +545,8 @@ TEST(FlagUpdaterEventTests, SecondDeleteNoEventPatch) {
         "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_TRUE(event->NewValue().is_null());
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_TRUE(event->NewValue().IsNull());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_TRUE(event->Deleted());
         });
@@ -578,8 +578,8 @@ TEST(FlagUpdaterDataTests, CanDisconnectEventAndStopGettingEvents) {
         "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
-            EXPECT_EQ("test", event->OldValue().as_string());
-            EXPECT_EQ("second", event->NewValue().as_string());
+            EXPECT_EQ("test", event->OldValue().AsString());
+            EXPECT_EQ("second", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_FALSE(event->Deleted());
         });
@@ -621,12 +621,12 @@ TEST(FlagUpdaterEventTests, UndeletedFlagProducesEvent) {
             got_event.store(true);
 
             if (event->Deleted()) {
-                EXPECT_EQ("test", event->OldValue().as_string());
-                EXPECT_TRUE(event->NewValue().is_null());
+                EXPECT_EQ("test", event->OldValue().AsString());
+                EXPECT_TRUE(event->NewValue().IsNull());
                 EXPECT_EQ("flagA", event->FlagName());
             } else {
-                EXPECT_EQ("second", event->NewValue().as_string());
-                EXPECT_TRUE(event->OldValue().is_null());
+                EXPECT_EQ("second", event->NewValue().AsString());
+                EXPECT_TRUE(event->OldValue().IsNull());
                 EXPECT_EQ("flagA", event->FlagName());
             }
         });
@@ -664,8 +664,8 @@ TEST(FlagUpdaterEventTests, CanListenToMultipleFlags) {
         [&got_event_b](std::shared_ptr<FlagValueChangeEvent> const& event) {
             got_event_b.store(true);
 
-            EXPECT_EQ("test-b", event->OldValue().as_string());
-            EXPECT_EQ("second-b", event->NewValue().as_string());
+            EXPECT_EQ("test-b", event->OldValue().AsString());
+            EXPECT_EQ("second-b", event->NewValue().AsString());
             EXPECT_EQ("flagB", event->FlagName());
         });
 
@@ -674,8 +674,8 @@ TEST(FlagUpdaterEventTests, CanListenToMultipleFlags) {
         [&got_event_a](std::shared_ptr<FlagValueChangeEvent> const& event) {
             got_event_a.store(true);
 
-            EXPECT_EQ("test-a", event->OldValue().as_string());
-            EXPECT_EQ("second-a", event->NewValue().as_string());
+            EXPECT_EQ("test-a", event->OldValue().AsString());
+            EXPECT_EQ("second-a", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
         });
 

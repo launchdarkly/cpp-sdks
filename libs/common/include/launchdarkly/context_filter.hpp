@@ -22,7 +22,7 @@ class ContextFilter {
     using JsonArray = boost::json::array;
 
     ContextFilter(bool all_attributes_private,
-                  AttributeReference::SetType const& global_private_attributes);
+                  AttributeReference::SetType global_private_attributes);
 
     /**
      * Filter the given context and produce a JSON value.
@@ -90,7 +90,7 @@ class ContextFilter {
     JsonValue filter_multi_context(Context const& context);
 
     bool all_attributes_private_;
-    AttributeReference::SetType const& global_private_attributes_;
+    AttributeReference::SetType const global_private_attributes_;
 };
 
 }  // namespace launchdarkly

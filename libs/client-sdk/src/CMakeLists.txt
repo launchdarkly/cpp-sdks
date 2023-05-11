@@ -30,7 +30,6 @@ add_library(${LIBNAME}
         client_impl.cpp
         client.cpp)
 
-
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE launchdarkly::sse)

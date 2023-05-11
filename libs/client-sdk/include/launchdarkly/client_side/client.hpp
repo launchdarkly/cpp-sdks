@@ -228,7 +228,7 @@ class IClient {
      *
      * @param timeout Time to wait.
      */
-    virtual void WaitForReadySync(std::chrono::seconds timeout) = 0;
+    virtual void WaitForReadySync(std::chrono::milliseconds timeout) = 0;
 
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
@@ -301,7 +301,7 @@ class Client : public IClient {
 
     flag_manager::detail::IFlagNotifier& FlagNotifier() override;
 
-    void WaitForReadySync(std::chrono::seconds timeout) override;
+    void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
    private:
     std::unique_ptr<IClient> client;

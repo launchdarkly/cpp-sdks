@@ -29,76 +29,76 @@ Value::Value(std::vector<Value> arr)
 Value::Value(std::map<std::string, Value> obj)
     : type_(Value::Type::kObject), storage_{std::move(obj)} {}
 
-Value::Type Value::type() const {
+enum Value::Type Value::Type() const {
     return type_;
 }
 
-bool Value::is_null() const {
+bool Value::IsNull() const {
     return type_ == Type::kNull;
 }
 
-bool Value::is_bool() const {
+bool Value::IsBool() const {
     return type_ == Type::kBool;
 }
 
-bool Value::is_number() const {
+bool Value::IsNumber() const {
     return type_ == Type::kNumber;
 }
 
-bool Value::is_string() const {
+bool Value::IsString() const {
     return type_ == Type::kString;
 }
 
-bool Value::is_array() const {
+bool Value::IsArray() const {
     return type_ == Type::kArray;
 }
 
-bool Value::is_object() const {
+bool Value::IsObject() const {
     return type_ == Type::kObject;
 }
 
-Value const& Value::null() {
+Value const& Value::Null() {
     // This still just constructs a value, but it may be more discoverable
     // for people using the API.
     return null_value_;
 }
 
-bool Value::as_bool() const {
+bool Value::AsBool() const {
     if (type_ == Type::kBool) {
         return boost::get<bool>(storage_);
     }
     return false;
 }
 
-int Value::as_int() const {
+int Value::AsInt() const {
     if (type_ == Type::kNumber) {
         return static_cast<int>(boost::get<double>(storage_));
     }
     return 0;
 }
 
-double Value::as_double() const {
+double Value::AsDouble() const {
     if (type_ == Type::kNumber) {
         return boost::get<double>(storage_);
     }
     return 0.0;
 }
 
-std::string const& Value::as_string() const {
+std::string const& Value::AsString() const {
     if (type_ == Type::kString) {
         return boost::get<std::string>(storage_);
     }
     return empty_string_;
 }
 
-Value::Array const& Value::as_array() const {
+Value::Array const& Value::AsArray() const {
     if (type_ == Type::kArray) {
         return boost::get<Array>(storage_);
     }
     return empty_vector_;
 }
 
-Value::Object const& Value::as_object() const {
+Value::Object const& Value::AsObject() const {
     if (type_ == Type::kObject) {
         return boost::get<Object>(storage_);
     }
@@ -153,7 +153,7 @@ Value const& Value::Array::operator[](std::size_t index) const {
     return vec_[index];
 }
 
-std::size_t Value::Array::size() const {
+std::size_t Value::Array::Size() const {
     return vec_.size();
 }
 
@@ -190,7 +190,7 @@ Value::Object::Iterator Value::Object::Iterator::operator++(int) {
     return tmp;
 }
 
-std::size_t Value::Object::size() const {
+std::size_t Value::Object::Size() const {
     return map_.size();
 }
 
@@ -202,25 +202,29 @@ Value::Object::Iterator Value::Object::end() const {
     return {map_.end()};
 }
 
-Value::Object::Iterator Value::Object::find(std::string const& key) const {
+Value::Object::Iterator Value::Object::Find(std::string const& key) const {
     return {map_.find(key)};
 }
 
+std::size_t Value::Object::Count(std::string const& key) const {
+    return map_.count(key);
+}
+
 bool operator==(Value const& lhs, Value const& rhs) {
-    if (lhs.type() == rhs.type()) {
-        switch (lhs.type()) {
+    if (lhs.Type() == rhs.Type()) {
+        switch (lhs.Type()) {
             case Value::Type::kNull:
                 return true;
             case Value::Type::kBool:
-                return lhs.as_bool() == rhs.as_bool();
+                return lhs.AsBool() == rhs.AsBool();
             case Value::Type::kNumber:
-                return lhs.as_double() == rhs.as_double();
+                return lhs.AsDouble() == rhs.AsDouble();
             case Value::Type::kString:
-                return lhs.as_string() == rhs.as_string();
+                return lhs.AsString() == rhs.AsString();
             case Value::Type::kObject:
-                return lhs.as_object() == rhs.as_object();
+                return lhs.AsObject() == rhs.AsObject();
             case Value::Type::kArray:
-                return lhs.as_array() == rhs.as_array();
+                return lhs.AsArray() == rhs.AsArray();
         }
     }
     return false;

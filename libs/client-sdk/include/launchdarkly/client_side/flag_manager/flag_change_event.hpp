@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/signals2.hpp>
-#include <launchdarkly/value.hpp>
+#include "launchdarkly/value.hpp"
 
 namespace launchdarkly::client_side::flag_manager::detail {
 /**

@@ -84,7 +84,7 @@ class ClientImpl : public IClient {
 
     flag_manager::detail::IFlagNotifier& FlagNotifier() override;
 
-    void WaitForReadySync(std::chrono::seconds timeout) override;
+    void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
     ~ClientImpl();
 

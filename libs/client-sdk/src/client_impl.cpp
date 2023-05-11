@@ -67,6 +67,8 @@ ClientImpl::ClientImpl(Config config, Context context)
     data_source_->Start();
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+
+    AsyncIdentify(context_);
 }
 
 bool ClientImpl::Initialized() const {
@@ -74,8 +76,14 @@ bool ClientImpl::Initialized() const {
     return initialized_;
 }
 
-std::unordered_map<ClientImpl::FlagKey, Value> ClientImpl::AllFlags() const {
-    return {};
+std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
+    std::unordered_map<Client::FlagKey, Value> result;
+    for (auto& [key, descriptor] : flag_manager_.GetAll()) {
+        if (descriptor->flag) {
+            result.try_emplace(key, descriptor->flag->detail().value());
+        }
+    }
+    return result;
 }
 
 void ClientImpl::TrackInternal(std::string event_name,
@@ -171,8 +179,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     auto const& flag = *(desc->flag);
     auto const& detail = flag.detail();
 
-    if (check_type && default_value.type() != Value::Type::kNull &&
-        detail.value().type() != default_value.type()) {
+    if (check_type && default_value.Type() != Value::Type::kNull &&
+        detail.value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
         if (eval_reasons_available_) {
@@ -266,7 +274,7 @@ flag_manager::detail::IFlagNotifier& ClientImpl::FlagNotifier() {
     return flag_updater_;
 }
 
-void ClientImpl::WaitForReadySync(std::chrono::seconds timeout) {
+void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
     std::unique_lock lock(init_mutex_);
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }

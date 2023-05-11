@@ -90,7 +90,7 @@ flag_manager::detail::IFlagNotifier& Client::FlagNotifier() {
     return client->FlagNotifier();
 }
 
-void Client::WaitForReadySync(std::chrono::seconds timeout) {
+void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
     return client->WaitForReadySync(timeout);
 }
 
