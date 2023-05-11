@@ -1,9 +1,8 @@
+#include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/sse/client.hpp>
-#include <launchdarkly/client_side/api.hpp>
 
 #include <boost/asio/io_context.hpp>
 
-#include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
 #include <launchdarkly/console_backend.hpp>
 #include <launchdarkly/context_builder.hpp>
 
@@ -18,8 +17,6 @@ using launchdarkly::LogLevel;
 using launchdarkly::client_side::Client;
 using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
-using launchdarkly::client_side::flag_manager::detail::FlagManager;
-using launchdarkly::client_side::flag_manager::detail::FlagUpdater;
 
 int main() {
     Logger logger(std::make_unique<ConsoleBackend>("Hello"));

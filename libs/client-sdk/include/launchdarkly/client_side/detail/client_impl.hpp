@@ -4,85 +4,89 @@
 
 #include <condition_variable>
 #include <cstdint>
+#include <memory>
+#include <optional>
+#include <thread>
+#include <tuple>
+
+#include <tl/expected.hpp>
+
+#include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/client_side/data_source.hpp>
 #include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
 #include <launchdarkly/client_side/event_processor.hpp>
 #include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_notifier.hpp>
 #include <launchdarkly/client_side/flag_manager/detail/flag_updater.hpp>
+#include <launchdarkly/client_side/flag_manager/flag_notifier.hpp>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/error.hpp>
 #include <launchdarkly/logger.hpp>
 #include <launchdarkly/value.hpp>
-#include <memory>
-#include <optional>
-#include <thread>
-#include <tl/expected.hpp>
-#include <tuple>
 
-namespace launchdarkly::client_side {
-class Client {
+namespace launchdarkly::client_side::detail {
+class ClientImpl : public IClient {
    public:
-    inline static char const* const kVersion =
-        "0.0.0";  // {x-release-please-version}
+    ClientImpl(Config config, Context context);
 
-    Client(Config config, Context context);
+    ClientImpl(ClientImpl&&) = delete;
+    ClientImpl(ClientImpl const&) = delete;
+    ClientImpl& operator=(ClientImpl) = delete;
+    ClientImpl& operator=(ClientImpl&& other) = delete;
 
-    Client(Client&&) = delete;
-    Client(Client const&) = delete;
-    Client& operator=(Client) = delete;
-    Client& operator=(Client&& other) = delete;
-
-    bool Initialized() const;
+    bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const;
+    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlags() const override;
 
-    void Track(std::string event_name, Value data, double metric_value);
+    void Track(std::string event_name,
+               Value data,
+               double metric_value) override;
 
-    void Track(std::string event_name, Value data);
+    void Track(std::string event_name, Value data) override;
 
-    void Track(std::string event_name);
+    void Track(std::string event_name) override;
 
-    void AsyncFlush();
+    void AsyncFlush() override;
 
-    void AsyncIdentify(Context context);
+    void AsyncIdentify(Context context) override;
 
-    bool BoolVariation(FlagKey const& key, bool default_value);
+    bool BoolVariation(FlagKey const& key, bool default_value) override;
 
     EvaluationDetail<bool> BoolVariationDetail(FlagKey const& key,
-                                               bool default_value);
+                                               bool default_value) override;
 
-    std::string StringVariation(FlagKey const& key, std::string default_value);
+    std::string StringVariation(FlagKey const& key,
+                                std::string default_value) override;
 
     EvaluationDetail<std::string> StringVariationDetail(
         FlagKey const& key,
-        std::string default_value);
+        std::string default_value) override;
 
-    double DoubleVariation(FlagKey const& key, double default_value);
+    double DoubleVariation(FlagKey const& key, double default_value) override;
 
-    EvaluationDetail<double> DoubleVariationDetail(FlagKey const& key,
-                                                   double default_value);
+    EvaluationDetail<double> DoubleVariationDetail(
+        FlagKey const& key,
+        double default_value) override;
 
-    int IntVariation(FlagKey const& key, int default_value);
+    int IntVariation(FlagKey const& key, int default_value) override;
 
     EvaluationDetail<int> IntVariationDetail(FlagKey const& key,
-                                             int default_value);
+                                             int default_value) override;
 
-    Value JsonVariation(FlagKey const& key, Value default_value);
+    Value JsonVariation(FlagKey const& key, Value default_value) override;
 
     EvaluationDetail<Value> JsonVariationDetail(FlagKey const& key,
-                                                Value default_value);
+                                                Value default_value) override;
 
-    data_sources::IDataSourceStatusProvider& DataSourceStatus();
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
-    flag_manager::detail::IFlagNotifier& FlagNotifier();
+    flag_manager::detail::IFlagNotifier& FlagNotifier() override;
 
-    void WaitForReadySync(std::chrono::seconds timeout);
+    void WaitForReadySync(std::chrono::seconds timeout) override;
 
-    ~Client();
+    ~ClientImpl();
 
    private:
     template <typename T>
@@ -112,5 +116,4 @@ class Client {
 
     bool eval_reasons_available_;
 };
-
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::client_side::detail
