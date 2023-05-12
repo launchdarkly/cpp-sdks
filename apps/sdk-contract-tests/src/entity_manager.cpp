@@ -72,14 +72,14 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         }
     }
 
+    auto event_config = EventsBuilder();
+
     if (in.events) {
         ConfigEventParams const& events = *in.events;
 
         if (events.baseUri) {
             endpoints.EventsBaseUrl(*events.baseUri);
         }
-
-        auto event_config = EventsBuilder();
 
         if (events.allAttributesPrivate) {
             event_config.AllAttributesPrivate(*events.allAttributesPrivate);
@@ -101,8 +101,11 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
                 std::chrono::milliseconds(*events.flushIntervalMs));
         }
 
-        config_builder.Events(std::move(event_config));
+    } else {
+        event_config.Disable();
     }
+
+    config_builder.Events(std::move(event_config));
 
     config_builder.ServiceEndpoints(std::move(endpoints));
 
