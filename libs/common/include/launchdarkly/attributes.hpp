@@ -3,8 +3,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "attribute_reference.hpp"
-#include "value.hpp"
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/value.hpp>
 
 namespace launchdarkly {
 

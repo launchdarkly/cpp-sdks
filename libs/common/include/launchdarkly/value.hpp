@@ -6,8 +6,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <boost/variant.hpp>
+#include <variant>
 
 namespace launchdarkly {
 
@@ -391,21 +390,21 @@ class Value final {
                 break;
             case Type::kBool:
                 out << "bool("
-                    << (boost::get<bool>(value.storage_) ? "true" : "false")
+                    << (std::get<bool>(value.storage_) ? "true" : "false")
                     << ")";
                 break;
             case Type::kNumber:
-                out << "number(" << boost::get<double>(value.storage_) << ")";
+                out << "number(" << std::get<double>(value.storage_) << ")";
                 break;
             case Type::kString:
-                out << "string(" << boost::get<std::string>(value.storage_)
+                out << "string(" << std::get<std::string>(value.storage_)
                     << ")";
                 break;
             case Type::kObject:
-                out << "object(" << boost::get<Object>(value.storage_) << ")";
+                out << "object(" << std::get<Object>(value.storage_) << ")";
                 break;
             case Type::kArray:
-                out << "array(" << boost::get<Array>(value.storage_) << ")";
+                out << "array(" << std::get<Array>(value.storage_) << ")";
                 break;
         }
         return out;
@@ -420,7 +419,7 @@ class Value final {
     operator int() const { return AsInt(); }
 
    private:
-    boost::variant<bool, double, std::string, Array, Object> storage_;
+    std::variant<bool, double, std::string, Array, Object> storage_;
     enum Type type_;
 
     // Empty constants used when accessing the wrong type.

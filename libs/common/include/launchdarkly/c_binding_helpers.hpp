@@ -1,6 +1,8 @@
 #include <launchdarkly/c_bindings/status.h>
+#include <launchdarkly/error.hpp>
+
 #include <functional>
-#include "error.hpp"
+
 #include "tl/expected.hpp"
 
 template <typename T, typename = void>

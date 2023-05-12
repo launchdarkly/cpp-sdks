@@ -6,6 +6,7 @@
 #include <launchdarkly/value.hpp>
 
 #include <boost/core/ignore_unused.hpp>
+#include <cassert>
 
 using launchdarkly::Value;
 

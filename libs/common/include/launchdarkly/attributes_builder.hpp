@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "attribute_reference.hpp"
-#include "attributes.hpp"
-#include "value.hpp"
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/attributes.hpp>
+#include <launchdarkly/value.hpp>
 
 namespace launchdarkly {
 

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <launchdarkly/attribute_reference.hpp>
+
 #include <chrono>
 #include <cstddef>
-#include <launchdarkly/attribute_reference.hpp>
 #include <string>
 #include <unordered_map>
 

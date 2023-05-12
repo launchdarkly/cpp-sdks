@@ -1,7 +1,9 @@
 #pragma once
 
-#include <boost/algorithm/string/compare.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#ifndef _MSC_VER
+#include <strings.h>
+#endif
+
 #include <cstdint>
 #include <future>
 #include <map>
@@ -21,7 +23,7 @@ namespace launchdarkly::network::detail {
 struct CaseInsensitiveComparator {
     bool operator()(std::string const& lhs,
                     std::string const& rhs) const noexcept {
-        return ::strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+        return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
     }
 };
 

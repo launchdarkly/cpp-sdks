@@ -73,7 +73,7 @@ TEST_F(ConfigBuilderTest,
     EXPECT_FALSE(cfg->DataSourceConfig().use_report);
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
-              boost::get<launchdarkly::config::detail::built::StreamingConfig<
+              std::get<launchdarkly::config::detail::built::StreamingConfig<
                   launchdarkly::config::detail::ClientSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
@@ -87,7 +87,7 @@ TEST_F(ConfigBuilderTest,
 
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
-              boost::get<launchdarkly::config::detail::built::StreamingConfig<
+              std::get<launchdarkly::config::detail::built::StreamingConfig<
                   launchdarkly::config::detail::ServerSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
@@ -104,7 +104,7 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     auto cfg = builder.Build();
 
     EXPECT_EQ(std::chrono::milliseconds{5000},
-              boost::get<launchdarkly::config::detail::built::StreamingConfig<
+              std::get<launchdarkly::config::detail::built::StreamingConfig<
                   launchdarkly::config::detail::ServerSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
@@ -127,7 +127,7 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     EXPECT_TRUE(cfg->DataSourceConfig().use_report);
     EXPECT_TRUE(cfg->DataSourceConfig().with_reasons);
     EXPECT_EQ(std::chrono::milliseconds{5000},
-              boost::get<launchdarkly::config::detail::built::StreamingConfig<
+              std::get<launchdarkly::config::detail::built::StreamingConfig<
                   launchdarkly::config::detail::ClientSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
