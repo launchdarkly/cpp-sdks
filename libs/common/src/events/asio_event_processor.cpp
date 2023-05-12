@@ -5,9 +5,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include "config/detail/builders/http_properties_builder.hpp"
-#include "config/detail/sdks.hpp"
-#include "network/detail/asio_requester.hpp"
-
 #include "serialization/events/json_events.hpp"
 
 namespace http = boost::beast::http;
@@ -111,7 +108,7 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 template <typename SDK>
 void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
     workers_.Get([this](RequestWorker* worker) {
-        if (!worker) {
+        if (worker == nullptr) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
                    "flush";
@@ -143,8 +140,8 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
     boost::ignore_unused(event_count);
 
     std::visit(
-        overloaded{[&](Clock::time_point&& server_time) {
-                       last_known_past_time_ = std::move(server_time);
+        overloaded{[&](Clock::time_point server_time) {
+                       last_known_past_time_ = server_time;
                    },
                    [&](network::detail::HttpResult::StatusCode status) {
                        std::lock_guard<std::mutex> guard{this->inbox_mutex_};
@@ -153,7 +150,7 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
                            permanent_delivery_failure_ = true;
                        }
                    }},
-        std::move(result));
+        result);
 }
 
 template <typename SDK>
@@ -220,29 +217,33 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
         overloaded{[&](client::FeatureEventParams&& event) {
                        summarizer_.Update(event);
 
-                       if (!event.require_full_event) {
-                           return;
-                       }
-
                        client::FeatureEventBase base{event};
 
                        auto debug_until_date = event.debug_events_until_date;
 
-                       auto max_time = std::max(
+                       // To be conservative, use as the current time the
+                       // maximum of the actual current time and the server's
+                       // time. This way if the local host is running behind, we
+                       // won't accidentally keep emitting events.
+
+                       auto conservative_now = std::max(
                            std::chrono::system_clock::now(),
                            last_known_past_time_.value_or(
-                               std::chrono::system_clock::time_point{}));
+                               std::chrono::system_clock::from_time_t(0)));
 
                        bool emit_debug_event =
-                           debug_until_date && debug_until_date->t > max_time;
+                           debug_until_date &&
+                           conservative_now < debug_until_date->t;
 
                        if (emit_debug_event) {
                            out.emplace_back(client::DebugEvent{
                                base, filter_.filter(event.context)});
                        }
 
-                       out.emplace_back(client::FeatureEvent{
-                           std::move(base), event.context.kinds_to_keys()});
+                       if (event.require_full_event) {
+                           out.emplace_back(client::FeatureEvent{
+                               std::move(base), event.context.kinds_to_keys()});
+                       }
                    },
                    [&](client::IdentifyEventParams&& event) {
                        // Contexts should already have been checked for

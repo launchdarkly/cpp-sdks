@@ -7,7 +7,7 @@
 #include "context_builder.hpp"
 #include "events/client_events.hpp"
 #include "events/detail/asio_event_processor.hpp"
-#include "events/detail/worker_pool.hpp"
+#include "events/detail/parse_date_header.hpp"
 
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network::detail;
@@ -26,7 +26,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
-    std::thread t([&]() { ioc.run(); });
+    std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), logger);
 
@@ -34,7 +34,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     ASSERT_TRUE(worker);
 
     work.reset();
-    t.join();
+    ioc_thread.join();
 }
 
 TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
@@ -43,7 +43,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
-    std::thread t([&]() { ioc.run(); });
+    std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), logger);
 
@@ -51,7 +51,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     ASSERT_FALSE(worker);
 
     work.reset();
-    t.join();
+    ioc_thread.join();
 }
 
 // This test is a temporary test that exists only to ensure the event processor
@@ -88,4 +88,38 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     processor.AsyncClose();
     ioc_thread.join();
+}
+
+TEST(EventProcessorTests, ParseValidDateHeader) {
+    using namespace launchdarkly;
+
+    using Clock = std::chrono::system_clock;
+    auto date =
+        events::detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
+
+    ASSERT_TRUE(date);
+
+    ASSERT_EQ(date->time_since_epoch(),
+              std::chrono::microseconds(1445412480000000));
+}
+
+TEST(EventProcessorTests, ParseInvalidDateHeader) {
+    using namespace launchdarkly;
+
+    auto not_a_date =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "this is definitely not a date");
+
+    ASSERT_FALSE(not_a_date);
+
+    auto not_gmt = events::detail::ParseDateHeader<std::chrono::system_clock>(
+        "Wed, 21 Oct 2015 07:28:00 PST");
+
+    ASSERT_FALSE(not_gmt);
+
+    auto missing_year =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "Wed, 21 Oct 07:28:00 GMT");
+
+    ASSERT_FALSE(missing_year);
 }
