@@ -7,7 +7,7 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
 | SDK packages                                          | issues                                      | tests                                                   |
 |-------------------------------------------------------|---------------------------------------------|---------------------------------------------------------|
-| [libs/client-sdk](packages/sdk/server-node/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] |
+| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] |
 
 | Shared packages                                              | issues                                            | tests                                                                 |
 |--------------------------------------------------------------|---------------------------------------------------|-----------------------------------------------------------------------|
