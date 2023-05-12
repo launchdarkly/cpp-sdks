@@ -13,4 +13,4 @@ namespace launchdarkly::client_side::data_sources::detail {
  */
 std::string Base64UrlEncode(std::string const& input);
 
-}  // namespace launchdarkly::client_size
+}  // namespace launchdarkly::client_side::data_sources::detail

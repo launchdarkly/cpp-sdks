@@ -1,4 +1,4 @@
-#include "context_filter.hpp"
+#include <launchdarkly/context_filter.hpp>
 
 #define INCLUDE_KIND true
 #define EXCLUDE_KIND false

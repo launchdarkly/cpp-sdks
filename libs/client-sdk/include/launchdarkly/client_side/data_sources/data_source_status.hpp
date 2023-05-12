@@ -6,11 +6,8 @@
 #include <ostream>
 #include <string>
 
-#include <boost/signals2.hpp>
-
-#include "launchdarkly/client_side/connection.hpp"
-#include "launchdarkly/client_side/data_sources/data_source_status.hpp"
-#include "network/detail/http_requester.hpp"
+#include <launchdarkly/client_side/connection.hpp>
+#include <launchdarkly/network/detail/http_requester.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -238,8 +235,7 @@ std::ostream& operator<<(std::ostream& out,
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::ErrorInfo::ErrorKind const& kind);
 
-std::ostream& operator<<(std::ostream& out,
-                         DataSourceStatus const& status);
+std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status);
 
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::ErrorInfo const& error);

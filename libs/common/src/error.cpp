@@ -1,4 +1,4 @@
-#include "error.hpp"
+#include <launchdarkly/error.hpp>
 
 namespace launchdarkly {
 

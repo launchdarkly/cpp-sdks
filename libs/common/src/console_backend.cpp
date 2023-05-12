@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "console_backend.hpp"
+#include <launchdarkly/console_backend.hpp>
 
 namespace launchdarkly {
 ConsoleBackend::ConsoleBackend(LogLevel level, std::string name)

@@ -2,7 +2,7 @@
 
 #include <thread>
 
-#include "launchdarkly/sse/detail/backoff.hpp"
+#include <launchdarkly/sse/detail/backoff.hpp>
 
 using namespace launchdarkly::sse::detail;
 

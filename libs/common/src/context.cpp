@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "context.hpp"
+#include <launchdarkly/context.hpp>
 
 namespace launchdarkly {
 
