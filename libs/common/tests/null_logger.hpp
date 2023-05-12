@@ -1,5 +1,5 @@
 #pragma once
-#include <launchdarkly/logger.hpp>
+#include "launchdarkly/logging/logger.hpp"
 
 /**
  * Creates a throwaway logger suitable for tests where assertions about the
@@ -14,10 +14,10 @@ class NullLoggerBackend : public launchdarkly::ILogBackend {
     /**
      * Always returns false.
      */
-    bool enabled(launchdarkly::LogLevel level) override;
+    bool Enabled(launchdarkly::LogLevel level) override;
 
     /**
      * No-op.
      */
-    void write(launchdarkly::LogLevel level, std::string message) override;
+    void Write(launchdarkly::LogLevel level, std::string message) override;
 };

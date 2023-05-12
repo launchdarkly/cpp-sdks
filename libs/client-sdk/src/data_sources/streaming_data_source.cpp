@@ -7,11 +7,11 @@
 
 #include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
 #include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/network/detail/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+#include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
 
@@ -106,6 +106,16 @@ StreamingDataSource::StreamingDataSource(
     client_builder.header("user-agent", http_properties.UserAgent());
     // TODO: Handle proxy support.
     client_ = client_builder.build();
+
+    if (!client_) {
+        LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kShutdown,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            kCouldNotParseEndpoint);
+    } else {
+        client_->run();
+    }
 }
 
 void StreamingDataSource::Start() {

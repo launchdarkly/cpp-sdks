@@ -2,14 +2,12 @@
 
 #include <boost/asio/io_context.hpp>
 
-#include <launchdarkly/console_backend.hpp>
 #include <launchdarkly/context_builder.hpp>
 
 #include <iostream>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
-using launchdarkly::ConsoleBackend;
 using launchdarkly::ContextBuilder;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
@@ -18,8 +16,6 @@ using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
-
     net::io_context ioc;
 
     char const* key = std::getenv("STG_SDK_KEY");
@@ -47,24 +43,21 @@ int main() {
             .value(),
         ContextBuilder().kind("user", "ryan").build());
 
-    LD_LOG(logger, LogLevel::kInfo)
-        << "Initial Status: " << client.DataSourceStatus().Status();
+    std::cout << "Initial Status: " << client.DataSourceStatus().Status();
 
-    client.DataSourceStatus().OnDataSourceStatusChange([&logger](auto status) {
-        LD_LOG(logger, LogLevel::kInfo) << "Got status: " << status;
+    client.DataSourceStatus().OnDataSourceStatusChange(
+        [](auto status) { std::cout << "Got status: " << status; });
+
+    client.FlagNotifier().OnFlagChange("my-boolean-flag", [](auto event) {
+        std::cout << "Got flag change: " << *event;
     });
-
-    client.FlagNotifier().OnFlagChange(
-        "my-boolean-flag", [&logger](auto event) {
-            LD_LOG(logger, LogLevel::kInfo) << "Got flag change: " << *event;
-        });
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
     auto value = client.BoolVariationDetail("my-boolean-flag", false);
-    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
+    std::cout << "Value was: " << *value;
     if (auto reason = value.Reason()) {
-        LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << *reason;
+        std::cout << "Reason was: " << *reason;
     }
 
     // Sit around.

@@ -279,6 +279,8 @@ void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
 
+
+
 ClientImpl::~ClientImpl() {
     data_source_->Close();
     ioc_.stop();

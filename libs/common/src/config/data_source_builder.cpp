@@ -1,4 +1,4 @@
-#include <launchdarkly/config/detail/builders/data_source_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 
 namespace launchdarkly::config::detail::builders {
 

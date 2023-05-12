@@ -1,4 +1,4 @@
-#include <launchdarkly/config/detail/built/service_endpoints.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 
 namespace launchdarkly::config::detail::built {
 

@@ -3,7 +3,7 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <launchdarkly/client_side/client.hpp>
-#include <launchdarkly/logger.hpp>
+#include "launchdarkly/logging/logger.hpp"
 
 #include "client_entity.hpp"
 #include "definitions.hpp"

@@ -5,7 +5,7 @@
 #include <ostream>
 #include <tuple>
 
-#include <launchdarkly/config/detail/builders/app_info_builder.hpp>
+#include <launchdarkly/config/shared/builders/app_info_builder.hpp>
 #include <launchdarkly/error.hpp>
 #include "null_logger.hpp"
 

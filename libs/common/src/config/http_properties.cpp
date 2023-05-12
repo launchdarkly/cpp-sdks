@@ -1,6 +1,6 @@
 #include <utility>
 
-#include <launchdarkly/config/detail/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/http_properties.hpp>
 
 namespace launchdarkly::config::detail::built {
 

@@ -1,4 +1,4 @@
-#include <launchdarkly/config/detail/built/events.hpp>
+#include <launchdarkly/config/shared/built/events.hpp>
 
 namespace launchdarkly::config::detail::built {
 

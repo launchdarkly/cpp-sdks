@@ -167,10 +167,7 @@ class Value final {
          */
         Object(std::map<std::string, Value> map) : map_(std::move(map)) {}
         Object() = default;
-        Object(std::initializer_list<std::pair<std::string, Value>> values) {
-            map_.insert(std::make_move_iterator(values.begin()),
-                        std::make_move_iterator(values.end()));
-        }
+        Object(std::initializer_list<std::pair<std::string, Value>> values);
 
         /*
          * Get the Value with the specified key.
@@ -178,9 +175,7 @@ class Value final {
          * This operates like `.at` on a map, and accessing out of bounds
          * is invalid.
          */
-        Value const& operator[](std::string const& key) const {
-            return map_.at(key);
-        }
+        Value const& operator[](std::string const& key) const;
 
         /**
          * The number of items in the Object.
@@ -258,9 +253,9 @@ class Value final {
      */
     Value(std::vector<Value> arr);
 
-    Value(Array arr) : storage_(std::move(arr)), type_(Type::kArray) {}
+    Value(Array arr);
 
-    Value(Object obj) : storage_(std::move(obj)), type_(Type::kObject) {}
+    Value(Object obj);
 
     /**
      * Construct an object value from a map of Value.

@@ -76,6 +76,7 @@ set(BUILD_SHARED_LIBS OFF)
 
 # Always build the common libraries as shared libs.
 add_subdirectory(libs/common)
+add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 add_subdirectory(bindings/c)
 

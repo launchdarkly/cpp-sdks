@@ -1,5 +1,5 @@
-#include <launchdarkly/config/detail/builders/events_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
+#include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include "launchdarkly/config/shared/defaults.hpp"
 
 #include <utility>
 

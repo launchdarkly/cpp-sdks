@@ -1,6 +1,6 @@
-#include <launchdarkly/config/detail/builders/config_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
-#include <launchdarkly/console_backend.hpp>
+#include <launchdarkly/config/shared/builders/config_builder.hpp>
+#include "../console_backend.hpp"
+#include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::config::detail::builders {
 

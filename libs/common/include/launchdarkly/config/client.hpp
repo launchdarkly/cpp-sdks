@@ -1,11 +1,11 @@
 #pragma once
 
-#include <launchdarkly/config/detail/builders/app_info_builder.hpp>
-#include <launchdarkly/config/detail/builders/config_builder.hpp>
-#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
-#include <launchdarkly/config/detail/builders/events_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
-#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/config/shared/builders/app_info_builder.hpp>
+#include <launchdarkly/config/shared/builders/config_builder.hpp>
+#include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include <launchdarkly/config/shared/defaults.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::client_side {
 

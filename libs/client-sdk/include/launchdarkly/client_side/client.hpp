@@ -18,7 +18,7 @@ namespace launchdarkly::client_side {
 /**
  *  Interface for the standard SDK client methods and properties.
  */
-class IClient {
+class main {
    public:
     /**
      * Returns a boolean value indicating LaunchDarkly connection and flag state

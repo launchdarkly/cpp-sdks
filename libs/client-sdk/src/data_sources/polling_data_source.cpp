@@ -2,10 +2,10 @@
 
 #include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
 #include <launchdarkly/client_side/data_sources/detail/polling_data_source.hpp>
-#include <launchdarkly/config/detail/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/network/detail/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+#include "launchdarkly/config/shared/sdks.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
 

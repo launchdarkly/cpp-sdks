@@ -1,23 +1,15 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/c_bindings/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/detail/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/data/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/events/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/network/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/network/detail/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/serialization/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/serialization/events/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
 add_library(${LIBNAME}
         ${HEADER_LIST}
-        logger.cpp
-        console_backend.cpp
-        log_level.cpp
         attribute_reference.cpp
         context.cpp
         context_builder.cpp
@@ -35,37 +27,19 @@ add_library(${LIBNAME}
         data/evaluation_detail_internal.cpp
         data/evaluation_detail.cpp
         data/evaluation_result.cpp
-        context_filter.cpp
         config/app_info_builder.cpp
-        value_mapping.cpp
-        serialization/json_attributes.cpp
-        serialization/json_context.cpp
-        serialization/json_evaluation_reason.cpp
-        serialization/json_evaluation_result.cpp
-        serialization/json_value.cpp
-        serialization/events/json_events.cpp
-        serialization/json_errors.cpp
-        events/asio_event_processor.cpp
-        events/outbox.cpp
-        events/worker_pool.cpp
-        events/summarizer.cpp
-        events/client_events.cpp
-        events/request_worker.cpp
-        events/event_batch.cpp
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp
-        network/http_requester.cpp
-        network/http_error_messages.cpp
-        c_bindings/value.cpp
-        c_bindings/array_builder.cpp
-        c_bindings/object_builder.cpp
-        c_bindings/context_builder.cpp
-        c_bindings/status.cpp
-        c_bindings/context.cpp
-        c_bindings/config/builder.cpp
-        c_bindings/config/config.cpp
-        )
+        bindings/c/value.cpp
+        bindings/c/array_builder.cpp
+        bindings/c/object_builder.cpp
+        bindings/c/context_builder.cpp
+        bindings/c/status.cpp
+        bindings/c/context.cpp
+        bindings/c/config/builder.cpp
+        bindings/c/config/config.cpp
+        log_level.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
