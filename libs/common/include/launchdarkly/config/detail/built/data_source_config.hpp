@@ -6,6 +6,7 @@
 #include <optional>
 #include <type_traits>
 #include <variant>
+#include <string>
 
 namespace launchdarkly::config::detail::built {
 
