@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "c_bindings/array_builder.h"
-#include "c_bindings/object_builder.h"
-#include "c_bindings/value.h"
+#include <launchdarkly/c_bindings/array_builder.h>
+#include <launchdarkly/c_bindings/object_builder.h>
+#include <launchdarkly/c_bindings/value.h>
 
 TEST(ValueCBindingTests, CanCreateNull) {
     auto* ptr = LDValue_NewNull();

@@ -1,4 +1,4 @@
-#include "attributes.hpp"
+#include <launchdarkly/attributes.hpp>
 
 namespace launchdarkly {
 

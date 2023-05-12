@@ -1,4 +1,4 @@
-#include "events/detail/summarizer.hpp"
+#include <launchdarkly/events/detail/summarizer.hpp>
 
 namespace launchdarkly::events::detail {
 

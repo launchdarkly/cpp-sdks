@@ -1,6 +1,6 @@
 #pragma once
 
-#include "launchdarkly/client_side/event_processor.hpp"
+#include <launchdarkly/client_side/event_processor.hpp>
 
 namespace launchdarkly::client_side::detail {
 

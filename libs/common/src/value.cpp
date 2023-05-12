@@ -1,6 +1,6 @@
 #pragma clang diagnostic push
 
-#include "value.hpp"
+#include <launchdarkly/value.hpp>
 
 #include <cstring>
 #include <iostream>
@@ -65,42 +65,42 @@ Value const& Value::Null() {
 
 bool Value::AsBool() const {
     if (type_ == Type::kBool) {
-        return boost::get<bool>(storage_);
+        return std::get<bool>(storage_);
     }
     return false;
 }
 
 int Value::AsInt() const {
     if (type_ == Type::kNumber) {
-        return static_cast<int>(boost::get<double>(storage_));
+        return static_cast<int>(std::get<double>(storage_));
     }
     return 0;
 }
 
 double Value::AsDouble() const {
     if (type_ == Type::kNumber) {
-        return boost::get<double>(storage_);
+        return std::get<double>(storage_);
     }
     return 0.0;
 }
 
 std::string const& Value::AsString() const {
     if (type_ == Type::kString) {
-        return boost::get<std::string>(storage_);
+        return std::get<std::string>(storage_);
     }
     return empty_string_;
 }
 
 Value::Array const& Value::AsArray() const {
     if (type_ == Type::kArray) {
-        return boost::get<Array>(storage_);
+        return std::get<Array>(storage_);
     }
     return empty_vector_;
 }
 
 Value::Object const& Value::AsObject() const {
     if (type_ == Type::kObject) {
-        return boost::get<Object>(storage_);
+        return std::get<Object>(storage_);
     }
     return empty_map_;
 }

@@ -1,4 +1,4 @@
-#include "events/client_events.hpp"
+#include <launchdarkly/events/client_events.hpp>
 
 namespace launchdarkly::events::client {
 FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <launchdarkly/client_side/api.hpp>
+#include <launchdarkly/client_side/client.hpp>
 #include <memory>
 #include "definitions.hpp"
 
