@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 16.x
           registry-url: 'https://registry.npmjs.org'
-      - run: sudo apt install doxygen
+      - run: sudo apt-get install doxygen
       - id: build
         # Build using the same steps from CI.
         name: Build

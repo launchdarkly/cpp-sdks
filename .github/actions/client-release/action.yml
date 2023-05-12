@@ -26,7 +26,8 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        sudo apt install doxygen
+        sudo apt-get install doxygen
+        sudo apt-get install graphviz
         ./scripts/build-release.sh launchdarkly-cpp-client
         ./scripts/build-docs.sh libs/client-sdk
       env:
