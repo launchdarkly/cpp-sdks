@@ -70,7 +70,7 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
 
 [//]: # 'libs/server-sent-events'
 [shared-sse-ci-badge-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml/badge.svg
-[shared-sdk-server-ci]: https://github.com/launchdarkly/jcpp-sdks/actions/workflows/sse.yml
+[shared-sdk-server-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml
 [package-shared-sdk-server-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fsse%22+
 
 
