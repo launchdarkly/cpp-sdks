@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <launchdarkly/client_side/api.hpp>
+#include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <map>
 

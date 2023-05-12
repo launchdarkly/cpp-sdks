@@ -1,16 +1,17 @@
 #pragma once
 
+#include <launchdarkly/config/detail/builders/app_info_builder.hpp>
+#include <launchdarkly/config/detail/builders/data_source_builder.hpp>
+#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/detail/builders/events_builder.hpp>
+#include <launchdarkly/config/detail/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/detail/config.hpp>
+#include <launchdarkly/logger.hpp>
+
 #include <optional>
 #include <string>
-#include "app_info_builder.hpp"
-#include "data_source_builder.hpp"
-#include "endpoints_builder.hpp"
-#include "events_builder.hpp"
-#include "http_properties_builder.hpp"
-#include "tl/expected.hpp"
 
-#include <launchdarkly/logger.hpp>
+#include "tl/expected.hpp"
 
 namespace launchdarkly::config::detail::builders {
 

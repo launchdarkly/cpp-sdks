@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/container_hash/hash.hpp>
-
 namespace launchdarkly {
 
 /**

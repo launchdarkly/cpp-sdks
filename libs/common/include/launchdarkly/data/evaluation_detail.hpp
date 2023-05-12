@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <optional>
 
-#include "evaluation_reason.hpp"
+#include <launchdarkly/data/evaluation_reason.hpp>
 
 namespace launchdarkly {
 

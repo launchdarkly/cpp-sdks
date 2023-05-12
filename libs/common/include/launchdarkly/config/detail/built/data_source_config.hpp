@@ -1,10 +1,11 @@
 #pragma once
 
-#include <boost/variant.hpp>
-#include <chrono>
 #include <launchdarkly/config/detail/sdks.hpp>
+
+#include <chrono>
 #include <optional>
 #include <type_traits>
+#include <variant>
 
 namespace launchdarkly::config::detail::built {
 
@@ -43,7 +44,7 @@ struct DataSourceConfig;
 
 template <>
 struct DataSourceConfig<ClientSDK> {
-    boost::variant<StreamingConfig<ClientSDK>, PollingConfig<ClientSDK>> method;
+    std::variant<StreamingConfig<ClientSDK>, PollingConfig<ClientSDK>> method;
 
     bool with_reasons;
     bool use_report;
@@ -51,7 +52,7 @@ struct DataSourceConfig<ClientSDK> {
 
 template <>
 struct DataSourceConfig<ServerSDK> {
-    boost::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
+    std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
 };
 
 }  // namespace launchdarkly::config::detail::built

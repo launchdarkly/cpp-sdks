@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #include <optional>
 #include <ostream>
 #include <utility>
 
+#include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/value.hpp>
-#include "evaluation_reason.hpp"
 
 namespace launchdarkly {
 

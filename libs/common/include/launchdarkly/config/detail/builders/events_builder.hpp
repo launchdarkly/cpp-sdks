@@ -3,6 +3,7 @@
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/config/detail/built/events.hpp>
 #include <launchdarkly/error.hpp>
+
 #include "tl/expected.hpp"
 
 #include <memory>

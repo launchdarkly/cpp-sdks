@@ -1,11 +1,11 @@
 #pragma once
 
 #include <launchdarkly/logger.hpp>
-
 #include <launchdarkly/error.hpp>
 #include <optional>
 #include <string>
 #include <vector>
+
 #include "tl/expected.hpp"
 
 namespace launchdarkly::config::detail::builders {
