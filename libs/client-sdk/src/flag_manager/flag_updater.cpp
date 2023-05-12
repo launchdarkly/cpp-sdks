@@ -1,7 +1,7 @@
 #include <utility>
 
-#include "launchdarkly/client_side/detail/boost_signal_connection.hpp"
-#include "launchdarkly/client_side/flag_manager/detail/flag_updater.hpp"
+#include <launchdarkly/client_side/detail/boost_signal_connection.hpp>
+#include <launchdarkly/client_side/flag_manager/detail/flag_updater.hpp>
 
 namespace launchdarkly::client_side::flag_manager::detail {
 

@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "context_builder.hpp"
+#include <launchdarkly/context_builder.hpp>
 
 using launchdarkly::ContextBuilder;
 

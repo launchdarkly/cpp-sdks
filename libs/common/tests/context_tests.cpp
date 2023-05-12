@@ -2,8 +2,8 @@
 
 #include <boost/json.hpp>
 
-#include "context_builder.hpp"
-#include "serialization/json_context.hpp"
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
 
 using launchdarkly::Context;
 using launchdarkly::ContextBuilder;

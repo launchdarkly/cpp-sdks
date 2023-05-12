@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "config/client.hpp"
-#include "config/detail/sdks.hpp"
-#include "config/server.hpp"
-#include "value.hpp"
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/config/server.hpp>
+#include <launchdarkly/value.hpp>
 
 #include <boost/json.hpp>
 #include <boost/url.hpp>
@@ -22,7 +22,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<
+        std::get<
             config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
             client_config.method)
             .initial_reconnect_delay);
@@ -41,7 +41,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
     EXPECT_FALSE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::seconds{88000},
-        boost::get<
+        std::get<
             config::detail::built::PollingConfig<config::detail::ClientSDK>>(
             client_config.method)
             .poll_interval);
@@ -56,7 +56,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        boost::get<
+        std::get<
             config::detail::built::StreamingConfig<config::detail::ServerSDK>>(
             server_config.method)
             .initial_reconnect_delay);
@@ -71,7 +71,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::seconds{30000},
-        boost::get<
+        std::get<
             config::detail::built::PollingConfig<config::detail::ServerSDK>>(
             server_config.method)
             .poll_interval);

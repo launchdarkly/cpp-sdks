@@ -4,8 +4,8 @@
 
 #include <boost/signals2.hpp>
 
-#include "launchdarkly/client_side/connection.hpp"
-#include "launchdarkly/client_side/data_sources/data_source_status.hpp"
+#include <launchdarkly/client_side/connection.hpp>
+#include <launchdarkly/client_side/data_sources/data_source_status.hpp>
 
 namespace launchdarkly::client_side::data_sources::detail {
 

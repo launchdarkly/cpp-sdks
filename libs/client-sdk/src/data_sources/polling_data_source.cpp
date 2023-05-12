@@ -1,11 +1,11 @@
 #include <boost/json.hpp>
 
-#include "config/detail/builders/http_properties_builder.hpp"
-#include "config/detail/sdks.hpp"
-#include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
-#include "launchdarkly/client_side/data_sources/detail/polling_data_source.hpp"
-#include "network/detail/http_error_messages.hpp"
-#include "serialization/json_context.hpp"
+#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
+#include <launchdarkly/client_side/data_sources/detail/polling_data_source.hpp>
+#include <launchdarkly/config/detail/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/network/detail/http_error_messages.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
 
 namespace launchdarkly::client_side::data_sources::detail {
 
@@ -18,7 +18,7 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
 
     auto const& data_source_config = config.DataSourceConfig();
 
-    auto const& polling_config = boost::get<
+    auto const& polling_config = std::get<
         config::detail::built::PollingConfig<config::detail::ClientSDK>>(
         config.DataSourceConfig().method);
 
@@ -73,12 +73,12 @@ PollingDataSource::PollingDataSource(Config const& config,
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
-          boost::get<
+          std::get<
               config::detail::built::PollingConfig<config::detail::ClientSDK>>(
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
-    auto const& polling_config = boost::get<
+    auto const& polling_config = std::get<
         config::detail::built::PollingConfig<config::detail::ClientSDK>>(
         config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {

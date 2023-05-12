@@ -8,7 +8,7 @@
         if: runner.os == 'Linux'
         id: install-ninja-ubuntu
         shell: bash
-        run: sudo apt install ninja-build
+        run: sudo apt-get install ninja-build
 
       - name: Install for Mac
         if: runner.os == 'macOS'

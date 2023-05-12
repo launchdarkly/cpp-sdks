@@ -4,8 +4,10 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/beast.hpp>
+
 #include "entity_manager.hpp"
-#include "logger.hpp"
+
+#include <launchdarkly/logger.hpp>
 
 #include <foxy/listener.hpp>
 

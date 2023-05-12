@@ -1,6 +1,6 @@
-#include "data/evaluation_detail.hpp"
+#include <launchdarkly/data/evaluation_detail.hpp>
+#include <launchdarkly/value.hpp>
 #include <string>
-#include "value.hpp"
 
 namespace launchdarkly {
 

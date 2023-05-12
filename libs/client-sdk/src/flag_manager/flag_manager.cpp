@@ -1,4 +1,4 @@
-#include "launchdarkly/client_side/flag_manager/detail/flag_manager.hpp"
+#include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
 
 namespace launchdarkly::client_side::flag_manager::detail {
 

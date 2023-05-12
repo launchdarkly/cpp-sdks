@@ -1,0 +1,7 @@
+{
+  "name": "launchdarkly-cpp-sse-client",
+  "description": "This package.json exists for modeling dependencies for the release process.",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {}
+}

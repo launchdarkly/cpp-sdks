@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "launchdarkly/client_side/data_source_update_sink.hpp"
+#include <launchdarkly/client_side/data_source_update_sink.hpp>
 
 namespace launchdarkly::client_side::flag_manager::detail {
 

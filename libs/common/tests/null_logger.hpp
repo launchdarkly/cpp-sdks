@@ -1,5 +1,5 @@
 #pragma once
-#include "logger.hpp"
+#include <launchdarkly/logger.hpp>
 
 /**
  * Creates a throwaway logger suitable for tests where assertions about the

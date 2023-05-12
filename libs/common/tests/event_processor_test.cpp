@@ -1,13 +1,15 @@
 #include <gtest/gtest.h>
 #include <boost/asio/io_context.hpp>
+
 #include <chrono>
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/console_backend.hpp>
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/events/client_events.hpp>
+#include <launchdarkly/events/detail/asio_event_processor.hpp>
+#include <launchdarkly/events/detail/parse_date_header.hpp>
+#include <launchdarkly/events/detail/worker_pool.hpp>
 #include <thread>
-#include "config/client.hpp"
-#include "console_backend.hpp"
-#include "context_builder.hpp"
-#include "events/client_events.hpp"
-#include "events/detail/asio_event_processor.hpp"
-#include "events/detail/parse_date_header.hpp"
 
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network::detail;

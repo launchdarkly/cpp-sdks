@@ -13,7 +13,6 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 # Automatic library: static or dynamic based on user config.
 
 add_library(${LIBNAME}
-        api.cpp
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/base_64.cpp
@@ -28,16 +27,22 @@ add_library(${LIBNAME}
         event_processor/event_processor.cpp
         event_processor/null_event_processor.cpp
         boost_signal_connection.cpp
-        )
+        client_impl.cpp
+        client.cpp)
 
 target_link_libraries(${LIBNAME}
-        PUBLIC
-        launchdarkly::common
-        PRIVATE
-        launchdarkly::sse
-        )
+        PUBLIC launchdarkly::common
+        PRIVATE launchdarkly::sse)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
+
+install(TARGETS ${LIBNAME})
+# Using PUBLIC_HEADERS would flatten the include.
+# This will preserve it, but dependencies must do the same.
+
+install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
+        DESTINATION "include"
+        )
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

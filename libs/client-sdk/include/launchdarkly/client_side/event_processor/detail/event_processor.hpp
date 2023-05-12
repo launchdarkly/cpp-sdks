@@ -1,11 +1,11 @@
 #pragma once
 
 #include <boost/asio/any_io_executor.hpp>
-#include "config/client.hpp"
-#include "config/detail/sdks.hpp"
-#include "events/detail/asio_event_processor.hpp"
-#include "launchdarkly/client_side/event_processor.hpp"
-#include "logger.hpp"
+#include <launchdarkly/client_side/event_processor.hpp>
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/events/detail/asio_event_processor.hpp>
+#include <launchdarkly/logger.hpp>
 
 namespace launchdarkly::client_side::detail {
 

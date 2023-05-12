@@ -1,4 +1,4 @@
-#include "config/detail/builders/data_source_builder.hpp"
+#include <launchdarkly/config/detail/builders/data_source_builder.hpp>
 
 namespace launchdarkly::config::detail::builders {
 
@@ -62,7 +62,7 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
 }
 
 built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
-    auto method = boost::apply_visitor(MethodVisitor<ClientSDK>(), method_);
+    auto method = std::visit(MethodVisitor<ClientSDK>(), method_);
     return {method, with_reasons_, use_report_};
 }
 
@@ -82,7 +82,7 @@ DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
 }
 
 built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
-    auto method = boost::apply_visitor(MethodVisitor<ServerSDK>(), method_);
+    auto method = std::visit(MethodVisitor<ServerSDK>(), method_);
     return {method};
 }
 
