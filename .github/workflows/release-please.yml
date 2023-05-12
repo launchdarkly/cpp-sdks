@@ -16,7 +16,7 @@ jobs:
         with:
           command: manifest
           token: ${{ secrets.GITHUB_TOKEN }}
-          default-branch: rlamb/add-release-please
+          default-branch: main
 
   release-client:
     strategy:
