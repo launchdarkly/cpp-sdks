@@ -2,8 +2,8 @@
 
 #include <boost/json/value.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
 #include <string>
+#include "launchdarkly/network/http_requester.hpp"
 
 namespace launchdarkly::events::detail {
 

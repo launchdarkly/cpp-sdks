@@ -3,7 +3,7 @@
 
 #include <utility>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::PollingBaseUrl(std::string url) {
@@ -88,4 +88,4 @@ template bool operator==(EndpointsBuilder<detail::ClientSDK> const&,
 template bool operator==(EndpointsBuilder<detail::ServerSDK> const&,
                          EndpointsBuilder<detail::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

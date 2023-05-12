@@ -1,6 +1,6 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 Events::Events(bool enabled,
                std::size_t capacity,
@@ -60,4 +60,4 @@ bool operator==(Events const& lhs, Events const& rhs) {
            lhs.DeliveryRetryDelay() == rhs.DeliveryRetryDelay() &&
            lhs.FlushWorkers() == rhs.FlushWorkers();
 }
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

@@ -11,7 +11,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 class EventsBuilder;
@@ -108,4 +108,4 @@ class EventsBuilder {
     built::Events config_;
 };
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

@@ -9,7 +9,7 @@
 #include "launchdarkly/config/shared/defaults.hpp"
 #include "launchdarkly/config/shared/sdks.hpp"
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 /**
  * Used to construct a DataSourceConfiguration for the specified SDK type.
@@ -211,4 +211,4 @@ class DataSourceBuilder<ServerSDK> {
     bool use_report_;
 };
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

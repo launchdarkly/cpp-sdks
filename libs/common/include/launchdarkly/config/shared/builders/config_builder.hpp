@@ -12,7 +12,7 @@
 
 #include "tl/expected.hpp"
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 /**
  * ConfigBuilder allows for creation of a Configuration object for use
@@ -97,4 +97,4 @@ class ConfigBuilder {
     std::optional<HttpPropertiesBuilder> http_properties_builder_;
 };
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

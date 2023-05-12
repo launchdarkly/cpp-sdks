@@ -5,6 +5,7 @@
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/logging_config.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 
 namespace launchdarkly::config::detail {
@@ -19,24 +20,27 @@ struct Config {
    public:
     Config(std::string sdk_key,
            bool offline,
-           launchdarkly::Logger logger,
-           built::ServiceEndpoints endpoints,
-           built::Events events,
+           config::shared::built::LoggingConfig logging_config,
+           config::shared::built::ServiceEndpoints endpoints,
+           config::shared::built::Events events,
            std::optional<std::string> application_tag,
-           built::DataSourceConfig<SDK> data_source_config,
-           built::HttpProperties http_properties);
+           config::shared::built::DataSourceConfig<SDK> data_source_config,
+           config::shared::built::HttpProperties http_properties);
 
     [[nodiscard]] std::string const& SdkKey() const;
 
-    [[nodiscard]] built::ServiceEndpoints const& ServiceEndpoints() const;
+    [[nodiscard]] config::shared::built::ServiceEndpoints const&
+    ServiceEndpoints() const;
 
-    [[nodiscard]] built::Events const& Events() const;
+    [[nodiscard]] config::shared::built::Events const& Events() const;
 
     [[nodiscard]] std::optional<std::string> const& ApplicationTag() const;
 
-    built::DataSourceConfig<SDK> const& DataSourceConfig() const;
+    config::shared::built::DataSourceConfig<SDK> const& DataSourceConfig()
+        const;
 
-    [[nodiscard]] built::HttpProperties const& HttpProperties() const;
+    [[nodiscard]] config::shared::built::HttpProperties const& HttpProperties()
+        const;
 
     [[nodiscard]] bool Offline() const;
 
@@ -45,12 +49,12 @@ struct Config {
    private:
     std::string sdk_key_;
     bool offline_;
-    launchdarkly::Logger logger_;
-    built::ServiceEndpoints service_endpoints_;
+    config::shared::built::LoggingConfig logging_config_;
+    config::shared::built::ServiceEndpoints service_endpoints_;
     std::optional<std::string> application_tag_;
-    built::Events events_;
-    built::DataSourceConfig<SDK> data_source_config_;
-    built::HttpProperties http_properties_;
+    config::shared::built::Events events_;
+    config::shared::built::DataSourceConfig<SDK> data_source_config_;
+    config::shared::built::HttpProperties http_properties_;
 };
 
 }  // namespace launchdarkly::config::detail

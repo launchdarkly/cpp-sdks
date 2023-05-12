@@ -2,8 +2,8 @@
 
 #include <boost/json.hpp>
 
-#include <launchdarkly/events/detail/summarizer.hpp>
 #include <launchdarkly/events/events.hpp>
+#include "launchdarkly/events/summarizer.hpp"
 
 namespace launchdarkly::events::client {
 void tag_invoke(boost::json::value_from_tag const&,

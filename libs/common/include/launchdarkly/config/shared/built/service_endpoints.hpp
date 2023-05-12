@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 /**
  * ServiceEndpoints contains configured ServiceEndpoints for the LaunchDarkly
@@ -48,4 +48,4 @@ class ServiceEndpoints final {
 };
 
 bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs);
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

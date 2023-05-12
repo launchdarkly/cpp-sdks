@@ -1,5 +1,5 @@
-#include <launchdarkly/events/detail/parse_date_header.hpp>
-#include <launchdarkly/events/detail/request_worker.hpp>
+#include "launchdarkly/events/request_worker.hpp"
+#include "launchdarkly/events/parse_date_header.hpp"
 
 namespace launchdarkly::events::detail {
 

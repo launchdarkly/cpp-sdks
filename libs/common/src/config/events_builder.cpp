@@ -3,7 +3,7 @@
 
 #include <utility>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
@@ -67,4 +67,4 @@ template bool operator==(EventsBuilder<detail::ClientSDK> const&,
 template bool operator==(EventsBuilder<detail::ServerSDK> const&,
                          EventsBuilder<detail::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

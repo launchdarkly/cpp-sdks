@@ -5,11 +5,11 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/events/client_events.hpp>
-#include <launchdarkly/events/detail/asio_event_processor.hpp>
-#include <launchdarkly/events/detail/parse_date_header.hpp>
-#include <launchdarkly/events/detail/worker_pool.hpp>
 #include <thread>
 #include "../src/console_backend.hpp"
+#include "launchdarkly/events/asio_event_processor.hpp"
+#include "launchdarkly/events/parse_date_header.hpp"
+#include "launchdarkly/events/worker_pool.hpp"
 
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network::detail;

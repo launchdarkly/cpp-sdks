@@ -3,11 +3,11 @@
 #include <boost/asio/steady_timer.hpp>
 #include <chrono>
 #include <functional>
-#include <launchdarkly/network/detail/asio_requester.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
 #include <tuple>
+#include "../logging/logger.hpp"
 #include "event_batch.hpp"
-#include "launchdarkly/logging/logger.hpp"
+#include "launchdarkly/network/asio_requester.hpp"
+#include "launchdarkly/network/http_requester.hpp"
 
 namespace launchdarkly::events::detail {
 

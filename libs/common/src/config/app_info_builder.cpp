@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cctype>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 // Defines the maximum character length for an Application Tag value.
 constexpr std::size_t kMaxTagValueLength = 64;
@@ -93,4 +93,4 @@ std::optional<std::string> AppInfoBuilder::Build(Logger& logger) const {
     return boost::algorithm::join(validated, " ");
 }
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

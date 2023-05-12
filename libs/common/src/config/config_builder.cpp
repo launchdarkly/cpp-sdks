@@ -2,7 +2,7 @@
 #include "../console_backend.hpp"
 #include "launchdarkly/config/shared/defaults.hpp"
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
@@ -93,4 +93,4 @@ ConfigBuilder<SDK>::Build() const {
 template class ConfigBuilder<detail::ClientSDK>;
 template class ConfigBuilder<detail::ServerSDK>;
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

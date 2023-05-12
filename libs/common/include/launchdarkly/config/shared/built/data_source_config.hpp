@@ -8,7 +8,7 @@
 #include <variant>
 #include <string>
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 template <typename SDK>
 struct StreamingConfig;
@@ -56,4 +56,4 @@ struct DataSourceConfig<ServerSDK> {
     std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
 };
 
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

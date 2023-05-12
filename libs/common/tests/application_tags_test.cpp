@@ -53,7 +53,7 @@ INSTANTIATE_TEST_SUITE_P(
             Error::kConfig_ApplicationInfo_ValueTooLong}));
 
 TEST_P(TagValidityFixture, ValidTagValues) {
-    using namespace launchdarkly::config::detail::builders;
+    using namespace launchdarkly::config::shared::builders;
     auto param = GetParam();
     std::optional<launchdarkly::Error> maybe_error =
         IsValidTag(param.key, param.value);
@@ -100,7 +100,7 @@ INSTANTIATE_TEST_SUITE_P(
     });
 
 TEST_P(TagBuildFixture, BuiltTags) {
-    using namespace launchdarkly::config::detail::builders;
+    using namespace launchdarkly::config::shared::builders;
     auto params = GetParam();
 
     auto logger = NullLogger();

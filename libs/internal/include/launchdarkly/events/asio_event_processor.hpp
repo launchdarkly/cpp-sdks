@@ -11,14 +11,14 @@
 #include <tuple>
 
 #include <launchdarkly/context_filter.hpp>
-#include <launchdarkly/events/detail/event_batch.hpp>
-#include <launchdarkly/events/detail/outbox.hpp>
-#include <launchdarkly/events/detail/summarizer.hpp>
-#include <launchdarkly/events/detail/worker_pool.hpp>
-#include <launchdarkly/events/events.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
+#include "../logging/logger.hpp"
+#include "event_batch.hpp"
+#include "events.hpp"
 #include "launchdarkly/config/shared/config.hpp"
-#include "launchdarkly/logging/logger.hpp"
+#include "launchdarkly/network/http_requester.hpp"
+#include "outbox.hpp"
+#include "summarizer.hpp"
+#include "worker_pool.hpp"
 
 namespace launchdarkly::events::detail {
 

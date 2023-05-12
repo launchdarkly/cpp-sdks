@@ -4,7 +4,7 @@
 #include "launchdarkly/config/shared/defaults.hpp"
 #include "launchdarkly/config/shared/sdks.hpp"
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder()
@@ -86,4 +86,4 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
 
 template class HttpPropertiesBuilder<detail::ClientSDK>;
 template class HttpPropertiesBuilder<detail::ServerSDK>;
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 class EndpointsBuilder;
@@ -75,4 +75,4 @@ class EndpointsBuilder {
     std::optional<std::string> events_base_url_;
 };
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

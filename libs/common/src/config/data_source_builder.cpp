@@ -1,6 +1,6 @@
 #include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
@@ -92,4 +92,4 @@ template class PollingBuilder<detail::ServerSDK>;
 template class StreamingBuilder<detail::ClientSDK>;
 template class StreamingBuilder<detail::ServerSDK>;
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

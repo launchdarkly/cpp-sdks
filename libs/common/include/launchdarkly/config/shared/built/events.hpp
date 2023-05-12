@@ -7,12 +7,12 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 template <typename T>
 class EventsBuilder;
 }
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 class Events final {
    public:
@@ -100,4 +100,4 @@ class Events final {
 
 bool operator==(Events const& lhs, Events const& rhs);
 
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

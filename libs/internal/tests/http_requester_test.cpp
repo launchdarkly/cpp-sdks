@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
 #include "launchdarkly/config/shared/sdks.hpp"
+#include "launchdarkly/network/http_requester.hpp"
 
-using launchdarkly::config::detail::ClientSDK;
-using launchdarkly::config::detail::builders::HttpPropertiesBuilder;
+using launchdarkly::config::shared::ClientSDK;
+using launchdarkly::config::shared::builders::HttpPropertiesBuilder;
 using launchdarkly::network::detail::AppendUrl;
 using launchdarkly::network::detail::HttpMethod;
 using launchdarkly::network::detail::HttpRequest;

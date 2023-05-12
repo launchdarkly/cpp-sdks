@@ -7,7 +7,7 @@
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 /**
  * Class used for building a set of HttpProperties.
@@ -132,4 +132,4 @@ class HttpPropertiesBuilder {
     std::string user_agent_;
 };
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

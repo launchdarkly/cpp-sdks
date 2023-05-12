@@ -8,14 +8,14 @@
 
 #include "tl/expected.hpp"
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 class AppInfoBuilder {
    public:
     AppInfoBuilder() = default;
     AppInfoBuilder& Identifier(std::string app_id);
     AppInfoBuilder& Version(std::string version);
-    [[nodiscard]] std::optional<std::string> Build(Logger& logger) const;
+    [[nodiscard]] std::optional<std::string> Build() const;
 
    private:
     struct Tag {
@@ -33,4 +33,4 @@ bool ValidChar(char c);
 std::optional<Error> IsValidTag(std::string const& key,
                                 std::string const& value);
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders
