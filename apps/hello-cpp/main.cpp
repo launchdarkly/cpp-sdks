@@ -1,5 +1,4 @@
 #include <launchdarkly/client_side/client.hpp>
-#include <launchdarkly/sse/client.hpp>
 
 #include <boost/asio/io_context.hpp>
 
