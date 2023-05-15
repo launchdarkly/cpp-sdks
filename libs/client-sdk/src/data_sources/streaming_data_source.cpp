@@ -105,16 +105,6 @@ StreamingDataSource::StreamingDataSource(
     client_builder.header("user-agent", http_properties.UserAgent());
     // TODO: Handle proxy support.
     client_ = client_builder.build();
-
-    if (!client_) {
-        LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
-        status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kShutdown,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-            kCouldNotParseEndpoint);
-    } else {
-        client_->run();
-    }
 }
 
 void StreamingDataSource::Start() {
