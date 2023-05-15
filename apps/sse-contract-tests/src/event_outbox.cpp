@@ -125,7 +125,7 @@ void EventOutbox::on_flush_timer(boost::system::error_code ec) {
 
 void EventOutbox::on_write(beast::error_code ec, std::size_t) {
     if (ec) {
-        return do_shutdown(ec, "Write");
+        return do_shutdown(ec, "write");
     }
     outbox_.pop();
     on_flush_timer(boost::system::error_code{});
