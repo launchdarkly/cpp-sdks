@@ -1,5 +1,5 @@
+#include "data_sources/base_64.hpp"
 #include <gtest/gtest.h>
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
 
 using launchdarkly::client_side::data_sources::Base64UrlEncode;
 

@@ -4,7 +4,7 @@
 #include "launchdarkly/config/sdks.hpp"
 #include "launchdarkly/network/http_requester.hpp"
 
-using launchdarkly::config::shared::ClientSDK;
+using launchdarkly::config::ClientSDK;
 using launchdarkly::config::shared::builders::HttpPropertiesBuilder;
 using launchdarkly::network::AppendUrl;
 using launchdarkly::network::HttpMethod;

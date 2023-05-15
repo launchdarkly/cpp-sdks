@@ -22,8 +22,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        std::get<
-            config::built::StreamingConfig<config::ClientSDK>>(
+        std::get<config::shared::built::StreamingConfig<config::ClientSDK>>(
             client_config.method)
             .initial_reconnect_delay);
 }
@@ -39,12 +38,10 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
 
     EXPECT_FALSE(client_config.use_report);
     EXPECT_FALSE(client_config.with_reasons);
-    EXPECT_EQ(
-        std::chrono::seconds{88000},
-        std::get<
-            config::built::PollingConfig<config::ClientSDK>>(
-            client_config.method)
-            .poll_interval);
+    EXPECT_EQ(std::chrono::seconds{88000},
+              std::get<config::shared::built::PollingConfig<config::ClientSDK>>(
+                  client_config.method)
+                  .poll_interval);
 }
 
 TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
@@ -56,8 +53,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        std::get<
-            config::built::StreamingConfig<config::ServerSDK>>(
+        std::get<config::shared::built::StreamingConfig<config::ServerSDK>>(
             server_config.method)
             .initial_reconnect_delay);
 }
@@ -69,10 +65,8 @@ TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
                 std::chrono::seconds{30000}))
             .Build();
 
-    EXPECT_EQ(
-        std::chrono::seconds{30000},
-        std::get<
-            config::built::PollingConfig<config::ServerSDK>>(
-            server_config.method)
-            .poll_interval);
+    EXPECT_EQ(std::chrono::seconds{30000},
+              std::get<config::shared::built::PollingConfig<config::ServerSDK>>(
+                  server_config.method)
+                  .poll_interval);
 }

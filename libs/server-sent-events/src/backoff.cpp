@@ -4,7 +4,7 @@ static double const kDefaultJitterRatio = 0.5;
 static const std::chrono::milliseconds kDefaultResetInterval =
     std::chrono::milliseconds{60'000};
 
-namespace launchdarkly::sse::detail {
+namespace launchdarkly::sse {
 
 std::chrono::milliseconds Backoff::calculate_backoff() {
     return initial_ * static_cast<uint64_t>(std::pow(2, attempt_ - 1));
@@ -69,4 +69,4 @@ Backoff::Backoff(std::chrono::milliseconds initial,
                   return distribution(this->random_gen_);
               }) {}
 
-}  // namespace launchdarkly::sse::detail
+}  // namespace launchdarkly::sse

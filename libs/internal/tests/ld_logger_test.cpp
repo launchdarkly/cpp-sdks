@@ -1,12 +1,11 @@
 #include <gtest/gtest.h>
-#include "../src/console_backend.hpp"
-#include "launchdarkly/logging/log_backend.hpp"
-#include "launchdarkly/logging/logger.hpp"
+#include <launchdarkly/logging/console_backend.hpp>
+#include <launchdarkly/logging/logger.hpp>
 #include "ostream_tester.hpp"
 
-using launchdarkly::ConsoleBackend;
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
+using launchdarkly::logging::ConsoleBackend;
 
 using Messages = std::map<LogLevel, std::vector<std::string>>;
 

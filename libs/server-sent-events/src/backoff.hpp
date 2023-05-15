@@ -5,7 +5,7 @@
 #include <optional>
 #include <random>
 
-namespace launchdarkly::sse::detail {
+namespace launchdarkly::sse {
 
 /**
  * Implements an algorithm for calculating the delay between connection
