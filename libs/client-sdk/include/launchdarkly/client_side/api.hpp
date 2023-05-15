@@ -116,9 +116,9 @@ class Client {
     Context context_;
     mutable std::shared_mutex context_mutex_;
 
-    std::function<std::unique_ptr<IDataSource>()> data_source_factory_;
+    std::function<std::shared_ptr<IDataSource>()> data_source_factory_;
 
-    std::unique_ptr<IDataSource> data_source_;
+    std::shared_ptr<IDataSource> data_source_;
 
     std::unique_ptr<IEventProcessor> event_processor_;
 

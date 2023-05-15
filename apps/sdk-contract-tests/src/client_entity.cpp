@@ -33,8 +33,10 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    client_->AsyncIdentify(*maybe_ctx);
-    client_->WaitForReadySync(std::chrono::seconds(1));
+    std::promise<void> identify_promise;
+    auto identify_future = identify_promise.get_future();
+    client_->AsyncIdentify(*maybe_ctx, [&]() { identify_promise.set_value(); });
+    identify_future.wait();
     return nlohmann::json{};
 }
 

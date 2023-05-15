@@ -16,7 +16,7 @@ auto const kAsioConcurrencyHint = 1;
 
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 
-static std::unique_ptr<IDataSource> MakeDataSource(
+static std::shared_ptr<IDataSource> MakeDataSource(
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
@@ -25,11 +25,11 @@ static std::unique_ptr<IDataSource> MakeDataSource(
     Logger& logger) {
     if (config.DataSourceConfig().method.which() == 0) {
         // TODO: use initial reconnect delay.
-        return std::make_unique<launchdarkly::client_side::data_sources::
+        return std::make_shared<launchdarkly::client_side::data_sources::
                                     detail::StreamingDataSource>(
             config, executor, context, &flag_updater, status_manager, logger);
     }
-    return std::make_unique<
+    return std::make_shared<
         launchdarkly::client_side::data_sources::detail::PollingDataSource>(
         config, executor, context, &flag_updater, status_manager, logger);
 }
@@ -119,24 +119,21 @@ void Client::AsyncFlush() {
 
 void Client::OnDataSourceShutdown(Context context,
                                   std::function<void()> user_completion) {
+    WriteContext(context);
     data_source_ = data_source_factory_();
+    if (data_source_) {
+        data_source_->Start();
+        event_processor_->AsyncSend(events::client::IdentifyEventParams{
+            std::chrono::system_clock::now(), context});
+    }
+    user_completion();
 }
 
 void Client::AsyncIdentify(Context context, std::function<void()> completion) {
     LD_LOG(logger_, LogLevel::kInfo) << "AsyncIdentify: calling AsyncShutdown";
-    // WriteContext(context);
     data_source_->AsyncShutdown([this, completion, context]() {
         OnDataSourceShutdown(std::move(context), std::move(completion));
     });
-
-    //        if (future.valid()) {
-    //            future.wait();
-    //        }
-
-    //        data_source_ = data_source_factory_();
-    //        data_source_->Start();
-    //        event_processor_->AsyncSend(events::client::IdentifyEventParams{
-    //            std::chrono::system_clock::now(), context});
 }
 
 // TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up

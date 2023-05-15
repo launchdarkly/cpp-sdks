@@ -93,65 +93,71 @@ PollingDataSource::PollingDataSource(Config const& config,
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
-    requester_.Request(request_, [this](network::detail::HttpResult res) {
-        auto header_etag = res.Headers().find("etag");
-        bool has_etag = header_etag != res.Headers().end();
-
-        if (etag_ && has_etag) {
-            if (etag_.value() == header_etag->second) {
-                // Got the same etag, we know the content has not changed.
-                // So we can just start the next timer.
-
-                // We don't need to update the "request_" because it would have
-                // the same Etag.
-                StartPollingTimer();
-                return;
-            }
+    auto weak_self = weak_from_this();
+    requester_.Request(request_, [weak_self](network::detail::HttpResult res) {
+        if (auto self = weak_self.lock()) {
+            self->HandlePollResult(std::move(res));
         }
-
-        if (has_etag) {
-            config::detail::builders::HttpPropertiesBuilder<
-                config::detail::ClientSDK>
-                builder(request_.Properties());
-            builder.Header("If-None-Match", header_etag->second);
-            request_ = network::detail::HttpRequest(request_, builder.Build());
-
-            etag_ = header_etag->second;
-        }
-
-        if (res.IsError()) {
-            status_manager_.SetState(
-                DataSourceStatus::DataSourceState::kInterrupted,
-                DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-                res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "Polling for feature flag updates failed: "
-                << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
-        } else if (res.Status() == 200) {
-            data_source_handler_.HandleMessage("put", res.Body().value());
-        } else if (res.Status() == 304) {
-            // This should be handled ahead of here, but if we get a 304,
-            // and it didn't have an etag, we still don't want to try to
-            // parse the body.
-        } else {
-            if (network::detail::IsRecoverableStatus(res.Status())) {
-                status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    res.Status(),
-                    launchdarkly::network::detail::ErrorForStatusCode(
-                        res.Status(), "polling request", "will retry"));
-            } else {
-                status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kShutdown, res.Status(),
-                    launchdarkly::network::detail::ErrorForStatusCode(
-                        res.Status(), "polling request", std::nullopt));
-                // We are giving up. Do not start a new polling request.
-                return;
-            }
-        }
-
-        StartPollingTimer();
     });
+}
+
+void PollingDataSource::HandlePollResult(network::detail::HttpResult res) {
+    auto header_etag = res.Headers().find("etag");
+    bool has_etag = header_etag != res.Headers().end();
+
+    if (etag_ && has_etag) {
+        if (etag_.value() == header_etag->second) {
+            // Got the same etag, we know the content has not changed.
+            // So we can just start the next timer.
+
+            // We don't need to update the "request_" because it would have
+            // the same Etag.
+            StartPollingTimer();
+            return;
+        }
+    }
+
+    if (has_etag) {
+        config::detail::builders::HttpPropertiesBuilder<
+            config::detail::ClientSDK>
+            builder(request_.Properties());
+        builder.Header("If-None-Match", header_etag->second);
+        request_ = network::detail::HttpRequest(request_, builder.Build());
+
+        etag_ = header_etag->second;
+    }
+
+    if (res.IsError()) {
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling for feature flag updates failed: "
+            << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+    } else if (res.Status() == 200) {
+        data_source_handler_.HandleMessage("put", res.Body().value());
+    } else if (res.Status() == 304) {
+        // This should be handled ahead of here, but if we get a 304,
+        // and it didn't have an etag, we still don't want to try to
+        // parse the body.
+    } else {
+        if (network::detail::IsRecoverableStatus(res.Status())) {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kInterrupted, res.Status(),
+                launchdarkly::network::detail::ErrorForStatusCode(
+                    res.Status(), "polling request", "will retry"));
+        } else {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kShutdown, res.Status(),
+                launchdarkly::network::detail::ErrorForStatusCode(
+                    res.Status(), "polling request", std::nullopt));
+            // We are giving up. Do not start a new polling request.
+            return;
+        }
+    }
+
+    StartPollingTimer();
 }
 
 void PollingDataSource::StartPollingTimer() {

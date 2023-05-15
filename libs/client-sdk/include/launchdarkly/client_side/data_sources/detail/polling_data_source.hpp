@@ -15,7 +15,9 @@
 
 namespace launchdarkly::client_side::data_sources::detail {
 
-class PollingDataSource : public IDataSource {
+class PollingDataSource
+    : public IDataSource,
+      public std::enable_shared_from_this<PollingDataSource> {
    public:
     PollingDataSource(Config const& config,
                       boost::asio::any_io_executor ioc,
@@ -32,6 +34,7 @@ class PollingDataSource : public IDataSource {
 
    private:
     void DoPoll();
+    void HandlePollResult(network::detail::HttpResult res);
 
     std::string string_context_;
     DataSourceStatusManager& status_manager_;
