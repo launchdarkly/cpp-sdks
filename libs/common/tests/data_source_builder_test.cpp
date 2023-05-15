@@ -2,7 +2,7 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/server.hpp>
 #include <launchdarkly/value.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
+#include <launchdarkly/config/shared/sdks.hpp>
 
 #include <boost/json.hpp>
 #include <boost/url.hpp>

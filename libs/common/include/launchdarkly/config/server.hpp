@@ -5,7 +5,7 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::server_side {
 

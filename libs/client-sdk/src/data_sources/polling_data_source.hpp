@@ -12,7 +12,7 @@
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 #include "data_source_status_manager.hpp"
-#include "launchdarkly/logging/logger.hpp"
+#include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 

@@ -1,8 +1,8 @@
 #include <utility>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include "launchdarkly/config/shared/defaults.hpp"
-#include "launchdarkly/config/shared/sdks.hpp"
+#include <launchdarkly/config/shared/defaults.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::config::shared::builders {
 

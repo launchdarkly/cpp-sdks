@@ -7,7 +7,7 @@
 
 #include "base_64.hpp"
 #include "data_source_update_sink.hpp"
-#include "launchdarkly/config/shared/sdks.hpp"
+#include <launchdarkly/config/shared/sdks.hpp>
 #include "polling_data_source.hpp"
 
 namespace launchdarkly::client_side::data_sources {

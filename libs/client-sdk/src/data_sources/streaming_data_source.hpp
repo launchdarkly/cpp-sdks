@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
 #include <launchdarkly/sse/client.hpp>
-#include "launchdarkly/logging/logger.hpp"
+#include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 

@@ -2,7 +2,7 @@
 
 #include <boost/signals2.hpp>
 
-#include "launchdarkly/connection.hpp"
+#include <launchdarkly/connection.hpp>
 
 namespace launchdarkly::client_side {
 

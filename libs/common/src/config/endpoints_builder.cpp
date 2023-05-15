@@ -1,5 +1,5 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
-#include "launchdarkly/config/shared/defaults.hpp"
+#include <launchdarkly/config/shared/defaults.hpp>
 
 #include <utility>
 

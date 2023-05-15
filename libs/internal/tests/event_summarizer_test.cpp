@@ -6,7 +6,7 @@
 #include <launchdarkly/serialization/events/json_events.hpp>
 #include <thread>
 #include <unordered_map>
-#include "launchdarkly/events/summarizer.hpp"
+#include <launchdarkly/events/summarizer.hpp>
 
 using namespace launchdarkly::events;
 using namespace launchdarkly::events::client;

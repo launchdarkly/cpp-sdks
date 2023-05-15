@@ -14,7 +14,7 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
-#include "launchdarkly/context_filter.hpp"
+#include <launchdarkly/context_filter.hpp>
 
 #include "event_batch.hpp"
 #include "events.hpp"
