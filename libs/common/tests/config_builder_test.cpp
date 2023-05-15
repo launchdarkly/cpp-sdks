@@ -75,7 +75,7 @@ TEST_F(ConfigBuilderTest,
     EXPECT_EQ(
         std::chrono::milliseconds{1000},
         std::get<launchdarkly::config::shared::built::StreamingConfig<
-            launchdarkly::config::ClientSDK>>(cfg->DataSourceConfig().method)
+            launchdarkly::config::shared::ClientSDK>>(cfg->DataSourceConfig().method)
             .initial_reconnect_delay);
 }
 
@@ -89,7 +89,7 @@ TEST_F(ConfigBuilderTest,
     EXPECT_EQ(
         std::chrono::milliseconds{1000},
         std::get<launchdarkly::config::shared::built::StreamingConfig<
-            launchdarkly::config::ServerSDK>>(cfg->DataSourceConfig().method)
+            launchdarkly::config::shared::ServerSDK>>(cfg->DataSourceConfig().method)
             .initial_reconnect_delay);
 }
 
@@ -106,7 +106,7 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     EXPECT_EQ(
         std::chrono::milliseconds{5000},
         std::get<launchdarkly::config::shared::built::StreamingConfig<
-            launchdarkly::config::ServerSDK>>(cfg->DataSourceConfig().method)
+            launchdarkly::config::shared::ServerSDK>>(cfg->DataSourceConfig().method)
             .initial_reconnect_delay);
 }
 
@@ -129,7 +129,7 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     EXPECT_EQ(
         std::chrono::milliseconds{5000},
         std::get<launchdarkly::config::shared::built::StreamingConfig<
-            launchdarkly::config::ClientSDK>>(cfg->DataSourceConfig().method)
+            launchdarkly::config::shared::ClientSDK>>(cfg->DataSourceConfig().method)
             .initial_reconnect_delay);
 }
 

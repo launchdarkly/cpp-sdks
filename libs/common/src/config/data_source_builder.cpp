@@ -86,10 +86,10 @@ built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
     return {method};
 }
 
-template class PollingBuilder<config::ClientSDK>;
-template class PollingBuilder<config::ServerSDK>;
+template class PollingBuilder<config::shared::ClientSDK>;
+template class PollingBuilder<config::shared::ServerSDK>;
 
-template class StreamingBuilder<config::ClientSDK>;
-template class StreamingBuilder<config::ServerSDK>;
+template class StreamingBuilder<config::shared::ClientSDK>;
+template class StreamingBuilder<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::config::shared::builders

@@ -79,13 +79,13 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
            lhs.polling_base_url_ == rhs.polling_base_url_;
 }
 
-template class EndpointsBuilder<config::ClientSDK>;
-template class EndpointsBuilder<config::ServerSDK>;
+template class EndpointsBuilder<config::shared::ClientSDK>;
+template class EndpointsBuilder<config::shared::ServerSDK>;
 
-template bool operator==(EndpointsBuilder<config::ClientSDK> const&,
-                         EndpointsBuilder<config::ClientSDK> const&);
+template bool operator==(EndpointsBuilder<config::shared::ClientSDK> const&,
+                         EndpointsBuilder<config::shared::ClientSDK> const&);
 
-template bool operator==(EndpointsBuilder<config::ServerSDK> const&,
-                         EndpointsBuilder<config::ServerSDK> const&);
+template bool operator==(EndpointsBuilder<config::shared::ServerSDK> const&,
+                         EndpointsBuilder<config::shared::ServerSDK> const&);
 
 }  // namespace launchdarkly::config::shared::builders

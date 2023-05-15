@@ -96,7 +96,7 @@ ConfigBuilder<SDK>::Build() const {
             std::move(http_properties)};
 }
 
-template class ConfigBuilder<config::ClientSDK>;
-template class ConfigBuilder<config::ServerSDK>;
+template class ConfigBuilder<config::shared::ClientSDK>;
+template class ConfigBuilder<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::config::shared::builders

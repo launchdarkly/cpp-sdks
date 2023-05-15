@@ -1,6 +1,6 @@
 #pragma once
 
-namespace launchdarkly::config {
+namespace launchdarkly::config::shared {
 /**
  * Represents a client-side SDK configured for production services.
  */

@@ -4,11 +4,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <launchdarkly/config/sdks.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
+#include "launchdarkly/config/shared/sdks.hpp"
 
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
@@ -201,7 +201,7 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
 
     // TODO(cwaldren): Template the event processor over SDK type? Add it into
     // HttpProperties?
-    config::shared::builders::HttpPropertiesBuilder<config::ClientSDK> props(
+    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK> props(
         http_props_);
 
     props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
@@ -263,6 +263,6 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     return out;
 }
 
-template class AsioEventProcessor<config::ClientSDK>;
+template class AsioEventProcessor<config::shared::ClientSDK>;
 
 }  // namespace launchdarkly::events

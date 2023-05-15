@@ -4,7 +4,7 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include "launchdarkly/config/sdks.hpp"
+#include "sdks.hpp"
 
 namespace launchdarkly::config::shared {
 

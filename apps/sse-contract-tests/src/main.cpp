@@ -1,6 +1,6 @@
 #include "server.hpp"
 
-#include "../../../libs/common/src/console_backend.hpp"
+#include <launchdarkly/logging/console_backend.hpp>
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -12,7 +12,7 @@
 namespace net = boost::asio;
 namespace beast = boost::beast;
 
-using launchdarkly::ConsoleBackend;
+using launchdarkly::logging::ConsoleBackend;
 
 using launchdarkly::LogLevel;
 

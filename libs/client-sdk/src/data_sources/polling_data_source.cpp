@@ -7,7 +7,7 @@
 
 #include "base_64.hpp"
 #include "data_source_update_sink.hpp"
-#include "launchdarkly/config/sdks.hpp"
+#include "launchdarkly/config/shared/sdks.hpp"
 #include "polling_data_source.hpp"
 
 namespace launchdarkly::client_side::data_sources {
@@ -22,7 +22,7 @@ static network::HttpRequest MakeRequest(Config const& config,
     auto const& data_source_config = config.DataSourceConfig();
 
     auto const& polling_config =
-        std::get<config::shared::built::PollingConfig<config::ClientSDK>>(
+        std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
             config.DataSourceConfig().method);
 
     auto string_context =
@@ -52,7 +52,7 @@ static network::HttpRequest MakeRequest(Config const& config,
         }
     }
 
-    config::shared::builders::HttpPropertiesBuilder<config::ClientSDK> builder(
+    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK> builder(
         config.HttpProperties());
 
     builder.Header("authorization", config.SdkKey());
@@ -75,12 +75,12 @@ PollingDataSource::PollingDataSource(Config const& config,
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
-          std::get<config::shared::built::PollingConfig<config::ClientSDK>>(
+          std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
     auto const& polling_config =
-        std::get<config::shared::built::PollingConfig<config::ClientSDK>>(
+        std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
             config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
@@ -111,7 +111,7 @@ void PollingDataSource::DoPoll() {
         }
 
         if (has_etag) {
-            config::shared::builders::HttpPropertiesBuilder<config::ClientSDK>
+            config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
                 builder(request_.Properties());
             builder.Header("If-None-Match", header_etag->second);
             request_ = network::HttpRequest(request_, builder.Build());

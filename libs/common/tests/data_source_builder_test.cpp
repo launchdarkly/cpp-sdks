@@ -2,7 +2,7 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/server.hpp>
 #include <launchdarkly/value.hpp>
-#include "launchdarkly/config/sdks.hpp"
+#include "launchdarkly/config/shared/sdks.hpp"
 
 #include <boost/json.hpp>
 #include <boost/url.hpp>
@@ -22,7 +22,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        std::get<config::shared::built::StreamingConfig<config::ClientSDK>>(
+        std::get<config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
             client_config.method)
             .initial_reconnect_delay);
 }
@@ -39,7 +39,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
     EXPECT_FALSE(client_config.use_report);
     EXPECT_FALSE(client_config.with_reasons);
     EXPECT_EQ(std::chrono::seconds{88000},
-              std::get<config::shared::built::PollingConfig<config::ClientSDK>>(
+              std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
                   client_config.method)
                   .poll_interval);
 }
@@ -53,7 +53,7 @@ TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
 
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
-        std::get<config::shared::built::StreamingConfig<config::ServerSDK>>(
+        std::get<config::shared::built::StreamingConfig<config::shared::ServerSDK>>(
             server_config.method)
             .initial_reconnect_delay);
 }
@@ -66,7 +66,7 @@ TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
             .Build();
 
     EXPECT_EQ(std::chrono::seconds{30000},
-              std::get<config::shared::built::PollingConfig<config::ServerSDK>>(
+              std::get<config::shared::built::PollingConfig<config::shared::ServerSDK>>(
                   server_config.method)
                   .poll_interval);
 }

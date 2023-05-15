@@ -5,11 +5,11 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
-#include "sdks.hpp"
+#include "launchdarkly/config/shared/sdks.hpp"
 
 namespace launchdarkly::server_side {
 
-using SDK = config::ServerSDK;
+using SDK = config::shared::ServerSDK;
 
 using Defaults = config::shared::Defaults<SDK>;
 using AppInfoBuilder = config::shared::builders::AppInfoBuilder;

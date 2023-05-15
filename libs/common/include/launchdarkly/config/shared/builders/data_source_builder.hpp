@@ -5,9 +5,9 @@
 #include <type_traits>
 #include <variant>
 
-#include "launchdarkly/config/sdks.hpp"
 #include "launchdarkly/config/shared/built/data_source_config.hpp"
 #include "launchdarkly/config/shared/defaults.hpp"
+#include "launchdarkly/config/shared/sdks.hpp"
 
 namespace launchdarkly::config::shared::builders {
 

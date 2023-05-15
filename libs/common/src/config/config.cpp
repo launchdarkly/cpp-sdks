@@ -62,7 +62,7 @@ shared::built::Logging const& Config<SDK>::Logging() const {
     return logging_;
 }
 
-template class Config<config::ClientSDK>;
-template class Config<config::ServerSDK>;
+template class Config<config::shared::ClientSDK>;
+template class Config<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::config
