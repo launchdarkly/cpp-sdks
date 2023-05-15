@@ -1,7 +1,7 @@
 #pragma once
 
-#include "definitions.hpp"
 #include <launchdarkly/logging/logger.hpp>
+#include "definitions.hpp"
 
 #include <launchdarkly/sse/client.hpp>
 
