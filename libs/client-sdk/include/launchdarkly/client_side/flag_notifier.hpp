@@ -4,6 +4,9 @@
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <functional>
+#include <memory>
+
 namespace launchdarkly::client_side::flag_manager {
 
 /**
