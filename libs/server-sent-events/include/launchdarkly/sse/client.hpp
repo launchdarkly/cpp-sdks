@@ -81,7 +81,7 @@ class Builder {
     Builder& connect_timeout(std::chrono::milliseconds timeout);
 
     /**
-     * Specifies the maximum time duration to Write the initial request.
+     * Specifies the maximum time duration to write the initial request.
      * @param timeout
      * @return Reference to this builder.
      */

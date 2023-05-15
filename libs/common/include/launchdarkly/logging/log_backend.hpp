@@ -23,7 +23,7 @@ class ILogBackend {
 
     /**
      * Write a message to the specified level.
-     * @param level The level to Write the message for.
+     * @param level The level to write the message for.
      * @param message The message to Write.
      */
     virtual void Write(LogLevel level, std::string message) = 0;
