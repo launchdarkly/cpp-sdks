@@ -24,10 +24,14 @@ template <typename SDK>
 class ConfigBuilder {
    public:
     using Result = Config<SDK>;
-    using EndpointsBuilder = EndpointsBuilder<SDK>;
-    using EventsBuilder = EventsBuilder<SDK>;
-    using DataSourceBuilder = DataSourceBuilder<SDK>;
-    using HttpPropertiesBuilder = HttpPropertiesBuilder<SDK>;
+    using EndpointsBuilder =
+        launchdarkly::config::shared::builders::EndpointsBuilder<SDK>;
+    using EventsBuilder =
+        launchdarkly::config::shared::builders::EventsBuilder<SDK>;
+    using DataSourceBuilder =
+        launchdarkly::config::shared::builders::DataSourceBuilder<SDK>;
+    using HttpPropertiesBuilder =
+        launchdarkly::config::shared::builders::HttpPropertiesBuilder<SDK>;
 
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
