@@ -48,21 +48,20 @@ install(TARGETS ${LIBNAME})
 
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
-install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include"
+install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly"
         DESTINATION "include"
         )
 
 message(STATUS "LaunchDarklyCommonSdk_SOURCE_DIR=${LaunchDarklyCommonSdk_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
-        PUBLIC tl::expected
+        PUBLIC tl::expected foxy
         PRIVATE
         Boost::headers
         Boost::url
         Boost::json
         OpenSSL::SSL
-        Boost::disable_autolinking
-        foxy)
+        Boost::disable_autolinking)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

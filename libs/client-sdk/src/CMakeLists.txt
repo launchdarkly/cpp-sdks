@@ -39,7 +39,7 @@ add_library(${LIBNAME}
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE launchdarkly::sse launchdarkly::internal)
+        PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 
