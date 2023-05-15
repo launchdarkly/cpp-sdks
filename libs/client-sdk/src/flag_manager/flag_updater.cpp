@@ -123,8 +123,7 @@ std::unique_ptr<IConnection> FlagUpdater::OnFlagChange(
     std::string const& key,
     std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler) {
     std::lock_guard lock{signal_mutex_};
-    return std::make_unique<
-        ::launchdarkly::client_side::SignalConnection>(
+    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
         signals_[key].connect(handler));
 }
 

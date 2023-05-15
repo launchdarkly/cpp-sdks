@@ -104,8 +104,7 @@ DataSourceStatus DataSourceStatusManager::Status() {
 std::unique_ptr<IConnection> DataSourceStatusManager::OnDataSourceStatusChange(
     std::function<void(data_sources::DataSourceStatus)> handler) {
     std::lock_guard lock{status_mutex_};
-    return std::make_unique<
-        ::launchdarkly::client_side::SignalConnection>(
+    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
         data_source_status_signal_.connect(handler));
 }
 

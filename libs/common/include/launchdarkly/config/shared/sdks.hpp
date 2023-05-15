@@ -15,4 +15,4 @@ struct ServerSDK {};
  */
 struct AnySDK {};
 
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::shared

@@ -116,4 +116,4 @@ struct Defaults<ServerSDK> {
     }
 };
 
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::shared

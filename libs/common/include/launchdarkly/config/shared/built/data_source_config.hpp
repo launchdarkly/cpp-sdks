@@ -4,9 +4,9 @@
 
 #include <chrono>
 #include <optional>
+#include <string>
 #include <type_traits>
 #include <variant>
-#include <string>
 
 namespace launchdarkly::config::shared::built {
 

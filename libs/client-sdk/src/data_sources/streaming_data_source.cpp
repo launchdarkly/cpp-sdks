@@ -33,9 +33,9 @@ StreamingDataSource::StreamingDataSource(
 
     auto& data_source_config = config.DataSourceConfig();
 
-    auto& streaming_config =
-        std::get<config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
-            data_source_config.method);
+    auto& streaming_config = std::get<
+        config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
+        data_source_config.method);
 
     auto updated_url =
         network::AppendUrl(config.ServiceEndpoints().StreamingBaseUrl(),

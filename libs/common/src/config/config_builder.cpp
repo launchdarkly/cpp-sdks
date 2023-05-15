@@ -82,8 +82,7 @@ ConfigBuilder<SDK>::Build() const {
                                ? http_properties_builder_.value().Build()
                                : Defaults<SDK>::HttpProperties();
 
-    auto logging =
-        logging_config_builder_.value_or(LoggingBuilder()).Build();
+    auto logging = logging_config_builder_.value_or(LoggingBuilder()).Build();
 
     return {tl::in_place,
             sdk_key,

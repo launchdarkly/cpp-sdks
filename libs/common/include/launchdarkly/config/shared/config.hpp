@@ -29,8 +29,8 @@ struct Config {
 
     [[nodiscard]] std::string const& SdkKey() const;
 
-    [[nodiscard]] shared::built::ServiceEndpoints const&
-    ServiceEndpoints() const;
+    [[nodiscard]] shared::built::ServiceEndpoints const& ServiceEndpoints()
+        const;
 
     [[nodiscard]] shared::built::Events const& Events() const;
 
@@ -39,8 +39,7 @@ struct Config {
     config::shared::built::DataSourceConfig<SDK> const& DataSourceConfig()
         const;
 
-    [[nodiscard]] shared::built::HttpProperties const& HttpProperties()
-        const;
+    [[nodiscard]] shared::built::HttpProperties const& HttpProperties() const;
 
     [[nodiscard]] bool Offline() const;
 

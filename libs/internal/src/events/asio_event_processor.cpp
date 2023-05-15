@@ -201,8 +201,8 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
 
     // TODO(cwaldren): Template the event processor over SDK type? Add it into
     // HttpProperties?
-    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK> props(
-        http_props_);
+    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
+        props(http_props_);
 
     props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));

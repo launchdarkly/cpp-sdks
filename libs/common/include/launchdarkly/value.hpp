@@ -5,8 +5,8 @@
 #include <optional>
 #include <ostream>
 #include <string>
-#include <vector>
 #include <variant>
+#include <vector>
 
 namespace launchdarkly {
 

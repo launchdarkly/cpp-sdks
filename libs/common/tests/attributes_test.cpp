@@ -38,7 +38,8 @@ TEST(AttributesTests, CanGetCustomAttributesByReference) {
              {"array", {true, false, "bacon"}},
              {"obj", std::map<std::string, Value>{{"string", "eggs"}}}})));
 
-    EXPECT_EQ(42,
+    EXPECT_EQ(
+        42,
         attributes.get(AttributeReference::from_reference_str("/int")).AsInt());
 
     EXPECT_EQ(3.14,

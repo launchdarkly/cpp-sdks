@@ -85,4 +85,4 @@ class Backoff {
     std::function<double(double ratio)> random_;
     std::default_random_engine random_gen_;
 };
-}  // namespace launchdarkly::sse::detail
+}  // namespace launchdarkly::sse

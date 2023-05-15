@@ -29,4 +29,4 @@ void ConsoleBackend::Write(LogLevel level, std::string message) {
         }
     }
 }
-}  // namespace launchdarkly
+}  // namespace launchdarkly::logging

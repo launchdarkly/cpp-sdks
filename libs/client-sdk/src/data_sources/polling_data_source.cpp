@@ -21,9 +21,9 @@ static network::HttpRequest MakeRequest(Config const& config,
 
     auto const& data_source_config = config.DataSourceConfig();
 
-    auto const& polling_config =
-        std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
-            config.DataSourceConfig().method);
+    auto const& polling_config = std::get<
+        config::shared::built::PollingConfig<config::shared::ClientSDK>>(
+        config.DataSourceConfig().method);
 
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
@@ -52,8 +52,8 @@ static network::HttpRequest MakeRequest(Config const& config,
         }
     }
 
-    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK> builder(
-        config.HttpProperties());
+    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
+        builder(config.HttpProperties());
 
     builder.Header("authorization", config.SdkKey());
 
@@ -75,13 +75,14 @@ PollingDataSource::PollingDataSource(Config const& config,
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
-          std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
+          std::get<
+              config::shared::built::PollingConfig<config::shared::ClientSDK>>(
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
-    auto const& polling_config =
-        std::get<config::shared::built::PollingConfig<config::shared::ClientSDK>>(
-            config.DataSourceConfig().method);
+    auto const& polling_config = std::get<
+        config::shared::built::PollingConfig<config::shared::ClientSDK>>(
+        config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval specified under minimum, defaulting to 30 "
@@ -111,7 +112,8 @@ void PollingDataSource::DoPoll() {
         }
 
         if (has_etag) {
-            config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
+            config::shared::builders::HttpPropertiesBuilder<
+                config::shared::ClientSDK>
                 builder(request_.Properties());
             builder.Header("If-None-Match", header_etag->second);
             request_ = network::HttpRequest(request_, builder.Build());

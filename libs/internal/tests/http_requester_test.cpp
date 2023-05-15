@@ -41,17 +41,15 @@ TEST(HttpRequestTests, UsesCorrectPort) {
 }
 
 TEST(HttpRequestTests, DetectsHttpsFromScheme) {
-    HttpRequest secure("https://some.domain.com",
-                       launchdarkly::network::HttpMethod::kGet,
-                       HttpPropertiesBuilder<ClientSDK>().Build(),
-                       std::nullopt);
+    HttpRequest secure(
+        "https://some.domain.com", launchdarkly::network::HttpMethod::kGet,
+        HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_TRUE(secure.Https());
 
-    HttpRequest insecure("http://some.domain.com",
-                         launchdarkly::network::HttpMethod::kGet,
-                         HttpPropertiesBuilder<ClientSDK>().Build(),
-                         std::nullopt);
+    HttpRequest insecure(
+        "http://some.domain.com", launchdarkly::network::HttpMethod::kGet,
+        HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_FALSE(insecure.Https());
 }
