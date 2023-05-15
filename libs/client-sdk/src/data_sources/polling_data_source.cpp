@@ -2,12 +2,12 @@
 
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
 #include "base_64.hpp"
 #include "data_source_update_sink.hpp"
-#include <launchdarkly/config/shared/sdks.hpp>
 #include "polling_data_source.hpp"
 
 namespace launchdarkly::client_side::data_sources {

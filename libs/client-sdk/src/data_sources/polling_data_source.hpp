@@ -6,13 +6,13 @@
 
 #include "data_source.hpp"
 #include "data_source_event_handler.hpp"
+#include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
-#include "data_source_status_manager.hpp"
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/asio_requester.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
