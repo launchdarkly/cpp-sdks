@@ -13,10 +13,16 @@
 #include "network/detail/http_requester.hpp"
 #include "serialization/json_context.hpp"
 
+#include <iostream>
+
 namespace launchdarkly::client_side::data_sources::detail {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
+
+StreamingDataSource::~StreamingDataSource() {
+    std::cout << "~StreamingDataSource\n";
+}
 
 StreamingDataSource::StreamingDataSource(
     Config const& config,
@@ -76,6 +82,7 @@ StreamingDataSource::StreamingDataSource(
                               : boost::beast::http::verb::get);
 
     client_builder.receiver([this](launchdarkly::sse::Event const& event) {
+        std::cout << "Got a message on SSE steram\n";
         data_source_handler_.HandleMessage(event.type(), event.data());
         // TODO: Use the result of handle message to restart the
         // event source if we got bad data.
@@ -106,6 +113,8 @@ StreamingDataSource::StreamingDataSource(
     client_builder.header("user-agent", http_properties.UserAgent());
     // TODO: Handle proxy support.
     client_ = client_builder.build();
+
+    std::cout << "StreamingDataSource()\n";
 }
 
 void StreamingDataSource::Start() {
@@ -120,11 +129,22 @@ void StreamingDataSource::Start() {
     client_->run();
 }
 
-void StreamingDataSource::Close() {
+void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
     if (client_) {
-        client_->close();
+        return client_->async_shutdown(std::move(handler));
     }
+    handler();
+}
+
+std::future<void> StreamingDataSource::SyncShutdown() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
+    if (client_) {
+        return client_->sync_shutdown();
+    }
+    std::promise<void> p;
+    p.set_value();
+    return p.get_future();
 }
 
 }  // namespace launchdarkly::client_side::data_sources::detail

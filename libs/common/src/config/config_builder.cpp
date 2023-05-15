@@ -64,7 +64,7 @@ ConfigBuilder<SDK>::Build() const {
         return tl::make_unexpected(events_config.error());
     }
 
-    Logger logger{std::make_unique<ConsoleBackend>("LaunchDarkly")};
+    Logger logger{std::make_shared<ConsoleBackend>("LaunchDarkly")};
 
     std::optional<std::string> app_tag;
     if (app_info_builder_) {

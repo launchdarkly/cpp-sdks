@@ -90,7 +90,7 @@ class Logger {
      *
      * @param backend The back-end to use for the logger.
      */
-    Logger(std::unique_ptr<ILogBackend> backend);
+    Logger(std::shared_ptr<ILogBackend> backend);
 
     /**
      * Open a logging record.
@@ -118,7 +118,7 @@ class Logger {
     bool enabled(LogLevel level) const;
 
    private:
-    std::unique_ptr<ILogBackend> backend_;
+    std::shared_ptr<ILogBackend> backend_;
 };
 
 #define LD_LOG(logger, level) \

@@ -10,6 +10,10 @@
 
 namespace launchdarkly::client_side {
 
+// The ASIO implementation assumes that the io_context will be run from a
+// single thread, and applies several optimisations based on this assumption.
+auto const kAsioConcurrencyHint = 1;
+
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 
 static std::unique_ptr<IDataSource> MakeDataSource(
@@ -31,16 +35,17 @@ static std::unique_ptr<IDataSource> MakeDataSource(
 }
 
 Client::Client(Config config, Context context)
-    : logger_(config.Logger()),
+    : config_(config),
+      logger_(config.Logger()),
+      ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
+      data_source_factory_([this]() {
+          return MakeDataSource(config_, context_, ioc_.get_executor(),
+                                flag_updater_, status_manager_, logger_);
+      }),
+      data_source_(data_source_factory_()),
       event_processor_(nullptr),
       flag_updater_(flag_manager_),
-      data_source_(MakeDataSource(config,
-                                  context_,
-                                  ioc_.get_executor(),
-                                  flag_updater_,
-                                  status_manager_,
-                                  logger_)),
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
@@ -67,7 +72,8 @@ Client::Client(Config config, Context context)
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 
-    AsyncIdentify(context_);
+    event_processor_->AsyncSend(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), context_});
 }
 
 bool Client::Initialized() const {
@@ -90,7 +96,9 @@ void Client::TrackInternal(std::string event_name,
                            std::optional<double> metric_value) {
     event_processor_->AsyncSend(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
-        context_.kinds_to_keys(), std::move(data), metric_value});
+        ReadContext<std::map<std::string, std::string>>(
+            [](Context const& c) { return c.kinds_to_keys(); }),
+        std::move(data), metric_value});
 }
 
 void Client::Track(std::string event_name, Value data, double metric_value) {
@@ -109,9 +117,26 @@ void Client::AsyncFlush() {
     event_processor_->AsyncFlush();
 }
 
-void Client::AsyncIdentify(Context context) {
-    event_processor_->AsyncSend(events::client::IdentifyEventParams{
-        std::chrono::system_clock::now(), std::move(context)});
+void Client::OnDataSourceShutdown(Context context,
+                                  std::function<void()> user_completion) {
+    data_source_ = data_source_factory_();
+}
+
+void Client::AsyncIdentify(Context context, std::function<void()> completion) {
+    LD_LOG(logger_, LogLevel::kInfo) << "AsyncIdentify: calling AsyncShutdown";
+    // WriteContext(context);
+    data_source_->AsyncShutdown([this, completion, context]() {
+        OnDataSourceShutdown(std::move(context), std::move(completion));
+    });
+
+    //        if (future.valid()) {
+    //            future.wait();
+    //        }
+
+    //        data_source_ = data_source_factory_();
+    //        data_source_->Start();
+    //        event_processor_->AsyncSend(events::client::IdentifyEventParams{
+    //            std::chrono::system_clock::now(), context});
 }
 
 // TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
@@ -126,7 +151,7 @@ EvaluationDetail<T> Client::VariationInternal(FlagKey const& key,
     events::client::FeatureEventParams event = {
         std::chrono::system_clock::now(),
         key,
-        context_,
+        ReadContext<Context>([](Context const& c) { return c; }),
         default_value,
         default_value,
         std::nullopt,
@@ -270,8 +295,13 @@ void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
 
+void Client::WriteContext(Context context) {
+    std::unique_lock lock(context_mutex_);
+    context_ = std::move(context);
+}
+
 Client::~Client() {
-    data_source_->Close();
+    data_source_->AsyncShutdown([]() {});
     ioc_.stop();
     // TODO: Probably not the best.
     run_thread_.join();

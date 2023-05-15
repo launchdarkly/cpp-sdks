@@ -20,7 +20,7 @@ Logger::LogRecordStream::~LogRecordStream() {
     }
 }
 
-Logger::Logger(std::unique_ptr<ILogBackend> backend)
+Logger::Logger(std::shared_ptr<ILogBackend> backend)
     : backend_(std::move(backend)) {}
 
 Logger::LogRecord Logger::open_record(LogLevel level) const {

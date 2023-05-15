@@ -68,32 +68,39 @@ class FoxyClient : public Client,
         // size limit.
         body_parser_.body_limit(boost::none);
         body_parser_.get().body().on_event(std::move(receiver));
+
+        std::cout << "FoxyClient()\n";
     }
+
+    ~FoxyClient() { std::cout << "~FoxyClient()\n"; }
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
-        do_close();
+        async_shutdown([]() {});
     }
 
-    virtual void run() override {
+    void run() override {
         session_.async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,
                                       shared_from_this()));
     }
 
-    virtual void close() override {
-        boost::asio::post(session_.get_executor(),
-                          beast::bind_front_handler(&FoxyClient::do_close,
-                                                    shared_from_this()));
+    void async_shutdown(
+        std::function<void()> shutdown_completion_handler) override {
+        session_.async_shutdown(beast::bind_front_handler(
+            &FoxyClient::on_shutdown, shared_from_this(),
+            std::move(shutdown_completion_handler)));
     }
 
-    void do_close() {
-        session_.async_shutdown(beast::bind_front_handler(&FoxyClient::on_close,
-                                                          shared_from_this()));
+    void on_shutdown(std::function<void()> user_completion_handler,
+                     boost::system::error_code ec) {
+        user_completion_handler();
     }
 
-    void on_close(boost::system::error_code ec) { boost::ignore_unused(ec); }
+    virtual std::future<void> sync_shutdown() override {
+        return session_.async_shutdown(boost::asio::use_future);
+    }
 
     void on_connect(boost::system::error_code ec) {
         if (ec) {
@@ -144,7 +151,7 @@ class FoxyClient : public Client,
     void on_read_complete(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec == boost::asio::error::operation_aborted) {
-            do_close();
+            async_shutdown([]() {});
         } else {
             return fail(ec, "read body");
         }

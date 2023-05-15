@@ -6,13 +6,36 @@
 #include "serialization/json_value.hpp"
 #include "value.hpp"
 
+#include <chrono>
+
 ClientEntity::ClientEntity(
     std::unique_ptr<launchdarkly::client_side::Client> client)
     : client_(std::move(client)) {}
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
     IdentifyEventParams params) {
-    return tl::make_unexpected("identify not yet supported");
+    boost::system::error_code ec;
+    auto json_value = boost::json::parse(params.context.dump(), ec);
+    if (ec) {
+        return tl::make_unexpected(ec.what());
+    }
+
+    auto maybe_ctx = boost::json::value_to<
+        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+        json_value);
+
+    if (!maybe_ctx) {
+        return tl::make_unexpected(
+            launchdarkly::ErrorToString(maybe_ctx.error()));
+    }
+
+    if (!maybe_ctx->valid()) {
+        return tl::make_unexpected(maybe_ctx->errors());
+    }
+
+    client_->AsyncIdentify(*maybe_ctx);
+    client_->WaitForReadySync(std::chrono::seconds(1));
+    return nlohmann::json{};
 }
 
 static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,

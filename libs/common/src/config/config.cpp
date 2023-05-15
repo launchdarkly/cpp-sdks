@@ -57,8 +57,8 @@ bool Config<SDK>::Offline() const {
 }
 
 template <typename SDK>
-launchdarkly::Logger Config<SDK>::Logger() {
-    return std::move(logger_);
+launchdarkly::Logger Config<SDK>::Logger() const {
+    return logger_;
 }
 
 template class Config<detail::ClientSDK>;

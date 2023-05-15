@@ -205,4 +205,17 @@ void PollingDataSource::Start() {
 void PollingDataSource::Close() {
     timer_.cancel();
 }
+
+void PollingDataSource::AsyncShutdown(std::function<void()> fn) {
+    Close();
+    fn();
+}
+
+std::future<void> PollingDataSource::SyncShutdown() {
+    Close();
+    std::promise<void> p;
+    p.set_value();
+    return p.get_future();
+}
+
 }  // namespace launchdarkly::client_side::data_sources::detail

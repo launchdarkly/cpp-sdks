@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 #include <thread>
 #include <tl/expected.hpp>
 #include <tuple>
@@ -45,7 +46,12 @@ class Client {
 
     void AsyncFlush();
 
-    void AsyncIdentify(Context context);
+    /**
+     * Re-initializes the client connection using a new context. Only one
+     * call to AsyncIdentify may be active at once.
+     * @param context
+     */
+    void AsyncIdentify(Context context, std::function<void()> completion);
 
     bool BoolVariation(FlagKey const& key, bool default_value);
 
@@ -91,20 +97,42 @@ class Client {
                        std::optional<Value> data,
                        std::optional<double> metric_value);
 
+    template <typename T>
+    T ReadContext(std::function<T(Context const&)> fn) const {
+        std::shared_lock lock(context_mutex_);
+        return fn(context_);
+    }
+
+    void WriteContext(Context context);
+
+    void OnDataSourceShutdown(Context context,
+                              std::function<void()> user_completion);
+
+    Config config_;
+
+    Logger logger_;
+    boost::asio::io_context ioc_;
+
+    Context context_;
+    mutable std::shared_mutex context_mutex_;
+
+    std::function<std::unique_ptr<IDataSource>()> data_source_factory_;
+
+    std::unique_ptr<IDataSource> data_source_;
+
+    std::unique_ptr<IEventProcessor> event_processor_;
+
+    flag_manager::detail::FlagManager flag_manager_;
+    flag_manager::detail::FlagUpdater flag_updater_;
+
     bool initialized_;
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
     data_sources::detail::DataSourceStatusManager status_manager_;
-    flag_manager::detail::FlagManager flag_manager_;
-    flag_manager::detail::FlagUpdater flag_updater_;
 
-    Logger logger_;
     std::thread thread_;
-    boost::asio::io_context ioc_;
-    Context context_;
-    std::unique_ptr<IEventProcessor> event_processor_;
-    std::unique_ptr<IDataSource> data_source_;
+
     std::thread run_thread_;
 
     bool eval_reasons_available_;

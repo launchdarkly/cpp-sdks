@@ -29,7 +29,10 @@ class StreamingDataSource final : public IDataSource {
                         Logger const& logger);
 
     void Start() override;
-    void Close() override;
+    void AsyncShutdown(std::function<void()>) override;
+    std::future<void> SyncShutdown() override;
+    
+    ~StreamingDataSource();
 
    private:
     DataSourceStatusManager& status_manager_;

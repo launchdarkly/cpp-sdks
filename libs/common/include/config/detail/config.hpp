@@ -41,7 +41,7 @@ struct Config {
 
     [[nodiscard]] bool Offline() const;
 
-    launchdarkly::Logger Logger();
+    launchdarkly::Logger Logger() const;
 
    private:
     std::string sdk_key_;
