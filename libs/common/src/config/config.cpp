@@ -2,18 +2,18 @@
 
 #include "launchdarkly/config/shared/config.hpp"
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config {
 template <typename SDK>
 Config<SDK>::Config(std::string sdk_key,
                     bool offline,
-                    launchdarkly::Logger logger,
-                    built::ServiceEndpoints service_endpoints,
-                    built::Events events,
+                    shared::built::Logging logging,
+                    shared::built::ServiceEndpoints service_endpoints,
+                    shared::built::Events events,
                     std::optional<std::string> application_tag,
-                    built::DataSourceConfig<SDK> data_source_config,
-                    built::HttpProperties http_properties)
+                    shared::built::DataSourceConfig<SDK> data_source_config,
+                    shared::built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
-      logger_(std::move(logger)),
+      logging_(std::move(logging)),
       offline_(offline),
       service_endpoints_(std::move(service_endpoints)),
       events_(std::move(events)),
@@ -27,12 +27,12 @@ std::string const& Config<SDK>::SdkKey() const {
 }
 
 template <typename SDK>
-built::ServiceEndpoints const& Config<SDK>::ServiceEndpoints() const {
+shared::built::ServiceEndpoints const& Config<SDK>::ServiceEndpoints() const {
     return service_endpoints_;
 }
 
 template <typename SDK>
-built::Events const& Config<SDK>::Events() const {
+shared::built::Events const& Config<SDK>::Events() const {
     return events_;
 }
 
@@ -42,12 +42,13 @@ std::optional<std::string> const& Config<SDK>::ApplicationTag() const {
 }
 
 template <typename SDK>
-built::DataSourceConfig<SDK> const& Config<SDK>::DataSourceConfig() const {
+shared::built::DataSourceConfig<SDK> const& Config<SDK>::DataSourceConfig()
+    const {
     return data_source_config_;
 }
 
 template <typename SDK>
-built::HttpProperties const& Config<SDK>::HttpProperties() const {
+shared::built::HttpProperties const& Config<SDK>::HttpProperties() const {
     return http_properties_;
 }
 
@@ -57,11 +58,11 @@ bool Config<SDK>::Offline() const {
 }
 
 template <typename SDK>
-launchdarkly::Logger Config<SDK>::Logger() {
-    return std::move(logger_);
+shared::built::Logging const& Config<SDK>::Logging() const {
+    return logging_;
 }
 
-template class Config<detail::ClientSDK>;
-template class Config<detail::ServerSDK>;
+template class Config<config::ClientSDK>;
+template class Config<config::ServerSDK>;
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config

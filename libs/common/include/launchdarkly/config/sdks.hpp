@@ -1,6 +1,6 @@
 #pragma once
 
-namespace launchdarkly::config::detail {
+namespace launchdarkly::config {
 /**
  * Represents a client-side SDK configured for production services.
  */
@@ -15,4 +15,4 @@ struct ServerSDK {};
  */
 struct AnySDK {};
 
-}  // namespace launchdarkly::config::detail
+}  // namespace launchdarkly::config

@@ -1,8 +1,9 @@
-#include "launchdarkly/events/worker_pool.hpp"
 #include <memory>
-#include "launchdarkly/events/request_worker.hpp"
 
-namespace launchdarkly::events::detail {
+#include <launchdarkly/events/request_worker.hpp>
+#include <launchdarkly/events/worker_pool.hpp>
+
+namespace launchdarkly::events {
 
 WorkerPool::WorkerPool(boost::asio::any_io_executor io,
                        std::size_t pool_size,
@@ -15,4 +16,4 @@ WorkerPool::WorkerPool(boost::asio::any_io_executor io,
     }
 }
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "launchdarkly/config/shared/sdks.hpp"
+#include "launchdarkly/config/sdks.hpp"
 
 #include <chrono>
 #include <optional>

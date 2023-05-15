@@ -5,7 +5,7 @@
 #include <optional>
 #include <sstream>
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 template <typename Clock>
 static std::optional<typename Clock::time_point> ParseDateHeader(
@@ -40,4 +40,4 @@ static std::optional<typename Clock::time_point> ParseDateHeader(
     return Clock::from_time_t(real_gm_t);
 }
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

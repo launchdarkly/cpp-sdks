@@ -10,23 +10,25 @@
 #include <optional>
 #include <tuple>
 
-#include <launchdarkly/context_filter.hpp>
-#include "../logging/logger.hpp"
+#include <launchdarkly/config/shared/config.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+
+#include "launchdarkly/context_filter.hpp"
+
 #include "event_batch.hpp"
 #include "events.hpp"
-#include "launchdarkly/config/shared/config.hpp"
-#include "launchdarkly/network/http_requester.hpp"
 #include "outbox.hpp"
 #include "summarizer.hpp"
 #include "worker_pool.hpp"
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 template <typename SDK>
 class AsioEventProcessor {
    public:
     AsioEventProcessor(boost::asio::any_io_executor const& io,
-                       config::detail::Config<SDK> const& config,
+                       config::Config<SDK> const& config,
                        Logger& logger);
 
     void AsyncFlush();
@@ -52,7 +54,7 @@ class AsioEventProcessor {
     std::string url_;
     std::string authorization_;
 
-    config::detail::built::HttpProperties http_props_;
+    config::shared::built::HttpProperties http_props_;
 
     boost::uuids::random_generator uuids_;
 
@@ -89,4 +91,4 @@ class AsioEventProcessor {
                                RequestWorker::DeliveryResult);
 };
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

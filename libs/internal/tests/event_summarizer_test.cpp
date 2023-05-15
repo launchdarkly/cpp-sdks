@@ -10,7 +10,7 @@
 
 using namespace launchdarkly::events;
 using namespace launchdarkly::events::client;
-using namespace launchdarkly::events::detail;
+using namespace launchdarkly::events;
 
 static std::chrono::system_clock::time_point TimeZero() {
     return std::chrono::system_clock::time_point{};

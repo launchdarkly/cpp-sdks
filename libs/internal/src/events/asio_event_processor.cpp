@@ -4,14 +4,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <launchdarkly/config/sdks.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/events/asio_event_processor.hpp>
+#include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
-#include "launchdarkly/events/asio_event_processor.hpp"
-#include "launchdarkly/network/asio_requester.hpp"
 
 namespace http = boost::beast::http;
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 auto const kEventSchemaHeader = "X-LaunchDarkly-Event-Schema";
 auto const kPayloadIdHeader = "X-LaunchDarkly-Payload-Id";
@@ -29,7 +29,7 @@ overloaded(Ts...) -> overloaded<Ts...>;
 template <typename SDK>
 AsioEventProcessor<SDK>::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
-    config::detail::Config<SDK> const& config,
+    config::Config<SDK> const& config,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
       outbox_(config.Events().Capacity()),
@@ -146,7 +146,7 @@ void AsioEventProcessor<SDK>::OnEventDeliveryResult(
         overloaded{[&](Clock::time_point server_time) {
                        last_known_past_time_ = server_time;
                    },
-                   [&](network::detail::HttpResult::StatusCode status) {
+                   [&](network::HttpResult::StatusCode status) {
                        std::lock_guard<std::mutex> guard{this->inbox_mutex_};
                        if (!permanent_delivery_failure_) {
                            timer_.cancel();
@@ -201,8 +201,8 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
 
     // TODO(cwaldren): Template the event processor over SDK type? Add it into
     // HttpProperties?
-    config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
-        props(http_props_);
+    config::shared::builders::HttpPropertiesBuilder<config::ClientSDK> props(
+        http_props_);
 
     props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
@@ -263,6 +263,6 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     return out;
 }
 
-template class AsioEventProcessor<config::detail::ClientSDK>;
+template class AsioEventProcessor<config::ClientSDK>;
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

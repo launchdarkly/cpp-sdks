@@ -1,19 +1,19 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
+#include "launchdarkly/config/sdks.hpp"
 #include "launchdarkly/network/http_requester.hpp"
 
 using launchdarkly::config::shared::ClientSDK;
 using launchdarkly::config::shared::builders::HttpPropertiesBuilder;
-using launchdarkly::network::detail::AppendUrl;
-using launchdarkly::network::detail::HttpMethod;
-using launchdarkly::network::detail::HttpRequest;
+using launchdarkly::network::AppendUrl;
+using launchdarkly::network::HttpMethod;
+using launchdarkly::network::HttpRequest;
 
 TEST(HttpRequestTests, NormalizesRelativeUrl) {
     HttpRequest normalized(
         "https://some.domain.com/potato/../ham?egg=true&cheese=true",
-        launchdarkly::network::detail::HttpMethod::kGet,
+        launchdarkly::network::HttpMethod::kGet,
         HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_EQ("some.domain.com", normalized.Host());
@@ -22,19 +22,19 @@ TEST(HttpRequestTests, NormalizesRelativeUrl) {
 
 TEST(HttpRequestTests, UsesCorrectPort) {
     HttpRequest a("scheme://some.domain.com:123",
-                  launchdarkly::network::detail::HttpMethod::kGet,
+                  launchdarkly::network::HttpMethod::kGet,
                   HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_EQ("123", a.Port());
 
     HttpRequest b("scheme://some.domain.com:456",
-                  launchdarkly::network::detail::HttpMethod::kGet,
+                  launchdarkly::network::HttpMethod::kGet,
                   HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_EQ("456", b.Port());
 
     HttpRequest c("scheme://some.domain.com",
-                  launchdarkly::network::detail::HttpMethod::kGet,
+                  launchdarkly::network::HttpMethod::kGet,
                   HttpPropertiesBuilder<ClientSDK>().Build(), std::nullopt);
 
     EXPECT_FALSE(c.Port());
@@ -42,14 +42,14 @@ TEST(HttpRequestTests, UsesCorrectPort) {
 
 TEST(HttpRequestTests, DetectsHttpsFromScheme) {
     HttpRequest secure("https://some.domain.com",
-                       launchdarkly::network::detail::HttpMethod::kGet,
+                       launchdarkly::network::HttpMethod::kGet,
                        HttpPropertiesBuilder<ClientSDK>().Build(),
                        std::nullopt);
 
     EXPECT_TRUE(secure.Https());
 
     HttpRequest insecure("http://some.domain.com",
-                         launchdarkly::network::detail::HttpMethod::kGet,
+                         launchdarkly::network::HttpMethod::kGet,
                          HttpPropertiesBuilder<ClientSDK>().Build(),
                          std::nullopt);
 

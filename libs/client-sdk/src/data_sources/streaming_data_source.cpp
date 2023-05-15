@@ -35,7 +35,7 @@ StreamingDataSource::StreamingDataSource(
     auto& data_source_config = config.DataSourceConfig();
 
     auto& streaming_config = std::get<
-        config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
+        config::detail::built::StreamingConfig<config::config::ClientSDK>>(
         data_source_config.method);
 
     auto updated_url =

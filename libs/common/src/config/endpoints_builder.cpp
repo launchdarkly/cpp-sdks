@@ -52,7 +52,7 @@ tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
 
     // If no URLs were set, return the default endpoints for this SDK.
     if (!polling_base_url_ && !streaming_base_url_ && !events_base_url_) {
-        return detail::Defaults<SDK>::ServiceEndpoints();
+        return shared::Defaults<SDK>::ServiceEndpoints();
     }
 
     // If all URLs were set, trim any trailing slashes and construct custom
@@ -79,13 +79,13 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
            lhs.polling_base_url_ == rhs.polling_base_url_;
 }
 
-template class EndpointsBuilder<detail::ClientSDK>;
-template class EndpointsBuilder<detail::ServerSDK>;
+template class EndpointsBuilder<config::ClientSDK>;
+template class EndpointsBuilder<config::ServerSDK>;
 
-template bool operator==(EndpointsBuilder<detail::ClientSDK> const&,
-                         EndpointsBuilder<detail::ClientSDK> const&);
+template bool operator==(EndpointsBuilder<config::ClientSDK> const&,
+                         EndpointsBuilder<config::ClientSDK> const&);
 
-template bool operator==(EndpointsBuilder<detail::ServerSDK> const&,
-                         EndpointsBuilder<detail::ServerSDK> const&);
+template bool operator==(EndpointsBuilder<config::ServerSDK> const&,
+                         EndpointsBuilder<config::ServerSDK> const&);
 
 }  // namespace launchdarkly::config::shared::builders

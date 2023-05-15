@@ -1,14 +1,14 @@
 #include <utility>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include "launchdarkly/config/sdks.hpp"
 #include "launchdarkly/config/shared/defaults.hpp"
-#include "launchdarkly/config/shared/sdks.hpp"
 
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder()
-    : HttpPropertiesBuilder(detail::Defaults<SDK>::HttpProperties()) {}
+    : HttpPropertiesBuilder(shared::Defaults<SDK>::HttpProperties()) {}
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
@@ -84,6 +84,6 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
             response_timeout_, user_agent_,   base_headers_};
 }
 
-template class HttpPropertiesBuilder<detail::ClientSDK>;
-template class HttpPropertiesBuilder<detail::ServerSDK>;
+template class HttpPropertiesBuilder<config::ClientSDK>;
+template class HttpPropertiesBuilder<config::ServerSDK>;
 }  // namespace launchdarkly::config::shared::builders

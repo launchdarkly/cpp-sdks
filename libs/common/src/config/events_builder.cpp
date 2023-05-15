@@ -58,13 +58,13 @@ bool operator==(EventsBuilder<SDK> const& lhs, EventsBuilder<SDK> const& rhs) {
     return lhs.config_ == rhs.config_;
 }
 
-template class EventsBuilder<detail::ClientSDK>;
-template class EventsBuilder<detail::ServerSDK>;
+template class EventsBuilder<config::ClientSDK>;
+template class EventsBuilder<config::ServerSDK>;
 
-template bool operator==(EventsBuilder<detail::ClientSDK> const&,
-                         EventsBuilder<detail::ClientSDK> const&);
+template bool operator==(EventsBuilder<config::ClientSDK> const&,
+                         EventsBuilder<config::ClientSDK> const&);
 
-template bool operator==(EventsBuilder<detail::ServerSDK> const&,
-                         EventsBuilder<detail::ServerSDK> const&);
+template bool operator==(EventsBuilder<config::ServerSDK> const&,
+                         EventsBuilder<config::ServerSDK> const&);
 
 }  // namespace launchdarkly::config::shared::builders

@@ -1,5 +1,6 @@
-#include "launchdarkly/logging/logger.hpp"
 #include <iostream>
+
+#include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly {
 Logger::LogRecord::LogRecord(LogLevel level, bool open)

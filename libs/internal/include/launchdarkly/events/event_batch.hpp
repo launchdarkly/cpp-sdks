@@ -2,10 +2,10 @@
 
 #include <boost/json/value.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/network/http_requester.hpp>
 #include <string>
-#include "launchdarkly/network/http_requester.hpp"
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 /**
  * EventBatch represents a batch of events being sent to LaunchDarkly as
@@ -20,7 +20,7 @@ class EventBatch {
      * @param events Array of events to be serialized in the request.
      */
     EventBatch(std::string url,
-               config::detail::built::HttpProperties http_props,
+               config::shared::built::HttpProperties http_props,
                boost::json::value const& events);
 
     /**
@@ -31,7 +31,7 @@ class EventBatch {
     /**
      * Returns the built HTTP request.
      */
-    [[nodiscard]] network::detail::HttpRequest const& Request() const;
+    [[nodiscard]] network::HttpRequest const& Request() const;
 
     /**
      * Returns the target of the request.
@@ -40,7 +40,7 @@ class EventBatch {
 
    private:
     std::size_t num_events_;
-    network::detail::HttpRequest request_;
+    network::HttpRequest request_;
 };
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

@@ -6,8 +6,8 @@
 
 #include <boost/json.hpp>
 
-#include "attribute_reference.hpp"
-#include "context.hpp"
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/context.hpp>
 
 namespace launchdarkly {
 

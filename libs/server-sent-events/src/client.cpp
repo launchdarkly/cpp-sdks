@@ -3,7 +3,8 @@
 #include <boost/asio/use_future.hpp>
 #include <foxy/client_session.hpp>
 #include <launchdarkly/sse/client.hpp>
-#include <launchdarkly/sse/detail/parser.hpp>
+
+#include "parser.hpp"
 
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/tcp_stream.hpp>

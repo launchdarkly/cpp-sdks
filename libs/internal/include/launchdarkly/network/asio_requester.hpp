@@ -24,7 +24,7 @@ namespace net = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
-namespace launchdarkly::network::detail {
+namespace launchdarkly::network {
 
 static unsigned char const kRedirectLimit = 20;
 
@@ -336,4 +336,4 @@ class AsioRequester {
     }
 };
 
-}  // namespace launchdarkly::network::detail
+}  // namespace launchdarkly::network

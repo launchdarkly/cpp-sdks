@@ -1,6 +1,6 @@
-#include "launchdarkly/network/http_error_messages.hpp"
+#include <launchdarkly/network/http_error_messages.hpp>
 
-namespace launchdarkly::network::detail {
+namespace launchdarkly::network {
 
 std::string ErrorForStatusCode(HttpResult::StatusCode code,
                                std::string context,
@@ -17,4 +17,4 @@ bool IsInvalidSdkKeyStatus(HttpResult::StatusCode code) {
     return code == 401 || code == 403;
 }
 
-}  // namespace launchdarkly::network::detail
+}  // namespace launchdarkly::network

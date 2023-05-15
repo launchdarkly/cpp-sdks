@@ -1,15 +1,10 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/bindings/c/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/config/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/config/detail/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/data/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/events/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/network/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/network/detail/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/serialization/*.hpp"
-        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/serialization/events/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/events/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/network/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -35,23 +30,17 @@ add_library(${LIBNAME}
         serialization/json_evaluation_reason.cpp
         serialization/json_value.cpp
         serialization/value_mapping.cpp
-        )
+        serialization/json_evaluation_result.cpp)
 
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
 install(TARGETS ${LIBNAME})
 
-# Using PUBLIC_HEADERS would flatten the include.
-# This will preserve it, but dependencies must do the same.
-install(DIRECTORY "${LaunchDarklyInternalSdk_SOURCE_DIR}/include"
-        DESTINATION "include"
-        )
-
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
-        PUBLIC Boost::headers tl::expected foxy
+        PUBLIC Boost::headers tl::expected foxy launchdarkly::common
         PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking)
 
 # Need the public headers to build.

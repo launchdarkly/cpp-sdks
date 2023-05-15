@@ -5,7 +5,7 @@
 #include <string>
 #include "events.hpp"
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 /**
  * Represents a fixed-size queue for holding output events, which are events
@@ -49,4 +49,4 @@ class Outbox {
     bool Push(OutputEvent item);
 };
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

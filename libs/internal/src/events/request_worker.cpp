@@ -1,7 +1,7 @@
-#include "launchdarkly/events/request_worker.hpp"
-#include "launchdarkly/events/parse_date_header.hpp"
+#include <launchdarkly/events/parse_date_header.hpp>
+#include <launchdarkly/events/request_worker.hpp>
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
@@ -21,7 +21,7 @@ bool RequestWorker::Available() const {
 
 // Returns true if the result is considered transient - meaning it should
 // not stop the event processor from processing future events.
-static bool IsTransientFailure(network::detail::HttpResult const& result) {
+static bool IsTransientFailure(network::HttpResult const& result) {
     auto status = http::status(result.Status());
 
     if (result.IsError() ||
@@ -37,17 +37,17 @@ static bool IsTransientFailure(network::detail::HttpResult const& result) {
 
 // Returns true if the request should be retried or not. Meant to be called
 // when IsTransientFailure returns true.
-static bool IsRetryable(network::detail::HttpResult::StatusCode status) {
+static bool IsRetryable(network::HttpResult::StatusCode status) {
     return http::status(status) != http::status::payload_too_large;
 }
 
-static bool IsSuccess(network::detail::HttpResult const& result) {
+static bool IsSuccess(network::HttpResult const& result) {
     return !result.IsError() &&
            http::to_status_class(http::status(result.Status())) ==
                http::status_class::successful;
 }
 
-void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
+void RequestWorker::OnDeliveryAttempt(network::HttpResult result,
                                       ResultCallback callback) {
     auto [next_state, action] = NextState(state_, result);
 
@@ -109,7 +109,7 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
                 }
                 requester_.Request(
                     batch_->Request(),
-                    [this, callback](network::detail::HttpResult result) {
+                    [this, callback](network::HttpResult result) {
                         OnDeliveryAttempt(std::move(result),
                                           std::move(callback));
                     });
@@ -121,7 +121,7 @@ void RequestWorker::OnDeliveryAttempt(network::detail::HttpResult result,
 }
 
 std::pair<State, Action> NextState(State state,
-                                   network::detail::HttpResult const& result) {
+                                   network::HttpResult const& result) {
     std::optional<Action> action;
     std::optional<State> next_state;
 
@@ -207,4 +207,4 @@ std::ostream& operator<<(std::ostream& out, Action const& s) {
     return out;
 }
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

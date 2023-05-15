@@ -3,9 +3,9 @@
 #include <optional>
 #include <utility>
 
-#include "launchdarkly/network/http_requester.hpp"
+#include <launchdarkly/network/http_requester.hpp>
 
-namespace launchdarkly::network::detail {
+namespace launchdarkly::network {
 
 HttpResult::StatusCode HttpResult::Status() const {
     return status_;
@@ -46,7 +46,7 @@ HttpRequest::BodyType const& HttpRequest::Body() const {
     return body_;
 }
 
-config::detail::built::HttpProperties const& HttpRequest::Properties() const {
+config::shared::built::HttpProperties const& HttpRequest::Properties() const {
     return properties_;
 }
 
@@ -64,7 +64,7 @@ std::string const& HttpRequest::Url() const {
 
 HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
-                         config::detail::built::HttpProperties properties,
+                         config::shared::built::HttpProperties properties,
                          HttpRequest::BodyType body)
     : properties_(std::move(properties)),
       method_(method),
@@ -101,7 +101,7 @@ HttpRequest::HttpRequest(std::string const& url,
 }
 
 HttpRequest::HttpRequest(HttpRequest& base_request,
-                         config::detail::built::HttpProperties properties)
+                         config::shared::built::HttpProperties properties)
     : properties_(std::move(properties)),
       host_(base_request.host_),
       port_(base_request.port_),
@@ -179,4 +179,4 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
     return url.c_str();
 }
 
-}  // namespace launchdarkly::network::detail
+}  // namespace launchdarkly::network

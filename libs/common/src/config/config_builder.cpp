@@ -1,6 +1,5 @@
 #include <launchdarkly/config/shared/builders/config_builder.hpp>
-#include "../console_backend.hpp"
-#include "launchdarkly/config/shared/defaults.hpp"
+#include <launchdarkly/config/shared/defaults.hpp>
 
 namespace launchdarkly::config::shared::builders {
 
@@ -47,6 +46,12 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::HttpProperties(
 }
 
 template <typename SDK>
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::Logging(LoggingConfigBuilder builder) {
+    logging_config_builder_ = builder;
+    return *this;
+}
+
+template <typename SDK>
 [[nodiscard]] tl::expected<typename ConfigBuilder<SDK>::Result, Error>
 ConfigBuilder<SDK>::Build() const {
     auto sdk_key = sdk_key_;
@@ -64,11 +69,9 @@ ConfigBuilder<SDK>::Build() const {
         return tl::make_unexpected(events_config.error());
     }
 
-    Logger logger{std::make_unique<ConsoleBackend>("LaunchDarkly")};
-
     std::optional<std::string> app_tag;
     if (app_info_builder_) {
-        app_tag = app_info_builder_->Build(logger);
+        app_tag = app_info_builder_->Build();
     }
 
     auto data_source_config = data_source_builder_
@@ -79,10 +82,13 @@ ConfigBuilder<SDK>::Build() const {
                                ? http_properties_builder_.value().Build()
                                : Defaults<SDK>::HttpProperties();
 
+    auto logging =
+        logging_config_builder_.value_or(LoggingConfigBuilder()).Build();
+
     return {tl::in_place,
             sdk_key,
             offline,
-            std::move(logger),
+            logging,
             *endpoints_config,
             *events_config,
             app_tag,
@@ -90,7 +96,7 @@ ConfigBuilder<SDK>::Build() const {
             std::move(http_properties)};
 }
 
-template class ConfigBuilder<detail::ClientSDK>;
-template class ConfigBuilder<detail::ServerSDK>;
+template class ConfigBuilder<config::ClientSDK>;
+template class ConfigBuilder<config::ServerSDK>;
 
 }  // namespace launchdarkly::config::shared::builders

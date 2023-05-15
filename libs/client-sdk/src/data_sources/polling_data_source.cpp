@@ -5,7 +5,7 @@
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/network/detail/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
+#include "launchdarkly/config/sdks.hpp"
 
 namespace launchdarkly::client_side::data_sources::detail {
 
@@ -19,7 +19,7 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
     auto const& data_source_config = config.DataSourceConfig();
 
     auto const& polling_config = std::get<
-        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config::detail::built::PollingConfig<config::config::ClientSDK>>(
         config.DataSourceConfig().method);
 
     auto string_context =
@@ -50,7 +50,7 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
         }
     }
 
-    config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
+    config::detail::builders::HttpPropertiesBuilder<config::config::ClientSDK>
         builder(config.HttpProperties());
 
     builder.Header("authorization", config.SdkKey());
@@ -74,12 +74,12 @@ PollingDataSource::PollingDataSource(Config const& config,
       timer_(ioc),
       polling_interval_(
           std::get<
-              config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+              config::detail::built::PollingConfig<config::config::ClientSDK>>(
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
     auto const& polling_config = std::get<
-        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config::detail::built::PollingConfig<config::config::ClientSDK>>(
         config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
@@ -111,7 +111,7 @@ void PollingDataSource::DoPoll() {
 
         if (has_etag) {
             config::detail::builders::HttpPropertiesBuilder<
-                config::detail::ClientSDK>
+                config::config::ClientSDK>
                 builder(request_.Properties());
             builder.Header("If-None-Match", header_etag->second);
             request_ = network::detail::HttpRequest(request_, builder.Build());

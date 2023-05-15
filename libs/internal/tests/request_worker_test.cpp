@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 #include "launchdarkly/network/http_requester.hpp"
 
-using namespace launchdarkly::events::detail;
-using namespace launchdarkly::network::detail;
+using namespace launchdarkly::events;
+using namespace launchdarkly::network;
 
 struct TestCase {
     State state;

@@ -39,7 +39,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 }  // namespace launchdarkly::events
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -47,4 +47,4 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer const& summary);
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

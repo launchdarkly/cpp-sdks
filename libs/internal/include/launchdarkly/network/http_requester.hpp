@@ -18,7 +18,7 @@
 #define strcasecmp _stricmp
 #endif
 
-namespace launchdarkly::network::detail {
+namespace launchdarkly::network {
 
 struct CaseInsensitiveComparator {
     bool operator()(std::string const& lhs,
@@ -93,7 +93,7 @@ class HttpRequest {
 
     [[nodiscard]] HttpMethod Method() const;
     [[nodiscard]] BodyType const& Body() const;
-    [[nodiscard]] config::detail::built::HttpProperties const& Properties()
+    [[nodiscard]] config::shared::built::HttpProperties const& Properties()
         const;
     [[nodiscard]] std::string const& Host() const;
     [[nodiscard]] std::optional<std::string> const& Port() const;
@@ -113,7 +113,7 @@ class HttpRequest {
 
     HttpRequest(std::string const& url,
                 HttpMethod method,
-                config::detail::built::HttpProperties properties,
+                config::shared::built::HttpProperties properties,
                 BodyType body);
 
     /**
@@ -123,13 +123,13 @@ class HttpRequest {
      * @param properties The properties for the request.
      */
     HttpRequest(HttpRequest& base_request,
-                config::detail::built::HttpProperties properties);
+                config::shared::built::HttpProperties properties);
 
    private:
     std::string url_;
     HttpMethod method_;
     std::optional<std::string> body_;
-    config::detail::built::HttpProperties properties_;
+    config::shared::built::HttpProperties properties_;
     std::string host_;
     std::optional<std::string> port_;
     std::string path_;
@@ -156,7 +156,7 @@ bool IsRecoverableStatus(HttpResult::StatusCode status);
 std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
                                      std::string const& to_append);
 
-}  // namespace launchdarkly::network::detail
+}  // namespace launchdarkly::network
 
 #ifdef _MSC_VER
 #undef strcasecmp _stricmp

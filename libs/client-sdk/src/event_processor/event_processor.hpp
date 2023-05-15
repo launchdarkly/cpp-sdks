@@ -4,7 +4,7 @@
 #include <launchdarkly/client_side/event_processor.hpp>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/events/detail/asio_event_processor.hpp>
-#include "launchdarkly/config/shared/sdks.hpp"
+#include "launchdarkly/config/sdks.hpp"
 #include "launchdarkly/logging/logger.hpp"
 
 namespace launchdarkly::client_side::detail {

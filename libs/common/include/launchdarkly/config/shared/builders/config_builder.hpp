@@ -5,6 +5,7 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/shared/builders/logging_config_bulder.hpp>
 #include <launchdarkly/config/shared/config.hpp>
 
 #include <optional>
@@ -22,11 +23,12 @@ namespace launchdarkly::config::shared::builders {
 template <typename SDK>
 class ConfigBuilder {
    public:
-    using Result = detail::Config<SDK>;
-    using EndpointsBuilder = detail::builders::EndpointsBuilder<SDK>;
-    using EventsBuilder = detail::builders::EventsBuilder<SDK>;
-    using DataSourceBuilder = detail::builders::DataSourceBuilder<SDK>;
-    using HttpPropertiesBuilder = detail::builders::HttpPropertiesBuilder<SDK>;
+    using Result = Config<SDK>;
+    using EndpointsBuilder = EndpointsBuilder<SDK>;
+    using EventsBuilder = EventsBuilder<SDK>;
+    using DataSourceBuilder = DataSourceBuilder<SDK>;
+    using HttpPropertiesBuilder = HttpPropertiesBuilder<SDK>;
+
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.
@@ -82,6 +84,13 @@ class ConfigBuilder {
     ConfigBuilder& HttpProperties(HttpPropertiesBuilder builder);
 
     /**
+     * Sets the logging configuration for the SDK.
+     * @param builder A Logging builder.
+     * @return Reference to this builder.
+     */
+    ConfigBuilder& Logging(LoggingConfigBuilder builder);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -95,6 +104,7 @@ class ConfigBuilder {
     std::optional<EventsBuilder> events_builder_;
     std::optional<DataSourceBuilder> data_source_builder_;
     std::optional<HttpPropertiesBuilder> http_properties_builder_;
+    std::optional<LoggingConfigBuilder> logging_config_builder_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

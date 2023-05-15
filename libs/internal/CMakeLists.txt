@@ -21,8 +21,6 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif ()
 
-#set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_FILES})
 
 # Needed to fetch external dependencies. 
 include(FetchContent)

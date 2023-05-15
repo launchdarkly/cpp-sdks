@@ -1,6 +1,6 @@
-#include "launchdarkly/events/outbox.hpp"
+#include <launchdarkly/events/outbox.hpp>
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 Outbox::Outbox(std::size_t capacity) : items_(), capacity_(capacity) {}
 
@@ -38,4 +38,4 @@ bool Outbox::Empty() {
     return items_.empty();
 }
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

@@ -4,12 +4,14 @@
 #include <chrono>
 #include <functional>
 #include <tuple>
-#include "../logging/logger.hpp"
-#include "event_batch.hpp"
-#include "launchdarkly/network/asio_requester.hpp"
-#include "launchdarkly/network/http_requester.hpp"
 
-namespace launchdarkly::events::detail {
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+
+#include "event_batch.hpp"
+
+namespace launchdarkly::events {
 
 enum class State {
     /* Worker is ready for a new job. */
@@ -46,8 +48,7 @@ std::ostream& operator<<(std::ostream& out, Action const& s);
  * @param result HTTP result.
  * @return Next state + action to take.
  */
-std::pair<State, Action> NextState(State,
-                                   network::detail::HttpResult const& result);
+std::pair<State, Action> NextState(State, network::HttpResult const& result);
 
 /**
  * RequestWorker is responsible for initiating HTTP requests to deliver
@@ -64,7 +65,7 @@ class RequestWorker {
      * meaning the request could not be delivered at all. In this case, the HTTP
      * status code is made available for inspection.
      */
-    using PermanentFailureResult = network::detail::HttpResult::StatusCode;
+    using PermanentFailureResult = network::HttpResult::StatusCode;
 
     /*
      * A delivery request can resolve as a ServerTimeResult, meaning the request
@@ -134,11 +135,10 @@ class RequestWorker {
             << batch_->Target() << " with payload: "
             << batch_->Request().Body().value_or("(no body)");
 
-        requester_.Request(batch_->Request(),
-                           [this, handler](network::detail::HttpResult result) {
-                               OnDeliveryAttempt(std::move(result),
-                                                 std::move(handler));
-                           });
+        requester_.Request(
+            batch_->Request(), [this, handler](network::HttpResult result) {
+                OnDeliveryAttempt(std::move(result), std::move(handler));
+            });
         return result.get();
     }
 
@@ -154,7 +154,7 @@ class RequestWorker {
     State state_;
 
     /* Component used to perform HTTP operations. */
-    network::detail::AsioRequester requester_;
+    network::AsioRequester requester_;
 
     /* Current event batch; only present if AsyncDeliver was called and
      * request is in-flight or a retry is taking place. */
@@ -165,8 +165,7 @@ class RequestWorker {
 
     Logger& logger_;
 
-    void OnDeliveryAttempt(network::detail::HttpResult request,
-                           ResultCallback cb);
+    void OnDeliveryAttempt(network::HttpResult request, ResultCallback cb);
 };
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

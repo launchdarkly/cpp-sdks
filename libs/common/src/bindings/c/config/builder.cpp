@@ -2,9 +2,8 @@
 // NOLINTBEGIN OCInconsistentNamingInspection
 
 #include <launchdarkly/bindings/c/config/builder.h>
-
 #include <launchdarkly/config/client.hpp>
-#include "../../c_binding_helpers.hpp"
+#include "../../../c_binding_helpers.hpp"
 
 using namespace launchdarkly::client_side;
 

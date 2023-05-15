@@ -1,14 +1,17 @@
 #pragma once
 #include <boost/container_hash/hash.hpp>
+
 #include <chrono>
 #include <functional>
-#include <launchdarkly/value.hpp>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <launchdarkly/value.hpp>
+
 #include "events.hpp"
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 /**
  * Summarizer is responsible for accepting FeatureEventParams (the context
@@ -108,4 +111,4 @@ class Summarizer {
     std::unordered_map<FlagKey, State> features_;
 };
 
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

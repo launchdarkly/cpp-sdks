@@ -2,6 +2,8 @@
 
 namespace launchdarkly::config::shared::built {
 
-class LoggingConfig {};
+class Logging {
+    // TODO: Implement
+};
 
 }  // namespace launchdarkly::config::shared::built

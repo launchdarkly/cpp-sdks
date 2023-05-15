@@ -1,6 +1,6 @@
 #pragma once
 
-#include "log_backend.hpp"
+#include <launchdarkly/logging/log_backend.hpp>
 
 #include <memory>
 #include <ostream>

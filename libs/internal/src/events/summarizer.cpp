@@ -1,6 +1,6 @@
-#include "launchdarkly/events/summarizer.hpp"
+#include <launchdarkly/events/summarizer.hpp>
 
-namespace launchdarkly::events::detail {
+namespace launchdarkly::events {
 
 Summarizer::Summarizer(std::chrono::system_clock::time_point start)
     : start_time_(start) {}
@@ -69,4 +69,4 @@ std::int32_t Summarizer::VariationSummary::Count() const {
 
 Summarizer::State::State(Value default_value)
     : default_(std::move(default_value)) {}
-}  // namespace launchdarkly::events::detail
+}  // namespace launchdarkly::events

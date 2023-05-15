@@ -53,9 +53,8 @@ AppInfoBuilder& AppInfoBuilder::Version(std::string version) {
     return AddTag("application-version", std::move(version));
 }
 
-std::optional<std::string> AppInfoBuilder::Build(Logger& logger) const {
+std::optional<std::string> AppInfoBuilder::Build() const {
     if (tags_.empty()) {
-        LD_LOG(logger, LogLevel::kDebug) << "no application tags configured";
         return std::nullopt;
     }
 
@@ -71,8 +70,7 @@ std::optional<std::string> AppInfoBuilder::Build(Logger& logger) const {
 
     for (auto const& tag : unvalidated) {
         if (!tag.second) {
-            LD_LOG(logger, LogLevel::kWarn)
-                << tag.second.error() << " for tag '" << tag.first << "'";
+            // TODO: Figure out how to report.
         } else {
             validated.push_back(tag.second.value());
         }
