@@ -1,6 +1,7 @@
 #pragma once
 
 #include <launchdarkly/logging/logger.hpp>
+
 #include "entity_manager.hpp"
 
 #include <boost/beast.hpp>

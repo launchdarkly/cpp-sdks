@@ -3,10 +3,11 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/logging/logger.hpp>
+
 #include "../event_processor.hpp"
-#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::client_side {
 

@@ -5,10 +5,10 @@
 #include <boost/uuid/uuid_io.hpp>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
