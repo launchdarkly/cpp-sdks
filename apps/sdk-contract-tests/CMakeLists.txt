@@ -22,6 +22,7 @@ add_executable(sdk-tests
 
 target_link_libraries(sdk-tests PRIVATE
         launchdarkly::client
+        launchdarkly::internal
         foxy
         nlohmann_json::nlohmann_json
         Boost::coroutine

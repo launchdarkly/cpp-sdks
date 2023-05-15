@@ -1,25 +1,28 @@
 #include <boost/json.hpp>
 
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
-#include <launchdarkly/client_side/data_sources/detail/polling_data_source.hpp>
-#include <launchdarkly/config/detail/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/detail/sdks.hpp>
-#include <launchdarkly/network/detail/http_error_messages.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
-namespace launchdarkly::client_side::data_sources::detail {
+#include "base_64.hpp"
+#include "data_source_update_sink.hpp"
+#include "polling_data_source.hpp"
+
+namespace launchdarkly::client_side::data_sources {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
-static network::detail::HttpRequest MakeRequest(Config const& config,
-                                                Context const& context) {
+static network::HttpRequest MakeRequest(Config const& config,
+                                        Context const& context) {
     auto url = std::make_optional(config.ServiceEndpoints().PollingBaseUrl());
 
     auto const& data_source_config = config.DataSourceConfig();
 
     auto const& polling_config = std::get<
-        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config::shared::built::PollingConfig<config::shared::ClientSDK>>(
         config.DataSourceConfig().method);
 
     auto string_context =
@@ -27,20 +30,19 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
 
     // TODO: Handle slashes.
 
-    network::detail::HttpRequest::BodyType body;
-    network::detail::HttpMethod method = network::detail::HttpMethod::kGet;
+    network::HttpRequest::BodyType body;
+    network::HttpMethod method = network::HttpMethod::kGet;
 
     if (data_source_config.use_report) {
-        url =
-            network::detail::AppendUrl(url, polling_config.polling_report_path);
-        method = network::detail::HttpMethod::kReport;
+        url = network::AppendUrl(url, polling_config.polling_report_path);
+        method = network::HttpMethod::kReport;
         body = string_context;
     } else {
-        url = network::detail::AppendUrl(url, polling_config.polling_get_path);
+        url = network::AppendUrl(url, polling_config.polling_get_path);
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url = network::detail::AppendUrl(url, Base64UrlEncode(string_context));
+        url = network::AppendUrl(url, Base64UrlEncode(string_context));
     }
 
     if (data_source_config.with_reasons) {
@@ -50,7 +52,7 @@ static network::detail::HttpRequest MakeRequest(Config const& config,
         }
     }
 
-    config::detail::builders::HttpPropertiesBuilder<config::detail::ClientSDK>
+    config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
         builder(config.HttpProperties());
 
     builder.Header("authorization", config.SdkKey());
@@ -74,12 +76,12 @@ PollingDataSource::PollingDataSource(Config const& config,
       timer_(ioc),
       polling_interval_(
           std::get<
-              config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+              config::shared::built::PollingConfig<config::shared::ClientSDK>>(
               config.DataSourceConfig().method)
               .poll_interval),
       request_(MakeRequest(config, context)) {
     auto const& polling_config = std::get<
-        config::detail::built::PollingConfig<config::detail::ClientSDK>>(
+        config::shared::built::PollingConfig<config::shared::ClientSDK>>(
         config.DataSourceConfig().method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
@@ -93,7 +95,7 @@ PollingDataSource::PollingDataSource(Config const& config,
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
-    requester_.Request(request_, [this](network::detail::HttpResult res) {
+    requester_.Request(request_, [this](network::HttpResult res) {
         auto header_etag = res.Headers().find("etag");
         bool has_etag = header_etag != res.Headers().end();
 
@@ -110,11 +112,11 @@ void PollingDataSource::DoPoll() {
         }
 
         if (has_etag) {
-            config::detail::builders::HttpPropertiesBuilder<
-                config::detail::ClientSDK>
+            config::shared::builders::HttpPropertiesBuilder<
+                config::shared::ClientSDK>
                 builder(request_.Properties());
             builder.Header("If-None-Match", header_etag->second);
-            request_ = network::detail::HttpRequest(request_, builder.Build());
+            request_ = network::HttpRequest(request_, builder.Build());
 
             etag_ = header_etag->second;
         }
@@ -134,16 +136,16 @@ void PollingDataSource::DoPoll() {
             // and it didn't have an etag, we still don't want to try to
             // parse the body.
         } else {
-            if (network::detail::IsRecoverableStatus(res.Status())) {
+            if (network::IsRecoverableStatus(res.Status())) {
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kInterrupted,
                     res.Status(),
-                    launchdarkly::network::detail::ErrorForStatusCode(
+                    launchdarkly::network::ErrorForStatusCode(
                         res.Status(), "polling request", "will retry"));
             } else {
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kShutdown, res.Status(),
-                    launchdarkly::network::detail::ErrorForStatusCode(
+                    launchdarkly::network::ErrorForStatusCode(
                         res.Status(), "polling request", std::nullopt));
                 // We are giving up. Do not start a new polling request.
                 return;
@@ -205,4 +207,4 @@ void PollingDataSource::Start() {
 void PollingDataSource::Close() {
     timer_.cancel();
 }
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

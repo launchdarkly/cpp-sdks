@@ -1,14 +1,15 @@
 #include "null_logger.hpp"
 
-using launchdarkly::Logger;
-using launchdarkly::LogLevel;
+namespace launchdarkly::logging {
 
-bool NullLoggerBackend::enabled(LogLevel level) {
+bool NullLoggerBackend::Enabled(LogLevel level) {
     return false;
 }
 
-void NullLoggerBackend::write(LogLevel level, std::string message) {}
+void NullLoggerBackend::Write(LogLevel level, std::string message) {}
 
 Logger NullLogger() {
     return {std::make_unique<NullLoggerBackend>()};
 }
+
+}  // namespace launchdarkly::logging

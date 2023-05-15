@@ -1,5 +1,6 @@
 {
   "libs/client-sdk": "0.0.0",
   "libs/server-sent-events": "0.0.0",
-  "libs/common": "0.0.0"
+  "libs/common": "0.0.0",
+  "libs/internal": "0.0.0"
 }

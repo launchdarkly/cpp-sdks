@@ -1,8 +1,8 @@
 #include <utility>
 
-#include <launchdarkly/config/detail/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/http_properties.hpp>
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
                                std::chrono::milliseconds read_timeout,
@@ -49,4 +49,4 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
            lhs.UserAgent() == rhs.UserAgent();
 }
 
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

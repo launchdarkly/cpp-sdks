@@ -1,25 +1,25 @@
 #pragma once
 
-#include <launchdarkly/config/detail/builders/app_info_builder.hpp>
-#include <launchdarkly/config/detail/builders/config_builder.hpp>
-#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
-#include <launchdarkly/config/detail/builders/events_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
-#include <launchdarkly/config/detail/sdks.hpp>
+#include <launchdarkly/config/shared/builders/app_info_builder.hpp>
+#include <launchdarkly/config/shared/builders/config_builder.hpp>
+#include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include <launchdarkly/config/shared/defaults.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::server_side {
 
-using SDK = config::detail::ServerSDK;
+using SDK = config::shared::ServerSDK;
 
-using Defaults = config::detail::Defaults<SDK>;
-using AppInfoBuilder = config::detail::builders::AppInfoBuilder;
-using EndpointsBuilder = config::detail::builders::EndpointsBuilder<SDK>;
-using ConfigBuilder = config::detail::builders::ConfigBuilder<SDK>;
-using EventsBuilder = config::detail::builders::EventsBuilder<SDK>;
+using Defaults = config::shared::Defaults<SDK>;
+using AppInfoBuilder = config::shared::builders::AppInfoBuilder;
+using EndpointsBuilder = config::shared::builders::EndpointsBuilder<SDK>;
+using ConfigBuilder = config::shared::builders::ConfigBuilder<SDK>;
+using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
-    config::detail::builders::HttpPropertiesBuilder<SDK>;
-using DataSourceBuilder = config::detail::builders::DataSourceBuilder<SDK>;
+    config::shared::builders::HttpPropertiesBuilder<SDK>;
+using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
 
-using Config = config::detail::Config<SDK>;
+using Config = config::Config<SDK>;
 
 }  // namespace launchdarkly::server_side

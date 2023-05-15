@@ -1,6 +1,9 @@
 #pragma once
-#include <launchdarkly/logger.hpp>
 
+#include <launchdarkly/logging/log_backend.hpp>
+#include <launchdarkly/logging/logger.hpp>
+
+namespace launchdarkly::logging {
 /**
  * Creates a throwaway logger suitable for tests where assertions about the
  * log messages aren't relevant.
@@ -14,10 +17,11 @@ class NullLoggerBackend : public launchdarkly::ILogBackend {
     /**
      * Always returns false.
      */
-    bool enabled(launchdarkly::LogLevel level) override;
+    bool Enabled(LogLevel level) override;
 
     /**
      * No-op.
      */
-    void write(launchdarkly::LogLevel level, std::string message) override;
+    void Write(LogLevel level, std::string message) override;
 };
+}  // namespace launchdarkly::logging

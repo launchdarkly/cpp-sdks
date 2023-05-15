@@ -8,8 +8,8 @@
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/value.hpp>
 
-#include <launchdarkly/client_side/data_sources/data_source_status.hpp>
-#include <launchdarkly/client_side/flag_manager/flag_notifier.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/client_side/flag_notifier.hpp>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
 
@@ -220,7 +220,7 @@ class IClient {
      * flag changes.
      * @return A flag notifier.
      */
-    virtual flag_manager::detail::IFlagNotifier& FlagNotifier() = 0;
+    virtual flag_manager::IFlagNotifier& FlagNotifier() = 0;
 
     /**
      * Wait for the client to be ready. A client will be ready when it either
@@ -299,7 +299,7 @@ class Client : public IClient {
 
     data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
-    flag_manager::detail::IFlagNotifier& FlagNotifier() override;
+    flag_manager::IFlagNotifier& FlagNotifier() override;
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 

@@ -1,10 +1,10 @@
-#include <launchdarkly/client_side/event_processor/detail/null_event_processor.hpp>
+#include "null_event_processor.hpp"
 
-namespace launchdarkly::client_side::detail {
+namespace launchdarkly::client_side {
 
 void NullEventProcessor::AsyncSend(events::InputEvent event) {}
 
 void NullEventProcessor::AsyncFlush() {}
 
 void NullEventProcessor::AsyncClose() {}
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

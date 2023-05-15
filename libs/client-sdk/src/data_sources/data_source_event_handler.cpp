@@ -1,5 +1,6 @@
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
-#include <launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp>
+#include "data_source_event_handler.hpp"
+#include "base_64.hpp"
+
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
@@ -54,7 +55,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
 }
 }  // namespace launchdarkly::client_side
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 static tl::expected<DataSourceEventHandler::PatchData, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<DataSourceEventHandler::PatchData,
@@ -184,4 +185,4 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     }
     return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

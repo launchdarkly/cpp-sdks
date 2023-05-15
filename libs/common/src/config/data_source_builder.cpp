@@ -1,6 +1,6 @@
-#include <launchdarkly/config/detail/builders/data_source_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
@@ -86,10 +86,10 @@ built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
     return {method};
 }
 
-template class PollingBuilder<detail::ClientSDK>;
-template class PollingBuilder<detail::ServerSDK>;
+template class PollingBuilder<config::shared::ClientSDK>;
+template class PollingBuilder<config::shared::ServerSDK>;
 
-template class StreamingBuilder<detail::ClientSDK>;
-template class StreamingBuilder<detail::ServerSDK>;
+template class StreamingBuilder<config::shared::ClientSDK>;
+template class StreamingBuilder<config::shared::ServerSDK>;
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

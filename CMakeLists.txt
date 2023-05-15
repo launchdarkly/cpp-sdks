@@ -49,8 +49,6 @@ if (BUILD_TESTING)
     enable_testing()
 endif ()
 
-add_subdirectory(libs/client-sdk)
-
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
 find_package(OpenSSL REQUIRED)
@@ -71,11 +69,14 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.80 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
+add_subdirectory(libs/client-sdk)
+
 set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 
 # Always build the common libraries as shared libs.
 add_subdirectory(libs/common)
+add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 add_subdirectory(bindings/c)
 

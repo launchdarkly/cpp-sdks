@@ -14,6 +14,9 @@
     },
     "libs/common": {
       "initial-version": "0.1.0"
+    },
+    "libs/internal": {
+      "initial-version": "0.1.0"
     }
   }
 }

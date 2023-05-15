@@ -1,6 +1,7 @@
-#include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
+#include "flag_manager.hpp"
+#include "../data_sources/data_source_update_sink.hpp"
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 
 // Shared pointers are used to item descriptors so that they may have a lifetime
 // greater than their duration in the store. If, for instance, a flag has been
@@ -43,4 +44,4 @@ FlagManager::GetAll() const {
     return data_;
 }
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager

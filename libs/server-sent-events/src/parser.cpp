@@ -1,4 +1,4 @@
-#include <launchdarkly/sse/detail/parser.hpp>
+#include "parser.hpp"
 
 namespace launchdarkly::sse::detail {
 

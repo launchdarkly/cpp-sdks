@@ -7,7 +7,7 @@
 
 #include "entity_manager.hpp"
 
-#include <launchdarkly/logger.hpp>
+#include <launchdarkly/logging/logger.hpp>
 
 #include <foxy/listener.hpp>
 
