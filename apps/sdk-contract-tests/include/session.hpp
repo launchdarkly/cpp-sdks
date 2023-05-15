@@ -1,7 +1,7 @@
 #pragma once
 
+#include <launchdarkly/logging/logger.hpp>
 #include "entity_manager.hpp"
-#include "launchdarkly/logging/logger.hpp"
 
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
@@ -68,7 +68,7 @@ class Session : boost::asio::coroutine {
 
                 if (ec) {
                     LD_LOG(logger_, LogLevel::kWarn)
-                        << "session: Write: " << ec.what();
+                        << "session: write: " << ec.what();
                     break;
                 }
 

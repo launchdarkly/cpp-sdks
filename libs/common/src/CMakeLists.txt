@@ -55,8 +55,14 @@ install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include"
 message(STATUS "LaunchDarklyCommonSdk_SOURCE_DIR=${LaunchDarklyCommonSdk_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
-        PUBLIC Boost::headers tl::expected foxy
-        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking)
+        PUBLIC tl::expected
+        PRIVATE
+        Boost::headers
+        Boost::url
+        Boost::json
+        OpenSSL::SSL
+        Boost::disable_autolinking
+        foxy)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
