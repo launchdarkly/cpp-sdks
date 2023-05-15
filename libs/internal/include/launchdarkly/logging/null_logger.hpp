@@ -1,7 +1,7 @@
 #pragma once
 
-#include <launchdarkly/logging/log_backend.hpp>
-#include <launchdarkly/logging/logger.hpp>
+#include "launchdarkly/logging/log_backend.hpp"
+#include "logger.hpp"
 
 namespace launchdarkly::logging {
 /**
@@ -12,6 +12,10 @@ namespace launchdarkly::logging {
  * launchdarkly::Logger.
  */
 launchdarkly::Logger NullLogger();
+
+/**
+ * Back-end to use when logging is disabled.
+ */
 class NullLoggerBackend : public launchdarkly::ILogBackend {
    public:
     /**

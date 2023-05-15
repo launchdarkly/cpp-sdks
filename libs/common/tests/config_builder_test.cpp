@@ -2,7 +2,7 @@
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/server.hpp>
-#include "null_logger.hpp"
+#include <launchdarkly/logging/null_logger.hpp>
 
 class ConfigBuilderTest
     : public ::testing::

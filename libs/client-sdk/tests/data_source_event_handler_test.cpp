@@ -29,7 +29,7 @@ class TestHandler : public IDataSourceUpdateSink {
 };
 
 TEST(StreamingDataHandlerTests, HandlesPutMessage) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -49,7 +49,7 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
 }
 
 TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -64,7 +64,7 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
 }
 
 TEST(StreamingDataHandlerTests, BadJsonPut) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -77,7 +77,7 @@ TEST(StreamingDataHandlerTests, BadJsonPut) {
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaPut) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -90,7 +90,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
 }
 
 TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -110,7 +110,7 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
 }
 
 TEST(StreamingDataHandlerTests, BadJsonPatch) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -123,7 +123,7 @@ TEST(StreamingDataHandlerTests, BadJsonPatch) {
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaPatch) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -136,7 +136,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
 }
 
 TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -153,7 +153,7 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
 }
 
 TEST(StreamingDataHandlerTests, BadJsonDelete) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -166,7 +166,7 @@ TEST(StreamingDataHandlerTests, BadJsonDelete) {
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaDelete) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,
@@ -179,7 +179,7 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
 }
 
 TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
-    auto logger = Logger(std::make_unique<logging::ConsoleBackend>("test"));
+    auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(test_handler.get(), logger,

@@ -26,7 +26,7 @@ static std::chrono::system_clock::time_point Time1000() {
 TEST(WorkerPool, PoolReturnsAvailableWorker) {
     using namespace launchdarkly;
     Logger logger{
-        std::make_unique<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
+        std::make_shared<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
@@ -44,7 +44,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
 TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     using namespace launchdarkly;
     Logger logger{
-        std::make_unique<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
+        std::make_shared<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
     auto work = boost::asio::make_work_guard(ioc);
@@ -65,7 +65,7 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     using namespace launchdarkly;
 
     Logger logger{
-        std::make_unique<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
+        std::make_shared<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
     auto config =

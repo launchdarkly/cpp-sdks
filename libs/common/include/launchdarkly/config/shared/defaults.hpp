@@ -4,7 +4,8 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include "sdks.hpp"
+#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/logging/log_level.hpp>
 
 namespace launchdarkly::config::shared {
 
@@ -20,6 +21,9 @@ struct Defaults {
      * @return
      */
     static bool Offline() { return false; }
+
+    static std::string LogTag() { return "LaunchDarkly"; }
+    static LogLevel LogLevel() { return LogLevel::kInfo; }
 };
 
 template <>

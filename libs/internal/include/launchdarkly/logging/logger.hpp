@@ -12,7 +12,7 @@ namespace launchdarkly {
  * Logger to be used in SDK implementation.
  *
  * ```
- * Logger logger(std::make_unique<ConsoleBackend>(LogLevel::kInfo,
+ * Logger logger(std::make_shared<ConsoleBackend>(LogLevel::kInfo,
  * "Example"));
  *
  * // Use the macro for logging.
@@ -90,7 +90,7 @@ class Logger {
      *
      * @param backend The back-end to use for the logger.
      */
-    Logger(std::unique_ptr<ILogBackend> backend);
+    Logger(std::shared_ptr<ILogBackend> backend);
 
     /**
      * Open a logging record.
@@ -118,7 +118,7 @@ class Logger {
     bool Enabled(LogLevel level) const;
 
    private:
-    std::unique_ptr<ILogBackend> backend_;
+    std::shared_ptr<ILogBackend> backend_;
 };
 
 #define LD_LOG(logger, level) \

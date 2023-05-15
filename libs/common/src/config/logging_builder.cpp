@@ -1,9 +1,28 @@
-#include <launchdarkly/config/shared/builders/logging_bulder.hpp>
+#include <launchdarkly/config/shared/builders/logging_builder.hpp>
+#include <launchdarkly/config/shared/defaults.hpp>
 
 namespace launchdarkly::config::shared::builders {
 
 built::Logging LoggingBuilder::Build() const {
-    return built::Logging();
+    return std::visit(
+        [](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, LoggingBuilder::BasicLogging>) {
+                return built::Logging{false,
+                                      std::shared_ptr<ILogBackend>(nullptr),
+                                      arg.tag_, arg.level_};
+            } else if constexpr (std::is_same_v<
+                                     T, LoggingBuilder::CustomLogging>) {
+                return built::Logging{false, arg.backend_,
+                                      Defaults<AnySDK>::LogTag(),
+                                      Defaults<AnySDK>::LogLevel()};
+            } else if constexpr (std::is_same_v<T, LoggingBuilder::NoLogging>) {
+                return built::Logging{
+                    true, std::shared_ptr<ILogBackend>(nullptr),
+                    Defaults<AnySDK>::LogTag(), Defaults<AnySDK>::LogLevel()};
+            }
+        },
+        logging_);
 }
 
 LoggingBuilder& LoggingBuilder::Logging(
@@ -14,17 +33,31 @@ LoggingBuilder& LoggingBuilder::Logging(
     return *this;
 }
 
+LoggingBuilder::LoggingBuilder(LoggingBuilder::CustomLogging custom) {
+    Logging(custom);
+}
+
+LoggingBuilder::LoggingBuilder(LoggingBuilder::BasicLogging basic) {
+    Logging(basic);
+}
+
+LoggingBuilder::LoggingBuilder(LoggingBuilder::NoLogging no) {
+    Logging(no);
+}
+
 LoggingBuilder::BasicLogging& LoggingBuilder::BasicLogging::Level(
     LogLevel level) {
     level_ = level;
     return *this;
 }
 
-LoggingBuilder::BasicLogging& LoggingBuilder::BasicLogging::Name(
-    std::string name) {
-    name_ = std::move(name);
+LoggingBuilder::BasicLogging& LoggingBuilder::BasicLogging::Tag(
+    std::string tag) {
+    tag_ = std::move(tag);
     return *this;
 }
+LoggingBuilder::BasicLogging::BasicLogging()
+    : level_(Defaults<AnySDK>::LogLevel()), tag_(Defaults<AnySDK>::LogTag()) {}
 
 LoggingBuilder::CustomLogging& LoggingBuilder::CustomLogging::Backend(
     std::shared_ptr<ILogBackend> backend) {
