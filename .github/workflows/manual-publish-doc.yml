@@ -1,0 +1,34 @@
+on:
+  workflow_dispatch:
+    inputs:
+      workspace_path:
+        description: 'The workspace to publish docs for'
+        required: true
+        default: 'libs/client-sdk'
+        type: choice
+        options:
+          - libs/client-sdk
+name: Publish Documentation
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          registry-url: 'https://registry.npmjs.org'
+      - run: sudo apt-get install doxygen
+      - id: build
+        # Build using the same steps from CI.
+        name: Build
+        run: |
+          cd $WORKSPACE_PATH
+          doxygen ./Doxyfile
+        env:
+          WORKSPACE_PATH: ${{ inputs.workspace_path }}
+      - id: publish
+        name: Publish Documentation
+        uses: ./.github/actions/publish-docs
+        with:
+          workspace_path: ${{ inputs.workspace_path }}

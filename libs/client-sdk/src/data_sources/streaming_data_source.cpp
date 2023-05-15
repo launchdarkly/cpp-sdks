@@ -5,13 +5,13 @@
 
 #include <utility>
 
-#include "config/detail/defaults.hpp"
-#include "context.hpp"
-#include "context_builder.hpp"
-#include "launchdarkly/client_side/data_sources/detail/base_64.hpp"
-#include "launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp"
-#include "network/detail/http_requester.hpp"
-#include "serialization/json_context.hpp"
+#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
+#include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
+#include <launchdarkly/config/detail/defaults.hpp>
+#include <launchdarkly/context.hpp>
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/network/detail/http_requester.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
 
 #include <iostream>
 
@@ -48,7 +48,7 @@ void StreamingDataSource::Start() {
     auto string_context =
         boost::json::serialize(boost::json::value_from(context_));
 
-    auto const& streaming_config = boost::get<
+    auto const& streaming_config = std::get<
         config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
         data_source_config_.method);
 

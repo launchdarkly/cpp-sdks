@@ -1,10 +1,11 @@
 #include "client_entity.hpp"
 #include <boost/json.hpp>
-#include "context_builder.hpp"
-#include "serialization/json_context.hpp"
-#include "serialization/json_evaluation_reason.hpp"
-#include "serialization/json_value.hpp"
-#include "value.hpp"
+
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
+#include <launchdarkly/serialization/json_evaluation_reason.hpp>
+#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/value.hpp>
 
 #include <chrono>
 

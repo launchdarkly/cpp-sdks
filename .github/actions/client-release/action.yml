@@ -1,0 +1,160 @@
+# This is a composite workflow that an generate all the release artifacts
+# for the C++ client SDK.
+
+# This can be ran automatically with the tag_name output from release-please,
+# or ran triggered manually with a user provided tag.
+
+name: C++ Client Release
+description: C++ Client Release Process
+inputs:
+  tag_name:
+    description: 'The tag name of the release to upload artifacts to.'
+    required: true
+  github_token:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Ninja
+      uses: ./.github/actions/install-ninja
+    - name: Install boost
+      uses: ./.github/actions/install-boost
+      id: install-boost
+
+    - name: Build Linux Artifacts
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get install doxygen
+        sudo apt-get install graphviz
+        ./scripts/build-release.sh launchdarkly-cpp-client
+        ./scripts/build-docs.sh libs/client-sdk
+      env:
+        WORKSPACE: libs/client-sdk
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
+    - name: Archive Release Linux - GCC/x64/Static
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-static.zip'
+
+    - name: Archive Release Linux - GCC/x64/Dynamic
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-dynamic.zip'
+
+
+    - name: Upload Linux Build Artifacts
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip --clobber
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+
+    - name: Publish Documentation
+      if: runner.os == 'Linux'
+      uses: ./.github/actions/publish-docs
+      with:
+        workspace_path: libs/client-sdk
+
+    - name: Configure MSVC
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Build Windows Artifacts
+      if: runner.os == 'Windows'
+      shell: bash
+      env:
+        OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
+        BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
+        BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+      run: ./scripts/build-windows.sh launchdarkly-cpp-client
+
+    - name: Archive Release Windows - MSVC/x64/Static
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Static/Debug
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-debug/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static-debug.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic/Debug
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-debug/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic-debug.zip'
+
+    - name: Upload Windows Build Artifacts
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip --clobber
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+
+    - name: Build Mac Artifacts
+      id: brew-action
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)" >> "$GITHUB_ENV"
+        export OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)
+        
+        ./scripts/build-release.sh launchdarkly-cpp-client
+      env:
+        WORKSPACE: libs/client-sdk
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
+    - name: Archive Release Mac - AppleClang/x64/Static
+      if: runner.os == 'macOS'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-static.zip'
+
+    - name: Archive Release Mac - AppleClang/x64/Dynamic
+      if: runner.os == 'macOS'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-dynamic.zip'
+
+    - name: Upload Mac Build Artifacts
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        ls
+        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip --clobber
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}

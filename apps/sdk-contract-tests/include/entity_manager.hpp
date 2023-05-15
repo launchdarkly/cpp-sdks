@@ -1,11 +1,12 @@
 #pragma once
 
-#include <launchdarkly/client_side/api.hpp>
-
 #include <boost/asio/any_io_executor.hpp>
+
+#include <launchdarkly/client_side/client.hpp>
+#include <launchdarkly/logger.hpp>
+
 #include "client_entity.hpp"
 #include "definitions.hpp"
-#include "logger.hpp"
 
 #include <memory>
 #include <mutex>

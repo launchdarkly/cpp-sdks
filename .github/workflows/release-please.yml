@@ -1,0 +1,37 @@
+on:
+  push:
+    branches:
+      - main
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      package-client-released: ${{ steps.release.outputs['libs/client-sdk--release_created'] }}
+      package-client-tag: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          command: manifest
+          token: ${{ secrets.GITHUB_TOKEN }}
+          default-branch: main
+
+  release-client:
+    strategy:
+      matrix:
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ ubuntu-latest, windows-2022, macos-12 ]
+    runs-on: ${{ matrix.os }}
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-client-released }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: release-client
+        name: Full release of libs/client-sdk
+        uses: ./.github/actions/client-release
+        with:
+          # The tag of the release to upload artifacts to.
+          tag_name: ${{ needs.release-please.outputs.package-client-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}

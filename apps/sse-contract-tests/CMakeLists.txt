@@ -8,12 +8,6 @@ project(
         LANGUAGES CXX
 )
 
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.80 REQUIRED COMPONENTS coroutine)
-
-
 include(${CMAKE_FILES}/json.cmake)
 include(${CMAKE_FILES}/foxy.cmake)
 
