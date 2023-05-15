@@ -1,8 +1,8 @@
 #pragma once
 
-#include <launchdarkly/client_side/event_processor.hpp>
+#include "../event_processor.hpp"
 
-namespace launchdarkly::client_side::detail {
+namespace launchdarkly::client_side {
 
 class NullEventProcessor : public IEventProcessor {
    public:
@@ -11,4 +11,4 @@ class NullEventProcessor : public IEventProcessor {
     void AsyncFlush() override;
     void AsyncClose() override;
 };
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

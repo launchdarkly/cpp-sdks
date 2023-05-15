@@ -19,7 +19,7 @@ add_library(${LIBNAME}
         events/summarizer.cpp
         events/worker_pool.cpp
         logging/console_backend.cpp
-        logging/console_backend.hpp
+        ../include/launchdarkly/logging/console_backend.hpp
         logging/logger.cpp
         network/http_error_messages.cpp
         network/http_requester.cpp

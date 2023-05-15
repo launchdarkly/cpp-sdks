@@ -9,23 +9,24 @@
 #include <thread>
 #include <tuple>
 
-#include <tl/expected.hpp>
+#include "tl/expected.hpp"
 
-#include <launchdarkly/client_side/client.hpp>
-#include <launchdarkly/client_side/data_source.hpp>
-#include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
-#include <launchdarkly/client_side/event_processor.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_updater.hpp>
-#include <launchdarkly/client_side/flag_manager/flag_notifier.hpp>
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/data/evaluation_detail.hpp>
-#include <launchdarkly/error.hpp>
-#include <launchdarkly/value.hpp>
+#include "launchdarkly/client_side/client.hpp"
+#include "launchdarkly/client_side/flag_notifier.hpp"
+#include "launchdarkly/config/client.hpp"
+#include "launchdarkly/context.hpp"
+#include "launchdarkly/data/evaluation_detail.hpp"
+#include "launchdarkly/error.hpp"
 #include "launchdarkly/logging/logger.hpp"
+#include "launchdarkly/value.hpp"
 
-namespace launchdarkly::client_side::detail {
+#include "data_sources/data_source.hpp"
+#include "data_sources/data_source_status_manager.hpp"
+#include "event_processor.hpp"
+#include "flag_manager/flag_manager.hpp"
+#include "flag_manager/flag_updater.hpp"
+
+namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
     ClientImpl(Config config, Context context);
@@ -82,7 +83,7 @@ class ClientImpl : public IClient {
 
     data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
-    flag_manager::detail::IFlagNotifier& FlagNotifier() override;
+    flag_manager::IFlagNotifier& FlagNotifier() override;
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
@@ -102,9 +103,9 @@ class ClientImpl : public IClient {
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
-    data_sources::detail::DataSourceStatusManager status_manager_;
-    flag_manager::detail::FlagManager flag_manager_;
-    flag_manager::detail::FlagUpdater flag_updater_;
+    data_sources::DataSourceStatusManager status_manager_;
+    flag_manager::FlagManager flag_manager_;
+    flag_manager::FlagUpdater flag_updater_;
 
     Logger logger_;
     std::thread thread_;
@@ -116,4 +117,4 @@ class ClientImpl : public IClient {
 
     bool eval_reasons_available_;
 };
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

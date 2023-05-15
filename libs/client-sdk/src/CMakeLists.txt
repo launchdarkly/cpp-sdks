@@ -10,7 +10,7 @@ add_library(${LIBNAME}
         data_sources/streaming_data_source.cpp
         data_sources/base_64.cpp
         data_sources/data_source_event_handler.cpp
-        data_source_update_sink.cpp
+        data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_updater.cpp
@@ -23,8 +23,8 @@ add_library(${LIBNAME}
         client_impl.cpp
         client.cpp
         data_sources/base_64.hpp
-        data_sources/boost_signal_connection.hpp
-        data_sources/client_impl.hpp
+        boost_signal_connection.hpp
+        client_impl.hpp
         data_sources/data_source.hpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status_manager.hpp
@@ -39,7 +39,7 @@ add_library(${LIBNAME}
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE launchdarkly::sse)
+        PRIVATE launchdarkly::sse launchdarkly::internal)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 

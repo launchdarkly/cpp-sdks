@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
 
-using launchdarkly::client_side::data_sources::detail::Base64UrlEncode;
+using launchdarkly::client_side::data_sources::Base64UrlEncode;
 
 TEST(Base64Encoding, CanEncodeString) {
     // Test vectors from RFC4668

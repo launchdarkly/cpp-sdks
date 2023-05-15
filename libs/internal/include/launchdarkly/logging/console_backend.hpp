@@ -1,8 +1,8 @@
 #pragma once
 
-#include <launchdarkly/logging/log_backend.hpp>
+#include "launchdarkly/logging/log_backend.hpp"
 
-namespace launchdarkly {
+namespace launchdarkly::logging {
 /**
  * Basic console back-end. Writes `kError` level to stderr and others to stdout.
  */
@@ -29,4 +29,4 @@ class ConsoleBackend : public ILogBackend {
     LogLevel level_;
     std::string name_;
 };
-}  // namespace launchdarkly
+}  // namespace launchdarkly::logging

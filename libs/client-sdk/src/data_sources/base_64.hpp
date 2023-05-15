@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 /**
  * Return a base64 encoded version of the input string.
@@ -13,4 +13,4 @@ namespace launchdarkly::client_side::data_sources::detail {
  */
 std::string Base64UrlEncode(std::string const& input);
 
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

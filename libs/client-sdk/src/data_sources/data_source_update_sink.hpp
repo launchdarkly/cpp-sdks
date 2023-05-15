@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <launchdarkly/client_side/data_sources/data_source_status.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>

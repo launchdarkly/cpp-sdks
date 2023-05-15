@@ -4,7 +4,7 @@
 
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::client_side::data_sources::IDataSourceStatusProvider;
-using launchdarkly::client_side::data_sources::detail::DataSourceStatusManager;
+using launchdarkly::client_side::data_sources::DataSourceStatusManager;
 
 class DataSourceStateParameterizedTestFixture
     : public ::testing::TestWithParam<DataSourceStatus::DataSourceState> {};

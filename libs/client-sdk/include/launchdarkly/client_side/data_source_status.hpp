@@ -2,11 +2,13 @@
 
 #include <chrono>
 #include <cstddef>
+#include <functional>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
 
-#include <launchdarkly/client_side/connection.hpp>
+#include <launchdarkly/connection.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 

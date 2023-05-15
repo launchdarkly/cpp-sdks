@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "console_backend.hpp"
+#include "launchdarkly/logging/console_backend.hpp"
 
-namespace launchdarkly {
+namespace launchdarkly::logging {
 ConsoleBackend::ConsoleBackend(LogLevel level, std::string name)
     : level_(level), name_(std::move(name)) {
     // Update the name to be enclosed in brackets and have a space after.

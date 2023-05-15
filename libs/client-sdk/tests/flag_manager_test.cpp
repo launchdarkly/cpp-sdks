@@ -9,7 +9,7 @@ using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
 using launchdarkly::client_side::ItemDescriptor;
-using launchdarkly::client_side::flag_manager::detail::FlagManager;
+using launchdarkly::client_side::flag_manager::FlagManager;
 
 TEST(FlagManagerTests, HandlesEmptyInit) {
     FlagManager manager;

@@ -2,7 +2,7 @@
 
 #include <launchdarkly/value.hpp>
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 /**
  * A notification, for the consumer of the SDK, that a flag value has
  * changed.
@@ -60,4 +60,4 @@ class FlagValueChangeEvent {
 
 std::ostream& operator<<(std::ostream& out, FlagValueChangeEvent const& event);
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager

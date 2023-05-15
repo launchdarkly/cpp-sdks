@@ -1,11 +1,12 @@
 #include <launchdarkly/client_side/client.hpp>
-#include <launchdarkly/client_side/detail/client_impl.hpp>
+
+#include "client_impl.hpp"
 
 namespace launchdarkly::client_side {
 
 Client::Client(Config config, Context context)
-    : client(std::make_unique<config::ClientImpl>(std::move(config),
-                                                  std::move(context))) {}
+    : client(std::make_unique<ClientImpl>(std::move(config),
+                                          std::move(context))) {}
 bool Client::Initialized() const {
     return false;
 }
@@ -86,7 +87,7 @@ data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
     return client->DataSourceStatus();
 }
 
-flag_manager::detail::IFlagNotifier& Client::FlagNotifier() {
+flag_manager::IFlagNotifier& Client::FlagNotifier() {
     return client->FlagNotifier();
 }
 

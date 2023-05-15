@@ -1,13 +1,14 @@
 #pragma once
 
 #include <boost/asio/any_io_executor.hpp>
-#include <launchdarkly/client_side/event_processor.hpp>
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/events/detail/asio_event_processor.hpp>
-#include "launchdarkly/config/sdks.hpp"
-#include "launchdarkly/logging/logger.hpp"
 
-namespace launchdarkly::client_side::detail {
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/sdks.hpp>
+#include <launchdarkly/events/asio_event_processor.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include "../event_processor.hpp"
+
+namespace launchdarkly::client_side {
 
 class EventProcessor : public IEventProcessor {
    public:
@@ -19,7 +20,7 @@ class EventProcessor : public IEventProcessor {
     void AsyncClose() override;
 
    private:
-    events::detail::AsioEventProcessor<SDK> impl_;
+    events::AsioEventProcessor<SDK> impl_;
 };
 
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

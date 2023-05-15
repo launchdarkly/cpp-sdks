@@ -9,7 +9,7 @@
 
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
-using namespace launchdarkly::client_side::data_sources::detail;
+using namespace launchdarkly::client_side::data_sources;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:

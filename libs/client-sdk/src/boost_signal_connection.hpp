@@ -2,9 +2,9 @@
 
 #include <boost/signals2.hpp>
 
-#include <launchdarkly/client_side/connection.hpp>
+#include "launchdarkly/connection.hpp"
 
-namespace launchdarkly::client_side::detail {
+namespace launchdarkly::client_side {
 
 class SignalConnection : public IConnection {
    public:
@@ -16,4 +16,4 @@ class SignalConnection : public IConnection {
     boost::signals2::connection connection_;
 };
 
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

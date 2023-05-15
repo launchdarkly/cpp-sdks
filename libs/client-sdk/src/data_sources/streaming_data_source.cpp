@@ -5,15 +5,14 @@
 
 #include <utility>
 
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
-#include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
-#include <launchdarkly/serialization/json_context.hpp>
-#include "launchdarkly/config/shared/defaults.hpp"
+#include "base_64.hpp"
+#include "streaming_data_source.hpp"
 
-namespace launchdarkly::client_side::data_sources::detail {
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
+
+namespace launchdarkly::client_side::data_sources {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
@@ -34,20 +33,20 @@ StreamingDataSource::StreamingDataSource(
 
     auto& data_source_config = config.DataSourceConfig();
 
-    auto& streaming_config = std::get<
-        config::detail::built::StreamingConfig<config::config::ClientSDK>>(
-        data_source_config.method);
+    auto& streaming_config =
+        std::get<config::shared::built::StreamingConfig<config::ClientSDK>>(
+            data_source_config.method);
 
     auto updated_url =
-        network::detail::AppendUrl(config.ServiceEndpoints().StreamingBaseUrl(),
-                                   streaming_config.streaming_path);
+        network::AppendUrl(config.ServiceEndpoints().StreamingBaseUrl(),
+                           streaming_config.streaming_path);
 
     if (!data_source_config.use_report) {
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        updated_url = network::detail::AppendUrl(
-            updated_url, Base64UrlEncode(string_context));
+        updated_url =
+            network::AppendUrl(updated_url, Base64UrlEncode(string_context));
     }
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {
@@ -137,4 +136,4 @@ void StreamingDataSource::Close() {
     }
 }
 
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

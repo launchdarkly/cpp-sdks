@@ -1,4 +1,4 @@
-#include <launchdarkly/client_side/data_source_update_sink.hpp>
+#include "data_source_update_sink.hpp"
 
 namespace launchdarkly::client_side {
 

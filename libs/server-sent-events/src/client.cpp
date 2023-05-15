@@ -6,8 +6,6 @@
 
 #include "parser.hpp"
 
-#include <boost/beast/core/flat_buffer.hpp>
-#include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/read.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>

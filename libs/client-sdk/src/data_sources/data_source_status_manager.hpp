@@ -1,13 +1,14 @@
 #pragma once
 
 #include <functional>
+#include <mutex>
 
 #include <boost/signals2.hpp>
 
-#include <launchdarkly/client_side/connection.hpp>
-#include <launchdarkly/client_side/data_sources/data_source_status.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/connection.hpp>
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 /**
  * Class that manages updates to the data source status and implements an
@@ -89,4 +90,4 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
     bool UpdateState(DataSourceStatus::DataSourceState const& requested_state);
 };
 
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

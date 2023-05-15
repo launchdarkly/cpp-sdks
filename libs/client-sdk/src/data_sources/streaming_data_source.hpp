@@ -5,10 +5,11 @@ using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <launchdarkly/client_side/data_source.hpp>
-#include <launchdarkly/client_side/data_source_update_sink.hpp>
-#include <launchdarkly/client_side/data_sources/detail/data_source_event_handler.hpp>
-#include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
+#include "data_source.hpp"
+#include "data_source_event_handler.hpp"
+#include "data_source_status_manager.hpp"
+#include "data_source_update_sink.hpp"
+
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
@@ -17,7 +18,7 @@ using namespace std::chrono_literals;
 #include <launchdarkly/sse/client.hpp>
 #include "launchdarkly/logging/logger.hpp"
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 class StreamingDataSource final : public IDataSource {
    public:
@@ -40,4 +41,4 @@ class StreamingDataSource final : public IDataSource {
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;
 };
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

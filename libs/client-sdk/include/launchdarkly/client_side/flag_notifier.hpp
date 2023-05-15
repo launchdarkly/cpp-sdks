@@ -1,10 +1,10 @@
 #pragma once
 
-#include <launchdarkly/client_side/connection.hpp>
-#include <launchdarkly/client_side/flag_manager/flag_change_event.hpp>
+#include <launchdarkly/client_side/flag_change_event.hpp>
+#include <launchdarkly/connection.hpp>
 #include <launchdarkly/value.hpp>
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 
 /**
  * Interface to allow listening for flag changes. Notification events should
@@ -40,4 +40,4 @@ class IFlagNotifier {
     IFlagNotifier() = default;
 };
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager

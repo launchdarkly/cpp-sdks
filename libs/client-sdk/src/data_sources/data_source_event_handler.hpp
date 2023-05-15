@@ -2,15 +2,16 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <launchdarkly/client_side/data_source.hpp>
-#include <launchdarkly/client_side/data_source_update_sink.hpp>
-#include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
+#include "data_source.hpp"
+#include "data_source_status_manager.hpp"
+#include "data_source_update_sink.hpp"
+
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include "launchdarkly/logging/logger.hpp"
+#include <launchdarkly/logging/logger.hpp>
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 /**
  * This class handles LaunchDarkly events, parses them, and then uses
@@ -65,4 +66,4 @@ class DataSourceEventHandler {
     Logger const& logger_;
     DataSourceStatusManager& status_manager_;
 };
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

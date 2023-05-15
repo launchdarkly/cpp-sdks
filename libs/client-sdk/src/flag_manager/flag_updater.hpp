@@ -5,14 +5,15 @@
 #include <string>
 #include <unordered_map>
 
-#include <launchdarkly/client_side/data_source_update_sink.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
-#include <launchdarkly/client_side/flag_manager/flag_notifier.hpp>
-#include <launchdarkly/client_side/flag_manager/flag_change_event.hpp>
+#include "../data_sources/data_source_update_sink.hpp"
+#include "flag_manager.hpp"
+
+#include <launchdarkly/client_side/flag_change_event.hpp>
+#include <launchdarkly/client_side/flag_notifier.hpp>
 
 #include <boost/signals2.hpp>
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
@@ -50,4 +51,4 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
     void DispatchEvent(FlagValueChangeEvent event);
 };
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager
