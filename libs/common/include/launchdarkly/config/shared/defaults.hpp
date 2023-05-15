@@ -23,7 +23,7 @@ struct Defaults {
     static bool Offline() { return false; }
 
     static std::string LogTag() { return "LaunchDarkly"; }
-    static LogLevel LogLevel() { return LogLevel::kInfo; }
+    static launchdarkly::LogLevel LogLevel() { return LogLevel::kInfo; }
 };
 
 template <>
