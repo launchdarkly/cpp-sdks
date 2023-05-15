@@ -10,7 +10,7 @@ endif ()
 
 FetchContent_Declare(foxy
         GIT_REPOSITORY https://github.com/launchdarkly/foxy.git
-        GIT_TAG 7f4ac0495ad2ed9cd0eca5994743d677ac1d2636
+        GIT_TAG rlamb/skip-install
         )
 
 
@@ -19,6 +19,7 @@ set(ORIGINAL_BUILD_TESTING "${BUILD_TESTING}")
 
 set(BUILD_TESTING OFF)
 set(BUILD_SHARED_LIBS OFF)
+set(FOXY_SKIP_INSTALL ON)
 FetchContent_MakeAvailable(foxy)
 
 set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")

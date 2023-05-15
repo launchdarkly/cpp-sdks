@@ -21,6 +21,7 @@ bool ConsoleBackend::Enabled(LogLevel level) {
 }
 
 void ConsoleBackend::Write(LogLevel level, std::string message) {
+    std::lock_guard lock(write_mutex_);
     if (Enabled(level)) {
         if (level == LogLevel::kError) {
             std::cerr << name_ << message << std::endl;
