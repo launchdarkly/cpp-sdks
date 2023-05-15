@@ -46,7 +46,7 @@ ConfigBuilder<SDK>& ConfigBuilder<SDK>::HttpProperties(
 }
 
 template <typename SDK>
-ConfigBuilder<SDK>& ConfigBuilder<SDK>::Logging(LoggingConfigBuilder builder) {
+ConfigBuilder<SDK>& ConfigBuilder<SDK>::Logging(LoggingBuilder builder) {
     logging_config_builder_ = builder;
     return *this;
 }
@@ -83,7 +83,7 @@ ConfigBuilder<SDK>::Build() const {
                                : Defaults<SDK>::HttpProperties();
 
     auto logging =
-        logging_config_builder_.value_or(LoggingConfigBuilder()).Build();
+        logging_config_builder_.value_or(LoggingBuilder()).Build();
 
     return {tl::in_place,
             sdk_key,

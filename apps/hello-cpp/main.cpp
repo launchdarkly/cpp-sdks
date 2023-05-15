@@ -9,8 +9,6 @@
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
 using launchdarkly::ContextBuilder;
-using launchdarkly::Logger;
-using launchdarkly::LogLevel;
 using launchdarkly::client_side::Client;
 using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
@@ -20,7 +18,8 @@ int main() {
 
     char const* key = std::getenv("STG_SDK_KEY");
     if (!key) {
-        std::cout << "Set environment variable STG_SDK_KEY to the sdk key";
+        std::cout << "Set environment variable STG_SDK_KEY to the sdk key"
+                  << std::endl;
         return 1;
     }
 
@@ -43,24 +42,26 @@ int main() {
             .value(),
         ContextBuilder().kind("user", "ryan").build());
 
-    std::cout << "Initial Status: " << client.DataSourceStatus().Status();
+    std::cout << "Initial Status: " << client.DataSourceStatus().Status()
+              << std::endl;
 
-    client.DataSourceStatus().OnDataSourceStatusChange(
-        [](auto status) { std::cout << "Got status: " << status; });
+    client.DataSourceStatus().OnDataSourceStatusChange([](auto status) {
+        std::cout << "Got status: " << status << std::endl;
+    });
 
     client.FlagNotifier().OnFlagChange("my-boolean-flag", [](auto event) {
-        std::cout << "Got flag change: " << *event;
+        std::cout << "Got flag change: " << *event << std::endl;
     });
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
     auto value = client.BoolVariationDetail("my-boolean-flag", false);
-    std::cout << "Value was: " << *value;
+    std::cout << "Value was: " << *value << std::endl;
     if (auto reason = value.Reason()) {
-        std::cout << "Reason was: " << *reason;
+        std::cout << "Reason was: " << *reason << std::endl;
     }
 
     // Sit around.
-    std::cout << "Press enter to exit" << std::endl;
+    std::cout << "Press enter to exit" << std::endl << std::endl;
     std::cin.get();
 }

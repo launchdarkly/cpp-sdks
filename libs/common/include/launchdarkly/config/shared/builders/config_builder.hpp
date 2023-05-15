@@ -5,7 +5,7 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/shared/builders/logging_config_bulder.hpp>
+#include <launchdarkly/config/shared/builders/logging_bulder.hpp>
 #include <launchdarkly/config/shared/config.hpp>
 
 #include <optional>
@@ -88,7 +88,7 @@ class ConfigBuilder {
      * @param builder A Logging builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& Logging(LoggingConfigBuilder builder);
+    ConfigBuilder& Logging(LoggingBuilder builder);
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
@@ -104,7 +104,7 @@ class ConfigBuilder {
     std::optional<EventsBuilder> events_builder_;
     std::optional<DataSourceBuilder> data_source_builder_;
     std::optional<HttpPropertiesBuilder> http_properties_builder_;
-    std::optional<LoggingConfigBuilder> logging_config_builder_;
+    std::optional<LoggingBuilder> logging_config_builder_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

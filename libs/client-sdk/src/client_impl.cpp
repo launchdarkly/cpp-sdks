@@ -9,7 +9,7 @@
 #include "event_processor/event_processor.hpp"
 #include "event_processor/null_event_processor.hpp"
 
-#include <launchdarkly/config/shared/built/logging_config.hpp>
+#include <launchdarkly/config/shared/built/logging.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 
 namespace launchdarkly::client_side {

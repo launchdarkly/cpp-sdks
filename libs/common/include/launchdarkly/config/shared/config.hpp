@@ -5,7 +5,7 @@
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/logging_config.hpp>
+#include <launchdarkly/config/shared/built/logging.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 
 namespace launchdarkly::config {
