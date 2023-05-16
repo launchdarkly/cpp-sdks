@@ -19,7 +19,7 @@ using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
 using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
-
+using LoggingBuilder = config::shared::builders::LoggingBuilder;
 using Config = config::Config<SDK>;
 
 }  // namespace launchdarkly::client_side

@@ -21,6 +21,12 @@ using namespace launchdarkly::client_side;
 
 #define FROM_POLL_BUILDER(ptr) (reinterpret_cast<LDDataSourcePollBuilder>(ptr))
 
+#define TO_BASIC_LOGGING_BUILDER(ptr) \
+    (reinterpret_cast<LoggingBuilder::BasicLogging*>(ptr))
+
+#define FROM_BASIC_LOGGING_BUILDER(ptr) \
+    (reinterpret_cast<LDLoggingBasicBuilder>(ptr))
+
 LD_EXPORT(LDClientConfigBuilder)
 LDClientConfigBuilder_New(char const* sdk_key) {
     ASSERT_NOT_NULL(sdk_key);
@@ -229,6 +235,58 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     ASSERT_NOT_NULL(key);
     ASSERT_NOT_NULL(value);
     TO_BUILDER(b)->HttpProperties().Header(key, value);
+}
+
+LD_EXPORT(LDLoggingBasicBuilder) LDLoggingBasicBuilder_New() {
+    return FROM_BASIC_LOGGING_BUILDER(new LoggingBuilder::BasicLogging());
+}
+
+LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b) {
+    if (LoggingBuilder::BasicLogging* builder = TO_BASIC_LOGGING_BUILDER(b)) {
+        delete builder;
+    }
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b) {
+    ASSERT_NOT_NULL(b);
+    TO_BUILDER(b)->Logging().Logging(LoggingBuilder::NoLogging());
+}
+
+LD_EXPORT(void)
+LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level) {
+    using launchdarkly::LogLevel;
+    ASSERT_NOT_NULL(b);
+    LoggingBuilder::BasicLogging* logger = TO_BASIC_LOGGING_BUILDER(b);
+    switch (level) {
+        case LD_LOG_DEBUG:
+            logger->Level(LogLevel::kDebug);
+            break;
+        case LD_LOG_INFO:
+            logger->Level(LogLevel::kInfo);
+            break;
+        case LD_LOG_WARN:
+            logger->Level(LogLevel::kWarn);
+            break;
+        case LD_LOG_ERROR:
+            logger->Level(LogLevel::kError);
+            break;
+    }
+}
+void LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(tag);
+    TO_BASIC_LOGGING_BUILDER(b)->Tag(tag);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
+                                    LDLoggingBasicBuilder basic_builder) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(basic_builder);
+    LoggingBuilder::BasicLogging* bb = TO_BASIC_LOGGING_BUILDER(basic_builder);
+    TO_BUILDER(b)->Logging().Logging(*bb);
+    LDLoggingBasicBuilder_Free(basic_builder);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

@@ -32,6 +32,8 @@ class ConfigBuilder {
         launchdarkly::config::shared::builders::DataSourceBuilder<SDK>;
     using HttpPropertiesBuilder =
         launchdarkly::config::shared::builders::HttpPropertiesBuilder<SDK>;
+    using LoggingBuilder =
+        launchdarkly::config::shared::builders::LoggingBuilder;
 
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.

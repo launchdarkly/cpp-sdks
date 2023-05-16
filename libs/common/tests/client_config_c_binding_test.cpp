@@ -62,6 +62,14 @@ TEST(ClientConfigBindings, AllConfigs) {
     LDClientConfigBuilder_HttpProperties_WrapperName(builder, "wrapper");
     LDClientConfigBuilder_HttpProperties_WrapperVersion(builder, "v1.2.3");
 
+    LDClientConfigBuilder_Logging_Disable(builder);
+
+    LDLoggingBasicBuilder log_builder = LDLoggingBasicBuilder_New();
+    LDLoggingBasicBuilder_Level(log_builder, LD_LOG_WARN);
+    LDLoggingBasicBuilder_Tag(log_builder, "tag");
+
+    LDClientConfigBuilder_Logging_Basic(builder, log_builder);
+
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));

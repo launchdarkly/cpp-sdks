@@ -19,6 +19,16 @@ typedef struct _LDDataSourceStreamBuilder* LDDataSourceStreamBuilder;
 
 typedef struct _LDDataSourcePollBuilder* LDDataSourcePollBuilder;
 
+typedef struct _LDLoggingCustomBuilder* LDLoggingCustomBuilder;
+typedef struct _LDLoggingBasicBuilder* LDLoggingBasicBuilder;
+
+enum LDLogLevel {
+    LD_LOG_DEBUG = 0,
+    LD_LOG_INFO = 1,
+    LD_LOG_WARN = 2,
+    LD_LOG_ERROR = 3,
+};
+
 /**
  * Constructs a client-side config builder.
  */
@@ -315,6 +325,58 @@ LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* key,
                                             char const* value);
+
+/**
+ * Creates a new builder for LaunchDarkly's default logger.
+ *
+ * If not passed into the config
+ * builder, must be manually freed with LDLoggingBasicBuilder_Free.
+ * @return New builder.
+ */
+LD_EXPORT(LDLoggingBasicBuilder) LDLoggingBasicBuilder_New();
+
+/**
+ * Frees a basic logging builder. Do not call if the builder was consumed by
+ * the config builder.
+ * @param b Builder to free.
+ */
+LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b);
+
+/**
+ * Sets the enabled log level. The default level is LD_LOG_INFO.
+ * @param b Client config builder. Must not be NULL.
+ * @param level Level to set.
+ */
+LD_EXPORT(void)
+LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level);
+
+/**
+ * Set a tag for this logger. This tag will be included at the start
+ * of log entries in square brackets.
+ *
+ * If the name was "LaunchDarkly", then log entries will be prefixed
+ * with "[LaunchDarkly]". The default tag is "LaunchDarkly".
+ * @param b Client config builder. Must not be NULL.
+ * @param tag Tag to set. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag);
+
+/**
+ * Disables the default SDK logging.
+ * @param b Client config builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b);
+
+/**
+ * Configures the SDK with basic logging.
+ * @param b  Client config builder. Must not be NULL.
+ * @param basic_builder The basic logging builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
+                                    LDLoggingBasicBuilder basic_builder);
 
 /**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.
