@@ -42,7 +42,7 @@ class EntityManager {
      * @return An ID representing the entity, or none if the entity couldn't
      * be created.
      */
-    std::optional<std::string> create(ConfigParams params);
+    std::optional<std::string> create(ConfigParams const& params);
     /**
      * Destroy an entity with the given ID.
      * @param id ID of the entity.

@@ -15,7 +15,7 @@ ClientEntity::ClientEntity(
     : client_(std::move(client)) {}
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
-    IdentifyEventParams params) {
+    IdentifyEventParams const& params) {
     boost::system::error_code ec;
     auto json_value = boost::json::parse(params.context.dump(), ec);
     if (ec) {
@@ -61,8 +61,8 @@ static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
     }
 }
 
-tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
-    ContextBuildParams params) {
+tl::expected<nlohmann::json, std::string> ContextBuild(
+    ContextBuildParams const& params) {
     ContextResponse resp{};
 
     auto builder = launchdarkly::ContextBuilder();
@@ -85,8 +85,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
     return resp;
 }
 
-tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
-    ContextConvertParams params) {
+tl::expected<nlohmann::json, std::string> ContextConvert(
+    ContextConvertParams const& params) {
     ContextResponse resp{};
 
     boost::system::error_code ec;
@@ -115,7 +115,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
-    CustomEventParams params) {
+    CustomEventParams const& params) {
     auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
                                   boost::json::parse(params.data->dump()))
                             : launchdarkly::Value::Null();
@@ -136,7 +136,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
-    EvaluateAllFlagParams params) {
+    EvaluateAllFlagParams const& params) {
     EvaluateAllFlagsResponse resp{};
 
     boost::ignore_unused(params);
@@ -150,7 +150,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
-    EvaluateFlagParams params) {
+    EvaluateFlagParams const& params) {
     auto const& key = params.flagKey;
 
     auto const& defaultVal = params.defaultValue;
@@ -225,7 +225,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
     return result;
 }
 tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
-    EvaluateFlagParams params) {
+    EvaluateFlagParams const& params) {
     if (params.detail) {
         return EvaluateDetail(params);
     }

@@ -68,7 +68,7 @@ ConfigBuilder<SDK>::Build() const {
     if (!events_config) {
         return tl::make_unexpected(events_config.error());
     }
-    
+
     std::optional<std::string> app_tag;
     if (app_info_builder_) {
         app_tag = app_info_builder_->Build();

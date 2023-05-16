@@ -5,12 +5,9 @@ using launchdarkly::LogLevel;
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
                              launchdarkly::Logger& logger)
-    : entities_(),
-      counter_{0},
-      executor_{std::move(executor)},
-      logger_{logger} {}
+    : counter_{0}, executor_{std::move(executor)}, logger_{logger} {}
 
-std::optional<std::string> EntityManager::create(ConfigParams params) {
+std::optional<std::string> EntityManager::create(ConfigParams const& params) {
     std::string id = std::to_string(counter_++);
 
     auto poster = std::make_shared<EventOutbox>(executor_, params.callbackUrl);
@@ -20,8 +17,8 @@ std::optional<std::string> EntityManager::create(ConfigParams params) {
         launchdarkly::sse::Builder(executor_, params.streamUrl);
 
     if (params.headers) {
-        for (auto const& h : *params.headers) {
-            client_builder.header(h.first, h.second);
+        for (auto const& header : *params.headers) {
+            client_builder.header(header.first, header.second);
         }
     }
 
