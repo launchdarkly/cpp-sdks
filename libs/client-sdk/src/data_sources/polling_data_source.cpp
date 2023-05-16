@@ -179,19 +179,23 @@ void PollingDataSource::StartPollingTimer() {
     timer_.cancel();
     timer_.expires_after(polling_interval_);
 
-    timer_.async_wait([this](boost::system::error_code const& ec) {
+    auto weak_self = weak_from_this();
+
+    timer_.async_wait([weak_self](boost::system::error_code const& ec) {
         if (ec == boost::asio::error::operation_aborted) {
             // The timer was cancelled. Stop polling.
             return;
         }
-        if (ec) {
-            // Something unexpected happened. Log it and continue to try
-            // polling.
-            LD_LOG(logger_, LogLevel::kError)
-                << "Unexpected error in polling timer: " << ec.message();
-            Close();
+        if (auto self = weak_self.lock()) {
+            if (ec) {
+                // Something unexpected happened. Log it and continue to try
+                // polling.
+                LD_LOG(self->logger_, LogLevel::kError)
+                    << "Unexpected error in polling timer: " << ec.message();
+                self->Close();
+            }
+            self->DoPoll();
         }
-        DoPoll();
     });
 }
 
@@ -216,7 +220,7 @@ void PollingDataSource::Close() {
 
 void PollingDataSource::AsyncShutdown(std::function<void()> fn) {
     Close();
-    fn();
+    boost::asio::post(timer_.get_executor(), [fn]() { fn(); });
 }
 
 }  // namespace launchdarkly::client_side::data_sources

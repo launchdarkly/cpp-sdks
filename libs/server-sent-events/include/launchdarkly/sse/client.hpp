@@ -142,8 +142,6 @@ class Client {
     virtual ~Client() = default;
     virtual void run() = 0;
     virtual void async_shutdown(std::function<void()>) = 0;
-
-    virtual std::future<void> sync_shutdown() = 0;
 };
 
 }  // namespace launchdarkly::sse

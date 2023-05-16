@@ -1,5 +1,6 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
+#include <boost/asio/post.hpp>
 #include <boost/json.hpp>
 #include <boost/url.hpp>
 
@@ -144,7 +145,10 @@ void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
     if (client_) {
         return client_->async_shutdown(std::move(handler));
     }
-    handler();
+    if (!handler) {
+        return;
+    }
+    boost::asio::post(exec_, [handler]() { handler(); });
 }
 
 }  // namespace launchdarkly::client_side::data_sources

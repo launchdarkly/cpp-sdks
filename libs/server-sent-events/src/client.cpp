@@ -71,7 +71,7 @@ class FoxyClient : public Client,
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
-        async_shutdown([]() {});
+        async_shutdown(nullptr);
     }
 
     void run() override {
@@ -90,11 +90,9 @@ class FoxyClient : public Client,
 
     void on_shutdown(std::function<void()> user_completion_handler,
                      boost::system::error_code ec) {
-        user_completion_handler();
-    }
-
-    virtual std::future<void> sync_shutdown() override {
-        return session_.async_shutdown(boost::asio::use_future);
+        if (user_completion_handler) {
+            user_completion_handler();
+        }
     }
 
     void on_connect(boost::system::error_code ec) {
@@ -146,7 +144,7 @@ class FoxyClient : public Client,
     void on_read_complete(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec == boost::asio::error::operation_aborted) {
-            async_shutdown([]() {});
+            async_shutdown(nullptr);
         } else {
             return fail(ec, "read body");
         }
