@@ -35,7 +35,8 @@ add_library(${LIBNAME}
         event_processor/null_event_processor.hpp
         flag_manager/flag_manager.hpp
         flag_manager/flag_updater.hpp
-        event_processor.hpp serialization/json_item_descriptor.cpp)
+        event_processor.hpp
+        serialization/json_all_flags.cpp)
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
