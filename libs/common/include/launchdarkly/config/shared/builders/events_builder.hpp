@@ -80,7 +80,7 @@ class EventsBuilder {
      *
      * (2) To specify that a specific set of attributes should be considered
      * private - in addition to those designated private on a per-context basis
-     * - call @ref PrivateAttributes.
+     * - call @ref PrivateAttributes or PrivateAttribute.
      *
      * (3) To specify private attributes on a per-context basis, it is not
      * necessary to call either of these methods, as the default behavior is to
@@ -93,10 +93,19 @@ class EventsBuilder {
     EventsBuilder& AllAttributesPrivate(bool all_attributes_private);
 
     /**
-     * Specify that a set of attributes are private.
+     * Specify a set of private attributes. Any existing private attributes
+     * are overwritten.
      * @return Reference to this builder.
      */
     EventsBuilder& PrivateAttributes(AttributeReference::SetType private_attrs);
+
+    /**
+     * Specifies a single private attribute. May be called multiple times
+     * with additional private attributes.
+     * @param attribute Attribute to mark private.
+     * @return Reference to this builder.
+     */
+    EventsBuilder& PrivateAttribute(AttributeReference attribute);
 
     /**
      * Builds Events configuration, if the configuration is valid.

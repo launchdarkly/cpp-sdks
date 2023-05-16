@@ -6,7 +6,7 @@
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
-EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
+EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()), {}
 
 template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::Enabled(bool enabled) {
@@ -42,6 +42,13 @@ template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttributes(
     AttributeReference::SetType attributes) {
     config_.private_attributes_ = std::move(attributes);
+    return *this;
+}
+
+template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttribute(
+    AttributeReference attribute) {
+    config_.private_attributes_.insert(std::move(attribute));
     return *this;
 }
 

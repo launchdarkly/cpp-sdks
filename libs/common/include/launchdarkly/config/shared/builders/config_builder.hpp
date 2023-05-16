@@ -56,7 +56,7 @@ class ConfigBuilder {
     AppInfoBuilder& AppInfo();
 
     /**
-     * To enable or disable "Offline" mode, pass a boolean value. True means
+     * Enables or disables "Offline" mode. True means
      * Offline mode is enabled.
      * @param offline True if the SDK should operate in Offline mode.
      * @return Reference to this builder.
