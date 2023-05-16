@@ -306,7 +306,6 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             return Custom(*params.customEvent);
         case Command::FlushEvents:
             client_->AsyncFlush();
-            //   std::this_thread::sleep_for(std::chrono::seconds(3));
             return nlohmann::json{};
         case Command::ContextBuild:
             if (!params.contextBuild) {

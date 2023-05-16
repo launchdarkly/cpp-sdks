@@ -106,13 +106,14 @@ class ClientImpl : public IClient {
                        std::optional<Value> data,
                        std::optional<double> metric_value);
 
-    template <typename T>
-    T ReadContext(std::function<T(Context const&)> fn) const {
+    template <typename F>
+    auto ReadContextSynchronized(F fn) const
+        -> std::invoke_result_t<F, Context const&> {
         std::shared_lock lock(context_mutex_);
         return fn(context_);
     }
 
-    void WriteContext(Context context);
+    void UpdateContextSynchronized(Context context);
 
     void OnDataSourceShutdown(Context context,
                               std::function<void()> user_completion);

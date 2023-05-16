@@ -86,10 +86,6 @@ class IClient {
     /**
      * Tells the client that all pending analytics events (if any) should be
      * delivered as soon as possible.
-     *
-     * Only one AsyncFlush can be in progress at once; calling it concurrently
-     * is undefined behavior.
-     *
      */
     virtual void AsyncFlush() = 0;
 

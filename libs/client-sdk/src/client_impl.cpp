@@ -112,7 +112,7 @@ void ClientImpl::TrackInternal(std::string event_name,
                                std::optional<double> metric_value) {
     event_processor_->AsyncSend(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
-        ReadContext<std::map<std::string, std::string>>(
+        ReadContextSynchronized(
             [](Context const& c) { return c.kinds_to_keys(); }),
         std::move(data), metric_value});
 }
@@ -137,13 +137,12 @@ void ClientImpl::AsyncFlush() {
 
 void ClientImpl::OnDataSourceShutdown(Context context,
                                       std::function<void()> user_completion) {
-    WriteContext(context);
+    UpdateContextSynchronized(context);
     data_source_ = data_source_factory_();
-    if (data_source_) {
-        data_source_->Start();
-        event_processor_->AsyncSend(events::client::IdentifyEventParams{
-            std::chrono::system_clock::now(), context});
-    }
+    data_source_->Start();
+    event_processor_->AsyncSend(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), std::move(context)});
+
     if (user_completion) {
         user_completion();
     }
@@ -169,7 +168,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     events::client::FeatureEventParams event = {
         std::chrono::system_clock::now(),
         key,
-        ReadContext<Context>([](Context const& c) { return c; }),
+        ReadContextSynchronized([](Context const& c) { return c; }),
         default_value,
         default_value,
         std::nullopt,
@@ -319,7 +318,7 @@ void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
 
-void ClientImpl::WriteContext(Context context) {
+void ClientImpl::UpdateContextSynchronized(Context context) {
     std::unique_lock lock(context_mutex_);
     context_ = std::move(context);
 }
