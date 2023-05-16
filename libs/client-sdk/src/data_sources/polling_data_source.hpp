@@ -28,10 +28,7 @@ class PollingDataSource
                       Logger const& logger);
 
     void Start() override;
-    void Close();
-
-    void AsyncShutdown(std::function<void()>) override;
-    std::future<void> SyncShutdown() override;
+    void ShutdownAsync(std::function<void()>) override;
 
    private:
     void DoPoll();

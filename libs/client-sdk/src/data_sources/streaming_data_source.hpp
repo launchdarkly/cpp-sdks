@@ -32,8 +32,7 @@ class StreamingDataSource final
                         Logger const& logger);
 
     void Start() override;
-    void AsyncShutdown(std::function<void()>) override;
-    std::future<void> SyncShutdown() override;
+    void ShutdownAsync(std::function<void()>) override;
 
    private:
     boost::asio::any_io_executor exec_;

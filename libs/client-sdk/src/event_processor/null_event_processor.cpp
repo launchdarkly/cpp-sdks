@@ -2,9 +2,9 @@
 
 namespace launchdarkly::client_side {
 
-void NullEventProcessor::AsyncSend(events::InputEvent event) {}
+void NullEventProcessor::SendAsync(events::InputEvent event) {}
 
-void NullEventProcessor::AsyncFlush() {}
+void NullEventProcessor::FlushAsync() {}
 
-void NullEventProcessor::AsyncClose() {}
+void NullEventProcessor::ShutdownAsync() {}
 }  // namespace launchdarkly::client_side

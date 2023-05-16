@@ -8,6 +8,7 @@
 #include <boost/beast/http/string_body.hpp>
 
 #include <functional>
+#include <future>
 #include <memory>
 #include <string>
 
@@ -141,8 +142,7 @@ class Client {
    public:
     virtual ~Client() = default;
     virtual void run() = 0;
-    virtual void async_shutdown(std::function<void()>) = 0;
-    virtual std::future<void> sync_shutdown() = 0;
+    virtual void async_shutdown(std::function<void()> completion) = 0;
 };
 
 }  // namespace launchdarkly::sse

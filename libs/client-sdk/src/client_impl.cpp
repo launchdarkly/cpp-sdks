@@ -19,6 +19,10 @@ namespace launchdarkly::client_side {
 // single thread, and applies several optimisations based on this assumption.
 auto const kAsioConcurrencyHint = 1;
 
+// Client's destructor attempts to gracefully shut down the datasource
+// connection in this amount of time.
+auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
+
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
@@ -88,7 +92,7 @@ ClientImpl::ClientImpl(Config config, Context context)
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 
-    event_processor_->AsyncSend(events::client::IdentifyEventParams{
+    event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), context_});
 }
 
@@ -110,7 +114,7 @@ std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
 void ClientImpl::TrackInternal(std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
-    event_processor_->AsyncSend(events::TrackEventParams{
+    event_processor_->SendAsync(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
         ReadContextSynchronized(
             [](Context const& c) { return c.kinds_to_keys(); }),
@@ -131,35 +135,22 @@ void ClientImpl::Track(std::string event_name) {
     this->TrackInternal(std::move(event_name), std::nullopt, std::nullopt);
 }
 
-void ClientImpl::AsyncFlush() {
-    event_processor_->AsyncFlush();
+void ClientImpl::FlushAsync() {
+    event_processor_->FlushAsync();
 }
 
-void ClientImpl::OnDataSourceShutdown(Context context,
-                                      std::function<void()> user_completion) {
-    UpdateContextSynchronized(context);
-    data_source_ = data_source_factory_();
-    data_source_->Start();
-    event_processor_->AsyncSend(events::client::IdentifyEventParams{
-        std::chrono::system_clock::now(), std::move(context)});
-
-    if (user_completion) {
-        user_completion();
-    }
-}
-
-void ClientImpl::AsyncIdentify(Context context,
-                               std::function<void()> completion) {
-    data_source_->AsyncShutdown(
-        [this, ctx = std::move(context), cb = std::move(completion)]() {
-            OnDataSourceShutdown(std::move(ctx), std::move(cb));
+std::future<void> ClientImpl::IdentifyAsync(Context context) {
+    auto identify_promise = std::make_shared<std::promise<void>>();
+    auto fut = identify_promise->get_future();
+    data_source_->ShutdownAsync(
+        [this, ctx = std::move(context), identify_promise]() {
+            UpdateContextSynchronized(ctx);
+            data_source_ = data_source_factory_();
+            data_source_->Start();
+            event_processor_->SendAsync(events::client::IdentifyEventParams{
+                std::chrono::system_clock::now(), std::move(ctx)});
+            identify_promise->set_value();
         });
-}
-
-std::future<void> ClientImpl::SyncIdentify(Context context) {
-    auto pr = std::make_shared<std::promise<void>>();
-    auto fut = pr->get_future();
-    AsyncIdentify(std::move(context), [pr]() { pr->set_value(); });
     return fut;
 }
 
@@ -197,7 +188,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
             if (eval_reasons_available_) {
                 event.reason = error_reason;
             }
-            event_processor_->AsyncSend(std::move(event));
+            event_processor_->SendAsync(std::move(event));
             return EvaluationDetail<T>(default_value, std::nullopt,
                                        std::move(error_reason));
         }
@@ -210,7 +201,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         if (eval_reasons_available_) {
             event.reason = error_reason;
         }
-        event_processor_->AsyncSend(std::move(event));
+        event_processor_->SendAsync(std::move(event));
         return EvaluationDetail<T>(default_value, std::nullopt,
                                    std::move(error_reason));
 
@@ -232,7 +223,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         if (eval_reasons_available_) {
             event.reason = error_reason;
         }
-        event_processor_->AsyncSend(std::move(event));
+        event_processor_->SendAsync(std::move(event));
         return EvaluationDetail<T>(default_value, std::nullopt, error_reason);
     }
 
@@ -249,7 +240,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         event.debug_events_until_date = events::Date{*date};
     }
 
-    event_processor_->AsyncSend(std::move(event));
+    event_processor_->SendAsync(std::move(event));
 
     return EvaluationDetail<T>(detail.value(), detail.variation_index(),
                                detail.reason());
@@ -331,7 +322,13 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 }
 
 ClientImpl::~ClientImpl() {
-    data_source_->AsyncShutdown([]() {});
+    auto shutdown_promise = std::make_shared<std::promise<void>>();
+    auto fut = shutdown_promise->get_future();
+
+    data_source_->ShutdownAsync(
+        [shutdown_promise]() { shutdown_promise->set_value(); });
+    fut.wait_for(kDataSourceShutdownWait);
+
     ioc_.stop();
     // TODO: Probably not the best.
     run_thread_.join();

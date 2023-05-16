@@ -88,26 +88,23 @@ class IClient {
      * Tells the client that all pending analytics events (if any) should be
      * delivered as soon as possible.
      */
-    virtual void AsyncFlush() = 0;
+    virtual void FlushAsync() = 0;
 
     /**
      * Changes the current evaluation context, requests flags for that context
      * from LaunchDarkly if we are online, and generates an analytics event to
      * tell LaunchDarkly about the context.
      *
-     * Only one AsyncIdentify can be in progress at once; calling it
+     * Only one IdentifyAsync can be in progress at once; calling it
      * concurrently is undefined behavior.
      *
-     * The given handler will be invoked when the operation is complete by a
-     * thread internal to the Client; blocking this thread may delay feature
-     * flag updates or event delivery.
+     * To block until the identify operation is complete, call wait() on
+     * the returned future.
      *
      * @param context The new evaluation context.
      */
-    virtual void AsyncIdentify(Context context,
-                               std::function<void()> completion) = 0;
 
-    virtual std::future<void> SyncIdentify(Context context) = 0;
+    virtual std::future<void> IdentifyAsync(Context context) = 0;
 
     /**
      * Returns the boolean value of a feature flag for a given flag key.
@@ -276,12 +273,9 @@ class Client : public IClient {
 
     void Track(std::string event_name) override;
 
-    void AsyncFlush() override;
+    void FlushAsync() override;
 
-    void AsyncIdentify(Context context,
-                       std::function<void()> completion) override;
-
-    std::future<void> SyncIdentify(Context context) override;
+    std::future<void> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 

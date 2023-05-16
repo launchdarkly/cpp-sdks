@@ -28,16 +28,12 @@ void Client::Track(std::string event_name) {
     client->Track(std::move(event_name));
 }
 
-void Client::AsyncFlush() {
-    client->AsyncFlush();
+void Client::FlushAsync() {
+    client->FlushAsync();
 }
 
-void Client::AsyncIdentify(Context context, std::function<void()> completion) {
-    client->AsyncIdentify(std::move(context), std::move(completion));
-}
-
-std::future<void> Client::SyncIdentify(Context context) {
-    return client->SyncIdentify(std::move(context));
+std::future<void> Client::IdentifyAsync(Context context) {
+    return client->IdentifyAsync(std::move(context));
 }
 
 bool Client::BoolVariation(FlagKey const& key, bool default_value) {

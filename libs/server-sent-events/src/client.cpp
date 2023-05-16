@@ -81,21 +81,17 @@ class FoxyClient : public Client,
                                       shared_from_this()));
     }
 
-    std::future<void> sync_shutdown() override {
-        return session_.async_shutdown(boost::asio::use_future);
-    }
-
-    void async_shutdown(
-        std::function<void()> shutdown_completion_handler) override {
+    void async_shutdown(std::function<void()> completion) override {
         session_.async_shutdown(beast::bind_front_handler(
             &FoxyClient::on_shutdown, shared_from_this(),
-            std::move(shutdown_completion_handler)));
+            std::move(completion)));
     }
 
-    void on_shutdown(std::function<void()> user_completion_handler,
+    void on_shutdown(std::function<void()> completion,
                      boost::system::error_code ec) {
-        if (user_completion_handler) {
-            user_completion_handler();
+        boost::ignore_unused(ec);
+        if (completion) {
+            completion();
         }
     }
 

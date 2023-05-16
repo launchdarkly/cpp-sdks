@@ -192,7 +192,6 @@ void PollingDataSource::StartPollingTimer() {
                 // polling.
                 LD_LOG(self->logger_, LogLevel::kError)
                     << "Unexpected error in polling timer: " << ec.message();
-                self->Close();
             }
             self->DoPoll();
         }
@@ -214,21 +213,11 @@ void PollingDataSource::Start() {
     DoPoll();
 }
 
-void PollingDataSource::Close() {
+void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
     timer_.cancel();
-}
-
-void PollingDataSource::AsyncShutdown(std::function<void()> fn) {
-    Close();
-    boost::asio::post(timer_.get_executor(), [fn]() { fn(); });
-}
-
-std::future<void> PollingDataSource::SyncShutdown() {
-    Close();
-    std::promise<void> pr;
-    auto fut = pr.get_future();
-    pr.set_value();
-    return fut;
+    if (completion) {
+        boost::asio::post(timer_.get_executor(), completion);
+    }
 }
 
 }  // namespace launchdarkly::client_side::data_sources

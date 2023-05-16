@@ -50,17 +50,9 @@ class ClientImpl : public IClient {
 
     void Track(std::string event_name) override;
 
-    void AsyncFlush() override;
+    void FlushAsync() override;
 
-    /**
-     * Re-initializes the client connection using a new context. Only one
-     * call to AsyncIdentify may be active at once.
-     * @param context
-     */
-    void AsyncIdentify(Context context,
-                       std::function<void()> completion) override;
-
-    std::future<void> SyncIdentify(Context context) override;
+    std::future<void> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 

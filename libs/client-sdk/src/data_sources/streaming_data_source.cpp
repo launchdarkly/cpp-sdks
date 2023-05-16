@@ -140,26 +140,14 @@ void StreamingDataSource::Start() {
     client_->run();
 }
 
-void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
+void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
     if (client_) {
         status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
-        return client_->async_shutdown(std::move(handler));
+        return client_->async_shutdown(std::move(completion));
     }
-    if (!handler) {
-        return;
+    if (completion) {
+        boost::asio::post(exec_, completion);
     }
-    boost::asio::post(exec_, [handler]() { handler(); });
-}
-
-std::future<void> StreamingDataSource::SyncShutdown() {
-    if (client_) {
-        status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
-        return client_->sync_shutdown();
-    }
-    std::promise<void> p;
-    auto fut = p.get_future();
-    p.set_value();
-    return fut;
 }
 
 }  // namespace launchdarkly::client_side::data_sources
