@@ -1,5 +1,4 @@
 #include "flag_manager.hpp"
-#include "../data_sources/data_source_update_sink.hpp"
 
 namespace launchdarkly::client_side::flag_manager {
 
@@ -7,6 +6,9 @@ namespace launchdarkly::client_side::flag_manager {
 // greater than their duration in the store. If, for instance, a flag has been
 // accessed, and which it is being used init is called, then we want the
 // flag being processed to be valid.
+
+FlagManager::FlagManager(std::shared_ptr<IPersistence> persistence, std::string environment_namespace)
+    : persistence_(persistence), environment_namespace_(std::move(environment_namespace)) {}
 
 void FlagManager::Init(
     std::unordered_map<std::string, ItemDescriptor> const& data) {
@@ -23,6 +25,14 @@ void FlagManager::Upsert(std::string const& key, ItemDescriptor item) {
     std::lock_guard lock{data_mutex_};
 
     data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
+}
+
+void FlagManager::LoadCache(Context const& context) {
+    if(persistence_) {
+        // TODO: Hash the canonical key.
+        auto data = persistence_->Read(environment_namespace_, context.canonical_key());
+
+    }
 }
 
 std::shared_ptr<ItemDescriptor> FlagManager::Get(
