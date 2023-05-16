@@ -37,7 +37,7 @@ add_library(${LIBNAME}
         flag_manager/flag_updater.hpp
         event_processor.hpp
         persistence/context_index.cpp
-        serialization/json_all_flags.cpp)
+        serialization/json_all_flags.cpp encoding/hash_encode.cpp)
 
 
 target_link_libraries(${LIBNAME}

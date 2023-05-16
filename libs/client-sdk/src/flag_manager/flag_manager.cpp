@@ -1,5 +1,6 @@
 #include <boost/json.hpp>
 
+#include "../encoding/hash_encode.hpp"
 #include "../persistence/context_index.hpp"
 #include "../serialization/json_all_flags.hpp"
 #include "flag_manager.hpp"
@@ -42,11 +43,11 @@ void FlagManager::Upsert(std::string const& key, ItemDescriptor item) {
 }
 
 void FlagManager::LoadCache(Context const& context) {
-    if (persistence_) {
+    if (persistence_ && context.valid()) {
         std::lock_guard lock(persistence_mutex_);
-        // TODO: Hash the canonical key.
         auto data =
-            persistence_->Read(environment_namespace_, context.canonical_key());
+            persistence_->Read(environment_namespace_,
+                               encoding::HashEncode(context.canonical_key()));
         if (data) {
             boost::json::error_code error_code;
             auto parsed = boost::json::parse(*data, error_code);

@@ -1,24 +1,23 @@
 
 #include <chrono>
+
 #include <optional>
 #include <utility>
 
 #include "client_impl.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
+#include "encoding/hash_encode.hpp"
+
 #include "event_processor/event_processor.hpp"
 #include "event_processor/null_event_processor.hpp"
-#include "serialization/json_all_flags.hpp"
 
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
 
-#include <boost/json.hpp>
-
 namespace launchdarkly::client_side {
 
 using launchdarkly::client_side::data_sources::DataSourceStatus;
-using launchdarkly::client_side::serialization::tag_invoke;
 
 static std::unique_ptr<IDataSource> MakeDataSource(
     Config const& config,
@@ -53,7 +52,7 @@ ClientImpl::ClientImpl(Config config, Context context)
     : logger_(MakeLogger(config.Logging())),
       context_(std::move(context)),
       event_processor_(nullptr),
-      flag_manager_(nullptr, "TODO: HASH SDK KEY"),
+      flag_manager_(nullptr, encoding::HashEncode(config.SdkKey())),
       flag_updater_(flag_manager_),
       data_source_(MakeDataSource(config,
                                   context_,
@@ -63,6 +62,9 @@ ClientImpl::ClientImpl(Config config, Context context)
                                   logger_)),
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
+
+    flag_manager_.LoadCache(context);
+
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
                                                             config, logger_);
