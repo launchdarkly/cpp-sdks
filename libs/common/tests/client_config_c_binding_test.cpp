@@ -32,3 +32,26 @@ TEST(ClientConfigBindings, MinimalValidConfig) {
     LDClientConfig_Free(config);
     // LDClientConfigBuilder is consumed by Build; no need to free it.
 }
+
+TEST(ClientConfigBindings, AllConfigs) {
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+
+    LDClientConfigBuilder_Offline(builder, false);
+
+    LDClientConfigBuilder_AppInfo_Identifier(builder, "app");
+    LDClientConfigBuilder_AppInfo_Version(builder, "v1.2.3");
+
+    LDClientConfigBuilder_Events_Enabled(builder, true);
+    LDClientConfigBuilder_Events_Disable(builder);
+    LDClientConfigBuilder_Events_Capacity(builder, 100);
+    LDClientConfigBuilder_Events_FlushInterval(builder, 1000);
+    LDClientConfigBuilder_Events_AllAttributesPrivate(builder, false);
+    LDClientConfigBuilder_Events_PrivateAttribute(builder, "/foo/bar");
+
+    LDClientConfig config = nullptr;
+    LDStatus status = LDClientConfigBuilder_Build(builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+    ASSERT_TRUE(config);
+
+    LDClientConfig_Free(config);
+}

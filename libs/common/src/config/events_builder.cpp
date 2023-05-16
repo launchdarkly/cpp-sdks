@@ -6,7 +6,7 @@
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
-EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()), {}
+EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
 
 template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::Enabled(bool enabled) {

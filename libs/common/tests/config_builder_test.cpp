@@ -47,12 +47,11 @@ TEST_F(ConfigBuilderTest,
 // This test should exercise all of the config options.
 TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     using namespace launchdarkly::client_side;
-    auto config =
-        ConfigBuilder("sdk-123")
-            .Offline(true)
-            .ServiceEndpoints(EndpointsBuilder().RelayProxy("foo"))
-            .AppInfo(AppInfoBuilder().Identifier("bar").Version("baz"))
-            .Build();
+    auto builder = ConfigBuilder("sdk-123").Offline(true);
+    builder.ServiceEndpoints().RelayProxy("foo");
+    builder.AppInfo().Identifier("bar").Version("baz");
+
+    auto config = builder.Build();
 
     ASSERT_TRUE(config);
     ASSERT_EQ(config->SdkKey(), "sdk-123");
@@ -97,9 +96,9 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
-    builder.DataSource(ConfigBuilder::DataSourceBuilder().Method(
+    builder.DataSource().Method(
         ConfigBuilder::DataSourceBuilder::Streaming().InitialReconnectDelay(
-            std::chrono::milliseconds{5000})));
+            std::chrono::milliseconds{5000}));
 
     auto cfg = builder.Build();
 
@@ -114,12 +113,12 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     using namespace launchdarkly::client_side;
     ConfigBuilder builder("sdk-123");
 
-    builder.DataSource(
-        ConfigBuilder::DataSourceBuilder()
-            .Method(ConfigBuilder::DataSourceBuilder::Streaming()
-                        .InitialReconnectDelay(std::chrono::milliseconds{5000}))
-            .UseReport(true)
-            .WithReasons(true));
+    builder.DataSource()
+        .Method(
+            ConfigBuilder::DataSourceBuilder::Streaming().InitialReconnectDelay(
+                std::chrono::milliseconds{5000}))
+        .UseReport(true)
+        .WithReasons(true);
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
@@ -153,14 +152,12 @@ TEST_F(ConfigBuilderTest,
 TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
     using namespace launchdarkly::client_side;
     ConfigBuilder builder("sdk-123");
-    builder.HttpProperties(
-        ConfigBuilder::HttpPropertiesBuilder()
-            .ConnectTimeout(std::chrono::milliseconds{1234})
-            .ReadTimeout(std::chrono::milliseconds{123456})
-            .WrapperName("potato")
-            .WrapperVersion("2.0-chip")
-            .CustomHeaders(
-                std::map<std::string, std::string>{{"color", "green"}}));
+    builder.HttpProperties()
+        .ConnectTimeout(std::chrono::milliseconds{1234})
+        .ReadTimeout(std::chrono::milliseconds{123456})
+        .WrapperName("potato")
+        .WrapperVersion("2.0-chip")
+        .CustomHeaders(std::map<std::string, std::string>{{"color", "green"}});
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
