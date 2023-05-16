@@ -63,5 +63,19 @@ LDClientConfigBuilder_Free(LDClientConfigBuilder builder) {
     }
 }
 
+LD_EXPORT(void)
+LDClientConfigBuilder_AppInfo_Identifier(LDClientConfigBuilder b,
+                                         char const* app_id) {
+    ASSERT_NOT_NULL(app_id);
+    TO_BUILDER(b)->AppInfo().Identifier(app_id);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_AppInfo_Version(LDClientConfigBuilder b,
+                                      char const* app_version) {
+    ASSERT_NOT_NULL(app_version);
+    TO_BUILDER(b)->AppInfo().Version(app_version);
+}
+
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTEND OCInconsistentNamingInspection

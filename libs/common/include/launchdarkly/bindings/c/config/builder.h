@@ -53,6 +53,25 @@ LDClientConfigBuilder_ServiceEndpoints_RelayProxy(LDClientConfigBuilder b,
                                                   char const* url);
 
 /**
+ * Sets an identifier for the application.
+ * @param app_id Non-empty string. Must be <= 64 chars. Must be alphanumeric,
+ * '-', '.', or '_'. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_AppInfo_Identifier(LDClientConfigBuilder b,
+                                         char const* app_id);
+
+/**
+ * Sets a version for the application.
+ * @param app_version Non-empty string. Must be <= 64 chars. Must be
+ * alphanumeric,
+ * '-', '.', or '_'. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_AppInfo_Version(LDClientConfigBuilder b,
+                                      char const* app_version);
+
+/**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.
  * On success, the config will be stored in out_config; otherwise,
  * out_config will be set to NULL and the returned LDStatus will indicate
