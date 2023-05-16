@@ -102,7 +102,7 @@ class EventsBuilder {
      * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */
-    [[nodiscard]] tl::expected<built::Events, Error> Build();
+    [[nodiscard]] tl::expected<built::Events, Error> Build() const;
 
    private:
     built::Events config_;

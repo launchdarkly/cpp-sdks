@@ -45,7 +45,7 @@ class ConfigBuilder {
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& ServiceEndpoints(EndpointsBuilder builder);
+    EndpointsBuilder& ServiceEndpoints();
 
     /**
      * To include metadata about the application that is utilizing the SDK,
@@ -53,7 +53,7 @@ class ConfigBuilder {
      * @param builder An AppInfoBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& AppInfo(AppInfoBuilder builder);
+    AppInfoBuilder& AppInfo();
 
     /**
      * To enable or disable "Offline" mode, pass a boolean value. True means
@@ -69,7 +69,7 @@ class ConfigBuilder {
      * @param builder An EventsBuilder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& Events(EventsBuilder builder);
+    EventsBuilder& Events();
 
     /**
      * Sets the configuration of the component that receives feature flag data
@@ -77,7 +77,7 @@ class ConfigBuilder {
      * @param builder A DataSourceConfig builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& DataSource(DataSourceBuilder builder);
+    DataSourceBuilder& DataSource();
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -85,14 +85,14 @@ class ConfigBuilder {
      * @param builder A HttpPropertiesBuilder builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& HttpProperties(HttpPropertiesBuilder builder);
+    HttpPropertiesBuilder& HttpProperties();
 
     /**
      * Sets the logging configuration for the SDK.
      * @param builder A Logging builder.
      * @return Reference to this builder.
      */
-    ConfigBuilder& Logging(LoggingBuilder builder);
+    LoggingBuilder& Logging();
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
@@ -103,12 +103,12 @@ class ConfigBuilder {
    private:
     std::string sdk_key_;
     std::optional<bool> offline_;
-    std::optional<EndpointsBuilder> service_endpoints_builder_;
-    std::optional<AppInfoBuilder> app_info_builder_;
-    std::optional<EventsBuilder> events_builder_;
-    std::optional<DataSourceBuilder> data_source_builder_;
-    std::optional<HttpPropertiesBuilder> http_properties_builder_;
-    std::optional<LoggingBuilder> logging_config_builder_;
+    EndpointsBuilder service_endpoints_builder_;
+    AppInfoBuilder app_info_builder_;
+    EventsBuilder events_builder_;
+    DataSourceBuilder data_source_builder_;
+    HttpPropertiesBuilder http_properties_builder_;
+    LoggingBuilder logging_config_builder_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

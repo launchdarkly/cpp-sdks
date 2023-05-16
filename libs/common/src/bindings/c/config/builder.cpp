@@ -12,7 +12,48 @@ using namespace launchdarkly::client_side;
 
 LD_EXPORT(LDClientConfigBuilder)
 LDClientConfigBuilder_New(char const* sdk_key) {
-    return FROM_BUILDER(new ConfigBuilder(sdk_key ? sdk_key : ""));
+    ASSERT_NOT_NULL(sdk_key);
+    return FROM_BUILDER(new ConfigBuilder(sdk_key));
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_ServiceEndpoints_PollingBaseURL(LDClientConfigBuilder b,
+                                                      char const* url) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(url);
+    TO_BUILDER(b)->ServiceEndpoints().PollingBaseUrl(url);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_ServiceEndpoints_StreamingBaseURL(LDClientConfigBuilder b,
+                                                        char const* url) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(url);
+    TO_BUILDER(b)->ServiceEndpoints().StreamingBaseUrl(url);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_ServiceEndpoints_EventsBaseURL(LDClientConfigBuilder b,
+                                                     char const* url) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(url);
+    TO_BUILDER(b)->ServiceEndpoints().EventsBaseUrl(url);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_ServiceEndpoints_RelayProxy(LDClientConfigBuilder b,
+                                                  char const* url) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(url);
+    TO_BUILDER(b)->ServiceEndpoints().RelayProxy(url);
+}
+
+LD_EXPORT(LDStatus)
+LDClientConfigBuilder_Build(LDClientConfigBuilder b,
+                            LDClientConfig* out_config) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(out_config);
+    return ConsumeBuilder<ConfigBuilder>(b, out_config);
 }
 
 LD_EXPORT(void)
@@ -20,12 +61,6 @@ LDClientConfigBuilder_Free(LDClientConfigBuilder builder) {
     if (ConfigBuilder* b = TO_BUILDER(builder)) {
         delete b;
     }
-}
-
-LD_EXPORT(LDStatus)
-LDClientConfigBuilder_Build(LDClientConfigBuilder builder,
-                            LDClientConfig* out_config) {
-    return ConsumeBuilder<ConfigBuilder>(builder, out_config);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

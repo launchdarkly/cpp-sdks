@@ -31,13 +31,11 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
     auto default_endpoints =
         launchdarkly::client_side::Defaults::ServiceEndpoints();
 
-    auto endpoints =
-        EndpointsBuilder()
+    auto& endpoints =
+        config_builder.ServiceEndpoints()
             .EventsBaseUrl(default_endpoints.EventsBaseUrl())
             .PollingBaseUrl(default_endpoints.PollingBaseUrl())
             .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
-
-    auto datasource = DataSourceBuilder();
 
     if (in.serviceEndpoints) {
         if (in.serviceEndpoints->streaming) {
@@ -57,6 +55,8 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         }
     }
 
+    auto& datasource = config_builder.DataSource();
+
     if (in.polling) {
         if (in.polling->baseUri) {
             endpoints.PollingBaseUrl(*in.polling->baseUri);
@@ -73,7 +73,7 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         }
     }
 
-    auto event_config = EventsBuilder();
+    auto& event_config = config_builder.Events();
 
     if (in.events) {
         ConfigEventParams const& events = *in.events;
@@ -106,10 +106,6 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
         event_config.Disable();
     }
 
-    config_builder.Events(std::move(event_config));
-
-    config_builder.ServiceEndpoints(std::move(endpoints));
-
     if (in.clientSide->evaluationReasons) {
         datasource.WithReasons(*in.clientSide->evaluationReasons);
     }
@@ -117,8 +113,6 @@ std::optional<std::string> EntityManager::create(ConfigParams in) {
     if (in.clientSide->useReport) {
         datasource.UseReport(*in.clientSide->useReport);
     }
-
-    config_builder.DataSource(std::move(datasource));
 
     auto config = config_builder.Build();
     if (!config) {

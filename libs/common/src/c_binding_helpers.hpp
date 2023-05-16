@@ -64,4 +64,12 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
     return LDStatus_Success();
 }
 
+// Macro is named the same as in the C Server SDK.
+
+#ifdef LAUNCHDARKLY_USE_ASSERT
+#define ASSERT_NOT_NULL(param) assert(param)
+#else
+#define ASSERT_NOT_NULL(param)
+#endif
+
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
