@@ -1,9 +1,9 @@
 #include <utility>
 
-#include <launchdarkly/client_side/detail/boost_signal_connection.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_updater.hpp>
+#include "../boost_signal_connection.hpp"
+#include "flag_updater.hpp"
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 
 FlagUpdater::FlagUpdater(FlagManager& flag_manager)
     : flag_manager_(flag_manager) {}
@@ -123,9 +123,8 @@ std::unique_ptr<IConnection> FlagUpdater::OnFlagChange(
     std::string const& key,
     std::function<void(std::shared_ptr<FlagValueChangeEvent>)> handler) {
     std::lock_guard lock{signal_mutex_};
-    return std::make_unique<
-        ::launchdarkly::client_side::detail::SignalConnection>(
+    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
         signals_[key].connect(handler));
 }
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager

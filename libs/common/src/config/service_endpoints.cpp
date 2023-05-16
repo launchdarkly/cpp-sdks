@@ -1,6 +1,6 @@
-#include <launchdarkly/config/detail/built/service_endpoints.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 
-namespace launchdarkly::config::detail::built {
+namespace launchdarkly::config::shared::built {
 
 ServiceEndpoints::ServiceEndpoints(std::string polling,
                                    std::string streaming,
@@ -27,4 +27,4 @@ bool operator==(ServiceEndpoints const& lhs, ServiceEndpoints const& rhs) {
            lhs.EventsBaseUrl() == rhs.EventsBaseUrl();
 }
 
-}  // namespace launchdarkly::config::detail::built
+}  // namespace launchdarkly::config::shared::built

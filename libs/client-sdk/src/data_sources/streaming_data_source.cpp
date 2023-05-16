@@ -5,17 +5,14 @@
 
 #include <utility>
 
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
-#include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
-#include <launchdarkly/context.hpp>
+#include "base_64.hpp"
+#include "streaming_data_source.hpp"
+
 #include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/network/detail/http_requester.hpp>
+#include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
-#include <iostream>
-
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
@@ -43,18 +40,18 @@ void StreamingDataSource::Start() {
         boost::json::serialize(boost::json::value_from(context_));
 
     auto const& streaming_config = std::get<
-        config::detail::built::StreamingConfig<config::detail::ClientSDK>>(
+        config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
         data_source_config_.method);
 
-    auto updated_url = network::detail::AppendUrl(
-        streaming_endpoint_, streaming_config.streaming_path);
+    auto updated_url = network::AppendUrl(streaming_endpoint_,
+                                          streaming_config.streaming_path);
 
     if (!data_source_config_.use_report) {
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        updated_url = network::detail::AppendUrl(
-            updated_url, Base64UrlEncode(string_context));
+        updated_url =
+            network::AppendUrl(updated_url, Base64UrlEncode(string_context));
     }
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {
@@ -150,4 +147,4 @@ void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
     handler();
 }
 
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources

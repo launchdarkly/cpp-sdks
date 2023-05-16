@@ -1,15 +1,16 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/client_side/data_source_update_sink.hpp>
-#include <launchdarkly/client_side/flag_manager/detail/flag_manager.hpp>
 #include <launchdarkly/data/evaluation_detail_internal.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
+
+#include "data_sources/data_source_update_sink.hpp"
+#include "flag_manager/flag_manager.hpp"
 
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
 using launchdarkly::client_side::ItemDescriptor;
-using launchdarkly::client_side::flag_manager::detail::FlagManager;
+using launchdarkly::client_side::flag_manager::FlagManager;
 
 TEST(FlagManagerTests, HandlesEmptyInit) {
     FlagManager manager;

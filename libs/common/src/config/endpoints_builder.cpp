@@ -1,9 +1,9 @@
-#include <launchdarkly/config/detail/builders/endpoints_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
+#include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
+#include <launchdarkly/config/shared/defaults.hpp>
 
 #include <utility>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::PollingBaseUrl(std::string url) {
@@ -52,7 +52,7 @@ tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
 
     // If no URLs were set, return the default endpoints for this SDK.
     if (!polling_base_url_ && !streaming_base_url_ && !events_base_url_) {
-        return detail::Defaults<SDK>::ServiceEndpoints();
+        return shared::Defaults<SDK>::ServiceEndpoints();
     }
 
     // If all URLs were set, trim any trailing slashes and construct custom
@@ -79,13 +79,13 @@ bool operator==(EndpointsBuilder<SDK> const& lhs,
            lhs.polling_base_url_ == rhs.polling_base_url_;
 }
 
-template class EndpointsBuilder<detail::ClientSDK>;
-template class EndpointsBuilder<detail::ServerSDK>;
+template class EndpointsBuilder<config::shared::ClientSDK>;
+template class EndpointsBuilder<config::shared::ServerSDK>;
 
-template bool operator==(EndpointsBuilder<detail::ClientSDK> const&,
-                         EndpointsBuilder<detail::ClientSDK> const&);
+template bool operator==(EndpointsBuilder<config::shared::ClientSDK> const&,
+                         EndpointsBuilder<config::shared::ClientSDK> const&);
 
-template bool operator==(EndpointsBuilder<detail::ServerSDK> const&,
-                         EndpointsBuilder<detail::ServerSDK> const&);
+template bool operator==(EndpointsBuilder<config::shared::ServerSDK> const&,
+                         EndpointsBuilder<config::shared::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

@@ -1,6 +1,6 @@
-#include "launchdarkly/client_side/flag_manager/flag_change_event.hpp"
+#include <launchdarkly/client_side/flag_change_event.hpp>
 
-namespace launchdarkly::client_side::flag_manager::detail {
+namespace launchdarkly::client_side::flag_manager {
 
 std::string const& FlagValueChangeEvent::FlagName() const {
     return flag_name_;
@@ -42,4 +42,4 @@ std::ostream& operator<<(std::ostream& out, FlagValueChangeEvent const& event) {
     return out;
 }
 
-}  // namespace launchdarkly::client_side::flag_manager::detail
+}  // namespace launchdarkly::client_side::flag_manager

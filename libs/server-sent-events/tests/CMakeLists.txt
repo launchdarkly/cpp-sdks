@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 include(GoogleTest)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/src")
 
 file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 

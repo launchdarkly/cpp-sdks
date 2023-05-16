@@ -2,29 +2,26 @@
 
 #include <boost/asio/io_context.hpp>
 
-#include <launchdarkly/console_backend.hpp>
 #include <launchdarkly/context_builder.hpp>
 
 #include <iostream>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
-using launchdarkly::ConsoleBackend;
 using launchdarkly::ContextBuilder;
-using launchdarkly::Logger;
 using launchdarkly::LogLevel;
 using launchdarkly::client_side::Client;
 using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
+using launchdarkly::config::shared::builders::LoggingBuilder;
 
 int main() {
-    Logger logger(std::make_unique<ConsoleBackend>("Hello"));
-
     net::io_context ioc;
 
     char const* key = std::getenv("STG_SDK_KEY");
     if (!key) {
-        std::cout << "Set environment variable STG_SDK_KEY to the sdk key";
+        std::cout << "Set environment variable STG_SDK_KEY to the sdk key"
+                  << std::endl;
         return 1;
     }
 
@@ -41,33 +38,33 @@ int main() {
                                 std::chrono::seconds{30}))
                             .WithReasons(true)
                             .UseReport(true))
+            .Logging(LoggingBuilder::BasicLogging().Level(LogLevel::kDebug))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
                 std::chrono::seconds(5)))
             .Build()
             .value(),
         ContextBuilder().kind("user", "ryan").build());
 
-    LD_LOG(logger, LogLevel::kInfo)
-        << "Initial Status: " << client.DataSourceStatus().Status();
+    std::cout << "Initial Status: " << client.DataSourceStatus().Status()
+              << std::endl;
 
-    client.DataSourceStatus().OnDataSourceStatusChange([&logger](auto status) {
-        LD_LOG(logger, LogLevel::kInfo) << "Got status: " << status;
+    client.DataSourceStatus().OnDataSourceStatusChange([](auto status) {
+        std::cout << "Got status: " << status << std::endl;
     });
 
-    client.FlagNotifier().OnFlagChange(
-        "my-boolean-flag", [&logger](auto event) {
-            LD_LOG(logger, LogLevel::kInfo) << "Got flag change: " << *event;
-        });
+    client.FlagNotifier().OnFlagChange("my-boolean-flag", [](auto event) {
+        std::cout << "Got flag change: " << *event << std::endl;
+    });
 
     client.WaitForReadySync(std::chrono::seconds(30));
 
     auto value = client.BoolVariationDetail("my-boolean-flag", false);
-    LD_LOG(logger, LogLevel::kInfo) << "Value was: " << *value;
+    std::cout << "Value was: " << *value << std::endl;
     if (auto reason = value.Reason()) {
-        LD_LOG(logger, LogLevel::kInfo) << "Reason was: " << *reason;
+        std::cout << "Reason was: " << *reason << std::endl;
     }
 
     // Sit around.
-    std::cout << "Press enter to exit" << std::endl;
+    std::cout << "Press enter to exit" << std::endl << std::endl;
     std::cin.get();
 }

@@ -2,14 +2,14 @@
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/config/server.hpp>
-#include "null_logger.hpp"
+#include <launchdarkly/logging/null_logger.hpp>
 
 class ConfigBuilderTest
     : public ::testing::
           Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    protected:
     launchdarkly::Logger logger;
-    ConfigBuilderTest() : logger(NullLogger()) {}
+    ConfigBuilderTest() : logger(launchdarkly::logging::NullLogger()) {}
 };
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ClientConfig) {
@@ -73,8 +73,8 @@ TEST_F(ConfigBuilderTest,
     EXPECT_FALSE(cfg->DataSourceConfig().use_report);
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
-              std::get<launchdarkly::config::detail::built::StreamingConfig<
-                  launchdarkly::config::detail::ClientSDK>>(
+              std::get<launchdarkly::config::shared::built::StreamingConfig<
+                  launchdarkly::config::shared::ClientSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
@@ -87,8 +87,8 @@ TEST_F(ConfigBuilderTest,
 
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
-              std::get<launchdarkly::config::detail::built::StreamingConfig<
-                  launchdarkly::config::detail::ServerSDK>>(
+              std::get<launchdarkly::config::shared::built::StreamingConfig<
+                  launchdarkly::config::shared::ServerSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
@@ -104,8 +104,8 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     auto cfg = builder.Build();
 
     EXPECT_EQ(std::chrono::milliseconds{5000},
-              std::get<launchdarkly::config::detail::built::StreamingConfig<
-                  launchdarkly::config::detail::ServerSDK>>(
+              std::get<launchdarkly::config::shared::built::StreamingConfig<
+                  launchdarkly::config::shared::ServerSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }
@@ -127,8 +127,8 @@ TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     EXPECT_TRUE(cfg->DataSourceConfig().use_report);
     EXPECT_TRUE(cfg->DataSourceConfig().with_reasons);
     EXPECT_EQ(std::chrono::milliseconds{5000},
-              std::get<launchdarkly::config::detail::built::StreamingConfig<
-                  launchdarkly::config::detail::ClientSDK>>(
+              std::get<launchdarkly::config::shared::built::StreamingConfig<
+                  launchdarkly::config::shared::ClientSDK>>(
                   cfg->DataSourceConfig().method)
                   .initial_reconnect_delay);
 }

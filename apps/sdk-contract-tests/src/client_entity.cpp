@@ -8,6 +8,7 @@
 #include <launchdarkly/value.hpp>
 
 #include <chrono>
+#include <future>
 
 ClientEntity::ClientEntity(
     std::unique_ptr<launchdarkly::client_side::Client> client)

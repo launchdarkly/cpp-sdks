@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/client_side/data_sources/detail/data_source_status_manager.hpp>
+#include "data_sources/data_source_status_manager.hpp"
 
 using launchdarkly::client_side::data_sources::DataSourceStatus;
+using launchdarkly::client_side::data_sources::DataSourceStatusManager;
 using launchdarkly::client_side::data_sources::IDataSourceStatusProvider;
-using launchdarkly::client_side::data_sources::detail::DataSourceStatusManager;
 
 class DataSourceStateParameterizedTestFixture
     : public ::testing::TestWithParam<DataSourceStatus::DataSourceState> {};

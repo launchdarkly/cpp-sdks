@@ -3,13 +3,17 @@
 #include <optional>
 #include <utility>
 
-#include <launchdarkly/client_side/data_sources/detail/polling_data_source.hpp>
-#include <launchdarkly/client_side/data_sources/detail/streaming_data_source.hpp>
-#include <launchdarkly/client_side/detail/client_impl.hpp>
-#include <launchdarkly/client_side/event_processor/detail/event_processor.hpp>
-#include <launchdarkly/client_side/event_processor/detail/null_event_processor.hpp>
+#include "client_impl.hpp"
+#include "data_sources/polling_data_source.hpp"
+#include "data_sources/streaming_data_source.hpp"
+#include "event_processor/event_processor.hpp"
+#include "event_processor/null_event_processor.hpp"
 
-namespace launchdarkly::client_side::detail {
+#include <launchdarkly/config/shared/built/logging.hpp>
+#include <launchdarkly/logging/console_backend.hpp>
+#include <launchdarkly/logging/null_logger.hpp>
+
+namespace launchdarkly::client_side {
 
 // The ASIO implementation assumes that the io_context will be run from a
 // single thread, and applies several optimisations based on this assumption.
@@ -21,23 +25,34 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
-    flag_manager::detail::FlagUpdater& flag_updater,
-    data_sources::detail::DataSourceStatusManager& status_manager,
+    flag_manager::FlagUpdater& flag_updater,
+    data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
-        return std::make_shared<launchdarkly::client_side::data_sources::
-                                    detail::StreamingDataSource>(
+        return std::make_shared<
+            launchdarkly::client_side::data_sources::StreamingDataSource>(
             config, executor, context, &flag_updater, status_manager, logger);
     }
     return std::make_shared<
-        launchdarkly::client_side::data_sources::detail::PollingDataSource>(
+        launchdarkly::client_side::data_sources::PollingDataSource>(
         config, executor, context, &flag_updater, status_manager, logger);
+}
+
+static Logger MakeLogger(config::shared::built::Logging const& config) {
+    if (config.disable_logging) {
+        return {std::make_shared<logging::NullLoggerBackend>()};
+    }
+    if (config.backend) {
+        return {config.backend};
+    }
+    return {
+        std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
 ClientImpl::ClientImpl(Config config, Context context)
     : config_(config),
-      logger_(config.Logger()),
+      logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
       data_source_factory_([this]() {
@@ -50,10 +65,10 @@ ClientImpl::ClientImpl(Config config, Context context)
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
-        event_processor_ = std::make_unique<detail::EventProcessor>(
-            ioc_.get_executor(), config, logger_);
+        event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
+                                                            config, logger_);
     } else {
-        event_processor_ = std::make_unique<detail::NullEventProcessor>();
+        event_processor_ = std::make_unique<NullEventProcessor>();
     }
 
     status_manager_.OnDataSourceStatusChange([this](auto status) {
@@ -295,7 +310,7 @@ data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
 }
 
-flag_manager::detail::IFlagNotifier& ClientImpl::FlagNotifier() {
+flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
     return flag_updater_;
 }
 
@@ -316,4 +331,4 @@ ClientImpl::~ClientImpl() {
     run_thread_.join();
 }
 
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

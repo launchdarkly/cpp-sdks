@@ -1,13 +1,6 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/*.hpp"
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/data_sources/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/data_sources/detail/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/flag_manager/detail/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/event_processor/*.hpp"
-        "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/event_processor/detail/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -17,7 +10,7 @@ add_library(${LIBNAME}
         data_sources/streaming_data_source.cpp
         data_sources/base_64.cpp
         data_sources/data_source_event_handler.cpp
-        data_source_update_sink.cpp
+        data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_updater.cpp
@@ -28,11 +21,25 @@ add_library(${LIBNAME}
         event_processor/null_event_processor.cpp
         boost_signal_connection.cpp
         client_impl.cpp
-        client.cpp)
+        client.cpp
+        data_sources/base_64.hpp
+        boost_signal_connection.hpp
+        client_impl.hpp
+        data_sources/data_source.hpp
+        data_sources/data_source_event_handler.hpp
+        data_sources/data_source_status_manager.hpp
+        data_sources/data_source_update_sink.hpp
+        data_sources/polling_data_source.hpp
+        data_sources/streaming_data_source.hpp
+        event_processor/event_processor.hpp
+        event_processor/null_event_processor.hpp
+        flag_manager/flag_manager.hpp
+        flag_manager/flag_updater.hpp
+        event_processor.hpp)
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE launchdarkly::sse)
+        PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal)
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 

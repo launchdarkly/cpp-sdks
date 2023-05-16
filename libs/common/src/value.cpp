@@ -116,6 +116,11 @@ Value::Value(std::optional<std::string> opt_str) : storage_{0.0} {
 Value::Value(std::initializer_list<Value> values)
     : type_(Type::kArray), storage_(std::vector<Value>(values)) {}
 
+Value::Value(Value::Array arr)
+    : storage_(std::move(arr)), type_(Type::kArray) {}
+Value::Value(Value::Object obj)
+    : storage_(std::move(obj)), type_(Type::kObject) {}
+
 Value::Array::Iterator::Iterator(std::vector<Value>::const_iterator iterator)
     : iterator_(iterator) {}
 
@@ -208,6 +213,15 @@ Value::Object::Iterator Value::Object::Find(std::string const& key) const {
 
 std::size_t Value::Object::Count(std::string const& key) const {
     return map_.count(key);
+}
+Value::Object::Object(
+    std::initializer_list<std::pair<std::string, Value>> values) {
+    map_.insert(std::make_move_iterator(values.begin()),
+                std::make_move_iterator(values.end()));
+}
+
+Value const& Value::Object::operator[](std::string const& key) const {
+    return map_.at(key);
 }
 
 bool operator==(Value const& lhs, Value const& rhs) {

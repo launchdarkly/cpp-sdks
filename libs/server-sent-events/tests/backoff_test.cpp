@@ -2,9 +2,9 @@
 
 #include <thread>
 
-#include <launchdarkly/sse/detail/backoff.hpp>
+#include "backoff.hpp"
 
-using namespace launchdarkly::sse::detail;
+using launchdarkly::sse::Backoff;
 
 // Demonstrate some basic assertions.
 TEST(BackoffTests, DelayStartsAtInitial) {

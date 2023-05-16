@@ -1,9 +1,9 @@
-#include <launchdarkly/config/detail/builders/events_builder.hpp>
-#include <launchdarkly/config/detail/defaults.hpp>
+#include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include <launchdarkly/config/shared/defaults.hpp>
 
 #include <utility>
 
-namespace launchdarkly::config::detail::builders {
+namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
 EventsBuilder<SDK>::EventsBuilder() : config_(Defaults<SDK>::Events()) {}
@@ -58,13 +58,13 @@ bool operator==(EventsBuilder<SDK> const& lhs, EventsBuilder<SDK> const& rhs) {
     return lhs.config_ == rhs.config_;
 }
 
-template class EventsBuilder<detail::ClientSDK>;
-template class EventsBuilder<detail::ServerSDK>;
+template class EventsBuilder<config::shared::ClientSDK>;
+template class EventsBuilder<config::shared::ServerSDK>;
 
-template bool operator==(EventsBuilder<detail::ClientSDK> const&,
-                         EventsBuilder<detail::ClientSDK> const&);
+template bool operator==(EventsBuilder<config::shared::ClientSDK> const&,
+                         EventsBuilder<config::shared::ClientSDK> const&);
 
-template bool operator==(EventsBuilder<detail::ServerSDK> const&,
-                         EventsBuilder<detail::ServerSDK> const&);
+template bool operator==(EventsBuilder<config::shared::ServerSDK> const&,
+                         EventsBuilder<config::shared::ServerSDK> const&);
 
-}  // namespace launchdarkly::config::detail::builders
+}  // namespace launchdarkly::config::shared::builders

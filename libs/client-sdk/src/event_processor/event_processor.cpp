@@ -1,6 +1,6 @@
-#include <launchdarkly/client_side/event_processor/detail/event_processor.hpp>
+#include "event_processor.hpp"
 
-namespace launchdarkly::client_side::detail {
+namespace launchdarkly::client_side {
 
 EventProcessor::EventProcessor(boost::asio::any_io_executor const& io,
                                Config const& config,
@@ -19,4 +19,4 @@ void EventProcessor::AsyncClose() {
     impl_.AsyncClose();
 }
 
-}  // namespace launchdarkly::client_side::detail
+}  // namespace launchdarkly::client_side

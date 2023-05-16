@@ -1,4 +1,4 @@
-#include <launchdarkly/client_side/data_sources/detail/base_64.hpp>
+#include "base_64.hpp"
 
 #include <algorithm>
 #include <array>
@@ -13,7 +13,7 @@ static unsigned char const kInputBytesPerEncodeSize = 3;
 // Base64 uses a 6 bit index.
 static unsigned long const kIndexBits = 6UL;
 
-namespace launchdarkly::client_side::data_sources::detail {
+namespace launchdarkly::client_side::data_sources {
 
 // URL safe base64 table.
 static std::array<unsigned char, 65> const kBase64Table{
@@ -75,4 +75,4 @@ std::string Base64UrlEncode(std::string const& input) {
     return out;
 }
 
-}  // namespace launchdarkly::client_side::data_sources::detail
+}  // namespace launchdarkly::client_side::data_sources
