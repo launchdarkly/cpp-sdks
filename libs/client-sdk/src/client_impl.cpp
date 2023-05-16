@@ -294,6 +294,11 @@ void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
     init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
 }
 
+std::string ClientImpl::ExportFlags() {
+    auto all = flag_manager_.GetAll();
+
+}
+
 ClientImpl::~ClientImpl() {
     data_source_->Close();
     ioc_.stop();

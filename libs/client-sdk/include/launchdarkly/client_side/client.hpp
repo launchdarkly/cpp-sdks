@@ -230,6 +230,14 @@ class IClient {
      */
     virtual void WaitForReadySync(std::chrono::milliseconds timeout) = 0;
 
+    /**
+     * Export the current flag state. These exported flags can be used when
+     * initializing the client.
+     *
+     * @return A string containing the current flag state.
+     */
+    virtual std::string ExportFlags() = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -302,6 +310,8 @@ class Client : public IClient {
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
+
+    std::string ExportFlags() override;
 
    private:
     std::unique_ptr<IClient> client;

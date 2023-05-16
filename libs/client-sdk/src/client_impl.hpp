@@ -87,6 +87,8 @@ class ClientImpl : public IClient {
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
+    std::string ExportFlags() override;
+
     ~ClientImpl();
 
    private:
