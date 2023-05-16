@@ -68,11 +68,7 @@ class FoxyClient : public Client,
         // size limit.
         body_parser_.body_limit(boost::none);
         body_parser_.get().body().on_event(std::move(receiver));
-
-        std::cout << "FoxyClient()\n";
     }
-
-    ~FoxyClient() { std::cout << "~FoxyClient()\n"; }
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());

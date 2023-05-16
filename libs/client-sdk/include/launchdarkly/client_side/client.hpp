@@ -86,6 +86,10 @@ class IClient {
     /**
      * Tells the client that all pending analytics events (if any) should be
      * delivered as soon as possible.
+     *
+     * Only one AsyncFlush can be in progress at once; calling it concurrently
+     * is undefined behavior.
+     *
      */
     virtual void AsyncFlush() = 0;
 
@@ -93,6 +97,13 @@ class IClient {
      * Changes the current evaluation context, requests flags for that context
      * from LaunchDarkly if we are online, and generates an analytics event to
      * tell LaunchDarkly about the context.
+     *
+     * Only one AsyncIdentify can be in progress at once; calling it
+     * concurrently is undefined behavior.
+     *
+     * The given handler will be invoked when the operation is complete by a
+     * thread internal to the Client; blocking this thread may delay feature
+     * flag updates or event delivery.
      *
      * @param context The new evaluation context.
      */

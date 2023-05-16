@@ -6,7 +6,6 @@ class IDataSource {
    public:
     virtual void Start() = 0;
     virtual void AsyncShutdown(std::function<void()>) = 0;
-    virtual std::future<void> SyncShutdown() = 0;
 
     virtual ~IDataSource() = default;
     IDataSource(IDataSource const& item) = delete;

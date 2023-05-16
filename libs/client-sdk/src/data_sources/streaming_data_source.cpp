@@ -20,10 +20,6 @@ namespace launchdarkly::client_side::data_sources::detail {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
 
-StreamingDataSource::~StreamingDataSource() {
-    std::cout << "~StreamingDataSource\n";
-}
-
 StreamingDataSource::StreamingDataSource(
     Config const& config,
     boost::asio::any_io_executor ioc,
@@ -40,9 +36,7 @@ StreamingDataSource::StreamingDataSource(
       http_config_(config.HttpProperties()),
       data_source_config_(config.DataSourceConfig()),
       sdk_key_(config.SdkKey()),
-      streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {
-    std::cout << "StreamingDataSource()\n";
-}
+      streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
     auto string_context =
@@ -154,16 +148,6 @@ void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
         return client_->async_shutdown(std::move(handler));
     }
     handler();
-}
-
-std::future<void> StreamingDataSource::SyncShutdown() {
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
-    if (client_) {
-        return client_->sync_shutdown();
-    }
-    std::promise<void> p;
-    p.set_value();
-    return p.get_future();
 }
 
 }  // namespace launchdarkly::client_side::data_sources::detail

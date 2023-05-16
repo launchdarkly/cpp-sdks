@@ -129,15 +129,17 @@ void ClientImpl::OnDataSourceShutdown(Context context,
         event_processor_->AsyncSend(events::client::IdentifyEventParams{
             std::chrono::system_clock::now(), context});
     }
-    user_completion();
+    if (user_completion) {
+        user_completion();
+    }
 }
 
 void ClientImpl::AsyncIdentify(Context context,
                                std::function<void()> completion) {
-    LD_LOG(logger_, LogLevel::kInfo) << "AsyncIdentify: calling AsyncShutdown";
-    data_source_->AsyncShutdown([this, completion, context]() {
-        OnDataSourceShutdown(std::move(context), std::move(completion));
-    });
+    data_source_->AsyncShutdown(
+        [this, ctx = std::move(context), cb = std::move(completion)]() {
+            OnDataSourceShutdown(std::move(ctx), std::move(cb));
+        });
 }
 
 // TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
