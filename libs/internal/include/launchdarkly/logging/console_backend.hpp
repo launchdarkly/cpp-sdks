@@ -22,9 +22,9 @@ class ConsoleBackend : public ILogBackend {
      */
     ConsoleBackend(std::string name);
 
-    bool Enabled(LogLevel level) override;
+    bool Enabled(LogLevel level) noexcept override;
 
-    void Write(LogLevel level, std::string message) override;
+    void Write(LogLevel level, std::string message) noexcept override;
 
    private:
     LogLevel level_;

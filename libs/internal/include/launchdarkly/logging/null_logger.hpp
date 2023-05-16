@@ -21,11 +21,11 @@ class NullLoggerBackend : public launchdarkly::ILogBackend {
     /**
      * Always returns false.
      */
-    bool Enabled(LogLevel level) override;
+    bool Enabled(LogLevel level) noexcept override;
 
     /**
      * No-op.
      */
-    void Write(LogLevel level, std::string message) override;
+    void Write(LogLevel level, std::string message) noexcept override;
 };
 }  // namespace launchdarkly::logging

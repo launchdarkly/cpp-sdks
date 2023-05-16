@@ -14,9 +14,9 @@ class TestLogBackend : public launchdarkly::ILogBackend {
     TestLogBackend(LogLevel level, std::string name, Messages& messages)
         : level_(level), name_(std::move(name)), messages(messages) {}
 
-    bool Enabled(LogLevel level) override { return level >= level_; }
+    bool Enabled(LogLevel level) noexcept override { return level >= level_; }
 
-    void Write(LogLevel level, std::string message) override {
+    void Write(LogLevel level, std::string message) noexcept override {
         messages[level].push_back(message);
     }
 

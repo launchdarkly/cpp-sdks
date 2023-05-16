@@ -19,14 +19,14 @@ class ILogBackend {
      * @param level The log level to check.
      * @return Returns true if the level is enabled.
      */
-    virtual bool Enabled(LogLevel level) = 0;
+    virtual bool Enabled(LogLevel level) noexcept = 0;
 
     /**
      * Write a message to the specified level.
      * @param level The level to write the message for.
      * @param message The message to Write.
      */
-    virtual void Write(LogLevel level, std::string message) = 0;
+    virtual void Write(LogLevel level, std::string message) noexcept = 0;
 
     virtual ~ILogBackend(){};
 };

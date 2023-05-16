@@ -13,9 +13,15 @@ built::Logging LoggingBuilder::Build() const {
                                       arg.tag_, arg.level_};
             } else if constexpr (std::is_same_v<
                                      T, LoggingBuilder::CustomLogging>) {
-                return built::Logging{false, arg.backend_,
-                                      Defaults<AnySDK>::LogTag(),
-                                      Defaults<AnySDK>::LogLevel()};
+                if (arg.backend_) {
+                    return built::Logging{false, arg.backend_,
+                                          Defaults<AnySDK>::LogTag(),
+                                          Defaults<AnySDK>::LogLevel()};
+                }
+                // No back-end set. Return a default config.
+                return built::Logging{
+                    false, std::shared_ptr<ILogBackend>(nullptr),
+                    Defaults<AnySDK>::LogTag(), Defaults<AnySDK>::LogLevel()};
             } else if constexpr (std::is_same_v<T, LoggingBuilder::NoLogging>) {
                 return built::Logging{
                     true, std::shared_ptr<ILogBackend>(nullptr),

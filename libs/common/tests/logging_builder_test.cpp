@@ -32,8 +32,8 @@ TEST(LoggingBuilderTests, ConfigureNoLogging) {
 
 class CustomBackend : public launchdarkly::ILogBackend {
    public:
-    bool Enabled(LogLevel level) override { return false; }
-    void Write(LogLevel level, std::string message) override {}
+    bool Enabled(LogLevel level) noexcept override { return false; }
+    void Write(LogLevel level, std::string message) noexcept override {}
 };
 
 TEST(LoggingBuilderTests, ConfigureCustomLogging) {
@@ -43,4 +43,14 @@ TEST(LoggingBuilderTests, ConfigureCustomLogging) {
                       .Build();
     ASSERT_FALSE(config.disable_logging);
     ASSERT_EQ(backend, config.backend);
+}
+
+TEST(LoggingBuilderTests, NoBackendSet) {
+    auto backend = std::make_shared<CustomBackend>();
+    auto config = LoggingBuilder().Build();
+
+    ASSERT_FALSE(config.disable_logging);
+    ASSERT_EQ("LaunchDarkly", config.tag);
+    ASSERT_EQ(LogLevel::kInfo, config.level);
+    ASSERT_EQ(std::shared_ptr<launchdarkly::ILogBackend>(), config.backend);
 }
