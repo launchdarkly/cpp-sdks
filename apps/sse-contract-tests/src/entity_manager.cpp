@@ -65,7 +65,7 @@ bool EntityManager::destroy(std::string const& id) {
         return false;
     }
 
-    it->second.first->close();
+    it->second.first->async_shutdown(nullptr);
     it->second.second->stop();
 
     entities_.erase(it);
