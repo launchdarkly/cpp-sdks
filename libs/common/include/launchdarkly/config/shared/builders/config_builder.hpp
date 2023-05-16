@@ -5,7 +5,7 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/shared/builders/logging_bulder.hpp>
+#include <launchdarkly/config/shared/builders/logging_builder.hpp>
 #include <launchdarkly/config/shared/config.hpp>
 
 #include <optional>

@@ -9,9 +9,11 @@
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
 using launchdarkly::ContextBuilder;
+using launchdarkly::LogLevel;
 using launchdarkly::client_side::Client;
 using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
+using launchdarkly::config::shared::builders::LoggingBuilder;
 
 int main() {
     net::io_context ioc;
@@ -36,6 +38,7 @@ int main() {
                                 std::chrono::seconds{30}))
                             .WithReasons(true)
                             .UseReport(true))
+            .Logging(LoggingBuilder::BasicLogging().Level(LogLevel::kDebug))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
                 std::chrono::seconds(5)))
             .Build()

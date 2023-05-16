@@ -16,11 +16,12 @@ ConsoleBackend::ConsoleBackend(std::string name)
           GetLogLevelEnum(std::getenv("LD_LOG_LEVEL"), LogLevel::kInfo),
           std::move(name)) {}
 
-bool ConsoleBackend::Enabled(LogLevel level) {
+bool ConsoleBackend::Enabled(LogLevel level) noexcept {
     return level >= level_;
 }
 
-void ConsoleBackend::Write(LogLevel level, std::string message) {
+void ConsoleBackend::Write(LogLevel level, std::string message) noexcept {
+    std::lock_guard lock(write_mutex_);
     if (Enabled(level)) {
         if (level == LogLevel::kError) {
             std::cerr << name_ << message << std::endl;

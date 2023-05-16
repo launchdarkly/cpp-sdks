@@ -2,12 +2,10 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <ostream>
 #include <tuple>
 
 #include <launchdarkly/config/shared/builders/app_info_builder.hpp>
-#include <launchdarkly/error.hpp>
-#include "null_logger.hpp"
+#include <launchdarkly/logging/null_logger.hpp>
 
 using launchdarkly::Error;
 using launchdarkly::Logger;

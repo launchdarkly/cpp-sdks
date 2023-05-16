@@ -11,6 +11,7 @@
 
 #include <launchdarkly/config/shared/built/logging.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
+#include <launchdarkly/logging/null_logger.hpp>
 
 namespace launchdarkly::client_side {
 
@@ -35,8 +36,14 @@ static std::unique_ptr<IDataSource> MakeDataSource(
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
-    // TODO: Use settings for logger.
-    return Logger(std::make_unique<logging::ConsoleBackend>("LaunchDarkly"));
+    if (config.disable_logging) {
+        return {std::make_shared<logging::NullLoggerBackend>()};
+    }
+    if (config.backend) {
+        return {config.backend};
+    }
+    return {
+        std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
 ClientImpl::ClientImpl(Config config, Context context)

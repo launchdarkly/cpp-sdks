@@ -1,6 +1,7 @@
 #pragma once
 
 #include <launchdarkly/logging/log_backend.hpp>
+#include <mutex>
 
 namespace launchdarkly::logging {
 /**
@@ -21,12 +22,13 @@ class ConsoleBackend : public ILogBackend {
      */
     ConsoleBackend(std::string name);
 
-    bool Enabled(LogLevel level) override;
+    bool Enabled(LogLevel level) noexcept override;
 
-    void Write(LogLevel level, std::string message) override;
+    void Write(LogLevel level, std::string message) noexcept override;
 
    private:
     LogLevel level_;
     std::string name_;
+    std::mutex write_mutex_;
 };
 }  // namespace launchdarkly::logging
