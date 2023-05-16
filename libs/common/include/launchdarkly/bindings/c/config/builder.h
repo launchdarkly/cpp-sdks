@@ -15,6 +15,10 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientConfigBuilder* LDClientConfigBuilder;
 
+typedef struct _LDDataSourceStreamBuilder* LDDataSourceStreamBuilder;
+
+typedef struct _LDDataSourcePollBuilder* LDDataSourcePollBuilder;
+
 /**
  * Constructs a client-side config builder.
  */
@@ -94,13 +98,6 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Events_Enabled(LDClientConfigBuilder b, bool enabled);
 
 /**
- * Disables events. Equivalent to calling Enabled with false.
- * @param b Client config builder. Must not be NULL.
- */
-LD_EXPORT(void)
-LDClientConfigBuilder_Events_Disable(LDClientConfigBuilder b);
-
-/**
  * Sets the capacity of the event processor. When more events are generated
  * within the processor's flush interval than this value, events will be
  * dropped.
@@ -118,8 +115,8 @@ LDClientConfigBuilder_Events_Capacity(LDClientConfigBuilder b, size_t capacity);
  * @param milliseconds Interval between automatic flushes.
  */
 LD_EXPORT(void)
-LDClientConfigBuilder_Events_FlushInterval(LDClientConfigBuilder b,
-                                           unsigned int milliseconds);
+LDClientConfigBuilder_Events_FlushIntervalMs(LDClientConfigBuilder b,
+                                             unsigned int milliseconds);
 
 /**
  * Attribute privacy indicates whether or not attributes should be
@@ -157,6 +154,131 @@ LDClientConfigBuilder_Events_AllAttributesPrivate(LDClientConfigBuilder b,
 LD_EXPORT(void)
 LDClientConfigBuilder_Events_PrivateAttribute(LDClientConfigBuilder b,
                                               char const* attribute_reference);
+/**
+ * * Whether LaunchDarkly should provide additional information about how flag
+ * values were calculated.
+ *
+ * The additional information will then be available through the client's
+ * VariationDetail methods. Since this increases the size of network
+ * requests, such information is not sent unless you set this option to
+ * true.
+ * @param b Client config builder. Must not be NULL.
+ * @param with_reasons True to enable reasons.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_WithReasons(LDClientConfigBuilder b,
+                                             bool with_reasons);
+
+/**
+ * Whether or not to use the REPORT verb to fetch flag settings.
+ *
+ * If this is true, flag settings will be fetched with a REPORT request
+ * including a JSON entity body with the context object.
+ *
+ * Otherwise (by default) a GET request will be issued with the context
+ * passed as a base64 URL-encoded path parameter.
+ *
+ * Do not use unless advised by LaunchDarkly.
+ * @param b Client config builder. Must not be NULL.
+ * @param use_reasons True to use the REPORT verb.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_UseReport(LDClientConfigBuilder b,
+                                           bool use_report);
+/**
+ * Set the streaming configuration for the builder.
+ *
+ * A data source may either be streaming or polling. Setting a streaming
+ * builder indicates the data source will use streaming. Setting a polling
+ * builder will indicate the use of polling.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param stream_builder The streaming builder. The builder is consumed; do not
+ * free it.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodStream(
+    LDClientConfigBuilder b,
+    LDDataSourceStreamBuilder stream_builder);
+
+/**
+ * Set the polling configuration for the builder.
+ *
+ * A data source may either be streaming or polling. Setting a stream
+ * builder indicates the data source will use streaming. Setting a polling
+ * builder will indicate the use of polling.
+ *
+ * @param b  Client config builder. Must not be NULL.
+ * @param poll_builder The polling builder. The builder is consumed; do not free
+ * it.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodPoll(
+    LDClientConfigBuilder b,
+    LDDataSourcePollBuilder poll_builder);
+
+/**
+ * Creates a new DataSource builder for the Streaming method.
+ *
+ * If not passed into the config
+ * builder, must be manually freed with LDDataSourceStreamBuilder_Free.
+ *
+ * @return New builder for Streaming method.
+ */
+LD_EXPORT(LDDataSourceStreamBuilder)
+LDDataSourceStreamBuilder_New();
+
+/**
+ * Sets the initial reconnect delay for the streaming connection.
+ *
+ * The streaming service uses a backoff algorithm (with jitter) every time
+ * the connection needs to be reestablished.The delay for the first
+ * reconnection will start near this value, and then increase exponentially
+ * for any subsequent connection failures.
+ *
+ * @param b Streaming method builder.
+ * @param milliseconds Initial delay for a reconnection attempt.
+ */
+LD_EXPORT(void)
+LDDataSourceStreamBuilder_InitialReconnectDelayMs(LDDataSourceStreamBuilder b,
+                                                  unsigned int milliseconds);
+
+/**
+ * Frees a Streaming method builder. Do not call if the builder was consumed by
+ * the config builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void) LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b);
+
+/**
+ * Creates a new DataSource builder for the Polling method.
+ *
+ * If not passed into the config
+ * builder, must be manually freed with LDDataSourcePollBuilder_Free.
+ *
+ * @return New builder for Polling method.
+ */
+
+LD_EXPORT(LDDataSourcePollBuilder)
+LDDataSourcePollBuilder_New();
+
+/**
+ * Sets the interval at which the SDK will poll for feature flag updates.
+ * @param b Polling method builder.
+ * @param milliseconds Polling interval.
+ */
+LD_EXPORT(void)
+LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
+                                  unsigned int seconds);
+
+/**
+ * Frees a Polling method builder. Do not call if the builder was consumed by
+ * the config builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b);
 
 /**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.

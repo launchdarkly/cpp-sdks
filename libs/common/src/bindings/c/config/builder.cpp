@@ -10,6 +10,17 @@ using namespace launchdarkly::client_side;
 #define TO_BUILDER(ptr) (reinterpret_cast<ConfigBuilder*>(ptr))
 #define FROM_BUILDER(ptr) (reinterpret_cast<LDClientConfigBuilder>(ptr))
 
+#define TO_STREAM_BUILDER(ptr) \
+    (reinterpret_cast<DataSourceBuilder::Streaming*>(ptr))
+
+#define FROM_STREAM_BUILDER(ptr) \
+    (reinterpret_cast<LDDataSourceStreamBuilder>(ptr))
+
+#define TO_POLL_BUILDER(ptr) \
+    (reinterpret_cast<DataSourceBuilder::Polling*>(ptr))
+
+#define FROM_POLL_BUILDER(ptr) (reinterpret_cast<LDDataSourcePollBuilder>(ptr))
+
 LD_EXPORT(LDClientConfigBuilder)
 LDClientConfigBuilder_New(char const* sdk_key) {
     ASSERT_NOT_NULL(sdk_key);
@@ -91,11 +102,6 @@ LDClientConfigBuilder_Events_Enabled(LDClientConfigBuilder b, bool enabled) {
     TO_BUILDER(b)->Events().Enabled(enabled);
 }
 
-LD_EXPORT(void) LDClientConfigBuilder_Events_Disable(LDClientConfigBuilder b) {
-    ASSERT_NOT_NULL(b);
-    TO_BUILDER(b)->Events().Disable();
-}
-
 LD_EXPORT(void)
 LDClientConfigBuilder_Events_Capacity(LDClientConfigBuilder b,
                                       size_t capacity) {
@@ -104,8 +110,8 @@ LDClientConfigBuilder_Events_Capacity(LDClientConfigBuilder b,
 }
 
 LD_EXPORT(void)
-LDClientConfigBuilder_Events_FlushInterval(LDClientConfigBuilder b,
-                                           unsigned int milliseconds) {
+LDClientConfigBuilder_Events_FlushIntervalMs(LDClientConfigBuilder b,
+                                             unsigned int milliseconds) {
     ASSERT_NOT_NULL(b);
     TO_BUILDER(b)->Events().FlushInterval(
         std::chrono::milliseconds{milliseconds});
@@ -123,6 +129,79 @@ LDClientConfigBuilder_Events_PrivateAttribute(LDClientConfigBuilder b,
                                               char const* attribute_reference) {
     ASSERT_NOT_NULL(b);
     TO_BUILDER(b)->Events().PrivateAttribute(attribute_reference);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_WithReasons(LDClientConfigBuilder b,
+                                             bool with_reasons) {
+    ASSERT_NOT_NULL(b);
+    TO_BUILDER(b)->DataSource().WithReasons(with_reasons);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_UseReport(LDClientConfigBuilder b,
+                                           bool use_report) {
+    ASSERT_NOT_NULL(b);
+    TO_BUILDER(b)->DataSource().UseReport(use_report);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodStream(
+    LDClientConfigBuilder b,
+    LDDataSourceStreamBuilder stream_builder) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(stream_builder);
+
+    DataSourceBuilder::Streaming* sb = TO_STREAM_BUILDER(stream_builder);
+    TO_BUILDER(b)->DataSource().Method(*sb);
+    LDDataSourceStreamBuilder_Free(stream_builder);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_DataSource_MethodPoll(
+    LDClientConfigBuilder b,
+    LDDataSourcePollBuilder poll_builder) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(poll_builder);
+
+    DataSourceBuilder::Polling* pb = TO_POLL_BUILDER(poll_builder);
+    TO_BUILDER(b)->DataSource().Method(*pb);
+    LDDataSourcePollBuilder_Free(poll_builder);
+}
+
+LD_EXPORT(LDDataSourceStreamBuilder) LDDataSourceStreamBuilder_New() {
+    return FROM_STREAM_BUILDER(new DataSourceBuilder::Streaming());
+}
+
+LD_EXPORT(void)
+LDDataSourceStreamBuilder_InitialReconnectDelayMs(LDDataSourceStreamBuilder b,
+                                                  unsigned int milliseconds) {
+    ASSERT_NOT_NULL(b);
+    TO_STREAM_BUILDER(b)->InitialReconnectDelay(
+        std::chrono::milliseconds{milliseconds});
+}
+
+LD_EXPORT(void) LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b) {
+    if (DataSourceBuilder::Streaming* builder = TO_STREAM_BUILDER(b)) {
+        delete builder;
+    }
+}
+
+LD_EXPORT(LDDataSourcePollBuilder) LDDataSourcePollBuilder_New() {
+    return FROM_POLL_BUILDER(new DataSourceBuilder::Polling());
+}
+
+LD_EXPORT(void)
+LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
+                                  unsigned int seconds) {
+    ASSERT_NOT_NULL(b);
+    TO_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});
+}
+
+LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b) {
+    if (DataSourceBuilder::Polling* builder = TO_POLL_BUILDER(b)) {
+        delete builder;
+    }
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

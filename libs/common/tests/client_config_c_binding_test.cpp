@@ -42,11 +42,21 @@ TEST(ClientConfigBindings, AllConfigs) {
     LDClientConfigBuilder_AppInfo_Version(builder, "v1.2.3");
 
     LDClientConfigBuilder_Events_Enabled(builder, true);
-    LDClientConfigBuilder_Events_Disable(builder);
     LDClientConfigBuilder_Events_Capacity(builder, 100);
-    LDClientConfigBuilder_Events_FlushInterval(builder, 1000);
+    LDClientConfigBuilder_Events_FlushIntervalMs(builder, 1000);
     LDClientConfigBuilder_Events_AllAttributesPrivate(builder, false);
     LDClientConfigBuilder_Events_PrivateAttribute(builder, "/foo/bar");
+
+    LDClientConfigBuilder_DataSource_UseReport(builder, true);
+    LDClientConfigBuilder_DataSource_WithReasons(builder, true);
+
+    LDDataSourceStreamBuilder stream_builder = LDDataSourceStreamBuilder_New();
+    LDDataSourceStreamBuilder_InitialReconnectDelayMs(stream_builder, 500);
+    LDClientConfigBuilder_DataSource_MethodStream(builder, stream_builder);
+
+    LDDataSourcePollBuilder poll_builder = LDDataSourcePollBuilder_New();
+    LDDataSourcePollBuilder_IntervalS(poll_builder, 10);
+    LDClientConfigBuilder_DataSource_MethodPoll(builder, poll_builder);
 
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
