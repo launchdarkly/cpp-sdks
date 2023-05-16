@@ -95,4 +95,8 @@ void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
     return client->WaitForReadySync(timeout);
 }
 
+std::string Client::ExportFlags() {
+    return client->ExportFlags();
+}
+
 }  // namespace launchdarkly::client_side

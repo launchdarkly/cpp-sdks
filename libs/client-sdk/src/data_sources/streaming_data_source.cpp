@@ -5,7 +5,7 @@
 
 #include <utility>
 
-#include "base_64.hpp"
+#include "../encoding/base_64.hpp"
 #include "streaming_data_source.hpp"
 
 #include <launchdarkly/context_builder.hpp>

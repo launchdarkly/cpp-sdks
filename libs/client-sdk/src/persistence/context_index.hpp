@@ -30,8 +30,9 @@ class ContextIndex {
         std::string id;
         std::chrono::time_point<std::chrono::system_clock> timestamp;
     };
-    
+
     using Index = std::vector<IndexEntry>;
+    ContextIndex() = default;
     explicit ContextIndex(Index);
 
     /**
