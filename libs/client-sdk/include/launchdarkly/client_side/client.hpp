@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <future>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -106,7 +107,7 @@ class IClient {
     virtual void AsyncIdentify(Context context,
                                std::function<void()> completion) = 0;
 
-    virtual void SyncIdentify(Context context) = 0;
+    virtual std::future<void> SyncIdentify(Context context) = 0;
 
     /**
      * Returns the boolean value of a feature flag for a given flag key.
@@ -280,7 +281,7 @@ class Client : public IClient {
     void AsyncIdentify(Context context,
                        std::function<void()> completion) override;
 
-    void SyncIdentify(Context context) override;
+    std::future<void> SyncIdentify(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 

@@ -60,7 +60,7 @@ class ClientImpl : public IClient {
     void AsyncIdentify(Context context,
                        std::function<void()> completion) override;
 
-    void SyncIdentify(Context context) override;
+    std::future<void> SyncIdentify(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 

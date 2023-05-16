@@ -35,7 +35,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    client_->SyncIdentify(*maybe_ctx);
+    client_->SyncIdentify(*maybe_ctx).wait();
     return nlohmann::json{};
 }
 
