@@ -208,7 +208,7 @@ LDClientConfigBuilder_DataSource_MethodStream(
  * builder indicates the data source will use streaming. Setting a polling
  * builder will indicate the use of polling.
  *
- * @param b  Client config builder. Must not be NULL.
+ * @param b Client config builder. Must not be NULL.
  * @param poll_builder The polling builder. The builder is consumed; do not free
  * it.
  */
@@ -236,7 +236,7 @@ LDDataSourceStreamBuilder_New();
  * reconnection will start near this value, and then increase exponentially
  * for any subsequent connection failures.
  *
- * @param b Streaming method builder.
+ * @param b Streaming method builder. Must not be NULL.
  * @param milliseconds Initial delay for a reconnection attempt.
  */
 LD_EXPORT(void)
@@ -265,7 +265,7 @@ LDDataSourcePollBuilder_New();
 
 /**
  * Sets the interval at which the SDK will poll for feature flag updates.
- * @param b Polling method builder.
+ * @param b Polling method builder. Must not be NULL.
  * @param milliseconds Polling interval.
  */
 LD_EXPORT(void)
@@ -279,6 +279,42 @@ LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
  * @param b Builder to free.
  */
 LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b);
+
+/**
+ * This should be used for wrapper SDKs to set the wrapper name.
+ *
+ * Wrapper information will be included in request headers.
+ * @param b Client config builder. Must not be NULL.
+ * @param wrapper_name Name of the wrapper.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_WrapperName(LDClientConfigBuilder b,
+                                                 char const* wrapper_name);
+
+/**
+ * This should be used for wrapper SDKs to set the wrapper version.
+ *
+ * Wrapper information will be included in request headers.
+ * @param b Client config builder. Must not be NULL.
+ * @param wrapper_version Version of the wrapper.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_WrapperVersion(
+    LDClientConfigBuilder b,
+    char const* wrapper_version);
+
+/**
+ * Set a custom header value. May be called more than once with additional
+ * headers.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param key Name of the header. Must not be NULL.
+ * @param value Value of the header. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
+                                            char const* key,
+                                            char const* value);
 
 /**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.

@@ -57,7 +57,7 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::WrapperVersion(
 }
 
 template <typename SDK>
-HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::CustomHeaders(
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Headers(
     std::map<std::string, std::string> base_headers) {
     base_headers_ = std::move(base_headers);
     return *this;

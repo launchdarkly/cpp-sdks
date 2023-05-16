@@ -204,5 +204,32 @@ LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b) {
     }
 }
 
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_WrapperName(LDClientConfigBuilder b,
+                                                 char const* wrapper_name) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(wrapper_name);
+    TO_BUILDER(b)->HttpProperties().WrapperName(wrapper_name);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_WrapperVersion(
+    LDClientConfigBuilder b,
+    char const* wrapper_version) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(wrapper_version);
+    TO_BUILDER(b)->HttpProperties().WrapperVersion(wrapper_version);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
+                                            char const* key,
+                                            char const* value) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(key);
+    ASSERT_NOT_NULL(value);
+    TO_BUILDER(b)->HttpProperties().Header(key, value);
+}
+
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTEND OCInconsistentNamingInspection

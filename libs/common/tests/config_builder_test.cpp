@@ -157,7 +157,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
         .ReadTimeout(std::chrono::milliseconds{123456})
         .WrapperName("potato")
         .WrapperVersion("2.0-chip")
-        .CustomHeaders(std::map<std::string, std::string>{{"color", "green"}});
+        .Headers(std::map<std::string, std::string>{{"color", "green"}});
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);

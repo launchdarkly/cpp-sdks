@@ -58,6 +58,10 @@ TEST(ClientConfigBindings, AllConfigs) {
     LDDataSourcePollBuilder_IntervalS(poll_builder, 10);
     LDClientConfigBuilder_DataSource_MethodPoll(builder, poll_builder);
 
+    LDClientConfigBuilder_HttpProperties_Header(builder, "foo", "bar");
+    LDClientConfigBuilder_HttpProperties_WrapperName(builder, "wrapper");
+    LDClientConfigBuilder_HttpProperties_WrapperVersion(builder, "v1.2.3");
+
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
