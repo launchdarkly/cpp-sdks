@@ -33,6 +33,7 @@ class StreamingDataSource final
 
     void Start() override;
     void AsyncShutdown(std::function<void()>) override;
+    std::future<void> SyncShutdown() override;
 
    private:
     boost::asio::any_io_executor exec_;

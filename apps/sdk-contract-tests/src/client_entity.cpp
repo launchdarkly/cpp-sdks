@@ -35,10 +35,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    std::promise<void> identify_promise;
-    auto identify_future = identify_promise.get_future();
-    client_->AsyncIdentify(*maybe_ctx, [&]() { identify_promise.set_value(); });
-    identify_future.wait();
+    client_->SyncIdentify(*maybe_ctx);
     return nlohmann::json{};
 }
 

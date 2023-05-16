@@ -156,6 +156,18 @@ void ClientImpl::AsyncIdentify(Context context,
         });
 }
 
+void ClientImpl::SyncIdentify(Context context) {
+    auto fut = data_source_->SyncShutdown();
+    if (fut.valid()) {
+        fut.wait();
+    }
+    UpdateContextSynchronized(context);
+    data_source_ = data_source_factory_();
+    data_source_->Start();
+    event_processor_->AsyncSend(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), std::move(context)});
+}
+
 // TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
 // multiple concerns.
 template <typename T>

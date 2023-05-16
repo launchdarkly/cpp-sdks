@@ -223,4 +223,12 @@ void PollingDataSource::AsyncShutdown(std::function<void()> fn) {
     boost::asio::post(timer_.get_executor(), [fn]() { fn(); });
 }
 
+std::future<void> PollingDataSource::SyncShutdown() {
+    Close();
+    std::promise<void> pr;
+    auto fut = pr.get_future();
+    pr.set_value();
+    return fut;
+}
+
 }  // namespace launchdarkly::client_side::data_sources

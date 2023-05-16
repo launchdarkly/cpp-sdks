@@ -141,14 +141,25 @@ void StreamingDataSource::Start() {
 }
 
 void StreamingDataSource::AsyncShutdown(std::function<void()> handler) {
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
     if (client_) {
+        status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
         return client_->async_shutdown(std::move(handler));
     }
     if (!handler) {
         return;
     }
     boost::asio::post(exec_, [handler]() { handler(); });
+}
+
+std::future<void> StreamingDataSource::SyncShutdown() {
+    if (client_) {
+        status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
+        return client_->sync_shutdown();
+    }
+    std::promise<void> p;
+    auto fut = p.get_future();
+    p.set_value();
+    return fut;
 }
 
 }  // namespace launchdarkly::client_side::data_sources

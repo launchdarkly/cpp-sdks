@@ -31,6 +31,7 @@ class PollingDataSource
     void Close();
 
     void AsyncShutdown(std::function<void()>) override;
+    std::future<void> SyncShutdown() override;
 
    private:
     void DoPoll();

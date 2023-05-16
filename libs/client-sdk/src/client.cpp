@@ -36,6 +36,10 @@ void Client::AsyncIdentify(Context context, std::function<void()> completion) {
     client->AsyncIdentify(std::move(context), std::move(completion));
 }
 
+void Client::SyncIdentify(Context context) {
+    return client->SyncIdentify(std::move(context));
+}
+
 bool Client::BoolVariation(FlagKey const& key, bool default_value) {
     return client->BoolVariation(key, default_value);
 }
