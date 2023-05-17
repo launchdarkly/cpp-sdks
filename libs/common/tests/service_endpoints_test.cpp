@@ -42,7 +42,7 @@ TEST(ServiceEndpointTest, ModifySingleURLCausesError) {
 }
 
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
-    auto eps = client_side::EndpointsBuilder().RelayProxy("foo").Build();
+    auto eps = client_side::EndpointsBuilder().RelayProxyBaseURL("foo").Build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     ASSERT_EQ(eps->PollingBaseUrl(), "foo");
@@ -51,27 +51,30 @@ TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
 
 TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
     {
-        auto eps = client_side::EndpointsBuilder().RelayProxy("foo/").Build();
+        auto eps =
+            client_side::EndpointsBuilder().RelayProxyBaseURL("foo/").Build();
+        ASSERT_TRUE(eps);
+        ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
+    }
+
+    {
+        auto eps = client_side::EndpointsBuilder()
+                       .RelayProxyBaseURL("foo////////")
+                       .Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
         auto eps =
-            client_side::EndpointsBuilder().RelayProxy("foo////////").Build();
-        ASSERT_TRUE(eps);
-        ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
-    }
-
-    {
-        auto eps = client_side::EndpointsBuilder().RelayProxy("/").Build();
+            client_side::EndpointsBuilder().RelayProxyBaseURL("/").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "");
     }
 }
 
 TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
-    auto result = client_side::EndpointsBuilder().RelayProxy("").Build();
+    auto result = client_side::EndpointsBuilder().RelayProxyBaseURL("").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 

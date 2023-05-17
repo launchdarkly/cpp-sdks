@@ -109,7 +109,7 @@ LDClientConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
 
-    TO_BUILDER(b)->ServiceEndpoints().RelayProxy(url);
+    TO_BUILDER(b)->ServiceEndpoints().RelayProxyBaseURL(url);
 }
 
 LD_EXPORT(void)
