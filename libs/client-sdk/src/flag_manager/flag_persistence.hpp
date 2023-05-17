@@ -13,7 +13,8 @@ namespace launchdarkly::client_side::flag_manager {
 
 class FlagPersistence : public IDataSourceUpdateSink {
    public:
-    FlagPersistence(IDataSourceUpdateSink* sink,
+    FlagPersistence(std::string const& sdk_key,
+                    IDataSourceUpdateSink* sink,
                     FlagStore& flag_store,
                     std::shared_ptr<IPersistence> persistence);
 
@@ -27,6 +28,9 @@ class FlagPersistence : public IDataSourceUpdateSink {
     void LoadCached(Context const& context);
 
    private:
+    inline static std::string global_namespace_ = "LaunchDarkly";
+    inline static std::string index_key_ = "ContextIndex";
+
     IDataSourceUpdateSink* sink_;
     std::shared_ptr<IPersistence> persistence_;
     mutable std::recursive_mutex persistence_mutex_;
@@ -35,8 +39,6 @@ class FlagPersistence : public IDataSourceUpdateSink {
     std::string environment_namespace_;
     // TODO: From config.
     std::size_t max_cached_contexts_ = 10;
-    inline static std::string global_namespace_ = "LaunchDarkly";
-    inline static std::string index_key_ = "ContextIndex";
 
     ContextIndex GetIndex();
     void StoreCache(std::string context_id);

@@ -52,7 +52,7 @@ ClientImpl::ClientImpl(Config config, Context context)
     : logger_(MakeLogger(config.Logging())),
       context_(std::move(context)),
       event_processor_(nullptr),
-      flag_manager_(nullptr),  // TODO: From config.
+      flag_manager_(config.SdkKey(), nullptr),  // TODO: From config.
       data_source_(MakeDataSource(config,
                                   context_,
                                   ioc_.get_executor(),

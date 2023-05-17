@@ -2,7 +2,6 @@
 #include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
-#include <launchdarkly/serialization/json_errors.hpp>
 
 namespace launchdarkly::client_side::flag_manager {
 
@@ -10,10 +9,19 @@ static std::string PersistenceEncodeKey(std::string const& input) {
     return encoding::Sha256String(input);
 }
 
-FlagPersistence::FlagPersistence(IDataSourceUpdateSink* sink,
+static std::string MakeEnvironment(std::string const& prefix,
+                                   std::string const& sdk_key) {
+    return prefix + "_" + PersistenceEncodeKey(sdk_key);
+}
+
+FlagPersistence::FlagPersistence(std::string const& sdk_key,
+                                 IDataSourceUpdateSink* sink,
                                  FlagStore& flag_store,
                                  std::shared_ptr<IPersistence> persistence)
-    : sink_(sink), flag_store_(flag_store), persistence_(persistence) {}
+    : sink_(sink),
+      flag_store_(flag_store),
+      persistence_(persistence),
+      environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)) {}
 
 void FlagPersistence::Init(
     Context const& context,
@@ -59,13 +67,13 @@ void FlagPersistence::StoreCache(std::string context_id) {
     if (persistence_) {
         std::lock_guard lock(persistence_mutex_);
         auto index = GetIndex();
-        index.Notice(context_id);
+        index.Notice(context_id, std::chrono::system_clock::now());
         auto pruned = index.Prune(max_cached_contexts_);
         for (auto& id : pruned) {
             persistence_->RemoveValue(environment_namespace_, id);
         }
         persistence_->SetValue(
-            global_namespace_, index_key_,
+            environment_namespace_, index_key_,
             boost::json::serialize(boost::json::value_from(index)));
 
         persistence_->SetValue(environment_namespace_, context_id,

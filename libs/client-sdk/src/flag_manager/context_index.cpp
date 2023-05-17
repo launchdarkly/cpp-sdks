@@ -9,14 +9,15 @@ namespace launchdarkly::client_side::flag_manager {
 ContextIndex::ContextIndex(ContextIndex::Index index)
     : index_(std::move(index)) {}
 
-void ContextIndex::Notice(std::string id) {
-    auto now = std::chrono::system_clock::now();
+void ContextIndex::Notice(
+    std::string id,
+    std::chrono::time_point<std::chrono::system_clock> timestamp) {
     auto found = std::find_if(index_.begin(), index_.end(),
                               [&id](auto& entry) { return entry.id == id; });
     if (found != index_.end()) {
-        found->timestamp = now;
+        found->timestamp = timestamp;
     } else {
-        index_.push_back(IndexEntry{id, now});
+        index_.push_back(IndexEntry{id, timestamp});
     }
 }
 
@@ -27,7 +28,7 @@ std::vector<std::string> ContextIndex::Prune(int maxContexts) {
 
     std::sort(index_.begin(), index_.end(),
               [](IndexEntry const& a, IndexEntry const& b) {
-                  return a.timestamp < b.timestamp;
+                  return a.timestamp > b.timestamp;
               });
 
     Index removed = std::vector(index_.begin() + maxContexts, index_.end());
@@ -72,7 +73,7 @@ ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
                 auto* id_iter = obj.find("id");
                 auto id = ValueAsOpt<std::string>(id_iter, obj.end());
 
-                auto* timestamp_iter = obj.find("id");
+                auto* timestamp_iter = obj.find("timestamp");
                 auto timestamp =
                     ValueAsOpt<uint64_t>(timestamp_iter, obj.end());
 
@@ -87,4 +88,4 @@ ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
     return ContextIndex(index);
 }
 
-}  // namespace launchdarkly::persistence
+}  // namespace launchdarkly::client_side::flag_manager

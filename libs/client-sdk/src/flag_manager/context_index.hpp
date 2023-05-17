@@ -41,8 +41,10 @@ class ContextIndex {
      * timestamp for the context.
      *
      * @param id The id of the context.
+     * @param timestamp The time the context is noticed.
      */
-    void Notice(std::string id);
+    void Notice(std::string id,
+                std::chrono::time_point<std::chrono::system_clock> timestamp);
 
     Index const& Entries() const;
 
