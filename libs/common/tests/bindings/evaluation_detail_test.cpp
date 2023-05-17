@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/bindings/c/data/evaluation_detail.h>
-#include <launchdarkly/data/evaluation_reason.hpp>
+#include "launchdarkly/bindings/c/data/evaluation_detail.h"
+#include "launchdarkly/data/evaluation_reason.hpp"
 
 TEST(ClientBindings, EvaluationDetailError) {
     using namespace launchdarkly;
