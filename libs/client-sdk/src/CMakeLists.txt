@@ -36,7 +36,7 @@ add_library(${LIBNAME}
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         event_processor.hpp
-        persistence/context_index.cpp
+        flag_manager/context_index.cpp
         serialization/json_all_flags.hpp
         serialization/json_all_flags.cpp
         encoding/sha_256.cpp flag_manager/flag_manager.cpp flag_manager/flag_persistence.cpp)

@@ -74,7 +74,7 @@ void FlagPersistence::StoreCache(std::string context_id) {
     }
 }
 
-persistence::ContextIndex FlagPersistence::GetIndex() {
+ContextIndex FlagPersistence::GetIndex() {
     if (persistence_) {
         std::lock_guard lock(persistence_mutex_);
         auto index_data = persistence_->Read(global_namespace_, index_key_);
@@ -85,12 +85,11 @@ persistence::ContextIndex FlagPersistence::GetIndex() {
             if (error_code) {
                 // TODO: Log?
             } else {
-                return boost::json::value_to<persistence::ContextIndex>(
-                    std::move(parsed));
+                return boost::json::value_to<ContextIndex>(std::move(parsed));
             }
         }
     }
-    return persistence::ContextIndex();
+    return ContextIndex();
 }
 
 }  // namespace launchdarkly::client_side::flag_manager

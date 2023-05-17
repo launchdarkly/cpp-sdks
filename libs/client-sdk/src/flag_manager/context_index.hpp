@@ -7,7 +7,7 @@
 
 #include <boost/json.hpp>
 
-namespace launchdarkly::persistence {
+namespace launchdarkly::client_side::flag_manager {
 
 /**
  * Used internally to track which contexts have flag data in the persistent

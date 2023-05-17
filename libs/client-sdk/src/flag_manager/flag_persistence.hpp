@@ -3,7 +3,7 @@
 #include <mutex>
 
 #include "../data_sources/data_source_update_sink.hpp"
-#include "../persistence/context_index.hpp"
+#include "context_index.hpp"
 #include "flag_store.hpp"
 
 #include <launchdarkly/client_side/persistence.hpp>
@@ -38,7 +38,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
     inline static std::string global_namespace_ = "LaunchDarkly";
     inline static std::string index_key_ = "ContextIndex";
 
-    persistence::ContextIndex GetIndex();
+    ContextIndex GetIndex();
     void StoreCache(std::string context_id);
 };
 

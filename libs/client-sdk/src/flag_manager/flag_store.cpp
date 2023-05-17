@@ -1,8 +1,8 @@
 #include <boost/json.hpp>
 
 #include "../encoding/sha_256.hpp"
-#include "../persistence/context_index.hpp"
 #include "../serialization/json_all_flags.hpp"
+#include "context_index.hpp"
 #include "flag_store.hpp"
 
 #include <boost/json/parse.hpp>

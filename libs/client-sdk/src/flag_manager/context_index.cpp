@@ -2,9 +2,9 @@
 
 #include "context_index.hpp"
 
-#include <launchdarkly/serialization/value_mapping.hpp>
+#include "launchdarkly/serialization/value_mapping.hpp"
 
-namespace launchdarkly::persistence {
+namespace launchdarkly::client_side::flag_manager {
 
 ContextIndex::ContextIndex(ContextIndex::Index index)
     : index_(std::move(index)) {}

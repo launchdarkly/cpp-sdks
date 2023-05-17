@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "../data_sources/data_source_update_sink.hpp"
-#include "../persistence/context_index.hpp"
+#include "context_index.hpp"
 
 #include <launchdarkly/client_side/persistence.hpp>
 
