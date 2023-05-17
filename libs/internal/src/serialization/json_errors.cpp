@@ -34,6 +34,8 @@ char const* ErrorToString(JsonError err) {
                    "reference";
         case JsonError::kContextInvalidPrivateAttributesField:
             return "context 'privateAttributes' field is invalid";
+        default:
+            return "unknown error";
     }
 }
 
