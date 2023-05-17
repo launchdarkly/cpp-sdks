@@ -7,6 +7,7 @@
 #include "../../../../common/src/c_binding_helpers.hpp"
 
 #include <boost/core/ignore_unused.hpp>
+#include <cstring>
 
 using namespace launchdarkly::client_side;
 using namespace launchdarkly;
@@ -17,6 +18,29 @@ struct Detail;
 #define FROM_SDK(ptr) (reinterpret_cast<LDClientSDK>(ptr))
 
 #define FROM_DETAIL(ptr) (reinterpret_cast<LDEvalDetail>(ptr))
+
+/*
+ * Helper to perform the common functionality of checking if the user
+ * requested a detail out parameter. If so, we allocate a copy of it
+ * on the heap and return it along with the result. Otherwise,
+ * we let it destruct and only return the result.
+ */
+template <typename Callable>
+inline static auto MaybeDetail(LDClientSDK sdk,
+                               LDEvalDetail* out_detail,
+                               Callable&& fn) {
+    auto internal_detail = fn(TO_SDK(sdk));
+
+    auto result = internal_detail.Value();
+
+    if (!out_detail) {
+        return result;
+    }
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(internal_detail));
+
+    return result;
+}
 
 LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context) {
@@ -119,18 +143,114 @@ LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
     LD_ASSERT_NOT_NULL(sdk);
     LD_ASSERT_NOT_NULL(flag_key);
 
-    auto internal_detail =
-        TO_SDK(sdk)->BoolVariationDetail(flag_key, default_value);
+    return MaybeDetail(sdk, out_detail, [&](Client* client) {
+        return client->BoolVariationDetail(flag_key, default_value);
+    });
+}
 
-    bool result = internal_detail.Value();
+LD_EXPORT(char*)
+LDClientSDK_StringVariation(LDClientSDK sdk,
+                            char const* flag_key,
+                            char const* default_value) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
 
-    if (!out_detail) {
-        return result;
-    }
+    // TODO: custom allocation / free routines
+    return strdup(
+        TO_SDK(sdk)->StringVariation(flag_key, default_value).c_str());
+}
 
-    *out_detail = FROM_DETAIL(new CEvaluationDetail(internal_detail));
+LD_EXPORT(char*)
+LDClientSDK_StringVariationDetail(LDClientSDK sdk,
+                                  char const* flag_key,
+                                  char const* default_value,
+                                  LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
 
-    return result;
+    return strdup(MaybeDetail(sdk, out_detail, [&](Client* client) {
+                      return client->StringVariationDetail(flag_key,
+                                                           default_value);
+                  }).c_str());
+}
+
+LD_EXPORT(int)
+LDClientSDK_IntVariation(LDClientSDK sdk,
+                         char const* flag_key,
+                         int default_value) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    return TO_SDK(sdk)->IntVariation(flag_key, default_value);
+}
+
+LD_EXPORT(int)
+LDClientSDK_IntVariationDetail(LDClientSDK sdk,
+                               char const* flag_key,
+                               int default_value,
+                               LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    return MaybeDetail(sdk, out_detail, [&](Client* client) {
+        return client->IntVariationDetail(flag_key, default_value);
+    });
+}
+
+LD_EXPORT(int)
+LDClientSDK_DoubleVariation(LDClientSDK sdk,
+                            char const* flag_key,
+                            double default_value) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    return TO_SDK(sdk)->DoubleVariation(flag_key, default_value);
+}
+
+LD_EXPORT(int)
+LDClientSDK_DoubleVariationDetail(LDClientSDK sdk,
+                                  char const* flag_key,
+                                  double default_value,
+                                  LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    return MaybeDetail(sdk, out_detail, [&](Client* client) {
+        return client->DoubleVariationDetail(flag_key, default_value);
+    });
+}
+
+LD_EXPORT(LDValue)
+LDClientSDK_JsonVariation(LDClientSDK sdk,
+                          char const* flag_key,
+                          LDValue default_value) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT(default_value);
+
+    auto as_value = reinterpret_cast<Value*>(default_value);
+
+    return reinterpret_cast<LDValue>(
+        new Value(TO_SDK(sdk)->JsonVariation(flag_key, *as_value)));
+}
+
+LD_EXPORT(LDValue)
+LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
+                                char const* flag_key,
+                                LDValue default_value,
+                                LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT(default_value);
+
+    auto as_value = reinterpret_cast<Value*>(default_value);
+
+    return reinterpret_cast<LDValue>(
+        new Value(MaybeDetail(sdk, out_detail, [&](Client* client) {
+            return client->JsonVariationDetail(flag_key, *as_value);
+        })));
 }
 
 LD_EXPORT(void) LDClientSDK_Free(LDClientSDK sdk) {

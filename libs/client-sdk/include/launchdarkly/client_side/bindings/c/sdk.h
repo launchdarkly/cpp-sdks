@@ -145,7 +145,133 @@ LD_EXPORT(bool)
 LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
                                 char const* flag_key,
                                 bool default_value,
-                                LDEvalDetail* detail);
+                                LDEvalDetail* out_detail);
+
+/**
+ * Returns the string value of a feature flag for a given flag key.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @return The variation for the current context, or a copy of default_value if
+ * the flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(char*)
+LDClientSDK_StringVariation(LDClientSDK sdk,
+                            char const* flag_key,
+                            char const* default_value);
+
+/**
+ * Returns the string value of a feature flag for a given flag key, and details
+ * that also describes the way the value was determined.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param detail Out parameter to store the details. May pass NULL to discard
+ * the details. The details object must be freed with
+ * LDEvalDetail_Free.
+ * @return The variation for the current context, or a copy of default_value if
+ * the flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(char*)
+LDClientSDK_StringVariationDetail(LDClientSDK sdk,
+                                  char const* flag_key,
+                                  char const* default_value,
+                                  LDEvalDetail* out_detail);
+
+/**
+ * Returns the int value of a feature flag for a given flag key.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @return The variation for the current context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDClientSDK_IntVariation(LDClientSDK sdk,
+                         char const* flag_key,
+                         int default_value);
+
+/**
+ * Returns the int value of a feature flag for a given flag key, and details
+ * that also describes the way the value was determined.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param detail Out parameter to store the details. May pass NULL to discard
+ * the details. The details object must be freed with
+ * LDEvalDetail_Free.
+ * @return The variation for the current context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDClientSDK_IntVariationDetail(LDClientSDK sdk,
+                               char const* flag_key,
+                               int default_value,
+                               LDEvalDetail* out_detail);
+
+/**
+ * Returns the double value of a feature flag for a given flag key.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @return The variation for the current context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDClientSDK_DoubleVariation(LDClientSDK sdk,
+                            char const* flag_key,
+                            double default_value);
+
+/**
+ * Returns the double value of a feature flag for a given flag key, and details
+ * that also describes the way the value was determined.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param detail Out parameter to store the details. May pass NULL to discard
+ * the details. The details object must be freed with
+ * LDEvalDetail_Free.
+ * @return The variation for the current context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDClientSDK_DoubleVariationDetail(LDClientSDK sdk,
+                                  char const* flag_key,
+                                  double default_value,
+                                  LDEvalDetail* out_detail);
+
+/**
+ * Returns the JSON value of a feature flag for a given flag key.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. The value is copied.
+ * @return The variation for the current context, or a copy of default_value if
+ * the flag is disabled in the LaunchDarkly control panel. The returned value
+ * must be freed using LDValue_Free.
+ */
+LD_EXPORT(LDValue)
+LDClientSDK_JsonVariation(LDClientSDK sdk,
+                          char const* flag_key,
+                          LDValue default_value);
+
+/**
+ * Returns the JSON value of a feature flag for a given flag key, and details
+ * that also describes the way the value was determined.
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. The value is copied.
+ * @param detail Out parameter to store the details. May pass NULL to discard
+ * the details. The details object must be freed with
+ * LDEvalDetail_Free.
+ * @return The variation for the current context, or a copy of default_value if
+ * the flag is disabled in the LaunchDarkly control panel. The returned value
+ * must be freed using LDValue_Free.
+ */
+LD_EXPORT(LDValue)
+LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
+                                char const* flag_key,
+                                LDValue default_value,
+                                LDEvalDetail* out_detail);
 
 /**
  * Frees the SDK's resources, shutting down any connections. May block.
