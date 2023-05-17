@@ -18,11 +18,13 @@ static std::string MakeEnvironment(std::string const& prefix,
 FlagPersistence::FlagPersistence(std::string const& sdk_key,
                                  IDataSourceUpdateSink* sink,
                                  FlagStore& flag_store,
-                                 std::shared_ptr<IPersistence> persistence)
+                                 std::shared_ptr<IPersistence> persistence,
+                                 FlagPersistence::TimeStampsource time_stamper)
     : sink_(sink),
       flag_store_(flag_store),
       persistence_(std::move(persistence)),
-      environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)) {}
+      environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)),
+      time_stamper_(time_stamper) {}
 
 void FlagPersistence::Init(
     Context const& context,
@@ -68,7 +70,7 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
     if (persistence_) {
         std::lock_guard lock(persistence_mutex_);
         auto index = GetIndex();
-        index.Notice(context_id, std::chrono::system_clock::now());
+        index.Notice(context_id, time_stamper_());
         auto pruned = index.Prune(max_cached_contexts_);
         for (auto& id : pruned) {
             persistence_->RemoveValue(environment_namespace_, id);

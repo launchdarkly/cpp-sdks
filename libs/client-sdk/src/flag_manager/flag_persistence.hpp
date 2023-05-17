@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+#include <functional>
 #include <mutex>
 
 #include "../data_sources/data_source_update_sink.hpp"
@@ -13,10 +15,17 @@ namespace launchdarkly::client_side::flag_manager {
 
 class FlagPersistence : public IDataSourceUpdateSink {
    public:
-    FlagPersistence(std::string const& sdk_key,
-                    IDataSourceUpdateSink* sink,
-                    FlagStore& flag_store,
-                    std::shared_ptr<IPersistence> persistence);
+    using TimeStampsource =
+        std::function<std::chrono::time_point<std::chrono::system_clock>()>;
+
+    FlagPersistence(
+        std::string const& sdk_key,
+        IDataSourceUpdateSink* sink,
+        FlagStore& flag_store,
+        std::shared_ptr<IPersistence> persistence,
+        TimeStampsource time_stamper = []() {
+            return std::chrono::system_clock::now();
+        });
 
     void Init(Context const& context,
               std::unordered_map<std::string, ItemDescriptor> data) override;
@@ -39,6 +48,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
     std::string environment_namespace_;
     // TODO: From config.
     std::size_t max_cached_contexts_ = 10;
+    TimeStampsource time_stamper_;
 
     ContextIndex GetIndex();
     void StoreCache(std::string const& context_id);

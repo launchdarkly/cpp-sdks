@@ -34,11 +34,11 @@ class IPersistence {
      * Add or update a value in the store. If the value cannot be set, then
      * the function should complete normally.
      *
-     * @param storageNamespace The namespace for the data.
+     * @param storage_namespace The namespace for the data.
      * @param key The key for the data.
      * @param value The data to add or update.
      */
-    virtual void SetValue(std::string storageNamespace,
+    virtual void SetValue(std::string storage_namespace,
                           std::string key,
                           std::string data) noexcept = 0;
 
@@ -46,20 +46,20 @@ class IPersistence {
      * Remove a value from the store. If the value cannot be removed, then
      * the function should complete normally.
      *
-     * @param storageNamespace The namespace of the data.
+     * @param storage_namespace The namespace of the data.
      * @param key The key of the data.
      */
-    virtual void RemoveValue(std::string storageNamespace,
+    virtual void RemoveValue(std::string storage_namespace,
                              std::string key) noexcept = 0;
 
     /**
      * Attempt to read a value from the store.
-     * @param storageNamespace The namespace of the data.
+     * @param storage_namespace The namespace of the data.
      * @param key The key of the data.
      *
      * @return The read value, or std::nullopt if the value does not exist
      * or could not be read.
      */
-    virtual std::optional<std::string> Read(std::string storageNamespace,
+    virtual std::optional<std::string> Read(std::string storage_namespace,
                                             std::string key) noexcept = 0;
 };
