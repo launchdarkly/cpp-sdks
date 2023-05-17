@@ -70,9 +70,7 @@ LDClientConfigBuilder_Build(LDClientConfigBuilder b,
 
 LD_EXPORT(void)
 LDClientConfigBuilder_Free(LDClientConfigBuilder builder) {
-    if (ConfigBuilder* b = TO_BUILDER(builder)) {
-        delete b;
-    }
+    delete TO_BUILDER(builder);
 }
 
 LD_EXPORT(void)
@@ -216,9 +214,7 @@ LDDataSourceStreamBuilder_InitialReconnectDelayMs(LDDataSourceStreamBuilder b,
 }
 
 LD_EXPORT(void) LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b) {
-    if (DataSourceBuilder::Streaming* builder = TO_STREAM_BUILDER(b)) {
-        delete builder;
-    }
+    delete TO_STREAM_BUILDER(b);
 }
 
 LD_EXPORT(LDDataSourcePollBuilder) LDDataSourcePollBuilder_New() {
@@ -233,9 +229,7 @@ LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
 }
 
 LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b) {
-    if (DataSourceBuilder::Polling* builder = TO_POLL_BUILDER(b)) {
-        delete builder;
-    }
+    delete TO_POLL_BUILDER(b);
 }
 
 LD_EXPORT(void)
@@ -270,9 +264,7 @@ LD_EXPORT(LDLoggingBasicBuilder) LDLoggingBasicBuilder_New() {
 }
 
 LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b) {
-    if (LoggingBuilder::BasicLogging* builder = TO_BASIC_LOGGING_BUILDER(b)) {
-        delete builder;
-    }
+    delete TO_BASIC_LOGGING_BUILDER(b);
 }
 
 LD_EXPORT(void)
@@ -316,9 +308,7 @@ LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New() {
 }
 
 LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b) {
-    if (LoggingBuilder::CustomLogging* builder = TO_CUSTOM_LOGGING_BUILDER(b)) {
-        delete builder;
-    }
+    delete TO_CUSTOM_LOGGING_BUILDER(b);
 }
 
 LD_EXPORT(void)
