@@ -1,7 +1,7 @@
+#include <assert.h>
 #include <launchdarkly/bindings/c/status.h>
-#include <launchdarkly/error.hpp>
-
 #include <functional>
+#include <launchdarkly/error.hpp>
 
 #include "tl/expected.hpp"
 
