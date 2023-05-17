@@ -37,7 +37,7 @@ built::Persistence<ClientSDK> PersistenceBuilder<ClientSDK>::Build() const {
                                                        ClientSDK>::Custom>) {
                 if (arg.implementation_) {
                     return built::Persistence<ClientSDK>{
-                        true, arg.implementation_, max_contexts_};
+                        false, arg.implementation_, max_contexts_};
                 }
                 // No implementation set. Return a default config.
                 return built::Persistence<ClientSDK>{true, nullptr,
@@ -47,4 +47,10 @@ built::Persistence<ClientSDK> PersistenceBuilder<ClientSDK>::Build() const {
         type_);
 }
 
+launchdarkly::config::shared::builders::PersistenceBuilder<ClientSDK>::Custom&
+PersistenceBuilder<ClientSDK>::Custom::Implementation(
+    std::shared_ptr<IPersistence> implementation) {
+    implementation_ = implementation;
+    return *this;
+}
 }  // namespace launchdarkly::config::shared::builders

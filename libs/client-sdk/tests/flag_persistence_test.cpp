@@ -72,7 +72,7 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
 
     // Created the index.
     EXPECT_EQ(
-        R"([{"id":"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d","timestamp":500}])",
+        R"({"index":[{"id":"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d","timestamp":500}]})",
         persistence->store_
             ["LaunchDarkly_"
              "ad44dc8e51cfbfa55e81ddbb626b466241069045066846e7e4cd096131505290"]

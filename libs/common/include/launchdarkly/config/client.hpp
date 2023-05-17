@@ -22,6 +22,7 @@ using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
 using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
+using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;
 
 using Config = config::Config<SDK>;
 

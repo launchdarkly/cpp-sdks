@@ -56,7 +56,8 @@ void FlagPersistence::LoadCached(Context const& context) {
             auto parsed = boost::json::parse(*data, error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError)
-                    << "Failed to parse flag data from persistence.";
+                    << "Failed to parse flag data from persistence: "
+                    << error_code.message();
             } else {
                 auto res = boost::json::value_to<tl::expected<
                     std::unordered_map<
@@ -66,7 +67,8 @@ void FlagPersistence::LoadCached(Context const& context) {
                     sink_->Init(context, *res);
                 } else {
                     LD_LOG(logger_, LogLevel::kError)
-                        << "Failed to parse flag data from persistence.";
+                        << "Failed to parse flag data from persistence: "
+                        << error_code.message();
                 }
             }
         }
@@ -95,14 +97,16 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
 ContextIndex FlagPersistence::GetIndex() {
     if (persistence_) {
         std::lock_guard lock(persistence_mutex_);
-        auto index_data = persistence_->Read(global_namespace_, index_key_);
+        auto index_data =
+            persistence_->Read(environment_namespace_, index_key_);
 
         if (index_data) {
             boost::json::error_code error_code;
             auto parsed = boost::json::parse(*index_data, error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError)
-                    << "Failed to parse index data from persistence.";
+                    << "Failed to parse index data from persistence: "
+                    << error_code.message() << " " << *index_data;
             } else {
                 return boost::json::value_to<ContextIndex>(std::move(parsed));
             }

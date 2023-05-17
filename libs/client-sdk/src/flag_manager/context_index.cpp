@@ -57,7 +57,8 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                 ContextIndex const& index) {
     boost::ignore_unused(unused);
 
-    auto& arr = json_value.emplace_array();
+    auto& top = json_value.emplace_object();
+    auto arr = boost::json::array();
 
     for (auto& entry : index.Entries()) {
         auto obj = boost::json::object();
@@ -68,6 +69,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                         .count());
         arr.emplace_back(std::move(obj));
     }
+    top.emplace("index", arr);
 }
 
 ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
@@ -75,21 +77,24 @@ ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
     boost::ignore_unused(unused);
 
     auto index = ContextIndex::Index();
-    if (json_value.is_array()) {
-        for (auto& item : json_value.as_array()) {
-            if (item.is_object()) {
-                auto& obj = item.as_object();
-                auto* id_iter = obj.find("id");
-                auto id = ValueAsOpt<std::string>(id_iter, obj.end());
+    if (json_value.is_object()) {
+        auto arr = json_value.as_object().find("index");
+        if (arr != json_value.as_object().end() && arr->value().is_array()) {
+            for (auto& item : arr->value().as_array()) {
+                if (item.is_object()) {
+                    auto& obj = item.as_object();
+                    auto* id_iter = obj.find("id");
+                    auto id = ValueAsOpt<std::string>(id_iter, obj.end());
 
-                auto* timestamp_iter = obj.find("timestamp");
-                auto timestamp =
-                    ValueAsOpt<uint64_t>(timestamp_iter, obj.end());
+                    auto* timestamp_iter = obj.find("timestamp");
+                    auto timestamp =
+                        ValueAsOpt<uint64_t>(timestamp_iter, obj.end());
 
-                if (id && timestamp) {
-                    index.push_back(ContextIndex::IndexEntry{
-                        *id, std::chrono::system_clock::time_point{
-                                 std::chrono::milliseconds{*timestamp}}});
+                    if (id && timestamp) {
+                        index.push_back(ContextIndex::IndexEntry{
+                            *id, std::chrono::system_clock::time_point{
+                                     std::chrono::milliseconds{*timestamp}}});
+                    }
                 }
             }
         }

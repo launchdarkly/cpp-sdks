@@ -72,7 +72,7 @@ ClientImpl::ClientImpl(Config config, Context context)
                                   logger_)),
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
-    flag_manager_.LoadCache(context);
+    flag_manager_.LoadCache(context_);
 
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
