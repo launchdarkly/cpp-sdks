@@ -6,6 +6,8 @@
 #include <launchdarkly/client_side/client.hpp>
 #include "../../../../common/src/c_binding_helpers.hpp"
 
+#include <boost/core/ignore_unused.hpp>
+
 using namespace launchdarkly::client_side;
 using namespace launchdarkly;
 
@@ -76,9 +78,9 @@ LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue value) {
 }
 
 LD_EXPORT(void)
-LDClientSDK_Flush(LDClientSDK sdk, int milliseconds) {
+LDClientSDK_Flush(LDClientSDK sdk, int reserved) {
     LD_ASSERT_NOT_NULL(sdk);
-
+    LD_ASSERT(reserved == LD_NONBLOCKING);
     TO_SDK(sdk)->FlushAsync();
 }
 

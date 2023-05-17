@@ -17,6 +17,8 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientSDK* LDClientSDK;
 
+#define LD_NONBLOCKING -1
+
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
  * context.
@@ -86,18 +88,13 @@ LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
 /**
  * Requests delivery of all pending analytic events (if any).
  *
- * To block until the flush operation is complete or a timeout is reached,
- * pass a non-negative milliseconds parameter.
- *
- * NOTE: Current behavior is that Flush will return immediately regardless of
- * the milliseconds parameter but this may change in the future.
+ * Pass LD_NONBLOCKING as the second parameter.
  *
  * @param sdk SDK. Must not be NULL.
- * @param milliseconds How long to wait for the flush to complete, or a negative
- * number to return immediately.
+ * @param milliseconds Must pass LD_NONBLOCKING.
  */
 LD_EXPORT(void)
-LDClientSDK_Flush(LDClientSDK sdk, int milliseconds);
+LDClientSDK_Flush(LDClientSDK sdk, int reserved);
 
 /**
  * Changes the current evaluation context, requests flags for that context
@@ -108,12 +105,13 @@ LDClientSDK_Flush(LDClientSDK sdk, int milliseconds);
  * concurrently invokes undefined behavior.
  *
  * To block until the identify operation is complete or a timeout is reached,
- * pass a non-negative milliseconds parameter.
+ * pass a non-negative milliseconds parameter. Otherwise to return immediately,
+ * pass LD_NONBLOCKING.
  *
  * @param sdk SDK. Must not be NULL.
  * @param context The new evaluation context.
- * @param milliseconds How long to wait for the identify to complete, or a
- * negative number to return immediately.
+ * @param milliseconds How long to wait for the identify to complete, or
+ * LD_NONBLOCKING to return immediately.
  */
 LD_EXPORT(void)
 LDClientSDK_Identify(LDClientSDK sdk, LDContext context, int milliseconds);
