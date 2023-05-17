@@ -14,11 +14,14 @@ using namespace launchdarkly::client_side::data_sources;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    void Init(std::unordered_map<std::string, ItemDescriptor> data) override {
+    void Init(Context const& context,
+              std::unordered_map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
-    void Upsert(std::string key, ItemDescriptor data) override {
+    void Upsert(Context const& context,
+                std::string key,
+                ItemDescriptor data) override {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
@@ -32,8 +35,9 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage(
         "put", R"({"flagA": {"version":1, "value":"test"}})");
@@ -52,8 +56,9 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{}");
 
@@ -67,8 +72,9 @@ TEST(StreamingDataHandlerTests, BadJsonPut) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{sorry");
 
@@ -80,8 +86,9 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{\"potato\": {}}");
 
@@ -93,8 +100,9 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage(
         "patch", R"({"key": "flagA", "version":1, "value": "test"})");
@@ -113,8 +121,9 @@ TEST(StreamingDataHandlerTests, BadJsonPatch) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("patch", "{sorry");
 
@@ -126,8 +135,9 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("patch", R"({"potato": {}})");
 
@@ -139,8 +149,9 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("delete",
                                             R"({"key": "flagA", "version":1})");
@@ -156,8 +167,9 @@ TEST(StreamingDataHandlerTests, BadJsonDelete) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("delete", "{sorry");
 
@@ -169,8 +181,9 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("delete", R"({"potato": {}})");
 
@@ -182,8 +195,9 @@ TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
     auto test_handler = std::make_unique<TestHandler>();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().kind("user", "user-key").build(), test_handler.get(),
+        logger, status_manager);
 
     auto res = stream_handler.HandleMessage("potato", R"({"potato": {}})");
 

@@ -12,13 +12,10 @@
 
 namespace launchdarkly::client_side {
 
-static tl::expected<
-    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
-    JsonError>
-tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::unordered_map<std::string,
-                                  launchdarkly::client_side::ItemDescriptor>,
-               JsonError>> const& unused,
+tl::expected<std::unordered_map<std::string, ItemDescriptor>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::unordered_map<std::string, ItemDescriptor>,
+                            JsonError>> const& unused,
            boost::json::value const& json_value);
 
 void tag_invoke(

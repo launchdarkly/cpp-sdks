@@ -12,7 +12,7 @@ add_library(${LIBNAME}
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
-        flag_manager/flag_manager.cpp
+        flag_manager/flag_store.cpp
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
@@ -33,11 +33,13 @@ add_library(${LIBNAME}
         data_sources/streaming_data_source.hpp
         event_processor/event_processor.hpp
         event_processor/null_event_processor.hpp
-        flag_manager/flag_manager.hpp
+        flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         event_processor.hpp
         persistence/context_index.cpp
-        serialization/json_all_flags.cpp encoding/hash_encode.cpp)
+        serialization/json_all_flags.hpp
+        serialization/json_all_flags.cpp
+        encoding/sha_256.cpp flag_manager/flag_manager.cpp flag_manager/flag_persistence.cpp)
 
 
 target_link_libraries(${LIBNAME}

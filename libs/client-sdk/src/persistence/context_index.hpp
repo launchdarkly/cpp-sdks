@@ -44,6 +44,8 @@ class ContextIndex {
      */
     void Notice(std::string id);
 
+    Index const& Entries() const;
+
     /**
      * Prune the index returning a list of the removed context keys
      *

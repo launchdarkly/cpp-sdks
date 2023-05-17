@@ -8,13 +8,10 @@ namespace launchdarkly::client_side {
 // This tag_invoke needs to be in the same namespace as the
 // ItemDescriptor.
 
-static tl::expected<
-    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
-    JsonError>
-tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::unordered_map<std::string,
-                                  launchdarkly::client_side::ItemDescriptor>,
-               JsonError>> const& unused,
+tl::expected<std::unordered_map<std::string, ItemDescriptor>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::unordered_map<std::string, ItemDescriptor>,
+                            JsonError>> const& unused,
            boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -22,8 +19,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
         return tl::unexpected(JsonError::kSchemaFailure);
     }
     auto const& obj = json_value.as_object();
-    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>
-        descriptors;
+    std::unordered_map<std::string, ItemDescriptor> descriptors;
     for (auto const& pair : obj) {
         auto eval_result =
             boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
@@ -32,8 +28,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
             return tl::unexpected(JsonError::kSchemaFailure);
         }
         descriptors.emplace(pair.key(),
-                            launchdarkly::client_side::ItemDescriptor(
-                                std::move(eval_result.value())));
+                            ItemDescriptor(std::move(eval_result.value())));
     }
     return descriptors;
 }

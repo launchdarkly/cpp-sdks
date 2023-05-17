@@ -27,7 +27,7 @@ StreamingDataSource::StreamingDataSource(
     : logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)) {
+          DataSourceEventHandler(context, handler, logger, status_manager_)) {
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
 
@@ -45,8 +45,8 @@ StreamingDataSource::StreamingDataSource(
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        updated_url =
-            network::AppendUrl(updated_url, Base64UrlEncode(string_context));
+        updated_url = network::AppendUrl(
+            updated_url, encoding::Base64UrlEncode(string_context));
     }
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {

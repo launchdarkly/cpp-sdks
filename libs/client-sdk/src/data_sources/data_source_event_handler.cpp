@@ -68,10 +68,14 @@ static tl::expected<DataSourceEventHandler::DeleteData, JsonError> tag_invoke(
 }
 
 DataSourceEventHandler::DataSourceEventHandler(
+    Context const& context,
     IDataSourceUpdateSink* handler,
     Logger const& logger,
     DataSourceStatusManager& status_manager)
-    : handler_(handler), logger_(logger), status_manager_(status_manager) {}
+    : context_(context),
+      handler_(handler),
+      logger_(logger),
+      status_manager_(status_manager) {}
 
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
@@ -91,7 +95,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             parsed);
 
         if (res.has_value()) {
-            handler_->Init(res.value());
+            handler_->Init(context_, res.value());
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
@@ -115,7 +119,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             tl::expected<DataSourceEventHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
             handler_->Upsert(
-                res.value().key,
+                context_, res.value().key,
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
@@ -139,7 +143,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             tl::expected<DataSourceEventHandler::DeleteData, JsonError>>(
             boost::json::parse(data));
         if (res.has_value()) {
-            handler_->Upsert(res.value().key,
+            handler_->Upsert(context_, res.value().key,
                              ItemDescriptor(res.value().version));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }

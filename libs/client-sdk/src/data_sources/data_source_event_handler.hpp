@@ -48,7 +48,8 @@ class DataSourceEventHandler {
         uint64_t version;
     };
 
-    DataSourceEventHandler(IDataSourceUpdateSink* handler,
+    DataSourceEventHandler(Context const& context,
+                           IDataSourceUpdateSink* handler,
                            Logger const& logger,
                            DataSourceStatusManager& status_manager);
 
@@ -65,5 +66,6 @@ class DataSourceEventHandler {
     IDataSourceUpdateSink* handler_;
     Logger const& logger_;
     DataSourceStatusManager& status_manager_;
+    Context context_;
 };
 }  // namespace launchdarkly::client_side::data_sources

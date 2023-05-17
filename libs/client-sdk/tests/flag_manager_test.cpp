@@ -4,120 +4,120 @@
 #include <launchdarkly/data/evaluation_result.hpp>
 
 #include "data_sources/data_source_update_sink.hpp"
-#include "flag_manager/flag_manager.hpp"
+#include "flag_manager/flag_store.hpp"
 
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
 using launchdarkly::client_side::ItemDescriptor;
-using launchdarkly::client_side::flag_manager::FlagManager;
+using launchdarkly::client_side::flag_manager::FlagStore;
 
-TEST(FlagManagerTests, HandlesEmptyInit) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandlesEmptyInit) {
+    FlagStore store;
 
-    manager.Init(
+    store.Init(
         std::unordered_map<std::string,
                            launchdarkly::client_side::ItemDescriptor>{});
 
-    EXPECT_TRUE(manager.GetAll().empty());
+    EXPECT_TRUE(store.GetAll().empty());
 }
 
-TEST(FlagManagerTests, HandlesInitWithData) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandlesInitWithData) {
+    FlagStore store;
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagA", ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag->detail().value());
+    EXPECT_FALSE(store.GetAll().empty());
+    EXPECT_EQ("test", store.Get("flagA")->flag->detail().value());
 }
 
-TEST(FlagManagerTests, HandlesSecondInit) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandlesSecondInit) {
+    FlagStore store;
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagA", ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagB", ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagB")->flag->detail().value());
-    EXPECT_FALSE(manager.Get("flagA"));
+    EXPECT_FALSE(store.GetAll().empty());
+    EXPECT_EQ("test", store.Get("flagB")->flag->detail().value());
+    EXPECT_FALSE(store.Get("flagA"));
 }
 
-TEST(FlagManagerTests, HandlePatchNewFlag) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandlePatchNewFlag) {
+    FlagStore store;
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagA", ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    manager.Upsert("flagB",
+    store.Upsert("flagB",
                    ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("second"), std::nullopt,
                                                 std::nullopt}}});
 
-    EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag->detail().value());
-    EXPECT_EQ("second", manager.Get("flagB")->flag->detail().value());
+    EXPECT_FALSE(store.GetAll().empty());
+    EXPECT_EQ("test", store.Get("flagA")->flag->detail().value());
+    EXPECT_EQ("second", store.Get("flagB")->flag->detail().value());
 }
 
-TEST(FlagManagerTests, HandlePatchUpdateFlag) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandlePatchUpdateFlag) {
+    FlagStore store;
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagA", ItemDescriptor{EvaluationResult{
                        0, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    manager.Upsert("flagA",
+    store.Upsert("flagA",
                    ItemDescriptor{EvaluationResult{
                        1, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("second"), std::nullopt,
                                                 std::nullopt}}});
 
-    EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("second", manager.Get("flagA")->flag->detail().value());
+    EXPECT_FALSE(store.GetAll().empty());
+    EXPECT_EQ("second", store.Get("flagA")->flag->detail().value());
 }
 
-TEST(FlagManagerTests, HandleDelete) {
-    FlagManager manager;
+TEST(FlagstoreTests, HandleDelete) {
+    FlagStore store;
 
-    manager.Init(std::unordered_map<std::string,
+    store.Init(std::unordered_map<std::string,
                                     launchdarkly::client_side::ItemDescriptor>{
         {{"flagA", ItemDescriptor{EvaluationResult{
                        1, std::nullopt, false, false, std::nullopt,
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    manager.Upsert("flagA", ItemDescriptor{2});
+    store.Upsert("flagA", ItemDescriptor{2});
 
-    EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_FALSE(manager.Get("flagA")->flag.has_value());
+    EXPECT_FALSE(store.GetAll().empty());
+    EXPECT_FALSE(store.Get("flagA")->flag.has_value());
 }
 
-TEST(FlagManagerTests, GetItemWhichDoesNotExist) {
-    FlagManager manager;
+TEST(FlagstoreTests, GetItemWhichDoesNotExist) {
+    FlagStore store;
 
     // Should be a null shared_ptr.
-    EXPECT_FALSE(manager.Get("Potato"));
+    EXPECT_FALSE(store.Get("Potato"));
 }

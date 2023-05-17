@@ -24,7 +24,6 @@
 #include "data_sources/data_source_status_manager.hpp"
 #include "event_processor.hpp"
 #include "flag_manager/flag_manager.hpp"
-#include "flag_manager/flag_updater.hpp"
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
@@ -105,7 +104,6 @@ class ClientImpl : public IClient {
 
     data_sources::DataSourceStatusManager status_manager_;
     flag_manager::FlagManager flag_manager_;
-    flag_manager::FlagUpdater flag_updater_;
 
     Logger logger_;
     std::thread thread_;

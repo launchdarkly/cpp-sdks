@@ -42,7 +42,8 @@ static network::HttpRequest MakeRequest(Config const& config,
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url = network::AppendUrl(url, Base64UrlEncode(string_context));
+        url =
+            network::AppendUrl(url, encoding::Base64UrlEncode(string_context));
     }
 
     if (data_source_config.with_reasons) {
@@ -71,7 +72,7 @@ PollingDataSource::PollingDataSource(Config const& config,
       logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+          DataSourceEventHandler(context, handler, logger, status_manager_)),
       requester_(ioc),
       timer_(ioc),
       polling_interval_(

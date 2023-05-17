@@ -7,7 +7,7 @@
 #include "client_impl.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
-#include "encoding/hash_encode.hpp"
+#include "encoding/sha_256.hpp"
 
 #include "event_processor/event_processor.hpp"
 #include "event_processor/null_event_processor.hpp"
@@ -23,7 +23,7 @@ static std::unique_ptr<IDataSource> MakeDataSource(
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
-    flag_manager::FlagUpdater& flag_updater,
+    IDataSourceUpdateSink& flag_updater,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.DataSourceConfig().method.index() == 0) {
@@ -52,17 +52,15 @@ ClientImpl::ClientImpl(Config config, Context context)
     : logger_(MakeLogger(config.Logging())),
       context_(std::move(context)),
       event_processor_(nullptr),
-      flag_manager_(nullptr, encoding::HashEncode(config.SdkKey())),
-      flag_updater_(flag_manager_),
+      flag_manager_(nullptr), // TODO: From config.
       data_source_(MakeDataSource(config,
                                   context_,
                                   ioc_.get_executor(),
-                                  flag_updater_,
+                                  flag_manager_.Updater(),
                                   status_manager_,
                                   logger_)),
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
-
     flag_manager_.LoadCache(context);
 
     if (config.Events().Enabled()) {
@@ -99,7 +97,7 @@ bool ClientImpl::Initialized() const {
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
-    for (auto& [key, descriptor] : flag_manager_.GetAll()) {
+    for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
         if (descriptor->flag) {
             result.try_emplace(key, descriptor->flag->detail().value());
         }
@@ -145,7 +143,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   Value default_value,
                                                   bool check_type,
                                                   bool detailed) {
-    auto desc = flag_manager_.Get(key);
+    auto desc = flag_manager_.Store().Get(key);
 
     events::client::FeatureEventParams event = {
         std::chrono::system_clock::now(),
@@ -292,7 +290,7 @@ data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
 }
 
 flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
-    return flag_updater_;
+    return flag_manager_.Notifier();
 }
 
 void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {

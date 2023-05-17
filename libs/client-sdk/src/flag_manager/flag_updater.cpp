@@ -5,8 +5,7 @@
 
 namespace launchdarkly::client_side::flag_manager {
 
-FlagUpdater::FlagUpdater(FlagManager& flag_manager)
-    : flag_manager_(flag_manager) {}
+FlagUpdater::FlagUpdater(FlagStore& flag_store) : flag_store_(flag_store) {}
 
 Value GetValue(ItemDescriptor& descriptor) {
     if (descriptor.flag) {
@@ -17,13 +16,14 @@ Value GetValue(ItemDescriptor& descriptor) {
     return {};
 }
 
-void FlagUpdater::Init(std::unordered_map<std::string, ItemDescriptor> data) {
+void FlagUpdater::Init(Context const& context,
+                       std::unordered_map<std::string, ItemDescriptor> data) {
     std::lock_guard lock{signal_mutex_};
 
     // Calculate what flags changed.
     std::list<FlagValueChangeEvent> change_events;
 
-    auto old_flags = flag_manager_.GetAll();
+    auto old_flags = flag_store_.GetAll();
 
     // No need to calculate any changes if nobody is listening to them.
     if (!old_flags.empty() && HasListeners()) {
@@ -65,7 +65,7 @@ void FlagUpdater::Init(std::unordered_map<std::string, ItemDescriptor> data) {
         }
     }
 
-    flag_manager_.Init(data);
+    flag_store_.Init(data);
 
     for (auto& event : change_events) {
         // Send the event.
@@ -86,9 +86,11 @@ void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
     }
 }
 
-void FlagUpdater::Upsert(std::string key, ItemDescriptor item) {
+void FlagUpdater::Upsert(Context const& context,
+                         std::string key,
+                         ItemDescriptor item) {
     // Check the version.
-    auto existing = flag_manager_.Get(key);
+    auto existing = flag_store_.Get(key);
     if (existing && (existing->version >= item.version)) {
         // Out of order update, ignore it.
         return;
@@ -111,7 +113,7 @@ void FlagUpdater::Upsert(std::string key, ItemDescriptor item) {
             // Do nothing.
         }
     }
-    flag_manager_.Upsert(key, item);
+    flag_store_.Upsert(key, item);
 }
 
 bool FlagUpdater::HasListeners() const {
