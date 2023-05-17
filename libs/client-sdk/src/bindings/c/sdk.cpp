@@ -3,7 +3,7 @@
 
 #include <launchdarkly/bindings/c/array_builder.h>
 #include <launchdarkly/bindings/c/value.h>
-#include <launchdarkly/client_side/bindings/c/client.h>
+#include <launchdarkly/client_side/bindings/c/sdk.h>
 #include <launchdarkly/c_binding_helpers.hpp>
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/config/client.hpp>
@@ -43,7 +43,7 @@ LDClientSDK_New(LDClientConfig config, LDContext context) {
     auto as_cfg = reinterpret_cast<Config*>(config);
     auto as_ctx = reinterpret_cast<Context*>(context);
 
-    auto sdk = new Client(std::move(*as_cfg), std::move(*as_ctx)));
+    auto sdk = new Client(std::move(*as_cfg), std::move(*as_ctx));
 
     LDClientConfig_Free(config);
     LDContext_Free(context);

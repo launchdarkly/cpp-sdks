@@ -36,7 +36,7 @@ add_library(${LIBNAME}
         flag_manager/flag_manager.hpp
         flag_manager/flag_updater.hpp
         event_processor.hpp
-        bindings/c/client.cpp)
+        bindings/c/sdk.cpp)
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
