@@ -68,11 +68,9 @@ TEST(EventProcessorTests, ProcessorCompiles) {
         std::make_shared<logging::ConsoleBackend>(LogLevel::kDebug, "test")};
     boost::asio::io_context ioc;
 
-    auto config =
-        client_side::ConfigBuilder("sdk-123")
-            .Events(client_side::EventsBuilder().Capacity(10).FlushInterval(
-                std::chrono::seconds(1)))
-            .Build();
+    auto config_builder = client_side::ConfigBuilder("sdk-123");
+    config_builder.Events().Capacity(10).FlushInterval(std::chrono::seconds(1));
+    auto config = config_builder.Build();
 
     ASSERT_TRUE(config);
 

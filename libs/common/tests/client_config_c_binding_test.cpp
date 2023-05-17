@@ -9,7 +9,7 @@ TEST(ClientConfigBindings, ConfigBuilderNewFree) {
 }
 
 TEST(ClientConfigBindings, ConfigBuilderEmptyResultsInError) {
-    LDClientConfigBuilder builder = LDClientConfigBuilder_New(nullptr);
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("");
 
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
