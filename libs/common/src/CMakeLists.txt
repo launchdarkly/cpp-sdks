@@ -40,7 +40,7 @@ add_library(${LIBNAME}
         bindings/c/config/builder.cpp
         bindings/c/config/config.cpp
         log_level.cpp
-        config/logging_builder.cpp)
+        config/logging_builder.cpp config/persistence_builder.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

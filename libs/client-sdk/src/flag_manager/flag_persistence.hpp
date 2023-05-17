@@ -8,9 +8,9 @@
 #include "context_index.hpp"
 #include "flag_store.hpp"
 
-#include <launchdarkly/client_side/persistence.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/persistence/persistence.hpp>
 
 namespace launchdarkly::client_side::flag_manager {
 
@@ -25,6 +25,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
         FlagStore& flag_store,
         std::shared_ptr<IPersistence> persistence,
         Logger& logger,
+        std::size_t max_cached_contexts,
         TimeStampsource time_stamper = []() {
             return std::chrono::system_clock::now();
         });
@@ -43,6 +44,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
     inline static std::string index_key_ = "ContextIndex";
 
     Logger& logger_;
+    std::size_t max_cached_contexts_;
 
     IDataSourceUpdateSink* sink_;
     std::shared_ptr<IPersistence> persistence_;
@@ -50,8 +52,6 @@ class FlagPersistence : public IDataSourceUpdateSink {
     FlagStore& flag_store_;
 
     std::string environment_namespace_;
-    // TODO: From config.
-    std::size_t max_cached_contexts_ = 10;
     TimeStampsource time_stamper_;
 
     ContextIndex GetIndex();

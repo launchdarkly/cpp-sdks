@@ -7,7 +7,7 @@
 #include "../data_sources/data_source_update_sink.hpp"
 #include "context_index.hpp"
 
-#include <launchdarkly/client_side/persistence.hpp>
+#include <launchdarkly/persistence/persistence.hpp>
 
 namespace launchdarkly::client_side::flag_manager {
 

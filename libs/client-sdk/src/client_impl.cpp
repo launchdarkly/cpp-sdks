@@ -48,11 +48,22 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
+static std::shared_ptr<IPersistence> MakePersistence(Config const& config) {
+    auto persistence = config.Persistence();
+    if (persistence.disable_persistence) {
+        return nullptr;
+    }
+    return persistence.implementation;
+}
+
 ClientImpl::ClientImpl(Config config, Context context)
     : logger_(MakeLogger(config.Logging())),
       context_(std::move(context)),
       event_processor_(nullptr),
-      flag_manager_(config.SdkKey(), logger_, nullptr),  // TODO: From config.
+      flag_manager_(config.SdkKey(),
+                    logger_,
+                    config.Persistence().max_contexts_,
+                    MakePersistence(config)),
       data_source_(MakeDataSource(config,
                                   context_,
                                   ioc_.get_executor(),

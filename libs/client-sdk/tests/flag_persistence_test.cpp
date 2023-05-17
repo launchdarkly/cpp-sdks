@@ -55,7 +55,7 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
     auto logger = launchdarkly::logging::NullLogger();
 
     FlagPersistence flag_persistence(
-        "the-key", &updater, store, persistence, logger, []() {
+        "the-key", &updater, store, persistence, logger, 5, []() {
             return std::chrono::system_clock::time_point{
                 std::chrono::milliseconds{500}};
         });
@@ -104,7 +104,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
            R"({"flagA":{"version":1,"value":"test"}})"}}}});
 
     FlagPersistence flag_persistence("the-key", &updater, store, persistence,
-                                     logger);
+                                     logger, 5);
 
     flag_persistence.LoadCached(context);
 

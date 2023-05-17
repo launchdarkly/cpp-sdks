@@ -12,6 +12,7 @@ class FlagManager {
    public:
     FlagManager(std::string const& sdk_key,
                 Logger& logger,
+                std::size_t max_cached_contexts,
                 std::shared_ptr<IPersistence> persistence);
     IDataSourceUpdateSink& Updater();
     IFlagNotifier& Notifier();

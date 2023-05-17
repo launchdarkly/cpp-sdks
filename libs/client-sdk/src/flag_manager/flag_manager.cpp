@@ -7,13 +7,15 @@ namespace launchdarkly::client_side::flag_manager {
 
 FlagManager::FlagManager(std::string const& sdk_key,
                          Logger& logger,
+                         std::size_t max_cached_contexts,
                          std::shared_ptr<IPersistence> persistence)
     : flag_updater_(flag_store_),
       persistence_updater_(sdk_key,
                            &flag_updater_,
                            flag_store_,
                            std::move(persistence),
-                           logger) {}
+                           logger,
+                           max_cached_contexts) {}
 
 IDataSourceUpdateSink& FlagManager::Updater() {
     return persistence_updater_;

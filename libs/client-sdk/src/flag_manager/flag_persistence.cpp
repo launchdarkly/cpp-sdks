@@ -21,13 +21,15 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
                                  FlagStore& flag_store,
                                  std::shared_ptr<IPersistence> persistence,
                                  Logger& logger,
+                                 std::size_t max_cached_contexts,
                                  FlagPersistence::TimeStampsource time_stamper)
     : logger_(logger),
       sink_(sink),
       flag_store_(flag_store),
       persistence_(std::move(persistence)),
       environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)),
-      time_stamper_(time_stamper) {}
+      time_stamper_(time_stamper),
+      max_cached_contexts_(max_cached_contexts) {}
 
 void FlagPersistence::Init(
     Context const& context,
