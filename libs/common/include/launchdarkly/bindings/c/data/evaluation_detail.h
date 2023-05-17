@@ -56,7 +56,7 @@ LDEvalDetail_Free(LDEvalDetail detail);
 
 /**
  * Returns variation index of the evaluation result, if any.
- * @param detail Evaluation detail.
+ * @param detail Evaluation detail. Must not be NULL.
  * @param out_variation_index Pointer where index should be stored, if any.
  * @return True if an index was present, false otherwise.
  */
@@ -65,9 +65,10 @@ LDEvalDetail_VariationIndex(LDEvalDetail detail, size_t* out_variation_index);
 
 /**
  * Returns the reason of the evaluation result, if any.
- * @param detail Evaluation detail.
+ * @param detail Evaluation detail.Must not be NULL.
  * @param out_reason Pointer where reason should be stored, if any. The reason's
- * lifetime is valid only for that of the containing EvalDetail.
+ * lifetime is valid only for that of the containing EvalDetail. Must not be
+ * NULL.
  * @return True if a reason was present, false otherwise.
  */
 LD_EXPORT(bool)
@@ -75,7 +76,7 @@ LDEvalDetail_Reason(LDEvalDetail detail, LDEvalReason* out_reason);
 
 /**
  * Returns the evaluation reason's kind.
- * @param reason Evaluation reason.
+ * @param reason Evaluation reason. Must not be NULL.
  * @return Kind of reason.
  */
 LD_EXPORT(enum LDEvalReason_Kind)
@@ -84,8 +85,9 @@ LDEvalReason_Kind(LDEvalReason reason);
 /**
  * Returns the evaluation reason's error kind, if the evaluation reason's kind
  * was LD_EVALREASON_ERROR.
- * @param reason Evaluation reason.
- * @param out_error_kind Pointer where error kind should be stored, if any.
+ * @param reason Evaluation reason. Must not be NULL.
+ * @param out_error_kind Pointer where error kind should be stored, if any. Must
+ * not be NULL.
  * @return True if an error kind was present, false otherwise.
  */
 LD_EXPORT(bool)
@@ -95,7 +97,7 @@ LDEvalReason_ErrorKind(LDEvalReason reason,
 /**
  * Whether the evaluation was part of an experiment.
  *
- * @param reason Evaluation reason.
+ * @param reason Evaluation reason. Must not be NULL.
  * @return True if the evaluation resulted in an experiment rollout and
  * served one of the variations in the experiment.
  */
