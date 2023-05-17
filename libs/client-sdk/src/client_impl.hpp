@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 #include <thread>
 #include <tuple>
 
@@ -49,9 +50,9 @@ class ClientImpl : public IClient {
 
     void Track(std::string event_name) override;
 
-    void AsyncFlush() override;
+    void FlushAsync() override;
 
-    void AsyncIdentify(Context context) override;
+    std::future<void> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 
@@ -99,6 +100,32 @@ class ClientImpl : public IClient {
                        std::optional<Value> data,
                        std::optional<double> metric_value);
 
+    template <typename F>
+    auto ReadContextSynchronized(F fn) const
+        -> std::invoke_result_t<F, Context const&> {
+        std::shared_lock lock(context_mutex_);
+        return fn(context_);
+    }
+
+    void UpdateContextSynchronized(Context context);
+
+    void OnDataSourceShutdown(Context context,
+                              std::function<void()> user_completion);
+
+    Config config_;
+
+    Logger logger_;
+    boost::asio::io_context ioc_;
+
+    Context context_;
+    mutable std::shared_mutex context_mutex_;
+
+    std::function<std::shared_ptr<IDataSource>()> data_source_factory_;
+
+    std::shared_ptr<IDataSource> data_source_;
+
+    std::unique_ptr<IEventProcessor> event_processor_;
+
     bool initialized_;
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
@@ -107,12 +134,8 @@ class ClientImpl : public IClient {
     flag_manager::FlagManager flag_manager_;
     flag_manager::FlagUpdater flag_updater_;
 
-    Logger logger_;
     std::thread thread_;
-    boost::asio::io_context ioc_;
-    Context context_;
-    std::unique_ptr<IEventProcessor> event_processor_;
-    std::unique_ptr<IDataSource> data_source_;
+
     std::thread run_thread_;
 
     bool eval_reasons_available_;

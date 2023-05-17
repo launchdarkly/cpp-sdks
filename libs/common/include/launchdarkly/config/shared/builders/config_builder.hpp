@@ -42,8 +42,8 @@ class ConfigBuilder {
     explicit ConfigBuilder(std::string sdk_key);
 
     /**
-     * To customize the ServiceEndpoints the SDK uses for streaming, polling,
-     * and events, pass in an EndpointsBuilder.
+     * To customize the ServiceEndpoints the SDK uses for streaming,
+     * polling, and events, pass in an EndpointsBuilder.
      * @param builder An EndpointsBuilder.
      * @return Reference to this builder.
      */

@@ -22,7 +22,7 @@ class ILogBackend {
     virtual bool Enabled(LogLevel level) noexcept = 0;
 
     /**
-     * Write a message to the specified level.
+     * Write a message to the specified level. This method must be thread safe.
      * @param level The level to write the message to.
      * @param message The message to write.
      */

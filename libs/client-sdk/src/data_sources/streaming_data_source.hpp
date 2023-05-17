@@ -20,23 +20,35 @@ using namespace std::chrono_literals;
 
 namespace launchdarkly::client_side::data_sources {
 
-class StreamingDataSource final : public IDataSource {
+class StreamingDataSource final
+    : public IDataSource,
+      public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(Config const& config,
                         boost::asio::any_io_executor ioc,
-                        Context const& context,
+                        Context context,
                         IDataSourceUpdateSink* handler,
                         DataSourceStatusManager& status_manager,
                         Logger const& logger);
 
     void Start() override;
-    void Close() override;
+    void ShutdownAsync(std::function<void()>) override;
 
    private:
+    boost::asio::any_io_executor exec_;
     DataSourceStatusManager& status_manager_;
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
     std::string string_context_;
+
+    Context context_;
+
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK>
+        data_source_config_;
+
+    config::shared::built::HttpProperties http_config_;
+
+    std::string sdk_key_;
 
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;

@@ -16,9 +16,9 @@ class EventProcessor : public IEventProcessor {
     EventProcessor(boost::asio::any_io_executor const& io,
                    Config const& config,
                    Logger& logger);
-    void AsyncSend(events::InputEvent event) override;
-    void AsyncFlush() override;
-    void AsyncClose() override;
+    void SendAsync(events::InputEvent event) override;
+    void FlushAsync() override;
+    void ShutdownAsync() override;
 
    private:
     events::AsioEventProcessor<SDK> impl_;
