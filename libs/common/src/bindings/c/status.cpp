@@ -24,9 +24,7 @@ LD_EXPORT(bool) LDStatus_Ok(LDStatus res) {
 }
 
 LD_EXPORT(void) LDStatus_Free(LDStatus error) {
-    if (Error* e = TO_ERROR(error)) {
-        delete e;
-    }
+    delete TO_ERROR(error);
 }
 
 LD_EXPORT(LDStatus) LDStatus_Success(void) {

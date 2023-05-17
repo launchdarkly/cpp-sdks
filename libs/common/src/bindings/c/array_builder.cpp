@@ -3,6 +3,7 @@
 
 #include <launchdarkly/bindings/c/array_builder.h>
 #include <launchdarkly/value.hpp>
+#include "../../c_binding_helpers.hpp"
 
 #include <vector>
 
@@ -21,12 +22,17 @@ LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder) {
 }
 
 LD_EXPORT(void) LDArrayBuilder_Add(LDArrayBuilder array_builder, LDValue val) {
+    LD_ASSERT_NOT_NULL(array_builder);
+    LD_ASSERT_NOT_NULL(val);
+
     auto vector = AS_VECTOR(array_builder);
     vector->emplace_back(std::move(*AS_VALUE(val)));
     LDValue_Free(val);
 }
 
 LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder) {
+    LD_ASSERT_NOT_NULL(array_builder);
+    
     auto vector = AS_VECTOR(array_builder);
     auto value = new Value(std::move(*vector));
     delete vector;
