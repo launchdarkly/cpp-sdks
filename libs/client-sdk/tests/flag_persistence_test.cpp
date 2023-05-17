@@ -5,6 +5,7 @@
 #include "flag_manager/flag_updater.hpp"
 
 #include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/logging/null_logger.hpp>
 
 using launchdarkly::ContextBuilder;
 using launchdarkly::EvaluationDetailInternal;
@@ -51,9 +52,10 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
     auto updater = FlagUpdater(store);
     auto persistence =
         std::make_shared<TestPersistence>(TestPersistence::StoreType());
+    auto logger = launchdarkly::logging::NullLogger();
 
     FlagPersistence flag_persistence(
-        "the-key", &updater, store, persistence, []() {
+        "the-key", &updater, store, persistence, logger, []() {
             return std::chrono::system_clock::time_point{
                 std::chrono::milliseconds{500}};
         });
@@ -90,6 +92,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
     auto context = ContextBuilder().kind("user", "user-key").build();
     auto store = FlagStore();
     auto updater = FlagUpdater(store);
+    auto logger = launchdarkly::logging::NullLogger();
 
     auto persistence = std::make_shared<
         TestPersistence>(TestPersistence::StoreType{
@@ -100,7 +103,8 @@ TEST(FlagPersistenceTests, CanLoadCache) {
           {"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d",
            R"({"flagA":{"version":1,"value":"test"}})"}}}});
 
-    FlagPersistence flag_persistence("the-key", &updater, store, persistence);
+    FlagPersistence flag_persistence("the-key", &updater, store, persistence,
+                                     logger);
 
     flag_persistence.LoadCached(context);
 

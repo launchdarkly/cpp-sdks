@@ -11,6 +11,7 @@ namespace launchdarkly::client_side::flag_manager {
 class FlagManager {
    public:
     FlagManager(std::string const& sdk_key,
+                Logger& logger,
                 std::shared_ptr<IPersistence> persistence);
     IDataSourceUpdateSink& Updater();
     IFlagNotifier& Notifier();

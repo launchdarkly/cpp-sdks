@@ -6,12 +6,14 @@
 namespace launchdarkly::client_side::flag_manager {
 
 FlagManager::FlagManager(std::string const& sdk_key,
+                         Logger& logger,
                          std::shared_ptr<IPersistence> persistence)
     : flag_updater_(flag_store_),
       persistence_updater_(sdk_key,
                            &flag_updater_,
                            flag_store_,
-                           std::move(persistence)) {}
+                           std::move(persistence),
+                           logger) {}
 
 IDataSourceUpdateSink& FlagManager::Updater() {
     return persistence_updater_;

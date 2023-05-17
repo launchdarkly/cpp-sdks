@@ -10,6 +10,7 @@
 
 #include <launchdarkly/client_side/persistence.hpp>
 #include <launchdarkly/context.hpp>
+#include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::client_side::flag_manager {
 
@@ -23,6 +24,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
         IDataSourceUpdateSink* sink,
         FlagStore& flag_store,
         std::shared_ptr<IPersistence> persistence,
+        Logger& logger,
         TimeStampsource time_stamper = []() {
             return std::chrono::system_clock::now();
         });
@@ -39,6 +41,8 @@ class FlagPersistence : public IDataSourceUpdateSink {
    private:
     inline static std::string global_namespace_ = "LaunchDarkly";
     inline static std::string index_key_ = "ContextIndex";
+
+    Logger& logger_;
 
     IDataSourceUpdateSink* sink_;
     std::shared_ptr<IPersistence> persistence_;

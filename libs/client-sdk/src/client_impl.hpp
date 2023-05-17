@@ -98,6 +98,7 @@ class ClientImpl : public IClient {
                        std::optional<Value> data,
                        std::optional<double> metric_value);
 
+    Logger logger_;
     bool initialized_;
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
@@ -105,7 +106,6 @@ class ClientImpl : public IClient {
     data_sources::DataSourceStatusManager status_manager_;
     flag_manager::FlagManager flag_manager_;
 
-    Logger logger_;
     std::thread thread_;
     boost::asio::io_context ioc_;
     Context context_;

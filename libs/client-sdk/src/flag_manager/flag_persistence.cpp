@@ -2,6 +2,7 @@
 #include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
+
 #include <utility>
 
 namespace launchdarkly::client_side::flag_manager {
@@ -19,8 +20,10 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
                                  IDataSourceUpdateSink* sink,
                                  FlagStore& flag_store,
                                  std::shared_ptr<IPersistence> persistence,
+                                 Logger& logger,
                                  FlagPersistence::TimeStampsource time_stamper)
-    : sink_(sink),
+    : logger_(logger),
+      sink_(sink),
       flag_store_(flag_store),
       persistence_(std::move(persistence)),
       environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)),
@@ -50,7 +53,8 @@ void FlagPersistence::LoadCached(Context const& context) {
             boost::json::error_code error_code;
             auto parsed = boost::json::parse(*data, error_code);
             if (error_code) {
-                // TODO: Log?
+                LD_LOG(logger_, LogLevel::kError)
+                    << "Failed to parse flag data from persistence.";
             } else {
                 auto res = boost::json::value_to<tl::expected<
                     std::unordered_map<
@@ -59,7 +63,8 @@ void FlagPersistence::LoadCached(Context const& context) {
                 if (res) {
                     sink_->Init(context, *res);
                 } else {
-                    // TODO: Log?
+                    LD_LOG(logger_, LogLevel::kError)
+                        << "Failed to parse flag data from persistence.";
                 }
             }
         }
@@ -94,7 +99,8 @@ ContextIndex FlagPersistence::GetIndex() {
             boost::json::error_code error_code;
             auto parsed = boost::json::parse(*index_data, error_code);
             if (error_code) {
-                // TODO: Log?
+                LD_LOG(logger_, LogLevel::kError)
+                    << "Failed to parse index data from persistence.";
             } else {
                 return boost::json::value_to<ContextIndex>(std::move(parsed));
             }
