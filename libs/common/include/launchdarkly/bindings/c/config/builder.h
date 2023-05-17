@@ -14,14 +14,15 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef struct _LDClientConfigBuilder* LDClientConfigBuilder;
-
 typedef struct _LDDataSourceStreamBuilder* LDDataSourceStreamBuilder;
-
 typedef struct _LDDataSourcePollBuilder* LDDataSourcePollBuilder;
-
 typedef struct _LDLoggingCustomBuilder* LDLoggingCustomBuilder;
 typedef struct _LDLoggingBasicBuilder* LDLoggingBasicBuilder;
 
+/**
+ * Defines the log levels used with the SDK's default logger, or a user-provided
+ * custom logger.
+ */
 enum LDLogLevel {
     LD_LOG_DEBUG = 0,
     LD_LOG_INFO = 1,
@@ -29,6 +30,9 @@ enum LDLogLevel {
     LD_LOG_ERROR = 3,
 };
 
+/**
+ * Defines a logging interface suitable for use with SDK configuration.
+ */
 struct LDLogBackend {
     typedef bool (*EnabledFn)(enum LDLogLevel level, void* user_data);
     typedef void (*WriteFn)(enum LDLogLevel level,
@@ -55,6 +59,11 @@ struct LDLogBackend {
     void* UserData;
 };
 
+/**
+ * Initializes a custom log backend. Must be called before passing a custom
+ * backend into configuration.
+ * @param backend Backend to initialize.
+ */
 LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
 
 /**

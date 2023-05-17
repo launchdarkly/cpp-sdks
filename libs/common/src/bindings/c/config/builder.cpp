@@ -33,9 +33,13 @@ using namespace launchdarkly::client_side;
 #define FROM_CUSTOM_LOGGING_BUILDER(ptr) \
     (reinterpret_cast<LDLoggingCustomBuilder>(ptr))
 
-class CLogBackend : public launchdarkly::ILogBackend {
+/**
+ * Utility class to allow user-provided backends to satisfy the ILogBackend
+ * interface.
+ */
+class LogBackendWrapper : public launchdarkly::ILogBackend {
    public:
-    explicit CLogBackend(LDLogBackend backend) : backend_(backend) {}
+    explicit LogBackendWrapper(LDLogBackend backend) : backend_(backend) {}
     bool Enabled(launchdarkly::LogLevel level) noexcept override {
         return backend_.Enabled(static_cast<LDLogLevel>(level),
                                 backend_.UserData);
@@ -331,7 +335,7 @@ LD_EXPORT(void)
 LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
     ASSERT_NOT_NULL(b);
     TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
-        std::make_shared<CLogBackend>(backend));
+        std::make_shared<LogBackendWrapper>(backend));
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
