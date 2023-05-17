@@ -3,7 +3,7 @@
 
 #include <launchdarkly/bindings/c/object_builder.h>
 #include <launchdarkly/value.hpp>
-#include "launchdarkly/c_binding_helpers.hpp"
+#include "../../c_binding_helpers.hpp"
 
 #include <map>
 #include <string>

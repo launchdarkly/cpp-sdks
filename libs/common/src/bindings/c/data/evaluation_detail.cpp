@@ -3,7 +3,7 @@
 
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/data/evaluation_detail.hpp>
-#include "launchdarkly/c_binding_helpers.hpp"
+#include "../../../c_binding_helpers.hpp"
 
 #define TO_DETAIL(ptr) (reinterpret_cast<launchdarkly::CEvaluationDetail*>(ptr))
 

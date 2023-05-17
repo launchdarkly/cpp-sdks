@@ -4,7 +4,7 @@
 #include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/bindings/c/iter.hpp>
 #include <launchdarkly/value.hpp>
-#include "launchdarkly/c_binding_helpers.hpp"
+#include "../../c_binding_helpers.hpp"
 
 using launchdarkly::Value;
 
