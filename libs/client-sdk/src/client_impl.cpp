@@ -199,7 +199,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                    std::move(error_reason));
 
     } else if (!Initialized()) {
-        LD_LOG(logger_, LogLevel::kWarn)
+        LD_LOG(logger_, LogLevel::kInfo)
             << "LaunchDarkly client has not yet been initialized. "
                "Returning cached value";
     }
