@@ -111,6 +111,8 @@ TEST(ClientConfigBindings, CustomNoopLogger) {
     // pointers to be no-ops.
     client_config->Logging().backend->Enabled(LogLevel::kError);
     client_config->Logging().backend->Write(LogLevel::kError, "hello");
+
+    LDClientConfig_Free(config);
 }
 
 struct LogArgs {
@@ -161,6 +163,8 @@ TEST(ClientConfigBindings, CustomLogger) {
 
     client_config->Logging().backend->Enabled(LogLevel::kWarn);
     client_config->Logging().backend->Write(LogLevel::kError, "hello");
+
+    LDClientConfig_Free(config);
 
     ASSERT_TRUE(args.enabled);
     ASSERT_EQ(args.enabled, LD_LOG_WARN);
