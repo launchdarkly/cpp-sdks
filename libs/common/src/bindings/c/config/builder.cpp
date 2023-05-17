@@ -3,7 +3,7 @@
 
 #include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/config/client.hpp>
-#include "../../../c_binding_helpers.hpp"
+#include "launchdarkly/c_binding_helpers.hpp"
 
 using namespace launchdarkly::client_side;
 
@@ -67,7 +67,7 @@ LDClientConfigBuilder_Build(LDClientConfigBuilder b,
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(out_config);
 
-    return ConsumeBuilder<ConfigBuilder>(b, out_config);
+    return launchdarkly::ConsumeBuilder<ConfigBuilder>(b, out_config);
 }
 
 LD_EXPORT(void)
@@ -351,7 +351,7 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
 LD_EXPORT(void)
 LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
     LD_ASSERT_NOT_NULL(b);
-    
+
     TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
         std::make_shared<LogBackendWrapper>(backend));
 }

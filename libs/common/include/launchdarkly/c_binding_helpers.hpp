@@ -3,8 +3,9 @@
 #include <functional>
 #include <launchdarkly/error.hpp>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
+namespace launchdarkly {
 template <typename T, typename = void>
 struct has_result_type : std::false_type {};
 
@@ -74,4 +75,5 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
 
 #define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
 
+}  // namespace launchdarkly
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

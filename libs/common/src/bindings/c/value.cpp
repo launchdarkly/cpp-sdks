@@ -4,7 +4,7 @@
 #include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/bindings/c/iter.hpp>
 #include <launchdarkly/value.hpp>
-#include "../../../src/c_binding_helpers.hpp"
+#include "launchdarkly/c_binding_helpers.hpp"
 
 using launchdarkly::Value;
 
@@ -30,7 +30,7 @@ LD_EXPORT(LDValue) LDValue_NewNumber(double val) {
 
 LD_EXPORT(LDValue) LDValue_NewString(char const* val) {
     LD_ASSERT_NOT_NULL(val);
-    
+
     return AS_LDVALUE(new Value(val));
 }
 
