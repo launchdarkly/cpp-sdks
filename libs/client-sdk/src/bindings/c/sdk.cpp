@@ -19,21 +19,7 @@ struct Detail;
 #define TO_SDK(ptr) (reinterpret_cast<Client*>(ptr))
 #define FROM_SDK(ptr) (reinterpret_cast<LDClientSDK>(ptr))
 
-#define TO_DETAIL(ptr) (reinterpret_cast<Detail*>(ptr))
-#define FROM_DETAIL(ptr) (reinterpret_cast<LDClientSDK_EvalDetail>(ptr))
-
-struct Detail {
-    template <typename T>
-    Detail(EvaluationDetail<T> const& detail)
-        : variation_index(detail.VariationIndex()), reason(detail.Reason()) {}
-    std::optional<std::size_t> variation_index;
-    std::optional<EvaluationReason> reason;
-};
-
-LD_EXPORT(void)
-LDClientSDK_EvalDetail_Free(LDClientSDK_EvalDetail detail) {
-    delete TO_DETAIL(detail);
-}
+#define FROM_DETAIL(ptr) (reinterpret_cast<LDEvalDetail>(ptr))
 
 LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context) {
@@ -132,7 +118,7 @@ LD_EXPORT(bool)
 LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
                                 char const* flag_key,
                                 bool default_value,
-                                LDClientSDK_EvalDetail* out_detail) {
+                                LDEvalDetail* out_detail) {
     LD_ASSERT_NOT_NULL(sdk);
     LD_ASSERT_NOT_NULL(flag_key);
 
@@ -145,7 +131,7 @@ LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
         return result;
     }
 
-    *out_detail = FROM_DETAIL(new Detail(internal_detail));
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(internal_detail));
 
     return result;
 }

@@ -4,6 +4,7 @@
 
 #include <launchdarkly/bindings/c/config/config.h>
 #include <launchdarkly/bindings/c/context.h>
+#include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
@@ -15,14 +16,6 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef struct _LDClientSDK* LDClientSDK;
-typedef struct _LDClientSDK_EvalDetail* LDClientSDK_EvalDetail;
-
-/**
- * Frees the detail structure optionally returned by *VariationDetail functions.
- * @param detail Detail to free.
- */
-LD_EXPORT(void)
-LDClientSDK_EvalDetail_Free(LDClientSDK_EvalDetail detail);
 
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
@@ -146,7 +139,7 @@ LDClientSDK_BoolVariation(LDClientSDK sdk,
  * @param default_value The default value of the flag.
  * @param detail Out parameter to store the details. May pass NULL to discard
  * the details. The details object must be freed with
- * LDClientSDK_EvalDetail_Free.
+ * LDEvalDetail_Free.
  * @return The variation for the current context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
  */
@@ -154,7 +147,7 @@ LD_EXPORT(bool)
 LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
                                 char const* flag_key,
                                 bool default_value,
-                                LDClientSDK_EvalDetail* detail);
+                                LDEvalDetail* detail);
 
 /**
  * Frees the SDK's resources, shutting down any connections. May block.

@@ -62,4 +62,18 @@ class EvaluationDetail {
     std::optional<std::size_t> variation_index_;
     std::optional<EvaluationReason> reason_;
 };
+
+/*
+ * Holds details for the C bindings, omitting the generic type parameter that is
+ * needed for EvaluationDetail<T>. Instead, the bindings will directly return
+ * the evaluation result, and fill in a detail structure using an out parameter.
+ */
+struct CEvaluationDetail {
+    template <typename T>
+    CEvaluationDetail(EvaluationDetail<T> const& detail)
+        : variation_index(detail.VariationIndex()), reason(detail.Reason()) {}
+    std::optional<std::size_t> variation_index;
+    std::optional<EvaluationReason> reason;
+};
+
 }  // namespace launchdarkly
