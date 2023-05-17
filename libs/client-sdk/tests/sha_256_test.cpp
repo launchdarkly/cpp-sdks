@@ -1,7 +1,6 @@
-#include "encoding/sha_256.hpp"
 #include <gtest/gtest.h>
 
-#include "openssl/sha.h"
+#include <launchdarkly/encoding/sha_256.hpp>
 
 using launchdarkly::encoding::Sha256String;
 

@@ -7,11 +7,11 @@
 #include "client_impl.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
-#include "encoding/sha_256.hpp"
 
 #include "event_processor/event_processor.hpp"
 #include "event_processor/null_event_processor.hpp"
 
+#include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
 
@@ -52,7 +52,7 @@ ClientImpl::ClientImpl(Config config, Context context)
     : logger_(MakeLogger(config.Logging())),
       context_(std::move(context)),
       event_processor_(nullptr),
-      flag_manager_(nullptr), // TODO: From config.
+      flag_manager_(nullptr),  // TODO: From config.
       data_source_(MakeDataSource(config,
                                   context_,
                                   ioc_.get_executor(),

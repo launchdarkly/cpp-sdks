@@ -5,10 +5,10 @@
 
 #include <utility>
 
-#include "../encoding/base_64.hpp"
 #include "streaming_data_source.hpp"
 
 #include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 

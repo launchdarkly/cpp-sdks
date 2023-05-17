@@ -8,7 +8,6 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
-        encoding/base_64.cpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
@@ -22,7 +21,6 @@ add_library(${LIBNAME}
         boost_signal_connection.cpp
         client_impl.cpp
         client.cpp
-        encoding/base_64.hpp
         boost_signal_connection.hpp
         client_impl.hpp
         data_sources/data_source.hpp
@@ -39,7 +37,8 @@ add_library(${LIBNAME}
         flag_manager/context_index.cpp
         serialization/json_all_flags.hpp
         serialization/json_all_flags.cpp
-        encoding/sha_256.cpp flag_manager/flag_manager.cpp flag_manager/flag_persistence.cpp)
+        flag_manager/flag_manager.cpp
+        flag_manager/flag_persistence.cpp)
 
 
 target_link_libraries(${LIBNAME}

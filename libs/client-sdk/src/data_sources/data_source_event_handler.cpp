@@ -1,7 +1,7 @@
 #include "data_source_event_handler.hpp"
-#include "../encoding/base_64.hpp"
 #include "../serialization/json_all_flags.hpp"
 
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 

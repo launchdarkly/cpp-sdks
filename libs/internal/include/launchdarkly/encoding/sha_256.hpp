@@ -1,6 +1,5 @@
 #pragma once
 
-#include <openssl/sha.h>
 #include <string>
 
 namespace launchdarkly::encoding {

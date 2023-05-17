@@ -1,6 +1,6 @@
-#include "sha_256.hpp"
-#include "base_64.hpp"
 #include "openssl/sha.h"
+
+#include <launchdarkly/encoding/sha_256.hpp>
 
 #include <functional>
 #include <iomanip>

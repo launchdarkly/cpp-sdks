@@ -1,7 +1,7 @@
 #include "flag_persistence.hpp"
-#include "../encoding/sha_256.hpp"
 #include "../serialization/json_all_flags.hpp"
 
+#include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 
 namespace launchdarkly::client_side::flag_manager {

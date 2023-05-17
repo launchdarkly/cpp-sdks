@@ -30,7 +30,9 @@ add_library(${LIBNAME}
         serialization/json_evaluation_reason.cpp
         serialization/json_value.cpp
         serialization/value_mapping.cpp
-        serialization/json_evaluation_result.cpp)
+        serialization/json_evaluation_result.cpp
+        encoding/base_64.cpp
+        encoding/sha_256.cpp)
 
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
