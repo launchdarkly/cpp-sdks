@@ -6,7 +6,7 @@
 #include <launchdarkly/bindings/c/export.h>
 #include <launchdarkly/bindings/c/status.h>
 
-#include <stdio.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -47,7 +47,8 @@ struct LDLogBackend {
     EnabledFn Enabled;
 
     /**
-     * Write a message to the specified level. Must be thread safe.
+     * Write a message to the specified level. The message pointer is valid only
+     * for the duration of this function call. Must be thread safe.
      * @param level The level to write the message to.
      * @param message The message to write.
      */
