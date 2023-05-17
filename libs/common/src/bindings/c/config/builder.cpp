@@ -27,6 +27,29 @@ using namespace launchdarkly::client_side;
 #define FROM_BASIC_LOGGING_BUILDER(ptr) \
     (reinterpret_cast<LDLoggingBasicBuilder>(ptr))
 
+#define TO_CUSTOM_LOGGING_BUILDER(ptr) \
+    (reinterpret_cast<LoggingBuilder::CustomLogging*>(ptr))
+
+#define FROM_CUSTOM_LOGGING_BUILDER(ptr) \
+    (reinterpret_cast<LDLoggingCustomBuilder>(ptr))
+
+class CLogBackend : public launchdarkly::ILogBackend {
+   public:
+    explicit CLogBackend(LDLogBackend backend) : backend_(backend) {}
+    bool Enabled(launchdarkly::LogLevel level) noexcept override {
+        return backend_.Enabled(static_cast<LDLogLevel>(level),
+                                backend_.UserData);
+    }
+    void Write(launchdarkly::LogLevel level,
+               std::string message) noexcept override {
+        return backend_.Write(static_cast<LDLogLevel>(level), message.c_str(),
+                              backend_.UserData);
+    }
+
+   private:
+    LDLogBackend backend_;
+};
+
 LD_EXPORT(LDClientConfigBuilder)
 LDClientConfigBuilder_New(char const* sdk_key) {
     ASSERT_NOT_NULL(sdk_key);
@@ -258,21 +281,9 @@ LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level) {
     using launchdarkly::LogLevel;
     ASSERT_NOT_NULL(b);
     LoggingBuilder::BasicLogging* logger = TO_BASIC_LOGGING_BUILDER(b);
-    switch (level) {
-        case LD_LOG_DEBUG:
-            logger->Level(LogLevel::kDebug);
-            break;
-        case LD_LOG_INFO:
-            logger->Level(LogLevel::kInfo);
-            break;
-        case LD_LOG_WARN:
-            logger->Level(LogLevel::kWarn);
-            break;
-        case LD_LOG_ERROR:
-            logger->Level(LogLevel::kError);
-            break;
-    }
+    logger->Level(static_cast<LogLevel>(level));
 }
+
 void LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag) {
     ASSERT_NOT_NULL(b);
     ASSERT_NOT_NULL(tag);
@@ -287,6 +298,40 @@ LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
     LoggingBuilder::BasicLogging* bb = TO_BASIC_LOGGING_BUILDER(basic_builder);
     TO_BUILDER(b)->Logging().Logging(*bb);
     LDLoggingBasicBuilder_Free(basic_builder);
+}
+
+LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend) {
+    backend->Enabled = [](enum LDLogLevel, void*) { return false; };
+    backend->Write = [](enum LDLogLevel, char const*, void*) {};
+    backend->UserData = nullptr;
+}
+
+LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New() {
+    return FROM_CUSTOM_LOGGING_BUILDER(new LoggingBuilder::CustomLogging());
+}
+
+LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b) {
+    if (LoggingBuilder::CustomLogging* builder = TO_CUSTOM_LOGGING_BUILDER(b)) {
+        delete builder;
+    }
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
+                                     LDLoggingCustomBuilder custom_builder) {
+    ASSERT_NOT_NULL(b);
+    ASSERT_NOT_NULL(custom_builder);
+    LoggingBuilder::CustomLogging* cb =
+        TO_CUSTOM_LOGGING_BUILDER(custom_builder);
+    TO_BUILDER(b)->Logging().Logging(*cb);
+    LDLoggingCustomBuilder_Free(custom_builder);
+}
+
+LD_EXPORT(void)
+LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
+    ASSERT_NOT_NULL(b);
+    TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
+        std::make_shared<CLogBackend>(backend));
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

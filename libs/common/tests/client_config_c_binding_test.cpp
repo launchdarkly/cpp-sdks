@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/bindings/c/config/builder.h>
+#include <launchdarkly/config/client.hpp>
 
 TEST(ClientConfigBindings, ConfigBuilderNewFree) {
     LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
@@ -70,10 +71,101 @@ TEST(ClientConfigBindings, AllConfigs) {
 
     LDClientConfigBuilder_Logging_Basic(builder, log_builder);
 
+    LDLoggingCustomBuilder custom_logger = LDLoggingCustomBuilder_New();
+
+    struct LDLogBackend backend;
+    LDLogBackend_Init(&backend);
+
+    LDLoggingCustomBuilder_Backend(custom_logger, backend);
+
+    LDClientConfigBuilder_Logging_Custom(builder, custom_logger);
+
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
     ASSERT_TRUE(config);
 
     LDClientConfig_Free(config);
+}
+
+TEST(ClientConfigBindings, CustomNoopLogger) {
+    using namespace launchdarkly;
+
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+
+    LDLoggingCustomBuilder custom = LDLoggingCustomBuilder_New();
+
+    struct LDLogBackend backend;
+    LDLogBackend_Init(&backend);
+
+    LDLoggingCustomBuilder_Backend(custom, backend);
+    LDClientConfigBuilder_Logging_Custom(builder, custom);
+
+    LDClientConfig config = nullptr;
+    LDStatus status = LDClientConfigBuilder_Build(builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    auto client_config = reinterpret_cast<client_side::Config*>(config);
+
+    // These should not abort since LDLogBackend_Init sets up the function
+    // pointers to be no-ops.
+    client_config->Logging().backend->Enabled(LogLevel::kError);
+    client_config->Logging().backend->Write(LogLevel::kError, "hello");
+}
+
+struct LogArgs {
+    std::optional<LDLogLevel> enabled;
+
+    struct WriteArgs {
+        LDLogLevel level;
+        std::string msg;
+        WriteArgs(LDLogLevel level, char const* msg) : level(level), msg(msg) {}
+    };
+
+    std::optional<WriteArgs> write;
+};
+
+TEST(ClientConfigBindings, CustomLogger) {
+    using namespace launchdarkly;
+
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+
+    LDLoggingCustomBuilder custom = LDLoggingCustomBuilder_New();
+
+    struct LDLogBackend backend;
+    LDLogBackend_Init(&backend);
+
+    LogArgs args;
+
+    backend.UserData = &args;
+
+    backend.Enabled = [](enum LDLogLevel level, void* user_data) -> bool {
+        auto spy = reinterpret_cast<decltype(args)*>(user_data);
+        spy->enabled.emplace(level);
+        return true;
+    };
+    backend.Write = [](enum LDLogLevel level, char const* msg,
+                       void* user_data) {
+        auto spy = reinterpret_cast<decltype(args)*>(user_data);
+        spy->write.emplace(level, msg);
+    };
+
+    LDLoggingCustomBuilder_Backend(custom, backend);
+    LDClientConfigBuilder_Logging_Custom(builder, custom);
+
+    LDClientConfig config = nullptr;
+    LDStatus status = LDClientConfigBuilder_Build(builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    auto client_config = reinterpret_cast<client_side::Config*>(config);
+
+    client_config->Logging().backend->Enabled(LogLevel::kWarn);
+    client_config->Logging().backend->Write(LogLevel::kError, "hello");
+
+    ASSERT_TRUE(args.enabled);
+    ASSERT_EQ(args.enabled, LD_LOG_WARN);
+
+    ASSERT_TRUE(args.write);
+    ASSERT_EQ(args.write->level, LD_LOG_ERROR);
+    ASSERT_EQ(args.write->msg, "hello");
 }

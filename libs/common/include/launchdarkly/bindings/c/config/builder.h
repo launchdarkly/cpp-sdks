@@ -29,6 +29,34 @@ enum LDLogLevel {
     LD_LOG_ERROR = 3,
 };
 
+struct LDLogBackend {
+    typedef bool (*EnabledFn)(enum LDLogLevel level, void* user_data);
+    typedef void (*WriteFn)(enum LDLogLevel level,
+                            char const* msg,
+                            void* user_data);
+
+    /**
+     * Check if the specified log level is enabled. Must be thread safe.
+     * @param level The log level to check.
+     * @return Returns true if the level is enabled.
+     */
+    EnabledFn Enabled;
+
+    /**
+     * Write a message to the specified level. Must be thread safe.
+     * @param level The level to write the message to.
+     * @param message The message to write.
+     */
+    WriteFn Write;
+
+    /**
+     * UserData is forwarded into both Enabled and Write.
+     */
+    void* UserData;
+};
+
+LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
+
 /**
  * Constructs a client-side config builder.
  */
@@ -377,6 +405,40 @@ LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b);
 LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
                                     LDLoggingBasicBuilder basic_builder);
+
+/**
+ * Creates a new builder for a custom, user-provided logger.
+ *
+ * If not passed into the config
+ * builder, must be manually freed with LDLoggingCustomBuilder_Free.
+ * @return New builder.
+ */
+LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New();
+
+/**
+ * Frees a custom logging builder. Do not call if the builder was consumed by
+ * the config builder.
+ * @param b Builder to free.
+ */
+LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b);
+
+/**
+ * Sets a custom log backend.
+ * @param b Custom logging builder. Must not be NULL.
+ * @param backend The backend to use for logging. Ensure the backend was
+ * initialized with LDLogBackend_Init.
+ */
+LD_EXPORT(void)
+LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend);
+
+/**
+ * Configures the SDK with custom logging.
+ * @param b  Client config builder. Must not be NULL.
+ * @param basic_builder The custom logging builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
+                                     LDLoggingCustomBuilder custom_builder);
 
 /**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.
