@@ -103,8 +103,9 @@ LDClientConfigBuilder_ServiceEndpoints_EventsBaseURL(LDClientConfigBuilder b,
  * @param url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
-LDClientConfigBuilder_ServiceEndpoints_RelayProxy(LDClientConfigBuilder b,
-                                                  char const* url);
+LDClientConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
+    LDClientConfigBuilder b,
+    char const* url);
 
 /**
  * Sets an identifier for the application.

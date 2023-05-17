@@ -4,9 +4,7 @@
 #include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/bindings/c/iter.hpp>
 #include <launchdarkly/value.hpp>
-
-#include <boost/core/ignore_unused.hpp>
-#include <cassert>
+#include "../../../src/c_binding_helpers.hpp"
 
 using launchdarkly::Value;
 
@@ -57,7 +55,7 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
         case Value::Type::kArray:
             return LDValueType_Array;
     }
-    assert(!"Unsupported value type.");
+    LD_ASSERT(!"Unsupported value type.");
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {

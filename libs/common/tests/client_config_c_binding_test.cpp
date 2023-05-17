@@ -37,6 +37,15 @@ TEST(ClientConfigBindings, MinimalValidConfig) {
 TEST(ClientConfigBindings, AllConfigs) {
     LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
 
+    LDClientConfigBuilder_ServiceEndpoints_PollingBaseURL(
+        builder, "https://launchdarkly.com");
+    LDClientConfigBuilder_ServiceEndpoints_StreamingBaseURL(
+        builder, "https://launchdarkly.com");
+    LDClientConfigBuilder_ServiceEndpoints_EventsBaseURL(
+        builder, "https://launchdarkly.com");
+    LDClientConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
+        builder, "https://launchdarkly.com");
+
     LDClientConfigBuilder_Offline(builder, false);
 
     LDClientConfigBuilder_AppInfo_Identifier(builder, "app");
