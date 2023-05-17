@@ -4,9 +4,9 @@
 #include <launchdarkly/config/shared/builders/config_builder.hpp>
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
+#include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
-#include "launchdarkly/config/shared/built/persistence.hpp"
 
 namespace launchdarkly::client_side {
 
