@@ -23,7 +23,7 @@ ParseContext(nlohmann::json value) {
         boost_json_val);
 }
 
-std::optional<std::string> EntityManager::create(ConfigParams in) {
+std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     std::string id = std::to_string(counter_++);
 
     auto config_builder = ConfigBuilder(in.credential);
@@ -159,7 +159,7 @@ bool EntityManager::destroy(std::string const& id) {
 
 tl::expected<nlohmann::json, std::string> EntityManager::command(
     std::string const& id,
-    CommandParams params) {
+    CommandParams const& params) {
     auto it = entities_.find(id);
     if (it == entities_.end()) {
         return tl::make_unexpected("entity not found");

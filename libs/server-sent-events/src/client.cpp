@@ -71,28 +71,29 @@ class FoxyClient : public Client,
 
     void fail(boost::system::error_code ec, std::string what) {
         logger_("sse-client: " + what + ": " + ec.message());
-        do_close();
+        async_shutdown(nullptr);
     }
 
-    virtual void run() override {
+    void run() override {
         session_.async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,
                                       shared_from_this()));
     }
 
-    virtual void close() override {
-        boost::asio::post(session_.get_executor(),
-                          beast::bind_front_handler(&FoxyClient::do_close,
-                                                    shared_from_this()));
+    void async_shutdown(std::function<void()> completion) override {
+        session_.async_shutdown(beast::bind_front_handler(
+            &FoxyClient::on_shutdown, shared_from_this(),
+            std::move(completion)));
     }
 
-    void do_close() {
-        session_.async_shutdown(beast::bind_front_handler(&FoxyClient::on_close,
-                                                          shared_from_this()));
+    void on_shutdown(std::function<void()> completion,
+                     boost::system::error_code ec) {
+        boost::ignore_unused(ec);
+        if (completion) {
+            completion();
+        }
     }
-
-    void on_close(boost::system::error_code ec) { boost::ignore_unused(ec); }
 
     void on_connect(boost::system::error_code ec) {
         if (ec) {
@@ -143,7 +144,7 @@ class FoxyClient : public Client,
     void on_read_complete(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec == boost::asio::error::operation_aborted) {
-            do_close();
+            async_shutdown(nullptr);
         } else {
             return fail(ec, "read body");
         }

@@ -39,7 +39,7 @@ class EntityManager {
      * @return An ID representing the entity, or none if the entity couldn't
      * be created.
      */
-    std::optional<std::string> create(ConfigParams params);
+    std::optional<std::string> create(ConfigParams const& params);
     /**
      * Destroy an entity with the given ID.
      * @param id ID of the entity.
@@ -47,6 +47,7 @@ class EntityManager {
      */
     bool destroy(std::string const& id);
 
-    tl::expected<nlohmann::json, std::string> command(std::string const& id,
-                                                      CommandParams params);
+    tl::expected<nlohmann::json, std::string> command(
+        std::string const& id,
+        CommandParams const& params);
 };

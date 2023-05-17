@@ -1,56 +1,10 @@
 events/summary events/basic counter behavior
-events/summary events/context kinds
 events/summary events/reset after each flush
-events/identify events/basic properties/single kind default
-events/identify events/basic properties/single kind non-default
-events/identify events/basic properties/multi-kind
-events/custom events/basic properties/single kind default
-events/custom events/basic properties/single kind non-default
-events/custom events/basic properties/multi-kind
-events/context properties/single-kind minimal/debug event
-events/context properties/single-kind minimal/identify event
-events/context properties/multi-kind minimal/debug event
-events/context properties/multi-kind minimal/identify event
-events/context properties/single-kind with attributes, nothing private/debug event
-events/context properties/single-kind with attributes, nothing private/identify event
-events/context properties/single-kind, allAttributesPrivate/debug event
-events/context properties/single-kind, allAttributesPrivate/identify event
-events/context properties/single-kind, specific private attributes/debug event
-events/context properties/single-kind, specific private attributes/identify event
-events/context properties/single-kind, private attribute nested property/debug event
-events/context properties/single-kind, private attribute nested property/identify event
-events/context properties/custom attribute with value false/debug event
-events/context properties/custom attribute with value false/identify event
-events/context properties/custom attribute with value true/debug event
-events/context properties/custom attribute with value true/identify event
-events/context properties/custom attribute with value -1000/debug event
-events/context properties/custom attribute with value -1000/identify event
-events/context properties/custom attribute with value 0/debug event
-events/context properties/custom attribute with value 0/identify event
-events/context properties/custom attribute with value 1000/debug event
-events/context properties/custom attribute with value 1000/identify event
-events/context properties/custom attribute with value -1000.5/debug event
-events/context properties/custom attribute with value -1000.5/identify event
-events/context properties/custom attribute with value 1000.5/debug event
-events/context properties/custom attribute with value 1000.5/identify event
-events/context properties/custom attribute with value ""/debug event
-events/context properties/custom attribute with value ""/identify event
-events/context properties/custom attribute with value "abc"/debug event
-events/context properties/custom attribute with value "abc"/identify event
-events/context properties/custom attribute with value "has \"escaped\" characters"/debug event
-events/context properties/custom attribute with value "has \"escaped\" characters"/identify event
-events/context properties/custom attribute with value []/debug event
-events/context properties/custom attribute with value []/identify event
-events/context properties/custom attribute with value ["a","b"]/debug event
-events/context properties/custom attribute with value ["a","b"]/identify event
-events/context properties/custom attribute with value {}/debug event
-events/context properties/custom attribute with value {}/identify event
-events/context properties/custom attribute with value {"a":1}/debug event
-events/context properties/custom attribute with value {"a":1}/identify event
-events/disabling/identify event
 streaming/requests/query parameters/evaluationReasons set to true/GET
 streaming/requests/query parameters/evaluationReasons set to true/REPORT
 tags/disallowed characters
+
+# The Client doesn't need to know how to deserialize users.
 context type/convert/old user to context/{"key": ""}
 context type/convert/old user to context/{"key": "a"}
 context type/convert/old user to context/{"key": "a"}

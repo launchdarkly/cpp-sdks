@@ -95,65 +95,71 @@ PollingDataSource::PollingDataSource(Config const& config,
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
-    requester_.Request(request_, [this](network::HttpResult res) {
-        auto header_etag = res.Headers().find("etag");
-        bool has_etag = header_etag != res.Headers().end();
-
-        if (etag_ && has_etag) {
-            if (etag_.value() == header_etag->second) {
-                // Got the same etag, we know the content has not changed.
-                // So we can just start the next timer.
-
-                // We don't need to update the "request_" because it would have
-                // the same Etag.
-                StartPollingTimer();
-                return;
-            }
+    auto weak_self = weak_from_this();
+    requester_.Request(request_, [weak_self](network::HttpResult res) {
+        if (auto self = weak_self.lock()) {
+            self->HandlePollResult(std::move(res));
         }
-
-        if (has_etag) {
-            config::shared::builders::HttpPropertiesBuilder<
-                config::shared::ClientSDK>
-                builder(request_.Properties());
-            builder.Header("If-None-Match", header_etag->second);
-            request_ = network::HttpRequest(request_, builder.Build());
-
-            etag_ = header_etag->second;
-        }
-
-        if (res.IsError()) {
-            status_manager_.SetState(
-                DataSourceStatus::DataSourceState::kInterrupted,
-                DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-                res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "Polling for feature flag updates failed: "
-                << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
-        } else if (res.Status() == 200) {
-            data_source_handler_.HandleMessage("put", res.Body().value());
-        } else if (res.Status() == 304) {
-            // This should be handled ahead of here, but if we get a 304,
-            // and it didn't have an etag, we still don't want to try to
-            // parse the body.
-        } else {
-            if (network::IsRecoverableStatus(res.Status())) {
-                status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    res.Status(),
-                    launchdarkly::network::ErrorForStatusCode(
-                        res.Status(), "polling request", "will retry"));
-            } else {
-                status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kShutdown, res.Status(),
-                    launchdarkly::network::ErrorForStatusCode(
-                        res.Status(), "polling request", std::nullopt));
-                // We are giving up. Do not start a new polling request.
-                return;
-            }
-        }
-
-        StartPollingTimer();
     });
+}
+
+void PollingDataSource::HandlePollResult(network::HttpResult res) {
+    auto header_etag = res.Headers().find("etag");
+    bool has_etag = header_etag != res.Headers().end();
+
+    if (etag_ && has_etag) {
+        if (etag_.value() == header_etag->second) {
+            // Got the same etag, we know the content has not changed.
+            // So we can just start the next timer.
+
+            // We don't need to update the "request_" because it would have
+            // the same Etag.
+            StartPollingTimer();
+            return;
+        }
+    }
+
+    if (has_etag) {
+        config::shared::builders::HttpPropertiesBuilder<
+            config::shared::ClientSDK>
+            builder(request_.Properties());
+        builder.Header("If-None-Match", header_etag->second);
+        request_ = network::HttpRequest(request_, builder.Build());
+
+        etag_ = header_etag->second;
+    }
+
+    if (res.IsError()) {
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Polling for feature flag updates failed: "
+            << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+    } else if (res.Status() == 200) {
+        data_source_handler_.HandleMessage("put", res.Body().value());
+    } else if (res.Status() == 304) {
+        // This should be handled ahead of here, but if we get a 304,
+        // and it didn't have an etag, we still don't want to try to
+        // parse the body.
+    } else {
+        if (network::IsRecoverableStatus(res.Status())) {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kInterrupted, res.Status(),
+                launchdarkly::network::ErrorForStatusCode(
+                    res.Status(), "polling request", "will retry"));
+        } else {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kShutdown, res.Status(),
+                launchdarkly::network::ErrorForStatusCode(
+                    res.Status(), "polling request", std::nullopt));
+            // We are giving up. Do not start a new polling request.
+            return;
+        }
+    }
+
+    StartPollingTimer();
 }
 
 void PollingDataSource::StartPollingTimer() {
@@ -173,19 +179,22 @@ void PollingDataSource::StartPollingTimer() {
     timer_.cancel();
     timer_.expires_after(polling_interval_);
 
-    timer_.async_wait([this](boost::system::error_code const& ec) {
+    auto weak_self = weak_from_this();
+
+    timer_.async_wait([weak_self](boost::system::error_code const& ec) {
         if (ec == boost::asio::error::operation_aborted) {
             // The timer was cancelled. Stop polling.
             return;
         }
-        if (ec) {
-            // Something unexpected happened. Log it and continue to try
-            // polling.
-            LD_LOG(logger_, LogLevel::kError)
-                << "Unexpected error in polling timer: " << ec.message();
-            Close();
+        if (auto self = weak_self.lock()) {
+            if (ec) {
+                // Something unexpected happened. Log it and continue to try
+                // polling.
+                LD_LOG(self->logger_, LogLevel::kError)
+                    << "Unexpected error in polling timer: " << ec.message();
+            }
+            self->DoPoll();
         }
-        DoPoll();
     });
 }
 
@@ -204,7 +213,11 @@ void PollingDataSource::Start() {
     DoPoll();
 }
 
-void PollingDataSource::Close() {
+void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
     timer_.cancel();
+    if (completion) {
+        boost::asio::post(timer_.get_executor(), completion);
+    }
 }
+
 }  // namespace launchdarkly::client_side::data_sources

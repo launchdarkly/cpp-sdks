@@ -8,6 +8,7 @@
 #include <boost/beast/http/string_body.hpp>
 
 #include <functional>
+#include <future>
 #include <memory>
 #include <string>
 
@@ -140,16 +141,8 @@ class Builder {
 class Client {
    public:
     virtual ~Client() = default;
-
-    /**
-     * Asynchronously kicks off an SSE connection to the server and begins
-     * reading the event stream. */
     virtual void run() = 0;
-
-    /**
-     * Asynchronously closes the connection.
-     */
-    virtual void close() = 0;
+    virtual void async_shutdown(std::function<void()> completion) = 0;
 };
 
 }  // namespace launchdarkly::sse
