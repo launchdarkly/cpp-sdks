@@ -41,7 +41,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
     std::size_t max_cached_contexts_ = 10;
 
     ContextIndex GetIndex();
-    void StoreCache(std::string context_id);
+    void StoreCache(std::string const& context_id);
 };
 
 }  // namespace launchdarkly::client_side::flag_manager

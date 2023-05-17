@@ -1,4 +1,5 @@
 #include <tl/expected.hpp>
+#include <utility>
 
 #include "flag_manager.hpp"
 
@@ -7,7 +8,10 @@ namespace launchdarkly::client_side::flag_manager {
 FlagManager::FlagManager(std::string const& sdk_key,
                          std::shared_ptr<IPersistence> persistence)
     : flag_updater_(flag_store_),
-      persistence_updater_(sdk_key, &flag_updater_, flag_store_, persistence) {}
+      persistence_updater_(sdk_key,
+                           &flag_updater_,
+                           flag_store_,
+                           std::move(persistence)) {}
 
 IDataSourceUpdateSink& FlagManager::Updater() {
     return persistence_updater_;

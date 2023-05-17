@@ -46,7 +46,7 @@ class ContextIndex {
     void Notice(std::string id,
                 std::chrono::time_point<std::chrono::system_clock> timestamp);
 
-    Index const& Entries() const;
+    [[nodiscard]] Index const& Entries() const;
 
     /**
      * Prune the index returning a list of the removed context keys
@@ -54,7 +54,7 @@ class ContextIndex {
      * @param maxContexts The maximum number of contexts to retain.
      * @return A list of the contexts that were pruned.
      */
-    std::vector<std::string> Prune(int maxContexts);
+    std::vector<std::string> Prune(std::size_t maxContexts);
 
    private:
     Index index_;
@@ -66,4 +66,4 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
 ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
                         boost::json::value const& json_value);
-}  // namespace launchdarkly::persistence
+}  // namespace launchdarkly::client_side::flag_manager

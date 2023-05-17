@@ -2,6 +2,7 @@
 #include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
+#include <utility>
 
 namespace launchdarkly::client_side::flag_manager {
 
@@ -20,7 +21,7 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
                                  std::shared_ptr<IPersistence> persistence)
     : sink_(sink),
       flag_store_(flag_store),
-      persistence_(persistence),
+      persistence_(std::move(persistence)),
       environment_namespace_(MakeEnvironment(global_namespace_, sdk_key)) {}
 
 void FlagPersistence::Init(
@@ -63,7 +64,7 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 }
 
-void FlagPersistence::StoreCache(std::string context_id) {
+void FlagPersistence::StoreCache(std::string const& context_id) {
     if (persistence_) {
         std::lock_guard lock(persistence_mutex_);
         auto index = GetIndex();

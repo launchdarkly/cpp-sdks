@@ -1,5 +1,7 @@
 #include <algorithm>
 
+#include <boost/core/ignore_unused.hpp>
+
 #include "context_index.hpp"
 
 #include "launchdarkly/serialization/value_mapping.hpp"
@@ -21,7 +23,7 @@ void ContextIndex::Notice(
     }
 }
 
-std::vector<std::string> ContextIndex::Prune(int maxContexts) {
+std::vector<std::string> ContextIndex::Prune(std::size_t maxContexts) {
     if (index_.size() <= maxContexts) {
         return {};
     }
@@ -31,7 +33,10 @@ std::vector<std::string> ContextIndex::Prune(int maxContexts) {
                   return a.timestamp > b.timestamp;
               });
 
-    Index removed = std::vector(index_.begin() + maxContexts, index_.end());
+    Index removed = std::vector(
+        index_.begin() +
+            static_cast<Index::iterator::difference_type>(maxContexts),
+        index_.end());
 
     index_.resize(maxContexts);
 
@@ -50,6 +55,8 @@ ContextIndex::Index const& ContextIndex::Entries() const {
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 ContextIndex const& index) {
+    boost::ignore_unused(unused);
+
     auto& arr = json_value.emplace_array();
 
     for (auto& entry : index.Entries()) {
@@ -65,6 +72,8 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
 ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
                         boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
     auto index = ContextIndex::Index();
     if (json_value.is_array()) {
         for (auto& item : json_value.as_array()) {
