@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 int main() {
     char const* key = getenv("STG_SDK_KEY");
     if (!key) {
