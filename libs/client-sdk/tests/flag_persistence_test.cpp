@@ -68,7 +68,10 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
-    EXPECT_EQ(2, persistence->store_.size());
+    // Only 1 namespace.
+    EXPECT_EQ(1, persistence->store_.size());
+    // Index + 1 context.
+    EXPECT_EQ(2, persistence->store_.begin()->second.size());
 
     // Created the index.
     EXPECT_EQ(
@@ -110,4 +113,69 @@ TEST(FlagPersistenceTests, CanLoadCache) {
 
     // The store contains the flag loaded from the persistence.
     EXPECT_EQ("test", store.Get("flagA")->flag->detail().value().AsString());
+}
+
+TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
+    auto store = FlagStore();
+    auto updater = FlagUpdater(store);
+    auto logger = launchdarkly::logging::NullLogger();
+
+    auto persistence =
+        std::make_shared<TestPersistence>(TestPersistence::StoreType());
+
+    uint64_t now = 0;
+
+    // Set the max contexts to 2.
+    FlagPersistence flag_persistence(
+        "the-key", &updater, store, persistence, logger, 2, [&now]() {
+            return std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{now}};
+        });
+
+    flag_persistence.Init(
+        ContextBuilder().kind("potato", "user-key").build(),
+        std::unordered_map<std::string,
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagA", ItemDescriptor{EvaluationResult{
+                           1, std::nullopt, false, false, std::nullopt,
+                           EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                    std::nullopt}}}}}});
+
+    now++;
+
+    flag_persistence.Init(
+        ContextBuilder().kind("potato", "bob-key").build(),
+        std::unordered_map<std::string,
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagB", ItemDescriptor{EvaluationResult{
+                           1, std::nullopt, false, false, std::nullopt,
+                           EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                    std::nullopt}}}}}});
+
+    now++;
+
+    flag_persistence.Init(
+        ContextBuilder().kind("potato", "susan-key").build(),
+        std::unordered_map<std::string,
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagC", ItemDescriptor{EvaluationResult{
+                           1, std::nullopt, false, false, std::nullopt,
+                           EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                    std::nullopt}}}}}});
+
+    // Only 1 namespace.
+    EXPECT_EQ(1, persistence->store_.size());
+
+    // Index + 2 Contexts
+    auto& space = persistence->store_.begin()->second;
+    EXPECT_EQ(3, space.size());
+    // Sha256 potato:user-key
+    EXPECT_EQ(0, space.count("423dbc8f0d4b15f7b2c466479be01beb4ded297f9d4efdce9"
+                             "08ecb6182341495"));
+    // Sha256 potato:bob-key
+    EXPECT_EQ(1, space.count("4d88492463db48c874deef4b87a96c952dc6d192a0ed2f0cf"
+                             "ee88485548e4035"));
+    // Sha256 potato:susan-key
+    EXPECT_EQ(1, space.count("2805a9631ca563307b71b1533acb1f74f938418ebdfe91f5a"
+                             "728e792f515831a"));
 }
