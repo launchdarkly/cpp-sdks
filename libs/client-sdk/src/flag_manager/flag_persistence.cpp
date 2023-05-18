@@ -10,7 +10,7 @@ namespace launchdarkly::client_side::flag_manager {
 
 std::string PersistenceEncodeKey(std::string const& input) {
     auto bytes = encoding::Sha256String(input);
-    std::string byte_str(reinterpret_cast<char*>(bytes.begin()), bytes.size());
+    std::string byte_str(reinterpret_cast<char*>(bytes.data()), bytes.size());
     return encoding::Base64UrlEncode(byte_str);
 }
 
