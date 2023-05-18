@@ -116,6 +116,7 @@ class ClientImpl : public IClient {
     Context context_;
     mutable std::shared_mutex context_mutex_;
 
+    flag_manager::FlagManager flag_manager_;
     std::function<std::shared_ptr<IDataSource>()> data_source_factory_;
 
     std::shared_ptr<IDataSource> data_source_;
@@ -127,7 +128,6 @@ class ClientImpl : public IClient {
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
-    flag_manager::FlagManager flag_manager_;
 
     std::thread thread_;
 
