@@ -12,9 +12,7 @@ int main() {
         return 1;
     }
 
-    // BEGIN CONFIG
-
-    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New(key);
 
     LDClientConfigBuilder_ServiceEndpoints_PollingBaseURL(
         builder, "http://sdk.launchdarkly.com");

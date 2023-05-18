@@ -13,10 +13,6 @@ extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-#ifdef __cplusplus
-}
-#endif
-
 typedef struct _LDContextBuilder* LDContextBuilder;
 
 /**
@@ -189,5 +185,7 @@ LD_EXPORT(bool)
 LDContextBuilder_Attributes_AddPrivateAttribute(LDContextBuilder builder,
                                                 char const* kind,
                                                 char const* attr_key);
-
+#ifdef __cplusplus
+}
+#endif
 // NOLINTEND modernize-use-using
