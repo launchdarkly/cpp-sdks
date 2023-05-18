@@ -80,6 +80,14 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigClientSideParams,
                                                 evaluationReasons,
                                                 useReport);
 
+struct ConfigTags {
+    std::optional<std::string> applicationId;
+    std::optional<std::string> applicationVersion;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTags,
+                                                applicationId,
+                                                applicationVersion);
+
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
@@ -89,6 +97,7 @@ struct ConfigParams {
     std::optional<ConfigEventParams> events;
     std::optional<ConfigServiceEndpointsParams> serviceEndpoints;
     std::optional<ConfigClientSideParams> clientSide;
+    std::optional<ConfigTags> tags;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 credential,
@@ -98,7 +107,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 polling,
                                                 events,
                                                 serviceEndpoints,
-                                                clientSide);
+                                                clientSide,
+                                                tags);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
