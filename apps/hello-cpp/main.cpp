@@ -122,6 +122,27 @@ int main() {
         std::cout << "Reason was: " << *reason << std::endl;
     }
 
+    // Identify a series of contexts.
+    for (auto context_index = 0; context_index < 4; context_index++) {
+        std::cout << "Identifying user: "
+                  << "ryan" << context_index << std::endl;
+        auto future = client.IdentifyAsync(
+            ContextBuilder()
+                .kind("user", "ryan" + std::to_string(context_index))
+                .build());
+        auto before_ident =
+            client.BoolVariationDetail("my-boolean-flag", false);
+        future.get();
+        auto after_ident = client.BoolVariationDetail("my-boolean-flag", false);
+
+        std::cout << "For: "
+                  << "ryan" << context_index << ": "
+                  << "Before ident complete: " << *before_init
+                  << " After: " << *after_ident << std::endl;
+
+        sleep(1);
+    }
+
     // Sit around.
     std::cout << "Press enter to exit" << std::endl << std::endl;
     std::cin.get();

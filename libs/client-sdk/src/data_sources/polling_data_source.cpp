@@ -200,6 +200,7 @@ void PollingDataSource::StartPollingTimer() {
 }
 
 void PollingDataSource::Start() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(

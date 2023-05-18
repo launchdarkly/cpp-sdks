@@ -156,6 +156,7 @@ void ClientImpl::FlushAsync() {
 }
 
 std::future<void> ClientImpl::IdentifyAsync(Context context) {
+    flag_manager_.LoadCache(context);
     auto identify_promise = std::make_shared<std::promise<void>>();
     auto fut = identify_promise->get_future();
     data_source_->ShutdownAsync(

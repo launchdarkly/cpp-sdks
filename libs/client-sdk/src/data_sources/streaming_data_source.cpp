@@ -37,6 +37,7 @@ StreamingDataSource::StreamingDataSource(
       streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     auto string_context =
         boost::json::serialize(boost::json::value_from(context_));
 
