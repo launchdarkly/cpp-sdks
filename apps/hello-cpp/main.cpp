@@ -39,7 +39,6 @@ int main() {
     config_builder.Logging().Logging(
         LoggingBuilder::BasicLogging().Level(LogLevel::kDebug));
     config_builder.Events().FlushInterval(std::chrono::seconds(5));
-    config_builder.Offline(true);
 
     auto config = config_builder.Build();
     if (!config) {
