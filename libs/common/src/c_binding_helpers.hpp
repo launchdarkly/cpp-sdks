@@ -1,7 +1,7 @@
 #include <launchdarkly/bindings/c/status.h>
-#include <launchdarkly/error.hpp>
-
+#include <cassert>
 #include <functional>
+#include <launchdarkly/error.hpp>
 
 #include "tl/expected.hpp"
 
@@ -63,5 +63,15 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
 
     return LDStatus_Success();
 }
+
+// Macro is named the same as in the C Server SDK.
+
+#ifdef LAUNCHDARKLY_USE_ASSERT
+#define LD_ASSERT(cond) assert(cond)
+#else
+#define LD_ASSERT(cond)
+#endif
+
+#define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

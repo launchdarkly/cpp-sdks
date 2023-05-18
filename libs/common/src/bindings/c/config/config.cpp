@@ -10,9 +10,7 @@
 using namespace launchdarkly::client_side;
 
 LD_EXPORT(void) LDClientConfig_Free(LDClientConfig config) {
-    if (Config* c = TO_CONFIG(config)) {
-        delete c;
-    }
+    delete TO_CONFIG(config);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

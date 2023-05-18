@@ -106,7 +106,7 @@ class DataSourceBuilder<ClientSDK> {
      * values were calculated.
      *
      * The additional information will then be available through the client's
-     * {TODO variation detail} method. Since this increases the size of network
+     * VariationDetail methods. Since this increases the size of network
      * requests, such information is not sent unless you set this option to
      * true.
      * @param value True to enable reasons.
@@ -124,7 +124,7 @@ class DataSourceBuilder<ClientSDK> {
      * passed as a base64 URL-encoded path parameter.
      *
      * Do not use unless advised by LaunchDarkly.
-     * @param value True to enable using the REPORT verb.
+     * @param value True to use the REPORT verb.
      * @return Reference to this builder.
      */
     DataSourceBuilder& UseReport(bool value);
