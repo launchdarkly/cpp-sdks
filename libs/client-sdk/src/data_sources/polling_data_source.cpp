@@ -214,10 +214,13 @@ void PollingDataSource::Start() {
 }
 
 void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
-    timer_.cancel();
-    if (completion) {
-        boost::asio::post(timer_.get_executor(), completion);
-    }
+    auto self = shared_from_this();
+    boost::asio::post(timer_.get_executor(), [self, completion]() {
+        self->timer_.cancel();
+        if (completion) {
+            completion();
+        }
+    });
 }
 
 }  // namespace launchdarkly::client_side::data_sources

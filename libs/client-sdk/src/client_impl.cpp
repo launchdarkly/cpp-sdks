@@ -19,10 +19,6 @@ namespace launchdarkly::client_side {
 // single thread, and applies several optimisations based on this assumption.
 auto const kAsioConcurrencyHint = 1;
 
-// Client's destructor attempts to gracefully shut down the datasource
-// connection in this amount of time.
-auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
-
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
@@ -322,15 +318,17 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 }
 
 ClientImpl::~ClientImpl() {
-    auto shutdown_promise = std::make_shared<std::promise<void>>();
-    auto fut = shutdown_promise->get_future();
+    // Necessary to signal shutdown because the data source
+    // may be continuously queueing async operations, such as timers or reads.
+    data_source_->ShutdownAsync([]() {});
 
-    data_source_->ShutdownAsync(
-        [shutdown_promise]() { shutdown_promise->set_value(); });
-    fut.wait_for(kDataSourceShutdownWait);
+    // Necessary because the processor may be queueing flushes continuously.
+    event_processor_->ShutdownAsync();
 
+    // Signals shutdown, doesn't block.
     ioc_.stop();
-    // TODO: Probably not the best.
+
+    // Blocks until the ioc_.run() call returns.
     run_thread_.join();
 }
 
