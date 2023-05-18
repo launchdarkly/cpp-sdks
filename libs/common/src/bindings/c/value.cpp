@@ -30,7 +30,7 @@ LD_EXPORT(LDValue) LDValue_NewNumber(double val) {
 
 LD_EXPORT(LDValue) LDValue_NewString(char const* val) {
     LD_ASSERT_NOT_NULL(val);
-    
+
     return AS_LDVALUE(new Value(val));
 }
 

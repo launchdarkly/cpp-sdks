@@ -36,7 +36,7 @@ LDObjectBuilder_Add(LDObjectBuilder builder, char const* key, LDValue val) {
 
 LD_EXPORT(LDValue) LDObjectBuilder_Build(LDObjectBuilder builder) {
     LD_ASSERT_NOT_NULL(builder);
-    
+
     auto map = AS_MAP(builder);
     auto value = new Value(std::move(*map));
     delete map;

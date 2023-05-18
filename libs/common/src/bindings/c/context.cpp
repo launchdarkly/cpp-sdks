@@ -83,7 +83,7 @@ LDContext_PrivateAttributesIter_End(LDContext_PrivateAttributesIter iter) {
 LD_EXPORT(char const*)
 LDContext_PrivateAttributesIter_Value(LDContext_PrivateAttributesIter iter) {
     LD_ASSERT_NOT_NULL(iter);
-    
+
     auto& redaction_name =
         AS_PRIVATE_ATTRIBUTES_ITERATOR(iter)->iter->redaction_name();
     return redaction_name.c_str();

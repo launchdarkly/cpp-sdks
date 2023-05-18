@@ -89,12 +89,77 @@ TEST(ClientConfigBindings, AllConfigs) {
 
     LDClientConfigBuilder_Logging_Custom(builder, custom_logger);
 
+    LDPersistenceCustomBuilder custom_persistence =
+        LDPersistenceCustomBuilder_New();
+    struct LDPersistence persistence;
+    LDPersistence_Init(&persistence);
+    LDPersistenceCustomBuilder_Implementation(custom_persistence, persistence);
+    LDClientConfigBuilder_Persistence_Custom(builder, custom_persistence);
+
     LDClientConfig config = nullptr;
     LDStatus status = LDClientConfigBuilder_Build(builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
     ASSERT_TRUE(config);
 
     LDClientConfig_Free(config);
+}
+
+TEST(ClientConfigBindings, CustomPersistence) {
+    using namespace launchdarkly;
+
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+
+    LDPersistenceCustomBuilder custom_persistence =
+        LDPersistenceCustomBuilder_New();
+
+    struct LDPersistence persistence;
+    LDPersistence_Init(&persistence);
+
+    persistence.UserData = strdup("user_data");
+
+    persistence.Set = [](char const* storage_namespace, char const* key,
+                         char const* data, void* user_data) {
+        EXPECT_EQ(std::string("namespace"), storage_namespace);
+        EXPECT_EQ(std::string("key"), key);
+        EXPECT_EQ(std::string("user_data"), (char*)user_data);
+    };
+    persistence.Remove = [](char const* storage_namespace, char const* key,
+                            void* user_data) {
+        EXPECT_EQ(std::string("namespace"), storage_namespace);
+        EXPECT_EQ(std::string("key"), key);
+        EXPECT_EQ(std::string("user_data"), (char*)user_data);
+    };
+    persistence.Read = [](char const* storage_namespace, char const* key,
+                          char const** read_value, void* user_data) {
+        EXPECT_EQ(std::string("namespace"), storage_namespace);
+        EXPECT_EQ(std::string("key"), key);
+        EXPECT_EQ(std::string("user_data"), (char*)user_data);
+
+        *read_value = strdup("data");
+        return (size_t)4;
+    };
+    persistence.FreeRead = [](char const* value, void* user_data) {
+        free((void*)value);
+    };
+
+    LDPersistenceCustomBuilder_Implementation(custom_persistence, persistence);
+    LDClientConfigBuilder_Persistence_Custom(builder, custom_persistence);
+
+    LDClientConfig config = nullptr;
+    LDStatus status = LDClientConfigBuilder_Build(builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    auto client_config = reinterpret_cast<client_side::Config*>(config);
+
+    client_config->Persistence().implementation->SetValue("namespace", "key",
+                                                          "data");
+    EXPECT_EQ("data", client_config->Persistence().implementation->Read(
+                          "namespace", "key"));
+    client_config->Persistence().implementation->RemoveValue("namespace",
+                                                             "key");
+
+    LDClientConfig_Free(config);
+    free((void*)persistence.UserData);
 }
 
 TEST(ClientConfigBindings, CustomNoopLogger) {
