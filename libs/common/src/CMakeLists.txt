@@ -43,6 +43,7 @@ add_library(${LIBNAME}
         bindings/c/config/builder.cpp
         bindings/c/config/config.cpp
         bindings/c/data/evaluation_detail.cpp
+        bindings/c/memory_routines.cpp
         log_level.cpp config/logging_builder.cpp)
 
 

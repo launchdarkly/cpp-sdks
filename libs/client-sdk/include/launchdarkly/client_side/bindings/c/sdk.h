@@ -6,6 +6,7 @@
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>
+#include <launchdarkly/bindings/c/memory_routines.h>
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
 #include <stddef.h>
@@ -18,6 +19,7 @@ extern "C" {  // only need to export C interface if
 typedef struct _LDClientSDK* LDClientSDK;
 
 #define LD_NONBLOCKING -1
+#define LD_DISCARD_DETAIL NULL
 
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
@@ -135,8 +137,8 @@ LDClientSDK_BoolVariation(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag.
- * @param detail Out parameter to store the details. May pass NULL to discard
- * the details. The details object must be freed with
+ * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
+ * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
  * @return The variation for the current context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
@@ -148,12 +150,14 @@ LDClientSDK_BoolVariationDetail(LDClientSDK sdk,
                                 LDEvalDetail* out_detail);
 
 /**
- * Returns the string value of a feature flag for a given flag key.
+ * Returns the string value of a feature flag for a given flag key. Ensure the
+ * string is freed with LDMemory_FreeString.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag.
  * @return The variation for the current context, or a copy of default_value if
- * the flag is disabled in the LaunchDarkly control panel.
+ * the flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDMemory_FreeString.
  */
 LD_EXPORT(char*)
 LDClientSDK_StringVariation(LDClientSDK sdk,
@@ -162,15 +166,17 @@ LDClientSDK_StringVariation(LDClientSDK sdk,
 
 /**
  * Returns the string value of a feature flag for a given flag key, and details
- * that also describes the way the value was determined.
+ * that also describes the way the value was determined. Ensure the
+ * string is freed with LDMemory_FreeString.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag.
- * @param detail Out parameter to store the details. May pass NULL to discard
- * the details. The details object must be freed with
+ * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
+ * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
  * @return The variation for the current context, or a copy of default_value if
- * the flag is disabled in the LaunchDarkly control panel.
+ * the flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDMemory_FreeString.
  */
 LD_EXPORT(char*)
 LDClientSDK_StringVariationDetail(LDClientSDK sdk,
@@ -197,8 +203,8 @@ LDClientSDK_IntVariation(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag.
- * @param detail Out parameter to store the details. May pass NULL to discard
- * the details. The details object must be freed with
+ * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
+ * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
  * @return The variation for the current context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
@@ -228,8 +234,8 @@ LDClientSDK_DoubleVariation(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag.
- * @param detail Out parameter to store the details. May pass NULL to discard
- * the details. The details object must be freed with
+ * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
+ * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
  * @return The variation for the current context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
@@ -260,8 +266,8 @@ LDClientSDK_JsonVariation(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param default_value The default value of the flag. The value is copied.
- * @param detail Out parameter to store the details. May pass NULL to discard
- * the details. The details object must be freed with
+ * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
+ * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
  * @return The variation for the current context, or a copy of default_value if
  * the flag is disabled in the LaunchDarkly control panel. The returned value
