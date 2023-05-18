@@ -351,7 +351,7 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
 LD_EXPORT(void)
 LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
     LD_ASSERT_NOT_NULL(b);
-    
+
     TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
         std::make_shared<LogBackendWrapper>(backend));
 }
