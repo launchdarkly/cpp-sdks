@@ -23,7 +23,7 @@ class FilePersistence : public IPersistence {
     FilePersistence(std::string directory) : directory_(std::move(directory)) {
         std::filesystem::create_directories(directory_);
     }
-    void SetValue(std::string storage_namespace,
+    void Set(std::string storage_namespace,
                   std::string key,
                   std::string data) noexcept override {
         try {
@@ -36,7 +36,7 @@ class FilePersistence : public IPersistence {
         }
     }
 
-    void RemoveValue(std::string storage_namespace,
+    void Remove(std::string storage_namespace,
                      std::string key) noexcept override {
         std::filesystem::remove(MakePath(storage_namespace, key));
     }

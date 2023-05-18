@@ -66,14 +66,14 @@ class PersistenceImplementationWrapper : public IPersistence {
     explicit PersistenceImplementationWrapper(LDPersistence impl)
         : impl_(impl) {}
 
-    void SetValue(std::string storage_namespace,
+    void Set(std::string storage_namespace,
                   std::string key,
                   std::string data) noexcept override {
         return impl_.Set(storage_namespace.c_str(), key.c_str(), data.c_str(),
                          impl_.UserData);
     }
 
-    void RemoveValue(std::string storage_namespace,
+    void Remove(std::string storage_namespace,
                      std::string key) noexcept override {
         return impl_.Remove(storage_namespace.c_str(), key.c_str(),
                             impl_.UserData);

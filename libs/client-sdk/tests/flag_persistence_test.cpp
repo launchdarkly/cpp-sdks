@@ -24,13 +24,13 @@ class TestPersistence : public IPersistence {
                  std::map<std::string, std::optional<std::string>>>;
     TestPersistence(StoreType store) : store_(std::move(store)) {}
 
-    void SetValue(std::string storageNamespace,
+    void Set(std::string storageNamespace,
                   std::string key,
                   std::string data) noexcept override {
         store_[storageNamespace][key] = data;
     };
 
-    void RemoveValue(std::string storageNamespace,
+    void Remove(std::string storageNamespace,
                      std::string key) noexcept override {
         auto& space = store_[storageNamespace];
         auto found = space.find(key);

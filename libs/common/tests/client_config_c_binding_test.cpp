@@ -151,12 +151,11 @@ TEST(ClientConfigBindings, CustomPersistence) {
 
     auto client_config = reinterpret_cast<client_side::Config*>(config);
 
-    client_config->Persistence().implementation->SetValue("namespace", "key",
-                                                          "data");
+    client_config->Persistence().implementation->Set("namespace", "key",
+                                                     "data");
     EXPECT_EQ("data", client_config->Persistence().implementation->Read(
                           "namespace", "key"));
-    client_config->Persistence().implementation->RemoveValue("namespace",
-                                                             "key");
+    client_config->Persistence().implementation->Remove("namespace", "key");
 
     LDClientConfig_Free(config);
     free((void*)persistence.UserData);

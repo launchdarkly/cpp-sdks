@@ -85,15 +85,15 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
         index.Notice(context_id, time_stamper_());
         auto pruned = index.Prune(max_cached_contexts_);
         for (auto& id : pruned) {
-            persistence_->RemoveValue(environment_namespace_, id);
+            persistence_->Remove(environment_namespace_, id);
         }
-        persistence_->SetValue(
+        persistence_->Set(
             environment_namespace_, index_key_,
             boost::json::serialize(boost::json::value_from(index)));
 
-        persistence_->SetValue(environment_namespace_, context_id,
-                               boost::json::serialize(boost::json::value_from(
-                                   flag_store_.GetAll())));
+        persistence_->Set(environment_namespace_, context_id,
+                          boost::json::serialize(
+                              boost::json::value_from(flag_store_.GetAll())));
     }
 }
 
