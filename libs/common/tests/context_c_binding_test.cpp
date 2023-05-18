@@ -51,7 +51,7 @@ TEST(ContextCBindingTests, CanAddAttributes) {
     auto count = 0;
 
     LDContext_PrivateAttributesIter iter =
-        LDContext_CreatePrivateAttributesIter(context, "user");
+        LDContext_PrivateAttributesIter_New(context, "user");
 
     while (!LDContext_PrivateAttributesIter_End(iter)) {
         if (count == 0) {
@@ -66,7 +66,7 @@ TEST(ContextCBindingTests, CanAddAttributes) {
         count++;
     }
 
-    LDContext_DestroyPrivateAttributesIter(iter);
+    LDContext_PrivateAttributesIter_Free(iter);
 
     EXPECT_EQ(2, count);
 

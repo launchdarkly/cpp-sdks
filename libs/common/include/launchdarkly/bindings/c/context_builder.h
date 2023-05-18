@@ -41,7 +41,7 @@ LD_EXPORT(void) LDContextBuilder_Free(LDContextBuilder builder);
  * When building a context using LDContextBuilder_Build the builder will be
  * consumed and you do not need to call LDContextBuilder_Free.
  *
- * @param builder The builder to build a context from.
+ * @param builder The builder to build a context from. Must not be NULL.
  * @return The built context.
  */
 LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder);
@@ -58,9 +58,9 @@ LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder);
  * If you call LDContextBuilder_AddKind a second time, with an already specified
  * kind, but a different key, then the key for that kind will be updated.
  *
- * @param builder The builder to add the kind to.
- * @param kind The kind to add.
- * @param key The key for that kind.
+ * @param builder The builder to add the kind to. Must not be NULL.
+ * @param kind The kind to add. Must not be NULL.
+ * @param key The key for that kind. Must not be NULL.
  */
 LD_EXPORT(void)
 LDContextBuilder_AddKind(LDContextBuilder builder,
@@ -74,9 +74,9 @@ LDContextBuilder_AddKind(LDContextBuilder builder,
  * You should not access the value after adding it to the builder, and you
  * do not need to call LDValue_Free on the value.
  *
- * @param kind The kind to add the attribute to.
- * @param attr_key The key of the attribute to add.
- * @param val The value of the attribute to add.
+ * @param kind The kind to add the attribute to. Must not be NULL.
+ * @param attr_key The key of the attribute to add. Must not be NULL.
+ * @param val The value of the attribute to add. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_Set(LDContextBuilder builder,
@@ -99,9 +99,9 @@ LDContextBuilder_Attributes_Set(LDContextBuilder builder,
  * convenience which also adds the attribute to the private attributes list,
  * as if using LDContextBuilder_Attributes_AddPrivateAttribute.
  *
- * @param kind The kind to set the private attribute for.
- * @param attr_key The key of the private attribute.
- * @param val The value of the private attribute.
+ * @param kind The kind to set the private attribute for. Must not be NULL.
+ * @param attr_key The key of the private attribute. Must not be NULL.
+ * @param val The value of the private attribute. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_SetPrivate(LDContextBuilder builder,
@@ -117,8 +117,8 @@ LDContextBuilder_Attributes_SetPrivate(LDContextBuilder builder,
  * This method will make a copy of the name string, and the caller remains
  * responsible for the original name string.
  *
- * @param kind The kind to set the name for.
- * @param name The name to set.
+ * @param kind The kind to set the name for. Must not be NULL.
+ * @param name The name to set. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_SetName(LDContextBuilder builder,
@@ -131,7 +131,7 @@ LDContextBuilder_Attributes_SetName(LDContextBuilder builder,
  * If true, the context will _not_ appear on the Contexts page in the
  * LaunchDarkly dashboard.
  *
- * @param kind The kind to set the anonymous attribute for.
+ * @param kind The kind to set the anonymous attribute for. Must not be NULL.
  * @param anonymous The value to set the anonymous attribute to.
  */
 LD_EXPORT(bool)
@@ -182,8 +182,8 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * This method will make a copy of the attr_ref string, and the caller remains
  * responsible for the original name string.
  *
- * @param kind The kind to set the attribute as private for.
- * @param attr_ref An attribute reference.
+ * @param kind The kind to set the attribute as private for. Must not be NULL.
+ * @param attr_ref An attribute reference. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_AddPrivateAttribute(LDContextBuilder builder,

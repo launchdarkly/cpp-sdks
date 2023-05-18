@@ -3,13 +3,14 @@
 namespace launchdarkly {
 /**
  * Log levels with kDebug being lowest severity and kError being highest
- * severity.
+ * severity. The values must not be changed to ensure backwards compatibility
+ * with the C API.
  */
 enum class LogLevel {
     kDebug = 0,
-    kInfo,
-    kWarn,
-    kError,
+    kInfo = 1,
+    kWarn = 2,
+    kError = 3,
 };
 
 /**

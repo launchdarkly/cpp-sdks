@@ -56,7 +56,8 @@ class EndpointsBuilder {
     EndpointsBuilder& EventsBaseUrl(std::string url);
 
     /**
-     * Sets a single base URL for a Relay Proxy instance.
+     * Sets a custom URL for a Relay Proxy instance. The streaming,
+     * polling, and events URLs are set automatically.
      * @param url URL to set.
      * @return Reference to this builder.
      */
@@ -64,10 +65,11 @@ class EndpointsBuilder {
 
     /**
      * Builds a ServiceEndpoints if the configuration is valid. If not,
-     * returns an error.
+     * returns an error. If any streaming, polling, or events URL is set,
+     * then all URLs must be set.
      * @return Unique pointer to ServiceEndpoints, or error.
      */
-    [[nodiscard]] tl::expected<built::ServiceEndpoints, Error> Build();
+    [[nodiscard]] tl::expected<built::ServiceEndpoints, Error> Build() const;
 
    private:
     std::optional<std::string> polling_base_url_;

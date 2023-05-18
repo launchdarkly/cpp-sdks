@@ -46,7 +46,14 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttributes(
 }
 
 template <typename SDK>
-tl::expected<built::Events, Error> EventsBuilder<SDK>::Build() {
+EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttribute(
+    AttributeReference attribute) {
+    config_.private_attributes_.insert(std::move(attribute));
+    return *this;
+}
+
+template <typename SDK>
+tl::expected<built::Events, Error> EventsBuilder<SDK>::Build() const {
     if (config_.Capacity() == 0) {
         return tl::unexpected(Error::kConfig_Events_ZeroCapacity);
     }

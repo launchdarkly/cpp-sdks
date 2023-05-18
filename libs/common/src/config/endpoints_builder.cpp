@@ -43,7 +43,8 @@ bool empty_string(std::optional<std::string> const& opt_string) {
 }
 
 template <typename SDK>
-tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build() {
+tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build()
+    const {
     // Empty URLs are not allowed.
     if (empty_string(polling_base_url_) || empty_string(streaming_base_url_) ||
         empty_string(events_base_url_)) {

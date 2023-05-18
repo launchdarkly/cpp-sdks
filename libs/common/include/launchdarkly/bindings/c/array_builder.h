@@ -34,8 +34,9 @@ LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder);
  * After calling this method the provider LDValue is consumed. It should not
  * be accessed, and the caller doesn't need to call LDValue_Free.
  *
- * @param array_builder The array builder to add the value to.
- * @param val The value to add.
+ * @param array_builder The array builder to add the value to.  Must not be
+ * NULL.
+ * @param val The value to add. Must not be NULL.
  */
 LD_EXPORT(void) LDArrayBuilder_Add(LDArrayBuilder array_builder, LDValue val);
 
@@ -45,8 +46,9 @@ LD_EXPORT(void) LDArrayBuilder_Add(LDArrayBuilder array_builder, LDValue val);
  * After calling this method the array builder is consumed. It should not be
  * used and the caller does not need to call LDArrayBuilder_Free.
  *
- * @param array_builder The array builder to build an LDValue from.
- * @return The built LDValue.
+ * @param array_builder The array builder to build an LDValue from. Must not be
+ * NULL.
+ * @return The built LDValue. Must not be NULL.
  */
 LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder);
 

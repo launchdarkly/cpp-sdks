@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/bindings/c/export.h>
+#include <launchdarkly/bindings/c/value.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -36,8 +36,8 @@ LD_EXPORT(void) LDObjectBuilder_Free(LDObjectBuilder builder);
  * be copied.
  *
  * @param array_builder The object builder to add the value to.
- * @param key The key for the value being added.
- * @param val The value to add.
+ * @param key The key for the value being added. Must not be NULL.
+ * @param val The value to add. Must not be NULL.
  */
 LD_EXPORT(void)
 LDObjectBuilder_Add(LDObjectBuilder builder, char const* key, LDValue val);
@@ -48,7 +48,7 @@ LDObjectBuilder_Add(LDObjectBuilder builder, char const* key, LDValue val);
  * After calling this method the object builder is consumed. It should not be
  * used and the caller does not need to call LDObjectBuilder_Free.
  *
- * @param builder The object builder to build an LDValue from.
+ * @param builder The object builder to build an LDValue from. Must not be NULL.
  * @return The built LDValue.
  */
 LD_EXPORT(LDValue) LDObjectBuilder_Build(LDObjectBuilder builder);

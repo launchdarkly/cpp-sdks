@@ -98,17 +98,17 @@ class HttpPropertiesBuilder {
     /**
      * Set all custom headers. This will replace any other customer headers
      * that were set with the Header method, or any previously set
-     * headers using the CustomHeaders method.
+     * headers using the Headers method.
      * @param base_headers The custom headers.
      * @return A reference to this builder.
      */
-    HttpPropertiesBuilder& CustomHeaders(
+    HttpPropertiesBuilder& Headers(
         std::map<std::string, std::string> base_headers);
 
     /**
      * Set a custom header value.
      *
-     * Calling CustomHeaders will replace any previously set values.
+     * Calling Headers will replace any previously set values.
      * @param key The key for the header.
      * @param value The header value.
      * @return A reference to this builder.

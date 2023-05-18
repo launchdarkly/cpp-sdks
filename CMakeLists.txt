@@ -27,6 +27,7 @@ option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
 
 if (BUILD_TESTING)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
+    add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak")

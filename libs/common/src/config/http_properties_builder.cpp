@@ -36,6 +36,13 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::ReadTimeout(
 }
 
 template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::WriteTimeout(
+    std::chrono::milliseconds write_timeout) {
+    write_timeout_ = write_timeout;
+    return *this;
+}
+
+template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::ResponseTimeout(
     std::chrono::milliseconds response_timeout) {
     response_timeout_ = response_timeout;
@@ -57,7 +64,7 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::WrapperVersion(
 }
 
 template <typename SDK>
-HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::CustomHeaders(
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Headers(
     std::map<std::string, std::string> base_headers) {
     base_headers_ = std::move(base_headers);
     return *this;

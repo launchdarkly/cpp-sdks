@@ -18,9 +18,9 @@ class PersistenceBuilder;
 template <>
 class PersistenceBuilder<ClientSDK> {
    public:
-    class None {};
+    class NoneBuilder {};
 
-    class Custom {
+    class CustomBuilder {
        public:
         /**
          * Set the backend to use for logging. The provided back-end should
@@ -28,25 +28,41 @@ class PersistenceBuilder<ClientSDK> {
          * @param backend The implementation of the backend.
          * @return A reference to this builder.
          */
-        Custom& Implementation(std::shared_ptr<IPersistence> implementation);
+        CustomBuilder& Implementation(
+            std::shared_ptr<IPersistence> implementation);
 
        private:
         std::shared_ptr<IPersistence> implementation_;
         friend class PersistenceBuilder;
     };
 
-    using PersistenceType = std::variant<None, Custom>;
+    using PersistenceType = std::variant<NoneBuilder, CustomBuilder>;
 
     PersistenceBuilder();
-    PersistenceBuilder(Custom custom);
-    PersistenceBuilder(None none);
 
     /**
      * Set the implementation of persistence.
-     * @param persistence Share
-     * @return
+     *
+     * The Custom and None convenience methods can be used to directly
+     * set the persistence type.
+     *
+     * @param persistence The builder for the type of persistence.
+     * @return A reference to this builder.
      */
-    PersistenceBuilder& Persistence(PersistenceType persistence);
+    PersistenceBuilder& Type(PersistenceType persistence);
+
+    /**
+     * Set the persistence to a custom implementation.
+     *
+     * @return A reference to this builder.
+     */
+    PersistenceBuilder& Custom(std::shared_ptr<IPersistence> implementation);
+
+    /**
+     * Disables persistence.
+     * @return A reference to this builder.
+     */
+    PersistenceBuilder& None();
 
     /**
      * Set the maximum number of contexts to retain cached flag data for.

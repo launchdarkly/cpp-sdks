@@ -75,27 +75,31 @@ int main() {
         return 1;
     }
 
-    Client client(
-        ConfigBuilder(key)
-            .ServiceEndpoints(
-                launchdarkly::client_side::EndpointsBuilder()
-                    // Set to http to demonstrate redirect to https.
-                    .PollingBaseUrl("http://sdk.launchdarkly.com")
-                    .StreamingBaseUrl("https://stream.launchdarkly.com")
-                    .EventsBaseUrl("https://events.launchdarkly.com"))
-            .DataSource(DataSourceBuilder()
-                            .Method(DataSourceBuilder::Polling().PollInterval(
-                                std::chrono::seconds{30}))
-                            .WithReasons(true)
-                            .UseReport(true))
-            .Logging(LoggingBuilder::BasicLogging().Level(LogLevel::kDebug))
-            .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
-                std::chrono::seconds(5)))
-            .Persistence(PersistenceBuilder::Custom().Implementation(
-                std::make_shared<FilePersistence>("ld_persist")))
-            .Build()
-            .value(),
-        ContextBuilder().kind("user", "ryan").build());
+    auto config_builder = ConfigBuilder(key);
+
+    config_builder.ServiceEndpoints()
+        .PollingBaseUrl("http://sdk.launchdarkly.com")
+        .StreamingBaseUrl("https://stream.launchdarkly.com")
+        .EventsBaseUrl("https://events.launchdarkly.com");
+    config_builder.DataSource()
+        .Method(
+            DataSourceBuilder::Polling().PollInterval(std::chrono::seconds{30}))
+        .WithReasons(true)
+        .UseReport(true);
+    config_builder.Logging().Logging(
+        LoggingBuilder::BasicLogging().Level(LogLevel::kDebug));
+    config_builder.Events().FlushInterval(std::chrono::seconds(5));
+    config_builder.Persistence().Custom(
+        std::make_shared<FilePersistence>("ld_persist"));
+
+    auto config = config_builder.Build();
+    if (!config) {
+        std::cout << config.error();
+        return 1;
+    }
+
+    Client client(std::move(*config),
+                  ContextBuilder().kind("user", "ryan").build());
 
     auto before_init = client.BoolVariationDetail("my-boolean-flag", false);
     // This should be the cached version from our persistence, if the
