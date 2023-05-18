@@ -7,8 +7,8 @@ namespace launchdarkly::client_side {
 class NullEventProcessor : public IEventProcessor {
    public:
     NullEventProcessor() = default;
-    void AsyncSend(events::InputEvent event) override;
-    void AsyncFlush() override;
-    void AsyncClose() override;
+    void SendAsync(events::InputEvent event) override;
+    void FlushAsync() override;
+    void ShutdownAsync() override;
 };
 }  // namespace launchdarkly::client_side

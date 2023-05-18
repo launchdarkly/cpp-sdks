@@ -13,24 +13,24 @@ class ClientEntity {
 
    private:
     tl::expected<nlohmann::json, std::string> Evaluate(
-        EvaluateFlagParams params);
+        EvaluateFlagParams const&);
 
     tl::expected<nlohmann::json, std::string> EvaluateDetail(
-        EvaluateFlagParams);
+        EvaluateFlagParams const&);
 
     tl::expected<nlohmann::json, std::string> EvaluateAll(
-        EvaluateAllFlagParams params);
+        EvaluateAllFlagParams const&);
 
     tl::expected<nlohmann::json, std::string> Identify(
-        IdentifyEventParams params);
+        IdentifyEventParams const&);
 
-    tl::expected<nlohmann::json, std::string> Custom(CustomEventParams params);
-
-    tl::expected<nlohmann::json, std::string> ContextBuild(
-        ContextBuildParams params);
-
-    tl::expected<nlohmann::json, std::string> ContextConvert(
-        ContextConvertParams params);
+    tl::expected<nlohmann::json, std::string> Custom(CustomEventParams const&);
 
     std::unique_ptr<launchdarkly::client_side::Client> client_;
 };
+
+static tl::expected<nlohmann::json, std::string> ContextConvert(
+    ContextConvertParams const&);
+
+static tl::expected<nlohmann::json, std::string> ContextBuild(
+    ContextBuildParams const&);

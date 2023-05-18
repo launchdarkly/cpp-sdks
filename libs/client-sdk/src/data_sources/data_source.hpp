@@ -1,12 +1,11 @@
 #pragma once
-
+#include <future>
 namespace launchdarkly::client_side {
 
 class IDataSource {
    public:
     virtual void Start() = 0;
-    virtual void Close() = 0;
-
+    virtual void ShutdownAsync(std::function<void()>) = 0;
     virtual ~IDataSource() = default;
     IDataSource(IDataSource const& item) = delete;
     IDataSource(IDataSource&& item) = delete;

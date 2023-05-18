@@ -12,17 +12,17 @@ class IEventProcessor {
      * capacity.
      * @param event InputEvent to deliver.
      */
-    virtual void AsyncSend(events::InputEvent event) = 0;
+    virtual void SendAsync(events::InputEvent event) = 0;
     /**
      * Asynchronously flush's the processor's events, returning as soon as
      * possible. Flushing may be a no-op if a flush is ongoing.
      */
-    virtual void AsyncFlush() = 0;
+    virtual void FlushAsync() = 0;
     /**
      * Asynchronously shutdown the processor. The processor should attempt to
      * flush all events before shutting down.
      */
-    virtual void AsyncClose() = 0;
+    virtual void ShutdownAsync() = 0;
 
     virtual ~IEventProcessor() = default;
     IEventProcessor(IEventProcessor const& item) = delete;

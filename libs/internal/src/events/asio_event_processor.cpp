@@ -175,10 +175,7 @@ void AsioEventProcessor<SDK>::ScheduleFlush() {
 
 template <typename SDK>
 void AsioEventProcessor<SDK>::AsyncFlush() {
-    boost::asio::post(io_, [this] {
-        boost::system::error_code ec;
-        Flush(FlushTrigger::Manual);
-    });
+    boost::asio::post(io_, [=] { Flush(FlushTrigger::Manual); });
 }
 
 template <typename SDK>

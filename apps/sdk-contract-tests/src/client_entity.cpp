@@ -7,13 +7,36 @@
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <chrono>
+#include <future>
+
 ClientEntity::ClientEntity(
     std::unique_ptr<launchdarkly::client_side::Client> client)
     : client_(std::move(client)) {}
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
-    IdentifyEventParams params) {
-    return tl::make_unexpected("identify not yet supported");
+    IdentifyEventParams const& params) {
+    boost::system::error_code ec;
+    auto json_value = boost::json::parse(params.context.dump(), ec);
+    if (ec) {
+        return tl::make_unexpected(ec.what());
+    }
+
+    auto maybe_ctx = boost::json::value_to<
+        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+        json_value);
+
+    if (!maybe_ctx) {
+        return tl::make_unexpected(
+            launchdarkly::ErrorToString(maybe_ctx.error()));
+    }
+
+    if (!maybe_ctx->valid()) {
+        return tl::make_unexpected(maybe_ctx->errors());
+    }
+
+    client_->IdentifyAsync(*maybe_ctx).wait();
+    return nlohmann::json{};
 }
 
 static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
@@ -38,8 +61,8 @@ static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
     }
 }
 
-tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
-    ContextBuildParams params) {
+tl::expected<nlohmann::json, std::string> ContextBuild(
+    ContextBuildParams const& params) {
     ContextResponse resp{};
 
     auto builder = launchdarkly::ContextBuilder();
@@ -62,8 +85,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextBuild(
     return resp;
 }
 
-tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
-    ContextConvertParams params) {
+tl::expected<nlohmann::json, std::string> ContextConvert(
+    ContextConvertParams const& params) {
     ContextResponse resp{};
 
     boost::system::error_code ec;
@@ -92,7 +115,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::ContextConvert(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
-    CustomEventParams params) {
+    CustomEventParams const& params) {
     auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
                                   boost::json::parse(params.data->dump()))
                             : launchdarkly::Value::Null();
@@ -113,7 +136,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
-    EvaluateAllFlagParams params) {
+    EvaluateAllFlagParams const& params) {
     EvaluateAllFlagsResponse resp{};
 
     boost::ignore_unused(params);
@@ -127,7 +150,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
-    EvaluateFlagParams params) {
+    EvaluateFlagParams const& params) {
     auto const& key = params.flagKey;
 
     auto const& defaultVal = params.defaultValue;
@@ -202,7 +225,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
     return result;
 }
 tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
-    EvaluateFlagParams params) {
+    EvaluateFlagParams const& params) {
     if (params.detail) {
         return EvaluateDetail(params);
     }
@@ -279,7 +302,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
             }
             return Custom(*params.customEvent);
         case Command::FlushEvents:
-            client_->AsyncFlush();
+            client_->FlushAsync();
             return nlohmann::json{};
         case Command::ContextBuild:
             if (!params.contextBuild) {

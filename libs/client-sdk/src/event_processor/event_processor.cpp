@@ -7,15 +7,15 @@ EventProcessor::EventProcessor(boost::asio::any_io_executor const& io,
                                Logger& logger)
     : impl_(io, config, logger) {}
 
-void EventProcessor::AsyncSend(launchdarkly::events::InputEvent event) {
+void EventProcessor::SendAsync(events::InputEvent event) {
     impl_.AsyncSend(std::move(event));
 }
 
-void EventProcessor::AsyncFlush() {
+void EventProcessor::FlushAsync() {
     impl_.AsyncFlush();
 }
 
-void EventProcessor::AsyncClose() {
+void EventProcessor::ShutdownAsync() {
     impl_.AsyncClose();
 }
 
