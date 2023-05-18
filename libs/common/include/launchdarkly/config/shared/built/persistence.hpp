@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/persistence/persistence.hpp>
 

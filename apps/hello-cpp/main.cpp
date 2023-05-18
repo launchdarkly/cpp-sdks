@@ -91,9 +91,8 @@ int main() {
             .Logging(LoggingBuilder::BasicLogging().Level(LogLevel::kDebug))
             .Events(launchdarkly::client_side::EventsBuilder().FlushInterval(
                 std::chrono::seconds(5)))
-            .Persistence(
-                PersistenceBuilder(PersistenceBuilder::Custom().Implementation(
-                    std::make_unique<FilePersistence>("ld_persist"))))
+            .Persistence(PersistenceBuilder::Custom().Implementation(
+                std::make_shared<FilePersistence>("ld_persist")))
             .Build()
             .value(),
         ContextBuilder().kind("user", "ryan").build());

@@ -17,9 +17,10 @@
  * - The value can be any string, including an empty string.
  *
  * The SDK assumes that the persistence is only being used by a single instance
- * of the SDK per SDK key (two different SDK instances, which 2 different SDK
- * keys could use the same instance). It does not implement read-through
- * behavior. It reads values at SDK initialization or when changing contexts.
+ * of the SDK per SDK key (two different SDK instances, with 2 different SDK
+ * keys could use the same persistence instance). It does not implement
+ * read-through behavior. It reads values at SDK initialization or when
+ * changing contexts.
  *
  * The SDK, with correct usage, will not have overlapping writes to the same
  * key. The Read/Write methods may not always be called from the same thread.
