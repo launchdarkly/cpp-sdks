@@ -2,9 +2,11 @@
 #include <cassert>
 #include <functional>
 #include <launchdarkly/error.hpp>
+#include <optional>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
+namespace launchdarkly {
 template <typename T, typename = void>
 struct has_result_type : std::false_type {};
 
@@ -64,6 +66,35 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
     return LDStatus_Success();
 }
 
+template <typename OptType, typename OutResult>
+bool OptReturn(std::optional<OptType> const& opt, OutResult* out_param) {
+    if (opt) {
+        *out_param = *opt;
+        return true;
+    }
+    return false;
+}
+
+template <typename OptType, typename OutResult>
+bool OptReturnStaticCast(std::optional<OptType> const& opt,
+                         OutResult* out_param) {
+    if (opt) {
+        *out_param = static_cast<OutResult>(*opt);
+        return true;
+    }
+    return false;
+}
+
+template <typename OptType, typename OutResult>
+bool OptReturnReinterpretCast(std::optional<OptType>& opt,
+                              OutResult* out_param) {
+    if (opt) {
+        *out_param = reinterpret_cast<OutResult>(&(opt.value()));
+        return true;
+    }
+    return false;
+}
+
 // Macro is named the same as in the C Server SDK.
 
 #ifdef LAUNCHDARKLY_USE_ASSERT
@@ -74,4 +105,5 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
 
 #define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
 
+}  // namespace launchdarkly
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

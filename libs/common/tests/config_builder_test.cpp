@@ -48,7 +48,7 @@ TEST_F(ConfigBuilderTest,
 TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     using namespace launchdarkly::client_side;
     auto builder = ConfigBuilder("sdk-123").Offline(true);
-    builder.ServiceEndpoints().RelayProxy("foo");
+    builder.ServiceEndpoints().RelayProxyBaseURL("foo");
     builder.AppInfo().Identifier("bar").Version("baz");
 
     auto config = builder.Build();
@@ -57,7 +57,7 @@ TEST_F(ConfigBuilderTest, CustomBuilderReflectsChanges) {
     ASSERT_EQ(config->SdkKey(), "sdk-123");
     ASSERT_TRUE(config->Offline());
     ASSERT_EQ(config->ServiceEndpoints(),
-              EndpointsBuilder().RelayProxy("foo").Build());
+              EndpointsBuilder().RelayProxyBaseURL("foo").Build());
     ASSERT_EQ(config->ApplicationTag(),
               "application-id/bar application-version/baz");
 }

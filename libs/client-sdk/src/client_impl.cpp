@@ -124,11 +124,11 @@ void ClientImpl::TrackInternal(std::string event_name,
 void ClientImpl::Track(std::string event_name,
                        Value data,
                        double metric_value) {
-    this->TrackInternal(std::move(event_name), data, metric_value);
+    this->TrackInternal(std::move(event_name), std::move(data), metric_value);
 }
 
 void ClientImpl::Track(std::string event_name, Value data) {
-    this->TrackInternal(std::move(event_name), data, std::nullopt);
+    this->TrackInternal(std::move(event_name), std::move(data), std::nullopt);
 }
 
 void ClientImpl::Track(std::string event_name) {

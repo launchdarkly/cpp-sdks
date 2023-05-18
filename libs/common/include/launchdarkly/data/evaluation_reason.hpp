@@ -12,6 +12,9 @@ namespace launchdarkly {
  */
 class EvaluationReason {
    public:
+    /**
+     * Do not change these values. They must remain stable for the C API.
+     */
     enum class Kind {
         // The flag was off and therefore returned its configured off value.
         kOff = 0,
@@ -30,6 +33,9 @@ class EvaluationReason {
     };
     friend std::ostream& operator<<(std::ostream& out, Kind const& kind);
 
+    /**
+     * Do not change these values. They must remain stable for the C API.
+     */
     enum class ErrorKind {
         // The SDK was not yet fully initialized and cannot evaluate flags.
         kClientNotReady = 0,
