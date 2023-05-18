@@ -4,7 +4,7 @@
 #include <launchdarkly/bindings/c/array_builder.h>
 #include <launchdarkly/client_side/bindings/c/sdk.h>
 #include <launchdarkly/client_side/client.hpp>
-#include "../../../../common/src/c_binding_helpers.hpp"
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 
 #include <boost/core/ignore_unused.hpp>
 #include <cstring>

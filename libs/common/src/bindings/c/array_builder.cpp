@@ -2,8 +2,8 @@
 // NOLINTBEGIN OCInconsistentNamingInspection
 
 #include <launchdarkly/bindings/c/array_builder.h>
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/value.hpp>
-#include "../../c_binding_helpers.hpp"
 
 #include <vector>
 
