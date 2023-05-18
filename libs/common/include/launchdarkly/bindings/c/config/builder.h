@@ -6,6 +6,7 @@
 #include <launchdarkly/bindings/c/export.h>
 #include <launchdarkly/bindings/c/status.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -30,15 +31,15 @@ enum LDLogLevel {
     LD_LOG_ERROR = 3,
 };
 
+typedef bool (*EnabledFn)(enum LDLogLevel level, void* user_data);
+typedef void (*WriteFn)(enum LDLogLevel level,
+                        char const* msg,
+                        void* user_data);
+
 /**
  * Defines a logging interface suitable for use with SDK configuration.
  */
 struct LDLogBackend {
-    typedef bool (*EnabledFn)(enum LDLogLevel level, void* user_data);
-    typedef void (*WriteFn)(enum LDLogLevel level,
-                            char const* msg,
-                            void* user_data);
-
     /**
      * Check if the specified log level is enabled. Must be thread safe.
      * @param level The log level to check.
@@ -440,7 +441,8 @@ LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b);
  * initialized with LDLogBackend_Init.
  */
 LD_EXPORT(void)
-LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend);
+LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b,
+                               struct LDLogBackend backend);
 
 /**
  * Configures the SDK with custom logging.
