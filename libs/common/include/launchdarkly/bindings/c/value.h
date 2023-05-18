@@ -109,7 +109,7 @@ LD_EXPORT(LDValue) LDValue_NewNumber(double val);
  * The input string will be copied. To avoid the copy, see
  * LDValue_ConstantString.
  *
- * @param val Constant reference to a string. The string is copied. Cannot be
+ * @param val Constant reference to a string. The string is copied. Must not be
  * NULL.
  * @return New LDValue.
  */
@@ -118,7 +118,7 @@ LD_EXPORT(LDValue) LDValue_NewString(char const* val);
 /**
  * Allocates an LDValue by cloning an existing LDValue.
  *
- * @param source Source LDValue. Must not be `NULL`.
+ * @param source Source LDValue. Must not be NULL.
  * @return New LDValue.
  */
 LD_EXPORT(LDValue) LDValue_NewValue(LDValue val);
@@ -129,13 +129,13 @@ LD_EXPORT(LDValue) LDValue_NewValue(LDValue val);
  * An LDValue should only be freed when directly owned by the caller, i.e.,
  * it was never moved into an LDArray or LDObject.
  *
- * @param value LDValue to free. No-op if NULL.
+ * @param value LDValue to free.
  */
 LD_EXPORT(void) LDValue_Free(LDValue val);
 
 /**
  * Returns the type of an LDValue.
- * @param value LDValue to inspect. Cannot be NULL.
+ * @param value LDValue to inspect. Must not be NULL.
  * @return Type of the LDValue, or LDValueType_Unrecognized if the type is
  * unrecognized.
  */
@@ -144,14 +144,14 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val);
 /**
  * Obtain value of a boolean-type LDValue, otherwise returns LDBooleanFalse.
  *
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return Boolean value, or false if not boolean-type.
  */
 LD_EXPORT(bool) LDValue_GetBool(LDValue val);
 
 /**
  * Obtain value of a number-type LDValue, otherwise return 0.
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return Number value, or 0 if not number-type.
  */
 LD_EXPORT(double) LDValue_GetNumber(LDValue val);
@@ -162,7 +162,7 @@ LD_EXPORT(double) LDValue_GetNumber(LDValue val);
  * the LDValue. If you need the string outside this lifetime, then a copy
  * should be made.
  *
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return String value, or empty string if not string-type.
  */
 LD_EXPORT(char const*) LDValue_GetString(LDValue val);
@@ -173,7 +173,7 @@ LD_EXPORT(char const*) LDValue_GetString(LDValue val);
  *
  * If not an array-type or object-type, returns 0.
  *
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return Count of LDValue elements, or 0 if not array-type/object-type.
  */
 LD_EXPORT(unsigned int) LDValue_Count(LDValue val);
@@ -183,7 +183,7 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val);
  *
  * The iterator starts at the first element.
  *
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return Iterator, or NULL if not an array-type. The iterator
  * must should be destroyed with LDValue_DestroyArrayIter.
  */
@@ -193,14 +193,14 @@ LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val);
  * Move the array-type iterator to the next item. Should only be done for an
  * iterator which is not at the end.
  *
- * @param iter The iterator to advance.
+ * @param iter The iterator to advance. Must not be NULL.
  */
 LD_EXPORT(void) LDValue_ArrayIter_Next(LDValue_ArrayIter iter);
 
 /**
  * Check if an array-type iterator is at the end.
  *
- * @param iter The iterator to check.
+ * @param iter The iterator to check. Must not be NULL.
  * @return True if the iterator is at the end.
  */
 LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter);
@@ -208,7 +208,7 @@ LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter);
 /**
  * Get the value for the array-type iterator.
  *
- * @param iter The iterator to get a value for.
+ * @param iter The iterator to get a value for. Must not be NULL.
  * @return The value.
  */
 LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter);
@@ -224,7 +224,7 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter);
  *
  * The iterator starts at the first element.
  *
- * @param value Target LDValue. Cannot be NULL.
+ * @param value Target LDValue. Must not be NULL.
  * @return Iterator, or NULL if not an object-type. The iterator
  * must should be destroyed with LDValue_DestroyObjectIter.
  */
@@ -234,14 +234,14 @@ LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val);
  * Move the object-type iterator to the next item. Should only be done for an
  * iterator which is not at the end.
  *
- * @param iter The iterator to advance.
+ * @param iter The iterator to advance. Must not be NULL.
  */
 LD_EXPORT(void) LDValue_ObjectIter_Next(LDValue_ObjectIter iter);
 
 /**
  * Check if an object-type iterator is at the end.
  *
- * @param iter The iterator to check.
+ * @param iter The iterator to check. Must not be NULL.
  * @return True if the iterator is at the end.
  */
 LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter);
@@ -249,7 +249,7 @@ LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter);
 /**
  * Get the value for an object-type iterator.
  *
- * @param iter The iterator to get a value for.
+ * @param iter The iterator to get a value for. Must not be NULL.
  * @return The value.
  */
 LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter);
@@ -259,7 +259,7 @@ LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter);
  *
  * The returned key has a lifetime attached to that of the LDValue.
  *
- * @param iter The iterator to get a key for.
+ * @param iter The iterator to get a key for. Must not be NULL.
  * @return The key.
  */
 LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter);

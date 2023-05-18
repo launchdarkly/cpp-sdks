@@ -57,6 +57,7 @@ class LogBackendWrapper : public launchdarkly::ILogBackend {
 LD_EXPORT(LDClientConfigBuilder)
 LDClientConfigBuilder_New(char const* sdk_key) {
     LD_ASSERT_NOT_NULL(sdk_key);
+
     return FROM_BUILDER(new ConfigBuilder(sdk_key));
 }
 
@@ -65,6 +66,7 @@ LDClientConfigBuilder_Build(LDClientConfigBuilder b,
                             LDClientConfig* out_config) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(out_config);
+
     return ConsumeBuilder<ConfigBuilder>(b, out_config);
 }
 
@@ -78,6 +80,7 @@ LDClientConfigBuilder_ServiceEndpoints_PollingBaseURL(LDClientConfigBuilder b,
                                                       char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
+
     TO_BUILDER(b)->ServiceEndpoints().PollingBaseUrl(url);
 }
 
@@ -86,6 +89,7 @@ LDClientConfigBuilder_ServiceEndpoints_StreamingBaseURL(LDClientConfigBuilder b,
                                                         char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
+
     TO_BUILDER(b)->ServiceEndpoints().StreamingBaseUrl(url);
 }
 
@@ -94,6 +98,7 @@ LDClientConfigBuilder_ServiceEndpoints_EventsBaseURL(LDClientConfigBuilder b,
                                                      char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
+
     TO_BUILDER(b)->ServiceEndpoints().EventsBaseUrl(url);
 }
 
@@ -103,6 +108,7 @@ LDClientConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
     char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
+
     TO_BUILDER(b)->ServiceEndpoints().RelayProxy(url);
 }
 
@@ -111,6 +117,7 @@ LDClientConfigBuilder_AppInfo_Identifier(LDClientConfigBuilder b,
                                          char const* app_id) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(app_id);
+
     TO_BUILDER(b)->AppInfo().Identifier(app_id);
 }
 
@@ -119,18 +126,21 @@ LDClientConfigBuilder_AppInfo_Version(LDClientConfigBuilder b,
                                       char const* app_version) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(app_version);
+
     TO_BUILDER(b)->AppInfo().Version(app_version);
 }
 
 LD_EXPORT(void)
 LDClientConfigBuilder_Offline(LDClientConfigBuilder b, bool offline) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Offline(offline);
 }
 
 LD_EXPORT(void)
 LDClientConfigBuilder_Events_Enabled(LDClientConfigBuilder b, bool enabled) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Events().Enabled(enabled);
 }
 
@@ -138,6 +148,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Events_Capacity(LDClientConfigBuilder b,
                                       size_t capacity) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Events().Capacity(capacity);
 }
 
@@ -145,6 +156,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Events_FlushIntervalMs(LDClientConfigBuilder b,
                                              unsigned int milliseconds) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Events().FlushInterval(
         std::chrono::milliseconds{milliseconds});
 }
@@ -153,6 +165,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Events_AllAttributesPrivate(LDClientConfigBuilder b,
                                                   bool all_attributes_private) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Events().AllAttributesPrivate(all_attributes_private);
 }
 
@@ -160,6 +173,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Events_PrivateAttribute(LDClientConfigBuilder b,
                                               char const* attribute_reference) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Events().PrivateAttribute(attribute_reference);
 }
 
@@ -167,6 +181,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_WithReasons(LDClientConfigBuilder b,
                                              bool with_reasons) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->DataSource().WithReasons(with_reasons);
 }
 
@@ -174,6 +189,7 @@ LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_UseReport(LDClientConfigBuilder b,
                                            bool use_report) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->DataSource().UseReport(use_report);
 }
 
@@ -209,6 +225,7 @@ LD_EXPORT(void)
 LDDataSourceStreamBuilder_InitialReconnectDelayMs(LDDataSourceStreamBuilder b,
                                                   unsigned int milliseconds) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_STREAM_BUILDER(b)->InitialReconnectDelay(
         std::chrono::milliseconds{milliseconds});
 }
@@ -225,6 +242,7 @@ LD_EXPORT(void)
 LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
                                   unsigned int seconds) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});
 }
 
@@ -237,6 +255,7 @@ LDClientConfigBuilder_HttpProperties_WrapperName(LDClientConfigBuilder b,
                                                  char const* wrapper_name) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(wrapper_name);
+
     TO_BUILDER(b)->HttpProperties().WrapperName(wrapper_name);
 }
 
@@ -246,6 +265,7 @@ LDClientConfigBuilder_HttpProperties_WrapperVersion(
     char const* wrapper_version) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(wrapper_version);
+
     TO_BUILDER(b)->HttpProperties().WrapperVersion(wrapper_version);
 }
 
@@ -256,6 +276,7 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(key);
     LD_ASSERT_NOT_NULL(value);
+
     TO_BUILDER(b)->HttpProperties().Header(key, value);
 }
 
@@ -270,6 +291,7 @@ LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b) {
 LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_BUILDER(b)->Logging().Logging(LoggingBuilder::NoLogging());
 }
 
@@ -277,6 +299,7 @@ LD_EXPORT(void)
 LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level) {
     using launchdarkly::LogLevel;
     LD_ASSERT_NOT_NULL(b);
+
     LoggingBuilder::BasicLogging* logger = TO_BASIC_LOGGING_BUILDER(b);
     logger->Level(static_cast<LogLevel>(level));
 }
@@ -284,6 +307,7 @@ LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level) {
 void LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(tag);
+
     TO_BASIC_LOGGING_BUILDER(b)->Tag(tag);
 }
 
@@ -292,6 +316,7 @@ LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
                                     LDLoggingBasicBuilder basic_builder) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(basic_builder);
+
     LoggingBuilder::BasicLogging* bb = TO_BASIC_LOGGING_BUILDER(basic_builder);
     TO_BUILDER(b)->Logging().Logging(*bb);
     LDLoggingBasicBuilder_Free(basic_builder);
@@ -316,6 +341,7 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
                                      LDLoggingCustomBuilder custom_builder) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(custom_builder);
+
     LoggingBuilder::CustomLogging* cb =
         TO_CUSTOM_LOGGING_BUILDER(custom_builder);
     TO_BUILDER(b)->Logging().Logging(*cb);
@@ -325,6 +351,7 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
 LD_EXPORT(void)
 LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
     LD_ASSERT_NOT_NULL(b);
+
     TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
         std::make_shared<LogBackendWrapper>(backend));
 }
