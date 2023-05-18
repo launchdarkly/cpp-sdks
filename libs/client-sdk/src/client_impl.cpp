@@ -60,7 +60,6 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
 
 ClientImpl::ClientImpl(Config config, Context context)
     : config_(config),
-      offline_(config.Offline()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
