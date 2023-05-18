@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "client_impl.hpp"
+#include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
 #include "event_processor/event_processor.hpp"
@@ -32,6 +33,9 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     flag_manager::FlagUpdater& flag_updater,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
+    if (config.Offline()) {
+        return std::make_shared<data_sources::NullDataSource>(status_manager);
+    }
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
         return std::make_shared<
@@ -56,6 +60,7 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
 
 ClientImpl::ClientImpl(Config config, Context context)
     : config_(config),
+      offline_(config.Offline()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
@@ -68,7 +73,7 @@ ClientImpl::ClientImpl(Config config, Context context)
       flag_updater_(flag_manager_),
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
-    if (config.Events().Enabled()) {
+    if (config.Events().Enabled() && !config.Offline()) {
         event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
                                                             config, logger_);
     } else {
@@ -86,6 +91,11 @@ ClientImpl::ClientImpl(Config config, Context context)
             init_waiter_.notify_all();
         }
     });
+
+    if (config.Offline()) {
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "Starting LaunchDarkly client in offline mode";
+    }
 
     // Should listen to status before attempting to start.
     data_source_->Start();

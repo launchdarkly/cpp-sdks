@@ -113,6 +113,7 @@ class ClientImpl : public IClient {
                               std::function<void()> user_completion);
 
     Config config_;
+    bool offline_;
 
     Logger logger_;
     boost::asio::io_context ioc_;
