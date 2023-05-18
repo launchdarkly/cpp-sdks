@@ -15,6 +15,7 @@ using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagPersistence;
 using launchdarkly::client_side::flag_manager::FlagStore;
 using launchdarkly::client_side::flag_manager::FlagUpdater;
+using launchdarkly::client_side::flag_manager::PersistenceEncodeKey;
 
 class TestPersistence : public IPersistence {
    public:
@@ -75,20 +76,16 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
 
     // Created the index.
     EXPECT_EQ(
-        R"({"index":[{"id":"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d","timestamp":500}]})",
+        R"({"index":[{"id":"CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0=","timestamp":500}]})",
         persistence->store_
-            ["LaunchDarkly_"
-             "ad44dc8e51cfbfa55e81ddbb626b466241069045066846e7e4cd096131505290"]
+            ["LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA="]
             ["ContextIndex"]);
 
     // Put the cache in for the specific context.
-    EXPECT_EQ(
-        R"({"flagA":{"version":1,"value":"test"}})",
-        persistence->store_
-            ["LaunchDarkly_"
-             "ad44dc8e51cfbfa55e81ddbb626b466241069045066846e7e4cd096131505290"]
-            ["0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1"
-             "d"]);
+    EXPECT_EQ(R"({"flagA":{"version":1,"value":"test"}})",
+              persistence->store_
+                  ["LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA="]
+                  ["CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0="]);
 }
 
 TEST(FlagPersistenceTests, CanLoadCache) {
@@ -99,11 +96,10 @@ TEST(FlagPersistenceTests, CanLoadCache) {
 
     auto persistence = std::make_shared<
         TestPersistence>(TestPersistence::StoreType{
-        {"LaunchDarkly_"
-         "ad44dc8e51cfbfa55e81ddbb626b466241069045066846e7e4cd096131505290",
+        {"LaunchDarkly_rUTcjlHPv6Vegd27YmtGYkEGkEUGaEbn5M0JYTFQUpA=",
          {{"ContextIndex",
-           R"([{"id":"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d","timestamp":500}])"},
-          {"0845e3658edc1c91bfc9d172eeae3e60417056b1b7fe9909c00e05023adb7f1d",
+           R"([{"id":"CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0=","timestamp":500}])"},
+          {"CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0=",
            R"({"flagA":{"version":1,"value":"test"}})"}}}});
 
     FlagPersistence flag_persistence("the-key", &updater, store, persistence,
@@ -170,12 +166,9 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     auto& space = persistence->store_.begin()->second;
     EXPECT_EQ(3, space.size());
     // Sha256 potato:user-key
-    EXPECT_EQ(0, space.count("423dbc8f0d4b15f7b2c466479be01beb4ded297f9d4efdce9"
-                             "08ecb6182341495"));
+    EXPECT_EQ(0, space.count(PersistenceEncodeKey("potato:user-key")));
     // Sha256 potato:bob-key
-    EXPECT_EQ(1, space.count("4d88492463db48c874deef4b87a96c952dc6d192a0ed2f0cf"
-                             "ee88485548e4035"));
+    EXPECT_EQ(1, space.count(PersistenceEncodeKey("potato:bob-key")));
     // Sha256 potato:susan-key
-    EXPECT_EQ(1, space.count("2805a9631ca563307b71b1533acb1f74f938418ebdfe91f5a"
-                             "728e792f515831a"));
+    EXPECT_EQ(1, space.count(PersistenceEncodeKey("potato:susan-key")));
 }

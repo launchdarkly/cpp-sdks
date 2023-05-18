@@ -14,6 +14,8 @@
 
 namespace launchdarkly::client_side::flag_manager {
 
+std::string PersistenceEncodeKey(std::string const& input);
+
 class FlagPersistence : public IDataSourceUpdateSink {
    public:
     using TimeStampsource =

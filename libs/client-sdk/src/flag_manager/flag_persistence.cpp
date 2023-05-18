@@ -1,14 +1,17 @@
 #include "flag_persistence.hpp"
 #include "../serialization/json_all_flags.hpp"
 
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/encoding/sha_256.hpp>
 
 #include <utility>
 
 namespace launchdarkly::client_side::flag_manager {
 
-static std::string PersistenceEncodeKey(std::string const& input) {
-    return encoding::Sha256String(input);
+std::string PersistenceEncodeKey(std::string const& input) {
+    auto bytes = encoding::Sha256String(input);
+    std::string byte_str(reinterpret_cast<char*>(bytes.begin()), bytes.size());
+    return encoding::Base64UrlEncode(byte_str);
 }
 
 static std::string MakeEnvironment(std::string const& prefix,
