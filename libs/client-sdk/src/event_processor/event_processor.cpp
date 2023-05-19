@@ -4,12 +4,11 @@ namespace launchdarkly::client_side {
 
 EventProcessor::EventProcessor(
     boost::asio::any_io_executor const& io,
-    std::string sdk_key,
-    config::shared::built::ServiceEndpoints endpoints,
-    config::shared::built::Events events_config,
-    config::shared::built::HttpProperties http_properties,
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::Events const& events_config,
+    config::shared::built::HttpProperties const& http_properties,
     Logger& logger)
-    : impl_(io, sdk_key, endpoints, events_config, http_properties, logger) {}
+    : impl_(io, endpoints, events_config, http_properties, logger) {}
 
 void EventProcessor::SendAsync(events::InputEvent event) {
     impl_.AsyncSend(std::move(event));

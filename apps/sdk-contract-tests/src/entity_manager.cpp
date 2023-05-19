@@ -114,6 +114,15 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         datasource.UseReport(*in.clientSide->useReport);
     }
 
+    if (in.tags) {
+        if (in.tags->applicationId) {
+            config_builder.AppInfo().Identifier(*in.tags->applicationId);
+        }
+        if (in.tags->applicationVersion) {
+            config_builder.AppInfo().Version(*in.tags->applicationVersion);
+        }
+    }
+
     auto config = config_builder.Build();
     if (!config) {
         LD_LOG(logger_, LogLevel::kWarn)

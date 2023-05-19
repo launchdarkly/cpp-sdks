@@ -30,25 +30,35 @@ using launchdarkly::config::shared::built::HttpProperties;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
     HttpProperties http_properties,
+    std::optional<std::string> app_tags,
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
     flag_manager::FlagUpdater& flag_updater,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
+    auto builder = HttpPropertiesBuilder(http_properties);
+
+    // Event sources should include application tags.
+    if (app_tags) {
+        builder.Header("x-launchdarkly-tags", *app_tags);
+    }
+
+    auto data_source_properties = builder.Build();
+
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
-            config.SdkKey(), config.ServiceEndpoints(),
-            config.DataSourceConfig(), http_properties, executor, context,
-            &flag_updater, status_manager, logger);
+            config.ServiceEndpoints(), config.DataSourceConfig(),
+            data_source_properties, executor, context, &flag_updater,
+            status_manager, logger);
     }
     return std::make_shared<
         launchdarkly::client_side::data_sources::PollingDataSource>(
-        config.SdkKey(), config.ServiceEndpoints(), config.DataSourceConfig(),
-        http_properties, executor, context, &flag_updater, status_manager,
-        logger);
+        config.ServiceEndpoints(), config.DataSourceConfig(),
+        data_source_properties, executor, context, &flag_updater,
+        status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -66,14 +76,15 @@ ClientImpl::ClientImpl(Config config, Context context, std::string version)
     : config_(config),
       http_properties_(HttpPropertiesBuilder(config.HttpProperties())
                            .Header("user-agent", "CPPClient/" + version)
+                           .Header("authorization", config.SdkKey())
                            .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
-      data_source_factory_([this]() {
-          return MakeDataSource(http_properties_, config_, context_,
-                                ioc_.get_executor(), flag_updater_,
-                                status_manager_, logger_);
+      data_source_factory_([&config, this]() {
+          return MakeDataSource(http_properties_, config.ApplicationTag(),
+                                config_, context_, ioc_.get_executor(),
+                                flag_updater_, status_manager_, logger_);
       }),
       data_source_(data_source_factory_()),
       event_processor_(nullptr),
@@ -82,8 +93,8 @@ ClientImpl::ClientImpl(Config config, Context context, std::string version)
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<EventProcessor>(
-            ioc_.get_executor(), config.SdkKey(), config.ServiceEndpoints(),
-            config.Events(), http_properties_, logger_);
+            ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
+            http_properties_, logger_);
     } else {
         event_processor_ = std::make_unique<NullEventProcessor>();
     }

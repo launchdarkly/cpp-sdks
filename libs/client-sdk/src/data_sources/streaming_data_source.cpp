@@ -19,7 +19,6 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
 
 StreamingDataSource::StreamingDataSource(
-    std::string const& sdk_key,
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
         data_source_config,
@@ -37,7 +36,6 @@ StreamingDataSource::StreamingDataSource(
       context_(std::move(context)),
       http_config_(http_properties),
       data_source_config_(data_source_config),
-      sdk_key_(sdk_key),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
@@ -106,7 +104,6 @@ void StreamingDataSource::Start() {
 
     client_builder.connect_timeout(http_config_.ConnectTimeout());
 
-    client_builder.header("authorization", sdk_key_);
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }

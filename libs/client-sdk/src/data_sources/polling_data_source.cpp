@@ -16,7 +16,6 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
 static network::HttpRequest MakeRequest(
-    std::string sdk_key,
     config::shared::built::ServiceEndpoints endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK>
         data_source_config,
@@ -58,14 +57,11 @@ static network::HttpRequest MakeRequest(
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
         builder(http_properties);
 
-    builder.Header("authorization", sdk_key);
-
     // If no URL is set, then we will fail the request.
     return {url.value_or(""), method, builder.Build(), body};
 }
 
 PollingDataSource::PollingDataSource(
-    std::string const& sdk_key,
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
         data_source_config,
@@ -87,8 +83,7 @@ PollingDataSource::PollingDataSource(
               config::shared::built::PollingConfig<config::shared::ClientSDK>>(
               data_source_config.method)
               .poll_interval),
-      request_(MakeRequest(sdk_key,
-                           endpoints,
+      request_(MakeRequest(endpoints,
                            data_source_config,
                            http_properties,
                            context)) {

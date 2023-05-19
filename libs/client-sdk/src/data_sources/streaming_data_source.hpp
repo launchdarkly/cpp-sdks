@@ -26,7 +26,6 @@ class StreamingDataSource final
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
-        std::string const& sdk_key,
         config::shared::built::ServiceEndpoints const& endpoints,
         config::shared::built::DataSourceConfig<
             config::shared::ClientSDK> const& data_source_config,
@@ -53,8 +52,6 @@ class StreamingDataSource final
         data_source_config_;
 
     config::shared::built::HttpProperties http_config_;
-
-    std::string sdk_key_;
 
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;

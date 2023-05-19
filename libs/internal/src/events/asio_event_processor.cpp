@@ -29,7 +29,6 @@ overloaded(Ts...) -> overloaded<Ts...>;
 template <typename SDK>
 AsioEventProcessor<SDK>::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
-    std::string const& sdk_key,
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::Events const& events_config,
     config::shared::built::HttpProperties const& http_properties,
@@ -41,7 +40,6 @@ AsioEventProcessor<SDK>::AsioEventProcessor(
       timer_(io_),
       url_(endpoints.EventsBaseUrl() + events_config.Path()),
       http_props_(http_properties),
-      authorization_(sdk_key),
       uuids_(),
       workers_(io_,
                events_config.FlushWorkers(),
@@ -206,7 +204,6 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
 
     props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
-    props.Header(to_string(http::field::authorization), authorization_);
     props.Header(to_string(http::field::content_type), "application/json");
 
     return EventBatch(url_, props.Build(), events);

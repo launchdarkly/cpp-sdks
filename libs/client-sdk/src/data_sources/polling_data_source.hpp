@@ -22,7 +22,6 @@ class PollingDataSource
       public std::enable_shared_from_this<PollingDataSource> {
    public:
     PollingDataSource(
-        std::string const& dk_key,
         config::shared::built::ServiceEndpoints const& endpoints,
         config::shared::built::DataSourceConfig<
             config::shared::ClientSDK> const& data_source_config,

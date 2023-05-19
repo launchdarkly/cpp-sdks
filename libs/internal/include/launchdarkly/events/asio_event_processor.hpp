@@ -29,7 +29,6 @@ class AsioEventProcessor {
    public:
     AsioEventProcessor(
         boost::asio::any_io_executor const& io,
-        std::string const& sdk_key,
         config::shared::built::ServiceEndpoints const& endpoints,
         config::shared::built::Events const& events_config,
         config::shared::built::HttpProperties const& http_properties,
@@ -56,7 +55,6 @@ class AsioEventProcessor {
     boost::asio::steady_timer timer_;
 
     std::string url_;
-    std::string authorization_;
 
     config::shared::built::HttpProperties http_props_;
 

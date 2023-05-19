@@ -48,10 +48,8 @@ struct Defaults<ClientSDK> {
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
+        return {std::chrono::seconds{10}, std::chrono::seconds{10},
+                std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
@@ -93,10 +91,8 @@ struct Defaults<ServerSDK> {
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{2},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
+        return {std::chrono::seconds{2}, std::chrono::seconds{10},
+                std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
