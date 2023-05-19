@@ -30,7 +30,7 @@
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context, std::string version);
+    ClientImpl(Config config, Context context, std::string const& version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -88,7 +88,7 @@ class ClientImpl : public IClient {
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
-    ~ClientImpl();
+    ~ClientImpl() override;
 
    private:
     template <typename T>

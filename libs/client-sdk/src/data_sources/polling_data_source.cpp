@@ -16,10 +16,10 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
 static network::HttpRequest MakeRequest(
-    config::shared::built::ServiceEndpoints endpoints,
+    const config::shared::built::ServiceEndpoints& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK>
         data_source_config,
-    config::shared::built::HttpProperties http_properties,
+    const config::shared::built::HttpProperties& http_properties,
     Context const& context) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
 

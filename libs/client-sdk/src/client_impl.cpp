@@ -9,7 +9,6 @@
 #include "event_processor/event_processor.hpp"
 #include "event_processor/null_event_processor.hpp"
 
-#include <launchdarkly/config/shared/built/logging.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
 
@@ -29,7 +28,7 @@ using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
-    HttpProperties http_properties,
+    HttpProperties const& http_properties,
     std::optional<std::string> app_tags,
     Config const& config,
     Context const& context,
@@ -72,7 +71,9 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-ClientImpl::ClientImpl(Config config, Context context, std::string version)
+ClientImpl::ClientImpl(Config config,
+                       Context context,
+                       std::string const& version)
     : config_(config),
       http_properties_(HttpPropertiesBuilder(config.HttpProperties())
                            .Header("user-agent", "CPPClient/" + version)
