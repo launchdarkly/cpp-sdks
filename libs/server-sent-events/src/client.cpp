@@ -247,7 +247,7 @@ std::shared_ptr<Client> Builder::build() {
     std::string host = uri_components->host();
 
     request.set(http::field::host, host);
-    request.target(uri_components->path());
+    request.target(uri_components->encoded_target());
 
     std::string service = uri_components->has_port() ? uri_components->port()
                                                      : uri_components->scheme();
