@@ -30,7 +30,7 @@
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context);
+    ClientImpl(Config config, Context context, std::string version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -113,6 +113,7 @@ class ClientImpl : public IClient {
                               std::function<void()> user_completion);
 
     Config config_;
+    launchdarkly::config::shared::built::HttpProperties http_properties_;
 
     Logger logger_;
     boost::asio::io_context ioc_;

@@ -19,7 +19,11 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
 
 StreamingDataSource::StreamingDataSource(
-    Config const& config,
+    std::string const& sdk_key,
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
+        data_source_config,
+    config::shared::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor ioc,
     Context context,
     IDataSourceUpdateSink* handler,
@@ -31,10 +35,10 @@ StreamingDataSource::StreamingDataSource(
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)),
       context_(std::move(context)),
-      http_config_(config.HttpProperties()),
-      data_source_config_(config.DataSourceConfig()),
-      sdk_key_(config.SdkKey()),
-      streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
+      http_config_(http_properties),
+      data_source_config_(data_source_config),
+      sdk_key_(sdk_key),
+      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
     auto string_context =
@@ -106,7 +110,6 @@ void StreamingDataSource::Start() {
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }
-    client_builder.header("user-agent", http_config_.UserAgent());
 
     // TODO: Handle proxy support.
 

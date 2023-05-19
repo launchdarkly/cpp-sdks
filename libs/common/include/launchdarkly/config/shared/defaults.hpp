@@ -28,8 +28,6 @@ struct Defaults {
 
 template <>
 struct Defaults<ClientSDK> {
-    static std::string SdkName() { return "CppClient"; }
-    static std::string SdkVersion() { return "TODO"; }
     static bool Offline() { return Defaults<AnySDK>::Offline(); }
 
     static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
@@ -54,7 +52,6 @@ struct Defaults<ClientSDK> {
                 std::chrono::seconds{10},
                 std::chrono::seconds{10},
                 std::chrono::seconds{10},
-                SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 
@@ -76,8 +73,6 @@ struct Defaults<ClientSDK> {
 
 template <>
 struct Defaults<ServerSDK> {
-    static std::string SdkName() { return "CppServer"; }
-    static std::string SdkVersion() { return "TODO"; }
     static bool Offline() { return Defaults<AnySDK>::Offline(); }
 
     static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
@@ -102,7 +97,6 @@ struct Defaults<ServerSDK> {
                 std::chrono::seconds{10},
                 std::chrono::seconds{10},
                 std::chrono::seconds{10},
-                SdkName() + "/" + SdkVersion(),
                 std::map<std::string, std::string>()};
     }
 

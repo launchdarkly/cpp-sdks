@@ -23,9 +23,13 @@ auto const kAsioConcurrencyHint = 1;
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
+using config::shared::ClientSDK;
 using launchdarkly::client_side::data_sources::DataSourceStatus;
+using launchdarkly::config::shared::built::DataSourceConfig;
+using launchdarkly::config::shared::built::HttpProperties;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
+    HttpProperties http_properties,
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
@@ -36,11 +40,15 @@ static std::shared_ptr<IDataSource> MakeDataSource(
         // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
-            config, executor, context, &flag_updater, status_manager, logger);
+            config.SdkKey(), config.ServiceEndpoints(),
+            config.DataSourceConfig(), http_properties, executor, context,
+            &flag_updater, status_manager, logger);
     }
     return std::make_shared<
         launchdarkly::client_side::data_sources::PollingDataSource>(
-        config, executor, context, &flag_updater, status_manager, logger);
+        config.SdkKey(), config.ServiceEndpoints(), config.DataSourceConfig(),
+        http_properties, executor, context, &flag_updater, status_manager,
+        logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -54,14 +62,18 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-ClientImpl::ClientImpl(Config config, Context context)
+ClientImpl::ClientImpl(Config config, Context context, std::string version)
     : config_(config),
+      http_properties_(HttpPropertiesBuilder(config.HttpProperties())
+                           .Header("user-agent", "CPPClient/" + version)
+                           .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
       data_source_factory_([this]() {
-          return MakeDataSource(config_, context_, ioc_.get_executor(),
-                                flag_updater_, status_manager_, logger_);
+          return MakeDataSource(http_properties_, config_, context_,
+                                ioc_.get_executor(), flag_updater_,
+                                status_manager_, logger_);
       }),
       data_source_(data_source_factory_()),
       event_processor_(nullptr),
@@ -69,8 +81,9 @@ ClientImpl::ClientImpl(Config config, Context context)
       initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
-        event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
-                                                            config, logger_);
+        event_processor_ = std::make_unique<EventProcessor>(
+            ioc_.get_executor(), config.SdkKey(), config.ServiceEndpoints(),
+            config.Events(), http_properties_, logger_);
     } else {
         event_processor_ = std::make_unique<NullEventProcessor>();
     }
