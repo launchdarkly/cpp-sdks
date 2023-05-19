@@ -1,8 +1,5 @@
 events/summary events/basic counter behavior
 events/summary events/reset after each flush
-streaming/requests/query parameters/evaluationReasons set to true/GET
-streaming/requests/query parameters/evaluationReasons set to true/REPORT
-tags/disallowed characters
 
 # The Client doesn't need to know how to deserialize users.
 context type/convert/old user to context/{"key": ""}
