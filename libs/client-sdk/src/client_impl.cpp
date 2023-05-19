@@ -323,16 +323,17 @@ ClientImpl::~ClientImpl() {
     // TODO: Ensure a final flush happens.
     event_processor_->ShutdownAsync();
 
-    // Ensure the datasource socket is closed before signalling the io_service
-    // to stop. Otherwise, outstanding async operations will be cancelled
-    // immediately and the underlying TCP connection may remain open for a
-    // while.
-    // TODO: Same should be done for event_processor once it is plumbed to
-    // acception a completion handler.
+    // There's no way to guarantee the shutdown call actually executes without
+    // waiting on a future, since the operation is posted asynchronously.
     std::promise<void> ds_shutdown;
     auto ds_done = ds_shutdown.get_future();
+    auto then = std::chrono::high_resolution_clock::now();
     data_source_->ShutdownAsync([&ds_shutdown]() { ds_shutdown.set_value(); });
     ds_done.wait();
+    auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - then);
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "datasource shutdown in " << dur.count() << "ms";
 
     // Cancels outstanding async operations; doesn't block.
     ioc_.stop();

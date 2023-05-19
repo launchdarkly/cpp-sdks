@@ -30,6 +30,8 @@ auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 // Time duration used when no timeout is specified (1 year).
 auto const kNoTimeout = std::chrono::hours(8760);
 
+auto const kShutdownTimeout = std::chrono::seconds(1);
+
 static boost::optional<net::ssl::context&> ToOptRef(
     std::optional<net::ssl::context>& maybe_val) {
     if (maybe_val) {
@@ -70,43 +72,14 @@ class FoxyClient : public Client,
     }
 
     void fail(boost::system::error_code ec, std::string what) {
-        if (ec == boost::asio::error::operation_aborted) {
-            return;
-        }
         logger_("sse-client: " + what + ": " + ec.message());
-        async_shutdown(nullptr);
     }
 
-    // Run initiates an asynchronous chain of events, which will continue until
-    // the stream fails. It will terminate with a call to async_shutdown.
     void run() override {
         session_.async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,
                                       shared_from_this()));
-    }
-
-    // Although async_shutdown may be called from within the io service (kicked
-    // off from run), it may also be invoked externally to shut down the client.
-    // In this case, we must guarantee that the call is performed from the io
-    // service because access to the session isn't thread safe.
-    void async_shutdown(std::function<void()> completion) override {
-        auto self = shared_from_this();
-        // dispatch because this may be called from the io service.
-        boost::asio::dispatch(session_.get_executor(), [self, completion]() {
-            self->session_.async_shutdown(beast::bind_front_handler(
-                &FoxyClient::on_shutdown, self, std::move(completion)));
-        });
-    }
-
-    void on_shutdown(std::function<void()> completion,
-                     boost::system::error_code ec) {
-        if (ec) {
-            return;
-        }
-        if (completion) {
-            completion();
-        }
     }
 
     void on_connect(boost::system::error_code ec) {
@@ -157,9 +130,45 @@ class FoxyClient : public Client,
 
     void on_read_complete(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
+        // In normal operation, read will complete with operation_aborted due to
+        // user calling async_shutdown. In this case, the session is already
+        // ended so we should return silently.
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
         if (ec) {
             return fail(ec, "read body");
         }
+        // This would only be reached if the server ended the message body.
+        session_.opts.timeout = kShutdownTimeout;
+        session_.async_shutdown(beast::bind_front_handler(
+            &FoxyClient::on_shutdown, shared_from_this()));
+    }
+
+    // Although async_shutdown may be called from within the io service (kicked
+    // off from run), it may also be invoked externally to shut down the client.
+    // In this case, we must guarantee that the call is performed from the io
+    // service because access to the session isn't thread safe.
+    void async_shutdown(std::function<void()> completion) override {
+        auto self = shared_from_this();
+        // dispatch because this may be called from the io service.
+        boost::asio::post(session_.get_executor(), [self, completion]() {
+            self->session_.async_shutdown([self](boost::system::error_code) {});
+            if (completion) {
+                completion();
+            }
+        });
+    }
+
+    void on_shutdown(boost::system::error_code ec) {
+        boost::ignore_unused(ec);
+        if (ec == net::error::eof) {
+            // Rationale:
+            // http://stackoverflow.com/questions/25587403/boost-asio-ssl-async-shutdown-always-finishes-with-an-error
+            ec = {};
+        }
+        if (ec)
+            return fail(ec, "shutdown");
     }
 
    private:
