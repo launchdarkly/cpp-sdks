@@ -51,8 +51,8 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
 }
 
 ClientImpl::ClientImpl(Config config, Context context)
-    : config_(config),
-      logger_(MakeLogger(config.Logging())),
+    : config_(std::move(config)),
+      logger_(MakeLogger(config_.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
       data_source_factory_([this]() {
@@ -63,10 +63,10 @@ ClientImpl::ClientImpl(Config config, Context context)
       event_processor_(nullptr),
       flag_updater_(flag_manager_),
       initialized_(false),
-      eval_reasons_available_(config.DataSourceConfig().with_reasons) {
-    if (config.Events().Enabled()) {
+      eval_reasons_available_(config_.DataSourceConfig().with_reasons) {
+    if (config_.Events().Enabled()) {
         event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
-                                                            config, logger_);
+                                                            config_, logger_);
     } else {
         event_processor_ = std::make_unique<NullEventProcessor>();
     }
@@ -319,7 +319,7 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 
 ClientImpl::~ClientImpl() {
     // TODO: perform an event processor flush.
-    
+
     // Cancels outstanding async operations; doesn't block.
     ioc_.stop();
 

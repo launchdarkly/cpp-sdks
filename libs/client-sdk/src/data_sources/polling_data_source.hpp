@@ -32,7 +32,8 @@ class PollingDataSource
 
    private:
     void DoPoll();
-    void HandlePollResult(network::HttpResult res);
+    void HandlePollResult(network::HttpResult const& res);
+    boost::asio::any_io_executor ioc_;
 
     std::string string_context_;
     DataSourceStatusManager& status_manager_;
@@ -41,7 +42,6 @@ class PollingDataSource
 
     network::AsioRequester requester_;
     Logger const& logger_;
-    boost::asio::any_io_executor ioc_;
     std::chrono::seconds polling_interval_;
     network::HttpRequest request_;
     std::optional<std::string> etag_;

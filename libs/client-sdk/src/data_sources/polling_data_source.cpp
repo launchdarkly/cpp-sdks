@@ -71,13 +71,13 @@ PollingDataSource::PollingDataSource(Config const& config,
                                      IDataSourceUpdateSink* handler,
                                      DataSourceStatusManager& status_manager,
                                      Logger const& logger)
-    : ioc_(ioc),
+    : ioc_(std::move(ioc)),
       logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)),
-      requester_(ioc),
-      timer_(ioc),
+      requester_(ioc_),
+      timer_(ioc_),
       polling_interval_(
           std::get<
               config::shared::built::PollingConfig<config::shared::ClientSDK>>(
@@ -102,12 +102,12 @@ void PollingDataSource::DoPoll() {
     auto weak_self = weak_from_this();
     requester_.Request(request_, [weak_self](network::HttpResult res) {
         if (auto self = weak_self.lock()) {
-            self->HandlePollResult(std::move(res));
+            self->HandlePollResult(res);
         }
     });
 }
 
-void PollingDataSource::HandlePollResult(network::HttpResult res) {
+void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     auto header_etag = res.Headers().find("etag");
     bool has_etag = header_etag != res.Headers().end();
 
