@@ -34,7 +34,8 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.Offline()) {
-        return std::make_shared<data_sources::NullDataSource>(status_manager);
+        return std::make_shared<data_sources::NullDataSource>(executor,
+                                                              status_manager);
     }
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
