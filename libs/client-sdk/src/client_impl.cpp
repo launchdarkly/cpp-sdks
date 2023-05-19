@@ -318,14 +318,23 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 }
 
 ClientImpl::~ClientImpl() {
-    // Necessary to signal shutdown because the data source
-    // may be continuously queueing async operations, such as timers or reads.
-    data_source_->ShutdownAsync([]() {});
-
-    // Necessary because the processor may be queueing flushes continuously.
+    // Cancel any future flush operations. Won't stop any currently executing
+    // flush.
+    // TODO: Ensure a final flush happens.
     event_processor_->ShutdownAsync();
 
-    // Signals shutdown, doesn't block.
+    // Ensure the datasource socket is closed before signalling the io_service
+    // to stop. Otherwise, outstanding async operations will be cancelled
+    // immediately and the underlying TCP connection may remain open for a
+    // while.
+    // TODO: Same should be done for event_processor once it is plumbed to
+    // acception a completion handler.
+    std::promise<void> ds_shutdown;
+    auto ds_done = ds_shutdown.get_future();
+    data_source_->ShutdownAsync([&ds_shutdown]() { ds_shutdown.set_value(); });
+    ds_done.wait();
+
+    // Cancels outstanding async operations; doesn't block.
     ioc_.stop();
 
     // Blocks until the ioc_.run() call returns.
