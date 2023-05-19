@@ -12,7 +12,7 @@
 namespace asio = boost::asio;
 
 extern "C" int
-foxy::certify::verify_server_certificates(::X509_STORE_CTX* ctx, void*) noexcept
+launchdarkly::foxy::certify::verify_server_certificates(::X509_STORE_CTX* ctx, void*) noexcept
 {
   auto const res = ::X509_verify_cert(ctx);
   if (res < 0) { return 0; }
@@ -20,14 +20,14 @@ foxy::certify::verify_server_certificates(::X509_STORE_CTX* ctx, void*) noexcept
 }
 
 auto
-foxy::certify::enable_https_verification(boost::asio::ssl::context& ssl_ctx) -> void
+launchdarkly::foxy::certify::enable_https_verification(boost::asio::ssl::context& ssl_ctx) -> void
 {
   ::SSL_CTX_set_cert_verify_callback(ssl_ctx.native_handle(),
-                                     &::foxy::certify::verify_server_certificates, nullptr);
+                                     &::launchdarkly::foxy::certify::verify_server_certificates, nullptr);
 }
 
 auto
-foxy::certify::set_server_hostname(::SSL*                     ssl,
+launchdarkly::foxy::certify::set_server_hostname(::SSL*                     ssl,
                                    boost::string_view         hostname,
                                    unsigned int               flags,
                                    boost::system::error_code& ec) -> void
@@ -44,7 +44,7 @@ foxy::certify::set_server_hostname(::SSL*                     ssl,
 }
 
 auto
-foxy::certify::set_server_hostname(::SSL* ssl, boost::string_view hostname, unsigned int flags)
+launchdarkly::foxy::certify::set_server_hostname(::SSL* ssl, boost::string_view hostname, unsigned int flags)
   -> void
 {
   auto ec = boost::system::error_code();

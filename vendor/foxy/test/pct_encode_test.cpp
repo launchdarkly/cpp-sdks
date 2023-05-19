@@ -43,7 +43,7 @@ TEST_CASE("pct_encode_test")
       auto utf8_bytes = std::vector<char>();
       utf8_bytes.resize(bytes_per_code_point * code_points.size());
 
-      foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
+      launchdarkly::foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
 
       auto is_valid_encoding = true;
 
@@ -81,7 +81,7 @@ TEST_CASE("pct_encode_test")
       auto utf8_bytes = std::vector<char>();
       utf8_bytes.resize(bytes_per_code_point * code_points.size());
 
-      foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
+      launchdarkly::foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
 
       auto is_valid_encoding = true;
 
@@ -129,7 +129,7 @@ TEST_CASE("pct_encode_test")
       auto utf8_bytes = std::vector<char>();
       utf8_bytes.resize(bytes_per_code_point * code_points.size());
 
-      foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
+      launchdarkly::foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
 
       auto is_valid_encoding = true;
 
@@ -187,7 +187,7 @@ TEST_CASE("pct_encode_test")
       auto utf8_bytes = std::vector<char>();
       utf8_bytes.resize(bytes_per_code_point * code_points.size());
 
-      foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
+      launchdarkly::foxy::utf8_encode(code_points.begin(), code_points.end(), utf8_bytes.begin());
 
       auto is_valid_encoding = true;
 
@@ -246,7 +246,7 @@ TEST_CASE("pct_encode_test")
 
     auto out = std::string(256, '\0');
 
-    auto const end          = foxy::uri::encode_host(host, out.begin());
+    auto const end          = launchdarkly::foxy::uri::encode_host(host, out.begin());
     auto const encoded_host = boost::string_view(out.data(), end - out.begin());
 
     CHECK(encoded_host == "%20%13%24!$'()*+,;=");
@@ -258,7 +258,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host == "hello%20world!%0a");
   }
@@ -269,7 +269,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host == "www.%c5%bc%c3%b3%c5%82%c4%87.pl");
   }
@@ -280,7 +280,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host == "127.0.0.1");
   }
@@ -291,7 +291,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host == "[::]");
   }
@@ -302,7 +302,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host == "%22%23%2f%3c%3e%3f%40%5b%5c%5d%5e%60%7b%7c%7d");
   }
@@ -315,7 +315,7 @@ TEST_CASE("pct_encode_test")
     auto out = std::string(256, '\0');
 
     auto const encoded_host =
-      boost::string_view(out.data(), foxy::uri::encode_host(host, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_host(host, out.begin()) - out.begin());
 
     CHECK(encoded_host ==
           "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=");
@@ -329,7 +329,7 @@ TEST_CASE("pct_encode_test")
     auto out = std::string(256, '\0');
 
     auto const encoded_path =
-      boost::string_view(out.data(), foxy::uri::encode_path(path, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_path(path, out.begin()) - out.begin());
 
     CHECK(encoded_path ==
           "/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=");
@@ -342,7 +342,7 @@ TEST_CASE("pct_encode_test")
     auto out = std::string(256, '\0');
 
     auto const encoded_path =
-      boost::string_view(out.data(), foxy::uri::encode_path(path, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_path(path, out.begin()) - out.begin());
 
     CHECK(encoded_path == "////1.234/432/@@");
   }
@@ -353,7 +353,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_path =
-      boost::string_view(out.data(), foxy::uri::encode_path(path, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_path(path, out.begin()) - out.begin());
 
     CHECK(encoded_path == "/%22%23%3c%3e%3f@%5b%5c%5d%5e%60%7b%7c%7d:::");
   }
@@ -364,7 +364,7 @@ TEST_CASE("pct_encode_test")
     auto       out  = std::string(256, '\0');
 
     auto const encoded_path =
-      boost::string_view(out.data(), foxy::uri::encode_path(path, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_path(path, out.begin()) - out.begin());
 
     CHECK(encoded_path == "/%20%21%22%23");
   }
@@ -375,7 +375,7 @@ TEST_CASE("pct_encode_test")
     auto       out   = std::string(256, '\0');
 
     auto const encoded_query =
-      boost::string_view(out.data(), foxy::uri::encode_query(query, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_query(query, out.begin()) - out.begin());
 
     CHECK(encoded_query == "?%20%21%22%23");
   }
@@ -387,7 +387,7 @@ TEST_CASE("pct_encode_test")
     auto out = std::string(256, '\0');
 
     auto const encoded_query =
-      boost::string_view(out.data(), foxy::uri::encode_query(query, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_query(query, out.begin()) - out.begin());
 
     CHECK(encoded_query ==
           "?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=/?");
@@ -399,7 +399,7 @@ TEST_CASE("pct_encode_test")
     auto       out   = std::string(256, '\0');
 
     auto const encoded_query =
-      boost::string_view(out.data(), foxy::uri::encode_query(query, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_query(query, out.begin()) - out.begin());
 
     CHECK(encoded_query == "?//%22%3a%23/%3c%3e?%40%5b%5c%5d%5e%60%7b%7c%7d");
   }
@@ -411,7 +411,7 @@ TEST_CASE("pct_encode_test")
     auto out = std::string(256, '\0');
 
     auto const encoded_query =
-      boost::string_view(out.data(), foxy::uri::encode_query(query, out.begin()) - out.begin());
+      boost::string_view(out.data(), launchdarkly::foxy::uri::encode_query(query, out.begin()) - out.begin());
 
     CHECK(encoded_query == "?q=%d0%92%d1%81%d0%b5%d0%bc%20%d0%bf%d1%80%d0%b8%d0%b2%d0%b5%d1%82");
   }

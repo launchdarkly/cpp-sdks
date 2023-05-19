@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -50,6 +50,6 @@ has_foxy_via(boost::beast::http::basic_fields<Allocator> const& fields) -> bool
 }
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_DETAIL_HAS_TOKEN_HPP_

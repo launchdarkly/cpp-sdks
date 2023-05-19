@@ -8,7 +8,7 @@ extern "C" int
 LLVMFuzzerTestOneInput(char const* data, size_t const size)
 {
   auto const input = boost::string_view(data, size);
-  foxy::parse_uri(input);
+  launchdarkly::foxy::parse_uri(input);
 
   auto const num_code_points = input.size() / sizeof(char32_t);
   if (num_code_points == 0) { return 0; }
@@ -25,7 +25,7 @@ LLVMFuzzerTestOneInput(char const* data, size_t const size)
     code_points.begin();
 
   auto const unicode_input = boost::u32string_view(code_points.data(), valid_size);
-  foxy::parse_uri(unicode_input);
+  launchdarkly::foxy::parse_uri(unicode_input);
 
   return 0;
 }

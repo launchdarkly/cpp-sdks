@@ -28,7 +28,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = delim.begin();
         auto const end   = delim.end();
 
-        return x3::parse(begin, end, foxy::uri::unicode::sub_delims);
+        return x3::parse(begin, end, launchdarkly::foxy::uri::unicode::sub_delims);
       });
 
     CHECK(matched_all_sub_delims);
@@ -37,7 +37,7 @@ TEST_CASE("unicode_uri_test")
     auto       begin = view.begin();
     auto const end   = view.end();
 
-    auto const non_match = !x3::parse(begin, end, foxy::uri::unicode::sub_delims);
+    auto const non_match = !x3::parse(begin, end, launchdarkly::foxy::uri::unicode::sub_delims);
 
     CHECK(non_match);
   }
@@ -52,7 +52,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = delim.begin();
         auto const end   = delim.end();
 
-        return x3::parse(begin, end, foxy::uri::unicode::gen_delims);
+        return x3::parse(begin, end, launchdarkly::foxy::uri::unicode::gen_delims);
       });
 
     CHECK(matched_all_gen_delims);
@@ -61,7 +61,7 @@ TEST_CASE("unicode_uri_test")
     auto       begin = view.begin();
     auto const end   = view.end();
 
-    auto const non_match = !x3::parse(begin, end, foxy::uri::unicode::gen_delims);
+    auto const non_match = !x3::parse(begin, end, launchdarkly::foxy::uri::unicode::gen_delims);
 
     CHECK(non_match);
   }
@@ -77,7 +77,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = delim.begin();
         auto const end   = delim.end();
 
-        return x3::parse(begin, end, foxy::uri::unicode::reserved);
+        return x3::parse(begin, end, launchdarkly::foxy::uri::unicode::reserved);
       });
 
     CHECK(matched_all_reserved);
@@ -87,7 +87,7 @@ TEST_CASE("unicode_uri_test")
       auto       begin = view.begin();
       auto const end   = view.end();
 
-      auto const non_match = !x3::parse(begin, end, foxy::uri::unicode::reserved);
+      auto const non_match = !x3::parse(begin, end, launchdarkly::foxy::uri::unicode::reserved);
 
       CHECK(non_match);
     }
@@ -97,7 +97,7 @@ TEST_CASE("unicode_uri_test")
       auto       begin = view.begin();
       auto const end   = view.end();
 
-      auto const match = x3::parse(begin, end, +foxy::uri::unicode::unreserved);
+      auto const match = x3::parse(begin, end, +launchdarkly::foxy::uri::unicode::unreserved);
 
       CHECK(match);
       CHECK(begin == end);
@@ -110,7 +110,7 @@ TEST_CASE("unicode_uri_test")
     auto       begin = view.begin();
     auto const end   = view.end();
 
-    auto const match = x3::parse(begin, end, foxy::uri::unicode::pct_encoded);
+    auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::pct_encoded);
 
     CHECK(match);
     CHECK(begin == end);
@@ -125,7 +125,7 @@ TEST_CASE("unicode_uri_test")
       auto       begin = view.begin();
       auto const end   = view.end();
 
-      auto const match = x3::parse(begin, end, +foxy::uri::unicode::pchar);
+      auto const match = x3::parse(begin, end, +launchdarkly::foxy::uri::unicode::pchar);
 
       CHECK(match);
       CHECK(begin == end);
@@ -138,7 +138,7 @@ TEST_CASE("unicode_uri_test")
       auto       begin = view.begin();
       auto const end   = view.end();
 
-      auto const match = x3::parse(begin, end, foxy::uri::unicode::pchar);
+      auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::pchar);
 
       CHECK(match);
       CHECK(begin == end);
@@ -155,7 +155,7 @@ TEST_CASE("unicode_uri_test")
           auto       begin = delim.begin();
           auto const end   = delim.end();
 
-          return x3::parse(begin, end, foxy::uri::unicode::pchar);
+          return x3::parse(begin, end, launchdarkly::foxy::uri::unicode::pchar);
         });
 
       CHECK(matched_all_sub_delims);
@@ -169,10 +169,10 @@ TEST_CASE("unicode_uri_test")
       auto       begin = view.begin();
       auto const end   = view.end();
 
-      auto const match1 = x3::parse(begin, end, foxy::uri::unicode::query);
+      auto const match1 = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::query);
 
       begin             = view.begin();
-      auto const match2 = x3::parse(begin, end, foxy::uri::unicode::fragment);
+      auto const match2 = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::fragment);
 
       CHECK((match1 && match2));
     }
@@ -188,7 +188,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::dec_octet);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::dec_octet);
 
         auto const full_match = match && (begin == end);
 
@@ -205,7 +205,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::dec_octet);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::dec_octet);
 
         if (match) { return begin != end; }
         return !match;
@@ -224,7 +224,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::ip_v4_address);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::ip_v4_address);
 
         auto const full_match = match && (begin == end);
 
@@ -241,7 +241,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::ip_v4_address);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::ip_v4_address);
 
         if (match) { return begin != end; }
         return !match;
@@ -272,7 +272,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match      = x3::parse(begin, end, foxy::uri::unicode::ip_v6_address);
+        auto const match      = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::ip_v6_address);
         auto const full_match = match && (begin == end);
 
         return full_match;
@@ -287,7 +287,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::ip_v6_address);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::ip_v6_address);
 
         if (match) { return begin != end; }
         return !match;
@@ -324,7 +324,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match      = x3::parse(begin, end, foxy::uri::unicode::uri);
+        auto const match      = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::uri);
         auto const full_match = match && (begin == end);
 
         return full_match;
@@ -340,7 +340,7 @@ TEST_CASE("unicode_uri_test")
         auto       begin = view.begin();
         auto const end   = view.end();
 
-        auto const match = x3::parse(begin, end, foxy::uri::unicode::uri);
+        auto const match = x3::parse(begin, end, launchdarkly::foxy::uri::unicode::uri);
 
         if (match) { return begin != end; }
         return !match;

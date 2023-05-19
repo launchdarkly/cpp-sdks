@@ -16,7 +16,7 @@
 #include <boost/asio/async_result.hpp>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class DynamicBuffer>
 struct basic_server_session : public basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>
@@ -55,7 +55,7 @@ public:
 
 using server_session = basic_server_session<boost::beast::flat_buffer>;
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #include <foxy/impl/server_session/async_detect_ssl.impl.hpp>
 #include <foxy/impl/server_session/async_handshake.impl.hpp>

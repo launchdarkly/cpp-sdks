@@ -11,8 +11,8 @@
 // TODO: someday get this working
 // The problem:
 //
-// x3::parse(begin, end, foxy::uri::unreserved(), unused) compiles
-// x3::parse(begin, end, (foxy::uri::unreserved()) >> ",", unused); fails
+// x3::parse(begin, end, launchdarkly::foxy::uri::unreserved(), unused) compiles
+// x3::parse(begin, end, (launchdarkly::foxy::uri::unreserved()) >> ",", unused); fails
 // with a compiler error of unresolved external symbols
 //
 // find out why X3 chokes so hard on the explicitly compiled template
@@ -22,7 +22,7 @@
 #include <foxy/uri.hpp>
 #include <foxy/detail/uri_def.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace uri
 {
@@ -37,4 +37,4 @@ BOOST_SPIRIT_INSTANTIATE(reserved_type, iterator_type, context_type);
 BOOST_SPIRIT_INSTANTIATE(unreserved_type, iterator_type, context_type);
 } // namespace parser
 } // namespace uri
-} // namespace foxy
+} // namespace launchdarkly::foxy

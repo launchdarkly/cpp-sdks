@@ -12,7 +12,7 @@
 
 #include <foxy/server_session.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class DynamicBuffer>
 template <class HandshakeHandler>
@@ -21,7 +21,7 @@ basic_server_session<DynamicBuffer>::async_handshake(HandshakeHandler&& handler)
   typename boost::asio::async_result<std::decay_t<HandshakeHandler>,
                                      void(boost::system::error_code, std::size_t)>::return_type
 {
-  return ::foxy::detail::async_timer<void(boost::system::error_code, std::size_t)>(
+  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code, std::size_t)>(
     [self = this, coro = boost::asio::coroutine()](auto& cb, boost::system::error_code ec = {},
                                                    std::size_t bytes_transferred = 0) mutable {
       auto& s = *self;
@@ -53,6 +53,6 @@ basic_server_session<DynamicBuffer>::async_handshake(HandshakeHandler&& handler)
     *this, std::forward<HandshakeHandler>(handler));
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_IMPL_SERVER_SESSION_ASYNC_HANDSHAKE_HPP_

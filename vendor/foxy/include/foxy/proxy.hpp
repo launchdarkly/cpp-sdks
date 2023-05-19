@@ -27,7 +27,7 @@
 #include <memory>
 #include <array>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 // proxy is a simple TLS forward proxy
 // It's intended to forward localhost traffic and then relay it for the client, performing any
@@ -45,7 +45,7 @@ private:
   stream_type          stream_;
   acceptor_type        acceptor_;
   executor_type        strand_;
-  ::foxy::session_opts client_opts_;
+  ::launchdarkly::foxy::session_opts client_opts_;
 
   boost::asio::coroutine accept_coro_;
 
@@ -71,6 +71,6 @@ public:
   cancel() -> void;
 };
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_PROXY_HPP_

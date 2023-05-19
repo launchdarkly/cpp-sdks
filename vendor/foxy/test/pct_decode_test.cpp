@@ -20,7 +20,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"www.\u017C\u00F3\u0142\u0107.pl");
     CHECK_FALSE(ec);
@@ -34,7 +34,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"!$'()*+,;=");
     CHECK_FALSE(ec);
@@ -48,7 +48,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"hello world!\n");
     CHECK_FALSE(ec);
@@ -62,7 +62,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"\"#/<>?@[\\]^`{|}");
     CHECK_FALSE(ec);
@@ -77,7 +77,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view ==
           u8"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=");
@@ -92,7 +92,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"/\"#<>?@[\\]^`{|}:::");
     CHECK_FALSE(ec);
@@ -105,7 +105,7 @@ TEST_CASE("pct_decode_test")
     auto const invalid_host = boost::string_view("www.goo%%%%gle.com");
 
     auto pos = invalid_host.begin();
-    x3::parse(pos, invalid_host.end(), foxy::uri::host);
+    x3::parse(pos, invalid_host.end(), launchdarkly::foxy::uri::host);
 
     auto const was_full_match = (pos == invalid_host.end());
     REQUIRE(!was_full_match);
@@ -113,15 +113,15 @@ TEST_CASE("pct_decode_test")
     auto bytes = std::array<char, 256>{0};
 
     auto decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(invalid_host, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(invalid_host, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == "www.goo");
-    CHECK(ec == foxy::error::unexpected_pct);
+    CHECK(ec == launchdarkly::foxy::error::unexpected_pct);
 
     bytes.fill(0);
 
     auto out = bytes.begin();
-    CHECK_THROWS(foxy::uri::pct_decode(invalid_host, out));
+    CHECK_THROWS(launchdarkly::foxy::uri::pct_decode(invalid_host, out));
 
     decoded_view = boost::string_view(bytes.data(), out - bytes.begin());
     CHECK(decoded_view == "www.goo");
@@ -135,10 +135,10 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"");
-    CHECK(ec == foxy::error::unexpected_pct);
+    CHECK(ec == launchdarkly::foxy::error::unexpected_pct);
   }
 
   SECTION("should handle an invalid pct-encoded byte")
@@ -149,20 +149,20 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"");
-    CHECK(ec == foxy::error::unexpected_pct);
+    CHECK(ec == launchdarkly::foxy::error::unexpected_pct);
 
     bytes.fill('\0');
 
     input = boost::string_view("%1g");
 
     decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"");
-    CHECK(ec == foxy::error::unexpected_pct);
+    CHECK(ec == launchdarkly::foxy::error::unexpected_pct);
   }
 
   SECTION("should ignore 8 bit ASCII and other non-printables [i.e. no URI validation here]")
@@ -173,7 +173,7 @@ TEST_CASE("pct_decode_test")
     auto ec    = boost::system::error_code();
 
     auto const decoded_view = boost::string_view(
-      bytes.data(), foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
+      bytes.data(), launchdarkly::foxy::uri::pct_decode(input, bytes.begin(), ec) - bytes.begin());
 
     CHECK(decoded_view == u8"\x00\xff\x8f\x01");
     CHECK_FALSE(ec);

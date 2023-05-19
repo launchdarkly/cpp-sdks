@@ -26,13 +26,13 @@
 
 #include <boost/optional/optional.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
 template <class TunnelHandler>
 struct tunnel_op
-  : boost::beast::stable_async_base<TunnelHandler, typename ::foxy::session::executor_type>,
+  : boost::beast::stable_async_base<TunnelHandler, typename ::launchdarkly::foxy::session::executor_type>,
     boost::asio::coroutine
 {
   struct state
@@ -43,7 +43,7 @@ struct tunnel_op
       boost::beast::http::response<boost::beast::http::string_body, boost::beast::http::fields>>
       response;
 
-    foxy::basic_uri_parts<char> uri_parts;
+    launchdarkly::foxy::basic_uri_parts<char> uri_parts;
 
     boost::tribool is_ssl;
 
@@ -55,8 +55,8 @@ struct tunnel_op
     bool close_tunnel = false;
   };
 
-  ::foxy::server_session& server;
-  ::foxy::client_session& client;
+  ::launchdarkly::foxy::server_session& server;
+  ::launchdarkly::foxy::client_session& client;
   state&                  s;
 
 public:
@@ -64,8 +64,8 @@ public:
   tunnel_op(tunnel_op const&) = default;
   tunnel_op(tunnel_op&&)      = default;
 
-  tunnel_op(foxy::server_session& server_, TunnelHandler handler, foxy::client_session& client_)
-    : boost::beast::stable_async_base<TunnelHandler, typename ::foxy::session::executor_type>(
+  tunnel_op(launchdarkly::foxy::server_session& server_, TunnelHandler handler, launchdarkly::foxy::client_session& client_)
+    : boost::beast::stable_async_base<TunnelHandler, typename ::launchdarkly::foxy::session::executor_type>(
         std::move(handler),
         server_.get_executor())
     , server(server_)
@@ -150,7 +150,7 @@ tunnel_op<TunnelHandler>::operator()(boost::system::error_code ec,
 
       if (ec) { goto upcall; }
 
-      s.uri_parts = foxy::parse_uri(s.parser->get().target());
+      s.uri_parts = launchdarkly::foxy::parse_uri(s.parser->get().target());
 
       s.is_authority = s.uri_parts.is_authority();
       s.is_connect   = s.parser->get().method() == http::verb::connect;
@@ -284,7 +284,7 @@ struct run_async_tunnel_op
 {
   template <class Handler>
   auto
-  operator()(Handler&& handler, foxy::server_session& server, foxy::client_session& client) -> void
+  operator()(Handler&& handler, launchdarkly::foxy::server_session& server, launchdarkly::foxy::client_session& client) -> void
   {
     tunnel_op<Handler>(server, std::forward<Handler>(handler), client);
   }
@@ -292,7 +292,7 @@ struct run_async_tunnel_op
 
 template <class CompletionToken>
 auto
-async_tunnel(foxy::server_session& server, foxy::client_session& client, CompletionToken&& token) ->
+async_tunnel(launchdarkly::foxy::server_session& server, launchdarkly::foxy::client_session& client, CompletionToken&& token) ->
   typename boost::asio::async_result<std::decay_t<CompletionToken>,
                                      void(boost::system::error_code, bool)>::return_type
 {
@@ -301,6 +301,6 @@ async_tunnel(foxy::server_session& server, foxy::client_session& client, Complet
 }
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_DETAIL_TUNNEL_HPP_

@@ -53,10 +53,10 @@ struct request_handler : asio::coroutine
     http::response<http::string_body> response;
   };
 
-  foxy::server_session&  server;
+  launchdarkly::foxy::server_session&  server;
   std::unique_ptr<frame> frame_ptr;
 
-  request_handler(foxy::server_session& server_)
+  request_handler(launchdarkly::foxy::server_session& server_)
     : server(server_)
     , frame_ptr(std::make_unique<frame>())
   {
@@ -101,7 +101,7 @@ struct client_op : asio::coroutine
 
   struct frame
   {
-    foxy::client_session              client;
+    launchdarkly::foxy::client_session              client;
     http::request<http::empty_body>   request;
     http::response<http::string_body> response;
 
@@ -109,7 +109,7 @@ struct client_op : asio::coroutine
     int const max_requests = num_client_requests;
 
     frame(asio::any_io_executor executor, ssl::context& ctx)
-      : client(executor, foxy::session_opts{ctx, std::chrono::seconds(30), true})
+      : client(executor, launchdarkly::foxy::session_opts{ctx, std::chrono::seconds(30), true})
     {
     }
   };
@@ -117,11 +117,11 @@ struct client_op : asio::coroutine
   std::unique_ptr<frame> frame_ptr;
   executor_type          strand;
   std::atomic_int&       req_count;
-  foxy::listener&        l;
+  launchdarkly::foxy::listener&        l;
 
   client_op(asio::any_io_executor   executor,
             std::atomic_int& req_count_,
-            foxy::listener&  l_,
+            launchdarkly::foxy::listener&  l_,
             ssl::context&    ctx)
     : frame_ptr(std::make_unique<frame>(executor, ctx))
     , strand(asio::make_strand(executor))
@@ -180,8 +180,8 @@ struct client_op : asio::coroutine
 int
 main()
 {
-  auto server_ctx = foxy::test::make_server_ssl_ctx();
-  auto client_ctx = foxy::test::make_client_ssl_ctx();
+  auto server_ctx = launchdarkly::foxy::test::make_server_ssl_ctx();
+  auto client_ctx = launchdarkly::foxy::test::make_client_ssl_ctx();
 
   auto const num_client_threads = 4;
   auto const num_server_threads = 4;
@@ -193,7 +193,7 @@ main()
 
   std::atomic_int req_count{0};
 
-  auto s = foxy::listener(
+  auto s = launchdarkly::foxy::listener(
     server_io.get_executor(),
     tcp::endpoint(asio::ip::make_address("127.0.0.1"), static_cast<unsigned short>(1337)),
     std::move(server_ctx));

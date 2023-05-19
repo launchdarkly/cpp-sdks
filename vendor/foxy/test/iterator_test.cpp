@@ -30,8 +30,8 @@ TEST_CASE("iterator_test")
   {
     auto const input = std::array<char, 3>{'\xff', 'a', 'b'};
 
-    auto       pos = foxy::code_point_iterator<decltype(input.begin())>(input.begin(), input.end());
-    auto const end = foxy::code_point_iterator<decltype(input.begin())>(input.end(), input.end());
+    auto       pos = launchdarkly::foxy::code_point_iterator<decltype(input.begin())>(input.begin(), input.end());
+    auto const end = launchdarkly::foxy::code_point_iterator<decltype(input.begin())>(input.end(), input.end());
 
     CHECK(*pos++ == 0xFFFFFFFFu);
     CHECK(*pos++ == U'a');
@@ -47,7 +47,7 @@ TEST_CASE("iterator_test")
     auto const expected = // 'h'  'e'  'l'  'l'  'o'  ',' ' ' 'w'  'o'  'r'  'l'  'd'  '!'
       std::vector<char32_t>{104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33};
 
-    auto const points_view  = foxy::code_point_view<wchar_t>(input);
+    auto const points_view  = launchdarkly::foxy::code_point_view<wchar_t>(input);
     auto const code_points  = std::vector<char32_t>(points_view.begin(), points_view.end());
     auto const ranges_match = std::equal(expected.begin(), expected.end(), code_points.begin());
 
@@ -61,7 +61,7 @@ TEST_CASE("iterator_test")
 
     auto const view = boost::string_view(input.data(), input.size());
 
-    auto const points_view = foxy::code_point_view<char>(view);
+    auto const points_view = launchdarkly::foxy::code_point_view<char>(view);
     auto const code_points = std::vector<char32_t>(points_view.begin(), points_view.end());
 
     REQUIRE(code_points.size() == 3);
@@ -74,7 +74,7 @@ TEST_CASE("iterator_test")
   {
     auto const view = boost::string_view("\xe2\x82");
 
-    auto const points_view = foxy::code_point_view<char>(view);
+    auto const points_view = launchdarkly::foxy::code_point_view<char>(view);
     auto const code_points = std::vector<char32_t>(points_view.begin(), points_view.end());
 
     REQUIRE(code_points.size() == 1);
@@ -87,7 +87,7 @@ TEST_CASE("iterator_test")
 
     auto const view = boost::u16string_view(buff.data(), buff.size());
 
-    auto const points_view = foxy::code_point_view<char16_t>(view);
+    auto const points_view = launchdarkly::foxy::code_point_view<char16_t>(view);
     auto const code_points = std::vector<char32_t>(points_view.begin(), points_view.end());
 
     REQUIRE(code_points.size() == 1);
@@ -98,31 +98,31 @@ TEST_CASE("iterator_test")
   {
     // CopyConstructible
     {
-      foxy::code_point_iterator<char const*> const pos{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> const pos{nullptr, nullptr};
 
       auto pos2(pos);
     }
 
     // MoveConstructible
     {
-      foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
 
       auto pos2(std::move(pos));
-      auto pos3(foxy::code_point_iterator<char const*>{nullptr, nullptr});
+      auto pos3(launchdarkly::foxy::code_point_iterator<char const*>{nullptr, nullptr});
     }
 
     // CopyAssignable
     {
-      foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
-      foxy::code_point_iterator<char const*> pos2{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> pos2{nullptr, nullptr};
 
       pos2 = pos;
     }
 
     // MoveAssignable
     {
-      foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
-      foxy::code_point_iterator<char const*> pos2{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> pos{nullptr, nullptr};
+      launchdarkly::foxy::code_point_iterator<char const*> pos2{nullptr, nullptr};
 
       pos2 = std::move(pos);
     }
@@ -137,7 +137,7 @@ TEST_CASE("iterator_test")
     //
     {
       using std::swap;
-      using foxy::code_point::swap;
+      using launchdarkly::foxy::code_point::swap;
 
       auto input1 = boost::u16string_view(u"hello, world!");
       auto input2 = boost::u16string_view(u"hello, world!");
@@ -145,8 +145,8 @@ TEST_CASE("iterator_test")
       auto const code_points = // 'h'  'e'  'l'  'l'  'o'  ',' ' ' 'w'  'o'  'r'  'l'  'd' '!'
         std::vector<char32_t>{104, 101, 108, 108, 111, 44, 32, 119, 111, 114, 108, 100, 33};
 
-      auto const pts_view1 = foxy::code_point_view<char16_t>(input1);
-      auto const pts_view2 = foxy::code_point_view<char16_t>(input2);
+      auto const pts_view1 = launchdarkly::foxy::code_point_view<char16_t>(input1);
+      auto const pts_view2 = launchdarkly::foxy::code_point_view<char16_t>(input2);
 
       auto begin1 = pts_view1.begin();
       auto begin2 = pts_view2.begin();
@@ -173,7 +173,7 @@ TEST_CASE("iterator_test")
     {
       auto input = boost::u16string_view(u"hello, world!");
 
-      auto points_view = foxy::code_point_view<char16_t>(input);
+      auto points_view = launchdarkly::foxy::code_point_view<char16_t>(input);
 
       auto iter1 = points_view.begin();
       auto iter2 = points_view.begin();
@@ -190,30 +190,30 @@ TEST_CASE("iterator_test")
     {
       static_assert(
         std::is_same<
-          typename std::iterator_traits<foxy::code_point_iterator<char const*>>::value_type,
+          typename std::iterator_traits<launchdarkly::foxy::code_point_iterator<char const*>>::value_type,
           char32_t>::value,
         "Invalid value_type");
 
       static_assert(
         std::is_same<
-          typename std::iterator_traits<foxy::code_point_iterator<char const*>>::difference_type,
+          typename std::iterator_traits<launchdarkly::foxy::code_point_iterator<char const*>>::difference_type,
           std::ptrdiff_t>::value,
         "Invalid difference_type");
 
       static_assert(
         std::is_same<
-          typename std::iterator_traits<foxy::code_point_iterator<char const*>>::reference,
+          typename std::iterator_traits<launchdarkly::foxy::code_point_iterator<char const*>>::reference,
           char32_t>::value,
         "Invalid reference type");
 
       static_assert(
-        std::is_same<typename std::iterator_traits<foxy::code_point_iterator<char const*>>::pointer,
+        std::is_same<typename std::iterator_traits<launchdarkly::foxy::code_point_iterator<char const*>>::pointer,
                      void>::value,
         "Invalid pointer type");
 
       static_assert(
         std::is_same<
-          typename std::iterator_traits<foxy::code_point_iterator<char const*>>::iterator_category,
+          typename std::iterator_traits<launchdarkly::foxy::code_point_iterator<char const*>>::iterator_category,
           std::input_iterator_tag>::value,
         "Invalid pointer type");
     }

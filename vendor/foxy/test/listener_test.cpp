@@ -34,7 +34,7 @@ namespace
 #include <boost/asio/yield.hpp>
 struct handler : asio::coroutine
 {
-  foxy::server_session& server;
+  launchdarkly::foxy::server_session& server;
 
   std::unique_ptr<http::request<http::empty_body>> request_handle =
     std::make_unique<http::request<http::empty_body>>();
@@ -42,7 +42,7 @@ struct handler : asio::coroutine
   std::unique_ptr<http::response<http::string_body>> response_handle =
     std::make_unique<http::response<http::string_body>>();
 
-  handler(foxy::server_session& server_)
+  handler(launchdarkly::foxy::server_session& server_)
     : server(server_)
   {
   }
@@ -73,7 +73,7 @@ struct handler : asio::coroutine
 #include <boost/asio/unyield.hpp>
 
 auto
-make_handler(foxy::server_session& server) -> handler
+make_handler(launchdarkly::foxy::server_session& server) -> handler
 {
   return handler(server);
 }
@@ -89,11 +89,11 @@ TEST_CASE("listener_test")
     auto const endpoint =
       tcp::endpoint(asio::ip::make_address("127.0.0.1"), static_cast<unsigned short>(1337));
 
-    auto listener = foxy::listener(io.get_executor(), endpoint);
+    auto listener = launchdarkly::foxy::listener(io.get_executor(), endpoint);
     listener.async_accept(&make_handler);
 
     asio::spawn(io.get_executor(), [&](auto yield) mutable {
-      auto client = foxy::client_session(io.get_executor(), {{}, std::chrono::seconds(4), false});
+      auto client = launchdarkly::foxy::client_session(io.get_executor(), {{}, std::chrono::seconds(4), false});
       client.async_connect("127.0.0.1", "1337", yield);
 
       auto req = http::request<http::empty_body>(http::verb::get, "/", 11);
@@ -116,20 +116,20 @@ TEST_CASE("listener_test")
 
   SECTION("Out HTTPS listener should be able to process a request")
   {
-    auto server_ctx = foxy::test::make_server_ssl_ctx();
-    auto client_ctx = foxy::test::make_client_ssl_ctx();
+    auto server_ctx = launchdarkly::foxy::test::make_server_ssl_ctx();
+    auto client_ctx = launchdarkly::foxy::test::make_client_ssl_ctx();
 
     asio::io_context io{1};
 
     auto const endpoint =
       tcp::endpoint(asio::ip::make_address("127.0.0.1"), static_cast<unsigned short>(1337));
 
-    auto listener = foxy::listener(io.get_executor(), endpoint, std::move(server_ctx));
+    auto listener = launchdarkly::foxy::listener(io.get_executor(), endpoint, std::move(server_ctx));
     listener.async_accept(&make_handler);
 
     asio::spawn(io.get_executor(), [&](auto yield) mutable {
       auto client =
-        foxy::client_session(io.get_executor(), {client_ctx, std::chrono::seconds(4), true});
+        launchdarkly::foxy::client_session(io.get_executor(), {client_ctx, std::chrono::seconds(4), true});
 
       client.async_connect("127.0.0.1", "1337", yield);
 

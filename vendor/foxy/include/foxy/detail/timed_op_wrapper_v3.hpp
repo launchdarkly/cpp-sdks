@@ -32,7 +32,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -46,7 +46,7 @@ struct async_timer_initiation<Ret(Args...)>
   auto
   operator()(CompletionHandler&&                           handler,
              Implementation&&                              implementation,
-             ::foxy::basic_session<Stream, DynamicBuffer>& session) const -> void
+             ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& session) const -> void
   {
     struct on_timer_t
     {
@@ -73,19 +73,19 @@ struct async_timer_initiation<Ret(Args...)>
     {
       using executor_type = boost::asio::associated_executor_t<
         std::decay_t<CompletionHandler>,
-        typename ::foxy::basic_session<Stream, DynamicBuffer>::executor_type>;
+        typename ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::executor_type>;
 
       using allocator_type = boost::asio::associated_allocator_t<std::decay_t<CompletionHandler>>;
 
       std::shared_ptr<state>                        p_;
-      ::foxy::basic_session<Stream, DynamicBuffer>& session_;
+      ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& session_;
 
       intermediate_completion_handler()                                       = delete;
       intermediate_completion_handler(intermediate_completion_handler const&) = default;
       intermediate_completion_handler(intermediate_completion_handler&&)      = default;
 
       intermediate_completion_handler(CompletionHandler&& completion_handler,
-                                      ::foxy::basic_session<Stream, DynamicBuffer>& session)
+                                      ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& session)
         : p_(std::allocate_shared<state>(boost::asio::get_associated_allocator(completion_handler),
                                          std::move(completion_handler)))
         , session_(session)
@@ -202,7 +202,7 @@ template <class Signature,
           class DynamicBuffer>
 auto
 async_timer(Implementation&&                              implementation,
-            ::foxy::basic_session<Stream, DynamicBuffer>& session,
+            ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& session,
             CompletionToken&&                             token) ->
   typename boost::asio::async_result<std::decay_t<CompletionToken>, Signature>::return_type
 {
@@ -210,6 +210,6 @@ async_timer(Implementation&&                              implementation,
     async_timer_initiation<Signature>{}, token, std::move(implementation), session);
 }
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_DETAIL_TIMED_OP_WRAPPER_V3_HPP_

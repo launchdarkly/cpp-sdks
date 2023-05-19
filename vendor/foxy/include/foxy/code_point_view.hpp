@@ -12,7 +12,7 @@
 
 #include <foxy/code_point_iterator.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Char, class Traits = std::char_traits<Char>>
 struct code_point_view
@@ -46,6 +46,6 @@ public:
     return make_code_point_iterator(view_.end(), view_.end());
   }
 };
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_CODE_POINT_VIEW_HPP_

@@ -12,11 +12,11 @@
 
 #include <foxy/session.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Stream, class DynamicBuffer>
 template <class... BufferArgs>
-foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::any_io_executor executor,
+launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::any_io_executor executor,
                                                           session_opts          opts_,
                                                           BufferArgs&&... bargs)
   : opts(std::move(opts_))
@@ -28,7 +28,7 @@ foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::any_io_ex
 
 template <class Stream, class DynamicBuffer>
 template <class... BufferArgs>
-foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::io_context& io,
+launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::io_context& io,
                                                           session_opts             opts_,
                                                           BufferArgs&&... bargs)
   : opts(std::move(opts_))
@@ -40,7 +40,7 @@ foxy::basic_session<Stream, DynamicBuffer>::basic_session(boost::asio::io_contex
 
 template <class Stream, class DynamicBuffer>
 template <class... BufferArgs>
-foxy::basic_session<Stream, DynamicBuffer>::basic_session(stream_type  stream_,
+launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::basic_session(stream_type  stream_,
                                                           session_opts opts_,
                                                           BufferArgs&&... bargs)
   : opts(std::move(opts_))
@@ -52,12 +52,12 @@ foxy::basic_session<Stream, DynamicBuffer>::basic_session(stream_type  stream_,
 
 template <class Stream, class DynamicBuffer>
 auto
-foxy::basic_session<Stream, DynamicBuffer>::get_executor() -> executor_type
+launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::get_executor() -> executor_type
 {
   return stream.get_executor();
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #include <foxy/impl/session/async_read.impl.hpp>
 #include <foxy/impl/session/async_write.impl.hpp>

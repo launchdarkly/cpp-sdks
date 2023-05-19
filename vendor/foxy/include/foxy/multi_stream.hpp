@@ -22,7 +22,7 @@
 #include <utility>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Stream>
 struct basic_multi_stream
@@ -148,6 +148,6 @@ basic_multi_stream<Stream>::upgrade(boost::asio::ssl::context& ctx) -> void
 
 using multi_stream = basic_multi_stream<boost::asio::ip::tcp::socket>;
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_MULTI_STREAM_HPP_

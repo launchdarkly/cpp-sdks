@@ -26,7 +26,7 @@
 #include <boost/beast/http/write.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Stream, class DynamicBuffer>
 struct basic_session
@@ -39,7 +39,7 @@ public:
                 "Requirements on the DynamicBuffer type were not met. DynamicBuffer must be an "
                 "Asio.DynamicBuffer");
 
-  using stream_type   = ::foxy::basic_multi_stream<Stream>;
+  using stream_type   = ::launchdarkly::foxy::basic_multi_stream<Stream>;
   using buffer_type   = DynamicBuffer;
   using timer_type    = boost::asio::steady_timer;
   using executor_type = typename stream_type::executor_type;
@@ -92,7 +92,7 @@ public:
 
 using session = basic_session<boost::asio::ip::tcp::socket, boost::beast::flat_buffer>;
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #include <foxy/impl/session.impl.hpp>
 

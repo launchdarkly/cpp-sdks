@@ -52,27 +52,27 @@ public:
   {
     // our session with the current client
     //
-    foxy::server_session session;
+    launchdarkly::foxy::server_session session;
 
     // our session with the client's intended remote
     //
-    foxy::client_session client;
+    launchdarkly::foxy::client_session client;
 
     http::response_parser<http::empty_body> shutdown_parser;
 
-    state(foxy::multi_stream stream, foxy::session_opts const& client_opts)
+    state(launchdarkly::foxy::multi_stream stream, launchdarkly::foxy::session_opts const& client_opts)
       : session(std::move(stream), {})
       , client(session.get_executor(), client_opts)
     {
     }
   };
 
-  using executor_type = boost::asio::strand<typename ::foxy::session::executor_type>;
+  using executor_type = boost::asio::strand<typename ::launchdarkly::foxy::session::executor_type>;
 
   std::unique_ptr<state> p_;
   executor_type          strand;
 
-  async_connect_op(foxy::multi_stream stream, foxy::session_opts const& client_opts)
+  async_connect_op(launchdarkly::foxy::multi_stream stream, launchdarkly::foxy::session_opts const& client_opts)
     : p_(std::make_unique<state>(std::move(stream), client_opts))
     , strand(p_->session.get_executor())
   {
@@ -93,12 +93,12 @@ public:
     {
       while (true) {
         BOOST_ASIO_CORO_YIELD
-        ::foxy::detail::async_tunnel(s.session, s.client, std::move(*this));
+        ::launchdarkly::foxy::detail::async_tunnel(s.session, s.client, std::move(*this));
         if (ec) { break; }
         if (close_tunnel) { break; }
 
         BOOST_ASIO_CORO_YIELD
-        ::foxy::detail::async_relay(s.session, s.client, std::move(*this));
+        ::launchdarkly::foxy::detail::async_relay(s.session, s.client, std::move(*this));
         if (ec) { break; }
 
         if (close_tunnel) { break; }
@@ -113,16 +113,16 @@ public:
         ec.assign(0, ec.category());
       }
 
-      if (ec) { foxy::log_error(ec, "proxy client shutdown"); }
+      if (ec) { launchdarkly::foxy::log_error(ec, "proxy client shutdown"); }
     }
   }
 };
 } // namespace
 
-foxy::proxy::proxy(boost::asio::io_context& io,
+launchdarkly::foxy::proxy::proxy(boost::asio::io_context& io,
                    endpoint_type const&     endpoint,
                    bool                     reuse_addr,
-                   foxy::session_opts       client_opts)
+                   launchdarkly::foxy::session_opts       client_opts)
   : stream_(io.get_executor())
   , acceptor_(io.get_executor(), endpoint, reuse_addr)
   , strand_(stream_.get_executor())
@@ -131,29 +131,29 @@ foxy::proxy::proxy(boost::asio::io_context& io,
 }
 
 auto
-foxy::proxy::get_executor() -> executor_type
+launchdarkly::foxy::proxy::get_executor() -> executor_type
 {
   return strand_;
 }
 
 auto
-foxy::proxy::cancel() -> void
+launchdarkly::foxy::proxy::cancel() -> void
 {
   strand_.post([self = shared_from_this()] { self->acceptor_.cancel(); }, std::allocator<char>());
 }
 
 auto
-foxy::proxy::async_accept() -> void
+launchdarkly::foxy::proxy::async_accept() -> void
 {
   if (!acceptor_.is_open()) {
-    std::cout << "foxy::proxy cannot accept on a closed ip::tcp::acceptor\n";
+    std::cout << "launchdarkly::foxy::proxy cannot accept on a closed ip::tcp::acceptor\n";
     return;
   }
   loop({});
 }
 
 auto
-foxy::proxy::loop(boost::system::error_code ec) -> void
+launchdarkly::foxy::proxy::loop(boost::system::error_code ec) -> void
 {
   BOOST_ASIO_CORO_REENTER(accept_coro_)
   {
@@ -169,7 +169,7 @@ foxy::proxy::loop(boost::system::error_code ec) -> void
       if (ec == boost::asio::error::operation_aborted) { break; }
 
       if (ec) {
-        foxy::log_error(ec, "foxy::proxy::async_accept");
+        launchdarkly::foxy::log_error(ec, "launchdarkly::foxy::proxy::async_accept");
         continue;
       }
 

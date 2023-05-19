@@ -24,14 +24,14 @@
 namespace asio = boost::asio;
 namespace http = boost::beast::http;
 
-static_assert(foxy::detail::is_closable_stream_throw<boost::beast::test::stream>::value,
-              "Incorrect implementation of foxy::detail::is_closable_stream_throw");
+static_assert(launchdarkly::foxy::detail::is_closable_stream_throw<boost::beast::test::stream>::value,
+              "Incorrect implementation of launchdarkly::foxy::detail::is_closable_stream_throw");
 
-static_assert(foxy::detail::is_closable_stream_throw<boost::asio::ip::tcp::socket>::value,
-              "Incorrect implementation of foxy::detail::is_closable_stream_throw");
+static_assert(launchdarkly::foxy::detail::is_closable_stream_throw<boost::asio::ip::tcp::socket>::value,
+              "Incorrect implementation of launchdarkly::foxy::detail::is_closable_stream_throw");
 
-static_assert(foxy::detail::is_closable_stream_nothrow<boost::asio::ip::tcp::socket>::value,
-              "Incorrect implementation of foxy::detail::is_closable_stream_throw");
+static_assert(launchdarkly::foxy::detail::is_closable_stream_nothrow<boost::asio::ip::tcp::socket>::value,
+              "Incorrect implementation of launchdarkly::foxy::detail::is_closable_stream_throw");
 
 TEST_CASE("session_test")
 {
@@ -44,7 +44,7 @@ TEST_CASE("session_test")
     auto req = http::request<http::empty_body>(http::verb::get, "/", 11);
     req.set(http::field::host, "www.google.com");
 
-    auto stream = foxy::basic_multi_stream<test_stream>(io);
+    auto stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     boost::beast::ostream(stream.plain().buffer()) << req;
 
@@ -54,7 +54,7 @@ TEST_CASE("session_test")
 
     asio::spawn(io.get_executor(), [&](asio::yield_context yield) mutable {
       auto session =
-        foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
+        launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
 
       http::request_parser<http::empty_body> parser;
 
@@ -86,7 +86,7 @@ TEST_CASE("session_test")
     req.body() = "I bestow the heads of virgins and the first-born sons!!!";
     req.prepare_payload();
 
-    auto stream = foxy::basic_multi_stream<test_stream>(io);
+    auto stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     boost::beast::ostream(stream.plain().buffer()) << req;
 
@@ -95,7 +95,7 @@ TEST_CASE("session_test")
 
     asio::spawn(io, [&](asio::yield_context yield) mutable {
       auto session =
-        foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
+        launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
 
       http::request_parser<http::string_body> parser;
 
@@ -119,8 +119,8 @@ TEST_CASE("session_test")
   {
     asio::io_context io;
 
-    auto stream      = foxy::basic_multi_stream<test_stream>(io);
-    auto peer_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto stream      = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto peer_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
     stream.plain().connect(peer_stream.plain());
 
     auto valid_serialization = false;
@@ -129,7 +129,7 @@ TEST_CASE("session_test")
       auto ec = boost::system::error_code();
 
       auto session =
-        foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
+        launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(stream), {});
 
       auto res = http::response<http::empty_body>(http::status::ok, 11);
       http::response_serializer<http::empty_body> serializer(res);

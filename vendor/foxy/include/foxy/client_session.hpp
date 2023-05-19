@@ -47,7 +47,7 @@
 #include <memory>
 #include <functional>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class DynamicBuffer>
 struct basic_client_session : public basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>
@@ -93,7 +93,7 @@ using client_session = basic_client_session<
   boost::beast::basic_flat_buffer<boost::container::pmr::polymorphic_allocator<T>>>;
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #include <foxy/impl/client_session/async_connect.impl.hpp>
 #include <foxy/impl/client_session/async_request.impl.hpp>

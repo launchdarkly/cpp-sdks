@@ -16,7 +16,7 @@
 #include <utility>
 #include <cstddef>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Iterator>
 struct code_point_iterator
@@ -109,7 +109,7 @@ public:
 };
 
 // we add this namespace here so users can do:
-// using namespace foxy::code_point;
+// using namespace launchdarkly::launchdarkly::foxy::code_point;
 //
 // and have `swap` be found via ADL without implicitly pulling in all of Foxy into the scope
 //
@@ -131,6 +131,6 @@ make_code_point_iterator(Iterator const iterator, Iterator const end)
   return code_point_iterator<Iterator>(iterator, end);
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_CODE_POINT_ITERATOR_HPP_

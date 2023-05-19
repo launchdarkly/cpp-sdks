@@ -23,7 +23,7 @@
 
 #include <utility>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace uri
 {
@@ -68,7 +68,7 @@ auto
 pct_decode(boost::string_view const str, OutputIterator& sink) -> void
 {
   auto const full_match = detail::pct_decode_impl(str, sink);
-  if (!full_match) { throw ::foxy::make_error_code(::foxy::error::unexpected_pct); }
+  if (!full_match) { throw ::launchdarkly::foxy::make_error_code(::launchdarkly::foxy::error::unexpected_pct); }
 }
 
 template <class OutputIterator>
@@ -79,13 +79,13 @@ pct_decode(boost::string_view const   str,
 {
   auto const full_match = detail::pct_decode_impl(str, sink);
 
-  ec = !full_match ? ::foxy::make_error_code(::foxy::error::unexpected_pct)
+  ec = !full_match ? ::launchdarkly::foxy::make_error_code(::launchdarkly::foxy::error::unexpected_pct)
                    : boost::system::error_code{};
 
   return sink;
 }
 
 } // namespace uri
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_PCT_DECODE_HPP_

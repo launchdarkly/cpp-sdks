@@ -31,7 +31,7 @@
 
 #include <boost/assert.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -42,11 +42,11 @@ struct server_op : boost::asio::coroutine
 
   struct frame
   {
-    std::unique_ptr<::foxy::server_session>                            server_handle;
+    std::unique_ptr<::launchdarkly::foxy::server_session>                            server_handle;
     RequestHandler                                                     handler;
     boost::beast::http::request_parser<boost::beast::http::empty_body> shutdown_parser;
 
-    frame(std::unique_ptr<::foxy::server_session>&& server_handle_, RequestHandler&& handler_)
+    frame(std::unique_ptr<::launchdarkly::foxy::server_session>&& server_handle_, RequestHandler&& handler_)
       : server_handle(std::move(server_handle_))
       , handler(std::move(handler_))
     {
@@ -56,7 +56,7 @@ struct server_op : boost::asio::coroutine
   std::unique_ptr<frame> frame_ptr;
   executor_type          strand;
 
-  server_op(std::unique_ptr<::foxy::server_session>&& server_handle_, RequestHandler&& handler_)
+  server_op(std::unique_ptr<::launchdarkly::foxy::server_session>&& server_handle_, RequestHandler&& handler_)
     : frame_ptr(std::make_unique<frame>(std::move(server_handle_), std::move(handler_)))
     , strand(boost::asio::make_strand(frame_ptr->server_handle->get_executor()))
   {
@@ -149,17 +149,17 @@ struct accept_op : boost::asio::coroutine
         BOOST_ASIO_CORO_YIELD acceptor.async_accept(f.socket, std::move(*this));
         if (ec) {
           if (ec != boost::asio::error::operation_aborted) {
-            ::foxy::log_error(ec, "foxy::listener::accept_op");
+            ::launchdarkly::foxy::log_error(ec, "launchdarkly::foxy::listener::accept_op");
           }
 
           return;
         }
 
         {
-          auto session_handle = std::make_unique<::foxy::server_session>(
-            ctx ? ::foxy::multi_stream(std::move(f.socket), *ctx)
-                : ::foxy::multi_stream(std::move(f.socket)),
-            ::foxy::session_opts{ctx, std::chrono::seconds{30}, false});
+          auto session_handle = std::make_unique<::launchdarkly::foxy::server_session>(
+            ctx ? ::launchdarkly::foxy::multi_stream(std::move(f.socket), *ctx)
+                : ::launchdarkly::foxy::multi_stream(std::move(f.socket)),
+            ::launchdarkly::foxy::session_opts{ctx, std::chrono::seconds{30}, false});
 
           auto handler = f.factory(*session_handle);
 
@@ -239,4 +239,4 @@ public:
     });
   }
 };
-} // namespace foxy
+} // namespace launchdarkly::foxy

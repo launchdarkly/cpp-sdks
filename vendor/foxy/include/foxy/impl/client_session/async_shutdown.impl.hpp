@@ -12,7 +12,7 @@
 
 #include <foxy/client_session.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class DynamicBuffer>
 template <class ShutdownHandler>
@@ -21,7 +21,7 @@ basic_client_session<DynamicBuffer>::async_shutdown(ShutdownHandler&& handler) &
   typename boost::asio::async_result<std::decay_t<ShutdownHandler>,
                                      void(boost::system::error_code)>::return_type
 {
-  return ::foxy::detail::async_timer<void(boost::system::error_code)>(
+  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code)>(
     [self = this, coro = boost::asio::coroutine()](auto& cb, boost::system::error_code ec = {},
                                                    std::size_t bytes_transferrred = 0) mutable {
       auto& s = *self;
@@ -44,6 +44,6 @@ basic_client_session<DynamicBuffer>::async_shutdown(ShutdownHandler&& handler) &
     *this, std::forward<ShutdownHandler>(handler));
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_IMPL_CLIENT_SESSION_ASYNC_SHUTDOWN_IMPL_HPP_

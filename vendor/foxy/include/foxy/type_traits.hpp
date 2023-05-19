@@ -15,7 +15,7 @@
 #include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -44,6 +44,6 @@ struct is_closable_stream_nothrow<
 };
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_TYPE_TRAITS_HPP_

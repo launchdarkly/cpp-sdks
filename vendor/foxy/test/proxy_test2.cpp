@@ -48,15 +48,15 @@ TEST_CASE("proxy_test2")
 
       auto const reuse_addr = true;
 
-      auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+      auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
       ctx.load_verify_file("root-cas.pem");
 
-      auto opts = foxy::session_opts{ctx, 5s};
+      auto opts = launchdarkly::foxy::session_opts{ctx, 5s};
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 5s;
 
       client.async_connect("127.0.0.1", "1337", yield);
@@ -107,15 +107,15 @@ TEST_CASE("proxy_test2")
 
       auto const reuse_addr = true;
 
-      auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+      auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
       ctx.load_verify_file("root-cas.pem");
 
-      auto opts = foxy::session_opts{ctx, 5s};
+      auto opts = launchdarkly::foxy::session_opts{ctx, 5s};
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 5s;
 
       client.async_connect("127.0.0.1", "1337", yield);
@@ -157,15 +157,15 @@ TEST_CASE("proxy_test2")
 
       auto const reuse_addr = true;
 
-      auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+      auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
       ctx.load_verify_file("root-cas.pem");
 
-      auto opts = foxy::session_opts{ctx, 30s};
+      auto opts = launchdarkly::foxy::session_opts{ctx, 30s};
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
 
       client.async_connect("127.0.0.1", "1337", yield);
@@ -216,17 +216,17 @@ TEST_CASE("proxy_test2")
 
     std::atomic_int num_valid_responses{0};
 
-    auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+    auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
     ctx.load_verify_file("root-cas.pem");
 
-    auto opts = foxy::session_opts{ctx, 30s};
+    auto opts = launchdarkly::foxy::session_opts{ctx, 30s};
 
-    auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+    auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
     proxy->async_accept();
 
     auto const crawler = [&io, &urls, &num_valid_responses, proxy,
                           num_requests](asio::yield_context yield) -> void {
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
 
       for (auto const url : urls) {

@@ -13,7 +13,7 @@
 #include <boost/system/error_code.hpp>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 enum class error {
   // our pct-decoding function hit a consecutive percent sign which means it doesn't follow a valid
@@ -28,7 +28,7 @@ namespace boost
 namespace system
 {
 template <>
-struct is_error_code_enum<::foxy::error>
+struct is_error_code_enum<::launchdarkly::foxy::error>
 {
   static bool const value = true;
 };
@@ -36,7 +36,7 @@ struct is_error_code_enum<::foxy::error>
 } // namespace system
 } // namespace boost
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -51,8 +51,8 @@ public:
   std::string
   message(int ev) const override
   {
-    switch (static_cast<::foxy::error>(ev)) {
-      case ::foxy::error::unexpected_pct: return "consecutive percent sign detected";
+    switch (static_cast<::launchdarkly::foxy::error>(ev)) {
+      case ::launchdarkly::foxy::error::unexpected_pct: return "consecutive percent sign detected";
 
       default: return "foxy default error";
     }
@@ -79,12 +79,12 @@ public:
 } // namespace detail
 
 auto
-make_error_code(::foxy::error ev) -> boost::system::error_code
+make_error_code(::launchdarkly::foxy::error ev) -> boost::system::error_code
 {
   static detail::foxy_error_category const cat{};
-  return boost::system::error_code{static_cast<std::underlying_type<::foxy::error>::type>(ev), cat};
+  return boost::system::error_code{static_cast<std::underlying_type<::launchdarkly::foxy::error>::type>(ev), cat};
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_ERROR_HPP_

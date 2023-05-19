@@ -25,7 +25,7 @@
 #include <memory>
 #include <iterator>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -49,11 +49,11 @@ export_connect_fields(boost::beast::http::basic_fields<Allocator>& src,
                       boost::beast::http::basic_fields<Allocator>& dst);
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 template <class Allocator>
 void
-foxy::detail::export_connect_fields(boost::beast::http::basic_fields<Allocator>& src,
+launchdarkly::foxy::detail::export_connect_fields(boost::beast::http::basic_fields<Allocator>& src,
                                     boost::beast::http::basic_fields<Allocator>& dst)
 {
   namespace http  = boost::beast::http;

@@ -32,17 +32,17 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server = foxy::basic_session<test_stream, boost::beast::flat_buffer>(
-      std::move(server_stream), foxy::session_opts{});
+    auto server = launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(
+      std::move(server_stream), launchdarkly::foxy::session_opts{});
 
-    auto client = foxy::basic_session<test_stream, boost::beast::flat_buffer>(
-      std::move(client_stream), foxy::session_opts{});
+    auto client = launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(
+      std::move(client_stream), launchdarkly::foxy::session_opts{});
 
     auto request = http::request<http::empty_body>(http::verb::get, "/", 11);
 
@@ -73,7 +73,7 @@ TEST_CASE("relay_test")
     REQUIRE(res_stream.plain().str() == "");
 
     net::spawn(
-      [&](net::yield_context yield) mutable { foxy::detail::async_relay(server, client, yield); });
+      [&](net::yield_context yield) mutable { launchdarkly::foxy::detail::async_relay(server, client, yield); });
 
     io.run();
 
@@ -97,17 +97,17 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     auto server =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
 
     auto client =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
 
     // in this test, it's our proxy client that initiates the teardown of the
     // Connection
@@ -131,7 +131,7 @@ TEST_CASE("relay_test")
     REQUIRE(res_stream.plain().str() == "");
 
     net::spawn(
-      [&](net::yield_context yield) mutable { foxy::detail::async_relay(server, client, yield); });
+      [&](net::yield_context yield) mutable { launchdarkly::foxy::detail::async_relay(server, client, yield); });
 
     io.run();
 
@@ -151,17 +151,17 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     auto server =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
 
     auto client =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
 
     auto request = http::request<http::empty_body>(http::verb::get, "/", 11);
 
@@ -181,7 +181,7 @@ TEST_CASE("relay_test")
     REQUIRE(res_stream.plain().str() == "");
 
     net::spawn(
-      [&](net::yield_context yield) mutable { foxy::detail::async_relay(server, client, yield); });
+      [&](net::yield_context yield) mutable { launchdarkly::foxy::detail::async_relay(server, client, yield); });
 
     io.run();
 
@@ -200,16 +200,16 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     auto server =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
     auto client =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
 
     auto request = http::request<http::string_body>(
       http::verb::post, "/", 11,
@@ -233,7 +233,7 @@ TEST_CASE("relay_test")
     REQUIRE(res_stream.plain().str() == "");
 
     net::spawn(
-      [&](net::yield_context yield) mutable { foxy::detail::async_relay(server, client, yield); });
+      [&](net::yield_context yield) mutable { launchdarkly::foxy::detail::async_relay(server, client, yield); });
 
     io.run();
 
@@ -277,11 +277,11 @@ TEST_CASE("relay_test")
 
     net::io_context io;
 
-    auto request_stream  = foxy::basic_multi_stream<test_stream>(io);
-    auto response_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto request_stream  = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto response_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto client = foxy::basic_session<test_stream, boost::beast::flat_buffer>(io, {});
-    auto server = foxy::basic_session<test_stream, boost::beast::flat_buffer>(io, {});
+    auto client = launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(io, {});
+    auto server = launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(io, {});
 
     beast::ostream(server.stream.plain().buffer()) << request;
     beast::ostream(client.stream.plain().buffer()) << response;
@@ -297,7 +297,7 @@ TEST_CASE("relay_test")
 
       server.async_read_header(header_parser, yield);
 
-      foxy::detail::async_relay(server, client, std::move(header_parser), yield);
+      launchdarkly::foxy::detail::async_relay(server, client, std::move(header_parser), yield);
     });
 
     io.run();
@@ -316,16 +316,16 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     auto server =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
     auto client =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
 
     auto fields = http::fields();
     fields.insert(http::field::via, "1.1 foxy");
@@ -355,7 +355,7 @@ TEST_CASE("relay_test")
     auto close_tunnel = false;
 
     net::spawn([&](net::yield_context yield) mutable {
-      close_tunnel = foxy::detail::async_relay(server, client, yield);
+      close_tunnel = launchdarkly::foxy::detail::async_relay(server, client, yield);
     });
 
     io.run();
@@ -370,17 +370,17 @@ TEST_CASE("relay_test")
   {
     net::io_context io;
 
-    auto req_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto res_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto req_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto res_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
-    auto server_stream = foxy::basic_multi_stream<test_stream>(io);
-    auto client_stream = foxy::basic_multi_stream<test_stream>(io);
+    auto server_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
+    auto client_stream = launchdarkly::foxy::basic_multi_stream<test_stream>(io);
 
     auto server =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(server_stream), {});
 
     auto client =
-      foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
+      launchdarkly::foxy::basic_session<test_stream, boost::beast::flat_buffer>(std::move(client_stream), {});
 
     auto req_fields = http::fields();
     req_fields.insert(http::field::via, "1.1 otherserver");
@@ -413,7 +413,7 @@ TEST_CASE("relay_test")
     auto close_tunnel = false;
 
     net::spawn([&](net::yield_context yield) mutable {
-      close_tunnel = foxy::detail::async_relay(server, client, yield);
+      close_tunnel = launchdarkly::foxy::detail::async_relay(server, client, yield);
     });
 
     io.run();

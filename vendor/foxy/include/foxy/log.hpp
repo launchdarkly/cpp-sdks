@@ -13,11 +13,11 @@
 #include <boost/system/error_code.hpp>
 #include <boost/utility/string_view.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 auto
 log_error(boost::system::error_code const ec, boost::string_view const what) -> void;
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_LOG_HPP_

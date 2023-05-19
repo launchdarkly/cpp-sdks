@@ -34,7 +34,7 @@ using body_type    = http::basic_string_body<char, std::char_traits<char>, alloc
 using parser_type  = http::response_parser<body_type, alloc_type>;
 using request_type = http::request<http::empty_body, fields_type>;
 
-using client_type = foxy::basic_client_session<boost::beast::basic_multi_buffer<alloc_type>>;
+using client_type = launchdarkly::foxy::basic_client_session<boost::beast::basic_multi_buffer<alloc_type>>;
 
 namespace
 {

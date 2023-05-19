@@ -9,7 +9,7 @@
 
 #include <boost/utility/string_view.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class CharT>
 struct basic_uri_parts
@@ -138,4 +138,4 @@ public:
   }
 };
 
-} // namespace foxy
+} // namespace launchdarkly::foxy

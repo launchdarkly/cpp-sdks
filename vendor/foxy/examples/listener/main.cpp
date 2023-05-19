@@ -41,7 +41,7 @@ main()
   // create the HTTP server, listening at 127.0.0.1:1337
   //
   auto listener =
-    foxy::listener(io.get_executor(),
+    launchdarkly::foxy::listener(io.get_executor(),
                    tcp::endpoint(ip::make_address("127.0.0.1"), static_cast<unsigned short>(1337)));
 
   // begin the acceptance loop
@@ -53,7 +53,7 @@ main()
   // because this is a static, it is only initialized the first time
   //
   listener.async_accept([&io](auto& server) {
-    static auto client_ssl_ctx = foxy::test::make_client_ssl_ctx();
+    static auto client_ssl_ctx = launchdarkly::foxy::test::make_client_ssl_ctx();
 
     return
       //
@@ -71,8 +71,8 @@ main()
       [&server, coro = asio::coroutine(),
        request  = std::make_unique<http::request<http::string_body>>(),
        response = std::make_unique<http::response<http::string_body>>(),
-       client   = std::make_unique<foxy::client_session>(
-         io.get_executor(), foxy::session_opts{client_ssl_ctx, std::chrono::seconds{30}}),
+       client   = std::make_unique<launchdarkly::foxy::client_session>(
+         io.get_executor(), launchdarkly::foxy::session_opts{client_ssl_ctx, std::chrono::seconds{30}}),
        client_req = std::make_unique<http::request<http::empty_body>>(),
        client_res = std::make_unique<http::response<http::string_body>>()](
         //
@@ -142,9 +142,9 @@ main()
             // we use `std::back_inserter(target)` so that the output is appended to our request
             // target
             //
-            auto const view        = foxy::code_point_view<char>(request->body());
+            auto const view        = launchdarkly::foxy::code_point_view<char>(request->body());
             auto const code_points = std::vector<char32_t>(view.begin(), view.end());
-            foxy::uri::encode_query({code_points.data(), code_points.size()},
+            launchdarkly::foxy::uri::encode_query({code_points.data(), code_points.size()},
                                     std::back_inserter(target));
 
             client_req->target(target);
@@ -177,7 +177,7 @@ main()
           yield server.async_write(*response, std::move(self));
 
           // note, we only need to shutdown the client here
-          // the `foxy::listener` handles the termination of server sessions automatically for the
+          // the `launchdarkly::foxy::listener` handles the termination of server sessions automatically for the
           // user
           //
           yield client->async_shutdown(std::move(self));
@@ -191,7 +191,7 @@ main()
   // a simple client that sends a request to our server with a body of "hello world in spanish"
   //
   asio::spawn(io.get_executor(), [&](auto yield_ctx) mutable {
-    auto client = foxy::client_session(io.get_executor(), {{}, std::chrono::seconds(30), false});
+    auto client = launchdarkly::foxy::client_session(io.get_executor(), {{}, std::chrono::seconds(30), false});
     client.async_connect("127.0.0.1", "1337", yield_ctx);
 
     auto req = http::request<http::string_body>(http::verb::post, "/", 11);

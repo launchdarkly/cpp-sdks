@@ -12,7 +12,7 @@
 
 #include <boost/locale/utf.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class OutputIterator>
 auto
@@ -50,6 +50,6 @@ utf8_encode(InputIterator begin, InputIterator end, OutputIterator sink) -> Outp
 
   return sink;
 }
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_UTF8_HPP_

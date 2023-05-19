@@ -45,7 +45,7 @@ TEST_CASE("export_connect_fields_test")
     //
     a.insert("nonconnectopt", "some random value");
 
-    foxy::detail::export_connect_fields(a, b);
+    launchdarkly::foxy::detail::export_connect_fields(a, b);
 
     auto const fields_range           = a.equal_range(http::field::connection);
     auto const missing_connect_fields = std::distance(fields_range.first, fields_range.second) == 0;

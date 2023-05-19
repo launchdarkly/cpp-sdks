@@ -21,7 +21,7 @@
 #include <string>
 #include <memory>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class RequestFactory, class Allocator = std::allocator<char>>
 auto
@@ -39,7 +39,7 @@ speak(boost::asio::any_io_executor ex,
 
     struct frame
     {
-      ::foxy::client_session client_session;
+      ::launchdarkly::foxy::client_session client_session;
       std::string            host;
       std::string            service;
       RequestFactory         request_factory;
@@ -63,7 +63,7 @@ speak(boost::asio::any_io_executor ex,
       : executor(executor_)
       , allocator(alloc_)
       , p_(boost::allocate_unique<frame>(allocator,
-                                         {::foxy::client_session(executor, opts__),
+                                         {::launchdarkly::foxy::client_session(executor, opts__),
                                           std::move(host__), std::move(service__),
                                           std::move(factory)}))
     {
@@ -103,4 +103,4 @@ speak(boost::asio::any_io_executor ex,
   boost::asio::post(speak_op(ex, std::move(host_), std::move(service_),
                              std::forward<RequestFactory>(request_factory_), opts_, alloc));
 }
-} // namespace foxy
+} // namespace launchdarkly::foxy

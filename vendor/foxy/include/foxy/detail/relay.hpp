@@ -27,14 +27,14 @@
 
 #include <array>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
 template <class Stream, class DynamicBuffer, class RelayHandler>
 struct relay_op : boost::beast::stable_async_base<
                     RelayHandler,
-                    typename ::foxy::basic_session<Stream, DynamicBuffer>::executor_type>,
+                    typename ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::executor_type>,
                   boost::asio::coroutine
 {
   template <bool isRequest, class Body>
@@ -88,8 +88,8 @@ struct relay_op : boost::beast::stable_async_base<
     }
   };
 
-  ::foxy::basic_session<Stream, DynamicBuffer>& server;
-  ::foxy::basic_session<Stream, DynamicBuffer>& client;
+  ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server;
+  ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client;
   state&                                        s;
 
 public:
@@ -97,12 +97,12 @@ public:
   relay_op(relay_op const&) = default;
   relay_op(relay_op&&)      = default;
 
-  relay_op(::foxy::basic_session<Stream, DynamicBuffer>& server_,
+  relay_op(::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server_,
            RelayHandler                                  handler,
-           ::foxy::basic_session<Stream, DynamicBuffer>& client_)
+           ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client_)
     : boost::beast::stable_async_base<
         RelayHandler,
-        typename ::foxy::basic_session<Stream, DynamicBuffer>::executor_type>(
+        typename ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::executor_type>(
         std::move(handler),
         server_.get_executor())
     , server(server_)
@@ -112,13 +112,13 @@ public:
     (*this)({}, 0, false);
   }
 
-  relay_op(::foxy::basic_session<Stream, DynamicBuffer>& server_,
+  relay_op(::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server_,
            RelayHandler                                  handler,
-           ::foxy::basic_session<Stream, DynamicBuffer>& client_,
+           ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client_,
            parser<true, empty_body>&&                    req_parser)
     : boost::beast::stable_async_base<
         RelayHandler,
-        typename ::foxy::basic_session<Stream, DynamicBuffer>::executor_type>(
+        typename ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>::executor_type>(
         std::move(handler),
         server_.get_executor())
     , server(server_)
@@ -161,9 +161,9 @@ relay_op<Stream, DynamicBuffer, RelayHandler>::operator()(boost::system::error_c
       s.close_tunnel        = s.close_tunnel || !s.req.keep_alive();
       auto const is_chunked = s.req.chunked();
 
-      if (::foxy::detail::has_foxy_via(s.req)) { goto upcall; }
+      if (::launchdarkly::foxy::detail::has_foxy_via(s.req)) { goto upcall; }
 
-      ::foxy::detail::export_connect_fields(s.req, s.req_fields);
+      ::launchdarkly::foxy::detail::export_connect_fields(s.req, s.req_fields);
 
       if (s.close_tunnel) { s.req.keep_alive(false); }
       if (is_chunked) { s.req.chunked(true); }
@@ -216,11 +216,11 @@ relay_op<Stream, DynamicBuffer, RelayHandler>::operator()(boost::system::error_c
     {
       s.close_tunnel = s.close_tunnel || !s.res.keep_alive();
 
-      if (::foxy::detail::has_foxy_via(s.res)) { goto upcall; }
+      if (::launchdarkly::foxy::detail::has_foxy_via(s.res)) { goto upcall; }
 
       auto const is_chunked = s.res.chunked();
 
-      ::foxy::detail::export_connect_fields(s.res, s.res_fields);
+      ::launchdarkly::foxy::detail::export_connect_fields(s.res, s.res_fields);
 
       if (s.close_tunnel) { s.res.keep_alive(false); }
       if (is_chunked) { s.res.chunked(true); }
@@ -276,8 +276,8 @@ struct run_async_relay_op
   template <class Handler, class Stream, class DynamicBuffer>
   auto
   operator()(Handler&&                                     handler,
-             ::foxy::basic_session<Stream, DynamicBuffer>& server,
-             ::foxy::basic_session<Stream, DynamicBuffer>& client) -> void
+             ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server,
+             ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client) -> void
   {
     relay_op<Stream, DynamicBuffer, Handler>(server, std::forward<Handler>(handler), client);
   }
@@ -285,8 +285,8 @@ struct run_async_relay_op
   template <class Handler, class Stream, class DynamicBuffer, class Parser>
   auto
   operator()(Handler&&                                     handler,
-             ::foxy::basic_session<Stream, DynamicBuffer>& server,
-             ::foxy::basic_session<Stream, DynamicBuffer>& client,
+             ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server,
+             ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client,
              Parser&&                                      parser)
   {
     relay_op<Stream, DynamicBuffer, Handler>(server, std::forward<Handler>(handler), client,
@@ -296,8 +296,8 @@ struct run_async_relay_op
 
 template <class Stream, class DynamicBuffer, class CompletionToken>
 auto
-async_relay(::foxy::basic_session<Stream, DynamicBuffer>& server,
-            ::foxy::basic_session<Stream, DynamicBuffer>& client,
+async_relay(::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server,
+            ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client,
             CompletionToken&&                             token) ->
   typename boost::asio::async_result<std::decay_t<CompletionToken>,
                                      void(boost::system::error_code, bool)>::return_type
@@ -308,8 +308,8 @@ async_relay(::foxy::basic_session<Stream, DynamicBuffer>& server,
 
 template <class Stream, class DynamicBuffer, class Parser, class CompletionToken>
 auto
-async_relay(::foxy::basic_session<Stream, DynamicBuffer>& server,
-            ::foxy::basic_session<Stream, DynamicBuffer>& client,
+async_relay(::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& server,
+            ::launchdarkly::foxy::basic_session<Stream, DynamicBuffer>& client,
             Parser&&                                      parser,
             CompletionToken&&                             token) ->
   typename boost::asio::async_result<std::decay_t<CompletionToken>,
@@ -320,6 +320,6 @@ async_relay(::foxy::basic_session<Stream, DynamicBuffer>& server,
 }
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_DETAIL_RELAY_HPP_

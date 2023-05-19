@@ -12,7 +12,7 @@
 
 #include <foxy/uri_parts.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 auto
 parse_uri(boost::basic_string_view<char, std::char_traits<char>> const uri)
@@ -36,5 +36,5 @@ parse_complete(boost::basic_string_view<char32_t, std::char_traits<char32_t>> co
 auto
 parse_authority(boost::basic_string_view<char32_t, std::char_traits<char32_t>> const uri,
                 basic_uri_parts<char32_t>&                                           parts) -> bool;
-} // namespace foxy
+} // namespace launchdarkly::foxy
 #endif // FOXY_PARSE_URI_HPP_

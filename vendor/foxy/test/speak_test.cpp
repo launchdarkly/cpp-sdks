@@ -38,7 +38,7 @@ TEST_CASE("speak_test")
 
     auto executor = io.get_executor();
 
-    foxy::speak(executor, host, service, [](auto& client_session) {
+    launchdarkly::foxy::speak(executor, host, service, [](auto& client_session) {
       auto req_ = std::make_unique<http::request<http::empty_body>>(http::verb::get, "/", 11);
       req_->set(http::field::host, "www.google.com");
 
@@ -70,7 +70,7 @@ TEST_CASE("speak_test")
 
     auto executor = io.get_executor();
 
-    foxy::speak(executor, host, service,
+    launchdarkly::foxy::speak(executor, host, service,
                 [](auto& client_session) {
                   return [&client_session,
                           coro = asio::coroutine()](auto& self, boost::system::error_code ec = {},
@@ -84,7 +84,7 @@ TEST_CASE("speak_test")
                     }
                   };
                 },
-                foxy::session_opts{{}, std::chrono::milliseconds{250}});
+                launchdarkly::foxy::session_opts{{}, std::chrono::milliseconds{250}});
 
     io.run();
   }
@@ -98,9 +98,9 @@ TEST_CASE("speak_test")
 
     auto executor = io.get_executor();
 
-    auto client_ctx = foxy::test::make_client_ssl_ctx();
+    auto client_ctx = launchdarkly::foxy::test::make_client_ssl_ctx();
 
-    foxy::speak(executor, host, service,
+    launchdarkly::foxy::speak(executor, host, service,
                 [](auto& client_session) {
                   auto req_ =
                     std::make_unique<http::request<http::empty_body>>(http::verb::get, "/", 11);
@@ -122,7 +122,7 @@ TEST_CASE("speak_test")
                     }
                   };
                 },
-                foxy::session_opts{client_ctx, std::chrono::seconds{30}, true});
+                launchdarkly::foxy::session_opts{client_ctx, std::chrono::seconds{30}, true});
 
     io.run();
   }

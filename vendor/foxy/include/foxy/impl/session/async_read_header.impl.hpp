@@ -13,7 +13,7 @@
 #include <foxy/session.hpp>
 #include <foxy/detail/timed_op_wrapper_v3.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 template <class Stream, class DynamicBuffer>
 template <class Parser, class ReadHandler>
@@ -22,7 +22,7 @@ basic_session<Stream, DynamicBuffer>::async_read_header(Parser& parser, ReadHand
   typename boost::asio::async_result<std::decay_t<ReadHandler>,
                                      void(boost::system::error_code, std::size_t)>::return_type
 {
-  return ::foxy::detail::async_timer<void(boost::system::error_code, std::size_t)>(
+  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code, std::size_t)>(
     [&parser, self = this, coro = boost::asio::coroutine()](
       auto& cb, boost::system::error_code ec = {}, std::size_t bytes_transferrred = 0) mutable {
       BOOST_ASIO_CORO_REENTER(coro)
@@ -36,6 +36,6 @@ basic_session<Stream, DynamicBuffer>::async_read_header(Parser& parser, ReadHand
     *this, std::forward<ReadHandler>(handler));
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_IMPL_SESSION_ASYNC_READ_HEADER_IMPL_HPP_

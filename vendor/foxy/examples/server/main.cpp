@@ -40,10 +40,10 @@ struct request_handler : asio::coroutine
     http::response<http::string_body> response;
   };
 
-  foxy::server_session&  server;
+  launchdarkly::foxy::server_session&  server;
   std::unique_ptr<frame> frame_ptr;
 
-  request_handler(foxy::server_session& server_)
+  request_handler(launchdarkly::foxy::server_session& server_)
     : server(server_)
     , frame_ptr(std::make_unique<frame>())
   {
@@ -96,13 +96,13 @@ main()
 {
   asio::io_context io{1};
 
-  auto s = foxy::listener(io.get_executor(), tcp::endpoint(asio::ip::make_address("127.0.0.1"),
+  auto s = launchdarkly::foxy::listener(io.get_executor(), tcp::endpoint(asio::ip::make_address("127.0.0.1"),
                                                            static_cast<unsigned short>(1337)));
   s.async_accept([](auto& server_session) { return request_handler(server_session); });
 
   asio::spawn(io.get_executor(), [&](auto yield) mutable -> void {
-    auto client = foxy::client_session(io.get_executor(),
-                                       foxy::session_opts{{}, std::chrono::seconds(30), false});
+    auto client = launchdarkly::foxy::client_session(io.get_executor(),
+                                       launchdarkly::foxy::session_opts{{}, std::chrono::seconds(30), false});
 
     client.async_connect("127.0.0.1", "1337", yield);
 

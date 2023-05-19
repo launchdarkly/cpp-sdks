@@ -30,7 +30,7 @@ TEST_CASE("client_session_test")
     asio::io_context io{1};
 
     auto session_handle =
-      boost::make_unique<foxy::client_session>(io.get_executor(), foxy::session_opts{});
+      boost::make_unique<launchdarkly::foxy::client_session>(io.get_executor(), launchdarkly::foxy::session_opts{});
 
     auto& session = *session_handle;
 
@@ -76,11 +76,11 @@ TEST_CASE("client_session_test")
   {
     asio::io_context io{1};
 
-    auto opts    = foxy::session_opts();
+    auto opts    = launchdarkly::foxy::session_opts();
     opts.timeout = std::chrono::milliseconds{250};
 
     auto session_handle =
-      boost::make_unique<foxy::client_session>(io.get_executor(), std::move(opts));
+      boost::make_unique<launchdarkly::foxy::client_session>(io.get_executor(), std::move(opts));
 
     auto& session = *session_handle;
 

@@ -30,7 +30,7 @@
 #include <iterator>
 #include <type_traits>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace uri
 {
@@ -64,7 +64,7 @@ encode_host(boost::u32string_view const host, OutputIterator out) -> OutputItera
 
     auto buffer = std::array<char, 4>{0x7f, 0x7f, 0x7f, 0x7f};
 
-    auto const end = ::foxy::utf8_encode(code_point, buffer.begin());
+    auto const end = ::launchdarkly::foxy::utf8_encode(code_point, buffer.begin());
 
     for (auto pos = buffer.begin(); pos < end; ++pos) {
       karma::generate(out, karma::lit("%") << karma::right_align(2, karma::lit("0"))[karma::hex],
@@ -98,7 +98,7 @@ encode_path(boost::u32string_view const host, OutputIterator out) -> OutputItera
 
     auto buffer = std::array<char, 4>{0x7f, 0x7f, 0x7f, 0x7f};
 
-    auto const end = ::foxy::utf8_encode(code_point, buffer.begin());
+    auto const end = ::launchdarkly::foxy::utf8_encode(code_point, buffer.begin());
 
     for (auto pos = buffer.begin(); pos < end; ++pos) {
       karma::generate(out, karma::lit("%") << karma::right_align(2, karma::lit("0"))[karma::hex],
@@ -133,7 +133,7 @@ encode_query(boost::u32string_view const host, OutputIterator out) -> OutputIter
 
     auto buffer = std::array<char, 4>{0x7f, 0x7f, 0x7f, 0x7f};
 
-    auto const end = ::foxy::utf8_encode(code_point, buffer.begin());
+    auto const end = ::launchdarkly::foxy::utf8_encode(code_point, buffer.begin());
 
     for (auto pos = buffer.begin(); pos < end; ++pos) {
       karma::generate(out, karma::lit("%") << karma::right_align(2, karma::lit("0"))[karma::hex],
@@ -152,6 +152,6 @@ encode_fragment(boost::u32string_view const host, OutputIterator out) -> OutputI
 }
 
 } // namespace uri
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_PCT_ENCODE_HPP_

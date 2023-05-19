@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 // this namespace is a port of the up-and-coming library Boost.Certify:
 // https://github.com/djarek/certify/tree/b5d8b2ed67fd12437e8b2f104477b2d06c3d6803
@@ -88,13 +88,13 @@ make_ssl_ctx(Args&&... args) -> boost::asio::ssl::context
 {
   auto ctx = boost::asio::ssl::context(std::forward<Args>(args)...);
 
-  foxy::certify::enable_https_verification(ctx);
+  launchdarkly::foxy::certify::enable_https_verification(ctx);
   ctx.set_verify_mode(boost::asio::ssl::context::verify_peer |
                       boost::asio::ssl::context::verify_fail_if_no_peer_cert);
 
   return ctx;
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_UTILITY_HPP_

@@ -39,7 +39,7 @@ struct request_op : asio::coroutine
     std::string service = "http";
   };
 
-  foxy::client_session&  client;
+  launchdarkly::foxy::client_session&  client;
   executor_type          executor;
   std::unique_ptr<frame> p = std::make_unique<frame>();
 
@@ -47,7 +47,7 @@ struct request_op : asio::coroutine
   request_op(request_op const&) = delete;
   request_op(request_op&&)      = default;
 
-  request_op(foxy::client_session& client_, executor_type executor_)
+  request_op(launchdarkly::foxy::client_session& client_, executor_type executor_)
     : client(client_)
     , executor(executor_)
   {
@@ -109,7 +109,7 @@ main()
 {
   asio::io_context io{1};
 
-  auto client = foxy::client_session(io, {});
+  auto client = launchdarkly::foxy::client_session(io, {});
   asio::post(io, request_op(client, io.get_executor()));
   io.run();
 

@@ -46,10 +46,10 @@ TEST_CASE("proxy_test")
       auto const request =
         http::request<http::empty_body>(http::verb::get, "lol-some-garbage-target", 11);
 
-      auto proxy = std::make_shared<foxy::proxy>(io, endpoint, reuse_addr);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, endpoint, reuse_addr);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
       client.async_connect("127.0.0.1", "1337", yield);
 
@@ -92,10 +92,10 @@ TEST_CASE("proxy_test")
       auto const request =
         http::request<http::empty_body>(http::verb::get, "http://www.google.com:80/", 11);
 
-      auto proxy = std::make_shared<foxy::proxy>(io, endpoint, reuse_addr);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, endpoint, reuse_addr);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
       client.async_connect("127.0.0.1", "1337", yield);
 
@@ -133,10 +133,10 @@ TEST_CASE("proxy_test")
 
       auto const reuse_addr = true;
 
-      auto proxy = std::make_shared<foxy::proxy>(io, endpoint, reuse_addr);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, endpoint, reuse_addr);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
       client.async_connect("127.0.0.1", "1337", yield);
 
@@ -184,10 +184,10 @@ TEST_CASE("proxy_test")
 
       auto const reuse_addr = true;
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
       client.async_connect("127.0.0.1", "1337", yield);
 
@@ -230,15 +230,15 @@ TEST_CASE("proxy_test")
 
       auto const reuse_addr = true;
 
-      auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+      auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
       ctx.load_verify_file("root-cas.pem");
 
-      auto opts = foxy::session_opts{ctx, 5s};
+      auto opts = launchdarkly::foxy::session_opts{ctx, 5s};
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
       client.async_connect("127.0.0.1", "1337", yield);
 
@@ -288,15 +288,15 @@ TEST_CASE("proxy_test")
 
       auto const reuse_addr = true;
 
-      auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+      auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
       ctx.load_verify_file("root-cas.pem");
 
-      auto opts = foxy::session_opts{ctx, 30s};
+      auto opts = launchdarkly::foxy::session_opts{ctx, 30s};
 
-      auto proxy = std::make_shared<foxy::proxy>(io, src_endpoint, reuse_addr, opts);
+      auto proxy = std::make_shared<launchdarkly::foxy::proxy>(io, src_endpoint, reuse_addr, opts);
       proxy->async_accept();
 
-      auto client         = foxy::client_session(io.get_executor(), {});
+      auto client         = launchdarkly::foxy::client_session(io.get_executor(), {});
       client.opts.timeout = 30s;
 
       client.async_connect("127.0.0.1", "1337", yield);

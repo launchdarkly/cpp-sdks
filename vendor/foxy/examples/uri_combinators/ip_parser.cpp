@@ -14,7 +14,7 @@
 
 // Foxy offers up a direct alias for Boost.Spirit.X3 under its `uri` namespace
 //
-namespace x3 = foxy::uri::x3;
+namespace x3 = launchdarkly::foxy::uri::x3;
 
 // the syntax of our command-line IP address parser will be:
 // ip-parser --addresses=IP1,IP2,IP3,IP4
@@ -39,7 +39,7 @@ main(int argc, char *argv[])
   if (argc != 2) { std::cout << "Incorrect number of command-line arguments!\n"; }
 
   auto const grammar =
-    "--addresses=" >> (foxy::uri::raw[(foxy::uri::ip_v4_address | foxy::uri::ip_v6_address)] % ",");
+    "--addresses=" >> (launchdarkly::foxy::uri::raw[(launchdarkly::foxy::uri::ip_v4_address | launchdarkly::foxy::uri::ip_v6_address)] % ",");
 
   auto ip_addrs = std::vector<boost::string_view>();
 

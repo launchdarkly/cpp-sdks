@@ -51,7 +51,7 @@ using request_type = http::request<http::empty_body, fields_type>;
 // we use the basic_client_session over Beast's multi buffer type
 // the multi_buffer is a Beast Body type that internally uses a sequence of buffers
 //
-using client_type = foxy::basic_client_session<boost::beast::basic_multi_buffer<alloc_type>>;
+using client_type = launchdarkly::foxy::basic_client_session<boost::beast::basic_multi_buffer<alloc_type>>;
 
 namespace
 {

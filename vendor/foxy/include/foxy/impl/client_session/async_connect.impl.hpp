@@ -12,7 +12,7 @@
 
 #include <foxy/client_session.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -29,7 +29,7 @@ struct connect_op : boost::asio::coroutine
   };
 
   std::unique_ptr<state, boost::alloc_deleter<state, Allocator>>      p_;
-  ::foxy::basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>& session;
+  ::launchdarkly::foxy::basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>& session;
 
   connect_op()                  = delete;
   connect_op(connect_op const&) = delete;
@@ -39,7 +39,7 @@ struct connect_op : boost::asio::coroutine
              Executor                                                            executor,
              std::string                                                         host_,
              std::string                                                         service_,
-             ::foxy::basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>& session_)
+             ::launchdarkly::foxy::basic_session<boost::asio::ip::tcp::socket, DynamicBuffer>& session_)
     : p_(boost::allocate_unique<state>(
         allocator,
         {boost::asio::ip::tcp::resolver(executor), boost::asio::ip::tcp::resolver::results_type{},
@@ -98,8 +98,8 @@ struct connect_op : boost::asio::coroutine
 
       if (session.stream.is_ssl()) {
         if (session.opts.verify_peer_cert) {
-          ::foxy::certify::set_sni_hostname(session.stream.ssl(), s.host);
-          ::foxy::certify::set_server_hostname(session.stream.ssl().native_handle(), s.host);
+          ::launchdarkly::foxy::certify::set_sni_hostname(session.stream.ssl(), s.host);
+          ::launchdarkly::foxy::certify::set_server_hostname(session.stream.ssl().native_handle(), s.host);
         }
 
         BOOST_ASIO_CORO_YIELD
@@ -130,13 +130,13 @@ basic_client_session<DynamicBuffer>::async_connect(std::string      host,
   auto const allocator = boost::asio::get_associated_allocator(handler);
   auto const executor  = boost::asio::get_associated_executor(handler, this->stream.get_executor());
 
-  return ::foxy::detail::async_timer<void(boost::system::error_code)>(
-    ::foxy::detail::connect_op<DynamicBuffer, std::decay_t<decltype(executor)>,
+  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code)>(
+    ::launchdarkly::foxy::detail::connect_op<DynamicBuffer, std::decay_t<decltype(executor)>,
                                std::decay_t<decltype(allocator)>>(
       allocator, executor, std::move(host), std::move(service), *this),
     *this, std::forward<ConnectHandler>(handler));
 }
 
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_IMPL_CLIENT_SESSION_ASYNC_CONNECT_IMPL_HPP_

@@ -151,19 +151,19 @@ TEST_CASE("server_session_test")
 
     auto ctx = ssl::context(ssl::context::tlsv12);
 
-    auto opts    = foxy::session_opts{};
+    auto opts    = launchdarkly::foxy::session_opts{};
     opts.timeout = std::chrono::seconds{1};
     opts.ssl_ctx = ctx;
 
-    auto client = foxy::client_session(io.get_executor(), opts);
+    auto client = launchdarkly::foxy::client_session(io.get_executor(), opts);
 
     asio::spawn(io, [&](asio::yield_context yield) mutable -> void {
       auto ec = boost::system::error_code();
 
-      auto stream = foxy::multi_stream(io.get_executor());
+      auto stream = launchdarkly::foxy::multi_stream(io.get_executor());
       acceptor.async_accept(stream.plain(), yield);
 
-      auto server = foxy::server_session(std::move(stream), {});
+      auto server = launchdarkly::foxy::server_session(std::move(stream), {});
 
       auto const detected_ssl = server.async_detect_ssl(yield);
       CHECK(detected_ssl);
@@ -209,22 +209,22 @@ TEST_CASE("server_session_test")
 
     load_server_certificate(server_ctx);
 
-    auto opts    = foxy::session_opts{};
+    auto opts    = launchdarkly::foxy::session_opts{};
     opts.timeout = std::chrono::seconds{30};
     opts.ssl_ctx = client_ctx;
 
-    auto server_opts = foxy::session_opts{server_ctx, std::chrono::seconds{30}};
+    auto server_opts = launchdarkly::foxy::session_opts{server_ctx, std::chrono::seconds{30}};
 
-    auto client = foxy::client_session(io.get_executor(), opts);
+    auto client = launchdarkly::foxy::client_session(io.get_executor(), opts);
     client.stream.ssl().set_verify_mode(ssl::verify_none);
 
     asio::spawn(io.get_executor(), [&](asio::yield_context yield) mutable -> void {
       auto ec = boost::system::error_code();
 
-      auto stream = foxy::multi_stream(io.get_executor());
+      auto stream = launchdarkly::foxy::multi_stream(io.get_executor());
       acceptor.async_accept(stream.plain(), yield);
 
-      auto server = foxy::server_session(std::move(stream), server_opts);
+      auto server = launchdarkly::foxy::server_session(std::move(stream), server_opts);
       REQUIRE_FALSE(server.stream.is_ssl());
 
       auto const detected_ssl = server.async_detect_ssl(yield);
@@ -272,22 +272,22 @@ TEST_CASE("server_session_test")
 
     load_server_certificate(server_ctx);
 
-    auto opts    = foxy::session_opts{};
+    auto opts    = launchdarkly::foxy::session_opts{};
     opts.timeout = std::chrono::seconds{30};
     opts.ssl_ctx = client_ctx;
 
-    auto server_opts = foxy::session_opts{server_ctx, std::chrono::seconds{30}};
+    auto server_opts = launchdarkly::foxy::session_opts{server_ctx, std::chrono::seconds{30}};
 
-    auto client = foxy::client_session(io.get_executor(), opts);
+    auto client = launchdarkly::foxy::client_session(io.get_executor(), opts);
     client.stream.ssl().set_verify_mode(ssl::verify_none);
 
     asio::spawn(io.get_executor(), [&](asio::yield_context yield) mutable -> void {
       auto ec = boost::system::error_code();
 
-      auto stream = foxy::multi_stream(io.get_executor());
+      auto stream = launchdarkly::foxy::multi_stream(io.get_executor());
       acceptor.async_accept(stream.plain(), yield);
 
-      auto server = foxy::server_session(std::move(stream), server_opts);
+      auto server = launchdarkly::foxy::server_session(std::move(stream), server_opts);
       server.stream.upgrade(server_ctx);
       REQUIRE(server.stream.is_ssl());
 

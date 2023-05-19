@@ -15,7 +15,7 @@
 
 #include <boost/optional/optional.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 struct session_opts
 {
@@ -25,6 +25,6 @@ struct session_opts
   duration_type                               timeout          = std::chrono::seconds{1};
   bool                                        verify_peer_cert = true;
 };
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_SESSION_OPTS_HPP_

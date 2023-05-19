@@ -14,7 +14,7 @@
 namespace net = boost::asio;
 
 auto
-foxy::log_error(boost::system::error_code const ec, boost::string_view const what) -> void
+launchdarkly::foxy::log_error(boost::system::error_code const ec, boost::string_view const what) -> void
 {
   // don't bother printing ssl short reads
   // if an SSL stream truly _is_ truncated, Beast's parser errors out with a partial_message

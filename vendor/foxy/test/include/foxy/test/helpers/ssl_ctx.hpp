@@ -9,7 +9,7 @@
 
 #include <boost/asio/ssl/context.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace test
 {
@@ -19,4 +19,4 @@ make_server_ssl_ctx() -> boost::asio::ssl::context;
 auto
 make_client_ssl_ctx() -> boost::asio::ssl::context;
 } // namespace test
-} // namespace foxy
+} // namespace launchdarkly::foxy

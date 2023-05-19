@@ -15,7 +15,7 @@ namespace ssl  = boost::asio::ssl;
 namespace asio = boost::asio;
 
 auto
-foxy::test::make_server_ssl_ctx() -> boost::asio::ssl::context
+launchdarkly::foxy::test::make_server_ssl_ctx() -> boost::asio::ssl::context
 {
   auto ctx = ssl::context(ssl::context::method::tlsv12_server);
 
@@ -80,11 +80,11 @@ foxy::test::make_server_ssl_ctx() -> boost::asio::ssl::context
 }
 
 auto
-foxy::test::make_client_ssl_ctx() -> boost::asio::ssl::context
+launchdarkly::foxy::test::make_client_ssl_ctx() -> boost::asio::ssl::context
 {
   auto ctx = ssl::context(ssl::context::method::tlsv12_client);
 
-  foxy::certify::enable_https_verification(ctx);
+  launchdarkly::foxy::certify::enable_https_verification(ctx);
   ctx.set_verify_mode(ssl::context::verify_peer | ssl::context::verify_fail_if_no_peer_cert);
 
   ctx.load_verify_file("root-cas.pem");

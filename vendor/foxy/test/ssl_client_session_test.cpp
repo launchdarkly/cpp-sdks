@@ -34,17 +34,17 @@ TEST_CASE("ssl_client_session_test")
   {
     asio::io_context io{1};
 
-    auto ctx = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+    auto ctx = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
 
     // load in our entire list of root CAs
     //
     ctx.load_verify_file("root-cas.pem");
 
-    auto opts = foxy::session_opts{ctx, 30s};
+    auto opts = launchdarkly::foxy::session_opts{ctx, 30s};
 
     // create a client that uses TLS 1.2 and has a 30 second timeout
     //
-    auto  session_handle = boost::make_unique<foxy::client_session>(io.get_executor(), opts);
+    auto  session_handle = boost::make_unique<launchdarkly::foxy::client_session>(io.get_executor(), opts);
     auto& session        = *session_handle;
 
     REQUIRE(session.stream.is_ssl());
@@ -88,10 +88,10 @@ TEST_CASE("ssl_client_session_test")
   {
     asio::io_context io{1};
 
-    auto ctx  = foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
-    auto opts = foxy::session_opts{ctx, 250ms};
+    auto ctx  = launchdarkly::foxy::make_ssl_ctx(ssl::context::method::tlsv12_client);
+    auto opts = launchdarkly::foxy::session_opts{ctx, 250ms};
 
-    auto  session_handle = boost::make_unique<foxy::client_session>(io.get_executor(), opts);
+    auto  session_handle = boost::make_unique<launchdarkly::foxy::client_session>(io.get_executor(), opts);
     auto& session        = *session_handle;
 
     auto timed_out = false;

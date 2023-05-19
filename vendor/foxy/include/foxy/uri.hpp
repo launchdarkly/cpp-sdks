@@ -15,7 +15,7 @@
 #include <boost/spirit/home/x3.hpp>
 #include <boost/utility/string_view.hpp>
 
-// all credit for the port of `foxy::uri::raw` goes to Kojoley from github:
+// all credit for the port of `launchdarkly::foxy::uri::raw` goes to Kojoley from github:
 // https://github.com/boostorg/spirit/issues/487#issuecomment-481899288
 //
 // without them, this wouldn't have been at all possible for the library
@@ -37,7 +37,7 @@ struct is_range<boost::basic_string_view<Char, Trait>> : boost::mpl::true_
 } // namespace spirit
 } // namespace boost
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 // A (hopefully) conforming implementation of the ABNF found at:
 // https://tools.ietf.org/html/rfc3986#appendix-A
@@ -637,6 +637,6 @@ auto const                                  uri_reference_def = uri | relative_r
 BOOST_SPIRIT_DEFINE(uri_reference);
 } // namespace unicode
 } // namespace uri
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_URI_HPP_

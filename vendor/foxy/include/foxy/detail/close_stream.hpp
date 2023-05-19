@@ -13,7 +13,7 @@
 
 #include <foxy/type_traits.hpp>
 
-namespace foxy
+namespace launchdarkly::foxy
 {
 namespace detail
 {
@@ -40,6 +40,6 @@ close(Stream& stream)
 }
 
 } // namespace detail
-} // namespace foxy
+} // namespace launchdarkly::foxy
 
 #endif // FOXY_DETAIL_CLOSE_STREAM_HPP_
