@@ -58,8 +58,7 @@ class FoxyClient : public Client,
           read_timeout_(read_timeout),
           write_timeout_(write_timeout),
           req_(std::move(req)),
-          body_parser_(),
-          session_(executor,
+          session_(std::move(executor),
                    foxy::session_opts{ToOptRef(ssl_context_),
                                       connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
@@ -69,7 +68,7 @@ class FoxyClient : public Client,
         body_parser_.get().body().on_event(std::move(receiver));
     }
 
-    void fail(boost::system::error_code ec, std::string what) {
+    void fail(boost::system::error_code ec, std::string const& what) {
         logger_("sse-client: " + what + ": " + ec.message());
         async_shutdown(nullptr);
     }
@@ -83,12 +82,11 @@ class FoxyClient : public Client,
 
     void async_shutdown(std::function<void()> completion) override {
         session_.async_shutdown(beast::bind_front_handler(
-            &FoxyClient::on_shutdown, shared_from_this(),
-            std::move(completion)));
+            &FoxyClient::on_shutdown, std::move(completion)));
     }
 
-    void on_shutdown(std::function<void()> completion,
-                     boost::system::error_code ec) {
+    static void on_shutdown(std::function<void()> completion,
+                            boost::system::error_code ec) {
         boost::ignore_unused(ec);
         if (completion) {
             completion();
@@ -229,15 +227,15 @@ std::shared_ptr<Client> Builder::build() {
 
     auto request = request_;
 
-    // Don't send a body unless the method is POST or REPORT
-    if (!(request.method() == http::verb::post ||
-          request.method() == http::verb::report)) {
+    // If this isn't a post or report, ensure the body is empty.
+    if (request.method() != http::verb::post &&
+        request.method() != http::verb::report) {
         request.body() = "";
     } else {
         // If it is, then setup Content-Type, only if one wasn't
         // specified.
-        if (auto it = request.find(http::field::content_type);
-            it == request.end()) {
+        if (auto content_header = request.find(http::field::content_type);
+            content_header == request.end()) {
             request.set(http::field::content_type, "text/plain");
         }
     }
