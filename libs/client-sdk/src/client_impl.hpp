@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
 #include <condition_variable>
@@ -13,6 +14,7 @@
 #include "tl/expected.hpp"
 
 #include <launchdarkly/client_side/client.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/client_side/flag_notifier.hpp>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
@@ -86,9 +88,9 @@ class ClientImpl : public IClient {
 
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
-    void WaitForReadySync(std::chrono::milliseconds timeout) override;
-
     ~ClientImpl();
+
+    std::future<void> RunAsync() override;
 
    private:
     template <typename T>
@@ -112,10 +114,19 @@ class ClientImpl : public IClient {
     void OnDataSourceShutdown(Context context,
                               std::function<void()> user_completion);
 
+    void RestartDataSource();
+    
+    std::future<void> RunAsyncInternal(
+        std::function<bool(launchdarkly::client_side::data_sources::
+                               DataSourceStatus::DataSourceState)>
+            complete_condition);
+
     Config config_;
 
     Logger logger_;
     boost::asio::io_context ioc_;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        work_;
 
     Context context_;
     mutable std::shared_mutex context_mutex_;
@@ -125,6 +136,8 @@ class ClientImpl : public IClient {
     std::shared_ptr<IDataSource> data_source_;
 
     std::unique_ptr<IEventProcessor> event_processor_;
+
+    std::unique_ptr<IConnection> status_manager_conn_;
 
     bool initialized_;
     mutable std::mutex init_mutex_;

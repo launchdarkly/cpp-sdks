@@ -35,7 +35,12 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    client_->IdentifyAsync(*maybe_ctx).wait();
+    // TODO: This needs to be like this BECAUSE:
+    // Although normally you want to be sure identify is complete before
+    // evaluating new flags (.wait()), there are some tests that make the SDK
+    // never successfully initialize; hence identify won't return, hence the
+    // harness will block. For example, the event tests do this.
+    client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
     return nlohmann::json{};
 }
 

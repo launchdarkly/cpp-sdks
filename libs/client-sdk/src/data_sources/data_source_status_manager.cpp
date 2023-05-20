@@ -96,7 +96,7 @@ void DataSourceStatusManager::SetError(
     data_source_status_signal_(Status());
 }
 
-DataSourceStatus DataSourceStatusManager::Status() {
+DataSourceStatus DataSourceStatusManager::Status() const {
     std::lock_guard lock(status_mutex_);
     return {state_, state_since_, last_error_};
 }
@@ -108,6 +108,19 @@ std::unique_ptr<IConnection> DataSourceStatusManager::OnDataSourceStatusChange(
         data_source_status_signal_.connect(handler));
 }
 
+std::unique_ptr<IConnection>
+DataSourceStatusManager::OnDataSourceStatusChangeEx(
+    std::function<bool(data_sources::DataSourceStatus)> handler) {
+    std::lock_guard lock{status_mutex_};
+    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
+        data_source_status_signal_.connect_extended(
+            [handler](boost::signals2::connection const& conn,
+                      data_sources::DataSourceStatus status) {
+                if (handler(status)) {
+                    conn.disconnect();
+                }
+            }));
+}
 DataSourceStatusManager::DataSourceStatusManager()
     : state_(DataSourceStatus::DataSourceState::kInitializing),
       state_since_(std::chrono::system_clock::now()) {}

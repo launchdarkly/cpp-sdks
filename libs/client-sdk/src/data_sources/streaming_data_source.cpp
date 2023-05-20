@@ -147,7 +147,7 @@ void StreamingDataSource::Start() {
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
     if (client_) {
-        status_manager_.SetState(DataSourceStatus::DataSourceState::kShutdown);
+        status_manager_.SetState(DataSourceStatus::DataSourceState::kSlept);
         return client_->async_shutdown(std::move(completion));
     }
     if (completion) {

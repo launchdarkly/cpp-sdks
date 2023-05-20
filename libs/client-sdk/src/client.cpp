@@ -7,8 +7,13 @@ namespace launchdarkly::client_side {
 Client::Client(Config config, Context context)
     : client(std::make_unique<ClientImpl>(std::move(config),
                                           std::move(context))) {}
+
+std::future<void> Client::RunAsync() {
+    return client->RunAsync();
+}
+
 bool Client::Initialized() const {
-    return false;
+    return client->Initialized();
 }
 
 using FlagKey = std::string;
@@ -89,10 +94,6 @@ data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
 
 flag_manager::IFlagNotifier& Client::FlagNotifier() {
     return client->FlagNotifier();
-}
-
-void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
-    return client->WaitForReadySync(timeout);
 }
 
 }  // namespace launchdarkly::client_side

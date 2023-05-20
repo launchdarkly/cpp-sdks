@@ -71,12 +71,15 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
                   std::string message);
     // TODO: Handle error codes once the EventSource supports it.
 
-    DataSourceStatus Status() override;
+    DataSourceStatus Status() const override;
 
     std::unique_ptr<IConnection> OnDataSourceStatusChange(
         std::function<void(data_sources::DataSourceStatus status)> handler)
         override;
 
+    std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
+        std::function<bool(data_sources::DataSourceStatus status)> handler)
+        override;
     DataSourceStatusManager();
 
    private:

@@ -58,12 +58,13 @@ ClientImpl::ClientImpl(Config config, Context context)
     : config_(config),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
+      work_(boost::asio::make_work_guard(ioc_)),
       context_(std::move(context)),
       data_source_factory_([this]() {
           return MakeDataSource(config_, context_, ioc_.get_executor(),
                                 flag_updater_, status_manager_, logger_);
       }),
-      data_source_(data_source_factory_()),
+      data_source_(nullptr),
       event_processor_(nullptr),
       flag_updater_(flag_manager_),
       initialized_(false),
@@ -75,30 +76,71 @@ ClientImpl::ClientImpl(Config config, Context context)
         event_processor_ = std::make_unique<NullEventProcessor>();
     }
 
-    status_manager_.OnDataSourceStatusChange([this](auto status) {
-        if (status.State() == DataSourceStatus::DataSourceState::kValid ||
-            status.State() == DataSourceStatus::DataSourceState::kShutdown ||
-            status.State() == DataSourceStatus::DataSourceState::kSetOffline) {
-            {
-                std::unique_lock lock(init_mutex_);
-                initialized_ = true;
-            }
-            init_waiter_.notify_all();
-        }
-    });
-
-    // Should listen to status before attempting to start.
-    data_source_->Start();
-
-    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
-
     event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), context_});
+
+    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+}
+
+std::future<void> ClientImpl::IdentifyAsync(Context context) {
+    UpdateContextSynchronized(context);
+    event_processor_->SendAsync(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), std::move(context)});
+
+    return RunAsyncInternal([](auto state) {
+        return (state == DataSourceStatus::DataSourceState::kValid ||
+                state == DataSourceStatus::DataSourceState::kShutdown ||
+                state == DataSourceStatus::DataSourceState::kSetOffline);
+    });
+}
+
+void ClientImpl::RestartDataSource() {
+    auto start_op = [this]() {
+        data_source_ = data_source_factory_();
+        data_source_->Start();
+    };
+    if (!data_source_) {
+        return start_op();
+    }
+    data_source_->ShutdownAsync(start_op);
+}
+
+std::future<void> ClientImpl::RunAsyncInternal(
+    std::function<bool(DataSourceStatus::DataSourceState)> cond) {
+    auto pr = std::make_shared<std::promise<void>>();
+    auto fut = pr->get_future();
+
+    // OK the problem here is that the datasource never becomes valid, hence
+    // Identify never returns.
+    // WHy ? because the test aharness is sending bogus data.So what are we
+    //       supposed to do herE
+    status_manager_.OnDataSourceStatusChangeEx(
+        [this, cond, pr](data_sources::DataSourceStatus status) {
+            if (cond(status.State())) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << "Calling future set value: " << status.State();
+                pr->set_value();
+                return true;
+            }
+            return false;
+        });
+
+    RestartDataSource();
+
+    return fut;
+}
+
+std::future<void> ClientImpl::RunAsync() {
+    return RunAsyncInternal([](auto state) {
+        return (state == DataSourceStatus::DataSourceState::kValid ||
+                state == DataSourceStatus::DataSourceState::kShutdown ||
+                state == DataSourceStatus::DataSourceState::kSetOffline);
+    });
 }
 
 bool ClientImpl::Initialized() const {
-    std::unique_lock lock(init_mutex_);
-    return initialized_;
+    return status_manager_.Status().State() ==
+           DataSourceStatus::DataSourceState::kValid;
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
@@ -137,21 +179,6 @@ void ClientImpl::Track(std::string event_name) {
 
 void ClientImpl::FlushAsync() {
     event_processor_->FlushAsync();
-}
-
-std::future<void> ClientImpl::IdentifyAsync(Context context) {
-    auto identify_promise = std::make_shared<std::promise<void>>();
-    auto fut = identify_promise->get_future();
-    data_source_->ShutdownAsync(
-        [this, ctx = std::move(context), identify_promise]() {
-            UpdateContextSynchronized(ctx);
-            data_source_ = data_source_factory_();
-            data_source_->Start();
-            event_processor_->SendAsync(events::client::IdentifyEventParams{
-                std::chrono::system_clock::now(), std::move(ctx)});
-            identify_promise->set_value();
-        });
-    return fut;
 }
 
 // TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
@@ -311,24 +338,12 @@ flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
     return flag_updater_;
 }
 
-void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
-    std::unique_lock lock(init_mutex_);
-    init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
-}
-
 void ClientImpl::UpdateContextSynchronized(Context context) {
     std::unique_lock lock(context_mutex_);
     context_ = std::move(context);
 }
 
 ClientImpl::~ClientImpl() {
-    auto shutdown_promise = std::make_shared<std::promise<void>>();
-    auto fut = shutdown_promise->get_future();
-
-    data_source_->ShutdownAsync(
-        [shutdown_promise]() { shutdown_promise->set_value(); });
-    fut.wait_for(kDataSourceShutdownWait);
-
     ioc_.stop();
     // TODO: Probably not the best.
     run_thread_.join();

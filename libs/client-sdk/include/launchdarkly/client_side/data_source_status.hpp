@@ -66,7 +66,9 @@ class DataSourceStatus {
          * SDK key will never become valid), or because the SDK client was
          * explicitly shut down.
          */
-        kShutdown
+        kShutdown,
+
+        kSlept,
 
         // BackgroundDisabled,
         // TODO: A plugin of sorts would likely be required for some
@@ -208,7 +210,7 @@ class IDataSourceStatusProvider {
      * The current status of the data source. Suitable for broadcast to
      * data source status listeners.
      */
-    virtual DataSourceStatus Status() = 0;
+    virtual DataSourceStatus Status() const = 0;
 
     /**
      * Listen to changes to the data source status.
@@ -218,6 +220,9 @@ class IDataSourceStatusProvider {
      */
     virtual std::unique_ptr<IConnection> OnDataSourceStatusChange(
         std::function<void(data_sources::DataSourceStatus status)> handler) = 0;
+
+    virtual std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
+        std::function<bool(data_sources::DataSourceStatus status)> handler) = 0;
 
     virtual ~IDataSourceStatusProvider() = default;
     IDataSourceStatusProvider(IDataSourceStatusProvider const& item) = delete;
