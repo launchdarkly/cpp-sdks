@@ -69,26 +69,26 @@ struct LDLogBackend {
  */
 LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
 
+typedef void (*SetFn)(char const* storage_namespace,
+                      char const* key,
+                      char const* data,
+                      void* user_data);
+
+typedef void (*RemoveFn)(char const* storage_namespace,
+                         char const* key,
+                         void* user_data);
+
+typedef size_t (*ReadFn)(char const* storage_namespace,
+                         char const* key,
+                         char const** read_value,
+                         void* user_data);
+
+typedef void (*FreeFn)(char const* value, void* user_data);
+
 /**
  * Defines a persistence interface suitable for use with SDK configuration.
  */
 struct LDPersistence {
-    typedef void (*SetFn)(char const* storage_namespace,
-                          char const* key,
-                          char const* data,
-                          void* user_data);
-
-    typedef void (*RemoveFn)(char const* storage_namespace,
-                             char const* key,
-                             void* user_data);
-
-    typedef size_t (*ReadFn)(char const* storage_namespace,
-                             char const* key,
-                             char const** read_value,
-                             void* user_data);
-
-    typedef void (*FreeFn)(char const* value, void* user_data);
-
     /**
      * Add or update a value in the store. If the value cannot be set, then
      * the function should complete normally.
@@ -548,7 +548,7 @@ LD_EXPORT(void) LDPersistenceCustomBuilder_Free(LDPersistenceCustomBuilder b);
  */
 LD_EXPORT(void)
 LDPersistenceCustomBuilder_Implementation(LDPersistenceCustomBuilder b,
-                                          LDPersistence impl);
+                                          struct LDPersistence impl);
 
 /**
  * Configures the SDK with custom persistence.
