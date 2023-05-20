@@ -33,6 +33,7 @@ StreamingDataSource::StreamingDataSource(
           DataSourceEventHandler(context_, handler, logger, status_manager_)),
       http_config_(config.HttpProperties()),
       data_source_config_(config.DataSourceConfig()),
+      app_tags_(config.ApplicationTag()),
       sdk_key_(config.SdkKey()),
       streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
 
@@ -108,6 +109,10 @@ void StreamingDataSource::Start() {
         client_builder.header(header.first, header.second);
     }
     client_builder.header("user-agent", http_config_.UserAgent());
+
+    if (app_tags_) {
+        client_builder.header("x-launchdarkly-tags", *app_tags_);
+    }
 
     // TODO: Handle proxy support.
 

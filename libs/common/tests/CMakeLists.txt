@@ -4,7 +4,9 @@ include(GoogleTest)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
-file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
+file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp"
+        "${PROJECT_SOURCE_DIR}/tests/bindings/*.cpp")
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 

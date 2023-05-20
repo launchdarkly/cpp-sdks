@@ -42,19 +42,19 @@ class IClient {
 
     /**
      * Returns a map from feature flag keys to <see cref="LdValue"/> feature
-     * flag values for the current user.
+     * flag values for the current context.
      *
      * This method will not send analytics events back to LaunchDarkly.
      *
-     * @return a map from feature flag keys to values for the current user
+     * @return a map from feature flag keys to values for the current context
      */
     using FlagKey = std::string;
     [[nodiscard]] virtual std::unordered_map<FlagKey, Value> AllFlags()
         const = 0;
 
     /**
-     * Tracks that the current user performed an event for the given event name,
-     * and associates it with a numeric metric value.
+     * Tracks that the current context performed an event for the given event
+     * name, and associates it with a numeric metric value.
      *
      * @param event_name The name of the event.
      * @param data A JSON value containing additional data associated with the
@@ -68,8 +68,8 @@ class IClient {
                        double metric_value) = 0;
 
     /**
-     * Tracks that the current user performed an event for the given event name,
-     * with additional JSON data.
+     * Tracks that the current context performed an event for the given event
+     * name, with additional JSON data.
      *
      * @param event_name The name of the event.
      * @param data A JSON value containing additional data associated with the
@@ -78,7 +78,8 @@ class IClient {
     virtual void Track(std::string event_name, Value data) = 0;
 
     /**
-     * Tracks that current user performed an event for the given event name.
+     * Tracks that the current context performed an event for the given event
+     * name.
      *
      * @param event_name The name of the event.
      */
@@ -92,11 +93,11 @@ class IClient {
 
     /**
      * Changes the current evaluation context, requests flags for that context
-     * from LaunchDarkly if we are online, and generates an analytics event to
+     * from LaunchDarkly if online, and generates an analytics event to
      * tell LaunchDarkly about the context.
      *
      * Only one IdentifyAsync can be in progress at once; calling it
-     * concurrently is undefined behavior.
+     * concurrently invokes undefined behavior.
      *
      * To block until the identify operation is complete, call wait() on
      * the returned future.
@@ -111,8 +112,8 @@ class IClient {
      *
      * @param key The unique feature key for the feature flag.
      * @param default_value The default value of the flag.
-     * @return The variation for the selected user, or default_value if the flag
-     * is disabled in the LaunchDarkly control panel
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
      */
     virtual bool BoolVariation(FlagKey const& key, bool default_value) = 0;
 
@@ -132,8 +133,8 @@ class IClient {
      *
      * @param key The unique feature key for the feature flag.
      * @param default_value The default value of the flag.
-     * @return The variation for the selected user, or default_value if the flag
-     * is disabled in the LaunchDarkly control panel
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
      */
     virtual std::string StringVariation(FlagKey const& key,
                                         std::string default_value) = 0;
@@ -155,8 +156,8 @@ class IClient {
      *
      * @param key The unique feature key for the feature flag.
      * @param default_value The default value of the flag.
-     * @return The variation for the selected user, or default_value if the flag
-     * is disabled in the LaunchDarkly control panel
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
      */
     virtual double DoubleVariation(FlagKey const& key,
                                    double default_value) = 0;
@@ -178,8 +179,8 @@ class IClient {
      *
      * @param key The unique feature key for the feature flag.
      * @param default_value The default value of the flag.
-     * @return The variation for the selected user, or default_value if the flag
-     * is disabled in the LaunchDarkly control panel
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
      */
     virtual int IntVariation(FlagKey const& key, int default_value) = 0;
 
@@ -199,8 +200,8 @@ class IClient {
      *
      * @param key The unique feature key for the feature flag.
      * @param default_value The default value of the flag.
-     * @return The variation for the selected user, or default_value if the flag
-     * is disabled in the LaunchDarkly control panel
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
      */
     virtual Value JsonVariation(FlagKey const& key, Value default_value) = 0;
 

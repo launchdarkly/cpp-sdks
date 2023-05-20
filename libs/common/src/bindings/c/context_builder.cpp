@@ -3,7 +3,7 @@
 
 #include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/context_builder.hpp>
-#include "../../c_binding_helpers.hpp"
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 
 #define AS_BUILDER(x) reinterpret_cast<BindingContextBuilder*>(x)
 

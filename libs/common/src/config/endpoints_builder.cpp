@@ -23,7 +23,7 @@ EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::EventsBaseUrl(std::string url) {
 }
 
 template <typename SDK>
-EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::RelayProxy(
+EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::RelayProxyBaseURL(
     std::string const& url) {
     return PollingBaseUrl(url).StreamingBaseUrl(url).EventsBaseUrl(url);
 }

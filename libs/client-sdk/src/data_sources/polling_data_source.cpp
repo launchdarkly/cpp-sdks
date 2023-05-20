@@ -58,6 +58,10 @@ static network::HttpRequest MakeRequest(Config const& config,
 
     builder.Header("authorization", config.SdkKey());
 
+    if (auto app_tag = config.ApplicationTag()) {
+        builder.Header("x-launchdarkly-tags", *app_tag);
+    }
+
     // If no URL is set, then we will fail the request.
     return {url.value_or(""), method, builder.Build(), body};
 }

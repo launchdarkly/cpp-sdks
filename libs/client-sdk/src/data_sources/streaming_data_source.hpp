@@ -47,6 +47,8 @@ class StreamingDataSource final
 
     config::shared::built::HttpProperties http_config_;
 
+    std::optional<std::string> app_tags_;
+
     std::string sdk_key_;
 
     Logger const& logger_;

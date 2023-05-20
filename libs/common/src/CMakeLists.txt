@@ -1,10 +1,13 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/*.h"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/config/*.h"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/data/*.h"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/data/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/logging/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
@@ -40,7 +43,10 @@ add_library(${LIBNAME}
         bindings/c/config/builder.cpp
         bindings/c/config/config.cpp
         log_level.cpp
-        config/logging_builder.cpp config/persistence_builder.cpp)
+        config/persistence_builder.cpp
+        bindings/c/data/evaluation_detail.cpp
+        bindings/c/memory_routines.cpp
+        config/logging_builder.cpp)
 
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})

@@ -4,7 +4,7 @@
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/iter.hpp>
 #include <launchdarkly/context.hpp>
-#include "../../c_binding_helpers.hpp"
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 
 using launchdarkly::AttributeReference;
 using launchdarkly::Context;

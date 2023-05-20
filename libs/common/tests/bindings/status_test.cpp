@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/error.hpp>
+#include "launchdarkly/error.hpp"
 
-#include <launchdarkly/bindings/c/status.h>
+#include "launchdarkly/bindings/c/status.h"
 
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 

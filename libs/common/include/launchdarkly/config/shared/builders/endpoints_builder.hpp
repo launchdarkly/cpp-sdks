@@ -61,7 +61,7 @@ class EndpointsBuilder {
      * @param url URL to set.
      * @return Reference to this builder.
      */
-    EndpointsBuilder& RelayProxy(std::string const& url);
+    EndpointsBuilder& RelayProxyBaseURL(std::string const& url);
 
     /**
      * Builds a ServiceEndpoints if the configuration is valid. If not,

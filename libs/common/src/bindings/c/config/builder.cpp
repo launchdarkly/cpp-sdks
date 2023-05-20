@@ -3,8 +3,8 @@
 
 #include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/config/client.hpp>
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/persistence/persistence.hpp>
-#include "../../../c_binding_helpers.hpp"
 
 using namespace launchdarkly::client_side;
 
@@ -113,7 +113,7 @@ LDClientConfigBuilder_Build(LDClientConfigBuilder b,
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(out_config);
 
-    return ConsumeBuilder<ConfigBuilder>(b, out_config);
+    return launchdarkly::ConsumeBuilder<ConfigBuilder>(b, out_config);
 }
 
 LD_EXPORT(void)
@@ -155,7 +155,7 @@ LDClientConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
 
-    TO_BUILDER(b)->ServiceEndpoints().RelayProxy(url);
+    TO_BUILDER(b)->ServiceEndpoints().RelayProxyBaseURL(url);
 }
 
 LD_EXPORT(void)

@@ -38,8 +38,8 @@ add_library(${LIBNAME}
         serialization/json_all_flags.hpp
         serialization/json_all_flags.cpp
         flag_manager/flag_manager.cpp
-        flag_manager/flag_persistence.cpp)
-
+        flag_manager/flag_persistence.cpp
+        bindings/c/sdk.cpp)
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
