@@ -11,7 +11,7 @@ FlagManager::FlagManager(std::string const& sdk_key,
                          std::shared_ptr<IPersistence> persistence)
     : flag_updater_(flag_store_),
       persistence_updater_(sdk_key,
-                           &flag_updater_,
+                           flag_updater_,
                            flag_store_,
                            std::move(persistence),
                            logger,

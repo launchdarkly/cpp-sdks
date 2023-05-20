@@ -23,7 +23,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
 
     FlagPersistence(
         std::string const& sdk_key,
-        IDataSourceUpdateSink* sink,
+        IDataSourceUpdateSink& sink,
         FlagStore& flag_store,
         std::shared_ptr<IPersistence> persistence,
         Logger& logger,
@@ -48,7 +48,7 @@ class FlagPersistence : public IDataSourceUpdateSink {
     Logger& logger_;
     std::size_t max_cached_contexts_;
 
-    IDataSourceUpdateSink* sink_;
+    IDataSourceUpdateSink& sink_;
     std::shared_ptr<IPersistence> persistence_;
     mutable std::recursive_mutex persistence_mutex_;
     FlagStore& flag_store_;

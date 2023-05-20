@@ -67,14 +67,14 @@ class PersistenceImplementationWrapper : public IPersistence {
         : impl_(impl) {}
 
     void Set(std::string storage_namespace,
-                  std::string key,
-                  std::string data) noexcept override {
+             std::string key,
+             std::string data) noexcept override {
         return impl_.Set(storage_namespace.c_str(), key.c_str(), data.c_str(),
                          impl_.UserData);
     }
 
     void Remove(std::string storage_namespace,
-                     std::string key) noexcept override {
+                std::string key) noexcept override {
         return impl_.Remove(storage_namespace.c_str(), key.c_str(),
                             impl_.UserData);
     }
@@ -87,7 +87,7 @@ class PersistenceImplementationWrapper : public IPersistence {
                                &read_value, impl_.UserData);
         if (size && read_value) {
             // Get a copy as a string.
-            value_as_optional_string = std::string(read_value);
+            value_as_optional_string = std::string(read_value, size);
         }
 
         if (read_value) {
@@ -443,7 +443,7 @@ LDClientConfigBuilder_Persistence_Custom(
 
     PersistenceBuilder::CustomBuilder* cb =
         TO_CUSTOM_PERSISTENCE_BUILDER(custom_builder);
-    TO_BUILDER(b)->Persistence().Type(*cb);
+    TO_BUILDER(b)->Persistence().Type(std::move(*cb));
     LDPersistenceCustomBuilder_Free(custom_builder);
 }
 

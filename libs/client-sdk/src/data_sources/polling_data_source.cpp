@@ -65,7 +65,7 @@ static network::HttpRequest MakeRequest(Config const& config,
 PollingDataSource::PollingDataSource(Config const& config,
                                      boost::asio::any_io_executor ioc,
                                      Context const& context,
-                                     IDataSourceUpdateSink* handler,
+                                     IDataSourceUpdateSink& handler,
                                      DataSourceStatusManager& status_manager,
                                      Logger const& logger)
     : ioc_(ioc),

@@ -25,13 +25,13 @@ class TestPersistence : public IPersistence {
     TestPersistence(StoreType store) : store_(std::move(store)) {}
 
     void Set(std::string storageNamespace,
-                  std::string key,
-                  std::string data) noexcept override {
+             std::string key,
+             std::string data) noexcept override {
         store_[storageNamespace][key] = data;
     };
 
     void Remove(std::string storageNamespace,
-                     std::string key) noexcept override {
+                std::string key) noexcept override {
         auto& space = store_[storageNamespace];
         auto found = space.find(key);
         if (found != space.end()) {
@@ -56,7 +56,7 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
     auto logger = launchdarkly::logging::NullLogger();
 
     FlagPersistence flag_persistence(
-        "the-key", &updater, store, persistence, logger, 5, []() {
+        "the-key", updater, store, persistence, logger, 5, []() {
             return std::chrono::system_clock::time_point{
                 std::chrono::milliseconds{500}};
         });
@@ -102,7 +102,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
           {"CEXjZY7cHJG_ydFy7q4-YEFwVrG3_pkJwA4FAjrbfx0=",
            R"({"flagA":{"version":1,"value":"test"}})"}}}});
 
-    FlagPersistence flag_persistence("the-key", &updater, store, persistence,
+    FlagPersistence flag_persistence("the-key", updater, store, persistence,
                                      logger, 5);
 
     flag_persistence.LoadCached(context);
@@ -123,7 +123,7 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
 
     // Set the max contexts to 2.
     FlagPersistence flag_persistence(
-        "the-key", &updater, store, persistence, logger, 2, [&now]() {
+        "the-key", updater, store, persistence, logger, 2, [&now]() {
             return std::chrono::system_clock::time_point{
                 std::chrono::milliseconds{now}};
         });

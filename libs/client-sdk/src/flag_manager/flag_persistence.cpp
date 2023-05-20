@@ -9,7 +9,8 @@
 namespace launchdarkly::client_side::flag_manager {
 
 std::string PersistenceEncodeKey(std::string const& input) {
-    auto bytes = encoding::Sha256String(input);
+    std::array<unsigned char, SHA256_DIGEST_LENGTH> bytes =
+        encoding::Sha256String(input);
     std::string byte_str(reinterpret_cast<char*>(bytes.data()), bytes.size());
     return encoding::Base64UrlEncode(byte_str);
 }
@@ -20,7 +21,7 @@ static std::string MakeEnvironment(std::string const& prefix,
 }
 
 FlagPersistence::FlagPersistence(std::string const& sdk_key,
-                                 IDataSourceUpdateSink* sink,
+                                 IDataSourceUpdateSink& sink,
                                  FlagStore& flag_store,
                                  std::shared_ptr<IPersistence> persistence,
                                  Logger& logger,
@@ -37,64 +38,70 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
 void FlagPersistence::Init(
     Context const& context,
     std::unordered_map<std::string, ItemDescriptor> data) {
-    sink_->Init(context, std::move(data));
+    sink_.Init(context, std::move(data));
     StoreCache(PersistenceEncodeKey(context.canonical_key()));
 }
 
 void FlagPersistence::Upsert(Context const& context,
                              std::string key,
                              ItemDescriptor item) {
-    sink_->Upsert(context, key, item);
+    sink_.Upsert(context, key, item);
     StoreCache(PersistenceEncodeKey(context.canonical_key()));
 }
 
 void FlagPersistence::LoadCached(Context const& context) {
-    if (persistence_ && context.valid()) {
-        std::lock_guard lock(persistence_mutex_);
-        auto data =
-            persistence_->Read(environment_namespace_,
-                               PersistenceEncodeKey(context.canonical_key()));
-        if (data) {
-            boost::json::error_code error_code;
-            auto parsed = boost::json::parse(*data, error_code);
-            if (error_code) {
-                LD_LOG(logger_, LogLevel::kError)
-                    << "Failed to parse flag data from persistence: "
-                    << error_code.message();
-            } else {
-                auto res = boost::json::value_to<tl::expected<
-                    std::unordered_map<
-                        std::string, launchdarkly::client_side::ItemDescriptor>,
-                    JsonError>>(parsed);
-                if (res) {
-                    sink_->Init(context, *res);
-                } else {
-                    LD_LOG(logger_, LogLevel::kError)
-                        << "Failed to parse flag data from persistence: "
-                        << error_code.message();
-                }
-            }
-        }
+    if (!persistence_ || !context.valid()) {
+        return;
     }
+
+    std::lock_guard lock(persistence_mutex_);
+    auto data = persistence_->Read(
+        environment_namespace_, PersistenceEncodeKey(context.canonical_key()));
+
+    if (!data) {
+        return;
+    }
+
+    boost::json::error_code error_code;
+    auto parsed = boost::json::parse(*data, error_code);
+    if (error_code) {
+        LD_LOG(logger_, LogLevel::kError)
+            << "Failed to parse flag data from persistence: "
+            << error_code.message();
+        return;
+    }
+
+    auto res = boost::json::value_to<tl::expected<
+        std::unordered_map<std::string,
+                           launchdarkly::client_side::ItemDescriptor>,
+        JsonError>>(parsed);
+    if (!res) {
+        LD_LOG(logger_, LogLevel::kError)
+            << "Failed to parse flag data from persistence: "
+            << error_code.message();
+        return;
+    }
+    sink_.Init(context, *res);
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {
-    if (persistence_) {
-        std::lock_guard lock(persistence_mutex_);
-        auto index = GetIndex();
-        index.Notice(context_id, time_stamper_());
-        auto pruned = index.Prune(max_cached_contexts_);
-        for (auto& id : pruned) {
-            persistence_->Remove(environment_namespace_, id);
-        }
-        persistence_->Set(
-            environment_namespace_, index_key_,
-            boost::json::serialize(boost::json::value_from(index)));
-
-        persistence_->Set(environment_namespace_, context_id,
-                          boost::json::serialize(
-                              boost::json::value_from(flag_store_.GetAll())));
+    if (!persistence_) {
+        return;
     }
+
+    std::lock_guard lock(persistence_mutex_);
+    auto index = GetIndex();
+    index.Notice(context_id, time_stamper_());
+    auto pruned = index.Prune(max_cached_contexts_);
+    for (auto& id : pruned) {
+        persistence_->Remove(environment_namespace_, id);
+    }
+    persistence_->Set(environment_namespace_, index_key_,
+                      boost::json::serialize(boost::json::value_from(index)));
+
+    persistence_->Set(
+        environment_namespace_, context_id,
+        boost::json::serialize(boost::json::value_from(flag_store_.GetAll())));
 }
 
 ContextIndex FlagPersistence::GetIndex() {

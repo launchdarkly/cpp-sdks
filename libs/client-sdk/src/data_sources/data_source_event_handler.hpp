@@ -49,7 +49,7 @@ class DataSourceEventHandler {
     };
 
     DataSourceEventHandler(Context const& context,
-                           IDataSourceUpdateSink* handler,
+                           IDataSourceUpdateSink& handler,
                            Logger const& logger,
                            DataSourceStatusManager& status_manager);
 
@@ -63,7 +63,7 @@ class DataSourceEventHandler {
                                 std::string const& data);
 
    private:
-    IDataSourceUpdateSink* handler_;
+    IDataSourceUpdateSink& handler_;
     Logger const& logger_;
     DataSourceStatusManager& status_manager_;
     Context context_;

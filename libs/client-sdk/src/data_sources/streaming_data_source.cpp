@@ -22,7 +22,7 @@ StreamingDataSource::StreamingDataSource(
     Config const& config,
     boost::asio::any_io_executor ioc,
     Context context,
-    IDataSourceUpdateSink* handler,
+    IDataSourceUpdateSink& handler,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
     : exec_(ioc),

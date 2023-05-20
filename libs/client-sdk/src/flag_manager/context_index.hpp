@@ -27,6 +27,10 @@ class ContextIndex {
      * Structure used to track the stored contexts.
      */
     struct IndexEntry {
+        IndexEntry() = default;
+        IndexEntry(
+            std::string id,
+            std::chrono::time_point<std::chrono::system_clock> timestamp);
         std::string id;
         std::chrono::time_point<std::chrono::system_clock> timestamp;
     };

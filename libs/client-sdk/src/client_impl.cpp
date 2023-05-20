@@ -38,11 +38,11 @@ static std::shared_ptr<IDataSource> MakeDataSource(
         // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
-            config, executor, context, &flag_updater, status_manager, logger);
+            config, executor, context, flag_updater, status_manager, logger);
     }
     return std::make_shared<
         launchdarkly::client_side::data_sources::PollingDataSource>(
-        config, executor, context, &flag_updater, status_manager, logger);
+        config, executor, context, flag_updater, status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {

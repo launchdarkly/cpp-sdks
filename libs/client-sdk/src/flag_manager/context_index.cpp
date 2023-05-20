@@ -19,7 +19,7 @@ void ContextIndex::Notice(
     if (found != index_.end()) {
         found->timestamp = timestamp;
     } else {
-        index_.push_back(IndexEntry{id, timestamp});
+        index_.emplace_back(id, timestamp);
     }
 }
 
@@ -91,9 +91,9 @@ ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
                         ValueAsOpt<uint64_t>(timestamp_iter, obj.end());
 
                     if (id && timestamp) {
-                        index.push_back(ContextIndex::IndexEntry{
+                        index.emplace_back(
                             *id, std::chrono::system_clock::time_point{
-                                     std::chrono::milliseconds{*timestamp}}});
+                                     std::chrono::milliseconds{*timestamp}});
                     }
                 }
             }
@@ -101,5 +101,10 @@ ContextIndex tag_invoke(boost::json::value_to_tag<ContextIndex> const& unused,
     }
     return ContextIndex(index);
 }
+
+ContextIndex::IndexEntry::IndexEntry(
+    std::string id,
+    std::chrono::time_point<std::chrono::system_clock> timestamp)
+    : id(id), timestamp(timestamp) {}
 
 }  // namespace launchdarkly::client_side::flag_manager

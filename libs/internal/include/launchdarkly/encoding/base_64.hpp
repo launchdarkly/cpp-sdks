@@ -4,8 +4,6 @@
 
 namespace launchdarkly::encoding {
 
-// TODO: Move to internal.
-
 /**
  * Return a base64 encoded version of the input string.
  * This version is URL safe, which means where a typical '+' or '/' are used
