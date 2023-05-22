@@ -43,8 +43,11 @@ class EventBody<EventReceiver>::value_type {
 
     EventReceiver events_;
 
+    std::optional<std::string> last_event_id_;
+
    public:
-    void on_event(EventReceiver&& receiver) { events_ = std::move(receiver); }
+    void on_event(EventReceiver receiver) { events_ = std::move(receiver); }
+    std::optional<std::string> last_event_id() const { return last_event_id_; }
 };
 
 template <class EventReceiver>
@@ -54,7 +57,7 @@ struct EventBody<EventReceiver>::reader {
     std::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
     bool begin_CR_;
-    std::optional<std::string> last_event_id_;
+
     std::optional<Event> event_;
 
    public:
@@ -64,7 +67,6 @@ struct EventBody<EventReceiver>::reader {
           buffered_line_(),
           complete_lines_(),
           begin_CR_(false),
-          last_event_id_(),
           event_() {
         boost::ignore_unused(h);
     }
@@ -80,7 +82,6 @@ struct EventBody<EventReceiver>::reader {
     void init(boost::optional<std::uint64_t> const& content_length,
               error_code& ec) {
         boost::ignore_unused(content_length);
-
         // The specification requires this to indicate "no error"
         ec = {};
     }
@@ -207,7 +208,7 @@ struct EventBody<EventReceiver>::reader {
 
                 if (!event_.has_value()) {
                     event_.emplace(Event{});
-                    event_->id = last_event_id_;
+                    event_->id = body_.last_event_id_;
                 }
 
                 if (field.first == "event") {
@@ -220,8 +221,8 @@ struct EventBody<EventReceiver>::reader {
                         // ignored.
                         continue;
                     }
-                    last_event_id_ = field.second;
-                    event_->id = last_event_id_;
+                    body_.last_event_id_ = field.second;
+                    event_->id = body_.last_event_id_;
                 } else if (field.first == "retry") {
                     // todo: implement
                 }

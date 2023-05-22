@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("comments");
         srv.add_capability("report");
         srv.add_capability("post");
-        srv.add_capability("read-timeout");
+        srv.add_capability("reconnection");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
