@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
 
@@ -24,8 +25,8 @@ class FilePersistence : public IPersistence {
         std::filesystem::create_directories(directory_);
     }
     void Set(std::string storage_namespace,
-                  std::string key,
-                  std::string data) noexcept override {
+             std::string key,
+             std::string data) noexcept override {
         try {
             std::ofstream file;
             file.open(MakePath(storage_namespace, key));
@@ -37,7 +38,7 @@ class FilePersistence : public IPersistence {
     }
 
     void Remove(std::string storage_namespace,
-                     std::string key) noexcept override {
+                std::string key) noexcept override {
         std::filesystem::remove(MakePath(storage_namespace, key));
     }
 

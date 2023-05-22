@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "client_impl.hpp"
+#include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
 
@@ -40,6 +41,11 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     IDataSourceUpdateSink& flag_updater,
     data_sources::DataSourceStatusManager& status_manager,
     Logger& logger) {
+    if (config.Offline()) {
+        return std::make_shared<data_sources::NullDataSource>(executor,
+                                                              status_manager);
+    }
+
     auto builder = HttpPropertiesBuilder(http_properties);
 
     // Event sources should include application tags.
@@ -98,8 +104,8 @@ ClientImpl::ClientImpl(Config config,
                     logger_,
                     config.Persistence().max_contexts_,
                     MakePersistence(config)),
-      data_source_factory_([&config, this]() {
-          return MakeDataSource(http_properties_, config.ApplicationTag(),
+      data_source_factory_([this]() {
+          return MakeDataSource(http_properties_, config_.ApplicationTag(),
                                 config_, context_, ioc_.get_executor(),
                                 flag_manager_.Updater(), status_manager_,
                                 logger_);
@@ -110,7 +116,7 @@ ClientImpl::ClientImpl(Config config,
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     flag_manager_.LoadCache(context_);
 
-    if (config.Events().Enabled()) {
+    if (config.Events().Enabled() && !config.Offline()) {
         event_processor_ = std::make_unique<EventProcessor>(
             ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
             http_properties_, logger_);
@@ -129,6 +135,11 @@ ClientImpl::ClientImpl(Config config,
             init_waiter_.notify_all();
         }
     });
+
+    if (config.Offline()) {
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "Starting LaunchDarkly client in offline mode";
+    }
 
     // Should listen to status before attempting to start.
     data_source_->Start();
