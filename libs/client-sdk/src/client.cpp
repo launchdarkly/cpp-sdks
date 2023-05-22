@@ -8,8 +8,8 @@ Client::Client(Config config, Context context)
     : client(std::make_unique<ClientImpl>(std::move(config),
                                           std::move(context))) {}
 
-std::future<void> Client::RunAsync() {
-    return client->RunAsync();
+std::future<void> Client::StartAsync() {
+    return client->StartAsync();
 }
 
 bool Client::Initialized() const {

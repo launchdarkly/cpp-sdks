@@ -90,7 +90,7 @@ class ClientImpl : public IClient {
 
     ~ClientImpl();
 
-    std::future<void> RunAsync() override;
+    std::future<void> StartAsync() override;
 
    private:
     template <typename T>
@@ -115,11 +115,10 @@ class ClientImpl : public IClient {
                               std::function<void()> user_completion);
 
     void RestartDataSource();
-    
-    std::future<void> RunAsyncInternal(
-        std::function<bool(launchdarkly::client_side::data_sources::
-                               DataSourceStatus::DataSourceState)>
-            complete_condition);
+
+    std::future<void> StartAsyncInternal(
+        std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
+            cond);
 
     Config config_;
 
@@ -139,7 +138,6 @@ class ClientImpl : public IClient {
 
     std::unique_ptr<IConnection> status_manager_conn_;
 
-    bool initialized_;
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 

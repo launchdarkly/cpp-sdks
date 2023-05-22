@@ -67,7 +67,6 @@ ClientImpl::ClientImpl(Config config, Context context)
       data_source_(nullptr),
       event_processor_(nullptr),
       flag_updater_(flag_manager_),
-      initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     if (config.Events().Enabled()) {
         event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
@@ -87,7 +86,7 @@ std::future<void> ClientImpl::IdentifyAsync(Context context) {
     event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
-    return RunAsyncInternal([](auto state) {
+    return StartAsyncInternal([](auto state) {
         return (state == DataSourceStatus::DataSourceState::kValid ||
                 state == DataSourceStatus::DataSourceState::kShutdown ||
                 state == DataSourceStatus::DataSourceState::kSetOffline);
@@ -105,24 +104,19 @@ void ClientImpl::RestartDataSource() {
     data_source_->ShutdownAsync(start_op);
 }
 
-std::future<void> ClientImpl::RunAsyncInternal(
+std::future<void> ClientImpl::StartAsyncInternal(
     std::function<bool(DataSourceStatus::DataSourceState)> cond) {
     auto pr = std::make_shared<std::promise<void>>();
     auto fut = pr->get_future();
 
-    // OK the problem here is that the datasource never becomes valid, hence
-    // Identify never returns.
-    // WHy ? because the test aharness is sending bogus data.So what are we
-    //       supposed to do herE
     status_manager_.OnDataSourceStatusChangeEx(
         [this, cond, pr](data_sources::DataSourceStatus status) {
             if (cond(status.State())) {
-                LD_LOG(logger_, LogLevel::kInfo)
-                    << "Calling future set value: " << status.State();
                 pr->set_value();
-                return true;
+                return true; /* delete this change listener since the desired
+                                state was reached */
             }
-            return false;
+            return false; /* keep the change listener */
         });
 
     RestartDataSource();
@@ -130,8 +124,8 @@ std::future<void> ClientImpl::RunAsyncInternal(
     return fut;
 }
 
-std::future<void> ClientImpl::RunAsync() {
-    return RunAsyncInternal([](auto state) {
+std::future<void> ClientImpl::StartAsync() {
+    return StartAsyncInternal([](auto state) {
         return (state == DataSourceStatus::DataSourceState::kValid ||
                 state == DataSourceStatus::DataSourceState::kShutdown ||
                 state == DataSourceStatus::DataSourceState::kSetOffline);
@@ -140,7 +134,9 @@ std::future<void> ClientImpl::RunAsync() {
 
 bool ClientImpl::Initialized() const {
     return status_manager_.Status().State() ==
-           DataSourceStatus::DataSourceState::kValid;
+               DataSourceStatus::DataSourceState::kValid ||
+           status_manager_.Status().State() ==
+               DataSourceStatus::DataSourceState::kSetOffline;
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {

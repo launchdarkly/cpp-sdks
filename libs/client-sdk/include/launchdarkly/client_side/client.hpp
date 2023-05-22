@@ -23,26 +23,26 @@ class IClient {
    public:
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
-     * If RunAsync isn't called, the client is able to post events but is unable
-     * to obtain flag data.
+     * If StartAsync isn't called, the client is able to post events but is
+     * unable to obtain flag data.
      *
      * The returned future will resolve when the client successfully
      * initializes, or encounters a permanent error.
      * @return Future representing client initialization.
      */
-    virtual std::future<void> RunAsync() = 0;
+    virtual std::future<void> StartAsync() = 0;
 
     /**
      * Returns a boolean value indicating LaunchDarkly connection and flag state
      * within the client.
      *
      *  [TODO Need to make WaitForReadyAsync, offline]
-     * When you first start the client, once RunAsync has completed, Initialized
-     * should return true if and only if either 1. it connected to LaunchDarkly
-     * and successfully retrieved flags, or 2. it started in offline mode so
-     * there's no need to connect to LaunchDarkly. If the client timed out
-     * trying to connect to LD, then Initialized returns false (even if we do
-     * have cached flags). If the client connected and got a 401 error,
+     * When you first start the client, once StartAsync has completed,
+     * Initialized should return true if and only if either 1. it connected to
+     * LaunchDarkly and successfully retrieved flags, or 2. it started in
+     * offline mode so there's no need to connect to LaunchDarkly. If the client
+     * timed out trying to connect to LD, then Initialized returns false (even
+     * if we do have cached flags). If the client connected and got a 401 error,
      * Initialized is will return false. This serves the purpose of letting the
      * app know that there was a problem of some kind.
      *
@@ -263,7 +263,7 @@ class Client : public IClient {
     Client& operator=(Client) = delete;
     Client& operator=(Client&& other) = delete;
 
-    std::future<void> RunAsync() override;
+    std::future<void> StartAsync() override;
 
     [[nodiscard]] bool Initialized() const override;
 

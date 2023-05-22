@@ -60,7 +60,7 @@ int main() {
         std::cout << "Got flag change: " << *event << std::endl;
     });
 
-    auto init = client.RunAsync();
+    auto init = client.StartAsync();
     init.wait_for(std::chrono::seconds(30));
 
     auto value = client.BoolVariationDetail("my-boolean-flag", false);

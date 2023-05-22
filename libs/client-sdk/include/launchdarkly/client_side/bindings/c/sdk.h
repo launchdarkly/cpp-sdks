@@ -36,7 +36,7 @@ LDClientSDK_New(LDClientConfig config, LDContext context);
  * within the client.
  *
  *  [TODO Need to make WaitForReadyAsync, offline]
- * When you first start the client, once RunAsync has completed, Initialized
+ * When you first start the client, once StartAsync has completed, Initialized
  * should return true if and only if either 1. it connected to LaunchDarkly and
  * successfully retrieved flags, or 2. it started in offline mode so there's no
  * need to connect to LaunchDarkly. If the client timed out trying to connect to

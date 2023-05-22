@@ -144,7 +144,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         waitForClient = std::chrono::milliseconds(*in.startWaitTimeMs);
     }
 
-    auto init = client->RunAsync();
+    auto init = client->StartAsync();
     init.wait_for(waitForClient);
 
     entities_.try_emplace(id, std::move(client));
