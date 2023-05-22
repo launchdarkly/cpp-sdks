@@ -16,7 +16,7 @@ namespace net = boost::asio;  // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 class server {
-    foxy::listener listener_;
+    launchdarkly::foxy::listener listener_;
     EntityManager entity_manager_;
     std::vector<std::string> caps_;
     launchdarkly::Logger& logger_;

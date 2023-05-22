@@ -59,8 +59,9 @@ class FoxyClient : public Client,
           write_timeout_(write_timeout),
           req_(std::move(req)),
           session_(std::move(executor),
-                   foxy::session_opts{ToOptRef(ssl_context_),
-                                      connect_timeout.value_or(kNoTimeout)}),
+                   launchdarkly::foxy::session_opts{
+                       ToOptRef(ssl_context_),
+                       connect_timeout.value_or(kNoTimeout)}),
           logger_(std::move(logger)) {
         // SSE body will never end unless an error occurs, so we shouldn't set a
         // size limit.
@@ -159,7 +160,7 @@ class FoxyClient : public Client,
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
     http::response_parser<body> body_parser_;
-    foxy::client_session session_;
+    launchdarkly::foxy::client_session session_;
     Builder::LogCallback logger_;
 };
 
@@ -252,7 +253,7 @@ std::shared_ptr<Client> Builder::build() {
 
     std::optional<ssl::context> ssl;
     if (service == "https") {
-        ssl = foxy::make_ssl_ctx(ssl::context::tlsv12_client);
+        ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
     }
 

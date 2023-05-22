@@ -27,7 +27,7 @@ endif ()
 # Needed to fetch external dependencies.
 include(FetchContent)
 
-include(${CMAKE_FILES}/foxy.cmake)
+#include(${CMAKE_FILES}/foxy.cmake)
 
 add_subdirectory(src)
 

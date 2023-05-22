@@ -1,9 +1,11 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
-        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
+        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/sse/*.hpp"
+        )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME}
+add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         client.cpp
         parser.cpp

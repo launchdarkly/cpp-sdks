@@ -7,7 +7,7 @@ const std::string kEntityPath = "/entity/";
 
 namespace net = boost::asio;
 
-Session::Session(foxy::server_session& session,
+Session::Session(launchdarkly::foxy::server_session& session,
                  EntityManager& manager,
                  std::vector<std::string>& caps,
                  launchdarkly::Logger& logger)

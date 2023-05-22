@@ -9,7 +9,6 @@ project(
 )
 
 include(${CMAKE_FILES}/json.cmake)
-include(${CMAKE_FILES}/foxy.cmake)
 
 add_executable(sse-tests
         src/main.cpp

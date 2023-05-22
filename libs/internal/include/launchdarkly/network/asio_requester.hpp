@@ -129,7 +129,7 @@ class FoxyClient
     std::chrono::milliseconds response_timeout_;
     ResponseHandler handler_;
     http::response<http::string_body> resp_;
-    foxy::client_session session_;
+    launchdarkly::foxy::client_session session_;
 
    public:
     FoxyClient(net::any_io_executor const& exec,
@@ -148,7 +148,7 @@ class FoxyClient
           response_timeout_(response_timeout),
           handler_(std::move(handler)),
           session_(exec,
-                   foxy::session_opts{ToOptRef(ssl_context_.get()),
+                   launchdarkly::foxy::session_opts{ToOptRef(ssl_context_.get()),
                                       connect_timeout_}),
           resp_() {}
 
@@ -251,7 +251,7 @@ class AsioRequester {
     AsioRequester(net::any_io_executor ctx)
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
-              foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
+              launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
         ssl_ctx_->set_default_verify_paths();
     }
 

@@ -8,7 +8,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME}
+add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         context_filter.cpp
         events/asio_event_processor.cpp
@@ -33,7 +33,6 @@ add_library(${LIBNAME}
         serialization/json_evaluation_result.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp)
-
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
