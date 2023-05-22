@@ -18,6 +18,10 @@ target_link_libraries(${LIBNAME}
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 
+
+set_property(TARGET ${LIBNAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 install(TARGETS ${LIBNAME})
 
 # Need the public headers to build.
