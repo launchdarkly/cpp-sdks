@@ -47,6 +47,11 @@ LoggingBuilder& ConfigBuilder<SDK>::Logging() {
 }
 
 template <typename SDK>
+PersistenceBuilder<SDK>& ConfigBuilder<SDK>::Persistence() {
+    return persistence_builder_;
+}
+
+template <typename SDK>
 [[nodiscard]] tl::expected<typename ConfigBuilder<SDK>::Result, Error>
 ConfigBuilder<SDK>::Build() const {
     auto sdk_key = sdk_key_;
@@ -71,6 +76,8 @@ ConfigBuilder<SDK>::Build() const {
 
     auto logging = logging_config_builder_.Build();
 
+    auto persistence = persistence_builder_.Build();
+
     return {tl::in_place,
             sdk_key,
             offline,
@@ -79,7 +86,8 @@ ConfigBuilder<SDK>::Build() const {
             *events_config,
             app_tag,
             std::move(data_source_config),
-            std::move(http_properties)};
+            std::move(http_properties),
+            std::move(persistence)};
 }
 
 template class ConfigBuilder<config::shared::ClientSDK>;

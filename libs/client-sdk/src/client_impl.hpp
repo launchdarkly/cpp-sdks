@@ -25,12 +25,11 @@
 #include "data_sources/data_source_status_manager.hpp"
 #include "event_processor.hpp"
 #include "flag_manager/flag_manager.hpp"
-#include "flag_manager/flag_updater.hpp"
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context);
+    ClientImpl(Config config, Context context, std::string const& version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -88,7 +87,7 @@ class ClientImpl : public IClient {
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
-    ~ClientImpl();
+    ~ClientImpl() override;
 
    private:
     template <typename T>
@@ -109,17 +108,16 @@ class ClientImpl : public IClient {
 
     void UpdateContextSynchronized(Context context);
 
-    void OnDataSourceShutdown(Context context,
-                              std::function<void()> user_completion);
-
-    Config config_;
-
     Logger logger_;
+    Config config_;
+    launchdarkly::config::shared::built::HttpProperties http_properties_;
+
     boost::asio::io_context ioc_;
 
     Context context_;
     mutable std::shared_mutex context_mutex_;
 
+    flag_manager::FlagManager flag_manager_;
     std::function<std::shared_ptr<IDataSource>()> data_source_factory_;
 
     std::shared_ptr<IDataSource> data_source_;
@@ -131,8 +129,6 @@ class ClientImpl : public IClient {
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
-    flag_manager::FlagManager flag_manager_;
-    flag_manager::FlagUpdater flag_updater_;
 
     std::thread thread_;
 

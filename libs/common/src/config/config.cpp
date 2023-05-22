@@ -11,7 +11,8 @@ Config<SDK>::Config(std::string sdk_key,
                     shared::built::Events events,
                     std::optional<std::string> application_tag,
                     shared::built::DataSourceConfig<SDK> data_source_config,
-                    shared::built::HttpProperties http_properties)
+                    shared::built::HttpProperties http_properties,
+                    shared::built::Persistence<SDK> persistence)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
       offline_(offline),
@@ -19,7 +20,8 @@ Config<SDK>::Config(std::string sdk_key,
       events_(std::move(events)),
       application_tag_(std::move(application_tag)),
       data_source_config_(std::move(data_source_config)),
-      http_properties_(std::move(http_properties)) {}
+      http_properties_(std::move(http_properties)),
+      persistence_(persistence) {}
 
 template <typename SDK>
 std::string const& Config<SDK>::SdkKey() const {
@@ -60,6 +62,11 @@ bool Config<SDK>::Offline() const {
 template <typename SDK>
 shared::built::Logging const& Config<SDK>::Logging() const {
     return logging_;
+}
+
+template <typename SDK>
+shared::built::Persistence<SDK> const& Config<SDK>::Persistence() const {
+    return persistence_;
 }
 
 template class Config<config::shared::ClientSDK>;

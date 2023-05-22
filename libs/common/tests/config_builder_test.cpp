@@ -163,7 +163,6 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_CanSetHttpProperties) {
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
 
-    EXPECT_EQ("CppClient/TODO", cfg->HttpProperties().UserAgent());
     EXPECT_EQ(123456, cfg->HttpProperties().ReadTimeout().count());
     EXPECT_EQ(1234, cfg->HttpProperties().ConnectTimeout().count());
     EXPECT_EQ("potato/2.0-chip",
