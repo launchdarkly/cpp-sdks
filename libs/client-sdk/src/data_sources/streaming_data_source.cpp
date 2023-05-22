@@ -19,7 +19,10 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
 
 StreamingDataSource::StreamingDataSource(
-    Config const& config,
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
+        data_source_config,
+    config::shared::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor ioc,
     Context context,
     IDataSourceUpdateSink& handler,
@@ -31,11 +34,9 @@ StreamingDataSource::StreamingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(context_, handler, logger, status_manager_)),
-      http_config_(config.HttpProperties()),
-      data_source_config_(config.DataSourceConfig()),
-      app_tags_(config.ApplicationTag()),
-      sdk_key_(config.SdkKey()),
-      streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
+      http_config_(http_properties),
+      data_source_config_(data_source_config),
+      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
@@ -104,14 +105,8 @@ void StreamingDataSource::Start() {
 
     client_builder.connect_timeout(http_config_.ConnectTimeout());
 
-    client_builder.header("authorization", sdk_key_);
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
-    }
-    client_builder.header("user-agent", http_config_.UserAgent());
-
-    if (app_tags_) {
-        client_builder.header("x-launchdarkly-tags", *app_tags_);
     }
 
     // TODO: Handle proxy support.

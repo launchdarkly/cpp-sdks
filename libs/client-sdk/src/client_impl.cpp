@@ -19,16 +19,22 @@
 namespace launchdarkly::client_side {
 
 // The ASIO implementation assumes that the io_context will be run from a
-// single thread, and applies several optimisations based on this assumption.
+// single thread, and applies several optimisations based on this
+// assumption.
 auto const kAsioConcurrencyHint = 1;
 
 // Client's destructor attempts to gracefully shut down the datasource
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
+using config::shared::ClientSDK;
 using launchdarkly::client_side::data_sources::DataSourceStatus;
+using launchdarkly::config::shared::built::DataSourceConfig;
+using launchdarkly::config::shared::built::HttpProperties;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
+    HttpProperties const& http_properties,
+    std::optional<std::string> app_tags,
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
@@ -39,15 +45,29 @@ static std::shared_ptr<IDataSource> MakeDataSource(
         return std::make_shared<data_sources::NullDataSource>(executor,
                                                               status_manager);
     }
+
+    auto builder = HttpPropertiesBuilder(http_properties);
+
+    // Event sources should include application tags.
+    if (app_tags) {
+        builder.Header("x-launchdarkly-tags", *app_tags);
+    }
+
+    auto data_source_properties = builder.Build();
+
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
-            config, executor, context, flag_updater, status_manager, logger);
+            config.ServiceEndpoints(), config.DataSourceConfig(),
+            data_source_properties, executor, context, flag_updater,
+            status_manager, logger);
     }
     return std::make_shared<
         launchdarkly::client_side::data_sources::PollingDataSource>(
-        config, executor, context, flag_updater, status_manager, logger);
+        config.ServiceEndpoints(), config.DataSourceConfig(),
+        data_source_properties, executor, context, flag_updater, status_manager,
+        logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -69,8 +89,14 @@ static std::shared_ptr<IPersistence> MakePersistence(Config const& config) {
     return persistence.implementation;
 }
 
-ClientImpl::ClientImpl(Config config, Context context)
+ClientImpl::ClientImpl(Config config,
+                       Context context,
+                       std::string const& version)
     : config_(config),
+      http_properties_(HttpPropertiesBuilder(config.HttpProperties())
+                           .Header("user-agent", "CPPClient/" + version)
+                           .Header("authorization", config.SdkKey())
+                           .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       context_(std::move(context)),
@@ -79,7 +105,8 @@ ClientImpl::ClientImpl(Config config, Context context)
                     config.Persistence().max_contexts_,
                     MakePersistence(config)),
       data_source_factory_([this]() {
-          return MakeDataSource(config_, context_, ioc_.get_executor(),
+          return MakeDataSource(http_properties_, config_.ApplicationTag(),
+                                config_, context_, ioc_.get_executor(),
                                 flag_manager_.Updater(), status_manager_,
                                 logger_);
       }),
@@ -90,8 +117,9 @@ ClientImpl::ClientImpl(Config config, Context context)
     flag_manager_.LoadCache(context_);
 
     if (config.Events().Enabled() && !config.Offline()) {
-        event_processor_ = std::make_unique<EventProcessor>(ioc_.get_executor(),
-                                                            config, logger_);
+        event_processor_ = std::make_unique<EventProcessor>(
+            ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
+            http_properties_, logger_);
     } else {
         event_processor_ = std::make_unique<NullEventProcessor>();
     }
@@ -181,8 +209,8 @@ std::future<void> ClientImpl::IdentifyAsync(Context context) {
     return fut;
 }
 
-// TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
-// multiple concerns.
+// TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing
+// up multiple concerns.
 template <typename T>
 EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   Value default_value,

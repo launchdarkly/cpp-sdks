@@ -9,8 +9,9 @@
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
-#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 
@@ -20,12 +21,16 @@ class PollingDataSource
     : public IDataSource,
       public std::enable_shared_from_this<PollingDataSource> {
    public:
-    PollingDataSource(Config const& config,
-                      boost::asio::any_io_executor ioc,
-                      Context const& context,
-                      IDataSourceUpdateSink& handler,
-                      DataSourceStatusManager& status_manager,
-                      Logger const& logger);
+    PollingDataSource(
+        config::shared::built::ServiceEndpoints const& endpoints,
+        config::shared::built::DataSourceConfig<
+            config::shared::ClientSDK> const& data_source_config,
+        config::shared::built::HttpProperties const& http_properties,
+        boost::asio::any_io_executor ioc,
+        Context const& context,
+        IDataSourceUpdateSink& handler,
+        DataSourceStatusManager& status_manager,
+        Logger const& logger);
 
     void Start() override;
     void ShutdownAsync(std::function<void()>) override;

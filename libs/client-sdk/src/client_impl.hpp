@@ -29,7 +29,7 @@
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context);
+    ClientImpl(Config config, Context context, std::string const& version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -87,7 +87,7 @@ class ClientImpl : public IClient {
 
     void WaitForReadySync(std::chrono::milliseconds timeout) override;
 
-    ~ClientImpl();
+    ~ClientImpl() override;
 
    private:
     template <typename T>
@@ -110,6 +110,7 @@ class ClientImpl : public IClient {
 
     Logger logger_;
     Config config_;
+    launchdarkly::config::shared::built::HttpProperties http_properties_;
 
     boost::asio::io_context ioc_;
 

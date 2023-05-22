@@ -29,29 +29,30 @@ overloaded(Ts...) -> overloaded<Ts...>;
 template <typename SDK>
 AsioEventProcessor<SDK>::AsioEventProcessor(
     boost::asio::any_io_executor const& io,
-    config::Config<SDK> const& config,
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::Events const& events_config,
+    config::shared::built::HttpProperties const& http_properties,
     Logger& logger)
     : io_(boost::asio::make_strand(io)),
-      outbox_(config.Events().Capacity()),
+      outbox_(events_config.Capacity()),
       summarizer_(std::chrono::system_clock::now()),
-      flush_interval_(config.Events().FlushInterval()),
+      flush_interval_(events_config.FlushInterval()),
       timer_(io_),
-      url_(config.ServiceEndpoints().EventsBaseUrl() + config.Events().Path()),
-      http_props_(config.HttpProperties()),
-      authorization_(config.SdkKey()),
+      url_(endpoints.EventsBaseUrl() + events_config.Path()),
+      http_props_(http_properties),
       uuids_(),
       workers_(io_,
-               config.Events().FlushWorkers(),
-               config.Events().DeliveryRetryDelay(),
+               events_config.FlushWorkers(),
+               events_config.DeliveryRetryDelay(),
                logger),
-      inbox_capacity_(config.Events().Capacity()),
+      inbox_capacity_(events_config.Capacity()),
       inbox_size_(0),
       full_outbox_encountered_(false),
       full_inbox_encountered_(false),
       permanent_delivery_failure_(false),
       last_known_past_time_(std::nullopt),
-      filter_(config.Events().AllAttributesPrivate(),
-              config.Events().PrivateAttributes()),
+      filter_(events_config.AllAttributesPrivate(),
+              events_config.PrivateAttributes()),
       logger_(logger) {
     ScheduleFlush();
 }
@@ -203,7 +204,6 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
 
     props.Header(kEventSchemaHeader, std::to_string(kEventSchemaVersion));
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
-    props.Header(to_string(http::field::authorization), authorization_);
     props.Header(to_string(http::field::content_type), "application/json");
 
     return EventBatch(url_, props.Build(), events);
