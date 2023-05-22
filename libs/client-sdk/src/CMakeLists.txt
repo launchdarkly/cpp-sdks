@@ -49,6 +49,10 @@ target_link_libraries(${LIBNAME}
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 
+
+set_property(TARGET ${LIBNAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 install(TARGETS ${LIBNAME})
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.

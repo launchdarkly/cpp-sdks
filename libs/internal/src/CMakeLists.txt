@@ -36,6 +36,10 @@ add_library(${LIBNAME} OBJECT
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
+
+set_property(TARGET ${LIBNAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
 install(TARGETS ${LIBNAME})
 
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
