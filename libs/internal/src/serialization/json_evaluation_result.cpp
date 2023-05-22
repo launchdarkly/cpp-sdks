@@ -3,6 +3,8 @@
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
+#include <boost/core/ignore_unused.hpp>
+
 namespace launchdarkly {
 tl::expected<EvaluationResult, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<EvaluationResult, JsonError>> const&
@@ -91,4 +93,47 @@ tl::expected<EvaluationResult, JsonError> tag_invoke(
 
     return tl::unexpected(JsonError::kSchemaFailure);
 }
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                EvaluationResult const& evaluation_result) {
+    boost::ignore_unused(unused);
+
+    auto& obj = json_value.emplace_object();
+    obj.emplace("version", evaluation_result.version());
+
+    if (evaluation_result.flag_version()) {
+        obj.emplace("flagVersion", *evaluation_result.flag_version());
+    }
+
+    if (evaluation_result.track_events()) {
+        obj.emplace("trackEvents", evaluation_result.track_events());
+    }
+
+    if (evaluation_result.track_reason()) {
+        obj.emplace("trackReason", evaluation_result.track_reason());
+    }
+
+    if (evaluation_result.debug_events_until_date()) {
+        obj.emplace(
+            "debugEventsUntilDate",
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                evaluation_result.debug_events_until_date()->time_since_epoch())
+                .count());
+    }
+
+    auto& detail = evaluation_result.detail();
+    auto value_json = boost::json::value_from(detail.value());
+    obj.emplace("value", value_json);
+
+    if (detail.variation_index()) {
+        obj.emplace("variationIndex", *detail.variation_index());
+    }
+
+    if (detail.reason()) {
+        auto reason_json = boost::json::value_from(*detail.reason());
+        obj.emplace("reason", reason_json);
+    }
+}
+
 }  // namespace launchdarkly

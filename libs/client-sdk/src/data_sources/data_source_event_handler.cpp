@@ -1,6 +1,7 @@
 #include "data_source_event_handler.hpp"
-#include "base_64.hpp"
+#include "../serialization/json_all_flags.hpp"
 
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
@@ -10,9 +11,7 @@
 
 #include "tl/expected.hpp"
 
-namespace launchdarkly::client_side {
-// This tag_invoke needs to be in the same namespace as the
-// ItemDescriptor.
+namespace launchdarkly::client_side::data_sources {
 
 static char const* const kErrorParsingPut = "Could not parse PUT message";
 static char const* const kErrorPutInvalid =
@@ -23,39 +22,6 @@ static char const* const kErrorPatchInvalid =
 static char const* const kErrorParsingDelete = "Could not parse DELETE message";
 static char const* const kErrorDeleteInvalid =
     "DELETE message contained invalid data\"";
-
-static tl::expected<
-    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>,
-    JsonError>
-tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::unordered_map<std::string,
-                                  launchdarkly::client_side::ItemDescriptor>,
-               JsonError>> const& unused,
-           boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-
-    if (!json_value.is_object()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    auto const& obj = json_value.as_object();
-    std::unordered_map<std::string, launchdarkly::client_side::ItemDescriptor>
-        descriptors;
-    for (auto const& pair : obj) {
-        auto eval_result =
-            boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-                pair.value());
-        if (!eval_result.has_value()) {
-            return tl::unexpected(JsonError::kSchemaFailure);
-        }
-        descriptors.emplace(pair.key(),
-                            launchdarkly::client_side::ItemDescriptor(
-                                std::move(eval_result.value())));
-    }
-    return descriptors;
-}
-}  // namespace launchdarkly::client_side
-
-namespace launchdarkly::client_side::data_sources {
 
 static tl::expected<DataSourceEventHandler::PatchData, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<DataSourceEventHandler::PatchData,
@@ -102,10 +68,14 @@ static tl::expected<DataSourceEventHandler::DeleteData, JsonError> tag_invoke(
 }
 
 DataSourceEventHandler::DataSourceEventHandler(
-    IDataSourceUpdateSink* handler,
+    Context const& context,
+    IDataSourceUpdateSink& handler,
     Logger const& logger,
     DataSourceStatusManager& status_manager)
-    : handler_(handler), logger_(logger), status_manager_(status_manager) {}
+    : context_(context),
+      handler_(handler),
+      logger_(logger),
+      status_manager_(status_manager) {}
 
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
@@ -125,7 +95,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             parsed);
 
         if (res.has_value()) {
-            handler_->Init(res.value());
+            handler_.Init(context_, res.value());
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
@@ -148,8 +118,8 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         auto res = boost::json::value_to<
             tl::expected<DataSourceEventHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_->Upsert(
-                res.value().key,
+            handler_.Upsert(
+                context_, res.value().key,
                 launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
@@ -173,7 +143,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             tl::expected<DataSourceEventHandler::DeleteData, JsonError>>(
             boost::json::parse(data));
         if (res.has_value()) {
-            handler_->Upsert(res.value().key,
+            handler_.Upsert(context_, res.value().key,
                              ItemDescriptor(res.value().version));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }

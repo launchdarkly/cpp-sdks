@@ -27,7 +27,7 @@ class StreamingDataSource final
     StreamingDataSource(Config const& config,
                         boost::asio::any_io_executor ioc,
                         Context context,
-                        IDataSourceUpdateSink* handler,
+                        IDataSourceUpdateSink& handler,
                         DataSourceStatusManager& status_manager,
                         Logger const& logger);
 
@@ -35,13 +35,12 @@ class StreamingDataSource final
     void ShutdownAsync(std::function<void()>) override;
 
    private:
+    Context context_;
     boost::asio::any_io_executor exec_;
     DataSourceStatusManager& status_manager_;
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
     std::string string_context_;
-
-    Context context_;
 
     config::shared::built::DataSourceConfig<config::shared::ClientSDK>
         data_source_config_;

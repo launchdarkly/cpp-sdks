@@ -26,6 +26,7 @@ option(BUILD_TESTING "Enable C++ unit tests." ON)
 option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
 
 if (BUILD_TESTING)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")

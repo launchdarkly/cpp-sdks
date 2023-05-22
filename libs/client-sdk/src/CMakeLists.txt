@@ -8,11 +8,10 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
-        data_sources/base_64.cpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
-        flag_manager/flag_manager.cpp
+        flag_manager/flag_store.cpp
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
@@ -22,7 +21,6 @@ add_library(${LIBNAME}
         boost_signal_connection.cpp
         client_impl.cpp
         client.cpp
-        data_sources/base_64.hpp
         boost_signal_connection.hpp
         client_impl.hpp
         data_sources/data_source.hpp
@@ -33,11 +31,17 @@ add_library(${LIBNAME}
         data_sources/streaming_data_source.hpp
         event_processor/event_processor.hpp
         event_processor/null_event_processor.hpp
-        flag_manager/flag_manager.hpp
+        flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         event_processor.hpp
         bindings/c/sdk.cpp
-        data_sources/null_data_source.cpp)
+        data_sources/null_data_source.cpp
+        flag_manager/context_index.cpp
+        serialization/json_all_flags.hpp
+        serialization/json_all_flags.cpp
+        flag_manager/flag_manager.cpp
+        flag_manager/flag_persistence.cpp
+        bindings/c/sdk.cpp)
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common

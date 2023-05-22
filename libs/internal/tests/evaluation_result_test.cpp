@@ -12,6 +12,8 @@ using launchdarkly::JsonError;
 // NOLINTBEGIN bugprone-unchecked-optional-access
 // In the tests I do not care to check it.
 
+using launchdarkly::Value;
+
 TEST(EvaluationResultTests, FromJsonAllFields) {
     auto evaluation_result =
         boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
@@ -64,6 +66,31 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
                                  .big_segment_status());
     EXPECT_TRUE(
         evaluation_result.value().detail().reason()->get().in_experiment());
+}
+
+TEST(EvaluationResultTests, ToJsonAllFields) {
+    EvaluationReason reason(EvaluationReason::Kind::kOff,
+                            EvaluationReason::ErrorKind::kMalformedFlag, 12,
+                            "RULE_ID", "PREREQ_KEY", true, "STORE_ERROR");
+    launchdarkly::EvaluationDetailInternal detail(
+        Value(std::map<std::string, Value>{{"item", "a"}}), 84, reason);
+    EvaluationResult result(12, 24, true, true,
+                            std::chrono::system_clock::time_point{
+                                std::chrono::milliseconds{1680555761}},
+                            detail);
+
+    auto res = boost::json::serialize(boost::json::value_from(result));
+    // Strictly speaking the serialized JSON order could change.
+    // In that case, then this test should be updated to check the fields of the
+    // boost json value.
+    EXPECT_EQ(
+        "{\"version\":12,\"flagVersion\":24,\"trackEvents\":true,"
+        "\"trackReason\":true,\"debugEventsUntilDate\":1680555761,\"value\":{"
+        "\"item\":\"a\"},\"variationIndex\":84,\"reason\":{\"kind\":\"OFF\","
+        "\"errorKind\":\"MALFORMED_FLAG\",\"bigSegmentStatus\":\"STORE_ERROR\","
+        "\"ruleId\":\"RULE_ID\",\"ruleIndex\":12,\"inExperiment\":true,"
+        "\"prerequisiteKey\":\"PREREQ_KEY\"}}",
+        res);
 }
 
 TEST(EvaluationResultTests, FromJsonMinimalFields) {

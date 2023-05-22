@@ -6,10 +6,10 @@
 
 #include <utility>
 
-#include "base_64.hpp"
 #include "streaming_data_source.hpp"
 
 #include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
@@ -22,15 +22,15 @@ StreamingDataSource::StreamingDataSource(
     Config const& config,
     boost::asio::any_io_executor ioc,
     Context context,
-    IDataSourceUpdateSink* handler,
+    IDataSourceUpdateSink& handler,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
     : exec_(ioc),
       logger_(logger),
+      context_(std::move(context)),
       status_manager_(status_manager),
       data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
-      context_(std::move(context)),
+          DataSourceEventHandler(context_, handler, logger, status_manager_)),
       http_config_(config.HttpProperties()),
       data_source_config_(config.DataSourceConfig()),
       app_tags_(config.ApplicationTag()),
@@ -38,6 +38,7 @@ StreamingDataSource::StreamingDataSource(
       streaming_endpoint_(config.ServiceEndpoints().StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     auto string_context =
         boost::json::serialize(boost::json::value_from(context_));
 
@@ -52,8 +53,8 @@ void StreamingDataSource::Start() {
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        updated_url =
-            network::AppendUrl(updated_url, Base64UrlEncode(string_context));
+        updated_url = network::AppendUrl(
+            updated_url, encoding::Base64UrlEncode(string_context));
     }
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {

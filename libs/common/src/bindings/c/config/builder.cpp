@@ -4,6 +4,7 @@
 #include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
+#include <launchdarkly/persistence/persistence.hpp>
 
 using namespace launchdarkly::client_side;
 
@@ -33,6 +34,12 @@ using namespace launchdarkly::client_side;
 #define FROM_CUSTOM_LOGGING_BUILDER(ptr) \
     (reinterpret_cast<LDLoggingCustomBuilder>(ptr))
 
+#define TO_CUSTOM_PERSISTENCE_BUILDER(ptr) \
+    (reinterpret_cast<PersistenceBuilder::CustomBuilder*>(ptr))
+
+#define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
+    (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
+
 /**
  * Utility class to allow user-provided backends to satisfy the ILogBackend
  * interface.
@@ -52,6 +59,45 @@ class LogBackendWrapper : public launchdarkly::ILogBackend {
 
    private:
     LDLogBackend backend_;
+};
+
+class PersistenceImplementationWrapper : public IPersistence {
+   public:
+    explicit PersistenceImplementationWrapper(LDPersistence impl)
+        : impl_(impl) {}
+
+    void Set(std::string storage_namespace,
+             std::string key,
+             std::string data) noexcept override {
+        return impl_.Set(storage_namespace.c_str(), key.c_str(), data.c_str(),
+                         impl_.UserData);
+    }
+
+    void Remove(std::string storage_namespace,
+                std::string key) noexcept override {
+        return impl_.Remove(storage_namespace.c_str(), key.c_str(),
+                            impl_.UserData);
+    }
+
+    std::optional<std::string> Read(std::string storage_namespace,
+                                    std::string key) noexcept override {
+        char const* read_value;
+        std::optional<std::string> value_as_optional_string;
+        auto size = impl_.Read(storage_namespace.c_str(), key.c_str(),
+                               &read_value, impl_.UserData);
+        if (size && read_value) {
+            // Get a copy as a string.
+            value_as_optional_string = std::string(read_value, size);
+        }
+
+        if (read_value) {
+            impl_.FreeRead(read_value, impl_.UserData);
+        }
+        return value_as_optional_string;
+    }
+
+   private:
+    LDPersistence impl_;
 };
 
 LD_EXPORT(LDClientConfigBuilder)
@@ -328,6 +374,20 @@ LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend) {
     backend->UserData = nullptr;
 }
 
+LD_EXPORT(void) LDPersistence_Init(struct LDPersistence* impl) {
+    impl->Set = [](char const* storage_namespace, char const* key,
+                   char const* data, void* user_data) {};
+    impl->Remove = [](char const* storage_namespace, char const* key,
+                      void* user_data) {};
+    impl->Read = [](char const* storage_namespace, char const* key,
+                    char const** read_value, void* user_data) {
+        *read_value = nullptr;
+        return (size_t)0;
+    };
+    impl->FreeRead = [](char const* value, void* user_data) {};
+    impl->UserData = nullptr;
+}
+
 LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New() {
     return FROM_CUSTOM_LOGGING_BUILDER(new LoggingBuilder::CustomLogging());
 }
@@ -355,6 +415,40 @@ LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
     TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
         std::make_shared<LogBackendWrapper>(backend));
 }
+
+LD_EXPORT(LDPersistenceCustomBuilder) LDPersistenceCustomBuilder_New() {
+    return FROM_CUSTOM_PERSISTENCE_BUILDER(
+        new PersistenceBuilder::CustomBuilder());
+}
+
+LD_EXPORT(void) LDPersistenceCustomBuilder_Free(LDPersistenceCustomBuilder b) {
+    delete TO_CUSTOM_PERSISTENCE_BUILDER(b);
+}
+
+LD_EXPORT(void)
+LDPersistenceCustomBuilder_Implementation(LDPersistenceCustomBuilder b,
+                                          LDPersistence impl) {
+    LD_ASSERT_NOT_NULL(b);
+
+    TO_CUSTOM_PERSISTENCE_BUILDER(b)->Implementation(
+        std::make_shared<PersistenceImplementationWrapper>(impl));
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_Persistence_Custom(
+    LDClientConfigBuilder b,
+    LDPersistenceCustomBuilder custom_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(custom_builder);
+
+    PersistenceBuilder::CustomBuilder* cb =
+        TO_CUSTOM_PERSISTENCE_BUILDER(custom_builder);
+    TO_BUILDER(b)->Persistence().Type(std::move(*cb));
+    LDPersistenceCustomBuilder_Free(custom_builder);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_Persistence_None(LDClientConfigBuilder b) {}
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTEND OCInconsistentNamingInspection
