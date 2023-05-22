@@ -19,6 +19,7 @@ typedef struct _LDDataSourceStreamBuilder* LDDataSourceStreamBuilder;
 typedef struct _LDDataSourcePollBuilder* LDDataSourcePollBuilder;
 typedef struct _LDLoggingCustomBuilder* LDLoggingCustomBuilder;
 typedef struct _LDLoggingBasicBuilder* LDLoggingBasicBuilder;
+typedef struct _LDPersistenceCustomBuilder* LDPersistenceCustomBuilder;
 
 /**
  * Defines the log levels used with the SDK's default logger, or a user-provided
@@ -67,6 +68,76 @@ struct LDLogBackend {
  * @param backend Backend to initialize.
  */
 LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
+
+typedef void (*SetFn)(char const* storage_namespace,
+                      char const* key,
+                      char const* data,
+                      void* user_data);
+
+typedef void (*RemoveFn)(char const* storage_namespace,
+                         char const* key,
+                         void* user_data);
+
+typedef size_t (*ReadFn)(char const* storage_namespace,
+                         char const* key,
+                         char const** read_value,
+                         void* user_data);
+
+typedef void (*FreeFn)(char const* value, void* user_data);
+
+/**
+ * Defines a persistence interface suitable for use with SDK configuration.
+ */
+struct LDPersistence {
+    /**
+     * Add or update a value in the store. If the value cannot be set, then
+     * the function should complete normally.
+     *
+     * @param storage_namespace The namespace for the data.
+     * @param key The key for the data.
+     * @param value The data to add or update.
+     */
+    SetFn Set;
+
+    /**
+     * Remove a value from the store. If the value cannot be removed, then
+     * the function should complete normally.
+     *
+     * @param storage_namespace The namespace of the data.
+     * @param key The key of the data.
+     */
+    RemoveFn Remove;
+
+    /**
+     * Attempt to read a value from the store.
+     * @param storage_namespace The namespace of the data.
+     * @param key The key of the data.
+     * @param [out] read_value Out buffer containing the read string data.
+     * Should be set to null if no data was read.
+     *
+     *
+     * @return The number of characters read. Should be 0 if no data was read.
+     */
+    ReadFn Read;
+
+    /**
+     * The SDK will call this function after it has finished with the
+     * read_value from Read.
+     */
+    FreeFn FreeRead;
+
+    /**
+     * UserData is forwarded into all method calls in this struct.
+     */
+    void* UserData;
+};
+
+/**
+ * Initializes a custom persistence implementation. Must be called before
+ * passing a custom implementation into configuration.
+ * @param backend Implementation to initialize.
+ */
+LD_EXPORT(void) LDPersistence_Init(struct LDPersistence* implementation);
 
 /**
  * Constructs a client-side config builder.
@@ -447,11 +518,55 @@ LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b,
 /**
  * Configures the SDK with custom logging.
  * @param b  Client config builder. Must not be NULL.
- * @param basic_builder The custom logging builder. Must not be NULL.
+ * @param custom_builder The custom logging builder. Must not be NULL.
  */
 LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
                                      LDLoggingCustomBuilder custom_builder);
+
+/**
+ * Creates a new builder for a custom, user-provided persistence.
+ *
+ * If not passed into the config builder, must be manually freed with
+ * LDPersistenceCustomBuilder_Free.
+ * @return New builder.
+ */
+LD_EXPORT(LDPersistenceCustomBuilder) LDPersistenceCustomBuilder_New();
+
+/**
+ * Frees a custom persistence builder. Do not call if the builder was consumed
+ * by the config builder.
+ * @param b Builder to free.
+ */
+LD_EXPORT(void) LDPersistenceCustomBuilder_Free(LDPersistenceCustomBuilder b);
+
+/**
+ * Sets a custom persistence implementation.
+ * @param b Custom persistence builder. Must not be NULL.
+ * @param impl The implementation to use for persistence. Ensure the
+ * implementation was initialized with LDPersistence_Init.
+ */
+LD_EXPORT(void)
+LDPersistenceCustomBuilder_Implementation(LDPersistenceCustomBuilder b,
+                                          struct LDPersistence impl);
+
+/**
+ * Configures the SDK with custom persistence.
+ * @param b  Client config builder. Must not be NULL.
+ * @param custom_builder The custom persistence builder. Must not be NULL.
+ * @return
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_Persistence_Custom(
+    LDClientConfigBuilder b,
+    LDPersistenceCustomBuilder custom_builder);
+
+/**
+ * Disables persistence.
+ * @param b  Client config builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_Persistence_None(LDClientConfigBuilder b);
 
 /**
  * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.

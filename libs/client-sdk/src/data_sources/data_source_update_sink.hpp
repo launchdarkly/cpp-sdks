@@ -46,8 +46,11 @@ struct ItemDescriptor {
  */
 class IDataSourceUpdateSink {
    public:
-    virtual void Init(std::unordered_map<std::string, ItemDescriptor> data) = 0;
-    virtual void Upsert(std::string key, ItemDescriptor item) = 0;
+    virtual void Init(Context const& context,
+                      std::unordered_map<std::string, ItemDescriptor> data) = 0;
+    virtual void Upsert(Context const& context,
+                        std::string key,
+                        ItemDescriptor item) = 0;
 
     IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
     IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;
