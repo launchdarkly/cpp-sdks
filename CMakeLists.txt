@@ -69,7 +69,6 @@ message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 set(Boost_USE_STATIC_LIBS ON)
 
 if(BUILD_SHARED_LIBS)
-    message("SETTING VISIBILITY FLAG FOR SHARED LIBS")
     # When building a shared library we hide all symbols
     # aside from this we have specifically exported for the C-API.
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
