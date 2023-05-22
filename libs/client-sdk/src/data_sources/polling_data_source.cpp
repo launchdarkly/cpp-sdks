@@ -3,10 +3,10 @@
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
-#include "base_64.hpp"
 #include "data_source_update_sink.hpp"
 #include "polling_data_source.hpp"
 
@@ -16,10 +16,10 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
 static network::HttpRequest MakeRequest(
-    const config::shared::built::ServiceEndpoints& endpoints,
+    config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK>
         data_source_config,
-    const config::shared::built::HttpProperties& http_properties,
+    config::shared::built::HttpProperties const& http_properties,
     Context const& context) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
 
@@ -44,7 +44,8 @@ static network::HttpRequest MakeRequest(
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url = network::AppendUrl(url, Base64UrlEncode(string_context));
+        url =
+            network::AppendUrl(url, encoding::Base64UrlEncode(string_context));
     }
 
     if (data_source_config.with_reasons) {
@@ -68,14 +69,14 @@ PollingDataSource::PollingDataSource(
     config::shared::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor ioc,
     Context const& context,
-    IDataSourceUpdateSink* handler,
+    IDataSourceUpdateSink& handler,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+          DataSourceEventHandler(context, handler, logger, status_manager_)),
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
@@ -206,6 +207,7 @@ void PollingDataSource::StartPollingTimer() {
 }
 
 void PollingDataSource::Start() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(

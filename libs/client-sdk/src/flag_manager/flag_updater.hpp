@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "../data_sources/data_source_update_sink.hpp"
-#include "flag_manager.hpp"
+#include "flag_store.hpp"
 
 #include <launchdarkly/client_side/flag_change_event.hpp>
 #include <launchdarkly/client_side/flag_notifier.hpp>
@@ -17,9 +17,12 @@ namespace launchdarkly::client_side::flag_manager {
 
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
-    FlagUpdater(FlagManager& flag_manager);
-    void Init(std::unordered_map<std::string, ItemDescriptor> data) override;
-    void Upsert(std::string key, ItemDescriptor item) override;
+    FlagUpdater(FlagStore& flag_store);
+    void Init(Context const& context,
+              std::unordered_map<std::string, ItemDescriptor> data) override;
+    void Upsert(Context const& context,
+                std::string key,
+                ItemDescriptor item) override;
 
     /**
      * Listen for changes for the specific flag.
@@ -36,7 +39,7 @@ class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    private:
     bool HasListeners() const;
 
-    FlagManager& flag_manager_;
+    FlagStore& flag_store_;
     std::unordered_map<
         std::string,
         boost::signals2::signal<void(std::shared_ptr<FlagValueChangeEvent>)>>

@@ -4,6 +4,8 @@
 
 #include <launchdarkly/context_builder.hpp>
 
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 
 namespace net = boost::asio;  // from <boost/asio.hpp>
@@ -13,7 +15,55 @@ using launchdarkly::LogLevel;
 using launchdarkly::client_side::Client;
 using launchdarkly::client_side::ConfigBuilder;
 using launchdarkly::client_side::DataSourceBuilder;
+using launchdarkly::client_side::PersistenceBuilder;
 using launchdarkly::config::shared::builders::LoggingBuilder;
+
+class FilePersistence : public IPersistence {
+   public:
+    FilePersistence(std::string directory) : directory_(std::move(directory)) {
+        std::filesystem::create_directories(directory_);
+    }
+    void Set(std::string storage_namespace,
+                  std::string key,
+                  std::string data) noexcept override {
+        try {
+            std::ofstream file;
+            file.open(MakePath(storage_namespace, key));
+            file << data;
+            file.close();
+        } catch (...) {
+            std::cout << "Problem writing" << std::endl;
+        }
+    }
+
+    void Remove(std::string storage_namespace,
+                     std::string key) noexcept override {
+        std::filesystem::remove(MakePath(storage_namespace, key));
+    }
+
+    std::optional<std::string> Read(std::string storage_namespace,
+                                    std::string key) noexcept override {
+        auto path = MakePath(storage_namespace, key);
+
+        try {
+            if (std::filesystem::exists(path)) {
+                std::ifstream file(path);
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                return buffer.str();
+            }
+        } catch (...) {
+            std::cout << "Problem reading" << std::endl;
+        }
+        return std::nullopt;
+    }
+
+   private:
+    std::string MakePath(std::string storage_namespace, std::string key) {
+        return directory_ + "/" + storage_namespace + "_" + key;
+    }
+    std::string directory_;
+};
 
 int main() {
     net::io_context ioc;
@@ -39,6 +89,8 @@ int main() {
     config_builder.Logging().Logging(
         LoggingBuilder::BasicLogging().Level(LogLevel::kDebug));
     config_builder.Events().FlushInterval(std::chrono::seconds(5));
+    config_builder.Persistence().Custom(
+        std::make_shared<FilePersistence>("ld_persist"));
 
     auto config = config_builder.Build();
     if (!config) {
@@ -48,6 +100,11 @@ int main() {
 
     Client client(std::move(*config),
                   ContextBuilder().kind("user", "ryan").build());
+
+    auto before_init = client.BoolVariationDetail("my-boolean-flag", false);
+    // This should be the cached version from our persistence, if the
+    // persistence is populated.
+    std::cout << "Before Init Complete: " << *before_init << std::endl;
 
     std::cout << "Initial Status: " << client.DataSourceStatus().Status()
               << std::endl;
@@ -66,6 +123,27 @@ int main() {
     std::cout << "Value was: " << *value << std::endl;
     if (auto reason = value.Reason()) {
         std::cout << "Reason was: " << *reason << std::endl;
+    }
+
+    // Identify a series of contexts.
+    for (auto context_index = 0; context_index < 4; context_index++) {
+        std::cout << "Identifying user: "
+                  << "ryan" << context_index << std::endl;
+        auto future = client.IdentifyAsync(
+            ContextBuilder()
+                .kind("user", "ryan" + std::to_string(context_index))
+                .build());
+        auto before_ident =
+            client.BoolVariationDetail("my-boolean-flag", false);
+        future.get();
+        auto after_ident = client.BoolVariationDetail("my-boolean-flag", false);
+
+        std::cout << "For: "
+                  << "ryan" << context_index << ": "
+                  << "Before ident complete: " << *before_init
+                  << " After: " << *after_ident << std::endl;
+
+        sleep(1);
     }
 
     // Sit around.

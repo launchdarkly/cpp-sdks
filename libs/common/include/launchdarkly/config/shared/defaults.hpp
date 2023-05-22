@@ -67,6 +67,8 @@ struct Defaults<ClientSDK> {
         return {std::chrono::seconds{5 * 60}, "/msdk/evalx/contexts",
                 "/msdk/evalx/context", std::chrono::seconds{30}};
     }
+
+    static std::size_t MaxCachedContexts() { return 5; }
 };
 
 template <>

@@ -28,7 +28,7 @@ class PollingDataSource
         config::shared::built::HttpProperties const& http_properties,
         boost::asio::any_io_executor ioc,
         Context const& context,
-        IDataSourceUpdateSink* handler,
+        IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
