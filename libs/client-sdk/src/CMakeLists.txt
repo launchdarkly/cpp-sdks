@@ -43,6 +43,10 @@ add_library(${LIBNAME}
         flag_manager/flag_persistence.cpp
         bindings/c/sdk.cpp)
 
+if (BUILD_SHARED_LIBS)
+    target_sources(${LIBNAME} PRIVATE boost.cpp)
+endif ()
+
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)

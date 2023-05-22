@@ -40,9 +40,16 @@ install(TARGETS ${LIBNAME})
 
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
 
-target_link_libraries(${LIBNAME}
-        PUBLIC launchdarkly::common
-        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
+if(BUILD_SHARED_LIBS)
+    target_link_libraries(${LIBNAME}
+            PUBLIC launchdarkly::common
+            PRIVATE OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
+else()
+    target_link_libraries(${LIBNAME}
+            PUBLIC launchdarkly::common
+            PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
+endif()
+
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

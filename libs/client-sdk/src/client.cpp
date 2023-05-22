@@ -9,7 +9,7 @@ Client::Client(Config config, Context context)
                                           std::move(context),
                                           kVersion)) {}
 bool Client::Initialized() const {
-    return false;
+    return client->Initialized();
 }
 
 using FlagKey = std::string;
