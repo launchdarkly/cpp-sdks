@@ -14,7 +14,7 @@
 #include <boost/beast/version.hpp>
 
 #include <boost/url/parse.hpp>
-
+#include <boost/url/url.hpp>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -57,6 +57,7 @@ class FoxyClient : public Client,
                std::optional<std::chrono::milliseconds> write_timeout,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
+               Builder::ErrorCallback errors,
                std::optional<net::ssl::context> maybe_ssl)
         : ssl_context_(std::move(maybe_ssl)),
           host_(std::move(host)),
@@ -73,12 +74,13 @@ class FoxyClient : public Client,
           last_event_id_(std::nullopt),
           backoff_timer_(session_.get_executor()),
           event_receiver_(std::move(receiver)),
-          logger_(std::move(logger)) {
+          logger_(std::move(logger)),
+          errors_(std::move(errors)) {
         create_parser();
     }
 
-    /** The body parser is recreated each time a connection is made because its
-     * internal state cannot be explicitly reset.
+    /** The body parser is recreated each time a connection is made because
+     * its internal state cannot be explicitly reset.
      *
      * Since SSE body will never end unless
      * an error occurs, the body size limit must be removed.
@@ -98,7 +100,16 @@ class FoxyClient : public Client,
      */
     void do_backoff() {
         backoff_.fail();
-        last_event_id_ = body_parser_->get().body().last_event_id();
+
+        if (auto id = body_parser_->get().body().last_event_id()) {
+            if (id->empty()) {
+                errors_(Error::InvalidRedirectLocation);
+                return;
+            } else {
+                last_event_id_ = id;
+            }
+        }
+
         create_parser();
         backoff_timer_.expires_from_now(backoff_.delay());
         backoff_timer_.async_wait(beast::bind_front_handler(
@@ -127,7 +138,7 @@ class FoxyClient : public Client,
             return do_backoff();
         }
 
-        if (last_event_id_ && !last_event_id_->empty()) {
+        if (last_event_id_) {
             req_.set("last-event-id", *last_event_id_);
         } else {
             req_.erase("last-event-id");
@@ -175,6 +186,10 @@ class FoxyClient : public Client,
         auto status_class = beast::http::to_status_class(response.result());
 
         if (status_class == beast::http::status_class::successful) {
+            if (response.result() == beast::http::status::no_content) {
+                errors_(Error::NoContent);
+                return;
+            }
             if (!correct_content_type(response)) {
                 return do_backoff();
             }
@@ -186,12 +201,30 @@ class FoxyClient : public Client,
                                           shared_from_this()));
         }
 
+        if (status_class == beast::http::status_class::redirection) {
+            if (can_redirect(response)) {
+                auto new_url =
+                    redirect_url("base", response.find("location")->value());
+
+                if (!new_url) {
+                    errors_(Error::InvalidRedirectLocation);
+                    return;
+                }
+
+                req_.set(http::field::host, new_url->host());
+                req_.target(new_url->encoded_target());
+            } else {
+                errors_(Error::InvalidRedirectLocation);
+                return;
+            }
+        }
+
         if (status_class == beast::http::status_class::client_error) {
             if (recoverable_client_error(response.result())) {
                 return do_backoff();
             }
-            // unrecoverable, log message.
 
+            errors_(Error::UnrecoverableClientError);
             return;
         }
 
@@ -246,21 +279,52 @@ class FoxyClient : public Client,
         return false;
     }
 
+    static bool can_redirect(FoxyClient::response const& response) {
+        return (response.result() == beast::http::status::moved_permanently ||
+                response.result() == beast::http::status::temporary_redirect) &&
+               response.find("location") != response.end();
+    }
+
+    static std::optional<boost::urls::url> redirect_url(
+        std::string orig_base,
+        std::string orig_location) {
+        auto location = boost::urls::parse_uri(orig_location);
+        if (!location) {
+            return std::nullopt;
+        }
+        if (location->has_scheme()) {
+            return location.value();
+        }
+
+        boost::urls::url base(orig_base);
+        auto result = base.resolve(*location);
+        if (!result) {
+            return std::nullopt;
+        }
+
+        return base;
+    }
+
    private:
     std::optional<net::ssl::context> ssl_context_;
     std::string host_;
     std::string port_;
+
     std::optional<std::chrono::milliseconds> connect_timeout_;
     std::optional<std::chrono::milliseconds> read_timeout_;
     std::optional<std::chrono::milliseconds> write_timeout_;
+
     http::request<http::string_body> req_;
+
     Builder::EventReceiver event_receiver_;
-    std::optional<http::response_parser<body> > body_parser_;
+    Builder::LogCallback logger_;
+    Builder::ErrorCallback errors_;
+
+    std::optional<http::response_parser<body>> body_parser_;
     launchdarkly::foxy::client_session session_;
     std::optional<std::string> last_event_id_;
     Backoff backoff_;
     boost::asio::steady_timer backoff_timer_;
-    Builder::LogCallback logger_;
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
@@ -269,9 +333,9 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       read_timeout_{std::nullopt},
       write_timeout_{std::nullopt},
       connect_timeout_{std::nullopt},
-      logging_cb_([](auto msg) {}) {
-    receiver_ = [](launchdarkly::sse::Event const&) {};
-
+      logging_cb_([](auto msg) {}),
+      receiver_([](launchdarkly::sse::Event const&) {}),
+      error_cb_([](auto err) {}) {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -314,8 +378,13 @@ Builder& Builder::receiver(EventReceiver receiver) {
     return *this;
 }
 
-Builder& Builder::logger(std::function<void(std::string)> callback) {
+Builder& Builder::logger(LogCallback callback) {
     logging_cb_ = std::move(callback);
+    return *this;
+}
+
+Builder& Builder::errors(ErrorCallback callback) {
+    error_cb_ = std::move(callback);
     return *this;
 }
 
@@ -358,7 +427,8 @@ std::shared_ptr<Client> Builder::build() {
 
     return std::make_shared<FoxyClient>(
         net::make_strand(executor_), request, host, service, connect_timeout_,
-        read_timeout_, write_timeout_, receiver_, logging_cb_, std::move(ssl));
+        read_timeout_, write_timeout_, receiver_, logging_cb_, error_cb_,
+        std::move(ssl));
 }
 
 }  // namespace launchdarkly::sse
