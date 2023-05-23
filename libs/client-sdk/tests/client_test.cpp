@@ -10,21 +10,21 @@ TEST(ClientTest, ClientConstructedWithMinimalConfigAndContext) {
     tl::expected<Config, Error> config = ConfigBuilder("sdk-123").Build();
     ASSERT_TRUE(config);
 
-    Context context = ContextBuilder().kind("cat", "shadow").build();
+    Context context = ContextBuilder().Kind("cat", "shadow").Build();
 
     Client client(std::move(*config), context);
 }
 
 TEST(ClientTest, AllFlagsIsEmpty) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
 
     ASSERT_TRUE(client.AllFlags().empty());
 }
 
 TEST(ClientTest, BoolVariationDefaultPassesThrough) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
 
     const std::string flag = "extra-cat-food";
     std::vector<bool> values = {true, false};
@@ -36,7 +36,7 @@ TEST(ClientTest, BoolVariationDefaultPassesThrough) {
 
 TEST(ClientTest, StringVariationDefaultPassesThrough) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
     const std::string flag = "treat";
     std::vector<std::string> values = {"chicken", "fish", "cat-grass"};
     for (auto const& v : values) {
@@ -47,7 +47,7 @@ TEST(ClientTest, StringVariationDefaultPassesThrough) {
 
 TEST(ClientTest, IntVariationDefaultPassesThrough) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
     const std::string flag = "weight";
     std::vector<int> values = {0, 12, 13, 24, 1000};
     for (auto const& v : values) {
@@ -58,7 +58,7 @@ TEST(ClientTest, IntVariationDefaultPassesThrough) {
 
 TEST(ClientTest, DoubleVariationDefaultPassesThrough) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
     const std::string flag = "weight";
     std::vector<double> values = {0.0, 12.0, 13.0, 24.0, 1000.0};
     for (auto const& v : values) {
@@ -69,7 +69,7 @@ TEST(ClientTest, DoubleVariationDefaultPassesThrough) {
 
 TEST(ClientTest, JsonVariationDefaultPassesThrough) {
     Client client(ConfigBuilder("sdk-123").Build().value(),
-                  ContextBuilder().kind("cat", "shadow").build());
+                  ContextBuilder().Kind("cat", "shadow").Build());
 
     const std::string flag = "assorted-values";
     std::vector<Value> values = {

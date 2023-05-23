@@ -5,9 +5,9 @@
 
 namespace launchdarkly {
 
-tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
+tl::expected<enum EvaluationReason::Kind, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<EvaluationReason::Kind, JsonError>> const& unused,
+        tl::expected<enum EvaluationReason::Kind, JsonError>> const& unused,
     boost::json::value const& json_value) {
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);
@@ -36,7 +36,7 @@ tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                EvaluationReason::Kind const& kind) {
+                enum EvaluationReason::Kind const& kind) {
     auto& str = json_value.emplace_string();
     switch (kind) {
         case EvaluationReason::Kind::kOff:
@@ -60,9 +60,9 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     }
 }
 
-tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
+tl::expected<enum EvaluationReason::ErrorKind, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<EvaluationReason::ErrorKind, JsonError>> const& unused,
+        tl::expected<enum EvaluationReason::ErrorKind, JsonError>> const& unused,
     boost::json::value const& json_value) {
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);
@@ -91,7 +91,7 @@ tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                EvaluationReason::ErrorKind const& kind) {
+                enum EvaluationReason::ErrorKind const& kind) {
     auto& str = json_value.emplace_string();
     switch (kind) {
         case EvaluationReason::ErrorKind::kClientNotReady:
@@ -129,7 +129,7 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         }
 
         auto kind = boost::json::value_to<
-            tl::expected<EvaluationReason::Kind, JsonError>>(
+            tl::expected<enum EvaluationReason::Kind, JsonError>>(
             kind_iter->value());
 
         if (!kind) {
@@ -137,10 +137,10 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         }
 
         auto* error_kind_iter = json_obj.find("errorKind");
-        std::optional<EvaluationReason::ErrorKind> error_kind;
+        std::optional<enum EvaluationReason::ErrorKind> error_kind;
         if (error_kind_iter != json_obj.end()) {
             auto parsed = boost::json::value_to<
-                tl::expected<EvaluationReason::ErrorKind, JsonError>>(
+                tl::expected<enum EvaluationReason::ErrorKind, JsonError>>(
                 error_kind_iter->value());
             if (!parsed) {
                 return tl::make_unexpected(parsed.error());
@@ -181,23 +181,23 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 EvaluationReason const& reason) {
     auto& obj = json_value.emplace_object();
-    obj.emplace("kind", boost::json::value_from(reason.kind()));
-    if (auto error_kind = reason.error_kind()) {
+    obj.emplace("kind", boost::json::value_from(reason.Kind()));
+    if (auto error_kind = reason.ErrorKind()) {
         obj.emplace("errorKind", boost::json::value_from(*error_kind));
     }
-    if (auto big_segment_status = reason.big_segment_status()) {
+    if (auto big_segment_status = reason.BigSegmentStatus()) {
         obj.emplace("bigSegmentStatus", *big_segment_status);
     }
-    if (auto rule_id = reason.rule_id()) {
+    if (auto rule_id = reason.RuleId()) {
         obj.emplace("ruleId", *rule_id);
     }
-    if (auto rule_index = reason.rule_index()) {
+    if (auto rule_index = reason.RuleIndex()) {
         obj.emplace("ruleIndex", *rule_index);
     }
-    if (reason.in_experiment()) {
+    if (reason.InExperiment()) {
         obj.emplace("inExperiment", true);
     }
-    if (auto prereq_key = reason.prerequisite_key()) {
+    if (auto prereq_key = reason.PrerequisiteKey()) {
         obj.emplace("prerequisiteKey", *prereq_key);
     }
 }

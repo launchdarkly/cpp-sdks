@@ -15,97 +15,97 @@ using launchdarkly::AttributeReference;
 // NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
 
 TEST(ContextBuilderTests, CanMakeBasicContext) {
-    auto context = ContextBuilder().kind("user", "user-key").build();
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
 
-    EXPECT_TRUE(context.valid());
+    EXPECT_TRUE(context.Valid());
 
-    EXPECT_EQ(1, context.kinds().size());
-    EXPECT_EQ("user", context.kinds()[0]);
-    EXPECT_EQ("user-key", context.get("user", "/key").AsString());
+    EXPECT_EQ(1, context.Kinds().size());
+    EXPECT_EQ("user", context.Kinds()[0]);
+    EXPECT_EQ("user-key", context.Get("user", "/key").AsString());
 
-    EXPECT_EQ("user-key", context.attributes("user").key());
-    EXPECT_FALSE(context.attributes("user").anonymous());
+    EXPECT_EQ("user-key", context.Attributes("user").Key());
+    EXPECT_FALSE(context.Attributes("user").Anonymous());
 }
 
 TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
     auto context = ContextBuilder()
-                       .kind("user", "bobby-bobberson")
-                       .name("Bob")
-                       .anonymous(true)
+                       .Kind("user", "bobby-bobberson")
+                       .Name("Bob")
+                       .Anonymous(true)
                        // Set a custom attribute.
-                       .set("likesCats", true)
+                       .Set("likesCats", true)
                        // Set a private custom attribute.
-                       .set_private("email", "email@email.email")
-                       .build();
+                       .SetPrivate("email", "email@email.email")
+                       .Build();
 
-    EXPECT_TRUE(context.valid());
+    EXPECT_TRUE(context.Valid());
 
-    EXPECT_EQ("user", context.kinds()[0]);
-    EXPECT_EQ("bobby-bobberson", context.get("user", "/key").AsString());
-    EXPECT_EQ("Bob", context.get("user", "name").AsString());
+    EXPECT_EQ("user", context.Kinds()[0]);
+    EXPECT_EQ("bobby-bobberson", context.Get("user", "/key").AsString());
+    EXPECT_EQ("Bob", context.Get("user", "name").AsString());
 
-    EXPECT_EQ("email@email.email", context.get("user", "email").AsString());
-    EXPECT_TRUE(context.get("user", "likesCats").AsBool());
+    EXPECT_EQ("email@email.email", context.Get("user", "email").AsString());
+    EXPECT_TRUE(context.Get("user", "likesCats").AsBool());
 
-    EXPECT_EQ("bobby-bobberson", context.attributes("user").key());
-    EXPECT_TRUE(context.attributes("user").anonymous());
-    EXPECT_EQ(1, context.attributes("user").private_attributes().size());
+    EXPECT_EQ("bobby-bobberson", context.Attributes("user").Key());
+    EXPECT_TRUE(context.Attributes("user").Anonymous());
+    EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().size());
     EXPECT_EQ(1,
-              context.attributes("user").private_attributes().count("email"));
+              context.Attributes("user").PrivateAttributes().count("email"));
 }
 
 TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
     auto context =
         ContextBuilder()
-            .kind("user", "user-key")
-            .anonymous(true)
-            .name("test")
-            .set("string", "potato")
-            .set("int", 42)
-            .set("double", 3.14)
-            .set("array", {false, true, 42})
+            .Kind("user", "user-key")
+            .Anonymous(true)
+            .Name("test")
+            .Set("string", "potato")
+            .Set("int", 42)
+            .Set("double", 3.14)
+            .Set("array", {false, true, 42})
 
-            .set_private("private", "this is private")
-            .add_private_attribute("double")
-            .add_private_attributes(std::vector<std::string>{"string", "int"})
-            .add_private_attributes(
+            .SetPrivate("private", "this is private")
+            .AddPrivateAttribute("double")
+            .AddPrivateAttributes(std::vector<std::string>{"string", "int"})
+            .AddPrivateAttributes(
                 std::vector<AttributeReference>{"explicitArray"})
             // Start the org kind.
-            .kind("org", "org-key")
-            .name("Macdonwalds")
-            .set("explicitArray", Array{"egg", "ham"})
-            .set("object", Object{{"string", "bacon"}, {"boolean", false}})
-            .build();
+            .Kind("org", "org-key")
+            .Name("Macdonwalds")
+            .Set("explicitArray", Array{"egg", "ham"})
+            .Set("object", Object{{"string", "bacon"}, {"boolean", false}})
+            .Build();
 
-    EXPECT_TRUE(context.valid());
+    EXPECT_TRUE(context.Valid());
 
-    EXPECT_TRUE(context.get("user", "/anonymous").AsBool());
-    EXPECT_EQ("test", context.get("user", "/name").AsString());
-    EXPECT_EQ("potato", context.get("user", "/string").AsString());
-    EXPECT_EQ(42, context.get("user", "int").AsInt());
-    EXPECT_EQ(3.14, context.get("user", "double").AsDouble());
-    EXPECT_EQ(42, context.get("user", "array").AsArray()[2].AsInt());
+    EXPECT_TRUE(context.Get("user", "/anonymous").AsBool());
+    EXPECT_EQ("test", context.Get("user", "/name").AsString());
+    EXPECT_EQ("potato", context.Get("user", "/string").AsString());
+    EXPECT_EQ(42, context.Get("user", "int").AsInt());
+    EXPECT_EQ(3.14, context.Get("user", "double").AsDouble());
+    EXPECT_EQ(42, context.Get("user", "array").AsArray()[2].AsInt());
     EXPECT_EQ("ham",
-              context.get("org", "explicitArray").AsArray()[1].AsString());
+              context.Get("org", "explicitArray").AsArray()[1].AsString());
     EXPECT_EQ("bacon",
-              context.get("org", "object").AsObject()["string"].AsString());
+              context.Get("org", "object").AsObject()["string"].AsString());
 
-    EXPECT_EQ(5, context.attributes("user").private_attributes().size());
-    EXPECT_EQ(1, context.attributes("user").private_attributes().count("int"));
+    EXPECT_EQ(5, context.Attributes("user").PrivateAttributes().size());
+    EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().count("int"));
     EXPECT_EQ(1,
-              context.attributes("user").private_attributes().count("double"));
-    EXPECT_EQ(1, context.attributes("user").private_attributes().count(
+              context.Attributes("user").PrivateAttributes().count("double"));
+    EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().count(
                      "explicitArray"));
     EXPECT_EQ(1,
-              context.attributes("user").private_attributes().count("string"));
+              context.Attributes("user").PrivateAttributes().count("string"));
     EXPECT_EQ(1,
-              context.attributes("user").private_attributes().count("private"));
-    EXPECT_EQ("Macdonwalds", context.get("org", "/name").AsString());
+              context.Attributes("user").PrivateAttributes().count("private"));
+    EXPECT_EQ("Macdonwalds", context.Get("org", "/name").AsString());
 }
 
 TEST(ContextBuilderTests, HandlesInvalidKinds) {
-    auto context_bad_kind = ContextBuilder().kind("#$#*(", "valid-key").build();
-    EXPECT_FALSE(context_bad_kind.valid());
+    auto context_bad_kind = ContextBuilder().Kind("#$#*(", "valid-key").Build();
+    EXPECT_FALSE(context_bad_kind.Valid());
 
     EXPECT_EQ(
         "#$#*(: \"Kind contained invalid characters. A kind may contain ASCII "
@@ -114,16 +114,16 @@ TEST(ContextBuilderTests, HandlesInvalidKinds) {
 }
 
 TEST(ContextBuilderTests, HandlesInvalidKeys) {
-    auto context_bad_key = ContextBuilder().kind("user", "").build();
-    EXPECT_FALSE(context_bad_key.valid());
+    auto context_bad_key = ContextBuilder().Kind("user", "").Build();
+    EXPECT_FALSE(context_bad_key.Valid());
 
     EXPECT_EQ("user: \"The key for a context may not be empty.\"",
               context_bad_key.errors());
 }
 
 TEST(ContextBuilderTests, HandlesMultipleErrors) {
-    auto context = ContextBuilder().kind("#$#*(", "").build();
-    EXPECT_FALSE(context.valid());
+    auto context = ContextBuilder().Kind("#$#*(", "").Build();
+    EXPECT_FALSE(context.Valid());
 
     EXPECT_EQ(
         "#$#*(: \"Kind contained invalid characters. A kind may contain ASCII "
@@ -134,8 +134,8 @@ TEST(ContextBuilderTests, HandlesMultipleErrors) {
 }
 
 TEST(ContextBuilderTests, HandlesEmptyContext) {
-    auto context = ContextBuilder().build();
-    EXPECT_FALSE(context.valid());
+    auto context = ContextBuilder().Build();
+    EXPECT_FALSE(context.Valid());
     EXPECT_EQ("\"The context must contain at least 1 kind.\"",
               context.errors());
 }
@@ -147,33 +147,33 @@ TEST(ContextBuilderTests, UseWithLoops) {
     auto builder = ContextBuilder();
 
     for (auto const& kind : kinds) {
-        auto& kind_builder = builder.kind(kind, kind + "-key");
+        auto& kind_builder = builder.Kind(kind, kind + "-key");
         for (auto const& prop : props) {
-            kind_builder.set(prop.first, prop.second);
+            kind_builder.Set(prop.first, prop.second);
         }
     }
 
-    auto context = builder.build();
+    auto context = builder.Build();
 
-    EXPECT_EQ("b", context.get("user", "/a").AsString());
-    EXPECT_EQ("d", context.get("user", "/c").AsString());
+    EXPECT_EQ("b", context.Get("user", "/a").AsString());
+    EXPECT_EQ("d", context.Get("user", "/c").AsString());
 
-    EXPECT_EQ("b", context.get("org", "/a").AsString());
-    EXPECT_EQ("d", context.get("org", "/c").AsString());
+    EXPECT_EQ("b", context.Get("org", "/a").AsString());
+    EXPECT_EQ("d", context.Get("org", "/c").AsString());
 }
 
 TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
     auto builder = ContextBuilder();
 
-    builder.kind("user", "potato").name("Bob").set("city", "Reno");
-    builder.kind("user", "ham").set("isCat", true);
+    builder.Kind("user", "potato").Name("Bob").Set("city", "Reno");
+    builder.Kind("user", "ham").Set("isCat", true);
 
-    auto context = builder.build();
+    auto context = builder.Build();
 
-    EXPECT_EQ("ham", context.get("user", "key").AsString());
-    EXPECT_EQ("Bob", context.get("user", "name").AsString());
-    EXPECT_EQ("Reno", context.get("user", "city").AsString());
-    EXPECT_TRUE(context.get("user", "isCat").AsBool());
+    EXPECT_EQ("ham", context.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", context.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", context.Get("user", "city").AsString());
+    EXPECT_TRUE(context.Get("user", "isCat").AsBool());
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers

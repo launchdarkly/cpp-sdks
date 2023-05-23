@@ -32,7 +32,7 @@ TEST(FlagstoreTests, HandlesInitWithData) {
                                                 std::nullopt}}}}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagA")->flag->detail().value());
+    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandlesSecondInit) {
@@ -53,7 +53,7 @@ TEST(FlagstoreTests, HandlesSecondInit) {
                                                 std::nullopt}}}}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagB")->flag->detail().value());
+    EXPECT_EQ("test", store.Get("flagB")->flag->Detail().Value());
     EXPECT_FALSE(store.Get("flagA"));
 }
 
@@ -74,8 +74,8 @@ TEST(FlagstoreTests, HandlePatchNewFlag) {
                                               std::nullopt}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagA")->flag->detail().value());
-    EXPECT_EQ("second", store.Get("flagB")->flag->detail().value());
+    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value());
+    EXPECT_EQ("second", store.Get("flagB")->flag->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandlePatchUpdateFlag) {
@@ -95,7 +95,7 @@ TEST(FlagstoreTests, HandlePatchUpdateFlag) {
                                               std::nullopt}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("second", store.Get("flagA")->flag->detail().value());
+    EXPECT_EQ("second", store.Get("flagA")->flag->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandleDelete) {

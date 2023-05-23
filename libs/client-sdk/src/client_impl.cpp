@@ -159,7 +159,7 @@ std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
         if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag->detail().value());
+            result.try_emplace(key, descriptor->flag->Detail().Value());
         }
     }
     return result;
@@ -171,7 +171,7 @@ void ClientImpl::TrackInternal(std::string event_name,
     event_processor_->SendAsync(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
         ReadContextSynchronized(
-            [](Context const& c) { return c.kinds_to_keys(); }),
+            [](Context const& c) { return c.KindsToKeys(); }),
         std::move(data), metric_value});
 }
 
@@ -269,10 +269,10 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     assert(desc->flag);
 
     auto const& flag = *(desc->flag);
-    auto const& detail = flag.detail();
+    auto const& detail = flag.Detail();
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
-        detail.value().Type() != default_value.Type()) {
+        detail.Value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
         if (eval_reasons_available_) {
@@ -282,23 +282,23 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         return EvaluationDetail<T>(default_value, std::nullopt, error_reason);
     }
 
-    event.value = detail.value();
-    event.variation = detail.variation_index();
+    event.value = detail.Value();
+    event.variation = detail.VariationIndex();
 
-    if (detailed || flag.track_reason()) {
-        event.reason = detail.reason();
+    if (detailed || flag.TrackReason()) {
+        event.reason = detail.Reason();
     }
 
-    event.version = flag.flag_version().value_or(flag.version());
-    event.require_full_event = flag.track_events();
-    if (auto date = flag.debug_events_until_date()) {
+    event.version = flag.FlagVersion().value_or(flag.Version());
+    event.require_full_event = flag.TrackEvents();
+    if (auto date = flag.DebugEventsUntilDate()) {
         event.debug_events_until_date = events::Date{*date};
     }
 
     event_processor_->SendAsync(std::move(event));
 
-    return EvaluationDetail<T>(detail.value(), detail.variation_index(),
-                               detail.reason());
+    return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
+                               detail.Reason());
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(

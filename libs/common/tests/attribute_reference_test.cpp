@@ -12,8 +12,8 @@ class BadReferencesTestFixture : public ::testing::TestWithParam<std::string> {
 
 TEST_P(BadReferencesTestFixture, InvalidAttributeReferences) {
     auto str = GetParam();
-    auto ref = AttributeReference::from_reference_str(std::move(str));
-    EXPECT_FALSE(ref.valid());
+    auto ref = AttributeReference::FromReferenceStr(std::move(str));
+    EXPECT_FALSE(ref.Valid());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -27,13 +27,13 @@ class GoodReferencesTestFixture
 
 TEST_P(GoodReferencesTestFixture, ValidAttributeReferences) {
     auto [str, components] = GetParam();
-    auto ref = AttributeReference::from_reference_str(str);
-    EXPECT_EQ(components.size(), ref.depth());
-    for (auto index = 0; index < ref.depth(); index++) {
-        EXPECT_EQ(components[index], ref.component(index));
+    auto ref = AttributeReference::FromReferenceStr(str);
+    EXPECT_EQ(components.size(), ref.Depth());
+    for (auto index = 0; index < ref.Depth(); index++) {
+        EXPECT_EQ(components[index], ref.Component(index));
     }
-    EXPECT_TRUE(ref.valid());
-    EXPECT_EQ(str, ref.redaction_name());
+    EXPECT_TRUE(ref.Valid());
+    EXPECT_EQ(str, ref.RedactionName());
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -48,9 +48,9 @@ INSTANTIATE_TEST_SUITE_P(
                     std::tuple(" /a/b", std::vector<std::string>{" /a/b"})));
 
 TEST(AttributeReferenceTests, KindReferences) {
-    EXPECT_TRUE(AttributeReference::from_reference_str("kind").is_kind());
-    EXPECT_TRUE(AttributeReference::from_reference_str("/kind").is_kind());
-    EXPECT_TRUE(AttributeReference::from_literal_str("kind").is_kind());
+    EXPECT_TRUE(AttributeReference::FromReferenceStr("kind").IsKind());
+    EXPECT_TRUE(AttributeReference::FromReferenceStr("/kind").IsKind());
+    EXPECT_TRUE(AttributeReference::FromLiteralStr("kind").IsKind());
 }
 
 class LiteralsTestFixture
@@ -58,11 +58,11 @@ class LiteralsTestFixture
 
 TEST_P(LiteralsTestFixture, LiteralsAreHandledCorrectly) {
     auto [str, redaction_name] = GetParam();
-    auto ref = AttributeReference::from_literal_str(str);
-    EXPECT_EQ(1, ref.depth());
-    EXPECT_EQ(redaction_name, ref.redaction_name());
-    EXPECT_EQ(str, ref.component(0));
-    EXPECT_TRUE(ref.valid());
+    auto ref = AttributeReference::FromLiteralStr(str);
+    EXPECT_EQ(1, ref.Depth());
+    EXPECT_EQ(redaction_name, ref.RedactionName());
+    EXPECT_EQ(str, ref.Component(0));
+    EXPECT_TRUE(ref.Valid());
 }
 
 INSTANTIATE_TEST_SUITE_P(AttributeReferenceTests,
@@ -73,16 +73,16 @@ INSTANTIATE_TEST_SUITE_P(AttributeReferenceTests,
                                          std::tuple("test", "test")));
 
 TEST(AttributeReferenceTests, GetComponentOutOfBounds) {
-    EXPECT_EQ("", AttributeReference::from_reference_str("a").component(1));
+    EXPECT_EQ("", AttributeReference::FromReferenceStr("a").Component(1));
 }
 
 TEST(AttributeReferenceTests, OstreamOperator) {
     std::stringstream stream;
-    stream << AttributeReference::from_reference_str("/a");
+    stream << AttributeReference::FromReferenceStr("/a");
     stream.flush();
     EXPECT_EQ("valid(/a)", stream.str());
     stream.str("");
-    stream << AttributeReference::from_reference_str("/~");
+    stream << AttributeReference::FromReferenceStr("/~");
     EXPECT_EQ("invalid(/~)", stream.str());
 }
 
@@ -90,8 +90,8 @@ TEST(AttributeReferenceTests, FromString) {
     AttributeReference ref("/a");
     AttributeReference ref_b(std::string("/b"));
 
-    EXPECT_EQ("a", ref.component(0));
-    EXPECT_EQ("b", ref_b.component(0));
+    EXPECT_EQ("a", ref.Component(0));
+    EXPECT_EQ("b", ref_b.Component(0));
 }
 
 TEST(AttributeReferenceTest, CompareToPath) {
@@ -107,9 +107,9 @@ TEST(AttributeReferenceTest, CompareToPath) {
 }
 
 TEST(AttributeReferenceTests, CanProduceRefStringsFromPaths) {
-    EXPECT_EQ("/a/b", AttributeReference::path_to_string_reference(
+    EXPECT_EQ("/a/b", AttributeReference::PathToStringReference(
                           std::vector<std::string_view>{"a", "b"}));
 
-    EXPECT_EQ("/~1a/~0b", AttributeReference::path_to_string_reference(
+    EXPECT_EQ("/~1a/~0b", AttributeReference::PathToStringReference(
                               std::vector<std::string_view>{"/a", "~b"}));
 }

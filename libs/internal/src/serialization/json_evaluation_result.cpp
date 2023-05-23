@@ -100,38 +100,38 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     boost::ignore_unused(unused);
 
     auto& obj = json_value.emplace_object();
-    obj.emplace("version", evaluation_result.version());
+    obj.emplace("version", evaluation_result.Version());
 
-    if (evaluation_result.flag_version()) {
-        obj.emplace("flagVersion", *evaluation_result.flag_version());
+    if (evaluation_result.FlagVersion()) {
+        obj.emplace("flagVersion", *evaluation_result.FlagVersion());
     }
 
-    if (evaluation_result.track_events()) {
-        obj.emplace("trackEvents", evaluation_result.track_events());
+    if (evaluation_result.TrackEvents()) {
+        obj.emplace("trackEvents", evaluation_result.TrackEvents());
     }
 
-    if (evaluation_result.track_reason()) {
-        obj.emplace("trackReason", evaluation_result.track_reason());
+    if (evaluation_result.TrackReason()) {
+        obj.emplace("trackReason", evaluation_result.TrackReason());
     }
 
-    if (evaluation_result.debug_events_until_date()) {
+    if (evaluation_result.DebugEventsUntilDate()) {
         obj.emplace(
             "debugEventsUntilDate",
             std::chrono::duration_cast<std::chrono::milliseconds>(
-                evaluation_result.debug_events_until_date()->time_since_epoch())
+                evaluation_result.DebugEventsUntilDate()->time_since_epoch())
                 .count());
     }
 
-    auto& detail = evaluation_result.detail();
-    auto value_json = boost::json::value_from(detail.value());
+    auto& detail = evaluation_result.Detail();
+    auto value_json = boost::json::value_from(detail.Value());
     obj.emplace("value", value_json);
 
-    if (detail.variation_index()) {
-        obj.emplace("variationIndex", *detail.variation_index());
+    if (detail.VariationIndex()) {
+        obj.emplace("variationIndex", *detail.VariationIndex());
     }
 
-    if (detail.reason()) {
-        auto reason_json = boost::json::value_from(*detail.reason());
+    if (detail.Reason()) {
+        auto reason_json = boost::json::value_from(*detail.Reason());
         obj.emplace("reason", reason_json);
     }
 }

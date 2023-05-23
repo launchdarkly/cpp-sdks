@@ -18,23 +18,23 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
         unused,
     boost::json::value const& json_value);
 
-tl::expected<EvaluationReason::Kind, JsonError> tag_invoke(
+tl::expected<enum EvaluationReason::Kind, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<EvaluationReason::Kind, JsonError>> const& unused,
+        tl::expected<enum EvaluationReason::Kind, JsonError>> const& unused,
     boost::json::value const& json_value);
 
-tl::expected<EvaluationReason::ErrorKind, JsonError> tag_invoke(
+tl::expected<enum EvaluationReason::ErrorKind, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<EvaluationReason::ErrorKind, JsonError>> const& unused,
+        tl::expected<enum EvaluationReason::ErrorKind, JsonError>> const& unused,
     boost::json::value const& json_value);
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                EvaluationReason::Kind const& kind);
+                enum EvaluationReason::Kind const& kind);
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                EvaluationReason::ErrorKind const& kind);
+                enum EvaluationReason::ErrorKind const& kind);
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,

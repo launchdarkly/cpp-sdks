@@ -31,7 +31,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
             launchdarkly::ErrorToString(maybe_ctx.error()));
     }
 
-    if (!maybe_ctx->valid()) {
+    if (!maybe_ctx->Valid()) {
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
@@ -41,21 +41,21 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
 
 static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
                                    ContextSingleParams const& single) {
-    auto& attrs = builder.kind(single.kind.value_or("user"), single.key);
+    auto& attrs = builder.Kind(single.kind.value_or("user"), single.key);
     if (single.anonymous) {
-        attrs.anonymous(*single.anonymous);
+        attrs.Anonymous(*single.anonymous);
     }
     if (single.name) {
-        attrs.name(*single.name);
+        attrs.Name(*single.name);
     }
 
     if (single._private) {
-        attrs.add_private_attributes(*single._private);
+        attrs.AddPrivateAttributes(*single._private);
     }
 
     if (single.custom) {
         for (auto const& [key, value] : *single.custom) {
-            attrs.set(key, boost::json::value_to<launchdarkly::Value>(
+            attrs.Set(key, boost::json::value_to<launchdarkly::Value>(
                                boost::json::parse(value.dump())));
         }
     }
@@ -75,8 +75,8 @@ tl::expected<nlohmann::json, std::string> ContextBuild(
         BuildContextFromParams(builder, *params.single);
     }
 
-    auto ctx = builder.build();
-    if (!ctx.valid()) {
+    auto ctx = builder.Build();
+    if (!ctx.Valid()) {
         resp.error = ctx.errors();
         return resp;
     }
@@ -105,7 +105,7 @@ tl::expected<nlohmann::json, std::string> ContextConvert(
         return resp;
     }
 
-    if (!maybe_ctx->valid()) {
+    if (!maybe_ctx->Valid()) {
         resp.error = maybe_ctx->errors();
         return resp;
     }

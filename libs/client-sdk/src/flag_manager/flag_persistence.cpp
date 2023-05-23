@@ -39,24 +39,24 @@ void FlagPersistence::Init(
     Context const& context,
     std::unordered_map<std::string, ItemDescriptor> data) {
     sink_.Init(context, std::move(data));
-    StoreCache(PersistenceEncodeKey(context.canonical_key()));
+    StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
 
 void FlagPersistence::Upsert(Context const& context,
                              std::string key,
                              ItemDescriptor item) {
     sink_.Upsert(context, key, item);
-    StoreCache(PersistenceEncodeKey(context.canonical_key()));
+    StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
 
 void FlagPersistence::LoadCached(Context const& context) {
-    if (!persistence_ || !context.valid()) {
+    if (!persistence_ || !context.Valid()) {
         return;
     }
 
     std::lock_guard lock(persistence_mutex_);
     auto data = persistence_->Read(
-        environment_namespace_, PersistenceEncodeKey(context.canonical_key()));
+        environment_namespace_, PersistenceEncodeKey(context.CanonicalKey()));
 
     if (!data) {
         return;

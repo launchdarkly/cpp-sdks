@@ -157,9 +157,10 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * supported for Private.
  *
  * This action only affects analytics events that involve this particular
- * Context. To mark some (or all) Context attributes as private for all
- * contexts, use the overall configuration for the SDK. See [TODO] and
- * [TODO].
+ * context. To mark some (or all) context attributes as private for all
+ * contexts, use the overall configuration for the SDK. See
+ * LDClientConfigBuilder_Events_AllAttributesPrivate and
+ * LDClientConfigBuilder_Events_PrivateAttribute.
  *
  * The attributes "kind" and "key", and the "_meta" attributes cannot be
  * made private.

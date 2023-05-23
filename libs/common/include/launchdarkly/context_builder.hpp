@@ -15,31 +15,31 @@ namespace launchdarkly {
  * Building a context with a single kind.
  * @code
  * auto context = ContextBuilder()
- *      .kind("user", "bobby-bobberson")
- *      .name("Bob")
- *      .anonymous(false)
+ *      .Kind("user", "bobby-bobberson")
+ *      .Name("Bob")
+ *      .Anonymous(false)
  *      // Set a custom attribute.
- *      .set("likesCats", true)
+ *      .Set("likesCats", true)
  *      // Set a private custom attribute.
- *      .set_private("email", "email@email.email")
- *      .build();
+ *      .SetPrivate("email", "email@email.email")
+ *      .Build();
  * @endcode
  *
- * Building a context with multiple kinds.
+ * Building a context with multiple Kinds.
  * @code
  * auto context = ContextBuilder()
- *      .kind("user", "bobby-bobberson")
- *      .name("Bob")
- *      .anonymous(false)
+ *      .Kind("user", "bobby-bobberson")
+ *      .Name("Bob")
+ *      .Anonymous(false)
  *      // Set a custom attribute.
- *      .set("likesCats", true)
+ *      .Set("likesCats", true)
  *      // Set a private custom attribute.
- *      .set_private("email", "email@email.email")
+ *      .SetPrivate("email", "email@email.email")
  *      // Add another kind to the context.
- *      .kind("org", "org-key")
- *      .anonymous(true)
- *      .set("goal", "money")
- *      .build();
+ *      .Kind("org", "org-key")
+ *      .Anonymous(true)
+ *      .Set("goal", "money")
+ *      .Build();
  * @endcode
  *
  * Using the builder with loops.
@@ -47,16 +47,16 @@ namespace launchdarkly {
  * auto builder = ContextBuilder();
  * // The data in this sample is not realistic, but it is intended to show
  * // how to use the builder with loops.
- * for (auto const& kind : kinds) { // Some collection we are using to make
- * kinds.
+ * for (auto const& kind : Kinds) { // Some collection we are using to make
+ * Kinds.
  *     // The `kind` method returns a reference, always store it in a reference.
- *     auto& kind_builder = builder.kind(kind, kind + "-key");
+ *     auto& kind_builder = builder.Kind(kind, kind + "-key");
  *     for (auto const& prop : props) { // A collection of props we want to add.
- *         kind_builder.set(prop.first, prop.second);
+ *         kind_builder.Set(prop.first, prop.second);
  *     }
  * }
  *
- * auto context = builder.build();
+ * auto context = builder.Build();
  * @endcode
  */
 class ContextBuilder final {
@@ -75,7 +75,7 @@ class ContextBuilder final {
      * @param key The key for the kind.
      * @return A builder which allows adding attributes for the kind.
      */
-    AttributesBuilder<ContextBuilder, Context>& kind(std::string const& kind,
+    AttributesBuilder<ContextBuilder, Context>& Kind(std::string const& kind,
                                                      std::string key);
 
     /**
@@ -90,7 +90,7 @@ class ContextBuilder final {
      *
      * @return The built context.
      */
-    Context build();
+    Context Build();
 
    private:
     std::map<std::string, AttributesBuilder<ContextBuilder, Context>> builders_;

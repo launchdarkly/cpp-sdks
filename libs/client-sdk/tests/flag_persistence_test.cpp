@@ -48,7 +48,7 @@ class TestPersistence : public IPersistence {
 };
 
 TEST(FlagPersistenceTests, StoresCacheOnInit) {
-    auto context = ContextBuilder().kind("user", "user-key").build();
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
     auto store = FlagStore();
     auto updater = FlagUpdater(store);
     auto persistence =
@@ -89,7 +89,7 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
 }
 
 TEST(FlagPersistenceTests, CanLoadCache) {
-    auto context = ContextBuilder().kind("user", "user-key").build();
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
     auto store = FlagStore();
     auto updater = FlagUpdater(store);
     auto logger = launchdarkly::logging::NullLogger();
@@ -108,7 +108,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
     flag_persistence.LoadCached(context);
 
     // The store contains the flag loaded from the persistence.
-    EXPECT_EQ("test", store.Get("flagA")->flag->detail().value().AsString());
+    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value().AsString());
 }
 
 TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
@@ -129,7 +129,7 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
         });
 
     flag_persistence.Init(
-        ContextBuilder().kind("potato", "user-key").build(),
+        ContextBuilder().Kind("potato", "user-key").Build(),
         std::unordered_map<std::string,
                            launchdarkly::client_side::ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
@@ -140,7 +140,7 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     now++;
 
     flag_persistence.Init(
-        ContextBuilder().kind("potato", "bob-key").build(),
+        ContextBuilder().Kind("potato", "bob-key").Build(),
         std::unordered_map<std::string,
                            launchdarkly::client_side::ItemDescriptor>{
             {{"flagB", ItemDescriptor{EvaluationResult{
@@ -151,7 +151,7 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     now++;
 
     flag_persistence.Init(
-        ContextBuilder().kind("potato", "susan-key").build(),
+        ContextBuilder().Kind("potato", "susan-key").Build(),
         std::unordered_map<std::string,
                            launchdarkly::client_side::ItemDescriptor>{
             {{"flagC", ItemDescriptor{EvaluationResult{

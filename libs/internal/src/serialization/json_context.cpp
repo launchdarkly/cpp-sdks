@@ -9,20 +9,20 @@ namespace launchdarkly {
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Context const& ld_context) {
-    if (ld_context.valid()) {
-        if (ld_context.kinds().size() == 1) {
-            auto kind = ld_context.kinds()[0].data();
+    if (ld_context.Valid()) {
+        if (ld_context.Kinds().size() == 1) {
+            auto kind = ld_context.Kinds()[0].data();
             auto& obj = json_value.emplace_object() =
-                std::move(boost::json::value_from(ld_context.attributes(kind))
+                std::move(boost::json::value_from(ld_context.Attributes(kind))
                               .as_object());
             obj.emplace("kind", kind);
         } else {
             auto& obj = json_value.emplace_object();
             obj.emplace("kind", "multi");
-            for (auto const& kind : ld_context.kinds()) {
+            for (auto const& kind : ld_context.Kinds()) {
                 obj.emplace(kind.data(),
                             boost::json::value_from(
-                                ld_context.attributes(kind.data())));
+                                ld_context.Attributes(kind.data())));
             }
         }
     }
@@ -40,12 +40,12 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
     }
     std::string key = boost::json::value_to<std::string>(key_iter->value());
 
-    auto& attrs = builder.kind(std::string(kind), key);
+    auto& attrs = builder.Kind(std::string(kind), key);
 
     auto* name_iter = context.find("name");
     if (name_iter != context.end() && !name_iter->value().is_null()) {
         if (name_iter->value().is_string()) {
-            attrs.name(boost::json::value_to<std::string>(name_iter->value()));
+            attrs.Name(boost::json::value_to<std::string>(name_iter->value()));
         } else {
             return JsonError::kContextInvalidNameField;
         }
@@ -54,7 +54,7 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
     auto* anon_iter = context.find("anonymous");
     if (anon_iter != context.end() && !anon_iter->value().is_null()) {
         if (anon_iter->value().is_bool()) {
-            attrs.anonymous(boost::json::value_to<bool>(anon_iter->value()));
+            attrs.Anonymous(boost::json::value_to<bool>(anon_iter->value()));
         } else {
             return JsonError::kContextInvalidAnonymousField;
         }
@@ -90,7 +90,7 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
                 if (!attr.is_string()) {
                     return JsonError::kContextInvalidAttributeReference;
                 }
-                attrs.add_private_attribute(
+                attrs.AddPrivateAttribute(
                     boost::json::value_to<std::string>(attr));
             }
         }
@@ -101,7 +101,7 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
             attr == meta_iter || attr->value().is_null()) {
             continue;
         }
-        attrs.set(attr->key(), boost::json::value_to<Value>(attr->value()));
+        attrs.Set(attr->key(), boost::json::value_to<Value>(attr->value()));
     }
 
     return std::nullopt;
@@ -151,6 +151,6 @@ tl::expected<Context, JsonError> tag_invoke(
         return tl::make_unexpected(*err);
     }
 
-    return builder.build();
+    return builder.Build();
 }
 }  // namespace launchdarkly

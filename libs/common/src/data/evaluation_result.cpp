@@ -6,28 +6,28 @@
 
 namespace launchdarkly {
 
-uint64_t EvaluationResult::version() const {
+uint64_t EvaluationResult::Version() const {
     return version_;
 }
 
-std::optional<uint64_t> EvaluationResult::flag_version() const {
+std::optional<uint64_t> EvaluationResult::FlagVersion() const {
     return flag_version_;
 }
 
-bool EvaluationResult::track_events() const {
+bool EvaluationResult::TrackEvents() const {
     return track_events_;
 }
 
-bool EvaluationResult::track_reason() const {
+bool EvaluationResult::TrackReason() const {
     return track_reason_;
 }
 
 std::optional<std::chrono::time_point<std::chrono::system_clock>>
-EvaluationResult::debug_events_until_date() const {
+EvaluationResult::DebugEventsUntilDate() const {
     return debug_events_until_date_;
 }
 
-EvaluationDetailInternal const& EvaluationResult::detail() const {
+EvaluationDetailInternal const& EvaluationResult::Detail() const {
     return detail_;
 }
 
@@ -64,12 +64,12 @@ std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
 }
 
 bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs) {
-    return lhs.version() == rhs.version() &&
-           lhs.track_reason() == rhs.track_reason() &&
-           lhs.track_events() == rhs.track_events() &&
-           lhs.detail() == rhs.detail() &&
-           lhs.debug_events_until_date() == rhs.debug_events_until_date() &&
-           lhs.flag_version() == rhs.flag_version();
+    return lhs.Version() == rhs.Version() &&
+           lhs.TrackReason() == rhs.TrackReason() &&
+           lhs.TrackEvents() == rhs.TrackEvents() &&
+           lhs.Detail() == rhs.Detail() &&
+           lhs.DebugEventsUntilDate() == rhs.DebugEventsUntilDate() &&
+           lhs.FlagVersion() == rhs.FlagVersion();
 }
 
 bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs) {

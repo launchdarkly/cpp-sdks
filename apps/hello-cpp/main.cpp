@@ -100,7 +100,7 @@ int main() {
     }
 
     Client client(std::move(*config),
-                  ContextBuilder().kind("user", "ryan").build());
+                  ContextBuilder().Kind("user", "ryan").Build());
 
     auto before_init = client.BoolVariationDetail("my-boolean-flag", false);
     // This should be the cached version from our persistence, if the
