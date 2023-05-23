@@ -1,7 +1,6 @@
 #pragma once
 
 namespace launchdarkly::client_side {
-// TODO: Can be moved to common.
 
 /**
  * Represents the connection of a listener.

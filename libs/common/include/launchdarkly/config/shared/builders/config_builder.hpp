@@ -6,6 +6,7 @@
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/builders/logging_builder.hpp>
+#include <launchdarkly/config/shared/builders/persistence_builder.hpp>
 #include <launchdarkly/config/shared/config.hpp>
 
 #include <optional>
@@ -32,6 +33,8 @@ class ConfigBuilder {
         launchdarkly::config::shared::builders::DataSourceBuilder<SDK>;
     using HttpPropertiesBuilder =
         launchdarkly::config::shared::builders::HttpPropertiesBuilder<SDK>;
+    using PersistenceBuilder =
+        launchdarkly::config::shared::builders::PersistenceBuilder<SDK>;
     using LoggingBuilder =
         launchdarkly::config::shared::builders::LoggingBuilder;
 
@@ -45,7 +48,7 @@ class ConfigBuilder {
      * To customize the ServiceEndpoints the SDK uses for streaming,
      * polling, and events, pass in an EndpointsBuilder.
      * @param builder An EndpointsBuilder.
-     * @return Reference to this builder.
+     * @return Reference to an EndpointsBuilder.
      */
     EndpointsBuilder& ServiceEndpoints();
 
@@ -53,7 +56,7 @@ class ConfigBuilder {
      * To include metadata about the application that is utilizing the SDK,
      * pass in an AppInfoBuilder.
      * @param builder An AppInfoBuilder.
-     * @return Reference to this builder.
+     * @return Reference to an AppInfoBuilder.
      */
     AppInfoBuilder& AppInfo();
 
@@ -69,7 +72,7 @@ class ConfigBuilder {
      * To tune settings related to event generation and delivery, pass an
      * EventsBuilder.
      * @param builder An EventsBuilder.
-     * @return Reference to this builder.
+     * @return Reference to an EventsBuilder.
      */
     EventsBuilder& Events();
 
@@ -77,7 +80,7 @@ class ConfigBuilder {
      * Sets the configuration of the component that receives feature flag data
      * from LaunchDarkly.
      * @param builder A DataSourceConfig builder.
-     * @return Reference to this builder.
+     * @return Reference to a DataSourceBuilder.
      */
     DataSourceBuilder& DataSource();
 
@@ -85,16 +88,23 @@ class ConfigBuilder {
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
      * The builder has methods for setting individual HTTP-related properties.
      * @param builder A HttpPropertiesBuilder builder.
-     * @return Reference to this builder.
+     * @return Reference to an HttpPropertiesBuilder.
      */
     HttpPropertiesBuilder& HttpProperties();
 
     /**
      * Sets the logging configuration for the SDK.
      * @param builder A Logging builder.
-     * @return Reference to this builder.
+     * @return Reference to a LoggingBuilder.
      */
     LoggingBuilder& Logging();
+
+    /**
+     * Sets the persistence configuration for the SDK.
+     * @param builder A persistence builder.
+     * @return Reference to a PersistenceBuilder.
+     */
+    PersistenceBuilder& Persistence();
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
@@ -105,12 +115,14 @@ class ConfigBuilder {
    private:
     std::string sdk_key_;
     std::optional<bool> offline_;
+
     EndpointsBuilder service_endpoints_builder_;
     AppInfoBuilder app_info_builder_;
     EventsBuilder events_builder_;
     DataSourceBuilder data_source_builder_;
     HttpPropertiesBuilder http_properties_builder_;
     LoggingBuilder logging_config_builder_;
+    PersistenceBuilder persistence_builder_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

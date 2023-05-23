@@ -18,7 +18,7 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientSDK* LDClientSDK;
 
-#define LD_NONBLOCKING -1
+#define LD_NONBLOCKING 0
 #define LD_DISCARD_DETAIL NULL
 
 /**
@@ -32,10 +32,20 @@ LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context);
 
 /**
+ * Starts the SDK, initiating a connection to LaunchDarkly.
+ *
+ * To start asynchronously, pass LD_NONBLOCKING. Otherwise, pass a positive
+ * milliseconds value to block for that amount of time.
+ *
+ * @param milliseconds Milliseconds to wait or LD_NONBLOCKING.
+ */
+LD_EXPORT(void)
+LDClientSDK_Start(LDClientSDK, unsigned int milliseconds);
+
+/**
  * Returns a boolean value indicating LaunchDarkly connection and flag state
  * within the client.
  *
- *  [TODO Need to make WaitForReadyAsync, offline]
  * When you first start the client, once StartAsync has completed, Initialized
  * should return true if and only if either 1. it connected to LaunchDarkly and
  * successfully retrieved flags, or 2. it started in offline mode so there's no
@@ -89,13 +99,13 @@ LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
 /**
  * Requests delivery of all pending analytic events (if any).
  *
- * Pass LD_NONBLOCKING as the second parameter.
+ * You MUST pass LD_NONBLOCKING as the second parameter.
  *
  * @param sdk SDK. Must not be NULL.
  * @param milliseconds Must pass LD_NONBLOCKING.
  */
 LD_EXPORT(void)
-LDClientSDK_Flush(LDClientSDK sdk, int reserved);
+LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved);
 
 /**
  * Changes the current evaluation context, requests flags for that context
@@ -106,7 +116,7 @@ LDClientSDK_Flush(LDClientSDK sdk, int reserved);
  * concurrently invokes undefined behavior.
  *
  * To block until the identify operation is complete or a timeout is reached,
- * pass a non-negative milliseconds parameter. Otherwise to return immediately,
+ * pass a positive milliseconds parameter. Otherwise to return immediately,
  * pass LD_NONBLOCKING.
  *
  * @param sdk SDK. Must not be NULL.
@@ -115,7 +125,9 @@ LDClientSDK_Flush(LDClientSDK sdk, int reserved);
  * LD_NONBLOCKING to return immediately.
  */
 LD_EXPORT(void)
-LDClientSDK_Identify(LDClientSDK sdk, LDContext context, int milliseconds);
+LDClientSDK_Identify(LDClientSDK sdk,
+                     LDContext context,
+                     unsigned int milliseconds);
 
 /**
  * Returns the boolean value of a feature flag for a given flag key.

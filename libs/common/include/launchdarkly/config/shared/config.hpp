@@ -6,6 +6,7 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/logging.hpp>
+#include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 
 namespace launchdarkly::config {
@@ -25,7 +26,8 @@ struct Config {
            shared::built::Events events,
            std::optional<std::string> application_tag,
            shared::built::DataSourceConfig<SDK> data_source_config,
-           shared::built::HttpProperties http_properties);
+           shared::built::HttpProperties http_properties,
+           shared::built::Persistence<SDK> persistence);
 
     [[nodiscard]] std::string const& SdkKey() const;
 
@@ -45,6 +47,8 @@ struct Config {
 
     [[nodiscard]] shared::built::Logging const& Logging() const;
 
+    [[nodiscard]] shared::built::Persistence<SDK> const& Persistence() const;
+
    private:
     std::string sdk_key_;
     bool offline_;
@@ -54,6 +58,7 @@ struct Config {
     config::shared::built::Events events_;
     config::shared::built::DataSourceConfig<SDK> data_source_config_;
     config::shared::built::HttpProperties http_properties_;
+    shared::built::Persistence<SDK> persistence_;
 };
 
 }  // namespace launchdarkly::config

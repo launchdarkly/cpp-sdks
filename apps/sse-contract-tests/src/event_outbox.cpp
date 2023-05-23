@@ -40,6 +40,12 @@ void EventOutbox::post_event(launchdarkly::sse::Event event) {
     flush_timer_.expires_from_now(boost::posix_time::milliseconds(0));
 }
 
+void EventOutbox::post_error(launchdarkly::sse::Error error) {
+    auto http_request = build_request(callback_counter_++, error);
+    outbox_.push(http_request);
+    flush_timer_.expires_from_now(boost::posix_time::milliseconds(0));
+}
+
 void EventOutbox::run() {
     resolver_.async_resolve(callback_host_, callback_port_,
                             beast::bind_front_handler(&EventOutbox::on_resolve,
@@ -57,7 +63,7 @@ void EventOutbox::stop() {
 
 EventOutbox::RequestType EventOutbox::build_request(
     std::size_t counter,
-    launchdarkly::sse::Event ev) {
+    std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> ev) {
     RequestType req;
 
     req.set(http::field::host, callback_host_);
@@ -66,11 +72,34 @@ EventOutbox::RequestType EventOutbox::build_request(
 
     nlohmann::json json;
 
-    if (ev.type() == "comment") {
-        json = CommentMessage{"comment", std::move(ev).take()};
-    } else {
-        json = EventMessage{"event", Event{ev}};
-    }
+    std::visit(
+        [&](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, launchdarkly::sse::Event>) {
+                if (arg.type() == "comment") {
+                    json = CommentMessage{"comment", std::move(arg).take()};
+                } else {
+                    json = EventMessage{"event", Event{std::move(arg)}};
+                }
+            } else if constexpr (std::is_same_v<T, launchdarkly::sse::Error>) {
+                using launchdarkly::sse::Error;
+                auto msg = ErrorMessage{"error"};
+                switch (arg) {
+                    case Error::NoContent:
+                        msg.comment = "no content";
+                        break;
+                    case Error::InvalidRedirectLocation:
+                        msg.comment = "invalid redirect location";
+                        break;
+                    case Error::UnrecoverableClientError:
+                        msg.comment = "unrecoverable client error";
+                    default:
+                        msg.comment = "unspecified error";
+                }
+                json = msg;
+            }
+        },
+        std::move(ev));
 
     req.body() = json.dump();
     req.prepare_payload();

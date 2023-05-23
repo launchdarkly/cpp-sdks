@@ -1,20 +1,27 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
-        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/*.hpp")
+        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklySSEClient_SOURCE_DIR}/include/launchdarkly/sse/*.hpp"
+        )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME}
+add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         client.cpp
         parser.cpp
         event.cpp
         backoff.cpp)
+
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers foxy
         PRIVATE Boost::url Boost::disable_autolinking
         )
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
+
+
+set_property(TARGET ${LIBNAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
 

@@ -3,10 +3,10 @@
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 
-#include "base_64.hpp"
 #include "data_source_update_sink.hpp"
 #include "polling_data_source.hpp"
 
@@ -15,15 +15,17 @@ namespace launchdarkly::client_side::data_sources {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
-static network::HttpRequest MakeRequest(Config const& config,
-                                        Context const& context) {
-    auto url = std::make_optional(config.ServiceEndpoints().PollingBaseUrl());
-
-    auto const& data_source_config = config.DataSourceConfig();
+static network::HttpRequest MakeRequest(
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK>
+        data_source_config,
+    config::shared::built::HttpProperties const& http_properties,
+    Context const& context) {
+    auto url = std::make_optional(endpoints.PollingBaseUrl());
 
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ClientSDK>>(
-        config.DataSourceConfig().method);
+        data_source_config.method);
 
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
@@ -42,7 +44,8 @@ static network::HttpRequest MakeRequest(Config const& config,
         // When not using 'REPORT' we need to base64
         // encode the context so that we can safely
         // put it in a url.
-        url = network::AppendUrl(url, Base64UrlEncode(string_context));
+        url =
+            network::AppendUrl(url, encoding::Base64UrlEncode(string_context));
     }
 
     if (data_source_config.with_reasons) {
@@ -53,40 +56,41 @@ static network::HttpRequest MakeRequest(Config const& config,
     }
 
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
-        builder(config.HttpProperties());
-
-    builder.Header("authorization", config.SdkKey());
-
-    if (auto app_tag = config.ApplicationTag()) {
-        builder.Header("x-launchdarkly-tags", *app_tag);
-    }
+        builder(http_properties);
 
     // If no URL is set, then we will fail the request.
     return {url.value_or(""), method, builder.Build(), body};
 }
 
-PollingDataSource::PollingDataSource(Config const& config,
-                                     boost::asio::any_io_executor ioc,
-                                     Context const& context,
-                                     IDataSourceUpdateSink* handler,
-                                     DataSourceStatusManager& status_manager,
-                                     Logger const& logger)
+PollingDataSource::PollingDataSource(
+    config::shared::built::ServiceEndpoints const& endpoints,
+    config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
+        data_source_config,
+    config::shared::built::HttpProperties const& http_properties,
+    boost::asio::any_io_executor ioc,
+    Context const& context,
+    IDataSourceUpdateSink& handler,
+    DataSourceStatusManager& status_manager,
+    Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
       status_manager_(status_manager),
       data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+          DataSourceEventHandler(context, handler, logger, status_manager_)),
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
           std::get<
               config::shared::built::PollingConfig<config::shared::ClientSDK>>(
-              config.DataSourceConfig().method)
+              data_source_config.method)
               .poll_interval),
-      request_(MakeRequest(config, context)) {
+      request_(MakeRequest(endpoints,
+                           data_source_config,
+                           http_properties,
+                           context)) {
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ClientSDK>>(
-        config.DataSourceConfig().method);
+        data_source_config.method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval specified under minimum, defaulting to 30 "
@@ -203,6 +207,7 @@ void PollingDataSource::StartPollingTimer() {
 }
 
 void PollingDataSource::Start() {
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(

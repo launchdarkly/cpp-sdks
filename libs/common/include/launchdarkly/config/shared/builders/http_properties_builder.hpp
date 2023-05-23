@@ -129,7 +129,6 @@ class HttpPropertiesBuilder {
     std::string wrapper_name_;
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
-    std::string user_agent_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

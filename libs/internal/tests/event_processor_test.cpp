@@ -74,11 +74,13 @@ TEST(EventProcessorTests, ProcessorCompiles) {
 
     ASSERT_TRUE(config);
 
-    events::AsioEventProcessor processor(ioc.get_executor(), *config, logger);
+    events::AsioEventProcessor<client_side::SDK> processor(
+        ioc.get_executor(), config->ServiceEndpoints(), config->Events(),
+        config->HttpProperties(), logger);
     std::thread ioc_thread([&]() { ioc.run(); });
 
-    auto context = launchdarkly::ContextBuilder().kind("org", "ld").build();
-    ASSERT_TRUE(context.valid());
+    auto context = launchdarkly::ContextBuilder().Kind("org", "ld").Build();
+    ASSERT_TRUE(context.Valid());
 
     auto identify_event = events::client::IdentifyEventParams{
         std::chrono::system_clock::now(),

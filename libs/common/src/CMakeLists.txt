@@ -1,17 +1,20 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/*.h"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/config/*.h"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/bindings/c/data/*.h"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/config/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/data/*.hpp"
-        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/logging/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/bindings/c/*.h"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/bindings/c/config/*.h"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/bindings/c/data/*.h"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/client_side/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/builders/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/built/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME}
+add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         attribute_reference.cpp
         context.cpp
@@ -42,12 +45,16 @@ add_library(${LIBNAME}
         bindings/c/context.cpp
         bindings/c/config/builder.cpp
         bindings/c/config/config.cpp
+        log_level.cpp
+        config/persistence_builder.cpp
         bindings/c/data/evaluation_detail.cpp
         bindings/c/memory_routines.cpp
-        log_level.cpp config/logging_builder.cpp)
-
+        config/logging_builder.cpp)
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
+
+set_property(TARGET ${LIBNAME} PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
 

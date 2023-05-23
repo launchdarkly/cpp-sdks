@@ -27,12 +27,11 @@
 #include "data_sources/data_source_status_manager.hpp"
 #include "event_processor.hpp"
 #include "flag_manager/flag_manager.hpp"
-#include "flag_manager/flag_updater.hpp"
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context);
+    ClientImpl(Config config, Context context, std::string const& version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -111,9 +110,6 @@ class ClientImpl : public IClient {
 
     void UpdateContextSynchronized(Context context);
 
-    void OnDataSourceShutdown(Context context,
-                              std::function<void()> user_completion);
-
     void RestartDataSource();
 
     std::future<void> StartAsyncInternal(
@@ -121,8 +117,10 @@ class ClientImpl : public IClient {
             cond);
 
     Config config_;
-
     Logger logger_;
+
+    launchdarkly::config::shared::built::HttpProperties http_properties_;
+
     boost::asio::io_context ioc_;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
@@ -130,23 +128,18 @@ class ClientImpl : public IClient {
     Context context_;
     mutable std::shared_mutex context_mutex_;
 
+    flag_manager::FlagManager flag_manager_;
     std::function<std::shared_ptr<IDataSource>()> data_source_factory_;
 
     std::shared_ptr<IDataSource> data_source_;
 
     std::unique_ptr<IEventProcessor> event_processor_;
 
-    std::unique_ptr<IConnection> status_manager_conn_;
-
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
-    flag_manager::FlagManager flag_manager_;
-    flag_manager::FlagUpdater flag_updater_;
-
-    std::thread thread_;
-
+    
     std::thread run_thread_;
 
     bool eval_reasons_available_;

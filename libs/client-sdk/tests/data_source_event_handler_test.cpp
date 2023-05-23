@@ -14,11 +14,14 @@ using namespace launchdarkly::client_side::data_sources;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    void Init(std::unordered_map<std::string, ItemDescriptor> data) override {
+    void Init(Context const& context,
+              std::unordered_map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
-    void Upsert(std::string key, ItemDescriptor data) override {
+    void Upsert(Context const& context,
+                std::string key,
+                ItemDescriptor data) override {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
@@ -30,163 +33,174 @@ class TestHandler : public IDataSourceUpdateSink {
 
 TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage(
         "put", R"({"flagA": {"version":1, "value":"test"}})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
-    EXPECT_EQ(1, test_handler->count_);
+    EXPECT_EQ(1, test_handler.count_);
     auto expected_put = std::unordered_map<std::string, ItemDescriptor>{
         {"flagA", ItemDescriptor(EvaluationResult(
                       1, std::nullopt, false, false, std::nullopt,
                       EvaluationDetailInternal(Value("test"), std::nullopt,
                                                std::nullopt)))}};
-    EXPECT_EQ(expected_put, test_handler->init_data_[0]);
+    EXPECT_EQ(expected_put, test_handler.init_data_[0]);
 }
 
 TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{}");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
-    EXPECT_EQ(1, test_handler->count_);
+    EXPECT_EQ(1, test_handler.count_);
     auto expected_put = std::unordered_map<std::string, ItemDescriptor>();
-    EXPECT_EQ(expected_put, test_handler->init_data_[0]);
+    EXPECT_EQ(expected_put, test_handler.init_data_[0]);
 }
 
 TEST(StreamingDataHandlerTests, BadJsonPut) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{sorry");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaPut) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{\"potato\": {}}");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage(
         "patch", R"({"key": "flagA", "version":1, "value": "test"})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
-    EXPECT_EQ(1, test_handler->count_);
+    EXPECT_EQ(1, test_handler.count_);
     auto expected_put = std::pair<std::string, ItemDescriptor>{
         "flagA", ItemDescriptor(EvaluationResult(
                      1, std::nullopt, false, false, std::nullopt,
                      EvaluationDetailInternal(Value("test"), std::nullopt,
                                               std::nullopt)))};
-    EXPECT_EQ(expected_put, test_handler->upsert_data_[0]);
+    EXPECT_EQ(expected_put, test_handler.upsert_data_[0]);
 }
 
 TEST(StreamingDataHandlerTests, BadJsonPatch) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("patch", "{sorry");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("patch", R"({"potato": {}})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("delete",
                                             R"({"key": "flagA", "version":1})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
-    EXPECT_EQ(1, test_handler->count_);
+    EXPECT_EQ(1, test_handler.count_);
     auto expected_put =
         std::pair<std::string, ItemDescriptor>{"flagA", ItemDescriptor(1)};
-    EXPECT_EQ(expected_put, test_handler->upsert_data_[0]);
+    EXPECT_EQ(expected_put, test_handler.upsert_data_[0]);
 }
 
 TEST(StreamingDataHandlerTests, BadJsonDelete) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("delete", "{sorry");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("delete", R"({"potato": {}})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }
 
 TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     auto logger = Logger(std::make_shared<logging::ConsoleBackend>("test"));
-    auto test_handler = std::make_unique<TestHandler>();
+    auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
-    DataSourceEventHandler stream_handler(test_handler.get(), logger,
-                                          status_manager);
+    DataSourceEventHandler stream_handler(
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
+        status_manager);
 
     auto res = stream_handler.HandleMessage("potato", R"({"potato": {}})");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kUnhandledVerb, res);
-    EXPECT_EQ(0, test_handler->count_);
+    EXPECT_EQ(0, test_handler.count_);
 }

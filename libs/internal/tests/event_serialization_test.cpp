@@ -17,7 +17,7 @@ TEST(EventSerialization, FeatureEvent) {
         client::FeatureEventBase(client::FeatureEventParams{
             creation_date,
             "key",
-            ContextBuilder().kind("foo", "bar").build(),
+            ContextBuilder().Kind("foo", "bar").Build(),
             Value(42),
             Value(3),
             1,
@@ -41,13 +41,13 @@ TEST(EventSerialization, DebugEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
     AttributeReference::SetType attrs;
     ContextFilter filter(false, attrs);
-    auto context = ContextBuilder().kind("foo", "bar").build();
+    auto context = ContextBuilder().Kind("foo", "bar").Build();
     auto event = events::client::DebugEvent{
         client::FeatureEventBase(
             client::FeatureEventBase(client::FeatureEventParams{
                 creation_date,
                 "key",
-                ContextBuilder().kind("foo", "bar").build(),
+                ContextBuilder().Kind("foo", "bar").Build(),
                 Value(42),
                 Value(3),
                 1,
@@ -73,7 +73,7 @@ TEST(EventSerialization, IdentifyEvent) {
     ContextFilter filter(false, attrs);
     auto event = events::client::IdentifyEvent{
         creation_date,
-        filter.filter(ContextBuilder().kind("foo", "bar").build())};
+        filter.filter(ContextBuilder().Kind("foo", "bar").Build())};
 
     auto event_json = boost::json::value_from(event);
 

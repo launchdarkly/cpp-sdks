@@ -2,38 +2,38 @@
 
 namespace launchdarkly {
 
-EvaluationReason::Kind const& EvaluationReason::kind() const {
+enum EvaluationReason::Kind const& EvaluationReason::Kind() const {
     return kind_;
 }
 
-std::optional<EvaluationReason::ErrorKind> EvaluationReason::error_kind()
+std::optional<enum EvaluationReason::ErrorKind> EvaluationReason::ErrorKind()
     const {
     return error_kind_;
 }
 
-std::optional<std::size_t> EvaluationReason::rule_index() const {
+std::optional<std::size_t> EvaluationReason::RuleIndex() const {
     return rule_index_;
 }
 
-std::optional<std::string> EvaluationReason::rule_id() const {
+std::optional<std::string> EvaluationReason::RuleId() const {
     return rule_id_;
 }
 
-std::optional<std::string> EvaluationReason::prerequisite_key() const {
+std::optional<std::string> EvaluationReason::PrerequisiteKey() const {
     return prerequisite_key_;
 }
 
-bool EvaluationReason::in_experiment() const {
+bool EvaluationReason::InExperiment() const {
     return in_experiment_;
 }
 
-std::optional<std::string> EvaluationReason::big_segment_status() const {
+std::optional<std::string> EvaluationReason::BigSegmentStatus() const {
     return big_segment_status_;
 }
 
 EvaluationReason::EvaluationReason(
-    Kind kind,
-    std::optional<ErrorKind> error_kind,
+    enum Kind kind,
+    std::optional<enum ErrorKind> error_kind,
     std::optional<std::size_t> rule_index,
     std::optional<std::string> rule_id,
     std::optional<std::string> prerequisite_key,
@@ -47,7 +47,7 @@ EvaluationReason::EvaluationReason(
       in_experiment_(in_experiment),
       big_segment_status_(std::move(big_segment_status)) {}
 
-EvaluationReason::EvaluationReason(ErrorKind error_kind)
+EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
     : EvaluationReason(Kind::kError,
                        error_kind,
                        std::nullopt,
@@ -65,7 +65,7 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     if (reason.rule_index_.has_value()) {
         out << " ruleIndex: " << reason.rule_index_.value();
     }
-    if (reason.rule_id()) {
+    if (reason.RuleId()) {
         out << " ruleId: " << reason.rule_id_.value();
     }
     if (reason.prerequisite_key_.has_value()) {
@@ -80,12 +80,11 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
 }
 
 bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
-    return lhs.kind() == rhs.kind() && lhs.error_kind() == rhs.error_kind() &&
-           lhs.in_experiment() == rhs.in_experiment() &&
-           lhs.big_segment_status() == rhs.big_segment_status() &&
-           lhs.prerequisite_key() == rhs.prerequisite_key() &&
-           lhs.rule_id() == rhs.rule_id() &&
-           lhs.rule_index() == rhs.rule_index();
+    return lhs.Kind() == rhs.Kind() && lhs.ErrorKind() == rhs.ErrorKind() &&
+           lhs.InExperiment() == rhs.InExperiment() &&
+           lhs.BigSegmentStatus() == rhs.BigSegmentStatus() &&
+           lhs.PrerequisiteKey() == rhs.PrerequisiteKey() &&
+           lhs.RuleId() == rhs.RuleId() && lhs.RuleIndex() == rhs.RuleIndex();
 }
 
 bool operator!=(EvaluationReason const& lhs, EvaluationReason const& rhs) {
@@ -93,7 +92,7 @@ bool operator!=(EvaluationReason const& lhs, EvaluationReason const& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& out,
-                         EvaluationReason::Kind const& kind) {
+                         enum EvaluationReason::Kind const& kind) {
     switch (kind) {
         case EvaluationReason::Kind::kOff:
             out << "OFF";
@@ -118,7 +117,7 @@ std::ostream& operator<<(std::ostream& out,
 }
 
 std::ostream& operator<<(std::ostream& out,
-                         EvaluationReason::ErrorKind const& kind) {
+                         enum EvaluationReason::ErrorKind const& kind) {
     switch (kind) {
         case EvaluationReason::ErrorKind::kClientNotReady:
             out << "CLIENT_NOT_READY";

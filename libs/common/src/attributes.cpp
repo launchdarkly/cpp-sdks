@@ -2,23 +2,23 @@
 
 namespace launchdarkly {
 
-std::string const& Attributes::key() const {
+std::string const& Attributes::Key() const {
     return key_.AsString();
 }
 
-std::string const& Attributes::name() const {
+std::string const& Attributes::Name() const {
     return name_.AsString();
 }
 
-bool Attributes::anonymous() const {
+bool Attributes::Anonymous() const {
     return anonymous_.AsBool();
 }
 
-Value const& Attributes::custom_attributes() const {
+Value const& Attributes::CustomAttributes() const {
     return custom_attributes_;
 }
 
-AttributeReference::SetType const& Attributes::private_attributes() const {
+AttributeReference::SetType const& Attributes::PrivateAttributes() const {
     return private_attributes_;
 }
 

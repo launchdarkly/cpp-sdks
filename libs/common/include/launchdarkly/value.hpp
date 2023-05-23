@@ -21,13 +21,14 @@ namespace launchdarkly {
  * null. If you want to evaluate a feature flag in a general way that does not
  * have expectations about the variation type, or if the variation value is a
  * complex data structure such as an array or object, you can use the SDK method
- * [TODO] to get the value and then use Value methods to examine it.
+ * launchdarkly::client_side::IClient::JsonVariation.
  *
- * Similarly, attributes of an evaluation context ([TODO])
+ * Similarly, attributes of an evaluation context (launchdarkly::Context)
  * can have variations of any JSON type other than null. If you want to set a
  * context attribute in a general way that will accept any type, or set the
  * attribute value to a complex data structure such as an array or object, you
- * can use the builder method [TODO].
+ * can use the builder method
+ * launchdarkly::AttributesBuilder< BuilderReturn, BuildType >::set.
  *
  * Arrays and objects have special meanings in LaunchDarkly flag evaluation:
  *   - An array of values means "try to match any of these values to the
@@ -37,12 +38,6 @@ namespace launchdarkly {
  * reference /objectAttr1/color to match the value "green". Nested property
  * references like /objectAttr1/address/street are allowed if a property
  *     contains another JSON object.
- *
- * # Constructors and builders
- * [TODO]
- *
- * # Comparisons
- * [TODO]
  */
 class Value final {
    public:

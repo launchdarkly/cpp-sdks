@@ -45,6 +45,8 @@ int main() {
     LDContext context = LDContextBuilder_Build(context_builder);
 
     LDClientSDK client = LDClientSDK_New(config, context);
+
+    LDClientSDK_Start(client, 1000);
     //
     //    std::cout << "Initial Status: " << client.DataSourceStatus().Status()
     //              << std::endl;

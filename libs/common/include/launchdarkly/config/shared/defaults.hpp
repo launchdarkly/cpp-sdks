@@ -28,8 +28,6 @@ struct Defaults {
 
 template <>
 struct Defaults<ClientSDK> {
-    static std::string SdkName() { return "CppClient"; }
-    static std::string SdkVersion() { return "TODO"; }
     static bool Offline() { return Defaults<AnySDK>::Offline(); }
 
     static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
@@ -50,11 +48,8 @@ struct Defaults<ClientSDK> {
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                SdkName() + "/" + SdkVersion(),
+        return {std::chrono::seconds{10}, std::chrono::seconds{10},
+                std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
@@ -72,12 +67,12 @@ struct Defaults<ClientSDK> {
         return {std::chrono::seconds{5 * 60}, "/msdk/evalx/contexts",
                 "/msdk/evalx/context", std::chrono::seconds{30}};
     }
+
+    static std::size_t MaxCachedContexts() { return 5; }
 };
 
 template <>
 struct Defaults<ServerSDK> {
-    static std::string SdkName() { return "CppServer"; }
-    static std::string SdkVersion() { return "TODO"; }
     static bool Offline() { return Defaults<AnySDK>::Offline(); }
 
     static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
@@ -98,11 +93,8 @@ struct Defaults<ServerSDK> {
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{2},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                std::chrono::seconds{10},
-                SdkName() + "/" + SdkVersion(),
+        return {std::chrono::seconds{2}, std::chrono::seconds{10},
+                std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 

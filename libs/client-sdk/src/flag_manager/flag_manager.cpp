@@ -1,47 +1,36 @@
+#include <tl/expected.hpp>
+#include <utility>
+
 #include "flag_manager.hpp"
-#include "../data_sources/data_source_update_sink.hpp"
 
 namespace launchdarkly::client_side::flag_manager {
 
-// Shared pointers are used to item descriptors so that they may have a lifetime
-// greater than their duration in the store. If, for instance, a flag has been
-// accessed, and which it is being used init is called, then we want the
-// flag being processed to be valid.
+FlagManager::FlagManager(std::string const& sdk_key,
+                         Logger& logger,
+                         std::size_t max_cached_contexts,
+                         std::shared_ptr<IPersistence> persistence)
+    : flag_updater_(flag_store_),
+      persistence_updater_(sdk_key,
+                           flag_updater_,
+                           flag_store_,
+                           std::move(persistence),
+                           logger,
+                           max_cached_contexts) {}
 
-void FlagManager::Init(
-    std::unordered_map<std::string, ItemDescriptor> const& data) {
-    std::lock_guard lock{data_mutex_};
-
-    data_.clear();
-    for (auto item : data) {
-        data_.emplace(item.first,
-                      std::make_shared<ItemDescriptor>(std::move(item.second)));
-    }
+IDataSourceUpdateSink& FlagManager::Updater() {
+    return persistence_updater_;
 }
 
-void FlagManager::Upsert(std::string const& key, ItemDescriptor item) {
-    std::lock_guard lock{data_mutex_};
-
-    data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
+IFlagNotifier& FlagManager::Notifier() {
+    return flag_updater_;
 }
 
-std::shared_ptr<ItemDescriptor> FlagManager::Get(
-    std::string const& flag_key) const {
-    std::lock_guard lock{data_mutex_};
-
-    auto found = data_.find(flag_key);
-    if (found != data_.end()) {
-        return found->second;
-    }
-    return nullptr;
+FlagStore const& FlagManager::Store() const {
+    return flag_store_;
 }
 
-std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>>
-FlagManager::GetAll() const {
-    std::lock_guard lock{data_mutex_};
-
-    // Returns a copy of the map. (The descriptors are pointers and not shared).
-    return data_;
+void FlagManager::LoadCache(Context const& context) {
+    persistence_updater_.LoadCached(context);
 }
 
 }  // namespace launchdarkly::client_side::flag_manager

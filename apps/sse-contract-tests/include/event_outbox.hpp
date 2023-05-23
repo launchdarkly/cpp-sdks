@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <variant>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -44,23 +45,34 @@ class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
      * @param callback_url Target URL.
      */
     EventOutbox(net::any_io_executor executor, std::string callback_url);
+
     /**
-     * Enqueues an event, which will be posted to the server
+     * Queues an event, which will be posted to the server
      * later.
      * @param event Event to post.
      */
     void post_event(launchdarkly::sse::Event event);
+
+    /**
+     * Queues an error, which will be posted to the server later.
+     * @param error Error to post.
+     */
+    void post_error(launchdarkly::sse::Error error);
+
     /**
      * Begins an async operation to connect to the server.
      */
     void run();
+
     /**
      * Begins an async operation to disconnect from the server.
      */
     void stop();
 
    private:
-    RequestType build_request(std::size_t counter, launchdarkly::sse::Event ev);
+    RequestType build_request(
+        std::size_t counter,
+        std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> ev);
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
     void on_connect(beast::error_code ec,
                     tcp::resolver::results_type::endpoint_type);

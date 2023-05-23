@@ -26,6 +26,7 @@ option(BUILD_TESTING "Enable C++ unit tests." ON)
 option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
 
 if (BUILD_TESTING)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -55,15 +56,14 @@ set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
-if (MSVC)
-    set(Boost_USE_STATIC_LIBS ON)
-else ()
-    if (BUILD_SHARED_LIBS)
-        set(Boost_USE_STATIC_LIBS OFF)
-    else ()
-        set(Boost_USE_STATIC_LIBS ON)
-    endif ()
-endif ()
+set(Boost_USE_STATIC_LIBS ON)
+
+if(BUILD_SHARED_LIBS)
+    # When building a shared library we hide all symbols
+    # aside from this we have specifically exported for the C-API.
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+endif()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -81,6 +81,14 @@ add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 add_subdirectory(bindings/c)
 
+set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+
+set(BUILD_TESTING OFF)
+add_subdirectory(vendor/foxy)
+
+set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
+
 set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")
+
 
 add_subdirectory(apps)

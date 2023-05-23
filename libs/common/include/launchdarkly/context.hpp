@@ -35,7 +35,7 @@ class Context final {
      *
      * @return A vector of kinds.
      */
-    [[nodiscard]] std::vector<std::string> const& kinds() const;
+    [[nodiscard]] std::vector<std::string> const& Kinds() const;
 
     /**
      * Get a set of attributes associated with a kind.
@@ -45,7 +45,8 @@ class Context final {
      * @param kind The kind to get attributes for.
      * @return The attributes if they exist.
      */
-    [[nodiscard]] Attributes const& attributes(std::string const& kind) const;
+    [[nodiscard]] launchdarkly::Attributes const& Attributes(
+        std::string const& kind) const;
 
     /**
      * Get an attribute value by kind and attribute reference. If the kind is
@@ -56,7 +57,7 @@ class Context final {
      * @param ref The reference to the desired attribute.
      * @return The attribute Value or a Value representing null.
      */
-    Value const& get(std::string const& kind,
+    Value const& Get(std::string const& kind,
                      launchdarkly::AttributeReference const& ref);
 
     /**
@@ -64,20 +65,19 @@ class Context final {
      *
      * @return Returns true if the context is valid.
      */
-    [[nodiscard]] bool valid() const { return valid_; }
+    [[nodiscard]] bool Valid() const { return valid_; }
 
     /**
      * Get the canonical key for this context.
      */
-    [[nodiscard]] std::string const& canonical_key() const;
+    [[nodiscard]] std::string const& CanonicalKey() const;
 
     /**
      * Get a collection containing the kinds and their associated keys.
      *
      * @return Returns a map of kinds to keys.
      */
-    [[nodiscard]] std::map<std::string, std::string> const& kinds_to_keys()
-        const;
+    [[nodiscard]] std::map<std::string, std::string> const& KindsToKeys() const;
 
     /**
      * Get a string containing errors the context encountered during
@@ -124,9 +124,9 @@ class Context final {
      * Create a valid context with the given attributes.
      * @param attributes
      */
-    Context(std::map<std::string, Attributes> attributes);
+    Context(std::map<std::string, launchdarkly::Attributes> attributes);
 
-    std::map<std::string, Attributes> attributes_;
+    std::map<std::string, launchdarkly::Attributes> attributes_;
     std::vector<std::string> kinds_;
     std::map<std::string, std::string> kinds_to_keys_;
     bool valid_ = false;

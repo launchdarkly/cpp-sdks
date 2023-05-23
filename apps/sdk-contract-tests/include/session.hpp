@@ -33,7 +33,7 @@ class Session : boost::asio::coroutine {
      * @param caps Test service capabilities to advertise.
      * @param logger Logger.
      */
-    Session(foxy::server_session& session,
+    Session(launchdarkly::foxy::server_session& session,
             EntityManager& manager,
             std::vector<std::string>& caps,
             launchdarkly::Logger& logger);
@@ -85,7 +85,7 @@ class Session : boost::asio::coroutine {
     std::optional<Response> generate_response(Request& req);
 
    private:
-    foxy::server_session& session_;
+    launchdarkly::foxy::server_session& session_;
     EntityManager& manager_;
     std::unique_ptr<Frame> frame_;
     std::vector<std::string>& caps_;
