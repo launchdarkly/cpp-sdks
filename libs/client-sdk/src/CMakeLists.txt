@@ -43,9 +43,22 @@ add_library(${LIBNAME}
         flag_manager/flag_persistence.cpp
         bindings/c/sdk.cpp)
 
-target_link_libraries(${LIBNAME}
+if(MSVC OR (NOT BUILD_SHARED_LIBS))
+        target_link_libraries(${LIBNAME}
+                PUBLIC launchdarkly::common
+                PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
+else()
+        # The default static lib builds, for linux, are positition independent.
+        # So they do not link into a shared object without issues. So, when
+        # building shared objects do not link the static libraries and instead
+        # use the "src.hpp" files for required libraries.
+        # macOS shares the same path for simplicity.
+        target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
+
+        target_sources(${LIBNAME} PRIVATE boost.cpp)
+endif ()
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 
