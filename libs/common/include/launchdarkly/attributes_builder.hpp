@@ -117,8 +117,10 @@ class AttributesBuilder final {
      *
      * This action only affects analytics events that involve this particular
      * Context. To mark some (or all) Context attributes as private for all
-     * contexts, use the overall configuration for the SDK. See [TODO] and
-     * [TODO].
+     * contexts, use the overall configuration for the SDK. See
+     * launchdarkly::config::shared::builders::EventsBuilder< SDK >::AllAttributesPrivate
+     * and
+     * launchdarkly::config::shared::builders::EventsBuilder< SDK >::PrivateAttribute.
      *
      * The attributes "kind" and "key", and the "_meta" attributes cannot be
      * made private.

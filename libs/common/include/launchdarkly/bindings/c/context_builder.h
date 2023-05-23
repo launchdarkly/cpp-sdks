@@ -156,10 +156,8 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * Pointer, but other JSON Pointer features such as array indexing are not
  * supported for Private.
  *
- * This action only affects analytics events that involve this particular
- * Context. To mark some (or all) Context attributes as private for all
- * contexts, use the overall configuration for the SDK. See [TODO] and
- * [TODO].
+
+
  *
  * The attributes "kind" and "key", and the "_meta" attributes cannot be
  * made private.
