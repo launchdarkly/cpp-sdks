@@ -49,23 +49,20 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
         evaluation_result.value().detail().Value().AsObject()["item"].AsInt());
     EXPECT_EQ(84, evaluation_result.value().detail().VariationIndex());
     EXPECT_EQ(EvaluationReason::Kind::kOff,
-              evaluation_result.value().detail().Reason()->get().kind());
+              evaluation_result.value().detail().Reason()->get().Kind());
     EXPECT_EQ(EvaluationReason::ErrorKind::kMalformedFlag,
-              evaluation_result.value().detail().Reason()->get().error_kind());
+              evaluation_result.value().detail().Reason()->get().ErrorKind());
     EXPECT_EQ(12,
-              evaluation_result.value().detail().Reason()->get().rule_index());
+              evaluation_result.value().detail().Reason()->get().RuleIndex());
     EXPECT_EQ("RULE_ID",
-              evaluation_result.value().detail().Reason()->get().rule_id());
+              evaluation_result.value().detail().Reason()->get().RuleId());
     EXPECT_EQ(
         "PREREQ_KEY",
-        evaluation_result.value().detail().Reason()->get().prerequisite_key());
-    EXPECT_EQ("STORE_ERROR", evaluation_result.value()
-                                 .detail()
-                                 .Reason()
-                                 ->get()
-                                 .big_segment_status());
+        evaluation_result.value().detail().Reason()->get().PrerequisiteKey());
+    EXPECT_EQ("STORE_ERROR",
+        evaluation_result.value().detail().Reason()->get().BigSegmentStatus());
     EXPECT_TRUE(
-        evaluation_result.value().detail().Reason()->get().in_experiment());
+        evaluation_result.value().detail().Reason()->get().InExperiment());
 }
 
 TEST(EvaluationResultTests, ToJsonAllFields) {

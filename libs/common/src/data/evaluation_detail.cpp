@@ -14,7 +14,7 @@ EvaluationDetail<T>::EvaluationDetail(
       reason_(std::move(reason)) {}
 
 template <typename T>
-EvaluationDetail<T>::EvaluationDetail(EvaluationReason::ErrorKind error_kind,
+EvaluationDetail<T>::EvaluationDetail(enum EvaluationReason::ErrorKind error_kind,
                                       T default_value)
     : value_(std::move(default_value)),
       variation_index_(std::nullopt),

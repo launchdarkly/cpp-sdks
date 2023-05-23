@@ -21,14 +21,14 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
                                "\"bigSegmentStatus\":\"STORE_ERROR\""
                                "}"));
 
-    EXPECT_EQ(EvaluationReason::Kind::kOff, reason.value().kind());
+    EXPECT_EQ(EvaluationReason::Kind::kOff, reason.value().Kind());
     EXPECT_EQ(EvaluationReason::ErrorKind::kMalformedFlag,
-              reason.value().error_kind());
-    EXPECT_EQ(12, reason.value().rule_index());
-    EXPECT_EQ("RULE_ID", reason.value().rule_id());
-    EXPECT_EQ("PREREQ_KEY", reason.value().prerequisite_key());
-    EXPECT_EQ("STORE_ERROR", reason.value().big_segment_status());
-    EXPECT_TRUE(reason.value().in_experiment());
+              reason.value().ErrorKind());
+    EXPECT_EQ(12, reason.value().RuleIndex());
+    EXPECT_EQ("RULE_ID", reason.value().RuleId());
+    EXPECT_EQ("PREREQ_KEY", reason.value().PrerequisiteKey());
+    EXPECT_EQ("STORE_ERROR", reason.value().BigSegmentStatus());
+    EXPECT_TRUE(reason.value().InExperiment());
 }
 
 TEST(EvaluationReasonsTests, FromMinimalJson) {
@@ -38,13 +38,13 @@ TEST(EvaluationReasonsTests, FromMinimalJson) {
                                "\"kind\":\"RULE_MATCH\""
                                "}"));
 
-    EXPECT_EQ(EvaluationReason::Kind::kRuleMatch, reason.value().kind());
-    EXPECT_EQ(std::nullopt, reason.value().error_kind());
-    EXPECT_EQ(std::nullopt, reason.value().rule_index());
-    EXPECT_EQ(std::nullopt, reason.value().rule_id());
-    EXPECT_EQ(std::nullopt, reason.value().prerequisite_key());
-    EXPECT_EQ(std::nullopt, reason.value().big_segment_status());
-    EXPECT_FALSE(reason.value().in_experiment());
+    EXPECT_EQ(EvaluationReason::Kind::kRuleMatch, reason.value().Kind());
+    EXPECT_EQ(std::nullopt, reason.value().ErrorKind());
+    EXPECT_EQ(std::nullopt, reason.value().RuleIndex());
+    EXPECT_EQ(std::nullopt, reason.value().RuleId());
+    EXPECT_EQ(std::nullopt, reason.value().PrerequisiteKey());
+    EXPECT_EQ(std::nullopt, reason.value().BigSegmentStatus());
+    EXPECT_FALSE(reason.value().InExperiment());
 }
 
 TEST(EvaluationReasonsTests, NoReasonFieldsJson) {

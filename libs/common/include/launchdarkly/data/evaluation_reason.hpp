@@ -58,31 +58,31 @@ class EvaluationReason {
     /**
      * @return The general category of the reason.
      */
-    [[nodiscard]] Kind const& kind() const;
+    [[nodiscard]] enum Kind const& Kind() const;
 
     /**
      * A further description of the error condition, if the Kind was
      * Kind::kError.
      */
-    [[nodiscard]] std::optional<ErrorKind> error_kind() const;
+    [[nodiscard]] std::optional<ErrorKind> ErrorKind() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
      * `"RULE_MATCH"`.
      */
-    [[nodiscard]] std::optional<std::size_t> rule_index() const;
+    [[nodiscard]] std::optional<std::size_t> RuleIndex() const;
 
     /**
      * The unique identifier of the matched rule, if the kind was
      * `"RULE_MATCH"`.
      */
-    [[nodiscard]] std::optional<std::string> rule_id() const;
+    [[nodiscard]] std::optional<std::string> RuleId() const;
 
     /**
      * The key of the failed prerequisite flag, if the kind was
      * `"PREREQUISITE_FAILED"`.
      */
-    [[nodiscard]] std::optional<std::string> prerequisite_key() const;
+    [[nodiscard]] std::optional<std::string> PrerequisiteKey() const;
 
     /**
      * Whether the evaluation was part of an experiment.
@@ -91,7 +91,7 @@ class EvaluationReason {
      * served one of the variations in the experiment. Otherwise it is false or
      * undefined.
      */
-    [[nodiscard]] bool in_experiment() const;
+    [[nodiscard]] bool InExperiment() const;
 
     /**
      * Describes the validity of Big Segment information, if and only if the
@@ -107,24 +107,24 @@ class EvaluationReason {
      * - `"STORE_ERROR"`: The Big Segment query involved in the flag evaluation
      * failed, for instance due to a database error.
      */
-    [[nodiscard]] std::optional<std::string> big_segment_status() const;
+    [[nodiscard]] std::optional<std::string> BigSegmentStatus() const;
 
-    EvaluationReason(Kind kind,
-                     std::optional<ErrorKind> error_kind,
+    EvaluationReason(enum Kind kind,
+                     std::optional<enum ErrorKind> error_kind,
                      std::optional<std::size_t> rule_index,
                      std::optional<std::string> rule_id,
                      std::optional<std::string> prerequisite_key,
                      bool in_experiment,
                      std::optional<std::string> big_segment_status);
 
-    explicit EvaluationReason(ErrorKind error_kind);
+    explicit EvaluationReason(enum ErrorKind error_kind);
 
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 
    private:
-    Kind kind_;
-    std::optional<ErrorKind> error_kind_;
+    enum Kind kind_;
+    std::optional<enum ErrorKind> error_kind_;
     std::optional<std::size_t> rule_index_;
     std::optional<std::string> rule_id_;
     std::optional<std::string> prerequisite_key_;

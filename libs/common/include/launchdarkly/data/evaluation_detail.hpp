@@ -33,7 +33,7 @@ class EvaluationDetail {
      * @param error_kind Kind of the error.
      * @param default_value Default value.
      */
-    EvaluationDetail(EvaluationReason::ErrorKind error_kind, T default_value);
+    EvaluationDetail(enum EvaluationReason::ErrorKind error_kind, T default_value);
 
     /**
      * @return A reference to the variation value. For convenience, the *
