@@ -15,7 +15,7 @@ Summarizer::Features() const {
 }
 
 void Summarizer::Update(client::FeatureEventParams const& event) {
-    auto const& kinds = event.context.kinds();
+    auto const& kinds = event.context.Kinds();
 
     auto feature_state_iterator =
         features_.try_emplace(event.key, event.default_).first;

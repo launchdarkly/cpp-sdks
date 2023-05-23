@@ -26,13 +26,13 @@ static bool ValidKind(std::string_view kind) {
     });
 }
 
-AttributesBuilder<ContextBuilder, Context>& ContextBuilder::kind(
+AttributesBuilder<ContextBuilder, Context>& ContextBuilder::Kind(
     std::string const& kind,
     std::string key) {
     auto existing = builders_.find(kind);
     if (existing != builders_.end()) {
         auto& kind_builder = builders_.at(kind);
-        kind_builder.key(key);
+        kind_builder.Key(key);
         return kind_builder;
     }
 
@@ -41,7 +41,7 @@ AttributesBuilder<ContextBuilder, Context>& ContextBuilder::kind(
     return builders_.at(kind);
 }
 
-Context ContextBuilder::build() {
+Context ContextBuilder::Build() {
     if (builders_.empty()) {
         valid_ = false;
         if (!errors_.empty()) {
@@ -78,7 +78,7 @@ Context ContextBuilder::build() {
     if (valid_) {
         for (auto& kind_builder : builders_) {
             kinds_.emplace(kind_builder.first,
-                           kind_builder.second.build_attributes());
+                           kind_builder.second.BuildAttributes());
         }
         builders_.clear();
         return {std::move(kinds_)};

@@ -18,10 +18,10 @@ TEST(ContextFilterTests, CanRedactName) {
     ContextFilter filter(false, global_private_attributes);
 
     auto filtered = filter.filter(ContextBuilder()
-                                      .kind("user", "user-key")
-                                      .name("Bob")
-                                      .set("isCat", false)
-                                      .build());
+                                      .Kind("user", "user-key")
+                                      .Name("Bob")
+                                      .Set("isCat", false)
+                                      .Build());
 
     auto expected = parse(
         "{\"key\":\"user-key\","
@@ -39,10 +39,10 @@ TEST(ContextFilterTests, CannotRedactKeyKindMeta) {
     ContextFilter filter(false, global_private_attributes);
 
     auto filtered = filter.filter(ContextBuilder()
-                                      .kind("user", "user-key")
-                                      .name("Bob")
-                                      .set("isCat", false)
-                                      .build());
+                                      .Kind("user", "user-key")
+                                      .Name("Bob")
+                                      .Set("isCat", false)
+                                      .Build());
 
     auto expected = parse(
         "{\"key\":\"user-key\","
@@ -60,15 +60,15 @@ TEST(ContextFilterTests, BasicContext) {
 
     auto filtered = filter.filter(
         ContextBuilder()
-            .kind("user", "user-key")
-            .set("email", "email.email@email")
-            .set("array", {false, true, "bacon", {"first", "second"}})
-            .set("object",
+            .Kind("user", "user-key")
+            .Set("email", "email.email@email")
+            .Set("array", {false, true, "bacon", {"first", "second"}})
+            .Set("object",
                  Object{{"test", true}, {"second", false}, {"arr", {1, 2}}})
-            .set("arrayWithObject", {true, Object{{"a", "b"}}, "c"})
-            .set_private("isCat", false)
-            .add_private_attribute("/object/test")
-            .build());
+            .Set("arrayWithObject", {true, Object{{"a", "b"}}, "c"})
+            .SetPrivate("isCat", false)
+            .AddPrivateAttribute("/object/test")
+            .Build());
 
     auto expected = parse(
         "{"
@@ -93,16 +93,16 @@ TEST(ContextFilterTests, MultiContext) {
 
     auto filtered = filter.filter(
         ContextBuilder()
-            .kind("user", "user-key")
-            .set("email", "email.email@email")
-            .set("array", {false, true, "bacon"})
-            .set("object", Object{{"test", true}, {"second", false}})
-            .set_private("isCat", false)
-            .add_private_attribute("/object/test")
-            .kind("org", "org-key")
-            .set("isCat", true)           // Not filtered in this context.
-            .set("email", "cat@cat.cat")  // Filtered globally.
-            .build());
+            .Kind("user", "user-key")
+            .Set("email", "email.email@email")
+            .Set("array", {false, true, "bacon"})
+            .Set("object", Object{{"test", true}, {"second", false}})
+            .SetPrivate("isCat", false)
+            .AddPrivateAttribute("/object/test"
+            .Kind("org", "org-key")
+            .Set("isCat", true)           // Not filtered in this context.
+            .Set("email", "cat@cat.cat")  // Filtered globally.
+            .Build());
 
     auto expected = parse(
         "{"
@@ -128,10 +128,10 @@ TEST(ContextFilterTests, AllAttributesPrivateSingleContext) {
     ContextFilter filter(true, global_private_attributes);
 
     auto filtered = filter.filter(ContextBuilder()
-                                      .kind("user", "user-key")
-                                      .name("Bob")
-                                      .set("isCat", false)
-                                      .build());
+                                      .Kind("user", "user-key")
+                                      .Name("Bob")
+                                      .Set("isCat", false)
+                                      .Build());
 
     auto expected = parse(
         "{\"key\":\"user-key\","
@@ -148,17 +148,17 @@ TEST(ContextFilterTests, AllAttributesPrivateMultiContext) {
 
     auto filtered = filter.filter(
         ContextBuilder()
-            .kind("user", "user-key")
-            .name("Bob")
-            .set("email", "email.email@email")
-            .set("array", {false, true, "bacon"})
-            .set("object", Object{{"test", true}, {"second", false}})
-            .set_private("isCat", false)
-            .add_private_attribute("/object/test")
-            .kind("org", "org-key")
-            .set("isCat", true)
-            .set("email", "cat@cat.cat")
-            .build());
+            .Kind("user", "user-key")
+            .Name("Bob")
+            .Set("email", "email.email@email")
+            .Set("array", {false, true, "bacon"})
+            .Set("object", Object{{"test", true}, {"second", false}})
+            .SetPrivate("isCat", false)
+            .AddPrivateAttribute("/object/test")
+            .Kind("org", "org-key")
+            .Set("isCat", true)
+            .Set("email", "cat@cat.cat")
+            .Build());
 
     auto expected = parse(
         "{\"kind\":\"multi\""

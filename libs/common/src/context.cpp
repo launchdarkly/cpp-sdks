@@ -22,41 +22,41 @@ static std::string EscapeKey(std::string_view const& to_escape) {
     return escaped;
 }
 
-std::vector<std::string> const& Context::kinds() const {
+std::vector<std::string> const& Context::Kinds() const {
     return kinds_;
 }
 
 Context::Context(std::string error_message)
     : errors_(std::move(error_message)) {}
 
-Context::Context(std::map<std::string, Attributes> attributes)
+Context::Context(std::map<std::string, launchdarkly::Attributes> attributes)
     : attributes_(std::move(attributes)), valid_(true) {
     for (auto& pair : attributes_) {
         kinds_.push_back(pair.first);
-        kinds_to_keys_[pair.first] = pair.second.key();
+        kinds_to_keys_[pair.first] = pair.second.Key();
     }
 
     canonical_key_ = make_canonical_key();
 }
 
-Value const& Context::get(std::string const& kind,
+Value const& Context::Get(std::string const& kind,
                           AttributeReference const& ref) {
     auto found = attributes_.find(kind);
     if (found != attributes_.end()) {
-        return found->second.get(ref);
+        return found->second.Get(ref);
     }
     return Value::Null();
 }
 
-Attributes const& Context::attributes(std::string const& kind) const {
+Attributes const& Context::Attributes(std::string const& kind) const {
     return attributes_.at(kind);
 }
 
-std::string const& Context::canonical_key() const {
+std::string const& Context::CanonicalKey() const {
     return canonical_key_;
 }
 
-std::map<std::string, std::string> const& Context::kinds_to_keys() const {
+std::map<std::string, std::string> const& Context::KindsToKeys() const {
     return kinds_to_keys_;
 }
 

@@ -9,29 +9,29 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
     auto& obj = json_value.emplace_object();
 
-    obj.emplace("key", attributes.key());
-    if (!attributes.name().empty()) {
-        obj.emplace("name", attributes.name());
+    obj.emplace("key", attributes.Key());
+    if (!attributes.Name().empty()) {
+        obj.emplace("name", attributes.Name());
     }
 
-    if (attributes.anonymous()) {
-        obj.emplace("anonymous", attributes.anonymous());
+    if (attributes.Anonymous()) {
+        obj.emplace("anonymous", attributes.Anonymous());
     }
 
-    for (auto const& attr : attributes.custom_attributes().AsObject()) {
+    for (auto const& attr : attributes.CustomAttributes().AsObject()) {
         if (!attr.second.IsNull()) {
             obj.emplace(attr.first, boost::json::value_from(attr.second));
         }
     }
 
-    auto private_attributes = attributes.private_attributes();
+    auto private_attributes = attributes.PrivateAttributes();
     if (!private_attributes.empty()) {
         obj.emplace("_meta", boost::json::object());
         auto& meta = obj.at("_meta").as_object();
         meta.emplace("privateAttributes", boost::json::array());
         auto& output_array = meta.at("privateAttributes").as_array();
         for (auto const& ref : private_attributes) {
-            output_array.push_back(boost::json::value(ref.redaction_name()));
+            output_array.push_back(boost::json::value(ref.RedactionName()));
         }
     }
 }

@@ -49,7 +49,7 @@ class AttributesBuilder final {
      * @param name
      * @return A reference to the current builder.
      */
-    AttributesBuilder& name(std::string name);
+    AttributesBuilder& Name(std::string name);
 
     /**
      * If true, the context will _not_ appear on the Contexts page in the
@@ -58,7 +58,7 @@ class AttributesBuilder final {
      * @param anonymous The value to set.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& anonymous(bool anonymous);
+    AttributesBuilder& Anonymous(bool anonymous);
 
     /**
      * Add or update an attribute in the context.
@@ -73,7 +73,7 @@ class AttributesBuilder final {
      * that is, the value will not be sent to LaunchDarkly in analytics events.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& set(std::string name, launchdarkly::Value value);
+    AttributesBuilder& Set(std::string name, launchdarkly::Value value);
 
     /**
      * Add or update a private attribute in the context.
@@ -84,7 +84,7 @@ class AttributesBuilder final {
      *
      * Once you have set an attribute private it will remain in the private
      * list even if you call `set` afterward. This method is just a convenience
-     * which also adds the attribute to the `private_attributes`.
+     * which also adds the attribute to the `PrivateAttributes`.
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.
@@ -92,7 +92,7 @@ class AttributesBuilder final {
      * that is, the value will not be sent to LaunchDarkly in analytics events.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& set_private(std::string name, launchdarkly::Value value);
+    AttributesBuilder& SetPrivate(std::string name, launchdarkly::Value value);
 
     /**
      * Designate a context attribute, or properties within them, as private:
@@ -138,7 +138,7 @@ class AttributesBuilder final {
      * @param ref The reference to set private.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& add_private_attribute(AttributeReference ref);
+    AttributesBuilder& AddPrivateAttribute(AttributeReference ref);
 
     /**
      * Add items from an iterable collection. One that provides a begin/end
@@ -148,15 +148,15 @@ class AttributesBuilder final {
      * @return A reference to the current builder.
      */
     template <typename IterType>
-    AttributesBuilder& add_private_attributes(IterType attributes) {
+    AttributesBuilder& AddPrivateAttributes(IterType attributes) {
         for (auto iter : attributes) {
             private_attributes_.insert(iter);
         }
         return *this;
     }
 
-    AttributesBuilder& kind(std::string kind, std::string key) {
-        return builder_.kind(kind, key);
+    AttributesBuilder& Kind(std::string kind, std::string key) {
+        return builder_.Kind(kind, key);
     }
 
     /**
@@ -165,7 +165,7 @@ class AttributesBuilder final {
      *
      * @return The built context.
      */
-    [[nodiscard]] BuildType build() { return builder_.build(); }
+    [[nodiscard]] BuildType Build() { return builder_.Build(); }
 
    private:
     BuilderReturn& builder_;
@@ -175,11 +175,11 @@ class AttributesBuilder final {
      * @param key The key to replace the existing key.
      * @return A reference to this builder.
      */
-    void key(std::string key) { key_ = std::move(key); }
+    void Key(std::string key) { key_ = std::move(key); }
 
-    Attributes build_attributes();
+    Attributes BuildAttributes();
 
-    AttributesBuilder& set(std::string name,
+    AttributesBuilder& Set(std::string name,
                            launchdarkly::Value value,
                            bool private_attribute);
 
