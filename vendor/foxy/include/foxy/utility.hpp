@@ -39,8 +39,6 @@ namespace launchdarkly::foxy
 //
 namespace certify
 {
-extern "C" int
-verify_server_certificates(::X509_STORE_CTX* ctx, void*) noexcept;
 
 auto
 enable_https_verification(boost::asio::ssl::context& ssl_ctx) -> void;
