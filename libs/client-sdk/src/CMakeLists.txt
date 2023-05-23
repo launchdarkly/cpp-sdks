@@ -43,10 +43,6 @@ add_library(${LIBNAME}
         flag_manager/flag_persistence.cpp
         bindings/c/sdk.cpp)
 
-if(NOT MSVC)
-
-endif()
-
 if(MSVC OR (NOT BUILD_SHARED_LIBS))
         target_link_libraries(${LIBNAME}
                 PUBLIC launchdarkly::common
