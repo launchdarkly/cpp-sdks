@@ -149,6 +149,7 @@ target_link_libraries(
         Boost::date_time
         OpenSSL::SSL
         Threads::Threads
+        PRIVATE
         certify::core
 )
 

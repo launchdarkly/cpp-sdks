@@ -26,8 +26,6 @@
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 
-#include <boost/certify/https_verification.hpp>
-
 #include <string>
 
 namespace launchdarkly::foxy {
@@ -42,6 +40,8 @@ namespace launchdarkly::foxy {
 // as it is
 //
 namespace certify {
+
+auto enable_https_verification(boost::asio::ssl::context& ssl_ctx) -> void;
 
 auto set_server_hostname(::SSL* ssl,
                          boost::string_view hostname,
@@ -86,7 +86,7 @@ template <class... Args>
 auto make_ssl_ctx(Args&&... args) -> boost::asio::ssl::context {
     auto ctx = boost::asio::ssl::context(std::forward<Args>(args)...);
 
-    boost::certify::enable_native_https_server_verification(ctx);
+    launchdarkly::foxy::certify::enable_https_verification(ctx);
     ctx.set_verify_mode(boost::asio::ssl::context::verify_peer |
                         boost::asio::ssl::context::verify_fail_if_no_peer_cert);
 
