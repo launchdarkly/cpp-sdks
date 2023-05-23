@@ -30,14 +30,14 @@ int main(int argc, char* argv[]) {
     try {
         net::io_context ioc{1};
 
-        auto p = boost::lexical_cast<unsigned short>(port);
-        server srv(ioc, "0.0.0.0", p, logger);
+        server srv(ioc, "0.0.0.0", boost::lexical_cast<unsigned short>(port),
+                   logger);
 
         srv.add_capability("headers");
         srv.add_capability("comments");
         srv.add_capability("report");
         srv.add_capability("post");
-        srv.add_capability("read-timeout");
+        srv.add_capability("reconnection");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

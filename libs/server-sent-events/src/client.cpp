@@ -1,9 +1,11 @@
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/use_future.hpp>
 #include <foxy/client_session.hpp>
 #include <launchdarkly/sse/client.hpp>
 
+#include "backoff.hpp"
 #include "parser.hpp"
 
 #include <boost/beast/http/parser.hpp>
@@ -16,6 +18,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 namespace launchdarkly::sse {
 
@@ -40,6 +43,11 @@ static boost::optional<net::ssl::context&> ToOptRef(
 
 class FoxyClient : public Client,
                    public std::enable_shared_from_this<FoxyClient> {
+   private:
+    using cb = std::function<void(launchdarkly::sse::Event)>;
+    using body = launchdarkly::sse::detail::EventBody<cb>;
+    using response = http::response<body>;
+
    public:
     FoxyClient(boost::asio::any_io_executor executor,
                http::request<http::string_body> req,
@@ -62,16 +70,57 @@ class FoxyClient : public Client,
                    launchdarkly::foxy::session_opts{
                        ToOptRef(ssl_context_),
                        connect_timeout.value_or(kNoTimeout)}),
+          backoff_(std::chrono::seconds(1), std::chrono::seconds(30)),
+          last_event_id_(std::nullopt),
+          backoff_timer_(session_.get_executor()),
+          event_receiver_(std::move(receiver)),
           logger_(std::move(logger)) {
-        // SSE body will never end unless an error occurs, so we shouldn't set a
-        // size limit.
-        body_parser_.body_limit(boost::none);
-        body_parser_.get().body().on_event(std::move(receiver));
+        create_parser();
     }
 
-    void fail(boost::system::error_code ec, std::string const& what) {
-        logger_("sse-client: " + what + ": " + ec.message());
-        async_shutdown(nullptr);
+    /** The body parser is recreated each time a connection is made because its
+     * internal state cannot be explicitly reset.
+     *
+     * Since SSE body will never end unless
+     * an error occurs, the body size limit must be removed.
+     */
+    void create_parser() {
+        body_parser_.emplace();
+        body_parser_->body_limit(boost::none);
+        body_parser_->get().body().on_event(event_receiver_);
+    }
+
+    /**
+     * Called whenever the connection needs to be reattempted, triggering
+     * a timed wait for the current backoff duration.
+     *
+     * The body parser's last SSE event ID must be cached so it can be added
+     * as a header on the next request (since the parser is destroyed.)
+     */
+    void do_backoff(std::string const& reason) {
+        backoff_.fail();
+
+        std::stringstream msg;
+        msg << "backing off in ("
+            << std::chrono::duration_cast<std::chrono::seconds>(
+                   backoff_.delay())
+                   .count()
+            << ") seconds due to " << reason;
+
+        logger_(msg.str());
+
+        last_event_id_ = body_parser_->get().body().last_event_id();
+        create_parser();
+        backoff_timer_.expires_from_now(backoff_.delay());
+        backoff_timer_.async_wait(beast::bind_front_handler(
+            &FoxyClient::on_backoff, shared_from_this()));
+    }
+
+    void on_backoff(boost::system::error_code ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        run();
     }
 
     void run() override {
@@ -81,7 +130,108 @@ class FoxyClient : public Client,
                                       shared_from_this()));
     }
 
+    void on_connect(boost::system::error_code ec) {
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        if (ec) {
+            return do_backoff(ec.what());
+        }
+
+        if (last_event_id_ && !last_event_id_->empty()) {
+            req_.set("last-event-id", *last_event_id_);
+        } else {
+            req_.erase("last-event-id");
+        }
+        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
+        session_.async_write(req_,
+                             beast::bind_front_handler(&FoxyClient::on_write,
+                                                       shared_from_this()));
+    }
+
+    void on_write(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        if (ec) {
+            return do_backoff(ec.what());
+        }
+
+        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
+        session_.async_read_header(
+            *body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
+                                                     shared_from_this()));
+    }
+
+    void on_headers(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        if (ec) {
+            return do_backoff(ec.what());
+        }
+
+        if (!body_parser_->is_header_done()) {
+            /* keep reading headers */
+            return session_.async_read_header(
+                *body_parser_,
+                beast::bind_front_handler(&FoxyClient::on_headers,
+                                          shared_from_this()));
+        }
+
+        /* headers are finished, body is ready */
+        auto response = body_parser_->get();
+        auto status_class = beast::http::to_status_class(response.result());
+
+        if (status_class == beast::http::status_class::successful) {
+            if (!correct_content_type(response)) {
+                return do_backoff("invalid Content-Type");
+            }
+
+            backoff_.succeed();
+            return session_.async_read(
+                *body_parser_,
+                beast::bind_front_handler(&FoxyClient::on_read_body,
+                                          shared_from_this()));
+        }
+
+        if (status_class == beast::http::status_class::client_error) {
+            if (recoverable_client_error(response.result())) {
+                return do_backoff(backoff_reason(response.result()));
+            }
+
+            // TODO: error callback
+
+            return;
+        }
+
+        do_backoff(backoff_reason(response.result()));
+    }
+
+    static std::string backoff_reason(beast::http::status status) {
+        std::stringstream ss;
+        ss << "HTTP status " << int(status) << " (" << status << ")";
+        return ss.str();
+    }
+
+    void on_read_body(boost::system::error_code ec, std::size_t amount) {
+        boost::ignore_unused(amount);
+        if (ec == boost::asio::error::operation_aborted) {
+            return;
+        }
+        do_backoff(ec.what());
+    }
+
     void async_shutdown(std::function<void()> completion) override {
+        boost::asio::post(session_.get_executor(),
+                          beast::bind_front_handler(&FoxyClient::do_shutdown,
+                                                    shared_from_this(),
+                                                    std::move(completion)));
+    }
+
+    void do_shutdown(std::function<void()> completion) {
         session_.async_shutdown(beast::bind_front_handler(
             &FoxyClient::on_shutdown, std::move(completion)));
     }
@@ -94,59 +244,24 @@ class FoxyClient : public Client,
         }
     }
 
-    void on_connect(boost::system::error_code ec) {
-        if (ec) {
-            return fail(ec, "connect");
-        }
-
-        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
-        session_.async_write(req_,
-                             beast::bind_front_handler(&FoxyClient::on_write,
-                                                       shared_from_this()));
+    void fail(boost::system::error_code ec, std::string const& what) {
+        logger_("sse-client: " + what + ": " + ec.message());
+        async_shutdown(nullptr);
     }
 
-    void on_write(boost::system::error_code ec, std::size_t amount) {
-        boost::ignore_unused(amount);
-        if (ec) {
-            return fail(ec, "send request");
-        }
-        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
-        session_.async_read_header(
-            body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
-                                                    shared_from_this()));
+    static bool recoverable_client_error(beast::http::status status) {
+        return (status == beast::http::status::bad_request ||
+                status == beast::http::status::request_timeout ||
+                status == beast::http::status::too_many_requests);
     }
 
-    void on_headers(boost::system::error_code ec, std::size_t amount) {
-        boost::ignore_unused(amount);
-        if (ec) {
-            return fail(ec, "read header");
+    static bool correct_content_type(FoxyClient::response const& response) {
+        if (auto content_type = response.find("content-type");
+            content_type != response.end()) {
+            return content_type->value().find("text/event-stream") !=
+                   content_type->value().npos;
         }
-
-        if (!body_parser_.is_header_done()) {
-            session_.async_read_header(
-                body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
-                                                        shared_from_this()));
-            return;
-        }
-
-        auto response = body_parser_.get();
-        if (beast::http::to_status_class(response.result()) ==
-            beast::http::status_class::successful) {
-            session_.async_read(body_parser_, beast::bind_front_handler(
-                                                  &FoxyClient::on_read_complete,
-                                                  shared_from_this()));
-        } else {
-            return fail(ec, "read response");
-        }
-    }
-
-    void on_read_complete(boost::system::error_code ec, std::size_t amount) {
-        boost::ignore_unused(amount);
-        if (ec == boost::asio::error::operation_aborted) {
-            async_shutdown(nullptr);
-        } else {
-            return fail(ec, "read body");
-        }
+        return false;
     }
 
    private:
@@ -157,10 +272,12 @@ class FoxyClient : public Client,
     std::optional<std::chrono::milliseconds> read_timeout_;
     std::optional<std::chrono::milliseconds> write_timeout_;
     http::request<http::string_body> req_;
-    using cb = std::function<void(launchdarkly::sse::Event)>;
-    using body = launchdarkly::sse::detail::EventBody<cb>;
-    http::response_parser<body> body_parser_;
+    Builder::EventReceiver event_receiver_;
+    std::optional<http::response_parser<body> > body_parser_;
     launchdarkly::foxy::client_session session_;
+    std::optional<std::string> last_event_id_;
+    Backoff backoff_;
+    boost::asio::steady_timer backoff_timer_;
     Builder::LogCallback logger_;
 };
 

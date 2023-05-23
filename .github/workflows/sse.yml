@@ -36,4 +36,4 @@ jobs:
         with:
           repo: 'sse-contract-tests'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip HTTP -skip reconnection'
+          extra_params: '-skip HTTP'
