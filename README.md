@@ -5,9 +5,9 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
 ## Packages
 
-| SDK packages                                          | issues                                      | tests                                                   |
-|-------------------------------------------------------|---------------------------------------------|---------------------------------------------------------|
-| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] |
+| SDK packages                                          | issues                                      | tests                                                    | docs                     |
+|-------------------------------------------------------|---------------------------------------------|----------------------------------------------------------|--------------------------|
+| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci]  |[![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/)
 
 | Shared packages                                              | issues                                            | tests                                                                 |
 |--------------------------------------------------------------|---------------------------------------------------|-----------------------------------------------------------------------|
