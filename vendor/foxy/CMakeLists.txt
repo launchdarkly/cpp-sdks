@@ -86,7 +86,6 @@ add_library(
         src/log.cpp
         src/proxy.cpp
         src/parse_uri.cpp
-        src/utility.cpp
 
         # TODO: someday make this work
         #
@@ -149,6 +148,7 @@ target_link_libraries(
         Boost::date_time
         OpenSSL::SSL
         Threads::Threads
+        certify::core
 )
 
 add_library(
