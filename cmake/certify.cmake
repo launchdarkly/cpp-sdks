@@ -14,7 +14,11 @@ FetchContent_Declare(boost_certify
 
 set(BUILD_TESTING OFF)
 
-FetchContent_MakeAvailable(boost_certify)
+FetchContent_GetProperties(boost_certify)
+if(NOT boost_certify_POPULATED)
+    FetchContent_Populate(boost_certify)
+    add_subdirectory(${boost_certify_SOURCE_DIR} ${boost_certify_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
 
