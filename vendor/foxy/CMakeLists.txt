@@ -86,6 +86,7 @@ add_library(
         src/log.cpp
         src/proxy.cpp
         src/parse_uri.cpp
+        src/utility.cpp
 
         # TODO: someday make this work
         #
