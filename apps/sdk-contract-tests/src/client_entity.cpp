@@ -35,11 +35,13 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    // TODO: This needs to be like this BECAUSE:
-    // Although normally you want to be sure identify is complete before
-    // evaluating new flags (.wait()), there are some tests that make the SDK
-    // never successfully initialize; hence identify won't return, hence the
-    // harness will block. For example, the event tests do this.
+    // This typical way to identify would be .wait(), to ensure identify
+    // completes fully before proceeding. Some of the contract tests send
+    // invalid data to the data source though, so identify will never complete
+    // because the data source can't start. So, limit the amount of time such
+    // that: 1) For most tests, this is *basically* synchronous 2) For the
+    // problematic tests, this eventually does unblock and let the test proceed.
+    // TODO: SC-204250
     client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
     return nlohmann::json{};
 }
