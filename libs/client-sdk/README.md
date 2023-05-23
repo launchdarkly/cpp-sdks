@@ -1,6 +1,9 @@
 LaunchDarkly Client-Side SDK for C/C++
 ===================================
 
+This SDK is a beta version and should not be considered ready for production use while this message is
+visible.
+
 [![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml)
 [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/)
 
