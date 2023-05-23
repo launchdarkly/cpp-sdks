@@ -97,7 +97,7 @@ class FoxyClient : public Client,
      * The body parser's last SSE event ID must be cached so it can be added
      * as a header on the next request (since the parser is destroyed.)
      */
-    void do_backoff(std::string reason) {
+    void do_backoff(std::string const& reason) {
         backoff_.fail();
 
         std::stringstream msg;
