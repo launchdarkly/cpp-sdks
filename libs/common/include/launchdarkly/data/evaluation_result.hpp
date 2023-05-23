@@ -17,22 +17,22 @@ class EvaluationResult {
     /**
      * Incremented by LaunchDarkly each time the flag's state changes.
      */
-    [[nodiscard]] uint64_t version() const;
+    [[nodiscard]] uint64_t Version() const;
 
     /**
      * Incremented by LaunchDarkly each time the flag's configuration changes.
      */
-    [[nodiscard]] std::optional<uint64_t> flag_version() const;
+    [[nodiscard]] std::optional<uint64_t> FlagVersion() const;
 
     /**
      * True if a client SDK should track events for this flag.
      */
-    [[nodiscard]] bool track_events() const;
+    [[nodiscard]] bool TrackEvents() const;
 
     /**
      * True if a client SDK should track reasons for this flag.
      */
-    [[nodiscard]] bool track_reason() const;
+    [[nodiscard]] bool TrackReason() const;
 
     /**
      * A timestamp, which if the current time is before, a client SDK
@@ -41,12 +41,12 @@ class EvaluationResult {
      */
     [[nodiscard]] std::optional<
         std::chrono::time_point<std::chrono::system_clock>>
-    debug_events_until_date() const;
+    DebugEventsUntilDate() const;
 
     /**
      * Details of the flags evaluation.
      */
-    [[nodiscard]] EvaluationDetailInternal const& detail() const;
+    [[nodiscard]] EvaluationDetailInternal const& Detail() const;
 
     EvaluationResult(
         uint64_t version,

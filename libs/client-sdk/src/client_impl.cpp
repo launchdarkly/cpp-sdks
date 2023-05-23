@@ -159,7 +159,7 @@ std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
         if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag->detail().Value());
+            result.try_emplace(key, descriptor->flag->Detail().Value());
         }
     }
     return result;
@@ -269,7 +269,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     assert(desc->flag);
 
     auto const& flag = *(desc->flag);
-    auto const& detail = flag.detail();
+    auto const& detail = flag.Detail();
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
         detail.Value().Type() != default_value.Type()) {
@@ -285,13 +285,13 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     event.value = detail.Value();
     event.variation = detail.VariationIndex();
 
-    if (detailed || flag.track_reason()) {
+    if (detailed || flag.TrackReason()) {
         event.reason = detail.Reason();
     }
 
-    event.version = flag.flag_version().value_or(flag.version());
-    event.require_full_event = flag.track_events();
-    if (auto date = flag.debug_events_until_date()) {
+    event.version = flag.FlagVersion().value_or(flag.Version());
+    event.require_full_event = flag.TrackEvents();
+    if (auto date = flag.DebugEventsUntilDate()) {
         event.debug_events_until_date = events::Date{*date};
     }
 

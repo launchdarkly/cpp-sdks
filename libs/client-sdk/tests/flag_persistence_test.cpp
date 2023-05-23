@@ -108,7 +108,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
     flag_persistence.LoadCached(context);
 
     // The store contains the flag loaded from the persistence.
-    EXPECT_EQ("test", store.Get("flagA")->flag->detail().Value().AsString());
+    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value().AsString());
 }
 
 TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
