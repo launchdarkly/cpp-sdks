@@ -3,18 +3,17 @@
 This repository contains LaunchDarkly SDK packages which are written in C++.
 This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
-This repository contains beta software and should not be considered ready for production use while this message is
-visible.
+This repository contains beta software and should not be considered ready for production use while this message is visible.
 
 ## Packages
 
-| SDK packages                                 | issues                                      | tests                                                   |
-|----------------------------------------------|---------------------------------------------|---------------------------------------------------------|
+| SDK packages                                          | issues                                      | tests                                                   |
+|-------------------------------------------------------|---------------------------------------------|---------------------------------------------------------|
 | [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] |
 
-| Shared packages                                              | issues                                            | tests                                                                |
-|--------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------------------|
-| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]            | [![Actions Status][shared-common-ci-badge]][shared-common-ci]        |
+| Shared packages                                              | issues                                            | tests                                                                 |
+|--------------------------------------------------------------|---------------------------------------------------|-----------------------------------------------------------------------|
+| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]            | [![Actions Status][shared-common-ci-badge]][shared-common-ci]         |
 | [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server][package-shared-sdk-server-issues] | [![Actions Status][shared-sse-ci-badge-badge]][shared-sdk-server-ci] |
 
 ## Organization
@@ -67,26 +66,17 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
       updates
 
 [//]: # 'libs/common'
-
 [shared-common-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/common.yml/badge.svg
-
 [shared-common-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/common.yml
-
 [package-shared-common-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fcommon%22+
 
 [//]: # 'libs/server-sent-events'
-
 [shared-sse-ci-badge-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml/badge.svg
-
 [shared-sdk-server-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml
-
 [package-shared-sdk-server-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fsse%22+
 
 
 [//]: # 'libs/client-sdk'
-
 [cpp-client-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml/badge.svg
-
 [cpp-client-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml
-
 [package-cpp-client-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+sdk%2Fclient%22+
