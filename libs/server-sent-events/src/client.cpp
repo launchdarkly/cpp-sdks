@@ -18,6 +18,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 namespace launchdarkly::sse {
 
@@ -98,7 +99,7 @@ class FoxyClient : public Client,
      * The body parser's last SSE event ID must be cached so it can be added
      * as a header on the next request (since the parser is destroyed.)
      */
-    void do_backoff() {
+    void do_backoff(std::string const& reason) {
         backoff_.fail();
 
         if (auto id = body_parser_->get().body().last_event_id()) {
@@ -109,6 +110,15 @@ class FoxyClient : public Client,
                 last_event_id_ = id;
             }
         }
+
+        std::stringstream msg;
+        msg << "backing off in ("
+            << std::chrono::duration_cast<std::chrono::seconds>(
+                   backoff_.delay())
+                   .count()
+            << ") seconds due to " << reason;
+
+        logger_(msg.str());
 
         create_parser();
         backoff_timer_.expires_from_now(backoff_.delay());
@@ -135,7 +145,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff();
+            return do_backoff(ec.what());
         }
 
         if (last_event_id_) {
@@ -155,7 +165,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff();
+            return do_backoff(ec.what());
         }
 
         session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
@@ -170,7 +180,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff();
+            return do_backoff(ec.what());
         }
 
         if (!body_parser_->is_header_done()) {
@@ -191,7 +201,7 @@ class FoxyClient : public Client,
                 return;
             }
             if (!correct_content_type(response)) {
-                return do_backoff();
+                return do_backoff("invalid Content-Type");
             }
 
             backoff_.succeed();
@@ -221,14 +231,20 @@ class FoxyClient : public Client,
 
         if (status_class == beast::http::status_class::client_error) {
             if (recoverable_client_error(response.result())) {
-                return do_backoff();
+                return do_backoff(backoff_reason(response.result()));
             }
 
             errors_(Error::UnrecoverableClientError);
             return;
         }
 
-        do_backoff();
+        do_backoff(backoff_reason(response.result()));
+    }
+
+    static std::string backoff_reason(beast::http::status status) {
+        std::stringstream ss;
+        ss << "HTTP status " << int(status) << " (" << status << ")";
+        return ss.str();
     }
 
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
@@ -236,7 +252,7 @@ class FoxyClient : public Client,
         if (ec == boost::asio::error::operation_aborted) {
             return;
         }
-        do_backoff();
+        do_backoff(ec.what());
     }
 
     void async_shutdown(std::function<void()> completion) override {
@@ -325,6 +341,7 @@ class FoxyClient : public Client,
     std::optional<std::string> last_event_id_;
     Backoff backoff_;
     boost::asio::steady_timer backoff_timer_;
+
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
