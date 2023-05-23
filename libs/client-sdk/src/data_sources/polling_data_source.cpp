@@ -223,7 +223,7 @@ void PollingDataSource::Start() {
 }
 
 void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kSlept);
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     timer_.cancel();
     if (completion) {
         boost::asio::post(timer_.get_executor(), completion);

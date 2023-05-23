@@ -68,8 +68,6 @@ class DataSourceStatus {
          */
         kShutdown,
 
-        kSlept,
-
         // BackgroundDisabled,
         // TODO: A plugin of sorts would likely be required for some
         // functionality like this. kNetworkUnavailable,

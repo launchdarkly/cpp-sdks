@@ -66,8 +66,6 @@ std::ostream& operator<<(std::ostream& out,
             break;
         case DataSourceStatus::DataSourceState::kShutdown:
             out << "SHUTDOWN";
-        case DataSourceStatus::DataSourceState::kSlept:
-            out << "SLEPT";
             break;
     }
 
