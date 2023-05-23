@@ -11,6 +11,7 @@ add_library(${LIBNAME} OBJECT
         parser.cpp
         event.cpp
         backoff.cpp)
+
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers foxy
         PRIVATE Boost::url Boost::disable_autolinking

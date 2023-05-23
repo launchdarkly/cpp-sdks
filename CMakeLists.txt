@@ -56,15 +56,14 @@ set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
-if (MSVC)
-    set(Boost_USE_STATIC_LIBS ON)
-else ()
-    if (BUILD_SHARED_LIBS)
-        set(Boost_USE_STATIC_LIBS OFF)
-    else ()
-        set(Boost_USE_STATIC_LIBS ON)
-    endif ()
-endif ()
+set(Boost_USE_STATIC_LIBS ON)
+
+if(BUILD_SHARED_LIBS)
+    # When building a shared library we hide all symbols
+    # aside from this we have specifically exported for the C-API.
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+endif()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
