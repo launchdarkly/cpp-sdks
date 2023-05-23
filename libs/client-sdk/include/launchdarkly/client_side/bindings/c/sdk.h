@@ -18,7 +18,7 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientSDK* LDClientSDK;
 
-#define LD_NONBLOCKING -1
+#define LD_NONBLOCKING 0
 #define LD_DISCARD_DETAIL NULL
 
 /**
@@ -90,13 +90,13 @@ LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
 /**
  * Requests delivery of all pending analytic events (if any).
  *
- * Pass LD_NONBLOCKING as the second parameter.
+ * You MUST pass LD_NONBLOCKING as the second parameter.
  *
  * @param sdk SDK. Must not be NULL.
  * @param milliseconds Must pass LD_NONBLOCKING.
  */
 LD_EXPORT(void)
-LDClientSDK_Flush(LDClientSDK sdk, int reserved);
+LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved);
 
 /**
  * Changes the current evaluation context, requests flags for that context
@@ -107,7 +107,7 @@ LDClientSDK_Flush(LDClientSDK sdk, int reserved);
  * concurrently invokes undefined behavior.
  *
  * To block until the identify operation is complete or a timeout is reached,
- * pass a non-negative milliseconds parameter. Otherwise to return immediately,
+ * pass a positive milliseconds parameter. Otherwise to return immediately,
  * pass LD_NONBLOCKING.
  *
  * @param sdk SDK. Must not be NULL.
@@ -116,7 +116,9 @@ LDClientSDK_Flush(LDClientSDK sdk, int reserved);
  * LD_NONBLOCKING to return immediately.
  */
 LD_EXPORT(void)
-LDClientSDK_Identify(LDClientSDK sdk, LDContext context, int milliseconds);
+LDClientSDK_Identify(LDClientSDK sdk,
+                     LDContext context,
+                     unsigned int milliseconds);
 
 /**
  * Returns the boolean value of a feature flag for a given flag key.
