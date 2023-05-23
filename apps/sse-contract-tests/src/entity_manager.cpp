@@ -43,6 +43,9 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
         copy->post_event(std::move(e));
     });
 
+    client_builder.errors(
+        [copy = poster](launchdarkly::sse::Error e) { copy->post_error(e); });
+
     auto client = client_builder.build();
     if (!client) {
         LD_LOG(logger_, LogLevel::kWarn)
