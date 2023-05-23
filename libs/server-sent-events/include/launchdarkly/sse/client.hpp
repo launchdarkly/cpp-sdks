@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/sse/error.hpp>
 #include <launchdarkly/sse/event.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -29,8 +30,9 @@ class Client;
  */
 class Builder {
    public:
-    using EventReceiver = std::function<void(launchdarkly::sse::Event)>;
+    using EventReceiver = std::function<void(Event)>;
     using LogCallback = std::function<void(std::string)>;
+    using ErrorCallback = std::function<void(Error)>;
 
     /**
      * Create a builder for the given URL. If the port is omitted, 443 is
@@ -115,6 +117,13 @@ class Builder {
     Builder& logger(LogCallback callback);
 
     /**
+     * Specify an error reporting callback for the Client.
+     * @param callback Callback to receive an error from the Client.
+     * @return Reference to this builder.
+     */
+    Builder& errors(ErrorCallback callback);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -131,6 +140,7 @@ class Builder {
     std::optional<std::chrono::milliseconds> connect_timeout_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
+    ErrorCallback error_cb_;
 };
 
 /**
