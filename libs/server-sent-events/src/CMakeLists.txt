@@ -16,19 +16,10 @@ target_link_libraries(${LIBNAME}
         PRIVATE Boost::url Boost::disable_autolinking
         )
 
-if (BUILD_SHARED_LIBS)
-    target_link_libraries(${LIBNAME}
-            PUBLIC OpenSSL::SSL Boost::headers foxy
-            PRIVATE Boost::disable_autolinking
-            )
-else ()
-    target_link_libraries(${LIBNAME}
-            PUBLIC OpenSSL::SSL Boost::headers foxy
-            PRIVATE Boost::url Boost::disable_autolinking
-            )
-
-
-endif ()
+target_link_libraries(${LIBNAME}
+        PUBLIC OpenSSL::SSL Boost::headers foxy
+        PRIVATE Boost::url Boost::disable_autolinking
+        )
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 
