@@ -103,10 +103,7 @@ class FoxyClient : public Client,
         backoff_.fail();
 
         if (auto id = body_parser_->get().body().last_event_id()) {
-            if (id->empty()) {
-                errors_(Error::InvalidRedirectLocation);
-                return;
-            } else {
+            if (!id->empty()) {
                 last_event_id_ = id;
             }
         }
@@ -275,11 +272,6 @@ class FoxyClient : public Client,
         }
     }
 
-    void fail(boost::system::error_code ec, std::string const& what) {
-        logger_("sse-client: " + what + ": " + ec.message());
-        async_shutdown(nullptr);
-    }
-
     static bool recoverable_client_error(beast::http::status status) {
         return (status == beast::http::status::bad_request ||
                 status == beast::http::status::request_timeout ||
@@ -341,7 +333,6 @@ class FoxyClient : public Client,
     std::optional<std::string> last_event_id_;
     Backoff backoff_;
     boost::asio::steady_timer backoff_timer_;
-
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
