@@ -123,15 +123,15 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     }
 
     auto& detail = evaluation_result.detail();
-    auto value_json = boost::json::value_from(detail.value());
+    auto value_json = boost::json::value_from(detail.Value());
     obj.emplace("value", value_json);
 
-    if (detail.variation_index()) {
-        obj.emplace("variationIndex", *detail.variation_index());
+    if (detail.VariationIndex()) {
+        obj.emplace("variationIndex", *detail.VariationIndex());
     }
 
-    if (detail.reason()) {
-        auto reason_json = boost::json::value_from(*detail.reason());
+    if (detail.Reason()) {
+        auto reason_json = boost::json::value_from(*detail.Reason());
         obj.emplace("reason", reason_json);
     }
 }

@@ -44,7 +44,7 @@ TEST(FlagUpdaterDataTests, HandlesInitWithData) {
                                                     std::nullopt}}}}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().Value());
 }
 
 TEST(FlagUpdaterDataTests, HandlesSecondInit) {
@@ -70,7 +70,7 @@ TEST(FlagUpdaterDataTests, HandlesSecondInit) {
                                                     std::nullopt}}}}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagB")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagB")->flag.value().detail().Value());
     EXPECT_FALSE(manager.Get("flagA"));
 }
 
@@ -94,8 +94,8 @@ TEST(FlagUpdaterDataTests, HandlePatchNewFlag) {
                                                 std::nullopt}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
-    EXPECT_EQ("second", manager.Get("flagB")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().Value());
+    EXPECT_EQ("second", manager.Get("flagB")->flag.value().detail().Value());
 }
 
 TEST(FlagUpdaterDataTests, HandlePatchUpdateFlag) {
@@ -118,7 +118,7 @@ TEST(FlagUpdaterDataTests, HandlePatchUpdateFlag) {
                                                 std::nullopt}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("second", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("second", manager.Get("flagA")->flag.value().detail().Value());
 }
 
 TEST(FlagUpdaterDataTests, HandlePatchOutOfOrder) {
@@ -141,7 +141,7 @@ TEST(FlagUpdaterDataTests, HandlePatchOutOfOrder) {
                                                 std::nullopt}}});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().Value());
 }
 
 TEST(FlagUpdaterDataTests, HandleDelete) {
@@ -181,7 +181,7 @@ TEST(FlagUpdaterDataTests, HandleDeleteOutOfOrder) {
                    ItemDescriptor{0});
 
     EXPECT_FALSE(manager.GetAll().empty());
-    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().value());
+    EXPECT_EQ("test", manager.Get("flagA")->flag.value().detail().Value());
 }
 
 TEST(FlagUpdaterEventTests, InitialInitProducesNoEvents) {

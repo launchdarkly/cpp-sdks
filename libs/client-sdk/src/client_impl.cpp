@@ -159,7 +159,7 @@ std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
         if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag->detail().value());
+            result.try_emplace(key, descriptor->flag->detail().Value());
         }
     }
     return result;
@@ -272,7 +272,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     auto const& detail = flag.detail();
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
-        detail.value().Type() != default_value.Type()) {
+        detail.Value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
         if (eval_reasons_available_) {
@@ -282,11 +282,11 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         return EvaluationDetail<T>(default_value, std::nullopt, error_reason);
     }
 
-    event.value = detail.value();
-    event.variation = detail.variation_index();
+    event.value = detail.Value();
+    event.variation = detail.VariationIndex();
 
     if (detailed || flag.track_reason()) {
-        event.reason = detail.reason();
+        event.reason = detail.Reason();
     }
 
     event.version = flag.flag_version().value_or(flag.version());
@@ -297,8 +297,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
 
     event_processor_->SendAsync(std::move(event));
 
-    return EvaluationDetail<T>(detail.value(), detail.variation_index(),
-                               detail.reason());
+    return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
+                               detail.Reason());
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(

@@ -46,26 +46,26 @@ TEST(EvaluationResultTests, FromJsonAllFields) {
               evaluation_result.value().debug_events_until_date());
     EXPECT_EQ(
         42,
-        evaluation_result.value().detail().value().AsObject()["item"].AsInt());
-    EXPECT_EQ(84, evaluation_result.value().detail().variation_index());
+        evaluation_result.value().detail().Value().AsObject()["item"].AsInt());
+    EXPECT_EQ(84, evaluation_result.value().detail().VariationIndex());
     EXPECT_EQ(EvaluationReason::Kind::kOff,
-              evaluation_result.value().detail().reason()->get().kind());
+              evaluation_result.value().detail().Reason()->get().kind());
     EXPECT_EQ(EvaluationReason::ErrorKind::kMalformedFlag,
-              evaluation_result.value().detail().reason()->get().error_kind());
+              evaluation_result.value().detail().Reason()->get().error_kind());
     EXPECT_EQ(12,
-              evaluation_result.value().detail().reason()->get().rule_index());
+              evaluation_result.value().detail().Reason()->get().rule_index());
     EXPECT_EQ("RULE_ID",
-              evaluation_result.value().detail().reason()->get().rule_id());
+              evaluation_result.value().detail().Reason()->get().rule_id());
     EXPECT_EQ(
         "PREREQ_KEY",
-        evaluation_result.value().detail().reason()->get().prerequisite_key());
+        evaluation_result.value().detail().Reason()->get().prerequisite_key());
     EXPECT_EQ("STORE_ERROR", evaluation_result.value()
                                  .detail()
-                                 .reason()
+                                 .Reason()
                                  ->get()
                                  .big_segment_status());
     EXPECT_TRUE(
-        evaluation_result.value().detail().reason()->get().in_experiment());
+        evaluation_result.value().detail().Reason()->get().in_experiment());
 }
 
 TEST(EvaluationResultTests, ToJsonAllFields) {
@@ -109,10 +109,10 @@ TEST(EvaluationResultTests, FromJsonMinimalFields) {
               evaluation_result.value().debug_events_until_date());
     EXPECT_EQ(
         42,
-        evaluation_result.value().detail().value().AsObject()["item"].AsInt());
+        evaluation_result.value().detail().Value().AsObject()["item"].AsInt());
     EXPECT_EQ(std::nullopt,
-              evaluation_result.value().detail().variation_index());
-    EXPECT_EQ(std::nullopt, evaluation_result.value().detail().reason());
+              evaluation_result.value().detail().VariationIndex());
+    EXPECT_EQ(std::nullopt, evaluation_result.value().detail().Reason());
 }
 
 TEST(EvaluationResultTests, FromMapOfResults) {
@@ -129,8 +129,8 @@ TEST(EvaluationResultTests, FromMapOfResults) {
                            "}"
                            "}"));
 
-    EXPECT_TRUE(results.at("flagA").value().detail().value().AsBool());
-    EXPECT_FALSE(results.at("flagB").value().detail().value().AsBool());
+    EXPECT_TRUE(results.at("flagA").value().detail().Value().AsBool());
+    EXPECT_FALSE(results.at("flagB").value().detail().Value().AsBool());
 }
 
 TEST(EvaluationResultTests, NoResultFieldsJson) {

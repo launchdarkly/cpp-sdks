@@ -98,7 +98,7 @@ TEST(ContextFilterTests, MultiContext) {
             .Set("array", {false, true, "bacon"})
             .Set("object", Object{{"test", true}, {"second", false}})
             .SetPrivate("isCat", false)
-            .AddPrivateAttribute("/object/test"
+            .AddPrivateAttribute("/object/test")
             .Kind("org", "org-key")
             .Set("isCat", true)           // Not filtered in this context.
             .Set("email", "cat@cat.cat")  // Filtered globally.
