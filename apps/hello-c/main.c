@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 int main() {
     char const* key = getenv("STG_SDK_KEY");
@@ -59,11 +58,6 @@ int main() {
     //    });
     //
     //    client.WaitForReadySync(std::chrono::seconds(30));
-
-    while(!LDClientSDK_Initialized(client)) {
-        printf("client not ready.\n");
-        sleep(1);
-    }
 
     LDEvalDetail detail;
     if (LDClientSDK_BoolVariationDetail(client, "my-boolean-flag", false,
