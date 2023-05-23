@@ -3,6 +3,8 @@
 This repository contains LaunchDarkly SDK packages which are written in C++.
 This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
+This repository contains beta software and should not be considered ready for production use while this message is visible.
+
 ## Packages
 
 | SDK packages                                          | issues                                      | tests                                                   |

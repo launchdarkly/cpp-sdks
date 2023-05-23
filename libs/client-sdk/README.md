@@ -1,6 +1,9 @@
 LaunchDarkly Client-Side SDK for C/C++
 ===================================
 
+This SDK is a beta version and should not be considered ready for production use while this message is
+visible.
+
 [![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml)
 
 The LaunchDarkly Client-Side SDK for C/C++ is designed primarily for use in desktop and embedded systems applications. It follows the client-side LaunchDarkly model for single-user contexts (much like our mobile or JavaScript SDKs). It is not intended for use in multi-user systems such as web servers and applications.
