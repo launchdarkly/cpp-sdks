@@ -219,6 +219,14 @@ class IDataSourceStatusProvider {
     virtual std::unique_ptr<IConnection> OnDataSourceStatusChange(
         std::function<void(data_sources::DataSourceStatus status)> handler) = 0;
 
+    /**
+     * Listen to changes to the data source status, with ability for listener
+     * to unregister itself.
+     *
+     * @param handler Function which will be called with the new status. Return
+     * true to unregister.
+     * @return A IConnection which can be used to stop listening to the status.
+     */
     virtual std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
         std::function<bool(data_sources::DataSourceStatus status)> handler) = 0;
 

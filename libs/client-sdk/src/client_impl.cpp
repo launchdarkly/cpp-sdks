@@ -231,8 +231,6 @@ void ClientImpl::FlushAsync() {
     event_processor_->FlushAsync();
 }
 
-// TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing up
-// multiple concerns.
 template <typename T>
 EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   Value default_value,
