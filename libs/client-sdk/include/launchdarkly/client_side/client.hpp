@@ -255,7 +255,7 @@ class IClient {
 class Client : public IClient {
    public:
     inline static char const* const kVersion =
-        "0.0.0";  // {x-release-please-version}
+        "0.1.0";  // {x-release-please-version}
 
     Client(Config config, Context context);
 
