@@ -35,7 +35,15 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
         return tl::make_unexpected(maybe_ctx->errors());
     }
 
-    client_->IdentifyAsync(*maybe_ctx).wait();
+    // The typical way to identify in contract tests would be .wait(), to ensure
+    // identify completes fully before proceeding. Some of the contract tests
+    // send invalid data to the data source though, so identify will never
+    // complete because the data source can't start. So, limit the amount of
+    // time such that: 1) For most tests, this is *basically* synchronous 2) For
+    // the problematic tests, this eventually does unblock and let the test
+    // proceed.
+    // TODO: SC-204250
+    client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
     return nlohmann::json{};
 }
 

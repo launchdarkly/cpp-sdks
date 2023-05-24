@@ -99,6 +99,7 @@ ClientImpl::ClientImpl(Config config,
                            .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
+      work_(boost::asio::make_work_guard(ioc_)),
       context_(std::move(context)),
       flag_manager_(config.SdkKey(),
                     logger_,
@@ -110,9 +111,8 @@ ClientImpl::ClientImpl(Config config,
                                 flag_manager_.Updater(), status_manager_,
                                 logger_);
       }),
-      data_source_(data_source_factory_()),
+      data_source_(nullptr),
       event_processor_(nullptr),
-      initialized_(false),
       eval_reasons_available_(config.DataSourceConfig().with_reasons) {
     flag_manager_.LoadCache(context_);
 
@@ -124,35 +124,73 @@ ClientImpl::ClientImpl(Config config,
         event_processor_ = std::make_unique<NullEventProcessor>();
     }
 
-    status_manager_.OnDataSourceStatusChange([this](auto status) {
-        if (status.State() == DataSourceStatus::DataSourceState::kValid ||
-            status.State() == DataSourceStatus::DataSourceState::kShutdown ||
-            status.State() == DataSourceStatus::DataSourceState::kSetOffline) {
-            {
-                std::unique_lock lock(init_mutex_);
-                initialized_ = true;
-            }
-            init_waiter_.notify_all();
-        }
-    });
-
-    if (config.Offline()) {
-        LD_LOG(logger_, LogLevel::kInfo)
-            << "Starting LaunchDarkly client in offline mode";
-    }
-
-    // Should listen to status before attempting to start.
-    data_source_->Start();
-
-    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
-
     event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), context_});
+
+    run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
+}
+
+// Was an attempt made to initialize the data source, and did that attempt
+// succeed? The data source being connected, or not being connected due to
+// offline mode, both represent successful terminal states.
+static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
+    return (state == DataSourceStatus::DataSourceState::kValid ||
+            state == DataSourceStatus::DataSourceState::kSetOffline);
+}
+
+// Was any attempt made to initialize the data source (with a successful or
+// permanent failure outcome?)
+static bool IsInitialized(DataSourceStatus::DataSourceState state) {
+    return IsInitializedSuccessfully(state) ||
+           (state == DataSourceStatus::DataSourceState::kShutdown);
+}
+
+std::future<bool> ClientImpl::IdentifyAsync(Context context) {
+    UpdateContextSynchronized(context);
+    event_processor_->SendAsync(events::client::IdentifyEventParams{
+        std::chrono::system_clock::now(), std::move(context)});
+
+    return StartAsyncInternal(IsInitializedSuccessfully);
+}
+
+void ClientImpl::RestartDataSource() {
+    auto start_op = [this]() {
+        data_source_ = data_source_factory_();
+        data_source_->Start();
+    };
+    if (!data_source_) {
+        return start_op();
+    }
+    data_source_->ShutdownAsync(start_op);
+}
+
+std::future<bool> ClientImpl::StartAsyncInternal(
+    std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
+    auto pr = std::make_shared<std::promise<bool>>();
+    auto fut = pr->get_future();
+
+    status_manager_.OnDataSourceStatusChangeEx(
+        [result_predicate, pr](data_sources::DataSourceStatus status) {
+            auto state = status.State();
+            if (IsInitialized(state)) {
+                pr->set_value(result_predicate(status.State()));
+                return true; /* delete this change listener since the desired
+                                state was reached */
+            }
+            return false; /* keep the change listener */
+        });
+
+    RestartDataSource();
+
+    return fut;
+}
+
+std::future<bool> ClientImpl::StartAsync() {
+    return StartAsyncInternal(IsInitializedSuccessfully);
 }
 
 bool ClientImpl::Initialized() const {
-    std::unique_lock lock(init_mutex_);
-    return initialized_;
+    return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
@@ -193,24 +231,6 @@ void ClientImpl::FlushAsync() {
     event_processor_->FlushAsync();
 }
 
-std::future<void> ClientImpl::IdentifyAsync(Context context) {
-    flag_manager_.LoadCache(context);
-    auto identify_promise = std::make_shared<std::promise<void>>();
-    auto fut = identify_promise->get_future();
-    data_source_->ShutdownAsync(
-        [this, ctx = std::move(context), identify_promise]() {
-            UpdateContextSynchronized(ctx);
-            data_source_ = data_source_factory_();
-            data_source_->Start();
-            event_processor_->SendAsync(events::client::IdentifyEventParams{
-                std::chrono::system_clock::now(), std::move(ctx)});
-            identify_promise->set_value();
-        });
-    return fut;
-}
-
-// TODO(cwaldren): refactor VariationInternal so it isn't so long and mixing
-// up multiple concerns.
 template <typename T>
 EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   Value default_value,
@@ -366,24 +386,12 @@ flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
     return flag_manager_.Notifier();
 }
 
-void ClientImpl::WaitForReadySync(std::chrono::milliseconds timeout) {
-    std::unique_lock lock(init_mutex_);
-    init_waiter_.wait_for(lock, timeout, [this] { return initialized_; });
-}
-
 void ClientImpl::UpdateContextSynchronized(Context context) {
     std::unique_lock lock(context_mutex_);
     context_ = std::move(context);
 }
 
 ClientImpl::~ClientImpl() {
-    auto shutdown_promise = std::make_shared<std::promise<void>>();
-    auto fut = shutdown_promise->get_future();
-
-    data_source_->ShutdownAsync(
-        [shutdown_promise]() { shutdown_promise->set_value(); });
-    fut.wait_for(kDataSourceShutdownWait);
-
     ioc_.stop();
     // TODO: Probably not the best.
     run_thread_.join();

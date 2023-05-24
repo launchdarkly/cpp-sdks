@@ -40,10 +40,16 @@ int main() {
 
     LDClientSDK client = LDClientSDK_New(config, context);
 
-    if (LDClientIsInitialized(client)) {
-        printf("*** SDK successfully initialized!\n\n");
+    bool initialized_successfully;
+    if (LDClientSDK_Start(client, 5000, &initialized_successfully)) {
+        if (initialized_successfully) {
+            printf("*** SDK successfully initialized!\n\n");
+        } else {
+            printf("*** SDK failed to initialize\n");
+            return 1;
+        }
     } else {
-        printf("*** SDK failed to initialize\n\n");
+        printf("SDK didn't initialize in time\n");
         return 1;
     }
 

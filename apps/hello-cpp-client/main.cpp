@@ -9,6 +9,10 @@
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
 
+// Set INIT_TIMEOUT_MILLISECONDS to the amount of time you will wait for
+// the client to become initialized.
+#define INIT_TIMEOUT_MILLISECONDS 3000
+
 using namespace launchdarkly;
 int main() {
     if (!strlen(MOBILE_KEY)) {
@@ -25,14 +29,22 @@ int main() {
     }
 
     auto context =
-        ContextBuilder().kind("user", "example-user-key").name("Sandy").build();
+        ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
 
     auto client = client_side::Client(std::move(*config), std::move(context));
 
-    if (client.Initialized()) {
-        std::cout << "*** SDK successfully initialized!\n\n";
+    auto start_result = client.StartAsync();
+    auto status = start_result.wait_for(
+        std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
+    if (status == std::future_status::ready) {
+        if (start_result.get()) {
+            std::cout << "*** SDK successfully initialized!\n\n";
+        } else {
+            std::cout << "*** SDK failed to initialize\n";
+            return 1;
+        }
     } else {
-        std::cout << "*** SDK failed to initialize\n\n";
+        std::cout << "*** SDK didn't initialize in time\n";
         return 1;
     }
 

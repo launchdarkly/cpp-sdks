@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
 #include <condition_variable>
@@ -13,6 +14,7 @@
 #include "tl/expected.hpp"
 
 #include <launchdarkly/client_side/client.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/client_side/flag_notifier.hpp>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
@@ -51,7 +53,7 @@ class ClientImpl : public IClient {
 
     void FlushAsync() override;
 
-    std::future<void> IdentifyAsync(Context context) override;
+    std::future<bool> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 
@@ -85,9 +87,9 @@ class ClientImpl : public IClient {
 
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
-    void WaitForReadySync(std::chrono::milliseconds timeout) override;
+    ~ClientImpl();
 
-    ~ClientImpl() override;
+    std::future<bool> StartAsync() override;
 
    private:
     template <typename T>
@@ -108,11 +110,20 @@ class ClientImpl : public IClient {
 
     void UpdateContextSynchronized(Context context);
 
-    Logger logger_;
+    void RestartDataSource();
+
+    std::future<bool> StartAsyncInternal(
+        std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
+            predicate);
+
     Config config_;
+    Logger logger_;
+
     launchdarkly::config::shared::built::HttpProperties http_properties_;
 
     boost::asio::io_context ioc_;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        work_;
 
     Context context_;
     mutable std::shared_mutex context_mutex_;
@@ -124,13 +135,10 @@ class ClientImpl : public IClient {
 
     std::unique_ptr<IEventProcessor> event_processor_;
 
-    bool initialized_;
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
-
-    std::thread thread_;
 
     std::thread run_thread_;
 
