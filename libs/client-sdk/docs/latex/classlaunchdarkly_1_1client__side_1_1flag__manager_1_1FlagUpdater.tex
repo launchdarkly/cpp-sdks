@@ -1,0 +1,62 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater}{}\doxysection{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Updater Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater}\index{launchdarkly::client\_side::flag\_manager::FlagUpdater@{launchdarkly::client\_side::flag\_manager::FlagUpdater}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Updater\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Updater\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_abb0957f7f11e6af17c0246140e613632}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_abb0957f7f11e6af17c0246140e613632}} 
+{\bfseries Flag\+Updater} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{Flag\+Store}} \&flag\+\_\+store)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a58c555361aa7a456a2f3c18cb4b9be2c}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a58c555361aa7a456a2f3c18cb4b9be2c}} 
+void {\bfseries Init} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} $>$ data) override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a190e1903ac82d77484421313c0c0010a}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a190e1903ac82d77484421313c0c0010a}} 
+void {\bfseries Upsert} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::string key, \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1ItemDescriptor}{Item\+Descriptor}} item) override
+\item 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IConnection}{IConnection}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a717fb675dad60466ed216866388d2f5f}{On\+Flag\+Change}} (std\+::string const \&key, std\+::function$<$ void(std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagValueChangeEvent}{Flag\+Value\+Change\+Event}} $>$)$>$ handler) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a717fb675dad60466ed216866388d2f5f}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater_a717fb675dad60466ed216866388d2f5f}} 
+\index{launchdarkly::client\_side::flag\_manager::FlagUpdater@{launchdarkly::client\_side::flag\_manager::FlagUpdater}!OnFlagChange@{OnFlagChange}}
+\index{OnFlagChange@{OnFlagChange}!launchdarkly::client\_side::flag\_manager::FlagUpdater@{launchdarkly::client\_side::flag\_manager::FlagUpdater}}
+\doxysubsubsection{\texorpdfstring{OnFlagChange()}{OnFlagChange()}}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IConnection}{IConnection}} $>$ launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Updater\+::\+On\+Flag\+Change (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{std\+::function$<$ void(std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagValueChangeEvent}{Flag\+Value\+Change\+Event}} $>$)$>$}]{handler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+Listen for changes for the specific flag. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The flag to listen to. \\
+\hline
+{\em handler} & The handler to signal when the flag changes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A Connection which can be used to stop listening for changes to the flag using this handler. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/flag\+\_\+manager/flag\+\_\+updater.\+hpp\item 
+src/flag\+\_\+manager/flag\+\_\+updater.\+cpp\end{DoxyCompactItemize}

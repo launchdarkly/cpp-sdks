@@ -1,0 +1,104 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Data\+Source\+Status\+::Error\+Info Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+status.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}{Error\+Kind}} \{ \newline
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba25c2dc47991b3df171ed5192bcf70390}{k\+Unknown}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941bab27d53d170bc6b3a21f586a562a99578}{k\+Network\+Error}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941badf3500671752af3ebd710e5a9f141fcb}{k\+Error\+Response}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba6cd69682ec2c46dba1cbf30b9e55e766}{k\+Invalid\+Data}}
+, \newline
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba3aa01cfa6b304670a75636a82c22aa6e}{k\+Store\+Error}}
+ \}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a6b493dd86356ce160db7b06931f45821}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a6b493dd86356ce160db7b06931f45821}} 
+using {\bfseries Status\+Code\+Type} = uint64\+\_\+t
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}{Error\+Kind}} \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a7c0d07031093115aa4bb537f29aebd66}{Kind}} () const
+\item 
+Status\+Code\+Type \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a18aa4889a55547ce11b86472dbd7f110}{Status\+Code}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a0a668dcbb4f3a7879c5e706e0b669757}{Message}} () const
+\item 
+Date\+Time \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a3547cd236f5865d5b3f5ed8e06118bb9}{Time}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a16207090fc6055ebdef9d19f4231ced5}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a16207090fc6055ebdef9d19f4231ced5}} 
+{\bfseries Error\+Info} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}{Error\+Kind}} kind, Status\+Code\+Type status\+\_\+code, std\+::string message, Date\+Time time)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A description of an error condition that the data source encountered. 
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!ErrorKind@{ErrorKind}}
+\index{ErrorKind@{ErrorKind}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+\doxysubsubsection{\texorpdfstring{ErrorKind}{ErrorKind}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Status\+::\+Error\+Info\+::\+Error\+Kind}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+An enumeration describing the general type of an error. \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kUnknown@{kUnknown}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!kUnknown@{kUnknown}}}\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba25c2dc47991b3df171ed5192bcf70390}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba25c2dc47991b3df171ed5192bcf70390}} 
+k\+Unknown&An unexpected error, such as an uncaught exception, further described by the error message. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kNetworkError@{kNetworkError}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!kNetworkError@{kNetworkError}}}\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941bab27d53d170bc6b3a21f586a562a99578}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941bab27d53d170bc6b3a21f586a562a99578}} 
+k\+Network\+Error&An I/O error such as a dropped connection. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kErrorResponse@{kErrorResponse}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!kErrorResponse@{kErrorResponse}}}\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941badf3500671752af3ebd710e5a9f141fcb}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941badf3500671752af3ebd710e5a9f141fcb}} 
+k\+Error\+Response&The Launch\+Darkly service returned an HTTP response with an error status, available in the status code. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kInvalidData@{kInvalidData}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!kInvalidData@{kInvalidData}}}\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba6cd69682ec2c46dba1cbf30b9e55e766}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba6cd69682ec2c46dba1cbf30b9e55e766}} 
+k\+Invalid\+Data&The SDK received malformed data from the Launch\+Darkly service. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kStoreError@{kStoreError}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!kStoreError@{kStoreError}}}\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba3aa01cfa6b304670a75636a82c22aa6e}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941ba3aa01cfa6b304670a75636a82c22aa6e}} 
+k\+Store\+Error&The data source itself is working, but when it tried to put an update into the data store, the data store failed (so the SDK may not have the latest data). \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a7c0d07031093115aa4bb537f29aebd66}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a7c0d07031093115aa4bb537f29aebd66}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!Kind@{Kind}}
+\index{Kind@{Kind}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+\doxysubsubsection{\texorpdfstring{Kind()}{Kind()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941b}{Data\+Source\+Status\+::\+Error\+Info\+::\+Error\+Kind}} launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Status\+::\+Error\+Info\+::\+Kind (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+An enumerated value representing the general category of the error. \mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a0a668dcbb4f3a7879c5e706e0b669757}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a0a668dcbb4f3a7879c5e706e0b669757}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!Message@{Message}}
+\index{Message@{Message}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+\doxysubsubsection{\texorpdfstring{Message()}{Message()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Status\+::\+Error\+Info\+::\+Message (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Any additional human-\/readable information relevant to the error.
+
+The format is subject to change and should not be relied on programmatically. \mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a18aa4889a55547ce11b86472dbd7f110}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a18aa4889a55547ce11b86472dbd7f110}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!StatusCode@{StatusCode}}
+\index{StatusCode@{StatusCode}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+\doxysubsubsection{\texorpdfstring{StatusCode()}{StatusCode()}}
+{\footnotesize\ttfamily Data\+Source\+Status\+::\+Error\+Info\+::\+Status\+Code\+Type launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Status\+::\+Error\+Info\+::\+Status\+Code (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The HTTP status code if the error was \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_abcec088fd8e80d4ccdc6481669d7941badf3500671752af3ebd710e5a9f141fcb}{Error\+Kind\+::k\+Error\+Response}}. \mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a3547cd236f5865d5b3f5ed8e06118bb9}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatus_1_1ErrorInfo_a3547cd236f5865d5b3f5ed8e06118bb9}} 
+\index{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}!Time@{Time}}
+\index{Time@{Time}!launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo@{launchdarkly::client\_side::data\_sources::DataSourceStatus::ErrorInfo}}
+\doxysubsubsection{\texorpdfstring{Time()}{Time()}}
+{\footnotesize\ttfamily Data\+Source\+Status\+::\+Date\+Time launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Data\+Source\+Status\+::\+Error\+Info\+::\+Time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The date/time that the error occurred. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/client\+\_\+side/data\+\_\+source\+\_\+status.\+hpp\item 
+src/data\+\_\+sources/data\+\_\+source\+\_\+status.\+cpp\end{DoxyCompactItemize}
