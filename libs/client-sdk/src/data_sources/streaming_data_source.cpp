@@ -109,7 +109,7 @@ void StreamingDataSource::Start() {
         client_builder.header(header.first, header.second);
     }
 
-    // TODO: Handle proxy support.
+    // TODO: Handle proxy support. sc-204386
 
     auto weak_self = weak_from_this();
 
@@ -118,7 +118,7 @@ void StreamingDataSource::Start() {
             self->data_source_handler_.HandleMessage(event.type(),
                                                      event.data());
             // TODO: Use the result of handle message to restart the
-            // event source if we got bad data.
+            // event source if we got bad data. sc-204387
         }
     });
 

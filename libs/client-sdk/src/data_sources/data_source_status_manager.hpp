@@ -60,8 +60,6 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
      */
     void SetError(DataSourceStatus::ErrorInfo::ErrorKind kind,
                   std::string message);
-    // TODO: Handle interrupted and other error states when they are
-    // propagated from the event source.
 
     /**
      * Set an error based on the given status code.

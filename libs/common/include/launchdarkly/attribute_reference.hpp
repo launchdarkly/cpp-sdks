@@ -11,9 +11,10 @@ namespace launchdarkly {
 
 /**
  *  Represents an attribute name or path expression identifying a value within a
- * [TODO: Context]. This can be used to retrieve a value with [TODO: Get Value],
- * or to identify an attribute or nested value that should be considered private
- * with [TODO: private attribute] (the SDK configuration can also have a list of
+ * launchdarkly::Context. This can be used to retrieve a value with
+ * launchdarkly::Context::Get, or to identify an attribute or nested value that
+ * should be considered private
+ * with launchdarkly::ContextBuilder:: (the SDK configuration can also have a list of
  * private attribute references).
  *
  *  This is represented as a separate type, rather than just a string, so that
