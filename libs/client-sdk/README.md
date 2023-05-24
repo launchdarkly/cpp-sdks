@@ -23,7 +23,39 @@ This version of the LaunchDarkly SDK is compatible with POSIX environments (Linu
 Getting started
 ---------------
 
-Download a release archive from the [TODO](TODO) for use in your project. Refer to the [SDK documentation](TODO) for complete instructions on installing and using the SDK.
+Download a release archive from the [Github releases]https://github.com/launchdarkly/cpp-sdks/releases?q=cpp-client&expanded=true) for use in your project.
+
+Refer to the [SDK documentation](https://docs.launchdarkly.com/sdk/client-side/c-c--) for complete instructions on installing and using the SDK.
+
+### Incorporating the SDK
+
+The SDK can be used via a C++ or C interface and can be incorporated via a static library or shared object. The static library and shared object each have their on use cases and limitations.
+
+The static library supports both the C++ and C interface. When using the static library, you should ensure that it is compiled using a compatible configuration and toolchain. For instance, when using MSVC, it needs to be using the same runtime library.
+
+Using the static library also requires that you have OpenSSL and Boost available at the time of compilation for your project.
+
+The C++ API does not have a stable ABI, so if this is important to you, consider using the shared object with the C API.
+
+Example of basic compilation using the C++ API with a static library using gcc:
+```shell
+g++ -I path_to_the_sdk_install/include -O3 -std=c++17 -Llib -fPIE -g main.cpp path_to_the_sdk_install/lib/liblaunchdarkly-cpp-client.a -lpthread -lstdc++ -lcrypto -lssl -lboost_json -lboost_url
+```
+Example of basic compilation using the C API with a static library using msvc:
+
+```shell
+cl /I include /Fe: hello.exe main.cpp /link lib/launchdarkly-cpp-client.lib
+```
+
+The shared library (so, DLL, dylib), only supports the C interface. The shared object does not require you to have Boost or OpenSSL available when linking the shared object to your project.
+
+Example of basic compilation using the C API with a shared library using gcc:
+```shell
+gcc -I $(pwd)/include -Llib -fPIE -g main.c liblaunchdarkly-cpp-client.so
+```
+
+The examples here are to help with getting started, but generally speaking the SDK should be incorporated using your
+build system (CMake for instance).
 
 Learn more
 -----------
