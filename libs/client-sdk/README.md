@@ -47,8 +47,6 @@ Example of basic compilation using the C API with a static library using msvc:
 cl /I include /Fe: hello.exe main.cpp /link lib/launchdarkly-cpp-client.lib
 ```
 
-Example of basic compilation using 
-
 The shared library (so, DLL, dylib), only supports the C interface. The shared object does not require you to have Boost or OpenSSL available when linking the shared object to your project.
 
 Example of basic compilation using the C API with a shared library using gcc:
