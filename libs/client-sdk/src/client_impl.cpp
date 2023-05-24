@@ -130,16 +130,22 @@ ClientImpl::ClientImpl(Config config,
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
-std::future<void> ClientImpl::IdentifyAsync(Context context) {
+static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
+    return (state == DataSourceStatus::DataSourceState::kValid ||
+            state == DataSourceStatus::DataSourceState::kSetOffline);
+}
+
+static bool IsInitialized(DataSourceStatus::DataSourceState state) {
+    return IsInitializedSuccessfully(state) ||
+           (state == DataSourceStatus::DataSourceState::kShutdown);
+}
+
+std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     UpdateContextSynchronized(context);
     event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
-    return StartAsyncInternal([](auto state) {
-        return (state == DataSourceStatus::DataSourceState::kValid ||
-                state == DataSourceStatus::DataSourceState::kShutdown ||
-                state == DataSourceStatus::DataSourceState::kSetOffline);
-    });
+    return StartAsyncInternal(IsInitializedSuccessfully);
 }
 
 void ClientImpl::RestartDataSource() {
@@ -153,15 +159,16 @@ void ClientImpl::RestartDataSource() {
     data_source_->ShutdownAsync(start_op);
 }
 
-std::future<void> ClientImpl::StartAsyncInternal(
-    std::function<bool(DataSourceStatus::DataSourceState)> cond) {
-    auto pr = std::make_shared<std::promise<void>>();
+std::future<bool> ClientImpl::StartAsyncInternal(
+    std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
+    auto pr = std::make_shared<std::promise<bool>>();
     auto fut = pr->get_future();
 
     status_manager_.OnDataSourceStatusChangeEx(
-        [this, cond, pr](data_sources::DataSourceStatus status) {
-            if (cond(status.State())) {
-                pr->set_value();
+        [result_predicate, pr](data_sources::DataSourceStatus status) {
+            auto state = status.State();
+            if (IsInitialized(state)) {
+                pr->set_value(result_predicate(status.State()));
                 return true; /* delete this change listener since the desired
                                 state was reached */
             }
@@ -173,19 +180,12 @@ std::future<void> ClientImpl::StartAsyncInternal(
     return fut;
 }
 
-std::future<void> ClientImpl::StartAsync() {
-    return StartAsyncInternal([](auto state) {
-        return (state == DataSourceStatus::DataSourceState::kValid ||
-                state == DataSourceStatus::DataSourceState::kShutdown ||
-                state == DataSourceStatus::DataSourceState::kSetOffline);
-    });
+std::future<bool> ClientImpl::StartAsync() {
+    return StartAsyncInternal(IsInitializedSuccessfully);
 }
 
 bool ClientImpl::Initialized() const {
-    return status_manager_.Status().State() ==
-               DataSourceStatus::DataSourceState::kValid ||
-           status_manager_.Status().State() ==
-               DataSourceStatus::DataSourceState::kSetOffline;
+    return IsInitialized(status_manager_.Status().State());
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {

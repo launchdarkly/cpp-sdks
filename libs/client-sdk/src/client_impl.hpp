@@ -53,7 +53,7 @@ class ClientImpl : public IClient {
 
     void FlushAsync() override;
 
-    std::future<void> IdentifyAsync(Context context) override;
+    std::future<bool> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 
@@ -89,7 +89,7 @@ class ClientImpl : public IClient {
 
     ~ClientImpl();
 
-    std::future<void> StartAsync() override;
+    std::future<bool> StartAsync() override;
 
    private:
     template <typename T>
@@ -112,9 +112,9 @@ class ClientImpl : public IClient {
 
     void RestartDataSource();
 
-    std::future<void> StartAsyncInternal(
+    std::future<bool> StartAsyncInternal(
         std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
-            cond);
+            predicate);
 
     Config config_;
     Logger logger_;
@@ -139,7 +139,7 @@ class ClientImpl : public IClient {
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
-    
+
     std::thread run_thread_;
 
     bool eval_reasons_available_;

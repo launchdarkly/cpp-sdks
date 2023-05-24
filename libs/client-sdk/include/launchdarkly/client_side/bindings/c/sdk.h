@@ -34,12 +34,21 @@ LDClientSDK_New(LDClientConfig config, LDContext context);
 /**
  * Starts the SDK, initiating a connection to LaunchDarkly.
  *
- * To start asynchronously, pass LD_NONBLOCKING. Otherwise, pass a positive
- * milliseconds value to block for that amount of time.
+ * To start asynchronously, pass LD_NONBLOCKING. In this case, the return value
+ * is defined to be false and can be ignored.
+ *
+ * Otherwise, pass a positive milliseconds value to block for that amount of
+ * time. If the initialization finished in time, the return value will be true.
+ * Otherwise, it will be false indicating initialization is still ongoing.
+ *
+ * If the return value is true, then out_succeeded will indicate whether or not
+ *
+ *
+ * if (LDClientSDK_Start(client, 5000)) {
  *
  * @param milliseconds Milliseconds to wait or LD_NONBLOCKING.
  */
-LD_EXPORT(void)
+LD_EXPORT(bool)
 LDClientSDK_Start(LDClientSDK, unsigned int milliseconds);
 
 /**

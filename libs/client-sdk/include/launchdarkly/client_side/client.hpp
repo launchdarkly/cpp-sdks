@@ -26,11 +26,10 @@ class IClient {
      * If StartAsync isn't called, the client is able to post events but is
      * unable to obtain flag data.
      *
-     * The returned future will resolve when the client successfully
-     * initializes, or encounters a permanent error.
-     * @return Future representing client initialization.
+     * The returned future will resolve to true or false based on the logic
+     * outlined on @ref Initialized.
      */
-    virtual std::future<void> StartAsync() = 0;
+    virtual std::future<bool> StartAsync() = 0;
 
     /**
      * Returns a boolean value indicating LaunchDarkly connection and flag state
@@ -262,7 +261,7 @@ class Client : public IClient {
     Client& operator=(Client) = delete;
     Client& operator=(Client&& other) = delete;
 
-    std::future<void> StartAsync() override;
+    std::future<bool> StartAsync() override;
 
     [[nodiscard]] bool Initialized() const override;
 
@@ -279,7 +278,7 @@ class Client : public IClient {
 
     void FlushAsync() override;
 
-    std::future<void> IdentifyAsync(Context context) override;
+    std::future<bool> IdentifyAsync(Context context) override;
 
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 

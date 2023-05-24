@@ -12,7 +12,7 @@ bool Client::Initialized() const {
     return client->Initialized();
 }
 
-std::future<void> Client::StartAsync() {
+std::future<bool> Client::StartAsync() {
     return client->StartAsync();
 }
 
@@ -37,7 +37,7 @@ void Client::FlushAsync() {
     client->FlushAsync();
 }
 
-std::future<void> Client::IdentifyAsync(Context context) {
+std::future<bool> Client::IdentifyAsync(Context context) {
     return client->IdentifyAsync(std::move(context));
 }
 
