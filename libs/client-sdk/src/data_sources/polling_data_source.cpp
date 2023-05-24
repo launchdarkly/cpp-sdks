@@ -30,8 +30,6 @@ static network::HttpRequest MakeRequest(
     auto string_context =
         boost::json::serialize(boost::json::value_from(context));
 
-    // TODO: Handle slashes.
-
     network::HttpRequest::BodyType body;
     network::HttpMethod method = network::HttpMethod::kGet;
 
@@ -49,7 +47,6 @@ static network::HttpRequest MakeRequest(
     }
 
     if (data_source_config.with_reasons) {
-        // TODO: Handle better.
         if (url) {
             url->append("?withReasons=true");
         }
