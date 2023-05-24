@@ -130,11 +130,15 @@ ClientImpl::ClientImpl(Config config,
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
+// Was an attempt made to initialize the data source, and did that attempt
+// succeed?
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
     return (state == DataSourceStatus::DataSourceState::kValid ||
             state == DataSourceStatus::DataSourceState::kSetOffline);
 }
 
+// Was any attempt made to initialize the data source (with a successful or
+// permanent failure outcome?)
 static bool IsInitialized(DataSourceStatus::DataSourceState state) {
     return IsInitializedSuccessfully(state) ||
            (state == DataSourceStatus::DataSourceState::kShutdown);

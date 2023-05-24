@@ -73,13 +73,30 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
 
     DataSourceStatus Status() const override;
 
+    /**
+     * Invokes a callback whenever the data source status changes.
+     * The returned IConnection can be used to disconnect the callback.
+     * @param handler Callback to be invoked on changes.
+     * @return IConnection.
+     */
     std::unique_ptr<IConnection> OnDataSourceStatusChange(
         std::function<void(data_sources::DataSourceStatus status)> handler)
         override;
 
+    /**
+     * Invokes a callback whenever the data source status changes.
+     * The returned IConnection can be used to disconnect the callback
+     *
+     * Additionally, the callback may return true to trigger disconnection.
+     *
+     * @param handler Callback to be invoked on changes. Return true to
+     * disconnect.
+     * @return IConnection,
+     */
     std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
         std::function<bool(data_sources::DataSourceStatus status)> handler)
         override;
+
     DataSourceStatusManager();
 
    private:
