@@ -4,6 +4,7 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
 
 ## 0.1.0 (2023-05-24)
 
+This is a prerelease version and is not considered suitable for production.
 
 ### Features
 
