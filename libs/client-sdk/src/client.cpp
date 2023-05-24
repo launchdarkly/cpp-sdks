@@ -12,6 +12,10 @@ bool Client::Initialized() const {
     return client->Initialized();
 }
 
+std::future<bool> Client::StartAsync() {
+    return client->StartAsync();
+}
+
 using FlagKey = std::string;
 [[nodiscard]] std::unordered_map<FlagKey, Value> Client::AllFlags() const {
     return client->AllFlags();
@@ -33,7 +37,7 @@ void Client::FlushAsync() {
     client->FlushAsync();
 }
 
-std::future<void> Client::IdentifyAsync(Context context) {
+std::future<bool> Client::IdentifyAsync(Context context) {
     return client->IdentifyAsync(std::move(context));
 }
 
@@ -90,10 +94,6 @@ data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
 
 flag_manager::IFlagNotifier& Client::FlagNotifier() {
     return client->FlagNotifier();
-}
-
-void Client::WaitForReadySync(std::chrono::milliseconds timeout) {
-    return client->WaitForReadySync(timeout);
 }
 
 }  // namespace launchdarkly::client_side

@@ -118,7 +118,14 @@ int main() {
         std::cout << "Got flag change: " << *event << std::endl;
     });
 
-    client.WaitForReadySync(std::chrono::seconds(30));
+    auto started = client.StartAsync();
+    auto status = started.wait_for(std::chrono::seconds(5));
+    if (status == std::future_status::ready) {
+        std::cout << "SDK initialized successfully: "
+                  << (started.get() ? "true" : "false") << std::endl;
+    } else {
+        std::cout << "SDK didn't initialize in time; quitting" << std::endl;
+    }
 
     auto value = client.BoolVariationDetail("my-boolean-flag", false);
     std::cout << "Value was: " << *value << std::endl;

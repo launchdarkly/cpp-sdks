@@ -45,6 +45,16 @@ int main() {
     LDContext context = LDContextBuilder_Build(context_builder);
 
     LDClientSDK client = LDClientSDK_New(config, context);
+
+    bool initialized_successfully;
+    if (LDClientSDK_Start(client, 5000, &initialized_successfully)) {
+        printf("SDK initialized successfully: %s\n",
+               (initialized_successfully ? "true" : "false"));
+    } else {
+        printf("SDK couldn't initialize in time; quitting\n");
+        return 1;
+    }
+
     //
     //    std::cout << "Initial Status: " << client.DataSourceStatus().Status()
     //              << std::endl;

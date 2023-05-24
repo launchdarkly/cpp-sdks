@@ -32,18 +32,71 @@ LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context);
 
 /**
+ * Starts the SDK, initiating a connection to LaunchDarkly if not offline.
+ *
+ * Only one Start call can be in progress at once; calling it
+ * concurrently invokes undefined behavior.
+ *
+ * The method may be blocking or asynchronous depending on the arguments.
+ *
+ * To block, pass a positive milliseconds value and an optional pointer to a
+ boolean. The return
+ * value will be true if the SDK started within the specified timeframe, or
+ false if the
+ * operation couldn't complete in time. The value of out_succeeded will be true
+ * if the SDK successfully initialized.
+ *
+ * Example:
+ * @code
+ * bool initialized_successfully;
+ * if (LDClientSDK_Start(client, 5000, &initialized_successfully)) {
+ *     // The client was able to initialize in less than 5 seconds.
+ *     if (initialized_successfully) {
+ *         // Initialization succeeded.
+ *     else {
+ *         // Initialization failed.
+ *     }
+ * } else {
+ *    // The client is still initializing.
+ * }
+ * @endcode
+ *
+ * To start asynchronously, pass `LD_NONBLOCKING`. In this case, the return
+ value
+ * will be false and you may pass NULL to out_succeeded.
+ *
+ * @code
+ * // Returns immediately.
+ * LDClientSDK_Start(client, LD_NONBLOCKING, NULL);
+ * @endcode
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param milliseconds Milliseconds to wait for initialization or
+ `LD_NONBLOCKING` to return immediately.
+ * @param out_succeeded Pointer to bool representing successful initialization.
+ Only
+ * modified if a positive milliseconds value is passed; may be NULL.
+ * @return True if the client started within the specified timeframe.
+ */
+LD_EXPORT(bool)
+LDClientSDK_Start(LDClientSDK sdk,
+                  unsigned int milliseconds,
+                  bool* out_succeeded);
+
+/**
  * Returns a boolean value indicating LaunchDarkly connection and flag state
  * within the client.
  *
- * When you first start the client, once WaitForReadySync has returned or
- * WaitForReadyAsync has completed, Initialized should return true if
- * and only if either 1. it connected to LaunchDarkly and successfully
- * retrieved flags, or 2. it started in offline mode so there's no need to
- * connect to LaunchDarkly. If the client timed out trying to connect to LD,
- * then Initialized returns false (even if we do have cached flags).
- * If the client connected and got a 401 error, Initialized is
- * will return false. This serves the purpose of letting the app know that
- * there was a problem of some kind.
+ * When you first start the client, once Start has completed, Initialized
+ * should return true if and only if either 1. it connected to LaunchDarkly and
+ * successfully retrieved flags, or 2. it started in offline mode so there's no
+ * need to connect to LaunchDarkly.
+ *
+ * If the client timed out trying to connect to
+ * LD, then Initialized returns false (even if we do have cached flags). If the
+ * client connected and got a 401 error, Initialized is will return false. This
+ * serves the purpose of letting the app know that there was a problem of some
+ * kind.
  *
  * @param sdk SDK. Must not be NULL.
  * @return True if initialized.
@@ -89,10 +142,10 @@ LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
 /**
  * Requests delivery of all pending analytic events (if any).
  *
- * You MUST pass LD_NONBLOCKING as the second parameter.
+ * You MUST pass `LD_NONBLOCKING` as the second parameter.
  *
  * @param sdk SDK. Must not be NULL.
- * @param milliseconds Must pass LD_NONBLOCKING.
+ * @param milliseconds Must pass `LD_NONBLOCKING`.
  */
 LD_EXPORT(void)
 LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved);
@@ -105,19 +158,54 @@ LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved);
  * Only one Identify call can be in progress at once; calling it
  * concurrently invokes undefined behavior.
  *
- * To block until the identify operation is complete or a timeout is reached,
- * pass a positive milliseconds parameter. Otherwise to return immediately,
- * pass LD_NONBLOCKING.
+ * The method may be blocking or asynchronous depending on the arguments.
+ *
+ * To block, pass a positive milliseconds value and an optional pointer to a
+ boolean. The return
+ * value will be true if the SDK was able to attempt the operation within
+ the specified timeframe, or false if the
+ * operation couldn't complete in time. The value of out_succeeded will be true
+ * if the SDK successfully changed evaluation contexts.
+ *
+ * Example:
+ * @code
+ * bool identified_successfully;
+ * if (LDClientSDK_Identify(client, 5000, &identified_successfully)) {
+ *     // The client was able to re-initialize in less than 5 seconds.
+ *     if (identified_successfully) {
+ *         // Evaluations will use data for the new context.
+ *     else {
+ *         // Evaluations will continue using existing data.
+ *     }
+ * } else {
+ *    // The client is still identifying.
+ * }
+ * @endcode
+ *
+ * To start asynchronously, pass `LD_NONBLOCKING`. In this case, the return
+value
+ * will be false and you may pass NULL to out_succeeded.
+ *
+ * @code
+ * // Returns immediately.
+ * LDClientSDK_Identify(client, LD_NONBLOCKING, NULL);
+ * @endcode
+ *
  *
  * @param sdk SDK. Must not be NULL.
  * @param context The new evaluation context.
- * @param milliseconds How long to wait for the identify to complete, or
- * LD_NONBLOCKING to return immediately.
+ * @param milliseconds Milliseconds to wait for identify to complete, or
+ * `LD_NONBLOCKING` to return immediately.
+ * @param out_succeeded Pointer to bool representing successful identification.
+Only
+* modified if a positive milliseconds value is passed; may be NULL.
+ * @return True if the client started within the specified timeframe.
  */
-LD_EXPORT(void)
+LD_EXPORT(bool)
 LDClientSDK_Identify(LDClientSDK sdk,
                      LDContext context,
-                     unsigned int milliseconds);
+                     unsigned int milliseconds,
+                     bool* out_succeeded);
 
 /**
  * Returns the boolean value of a feature flag for a given flag key.

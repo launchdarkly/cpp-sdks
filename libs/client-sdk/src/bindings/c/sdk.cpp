@@ -58,6 +58,29 @@ LDClientSDK_New(LDClientConfig config, LDContext context) {
     return FROM_SDK(sdk);
 }
 
+LD_EXPORT(bool)
+LDClientSDK_Start(LDClientSDK sdk,
+                  unsigned int milliseconds,
+                  bool* out_succeeded) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    auto future = TO_SDK(sdk)->StartAsync();
+
+    if (milliseconds == LD_NONBLOCKING) {
+        return false;
+    }
+
+    if (future.wait_for(std::chrono::milliseconds{milliseconds}) ==
+        std::future_status::ready) {
+        if (out_succeeded) {
+            *out_succeeded = future.get();
+        }
+        return true;
+    }
+
+    return false;
+}
+
 LD_EXPORT(bool) LDClientSDK_Initialized(LDClientSDK sdk) {
     LD_ASSERT_NOT_NULL(sdk);
 
@@ -108,10 +131,11 @@ LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved) {
     TO_SDK(sdk)->FlushAsync();
 }
 
-LD_EXPORT(void)
+LD_EXPORT(bool)
 LDClientSDK_Identify(LDClientSDK sdk,
                      LDContext context,
-                     unsigned int milliseconds) {
+                     unsigned int milliseconds,
+                     bool* out_succeeded) {
     LD_ASSERT_NOT_NULL(sdk);
     LD_ASSERT_NOT_NULL(context);
 
@@ -121,10 +145,18 @@ LDClientSDK_Identify(LDClientSDK sdk,
     LDContext_Free(context);
 
     if (milliseconds == LD_NONBLOCKING) {
-        return;
+        return false;
     }
 
-    future.wait_for(std::chrono::milliseconds{milliseconds});
+    if (future.wait_for(std::chrono::milliseconds{milliseconds}) ==
+        std::future_status::ready) {
+        if (out_succeeded) {
+            *out_succeeded = future.get();
+        }
+        return true;
+    }
+
+    return false;
 }
 
 LD_EXPORT(bool)
