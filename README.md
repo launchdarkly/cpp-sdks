@@ -33,7 +33,7 @@ This repository contains beta software and should not be considered ready for pr
 
 1. C++17 and above
 1. CMake 3.19 or higher
-1. Ninja
+1. Ninja (if using the included build scripts)
 1. Boost version 1.80 or higher.
 1. OpenSSL
 
