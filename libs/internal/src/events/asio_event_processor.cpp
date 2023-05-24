@@ -197,8 +197,6 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
         return std::nullopt;
     }
 
-    // TODO(cwaldren): Template the event processor over SDK type? Add it into
-    // HttpProperties?
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
         props(http_props_);
 

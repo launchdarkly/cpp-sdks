@@ -9,21 +9,16 @@
 
 #include <foxy/utility.hpp>
 
+#include <boost/certify/https_verification.hpp>
+
 namespace asio = boost::asio;
 
-extern "C" int
-launchdarkly::foxy::certify::verify_server_certificates(::X509_STORE_CTX* ctx, void*) noexcept
-{
-  auto const res = ::X509_verify_cert(ctx);
-  if (res < 0) { return 0; }
-  return res;
-}
-
-auto
-launchdarkly::foxy::certify::enable_https_verification(boost::asio::ssl::context& ssl_ctx) -> void
-{
-  ::SSL_CTX_set_cert_verify_callback(ssl_ctx.native_handle(),
-                                     &::launchdarkly::foxy::certify::verify_server_certificates, nullptr);
+void launchdarkly::foxy::certify::enable_https_verification(
+    boost::asio::ssl::context& ssl_ctx) {
+    // This method is called here, instead of in the header, so that boost/certify
+    // is only used in implementation. If it was used in the header
+    // it would be a public dependency.
+    boost::certify::enable_native_https_server_verification(ssl_ctx);
 }
 
 auto

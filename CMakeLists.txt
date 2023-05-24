@@ -75,15 +75,15 @@ add_subdirectory(libs/client-sdk)
 set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 
-# Always build the common libraries as shared libs.
+# Always build the common libraries as static libs.
 add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
-add_subdirectory(bindings/c)
 
 set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 
 set(BUILD_TESTING OFF)
+include(${CMAKE_FILES}/certify.cmake)
 add_subdirectory(vendor/foxy)
 
 set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")

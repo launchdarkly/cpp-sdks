@@ -60,8 +60,6 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
      */
     void SetError(DataSourceStatus::ErrorInfo::ErrorKind kind,
                   std::string message);
-    // TODO: Handle interrupted and other error states when they are
-    // propagated from the event source.
 
     /**
      * Set an error based on the given status code.
@@ -69,7 +67,7 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
      */
     void SetError(DataSourceStatus::ErrorInfo::StatusCodeType code,
                   std::string message);
-    // TODO: Handle error codes once the EventSource supports it.
+    // TODO: Handle error codes once the EventSource supports it. sc-204392
 
     DataSourceStatus Status() const override;
 
