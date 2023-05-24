@@ -18,7 +18,7 @@ class Attributes final {
      * Get the key for the context.
      * @return A reference to the context key.
      */
-    std::string const& key() const;
+    std::string const& Key() const;
 
     /**
      * Get the name for the context.
@@ -26,25 +26,25 @@ class Attributes final {
      * @return A reference to the context name, or an empty string if no name
      * is set.
      */
-    std::string const& name() const;
+    std::string const& Name() const;
 
     /**
      * Is the context anonymous or not. Defaults to false.
      * @return True if the context is anonymous.
      */
-    bool anonymous() const;
+    bool Anonymous() const;
 
     /**
      * Get the custom attributes as a Value. This value is an kObject type.
      * @return The custom attributes.
      */
-    Value const& custom_attributes() const;
+    Value const& CustomAttributes() const;
 
     /**
      * Get a set of the private attributes for the context.
      * @return The set of private attributes for the context.
      */
-    AttributeReference::SetType const& private_attributes() const;
+    AttributeReference::SetType const& PrivateAttributes() const;
 
     /**
      * Gets the item by the specified attribute reference, or returns a null
@@ -53,34 +53,34 @@ class Attributes final {
      * @return A Value containing the requested field, or a Value representing
      * null.
      */
-    launchdarkly::Value const& get(
+    launchdarkly::Value const& Get(
         launchdarkly::AttributeReference const& ref) const {
-        if (!ref.valid()) {
+        if (!ref.Valid()) {
             // Cannot index by invalid references.
             return launchdarkly::Value::Null();
         }
-        if (ref.is_kind()) {
+        if (ref.IsKind()) {
             // Cannot access kind.
             return launchdarkly::Value::Null();
         }
 
-        if (ref.depth() == 1) {
+        if (ref.Depth() == 1) {
             // Handle built-in attributes.
-            if (ref.component(0) == "key") {
+            if (ref.Component(0) == "key") {
                 return key_;
             }
-            if (ref.component(0) == "name") {
+            if (ref.Component(0) == "name") {
                 return name_;
             }
-            if (ref.component(0) == "anonymous") {
+            if (ref.Component(0) == "anonymous") {
                 return anonymous_;
             }
         }
 
         launchdarkly::Value const* node = &custom_attributes_;
         bool found = true;
-        for (size_t index = 0; index < ref.depth(); index++) {
-            auto const& component = ref.component(index);
+        for (size_t index = 0; index < ref.Depth(); index++) {
+            auto const& component = ref.Component(index);
             if (node->IsObject()) {
                 auto const& map = node->AsObject();
                 if (auto search = map.Find(component); search != map.end()) {

@@ -189,34 +189,34 @@ AttributeReference::AttributeReference(std::string str, bool literal) {
     }
 }
 
-AttributeReference AttributeReference::from_literal_str(std::string lit_str) {
+AttributeReference AttributeReference::FromLiteralStr(std::string lit_str) {
     return {std::move(lit_str), true};
 }
 
-AttributeReference AttributeReference::from_reference_str(std::string ref_str) {
+AttributeReference AttributeReference::FromReferenceStr(std::string ref_str) {
     return {std::move(ref_str), false};
 }
 
-std::string const& AttributeReference::component(std::size_t depth) const {
+std::string const& AttributeReference::Component(std::size_t depth) const {
     if (depth < components_.size()) {
         return components_[depth];
     }
     return empty_;
 }
 
-std::size_t AttributeReference::depth() const {
+std::size_t AttributeReference::Depth() const {
     return components_.size();
 }
 
-bool AttributeReference::is_kind() const {
-    return depth() == 1 && component(0) == "kind";
+bool AttributeReference::IsKind() const {
+    return Depth() == 1 && Component(0) == "kind";
 }
 
-bool AttributeReference::valid() const {
+bool AttributeReference::Valid() const {
     return valid_;
 }
 
-std::string const& AttributeReference::redaction_name() const {
+std::string const& AttributeReference::RedactionName() const {
     return redaction_name_;
 }
 
@@ -226,7 +226,7 @@ AttributeReference::AttributeReference(std::string ref_str)
 AttributeReference::AttributeReference(char const* ref_str)
     : AttributeReference(std::string(ref_str)) {}
 
-std::string AttributeReference::path_to_string_reference(
+std::string AttributeReference::PathToStringReference(
     std::vector<std::string_view> path) {
     // Approximate size to reduce resizes.
     auto size = std::accumulate(path.begin(), path.end(), 0,

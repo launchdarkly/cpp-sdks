@@ -11,7 +11,7 @@ Value GetValue(ItemDescriptor& descriptor) {
     if (descriptor.flag) {
         // `flag->` unwraps the first optional we know is present.
         // The second `value()` is not an optional.
-        return descriptor.flag->detail().value();
+        return descriptor.flag->Detail().Value();
     }
     return {};
 }
@@ -27,8 +27,6 @@ void FlagUpdater::Init(Context const& context,
 
     // No need to calculate any changes if nobody is listening to them.
     if (!old_flags.empty() && HasListeners()) {
-        // TODO: Should we send events for ALL of the flags when they
-        // are first added?
         for (auto& new_pair : data) {
             auto existing = old_flags.find(new_pair.first);
             if (existing != old_flags.end()) {
@@ -103,7 +101,7 @@ void FlagUpdater::Upsert(Context const& context,
                 FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
         } else if (item.flag) {
             DispatchEvent(FlagValueChangeEvent(
-                key, item.flag.value().detail().value(), Value()));
+                key, item.flag.value().Detail().Value(), Value()));
             // new flag
         } else if (existing && existing->flag.has_value()) {
             // Existed and deleted.

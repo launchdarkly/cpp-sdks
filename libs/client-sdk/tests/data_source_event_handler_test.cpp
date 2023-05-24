@@ -36,7 +36,7 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage(
@@ -57,7 +57,7 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{}");
@@ -73,7 +73,7 @@ TEST(StreamingDataHandlerTests, BadJsonPut) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{sorry");
@@ -87,7 +87,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("put", "{\"potato\": {}}");
@@ -101,7 +101,7 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage(
@@ -122,7 +122,7 @@ TEST(StreamingDataHandlerTests, BadJsonPatch) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("patch", "{sorry");
@@ -136,7 +136,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPatch) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("patch", R"({"potato": {}})");
@@ -150,7 +150,7 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("delete",
@@ -168,7 +168,7 @@ TEST(StreamingDataHandlerTests, BadJsonDelete) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("delete", "{sorry");
@@ -182,7 +182,7 @@ TEST(StreamingDataHandlerTests, BadSchemaDelete) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("delete", R"({"potato": {}})");
@@ -196,7 +196,7 @@ TEST(StreamingDataHandlerTests, UnrecognizedVerb) {
     auto test_handler = TestHandler();
     DataSourceStatusManager status_manager;
     DataSourceEventHandler stream_handler(
-        ContextBuilder().kind("user", "user-key").build(), test_handler, logger,
+        ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
     auto res = stream_handler.HandleMessage("potato", R"({"potato": {}})");

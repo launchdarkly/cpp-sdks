@@ -15,15 +15,15 @@ TEST(AttributesTests, CanGetBuiltInAttributesByReference) {
     Attributes attributes("the-key", "the-name", true, Value());
 
     EXPECT_EQ("the-key",
-              attributes.get(AttributeReference::from_reference_str("/key"))
+              attributes.Get(AttributeReference::FromReferenceStr("/key"))
                   .AsString());
 
     EXPECT_EQ("the-name",
-              attributes.get(AttributeReference::from_reference_str("/name"))
+              attributes.Get(AttributeReference::FromReferenceStr("/name"))
                   .AsString());
 
     EXPECT_TRUE(
-        attributes.get(AttributeReference::from_reference_str("/anonymous"))
+        attributes.Get(AttributeReference::FromReferenceStr("/anonymous"))
             .AsBool());
 }
 
@@ -40,36 +40,36 @@ TEST(AttributesTests, CanGetCustomAttributesByReference) {
 
     EXPECT_EQ(
         42,
-        attributes.get(AttributeReference::from_reference_str("/int")).AsInt());
+        attributes.Get(AttributeReference::FromReferenceStr("/int")).AsInt());
 
     EXPECT_EQ(3.14,
-              attributes.get(AttributeReference::from_reference_str("/double"))
+              attributes.Get(AttributeReference::FromReferenceStr("/double"))
                   .AsDouble());
 
     EXPECT_EQ("potato",
-              attributes.get(AttributeReference::from_reference_str("/string"))
+              attributes.Get(AttributeReference::FromReferenceStr("/string"))
                   .AsString());
 
-    EXPECT_TRUE(attributes.get(AttributeReference::from_reference_str("/bool"))
+    EXPECT_TRUE(attributes.Get(AttributeReference::FromReferenceStr("/bool"))
                     .AsBool());
 
-    EXPECT_TRUE(attributes.get(AttributeReference::from_reference_str("/array"))
+    EXPECT_TRUE(attributes.Get(AttributeReference::FromReferenceStr("/array"))
                     .AsArray()[0]
                     .AsBool());
 
     EXPECT_FALSE(
-        attributes.get(AttributeReference::from_reference_str("/array"))
+        attributes.Get(AttributeReference::FromReferenceStr("/array"))
             .AsArray()[1]
             .AsBool());
 
     EXPECT_EQ("bacon",
-              attributes.get(AttributeReference::from_reference_str("/array"))
+              attributes.Get(AttributeReference::FromReferenceStr("/array"))
                   .AsArray()[2]
                   .AsString());
 
     EXPECT_EQ(
         "eggs",
-        attributes.get(AttributeReference::from_reference_str("/obj/string"))
+        attributes.Get(AttributeReference::FromReferenceStr("/obj/string"))
             .AsString());
 }
 
@@ -78,7 +78,7 @@ TEST(AttributesTests, CanGetSomethingThatDoesNotExist) {
                           Value(std::map<std::string, Value>({{"int", 42}})));
 
     EXPECT_TRUE(
-        attributes.get(AttributeReference::from_reference_str("/missing"))
+        attributes.Get(AttributeReference::FromReferenceStr("/missing"))
             .IsNull());
 }
 

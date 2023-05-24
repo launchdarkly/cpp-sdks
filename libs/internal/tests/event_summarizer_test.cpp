@@ -97,7 +97,7 @@ TEST_P(SummaryCounterTestsFixture, EventsAreCounted) {
 
     auto test_cases = test_params.evaluations;
 
-    auto const context = ContextBuilder().kind("cat", "shadow").build();
+    auto const context = ContextBuilder().Kind("cat", "shadow").Build();
 
     // For each event in a test case, inject it into the summarizer N number of
     // times (where N = the second value in the pair).
@@ -297,7 +297,7 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
     Summarizer summarizer;
 
     auto const feature_key = "cat-food-amount";
-    auto const context = ContextBuilder().kind("cat", "shadow").build();
+    auto const context = ContextBuilder().Kind("cat", "shadow").Build();
     auto const feature_default = Value(1);
 
     auto const event = FeatureEventParams{
@@ -348,7 +348,7 @@ TEST(SummarizerTests, JsonSerialization) {
         EvaluationParams params{feature_key, 1, 0, Value(3), Value(1)};
 
         auto const event = FeatureEventFromParams(
-            params, ContextBuilder().kind("cat", "shadow").build());
+            params, ContextBuilder().Kind("cat", "shadow").Build());
 
         for (size_t i = 0; i < count; i++) {
             summarizer.Update(event);

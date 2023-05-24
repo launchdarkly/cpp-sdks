@@ -197,8 +197,6 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
         return std::nullopt;
     }
 
-    // TODO(cwaldren): Template the event processor over SDK type? Add it into
-    // HttpProperties?
     config::shared::builders::HttpPropertiesBuilder<config::shared::ClientSDK>
         props(http_props_);
 
@@ -242,13 +240,13 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
 
                        if (event.require_full_event) {
                            out.emplace_back(client::FeatureEvent{
-                               std::move(base), event.context.kinds_to_keys()});
+                               std::move(base), event.context.KindsToKeys()});
                        }
                    },
                    [&](client::IdentifyEventParams&& event) {
                        // Contexts should already have been checked for
                        // validity by this point.
-                       assert(event.context.valid());
+                       assert(event.context.Valid());
                        out.emplace_back(client::IdentifyEvent{
                            event.creation_date, filter_.filter(event.context)});
                    },

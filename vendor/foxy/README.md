@@ -1,3 +1,12 @@
+# LaunchDarkly Modifications
+
+This version of foxy is originally from: https://github.com/cmazakas/foxy
+
+It has been modified in the following ways:
+1. The CMake configuration has been updated not to install headers/libraries.
+2. It depends on boost::certify in order to use native certificate stores.
+3. The namespace has been moved changed from `foxy` to `launchdarkly::foxy` to reduce the possibility of conflicts.
+
 # Foxy [![Build Status](https://travis-ci.org/LeonineKing1199/foxy.svg?branch=develop)](https://travis-ci.org/LeonineKing1199/foxy)
 
 Low-level HTTP session primitives for Beast/Asio + URL parsing and pct-coding

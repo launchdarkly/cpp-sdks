@@ -37,7 +37,7 @@ LD_EXPORT(enum LDEvalReason_Kind)
 LDEvalReason_Kind(LDEvalReason reason) {
     LD_ASSERT_NOT_NULL(reason);
 
-    return static_cast<enum LDEvalReason_Kind>(TO_REASON(reason)->kind());
+    return static_cast<enum LDEvalReason_Kind>(TO_REASON(reason)->Kind());
 }
 
 LD_EXPORT(bool)
@@ -46,14 +46,14 @@ LDEvalReason_ErrorKind(LDEvalReason reason,
     LD_ASSERT_NOT_NULL(reason);
     LD_ASSERT_NOT_NULL(out_error_kind);
 
-    return OptReturnStaticCast(TO_REASON(reason)->error_kind(), out_error_kind);
+    return OptReturnStaticCast(TO_REASON(reason)->ErrorKind(), out_error_kind);
 }
 
 LD_EXPORT(bool)
 LDEvalReason_InExperiment(LDEvalReason reason) {
     LD_ASSERT_NOT_NULL(reason);
 
-    return TO_REASON(reason)->in_experiment();
+    return TO_REASON(reason)->InExperiment();
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

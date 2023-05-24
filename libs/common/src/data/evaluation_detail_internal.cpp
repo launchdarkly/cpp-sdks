@@ -2,20 +2,20 @@
 
 namespace launchdarkly {
 
-Value const& EvaluationDetailInternal::value() const {
+Value const& EvaluationDetailInternal::Value() const {
     return value_;
 }
 
-std::optional<std::size_t> EvaluationDetailInternal::variation_index() const {
+std::optional<std::size_t> EvaluationDetailInternal::VariationIndex() const {
     return variation_index_;
 }
 
 std::optional<std::reference_wrapper<EvaluationReason const>>
-EvaluationDetailInternal::reason() const {
+EvaluationDetailInternal::Reason() const {
     return reason_;
 }
 EvaluationDetailInternal::EvaluationDetailInternal(
-    Value value,
+    launchdarkly::Value value,
     std::optional<std::size_t> variation_index,
     std::optional<EvaluationReason> reason)
     : value_(std::move(value)),
@@ -38,8 +38,8 @@ std::ostream& operator<<(std::ostream& out,
 
 bool operator==(EvaluationDetailInternal const& lhs,
                 EvaluationDetailInternal const& rhs) {
-    return lhs.value() == rhs.value() && lhs.reason() == rhs.reason() &&
-           lhs.variation_index() == rhs.variation_index();
+    return lhs.Value() == rhs.Value() && lhs.Reason() == rhs.Reason() &&
+           lhs.VariationIndex() == rhs.VariationIndex();
 }
 
 bool operator!=(EvaluationDetailInternal const& lhs,

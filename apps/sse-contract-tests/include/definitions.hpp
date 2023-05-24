@@ -84,3 +84,10 @@ struct CommentMessage {
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CommentMessage, kind, comment);
+
+struct ErrorMessage {
+    std::string kind;
+    std::string comment;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ErrorMessage, kind, comment);

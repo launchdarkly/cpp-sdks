@@ -9,41 +9,41 @@ using launchdarkly::Context;
 using launchdarkly::ContextBuilder;
 
 TEST(ContextTests, CanonicalKeyForUser) {
-    auto context = ContextBuilder().kind("user", "user-key").build();
-    EXPECT_EQ("user-key", context.canonical_key());
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
+    EXPECT_EQ("user-key", context.CanonicalKey());
 }
 
 TEST(ContextTests, CanonicalKeyForNonUser) {
-    auto context = ContextBuilder().kind("org", "org-key").build();
-    EXPECT_EQ("org:org-key", context.canonical_key());
+    auto context = ContextBuilder().Kind("org", "org-key").Build();
+    EXPECT_EQ("org:org-key", context.CanonicalKey());
 }
 
 TEST(ContextTests, CanonicalKeyForMultiContext) {
     auto context = ContextBuilder()
-                       .kind("user", "user-key")
-                       .kind("org", "org-key")
-                       .build();
+                       .Kind("user", "user-key")
+                       .Kind("org", "org-key")
+                       .Build();
 
-    EXPECT_EQ("org:org-key:user:user-key", context.canonical_key());
+    EXPECT_EQ("org:org-key:user:user-key", context.CanonicalKey());
 }
 
 TEST(ContextTests, EscapesCanonicalKey) {
     auto context = ContextBuilder()
-                       .kind("user", "user:key")
-                       .kind("org", "org%key")
-                       .build();
+                       .Kind("user", "user:key")
+                       .Kind("org", "org%key")
+                       .Build();
 
-    EXPECT_EQ("org:org%3Akey:user:user%25key", context.canonical_key());
+    EXPECT_EQ("org:org%3Akey:user:user%25key", context.CanonicalKey());
 }
 
 TEST(ContextTests, CanGetKeysAndKinds) {
     auto context = ContextBuilder()
-                       .kind("user", "user-key")
-                       .kind("org", "org-key")
-                       .build();
-    EXPECT_EQ(2, context.kinds_to_keys().size());
-    EXPECT_EQ("user-key", context.kinds_to_keys().find("user")->second);
-    EXPECT_EQ("org-key", context.kinds_to_keys().find("org")->second);
+                       .Kind("user", "user-key")
+                       .Kind("org", "org-key")
+                       .Build();
+    EXPECT_EQ(2, context.KindsToKeys().size());
+    EXPECT_EQ("user-key", context.KindsToKeys().find("user")->second);
+    EXPECT_EQ("org-key", context.KindsToKeys().find("org")->second);
 }
 
 std::string ProduceString(Context const& ctx) {
@@ -54,19 +54,19 @@ std::string ProduceString(Context const& ctx) {
 }
 
 TEST(ContextTests, OstreamOperatorValidContext) {
-    auto context = ContextBuilder().kind("user", "user-key").build();
+    auto context = ContextBuilder().Kind("user", "user-key").Build();
     EXPECT_EQ(
         "{contexts: [kind: user attributes: {key: string(user-key),  name: "
         "string() anonymous: bool(false) private: []  custom: object({})}]",
         ProduceString(context));
 
     auto context_2 = ContextBuilder()
-                         .kind("user", "user-key")
-                         .kind("org", "org-key")
-                         .name("Sam")
-                         .set_private("test", true)
-                         .set("string", "potato")
-                         .build();
+                         .Kind("user", "user-key")
+                         .Kind("org", "org-key")
+                         .Name("Sam")
+                         .SetPrivate("test", true)
+                         .Set("string", "potato")
+                         .Build();
 
     EXPECT_EQ(
         "{contexts: [kind: org attributes: {key: string(org-key),  name: "
@@ -78,8 +78,8 @@ TEST(ContextTests, OstreamOperatorValidContext) {
 }
 
 TEST(ContextTests, OstreamOperatorInvalidContext) {
-    auto context = ContextBuilder().kind("#$#*(", "").build();
-    EXPECT_FALSE(context.valid());
+    auto context = ContextBuilder().Kind("#$#*(", "").Build();
+    EXPECT_FALSE(context.Valid());
 
     EXPECT_EQ(
         "{invalid: errors: [#$#*(: \"Kind contained invalid characters. A kind "
@@ -94,10 +94,10 @@ TEST(ContextTests, OstreamOperatorInvalidContext) {
 TEST(ContextTests, JsonSerializeSingleContext) {
     auto context_value =
         boost::json::value_from(ContextBuilder()
-                                    .kind("user", "user-key")
-                                    .set("isCat", true)
-                                    .set_private("email", "cat@email.email")
-                                    .build());
+                                    .Kind("user", "user-key")
+                                    .Set("isCat", true)
+                                    .SetPrivate("email", "cat@email.email")
+                                    .Build());
 
     auto parsed_value = boost::json::parse(
         "{"
@@ -114,11 +114,11 @@ TEST(ContextTests, JsonSerializeSingleContext) {
 TEST(ContextTests, JsonSerializeMultiContext) {
     auto context_value =
         boost::json::value_from(ContextBuilder()
-                                    .kind("user", "user-key")
-                                    .set("isCat", true)
-                                    .set_private("email", "cat@email.email")
-                                    .kind("org", "org-key")
-                                    .build());
+                                    .Kind("user", "user-key")
+                                    .Set("isCat", true)
+                                    .SetPrivate("email", "cat@email.email")
+                                    .Kind("org", "org-key")
+                                    .Build());
 
     auto parsed_value = boost::json::parse(
         "{"
