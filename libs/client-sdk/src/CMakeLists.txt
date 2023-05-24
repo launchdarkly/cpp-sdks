@@ -67,6 +67,9 @@ set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
+if (BUILD_SHARED_LIBS)
+        install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
+endif ()
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
 
