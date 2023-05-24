@@ -210,8 +210,10 @@ class FoxyClient : public Client,
 
         if (status_class == beast::http::status_class::redirection) {
             if (can_redirect(response)) {
-                auto new_url =
-                    redirect_url("base", response.find("location")->value());
+                auto const& location_header =
+                    response.find("location")->value();
+
+                auto new_url = redirect_url("base", location_header);
 
                 if (!new_url) {
                     errors_(Error::InvalidRedirectLocation);
