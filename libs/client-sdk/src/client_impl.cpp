@@ -131,7 +131,8 @@ ClientImpl::ClientImpl(Config config,
 }
 
 // Was an attempt made to initialize the data source, and did that attempt
-// succeed?
+// succeed? The data source being connected, or not being connected due to
+// offline mode, both represent successful terminal states.
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
     return (state == DataSourceStatus::DataSourceState::kValid ||
             state == DataSourceStatus::DataSourceState::kSetOffline);
@@ -189,7 +190,7 @@ std::future<bool> ClientImpl::StartAsync() {
 }
 
 bool ClientImpl::Initialized() const {
-    return IsInitialized(status_manager_.Status().State());
+    return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {

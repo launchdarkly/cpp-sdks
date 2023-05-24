@@ -72,7 +72,9 @@ LDClientSDK_Start(LDClientSDK sdk,
 
     if (future.wait_for(std::chrono::milliseconds{milliseconds}) ==
         std::future_status::ready) {
-        *out_succeeded = future.get();
+        if (out_succeeded) {
+            *out_succeeded = future.get();
+        }
         return true;
     }
 
@@ -148,7 +150,9 @@ LDClientSDK_Identify(LDClientSDK sdk,
 
     if (future.wait_for(std::chrono::milliseconds{milliseconds}) ==
         std::future_status::ready) {
-        *out_succeeded = future.get();
+        if (out_succeeded) {
+            *out_succeeded = future.get();
+        }
         return true;
     }
 

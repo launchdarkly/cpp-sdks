@@ -110,10 +110,13 @@ class IClient {
      * To block until the identify operation is complete, call wait() on
      * the returned future.
      *
+     * The returned future will resolve to true or false based on the logic
+     * outlined on @ref Initialized.
+     *
      * @param context The new evaluation context.
      */
 
-    virtual std::future<void> IdentifyAsync(Context context) = 0;
+    virtual std::future<bool> IdentifyAsync(Context context) = 0;
 
     /**
      * Returns the boolean value of a feature flag for a given flag key.
