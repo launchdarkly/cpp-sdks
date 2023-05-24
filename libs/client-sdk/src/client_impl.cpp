@@ -147,6 +147,7 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     UpdateContextSynchronized(context);
+    flag_manager_.LoadCache(context);
     event_processor_->SendAsync(events::client::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
