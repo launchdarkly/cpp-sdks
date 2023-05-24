@@ -27,8 +27,6 @@ void FlagUpdater::Init(Context const& context,
 
     // No need to calculate any changes if nobody is listening to them.
     if (!old_flags.empty() && HasListeners()) {
-        // TODO: Should we send events for ALL of the flags when they
-        // are first added?
         for (auto& new_pair : data) {
             auto existing = old_flags.find(new_pair.first);
             if (existing != old_flags.end()) {

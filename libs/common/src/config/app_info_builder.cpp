@@ -70,7 +70,7 @@ std::optional<std::string> AppInfoBuilder::Build() const {
 
     for (auto const& tag : unvalidated) {
         if (!tag.second) {
-            // TODO: Figure out how to report.
+            // TODO: Figure out how to report. sc-204388
         } else {
             validated.push_back(tag.second.value());
         }
