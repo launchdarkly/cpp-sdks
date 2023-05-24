@@ -14,6 +14,10 @@
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
 
+// Set INIT_TIMEOUT_MILLISECONDS to the amount of time you will wait for
+// the client to become initialized.
+#define INIT_TIMEOUT_MILLISECONDS 3000
+
 int main() {
     if (!strlen(MOBILE_KEY)) {
         printf(
@@ -41,7 +45,8 @@ int main() {
     LDClientSDK client = LDClientSDK_New(config, context);
 
     bool initialized_successfully;
-    if (LDClientSDK_Start(client, 5000, &initialized_successfully)) {
+    if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
+                          &initialized_successfully)) {
         if (initialized_successfully) {
             printf("*** SDK successfully initialized!\n\n");
         } else {
@@ -49,7 +54,8 @@ int main() {
             return 1;
         }
     } else {
-        printf("SDK didn't initialize in time\n");
+        printf("SDK initialization didn't complete in %dms\n",
+               INIT_TIMEOUT_MILLISECONDS);
         return 1;
     }
 

@@ -44,7 +44,8 @@ int main() {
             return 1;
         }
     } else {
-        std::cout << "*** SDK didn't initialize in time\n";
+        std::cout << "*** SDK initialization didn't complete in "
+                  << INIT_TIMEOUT_MILLISECONDS << "ms\n";
         return 1;
     }
 

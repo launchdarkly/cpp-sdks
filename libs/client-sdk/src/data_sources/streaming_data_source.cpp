@@ -18,6 +18,18 @@ namespace launchdarkly::client_side::data_sources {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL.";
 
+static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
+    switch (error) {
+        case sse::Error::NoContent:
+            return "server responded 204 (No Content), will not attempt to "
+                   "reconnect";
+        case sse::Error::InvalidRedirectLocation:
+            return "server responded with an invalid redirection";
+        case sse::Error::UnrecoverableClientError:
+            return "unrecoverable client-side error";
+    }
+}
+
 StreamingDataSource::StreamingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::DataSourceConfig<config::shared::ClientSDK> const&
@@ -124,7 +136,18 @@ void StreamingDataSource::Start() {
 
     client_builder.logger([weak_self](auto msg) {
         if (auto self = weak_self.lock()) {
-            LD_LOG(self->logger_, LogLevel::kInfo) << msg;
+            LD_LOG(self->logger_, LogLevel::kDebug) << msg;
+        }
+    });
+
+    client_builder.errors([weak_self](auto error) {
+        if (auto self = weak_self.lock()) {
+            auto error_string = DataSourceErrorToString(error);
+            LD_LOG(self->logger_, LogLevel::kError) << error_string;
+            self->status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kShutdown,
+                DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse,
+                error_string);
         }
     });
 
