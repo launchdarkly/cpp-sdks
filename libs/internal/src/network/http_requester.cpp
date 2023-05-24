@@ -1,11 +1,23 @@
 #include <boost/url.hpp>
 
+#include <algorithm>
+#include <cctype>
 #include <optional>
 #include <utility>
 
 #include <launchdarkly/network/http_requester.hpp>
 
 namespace launchdarkly::network {
+
+bool CaseInsensitiveComparator::operator()(
+    std::string const& lhs,
+    std::string const& rhs) const noexcept {
+#ifdef _MSC_VER
+    return _stricmp(lhs.c_str(), rhs.c_str()) < 0;
+#else
+    return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+#endif
+}
 
 HttpResult::StatusCode HttpResult::Status() const {
     return status_;
