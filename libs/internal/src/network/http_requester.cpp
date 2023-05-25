@@ -1,7 +1,6 @@
 #include <boost/url.hpp>
 
-#include <algorithm>
-#include <cctype>
+#include <cstring>
 #include <optional>
 #include <utility>
 
