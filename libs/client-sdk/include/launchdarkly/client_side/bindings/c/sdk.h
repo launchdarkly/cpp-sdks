@@ -6,9 +6,11 @@
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>
+#include <launchdarkly/bindings/c/listener_connection.h>
 #include <launchdarkly/bindings/c/memory_routines.h>
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
+
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -373,6 +375,69 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
  * @param sdk SDK.
  */
 LD_EXPORT(void) LDClientSDK_Free(LDClientSDK sdk);
+
+typedef void (*FlagChangedCallbackFn)(char const* flag_key,
+                                      LDValue new_value,
+                                      LDValue old_value,
+                                      bool deleted,
+                                      void* user_data);
+
+/**
+ * Defines a feature flag listener which may be used to listen for flag changes.
+ * The struct should be initialized using LDFlagListener_Init before use.
+ */
+struct LDFlagListener {
+    /**
+     * Callback function which is invoked for flag changes.
+     *
+     * The provided pointers are only valid for the duration of the function
+     * call.
+     *
+     * @param flag_key The name of the flag that changed.
+     * @param new_value The new value of the flag. If there was not an new
+     * value, because the flag was deleted, then the LDValue will be of a null
+     * type. Check the deleted parameter to see if a flag was deleted.
+     * @param old_value The old value of the flag. If there was not an old
+     * value, for instance a newly created flag, then the Value will be of a
+     * null type.
+     * @param deleted True if the flag has been deleted.
+     */
+    FlagChangedCallbackFn FlagChanged;
+
+    /**
+     * UserData is forwarded into both Enabled and Write.
+     */
+    void* UserData;
+};
+
+/**
+ * Initializes a flag listener. Must be called before passing the listener
+ * to LDClientSDK_FlagNotifier_OnFlagChange.
+ *
+ * Create the struct, initialize the struct, set the FlagChanged handler
+ * and optionally UserData, and then pass the struct to
+ * LDClientSDK_FlagNotifier_OnFlagChange.
+ *
+ * @param backend Backend to initialize.
+ */
+LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
+
+/**
+ * Listen for changes for the specific flag.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param listener The listener, whose FlagChanged callback will be invoked,
+ * when the flag changes. Must not be NULL.
+ *
+ * @return A LDListenerConnection. The connection can be freed using
+ * LDListenerConnection_Free and the listener can be disconnected using
+ * LDListenerConnection_Disconnect.
+ */
+LD_EXPORT(LDListenerConnection)
+LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
+                                              char const* flag_key,
+                                              struct LDFlagListener listener);
 
 #ifdef __cplusplus
 }

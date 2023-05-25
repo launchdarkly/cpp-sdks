@@ -1,6 +1,6 @@
 #pragma once
 
-namespace launchdarkly::client_side {
+namespace launchdarkly {
 
 /**
  * Represents the connection of a listener.
