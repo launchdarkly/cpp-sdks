@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <unistd.h>
-
 // Set MOBILE_KEY to your LaunchDarkly mobile key.
 #define MOBILE_KEY ""
 
@@ -20,19 +18,8 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
-void ListenerFunction(char const* flag_key,
-                      LDValue new_value,
-                      LDValue old_value,
-                      bool deleted,
-                      void* user_data) {
-    printf("Got change %s %s \r\n", flag_key, (char*)user_data);
-    printf("Old value %s\r\n", LDValue_GetBool(old_value) ? "true" : "false");
-    printf("New value %s\r\n", LDValue_GetBool(new_value) ? "true" : "false");
-    printf("Deleted %s\r\n", deleted ? "true" : "false");
-}
-
 int main() {
-    if (!strlen(getenv("LD_SDK_KEY"))) {
+    if (!strlen(MOBILE_KEY)) {
         printf(
             "*** Please edit main.c to set MOBILE_KEY to your LaunchDarkly "
             "mobile key first\n\n");
@@ -40,7 +27,7 @@ int main() {
     }
 
     LDClientConfigBuilder config_builder =
-        LDClientConfigBuilder_New(getenv("LD_SDK_KEY"));
+        LDClientConfigBuilder_New(MOBILE_KEY);
 
     LDClientConfig config;
     LDStatus config_status =
@@ -77,16 +64,6 @@ int main() {
 
     printf("*** Feature flag '%s' is %s for this user\n\n", FEATURE_FLAG_KEY,
            flag_value ? "true" : "false");
-
-    struct LDFlagListener listener;
-
-    LDFlagListener_Init(listener);
-    listener.UserData = "Potato";
-    listener.FlagChanged = ListenerFunction;
-
-    LDListenerConnection connection = LDClientSDK_FlagNotifier_OnFlagChange(client, "my-boolean-flag", listener);
-
-    LDListenerConnection_Free(connection);
 
     // Here we ensure that the SDK shuts down cleanly and has a chance to
     // deliver analytics events to LaunchDarkly before the program exits. If
