@@ -2,6 +2,7 @@
 #include <launchdarkly/context_builder.hpp>
 
 #include <iostream>
+#include <string.h>
 
 // Set MOBILE_KEY to your LaunchDarkly mobile key.
 #define MOBILE_KEY ""

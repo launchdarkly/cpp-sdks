@@ -53,6 +53,8 @@ TEST(ClientBindings, RegisterFlagListener) {
 
     LDListenerConnection connection = LDClientSDK_FlagNotifier_OnFlagChange(sdk, "my-boolean-flag", listener);
 
+    LDListenerConnection_Disconnect(connection);
+
     LDListenerConnection_Free(connection);
     LDClientSDK_Free(sdk);
 }
