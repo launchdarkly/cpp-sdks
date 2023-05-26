@@ -658,9 +658,18 @@ LDClientSDK_DataSourceStatus_OnStatusChange(
     LDClientSDK sdk,
     struct LDDataSourceStatusListener listener);
 
+/**
+ * The current status of the data source.
+ *
+ * The caller must free the returned value using LDDataSourceStatus_Free.
+ */
 LD_EXPORT(LDDataSourceStatus)
 LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
 
+/**
+ * Frees the data source status.
+ * @param status The data source status to free.
+ */
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
 
 #ifdef __cplusplus
