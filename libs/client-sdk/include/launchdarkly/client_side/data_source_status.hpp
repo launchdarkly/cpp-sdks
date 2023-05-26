@@ -161,7 +161,7 @@ class DataSourceStatus {
      * The meaning of this depends on the current state:
      * - For DataSourceState::kInitializing, it is the time that the SDK started
      * initializing.
-     * - For <see cref="DataSourceState.Valid"/>, it is the time that the data
+     * - For DataSourceState::kValid, it is the time that the data
      * source most recently entered a valid state, after previously having been
      * DataSourceState::kInitializing or an invalid state such as
      * DataSourceState::kInterrupted.

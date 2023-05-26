@@ -12,6 +12,7 @@
 #include <launchdarkly/bindings/c/value.h>
 
 #include <stddef.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -391,7 +392,7 @@ struct LDFlagListener {
      * Callback function which is invoked for flag changes.
      *
      * The provided pointers are only valid for the duration of the function
-     * call.
+     * call (excluding UserData, whose lifetime is controlled by the caller).
      *
      * @param flag_key The name of the flag that changed.
      * @param new_value The new value of the flag. If there was not an new
@@ -405,7 +406,7 @@ struct LDFlagListener {
     FlagChangedCallbackFn FlagChanged;
 
     /**
-     * UserData is forwarded into both Enabled and Write.
+     * UserData is forwarded into callback functions.
      */
     void* UserData;
 };
@@ -418,7 +419,7 @@ struct LDFlagListener {
  * and optionally UserData, and then pass the struct to
  * LDClientSDK_FlagNotifier_OnFlagChange.
  *
- * @param backend Backend to initialize.
+ * @param listener Listener to initialize.
  */
 LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
 
@@ -436,8 +437,231 @@ LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
  */
 LD_EXPORT(LDListenerConnection)
 LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
-                                              char const* flag_key,
-                                              struct LDFlagListener listener);
+                                      char const* flag_key,
+                                      struct LDFlagListener listener);
+
+typedef struct _LDDataSourceStatus* LDDataSourceStatus;
+typedef struct _LDDataSourceStatus_ErrorInfo* LDDataSourceStatus_ErrorInfo;
+
+/**
+ * Enumeration of possible data source states.
+ */
+enum LDDataSourceStatus_State {
+    /**
+     * The initial state of the data source when the SDK is being
+     * initialized.
+     *
+     * If it encounters an error that requires it to retry initialization,
+     * the state will remain at kInitializing until it either succeeds and
+     * becomes LD_DATASOURCESTATUS_STATE_VALID, or permanently fails and becomes
+     * LD_DATASOURCESTATUS_STATE_SHUTDOWN.
+     */
+    LD_DATASOURCESTATUS_STATE_INITIALIZING = 0,
+
+    /**
+     * Indicates that the data source is currently operational and has not
+     * had any problems since the last time it received data.
+     *
+     * In streaming mode, this means that there is currently an open stream
+     * connection and that at least one initial message has been received on
+     * the stream. In polling mode, it means that the last poll request
+     * succeeded.
+     */
+    LD_DATASOURCESTATUS_STATE_VALID = 1,
+
+    /**
+     * Indicates that the data source encountered an error that it will
+     * attempt to recover from.
+     *
+     * In streaming mode, this means that the stream connection failed, or
+     * had to be dropped due to some other error, and will be retried after
+     * a backoff delay. In polling mode, it means that the last poll request
+     * failed, and a new poll request will be made after the configured
+     * polling interval.
+     */
+    LD_DATASOURCESTATUS_STATE_INTERRUPTED = 2,
+
+    /**
+     * Indicates that the application has told the SDK to stay offline.
+     */
+    LD_DATASOURCESTATUS_STATE_OFFLINE = 3,
+
+    /**
+     * Indicates that the data source has been permanently shut down.
+     *
+     * This could be because it encountered an unrecoverable error (for
+     * instance, the LaunchDarkly service rejected the SDK key; an invalid
+     * SDK key will never become valid), or because the SDK client was
+     * explicitly shut down.
+     */
+    LD_DATASOURCESTATUS_STATE_SHUTDOWN = 4
+};
+
+/**
+ * A description of an error condition that the data source encountered.
+ */
+enum LDDataSourceStatus_ErrorKind {
+    /**
+     * An unexpected error, such as an uncaught exception, further
+     * described by the error message.
+     */
+    LD_DATASOURCESTATUS_ERRORKIND_UNKNOWN = 0,
+
+    /**
+     * An I/O error such as a dropped connection.
+     */
+    LD_DATASOURCESTATUS_ERRORKIND_NETWORK_ERROR = 1,
+
+    /**
+     * The LaunchDarkly service returned an HTTP response with an error
+     * status, available in the status code.
+     */
+    LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE = 2,
+
+    /**
+     * The SDK received malformed data from the LaunchDarkly service.
+     */
+    LD_DATASOURCESTATUS_ERRORKIND_INVALID_DATA = 3,
+
+    /**
+     * The data source itself is working, but when it tried to put an
+     * update into the data store, the data store failed (so the SDK may
+     * not have the latest data).
+     */
+    LD_DATASOURCESTATUS_ERRORKIND_STORE_ERROR = 4,
+};
+
+/**
+ * Get an enumerated value representing the overall current state of the data
+ * source.
+ */
+LD_EXPORT(LDDataSourceStatus_State)
+LDDataSourceStatus_GetState(LDDataSourceStatus status);
+
+/**
+ * Information about the last error that the data source encountered, if
+ * any.
+ *
+ * This property should be updated whenever the data source encounters a
+ * problem, even if it does not cause the state to change. For instance, if
+ * a stream connection fails and the state changes to
+ * LD_DATASOURCESTATUS_STATE_INTERRUPTED, and then subsequent attempts to
+ * restart the connection also fail, the state will remain
+ * LD_DATASOURCESTATUS_STATE_INTERRUPTED but the error information will be
+ * updated each time-- and the last error will still be reported in this
+ * property even if the state later becomes LD_DATASOURCESTATUS_STATE_VALID.
+ */
+LD_EXPORT(LDDataSourceStatus_ErrorInfo)
+LDDataSourceStatus_State_GetLastError(LDDataSourceStatus status);
+
+/**
+ * The date/time that the value of State most recently changed.
+ *
+ * The meaning of this depends on the current state:
+ * - For LD_DATASOURCESTATUS_STATE_INITIALIZING, it is the time that the SDK
+ * started initializing.
+ * - For LD_DATASOURCESTATUS_STATE_VALID, it is the time that the data
+ * source most recently entered a valid state, after previously having been
+ * LD_DATASOURCESTATUS_STATE_INITIALIZING or an invalid state such as
+ * LD_DATASOURCESTATUS_STATE_INTERRUPTED.
+ * - For LD_DATASOURCESTATUS_STATE_INTERRUPTED, it is the time that the data
+ * source most recently entered an error state, after previously having been
+ * DataSourceState::kValid.
+ * - For LD_DATASOURCESTATUS_STATE_SHUTDOWN, it is the time that the data source
+ * encountered an unrecoverable error or that the SDK was explicitly shut
+ * down.
+ */
+LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
+
+/**
+ * Get an enumerated value representing the general category of the error.
+ */
+LD_EXPORT(LDDataSourceStatus_ErrorKind)
+LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info);
+
+/**
+ * The HTTP status code if the error was
+ * LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE.
+ */
+LD_EXPORT(uint64_t)
+LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info);
+
+/**
+ * Any additional human-readable information relevant to the error.
+ *
+ * The format is subject to change and should not be relied on
+ * programmatically.
+ *
+ * The return value must be freed using LDMemory_FreeString.
+ */
+LD_EXPORT(char const*)
+LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info);
+
+/**
+ * The date/time that the error occurred.
+ */
+LD_EXPORT(time_t)
+LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info);
+
+typedef void (*DataSourceStatusCallbackFn)(LDDataSourceStatus status,
+                                           void* user_data);
+
+/**
+ * Defines a data source status listener which may be used to listen for
+ * changes to the data source status.
+ * The struct should be initialized using LDDataSourceStatusListener_Init
+ * before use.
+ */
+struct LDDataSourceStatusListener {
+    /**
+     * Callback function which is invoked for data source status changes.
+     *
+     * The provided pointers are only valid for the duration of the function
+     * call (excluding UserData, whose lifetime is controlled by the caller).
+     *
+     * @param status The updated data source status.
+     */
+    DataSourceStatusCallbackFn StatusChanged;
+
+    /**
+     * UserData is forwarded into callback functions.
+     */
+    void* UserData;
+};
+
+/**
+ * Initializes a data source status change listener. Must be called before
+ * passing the listener to LDClientSDK_DataSourceStatus_OnStatusChange.
+ *
+ * Create the struct, initialize the struct, set the StatusChanged handler
+ * and optionally UserData, and then pass the struct to
+ * LDClientSDK_DataSourceStatus_OnStatusChange.
+ *
+ * @param listener Listener to initialize.
+ */
+LD_EXPORT(void)
+LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener);
+
+/**
+ * Listen for changes to the data source status.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param listener The listener, whose StatusChanged callback will be invoked,
+ * when the data source status changes. Must not be NULL.
+ *
+ * @return A LDListenerConnection. The connection can be freed using
+ * LDListenerConnection_Free and the listener can be disconnected using
+ * LDListenerConnection_Disconnect.
+ */
+LD_EXPORT(LDListenerConnection)
+LDClientSDK_DataSourceStatus_OnStatusChange(
+    LDClientSDK sdk,
+    struct LDDataSourceStatusListener listener);
+
+LD_EXPORT(LDDataSourceStatus)
+LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
+
+LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
 
 #ifdef __cplusplus
 }
