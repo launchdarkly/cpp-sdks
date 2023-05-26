@@ -405,7 +405,7 @@ struct LDFlagListener {
     FlagChangedCallbackFn FlagChanged;
 
     /**
-     * UserData is forwarded into both Enabled and Write.
+     * UserData is forwarded into callback functions.
      */
     void* UserData;
 };
@@ -418,7 +418,7 @@ struct LDFlagListener {
  * and optionally UserData, and then pass the struct to
  * LDClientSDK_FlagNotifier_OnFlagChange.
  *
- * @param backend Backend to initialize.
+ * @param listener Listener to initialize.
  */
 LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
 
