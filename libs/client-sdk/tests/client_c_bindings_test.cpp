@@ -93,7 +93,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    struct LDDataSourceStatusListener listener;
+    struct LDDataSourceStatusListener listener{};
     LDDataSourceStatusListener_Init(listener);
 
     listener.UserData = const_cast<char*>("Potato");
