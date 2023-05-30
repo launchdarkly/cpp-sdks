@@ -13,18 +13,11 @@
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 
-#ifdef _MSC_VER
-// MSVC doesn't support strcasecmp.
-#define strcasecmp _stricmp
-#endif
-
 namespace launchdarkly::network {
 
 struct CaseInsensitiveComparator {
     bool operator()(std::string const& lhs,
-                    std::string const& rhs) const noexcept {
-        return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
-    }
+                    std::string const& rhs) const noexcept;
 };
 
 class HttpResult {
@@ -157,7 +150,3 @@ std::optional<std::string> AppendUrl(std::optional<std::string> url_in,
                                      std::string const& to_append);
 
 }  // namespace launchdarkly::network
-
-#ifdef _MSC_VER
-#undef strcasecmp _stricmp
-#endif
