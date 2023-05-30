@@ -371,12 +371,28 @@ LD_EXPORT(time_t)
 LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info) {}
 
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener) {}
+LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener) {
+
+}
 
 LD_EXPORT(LDListenerConnection)
 LDClientSDK_DataSourceStatus_OnStatusChange(
     LDClientSDK sdk,
-    struct LDDataSourceStatusListener listener) {}
+    struct LDDataSourceStatusListener listener) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    if (listener.StatusChanged) {
+        auto connection =
+            TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
+                [listener](data_sources::DataSourceStatus status) {
+                    listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
+                                           listener.UserData);
+                });
+
+        return reinterpret_cast<LDListenerConnection>(connection.release());
+    }
+    return nullptr;
+}
 
 LD_EXPORT(LDDataSourceStatus)
 LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk) {

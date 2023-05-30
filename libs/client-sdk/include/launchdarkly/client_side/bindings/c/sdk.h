@@ -636,9 +636,14 @@ struct LDDataSourceStatusListener {
  * Initializes a data source status change listener. Must be called before
  * passing the listener to LDClientSDK_DataSourceStatus_OnStatusChange.
  *
+ * If the StatusChanged member of the listener struct is not set (NULL), then
+ * the function will not register a listener. In that case the return value
+ * will be NULL.
+ *
  * Create the struct, initialize the struct, set the StatusChanged handler
  * and optionally UserData, and then pass the struct to
- * LDClientSDK_DataSourceStatus_OnStatusChange.
+ * LDClientSDK_DataSourceStatus_OnStatusChange. NULL will be returned if the
+ * StatusChanged member of the listener struct is NULL.
  *
  * @param listener Listener to initialize.
  */
