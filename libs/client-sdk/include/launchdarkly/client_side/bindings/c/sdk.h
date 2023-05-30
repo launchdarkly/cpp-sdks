@@ -13,7 +13,7 @@
 
 #include <stddef.h>
 #include <time.h>
-#include <cstdint>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
