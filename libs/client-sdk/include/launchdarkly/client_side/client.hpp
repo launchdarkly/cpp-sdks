@@ -246,7 +246,7 @@ class IClient {
      * Returns the version of the SDK.
      * @return String representing version of the SDK.
      */
-    virtual char const* Version() const = 0;
+    [[nodiscard]] virtual char const* Version() const = 0;
 
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
@@ -318,7 +318,7 @@ class Client : public IClient {
 
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
-    char const* Version() const override;
+    [[nodiscard]] char const* Version() const override;
 
    private:
     inline static char const* const kVersion =
