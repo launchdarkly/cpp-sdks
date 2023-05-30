@@ -18,5 +18,9 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
+    char const* version = LDClientSDK_Version(sdk);
+    ASSERT_TRUE(version);
+    ASSERT_STRNE(version, "");
+
     LDClientSDK_Free(sdk);
 }
