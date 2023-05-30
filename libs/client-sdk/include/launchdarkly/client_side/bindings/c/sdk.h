@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 #include <time.h>
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -560,10 +561,11 @@ LDDataSourceStatus_GetState(LDDataSourceStatus status);
  * property even if the state later becomes LD_DATASOURCESTATUS_STATE_VALID.
  */
 LD_EXPORT(LDDataSourceStatus_ErrorInfo)
-LDDataSourceStatus_State_GetLastError(LDDataSourceStatus status);
+LDDataSourceStatus_GetLastError(LDDataSourceStatus status);
 
 /**
- * The date/time that the value of State most recently changed.
+ * The date/time that the value of State most recently changed, in seconds
+ * since epoch.
  *
  * The meaning of this depends on the current state:
  * - For LD_DATASOURCESTATUS_STATE_INITIALIZING, it is the time that the SDK
@@ -606,7 +608,7 @@ LD_EXPORT(char const*)
 LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info);
 
 /**
- * The date/time that the error occurred.
+ * The date/time that the error occurred, in seconds since epoch.
  */
 LD_EXPORT(time_t)
 LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info);
