@@ -16,7 +16,7 @@ jobs:
     env:
       # Port the test service (implemented in this repo) should bind to.
       TEST_SERVICE_PORT: 8123
-      TEST_SERVICE_BINARY: ./build/apps/sdk-contract-tests/sdk-tests
+      TEST_SERVICE_BINARY: ./build/contract-tests/sdk-contract-tests/sdk-tests
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
