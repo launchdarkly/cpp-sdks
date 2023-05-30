@@ -23,6 +23,10 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
+    char const* version = LDClientSDK_Version();
+    ASSERT_TRUE(version);
+    ASSERT_STREQ(version, "0.1.0");  // {x-release-please-version}
+
     LDClientSDK_Free(sdk);
 }
 
@@ -48,6 +52,10 @@ TEST(ClientBindings, RegisterFlagListener) {
     LDContext context = LDContextBuilder_Build(ctx_builder);
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
+
+    bool success = false;
+    LDClientSDK_Start(sdk, 3000, &success);
+    EXPECT_TRUE(success);
 
     struct LDFlagListener listener;
     LDFlagListener_Init(listener);
@@ -96,6 +104,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     bool success = false;
     LDClientSDK_Start(sdk, 3000, &success);
+    EXPECT_TRUE(success);
 
     LDListenerConnection_Disconnect(connection);
 
@@ -108,7 +117,6 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
     LDClientConfigBuilder_Offline(cfg_builder, true);
 
     LDClientConfig config;
-    LDClientConfigBuilder_Offline(cfg_builder, true);
     LDStatus status = LDClientConfigBuilder_Build(cfg_builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
 

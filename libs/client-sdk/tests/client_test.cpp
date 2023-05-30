@@ -13,6 +13,10 @@ TEST(ClientTest, ClientConstructedWithMinimalConfigAndContext) {
     Context context = ContextBuilder().Kind("cat", "shadow").Build();
 
     Client client(std::move(*config), context);
+
+    char const* version = client.Version();
+    ASSERT_TRUE(version);
+    ASSERT_STREQ(version, "0.1.0");  // {x-release-please-version}
 }
 
 TEST(ClientTest, AllFlagsIsEmpty) {
