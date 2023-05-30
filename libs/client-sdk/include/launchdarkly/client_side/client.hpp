@@ -254,9 +254,6 @@ class IClient {
 
 class Client : public IClient {
    public:
-    inline static char const* const kVersion =
-        "0.1.0";  // {x-release-please-version}
-
     Client(Config config, Context context);
 
     Client(Client&&) = delete;
@@ -315,7 +312,15 @@ class Client : public IClient {
 
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
+    /**
+     * Returns the version of the SDK.
+     * @return String representing version of the SDK.
+     */
+    [[nodiscard]] static char const* Version();
+
    private:
+    inline static char const* const kVersion =
+        "0.1.0";  // {x-release-please-version}
     std::unique_ptr<IClient> client;
 };
 

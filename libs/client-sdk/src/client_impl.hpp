@@ -37,7 +37,7 @@ class ClientImpl : public IClient {
     ClientImpl(ClientImpl const&) = delete;
     ClientImpl& operator=(ClientImpl) = delete;
     ClientImpl& operator=(ClientImpl&& other) = delete;
-
+    
     bool Initialized() const override;
 
     using FlagKey = std::string;
