@@ -374,21 +374,21 @@ LD_EXPORT(uint64_t)
 LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info) {
     LD_ASSERT_NOT_NULL(info);
 
-    TO_DATASOURCESTATUS_ERRORINFO(info)->StatusCode();
+    return TO_DATASOURCESTATUS_ERRORINFO(info)->StatusCode();
 }
 
 LD_EXPORT(char const*)
 LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info) {
     LD_ASSERT_NOT_NULL(info);
 
-    TO_DATASOURCESTATUS_ERRORINFO(info)->Message().c_str();
+    return TO_DATASOURCESTATUS_ERRORINFO(info)->Message().c_str();
 }
 
 LD_EXPORT(time_t)
 LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info) {
     LD_ASSERT_NOT_NULL(info);
 
-    std::chrono::duration_cast<std::chrono::seconds>(
+    return std::chrono::duration_cast<std::chrono::seconds>(
         TO_DATASOURCESTATUS_ERRORINFO(info)->Time().time_since_epoch())
         .count();
 }
@@ -430,7 +430,7 @@ LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
 }
 
-LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus_ErrorInfo info) {
+LD_EXPORT(void) LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info) {
     delete TO_DATASOURCESTATUS_ERRORINFO(info);
 }
 

@@ -1,8 +1,13 @@
 #include <gtest/gtest.h>
+
 #include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/bindings/c/context_builder.h>
-
 #include <launchdarkly/client_side/bindings/c/sdk.h>
+#include <launchdarkly/client_side/data_source_status.hpp>
+
+#include <chrono>
+
+using launchdarkly::client_side::data_sources::DataSourceStatus;
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDClientConfigBuilder cfg_builder = LDClientConfigBuilder_New("sdk-123");
@@ -89,7 +94,8 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
     LDListenerConnection connection =
         LDClientSDK_DataSourceStatus_OnStatusChange(sdk, listener);
 
-    // TODO: Wait for ready.
+    bool success = false;
+    LDClientSDK_Start(sdk, 3000, &success);
 
     LDListenerConnection_Disconnect(connection);
 
@@ -113,16 +119,55 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    LDDataSourceStatus ds_status = LDClientSDK_DataSourceStatus_Status(sdk);
+    LDDataSourceStatus status_1 = LDClientSDK_DataSourceStatus_Status(sdk);
+    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_INITIALIZING,
+              LDDataSourceStatus_GetState(status_1));
 
-    // TODO: Wait for ready.
+    bool success = false;
+    LDClientSDK_Start(sdk, 3000, &success);
 
+    LDDataSourceStatus status_2 = LDClientSDK_DataSourceStatus_Status(sdk);
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_OFFLINE,
-              LDDataSourceStatus_GetState(ds_status));
+              LDDataSourceStatus_GetState(status_2));
 
-    EXPECT_EQ(nullptr, LDDataSourceStatus_GetLastError(ds_status));
+    EXPECT_EQ(nullptr, LDDataSourceStatus_GetLastError(status_2));
 
-    EXPECT_NE(0, LDDataSourceStatus_StateSince(ds_status));
+    EXPECT_NE(0, LDDataSourceStatus_StateSince(status_2));
 
-    LDDataSourceStatus_Free(ds_status);
+    LDDataSourceStatus_Free(status_1);
+    LDDataSourceStatus_Free(status_2);
+}
+
+TEST(ClientBindings, ComplexDataSourceStatus) {
+    DataSourceStatus status(
+        DataSourceStatus::DataSourceState::kValid,
+        std::chrono::time_point<std::chrono::system_clock>{
+            std::chrono::seconds{200}},
+        DataSourceStatus::ErrorInfo(
+            DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, 404,
+            "Not found",
+            std::chrono::time_point<std::chrono::system_clock>{
+                std::chrono::seconds{100}}));
+
+    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
+              LDDataSourceStatus_GetState(
+                  reinterpret_cast<LDDataSourceStatus>(&status)));
+
+    EXPECT_EQ(200, LDDataSourceStatus_StateSince(
+                       reinterpret_cast<LDDataSourceStatus>(&status)));
+
+    LDDataSourceStatus_ErrorInfo info = LDDataSourceStatus_GetLastError(
+        reinterpret_cast<LDDataSourceStatus>(&status));
+
+    EXPECT_EQ(LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE,
+              LDDataSourceStatus_ErrorInfo_GetKind(info));
+
+    EXPECT_EQ(std::string("Not found"),
+              LDDataSourceStatus_ErrorInfo_Message(info));
+
+    EXPECT_EQ(100, LDDataSourceStatus_ErrorInfo_Time(info));
+
+    EXPECT_EQ(404, LDDataSourceStatus_ErrorInfo_StatusCode(info));
+
+    LDDataSourceStatus_ErrorInfo_Free(info);
 }
