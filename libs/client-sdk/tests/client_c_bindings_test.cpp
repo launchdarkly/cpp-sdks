@@ -143,6 +143,7 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 
     LDDataSourceStatus_Free(status_1);
     LDDataSourceStatus_Free(status_2);
+    LDClientSDK_Free(sdk);
 }
 
 TEST(ClientBindings, ComplexDataSourceStatus) {
