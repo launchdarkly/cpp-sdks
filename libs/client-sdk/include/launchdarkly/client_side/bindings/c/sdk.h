@@ -179,7 +179,7 @@ LDClientSDK_Flush(LDClientSDK sdk, unsigned int reserved);
  * Example:
  * @code
  * bool identified_successfully;
- * if (LDClientSDK_Identify(client, 5000, &identified_successfully)) {
+ * if (LDClientSDK_Identify(client, context, 5000, &identified_successfully)) {
  *     // The client was able to re-initialize in less than 5 seconds.
  *     if (identified_successfully) {
  *         // Evaluations will use data for the new context.
@@ -197,7 +197,7 @@ value
  *
  * @code
  * // Returns immediately.
- * LDClientSDK_Identify(client, LD_NONBLOCKING, NULL);
+ * LDClientSDK_Identify(client, context, LD_NONBLOCKING, NULL);
  * @endcode
  *
  *
@@ -448,8 +448,8 @@ LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
  */
 LD_EXPORT(LDListenerConnection)
 LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
-                                              char const* flag_key,
-                                              struct LDFlagListener listener);
+                                      char const* flag_key,
+                                      struct LDFlagListener listener);
 
 #ifdef __cplusplus
 }
