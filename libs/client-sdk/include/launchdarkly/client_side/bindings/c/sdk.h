@@ -540,7 +540,10 @@ LDDataSourceStatus_GetState(LDDataSourceStatus status);
 
 /**
  * Information about the last error that the data source encountered, if
- * any.
+ * any. If there has not been an error, then NULL will be returned.
+ *
+ * If a non-NULL value is returned, then it should be freed using
+ * LDDataSourceStatus_ErrorInfo_Free.
  *
  * This property should be updated whenever the data source encounters a
  * problem, even if it does not cause the state to change. For instance, if
@@ -671,6 +674,12 @@ LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
  * @param status The data source status to free.
  */
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
+
+/**
+ * Frees the data source status error information.
+ * @param status The error information to free.
+ */
+LD_EXPORT(void) LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info);
 
 #ifdef __cplusplus
 }
