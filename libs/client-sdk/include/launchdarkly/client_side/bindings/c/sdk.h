@@ -426,6 +426,10 @@ LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
 /**
  * Listen for changes for the specific flag.
  *
+ * If the FlagChanged member of the listener struct is not set (NULL), then the
+ * function will not register a listener. In that case the return value
+ * will be NULL.
+ *
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
  * @param listener The listener, whose FlagChanged callback will be invoked,
@@ -433,7 +437,8 @@ LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
  *
  * @return A LDListenerConnection. The connection can be freed using
  * LDListenerConnection_Free and the listener can be disconnected using
- * LDListenerConnection_Disconnect.
+ * LDListenerConnection_Disconnect. NULL will be returned if the FlagChanged
+ * member of the listener struct is NULL.
  */
 LD_EXPORT(LDListenerConnection)
 LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
