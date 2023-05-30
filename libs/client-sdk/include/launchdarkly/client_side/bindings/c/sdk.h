@@ -33,11 +33,10 @@ LDClientSDK_New(LDClientConfig config, LDContext context);
 
 /**
  * Returns the version of the SDK.
- * @param sdk SDK. Must not be NULL.
  * @return String representation of the SDK version.
  */
 LD_EXPORT(char const*)
-LDClientSDK_Version(LDClientSDK sdk);
+LDClientSDK_Version(void);
 
 /**
  * Starts the SDK, initiating a connection to LaunchDarkly if not offline.

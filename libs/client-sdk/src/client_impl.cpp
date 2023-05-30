@@ -89,11 +89,12 @@ static std::shared_ptr<IPersistence> MakePersistence(Config const& config) {
     return persistence.implementation;
 }
 
-ClientImpl::ClientImpl(Config config, Context context, std::string version)
-    : version_(std::move(version)),
-      config_(config),
+ClientImpl::ClientImpl(Config config,
+                       Context context,
+                       std::string const& version)
+    : config_(config),
       http_properties_(HttpPropertiesBuilder(config.HttpProperties())
-                           .Header("user-agent", "CPPClient/" + version_)
+                           .Header("user-agent", "CPPClient/" + version)
                            .Header("authorization", config.SdkKey())
                            .Build()),
       logger_(MakeLogger(config.Logging())),
@@ -127,10 +128,6 @@ ClientImpl::ClientImpl(Config config, Context context, std::string version)
         std::chrono::system_clock::now(), context_});
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
-}
-
-char const* ClientImpl::Version() const {
-    return version_.c_str();
 }
 
 // Was an attempt made to initialize the data source, and did that attempt

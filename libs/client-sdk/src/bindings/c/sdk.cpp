@@ -59,10 +59,8 @@ LDClientSDK_New(LDClientConfig config, LDContext context) {
 }
 
 LD_EXPORT(char const*)
-LDClientSDK_Version(LDClientSDK sdk) {
-    LD_ASSERT_NOT_NULL(sdk);
-
-    return TO_SDK(sdk)->Version();
+LDClientSDK_Version(void) {
+    return Client::Version();
 }
 
 LD_EXPORT(bool)
