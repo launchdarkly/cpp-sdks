@@ -47,7 +47,7 @@ TEST(ClientBindings, RegisterFlagListener) {
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDContextBuilder ctx_builder = LDContextBuilder_New();
-    LDContextBuilder_AddKind(ctx_builder, "user", "shadow");
+    LDContextBuilder_AddKind(ctx_builder, "`user", "shadow");
 
     LDContext context = LDContextBuilder_Build(ctx_builder);
 
@@ -57,14 +57,13 @@ TEST(ClientBindings, RegisterFlagListener) {
     LDClientSDK_Start(sdk, 3000, &success);
     EXPECT_TRUE(success);
 
-    struct LDFlagListener listener{};
+    struct LDFlagListener listener {};
     LDFlagListener_Init(listener);
     listener.UserData = const_cast<char*>("Potato");
     listener.FlagChanged = FlagListenerFunction;
 
     LDListenerConnection connection =
         LDClientSDK_FlagNotifier_OnFlagChange(sdk, "my-boolean-flag", listener);
-
     LDListenerConnection_Disconnect(connection);
 
     LDListenerConnection_Free(connection);
@@ -93,7 +92,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    struct LDDataSourceStatusListener listener{};
+    struct LDDataSourceStatusListener listener {};
     LDDataSourceStatusListener_Init(listener);
 
     listener.UserData = const_cast<char*>("Potato");

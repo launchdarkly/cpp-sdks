@@ -12,8 +12,8 @@
 #include <launchdarkly/bindings/c/value.h>
 
 #include <stddef.h>
-#include <time.h>
 #include <stdint.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -696,7 +696,8 @@ LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
  * Frees the data source status error information.
  * @param status The error information to free.
  */
-LD_EXPORT(void) LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info);
+LD_EXPORT(void)
+LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info);
 
 #ifdef __cplusplus
 }

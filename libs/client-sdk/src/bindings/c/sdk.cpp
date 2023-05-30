@@ -394,7 +394,7 @@ LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info) {
     LD_ASSERT_NOT_NULL(info);
 
     return std::chrono::duration_cast<std::chrono::seconds>(
-        TO_DATASOURCESTATUS_ERRORINFO(info)->Time().time_since_epoch())
+               TO_DATASOURCESTATUS_ERRORINFO(info)->Time().time_since_epoch())
         .count();
 }
 
@@ -435,7 +435,8 @@ LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
 }
 
-LD_EXPORT(void) LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info) {
+LD_EXPORT(void)
+LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info) {
     delete TO_DATASOURCESTATUS_ERRORINFO(info);
 }
 

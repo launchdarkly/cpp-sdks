@@ -36,4 +36,8 @@ Contains JSON definitions that are used to communicate with the test harness.
 
 **server (server.hpp)**
 
-Glues everything together, mainly providing the TCP acceptor that spawns new sessions. 
+Glues everything together, mainly providing the TCP acceptor that spawns new sessions.
+
+**session (session.hpp)**
+
+Prepares HTTP responses based on the results of commands sent to entities. 
