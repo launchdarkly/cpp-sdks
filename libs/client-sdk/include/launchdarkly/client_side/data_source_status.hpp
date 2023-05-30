@@ -193,6 +193,8 @@ class DataSourceStatus {
                      DateTime state_since,
                      std::optional<ErrorInfo> last_error);
 
+    DataSourceStatus(DataSourceStatus const& status);
+
    private:
     DataSourceState state_;
     DateTime state_since_;

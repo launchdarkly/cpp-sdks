@@ -379,7 +379,12 @@ LDClientSDK_DataSourceStatus_OnStatusChange(
     struct LDDataSourceStatusListener listener) {}
 
 LD_EXPORT(LDDataSourceStatus)
-LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk) {}
+LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
+        TO_SDK(sdk)->DataSourceStatus().Status()));
+}
 
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
