@@ -29,7 +29,7 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip-from ./apps/sdk-contract-tests/test-suppressions.txt'
+          extra_params: '-skip-from ./contract-tests/sdk-contract-tests/test-suppressions.txt'
   build-test:
     runs-on: ubuntu-22.04
     steps:
