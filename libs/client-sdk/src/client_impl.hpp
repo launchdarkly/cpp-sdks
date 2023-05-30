@@ -31,12 +31,14 @@
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context, std::string const& version);
+    ClientImpl(Config config, Context context, std::string version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
     ClientImpl& operator=(ClientImpl) = delete;
     ClientImpl& operator=(ClientImpl&& other) = delete;
+
+    char const* Version() const override;
 
     bool Initialized() const override;
 
@@ -116,6 +118,7 @@ class ClientImpl : public IClient {
         std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
             predicate);
 
+    std::string version_;
     Config config_;
     Logger logger_;
 

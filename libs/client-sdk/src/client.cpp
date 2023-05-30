@@ -96,4 +96,8 @@ flag_manager::IFlagNotifier& Client::FlagNotifier() {
     return client->FlagNotifier();
 }
 
+char const* Client::Version() const {
+    return client->Version();
+}
+
 }  // namespace launchdarkly::client_side

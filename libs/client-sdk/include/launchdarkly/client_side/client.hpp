@@ -242,6 +242,12 @@ class IClient {
      */
     virtual flag_manager::IFlagNotifier& FlagNotifier() = 0;
 
+    /**
+     * Returns the version of the SDK.
+     * @return String representing version of the SDK.
+     */
+    virtual char const* Version() const = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -254,9 +260,6 @@ class IClient {
 
 class Client : public IClient {
    public:
-    inline static char const* const kVersion =
-        "0.1.0";  // {x-release-please-version}
-
     Client(Config config, Context context);
 
     Client(Client&&) = delete;
@@ -315,7 +318,11 @@ class Client : public IClient {
 
     flag_manager::IFlagNotifier& FlagNotifier() override;
 
+    char const* Version() const override;
+
    private:
+    inline static char const* const kVersion =
+        "0.1.0";  // {x-release-please-version}
     std::unique_ptr<IClient> client;
 };
 
