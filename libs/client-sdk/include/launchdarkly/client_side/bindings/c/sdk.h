@@ -608,8 +608,6 @@ LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info);
  *
  * The format is subject to change and should not be relied on
  * programmatically.
- *
- * The return value must be freed using LDMemory_FreeString.
  */
 LD_EXPORT(char const*)
 LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info);
