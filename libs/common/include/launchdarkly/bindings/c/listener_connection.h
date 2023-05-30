@@ -39,3 +39,5 @@ LD_EXPORT(void) LDListenerConnection_Free(LDListenerConnection connection);
 #ifdef __cplusplus
 }
 #endif
+
+// NOLINTEND modernize-use-using
