@@ -49,7 +49,8 @@ add_library(${LIBNAME} OBJECT
         config/persistence_builder.cpp
         bindings/c/data/evaluation_detail.cpp
         bindings/c/memory_routines.cpp
-        config/logging_builder.cpp)
+        config/logging_builder.cpp
+        bindings/c/listener_connection.cpp)
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
