@@ -53,7 +53,7 @@ TEST(ClientBindings, RegisterFlagListener) {
     LDClientSDK_Start(sdk, 3000, &success);
     EXPECT_TRUE(success);
 
-    struct LDFlagListener listener;
+    struct LDFlagListener listener{};
     LDFlagListener_Init(listener);
     listener.UserData =  const_cast<char*>("Potato");
     listener.FlagChanged = ListenerFunction;
