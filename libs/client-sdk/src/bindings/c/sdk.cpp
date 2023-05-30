@@ -298,13 +298,11 @@ LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
     LD_ASSERT_NOT_NULL(sdk);
     LD_ASSERT_NOT_NULL(flag_key);
 
-    auto connection = TO_SDK(sdk)->FlagNotifier().OnFlagChange(
-        flag_key,
-        [listener](
-            std::shared_ptr<
-                launchdarkly::client_side::flag_manager::FlagValueChangeEvent>
-                event) {
-            if (listener.FlagChanged) {
+    if (listener.FlagChanged) {
+        auto connection = TO_SDK(sdk)->FlagNotifier().OnFlagChange(
+            flag_key,
+            [listener](std::shared_ptr<launchdarkly::client_side::flag_manager::
+                                           FlagValueChangeEvent> event) {
                 listener.FlagChanged(
                     event->FlagName().c_str(),
                     reinterpret_cast<LDValue>(
@@ -312,10 +310,12 @@ LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
                     reinterpret_cast<LDValue>(
                         const_cast<Value*>(&event->OldValue())),
                     event->Deleted(), listener.UserData);
-            }
-        });
+            });
 
-    return reinterpret_cast<LDListenerConnection>(connection.release());
+        return reinterpret_cast<LDListenerConnection>(connection.release());
+    }
+
+    return nullptr;
 }
 
 LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener) {
