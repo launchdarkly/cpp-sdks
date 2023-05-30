@@ -49,6 +49,9 @@ TEST(ClientBindings, RegisterFlagListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
+    bool success = false;
+    LDClientSDK_Start(sdk, 3000, &success);
+    EXPECT_TRUE(success);
 
     struct LDFlagListener listener;
     LDFlagListener_Init(listener);
