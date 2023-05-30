@@ -58,6 +58,11 @@ LDClientSDK_New(LDClientConfig config, LDContext context) {
     return FROM_SDK(sdk);
 }
 
+LD_EXPORT(char const*)
+LDClientSDK_Version(void) {
+    return Client::Version();
+}
+
 LD_EXPORT(bool)
 LDClientSDK_Start(LDClientSDK sdk,
                   unsigned int milliseconds,

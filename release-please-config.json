@@ -6,7 +6,9 @@
     "libs/client-sdk": {
       "initial-version": "0.1.0",
       "extra-files": [
-        "include/launchdarkly/client_side/client.hpp"
+        "include/launchdarkly/client_side/client.hpp",
+        "tests/client_c_bindings_test.cpp",
+        "tests/client_test.cpp"
       ]
     },
     "libs/server-sent-events": {
