@@ -61,7 +61,7 @@ class HttpPropertiesBuilder {
      * Set a write timeout. This is how long it takes to perform a Write
      * operation.
      *
-     * @param read_timeout The write timeout.
+     * @param write_timeout The write timeout.
      * @return A reference to this builder.
      */
     HttpPropertiesBuilder& WriteTimeout(

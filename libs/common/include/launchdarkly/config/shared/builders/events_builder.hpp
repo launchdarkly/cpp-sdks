@@ -86,8 +86,8 @@ class EventsBuilder {
      * necessary to call either of these methods, as the default behavior is to
      * treat all attributes as non-private unless otherwise specified.
      *
-     * @param value True for behavior of (1), false for default behavior of (2)
-     * or (3).
+     * @param all_attributes_private True for behavior of (1), false for default
+     * behavior of (2) or (3).
      * @return Reference to this builder.
      */
     EventsBuilder& AllAttributesPrivate(bool all_attributes_private);

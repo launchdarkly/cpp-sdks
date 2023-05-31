@@ -184,7 +184,7 @@ class DataSourceBuilder<ServerSDK> {
      * @param stream_builder The streaming builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& Method(Streaming builder);
+    DataSourceBuilder& Method(Streaming stream_builder);
 
     /**
      * Set the polling configuration for the builder.
@@ -196,7 +196,7 @@ class DataSourceBuilder<ServerSDK> {
      * @param polling_builder The polling builder.
      * @return Reference to this builder.
      */
-    DataSourceBuilder& Method(Polling builder);
+    DataSourceBuilder& Method(Polling polling_builder);
 
     /**
      * Build a data source config. This is used internal to the SDK.

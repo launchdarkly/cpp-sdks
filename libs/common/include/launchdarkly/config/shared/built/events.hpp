@@ -32,8 +32,8 @@ class Events final {
      * private or not.
      * @param private_attrs Which attributes should be treated as private, if
      * AllAttributesPrivate is false.
-     * @param security Whether a plaintext or encrypted client should be used
-     * for event delivery.
+     * @param delivery_retry_delay How long to wait before a redelivery attempt
+     * should be made.
      * @param flush_workers How many workers to use for concurrent event
      * delivery.
      */
