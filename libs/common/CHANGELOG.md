@@ -15,21 +15,6 @@
 
 * rename C iterator bindings to follow new/free pattern ([#129](https://github.com/launchdarkly/cpp-sdks/issues/129)) ([24dff9a](https://github.com/launchdarkly/cpp-sdks/commit/24dff9aebe4626bca02ccc6336ef46f2e41f76c7))
 
-## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.1.0...launchdarkly-cpp-common-v0.2.0) (2023-05-31)
-
-
-### Features
-
-* add AllFlags C binding ([#128](https://github.com/launchdarkly/cpp-sdks/issues/128)) ([9aa0794](https://github.com/launchdarkly/cpp-sdks/commit/9aa07941c1c9d4184f8ff009fccb03db785320c3))
-* Add C bindings for data source status. ([#124](https://github.com/launchdarkly/cpp-sdks/issues/124)) ([d175abb](https://github.com/launchdarkly/cpp-sdks/commit/d175abb26fdcdf28700315cdd7347dd1399cbe17))
-* Add c bindings for FlagNotifier. ([#119](https://github.com/launchdarkly/cpp-sdks/issues/119)) ([11a7f61](https://github.com/launchdarkly/cpp-sdks/commit/11a7f61d56deb1ee10e73fad134efdb05887f86f))
-* Allow for easier creation of contexts from existing contexts. ([#130](https://github.com/launchdarkly/cpp-sdks/issues/130)) ([5e18616](https://github.com/launchdarkly/cpp-sdks/commit/5e18616916dbb2a5ade86b06e17f194b3981fe37))
-
-
-### Bug Fixes
-
-* rename C iterator bindings to follow new/free pattern ([#129](https://github.com/launchdarkly/cpp-sdks/issues/129)) ([24dff9a](https://github.com/launchdarkly/cpp-sdks/commit/24dff9aebe4626bca02ccc6336ef46f2e41f76c7))
-
 ## 0.1.0 (2023-05-24)
 
 
