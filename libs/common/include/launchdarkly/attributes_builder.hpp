@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include <string>
 
 #include <launchdarkly/attribute_reference.hpp>

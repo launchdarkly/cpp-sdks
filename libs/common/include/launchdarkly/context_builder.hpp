@@ -3,7 +3,6 @@
 #include <launchdarkly/attributes_builder.hpp>
 #include <launchdarkly/context.hpp>
 
-#include <functional>
 #include <string>
 
 namespace launchdarkly {
