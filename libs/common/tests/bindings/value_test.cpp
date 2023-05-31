@@ -75,7 +75,7 @@ TEST(ValueCBindingTests, CanCreateArray) {
 
     EXPECT_EQ(LDValueType_Array, LDValue_Type(val_ptr));
 
-    auto* iter = LDValue_CreateArrayIter(val_ptr);
+    auto* iter = LDValue_ArrayIter_New(val_ptr);
 
     auto index = 0;
     while (!LDValue_ArrayIter_End(iter)) {
@@ -102,7 +102,7 @@ TEST(ValueCBindingTests, CanCreateArray) {
         index++;
     }
 
-    LDValue_DestroyArrayIter(iter);
+    LDValue_ArrayIter_Free(iter);
 
     // Should have iterated 4 items.
     EXPECT_EQ(4, index);
@@ -128,7 +128,7 @@ TEST(ValueCBindingTests, CanCreateObject) {
 
     EXPECT_EQ(LDValueType_Object, LDValue_Type(val_ptr));
 
-    auto* iter = LDValue_CreateObjectIter(val_ptr);
+    auto* iter = LDValue_ObjectIter_New(val_ptr);
 
     auto index = 0;
     while (!LDValue_ObjectIter_End(iter)) {
@@ -159,7 +159,7 @@ TEST(ValueCBindingTests, CanCreateObject) {
         LDValue_ObjectIter_Next(iter);
     }
 
-    LDValue_DestroyObjectIter(iter);
+    LDValue_ObjectIter_Free(iter);
 
     // Should have iterated 4 items.
     EXPECT_EQ(4, index);

@@ -185,9 +185,9 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val);
  *
  * @param value Target LDValue. Must not be NULL.
  * @return Iterator, or NULL if not an array-type. The iterator
- * must should be destroyed with LDValue_DestroyArrayIter.
+ * must should be destroyed with LDValue_ArrayIter_Free.
  */
-LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val);
+LD_EXPORT(LDValue_ArrayIter) LDValue_ArrayIter_New(LDValue val);
 
 /**
  * Move the array-type iterator to the next item. Should only be done for an
@@ -219,7 +219,7 @@ LD_EXPORT(LDValue) LDValue_ArrayIter_Value(LDValue_ArrayIter iter);
  * Destroy an array iterator.
  * @param iter The iterator to destroy.
  */
-LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter);
+LD_EXPORT(void) LDValue_ArrayIter_Free(LDValue_ArrayIter iter);
 
 /**
  * Obtain iterator over an object-type LDValue, otherwise NULL.
@@ -228,9 +228,9 @@ LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter);
  *
  * @param value Target LDValue. Must not be NULL.
  * @return Iterator, or NULL if not an object-type. The iterator
- * must should be destroyed with LDValue_DestroyObjectIter.
+ * must should be destroyed with LDValue_ObjectIter_Free.
  */
-LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val);
+LD_EXPORT(LDValue_ObjectIter) LDValue_ObjectIter_New(LDValue val);
 
 /**
  * Move the object-type iterator to the next item. Should only be done for an
@@ -272,7 +272,7 @@ LD_EXPORT(char const*) LDValue_ObjectIter_Key(LDValue_ObjectIter iter);
  * Destroy an object iterator.
  * @param iter The iterator to destroy.
  */
-LD_EXPORT(void) LDValue_DestroyObjectIter(LDValue_ObjectIter iter);
+LD_EXPORT(void) LDValue_ObjectIter_Free(LDValue_ObjectIter iter);
 
 #ifdef __cplusplus
 }
