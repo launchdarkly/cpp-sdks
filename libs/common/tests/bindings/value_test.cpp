@@ -132,7 +132,7 @@ TEST(ValueCBindingTests, CanCreateObject) {
 
     auto index = 0;
     while (!LDValue_ObjectIter_End(iter)) {
-        auto const* key_at = LdValue_ObjectIter_Key(iter);
+        auto const* key_at = LDValue_ObjectIter_Key(iter);
         if (strcmp(key_at, "null") == 0) {
             auto* value_at = LDValue_ObjectIter_Value(iter);
             EXPECT_EQ(LDValueType_Null, LDValue_Type(value_at));

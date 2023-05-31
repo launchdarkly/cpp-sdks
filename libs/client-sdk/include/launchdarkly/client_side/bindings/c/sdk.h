@@ -382,6 +382,21 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
 /**
  * Returns a map from feature flag keys to feature flag values for the current
  * context.
+ *
+ * In the example, all flags of type boolean are printed.
+ * @code
+ * LDValue all_flags = LDClientSDK_AllFlags(sdk);
+ * LDValue_ObjectIter it;
+ * for (it = LDValue_CreateObjectIter(all_flags);
+ * !LDValue_ObjectIter_End(it); LDValue_ObjectIter_Next(it)) { char
+ * const* flag_key = LDValue_ObjectIter_Key(it); LDValue flag_val_ref =
+ * LDValue_ObjectIter_Value(it);
+ *
+ *   if (LDValue_Type(flag_val_ref) == LDValueType_Bool) {
+ *       printf("%s: %d\n", flag_key, LDValue_GetBool(flag_val_ref));
+ *   }
+ * }
+ * @endcode
  * @param sdk SDK. Must not be NULL.
  * @return Value of type Object.
  */
