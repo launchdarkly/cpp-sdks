@@ -94,7 +94,7 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
     }
 }
 
-LD_EXPORT(LDValue_ArrayIter) LDValue_CreateArrayIter(LDValue val) {
+LD_EXPORT(LDValue_ArrayIter) LDValue_ArrayIter_New(LDValue val) {
     LD_ASSERT_NOT_NULL(val);
 
     if (AS_VALUE(val)->IsArray()) {
@@ -126,13 +126,13 @@ LD_EXPORT(LDValue) LDValue_ArrayIter_Value(LDValue_ArrayIter iter) {
     return AS_LDVALUE(const_cast<Value*>(&(*val_iter->iter)));
 }
 
-LD_EXPORT(void) LDValue_DestroyArrayIter(LDValue_ArrayIter iter) {
+LD_EXPORT(void) LDValue_ArrayIter_Free(LDValue_ArrayIter iter) {
     LD_ASSERT_NOT_NULL(iter);
 
     delete AS_ARR_ITER(iter);
 }
 
-LD_EXPORT(LDValue_ObjectIter) LDValue_CreateObjectIter(LDValue val) {
+LD_EXPORT(LDValue_ObjectIter) LDValue_ObjectIter_New(LDValue val) {
     LD_ASSERT_NOT_NULL(val);
 
     if (AS_VALUE(val)->IsObject()) {
@@ -171,7 +171,7 @@ LD_EXPORT(char const*) LDValue_ObjectIter_Key(LDValue_ObjectIter iter) {
     return val_iter->iter->first.c_str();
 }
 
-LD_EXPORT(void) LDValue_DestroyObjectIter(LDValue_ObjectIter iter) {
+LD_EXPORT(void) LDValue_ObjectIter_Free(LDValue_ObjectIter iter) {
     LD_ASSERT_NOT_NULL(iter);
 
     delete AS_OBJ_ITER(iter);
