@@ -1,3 +1,4 @@
+/** @file */
 // NOLINTBEGIN modernize-use-using
 
 #pragma once

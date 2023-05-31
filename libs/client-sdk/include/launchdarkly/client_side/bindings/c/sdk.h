@@ -1,5 +1,7 @@
+/** @file sdk.h
+ * @brief LaunchDarkly Client-side C Bindings.
+ */
 // NOLINTBEGIN modernize-use-using
-
 #pragma once
 
 #include <launchdarkly/bindings/c/config/config.h>

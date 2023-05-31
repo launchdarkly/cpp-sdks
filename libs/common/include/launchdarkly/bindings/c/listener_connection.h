@@ -1,3 +1,4 @@
+/** @file */
 // NOLINTBEGIN modernize-use-using
 
 #pragma once
@@ -18,7 +19,7 @@ extern "C" {  // only need to export C interface if
  * Freeing an LDListenerConnection does not disconnect the connection. If it is
  * deleted, without being disconnected, then the listener will remain active
  * until the associated SDK is freed.
-*/
+ */
 typedef struct _LDListenerConnection* LDListenerConnection;
 
 /**
@@ -27,7 +28,8 @@ typedef struct _LDListenerConnection* LDListenerConnection;
  * @param connection The connection for the listener to disconnect.
  * Must not be NULL.
  */
-LD_EXPORT(void) LDListenerConnection_Disconnect(LDListenerConnection connection);
+LD_EXPORT(void)
+LDListenerConnection_Disconnect(LDListenerConnection connection);
 
 /**
  * Free a listener connection.
