@@ -21,6 +21,11 @@ namespace launchdarkly::client_side {
  */
 class IClient {
    public:
+    /**
+     * Represents the key of a feature flag.
+     */
+    using FlagKey = std::string;
+
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
      * If StartAsync isn't called, the client is able to post events but is
@@ -49,14 +54,13 @@ class IClient {
     [[nodiscard]] virtual bool Initialized() const = 0;
 
     /**
-     * Returns a map from feature flag keys to <see cref="LdValue"/> feature
+     * Returns a map from feature flag keys to feature
      * flag values for the current context.
      *
      * This method will not send analytics events back to LaunchDarkly.
      *
-     * @return a map from feature flag keys to values for the current context
+     * @return A map from feature flag keys to values for the current context.
      */
-    using FlagKey = std::string;
     [[nodiscard]] virtual std::unordered_map<FlagKey, Value> AllFlags()
         const = 0;
 
