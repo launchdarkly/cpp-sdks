@@ -28,7 +28,7 @@ class DataSourceStatus {
          * the state will remain at kInitializing until it either succeeds and
          * becomes kValid, or permanently fails and becomes kShutdown.
          */
-        kInitializing,
+        kInitializing = 0,
 
         /**
          * Indicates that the data source is currently operational and has not
@@ -39,7 +39,7 @@ class DataSourceStatus {
          * the stream. In polling mode, it means that the last poll request
          * succeeded.
          */
-        kValid,
+        kValid = 1,
 
         /**
          * Indicates that the data source encountered an error that it will
@@ -51,12 +51,12 @@ class DataSourceStatus {
          * failed, and a new poll request will be made after the configured
          * polling interval.
          */
-        kInterrupted,
+        kInterrupted = 2,
 
         /**
          * Indicates that the application has told the SDK to stay offline.
          */
-        kSetOffline,
+        kSetOffline = 3,
 
         /**
          * Indicates that the data source has been permanently shut down.
@@ -66,7 +66,7 @@ class DataSourceStatus {
          * SDK key will never become valid), or because the SDK client was
          * explicitly shut down.
          */
-        kShutdown,
+        kShutdown = 4,
 
         // BackgroundDisabled,
         // TODO: A plugin of sorts would likely be required for some
@@ -88,30 +88,30 @@ class DataSourceStatus {
              * An unexpected error, such as an uncaught exception, further
              * described by the error message.
              */
-            kUnknown,
+            kUnknown = 0,
 
             /**
              * An I/O error such as a dropped connection.
              */
-            kNetworkError,
+            kNetworkError = 1,
 
             /**
              * The LaunchDarkly service returned an HTTP response with an error
              * status, available in the status code.
              */
-            kErrorResponse,
+            kErrorResponse = 2,
 
             /**
              * The SDK received malformed data from the LaunchDarkly service.
              */
-            kInvalidData,
+            kInvalidData = 3,
 
             /**
              * The data source itself is working, but when it tried to put an
              * update into the data store, the data store failed (so the SDK may
              * not have the latest data).
              */
-            kStoreError
+            kStoreError = 4
         };
 
         /**
@@ -161,7 +161,7 @@ class DataSourceStatus {
      * The meaning of this depends on the current state:
      * - For DataSourceState::kInitializing, it is the time that the SDK started
      * initializing.
-     * - For <see cref="DataSourceState.Valid"/>, it is the time that the data
+     * - For DataSourceState::kValid, it is the time that the data
      * source most recently entered a valid state, after previously having been
      * DataSourceState::kInitializing or an invalid state such as
      * DataSourceState::kInterrupted.
@@ -192,6 +192,8 @@ class DataSourceStatus {
     DataSourceStatus(DataSourceState state,
                      DateTime state_since,
                      std::optional<ErrorInfo> last_error);
+
+    DataSourceStatus(DataSourceStatus const& status);
 
    private:
     DataSourceState state_;
