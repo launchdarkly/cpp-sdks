@@ -42,6 +42,11 @@ std::optional<DataSourceStatus::ErrorInfo> DataSourceStatus::LastError() const {
     return last_error_;
 }
 
+DataSourceStatus::DataSourceStatus(DataSourceStatus const& status)
+    : state_(status.State()),
+      state_since_(status.StateSince()),
+      last_error_(status.LastError()) {}
+
 DataSourceStatus::DataSourceStatus(DataSourceState state,
                                    DataSourceStatus::DateTime state_since,
                                    std::optional<ErrorInfo> last_error)
