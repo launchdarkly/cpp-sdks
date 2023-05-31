@@ -80,21 +80,21 @@ TEST(ValueCBindingTests, CanCreateArray) {
     auto index = 0;
     while (!LDValue_ArrayIter_End(iter)) {
         if (index == 0) {
-            auto* value_at = LdValue_ArrayIter_Value(iter);
+            auto* value_at = LDValue_ArrayIter_Value(iter);
             EXPECT_EQ(LDValueType_Null, LDValue_Type(value_at));
         }
         if (index == 1) {
-            auto* value_at = LdValue_ArrayIter_Value(iter);
+            auto* value_at = LDValue_ArrayIter_Value(iter);
             EXPECT_EQ(LDValueType_Bool, LDValue_Type(value_at));
             EXPECT_TRUE(LDValue_GetBool(value_at));
         }
         if (index == 2) {
-            auto* value_at = LdValue_ArrayIter_Value(iter);
+            auto* value_at = LDValue_ArrayIter_Value(iter);
             EXPECT_EQ(LDValueType_Number, LDValue_Type(value_at));
             EXPECT_EQ(17, LDValue_GetNumber(value_at));
         }
         if (index == 3) {
-            auto* value_at = LdValue_ArrayIter_Value(iter);
+            auto* value_at = LDValue_ArrayIter_Value(iter);
             EXPECT_EQ(LDValueType_String, LDValue_Type(value_at));
             EXPECT_EQ(std::string("Potato"), LDValue_GetString(value_at));
         }
@@ -134,24 +134,24 @@ TEST(ValueCBindingTests, CanCreateObject) {
     while (!LDValue_ObjectIter_End(iter)) {
         auto const* key_at = LdValue_ObjectIter_Key(iter);
         if (strcmp(key_at, "null") == 0) {
-            auto* value_at = LdValue_ObjectIter_Value(iter);
+            auto* value_at = LDValue_ObjectIter_Value(iter);
             EXPECT_EQ(LDValueType_Null, LDValue_Type(value_at));
             index++;
         }
         if (strcmp(key_at, "bool") == 0) {
-            auto* value_at = LdValue_ObjectIter_Value(iter);
+            auto* value_at = LDValue_ObjectIter_Value(iter);
             EXPECT_EQ(LDValueType_Bool, LDValue_Type(value_at));
             EXPECT_TRUE(LDValue_GetBool(value_at));
             index++;
         }
         if (strcmp(key_at, "num") == 0) {
-            auto* value_at = LdValue_ObjectIter_Value(iter);
+            auto* value_at = LDValue_ObjectIter_Value(iter);
             EXPECT_EQ(LDValueType_Number, LDValue_Type(value_at));
             EXPECT_EQ(17, LDValue_GetNumber(value_at));
             index++;
         }
         if (strcmp(key_at, "str") == 0) {
-            auto* value_at = LdValue_ObjectIter_Value(iter);
+            auto* value_at = LDValue_ObjectIter_Value(iter);
             EXPECT_EQ(LDValueType_String, LDValue_Type(value_at));
             EXPECT_EQ(std::string("Potato"), LDValue_GetString(value_at));
             index++;

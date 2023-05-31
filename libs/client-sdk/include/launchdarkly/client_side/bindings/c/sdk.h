@@ -380,6 +380,15 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
                                 LDEvalDetail* out_detail);
 
 /**
+ * Returns a map from feature flag keys to feature flag values for the current
+ * context.
+ * @param sdk SDK. Must not be NULL.
+ * @return Value of type Object.
+ */
+LD_EXPORT(LDValue)
+LDClientSDK_AllFlags(LDClientSDK sdk);
+
+/**
  * Frees the SDK's resources, shutting down any connections. May block.
  * @param sdk SDK.
  */
@@ -548,7 +557,7 @@ enum LDDataSourceStatus_ErrorKind {
  * Get an enumerated value representing the overall current state of the data
  * source.
  */
-LD_EXPORT(LDDataSourceStatus_State)
+LD_EXPORT(enum LDDataSourceStatus_State)
 LDDataSourceStatus_GetState(LDDataSourceStatus status);
 
 /**
@@ -593,7 +602,7 @@ LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
 /**
  * Get an enumerated value representing the general category of the error.
  */
-LD_EXPORT(LDDataSourceStatus_ErrorKind)
+LD_EXPORT(enum LDDataSourceStatus_ErrorKind)
 LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info);
 
 /**
@@ -660,7 +669,7 @@ struct LDDataSourceStatusListener {
  * @param listener Listener to initialize.
  */
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener);
+LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener listener);
 
 /**
  * Listen for changes to the data source status.

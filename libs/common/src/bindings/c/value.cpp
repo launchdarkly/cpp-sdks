@@ -119,7 +119,7 @@ LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter) {
     return val_iter->End();
 }
 
-LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter) {
+LD_EXPORT(LDValue) LDValue_ArrayIter_Value(LDValue_ArrayIter iter) {
     LD_ASSERT_NOT_NULL(iter);
 
     auto* val_iter = AS_ARR_ITER(iter);
@@ -157,14 +157,14 @@ LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter) {
     return val_iter->End();
 }
 
-LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter) {
+LD_EXPORT(LDValue) LDValue_ObjectIter_Value(LDValue_ObjectIter iter) {
     LD_ASSERT_NOT_NULL(iter);
 
     auto* val_iter = AS_OBJ_ITER(iter);
     return AS_LDVALUE(const_cast<Value*>(&val_iter->iter->second));
 }
 
-LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter) {
+LD_EXPORT(char const*) LDValue_ObjectIter_Key(LDValue_ObjectIter iter) {
     LD_ASSERT_NOT_NULL(iter);
 
     auto* val_iter = AS_OBJ_ITER(iter);
