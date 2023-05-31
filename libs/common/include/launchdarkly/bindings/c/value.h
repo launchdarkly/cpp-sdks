@@ -206,12 +206,14 @@ LD_EXPORT(void) LDValue_ArrayIter_Next(LDValue_ArrayIter iter);
 LD_EXPORT(bool) LDValue_ArrayIter_End(LDValue_ArrayIter iter);
 
 /**
- * Get the value for the array-type iterator.
+ * Get the value for the array-type iterator. The value's lifetime is valid
+ * only for as long as the iterator. To obtain a copy, call @ref
+ * LDValue_NewValue.
  *
  * @param iter The iterator to get a value for. Must not be NULL.
  * @return The value.
  */
-LD_EXPORT(LDValue) LdValue_ArrayIter_Value(LDValue_ArrayIter iter);
+LD_EXPORT(LDValue) LDValue_ArrayIter_Value(LDValue_ArrayIter iter);
 
 /**
  * Destroy an array iterator.
@@ -247,12 +249,14 @@ LD_EXPORT(void) LDValue_ObjectIter_Next(LDValue_ObjectIter iter);
 LD_EXPORT(bool) LDValue_ObjectIter_End(LDValue_ObjectIter iter);
 
 /**
- * Get the value for an object-type iterator.
+ * Get the value for an object-type iterator. The value's lifetime is valid
+ * only for as long as the iterator. To obtain a copy, call @ref
+ * LDValue_NewValue.
  *
  * @param iter The iterator to get a value for. Must not be NULL.
  * @return The value.
  */
-LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter);
+LD_EXPORT(LDValue) LDValue_ObjectIter_Value(LDValue_ObjectIter iter);
 
 /**
  * Get the key for an object-type iterator.
@@ -262,7 +266,7 @@ LD_EXPORT(LDValue) LdValue_ObjectIter_Value(LDValue_ObjectIter iter);
  * @param iter The iterator to get a key for. Must not be NULL.
  * @return The key.
  */
-LD_EXPORT(char const*) LdValue_ObjectIter_Key(LDValue_ObjectIter iter);
+LD_EXPORT(char const*) LDValue_ObjectIter_Key(LDValue_ObjectIter iter);
 
 /**
  * Destroy an object iterator.

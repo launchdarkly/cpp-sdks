@@ -303,6 +303,21 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
         })));
 }
 
+LD_EXPORT(LDValue)
+LDClientSDK_AllFlags(LDClientSDK sdk) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    std::unordered_map<std::string, Value> all_flags_unordered =
+        TO_SDK(sdk)->AllFlags();
+
+    std::map<std::string, Value> all_flags_ordered{all_flags_unordered.begin(),
+                                                   all_flags_unordered.end()};
+
+    Value* val = new Value(Value::Object{std::move(all_flags_ordered)});
+
+    return reinterpret_cast<LDValue>(val);
+}
+
 LD_EXPORT(void) LDClientSDK_Free(LDClientSDK sdk) {
     delete TO_SDK(sdk);
 }

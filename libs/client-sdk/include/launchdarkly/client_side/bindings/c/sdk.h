@@ -380,6 +380,30 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
                                 LDEvalDetail* out_detail);
 
 /**
+ * Returns a map from feature flag keys to feature flag values for the current
+ * context.
+ *
+ * In the example, all flags of type boolean are printed.
+ * @code
+ * LDValue all_flags = LDClientSDK_AllFlags(sdk);
+ * LDValue_ObjectIter it;
+ * for (it = LDValue_CreateObjectIter(all_flags);
+ * !LDValue_ObjectIter_End(it); LDValue_ObjectIter_Next(it)) { char
+ * const* flag_key = LDValue_ObjectIter_Key(it); LDValue flag_val_ref =
+ * LDValue_ObjectIter_Value(it);
+ *
+ *   if (LDValue_Type(flag_val_ref) == LDValueType_Bool) {
+ *       printf("%s: %d\n", flag_key, LDValue_GetBool(flag_val_ref));
+ *   }
+ * }
+ * @endcode
+ * @param sdk SDK. Must not be NULL.
+ * @return Value of type Object.
+ */
+LD_EXPORT(LDValue)
+LDClientSDK_AllFlags(LDClientSDK sdk);
+
+/**
  * Frees the SDK's resources, shutting down any connections. May block.
  * @param sdk SDK.
  */
@@ -548,7 +572,7 @@ enum LDDataSourceStatus_ErrorKind {
  * Get an enumerated value representing the overall current state of the data
  * source.
  */
-LD_EXPORT(LDDataSourceStatus_State)
+LD_EXPORT(enum LDDataSourceStatus_State)
 LDDataSourceStatus_GetState(LDDataSourceStatus status);
 
 /**
@@ -593,7 +617,7 @@ LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
 /**
  * Get an enumerated value representing the general category of the error.
  */
-LD_EXPORT(LDDataSourceStatus_ErrorKind)
+LD_EXPORT(enum LDDataSourceStatus_ErrorKind)
 LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info);
 
 /**
@@ -660,7 +684,7 @@ struct LDDataSourceStatusListener {
  * @param listener Listener to initialize.
  */
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener);
+LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener listener);
 
 /**
  * Listen for changes to the data source status.
