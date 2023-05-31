@@ -10,23 +10,24 @@ visible.
 
 | Readme                                       | issues                                      | tests                                                   | docs                                                                                                                                                                           |
 |----------------------------------------------|---------------------------------------------|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/) 
+| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/) |
 
-| Shared packages                                              | issues                                            | tests                                                                |
-|--------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------------------|
-| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]            | [![Actions Status][shared-common-ci-badge]][shared-common-ci]        |
-| [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server][package-shared-sdk-server-issues] | [![Actions Status][shared-sse-ci-badge-badge]][shared-sdk-server-ci] |
+| Shared packages                                              | issues                                                 | tests                                                         |
+|--------------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------------|
+| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]                 | [![Actions Status][shared-common-ci-badge]][shared-common-ci] |
+| [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server-Sent-Events][package-shared-sse-issues] | [![Actions Status][shared-sse-ci-badge]][shared-sse-ci]       |
 
 ## Organization
 
-| Directory | Description                                                                                                                                                                                                                |
- |-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| .github   | Contains CI and release process workflows and actions.                                                                                                                                                                     
-| apps      | Contains example and test applications.                                                                                                                                                                                    
-| cmake     | Contains cmake files for importing and configuring external libraries.                                                                                                                                                     
-| libs      | Contains library implementations. This includes libraries shared within the project as well as SDK libraries like the client-sdk.                                                                                          
-| scripts   | Contains scripts used in the release process.                                                                                                                                                                              
-| vendor    | Contains third party source which is directly integrated into the project. Generally third party source is included through CMake using FetchContent, but some libraries require modification specific to this repository. 
+| Directory      | Description                                                                                                                                                                                                                |
+ |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| .github        | Contains CI and release process workflows and actions.                                                                                                                                                                     |
+| examples       | Contains examples (hello-world style).                                                                                                                                                                                     |
+| contract-tests | Contains contract test service.                                                                                                                                                                                            |
+| cmake          | Contains cmake files for importing and configuring external libraries.                                                                                                                                                     |
+| libs           | Contains library implementations. This includes libraries shared within the project as well as SDK libraries like the client-sdk.                                                                                          |
+| scripts        | Contains scripts used in the release process.                                                                                                                                                                              |
+| vendor         | Contains third party source which is directly integrated into the project. Generally third party source is included through CMake using FetchContent, but some libraries require modification specific to this repository. |
 
 ## Build Requirements
 
@@ -99,11 +100,11 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
 
 [//]: # 'libs/server-sent-events'
 
-[shared-sse-ci-badge-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml/badge.svg
+[shared-sse-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml/badge.svg
 
-[shared-sdk-server-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml
+[shared-sse-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml
 
-[package-shared-sdk-server-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fsse%22+
+[package-shared-sse-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fsse%22+
 
 
 [//]: # 'libs/client-sdk'
