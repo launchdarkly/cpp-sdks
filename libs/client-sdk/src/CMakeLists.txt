@@ -62,12 +62,11 @@ endif ()
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
 
-
 set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND MSVC)
         install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
 endif ()
 # Using PUBLIC_HEADERS would flatten the include.
