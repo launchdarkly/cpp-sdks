@@ -17,6 +17,23 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
 
 * The following workspace dependencies were updated
   * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.1 to 0.1.2
+
+## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v0.1.0...launchdarkly-cpp-client-v0.2.0) (2023-05-31)
+
+
+### Features
+
+* add AllFlags C binding ([#128](https://github.com/launchdarkly/cpp-sdks/issues/128)) ([9aa0794](https://github.com/launchdarkly/cpp-sdks/commit/9aa07941c1c9d4184f8ff009fccb03db785320c3))
+* Add C bindings for data source status. ([#124](https://github.com/launchdarkly/cpp-sdks/issues/124)) ([d175abb](https://github.com/launchdarkly/cpp-sdks/commit/d175abb26fdcdf28700315cdd7347dd1399cbe17))
+* Add c bindings for FlagNotifier. ([#119](https://github.com/launchdarkly/cpp-sdks/issues/119)) ([11a7f61](https://github.com/launchdarkly/cpp-sdks/commit/11a7f61d56deb1ee10e73fad134efdb05887f86f))
+* add Version method to obtain SDK version ([#122](https://github.com/launchdarkly/cpp-sdks/issues/122)) ([1003117](https://github.com/launchdarkly/cpp-sdks/commit/10031170b30f75fa7d182aab51a36ada5e126250))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
     * launchdarkly-cpp-internal bumped from 0.1.0 to 0.1.1
     * launchdarkly-cpp-common bumped from 0.1.0 to 0.2.0
 
