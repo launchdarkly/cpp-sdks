@@ -50,8 +50,7 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
     EXPECT_EQ("bobby-bobberson", context.Attributes("user").Key());
     EXPECT_TRUE(context.Attributes("user").Anonymous());
     EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().size());
-    EXPECT_EQ(1,
-              context.Attributes("user").PrivateAttributes().count("email"));
+    EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().count("email"));
 }
 
 TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
@@ -174,6 +173,72 @@ TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
     EXPECT_EQ("Bob", context.Get("user", "name").AsString());
     EXPECT_EQ("Reno", context.Get("user", "city").AsString());
     EXPECT_TRUE(context.Get("user", "isCat").AsBool());
+}
+
+TEST(ContextBuilderTests, AddAttributeToExistingContext) {
+    auto context = ContextBuilder()
+                       .Kind("user", "potato")
+                       .Name("Bob")
+                       .Set("city", "Reno")
+                       .SetPrivate("private", "a")
+                       .Build();
+
+    auto builder = ContextBuilder(context);
+    if (auto updater = builder.Kind("user")) {
+        updater->Set("state", "Nevada");
+        updater->SetPrivate("sneaky", true);
+    }
+    auto updated_context = builder.Build();
+
+    EXPECT_EQ("potato", updated_context.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", updated_context.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", updated_context.Get("user", "city").AsString());
+    EXPECT_EQ("Nevada", updated_context.Get("user", "state").AsString());
+
+    EXPECT_EQ(2, updated_context.Attributes("user").PrivateAttributes().size());
+    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("private"));
+    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("sneaky"));
+}
+
+TEST(ContextBuilderTests, AddKindToExistingContext) {
+    auto context = ContextBuilder()
+                       .Kind("user", "potato")
+                       .Name("Bob")
+                       .Set("city", "Reno")
+                       .Build();
+
+    auto updated_context =
+        ContextBuilder(context).Kind("org", "org-key").Build();
+
+    EXPECT_EQ("potato", updated_context.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", updated_context.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", updated_context.Get("user", "city").AsString());
+
+    EXPECT_EQ("org-key", updated_context.Get("org", "key"));
+}
+
+TEST(ContextBuilderTests, UseTheSameBuilderToBuildMultipleContexts) {
+    auto builder = ContextBuilder();
+
+    auto context_a =
+        builder.Kind("user", "potato").Name("Bob").Set("city", "Reno").Build();
+
+    auto context_b = builder.Build();
+
+    auto context_c = builder.Kind("bob", "tomato").Build();
+
+    EXPECT_EQ("potato", context_a.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", context_a.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", context_a.Get("user", "city").AsString());
+
+    EXPECT_EQ("potato", context_b.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", context_b.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", context_b.Get("user", "city").AsString());
+
+    EXPECT_EQ("potato", context_c.Get("user", "key").AsString());
+    EXPECT_EQ("Bob", context_c.Get("user", "name").AsString());
+    EXPECT_EQ("Reno", context_c.Get("user", "city").AsString());
+    EXPECT_EQ("tomato", context_c.Get("bob", "key").AsString());
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers

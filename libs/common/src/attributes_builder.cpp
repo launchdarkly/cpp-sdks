@@ -43,7 +43,7 @@ AttributesBuilder<ContextBuilder, Context>::Set(std::string name, Value value) {
 template <>
 AttributesBuilder<ContextBuilder, Context>&
 AttributesBuilder<ContextBuilder, Context>::SetPrivate(std::string name,
-                                                        Value value) {
+                                                       Value value) {
     return Set(std::move(name), std::move(value), true);
 }
 
@@ -56,9 +56,8 @@ AttributesBuilder<ContextBuilder, Context>::AddPrivateAttribute(
 }
 
 template <>
-Attributes AttributesBuilder<ContextBuilder, Context>::BuildAttributes() {
-    return {std::move(key_), std::move(name_), anonymous_, std::move(values_),
-            std::move(private_attributes_)};
+Attributes AttributesBuilder<ContextBuilder, Context>::BuildAttributes() const {
+    return {key_, name_, anonymous_, values_, private_attributes_};
 }
 
 }  // namespace launchdarkly
