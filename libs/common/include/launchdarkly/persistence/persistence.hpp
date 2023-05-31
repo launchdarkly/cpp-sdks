@@ -37,11 +37,11 @@ class IPersistence {
      *
      * @param storage_namespace The namespace for the data.
      * @param key The key for the data.
-     * @param value The data to add or update.
+     * @param data The data to add or update.
      */
     virtual void Set(std::string storage_namespace,
-                          std::string key,
-                          std::string data) noexcept = 0;
+                     std::string key,
+                     std::string data) noexcept = 0;
 
     /**
      * Remove a value from the store. If the value cannot be removed, then
@@ -51,7 +51,7 @@ class IPersistence {
      * @param key The key of the data.
      */
     virtual void Remove(std::string storage_namespace,
-                             std::string key) noexcept = 0;
+                        std::string key) noexcept = 0;
 
     /**
      * Attempt to read a value from the store.
