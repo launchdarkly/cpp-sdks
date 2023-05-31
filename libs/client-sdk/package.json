@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
-    "launchdarkly-cpp-internal": "0.1.1",
+    "launchdarkly-cpp-internal": "0.1.2",
     "launchdarkly-cpp-common": "0.2.0"
   }
 }
