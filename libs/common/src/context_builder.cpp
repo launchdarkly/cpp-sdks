@@ -26,6 +26,18 @@ static bool ValidKind(std::string_view kind) {
     });
 }
 
+ContextBuilder::ContextBuilder(Context const& context) {
+    if (!context.Valid()) {
+        return;
+    }
+
+    for (auto& kind : context.kinds_) {
+        auto& attributes = context.Attributes(kind);
+        builders_.emplace(kind, AttributesBuilder<ContextBuilder, Context>(
+                                    *this, kind, attributes));
+    }
+}
+
 AttributesBuilder<ContextBuilder, Context>& ContextBuilder::Kind(
     std::string const& kind,
     std::string key) {
@@ -41,13 +53,17 @@ AttributesBuilder<ContextBuilder, Context>& ContextBuilder::Kind(
     return builders_.at(kind);
 }
 
-Context ContextBuilder::Build() {
+Context ContextBuilder::Build() const {
+    bool valid = true;
+    std::string errors;
+    std::map<std::string, Attributes> kinds;
+
     if (builders_.empty()) {
-        valid_ = false;
-        if (!errors_.empty()) {
-            errors_.append(", ");
+        valid = false;
+        if (!errors.empty()) {
+            errors.append(", ");
         }
-        errors_.append(ContextErrors::kMissingKinds);
+        errors.append(ContextErrors::kMissingKinds);
     }
     // We need to validate all the kinds. Being as kinds could be updated
     // we cannot do this validation in the `kind` method.
@@ -56,9 +72,9 @@ Context ContextBuilder::Build() {
         bool kind_valid = ValidKind(kind);
         bool key_valid = !kind_builder.second.key_.empty();
         if (!kind_valid || !key_valid) {
-            valid_ = false;
-            auto append = errors_.length() != 0;
-            std::stringstream stream(errors_);
+            valid = false;
+            auto append = errors.length() != 0;
+            std::stringstream stream(errors);
             if (append) {
                 stream << ", ";
             }
@@ -72,18 +88,25 @@ Context ContextBuilder::Build() {
                 stream << kind << ": " << ContextErrors::kInvalidKey;
             }
             stream.flush();
-            errors_ = stream.str();
+            errors = stream.str();
         }
     }
-    if (valid_) {
+    if (valid) {
         for (auto& kind_builder : builders_) {
-            kinds_.emplace(kind_builder.first,
-                           kind_builder.second.BuildAttributes());
+            kinds.emplace(kind_builder.first,
+                          kind_builder.second.BuildAttributes());
         }
-        builders_.clear();
-        return {std::move(kinds_)};
+        return {std::move(kinds)};
     }
-    return {std::move(errors_)};
+    return {std::move(errors)};
+}
+
+AttributesBuilder<ContextBuilder, Context>* ContextBuilder::UpdateKind(
+    std::string kind) {
+    if (builders_.count(kind)) {
+        return &builders_.at(kind);
+    }
+    return nullptr;
 }
 
 }  // namespace launchdarkly

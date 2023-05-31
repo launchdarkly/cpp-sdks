@@ -3,6 +3,7 @@
 #include <launchdarkly/attributes_builder.hpp>
 #include <launchdarkly/context.hpp>
 
+#include <functional>
 #include <string>
 
 namespace launchdarkly {
@@ -63,6 +64,19 @@ class ContextBuilder final {
     friend AttributesBuilder<ContextBuilder, Context>;
 
    public:
+    ContextBuilder() = default;
+
+    /**
+     * Create a new context builder from the given context. The created builder
+     * will have all the kinds and attributes of the original context.
+     *
+     * If the original context is not valid, then this builder will
+     * be created in a default state.
+     *
+     * @param context The context to base the builder on.
+     */
+    ContextBuilder(Context const& context);
+
     /**
      * Start adding a kind to the context.
      *
@@ -79,24 +93,27 @@ class ContextBuilder final {
                                                      std::string key);
 
     /**
-     * Build a context. This should only be called once, because
-     * the contents of the builder are moved into the created context.
+     * Start updating an existing kind.
      *
-     * After the context is build, then this builder, and any kind builders
-     * associated with it, should no longer be used.
+     * @param kind The kind to start updating.
+     * @return A builder which allows adding attributes for the kind, or
+     * nullptr if the kind doesn't already exist.
+     */
+    AttributesBuilder<ContextBuilder, Context>* UpdateKind(std::string kind);
+
+    /**
+     * Build a context. The same builder instance may be used to build multiple
+     * contexts.
      *
      * You MUST add at least one kind before building a context. Not doing
      * so will result in an invalid context.
      *
      * @return The built context.
      */
-    Context Build();
+    Context Build() const;
 
    private:
     std::map<std::string, AttributesBuilder<ContextBuilder, Context>> builders_;
-    std::map<std::string, Attributes> kinds_;
-    bool valid_ = true;
-    std::string errors_;
 };
 
 }  // namespace launchdarkly

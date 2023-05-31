@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include <launchdarkly/attribute_reference.hpp>
@@ -24,11 +25,36 @@ class AttributesBuilder final {
 
    public:
     /**
-     * Create an attributes builder with the given key.
-     * @param key A unique string identifying a context.
+     * Create an attributes builder with the given kind and key.
+     * @param builder The context builder associated with this attributes
+     * builder.
+     * @param kind The kind being added.
+     * @param key The key for the kind.
      */
     AttributesBuilder(BuilderReturn& builder, std::string kind, std::string key)
         : key_(std::move(key)), kind_(std::move(kind)), builder_(builder) {}
+
+    /**
+     * Crate an attributes builder with the specified kind, and pre-populated
+     * with the given attributes.
+     * @param builder The context builder associated with this attributes
+     * builder.
+     * @param kind The kind being added.
+     * @param attributes Attributes to populate the builder with.
+     */
+    AttributesBuilder(BuilderReturn& builder,
+                      std::string kind,
+                      Attributes attributes)
+        : key_(attributes.Key()),
+          kind_(std::move(kind)),
+          builder_(builder),
+          name_(attributes.Name()),
+          anonymous_(attributes.Anonymous()),
+          private_attributes_(attributes.PrivateAttributes()) {
+        for (auto& pair : attributes.CustomAttributes().AsObject()) {
+            values_[pair.first] = pair.second;
+        }
+    }
 
     /**
      * The attributes builder should never be copied. We depend on a stable
@@ -118,9 +144,10 @@ class AttributesBuilder final {
      * This action only affects analytics events that involve this particular
      * Context. To mark some (or all) Context attributes as private for all
      * contexts, use the overall configuration for the SDK. See
-     * launchdarkly::config::shared::builders::EventsBuilder< SDK >::AllAttributesPrivate
-     * and
-     * launchdarkly::config::shared::builders::EventsBuilder< SDK >::PrivateAttribute.
+     * launchdarkly::config::shared::builders::EventsBuilder< SDK
+     * >::AllAttributesPrivate and
+     * launchdarkly::config::shared::builders::EventsBuilder< SDK
+     * >::PrivateAttribute.
      *
      * The attributes "kind" and "key", and the "_meta" attributes cannot be
      * made private.
@@ -155,17 +182,39 @@ class AttributesBuilder final {
         return *this;
     }
 
+    /**
+     * Start adding a kind to the context.
+     *
+     * If you call this function multiple times with the same kind, then
+     * the same builder will be returned each time. If you previously called
+     * the function with the same kind, but different key, then the key
+     * will be updated.
+     *
+     * @param kind The kind being added.
+     * @param key The key for the kind.
+     * @return A builder which allows adding attributes for the kind.
+     */
     AttributesBuilder& Kind(std::string kind, std::string key) {
         return builder_.Kind(kind, key);
     }
 
     /**
-     * Build the context. This method should not be called more than once.
-     * It moves the builder content into the built context.
+     * Start updating an existing kind.
+     *
+     * @param kind The kind to start updating.
+     * @return A builder which allows adding attributes for the kind, or
+     * nullptr if the kind doesn't already exist.
+     */
+    AttributesBuilder* UpdateKind(std::string kind) {
+        return builder_.UpdateKind(kind);
+    }
+
+    /**
+     * Build the context.
      *
      * @return The built context.
      */
-    [[nodiscard]] BuildType Build() { return builder_.Build(); }
+    [[nodiscard]] BuildType Build() const { return builder_.Build(); }
 
    private:
     BuilderReturn& builder_;
@@ -177,7 +226,7 @@ class AttributesBuilder final {
      */
     void Key(std::string key) { key_ = std::move(key); }
 
-    Attributes BuildAttributes();
+    Attributes BuildAttributes() const;
 
     AttributesBuilder& Set(std::string name,
                            launchdarkly::Value value,
