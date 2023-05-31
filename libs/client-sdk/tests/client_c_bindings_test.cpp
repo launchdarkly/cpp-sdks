@@ -25,7 +25,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDClientSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "0.1.0");  // {x-release-please-version}
+    ASSERT_STREQ(version, "0.2.0");  // {x-release-please-version}
 
     LDClientSDK_Free(sdk);
 }
