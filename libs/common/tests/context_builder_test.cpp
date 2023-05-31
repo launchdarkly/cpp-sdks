@@ -180,12 +180,13 @@ TEST(ContextBuilderTests, AddAttributeToExistingContext) {
                        .Kind("user", "potato")
                        .Name("Bob")
                        .Set("city", "Reno")
+                       .SetPrivate("private", "a")
                        .Build();
 
     auto builder = ContextBuilder(context);
-    auto updater = builder.UpdateKind("user");
-    if (updater) {
+    if (auto updater = builder.Update("user")) {
         updater->Set("state", "Nevada");
+        updater->SetPrivate("sneaky", true);
     }
     auto updated_context = builder.Build();
 
@@ -193,6 +194,10 @@ TEST(ContextBuilderTests, AddAttributeToExistingContext) {
     EXPECT_EQ("Bob", updated_context.Get("user", "name").AsString());
     EXPECT_EQ("Reno", updated_context.Get("user", "city").AsString());
     EXPECT_EQ("Nevada", updated_context.Get("user", "state").AsString());
+
+    EXPECT_EQ(2, updated_context.Attributes("user").PrivateAttributes().size());
+    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("private"));
+    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("sneaky"));
 }
 
 TEST(ContextBuilderTests, AddKindToExistingContext) {

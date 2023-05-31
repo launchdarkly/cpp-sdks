@@ -99,7 +99,7 @@ class ContextBuilder final {
      * @return A builder which allows adding attributes for the kind, or
      * nullptr if the kind doesn't already exist.
      */
-    AttributesBuilder<ContextBuilder, Context>* UpdateKind(std::string kind);
+    AttributesBuilder<ContextBuilder, Context>* Update(std::string kind);
 
     /**
      * Build a context. The same builder instance may be used to build multiple

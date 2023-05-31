@@ -205,8 +205,8 @@ class AttributesBuilder final {
      * @return A builder which allows adding attributes for the kind, or
      * nullptr if the kind doesn't already exist.
      */
-    AttributesBuilder* UpdateKind(std::string kind) {
-        return builder_.UpdateKind(kind);
+    AttributesBuilder* Update(std::string kind) {
+        return builder_.Update(kind);
     }
 
     /**

@@ -101,7 +101,7 @@ Context ContextBuilder::Build() const {
     return {std::move(errors)};
 }
 
-AttributesBuilder<ContextBuilder, Context>* ContextBuilder::UpdateKind(
+AttributesBuilder<ContextBuilder, Context>* ContextBuilder::Update(
     std::string kind) {
     if (builders_.count(kind)) {
         return &builders_.at(kind);
