@@ -184,7 +184,7 @@ TEST(ContextBuilderTests, AddAttributeToExistingContext) {
                        .Build();
 
     auto builder = ContextBuilder(context);
-    if (auto updater = builder.Update("user")) {
+    if (auto updater = builder.Kind("user")) {
         updater->Set("state", "Nevada");
         updater->SetPrivate("sneaky", true);
     }
