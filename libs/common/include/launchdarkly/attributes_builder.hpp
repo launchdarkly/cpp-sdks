@@ -43,7 +43,7 @@ class AttributesBuilder final {
      */
     AttributesBuilder(BuilderReturn& builder,
                       std::string kind,
-                      Attributes attributes)
+                      Attributes const& attributes)
         : key_(attributes.Key()),
           kind_(std::move(kind)),
           builder_(builder),
@@ -203,7 +203,7 @@ class AttributesBuilder final {
      * @return A builder which allows adding attributes for the kind, or
      * nullptr if the kind doesn't already exist.
      */
-    AttributesBuilder* Kind(std::string kind) {
+    AttributesBuilder* Kind(std::string const& kind) {
         return builder_.Kind(kind);
     }
 

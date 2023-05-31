@@ -31,8 +31,8 @@ ContextBuilder::ContextBuilder(Context const& context) {
         return;
     }
 
-    for (auto& kind : context.kinds_) {
-        auto& attributes = context.Attributes(kind);
+    for (const auto& kind : context.kinds_) {
+        const auto& attributes = context.Attributes(kind);
         builders_.emplace(kind, AttributesBuilder<ContextBuilder, Context>(
                                     *this, kind, attributes));
     }
@@ -102,7 +102,7 @@ Context ContextBuilder::Build() const {
 }
 
 AttributesBuilder<ContextBuilder, Context>* ContextBuilder::Kind(
-    std::string kind) {
+    std::string const& kind) {
     if (builders_.count(kind)) {
         return &builders_.at(kind);
     }
