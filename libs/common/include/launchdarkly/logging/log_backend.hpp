@@ -10,7 +10,7 @@ namespace launchdarkly {
 /**
  * Interface for logging back-ends.
  *
- * @example ../src/ConsoleBackend.hpp
+ * For a reference implementation refer to console_backend.hpp/cpp.
  */
 class ILogBackend {
    public:
