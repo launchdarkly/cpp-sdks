@@ -28,6 +28,6 @@ class ILogBackend {
      */
     virtual void Write(LogLevel level, std::string message) noexcept = 0;
 
-    virtual ~ILogBackend(){};
+    virtual ~ILogBackend() = default;
 };
 }  // namespace launchdarkly
