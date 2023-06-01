@@ -2,6 +2,21 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v0.2.0...launchdarkly-cpp-client-v3.0.0) (2023-06-01)
+
+
+### Features
+
+* 3.0.0 Client Release ([19cebd9](https://github.com/launchdarkly/cpp-sdks/commit/19cebd9a06fe515986d8199d45c009856ffd06de))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.2 to 0.1.3
+    * launchdarkly-cpp-common bumped from 0.2.0 to 0.3.0
+
 ## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v0.1.0...launchdarkly-cpp-client-v0.2.0) (2023-05-31)
 
 

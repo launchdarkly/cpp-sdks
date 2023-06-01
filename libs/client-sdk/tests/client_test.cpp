@@ -16,7 +16,7 @@ TEST(ClientTest, ClientConstructedWithMinimalConfigAndContext) {
 
     char const* version = client.Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "0.2.0");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.0.0");  // {x-release-please-version}
 }
 
 TEST(ClientTest, AllFlagsIsEmpty) {
