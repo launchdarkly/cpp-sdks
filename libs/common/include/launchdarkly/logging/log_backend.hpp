@@ -33,5 +33,8 @@ class ILogBackend {
     ILogBackend(ILogBackend&& item) = delete;
     ILogBackend& operator=(ILogBackend const&) = delete;
     ILogBackend& operator=(ILogBackend&&) = delete;
+
+   protected:
+    ILogBackend() = default;
 };
 }  // namespace launchdarkly
