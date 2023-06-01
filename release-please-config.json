@@ -4,7 +4,7 @@
   ],
   "packages": {
     "libs/client-sdk": {
-      "initial-version": "0.1.0",
+      "release-as": "3.0.0",
       "extra-files": [
         "include/launchdarkly/client_side/client.hpp",
         "tests/client_c_bindings_test.cpp",
