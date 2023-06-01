@@ -10,7 +10,7 @@ namespace launchdarkly {
 /**
  * Interface for logging back-ends.
  *
- * @example ../src/ConsoleBackend.hpp
+ * For a reference implementation refer to console_backend.hpp/cpp.
  */
 class ILogBackend {
    public:
@@ -28,6 +28,13 @@ class ILogBackend {
      */
     virtual void Write(LogLevel level, std::string message) noexcept = 0;
 
-    virtual ~ILogBackend(){};
+    virtual ~ILogBackend() = default;
+    ILogBackend(ILogBackend const& item) = delete;
+    ILogBackend(ILogBackend&& item) = delete;
+    ILogBackend& operator=(ILogBackend const&) = delete;
+    ILogBackend& operator=(ILogBackend&&) = delete;
+
+   protected:
+    ILogBackend() = default;
 };
 }  // namespace launchdarkly
