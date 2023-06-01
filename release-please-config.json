@@ -9,16 +9,20 @@
         "include/launchdarkly/client_side/client.hpp",
         "tests/client_c_bindings_test.cpp",
         "tests/client_test.cpp"
-      ]
+      ],
+      "last-release-sha": "558d3f7c6ad83bbc8bed66823b704aa288eee30b"
     },
     "libs/server-sent-events": {
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "last-release-sha": "558d3f7c6ad83bbc8bed66823b704aa288eee30b"
     },
     "libs/common": {
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "last-release-sha": "558d3f7c6ad83bbc8bed66823b704aa288eee30b"
     },
     "libs/internal": {
-      "initial-version": "0.1.0"
+      "initial-version": "0.1.0",
+      "last-release-sha": "558d3f7c6ad83bbc8bed66823b704aa288eee30b"
     }
   }
 }
