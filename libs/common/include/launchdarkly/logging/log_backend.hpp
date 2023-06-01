@@ -29,5 +29,9 @@ class ILogBackend {
     virtual void Write(LogLevel level, std::string message) noexcept = 0;
 
     virtual ~ILogBackend() = default;
+    ILogBackend(ILogBackend const& item) = delete;
+    ILogBackend(ILogBackend&& item) = delete;
+    ILogBackend& operator=(ILogBackend const&) = delete;
+    ILogBackend& operator=(ILogBackend&&) = delete;
 };
 }  // namespace launchdarkly
