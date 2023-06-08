@@ -34,7 +34,6 @@ using launchdarkly::config::shared::built::HttpProperties;
 
 static std::shared_ptr<IDataSource> MakeDataSource(
     HttpProperties const& http_properties,
-    std::optional<std::string> app_tags,
     Config const& config,
     Context const& context,
     boost::asio::any_io_executor const& executor,
@@ -47,11 +46,6 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     }
 
     auto builder = HttpPropertiesBuilder(http_properties);
-
-    // Event sources should include application tags.
-    if (app_tags) {
-        builder.Header("x-launchdarkly-tags", *app_tags);
-    }
 
     auto data_source_properties = builder.Build();
 
@@ -93,10 +87,12 @@ ClientImpl::ClientImpl(Config config,
                        Context context,
                        std::string const& version)
     : config_(config),
-      http_properties_(HttpPropertiesBuilder(config.HttpProperties())
-                           .Header("user-agent", "CPPClient/" + version)
-                           .Header("authorization", config.SdkKey())
-                           .Build()),
+      http_properties_(
+          HttpPropertiesBuilder(config.HttpProperties())
+              .Header("user-agent", "CPPClient/" + version)
+              .Header("authorization", config.SdkKey())
+              .Header("x-launchdarkly-tags", config.ApplicationTag())
+              .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
@@ -106,10 +102,9 @@ ClientImpl::ClientImpl(Config config,
                     config.Persistence().max_contexts_,
                     MakePersistence(config)),
       data_source_factory_([this]() {
-          return MakeDataSource(http_properties_, config_.ApplicationTag(),
-                                config_, context_, ioc_.get_executor(),
-                                flag_manager_.Updater(), status_manager_,
-                                logger_);
+          return MakeDataSource(http_properties_, config_, context_,
+                                ioc_.get_executor(), flag_manager_.Updater(),
+                                status_manager_, logger_);
       }),
       data_source_(nullptr),
       event_processor_(nullptr),
