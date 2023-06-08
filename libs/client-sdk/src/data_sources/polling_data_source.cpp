@@ -90,8 +90,11 @@ PollingDataSource::PollingDataSource(
         data_source_config.method);
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
-            << "Polling interval specified under minimum, defaulting to 30 "
-               "second polling interval";
+            << "Polling interval too frequent, defaulting to "
+            << std::chrono::duration_cast<std::chrono::seconds>(
+                   polling_config.min_polling_interval)
+                   .count()
+            << " seconds";
 
         polling_interval_ = polling_config.min_polling_interval;
     }
