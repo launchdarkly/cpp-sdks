@@ -2,6 +2,22 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.0...launchdarkly-cpp-client-v3.0.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* enforce minimum polling interval of 5 minutes ([#144](https://github.com/launchdarkly/cpp-sdks/issues/144)) ([2d60197](https://github.com/launchdarkly/cpp-sdks/commit/2d60197a72624b40088c0cac22d2dda0f30dd7ac))
+* ensure x-launchdarkly-tags is sent in event requests ([#145](https://github.com/launchdarkly/cpp-sdks/issues/145)) ([c8b3aee](https://github.com/launchdarkly/cpp-sdks/commit/c8b3aee72b1ca3d33a7f614822c23f2fee6a093a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.3 to 0.1.4
+    * launchdarkly-cpp-common bumped from 0.3.0 to 0.3.1
+
 ## [3.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v0.2.0...launchdarkly-cpp-client-v3.0.0) (2023-06-01)
 
 

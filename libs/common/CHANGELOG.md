@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.0...launchdarkly-cpp-common-v0.3.1) (2023-06-08)
+
+
+### Bug Fixes
+
+* enforce minimum polling interval of 5 minutes ([#144](https://github.com/launchdarkly/cpp-sdks/issues/144)) ([2d60197](https://github.com/launchdarkly/cpp-sdks/commit/2d60197a72624b40088c0cac22d2dda0f30dd7ac))
+* ensure x-launchdarkly-tags is sent in event requests ([#145](https://github.com/launchdarkly/cpp-sdks/issues/145)) ([c8b3aee](https://github.com/launchdarkly/cpp-sdks/commit/c8b3aee72b1ca3d33a7f614822c23f2fee6a093a))
+
 ## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.2.0...launchdarkly-cpp-common-v0.3.0) (2023-06-01)
 
 
