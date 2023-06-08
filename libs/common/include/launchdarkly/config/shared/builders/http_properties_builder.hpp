@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -106,14 +107,14 @@ class HttpPropertiesBuilder {
         std::map<std::string, std::string> base_headers);
 
     /**
-     * Set a custom header value.
-     *
-     * Calling Headers will replace any previously set values.
-     * @param key The key for the header.
-     * @param value The header value.
+     * Set an optional header value. If the value is std::nullopt, any existing
+     * header by that name is removed.
+     * @param name The name of the header.
+     * @param value The optional header value.
      * @return A reference to this builder.
      */
-    HttpPropertiesBuilder& Header(std::string key, std::string value);
+    HttpPropertiesBuilder& Header(std::string key,
+                                  std::optional<std::string> value);
 
     /**
      * Build a set of HttpProperties.

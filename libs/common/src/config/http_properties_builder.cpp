@@ -72,8 +72,12 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Headers(
 template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
     std::string key,
-    std::string value) {
-    base_headers_.insert_or_assign(key, value);
+    std::optional<std::string> value) {
+    if (value) {
+        base_headers_.insert_or_assign(key, *value);
+    } else {
+        base_headers_.erase(key);
+    }
     return *this;
 }
 
