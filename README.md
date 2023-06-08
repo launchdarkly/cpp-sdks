@@ -44,7 +44,7 @@ For information on integrating an SDK package please refer to the SDK specific R
 
 ## LaunchDarkly overview
 
-[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves over 100 billion feature flags
+[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves trillions of feature flags
 daily to help teams build better software, faster. [Get started](https://docs.launchdarkly.com/home/getting-started)
 using LaunchDarkly today!
 
@@ -76,8 +76,7 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
     - Grant access to certain features based on user attributes, like payment plan (eg: users on the ‘gold’ plan get
       access to more features than users in the ‘silver’ plan). Disable parts of your application to facilitate
       maintenance, without taking everything offline.
-- LaunchDarkly provides feature flag SDKs for a wide variety of languages and technologies. Check
-  out [our documentation](https://docs.launchdarkly.com/sdk) for a complete list.
+- LaunchDarkly provides feature flag SDKs for a wide variety of languages and technologies. Read [our documentation](https://docs.launchdarkly.com/sdk) for a complete list.
 - Explore LaunchDarkly
     - [launchdarkly.com](https://www.launchdarkly.com/ 'LaunchDarkly Main Website') for more information
     - [docs.launchdarkly.com](https://docs.launchdarkly.com/ 'LaunchDarkly Documentation') for our documentation and SDK
