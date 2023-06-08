@@ -63,9 +63,8 @@ struct Defaults<ClientSDK> {
     }
 
     static auto PollingConfig() -> shared::built::PollingConfig<ClientSDK> {
-        // Default to 5 minutes;
-        return {std::chrono::seconds{5 * 60}, "/msdk/evalx/contexts",
-                "/msdk/evalx/context", std::chrono::seconds{30}};
+        return {std::chrono::minutes(5), "/msdk/evalx/contexts",
+                "/msdk/evalx/context", std::chrono::minutes(5)};
     }
 
     static std::size_t MaxCachedContexts() { return 5; }
