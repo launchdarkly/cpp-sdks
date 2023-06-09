@@ -92,13 +92,13 @@ struct Defaults<ServerSDK> {
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{2}, std::chrono::seconds{10},
+        return {std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
     static auto StreamingConfig() -> shared::built::StreamingConfig<ServerSDK> {
-        return {std::chrono::seconds{1}};
+        return {std::chrono::seconds{1}, "/all"};
     }
 
     static auto DataSourceConfig()
@@ -107,7 +107,8 @@ struct Defaults<ServerSDK> {
     }
 
     static auto PollingConfig() -> shared::built::PollingConfig<ServerSDK> {
-        return {std::chrono::seconds{30}};
+        return {std::chrono::seconds{30}, "/sdk/latest-all",
+                std::chrono::seconds{30}};
     }
 };
 

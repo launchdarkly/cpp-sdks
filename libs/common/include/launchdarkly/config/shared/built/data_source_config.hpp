@@ -22,6 +22,7 @@ struct StreamingConfig<ClientSDK> {
 template <>
 struct StreamingConfig<ServerSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
+    std::string streaming_path;
 };
 
 template <typename SDK>
@@ -38,6 +39,8 @@ struct PollingConfig<ClientSDK> {
 template <>
 struct PollingConfig<ServerSDK> {
     std::chrono::seconds poll_interval;
+    std::string polling_get_path;
+    std::chrono::seconds min_polling_interval;
 };
 
 template <typename SDK>
