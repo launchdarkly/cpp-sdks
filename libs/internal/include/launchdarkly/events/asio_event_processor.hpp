@@ -13,6 +13,7 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context_filter.hpp>
+#include <launchdarkly/events/context_key_cache.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
@@ -73,6 +74,8 @@ class AsioEventProcessor {
     std::optional<Clock::time_point> last_known_past_time_;
 
     launchdarkly::ContextFilter filter_;
+
+    ContextKeyCache context_key_cache_;
 
     Logger& logger_;
 

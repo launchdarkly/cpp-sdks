@@ -44,7 +44,8 @@ struct Defaults<ClientSDK> {
                 false,
                 AttributeReference::SetType(),
                 std::chrono::seconds(1),
-                5};
+                5,
+                std::nullopt};
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {
@@ -88,7 +89,8 @@ struct Defaults<ServerSDK> {
                 false,
                 AttributeReference::SetType(),
                 std::chrono::seconds(1),
-                5};
+                5,
+                1000};
     }
 
     static auto HttpProperties() -> shared::built::HttpProperties {

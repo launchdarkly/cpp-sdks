@@ -56,7 +56,7 @@ TEST(ContextKeyCacheTests, DoesNotExceedCapacity) {
     for (int i = 0; i < N; ++i) {
         cache.Notice(std::to_string(i));
     }
-
+    
     for (int i = N - CAP; i < N; ++i) {
         ASSERT_TRUE(cache.Notice(std::to_string(i)));
     }
