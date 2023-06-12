@@ -25,4 +25,8 @@ void ContextKeyCache::Clear() {
     list_.clear();
 }
 
+std::size_t ContextKeyCache::Size() const {
+    return list_.size();
+}
+
 }  // namespace launchdarkly::events

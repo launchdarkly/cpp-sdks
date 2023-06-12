@@ -6,8 +6,29 @@ namespace launchdarkly::events {
 
 class ContextKeyCache {
    public:
+    /**
+     * Constructs a new cache with a given capacity. When capacity is exceeded,
+     * entries are evicted from the cache in LRU order.
+     * @param capacity
+     */
     explicit ContextKeyCache(std::size_t capacity);
+
+    /**
+     * Adds a value to the cache; returns true if it was already there.
+     * @param context_key Value to add.
+     * @return True if the value was already in the cache.
+     */
     bool Notice(std::string const& context_key);
+
+    /**
+     * Returns the current size of the cache.
+     * @return Number of unique entries in cache.
+     */
+    std::size_t Size() const;
+
+    /**
+     * Clears all cache entries.
+     */
     void Clear();
 
    private:
