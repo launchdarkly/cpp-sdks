@@ -7,7 +7,7 @@ namespace launchdarkly::client_side::flag_manager {
 
 FlagUpdater::FlagUpdater(FlagStore& flag_store) : flag_store_(flag_store) {}
 
-Value GetValue(ItemDescriptor& descriptor) {
+Value GetValue(FlagItemDescriptor& descriptor) {
     if (descriptor.flag) {
         // `flag->` unwraps the first optional we know is present.
         // The second `value()` is not an optional.
@@ -16,8 +16,9 @@ Value GetValue(ItemDescriptor& descriptor) {
     return {};
 }
 
-void FlagUpdater::Init(Context const& context,
-                       std::unordered_map<std::string, ItemDescriptor> data) {
+void FlagUpdater::Init(
+    Context const& context,
+    std::unordered_map<std::string, FlagItemDescriptor> data) {
     std::lock_guard lock{signal_mutex_};
 
     // Calculate what flags changed.
@@ -86,7 +87,7 @@ void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
 
 void FlagUpdater::Upsert(Context const& context,
                          std::string key,
-                         ItemDescriptor item) {
+                         FlagItemDescriptor item) {
     // Check the version.
     auto existing = flag_store_.Get(key);
     if (existing && (existing->version >= item.version)) {

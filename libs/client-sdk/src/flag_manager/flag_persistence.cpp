@@ -1,8 +1,9 @@
 #include "flag_persistence.hpp"
-#include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/encoding/sha_256.hpp>
+
+#include <launchdarkly/serialization/json_evaluation_result.hpp>
 
 #include <utility>
 
@@ -37,14 +38,14 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
 
 void FlagPersistence::Init(
     Context const& context,
-    std::unordered_map<std::string, ItemDescriptor> data) {
+    std::unordered_map<std::string, FlagItemDescriptor> data) {
     sink_.Init(context, std::move(data));
     StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
 
 void FlagPersistence::Upsert(Context const& context,
                              std::string key,
-                             ItemDescriptor item) {
+                             FlagItemDescriptor item) {
     sink_.Upsert(context, key, item);
     StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
@@ -73,7 +74,7 @@ void FlagPersistence::LoadCached(Context const& context) {
 
     auto res = boost::json::value_to<tl::expected<
         std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>,
+                           launchdarkly::client_side::FlagItemDescriptor>,
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)
@@ -99,9 +100,10 @@ void FlagPersistence::StoreCache(std::string const& context_id) {
     persistence_->Set(environment_namespace_, index_key_,
                       boost::json::serialize(boost::json::value_from(index)));
 
-    persistence_->Set(
-        environment_namespace_, context_id,
-        boost::json::serialize(boost::json::value_from(flag_store_.GetAll())));
+    boost::json::value v = boost::json::value_from(flag_store_.GetAll());
+
+    persistence_->Set(environment_namespace_, context_id,
+                      boost::json::serialize(v));
 }
 
 ContextIndex FlagPersistence::GetIndex() {

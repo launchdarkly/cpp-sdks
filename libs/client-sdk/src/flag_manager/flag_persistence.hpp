@@ -32,12 +32,13 @@ class FlagPersistence : public IDataSourceUpdateSink {
             return std::chrono::system_clock::now();
         });
 
-    void Init(Context const& context,
-              std::unordered_map<std::string, ItemDescriptor> data) override;
+    void Init(
+        Context const& context,
+        std::unordered_map<std::string, FlagItemDescriptor> data) override;
 
     void Upsert(Context const& context,
                 std::string key,
-                ItemDescriptor item) override;
+                FlagItemDescriptor item) override;
 
     void LoadCached(Context const& context);
 
