@@ -7,7 +7,8 @@
       "extra-files": [
         "include/launchdarkly/client_side/client.hpp",
         "tests/client_c_bindings_test.cpp",
-        "tests/client_test.cpp"
+        "tests/client_test.cpp",
+        "CMakeLists.txt"
       ]
     },
     "libs/server-sent-events": {
