@@ -71,6 +71,7 @@ find_package(Boost 1.80 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 add_subdirectory(libs/client-sdk)
+add_subdirectory(libs/server-sdk)
 
 set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
