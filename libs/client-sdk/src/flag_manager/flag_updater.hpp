@@ -18,12 +18,11 @@ namespace launchdarkly::client_side::flag_manager {
 class FlagUpdater : public IDataSourceUpdateSink, public IFlagNotifier {
    public:
     FlagUpdater(FlagStore& flag_store);
-    void Init(
-        Context const& context,
-        std::unordered_map<std::string, FlagItemDescriptor> data) override;
+    void Init(Context const& context,
+              std::unordered_map<std::string, ItemDescriptor> data) override;
     void Upsert(Context const& context,
                 std::string key,
-                FlagItemDescriptor item) override;
+                ItemDescriptor item) override;
 
     /**
      * Listen for changes for the specific flag.

@@ -13,19 +13,18 @@
 
 namespace launchdarkly::client_side {
 
-using FlagItemDescriptor = ItemDescriptor<EvaluationResult>;
+using ItemDescriptor = data_kinds::ItemDescriptor<EvaluationResult>;
 
 /**
  * Interface for handling updates from LaunchDarkly.
  */
 class IDataSourceUpdateSink {
    public:
-    virtual void Init(
-        Context const& context,
-        std::unordered_map<std::string, FlagItemDescriptor> data) = 0;
+    virtual void Init(Context const& context,
+                      std::unordered_map<std::string, ItemDescriptor> data) = 0;
     virtual void Upsert(Context const& context,
                         std::string key,
-                        FlagItemDescriptor item) = 0;
+                        ItemDescriptor item) = 0;
 
     IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
     IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;

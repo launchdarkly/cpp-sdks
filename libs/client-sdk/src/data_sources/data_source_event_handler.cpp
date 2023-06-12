@@ -90,7 +90,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
-            std::unordered_map<std::string, FlagItemDescriptor>, JsonError>>(
+            std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
             parsed);
 
         if (res.has_value()) {
@@ -117,9 +117,9 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         auto res = boost::json::value_to<
             tl::expected<DataSourceEventHandler::PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_.Upsert(context_, res.value().key,
-                            launchdarkly::client_side::FlagItemDescriptor(
-                                res.value().flag));
+            handler_.Upsert(
+                context_, res.value().key,
+                launchdarkly::client_side::ItemDescriptor(res.value().flag));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPatchInvalid;
@@ -143,7 +143,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             boost::json::parse(data));
         if (res.has_value()) {
             handler_.Upsert(context_, res.value().key,
-                            FlagItemDescriptor(res.value().version));
+                            ItemDescriptor(res.value().version));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;

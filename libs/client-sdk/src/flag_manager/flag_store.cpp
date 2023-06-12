@@ -12,27 +12,27 @@ namespace launchdarkly::client_side::flag_manager {
 // flag being processed to be valid.
 
 void FlagStore::Init(
-    std::unordered_map<std::string, FlagItemDescriptor> const& data) {
+    std::unordered_map<std::string, ItemDescriptor> const& data) {
     UpdateData(data);
 }
 
 void FlagStore::UpdateData(
-    std::unordered_map<std::string, FlagItemDescriptor> const& data) {
+    std::unordered_map<std::string, ItemDescriptor> const& data) {
     std::lock_guard lock{data_mutex_};
     this->data_.clear();
     for (auto item : data) {
-        this->data_.emplace(item.first, std::make_shared<FlagItemDescriptor>(
+        this->data_.emplace(item.first, std::make_shared<ItemDescriptor>(
                                             std::move(item.second)));
     }
 }
 
-void FlagStore::Upsert(std::string const& key, FlagItemDescriptor item) {
+void FlagStore::Upsert(std::string const& key, ItemDescriptor item) {
     std::lock_guard lock{data_mutex_};
 
-    data_[key] = std::make_shared<FlagItemDescriptor>(std::move(item));
+    data_[key] = std::make_shared<ItemDescriptor>(std::move(item));
 }
 
-std::shared_ptr<FlagItemDescriptor> FlagStore::Get(
+std::shared_ptr<ItemDescriptor> FlagStore::Get(
     std::string const& flag_key) const {
     std::lock_guard lock{data_mutex_};
 
@@ -43,7 +43,7 @@ std::shared_ptr<FlagItemDescriptor> FlagStore::Get(
     return nullptr;
 }
 
-std::unordered_map<std::string, std::shared_ptr<FlagItemDescriptor>>
+std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>>
 FlagStore::GetAll() const {
     std::lock_guard lock{data_mutex_};
 

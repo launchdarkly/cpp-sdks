@@ -11,7 +11,7 @@ using launchdarkly::ContextBuilder;
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
-using launchdarkly::client_side::FlagItemDescriptor;
+using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagPersistence;
 using launchdarkly::client_side::flag_manager::FlagStore;
 using launchdarkly::client_side::flag_manager::FlagUpdater;
@@ -63,8 +63,8 @@ TEST(FlagPersistenceTests, StoresCacheOnInit) {
     flag_persistence.Init(
         context,
         std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
@@ -108,7 +108,7 @@ TEST(FlagPersistenceTests, CanLoadCache) {
     flag_persistence.LoadCached(context);
 
     // The store contains the flag loaded from the persistence.
-    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value().AsString());
+    EXPECT_EQ("test", store.Get("flagA")->item->Detail().Value().AsString());
 }
 
 TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
@@ -131,8 +131,8 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     flag_persistence.Init(
         ContextBuilder().Kind("potato", "user-key").Build(),
         std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
@@ -142,8 +142,8 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     flag_persistence.Init(
         ContextBuilder().Kind("potato", "bob-key").Build(),
         std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagB", FlagItemDescriptor{EvaluationResult{
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagB", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
@@ -153,8 +153,8 @@ TEST(FlagPersistenceTests, EvictsContextsBeyondMax) {
     flag_persistence.Init(
         ContextBuilder().Kind("potato", "susan-key").Build(),
         std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagC", FlagItemDescriptor{EvaluationResult{
+                           launchdarkly::client_side::ItemDescriptor>{
+            {{"flagC", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});

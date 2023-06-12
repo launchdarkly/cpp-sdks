@@ -9,15 +9,14 @@
 using launchdarkly::EvaluationDetailInternal;
 using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
-using launchdarkly::client_side::FlagItemDescriptor;
+using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagStore;
 
 TEST(FlagstoreTests, HandlesEmptyInit) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{});
 
     EXPECT_TRUE(store.GetAll().empty());
 }
@@ -25,100 +24,94 @@ TEST(FlagstoreTests, HandlesEmptyInit) {
 TEST(FlagstoreTests, HandlesInitWithData) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
-                           0, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       0, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value());
+    EXPECT_EQ("test", store.Get("flagA")->item->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandlesSecondInit) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
-                           0, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       0, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagB", FlagItemDescriptor{EvaluationResult{
-                           0, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagB", ItemDescriptor{EvaluationResult{
+                       0, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagB")->flag->Detail().Value());
+    EXPECT_EQ("test", store.Get("flagB")->item->Detail().Value());
     EXPECT_FALSE(store.Get("flagA"));
 }
 
 TEST(FlagstoreTests, HandlePatchNewFlag) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
-                           0, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       0, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
     store.Upsert("flagB",
-                 FlagItemDescriptor{EvaluationResult{
+                 ItemDescriptor{EvaluationResult{
                      0, std::nullopt, false, false, std::nullopt,
                      EvaluationDetailInternal{Value("second"), std::nullopt,
                                               std::nullopt}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("test", store.Get("flagA")->flag->Detail().Value());
-    EXPECT_EQ("second", store.Get("flagB")->flag->Detail().Value());
+    EXPECT_EQ("test", store.Get("flagA")->item->Detail().Value());
+    EXPECT_EQ("second", store.Get("flagB")->item->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandlePatchUpdateFlag) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
-                           0, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       0, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
     store.Upsert("flagA",
-                 FlagItemDescriptor{EvaluationResult{
+                 ItemDescriptor{EvaluationResult{
                      1, std::nullopt, false, false, std::nullopt,
                      EvaluationDetailInternal{Value("second"), std::nullopt,
                                               std::nullopt}}});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_EQ("second", store.Get("flagA")->flag->Detail().Value());
+    EXPECT_EQ("second", store.Get("flagA")->item->Detail().Value());
 }
 
 TEST(FlagstoreTests, HandleDelete) {
     FlagStore store;
 
-    store.Init(
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>{
-            {{"flagA", FlagItemDescriptor{EvaluationResult{
-                           1, std::nullopt, false, false, std::nullopt,
-                           EvaluationDetailInternal{Value("test"), std::nullopt,
-                                                    std::nullopt}}}}}});
+    store.Init(std::unordered_map<std::string,
+                                  launchdarkly::client_side::ItemDescriptor>{
+        {{"flagA", ItemDescriptor{EvaluationResult{
+                       1, std::nullopt, false, false, std::nullopt,
+                       EvaluationDetailInternal{Value("test"), std::nullopt,
+                                                std::nullopt}}}}}});
 
-    store.Upsert("flagA", FlagItemDescriptor{2});
+    store.Upsert("flagA", ItemDescriptor{2});
 
     EXPECT_FALSE(store.GetAll().empty());
-    EXPECT_FALSE(store.Get("flagA")->flag.has_value());
+    EXPECT_FALSE(store.Get("flagA")->item.has_value());
 }
 
 TEST(FlagstoreTests, GetItemWhichDoesNotExist) {

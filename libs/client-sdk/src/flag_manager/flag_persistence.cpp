@@ -38,14 +38,14 @@ FlagPersistence::FlagPersistence(std::string const& sdk_key,
 
 void FlagPersistence::Init(
     Context const& context,
-    std::unordered_map<std::string, FlagItemDescriptor> data) {
+    std::unordered_map<std::string, ItemDescriptor> data) {
     sink_.Init(context, std::move(data));
     StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
 
 void FlagPersistence::Upsert(Context const& context,
                              std::string key,
-                             FlagItemDescriptor item) {
+                             ItemDescriptor item) {
     sink_.Upsert(context, key, item);
     StoreCache(PersistenceEncodeKey(context.CanonicalKey()));
 }
@@ -74,7 +74,7 @@ void FlagPersistence::LoadCached(Context const& context) {
 
     auto res = boost::json::value_to<tl::expected<
         std::unordered_map<std::string,
-                           launchdarkly::client_side::FlagItemDescriptor>,
+                           launchdarkly::client_side::ItemDescriptor>,
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)

@@ -7,18 +7,17 @@ namespace launchdarkly::client_side::flag_manager {
 
 FlagUpdater::FlagUpdater(FlagStore& flag_store) : flag_store_(flag_store) {}
 
-Value GetValue(FlagItemDescriptor& descriptor) {
-    if (descriptor.flag) {
+Value GetValue(ItemDescriptor& descriptor) {
+    if (descriptor.item) {
         // `flag->` unwraps the first optional we know is present.
         // The second `value()` is not an optional.
-        return descriptor.flag->Detail().Value();
+        return descriptor.item->Detail().Value();
     }
     return {};
 }
 
-void FlagUpdater::Init(
-    Context const& context,
-    std::unordered_map<std::string, FlagItemDescriptor> data) {
+void FlagUpdater::Init(Context const& context,
+                       std::unordered_map<std::string, ItemDescriptor> data) {
     std::lock_guard lock{signal_mutex_};
 
     // Calculate what flags changed.
@@ -32,7 +31,7 @@ void FlagUpdater::Init(
             auto existing = old_flags.find(new_pair.first);
             if (existing != old_flags.end()) {
                 // The flag changed.
-                auto& evaluation_result = new_pair.second.flag;
+                auto& evaluation_result = new_pair.second.item;
                 if (evaluation_result) {
                     auto new_value = GetValue(new_pair.second);
                     auto old_value = GetValue(*existing->second);
@@ -87,24 +86,24 @@ void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
 
 void FlagUpdater::Upsert(Context const& context,
                          std::string key,
-                         FlagItemDescriptor item) {
+                         ItemDescriptor descriptor) {
     // Check the version.
     auto existing = flag_store_.Get(key);
-    if (existing && (existing->version >= item.version)) {
+    if (existing && (existing->version >= descriptor.version)) {
         // Out of order update, ignore it.
         return;
     }
 
     if (HasListeners()) {
         // Existed and updated.
-        if (existing && item.flag) {
-            DispatchEvent(
-                FlagValueChangeEvent(key, GetValue(item), GetValue(*existing)));
-        } else if (item.flag) {
+        if (existing && descriptor.item) {
+            DispatchEvent(FlagValueChangeEvent(key, GetValue(descriptor),
+                                               GetValue(*existing)));
+        } else if (descriptor.item) {
             DispatchEvent(FlagValueChangeEvent(
-                key, item.flag.value().Detail().Value(), Value()));
+                key, descriptor.item.value().Detail().Value(), Value()));
             // new flag
-        } else if (existing && existing->flag.has_value()) {
+        } else if (existing && existing->item.has_value()) {
             // Existed and deleted.
             DispatchEvent(FlagValueChangeEvent(key, GetValue(*existing)));
         } else {
@@ -112,7 +111,7 @@ void FlagUpdater::Upsert(Context const& context,
             // Do nothing.
         }
     }
-    flag_store_.Upsert(key, item);
+    flag_store_.Upsert(key, descriptor);
 }
 
 bool FlagUpdater::HasListeners() const {

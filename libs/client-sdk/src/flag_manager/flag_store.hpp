@@ -13,8 +13,8 @@ namespace launchdarkly::client_side::flag_manager {
 
 class FlagStore {
    public:
-    void Init(std::unordered_map<std::string, FlagItemDescriptor> const& data);
-    void Upsert(std::string const& key, FlagItemDescriptor item);
+    void Init(std::unordered_map<std::string, ItemDescriptor> const& data);
+    void Upsert(std::string const& key, ItemDescriptor item);
 
     /**
      * Attempts to get a flag by key from the current flags.
@@ -23,21 +23,21 @@ class FlagStore {
      * @return A shared_ptr to the value if present. A null shared_ptr if the
      * item is not present.
      */
-    std::shared_ptr<FlagItemDescriptor> Get(std::string const& flag_key) const;
+    std::shared_ptr<ItemDescriptor> Get(std::string const& flag_key) const;
 
     /**
      * Gets all the current flags.
      *
      * @return All of the current flags.
      */
-    std::unordered_map<std::string, std::shared_ptr<FlagItemDescriptor>>
-    GetAll() const;
+    std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>> GetAll()
+        const;
 
    private:
     void UpdateData(
-        std::unordered_map<std::string, FlagItemDescriptor> const& data);
+        std::unordered_map<std::string, ItemDescriptor> const& data);
 
-    std::unordered_map<std::string, std::shared_ptr<FlagItemDescriptor>> data_;
+    std::unordered_map<std::string, std::shared_ptr<ItemDescriptor>> data_;
     mutable std::mutex data_mutex_;
 };
 

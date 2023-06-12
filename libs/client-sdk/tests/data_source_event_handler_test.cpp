@@ -14,22 +14,21 @@ using namespace launchdarkly::client_side::data_sources;
 
 class TestHandler : public IDataSourceUpdateSink {
    public:
-    void Init(
-        Context const& context,
-        std::unordered_map<std::string, FlagItemDescriptor> data) override {
+    void Init(Context const& context,
+              std::unordered_map<std::string, ItemDescriptor> data) override {
         init_data_.push_back(data);
         count_ += 1;
     }
     void Upsert(Context const& context,
                 std::string key,
-                FlagItemDescriptor data) override {
+                ItemDescriptor data) override {
         upsert_data_.emplace_back(key, data);
         count_ += 1;
     }
 
     uint64_t count_ = 0;
-    std::vector<std::unordered_map<std::string, FlagItemDescriptor>> init_data_;
-    std::vector<std::pair<std::string, FlagItemDescriptor>> upsert_data_;
+    std::vector<std::unordered_map<std::string, ItemDescriptor>> init_data_;
+    std::vector<std::pair<std::string, ItemDescriptor>> upsert_data_;
 };
 
 TEST(StreamingDataHandlerTests, HandlesPutMessage) {
@@ -45,8 +44,8 @@ TEST(StreamingDataHandlerTests, HandlesPutMessage) {
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler.count_);
-    auto expected_put = std::unordered_map<std::string, FlagItemDescriptor>{
-        {"flagA", FlagItemDescriptor(EvaluationResult(
+    auto expected_put = std::unordered_map<std::string, ItemDescriptor>{
+        {"flagA", ItemDescriptor(EvaluationResult(
                       1, std::nullopt, false, false, std::nullopt,
                       EvaluationDetailInternal(Value("test"), std::nullopt,
                                                std::nullopt)))}};
@@ -65,7 +64,7 @@ TEST(StreamingDataHandlerTests, HandlesEmptyPutMessage) {
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler.count_);
-    auto expected_put = std::unordered_map<std::string, FlagItemDescriptor>();
+    auto expected_put = std::unordered_map<std::string, ItemDescriptor>();
     EXPECT_EQ(expected_put, test_handler.init_data_[0]);
 }
 
@@ -110,8 +109,8 @@ TEST(StreamingDataHandlerTests, HandlesPatchMessage) {
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler.count_);
-    auto expected_put = std::pair<std::string, FlagItemDescriptor>{
-        "flagA", FlagItemDescriptor(EvaluationResult(
+    auto expected_put = std::pair<std::string, ItemDescriptor>{
+        "flagA", ItemDescriptor(EvaluationResult(
                      1, std::nullopt, false, false, std::nullopt,
                      EvaluationDetailInternal(Value("test"), std::nullopt,
                                               std::nullopt)))};
@@ -159,8 +158,8 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler.count_);
-    auto expected_put = std::pair<std::string, FlagItemDescriptor>{
-        "flagA", FlagItemDescriptor(1)};
+    auto expected_put =
+        std::pair<std::string, ItemDescriptor>{"flagA", ItemDescriptor(1)};
     EXPECT_EQ(expected_put, test_handler.upsert_data_[0]);
 }
 

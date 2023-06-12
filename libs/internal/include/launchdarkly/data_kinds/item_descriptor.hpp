@@ -8,7 +8,7 @@
 #include <tl/expected.hpp>
 #include <unordered_map>
 
-namespace launchdarkly {
+namespace launchdarkly::data_kinds {
 /**
  * An item descriptor is an abstraction that allows for Flag data to be
  * handled using the same type in both a put or a patch.
@@ -23,25 +23,22 @@ struct ItemDescriptor {
     /**
      * The data item, or nullopt if this is a deleted item placeholder.
      */
-    std::optional<T> flag;
+    std::optional<T> item;
 
     explicit ItemDescriptor(uint64_t version);
 
-    explicit ItemDescriptor(T flag);
+    explicit ItemDescriptor(T item);
 
-    ItemDescriptor(ItemDescriptor const& item) = default;
-    ItemDescriptor(ItemDescriptor&& item) = default;
+    ItemDescriptor(ItemDescriptor const&) = default;
+    ItemDescriptor(ItemDescriptor&&) = default;
     ItemDescriptor& operator=(ItemDescriptor const&) = default;
     ItemDescriptor& operator=(ItemDescriptor&&) = default;
     ~ItemDescriptor() = default;
-
-    friend std::ostream& operator<<(std::ostream& out,
-                                    ItemDescriptor const& descriptor);
 };
 
 template <typename T>
 bool operator==(ItemDescriptor<T> const& lhs, ItemDescriptor<T> const& rhs) {
-    return lhs.version == rhs.version && lhs.flag == rhs.flag;
+    return lhs.version == rhs.version && lhs.item == rhs.item;
 }
 
 template <typename T>
@@ -49,10 +46,10 @@ std::ostream& operator<<(std::ostream& out,
                          ItemDescriptor<T> const& descriptor) {
     out << "{";
     out << " version: " << descriptor.version;
-    if (descriptor.flag.has_value()) {
-        out << " flag: " << descriptor.flag.value();
+    if (descriptor.item.has_value()) {
+        out << " item: " << descriptor.item.value();
     } else {
-        out << " flag: <nullopt>";
+        out << " item: <nullopt>";
     }
     return out;
 }
@@ -61,8 +58,8 @@ template <typename T>
 ItemDescriptor<T>::ItemDescriptor(uint64_t version) : version(version) {}
 
 template <typename T>
-ItemDescriptor<T>::ItemDescriptor(T flag)
-    : version(flag.Version()), flag(std::move(flag)) {}
+ItemDescriptor<T>::ItemDescriptor(T item)
+    : version(item.Version()), item(std::move(item)) {}
 
 template <typename T>
 tl::expected<std::unordered_map<std::string, ItemDescriptor<T>>, JsonError>
@@ -99,13 +96,13 @@ void tag_invoke(
 
     auto& obj = json_value.emplace_object();
     for (auto descriptor : all_flags) {
-        // Only serialize non-deleted flags.
-        if (descriptor.second->flag) {
+        // Only serialize non-deleted items..
+        if (descriptor.second->item) {
             auto eval_result_json =
-                boost::json::value_from(*descriptor.second->flag);
+                boost::json::value_from(*descriptor.second->item);
             obj.emplace(descriptor.first, eval_result_json);
         }
     }
 }
 
-}  // namespace launchdarkly
+}  // namespace launchdarkly::data_kinds
