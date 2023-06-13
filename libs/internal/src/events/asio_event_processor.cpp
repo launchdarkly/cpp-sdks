@@ -10,6 +10,8 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 
+#include <launchdarkly/events/server_events.hpp>
+
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
 
@@ -221,9 +223,9 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                                            config::shared::ServerSDK>::value) {
                     if (!context_key_cache_.Notice(
                             event.context.CanonicalKey())) {
-                        out.emplace_back(client::IdentifyEvent{
-                            event.creation_date,
-                            filter_.filter(event.context)});
+                        out.emplace_back(
+                            server::IndexEvent{event.creation_date,
+                                               filter_.filter(event.context)});
                     }
                 }
 
