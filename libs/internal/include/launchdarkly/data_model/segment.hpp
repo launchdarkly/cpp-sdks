@@ -1,0 +1,47 @@
+#pragma once
+
+#include <boost/json/value.hpp>
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/value.hpp>
+#include <optional>
+#include <string>
+#include <tl/expected.hpp>
+#include <unordered_map>
+#include <vector>
+
+namespace launchdarkly::data_model {
+
+struct Segment {
+    struct Target {
+        std::string contextKind;
+        std::vector<std::string> values;
+    };
+    struct Clause {
+        AttributeReference attribute;
+        std::string op;
+        std::vector<Value> values;
+
+        std::optional<bool> negate;
+        std::optional<std::string> contextKind;
+    };
+    struct Rule {
+        std::vector<Clause> clauses;
+        std::optional<std::string> id;
+        std::optional<std::uint64_t> weight;
+        std::optional<std::string> bucketBy;
+        std::optional<std::string> rolloutContextKind;
+    };
+    std::string key;
+    std::size_t version;
+
+    std::optional<std::vector<std::string>> included;
+    std::optional<std::vector<std::string>> excluded;
+    std::optional<std::vector<Target>> includedContexts;
+    std::optional<std::vector<Target>> excludedContexts;
+    std::optional<std::vector<Rule>> rules;
+    std::optional<std::string> salt;
+    std::optional<bool> unbounded;
+    std::optional<std::string> unboundedContextKind;
+    std::optional<std::size_t> generation;
+};
+}  // namespace launchdarkly::data_model

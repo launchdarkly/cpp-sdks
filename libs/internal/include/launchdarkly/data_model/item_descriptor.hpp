@@ -8,7 +8,7 @@
 #include <tl/expected.hpp>
 #include <unordered_map>
 
-namespace launchdarkly::data_kinds {
+namespace launchdarkly::data_model {
 /**
  * An item descriptor is an abstraction that allows for Flag data to be
  * handled using the same type in both a put or a patch.
@@ -105,4 +105,4 @@ void tag_invoke(
     }
 }
 
-}  // namespace launchdarkly::data_kinds
+}  // namespace launchdarkly::data_model
