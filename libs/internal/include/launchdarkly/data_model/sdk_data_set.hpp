@@ -15,9 +15,4 @@ struct SDKDataSet {
     std::unordered_map<SegmentKey, ItemDescriptor<Segment>> segments;
 };
 
-tl::expected<SDKDataSet, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<SDKDataSet, JsonError>> const&
-        unused,
-    boost::json::value const& json_value);
-
 }  // namespace launchdarkly::data_model

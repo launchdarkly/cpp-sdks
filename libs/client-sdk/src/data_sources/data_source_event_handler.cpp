@@ -2,6 +2,7 @@
 
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
+#include <launchdarkly/serialization/json_item_descriptor.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/json.hpp>

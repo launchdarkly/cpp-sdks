@@ -4,6 +4,7 @@
 #include <launchdarkly/encoding/sha_256.hpp>
 
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
+#include <launchdarkly/serialization/json_item_descriptor.hpp>
 
 #include <utility>
 
