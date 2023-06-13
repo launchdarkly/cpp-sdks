@@ -1,31 +1,31 @@
-#include <launchdarkly/events/context_key_cache.hpp>
+#include <launchdarkly/events/lru_cache.hpp>
 
 namespace launchdarkly::events {
-ContextKeyCache::ContextKeyCache(std::size_t capacity)
+LRUCache::LRUCache(std::size_t capacity)
     : capacity_(capacity), map_(), list_() {}
 
-bool ContextKeyCache::Notice(std::string const& context_key) {
-    auto it = map_.find(context_key);
+bool LRUCache::Notice(std::string const& value) {
+    auto it = map_.find(value);
     if (it != map_.end()) {
-        list_.remove(context_key);
-        list_.push_front(context_key);
+        list_.remove(value);
+        list_.push_front(value);
         return true;
     }
     while (map_.size() >= capacity_) {
         map_.erase(list_.back());
         list_.pop_back();
     }
-    list_.push_front(context_key);
-    map_.emplace(context_key, list_.front());
+    list_.push_front(value);
+    map_.emplace(value, list_.front());
     return false;
 }
 
-void ContextKeyCache::Clear() {
+void LRUCache::Clear() {
     map_.clear();
     list_.clear();
 }
 
-std::size_t ContextKeyCache::Size() const {
+std::size_t LRUCache::Size() const {
     return list_.size();
 }
 

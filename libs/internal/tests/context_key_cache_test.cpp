@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include <launchdarkly/events/context_key_cache.hpp>
+#include <launchdarkly/events/lru_cache.hpp>
 
 using namespace launchdarkly::events;
 
 TEST(ContextKeyCacheTests, CacheSizeOne) {
-    ContextKeyCache cache(1);
+    LRUCache cache(1);
 
     auto keys = {"foo", "bar", "baz", "qux"};
     for (auto const& k : keys) {
@@ -14,7 +14,7 @@ TEST(ContextKeyCacheTests, CacheSizeOne) {
 }
 
 TEST(ContextKeyCacheTests, CacheIsCleared) {
-    ContextKeyCache cache(3);
+    LRUCache cache(3);
     auto keys = {"foo", "bar", "baz"};
     for (auto const& k : keys) {
         cache.Notice(k);
@@ -25,7 +25,7 @@ TEST(ContextKeyCacheTests, CacheIsCleared) {
 }
 
 TEST(ContextKeyCacheTests, LRUProperty) {
-    ContextKeyCache cache(3);
+    LRUCache cache(3);
     auto keys = {"foo", "bar", "baz"};
     for (auto const& k : keys) {
         cache.Notice(k);
@@ -51,12 +51,12 @@ TEST(ContextKeyCacheTests, LRUProperty) {
 TEST(ContextKeyCacheTests, DoesNotExceedCapacity) {
     const std::size_t CAP = 100;
     const std::size_t N = 100000;
-    ContextKeyCache cache(CAP);
+    LRUCache cache(CAP);
 
     for (int i = 0; i < N; ++i) {
         cache.Notice(std::to_string(i));
     }
-    
+
     for (int i = N - CAP; i < N; ++i) {
         ASSERT_TRUE(cache.Notice(std::to_string(i)));
     }

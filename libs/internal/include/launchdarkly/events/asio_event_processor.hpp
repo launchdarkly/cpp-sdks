@@ -13,7 +13,7 @@
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context_filter.hpp>
-#include <launchdarkly/events/context_key_cache.hpp>
+#include <launchdarkly/events/lru_cache.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
@@ -75,7 +75,7 @@ class AsioEventProcessor {
 
     launchdarkly::ContextFilter filter_;
 
-    ContextKeyCache context_key_cache_;
+    LRUCache context_key_cache_;
 
     Logger& logger_;
 
