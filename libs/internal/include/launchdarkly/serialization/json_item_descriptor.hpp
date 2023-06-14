@@ -27,7 +27,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
         auto eval_result =
             boost::json::value_to<tl::expected<T, JsonError>>(pair.value());
         if (!eval_result.has_value()) {
-            return tl::unexpected(JsonError::kSchemaFailure);
+            return tl::unexpected(eval_result.error());
         }
         descriptors.emplace(pair.key(), data_model::ItemDescriptor<T>(
                                             std::move(eval_result.value())));

@@ -17,9 +17,9 @@ struct Segment {
         std::vector<std::string> values;
     };
     struct Clause {
-        AttributeReference attribute;
+        // AttributeReference attribute;
         std::string op;
-        std::vector<Value> values;
+        // std::vector<Value> values;
 
         std::optional<bool> negate;
         std::optional<std::string> contextKind;
@@ -32,7 +32,7 @@ struct Segment {
         std::optional<std::string> rolloutContextKind;
     };
     std::string key;
-    std::size_t version;
+    std::uint64_t version;
 
     std::optional<std::vector<std::string>> included;
     std::optional<std::vector<std::string>> excluded;
@@ -42,6 +42,8 @@ struct Segment {
     std::optional<std::string> salt;
     std::optional<bool> unbounded;
     std::optional<std::string> unboundedContextKind;
-    std::optional<std::size_t> generation;
+    std::optional<std::uint64_t> generation;
+
+    [[nodiscard]] inline std::uint64_t Version() const { return version; }
 };
 }  // namespace launchdarkly::data_model
