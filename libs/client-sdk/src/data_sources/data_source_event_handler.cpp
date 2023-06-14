@@ -1,5 +1,4 @@
 #include "data_source_event_handler.hpp"
-#include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
@@ -144,7 +143,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             boost::json::parse(data));
         if (res.has_value()) {
             handler_.Upsert(context_, res.value().key,
-                             ItemDescriptor(res.value().version));
+                            ItemDescriptor(res.value().version));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;

@@ -192,8 +192,8 @@ bool ClientImpl::Initialized() const {
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
-        if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag->Detail().Value());
+        if (descriptor->item) {
+            result.try_emplace(key, descriptor->item->Detail().Value());
         }
     }
     return result;
@@ -247,7 +247,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         std::nullopt,
     };
 
-    if (!desc || !desc->flag) {
+    if (!desc || !desc->item) {
         if (!Initialized()) {
             LD_LOG(logger_, LogLevel::kWarn)
                 << "LaunchDarkly client has not yet been initialized. "
@@ -282,9 +282,9 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                "Returning cached value";
     }
 
-    assert(desc->flag);
+    assert(desc->item);
 
-    auto const& flag = *(desc->flag);
+    auto const& flag = *(desc->item);
     auto const& detail = flag.Detail();
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
