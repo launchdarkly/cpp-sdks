@@ -51,6 +51,18 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 }
 }  // namespace launchdarkly::events::client
 
+namespace launchdarkly::events::server {
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IndexEvent const& event) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "index");
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
+    obj.emplace("context", event.context);
+}
+}  // namespace launchdarkly::events::server
+
 namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const& tag,

@@ -10,6 +10,8 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 
+#include <launchdarkly/events/server_events.hpp>
+
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
 
@@ -53,6 +55,7 @@ AsioEventProcessor<SDK>::AsioEventProcessor(
       last_known_past_time_(std::nullopt),
       filter_(events_config.AllAttributesPrivate(),
               events_config.PrivateAttributes()),
+      context_key_cache_(events_config.ContextKeysCacheCapacity().value_or(0)),
       logger_(logger) {
     ScheduleFlush();
 }
@@ -212,47 +215,63 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     InputEvent input_event) {
     std::vector<OutputEvent> out;
     std::visit(
-        overloaded{[&](client::FeatureEventParams&& event) {
-                       summarizer_.Update(event);
+        overloaded{
+            [&](client::FeatureEventParams&& event) {
+                summarizer_.Update(event);
 
-                       client::FeatureEventBase base{event};
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    if (!context_key_cache_.Notice(
+                            event.context.CanonicalKey())) {
+                        out.emplace_back(
+                            server::IndexEvent{event.creation_date,
+                                               filter_.filter(event.context)});
+                    }
+                }
 
-                       auto debug_until_date = event.debug_events_until_date;
+                client::FeatureEventBase base{event};
 
-                       // To be conservative, use as the current time the
-                       // maximum of the actual current time and the server's
-                       // time. This way if the local host is running behind, we
-                       // won't accidentally keep emitting events.
+                auto debug_until_date = event.debug_events_until_date;
 
-                       auto conservative_now = std::max(
-                           std::chrono::system_clock::now(),
-                           last_known_past_time_.value_or(
-                               std::chrono::system_clock::from_time_t(0)));
+                // To be conservative, use as the current time the
+                // maximum of the actual current time and the server's
+                // time. This way if the local host is running behind, we
+                // won't accidentally keep emitting events.
 
-                       bool emit_debug_event =
-                           debug_until_date &&
-                           conservative_now < debug_until_date->t;
+                auto conservative_now =
+                    std::max(std::chrono::system_clock::now(),
+                             last_known_past_time_.value_or(
+                                 std::chrono::system_clock::from_time_t(0)));
 
-                       if (emit_debug_event) {
-                           out.emplace_back(client::DebugEvent{
-                               base, filter_.filter(event.context)});
-                       }
+                bool emit_debug_event =
+                    debug_until_date && conservative_now < debug_until_date->t;
 
-                       if (event.require_full_event) {
-                           out.emplace_back(client::FeatureEvent{
-                               std::move(base), event.context.KindsToKeys()});
-                       }
-                   },
-                   [&](client::IdentifyEventParams&& event) {
-                       // Contexts should already have been checked for
-                       // validity by this point.
-                       assert(event.context.Valid());
-                       out.emplace_back(client::IdentifyEvent{
-                           event.creation_date, filter_.filter(event.context)});
-                   },
-                   [&](TrackEventParams&& event) {
-                       out.emplace_back(std::move(event));
-                   }},
+                if (emit_debug_event) {
+                    out.emplace_back(client::DebugEvent{
+                        base, filter_.filter(event.context)});
+                }
+
+                if (event.require_full_event) {
+                    out.emplace_back(client::FeatureEvent{
+                        std::move(base), event.context.KindsToKeys()});
+                }
+            },
+            [&](client::IdentifyEventParams&& event) {
+                // Contexts should already have been checked for
+                // validity by this point.
+                assert(event.context.Valid());
+
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    context_key_cache_.Notice(event.context.CanonicalKey());
+                }
+
+                out.emplace_back(client::IdentifyEvent{
+                    event.creation_date, filter_.filter(event.context)});
+            },
+            [&](TrackEventParams&& event) {
+                out.emplace_back(std::move(event));
+            }},
         std::move(input_event));
 
     return out;
