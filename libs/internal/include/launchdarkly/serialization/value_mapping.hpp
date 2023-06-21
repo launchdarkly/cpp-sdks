@@ -5,30 +5,39 @@
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <tl/expected.hpp>
 
-#define PARSE_OPTIONAL_FIELD(field, obj, key)                            \
-    do {                                                                 \
-        if (auto error = ParseOptionalFieldOutParam(obj, key, &field)) { \
-            return tl::make_unexpected(error.value());                   \
-        }                                                                \
+#define PARSE_FIELD(field, it)                                               \
+    if (auto result =                                                        \
+            boost::json::value_to<tl::expected<decltype(field), JsonError>>( \
+                it->value())) {                                              \
+        field = result.value();                                              \
+    } else {                                                                 \
+        return tl::make_unexpected(result.error());                          \
+    }
+
+// Attempts to parse a field only if it exists in the data. Propagates an error
+// if the field's destination type is not compatible with the data.
+#define PARSE_OPTIONAL_FIELD(field, obj, key) \
+    do {                                      \
+        auto const& it = obj.find(key);       \
+        if (it != obj.end()) {                \
+            PARSE_FIELD(field, it);           \
+        }                                     \
     } while (0)
 
-#define PARSE_REQUIRED_FIELD(field, obj, key)                            \
-    do {                                                                 \
-        if (auto error = ParseRequiredFieldOutParam(obj, key, &field)) { \
-            return tl::make_unexpected(error.value());                   \
-        }                                                                \
+// Propagates an error upwards if the specified field isn't present in the
+// data.
+#define PARSE_REQUIRED_FIELD(field, obj, key)                      \
+    do {                                                           \
+        auto const& it = obj.find(key);                            \
+        if (it == obj.end()) {                                     \
+            return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+        PARSE_FIELD(field, it);                                    \
     } while (0)
 
 #define REQUIRE_OBJECT(value)                                      \
     do {                                                           \
         if (!json_value.is_object()) {                             \
-            return tl::make_unexpected(JsonError::kSchemaFailure); \
-        }                                                          \
-    } while (0)
-
-#define REQUIRE_STRING(value)                                      \
-    do {                                                           \
-        if (!json_value.is_string()) {                             \
             return tl::make_unexpected(JsonError::kSchemaFailure); \
         }                                                          \
     } while (0)
@@ -64,69 +73,9 @@ std::optional<OutType> MapOpt(std::optional<InType> opt,
     return std::nullopt;
 }
 
-template <typename T>
-tl::expected<std::optional<T>, JsonError> ParseOptionalField(
-    boost::json::object const& obj,
-    std::string const& field_name) {
-    auto const& it = obj.find(field_name);
-    if (it == obj.end()) {
-        return std::nullopt;
-    }
-    return boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
-        it->value());
-}
-
-template <typename T>
-std::optional<JsonError> ParseOptionalFieldOutParam(
-    boost::json::object const& obj,
-    std::string const& field_name,
-    std::optional<T>* out_value) {
-    auto maybe_opt_val = ParseOptionalField<T>(obj, field_name);
-    if (!maybe_opt_val) {
-        return maybe_opt_val.error();
-    }
-    *out_value = std::move(maybe_opt_val.value());
-    return std::nullopt;
-}
-
-template <typename T>
-tl::expected<T, JsonError> ParseRequiredField(boost::json::object const& obj,
-                                              std::string const& field_name) {
-    auto const& it = obj.find(field_name);
-    if (it == obj.end()) {
-        return tl::make_unexpected(JsonError::kSchemaFailure);
-    }
-    return boost::json::value_to<tl::expected<T, JsonError>>(it->value());
-}
-
-template <typename T>
-std::optional<JsonError> ParseRequiredFieldOutParam(
-    boost::json::object const& obj,
-    std::string const& field_name,
-    T* out_value) {
-    auto maybe_val = ParseRequiredField<T>(obj, field_name);
-    if (!maybe_val) {
-        return maybe_val.error();
-    }
-    *out_value = std::move(maybe_val.value());
-    return std::nullopt;
-}
-
 template <>
 std::optional<uint64_t> ValueAsOpt(boost::json::object::const_iterator iterator,
                                    boost::json::object::const_iterator end);
-
-template <>
-std::optional<bool> ValueAsOpt(boost::json::object::const_iterator iterator,
-                               boost::json::object::const_iterator end);
-
-// Returns std::nullopt if:
-// - The iterator value is not an array
-// - ANY element of the array is not a string
-template <>
-std::optional<std::vector<std::string>> ValueAsOpt(
-    boost::json::object::const_iterator iterator,
-    boost::json::object::const_iterator end);
 
 template <>
 std::optional<std::string> ValueAsOpt(

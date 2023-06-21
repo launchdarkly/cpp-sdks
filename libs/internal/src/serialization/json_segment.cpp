@@ -35,6 +35,7 @@ tl::expected<data_model::Segment::Rule, JsonError> tag_invoke(
     data_model::Segment::Rule rule;
 
     PARSE_REQUIRED_FIELD(rule.clauses, obj, "clauses");
+
     PARSE_OPTIONAL_FIELD(rule.rolloutContextKind, obj, "rolloutContextKind");
     PARSE_OPTIONAL_FIELD(rule.weight, obj, "weight");
     PARSE_OPTIONAL_FIELD(rule.id, obj, "id");

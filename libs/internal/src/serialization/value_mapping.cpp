@@ -22,15 +22,6 @@ std::optional<std::string> ValueAsOpt(
 }
 
 template <>
-std::optional<bool> ValueAsOpt(boost::json::object::const_iterator iterator,
-                               boost::json::object::const_iterator end) {
-    if (iterator != end && iterator->value().is_bool()) {
-        return iterator->value().as_bool();
-    }
-    return std::nullopt;
-}
-
-template <>
 std::optional<std::vector<std::string>> ValueAsOpt(
     boost::json::object::const_iterator iterator,
     boost::json::object::const_iterator end) {
