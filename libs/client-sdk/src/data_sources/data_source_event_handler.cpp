@@ -34,13 +34,14 @@ static tl::expected<DataSourceEventHandler::PatchData, JsonError> tag_invoke(
         auto const& obj = json_value.as_object();
         auto const* key_iter = obj.find("key");
         auto key = ValueAsOpt<std::string>(key_iter, obj.end());
-        auto result =
-            boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-                json_value);
+        auto result = boost::json::value_to<
+            tl::expected<std::optional<EvaluationResult>, JsonError>>(
+            json_value);
 
-        if (result.has_value() && key.has_value()) {
+        if (result.has_value() && result.value().has_value() &&
+            key.has_value()) {
             return DataSourceEventHandler::PatchData{key.value(),
-                                                     result.value()};
+                                                     result.value().value()};
         }
     }
     return tl::unexpected(JsonError::kSchemaFailure);

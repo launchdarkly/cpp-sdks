@@ -40,27 +40,9 @@ tl::expected<std::optional<std::vector<T>>, JsonError> tag_invoke(
     return items;
 }
 
-template <typename T>
-tl::expected<std::vector<T>, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<std::vector<T>, JsonError>> const&
-        unused,
-    boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-    auto maybe_val = boost::json::value_to<
-        tl::expected<std::optional<std::vector<T>>, JsonError>>(json_value);
-    if (!maybe_val.has_value()) {
-        return tl::unexpected(maybe_val.error());
-    }
-    return maybe_val.value().value_or(std::vector<T>{});
-}
-
 tl::expected<std::optional<bool>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<bool>, JsonError>> const& unused,
-    boost::json::value const& json_value);
-
-tl::expected<bool, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<bool, JsonError>> const& unused,
     boost::json::value const& json_value);
 
 tl::expected<std::optional<std::uint64_t>, JsonError> tag_invoke(
@@ -68,19 +50,9 @@ tl::expected<std::optional<std::uint64_t>, JsonError> tag_invoke(
         tl::expected<std::optional<std::uint64_t>, JsonError>> const& unused,
     boost::json::value const& json_value);
 
-tl::expected<std::uint64_t, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<std::uint64_t, JsonError>> const&
-        unused,
-    boost::json::value const& json_value);
-
 tl::expected<std::optional<std::string>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<std::string>, JsonError>> const& unused,
-    boost::json::value const& json_value);
-
-tl::expected<std::string, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<std::string, JsonError>> const&
-        unused,
     boost::json::value const& json_value);
 
 template <typename K, typename V>
@@ -113,20 +85,27 @@ tl::expected<std::optional<std::unordered_map<K, V>>, JsonError> tag_invoke(
     return descriptors;
 }
 
-template <typename K, typename V>
-tl::expected<std::unordered_map<K, V>, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<std::unordered_map<K, V>, JsonError>> const& unused,
+/**
+ * Convenience implementation that deserializes a T via the tag_invoke overload
+ * for std::optional<T>.
+ *
+ * If that overload returns std::nullopt, this returns
+ * a default-constructed T.
+ *
+ * Json errors are propagated.
+ */
+template <typename T>
+tl::expected<T, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<T, JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
-    auto maybe_val = boost::json::value_to<
-        tl::expected<std::optional<std::unordered_map<K, V>>, JsonError>>(
-        json_value);
+    auto maybe_val =
+        boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+            json_value);
     if (!maybe_val.has_value()) {
         return tl::unexpected(maybe_val.error());
     }
-    auto const& val = maybe_val.value();
-    return val.value_or(std::unordered_map<K, V>{});
+    return maybe_val.value().value_or(T{});
 }
 
 }  // namespace launchdarkly

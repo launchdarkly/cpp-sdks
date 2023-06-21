@@ -6,22 +6,6 @@
 #include <boost/core/ignore_unused.hpp>
 
 namespace launchdarkly {
-tl::expected<EvaluationResult, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<EvaluationResult, JsonError>> const&
-        unused,
-    boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-    auto maybe_result = boost::json::value_to<
-        tl::expected<std::optional<EvaluationResult>, JsonError>>(json_value);
-    if (!maybe_result) {
-        return tl::unexpected(maybe_result.error());
-    }
-    auto const& result = maybe_result.value();
-    if (!result.has_value()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    return *result;
-}
 
 tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     boost::json::value_to_tag<
