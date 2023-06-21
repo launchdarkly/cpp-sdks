@@ -5,6 +5,7 @@
 
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 
 #include <utility>
 
@@ -20,6 +21,17 @@ std::string PersistenceEncodeKey(std::string const& input) {
 static std::string MakeEnvironment(std::string const& prefix,
                                    std::string const& sdk_key) {
     return prefix + "_" + PersistenceEncodeKey(sdk_key);
+}
+
+std::unordered_map<std::string, ItemDescriptor> remove_nulls(
+    std::unordered_map<std::string, std::optional<ItemDescriptor>> map) {
+    std::unordered_map<std::string, ItemDescriptor> result;
+    for (auto [key, value] : map) {
+        if (value.has_value()) {
+            result.emplace(key, std::move(value.value()));
+        }
+    }
+    return result;
 }
 
 FlagPersistence::FlagPersistence(std::string const& sdk_key,
@@ -74,8 +86,9 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 
     auto res = boost::json::value_to<tl::expected<
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>,
+        std::optional<std::unordered_map<
+            std::string,
+            std::optional<launchdarkly::client_side::ItemDescriptor>>>,
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)
@@ -83,7 +96,14 @@ void FlagPersistence::LoadCached(Context const& context) {
             << error_code.message();
         return;
     }
-    sink_.Init(context, *res);
+
+    // If the map was null or omitted, treat it like an empty data set.
+    auto map = res.value().value_or(
+        std::unordered_map<std::string, std::optional<ItemDescriptor>>{});
+    // If any map value is null or omitted, remove it.
+    auto filtered = remove_nulls(std::move(map));
+
+    sink_.Init(context, std::move(filtered));
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {

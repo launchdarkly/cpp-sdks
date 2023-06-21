@@ -90,7 +90,7 @@ TEST(StreamingDataHandlerTests, BadSchemaPut) {
         ContextBuilder().Kind("user", "user-key").Build(), test_handler, logger,
         status_manager);
 
-    auto res = stream_handler.HandleMessage("put", "{\"potato\": {}}");
+    auto res = stream_handler.HandleMessage("put", "{\"potato\": 3}");
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
     EXPECT_EQ(0, test_handler.count_);

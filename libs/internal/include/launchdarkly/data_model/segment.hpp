@@ -18,7 +18,8 @@ struct Segment {
     };
     struct Clause {
         enum class Op {
-            kUnrecognized,
+            kOmitted,      /* represents empty string */
+            kUnrecognized, /* didn't match any known operators */
             kIn,
             kStartsWith,
             kEndsWith,
@@ -36,7 +37,7 @@ struct Segment {
             kSegmentMatch
         };
 
-        AttributeReference attribute;
+        std::optional<AttributeReference> attribute;
         Op op;
         std::vector<Value> values;
 

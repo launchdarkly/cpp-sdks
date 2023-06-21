@@ -66,35 +66,43 @@ tl::expected<data_model::Segment::Clause, JsonError> tag_invoke(
 
     data_model::Segment::Clause clause;
 
-    PARSE_OPTIONAL_FIELD(clause.contextKind, obj, "contextKind");
-
-    std::string literal_or_ref;
-
-    PARSE_REQUIRED_FIELD(literal_or_ref, obj, "attribute");
-
-    if (clause.contextKind) {
-        clause.attribute =
-            AttributeReference::FromReferenceStr(std::move(literal_or_ref));
-    } else {
-        clause.attribute =
-            AttributeReference::FromLiteralStr(std::move(literal_or_ref));
-    }
-
     PARSE_REQUIRED_FIELD(clause.op, obj, "op");
     PARSE_REQUIRED_FIELD(clause.values, obj, "values");
+
     PARSE_OPTIONAL_FIELD(clause.negate, obj, "negate");
+    PARSE_OPTIONAL_FIELD(clause.contextKind, obj, "contextKind");
+
+    std::optional<std::string> literal_or_ref;
+    PARSE_OPTIONAL_FIELD(literal_or_ref, obj, "attribute");
+
+    clause.attribute = MapOpt<AttributeReference, std::string>(
+        literal_or_ref,
+        [has_context = clause.contextKind.has_value()](auto&& ref) {
+            if (has_context) {
+                return AttributeReference::FromReferenceStr(ref);
+            } else {
+                return AttributeReference::FromLiteralStr(ref);
+            }
+        });
 
     return clause;
 }
 
-tl::expected<data_model::Segment::Clause::Op, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<data_model::Segment::Clause::Op, JsonError>> const& unused,
-    boost::json::value const& json_value) {
+tl::expected<std::optional<data_model::Segment::Clause::Op>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::optional<data_model::Segment::Clause::Op>,
+                            JsonError>> const& unused,
+           boost::json::value const& json_value) {
     boost::ignore_unused(unused);
-
-    REQUIRE_STRING(json_value);
-
+    if (json_value.is_null()) {
+        return std::nullopt;
+    }
+    if (!json_value.is_string()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+    if (json_value.as_string().empty()) {
+        return std::nullopt;
+    }
     auto const& str = json_value.as_string();
 
     if (str == "in") {
@@ -132,13 +140,36 @@ tl::expected<data_model::Segment::Clause::Op, JsonError> tag_invoke(
     }
 }
 
-tl::expected<data_model::Segment, JsonError> tag_invoke(
+tl::expected<data_model::Segment::Clause::Op, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<data_model::Segment, JsonError>> const& unused,
+        tl::expected<data_model::Segment::Clause::Op, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+    auto maybe_op = boost::json::value_to<tl::expected<
+        std::optional<data_model::Segment::Clause::Op>, JsonError>>(json_value);
+    if (!maybe_op) {
+        return tl::unexpected(maybe_op.error());
+    }
+    return maybe_op.value().value_or(data_model::Segment::Clause::Op::kOmitted);
+}
+
+tl::expected<std::optional<data_model::Segment>, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<std::optional<data_model::Segment>,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
-    REQUIRE_OBJECT(json_value);
+    if (json_value.is_null()) {
+        return std::nullopt;
+    }
+
+    if (!json_value.is_object()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+
+    if (json_value.as_object().empty()) {
+        return std::nullopt;
+    }
 
     auto const& obj = json_value.as_object();
 
@@ -161,4 +192,5 @@ tl::expected<data_model::Segment, JsonError> tag_invoke(
 
     return segment;
 }
+
 }  // namespace launchdarkly

@@ -72,14 +72,8 @@ tl::expected<std::optional<T>, JsonError> ParseOptionalField(
     if (it == obj.end()) {
         return std::nullopt;
     }
-    if (it->value().is_null()) {
-        return std::nullopt;
-    }
-    auto val = boost::json::value_to<tl::expected<T, JsonError>>(it->value());
-    if (!val) {
-        return tl::make_unexpected(val.error());
-    }
-    return std::make_optional(val.value());
+    return boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+        it->value());
 }
 
 template <typename T>
@@ -100,16 +94,9 @@ tl::expected<T, JsonError> ParseRequiredField(boost::json::object const& obj,
                                               std::string const& field_name) {
     auto const& it = obj.find(field_name);
     if (it == obj.end()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
+        return tl::make_unexpected(JsonError::kSchemaFailure);
     }
-    if (it->value().is_null()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    auto val = boost::json::value_to<tl::expected<T, JsonError>>(it->value());
-    if (!val) {
-        return tl::make_unexpected(val.error());
-    }
-    return val.value();
+    return boost::json::value_to<tl::expected<T, JsonError>>(it->value());
 }
 
 template <typename T>

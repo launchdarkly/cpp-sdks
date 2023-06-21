@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
@@ -26,48 +27,33 @@ TEST(SDKDataSetTests, DeserializesZeroSegments) {
         boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
             boost::json::parse(R"({"segments":{}})"));
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->segments->empty());
-}
-
-TEST(SDKDataSetTests, DeserializesComplexSegment) {
-    auto result =
-        boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
-            boost::json::parse(R"({"segments":{
-"foo" : {"key":"foo", "version": 42, "included": {"values": ["a", "b"]}, "excluded": {"values": ["c", "d"]}, "salt": "salt", "rules": [{"clauses": [{"attribute": "foo", "op": "in", "values": ["bar"]}]}]}}})"));
-    ASSERT_TRUE(result);
-    ASSERT_EQ(result->segments->size(), 1);
-    auto const& segment_descriptor = result->segments->at("foo");
-
-    ASSERT_TRUE(segment_descriptor.item);
-    ASSERT_EQ(segment_descriptor.version, 42);
-
-    auto const& segment = *segment_descriptor.item;
-    ASSERT_EQ(segment.key, "foo");
-    ASSERT_EQ(segment.salt, "salt");
+    ASSERT_FALSE(result->segments);
 }
 
 TEST(SegmentTests, DeserializesMinimumValid) {
-    auto result =
-        boost::json::value_to<tl::expected<data_model::Segment, JsonError>>(
-            boost::json::parse(R"({"key":"foo", "version": 42})"));
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<data_model::Segment>, JsonError>>(
+        boost::json::parse(R"({"key":"foo", "version": 42})"));
     ASSERT_TRUE(result);
+    ASSERT_TRUE(result.value());
 
-    ASSERT_EQ(result->version, 42);
-    ASSERT_EQ(result->key, "foo");
+    ASSERT_EQ(result.value()->version, 42);
+    ASSERT_EQ(result.value()->key, "foo");
 }
 
 TEST(SegmentTests, TolerantOfUnrecognizedFields) {
-    auto result =
-        boost::json::value_to<tl::expected<data_model::Segment, JsonError>>(
-            boost::json::parse(
-                R"({"key":"foo", "version": 42, "somethingRandom" : true})"));
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<data_model::Segment>, JsonError>>(
+        boost::json::parse(
+            R"({"key":"foo", "version": 42, "somethingRandom" : true})"));
     ASSERT_TRUE(result);
+    ASSERT_TRUE(result.value());
 }
 
 TEST(RuleTests, DeserializesMinimumValid) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
-        R"({"clauses": [{"attribute": "", "op": "in", "values": []}]})"));
+        R"({"clauses": [{"attribute": "", "op": "in", "values": ["a"]}]})"));
     ASSERT_TRUE(result);
 
     auto const& clauses = result->clauses;
@@ -80,7 +66,7 @@ TEST(RuleTests, DeserializesMinimumValid) {
 TEST(RuleTests, TolerantOfUnrecognizedFields) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
-        R"({"somethingRandom": true, "clauses": [{"attribute": "", "op": "in", "values": []}]})"));
+        R"({"somethingRandom": true, "clauses": [{"attribute": "", "op": "in", "values": ["a"]}]})"));
 
     ASSERT_TRUE(result);
 }
@@ -124,34 +110,33 @@ TEST(RuleTests, DeserializesLiteralReference) {
 TEST(ClauseTests, DeserializesMinimumValid) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(
-        boost::json::parse(R"({"attribute": "", "op": "in", "values": []})"));
+        boost::json::parse(R"({"op": "segmentMatch", "values": []})"));
     ASSERT_TRUE(result);
 
-    ASSERT_EQ(result->op, data_model::Segment::Clause::Op::kIn);
+    ASSERT_EQ(result->op, data_model::Segment::Clause::Op::kSegmentMatch);
     ASSERT_TRUE(result->values.empty());
-    ASSERT_FALSE(result->attribute.Valid());
 }
 
 TEST(ClauseTests, TolerantOfUnrecognizedFields) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(boost::json::parse(
-        R"({"somethingRandom": true, "attribute": "", "op": "in", "values": []})"));
+        R"({"somethingRandom": true, "attribute": "", "op": "in", "values": ["a"]})"));
     ASSERT_TRUE(result);
 }
 
 TEST(ClauseTests, TolerantOfEmptyAttribute) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(
-        boost::json::parse(R"({"attribute": "", "op": "in", "values": []})"));
+        boost::json::parse(
+            R"({"attribute": "", "op": "segmentMatch", "values": ["a"]})"));
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->attribute.Valid());
+    ASSERT_FALSE(result->attribute);
 }
 
 TEST(ClauseTests, TolerantOfUnrecognizedOperator) {
     auto result = boost::json::value_to<
-        tl::expected<data_model::Segment::Clause, JsonError>>(
-        boost::json::parse(
-            R"({"attribute": "", "op": "notAnActualOperator", "values": []})"));
+        tl::expected<data_model::Segment::Clause, JsonError>>(boost::json::parse(
+        R"({"attribute": "", "op": "notAnActualOperator", "values": ["a"]})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->op, data_model::Segment::Clause::Op::kUnrecognized);
 }
@@ -159,7 +144,7 @@ TEST(ClauseTests, TolerantOfUnrecognizedOperator) {
 TEST(ClauseTests, DeserializesSimpleAttributeReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(boost::json::parse(
-        R"({"attribute": "foo", "op": "in", "values": [], "contextKind" : "user"})"));
+        R"({"attribute": "foo", "op": "in", "values": ["a"], "contextKind" : "user"})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->attribute, AttributeReference("foo"));
 }
@@ -167,7 +152,7 @@ TEST(ClauseTests, DeserializesSimpleAttributeReference) {
 TEST(ClauseTests, DeserializesPointerAttributeReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(boost::json::parse(
-        R"({"attribute": "/foo/bar", "op": "in", "values": [], "contextKind" : "user"})"));
+        R"({"attribute": "/foo/bar", "op": "in", "values": ["a"], "contextKind" : "user"})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->attribute, AttributeReference("/foo/bar"));
 }
@@ -175,7 +160,7 @@ TEST(ClauseTests, DeserializesPointerAttributeReference) {
 TEST(ClauseTests, DeserializesEscapedReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(boost::json::parse(
-        R"({"attribute": "/~1foo~1bar", "op": "in", "values": [], "contextKind" : "user"})"));
+        R"({"attribute": "/~1foo~1bar", "op": "in", "values": ["a"], "contextKind" : "user"})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->attribute, AttributeReference("/~1foo~1bar"));
 }
@@ -184,7 +169,7 @@ TEST(ClauseTests, DeserializesLiteralAttributeReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Clause, JsonError>>(
         boost::json::parse(
-            R"({"attribute": "/foo/bar", "op": "in", "values": []})"));
+            R"({"attribute": "/foo/bar", "op": "in", "values": ["a"]})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->attribute,
               AttributeReference::FromLiteralStr("/foo/bar"));

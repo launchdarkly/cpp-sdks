@@ -5,34 +5,35 @@
 #include <boost/json.hpp>
 
 #include <launchdarkly/data_model/item_descriptor.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/value_mapping.hpp>
 #include "json_errors.hpp"
 
 namespace launchdarkly {
 
 template <typename T>
-tl::expected<std::unordered_map<std::string, data_model::ItemDescriptor<T>>,
-             JsonError>
-tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::unordered_map<std::string, data_model::ItemDescriptor<T>>,
-               JsonError>> const& unused,
+tl::expected<std::optional<data_model::ItemDescriptor<T>>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::optional<data_model::ItemDescriptor<T>>,
+                            JsonError>> const& unused,
            boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
-    if (!json_value.is_object()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
+    auto maybe_item =
+        boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+            json_value);
+
+    if (!maybe_item) {
+        return tl::unexpected(maybe_item.error());
     }
-    auto const& obj = json_value.as_object();
-    std::unordered_map<std::string, data_model::ItemDescriptor<T>> descriptors;
-    for (auto const& pair : obj) {
-        auto eval_result =
-            boost::json::value_to<tl::expected<T, JsonError>>(pair.value());
-        if (!eval_result.has_value()) {
-            return tl::unexpected(eval_result.error());
-        }
-        descriptors.emplace(pair.key(), data_model::ItemDescriptor<T>(
-                                            std::move(eval_result.value())));
+
+    auto const& item = maybe_item.value();
+
+    if (!item) {
+        return std::nullopt;
     }
-    return descriptors;
+
+    return data_model::ItemDescriptor<T>(std::move(item.value()));
 }
 
 template <typename T>

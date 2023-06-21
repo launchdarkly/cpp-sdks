@@ -13,7 +13,8 @@ struct SDKDataSet {
     using FlagKey = std::string;
     using SegmentKey = std::string;
     // std::unordered_map<FlagKey, ItemDescriptor<Flag>> flags;
-    std::optional<std::unordered_map<SegmentKey, ItemDescriptor<Segment>>>
+    std::optional<
+        std::unordered_map<SegmentKey, std::optional<ItemDescriptor<Segment>>>>
         segments;
 };
 
