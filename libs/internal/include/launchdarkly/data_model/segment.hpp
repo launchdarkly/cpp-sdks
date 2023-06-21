@@ -47,7 +47,7 @@ struct Segment {
         std::vector<Clause> clauses;
         std::optional<std::string> id;
         std::optional<std::uint64_t> weight;
-        std::optional<std::string> bucketBy;
+        std::optional<AttributeReference> bucketBy;
         std::optional<std::string> rolloutContextKind;
     };
     std::string key;

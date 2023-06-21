@@ -13,7 +13,6 @@ tl::expected<data_model::Segment::Target, JsonError> tag_invoke(
     boost::ignore_unused(unused);
 
     REQUIRE_OBJECT(json_value);
-
     auto const& obj = json_value.as_object();
 
     data_model::Segment::Target target;
@@ -36,11 +35,22 @@ tl::expected<data_model::Segment::Rule, JsonError> tag_invoke(
     data_model::Segment::Rule rule;
 
     PARSE_REQUIRED_FIELD(rule.clauses, obj, "clauses");
-
-    PARSE_OPTIONAL_FIELD(rule.weight, obj, "weight");
-    PARSE_OPTIONAL_FIELD(rule.bucketBy, obj, "bucketBy");
-    PARSE_OPTIONAL_FIELD(rule.id, obj, "id");
     PARSE_OPTIONAL_FIELD(rule.rolloutContextKind, obj, "rolloutContextKind");
+    PARSE_OPTIONAL_FIELD(rule.weight, obj, "weight");
+    PARSE_OPTIONAL_FIELD(rule.id, obj, "id");
+
+    std::optional<std::string> literal_or_ref;
+    PARSE_OPTIONAL_FIELD(literal_or_ref, obj, "bucketBy");
+
+    rule.bucketBy = MapOpt<AttributeReference, std::string>(
+        literal_or_ref,
+        [has_context = rule.rolloutContextKind.has_value()](auto&& ref) {
+            if (has_context) {
+                return AttributeReference::FromReferenceStr(ref);
+            } else {
+                return AttributeReference::FromLiteralStr(ref);
+            }
+        });
 
     return rule;
 }

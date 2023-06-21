@@ -29,6 +29,23 @@ TEST(SDKDataSetTests, DeserializesZeroSegments) {
     ASSERT_TRUE(result->segments->empty());
 }
 
+TEST(SDKDataSetTests, DeserializesComplexSegment) {
+    auto result =
+        boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
+            boost::json::parse(R"({"segments":{
+"foo" : {"key":"foo", "version": 42, "included": {"values": ["a", "b"]}, "excluded": {"values": ["c", "d"]}, "salt": "salt", "rules": [{"clauses": [{"attribute": "foo", "op": "in", "values": ["bar"]}]}]}}})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->segments->size(), 1);
+    auto const& segment_descriptor = result->segments->at("foo");
+
+    ASSERT_TRUE(segment_descriptor.item);
+    ASSERT_EQ(segment_descriptor.version, 42);
+
+    auto const& segment = *segment_descriptor.item;
+    ASSERT_EQ(segment.key, "foo");
+    ASSERT_EQ(segment.salt, "salt");
+}
+
 TEST(SegmentTests, DeserializesMinimumValid) {
     auto result =
         boost::json::value_to<tl::expected<data_model::Segment, JsonError>>(
@@ -66,6 +83,42 @@ TEST(RuleTests, TolerantOfUnrecognizedFields) {
         R"({"somethingRandom": true, "clauses": [{"attribute": "", "op": "in", "values": []}]})"));
 
     ASSERT_TRUE(result);
+}
+
+TEST(RuleTests, DeserializesSimpleAttributeReference) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
+        R"({"rolloutContextKind" : "foo", "bucketBy" : "bar", "clauses": []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->bucketBy, AttributeReference("bar"));
+}
+
+TEST(RuleTests, DeserializesPointerAttributeReference) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
+        R"({"rolloutContextKind" : "foo", "bucketBy" : "/foo/bar", "clauses": []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->bucketBy, AttributeReference("/foo/bar"));
+}
+
+TEST(RuleTests, DeserializesEscapedReference) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
+        R"({"rolloutContextKind" : "foo", "bucketBy" : "/~1foo~1bar", "clauses": []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->bucketBy, AttributeReference("/~1foo~1bar"));
+}
+
+TEST(RuleTests, DeserializesLiteralReference) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Segment::Rule, JsonError>>(
+        boost::json::parse(R"({"bucketBy" : "/~1foo~1bar", "clauses": []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->bucketBy,
+              AttributeReference::FromLiteralStr("/~1foo~1bar"));
 }
 
 TEST(ClauseTests, DeserializesMinimumValid) {
