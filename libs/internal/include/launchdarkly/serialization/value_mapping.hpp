@@ -26,6 +26,13 @@
         }                                                          \
     } while (0)
 
+#define REQUIRE_STRING(value)                                      \
+    do {                                                           \
+        if (!json_value.is_string()) {                             \
+            return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+    } while (0)
+
 namespace launchdarkly {
 template <typename Type>
 std::optional<Type> ValueAsOpt(boost::json::object::const_iterator iterator,

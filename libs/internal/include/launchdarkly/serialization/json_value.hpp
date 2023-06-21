@@ -2,7 +2,9 @@
 
 #include <boost/json.hpp>
 
+#include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/value.hpp>
+#include <tl/expected.hpp>
 
 namespace launchdarkly {
 /**
@@ -12,6 +14,10 @@ namespace launchdarkly {
  */
 Value tag_invoke(boost::json::value_to_tag<Value> const&,
                  boost::json::value const&);
+
+tl::expected<Value, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<Value, JsonError>> const&,
+    boost::json::value const&);
 
 /**
  * Method used by boost::json for converting a launchdarkly::Value into a

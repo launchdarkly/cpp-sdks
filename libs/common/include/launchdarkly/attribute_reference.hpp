@@ -15,8 +15,9 @@ namespace launchdarkly {
  * launchdarkly::Context::Get, or to identify an attribute or nested value that
  * should be considered private
  * with launchdarkly::AttributesBuilder<BuilderReturn, BuildType>::SetPrivate or
- * launchdarkly::AttributesBuilder<BuilderReturn, BuildType>::AddPrivateAttribute
- * (the SDK configuration can also have a list of private attribute references).
+ * launchdarkly::AttributesBuilder<BuilderReturn,
+ * BuildType>::AddPrivateAttribute (the SDK configuration can also have a list
+ * of private attribute references).
  *
  *  This is represented as a separate type, rather than just a string, so that
  * validation and parsing can be done ahead of time if an attribute reference
@@ -122,6 +123,11 @@ class AttributeReference {
      * @param ref_str The string to make an attribute reference from.
      */
     AttributeReference(char const* ref_str);
+
+    /**
+     * Default constructs an invalid attribute reference.
+     */
+    explicit AttributeReference();
 
     bool operator==(AttributeReference const& other) const {
         return components_ == other.components_;

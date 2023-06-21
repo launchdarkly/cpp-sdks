@@ -17,9 +17,28 @@ struct Segment {
         std::vector<std::string> values;
     };
     struct Clause {
-        // AttributeReference attribute;
-        std::string op;
-        // std::vector<Value> values;
+        enum class Op {
+            kUnrecognized,
+            kIn,
+            kStartsWith,
+            kEndsWith,
+            kMatches,
+            kContains,
+            kLessThan,
+            kLessThanOrEqual,
+            kGreaterThan,
+            kGreaterThanOrEqual,
+            kBefore,
+            kAfter,
+            kSemVerEqual,
+            kSemVerLessThan,
+            kSemVerGreaterThan,
+            kSegmentMatch
+        };
+
+        AttributeReference attribute;
+        Op op;
+        std::vector<Value> values;
 
         std::optional<bool> negate;
         std::optional<std::string> contextKind;
