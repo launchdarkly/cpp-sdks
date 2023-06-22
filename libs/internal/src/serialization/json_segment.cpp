@@ -1,4 +1,5 @@
 #include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>

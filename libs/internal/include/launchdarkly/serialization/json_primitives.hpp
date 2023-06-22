@@ -2,8 +2,8 @@
 
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include <launchdarkly/serialization/json_errors.hpp>
 #include <tl/expected.hpp>
-#include "json_errors.hpp"
 
 namespace launchdarkly {
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/json/fwd.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 

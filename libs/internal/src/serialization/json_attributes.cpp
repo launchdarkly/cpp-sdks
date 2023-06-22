@@ -1,3 +1,5 @@
+#include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 #include <launchdarkly/serialization/json_attributes.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 

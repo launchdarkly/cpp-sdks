@@ -5,9 +5,9 @@
 #include <boost/json.hpp>
 
 #include <launchdarkly/data_model/item_descriptor.hpp>
+#include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
-#include "json_errors.hpp"
 
 namespace launchdarkly {
 

@@ -53,6 +53,11 @@ struct Flag {
         std::optional<std::string> id;
     };
 
+    struct ClientSideAvailability {
+        std::optional<bool> usingMobileKey;
+        std::optional<bool> usingEnvironmentId;
+    };
+
     std::string key;
     std::uint64_t version;
     bool on;

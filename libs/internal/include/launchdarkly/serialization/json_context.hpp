@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/json.hpp>
+#include <boost/json/fwd.hpp>
 
 #include <tl/expected.hpp>
 

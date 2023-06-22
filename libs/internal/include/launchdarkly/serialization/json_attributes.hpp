@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/json.hpp>
+#include <boost/json/fwd.hpp>
 
 #include <launchdarkly/attributes.hpp>
 
