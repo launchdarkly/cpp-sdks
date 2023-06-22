@@ -8,18 +8,6 @@ namespace launchdarkly {
 // constructors. Replacing them with braced init lists would result in all types
 // being lists.
 
-Value tag_invoke(boost::json::value_to_tag<Value> const& unused,
-                 boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-    auto maybe_val =
-        boost::json::value_to<tl::expected<std::optional<Value>, JsonError>>(
-            json_value);
-    if (!maybe_val) {
-        return Value::Null();
-    }
-    return maybe_val.value().value_or(Value::Null());
-}
-
 tl::expected<std::optional<Value>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<Value>, JsonError>> const& unused,
@@ -47,7 +35,12 @@ tl::expected<std::optional<Value>, JsonError> tag_invoke(
             auto vec = json_value.as_array();
             std::vector<Value> values;
             for (auto const& item : vec) {
-                values.push_back(boost::json::value_to<Value>(item));
+                auto value =
+                    boost::json::value_to<tl::expected<Value, JsonError>>(item);
+                if (!value) {
+                    return tl::make_unexpected(value.error());
+                }
+                values.emplace_back(std::move(*value));
             }
             return Value(values);
         }
@@ -55,8 +48,13 @@ tl::expected<std::optional<Value>, JsonError> tag_invoke(
             auto& map = json_value.as_object();
             std::map<std::string, Value> values;
             for (auto const& pair : map) {
-                auto value = boost::json::value_to<Value>(pair.value());
-                values.emplace(pair.key().data(), std::move(value));
+                auto value =
+                    boost::json::value_to<tl::expected<Value, JsonError>>(
+                        pair.value());
+                if (!value) {
+                    return tl::make_unexpected(value.error());
+                }
+                values.emplace(pair.key().data(), std::move(*value));
             }
             return Value(std::move(values));
         }
