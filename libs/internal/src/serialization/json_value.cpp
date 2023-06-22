@@ -8,9 +8,24 @@ namespace launchdarkly {
 // constructors. Replacing them with braced init lists would result in all types
 // being lists.
 
-Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
+Value tag_invoke(boost::json::value_to_tag<Value> const& unused,
                  boost::json::value const& json_value) {
     boost::ignore_unused(unused);
+    auto maybe_val =
+        boost::json::value_to<tl::expected<std::optional<Value>, JsonError>>(
+            json_value);
+    if (!maybe_val) {
+        return Value::Null();
+    }
+    return maybe_val.value().value_or(Value::Null());
+}
+
+tl::expected<std::optional<Value>, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<std::optional<Value>, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
     // The name of the function needs to be tag_invoke for boost::json.
 
     // The conditions in these switches explicitly use the constructors, because
@@ -81,12 +96,6 @@ void tag_invoke(boost::json::value_from_tag const&,
             }
         } break;
     }
-}
-
-tl::expected<Value, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<Value, JsonError>> const& tag,
-    boost::json::value const& json_value) {
-    return boost::json::value_to<Value>(json_value);
 }
 
 // NOLINTEND modernize-return-braced-init-list

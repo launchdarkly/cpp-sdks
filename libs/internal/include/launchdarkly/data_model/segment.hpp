@@ -2,6 +2,7 @@
 
 #include <boost/json/value.hpp>
 #include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 #include <optional>
 #include <string>
@@ -15,34 +16,6 @@ struct Segment {
     struct Target {
         std::string contextKind;
         std::vector<std::string> values;
-    };
-    struct Clause {
-        enum class Op {
-            kOmitted,      /* represents empty string */
-            kUnrecognized, /* didn't match any known operators */
-            kIn,
-            kStartsWith,
-            kEndsWith,
-            kMatches,
-            kContains,
-            kLessThan,
-            kLessThanOrEqual,
-            kGreaterThan,
-            kGreaterThanOrEqual,
-            kBefore,
-            kAfter,
-            kSemVerEqual,
-            kSemVerLessThan,
-            kSemVerGreaterThan,
-            kSegmentMatch
-        };
-
-        std::optional<AttributeReference> attribute;
-        Op op;
-        std::vector<Value> values;
-
-        std::optional<bool> negate;
-        std::optional<std::string> contextKind;
     };
     struct Rule {
         std::vector<Clause> clauses;

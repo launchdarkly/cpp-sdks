@@ -60,7 +60,11 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     if (value_iter == json_obj.end()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    auto value = boost::json::value_to<Value>(value_iter->value());
+    auto maybe_value = boost::json::value_to<tl::expected<Value, JsonError>>(
+        value_iter->value());
+    if (!maybe_value) {
+        return tl::unexpected(maybe_value.error());
+    }
 
     auto* variation_iter = json_obj.find("variation");
     auto variation = ValueAsOpt<uint64_t>(variation_iter, json_obj.end());
@@ -80,7 +84,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
                 track_events,
                 track_reason,
                 debug_events_until_date,
-                EvaluationDetailInternal(value, variation,
+                EvaluationDetailInternal(*maybe_value, variation,
                                          std::make_optional(reason.value()))};
         }
         // We could not parse the reason.
@@ -94,7 +98,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         track_events,
         track_reason,
         debug_events_until_date,
-        EvaluationDetailInternal(value, variation, std::nullopt)};
+        EvaluationDetailInternal(*maybe_value, variation, std::nullopt)};
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
