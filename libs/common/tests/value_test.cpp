@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
+#include <boost/json.hpp>
+#include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/value.hpp>
-
-#include <boost/json.hpp>
 
 // NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
 

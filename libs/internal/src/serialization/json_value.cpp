@@ -65,6 +65,13 @@ tl::expected<std::optional<Value>, JsonError> tag_invoke(
     assert(!"All types need to be handled.");
 }
 
+Value tag_invoke(boost::json::value_to_tag<Value> const&,
+                 boost::json::value const& json_value) {
+    auto val =
+        boost::json::value_to<tl::expected<Value, JsonError>>(json_value);
+    return val ? std::move(*val) : Value();
+}
+
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Value const& ld_value) {

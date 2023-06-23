@@ -17,6 +17,9 @@ tl::expected<std::optional<Value>, JsonError> tag_invoke(
         tl::expected<std::optional<Value>, JsonError>> const&,
     boost::json::value const&);
 
+Value tag_invoke(boost::json::value_to_tag<Value> const&,
+                 boost::json::value const& json_value);
+
 /**
  * Method used by boost::json for converting a launchdarkly::Value into a
  * boost::json::value.
