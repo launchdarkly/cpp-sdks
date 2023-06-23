@@ -7,9 +7,10 @@
 
 namespace launchdarkly {
 
-tl::expected<data_model::Segment::Target, JsonError> tag_invoke(
+tl::expected<std::optional<data_model::Segment::Target>, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<data_model::Segment::Target, JsonError>> const& unused,
+        tl::expected<std::optional<data_model::Segment::Target>,
+                     JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -24,9 +25,10 @@ tl::expected<data_model::Segment::Target, JsonError> tag_invoke(
     return target;
 }
 
-tl::expected<data_model::Segment::Rule, JsonError> tag_invoke(
+tl::expected<std::optional<data_model::Segment::Rule>, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<data_model::Segment::Rule, JsonError>> const& unused,
+        tl::expected<std::optional<data_model::Segment::Rule>,
+                     JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 

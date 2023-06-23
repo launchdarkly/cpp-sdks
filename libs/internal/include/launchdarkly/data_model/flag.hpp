@@ -16,6 +16,7 @@ struct Flag {
         enum class Kind {
             kUnrecognized = 0,
             kExperiment = 1,
+            kRollout = 2,
         };
 
         struct WeightedVariation {
@@ -32,7 +33,8 @@ struct Flag {
         std::optional<std::int64_t> seed;
     };
 
-    using VariationOrRollout = std::variant<std::uint64_t, Rollout>;
+    using Variation = std::uint64_t;
+    using VariationOrRollout = std::variant<Variation, Rollout>;
 
     struct Prerequisite {
         std::string key;

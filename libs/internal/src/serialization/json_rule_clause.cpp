@@ -6,9 +6,9 @@
 
 namespace launchdarkly {
 
-tl::expected<data_model::Clause, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<data_model::Clause, JsonError>> const& unused,
+tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<std::optional<data_model::Clause>,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -45,15 +45,9 @@ tl::expected<std::optional<data_model::Clause::Op>, JsonError> tag_invoke(
         unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
-    if (json_value.is_null()) {
-        return std::nullopt;
-    }
-    if (!json_value.is_string()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    if (json_value.as_string().empty()) {
-        return std::nullopt;
-    }
+
+    REQUIRE_STRING(json_value);
+    
     auto const& str = json_value.as_string();
 
     if (str == "in") {

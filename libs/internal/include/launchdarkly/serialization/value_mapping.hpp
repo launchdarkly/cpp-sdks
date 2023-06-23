@@ -37,8 +37,27 @@
 
 #define REQUIRE_OBJECT(value)                                      \
     do {                                                           \
+        if (json_value.is_null()) {                                \
+            return std::nullopt;                                   \
+        }                                                          \
         if (!json_value.is_object()) {                             \
             return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+        if (json_value.as_object().empty()) {                      \
+            return std::nullopt;                                   \
+        }                                                          \
+    } while (0)
+
+#define REQUIRE_STRING(value)                                      \
+    do {                                                           \
+        if (json_value.is_null()) {                                \
+            return std::nullopt;                                   \
+        }                                                          \
+        if (!json_value.is_string()) {                             \
+            return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+        if (json_value.as_string().empty()) {                      \
+            return std::nullopt;                                   \
         }                                                          \
     } while (0)
 

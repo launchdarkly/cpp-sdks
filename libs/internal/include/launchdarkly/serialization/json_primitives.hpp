@@ -31,11 +31,15 @@ tl::expected<std::optional<std::vector<T>>, JsonError> tag_invoke(
     items.reserve(arr.size());
     for (auto const& item : arr) {
         auto eval_result =
-            boost::json::value_to<tl::expected<T, JsonError>>(item);
+            boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+                item);
         if (!eval_result.has_value()) {
             return tl::unexpected(eval_result.error());
         }
-        items.emplace_back(std::move(eval_result.value()));
+        auto maybe_val = eval_result.value();
+        if (maybe_val) {
+            items.emplace_back(std::move(maybe_val.value()));
+        }
     }
     return items;
 }
@@ -48,6 +52,11 @@ tl::expected<std::optional<bool>, JsonError> tag_invoke(
 tl::expected<std::optional<std::uint64_t>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<std::uint64_t>, JsonError>> const& unused,
+    boost::json::value const& json_value);
+
+tl::expected<std::optional<std::int64_t>, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<std::optional<std::int64_t>, JsonError>> const& unused,
     boost::json::value const& json_value);
 
 tl::expected<std::optional<std::string>, JsonError> tag_invoke(
