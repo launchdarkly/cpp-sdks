@@ -19,7 +19,7 @@ tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
 
     data_model::SDKDataSet data_set;
 
-    PARSE_OPTIONAL_FIELD(data_set.segments, obj, "segments");
+    PARSE_CONDITIONAL_FIELD(data_set.segments, obj, "segments");
 
     return data_set;
 }

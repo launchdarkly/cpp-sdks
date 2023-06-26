@@ -13,30 +13,38 @@
 namespace launchdarkly::data_model {
 
 struct Segment {
+    using Kind = std::string;
     struct Target {
-        std::string contextKind;
+        Kind contextKind;
         std::vector<std::string> values;
+    };
+
+    struct context_aware {
+        std::optional<Kind> contextKind;
+        AttributeReference bucketBy;
     };
     struct Rule {
         std::vector<Clause> clauses;
         std::optional<std::string> id;
         std::optional<std::uint64_t> weight;
-        std::optional<AttributeReference> bucketBy;
-        std::optional<std::string> rolloutContextKind;
+        AttributeReference bucketBy;
+        std::optional<Kind> rolloutContextKind;
     };
     std::string key;
     std::uint64_t version;
 
-    std::optional<std::vector<std::string>> included;
-    std::optional<std::vector<std::string>> excluded;
-    std::optional<std::vector<Target>> includedContexts;
-    std::optional<std::vector<Target>> excludedContexts;
-    std::optional<std::vector<Rule>> rules;
+    std::vector<std::string> included;
+    std::vector<std::string> excluded;
+    std::vector<Target> includedContexts;
+    std::vector<Target> excludedContexts;
+    std::vector<Rule> rules;
     std::optional<std::string> salt;
-    std::optional<bool> unbounded;
-    std::optional<std::string> unboundedContextKind;
+    bool unbounded;
+    std::optional<Kind> unboundedContextKind;
     std::optional<std::uint64_t> generation;
 
+    // TODO(cwaldren): make Kind a real type that is deserialized, so we can
+    // make empty string an error.
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
 };
 }  // namespace launchdarkly::data_model

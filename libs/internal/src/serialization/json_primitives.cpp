@@ -12,9 +12,6 @@ tl::expected<std::optional<bool>, JsonError> tag_invoke(
     if (!json_value.is_bool()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    if (!json_value.as_bool()) {
-        return std::nullopt;
-    }
     return json_value.as_bool();
 }
 
@@ -57,10 +54,6 @@ tl::expected<std::optional<std::string>, JsonError> tag_invoke(
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    if (json_value.as_string().empty()) {
-        return std::nullopt;
-    }
     return std::string(json_value.as_string());
 }
-
 }  // namespace launchdarkly

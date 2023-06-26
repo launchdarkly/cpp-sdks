@@ -7,6 +7,37 @@
 
 namespace launchdarkly {
 
+tl::expected<std::pair<data_model::Flag::ContextKind, AttributeReference>,
+             JsonError>
+tag_invoke(boost::json::value_to_tag<tl::expected<
+               std::pair<data_model::Flag::ContextKind, AttributeReference>,
+               JsonError>> const& unused,
+           boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
+    auto const& obj = json_value.as_object();
+
+    std::optional<data_model::Flag::ContextKind> kind;
+
+    PARSE_CONDITIONAL_FIELD(kind, obj, "contextKind");
+
+    if (kind && *kind == "") {
+        // Empty string is not a valid kind.
+        return tl::make_unexpected(JsonError::kSchemaFailure);
+    }
+
+    std::string attr_ref_or_name;
+    PARSE_FIELD_DEFAULT(attr_ref_or_name, obj, "bucketBy", "key");
+
+    if (kind) {
+        return std::make_pair(
+            *kind, AttributeReference::FromReferenceStr(attr_ref_or_name));
+    }
+
+    return std::make_pair("user",
+                          AttributeReference::FromLiteralStr(attr_ref_or_name));
+}
+
 tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<data_model::Flag::Rollout>,
@@ -18,23 +49,22 @@ tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     auto const& obj = json_value.as_object();
 
     data_model::Flag::Rollout rollout;
-    PARSE_REQUIRED_FIELD(rollout.variations, obj, "variations");
-    PARSE_OPTIONAL_FIELD(rollout.contextKind, obj, "contextKind");
-    PARSE_OPTIONAL_FIELD(rollout.kind, obj, "kind");
-    PARSE_OPTIONAL_FIELD(rollout.seed, obj, "seed");
 
-    std::optional<std::string> literal_or_ref;
-    PARSE_OPTIONAL_FIELD(literal_or_ref, obj, "bucketBy");
+    PARSE_FIELD(rollout.variations, obj, "variations");
+    PARSE_FIELD_DEFAULT(rollout.contextKind, obj, "contextKind", "user");
+    PARSE_FIELD_DEFAULT(rollout.kind, obj, "kind",
+                        data_model::Flag::Rollout::Kind::kRollout);
+    PARSE_CONDITIONAL_FIELD(rollout.seed, obj, "seed");
 
-    rollout.bucketBy = MapOpt<AttributeReference, std::string>(
-        literal_or_ref,
-        [has_context = rollout.contextKind.has_value()](auto&& ref) {
-            if (has_context) {
-                return AttributeReference::FromReferenceStr(ref);
-            } else {
-                return AttributeReference::FromLiteralStr(ref);
-            }
-        });
+    auto kind_and_bucket_by = boost::json::value_to<tl::expected<
+        std::pair<data_model::Flag::ContextKind, AttributeReference>,
+        JsonError>>(json_value);
+    if (!kind_and_bucket_by) {
+        return tl::make_unexpected(kind_and_bucket_by.error());
+    }
+
+    rollout.contextKind = kind_and_bucket_by->first;
+    rollout.bucketBy = kind_and_bucket_by->second;
 
     return rollout;
 }
@@ -50,9 +80,9 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
     auto const& obj = json_value.as_object();
 
     data_model::Flag::Rollout::WeightedVariation weighted_variation;
-    PARSE_REQUIRED_FIELD(weighted_variation.variation, obj, "variation");
-    PARSE_REQUIRED_FIELD(weighted_variation.weight, obj, "weight");
-    PARSE_OPTIONAL_FIELD(weighted_variation.untracked, obj, "untracked");
+    PARSE_FIELD(weighted_variation.variation, obj, "variation");
+    PARSE_FIELD(weighted_variation.weight, obj, "weight");
+    PARSE_FIELD(weighted_variation.untracked, obj, "untracked");
     return weighted_variation;
 }
 
@@ -85,7 +115,7 @@ tag_invoke(boost::json::value_to_tag<
 
     data_model::Flag::Prerequisite prerequisite;
     PARSE_REQUIRED_FIELD(prerequisite.key, obj, "key");
-    PARSE_REQUIRED_FIELD(prerequisite.variation, obj, "variation");
+    PARSE_FIELD(prerequisite.variation, obj, "variation");
     return prerequisite;
 }
 
@@ -99,9 +129,9 @@ tl::expected<std::optional<data_model::Flag::Target>, JsonError> tag_invoke(
     auto const& obj = json_value.as_object();
 
     data_model::Flag::Target target;
-    PARSE_REQUIRED_FIELD(target.values, obj, "values");
-    PARSE_REQUIRED_FIELD(target.variation, obj, "variation");
-    PARSE_OPTIONAL_FIELD(target.contextKind, obj, "contextKind");
+    PARSE_FIELD(target.values, obj, "values");
+    PARSE_FIELD(target.variation, obj, "variation");
+    PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind", "user");
     return target;
 }
 
@@ -115,9 +145,10 @@ tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
     auto const& obj = json_value.as_object();
 
     data_model::Flag::Rule rule;
-    PARSE_OPTIONAL_FIELD(rule.id, obj, "id");
-    PARSE_OPTIONAL_FIELD(rule.trackEvents, obj, "trackEvents");
-    PARSE_REQUIRED_FIELD(rule.clauses, obj, "clauses");
+
+    PARSE_FIELD(rule.trackEvents, obj, "trackEvents");
+    PARSE_FIELD(rule.clauses, obj, "clauses");
+    PARSE_CONDITIONAL_FIELD(rule.id, obj, "id");
 
     auto variation_or_rollout = boost::json::value_to<tl::expected<
         std::optional<data_model::Flag::VariationOrRollout>, JsonError>>(
@@ -143,10 +174,9 @@ tag_invoke(
     auto const& obj = json_value.as_object();
 
     data_model::Flag::ClientSideAvailability client_side_availability;
-    PARSE_OPTIONAL_FIELD(client_side_availability.usingEnvironmentId, obj,
-                         "usingEnvironmentId");
-    PARSE_OPTIONAL_FIELD(client_side_availability.usingMobileKey, obj,
-                         "usingMobileKey");
+    PARSE_FIELD(client_side_availability.usingEnvironmentId, obj,
+                "usingEnvironmentId");
+    PARSE_FIELD(client_side_availability.usingMobileKey, obj, "usingMobileKey");
     return client_side_availability;
 }
 
@@ -163,35 +193,25 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
     data_model::Flag flag;
 
     PARSE_REQUIRED_FIELD(flag.key, obj, "key");
-    PARSE_REQUIRED_FIELD(flag.version, obj, "version");
-    PARSE_REQUIRED_FIELD(flag.on, obj, "on");
-    PARSE_REQUIRED_FIELD(flag.variations, obj, "variations");
 
-    PARSE_OPTIONAL_FIELD(flag.prerequisites, obj, "prerequisites");
-    PARSE_OPTIONAL_FIELD(flag.targets, obj, "targets");
-    PARSE_OPTIONAL_FIELD(flag.contextTargets, obj, "contextTargets");
-    PARSE_OPTIONAL_FIELD(flag.rules, obj, "rules");
-    PARSE_OPTIONAL_FIELD(flag.offVariation, obj, "offVariation");
-    PARSE_OPTIONAL_FIELD(flag.clientSide, obj, "clientSide");
-    PARSE_OPTIONAL_FIELD(flag.clientSideAvailability, obj,
-                         "clientSideAvailability");
-    PARSE_OPTIONAL_FIELD(flag.salt, obj, "salt");
-    PARSE_OPTIONAL_FIELD(flag.trackEvents, obj, "trackEvents");
-    PARSE_OPTIONAL_FIELD(flag.trackEventsFallthrough, obj,
-                         "trackEventsFallthrough");
-    PARSE_OPTIONAL_FIELD(flag.debugEventsUntilDate, obj,
-                         "debugEventsUntilDate");
+    PARSE_CONDITIONAL_FIELD(flag.debugEventsUntilDate, obj,
+                            "debugEventsUntilDate");
+    PARSE_CONDITIONAL_FIELD(flag.salt, obj, "salt");
 
-    auto variation_or_rollout = boost::json::value_to<tl::expected<
-        std::optional<data_model::Flag::VariationOrRollout>, JsonError>>(
-        json_value);
-    if (!variation_or_rollout) {
-        return tl::make_unexpected(variation_or_rollout.error());
-    }
+    PARSE_FIELD(flag.version, obj, "version");
+    PARSE_FIELD(flag.on, obj, "on");
+    PARSE_FIELD(flag.variations, obj, "variations");
 
-    flag.fallthrough =
-        variation_or_rollout->value_or(data_model::Flag::Variation(0));
-
+    PARSE_FIELD(flag.prerequisites, obj, "prerequisites");
+    PARSE_FIELD(flag.targets, obj, "targets");
+    PARSE_FIELD(flag.contextTargets, obj, "contextTargets");
+    PARSE_FIELD(flag.rules, obj, "rules");
+    PARSE_FIELD(flag.offVariation, obj, "offVariation");
+    PARSE_FIELD(flag.clientSide, obj, "clientSide");
+    PARSE_FIELD(flag.clientSideAvailability, obj, "clientSideAvailability");
+    PARSE_FIELD(flag.trackEvents, obj, "trackEvents");
+    PARSE_FIELD(flag.trackEventsFallthrough, obj, "trackEventsFallthrough");
+    PARSE_FIELD(flag.fallthrough, obj, "fallthrough");
     return flag;
 }
 
@@ -205,7 +225,7 @@ tag_invoke(boost::json::value_to_tag<
     auto const& obj = json_value.as_object();
 
     std::optional<data_model::Flag::Rollout> rollout;
-    PARSE_OPTIONAL_FIELD(rollout, obj, "rollout");
+    PARSE_CONDITIONAL_FIELD(rollout, obj, "rollout");
 
     if (rollout) {
         return std::make_optional(*rollout);

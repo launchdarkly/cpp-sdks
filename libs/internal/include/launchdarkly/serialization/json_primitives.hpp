@@ -22,10 +22,6 @@ tl::expected<std::optional<std::vector<T>>, JsonError> tag_invoke(
         return tl::unexpected(JsonError::kSchemaFailure);
     }
 
-    if (json_value.as_array().empty()) {
-        return std::nullopt;
-    }
-
     auto const& arr = json_value.as_array();
     std::vector<T> items;
     items.reserve(arr.size());
@@ -78,15 +74,12 @@ tl::expected<std::optional<std::unordered_map<K, V>>, JsonError> tag_invoke(
     if (!json_value.is_object()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    if (json_value.as_object().empty()) {
-        return std::nullopt;
-    }
     auto const& obj = json_value.as_object();
     std::unordered_map<K, V> descriptors;
     for (auto const& pair : obj) {
         auto eval_result =
             boost::json::value_to<tl::expected<V, JsonError>>(pair.value());
-        if (!eval_result.has_value()) {
+        if (!eval_result) {
             return tl::unexpected(eval_result.error());
         }
         descriptors.emplace(pair.key(), eval_result.value());
@@ -114,7 +107,7 @@ tl::expected<T, JsonError> tag_invoke(
     if (!maybe_val.has_value()) {
         return tl::unexpected(maybe_val.error());
     }
-    return maybe_val.value().value_or(T{});
+    return maybe_val.value().value_or(T());
 }
 
 }  // namespace launchdarkly

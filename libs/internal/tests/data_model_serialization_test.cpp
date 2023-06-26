@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>

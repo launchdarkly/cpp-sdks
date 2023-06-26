@@ -18,13 +18,14 @@ tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
     data_model::Clause clause;
 
     PARSE_REQUIRED_FIELD(clause.op, obj, "op");
-    PARSE_REQUIRED_FIELD(clause.values, obj, "values");
+    PARSE_FIELD(clause.values, obj, "values");
 
-    PARSE_OPTIONAL_FIELD(clause.negate, obj, "negate");
-    PARSE_OPTIONAL_FIELD(clause.contextKind, obj, "contextKind");
+    PARSE_FIELD(clause.negate, obj, "negate");
+    // TODO(cwaldren): refactor w/ std::pair<kind, reference>
+    PARSE_CONDITIONAL_FIELD(clause.contextKind, obj, "contextKind");
 
     std::optional<std::string> literal_or_ref;
-    PARSE_OPTIONAL_FIELD(literal_or_ref, obj, "attribute");
+    PARSE_CONDITIONAL_FIELD(literal_or_ref, obj, "attribute");
 
     clause.attribute = MapOpt<AttributeReference, std::string>(
         literal_or_ref,
@@ -47,10 +48,14 @@ tl::expected<std::optional<data_model::Clause::Op>, JsonError> tag_invoke(
     boost::ignore_unused(unused);
 
     REQUIRE_STRING(json_value);
-    
+
     auto const& str = json_value.as_string();
 
-    if (str == "in") {
+    if (str == "") {
+        // Treating empty string as indicating the field is absent, but could
+        // also treat it as a valid but unknown value (like kUnrecognized.)
+        return std::nullopt;
+    } else if (str == "in") {
         return data_model::Clause::Op::kIn;
     } else if (str == "endsWith") {
         return data_model::Clause::Op::kEndsWith;

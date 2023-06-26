@@ -12,6 +12,8 @@
 namespace launchdarkly::data_model {
 
 struct Flag {
+    using ContextKind = std::string;
+
     struct Rollout {
         enum class Kind {
             kUnrecognized = 0,
@@ -22,14 +24,14 @@ struct Flag {
         struct WeightedVariation {
             std::uint64_t variation;
             std::uint64_t weight;
-            std::optional<bool> untracked;
+            bool untracked;
         };
 
         std::vector<WeightedVariation> variations;
 
-        std::optional<std::string> contextKind;
-        std::optional<Kind> kind;
-        std::optional<AttributeReference> bucketBy;
+        ContextKind contextKind;
+        Kind kind;
+        AttributeReference bucketBy;
         std::optional<std::int64_t> seed;
     };
 
@@ -44,20 +46,20 @@ struct Flag {
     struct Target {
         std::vector<std::string> values;
         std::uint64_t variation;
-        std::optional<std::string> contextKind;
+        ContextKind contextKind;
     };
 
     struct Rule {
         std::vector<Clause> clauses;
         VariationOrRollout variation_or_rollout;
 
-        std::optional<bool> trackEvents;
+        bool trackEvents;
         std::optional<std::string> id;
     };
 
     struct ClientSideAvailability {
-        std::optional<bool> usingMobileKey;
-        std::optional<bool> usingEnvironmentId;
+        bool usingMobileKey;
+        bool usingEnvironmentId;
     };
 
     std::string key;
@@ -66,16 +68,16 @@ struct Flag {
     VariationOrRollout fallthrough;
     std::vector<Value> variations;
 
-    std::optional<std::vector<Prerequisite>> prerequisites;
-    std::optional<std::vector<Target>> targets;
-    std::optional<std::vector<Target>> contextTargets;
-    std::optional<std::vector<Rule>> rules;
-    std::optional<std::uint64_t> offVariation;
-    std::optional<bool> clientSide;
-    std::optional<ClientSideAvailability> clientSideAvailability;
+    std::vector<Prerequisite> prerequisites;
+    std::vector<Target> targets;
+    std::vector<Target> contextTargets;
+    std::vector<Rule> rules;
+    std::uint64_t offVariation;
+    bool clientSide;
+    ClientSideAvailability clientSideAvailability;
     std::optional<std::string> salt;
-    std::optional<bool> trackEvents;
-    std::optional<bool> trackEventsFallthrough;
+    bool trackEvents;
+    bool trackEventsFallthrough;
     std::optional<std::uint64_t> debugEventsUntilDate;
 };
 }  // namespace launchdarkly::data_model

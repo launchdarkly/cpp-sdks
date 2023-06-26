@@ -32,7 +32,7 @@ struct Clause {
     Op op;
     std::vector<Value> values;
 
-    std::optional<bool> negate;
+    bool negate;
     std::optional<std::string> contextKind;
 };
 }  // namespace launchdarkly::data_model
