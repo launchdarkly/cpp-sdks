@@ -1,5 +1,6 @@
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include <launchdarkly/serialization/json_context_aware_reference.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
@@ -19,24 +20,16 @@ tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
 
     PARSE_REQUIRED_FIELD(clause.op, obj, "op");
     PARSE_FIELD(clause.values, obj, "values");
-
     PARSE_FIELD(clause.negate, obj, "negate");
-    // TODO(cwaldren): refactor w/ std::pair<kind, reference>
-    PARSE_CONDITIONAL_FIELD(clause.contextKind, obj, "contextKind");
 
-    std::optional<std::string> literal_or_ref;
-    PARSE_CONDITIONAL_FIELD(literal_or_ref, obj, "attribute");
+    auto kind_and_attr = boost::json::value_to<
+        tl::expected<data_model::Clause::ReferenceType, JsonError>>(json_value);
+    if (!kind_and_attr) {
+        return tl::make_unexpected(kind_and_attr.error());
+    }
 
-    clause.attribute = MapOpt<AttributeReference, std::string>(
-        literal_or_ref,
-        [has_context = clause.contextKind.has_value()](auto&& ref) {
-            if (has_context) {
-                return AttributeReference::FromReferenceStr(ref);
-            } else {
-                return AttributeReference::FromLiteralStr(ref);
-            }
-        });
-
+    clause.contextKind = kind_and_attr->contextKind;
+    clause.attribute = kind_and_attr->reference;
     return clause;
 }
 

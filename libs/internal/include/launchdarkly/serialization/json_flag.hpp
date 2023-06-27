@@ -59,11 +59,4 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
         tl::expected<std::optional<data_model::Flag>, JsonError>> const& unused,
     boost::json::value const& json_value);
 
-tl::expected<std::pair<data_model::Flag::ContextKind, AttributeReference>,
-             JsonError>
-tag_invoke(boost::json::value_to_tag<tl::expected<
-               std::pair<data_model::Flag::ContextKind, AttributeReference>,
-               JsonError>> const& unused,
-           boost::json::value const& json_value);
-
 }  // namespace launchdarkly

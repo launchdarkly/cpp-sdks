@@ -2,6 +2,7 @@
 
 #include <boost/json/value.hpp>
 #include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 #include <optional>
@@ -19,11 +20,11 @@ struct Segment {
         std::vector<std::string> values;
     };
 
-    struct context_aware {
-        std::optional<Kind> contextKind;
-        AttributeReference bucketBy;
-    };
     struct Rule {
+        constexpr static char const* kReferenceField = "bucketBy";
+        constexpr static char const* kContextKindField = "rolloutContextKind";
+        using ReferenceType = ContextAwareReference<Rule>;
+
         std::vector<Clause> clauses;
         std::optional<std::string> id;
         std::optional<std::uint64_t> weight;

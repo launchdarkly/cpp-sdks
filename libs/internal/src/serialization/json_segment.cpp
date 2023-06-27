@@ -1,5 +1,6 @@
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include <launchdarkly/serialization/json_context_aware_reference.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
@@ -26,40 +27,6 @@ tl::expected<std::optional<data_model::Segment::Target>, JsonError> tag_invoke(
     return target;
 }
 
-tl::expected<ContextAwareReference<RolloutBucketing>, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<ContextAwareReference<RolloutBucketing>, JsonError>> const&
-        unused,
-    boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-
-    auto const& obj = json_value.as_object();
-
-    std::optional<std::string> kind;
-
-    PARSE_CONDITIONAL_FIELD(
-        kind, obj,
-        ContextAwareReference<RolloutBucketing>::ContextKindFieldName());
-
-    if (kind && *kind == "") {
-        // Empty string is not a valid kind.
-        return tl::make_unexpected(JsonError::kSchemaFailure);
-    }
-
-    std::string attr_ref_or_name;
-    PARSE_FIELD_DEFAULT(
-        attr_ref_or_name, obj,
-        ContextAwareReference<RolloutBucketing>::ReferenceFieldName(), "key");
-
-    if (kind) {
-        return ContextAwareReference<RolloutBucketing>{
-            *kind, AttributeReference::FromReferenceStr(attr_ref_or_name)};
-    }
-
-    return ContextAwareReference<RolloutBucketing>{
-        "user", AttributeReference::FromLiteralStr(attr_ref_or_name)};
-}
-
 tl::expected<std::optional<data_model::Segment::Rule>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<data_model::Segment::Rule>,
@@ -78,14 +45,14 @@ tl::expected<std::optional<data_model::Segment::Rule>, JsonError> tag_invoke(
     PARSE_CONDITIONAL_FIELD(rule.id, obj, "id");
 
     auto kind_and_bucket_by = boost::json::value_to<
-        tl::expected<ContextAwareReference<RolloutBucketing>, JsonError>>(
+        tl::expected<data_model::Segment::Rule::ReferenceType, JsonError>>(
         json_value);
     if (!kind_and_bucket_by) {
         return tl::make_unexpected(kind_and_bucket_by.error());
     }
 
-    rule.rolloutContextKind = kind_and_bucket_by->contextKind;
     rule.bucketBy = kind_and_bucket_by->reference;
+    rule.rolloutContextKind = kind_and_bucket_by->contextKind;
 
     return rule;
 }

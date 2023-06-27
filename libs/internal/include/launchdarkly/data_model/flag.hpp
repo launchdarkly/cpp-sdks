@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/json/value.hpp>
+#include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 #include <optional>
@@ -15,6 +16,10 @@ struct Flag {
     using ContextKind = std::string;
 
     struct Rollout {
+        constexpr static char const* kReferenceField = "bucketBy";
+        constexpr static char const* kContextKindField = "contextKind";
+        using ReferenceType = ContextAwareReference<Rollout>;
+
         enum class Kind {
             kUnrecognized = 0,
             kExperiment = 1,

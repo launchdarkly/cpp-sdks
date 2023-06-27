@@ -7,6 +7,10 @@
 
 namespace launchdarkly::data_model {
 struct Clause {
+    constexpr static char const* kReferenceField = "attribute";
+    constexpr static char const* kContextKindField = "contextKind";
+    using ReferenceType = ContextAwareReference<Clause>;
+
     enum class Op {
         kUnrecognized, /* didn't match any known operators */
         kUnspecified,  /* the operator was not specified, i.e. omitted or empty
