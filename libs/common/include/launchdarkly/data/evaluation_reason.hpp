@@ -119,6 +119,11 @@ class EvaluationReason {
 
     explicit EvaluationReason(enum ErrorKind error_kind);
 
+    /**
+     * Returns an EvaluationReason representing the fact that the flag was off.
+     * */
+    static EvaluationReason Off();
+
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 

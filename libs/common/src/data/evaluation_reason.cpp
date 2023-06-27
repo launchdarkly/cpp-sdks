@@ -56,6 +56,11 @@ EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
                        false,
                        std::nullopt) {}
 
+EvaluationReason EvaluationReason::Off() {
+    return EvaluationReason(Kind::kOff, std::nullopt, std::nullopt,
+                            std::nullopt, std::nullopt, false, std::nullopt);
+}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;
