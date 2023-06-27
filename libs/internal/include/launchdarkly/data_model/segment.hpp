@@ -21,15 +21,14 @@ struct Segment {
     };
 
     struct Rule {
-        constexpr static char const* kReferenceField = "bucketBy";
-        constexpr static char const* kContextKindField = "rolloutContextKind";
         using ReferenceType = ContextAwareReference<Rule>;
 
         std::vector<Clause> clauses;
         std::optional<std::string> id;
         std::optional<std::uint64_t> weight;
-        AttributeReference bucketBy;
-        std::optional<Kind> rolloutContextKind;
+
+        DEFINE_CONTEXT_KIND_FIELD(rolloutContextKind)
+        DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
     };
     std::string key;
     std::uint64_t version;

@@ -16,10 +16,6 @@ struct Flag {
     using ContextKind = std::string;
 
     struct Rollout {
-        constexpr static char const* kReferenceField = "bucketBy";
-        constexpr static char const* kContextKindField = "contextKind";
-        using ReferenceType = ContextAwareReference<Rollout>;
-
         enum class Kind {
             kUnrecognized = 0,
             kExperiment = 1,
@@ -34,10 +30,11 @@ struct Flag {
 
         std::vector<WeightedVariation> variations;
 
-        ContextKind contextKind;
         Kind kind;
-        AttributeReference bucketBy;
         std::optional<std::int64_t> seed;
+
+        DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
+        DEFINE_CONTEXT_KIND_FIELD(contextKind)
     };
 
     using Variation = std::uint64_t;

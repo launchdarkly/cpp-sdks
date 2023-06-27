@@ -21,14 +21,13 @@ tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     data_model::Flag::Rollout rollout;
 
     PARSE_FIELD(rollout.variations, obj, "variations");
-    PARSE_FIELD_DEFAULT(rollout.contextKind, obj, "contextKind", "user");
     PARSE_FIELD_DEFAULT(rollout.kind, obj, "kind",
                         data_model::Flag::Rollout::Kind::kRollout);
     PARSE_CONDITIONAL_FIELD(rollout.seed, obj, "seed");
 
-    auto kind_and_bucket_by = boost::json::value_to<
-        tl::expected<data_model::Flag::Rollout::ReferenceType, JsonError>>(
-        json_value);
+    auto kind_and_bucket_by = boost::json::value_to<tl::expected<
+        data_model::ContextAwareReference<data_model::Flag::Rollout>,
+        JsonError>>(json_value);
     if (!kind_and_bucket_by) {
         return tl::make_unexpected(kind_and_bucket_by.error());
     }

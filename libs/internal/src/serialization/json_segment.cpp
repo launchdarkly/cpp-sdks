@@ -44,9 +44,9 @@ tl::expected<std::optional<data_model::Segment::Rule>, JsonError> tag_invoke(
     PARSE_CONDITIONAL_FIELD(rule.weight, obj, "weight");
     PARSE_CONDITIONAL_FIELD(rule.id, obj, "id");
 
-    auto kind_and_bucket_by = boost::json::value_to<
-        tl::expected<data_model::Segment::Rule::ReferenceType, JsonError>>(
-        json_value);
+    auto kind_and_bucket_by = boost::json::value_to<tl::expected<
+        data_model::ContextAwareReference<data_model::Segment::Rule>,
+        JsonError>>(json_value);
     if (!kind_and_bucket_by) {
         return tl::make_unexpected(kind_and_bucket_by.error());
     }

@@ -22,8 +22,9 @@ tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
     PARSE_FIELD(clause.values, obj, "values");
     PARSE_FIELD(clause.negate, obj, "negate");
 
-    auto kind_and_attr = boost::json::value_to<
-        tl::expected<data_model::Clause::ReferenceType, JsonError>>(json_value);
+    auto kind_and_attr = boost::json::value_to<tl::expected<
+        data_model::ContextAwareReference<data_model::Clause>, JsonError>>(
+        json_value);
     if (!kind_and_attr) {
         return tl::make_unexpected(kind_and_attr.error());
     }

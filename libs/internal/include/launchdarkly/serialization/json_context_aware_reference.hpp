@@ -25,7 +25,7 @@ tl::expected<data_model::ContextAwareReference<Fields>, JsonError> tag_invoke(
 
     std::optional<std::string> kind;
 
-    PARSE_CONDITIONAL_FIELD(kind, obj, Type::fields::kContextKindField);
+    PARSE_CONDITIONAL_FIELD(kind, obj, Type::fields::kContextFieldName);
 
     if (kind && *kind == "") {
         // Empty string is not a valid kind.
@@ -33,8 +33,8 @@ tl::expected<data_model::ContextAwareReference<Fields>, JsonError> tag_invoke(
     }
 
     std::string attr_ref_or_name;
-    PARSE_FIELD_DEFAULT(attr_ref_or_name, obj, Type::fields::kReferenceField,
-                        "key");
+    PARSE_FIELD_DEFAULT(attr_ref_or_name, obj,
+                        Type::fields::kReferenceFieldName, "key");
 
     if (kind) {
         return Type{*kind,

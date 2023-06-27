@@ -7,10 +7,6 @@
 
 namespace launchdarkly::data_model {
 struct Clause {
-    constexpr static char const* kReferenceField = "attribute";
-    constexpr static char const* kContextKindField = "contextKind";
-    using ReferenceType = ContextAwareReference<Clause>;
-
     enum class Op {
         kUnrecognized, /* didn't match any known operators */
         kUnspecified,  /* the operator was not specified, i.e. omitted or empty
@@ -32,11 +28,13 @@ struct Clause {
         kSegmentMatch
     };
 
-    std::optional<AttributeReference> attribute;
     Op op;
     std::vector<Value> values;
 
     bool negate;
-    std::optional<std::string> contextKind;
+
+    DEFINE_CONTEXT_KIND_FIELD(contextKind)
+
+    DEFINE_ATTRIBUTE_REFERENCE_FIELD(attribute)
 };
 }  // namespace launchdarkly::data_model

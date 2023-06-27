@@ -132,7 +132,7 @@ TEST(ClauseTests, TolerantOfEmptyAttribute) {
             boost::json::parse(
                 R"({"attribute": "", "op": "segmentMatch", "values": ["a"]})"));
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->attribute);
+    ASSERT_FALSE(result->attribute.Valid());
 }
 
 TEST(ClauseTests, TolerantOfUnrecognizedOperator) {
