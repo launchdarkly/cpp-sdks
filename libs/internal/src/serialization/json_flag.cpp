@@ -166,6 +166,7 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
     PARSE_CONDITIONAL_FIELD(flag.debugEventsUntilDate, obj,
                             "debugEventsUntilDate");
     PARSE_CONDITIONAL_FIELD(flag.salt, obj, "salt");
+    PARSE_CONDITIONAL_FIELD(flag.offVariation, obj, "offVariation");
 
     PARSE_FIELD(flag.version, obj, "version");
     PARSE_FIELD(flag.on, obj, "on");
@@ -175,7 +176,6 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
     PARSE_FIELD(flag.targets, obj, "targets");
     PARSE_FIELD(flag.contextTargets, obj, "contextTargets");
     PARSE_FIELD(flag.rules, obj, "rules");
-    PARSE_FIELD(flag.offVariation, obj, "offVariation");
     PARSE_FIELD(flag.clientSide, obj, "clientSide");
     PARSE_FIELD(flag.clientSideAvailability, obj, "clientSideAvailability");
     PARSE_FIELD(flag.trackEvents, obj, "trackEvents");
