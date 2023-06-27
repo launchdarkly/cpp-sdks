@@ -53,7 +53,7 @@ struct Flag {
 
     struct Rule {
         std::vector<Clause> clauses;
-        VariationOrRollout variation_or_rollout;
+        VariationOrRollout variationOrRollout;
 
         bool trackEvents;
         std::optional<std::string> id;

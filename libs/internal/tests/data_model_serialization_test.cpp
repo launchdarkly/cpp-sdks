@@ -29,7 +29,8 @@ TEST(SDKDataSetTests, DeserializesZeroSegments) {
         boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
             boost::json::parse(R"({"segments":{}})"));
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->segments);
+    ASSERT_TRUE(result->segments);
+    ASSERT_TRUE(result->segments->empty());
 }
 
 TEST(SegmentTests, DeserializesMinimumValid) {
@@ -52,7 +53,7 @@ TEST(SegmentTests, TolerantOfUnrecognizedFields) {
     ASSERT_TRUE(result.value());
 }
 
-TEST(RuleTests, DeserializesMinimumValid) {
+TEST(SegmentRuleTests, DeserializesMinimumValid) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"clauses": [{"attribute": "", "op": "in", "values": ["a"]}]})"));
@@ -65,7 +66,7 @@ TEST(RuleTests, DeserializesMinimumValid) {
     ASSERT_EQ(clause.op, data_model::Clause::Op::kIn);
 }
 
-TEST(RuleTests, TolerantOfUnrecognizedFields) {
+TEST(SegmentRuleTests, TolerantOfUnrecognizedFields) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"somethingRandom": true, "clauses": [{"attribute": "", "op": "in", "values": ["a"]}]})"));
@@ -73,7 +74,7 @@ TEST(RuleTests, TolerantOfUnrecognizedFields) {
     ASSERT_TRUE(result);
 }
 
-TEST(RuleTests, DeserializesSimpleAttributeReference) {
+TEST(SegmentRuleTests, DeserializesSimpleAttributeReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "bar", "clauses": []})"));
@@ -82,7 +83,7 @@ TEST(RuleTests, DeserializesSimpleAttributeReference) {
     ASSERT_EQ(result->bucketBy, AttributeReference("bar"));
 }
 
-TEST(RuleTests, DeserializesPointerAttributeReference) {
+TEST(SegmentRuleTests, DeserializesPointerAttributeReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "/foo/bar", "clauses": []})"));
@@ -91,7 +92,7 @@ TEST(RuleTests, DeserializesPointerAttributeReference) {
     ASSERT_EQ(result->bucketBy, AttributeReference("/foo/bar"));
 }
 
-TEST(RuleTests, DeserializesEscapedReference) {
+TEST(SegmentRuleTests, DeserializesEscapedReference) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "/~1foo~1bar", "clauses": []})"));
@@ -100,7 +101,7 @@ TEST(RuleTests, DeserializesEscapedReference) {
     ASSERT_EQ(result->bucketBy, AttributeReference("/~1foo~1bar"));
 }
 
-TEST(RuleTests, DeserializesLiteralReference) {
+TEST(SegmentRuleTests, DeserializesLiteralAttributeName) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Segment::Rule, JsonError>>(
         boost::json::parse(R"({"bucketBy" : "/~1foo~1bar", "clauses": []})"));
@@ -167,7 +168,7 @@ TEST(ClauseTests, DeserializesEscapedReference) {
     ASSERT_EQ(result->attribute, AttributeReference("/~1foo~1bar"));
 }
 
-TEST(ClauseTests, DeserializesLiteralAttributeReference) {
+TEST(ClauseTests, DeserializesLiteralAttributeName) {
     auto result =
         boost::json::value_to<tl::expected<data_model::Clause, JsonError>>(
             boost::json::parse(
@@ -175,4 +176,172 @@ TEST(ClauseTests, DeserializesLiteralAttributeReference) {
     ASSERT_TRUE(result);
     ASSERT_EQ(result->attribute,
               AttributeReference::FromLiteralStr("/foo/bar"));
+}
+
+TEST(RolloutTests, DeserializesMinimumValid) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rollout, JsonError>>(
+        boost::json::parse(R"({})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kRollout);
+    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->bucketBy, "key");
+}
+
+TEST(RolloutTests, DeserializesAllFieldsWithAttributeReference) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rollout, JsonError>>(boost::json::parse(
+        R"({"kind": "experiment", "contextKind": "org", "bucketBy": "/foo/bar", "seed" : 123, "variations" : []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kExperiment);
+    ASSERT_EQ(result->contextKind, "org");
+    ASSERT_EQ(result->bucketBy, "/foo/bar");
+    ASSERT_EQ(result->seed, 123);
+    ASSERT_TRUE(result->variations.empty());
+}
+
+TEST(RolloutTests, DeserializesAllFieldsWithLiteralAttributeName) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rollout, JsonError>>(boost::json::parse(
+        R"({"kind": "experiment", "bucketBy": "/foo/bar", "seed" : 123, "variations" : []})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kExperiment);
+    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->bucketBy, "/~1foo~1bar");
+    ASSERT_EQ(result->seed, 123);
+    ASSERT_TRUE(result->variations.empty());
+}
+
+TEST(WeightedVariationTests, DeserializesMinimumValid) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rollout::WeightedVariation, JsonError>>(
+        boost::json::parse(R"({})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->variation, 0);
+    ASSERT_EQ(result->weight, 0);
+    ASSERT_FALSE(result->untracked);
+}
+
+TEST(WeightedVariationTests, DeserializesAllFields) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rollout::WeightedVariation, JsonError>>(
+        boost::json::parse(
+            R"({"variation" : 2, "weight" : 123, "untracked" : true})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->variation, 2);
+    ASSERT_EQ(result->weight, 123);
+    ASSERT_TRUE(result->untracked);
+}
+
+TEST(PrerequisiteTests, DeserializeFailsWithoutKey) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Prerequisite, JsonError>>(
+        boost::json::parse(R"({})"));
+    ASSERT_FALSE(result);
+}
+
+TEST(PrerequisiteTests, DeserializesMinimumValid) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Prerequisite, JsonError>>(
+        boost::json::parse(R"({"key" : "foo"})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->variation, 0);
+    ASSERT_EQ(result->key, "foo");
+}
+
+TEST(PrerequisiteTests, DeserializesAllFields) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Prerequisite, JsonError>>(
+        boost::json::parse(R"({"key" : "foo", "variation" : 123})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->key, "foo");
+    ASSERT_EQ(result->variation, 123);
+}
+
+TEST(PrerequisiteTests, DeserializeFailsWithNegativeVariation) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Prerequisite, JsonError>>(
+        boost::json::parse(R"({"key" : "foo", "variation" : -123})"));
+    ASSERT_FALSE(result);
+}
+
+TEST(TargetTests, DeserializesMinimumValid) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Target, JsonError>>(
+        boost::json::parse(R"({})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->variation, 0);
+    ASSERT_TRUE(result->values.empty());
+}
+
+TEST(TargetTests, DeserializesFailsWithNegativeVariation) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Target, JsonError>>(
+        boost::json::parse(R"({"variation" : -123})"));
+    ASSERT_FALSE(result);
+}
+
+TEST(TargetTests, DeserializesAllFields) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Target, JsonError>>(boost::json::parse(
+        R"({"variation" : 123, "values" : ["a"], "contextKind" : "org"})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->contextKind, "org");
+    ASSERT_EQ(result->variation, 123);
+    ASSERT_EQ(result->values.size(), 1);
+    ASSERT_EQ(result->values[0], "a");
+}
+
+TEST(FlagRuleTests, DeserializesMinimumValid) {
+    auto result =
+        boost::json::value_to<tl::expected<data_model::Flag::Rule, JsonError>>(
+            boost::json::parse(R"({"variation" : 123})"));
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(result->trackEvents);
+    ASSERT_TRUE(result->clauses.empty());
+    ASSERT_FALSE(result->id);
+    ASSERT_EQ(std::get<data_model::Flag::Variation>(result->variationOrRollout),
+              data_model::Flag::Variation(123));
+}
+
+TEST(FlagRuleTests, DeserializesRollout) {
+    auto result =
+        boost::json::value_to<tl::expected<data_model::Flag::Rule, JsonError>>(
+            boost::json::parse(R"({"rollout" : {}})"));
+    ASSERT_TRUE(result);
+    ASSERT_EQ(
+        std::get<data_model::Flag::Rollout>(result->variationOrRollout).kind,
+        data_model::Flag::Rollout::Kind::kRollout);
+}
+
+TEST(FlagRuleTests, DeserializesAllFields) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::Rule, JsonError>>(boost::json::parse(
+        R"({"id" : "foo", "variation" : 123, "trackEvents" : true, "clauses" : []})"));
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->trackEvents);
+    ASSERT_TRUE(result->clauses.empty());
+    ASSERT_EQ(result->id, "foo");
+    ASSERT_EQ(std::get<data_model::Flag::Variation>(result->variationOrRollout),
+              data_model::Flag::Variation(123));
+}
+
+TEST(ClientSideAvailabilityTests, DeserializesMinimumValid) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::ClientSideAvailability, JsonError>>(
+        boost::json::parse(R"({})"));
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(result->usingMobileKey);
+    ASSERT_FALSE(result->usingEnvironmentId);
+}
+
+TEST(ClientSideAvailabilityTests, DeserializesAllFields) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Flag::ClientSideAvailability, JsonError>>(
+        boost::json::parse(
+            R"({"usingMobileKey" : true, "usingEnvironmentId" : true})"));
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->usingMobileKey);
+    ASSERT_TRUE(result->usingEnvironmentId);
 }

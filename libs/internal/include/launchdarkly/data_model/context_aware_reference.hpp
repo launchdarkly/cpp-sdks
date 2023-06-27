@@ -51,7 +51,7 @@ struct ContextAwareReference<
 };
 
 #define DEFINE_CONTEXT_KIND_FIELD(name) \
-    std::optional<std::string> name;    \
+    std::string name;                   \
     constexpr static const char* kContextFieldName = #name;
 
 #define DEFINE_ATTRIBUTE_REFERENCE_FIELD(name) \

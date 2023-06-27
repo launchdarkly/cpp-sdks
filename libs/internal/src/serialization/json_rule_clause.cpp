@@ -95,7 +95,7 @@ tl::expected<data_model::Clause::Op, JsonError> tag_invoke(
     if (!maybe_op) {
         return tl::unexpected(maybe_op.error());
     }
-    return maybe_op.value().value_or(data_model::Clause::Op::kUnspecified);
+    return maybe_op.value().value_or(data_model::Clause::Op::kUnrecognized);
 }
 
 }  // namespace launchdarkly

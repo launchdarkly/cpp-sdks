@@ -9,8 +9,6 @@ namespace launchdarkly::data_model {
 struct Clause {
     enum class Op {
         kUnrecognized, /* didn't match any known operators */
-        kUnspecified,  /* the operator was not specified, i.e. omitted or empty
-                          string */
         kIn,
         kStartsWith,
         kEndsWith,
@@ -30,11 +28,9 @@ struct Clause {
 
     Op op;
     std::vector<Value> values;
-
     bool negate;
 
     DEFINE_CONTEXT_KIND_FIELD(contextKind)
-
     DEFINE_ATTRIBUTE_REFERENCE_FIELD(attribute)
 };
 }  // namespace launchdarkly::data_model

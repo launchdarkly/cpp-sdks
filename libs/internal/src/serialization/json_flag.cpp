@@ -126,7 +126,7 @@ tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
         return tl::make_unexpected(variation_or_rollout.error());
     }
 
-    rule.variation_or_rollout =
+    rule.variationOrRollout =
         variation_or_rollout->value_or(data_model::Flag::Variation(0));
 
     return rule;
