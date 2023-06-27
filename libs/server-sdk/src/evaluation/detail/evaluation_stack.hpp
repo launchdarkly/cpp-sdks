@@ -1,10 +1,13 @@
 #pragma once
 
+#include <string>
 #include <unordered_set>
+
+namespace launchdarkly::evaluation::detail {
 
 class EvaluationStack {
    public:
-    EvaluationStack(std::size_t initial_capacity);
+    EvaluationStack(std::size_t initial_bucket_count);
 
     void NoticePrerequisite(std::string const& prerequisite_key);
     void NoticeSegment(std::string const& segment_key);
@@ -13,6 +16,8 @@ class EvaluationStack {
     bool SeenSegment(std::string const& segment_key) const;
 
    private:
-    std::unordered_set<std::string> prerequisites_seen;
-    std::unordered_set<std::string> segments_seen;
+    std::unordered_set<std::string> prerequisites_seen_;
+    std::unordered_set<std::string> segments_seen_;
 };
+
+}  // namespace launchdarkly::evaluation::detail

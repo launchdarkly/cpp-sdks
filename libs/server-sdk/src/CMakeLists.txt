@@ -8,7 +8,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         boost.cpp
-        evaluation/evaluation_stack.cpp
+        evaluation/detail/evaluation_stack.cpp
         evaluation/evaluator.cpp
         )
 
