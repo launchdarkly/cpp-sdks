@@ -40,7 +40,7 @@ Context::Context(std::map<std::string, launchdarkly::Attributes> attributes)
 }
 
 Value const& Context::Get(std::string const& kind,
-                          AttributeReference const& ref) {
+                          AttributeReference const& ref) const {
     auto found = attributes_.find(kind);
     if (found != attributes_.end()) {
         return found->second.Get(ref);

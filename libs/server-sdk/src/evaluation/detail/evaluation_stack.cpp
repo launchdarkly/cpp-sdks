@@ -1,6 +1,6 @@
 #include "evaluation_stack.hpp"
 
-namespace launchdarkly::evaluation::detail {
+namespace launchdarkly::server_side::evaluation::detail {
 
 Guard::Guard(std::unordered_set<std::string>& set, std::string const& key)
     : set_(set), key_(key) {
@@ -33,4 +33,4 @@ bool EvaluationStack::SeenSegment(std::string const& segment_key) const {
     return segments_seen_.find(segment_key) != segments_seen_.end();
 }
 
-}  // namespace launchdarkly::evaluation::detail
+}  // namespace launchdarkly::server_side::evaluation::detail

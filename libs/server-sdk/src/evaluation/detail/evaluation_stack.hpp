@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_set>
 
-namespace launchdarkly::evaluation::detail {
+namespace launchdarkly::server_side::evaluation::detail {
 
 struct Guard {
     Guard(std::unordered_set<std::string>& set, std::string const& key);
@@ -35,4 +35,4 @@ class EvaluationStack {
     std::unordered_set<std::string> segments_seen_;
 };
 
-}  // namespace launchdarkly::evaluation::detail
+}  // namespace launchdarkly::server_side::evaluation::detail

@@ -11,9 +11,10 @@
 #include <string_view>
 #include <tl/expected.hpp>
 #include <variant>
-namespace launchdarkly::evaluation {
+namespace launchdarkly::server_side::evaluation {
 
 constexpr std::int64_t kBucketScaleInt = 0x0FFFFFFFFFFFFFFF;
+
 static_assert(kBucketScaleInt < std::numeric_limits<double>::max(),
               "Bucket scale is too large to be represented as a double");
 constexpr double kBucketScaleDouble = static_cast<double>(kBucketScaleInt);
@@ -88,7 +89,17 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     data_model::Flag::Target const& target);
 
-tl::expected<std::pair<float, bool /* context was missing */>, char const*>
+enum RolloutKindPresence {
+    /* The rollout's contextKind was found in the current evaluation context. */
+    kPresent,
+    /* The rollout's contextKind was not found in the current evaluation
+     * context. */
+    kAbsent
+};
+
+using ContextHashValue = float;
+
+tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, char const*>
 Bucket(Context const& context,
        AttributeReference const& by_attr,
        BucketPrefix const& prefix,
@@ -101,7 +112,8 @@ std::optional<float> ComputeBucket(Value const& value,
 
 std::optional<std::string> BucketValue(Value const& value);
 
-Evaluator::Evaluator(Logger& logger) : logger_(logger), stack_(20) {}
+Evaluator::Evaluator(Logger& logger, flag_manager::FlagStore const& store)
+    : logger_(logger), store_(store), stack_(20) {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
@@ -131,18 +143,27 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
         for (data_model::Flag::Prerequisite const& prereq :
              flag.prerequisites) {
-            std::optional<std::reference_wrapper<data_model::Flag>>
-                prereq_flag = store_.flag(prereq.key);
+            flag_manager::FlagStore::Item prereq_flag = store_.Get(prereq.key);
             if (!prereq_flag) {
                 return OffValue(
                     flag, EvaluationReason::PrerequisiteFailed(prereq.key));
             }
-            if (stack_.SeenPrerequisite(prereq_flag->get().key)) {
+
+            flag_manager::ItemDescriptor const& prereq_flag_ref = *prereq_flag;
+
+            if (!prereq_flag_ref.item) {
+                // This flag existed at some point, but has since been deleted.
+                return OffValue(
+                    flag, EvaluationReason::PrerequisiteFailed(prereq.key));
+            }
+
+            if (stack_.SeenPrerequisite(prereq_flag->item->key)) {
                 return EvaluationDetail<Value>(
                     EvaluationReason::ErrorKind::kMalformedFlag, Value());
             }
+
             EvaluationDetail<Value> prerequisite_result =
-                Evaluate(prereq_flag, context);
+                Evaluate(*prereq_flag_ref.item, context);
 
             if (prerequisite_result.Reason().has_value() &&
                 prerequisite_result.Reason().value().Kind() ==
@@ -156,7 +177,13 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
             // todo(cwaldren) record prerequisite evaluation
 
-            if (!prereq_flag->get().on || !variation_index) {
+            // Although it would seem we could immediately fail the prereq if it
+            // is off (after retrieving it from the store) that needs to be
+            // deferred until this point, in order to generate prerequisite
+            // events.
+
+            if (!prereq_flag_ref.item->on ||
+                variation_index != prereq.variation) {
                 return OffValue(
                     flag, EvaluationReason::PrerequisiteFailed(prereq.key));
             }
@@ -179,7 +206,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     for (std::size_t i = 0; i < flag.rules.size(); i++) {
         auto const& rule = flag.rules[i];
         tl::expected<bool, enum EvaluationReason::ErrorKind> rule_match =
-            Match(rule, context, store, stack_);
+            Match(rule, context);
+
         if (!rule_match) {
             LD_LOG(logger_, LogLevel::kWarn) << rule_match.error();
             return EvaluationDetail<Value>(
@@ -206,6 +234,11 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     }
     auto reason = EvaluationReason::Fallthrough(result->in_experiment);
     return FlagVariation(flag, result->variation_index, std::move(reason));
+}
+
+bool Evaluator::Match(data_model::Flag::Rule const&,
+                      launchdarkly::Context const&) const {
+    return false;
 }
 
 EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
@@ -262,13 +295,11 @@ std::optional<std::size_t> AnyTargetMatchVariation(
 std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     data_model::Flag::Target const& target) {
-    auto has_kind = std::find(context.Kinds().begin(), context.Kinds().end(),
-                              target.contextKind);
-    if (has_kind == context.Kinds().end()) {
+    Value key = context.Get(target.contextKind, "key");
+    if (!key) {
         return std::nullopt;
     }
 
-    std::string const& key = context.Attributes(target.contextKind).Key();
     for (auto const& value : target.values) {
         if (value == key) {
             return target.variation;
@@ -309,7 +340,7 @@ tl::expected<std::optional<BucketResult>, char const*> Variation(
                 if (!bucketing_result) {
                     return tl::make_unexpected(bucketing_result.error());
                 }
-                auto [bucket, was_missing_context] = *bucketing_result;
+                auto [bucket, lookup] = *bucketing_result;
 
                 double sum = 0.0;
 
@@ -317,12 +348,15 @@ tl::expected<std::optional<BucketResult>, char const*> Variation(
                     sum += variation.weight / 100000.0;
                     if (bucket < sum) {
                         return BucketResult(
-                            variation, is_experiment && !was_missing_context);
+                            variation,
+                            is_experiment &&
+                                lookup == RolloutKindPresence::kPresent);
                     }
                 }
 
-                return BucketResult(arg.variations.back(),
-                                    is_experiment && !was_missing_context);
+                return BucketResult(
+                    arg.variations.back(),
+                    is_experiment && lookup == RolloutKindPresence::kPresent);
             }
         },
         vr);
@@ -348,9 +382,9 @@ ResolveVariationOrRollout(data_model::Flag const& flag,
     return *bucket;
 }
 
-tl::expected<std::pair<float, bool /* context was missing */>, char const*>
+tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, char const*>
 Bucket(Context const& context,
-       AttributeReference by_attr,
+       AttributeReference const& by_attr,
        BucketPrefix const& prefix,
        bool is_experiment,
        std::string const& context_kind) {
@@ -361,14 +395,24 @@ Bucket(Context const& context,
         return tl::make_unexpected("invalid attribute reference");
     }
 
-    Value value = context.Attributes(context_kind).Get(ref);
+    Value value = context.Get(context_kind, ref);
 
-    if (!(value.Type() == Value::Type::kNumber ||
-          value.Type() == Value::Type::kString)) {
-        return std::make_pair(0.0, true);
+    bool is_bucketable = value.Type() == Value::Type::kNumber ||
+                         value.Type() == Value::Type::kString;
+
+    if (is_bucketable) {
+        return std::make_pair(
+            ComputeBucket(value, prefix, is_experiment).value_or(0.0),
+            RolloutKindPresence::kPresent);
     }
-    return std::make_pair(
-        ComputeBucket(value, prefix, is_experiment).value_or(0.0), false);
+
+    auto rollout_context_found =
+        std::count(context.Kinds().begin(), context.Kinds().end(),
+                   context_kind) > 0
+            ? RolloutKindPresence::kPresent
+            : RolloutKindPresence::kAbsent;
+
+    return std::make_pair(0.0, rollout_context_found);
 }
 
 std::optional<float> ComputeBucket(Value const& value,
@@ -388,12 +432,13 @@ std::optional<float> ComputeBucket(Value const& value,
     input.append(*id);
 
     auto sha1hash = launchdarkly::encoding::Sha1String(input);
-    auto sha1hash_hexed = launchdarkly::encoding::Base16Encode(hashed);
+    auto sha1hash_hexed = launchdarkly::encoding::Base16Encode(sha1hash);
     std::string_view sha1hash_hexed_first_15 = {sha1hash_hexed.data(), 15};
 
     try {
         unsigned long long as_number =
             std::stoull(sha1hash_hexed_first_15.data(), nullptr, 16);
+
         double as_double = static_cast<double>(as_number);
         return as_double / kBucketScaleDouble;
 
@@ -424,4 +469,4 @@ std::optional<std::string> BucketValue(Value const& value) {
     }
 }
 
-}  // namespace launchdarkly::evaluation
+}  // namespace launchdarkly::server_side::evaluation

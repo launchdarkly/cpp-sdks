@@ -7,20 +7,23 @@
 
 #include <launchdarkly/value.hpp>
 
+#include "../flag_manager/flag_store.hpp"
 #include "detail/evaluation_stack.hpp"
 
-namespace launchdarkly::evaluation {
+namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
-    Evaluator(Logger& logger);
+    Evaluator(Logger& logger, flag_manager::FlagStore const& store);
     EvaluationDetail<Value> Evaluate(data_model::Flag const& flag,
                                      launchdarkly::Context const& context);
 
    private:
+    bool Match(data_model::Flag::Rule const&, Context const&) const;
+
     Logger& logger_;
+    flag_manager::FlagStore const& store_;
     detail::EvaluationStack stack_;
-    Store& store_;
 };
 
-}  // namespace launchdarkly::evaluation
+}  // namespace launchdarkly::server_side::evaluation
