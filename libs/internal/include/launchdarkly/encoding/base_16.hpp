@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace launchdarkly::encoding {

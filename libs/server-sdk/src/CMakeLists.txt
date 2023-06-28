@@ -10,6 +10,7 @@ add_library(${LIBNAME}
         boost.cpp
         evaluation/detail/evaluation_stack.cpp
         evaluation/evaluator.cpp
+        evaluation/bucketing.cpp
         flag_manager/flag_store.cpp
         )
 
