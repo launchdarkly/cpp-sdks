@@ -120,9 +120,21 @@ class EvaluationReason {
     explicit EvaluationReason(enum ErrorKind error_kind);
 
     /**
-     * Returns an EvaluationReason representing the fact that the flag was off.
+     * Represents the fact that the flag was off.
      * */
     static EvaluationReason Off();
+
+    /*
+     * Represents the fact that the flag didn't return a
+     * variation due to a prerequisite failing.
+     */
+    static EvaluationReason PrerequisiteFailed(std::string prerequisite_key);
+
+    /**
+     * Represents the fact that the flag evaluated to a particular variation
+     * due to a target match.
+     */
+    static EvaluationReason TargetMatch();
 
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);

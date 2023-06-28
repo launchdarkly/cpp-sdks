@@ -20,6 +20,7 @@ class Evaluator {
    private:
     Logger& logger_;
     detail::EvaluationStack stack_;
+    Store& store_;
 };
 
 }  // namespace launchdarkly::evaluation

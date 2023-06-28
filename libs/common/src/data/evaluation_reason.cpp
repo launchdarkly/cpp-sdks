@@ -61,6 +61,18 @@ EvaluationReason EvaluationReason::Off() {
                             std::nullopt, std::nullopt, false, std::nullopt);
 }
 
+EvaluationReason EvaluationReason::PrerequisiteFailed(
+    std::string prerequisite_key) {
+    return EvaluationReason(Kind::kPrerequisiteFailed, std::nullopt,
+                            std::nullopt, std::nullopt,
+                            std::move(prerequisite_key), false, std::nullopt);
+}
+
+EvaluationReason EvaluationReason::TargetMatch() {
+    return EvaluationReason(Kind::kTargetMatch, std::nullopt, std::nullopt,
+                            std::nullopt, std::nullopt, false, std::nullopt);
+}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;
