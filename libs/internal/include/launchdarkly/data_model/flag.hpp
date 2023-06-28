@@ -56,7 +56,7 @@ struct Flag {
         VariationOrRollout variationOrRollout;
 
         bool trackEvents;
-        std::optional<std::string> id;
+        std::string id;
     };
 
     struct ClientSideAvailability {

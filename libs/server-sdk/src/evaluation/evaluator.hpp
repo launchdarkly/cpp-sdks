@@ -14,8 +14,8 @@ namespace launchdarkly::evaluation {
 class Evaluator {
    public:
     Evaluator(Logger& logger);
-    EvaluationDetail<Value> Evaluate(data_model::Flag& flag,
-                                     launchdarkly::Context& context);
+    EvaluationDetail<Value> Evaluate(data_model::Flag const& flag,
+                                     launchdarkly::Context const& context);
 
    private:
     Logger& logger_;

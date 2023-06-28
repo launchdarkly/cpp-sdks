@@ -117,7 +117,7 @@ tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
 
     PARSE_FIELD(rule.trackEvents, obj, "trackEvents");
     PARSE_FIELD(rule.clauses, obj, "clauses");
-    PARSE_CONDITIONAL_FIELD(rule.id, obj, "id");
+    PARSE_FIELD(rule.id, obj, "id");
 
     auto variation_or_rollout = boost::json::value_to<tl::expected<
         std::optional<data_model::Flag::VariationOrRollout>, JsonError>>(

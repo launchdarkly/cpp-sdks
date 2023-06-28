@@ -5,11 +5,18 @@
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
+#include <launchdarkly/encoding/base_16.hpp>
 #include <launchdarkly/encoding/sha_1.hpp>
 #include <launchdarkly/value.hpp>
+#include <string_view>
 #include <tl/expected.hpp>
 #include <variant>
 namespace launchdarkly::evaluation {
+
+constexpr std::int64_t kBucketScaleInt = 0x0FFFFFFFFFFFFFFF;
+static_assert(kBucketScaleInt < std::numeric_limits<double>::max(),
+              "Bucket scale is too large to be represented as a double");
+constexpr double kBucketScaleDouble = static_cast<double>(kBucketScaleInt);
 
 class BucketPrefix {
    public:
@@ -44,20 +51,29 @@ class BucketPrefix {
 struct BucketResult {
     std::size_t variation_index;
     bool in_experiment;
+
+    BucketResult(
+        data_model::Flag::Rollout::WeightedVariation weighted_variation,
+        bool is_experiment)
+        : variation_index(weighted_variation.variation),
+          in_experiment(is_experiment && !weighted_variation.untracked) {}
+
+    BucketResult(data_model::Flag::Variation variation, bool in_experiment)
+        : variation_index(variation), in_experiment(in_experiment) {}
 };
 
-EvaluationDetail<Value> Variation(data_model::Flag const& flag,
-                                  std::uint64_t variation_index,
-                                  EvaluationReason reason);
+EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
+                                      std::uint64_t variation_index,
+                                      EvaluationReason reason);
 
 EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
                                  EvaluationReason reason);
 
-tl::expected<std::optional<BucketResult>, enum EvaluationReason::ErrorKind>
-Variation(data_model::Flag::VariationOrRollout const& vr,
-          std::string const& flag_key,
-          Context const& context,
-          std::string const& salt);
+tl::expected<std::optional<BucketResult>, char const*> Variation(
+    data_model::Flag::VariationOrRollout const& vr,
+    std::string const& flag_key,
+    Context const& context,
+    std::string const& salt);
 
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
 ResolveVariationOrRollout(data_model::Flag const& flag,
@@ -72,14 +88,14 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     data_model::Flag::Target const& target);
 
-void Bucket(Context const& context,
-            AttributeReference const& by_attr,
-            BucketPrefix const& prefix,
-            bool is_experiment,
-            std::string const& context_kind);
+tl::expected<std::pair<float, bool /* context was missing */>, char const*>
+Bucket(Context const& context,
+       AttributeReference const& by_attr,
+       BucketPrefix const& prefix,
+       bool is_experiment,
+       std::string const& context_kind);
 
-std::optional<float> ComputeBucket(Context const& context,
-                                   Value const& value,
+std::optional<float> ComputeBucket(Value const& value,
                                    BucketPrefix prefix,
                                    bool is_experiment);
 
@@ -87,8 +103,9 @@ std::optional<std::string> BucketValue(Value const& value);
 
 Evaluator::Evaluator(Logger& logger) : logger_(logger), stack_(20) {}
 
-EvaluationDetail<Value> Evaluator::Evaluate(data_model::Flag& flag,
-                                            launchdarkly::Context& context) {
+EvaluationDetail<Value> Evaluator::Evaluate(
+    data_model::Flag const& flag,
+    launchdarkly::Context const& context) {
     // If the flag is off, return immediately.
     if (!flag.on) {
         return OffValue(flag, EvaluationReason::Off());
@@ -152,8 +169,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(data_model::Flag& flag,
 
     if (std::optional<std::size_t> variation_index =
             AnyTargetMatchVariation(context, flag)) {
-        return Variation(flag, *variation_index,
-                         EvaluationReason::TargetMatch());
+        return FlagVariation(flag, *variation_index,
+                             EvaluationReason::TargetMatch());
     }
 
     // If there were no target matches, then evaluate against the
@@ -177,8 +194,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(data_model::Flag& flag,
             return EvaluationDetail<Value>(result.error(), Value());
         }
         auto reason =
-            EvaluationReason::RuleMatch(i, rule.id, result->inExperiment);
-        return Variation(flag, rule_match->variationIndex, std::move(reason));
+            EvaluationReason::RuleMatch(i, rule.id, result->in_experiment);
+        return FlagVariation(flag, result->variation_index, std::move(reason));
     }
 
     // If there were no rule matches, then return the fallthrough variation.
@@ -187,13 +204,13 @@ EvaluationDetail<Value> Evaluator::Evaluate(data_model::Flag& flag,
     if (!result) {
         return EvaluationDetail<Value>(result.error(), Value());
     }
-    auto reason = EvaluationReason::Fallthrough(result->inExperiment);
-    return Variation(flag, result->variationIndex, std::move(reason));
+    auto reason = EvaluationReason::Fallthrough(result->in_experiment);
+    return FlagVariation(flag, result->variation_index, std::move(reason));
 }
 
-EvaluationDetail<Value> Variation(data_model::Flag const& flag,
-                                  std::uint64_t variation_index,
-                                  EvaluationReason reason) {
+EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
+                                      std::uint64_t variation_index,
+                                      EvaluationReason reason) {
     if (variation_index >= flag.variations.size()) {
         return EvaluationDetail<Value>(
             EvaluationReason::ErrorKind::kMalformedFlag, Value());
@@ -206,7 +223,7 @@ EvaluationDetail<Value> Variation(data_model::Flag const& flag,
 EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
                                  EvaluationReason reason) {
     if (flag.offVariation) {
-        return Variation(flag, *flag.offVariation, std::move(reason));
+        return FlagVariation(flag, *flag.offVariation, std::move(reason));
     }
     return EvaluationDetail<Value>(std::move(reason));
 }
@@ -261,17 +278,22 @@ std::optional<std::size_t> TargetMatchVariation(
     return std::nullopt;
 }
 
-tl::expected<std::optional<BucketResult>, enum EvaluationReason::ErrorKind>
-Variation(data_model::Flag::VariationOrRollout const& vr,
-          std::string const& flag_key,
-          Context const& context,
-          std::string const& salt) {
+tl::expected<std::optional<BucketResult>, char const*> Variation(
+    data_model::Flag::VariationOrRollout const& vr,
+    std::string const& flag_key,
+    Context const& context,
+    std::string const& salt) {
     return std::visit(
-        [&](auto&& arg) {
+        [&](auto&& arg)
+            -> tl::expected<std::optional<BucketResult>, char const*> {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, data_model::Flag::Variation>) {
-                return BucketResult{arg, false};
+                return BucketResult(arg, false);
             } else if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+                if (arg.variations.empty()) {
+                    return tl::make_unexpected("rollout with no variations");
+                }
+
                 bool is_experiment =
                     arg.kind == data_model::Flag::Rollout::Kind::kExperiment;
 
@@ -282,22 +304,25 @@ Variation(data_model::Flag::VariationOrRollout const& vr,
                     prefix = BucketPrefix(flag_key, salt);
                 }
 
-                auto [bucket, bucket_and_was_missing_context] =
-                    Bucket(context, arg.bucketBy, *prefix, is_experiment,
-                           arg.contextKind);
+                auto bucketing_result = Bucket(context, arg.bucketBy, *prefix,
+                                               is_experiment, arg.contextKind);
+                if (!bucketing_result) {
+                    return tl::make_unexpected(bucketing_result.error());
+                }
+                auto [bucket, was_missing_context] = *bucketing_result;
 
                 double sum = 0.0;
 
                 for (const auto& variation : arg.variations) {
                     sum += variation.weight / 100000.0;
                     if (bucket < sum) {
-                        return variation.as_bucket_result(
-                            is_experiment && !bucket_and_was_missing_context)
+                        return BucketResult(
+                            variation, is_experiment && !was_missing_context);
                     }
                 }
 
-                return variations.last().as_bucket_result(
-                    is_experiment && !bucket_and_was_missing_context);
+                return BucketResult(arg.variations.back(),
+                                    is_experiment && !was_missing_context);
             }
         },
         vr);
@@ -306,7 +331,13 @@ tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
 ResolveVariationOrRollout(data_model::Flag const& flag,
                           data_model::Flag::VariationOrRollout const& vr,
                           Context const& context) {
-    auto const& result = Variation(vr, flag.key, context, flag.salt);
+    if (!flag.salt) {
+        return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
+    }
+
+    const tl::expected<std::optional<BucketResult>, char const*> result =
+        Variation(vr, flag.key, context, *flag.salt);
+
     if (!result) {
         return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
     }
@@ -317,7 +348,7 @@ ResolveVariationOrRollout(data_model::Flag const& flag,
     return *bucket;
 }
 
-tl::expected<std::pair<float, bool /* context was missing */>, std::string>
+tl::expected<std::pair<float, bool /* context was missing */>, char const*>
 Bucket(Context const& context,
        AttributeReference by_attr,
        BucketPrefix const& prefix,
@@ -340,8 +371,7 @@ Bucket(Context const& context,
         ComputeBucket(value, prefix, is_experiment).value_or(0.0), false);
 }
 
-std::optional<float> ComputeBucket(Context const& context,
-                                   Value const& value,
+std::optional<float> ComputeBucket(Value const& value,
                                    BucketPrefix prefix,
                                    bool is_experiment) {
     LD_ASSERT(value.Type() == Value::Type::kNumber ||
@@ -357,7 +387,21 @@ std::optional<float> ComputeBucket(Context const& context,
     input.push_back('.');
     input.append(*id);
 
-    auto hashed = launchdarkly::encoding::Sha1String(input);
+    auto sha1hash = launchdarkly::encoding::Sha1String(input);
+    auto sha1hash_hexed = launchdarkly::encoding::Base16Encode(hashed);
+    std::string_view sha1hash_hexed_first_15 = {sha1hash_hexed.data(), 15};
+
+    try {
+        unsigned long long as_number =
+            std::stoull(sha1hash_hexed_first_15.data(), nullptr, 16);
+        double as_double = static_cast<double>(as_number);
+        return as_double / kBucketScaleDouble;
+
+    } catch (std::invalid_argument) {
+        return std::nullopt;
+    } catch (std::out_of_range) {
+        return std::nullopt;
+    }
 }
 
 inline bool IsIntegral(double f) {

@@ -73,6 +73,19 @@ EvaluationReason EvaluationReason::TargetMatch() {
                             std::nullopt, std::nullopt, false, std::nullopt);
 }
 
+EvaluationReason EvaluationReason::Fallthrough(bool in_experiment) {
+    return EvaluationReason(Kind::kFallthrough, std::nullopt, std::nullopt,
+                            std::nullopt, std::nullopt, in_experiment,
+                            std::nullopt);
+}
+
+EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
+                                             std::string rule_id,
+                                             bool in_experiment) {
+    return EvaluationReason(Kind::kRuleMatch, std::nullopt, rule_index, rule_id,
+                            std::nullopt, in_experiment, std::nullopt);
+}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;

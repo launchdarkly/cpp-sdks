@@ -136,6 +136,23 @@ class EvaluationReason {
      */
     static EvaluationReason TargetMatch();
 
+    /**
+     * Represents the fact that the flag evaluated to its fallthrough value.
+     * @param in_experiment Whether the flag is part of an experiment.
+     */
+    static EvaluationReason Fallthrough(bool in_experiment);
+
+    /**
+     * Represents the fact that the flag evaluated to a particular variation
+     * because it matched a rule.
+     * @param rule_index Index of the rule.
+     * @param rule_id ID of the rule.
+     * @param in_experiment Whether the flag is part of an experiment.
+     */
+    static EvaluationReason RuleMatch(std::size_t rule_index,
+                                      std::string rule_id,
+                                      bool in_experiment);
+
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 
