@@ -37,7 +37,8 @@ add_library(${LIBNAME} OBJECT
         serialization/json_rule_clause.cpp
         serialization/json_flag.cpp
         encoding/base_64.cpp
-        encoding/sha_256.cpp)
+        encoding/sha_256.cpp
+        encoding/sha_1.cpp)
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 

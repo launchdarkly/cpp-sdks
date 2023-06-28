@@ -5,7 +5,7 @@
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
-#include <launchdarkly/encoding/sha_256.hpp>
+#include <launchdarkly/encoding/sha_1.hpp>
 #include <launchdarkly/value.hpp>
 #include <tl/expected.hpp>
 #include <variant>
@@ -357,7 +357,7 @@ std::optional<float> ComputeBucket(Context const& context,
     input.push_back('.');
     input.append(*id);
 
-    auto hashed = launchdarkly::encoding::Sha256String(input);
+    auto hashed = launchdarkly::encoding::Sha1String(input);
 }
 
 inline bool IsIntegral(double f) {
