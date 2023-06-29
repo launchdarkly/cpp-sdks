@@ -1,5 +1,6 @@
 #include "evaluator.hpp"
 #include "bucketing.hpp"
+#include "operators.hpp"
 
 #include <algorithm>
 #include <launchdarkly/data/evaluation_reason.hpp>
@@ -317,7 +318,7 @@ tl::expected<bool, Error> Evaluator::MatchNonSegment(
     if (clause.attribute.IsKind()) {
         for (auto const& clause_value : clause.values) {
             for (auto const& kind : context.Kinds()) {
-                if (Matches(clause.op, kind, clause_value)) {
+                if (operators::Match(clause.op, kind, clause_value)) {
                     return MaybeNegate(clause, true);
                 }
             }
@@ -332,7 +333,7 @@ tl::expected<bool, Error> Evaluator::MatchNonSegment(
     if (val.Type() == Value::Type::kArray) {
         for (auto const& clause_value : clause.values) {
             for (auto const& context_value : val.AsArray()) {
-                if (Matches(clause.op, context_value, clause_value)) {
+                if (operators::Match(clause.op, context_value, clause_value)) {
                     return MaybeNegate(clause, true);
                 }
             }
@@ -341,7 +342,7 @@ tl::expected<bool, Error> Evaluator::MatchNonSegment(
     }
     if (std::any_of(clause.values.begin(), clause.values.end(),
                     [&](Value const& clause_value) {
-                        return Matches(clause.op, val, clause_value);
+                        return operators::Match(clause.op, val, clause_value);
                     })) {
         return MaybeNegate(clause, true);
     }

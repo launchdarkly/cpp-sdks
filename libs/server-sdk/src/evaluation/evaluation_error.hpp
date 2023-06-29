@@ -6,7 +6,8 @@ enum Error {
     kCyclicReference,
     kBigSegmentEncountered,
     kInvalidAttributeReference,
-    kRolloutMissingVariations
+    kRolloutMissingVariations,
+    kUnknownOperator,
 };
 
 }

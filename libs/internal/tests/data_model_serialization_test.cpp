@@ -300,7 +300,7 @@ TEST(FlagRuleTests, DeserializesMinimumValid) {
     ASSERT_TRUE(result);
     ASSERT_FALSE(result->trackEvents);
     ASSERT_TRUE(result->clauses.empty());
-    ASSERT_FALSE(result->id);
+    ASSERT_EQ(result->id, "");
     ASSERT_EQ(std::get<data_model::Flag::Variation>(result->variationOrRollout),
               data_model::Flag::Variation(123));
 }

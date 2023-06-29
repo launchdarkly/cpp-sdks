@@ -264,4 +264,23 @@ bool operator!=(Value::Object const& lhs, Value::Object const& rhs) {
     return !(lhs == rhs);
 }
 
+bool operator<(Value const& lhs, Value const& rhs) {
+    if (!(lhs.Type() == Value::Type::kNumber &&
+          rhs.Type() == Value::Type::kNumber)) {
+        return false;
+    }
+    return lhs.AsDouble() < rhs.AsDouble();
+}
+
+bool operator>(Value const& lhs, Value const& rhs) {
+    return rhs < lhs;
+}
+
+bool operator<=(Value const& lhs, Value const& rhs) {
+    return !(lhs > rhs);
+}
+
+bool operator>=(Value const& lhs, Value const& rhs) {
+    return !(lhs < rhs);
+}
 }  // namespace launchdarkly
