@@ -8,6 +8,8 @@
 #include <tl/expected.hpp>
 #include <variant>
 
+#include "evaluation_error.hpp"
+
 namespace launchdarkly::server_side::evaluation {
 
 enum RolloutKindPresence {
@@ -25,24 +27,10 @@ class BucketPrefix {
         std::string salt;
     };
     using Seed = std::int64_t;
-    BucketPrefix(Seed seed) : prefix_(seed) {}
-    BucketPrefix(std::string key, std::string salt)
-        : prefix_(KeyAndSalt{key, salt}) {}
+    BucketPrefix(Seed seed);
+    BucketPrefix(std::string key, std::string salt);
 
-    void Update(std::string* input) const {
-        return std::visit(
-            [&](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, KeyAndSalt>) {
-                    input->append(arg.key);
-                    input->push_back('.');
-                    input->append(arg.salt);
-                } else if constexpr (std::is_same_v<T, Seed>) {
-                    input->append(std::to_string(arg));
-                }
-            },
-            prefix_);
-    }
+    void Update(std::string* input) const;
 
    private:
     std::variant<KeyAndSalt, Seed> prefix_;
@@ -70,11 +58,11 @@ std::optional<std::string> BucketValue(Value const& value);
 
 using ContextHashValue = float;
 
-tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, char const*>
-Bucket(Context const& context,
-       AttributeReference const& by_attr,
-       BucketPrefix const& prefix,
-       bool is_experiment,
-       std::string const& context_kind);
+tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, Error> Bucket(
+    Context const& context,
+    AttributeReference const& by_attr,
+    BucketPrefix const& prefix,
+    bool is_experiment,
+    std::string const& context_kind);
 
 }  // namespace launchdarkly::server_side::evaluation

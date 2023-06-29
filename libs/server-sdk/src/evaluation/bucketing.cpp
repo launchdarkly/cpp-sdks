@@ -12,17 +12,36 @@ static_assert(kBucketScaleInt < std::numeric_limits<double>::max(),
               "Bucket scale is too large to be represented as a double");
 constexpr double kBucketScaleDouble = static_cast<double>(kBucketScaleInt);
 
-tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, char const*>
-Bucket(Context const& context,
-       AttributeReference const& by_attr,
-       BucketPrefix const& prefix,
-       bool is_experiment,
-       std::string const& context_kind) {
+BucketPrefix::BucketPrefix(Seed seed) : prefix_(seed) {}
+BucketPrefix::BucketPrefix(std::string key, std::string salt)
+    : prefix_(KeyAndSalt{key, salt}) {}
+
+void BucketPrefix::Update(std::string* input) const {
+    return std::visit(
+        [&](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, KeyAndSalt>) {
+                input->append(arg.key);
+                input->push_back('.');
+                input->append(arg.salt);
+            } else if constexpr (std::is_same_v<T, Seed>) {
+                input->append(std::to_string(arg));
+            }
+        },
+        prefix_);
+}
+
+tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, Error> Bucket(
+    Context const& context,
+    AttributeReference const& by_attr,
+    BucketPrefix const& prefix,
+    bool is_experiment,
+    std::string const& context_kind) {
     AttributeReference ref =
         is_experiment ? AttributeReference("key") : std::move(by_attr);
 
     if (!ref.Valid()) {
-        return tl::make_unexpected("invalid attribute reference");
+        return tl::make_unexpected(Error::kInvalidAttributeReference);
     }
 
     Value value = context.Get(context_kind, ref);
