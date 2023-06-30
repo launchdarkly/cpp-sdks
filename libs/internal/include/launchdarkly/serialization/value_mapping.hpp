@@ -2,9 +2,48 @@
 
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include <launchdarkly/serialization/json_errors.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
+#include <tl/expected.hpp>
+
+#define PARSE_FIELD(field, it)                                               \
+    if (auto result =                                                        \
+            boost::json::value_to<tl::expected<decltype(field), JsonError>>( \
+                it->value())) {                                              \
+        field = result.value();                                              \
+    } else {                                                                 \
+        return tl::make_unexpected(result.error());                          \
+    }
+
+// Attempts to parse a field only if it exists in the data. Propagates an error
+// if the field's destination type is not compatible with the data.
+#define PARSE_OPTIONAL_FIELD(field, obj, key) \
+    do {                                      \
+        auto const& it = obj.find(key);       \
+        if (it != obj.end()) {                \
+            PARSE_FIELD(field, it);           \
+        }                                     \
+    } while (0)
+
+// Propagates an error upwards if the specified field isn't present in the
+// data.
+#define PARSE_REQUIRED_FIELD(field, obj, key)                      \
+    do {                                                           \
+        auto const& it = obj.find(key);                            \
+        if (it == obj.end()) {                                     \
+            return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+        PARSE_FIELD(field, it);                                    \
+    } while (0)
+
+#define REQUIRE_OBJECT(value)                                      \
+    do {                                                           \
+        if (!json_value.is_object()) {                             \
+            return tl::make_unexpected(JsonError::kSchemaFailure); \
+        }                                                          \
+    } while (0)
 
 namespace launchdarkly {
-
 template <typename Type>
 std::optional<Type> ValueAsOpt(boost::json::object::const_iterator iterator,
                                boost::json::object::const_iterator end) {

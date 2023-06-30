@@ -226,6 +226,8 @@ AttributeReference::AttributeReference(std::string ref_str)
 AttributeReference::AttributeReference(char const* ref_str)
     : AttributeReference(std::string(ref_str)) {}
 
+AttributeReference::AttributeReference() : AttributeReference("") {}
+
 std::string AttributeReference::PathToStringReference(
     std::vector<std::string_view> path) {
     // Approximate size to reduce resizes.

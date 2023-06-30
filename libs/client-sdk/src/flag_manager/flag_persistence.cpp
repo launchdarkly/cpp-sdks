@@ -4,6 +4,8 @@
 #include <launchdarkly/encoding/sha_256.hpp>
 
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
+#include <launchdarkly/serialization/json_item_descriptor.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 
 #include <utility>
 
@@ -73,8 +75,7 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 
     auto res = boost::json::value_to<tl::expected<
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>,
+        std::optional<std::unordered_map<std::string, ItemDescriptor>>,
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)
@@ -82,7 +83,12 @@ void FlagPersistence::LoadCached(Context const& context) {
             << error_code.message();
         return;
     }
-    sink_.Init(context, *res);
+
+    // If the map was null or omitted, treat it like an empty data set.
+    auto map =
+        res.value().value_or(std::unordered_map<std::string, ItemDescriptor>{});
+
+    sink_.Init(context, std::move(map));
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {

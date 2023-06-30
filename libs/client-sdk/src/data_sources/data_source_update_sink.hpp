@@ -9,11 +9,11 @@
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_kinds/item_descriptor.hpp>
+#include <launchdarkly/data_model/item_descriptor.hpp>
 
 namespace launchdarkly::client_side {
 
-using ItemDescriptor = data_kinds::ItemDescriptor<EvaluationResult>;
+using ItemDescriptor = data_model::ItemDescriptor<EvaluationResult>;
 
 /**
  * Interface for handling updates from LaunchDarkly.

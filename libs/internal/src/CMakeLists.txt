@@ -32,6 +32,9 @@ add_library(${LIBNAME} OBJECT
         serialization/json_value.cpp
         serialization/value_mapping.cpp
         serialization/json_evaluation_result.cpp
+        serialization/json_sdk_data_set.cpp
+        serialization/json_segment.cpp
+        serialization/json_primitives.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp)
 
