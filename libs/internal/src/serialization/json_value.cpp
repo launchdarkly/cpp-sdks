@@ -104,5 +104,11 @@ void tag_invoke(boost::json::value_from_tag const&,
     }
 }
 
+tl::expected<Value, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<Value, JsonError>> const& tag,
+    boost::json::value const& json_value) {
+    return boost::json::value_to<Value>(json_value);
+}
+
 // NOLINTEND modernize-return-braced-init-list
 }  // namespace launchdarkly

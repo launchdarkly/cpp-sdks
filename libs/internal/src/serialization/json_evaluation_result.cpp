@@ -60,6 +60,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     if (value_iter == json_obj.end()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
+
     auto maybe_value = boost::json::value_to<tl::expected<Value, JsonError>>(
         value_iter->value());
     if (!maybe_value) {

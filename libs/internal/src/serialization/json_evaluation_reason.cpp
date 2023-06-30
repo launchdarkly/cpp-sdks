@@ -2,6 +2,7 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 
 #include <sstream>

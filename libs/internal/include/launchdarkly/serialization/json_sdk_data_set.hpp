@@ -12,4 +12,4 @@ tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
         unused,
     boost::json::value const& json_value);
 
-}
+}  // namespace launchdarkly

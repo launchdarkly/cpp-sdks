@@ -8,6 +8,8 @@
 
 #include <optional>
 
+#include <boost/core/ignore_unused.hpp>
+
 namespace launchdarkly {
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
