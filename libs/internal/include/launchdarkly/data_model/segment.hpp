@@ -18,6 +18,7 @@ struct Segment {
         std::string contextKind;
         std::vector<std::string> values;
     };
+
     struct Clause {
         enum class Op {
             kOmitted,      /* represents empty string */
@@ -46,6 +47,7 @@ struct Segment {
         std::optional<bool> negate;
         std::optional<std::string> contextKind;
     };
+
     struct Rule {
         std::vector<Clause> clauses;
         std::optional<std::string> id;
@@ -53,6 +55,7 @@ struct Segment {
         std::optional<AttributeReference> bucketBy;
         std::optional<std::string> rolloutContextKind;
     };
+
     std::string key;
     std::uint64_t version;
 
