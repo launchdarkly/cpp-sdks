@@ -2,7 +2,6 @@
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
-#include <launchdarkly/serialization/value_mapping.hpp>
 #include <tl/expected.hpp>
 
 namespace launchdarkly {

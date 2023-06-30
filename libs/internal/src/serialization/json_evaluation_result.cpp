@@ -12,14 +12,12 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         tl::expected<std::optional<EvaluationResult>, JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
+
     if (json_value.is_null()) {
         return std::nullopt;
     }
     if (!json_value.is_object()) {
         return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    if (json_value.as_object().empty()) {
-        return std::nullopt;
     }
     auto const& json_obj = json_value.as_object();
 

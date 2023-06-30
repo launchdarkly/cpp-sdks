@@ -126,9 +126,8 @@ TEST(EvaluationResultTests, NoResultFieldsJson) {
         tl::expected<std::optional<EvaluationResult>, JsonError>>(
         boost::json::parse("{}"));
 
-    EXPECT_TRUE(results);
-    auto const& val = results.value();
-    EXPECT_FALSE(val);
+    EXPECT_FALSE(results);
+    EXPECT_EQ(JsonError::kSchemaFailure, results.error());
 }
 
 TEST(EvaluationResultTests, VersionWrongTypeJson) {

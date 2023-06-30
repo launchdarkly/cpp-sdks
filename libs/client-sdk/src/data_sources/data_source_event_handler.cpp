@@ -79,17 +79,6 @@ DataSourceEventHandler::DataSourceEventHandler(
       logger_(logger),
       status_manager_(status_manager) {}
 
-std::unordered_map<std::string, ItemDescriptor> remove_nulls(
-    std::unordered_map<std::string, std::optional<ItemDescriptor>> map) {
-    std::unordered_map<std::string, ItemDescriptor> result;
-    for (auto [key, value] : map) {
-        if (value.has_value()) {
-            result.emplace(key, std::move(value.value()));
-        }
-    }
-    return result;
-}
-
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
     std::string const& data) {
@@ -103,19 +92,16 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
                 kErrorParsingPut);
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<std::optional<std::unordered_map<
-                             std::string, std::optional<ItemDescriptor>>>,
-                         JsonError>>(parsed);
+        auto res = boost::json::value_to<tl::expected<
+            std::optional<std::unordered_map<std::string, ItemDescriptor>>,
+            JsonError>>(parsed);
 
         if (res.has_value()) {
             // If the map was null or omitted, treat it like an empty data set.
             auto map = res.value().value_or(
-                std::unordered_map<std::string,
-                                   std::optional<ItemDescriptor>>{});
-            // If any map value is null or omitted, remove it.
-            auto filtered = remove_nulls(std::move(map));
-            handler_.Init(context_, std::move(filtered));
+                std::unordered_map<std::string, ItemDescriptor>{});
+
+            handler_.Init(context_, std::move(map));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
