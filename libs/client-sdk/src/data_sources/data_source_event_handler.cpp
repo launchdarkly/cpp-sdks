@@ -7,6 +7,8 @@
 
 #include <boost/json.hpp>
 #include <unordered_map>
+#include <boost/core/ignore_unused.hpp>
+
 #include <utility>
 
 #include "tl/expected.hpp"

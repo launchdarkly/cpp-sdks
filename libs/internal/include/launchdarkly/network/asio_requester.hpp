@@ -8,6 +8,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 #include "foxy/client_session.hpp"
 
