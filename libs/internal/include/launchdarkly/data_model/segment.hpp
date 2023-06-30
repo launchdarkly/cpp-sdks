@@ -1,6 +1,8 @@
 #pragma once
 
 #include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/data_model/context_aware_reference.hpp>
+#include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 
 #include <boost/json/value.hpp>
@@ -14,61 +16,38 @@
 namespace launchdarkly::data_model {
 
 struct Segment {
+    using Kind = std::string;
     struct Target {
-        std::string contextKind;
+        Kind contextKind;
         std::vector<std::string> values;
     };
 
-    struct Clause {
-        enum class Op {
-            kOmitted,      /* represents empty string */
-            kUnrecognized, /* didn't match any known operators */
-            kIn,
-            kStartsWith,
-            kEndsWith,
-            kMatches,
-            kContains,
-            kLessThan,
-            kLessThanOrEqual,
-            kGreaterThan,
-            kGreaterThanOrEqual,
-            kBefore,
-            kAfter,
-            kSemVerEqual,
-            kSemVerLessThan,
-            kSemVerGreaterThan,
-            kSegmentMatch
-        };
-
-        std::optional<AttributeReference> attribute;
-        Op op;
-        std::vector<Value> values;
-
-        std::optional<bool> negate;
-        std::optional<std::string> contextKind;
-    };
-
     struct Rule {
+        using ReferenceType = ContextAwareReference<Rule>;
+
         std::vector<Clause> clauses;
         std::optional<std::string> id;
         std::optional<std::uint64_t> weight;
-        std::optional<AttributeReference> bucketBy;
-        std::optional<std::string> rolloutContextKind;
+
+        DEFINE_CONTEXT_KIND_FIELD(rolloutContextKind)
+        DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
     };
 
     std::string key;
     std::uint64_t version;
 
-    std::optional<std::vector<std::string>> included;
-    std::optional<std::vector<std::string>> excluded;
-    std::optional<std::vector<Target>> includedContexts;
-    std::optional<std::vector<Target>> excludedContexts;
-    std::optional<std::vector<Rule>> rules;
+    std::vector<std::string> included;
+    std::vector<std::string> excluded;
+    std::vector<Target> includedContexts;
+    std::vector<Target> excludedContexts;
+    std::vector<Rule> rules;
     std::optional<std::string> salt;
-    std::optional<bool> unbounded;
-    std::optional<std::string> unboundedContextKind;
+    bool unbounded;
+    std::optional<Kind> unboundedContextKind;
     std::optional<std::uint64_t> generation;
 
+    // TODO(cwaldren): make Kind a real type that is deserialized, so we can
+    // make empty string an error.
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
 };
 }  // namespace launchdarkly::data_model

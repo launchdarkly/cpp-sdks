@@ -1,7 +1,10 @@
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_attributes.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
+
+#include <boost/json.hpp>
 
 #include <optional>
 
@@ -103,7 +106,12 @@ std::optional<JsonError> ParseSingle(ContextBuilder& builder,
             attr == meta_iter || attr->value().is_null()) {
             continue;
         }
-        attrs.Set(attr->key(), boost::json::value_to<Value>(attr->value()));
+        auto maybe_unmarshalled_attr =
+            boost::json::value_to<tl::expected<Value, JsonError>>(
+                attr->value());
+        if (maybe_unmarshalled_attr) {
+            attrs.Set(attr->key(), maybe_unmarshalled_attr.value());
+        }
     }
 
     return std::nullopt;

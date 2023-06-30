@@ -1,9 +1,10 @@
 #pragma once
 
+#include <launchdarkly/serialization/json_errors.hpp>
+#include <tl/expected.hpp>
+
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
-#include <tl/expected.hpp>
-#include "json_errors.hpp"
 
 namespace launchdarkly {
 
@@ -22,20 +23,20 @@ tl::expected<std::optional<std::vector<T>>, JsonError> tag_invoke(
         return tl::unexpected(JsonError::kSchemaFailure);
     }
 
-    if (json_value.as_array().empty()) {
-        return std::nullopt;
-    }
-
     auto const& arr = json_value.as_array();
     std::vector<T> items;
     items.reserve(arr.size());
     for (auto const& item : arr) {
         auto eval_result =
-            boost::json::value_to<tl::expected<T, JsonError>>(item);
+            boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+                item);
         if (!eval_result.has_value()) {
             return tl::unexpected(eval_result.error());
         }
-        items.emplace_back(std::move(eval_result.value()));
+        auto maybe_val = eval_result.value();
+        if (maybe_val) {
+            items.emplace_back(std::move(maybe_val.value()));
+        }
     }
     return items;
 }
@@ -48,6 +49,11 @@ tl::expected<std::optional<bool>, JsonError> tag_invoke(
 tl::expected<std::optional<std::uint64_t>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<std::uint64_t>, JsonError>> const& unused,
+    boost::json::value const& json_value);
+
+tl::expected<std::optional<std::int64_t>, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<std::optional<std::int64_t>, JsonError>> const& unused,
     boost::json::value const& json_value);
 
 tl::expected<std::optional<std::string>, JsonError> tag_invoke(
@@ -68,9 +74,6 @@ tl::expected<std::optional<std::unordered_map<K, V>>, JsonError> tag_invoke(
     }
     if (!json_value.is_object()) {
         return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    if (json_value.as_object().empty()) {
-        return std::nullopt;
     }
     auto const& obj = json_value.as_object();
     std::unordered_map<K, V> descriptors;
@@ -109,7 +112,7 @@ tl::expected<T, JsonError> tag_invoke(
     if (!maybe_val.has_value()) {
         return tl::unexpected(maybe_val.error());
     }
-    return maybe_val.value().value_or(T{});
+    return maybe_val.value().value_or(T());
 }
 
 }  // namespace launchdarkly

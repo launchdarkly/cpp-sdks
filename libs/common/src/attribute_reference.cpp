@@ -170,6 +170,10 @@ std::string EscapeLiteral(std::string const& literal,
 }
 
 AttributeReference::AttributeReference(std::string str, bool literal) {
+    if (str.empty()) {
+        valid_ = false;
+        return;
+    }
     if (literal) {
         components_.push_back(str);
         // Literal starting with a '/' needs to be converted to an attribute
