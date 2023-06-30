@@ -23,17 +23,6 @@ static std::string MakeEnvironment(std::string const& prefix,
     return prefix + "_" + PersistenceEncodeKey(sdk_key);
 }
 
-std::unordered_map<std::string, ItemDescriptor> remove_nulls(
-    std::unordered_map<std::string, std::optional<ItemDescriptor>> map) {
-    std::unordered_map<std::string, ItemDescriptor> result;
-    for (auto [key, value] : map) {
-        if (value.has_value()) {
-            result.emplace(key, std::move(value.value()));
-        }
-    }
-    return result;
-}
-
 FlagPersistence::FlagPersistence(std::string const& sdk_key,
                                  IDataSourceUpdateSink& sink,
                                  FlagStore& flag_store,
@@ -86,9 +75,7 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 
     auto res = boost::json::value_to<tl::expected<
-        std::optional<std::unordered_map<
-            std::string,
-            std::optional<launchdarkly::client_side::ItemDescriptor>>>,
+        std::optional<std::unordered_map<std::string, ItemDescriptor>>,
         JsonError>>(parsed);
     if (!res) {
         LD_LOG(logger_, LogLevel::kError)
@@ -98,12 +85,10 @@ void FlagPersistence::LoadCached(Context const& context) {
     }
 
     // If the map was null or omitted, treat it like an empty data set.
-    auto map = res.value().value_or(
-        std::unordered_map<std::string, std::optional<ItemDescriptor>>{});
-    // If any map value is null or omitted, remove it.
-    auto filtered = remove_nulls(std::move(map));
+    auto map =
+        res.value().value_or(std::unordered_map<std::string, ItemDescriptor>{});
 
-    sink_.Init(context, std::move(filtered));
+    sink_.Init(context, std::move(map));
 }
 
 void FlagPersistence::StoreCache(std::string const& context_id) {
