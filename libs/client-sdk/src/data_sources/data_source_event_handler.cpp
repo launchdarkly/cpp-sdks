@@ -5,9 +5,9 @@
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 #include <unordered_map>
-#include <boost/core/ignore_unused.hpp>
 
 #include <utility>
 
@@ -146,7 +146,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             boost::json::parse(data));
         if (res.has_value()) {
             handler_.Upsert(context_, res.value().key,
-                             ItemDescriptor(res.value().version));
+                            ItemDescriptor(res.value().version));
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;

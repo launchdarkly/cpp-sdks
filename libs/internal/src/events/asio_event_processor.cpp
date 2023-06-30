@@ -1,9 +1,9 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/core/ignore_unused.hpp>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>

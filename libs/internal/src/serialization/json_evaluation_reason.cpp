@@ -63,8 +63,8 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 }
 
 tl::expected<enum EvaluationReason::ErrorKind, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<enum EvaluationReason::ErrorKind, JsonError>> const& unused,
+    boost::json::value_to_tag<tl::expected<enum EvaluationReason::ErrorKind,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value) {
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);

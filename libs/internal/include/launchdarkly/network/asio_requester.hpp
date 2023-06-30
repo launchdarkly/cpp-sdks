@@ -149,8 +149,8 @@ class FoxyClient
           response_timeout_(response_timeout),
           handler_(std::move(handler)),
           session_(exec,
-                   launchdarkly::foxy::session_opts{ToOptRef(ssl_context_.get()),
-                                      connect_timeout_}),
+                   launchdarkly::foxy::session_opts{
+                       ToOptRef(ssl_context_.get()), connect_timeout_}),
           resp_() {}
 
     void Run() {
