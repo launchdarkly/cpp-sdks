@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 
 namespace launchdarkly {

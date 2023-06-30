@@ -2,6 +2,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/use_future.hpp>
+
 #include <foxy/client_session.hpp>
 #include <launchdarkly/sse/client.hpp>
 
@@ -13,8 +14,11 @@
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/version.hpp>
 
+#include <boost/core/ignore_unused.hpp>
+
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
+
 #include <chrono>
 #include <iostream>
 #include <memory>

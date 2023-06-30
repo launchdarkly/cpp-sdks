@@ -4,8 +4,10 @@
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 #include <unordered_map>
+
 #include <utility>
 
 #include "tl/expected.hpp"
