@@ -1,5 +1,6 @@
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
@@ -19,6 +20,7 @@ tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
 
     data_model::SDKDataSet data_set;
 
+    PARSE_CONDITIONAL_FIELD(data_set.flags, obj, "flags");
     PARSE_CONDITIONAL_FIELD(data_set.segments, obj, "segments");
 
     return data_set;
