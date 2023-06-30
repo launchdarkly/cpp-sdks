@@ -1,13 +1,15 @@
 #pragma once
 
-#include <boost/json.hpp>
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
+
+#include <boost/json.hpp>
+#include <tl/expected.hpp>
+
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
 
 namespace launchdarkly {
 

@@ -1,12 +1,14 @@
 #pragma once
 
-#include <boost/json/value.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
+
+#include <boost/json/value.hpp>
+#include <tl/expected.hpp>
+
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
 #include <unordered_map>
 #include <vector>
 

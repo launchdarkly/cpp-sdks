@@ -1,6 +1,9 @@
-#include <boost/json/fwd.hpp>
+#pragma once
+
 #include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
+
+#include <boost/json/fwd.hpp>
 
 namespace launchdarkly {
 

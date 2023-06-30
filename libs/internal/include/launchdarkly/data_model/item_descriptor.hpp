@@ -1,11 +1,13 @@
 #pragma once
 
-#include <boost/json.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
+
+#include <boost/json.hpp>
+#include <tl/expected.hpp>
+
 #include <memory>
 #include <optional>
 #include <ostream>
-#include <tl/expected.hpp>
 #include <unordered_map>
 
 namespace launchdarkly::data_model {

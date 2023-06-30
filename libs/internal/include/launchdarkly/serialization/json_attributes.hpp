@@ -1,8 +1,8 @@
 #pragma once
 
-#include <boost/json/fwd.hpp>
-
 #include <launchdarkly/attributes.hpp>
+
+#include <boost/json/fwd.hpp>
 
 namespace launchdarkly {
 /**

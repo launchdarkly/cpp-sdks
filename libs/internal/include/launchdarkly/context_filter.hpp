@@ -1,13 +1,13 @@
 #pragma once
 
-#include <string>
-#include <unordered_set>
-#include <vector>
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/context.hpp>
 
 #include <boost/json.hpp>
 
-#include <launchdarkly/attribute_reference.hpp>
-#include <launchdarkly/context.hpp>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 namespace launchdarkly {
 
