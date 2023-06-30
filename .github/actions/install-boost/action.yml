@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         choco install boost-msvc-14.3 -y
-        echo "BOOST_ROOT=C:\local\boost_1_81_0" >> $GITHUB_OUTPUT
+        echo "BOOST_ROOT=C:\local\boost_1_82_0" >> $GITHUB_OUTPUT
 
     - name: Install boost using homebrew
       id: brew-action
@@ -40,7 +40,7 @@ runs:
       shell: bash
       run: |
         brew install boost
-        echo "BOOST_ROOT=$(boost --prefix boost@1.81)" >> $GITHUB_OUTPUT
+        echo "BOOST_ROOT=$(boost --prefix boost@1.82)" >> $GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
