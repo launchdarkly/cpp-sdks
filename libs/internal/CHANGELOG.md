@@ -22,6 +22,20 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 0.3.0 to 0.3.1
 
+## [0.1.5](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.1.4...launchdarkly-cpp-internal-v0.1.5) (2023-06-30)
+
+
+### Bug Fixes
+
+* Fix compilation with boost 1.82. ([#157](https://github.com/launchdarkly/cpp-sdks/issues/157)) ([868e9a6](https://github.com/launchdarkly/cpp-sdks/commit/868e9a647487fa78b3316d2d8f6b2c6728903b48))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 0.3.1 to 0.3.2
+
 ## 0.1.0 (2023-05-24)
 
 
