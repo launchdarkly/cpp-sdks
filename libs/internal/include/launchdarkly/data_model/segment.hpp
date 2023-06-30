@@ -1,11 +1,13 @@
 #pragma once
 
-#include <boost/json/value.hpp>
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/value.hpp>
+
+#include <boost/json/value.hpp>
+#include <tl/expected.hpp>
+
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
 #include <unordered_map>
 #include <vector>
 
