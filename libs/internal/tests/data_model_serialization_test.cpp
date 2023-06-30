@@ -13,8 +13,8 @@ TEST(SDKDataSetTests, DeserializesEmptyDataSet) {
         boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
             boost::json::parse("{}"));
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->segments);
-    ASSERT_FALSE(result->flags);
+    ASSERT_TRUE(result->segments.empty());
+    ASSERT_TRUE(result->flags.empty());
 }
 
 TEST(SDKDataSetTests, ErrorOnInvalidSchema) {
@@ -30,9 +30,7 @@ TEST(SDKDataSetTests, DeserializesZeroSegments) {
         boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
             boost::json::parse(R"({"segments":{}})"));
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->segments);
-    ASSERT_TRUE(result->segments->empty());
-    ASSERT_FALSE(result->flags);
+    ASSERT_TRUE(result->segments.empty());
 }
 
 TEST(SDKDataSetTests, DeserializesZeroFlags) {
@@ -40,9 +38,7 @@ TEST(SDKDataSetTests, DeserializesZeroFlags) {
         boost::json::value_to<tl::expected<data_model::SDKDataSet, JsonError>>(
             boost::json::parse(R"({"flags":{}})"));
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->flags);
-    ASSERT_TRUE(result->flags->empty());
-    ASSERT_FALSE(result->segments);
+    ASSERT_TRUE(result->flags.empty());
 }
 
 TEST(SegmentTests, DeserializesMinimumValid) {
