@@ -44,3 +44,14 @@ TEST(OpTests, NumericComparisons) {
     EXPECT_TRUE(Match(Clause::Op::kGreaterThanOrEqual, 0, 0));
     EXPECT_FALSE(Match(Clause::Op::kGreaterThanOrEqual, 0, 1));
 }
+
+TEST(OpTests, DateComparisons) {
+    EXPECT_TRUE(Match(Clause::Op::kBefore, "1985-04-12T23:20:50.52Z",
+                      "1985-04-12T23:20:50.53Z"));
+    EXPECT_TRUE(Match(Clause::Op::kAfter, "1985-04-12T23:20:50.53Z",
+                      "1985-04-12T23:20:50.52Z"));
+    EXPECT_TRUE(Match(Clause::Op::kBefore, "1985-04-12T23:20:50.52Z",
+                      "2023-04-12T23:20:50.52Z"));
+    EXPECT_TRUE(Match(Clause::Op::kAfter, "2023-04-12T23:20:50.52Z",
+                      "1985-04-12T23:20:50.52Z"));
+}
