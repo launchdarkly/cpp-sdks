@@ -1,6 +1,6 @@
 #include "operators.hpp"
 #include <boost/date_time/gregorian/gregorian.hpp>
-#include <regex>
+#include <boost/regex.hpp>
 namespace launchdarkly::server_side::evaluation::operators {
 
 using boost_date = boost::gregorian::date;
@@ -66,9 +66,31 @@ bool Contains(std::string const& context_value,
     return context_value.find(clause_value) != std::string::npos;
 }
 
+// RegexMatch uses boost::regex instead of std::regex, because the former
+// appears to be significantly more performant according to boost benchmarks.
+// For more information, see here:
+// https://www.boost.org/doc/libs/1_82_0/libs/regex/doc/html/boost_regex/background/performance.html
 bool RegexMatch(std::string const& context_value,
                 std::string const& clause_value) {
-    return std::regex_match(context_value, std::regex(clause_value));
+    // See here for FAQ on boost::regex exceptions:
+    // https://www.boost.org/doc/libs/1_82_0/libs/regex/doc/html/boost_regex/background/faq.html
+    try {
+        return boost::regex_search(context_value, boost::regex(clause_value));
+    } catch (boost::bad_expression) {
+        // boost::bad_expression can be thrown by basic_regex when compiling a
+        // regular expression.
+        return false;
+    } catch (boost::regex_error) {
+        // boost::regex_error thrown on stack exhaustion
+        return false;
+    } catch (std::runtime_error) {
+        // std::runtime_error can be thrown when a call to basic_regex::imbue
+        // tries to open a message catalogue that doesn't exist, or when a call
+        // to regex_search or regex_match results in an "everlasting" search, or
+        // when a call to RegEx::GrepFiles or RegEx::FindFiles tries to open a
+        // file that cannot be opened
+        return false;
+    }
 }
 
 bool Before(boost_date const& context_value, boost_date const& clause_value) {
