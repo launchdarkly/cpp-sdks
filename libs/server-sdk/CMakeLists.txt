@@ -27,6 +27,10 @@ endif ()
 # Needed to fetch external dependencies. 
 include(FetchContent)
 
+# Needed to parsing RFC3339 dates.
+include(${CMAKE_FILES}/date.cmake)
+
+
 # Add main SDK sources.
 add_subdirectory(src)
 
