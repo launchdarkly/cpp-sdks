@@ -48,6 +48,12 @@ struct Segment {
 
     // TODO(cwaldren): make Kind a real type that is deserialized, so we can
     // make empty string an error.
+
+    /**
+     * Returns the segment's version. Satisfies ItemDescriptor template
+     * constraints.
+     * @return Version of this segment.
+     */
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
 };
 }  // namespace launchdarkly::data_model

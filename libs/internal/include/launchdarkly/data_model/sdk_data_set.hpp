@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
@@ -14,9 +15,8 @@ namespace launchdarkly::data_model {
 struct SDKDataSet {
     using FlagKey = std::string;
     using SegmentKey = std::string;
-    // std::unordered_map<FlagKey, ItemDescriptor<Flag>> flags;
-    std::optional<std::unordered_map<SegmentKey, ItemDescriptor<Segment>>>
-        segments;
+    std::unordered_map<FlagKey, ItemDescriptor<Flag>> flags;
+    std::unordered_map<SegmentKey, ItemDescriptor<Segment>> segments;
 };
 
 }  // namespace launchdarkly::data_model
