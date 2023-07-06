@@ -1,4 +1,5 @@
 #include "operators.hpp"
+#include "detail/timestamp_operations.hpp"
 
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 
@@ -33,60 +34,15 @@ bool StringOp(Value const& context_value,
     return op(context_value.AsString(), clause_value.AsString());
 }
 
-using Timepoint = std::chrono::time_point<std::chrono::system_clock,
-                                          std::chrono::microseconds>;
-
-std::optional<Timepoint> ParseTimestamp(std::string const& date,
-                                        std::string const& format) {
-    using namespace date;
-    std::istringstream infile{date};
-    Timepoint tp;
-    infile >> date::parse(format, tp);
-    if (infile.rdstate() == std::ios_base::failbit) {
-        return std::nullopt;
-    }
-    return tp;
-}
-
-std::optional<Timepoint> MillisecondsToTimepoint(double ms) {
-    if (std::trunc(ms) == ms) {
-        return std::chrono::system_clock::time_point{
-            std::chrono::milliseconds{static_cast<long long>(ms)}};
-    }
-    return std::nullopt;
-}
-
-std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp) {
-    if (timestamp.empty()) {
-        return std::nullopt;
-    }
-    if (timestamp.back() == 'Z') {
-        return ParseTimestamp(timestamp, "%FT%H:%M:%6SZ");
-    }
-    return ParseTimestamp(timestamp, "%FT%H:%M:%6S%Ez");
-}
-
-std::optional<Timepoint> ToTimepoint(Value const& value) {
-    if (value.Type() == Value::Type::kNumber) {
-        double const& epoch_ms = value.AsDouble();
-        return MillisecondsToTimepoint(epoch_ms);
-    }
-    if (value.Type() == Value::Type::kString) {
-        std::string const& rfc3339_timestamp = value.AsString();
-        return RFC3339ToTimepoint(rfc3339_timestamp);
-    }
-    return std::nullopt;
-}
-
 template <typename Callable>
 bool TimeOp(Value const& context_value,
             Value const& clause_value,
             Callable&& op) {
-    auto context_tp = ToTimepoint(context_value);
+    auto context_tp = detail::ToTimepoint(context_value);
     if (!context_tp) {
         return false;
     }
-    auto clause_tp = ToTimepoint(clause_value);
+    auto clause_tp = detail::ToTimepoint(clause_value);
     if (!clause_tp) {
         return false;
     }
