@@ -80,10 +80,11 @@ EvaluationReason EvaluationReason::Fallthrough(bool in_experiment) {
 }
 
 EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
-                                             std::string rule_id,
+                                             std::optional<std::string> rule_id,
                                              bool in_experiment) {
-    return EvaluationReason(Kind::kRuleMatch, std::nullopt, rule_index, rule_id,
-                            std::nullopt, in_experiment, std::nullopt);
+    return EvaluationReason(Kind::kRuleMatch, std::nullopt, rule_index,
+                            std::move(rule_id), std::nullopt, in_experiment,
+                            std::nullopt);
 }
 
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {

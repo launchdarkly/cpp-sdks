@@ -150,7 +150,7 @@ class EvaluationReason {
      * @param in_experiment Whether the flag is part of an experiment.
      */
     static EvaluationReason RuleMatch(std::size_t rule_index,
-                                      std::string rule_id,
+                                      std::optional<std::string> rule_id,
                                       bool in_experiment);
 
     friend std::ostream& operator<<(std::ostream& out,
