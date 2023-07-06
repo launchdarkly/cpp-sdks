@@ -35,5 +35,5 @@ bool operator<(SemVer::Token const& lhs, SemVer::Token const& rhs);
 bool operator==(SemVer const& lhs, SemVer const& rhs);
 bool operator<(SemVer const& lhs, SemVer const& rhs);
 bool operator>(SemVer const& lhs, SemVer const& rhs);
-std::optional<SemVer> ToSemVer(std::string const& value);
+[[nodiscard]] std::optional<SemVer> ToSemVer(std::string const& value);
 }  // namespace launchdarkly::server_side::evaluation::detail
