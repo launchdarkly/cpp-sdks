@@ -65,8 +65,8 @@ classDiagram
 
     class IDataStore{
         <<interface>>
-        +const GetFlag(std::string key): std::shared_ptr&lt;const Flag&gt 
-        +const GetSegment(std::string key): std::shared_ptr&lt;const Segment&gt
+        +const GetFlag(std::string key): std::shared_ptr&lt;const ItemDescriptor&lt;Flag&gt;&gt 
+        +const GetSegment(std::string key): std::shared_ptr&lt;const ItemDescriptor&lt;Segment&gt;&gt
         +const Initialized(): bool
         +const Description(): string
     }
