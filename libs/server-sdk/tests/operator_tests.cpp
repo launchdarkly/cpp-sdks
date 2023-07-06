@@ -102,10 +102,6 @@ TEST(OpTests, InvalidDates) {
     EXPECT_FALSE(Match(Clause::Op::kBefore, "foo", ""));
     EXPECT_FALSE(Match(Clause::Op::kAfter, "foo", ""));
 }
-// Table-driven gtest that allows for specification of an input string
-// and a regex expression. There is also a boolean to indicate if the match
-// should succeed or not. The test then calls Match(Clause::Op::kMatches, ...)
-// and verifies that the value matches or not based on the boolean.
 
 struct RegexTest {
     std::string input;

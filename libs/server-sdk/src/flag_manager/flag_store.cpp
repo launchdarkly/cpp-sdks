@@ -2,8 +2,8 @@
 
 namespace launchdarkly::server_side::flag_manager {
 
-// TODO: This is copy-pasted from the client-side SDK. It may be able to be
-// shared.
+// TODO(cwaldren): This is copy-pasted from the client-side SDK. It may be able
+// to be shared.
 
 // Shared pointers are used to item descriptors so that they may have a lifetime
 // greater than their duration in the store. If, for instance, a flag has been

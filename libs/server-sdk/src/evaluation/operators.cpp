@@ -93,11 +93,8 @@ bool RegexMatch(std::string const& context_value,
         // boost::regex_error thrown on stack exhaustion
         return false;
     } catch (std::runtime_error) {
-        // std::runtime_error can be thrown when a call to basic_regex::imbue
-        // tries to open a message catalogue that doesn't exist, or when a call
-        // to regex_search or regex_match results in an "everlasting" search, or
-        // when a call to RegEx::GrepFiles or RegEx::FindFiles tries to open a
-        // file that cannot be opened
+        // std::runtime_error can be thrown when a call
+        // to regex_search results in an "everlasting" search
         return false;
     }
 }

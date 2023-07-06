@@ -27,7 +27,7 @@ endif ()
 # Needed to fetch external dependencies. 
 include(FetchContent)
 
-# Needed to parsing RFC3339 dates.
+# Needed to parse RFC3339 dates in flag rules.
 include(${CMAKE_FILES}/date.cmake)
 
 
