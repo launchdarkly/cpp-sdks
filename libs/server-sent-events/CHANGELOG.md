@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.1.0...launchdarkly-cpp-sse-client-v0.1.1) (2023-06-30)
+
+
+### Bug Fixes
+
+* Fix compilation with boost 1.82. ([#157](https://github.com/launchdarkly/cpp-sdks/issues/157)) ([868e9a6](https://github.com/launchdarkly/cpp-sdks/commit/868e9a647487fa78b3316d2d8f6b2c6728903b48))
+
 ## 0.1.0 (2023-05-24)
 
 
