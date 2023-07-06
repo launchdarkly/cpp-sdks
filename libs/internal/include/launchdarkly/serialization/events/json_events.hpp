@@ -23,6 +23,13 @@ void tag_invoke(boost::json::value_from_tag const&,
                 DebugEvent const& event);
 }  // namespace launchdarkly::events::client
 
+namespace launchdarkly::events::server {
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IndexEvent const& event);
+}  // namespace launchdarkly::events::server
+
 namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const&,

@@ -1,6 +1,8 @@
 #pragma once
+
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/value.hpp>
+
 #include <optional>
 #include <string>
 #include <vector>

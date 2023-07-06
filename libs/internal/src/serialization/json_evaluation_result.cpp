@@ -1,10 +1,11 @@
-#include <boost/core/ignore_unused.hpp>
-#include <boost/json.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
+
+#include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 
 namespace launchdarkly {
 
@@ -13,14 +14,12 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         tl::expected<std::optional<EvaluationResult>, JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
+
     if (json_value.is_null()) {
         return std::nullopt;
     }
     if (!json_value.is_object()) {
         return tl::unexpected(JsonError::kSchemaFailure);
-    }
-    if (json_value.as_object().empty()) {
-        return std::nullopt;
     }
     auto const& json_obj = json_value.as_object();
 
@@ -61,6 +60,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     if (value_iter == json_obj.end()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
+
     auto maybe_value = boost::json::value_to<tl::expected<Value, JsonError>>(
         value_iter->value());
     if (!maybe_value) {

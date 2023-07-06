@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/json/fwd.hpp>
 #include <launchdarkly/data_model/sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
+
+#include <boost/json/fwd.hpp>
 
 namespace launchdarkly {
 tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
@@ -11,4 +12,4 @@ tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
         unused,
     boost::json::value const& json_value);
 
-}
+}  // namespace launchdarkly

@@ -1,13 +1,15 @@
 #pragma once
 
-#include <boost/json/value.hpp>
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
+
+#include <boost/json/value.hpp>
+#include <tl/expected.hpp>
+
 #include <optional>
 #include <string>
-#include <tl/expected.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -30,6 +32,7 @@ struct Segment {
         DEFINE_CONTEXT_KIND_FIELD(rolloutContextKind)
         DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
     };
+
     std::string key;
     std::uint64_t version;
 

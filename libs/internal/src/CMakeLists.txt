@@ -18,6 +18,7 @@ add_library(${LIBNAME} OBJECT
         events/request_worker.cpp
         events/summarizer.cpp
         events/worker_pool.cpp
+        events/lru_cache.cpp
         logging/console_backend.cpp
         logging/null_logger.cpp
         logging/logger.cpp

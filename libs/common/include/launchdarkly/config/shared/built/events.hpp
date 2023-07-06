@@ -36,6 +36,9 @@ class Events final {
      * should be made.
      * @param flush_workers How many workers to use for concurrent event
      * delivery.
+     * @param context_keys_cache_capacity Max number of unique context keys to
+     * hold in LRU cache used for context deduplication when generating index
+     * events.
      */
     Events(bool enabled,
            std::size_t capacity,
@@ -44,7 +47,8 @@ class Events final {
            bool all_attributes_private,
            AttributeReference::SetType private_attrs,
            std::chrono::milliseconds delivery_retry_delay,
-           std::size_t flush_workers);
+           std::size_t flush_workers,
+           std::optional<std::size_t> context_keys_cache_capacity);
 
     /**
      * Returns true if event-sending is enabled.
@@ -87,6 +91,13 @@ class Events final {
      */
     [[nodiscard]] std::size_t FlushWorkers() const;
 
+    /**
+     * Max number of unique context keys to hold in LRU cache used for context
+     * deduplication when generating index events.
+     * @return Max, or std::nullopt if not applicable.
+     */
+    [[nodiscard]] std::optional<std::size_t> ContextKeysCacheCapacity() const;
+
    private:
     bool enabled_;
     std::size_t capacity_;
@@ -96,6 +107,7 @@ class Events final {
     AttributeReference::SetType private_attributes_;
     std::chrono::milliseconds delivery_retry_delay_;
     std::size_t flush_workers_;
+    std::optional<std::size_t> context_keys_cache_capacity_;
 };
 
 bool operator==(Events const& lhs, Events const& rhs);

@@ -7,6 +7,7 @@
 #include <boost/beast/http/fields.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/type_traits.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 #include <deque>
 #include <iostream>

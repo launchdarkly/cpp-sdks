@@ -1,9 +1,10 @@
 #pragma once
 
-#include <boost/core/ignore_unused.hpp>
-#include <boost/json.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 #include <tl/expected.hpp>
+
+#include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 
 namespace launchdarkly {
 
@@ -78,11 +79,15 @@ tl::expected<std::optional<std::unordered_map<K, V>>, JsonError> tag_invoke(
     std::unordered_map<K, V> descriptors;
     for (auto const& pair : obj) {
         auto eval_result =
-            boost::json::value_to<tl::expected<V, JsonError>>(pair.value());
+            boost::json::value_to<tl::expected<std::optional<V>, JsonError>>(
+                pair.value());
         if (!eval_result) {
             return tl::unexpected(eval_result.error());
         }
-        descriptors.emplace(pair.key(), eval_result.value());
+        auto const& maybe_val = eval_result.value();
+        if (maybe_val) {
+            descriptors.emplace(pair.key(), std::move(maybe_val.value()));
+        }
     }
     return descriptors;
 }

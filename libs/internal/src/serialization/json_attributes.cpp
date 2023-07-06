@@ -3,6 +3,9 @@
 #include <launchdarkly/serialization/json_attributes.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 
+#include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
+
 namespace launchdarkly {
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,

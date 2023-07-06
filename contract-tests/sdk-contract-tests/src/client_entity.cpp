@@ -1,4 +1,6 @@
 #include "client_entity.hpp"
+
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 
 #include <launchdarkly/context_builder.hpp>

@@ -1,10 +1,12 @@
 #pragma once
 
-#include <boost/json/value.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/segment.hpp>
-#include <optional>
+
+#include <boost/json/value.hpp>
 #include <tl/expected.hpp>
+
+#include <optional>
 #include <unordered_map>
 
 namespace launchdarkly::data_model {
@@ -13,8 +15,7 @@ struct SDKDataSet {
     using FlagKey = std::string;
     using SegmentKey = std::string;
     // std::unordered_map<FlagKey, ItemDescriptor<Flag>> flags;
-    std::optional<
-        std::unordered_map<SegmentKey, std::optional<ItemDescriptor<Segment>>>>
+    std::optional<std::unordered_map<SegmentKey, ItemDescriptor<Segment>>>
         segments;
 };
 
