@@ -48,9 +48,9 @@ classDiagram
         +Upsert(PersistentKind kind, std::string key, SerializedItemDescriptor descriptor) SerializedItemDescriptor
 
         +Get(PersistentKind kind, std::string key) SerializedItemDescriptor
-        +All(PersistentKind kind) std::vector~SerializedItemDescriptor~ 
+        +All(PersistentKind kind) std::unordered_map&lt;std::string, SerializedItemDescriptor&gt;
 
-        +const Description() std::string&
+        +const Description() std::string const&
         +const Initialized() bool
     }
 
@@ -65,10 +65,12 @@ classDiagram
 
     class IDataStore{
         <<interface>>
-        +const GetFlag(std::string key): std::shared_ptr&lt;const ItemDescriptor&lt;Flag&gt;&gt 
-        +const GetSegment(std::string key): std::shared_ptr&lt;const ItemDescriptor&lt;Segment&gt;&gt
-        +const Initialized(): bool
-        +const Description(): string
+        +const GetFlag(std::string key) std::shared_ptr&lt;const ItemDescriptor&lt;Flag&gt;&gt 
+        +const GetSegment(std::string key) std::shared_ptr&lt;const ItemDescriptor&lt;Segment&gt;&gt
+        +const AllFlags() std::unordered_map&lt;std::string, std::shared_ptr&lt;const ItemDescriptor&lt;Flag&gt;&gt&gt;
+        +const AllSegments() std::unordered_map&lt;std::string, std::shared_ptr&lt;const ItemDescriptor&lt;Segment&gt;&gt&gt;
+        +const Initialized() bool
+        +const Description() string
     }
 
     class TtlTracker{
