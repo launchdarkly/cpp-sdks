@@ -84,6 +84,11 @@ struct Flag {
     bool trackEventsFallthrough;
     std::optional<std::uint64_t> debugEventsUntilDate;
 
+    /**
+     * Returns the flag's version. Satisfies ItemDescriptor template
+     * constraints.
+     * @return Version of this flag.
+     */
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
 };
 }  // namespace launchdarkly::data_model
