@@ -13,6 +13,7 @@ add_library(${LIBNAME}
         evaluation/bucketing.cpp
         evaluation/operators.cpp
         evaluation/detail/timestamp_operations.cpp
+        evaluation/detail/semver_operations.cpp
         flag_manager/flag_store.cpp
         )
 

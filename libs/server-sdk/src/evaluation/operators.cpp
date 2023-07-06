@@ -1,27 +1,10 @@
 #include "operators.hpp"
+#include "detail/semver_operations.hpp"
 #include "detail/timestamp_operations.hpp"
 
-#include <launchdarkly/detail/c_binding_helpers.hpp>
-
-#include <date/date.h>
-#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <iostream>
-#include <sstream>
+
 namespace launchdarkly::server_side::evaluation::operators {
-
-/*
- * Official SemVer 2.0 Regex
- * https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
- */
-char const* const kSemVerRegex =
-    R"(^(?<major>0|[1-9]\d*)(\.(?<minor>0|[1-9]\d*))?(\.(?<patch>0|[1-9]\d*))?(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$)";
-
-static boost::regex const& SemVerRegex() {
-    static boost::regex regex{kSemVerRegex};
-    LD_ASSERT(regex.status() == 0);
-    return regex;
-}
 
 template <typename Callable>
 bool StringOp(Value const& context_value,
@@ -32,6 +15,27 @@ bool StringOp(Value const& context_value,
         return false;
     }
     return op(context_value.AsString(), clause_value.AsString());
+}
+
+template <typename Callable>
+bool SemverOp(Value const& context_value,
+              Value const& clause_value,
+              Callable&& op) {
+    return StringOp(context_value, clause_value,
+                    [op = std::move(op)](std::string const& context,
+                                         std::string const& clause) {
+                        auto context_semver = detail::ToSemVer(context);
+                        if (!context_semver) {
+                            return false;
+                        }
+
+                        auto clause_semver = detail::ToSemVer(clause);
+                        if (!clause_semver) {
+                            return false;
+                        }
+
+                        return op(*context_semver, *clause_semver);
+                    });
 }
 
 template <typename Callable>
@@ -96,172 +100,6 @@ bool RegexMatch(std::string const& context_value,
         // file that cannot be opened
         return false;
     }
-}
-
-class SemVer {
-   public:
-    using VersionType = unsigned long long;
-
-    using Token = std::variant<uint64_t, std::string>;
-
-    SemVer(VersionType major,
-           VersionType minor,
-           VersionType patch,
-           std::optional<std::vector<Token>> prerelease)
-        : major_(major),
-          minor_(minor),
-          patch_(patch),
-          prerelease_(prerelease) {}
-
-    SemVer::VersionType Major() const { return major_; }
-    SemVer::VersionType Minor() const { return minor_; }
-    SemVer::VersionType Patch() const { return patch_; }
-    std::optional<std::vector<Token>> const& Prerelease() const {
-        return prerelease_;
-    }
-
-   private:
-    VersionType major_;
-    VersionType minor_;
-    VersionType patch_;
-    std::optional<std::vector<Token>> prerelease_;
-};
-
-bool operator<(SemVer::Token const& lhs, SemVer::Token const& rhs) {
-    if (lhs.index() != rhs.index()) {
-        /* Numeric identifiers (index 0 of variant) always have lower precedence
-than non-numeric identifiers. */
-        return lhs.index() < rhs.index();
-    }
-    if (lhs.index() == 0) {
-        return std::get<0>(lhs) < std::get<0>(rhs);
-    }
-    return std::get<1>(lhs) < std::get<1>(rhs);
-}
-
-bool operator==(SemVer const& lhs, SemVer const& rhs) {
-    return lhs.Major() == rhs.Major() && lhs.Minor() == rhs.Minor() &&
-           lhs.Patch() == rhs.Patch() && lhs.Prerelease() == rhs.Prerelease();
-}
-
-bool operator<(SemVer const& lhs, SemVer const& rhs) {
-    if (lhs.Major() < rhs.Major()) {
-        return true;
-    }
-    if (lhs.Major() > rhs.Major()) {
-        return false;
-    }
-    if (lhs.Minor() < rhs.Minor()) {
-        return true;
-    }
-    if (lhs.Minor() > rhs.Minor()) {
-        return false;
-    }
-    if (lhs.Patch() < rhs.Patch()) {
-        return true;
-    }
-    if (lhs.Patch() > rhs.Patch()) {
-        return false;
-    }
-    if (!lhs.Prerelease() && !rhs.Prerelease()) {
-        return false;
-    }
-    if (lhs.Prerelease() && !rhs.Prerelease()) {
-        return true;
-    }
-    if (!lhs.Prerelease() && rhs.Prerelease()) {
-        return false;
-    }
-    return *lhs.Prerelease() < *rhs.Prerelease();
-}
-
-bool operator>(SemVer const& lhs, SemVer const& rhs) {
-    return rhs < lhs;
-}
-
-std::optional<SemVer> ToSemVer(std::string const& value) {
-    if (value.empty()) {
-        return std::nullopt;
-    }
-    boost::regex const& semver_regex = SemVerRegex();
-    boost::smatch match;
-    try {
-        if (!boost::regex_match(value, match, semver_regex)) {
-            return std::nullopt;
-        }
-    } catch (std::runtime_error) {
-        /* std::runtime_error if the complexity of matching the expression
-         * against an N character string begins to exceed O(N2), or if the
-         * program runs out of stack space while matching the expression
-         * (if Boost.Regex is configured in recursive mode), or if the matcher
-         * exhausts its permitted memory allocation (if Boost.Regex
-         * is configured in non-recursive mode).*/
-        return std::nullopt;
-    }
-
-    SemVer::VersionType major = 0;
-    SemVer::VersionType minor = 0;
-    SemVer::VersionType patch = 0;
-
-    std::optional<std::vector<SemVer::Token>> prerelease;
-
-    try {
-        if (match["major"].matched) {
-            major = std::stoull(match["major"]);
-        }
-        if (match["minor"].matched) {
-            minor = std::stoull(match["minor"]);
-        }
-        if (match["patch"].matched) {
-            patch = std::stoull(match["patch"]);
-        }
-
-        if (match["prerelease"].matched) {
-            std::vector<std::string> tokens;
-            boost::split(tokens, match["prerelease"], boost::is_any_of("."));
-            if (!tokens.empty()) {
-                prerelease.emplace();
-                std::transform(tokens.begin(), tokens.end(),
-                               std::back_inserter(*prerelease),
-                               [](std::string const& token)
-                                   -> std::variant<uint64_t, std::string> {
-                                   try {
-                                       return std::stoull(token);
-                                   } catch (std::invalid_argument) {
-                                       return token;
-                                   }
-                               });
-            }
-        }
-    } catch (std::invalid_argument) {
-        // Conversion failed.
-        return std::nullopt;
-    } catch (std::out_of_range) {
-        // Cannot represent the value as an unsigned long long,
-        return std::nullopt;
-    }
-    return SemVer{major, minor, patch, prerelease};
-}
-
-template <typename Callable>
-bool SemverOp(Value const& context_value,
-              Value const& clause_value,
-              Callable&& op) {
-    return StringOp(context_value, clause_value,
-                    [op = std::move(op)](std::string const& context,
-                                         std::string const& clause) {
-                        auto context_semver = ToSemVer(context);
-                        if (!context_semver) {
-                            return false;
-                        }
-
-                        auto clause_semver = ToSemVer(clause);
-                        if (!clause_semver) {
-                            return false;
-                        }
-
-                        return op(*context_semver, *clause_semver);
-                    });
 }
 
 bool Match(data_model::Clause::Op op,
