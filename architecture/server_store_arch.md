@@ -47,8 +47,8 @@ classDiagram
         +Init(OrderedDataSets dataSets)
         +Upsert(PersistentKind kind, std::string key, SerializedItemDescriptor descriptor) SerializedItemDescriptor
 
-        +Get(PersistentKind kind, std::string key) SerializedItemDescriptor
-        +All(PersistentKind kind) std::unordered_map&lt;std::string, SerializedItemDescriptor&gt;
+        +const Get(PersistentKind kind, std::string key) SerializedItemDescriptor
+        +const All(PersistentKind kind) std::unordered_map&lt;std::string, SerializedItemDescriptor&gt;
 
         +const Description() std::string const&
         +const Initialized() bool
@@ -58,7 +58,8 @@ classDiagram
     class IDataSourceUpdateSink{
         <<interface>>
         +void Init(SDKDataSet allData)
-        +void Upsert(std::string key, std::variant&lt;ItemDescriptor&ltFlag&gt, ItemDescriptor&ltSegment&gt&gt; data)
+        +void Upsert(std::string key, ItemDescriptor~Flag~ data)
+        +void Upsert(std::string key, ItemDescriptor~Segment~ data)
     }
     
     note for IDataStore "The shared_ptr from GetFlag or GetSegment may be null."
