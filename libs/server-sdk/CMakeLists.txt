@@ -28,7 +28,7 @@ endif ()
 include(FetchContent)
 
 # Needed to parse RFC3339 dates in flag rules.
-include(${CMAKE_FILES}/date.cmake)
+include(${CMAKE_FILES}/rfc3339_timestamp.cmake)
 
 
 # Add main SDK sources.

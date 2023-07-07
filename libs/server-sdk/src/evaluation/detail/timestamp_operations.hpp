@@ -2,15 +2,14 @@
 
 #include <launchdarkly/value.hpp>
 
-#include <date/date.h>
-
 #include <chrono>
 #include <optional>
 #include <string>
 
 namespace launchdarkly::server_side::evaluation::detail {
 
-using Timepoint = std::chrono::system_clock::time_point;
+using Clock = std::chrono::system_clock;
+using Timepoint = Clock::time_point;
 
 [[nodiscard]] std::optional<Timepoint> ParseTimestamp(
     std::string const& date,

@@ -1,6 +1,6 @@
 #include "timestamp_operations.hpp"
 
-#include "date/date.h"
+#include "timestamp.h"
 
 #include <sstream>
 
@@ -30,21 +30,18 @@ std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp) {
     if (timestamp.empty()) {
         return std::nullopt;
     }
-    if (timestamp.back() == 'Z') {
-        return ParseTimestamp(timestamp, "%FT%H:%M:%12SZ");
-    }
-    return ParseTimestamp(timestamp, "%FT%H:%M:%12S%z");
-}
 
-std::optional<Timepoint> ParseTimestamp(std::string const& date,
-                                        std::string const& format) {
-    using namespace date;
-    std::istringstream iss{date};
-    Timepoint tp;
-    iss >> date::parse(format, tp);
-    if (iss.fail()) {
+    timestamp_t ts{};
+    if (timestamp_parse(timestamp.c_str(), timestamp.size(), &ts)) {
         return std::nullopt;
     }
-    return tp;
+    
+    Timepoint epoch{};
+    epoch += std::chrono::seconds{ts.sec};
+    epoch +=
+        std::chrono::floor<Clock::duration>(std::chrono::nanoseconds{ts.nsec});
+
+    return epoch;
 }
+
 }  // namespace launchdarkly::server_side::evaluation::detail

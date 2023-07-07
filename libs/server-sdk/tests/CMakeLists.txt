@@ -14,6 +14,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}../")
 
 add_executable(gtest_${LIBNAME}
         ${tests})
-target_link_libraries(gtest_${LIBNAME} launchdarkly::server launchdarkly::internal GTest::gtest_main date::date)
+target_link_libraries(gtest_${LIBNAME} launchdarkly::server launchdarkly::internal GTest::gtest_main timestamp)
 
 gtest_discover_tests(gtest_${LIBNAME})

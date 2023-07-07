@@ -21,7 +21,7 @@ add_library(${LIBNAME}
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy date::date)
+            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 else ()
     # The default static lib builds, for linux, are positition independent.
     # So they do not link into a shared object without issues. So, when
@@ -30,7 +30,7 @@ else ()
     # macOS shares the same path for simplicity.
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
+            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy timestamp)
 
     target_sources(${LIBNAME} PRIVATE boost.cpp)
 endif ()

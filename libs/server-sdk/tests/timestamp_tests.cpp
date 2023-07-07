@@ -1,12 +1,10 @@
 #include "evaluation/detail/timestamp_operations.hpp"
 
-#include <date/date.h>
 #include <gtest/gtest.h>
 #include <unordered_map>
 
 using namespace launchdarkly::server_side::evaluation::detail;
 using namespace std::chrono_literals;
-using namespace date;
 
 struct TimestampTest {
     std::variant<std::string, double> input;
@@ -49,7 +47,9 @@ TEST_P(TimestampTests, ExpectedTimestampIsParsed) {
         << print_tp(result);
 }
 
-constexpr auto kBasicDate = Timepoint{sys_days{2020_y / 1 / 1} + 0h};
+static Timepoint BasicDate() {
+    return std::chrono::system_clock::from_time_t(1577836800);
+}
 
 INSTANTIATE_TEST_SUITE_P(
     ValidTimestamps,
@@ -60,23 +60,28 @@ INSTANTIATE_TEST_SUITE_P(
         TimestampTest{1000.0 * 60, "60 seconds", Timepoint{60s}},
         TimestampTest{1000.0 * 60 * 60, "1 hour", Timepoint{60min}},
         TimestampTest{-1000.0, "-1 second", Timepoint{-1s}},
-        TimestampTest{"2020-01-01T00:00:00Z", "with Zulu offset", kBasicDate},
+        TimestampTest{"2020-01-01T00:00:00Z", "with Zulu offset", BasicDate()},
+        TimestampTest{"2020-01-01T00:00:00+00:00", "with normal offset",
+                      BasicDate()},
+        TimestampTest{"2020-01-01T01:00:00+01:00", "with 1hr offset",
+                      BasicDate()},
         TimestampTest{"2020-01-01T01:00:00+01:00",
-                      "with colon-delimited offset", kBasicDate},
-        TimestampTest{"2020-01-01T01:00:00+0100", "with normal offset",
-                      kBasicDate},
+                      "with colon-delimited offset", BasicDate()},
+
         TimestampTest{"2020-01-01T00:00:00.123Z", "with milliseconds",
-                      kBasicDate + 123ms},
+                      BasicDate() + 123ms},
         TimestampTest{"2020-01-01T00:00:00.123+00:00",
-                      "with milliseconds and offset", kBasicDate + 123ms},
-        TimestampTest{"2020-01-01T00:00:00.000123Z", "with microseconds",
-                      kBasicDate + 123us},
+                      "with milliseconds and offset", BasicDate() + 123ms},
+        TimestampTest{"2020-01-01T00:00:00.000123Z", "with microseconds ",
+                      BasicDate() + 123us},
         TimestampTest{"2020-01-01T00:00:00.000123+00:00",
-                      "with microseconds and offset", kBasicDate + 123us},
-        TimestampTest{"2020-01-01T00:00:00.000000001Z",
-                      "nanoseconds rounded to nearest", kBasicDate},
-        TimestampTest{"2020-01-01T00:00:00.000000001+00:00",
-                      "nanoseconds rounded to nearest with offset", kBasicDate},
+                      "with microseconds and offset", BasicDate() + 123us},
+        TimestampTest{"2020-01-01T00:00:00.123456789Z",
+                      "floor nanoseconds with zulu offset",
+                      BasicDate() + 123ms + 456us},
+        TimestampTest{"2020-01-01T01:00:00.123456789+01:00",
+                      "floor nanoseconds with offset",
+                      BasicDate() + 123ms + 456us},
 
     }));
 
@@ -89,17 +94,9 @@ INSTANTIATE_TEST_SUITE_P(
         TimestampTest{123456.789, "not an integer", std::nullopt},
         TimestampTest{-1000.5, "not an integer", std::nullopt},
         TimestampTest{"", "empty string", std::nullopt},
-        TimestampTest{"2020-01-01T00:00:00z", "lowercase zulu", std::nullopt},
-        TimestampTest{"2020-01-01t00:00:00z", "lowercase t and zulu",
-                      std::nullopt},
-        TimestampTest{"2020-01-01t00:00:00Z", "lowercase t", std::nullopt},
-        TimestampTest{"2020-01-01 00:00:00Z", "space instead of T",
-                      std::nullopt},
         TimestampTest{"2020-01-01T00:00:00/foo", "invalid offset",
                       std::nullopt},
-        TimestampTest{"2020-01-01T00:00:00.0000000000000000123Z",
-                      "too much precision", std::nullopt},
+        TimestampTest{"2020-01-01T00:00:00.0000000001Z",
+                      "more than 9 digits of precision", std::nullopt},
 
     }));
-
-// Something about the : character?
