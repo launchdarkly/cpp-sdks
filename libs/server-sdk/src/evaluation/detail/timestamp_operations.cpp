@@ -19,6 +19,9 @@ std::optional<Timepoint> ToTimepoint(Value const& value) {
 }
 
 std::optional<Timepoint> MillisecondsToTimepoint(double ms) {
+    if (ms < 0.0) {
+        return std::nullopt;
+    }
     if (std::trunc(ms) == ms) {
         return std::chrono::system_clock::time_point{
             std::chrono::milliseconds{static_cast<long long>(ms)}};
@@ -35,7 +38,7 @@ std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp) {
     if (timestamp_parse(timestamp.c_str(), timestamp.size(), &ts)) {
         return std::nullopt;
     }
-    
+
     Timepoint epoch{};
     epoch += std::chrono::seconds{ts.sec};
     epoch +=

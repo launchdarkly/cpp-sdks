@@ -23,6 +23,7 @@ class AllOperatorsTest : public ::testing::TestWithParam<ClauseTest> {
     const static std::string DATE_STR2;
     const static int DATE_MS1;
     const static int DATE_MS2;
+    const static int DATE_MS_NEGATIVE;
     const static std::string INVALID_DATE;
 };
 
@@ -30,6 +31,7 @@ const std::string AllOperatorsTest::DATE_STR1 = "2017-12-06T00:00:00.000-07:00";
 const std::string AllOperatorsTest::DATE_STR2 = "2017-12-06T00:01:01.000-07:00";
 int const AllOperatorsTest::DATE_MS1 = 10000000;
 int const AllOperatorsTest::DATE_MS2 = 10000001;
+int const AllOperatorsTest::DATE_MS_NEGATIVE = -10000;
 const std::string AllOperatorsTest::INVALID_DATE = "hey what's this?";
 
 TEST_P(AllOperatorsTest, Matches) {
@@ -209,6 +211,11 @@ INSTANTIATE_TEST_SUITE_P(
                    AllOperatorsTest::DATE_STR1, NO_MATCH},
         ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_STR1,
                    AllOperatorsTest::INVALID_DATE, NO_MATCH},
+        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_MS_NEGATIVE,
+                   AllOperatorsTest::DATE_MS1, NO_MATCH},
+        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_MS1,
+                   AllOperatorsTest::DATE_MS_NEGATIVE, NO_MATCH},
+
     }));
 
 INSTANTIATE_TEST_SUITE_P(
