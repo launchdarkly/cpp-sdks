@@ -17,7 +17,7 @@ if (MSVC OR (NOT BUILD_SHARED_LIBS))
             PUBLIC launchdarkly::common
             PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
 else ()
-    # The default static lib builds, for linux, are positition independent.
+    # The default static lib builds, for linux, are position independent.
     # So they do not link into a shared object without issues. So, when
     # building shared objects do not link the static libraries and instead
     # use the "src.hpp" files for required libraries.
