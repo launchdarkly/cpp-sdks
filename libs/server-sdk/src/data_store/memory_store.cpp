@@ -7,13 +7,21 @@ namespace launchdarkly::server_side::data_store {
 std::shared_ptr<IDataStore::FlagDescriptor> MemoryStore::GetFlag(
     std::string key) const {
     std::lock_guard lock{data_mutex_};
-    return std::shared_ptr<FlagDescriptor>();
+    auto found = flags_.find(key);
+    if (found != flags_.end() && found->second->item) {
+        return found->second;
+    }
+    return nullptr;
 }
 
 std::shared_ptr<IDataStore::SegmentDescriptor> MemoryStore::GetSegment(
     std::string key) const {
     std::lock_guard lock{data_mutex_};
-    return std::shared_ptr<SegmentDescriptor>();
+    auto found = segments_.find(key);
+    if (found != segments_.end() && found->second->item) {
+        return found->second;
+    }
+    return nullptr;
 }
 
 std::unordered_map<std::string, std::shared_ptr<IDataStore::FlagDescriptor>>
