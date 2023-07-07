@@ -31,9 +31,9 @@ std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp) {
         return std::nullopt;
     }
     if (timestamp.back() == 'Z') {
-        return ParseTimestamp(timestamp, "%FT%H:%M:%6SZ");
+        return ParseTimestamp(timestamp, "%FT%H:%M:%9SZ");
     }
-    return ParseTimestamp(timestamp, "%FT%H:%M:%6S%Ez");
+    return ParseTimestamp(timestamp, "%FT%H:%M:%9S%Ez");
 }
 
 std::optional<Timepoint> ParseTimestamp(std::string const& date,

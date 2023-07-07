@@ -6,8 +6,6 @@
 #include "evaluation/operators.hpp"
 #include "evaluation/rules.hpp"
 
-#include "flag_manager/flag_store.hpp"
-
 using namespace launchdarkly::server_side::evaluation::operators;
 using namespace launchdarkly::data_model;
 using namespace launchdarkly;
@@ -52,44 +50,59 @@ TEST(OpTests, NumericComparisons) {
     EXPECT_FALSE(Match(Clause::Op::kGreaterThanOrEqual, 0, 1));
 }
 
+// We can only support microsecond precision due to resolution of the
+// system_clock::time_point.
+//
+// The spec says we should support no more than 9 digits
+// (nanoseconds.) This test attempts to verify that microsecond precision
+// differences are handled.
 TEST(OpTests, DateComparisonMicrosecondPrecision) {
-    EXPECT_TRUE(Match(Clause::Op::kBefore, "2021-10-08T02:00:00.000001-00:00",
-                      "2022-10-08T02:00:00.000002-00:00"));
+    const std::string kDate1 = "2023-10-08T02:00:00.000001Z";
+    const std::string kDate2 = "2023-10-08T02:00:00.000002Z";
 
-    EXPECT_FALSE(Match(Clause::Op::kAfter, "2021-10-08T02:00:00.000001-00:00",
-                       "2022-10-08T02:00:00.000002-00:00"));
+    EXPECT_TRUE(Match(Clause::Op::kBefore, kDate1, kDate2))
+        << kDate1 << " < " << kDate2;
 
-    EXPECT_TRUE(Match(Clause::Op::kBefore, "2021-10-08T02:00:01.234567-00:00",
-                      "2022-10-08T02:00:01.234568-00:00"));
+    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
+        << kDate1 << " not > " << kDate2;
 
-    EXPECT_FALSE(Match(Clause::Op::kAfter, "2021-10-08T02:00:01.234567-00:00",
-                       "2022-10-08T02:00:01.234568-00:00"));
+    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
+        << kDate2 << " not < " << kDate1;
 
-    EXPECT_FALSE(Match(Clause::Op::kBefore, "2021-10-08T02:00:00.000001-00:00",
-                       "2021-10-08T02:00:00.000001-00:00"));
-
-    EXPECT_FALSE(Match(Clause::Op::kAfter, "2021-10-08T02:00:00.000001-00:00",
-                       "2021-10-08T02:00:00.000001-00:00"));
+    EXPECT_TRUE(Match(Clause::Op::kAfter, kDate2, kDate1))
+        << kDate2 << " > " << kDate1;
 }
 
-TEST(OpTests, DateComparisonMicrosecodPrecisionOutOfBounds) {
-    EXPECT_FALSE(Match(Clause::Op::kBefore, "2021-oo-08T02:00:00.000001-00:00",
-                       "2021-10-08T02:00:00.0000011-00:00"));
+// Comparison should be effectively "equal" for all combinations.
+TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
+    const std::string kDate1 = "2023-10-08T02:00:00.000001Z";
+    const std::string kDate2 = "2023-10-08T02:00:00.0000011Z";
+
+    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate1, kDate2))
+        << kDate1 << " < " << kDate2;
+
+    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
+        << kDate1 << " not > " << kDate2;
+
+    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
+        << kDate2 << " not < " << kDate1;
+
+    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate2, kDate1))
+        << kDate2 << " > " << kDate1;
 }
 
-TEST(OpTests, DateComparisons) {
-    EXPECT_TRUE(Match(Clause::Op::kBefore, "1985-04-12T23:20:50.52Z",
-                      "1985-04-12T23:20:50.53Z"));
-    EXPECT_TRUE(Match(Clause::Op::kAfter, "1985-04-12T23:20:50.53Z",
-                      "1985-04-12T23:20:50.52Z"));
-    EXPECT_TRUE(Match(Clause::Op::kBefore, "1985-04-12T23:20:50.52Z",
-                      "2023-04-12T23:20:50.52Z"));
-    EXPECT_TRUE(Match(Clause::Op::kAfter, "2023-04-12T23:20:50.52Z",
-                      "1985-04-12T23:20:50.52Z"));
-}
-TEST(OpTests, AcceptsZuluTimezone) {
-    EXPECT_TRUE(Match(Clause::Op::kBefore, "1985-04-12T23:20:50Z",
-                      "1985-04-12T23:20:51Z"));
+// Because RFC3339 timestamps may use 'Z' to indicate a 00:00 offset,
+// we should ensure these timestamps can be compared to timestamps using normal
+// offsets.
+TEST(OpTests, AcceptsZuluAndNormalTimezoneOffsets) {
+    const std::string kDate1 = "1985-04-12T23:20:50Z";
+    const std::string kDate2 = "1986-04-12T23:20:50-01:00";
+
+    EXPECT_TRUE(Match(Clause::Op::kBefore, kDate1, kDate2));
+    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2));
+
+    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1));
+    EXPECT_TRUE(Match(Clause::Op::kAfter, kDate2, kDate1));
 }
 
 TEST(OpTests, InvalidDates) {
@@ -116,9 +129,6 @@ struct RegexTest {
     bool shouldMatch;
 };
 
-#define MATCH true
-#define NO_MATCH false
-
 class RegexTests : public ::testing::TestWithParam<RegexTest> {};
 
 TEST_P(RegexTests, Matches) {
@@ -131,6 +141,9 @@ TEST_P(RegexTests, Matches) {
         << ")";
 }
 
+#define MATCH true
+#define NO_MATCH false
+
 INSTANTIATE_TEST_SUITE_P(RegexComparisons,
                          RegexTests,
                          ::testing::ValuesIn({
@@ -142,7 +155,6 @@ INSTANTIATE_TEST_SUITE_P(RegexComparisons,
                              RegexTest{"hello world", "hello.*orl", MATCH},
                              RegexTest{"hello world", "l+", MATCH},
                              RegexTest{"hello world", "(world|planet)", MATCH},
-
                              RegexTest{"", ".", NO_MATCH},
                              RegexTest{"", R"(\)", NO_MATCH},
                              RegexTest{"hello world", "aloha", NO_MATCH},
@@ -167,15 +179,20 @@ TEST_P(SemVerTests, Matches) {
     auto const& param = GetParam();
 
     bool result = false;
+    bool swapped = false;
 
     if (param.op == SEMVER_EQUAL) {
         result = Match(Clause::Op::kSemVerEqual, param.lhs, param.rhs);
+        swapped = Match(Clause::Op::kSemVerEqual, param.rhs, param.lhs);
     } else if (param.op == SEMVER_NOT_EQUAL) {
         result = !Match(Clause::Op::kSemVerEqual, param.lhs, param.rhs);
+        swapped = !Match(Clause::Op::kSemVerEqual, param.rhs, param.lhs);
     } else if (param.op == SEMVER_GREATER) {
         result = Match(Clause::Op::kSemVerGreaterThan, param.lhs, param.rhs);
+        swapped = Match(Clause::Op::kSemVerLessThan, param.rhs, param.lhs);
     } else if (param.op == SEMVER_LESS) {
         result = Match(Clause::Op::kSemVerLessThan, param.lhs, param.rhs);
+        swapped = Match(Clause::Op::kSemVerGreaterThan, param.rhs, param.lhs);
     } else {
         FAIL() << "Invalid operator: " << param.op;
     }
@@ -183,6 +200,10 @@ TEST_P(SemVerTests, Matches) {
     EXPECT_EQ(result, param.shouldMatch)
         << param.lhs << " " << param.op << " " << param.rhs << " should be "
         << (param.shouldMatch ? "true" : "false");
+
+    EXPECT_EQ(result, swapped)
+        << "commutative property invalid for " << param.lhs << " " << param.op
+        << " " << param.rhs;
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -192,6 +213,8 @@ INSTANTIATE_TEST_SUITE_P(
         {SemVerTest{"2.0.0", "2.0.0", SEMVER_EQUAL, MATCH},
          SemVerTest{"2.0", "2.0.0", SEMVER_EQUAL, MATCH},
          SemVerTest{"2", "2.0.0", SEMVER_EQUAL, MATCH},
+         SemVerTest{"2", "2.0.0+123", SEMVER_EQUAL, MATCH},
+         SemVerTest{"2+456", "2.0.0+123", SEMVER_EQUAL, MATCH},
          SemVerTest{"2.0.0", "3.0.0", SEMVER_NOT_EQUAL, MATCH},
          SemVerTest{"2.0.0", "2.1.0", SEMVER_NOT_EQUAL, MATCH},
          SemVerTest{"2.0.0", "2.0.1", SEMVER_NOT_EQUAL, MATCH},
@@ -220,227 +243,5 @@ INSTANTIATE_TEST_SUITE_P(
 #undef SEMVER_EQUAL
 #undef SEMVER_GREATER
 #undef SEMVER_LESS
-
-struct ClauseTest {
-    Clause::Op op;
-    launchdarkly::Value contextValue;
-    launchdarkly::Value clauseValue;
-    bool expected;
-};
-
-class AllOperatorsTest : public ::testing::TestWithParam<ClauseTest> {
-   public:
-    const static std::string DATE_STR1;
-    const static std::string DATE_STR2;
-    const static int DATE_MS1;
-    const static int DATE_MS2;
-    const static std::string INVALID_DATE;
-};
-
-const std::string AllOperatorsTest::DATE_STR1 = "2017-12-06T00:00:00.000-07:00";
-const std::string AllOperatorsTest::DATE_STR2 = "2017-12-06T00:01:01.000-07:00";
-int const AllOperatorsTest::DATE_MS1 = 10000000;
-int const AllOperatorsTest::DATE_MS2 = 10000001;
-const std::string AllOperatorsTest::INVALID_DATE = "hey what's this?";
-
-TEST_P(AllOperatorsTest, Matches) {
-    using namespace launchdarkly::server_side::evaluation::detail;
-    using namespace launchdarkly;
-
-    auto const& param = GetParam();
-
-    std::vector<Value> clauseValues;
-
-    if (param.clauseValue.IsArray()) {
-        auto const& as_array = param.clauseValue.AsArray();
-        clauseValues = std::vector<Value>{as_array.begin(), as_array.end()};
-    } else {
-        clauseValues.push_back(param.clauseValue);
-    }
-
-    Clause clause{param.op, std::move(clauseValues), false, "user", "attr"};
-
-    auto context = launchdarkly::ContextBuilder()
-                       .Kind("user", "key")
-                       .Set("attr", param.contextValue)
-                       .Build();
-    ASSERT_TRUE(context.Valid());
-
-    EvaluationStack stack{20};
-    server_side::flag_manager::FlagStore store;
-
-    auto result = launchdarkly::server_side::evaluation::Match(clause, context,
-                                                               store, stack);
-    ASSERT_EQ(result, param.expected)
-        << context.Get("user", "attr") << " " << clause.op << " "
-        << clause.values << " should be " << param.expected;
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    NumericClauses,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, 99, 99, MATCH},
-        ClauseTest{Clause::Op::kIn, 99.0, 99, MATCH},
-        ClauseTest{Clause::Op::kIn, 99, 99.0, MATCH},
-        ClauseTest{Clause::Op::kIn, 99,
-                   std::vector<launchdarkly::Value>{99, 98, 97, 96}, MATCH},
-        ClauseTest{Clause::Op::kIn, 99.0001, 99.0001, MATCH},
-        ClauseTest{Clause::Op::kIn, 99.0001,
-                   std::vector<launchdarkly::Value>{99.0001, 98.0, 97.0, 96.0},
-                   MATCH},
-        ClauseTest{Clause::Op::kLessThan, 1, 1.99999, MATCH},
-        ClauseTest{Clause::Op::kLessThan, 1.99999, 1, NO_MATCH},
-        ClauseTest{Clause::Op::kLessThan, 1, 2, MATCH},
-        ClauseTest{Clause::Op::kLessThanOrEqual, 1, 1.0, MATCH},
-        ClauseTest{Clause::Op::kGreaterThan, 2, 1.99999, MATCH},
-        ClauseTest{Clause::Op::kGreaterThan, 1.99999, 2, NO_MATCH},
-        ClauseTest{Clause::Op::kGreaterThan, 2, 1, MATCH},
-        ClauseTest{Clause::Op::kGreaterThanOrEqual, 1, 1.0, MATCH},
-
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    StringClauses,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, "x", "x", MATCH},
-        ClauseTest{Clause::Op::kIn, "x",
-                   std::vector<launchdarkly::Value>{"x", "a", "b", "c"}, MATCH},
-        ClauseTest{Clause::Op::kIn, "x", "xyz", NO_MATCH},
-        ClauseTest{Clause::Op::kStartsWith, "xyz", "x", MATCH},
-        ClauseTest{Clause::Op::kStartsWith, "x", "xyz", NO_MATCH},
-        ClauseTest{Clause::Op::kEndsWith, "xyz", "z", MATCH},
-        ClauseTest{Clause::Op::kEndsWith, "z", "xyz", NO_MATCH},
-        ClauseTest{Clause::Op::kContains, "xyz", "y", MATCH},
-        ClauseTest{Clause::Op::kContains, "y", "xyz", NO_MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    MixedStringAndNumbers,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kIn, 99, "99", NO_MATCH},
-        ClauseTest{Clause::Op::kContains, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kStartsWith, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kEndsWith, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kLessThanOrEqual, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kLessThanOrEqual, 99, "99", NO_MATCH},
-        ClauseTest{Clause::Op::kGreaterThanOrEqual, "99", 99, NO_MATCH},
-        ClauseTest{Clause::Op::kGreaterThanOrEqual, 99, "99", NO_MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    BooleanEquality,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, true, true, MATCH},
-        ClauseTest{Clause::Op::kIn, false, false, MATCH},
-        ClauseTest{Clause::Op::kIn, true, false, NO_MATCH},
-        ClauseTest{Clause::Op::kIn, false, true, NO_MATCH},
-        ClauseTest{Clause::Op::kIn, true,
-                   std::vector<launchdarkly::Value>{false, true}, MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    ArrayEquality,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, {{"x"}}, {{"x"}}, MATCH},
-        ClauseTest{Clause::Op::kIn, {{"x"}}, {"x"}, NO_MATCH},
-        ClauseTest{Clause::Op::kIn, {{"x"}}, {{"x"}, {"a"}, {"b"}}, MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    ObjectEquality,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kIn, Value::Object({{"x", "1"}}),
-                   Value::Object({{"x", "1"}}), MATCH},
-        ClauseTest{Clause::Op::kIn, Value::Object({{"x", "1"}}),
-                   std::vector<launchdarkly::Value>{
-                       Value::Object({{"x", "1"}}),
-                       Value::Object({{"a", "2"}}),
-                       Value::Object({{"b", "3"}}),
-                   },
-                   MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    RegexMatch,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kMatches, "hello world", "hello.*rld", MATCH},
-        ClauseTest{Clause::Op::kMatches, "hello world", "hello.*orl", MATCH},
-        ClauseTest{Clause::Op::kMatches, "hello world", "l+", MATCH},
-        ClauseTest{Clause::Op::kMatches, "hello world", "(world|planet)",
-                   MATCH},
-        ClauseTest{Clause::Op::kMatches, "hello world", "aloha", NO_MATCH},
-        ClauseTest{Clause::Op::kMatches, "hello world", "***bad regex",
-                   NO_MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    DateClauses,
-    AllOperatorsTest,
-    ::testing::ValuesIn({
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::DATE_STR2, MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_MS1,
-                   AllOperatorsTest::DATE_MS2, MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_STR2,
-                   AllOperatorsTest::DATE_STR1, NO_MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_MS2,
-                   AllOperatorsTest::DATE_MS1, NO_MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::DATE_STR1, NO_MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_MS1,
-                   AllOperatorsTest::DATE_MS1, NO_MATCH},
-        ClauseTest{Clause::Op::kBefore, Value::Null(),
-                   AllOperatorsTest::DATE_STR1, NO_MATCH},
-        ClauseTest{Clause::Op::kBefore, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::INVALID_DATE, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_STR2,
-                   AllOperatorsTest::DATE_STR1, MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_MS2,
-                   AllOperatorsTest::DATE_MS1, MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::DATE_STR2, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_MS1,
-                   AllOperatorsTest::DATE_MS2, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::DATE_STR1, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_MS1,
-                   AllOperatorsTest::DATE_MS1, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, Value::Null(),
-                   AllOperatorsTest::DATE_STR1, NO_MATCH},
-        ClauseTest{Clause::Op::kAfter, AllOperatorsTest::DATE_STR1,
-                   AllOperatorsTest::INVALID_DATE, NO_MATCH},
-    }));
-
-INSTANTIATE_TEST_SUITE_P(
-    SemVerTests,
-    AllOperatorsTest,
-    ::testing::ValuesIn(
-        {ClauseTest{Clause::Op::kSemVerEqual, "2.0.0", "2.0.0", MATCH},
-         ClauseTest{Clause::Op::kSemVerEqual, "2.0", "2.0.0", MATCH},
-         ClauseTest{Clause::Op::kSemVerEqual, "2-rc1", "2.0.0-rc1", MATCH},
-         ClauseTest{Clause::Op::kSemVerEqual, "2+build2", "2.0.0+build2",
-                    MATCH},
-         ClauseTest{Clause::Op::kSemVerEqual, "2.0.0", "2.0.1", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0.0", "2.0.1", MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0", "2.0.1", MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0.1", "2.0.0", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0.1", "2.0", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0.1", "xbad%ver", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerLessThan, "2.0.0-rc", "2.0.0-rc.beta",
-                    MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "2.0.1", "2.0", MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "10.0.1", "2.0", MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "2.0.0", "2.0.1", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "2.0", "2.0.1", NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "2.0.1", "xbad%ver",
-                    NO_MATCH},
-         ClauseTest{Clause::Op::kSemVerGreaterThan, "2.0.0-rc.1", "2.0.0-rc.0",
-                    MATCH}}));
+#undef MATCH
+#undef NO_MATCH
