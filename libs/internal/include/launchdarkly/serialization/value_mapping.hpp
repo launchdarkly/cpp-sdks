@@ -3,8 +3,8 @@
 #include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 
-#include <boost/json.hpp>
 #include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 #include <tl/expected.hpp>
 
 // Parses a field, propagating an error if the field's value is of the wrong
