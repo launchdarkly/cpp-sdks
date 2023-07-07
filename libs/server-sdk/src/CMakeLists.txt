@@ -10,6 +10,7 @@ add_library(${LIBNAME}
         boost.cpp
         evaluation/detail/evaluation_stack.cpp
         evaluation/evaluator.cpp
+        evaluation/rules.cpp
         evaluation/bucketing.cpp
         evaluation/operators.cpp
         evaluation/detail/timestamp_operations.cpp

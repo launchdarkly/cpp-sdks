@@ -273,14 +273,26 @@ bool operator<(Value const& lhs, Value const& rhs) {
 }
 
 bool operator>(Value const& lhs, Value const& rhs) {
+    if (!(lhs.Type() == Value::Type::kNumber &&
+          rhs.Type() == Value::Type::kNumber)) {
+        return false;
+    }
     return rhs < lhs;
 }
 
 bool operator<=(Value const& lhs, Value const& rhs) {
+    if (!(lhs.Type() == Value::Type::kNumber &&
+          rhs.Type() == Value::Type::kNumber)) {
+        return false;
+    }
     return !(lhs > rhs);
 }
 
 bool operator>=(Value const& lhs, Value const& rhs) {
+    if (!(lhs.Type() == Value::Type::kNumber &&
+          rhs.Type() == Value::Type::kNumber)) {
+        return false;
+    }
     return !(lhs < rhs);
 }
 }  // namespace launchdarkly

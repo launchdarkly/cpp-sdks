@@ -20,29 +20,6 @@ class Evaluator {
         launchdarkly::Context const& context);
 
    private:
-    [[nodiscard]] bool Match(data_model::Flag::Rule const&,
-                             Context const&) const;
-
-    [[nodiscard]] tl::expected<bool, Error> Match(data_model::Clause const&,
-                                                  Context const&) const;
-
-    [[nodiscard]] tl::expected<bool, Error> Match(
-        data_model::Segment::Rule const& rule,
-        Context const& context,
-        std::string const& key,
-        std::string const& salt) const;
-
-    [[nodiscard]] tl::expected<bool, Error> MatchSegment(
-        data_model::Clause const&,
-        Context const&) const;
-
-    [[nodiscard]] tl::expected<bool, Error> MatchNonSegment(
-        data_model::Clause const&,
-        Context const&) const;
-
-    [[nodiscard]] tl::expected<bool, Error> Contains(data_model::Segment const&,
-                                                     Context const&) const;
-
     Logger& logger_;
     flag_manager::FlagStore const& store_;
     mutable detail::EvaluationStack stack_;
