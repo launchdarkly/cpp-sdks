@@ -31,18 +31,18 @@ std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp) {
         return std::nullopt;
     }
     if (timestamp.back() == 'Z') {
-        return ParseTimestamp(timestamp, "%FT%H:%M:%9SZ");
+        return ParseTimestamp(timestamp, "%FT%H:%M:%12SZ");
     }
-    return ParseTimestamp(timestamp, "%FT%H:%M:%9S%Ez");
+    return ParseTimestamp(timestamp, "%FT%H:%M:%12S%z");
 }
 
 std::optional<Timepoint> ParseTimestamp(std::string const& date,
                                         std::string const& format) {
     using namespace date;
-    std::istringstream infile{date};
+    std::istringstream iss{date};
     Timepoint tp;
-    infile >> date::parse(format, tp);
-    if (infile.rdstate() == std::ios_base::failbit) {
+    iss >> date::parse(format, tp);
+    if (iss.fail()) {
         return std::nullopt;
     }
     return tp;

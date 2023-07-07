@@ -57,38 +57,64 @@ TEST(OpTests, NumericComparisons) {
 // (nanoseconds.) This test attempts to verify that microsecond precision
 // differences are handled.
 TEST(OpTests, DateComparisonMicrosecondPrecision) {
-    const std::string kDate1 = "2023-10-08T02:00:00.000001Z";
-    const std::string kDate2 = "2023-10-08T02:00:00.000002Z";
+    auto dates = std::vector<std::pair<std::string, std::string>>{
+        // Using Zulu suffix.
+        {"2023-10-08T02:00:00.000001Z", "2023-10-08T02:00:00.000002Z"},
+        // Using offset suffix.
+        {"2023-10-08T02:00:00.000001+00:00",
+         "2023-10-08T02:00:00.000002+00:00"}};
 
-    EXPECT_TRUE(Match(Clause::Op::kBefore, kDate1, kDate2))
-        << kDate1 << " < " << kDate2;
+    for (auto const& [date1, date2] : dates) {
+        EXPECT_TRUE(Match(Clause::Op::kBefore, date1, date2))
+            << date1 << " < " << date2;
 
-    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
-        << kDate1 << " not > " << kDate2;
+        EXPECT_FALSE(Match(Clause::Op::kAfter, date1, date2))
+            << date1 << " not > " << date2;
 
-    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
-        << kDate2 << " not < " << kDate1;
+        EXPECT_FALSE(Match(Clause::Op::kBefore, date2, date1))
+            << date2 << " not < " << date1;
 
-    EXPECT_TRUE(Match(Clause::Op::kAfter, kDate2, kDate1))
-        << kDate2 << " > " << kDate1;
+        EXPECT_TRUE(Match(Clause::Op::kAfter, date2, date1))
+            << date2 << " > " << date1;
+    }
 }
 
 // Comparison should be effectively "equal" for all combinations.
 TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
-    const std::string kDate1 = "2023-10-08T02:00:00.000001Z";
-    const std::string kDate2 = "2023-10-08T02:00:00.0000011Z";
+    auto dates = std::vector<std::pair<std::string, std::string>>{
+        // Using Zulu suffix.
+        {"2023-10-08T02:00:00.000001Z", "2023-10-08T02:00:00.0000011Z"},
+        // Using offset suffix.
+        {"2023-10-08T02:00:00.0000000001+00:00",
+         "2023-10-08T02:00:00.00000000011+00:00"}};
 
-    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate1, kDate2))
-        << kDate1 << " < " << kDate2;
+    //
+    //    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate1, kDate2))
+    //        << kDate1 << " < " << kDate2;
+    //
+    //    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
+    //        << kDate1 << " not > " << kDate2;
+    //
+    //    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
+    //        << kDate2 << " not < " << kDate1;
+    //
+    //    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate2, kDate1))
+    //        << kDate2 << " > " << kDate1;
 
-    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
-        << kDate1 << " not > " << kDate2;
+    for (auto const& [date1, date2] : dates) {
+        EXPECT_FALSE(Match(Clause::Op::kBefore, date1, date2))
+            << date1 << " < " << date2;
 
-    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
-        << kDate2 << " not < " << kDate1;
+        EXPECT_FALSE(Match(Clause::Op::kAfter, date1, date2))
+            << date1 << " not > " << date2;
 
-    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate2, kDate1))
-        << kDate2 << " > " << kDate1;
+        EXPECT_FALSE(Match(Clause::Op::kBefore, date2, date1))
+            << date2 << " not < " << date1;
+
+        EXPECT_FALSE(Match(Clause::Op::kAfter, date2, date1))
+            << date2 << " > " << date1;
+    }
+    // Somehow date parsing is succeeding when we have the offset.
 }
 
 // Because RFC3339 timestamps may use 'Z' to indicate a 00:00 offset,
