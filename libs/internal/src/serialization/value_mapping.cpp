@@ -1,5 +1,7 @@
 #include <launchdarkly/serialization/value_mapping.hpp>
 
+#include <vector>
+
 namespace launchdarkly {
 
 template <>
