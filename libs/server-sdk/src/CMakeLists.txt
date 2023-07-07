@@ -10,7 +10,7 @@ add_library(${LIBNAME}
         data_source/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/data_store_updater.hpp
-        )
+        data_store/data_store_updater.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
