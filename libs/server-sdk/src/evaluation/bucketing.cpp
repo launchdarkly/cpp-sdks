@@ -80,9 +80,13 @@ std::optional<float> ComputeBucket(Value const& value,
     input.push_back('.');
     input.append(*id);
 
-    auto sha1hash = launchdarkly::encoding::Sha1String(input);
-    auto sha1hash_hexed = launchdarkly::encoding::Base16Encode(sha1hash);
-    std::string_view sha1hash_hexed_first_15 = {sha1hash_hexed.data(), 15};
+    std::array<unsigned char, SHA_DIGEST_LENGTH> const sha1hash =
+        launchdarkly::encoding::Sha1String(input);
+
+    std::string const sha1hash_hexed =
+        launchdarkly::encoding::Base16Encode(sha1hash);
+
+    std::string const sha1hash_hexed_first_15 = sha1hash_hexed.substr(0, 15);
 
     try {
         unsigned long long as_number =

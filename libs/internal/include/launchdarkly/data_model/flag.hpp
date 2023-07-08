@@ -28,6 +28,9 @@ struct Flag {
             std::uint64_t variation;
             std::uint64_t weight;
             bool untracked;
+
+            WeightedVariation() = default;
+            WeightedVariation(std::uint64_t variation, std::uint64_t weight);
         };
 
         std::vector<WeightedVariation> variations;
@@ -37,6 +40,9 @@ struct Flag {
 
         DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
         DEFINE_CONTEXT_KIND_FIELD(contextKind)
+
+        Rollout() = default;
+        Rollout(std::vector<WeightedVariation>);
     };
 
     using Variation = std::uint64_t;

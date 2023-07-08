@@ -7,8 +7,11 @@
 #include <launchdarkly/value.hpp>
 
 #include "../flag_manager/flag_store.hpp"
+#include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
+
+#include <tl/expected.hpp>
 
 namespace launchdarkly::server_side::evaluation {
 
@@ -24,5 +27,11 @@ class Evaluator {
     flag_manager::FlagStore const& store_;
     mutable detail::EvaluationStack stack_;
 };
+
+tl::expected<BucketResult, Error> Variation(
+    data_model::Flag::VariationOrRollout const& vr,
+    std::string const& flag_key,
+    launchdarkly::Context const& context,
+    std::string const& salt);
 
 }  // namespace launchdarkly::server_side::evaluation

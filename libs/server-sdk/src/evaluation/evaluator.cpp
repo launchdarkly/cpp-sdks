@@ -1,9 +1,5 @@
 #include "evaluator.hpp"
-#include "bucketing.hpp"
-#include "operators.hpp"
 #include "rules.hpp"
-
-#include <launchdarkly/data/evaluation_reason.hpp>
 
 #include <tl/expected.hpp>
 
@@ -18,12 +14,6 @@ EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
 
 EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
                                  EvaluationReason reason);
-
-tl::expected<std::optional<BucketResult>, Error> Variation(
-    data_model::Flag::VariationOrRollout const& vr,
-    std::string const& flag_key,
-    Context const& context,
-    std::string const& salt);
 
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
 ResolveVariationOrRollout(data_model::Flag const& flag,
@@ -232,13 +222,13 @@ std::optional<std::size_t> TargetMatchVariation(
     return std::nullopt;
 }
 
-tl::expected<std::optional<BucketResult>, Error> Variation(
+tl::expected<BucketResult, Error> Variation(
     data_model::Flag::VariationOrRollout const& vr,
     std::string const& flag_key,
     Context const& context,
     std::string const& salt) {
     return std::visit(
-        [&](auto&& arg) -> tl::expected<std::optional<BucketResult>, Error> {
+        [&](auto&& arg) -> tl::expected<BucketResult, Error> {
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, data_model::Flag::Variation>) {
                 return BucketResult(arg, false);
@@ -292,17 +282,13 @@ ResolveVariationOrRollout(data_model::Flag const& flag,
         return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
     }
 
-    const tl::expected<std::optional<BucketResult>, Error> result =
+    const tl::expected<BucketResult, Error> result =
         Variation(vr, flag.key, context, *flag.salt);
 
     if (!result) {
         return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
     }
-    auto const& bucket = result.value();
-    if (!bucket) {
-        return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
-    }
-    return *bucket;
+    return *result;
 }
 
 }  // namespace launchdarkly::server_side::evaluation

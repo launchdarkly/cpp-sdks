@@ -1,8 +1,10 @@
 #pragma once
 
+#include <ostream>
+
 namespace launchdarkly::server_side::evaluation {
 
-enum Error {
+enum class Error {
     kCyclicReference,
     kBigSegmentEncountered,
     kInvalidAttributeReference,
@@ -10,4 +12,6 @@ enum Error {
     kUnknownOperator,
 };
 
-}
+std::ostream& operator<<(std::ostream& out, Error const& arr);
+
+}  // namespace launchdarkly::server_side::evaluation
