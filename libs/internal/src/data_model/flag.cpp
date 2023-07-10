@@ -4,7 +4,18 @@ namespace launchdarkly::data_model {
 
 Flag::Rollout::WeightedVariation::WeightedVariation(std::uint64_t variation_,
                                                     std::uint64_t weight_)
-    : variation(variation_), weight(weight_), untracked(false) {}
+    : WeightedVariation(variation_, weight_, false) {}
+
+Flag::Rollout::WeightedVariation::WeightedVariation(std::uint64_t variation_,
+                                                    std::uint64_t weight_,
+                                                    bool untracked_)
+    : variation(variation_), weight(weight_), untracked(untracked_) {}
+
+Flag::Rollout::WeightedVariation Flag::Rollout::WeightedVariation::Untracked(
+    Flag::Variation variation_,
+    std::uint64_t weight_) {
+    return Flag::Rollout::WeightedVariation(variation_, weight_, true);
+}
 
 Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)
     : variations(std::move(variations_)),
