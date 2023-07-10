@@ -26,6 +26,11 @@ class DataStoreUpdater
     void Upsert(std::string key, SegmentDescriptor segment) override;
     ~DataStoreUpdater() override = default;
 
+    DataStoreUpdater(DataStoreUpdater const& item) = delete;
+    DataStoreUpdater(DataStoreUpdater&& item) = delete;
+    DataStoreUpdater& operator=(DataStoreUpdater const&) = delete;
+    DataStoreUpdater& operator=(DataStoreUpdater&&) = delete;
+
    private:
     bool HasListeners() const;
 

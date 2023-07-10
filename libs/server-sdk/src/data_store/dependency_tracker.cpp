@@ -22,8 +22,8 @@ bool DependencySet::Contains(DataKind kind, std::string const& key) {
 
 std::size_t DependencySet::Size() {
     std::size_t size = 0;
-    for (auto dk : data_) {
-        size += dk.Data().size();
+    for (auto data_kind : data_) {
+        size += data_kind.Data().size();
     }
     return size;
 }
@@ -66,8 +66,8 @@ std::optional<DependencySet> DependencyMap::Get(DataKind kind,
 }
 
 void DependencyMap::Clear() {
-    for (auto& ns : data_) {
-        ns.Data().clear();
+    for (auto& data_kind : data_) {
+        data_kind.Data().clear();
     }
 }
 
