@@ -236,3 +236,47 @@ TEST(MemoryStoreTest, CanUpsertExitingSegment) {
     EXPECT_EQ(2, fetched_segment->item->version);
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
+
+TEST(MemoryStoreTest, OriginalFlagValidAfterUpsertOfFlag) {
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
+    flag_a.variations = std::vector<Value>{"potato", "ham"};
+
+    MemoryStore store;
+    store.Init(SDKDataSet{
+        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
+            {"flagA", IDataStore::FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+    });
+    auto fetched_flag_before = store.GetFlag("flagA");
+
+    Flag flag_a_2;
+    flag_a_2.version = 2;
+    flag_a_2.key = "flagA";
+    flag_a_2.variations = std::vector<Value>{"potato"};
+
+    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a_2));
+
+    auto fetched_flag_after = store.GetFlag("flagA");
+
+    EXPECT_TRUE(fetched_flag_before);
+    EXPECT_TRUE(fetched_flag_before->item);
+    EXPECT_EQ("flagA", fetched_flag_before->item->key);
+    EXPECT_EQ(1, fetched_flag_before->item->version);
+    EXPECT_EQ(fetched_flag_before->version, fetched_flag_before->item->version);
+    EXPECT_EQ(2, fetched_flag_before->item->variations.size());
+    EXPECT_EQ(std::string("potato"),
+              fetched_flag_before->item->variations[0].AsString());
+    EXPECT_EQ(std::string("ham"),
+              fetched_flag_before->item->variations[1].AsString());
+
+    EXPECT_TRUE(fetched_flag_after);
+    EXPECT_TRUE(fetched_flag_after->item);
+    EXPECT_EQ("flagA", fetched_flag_after->item->key);
+    EXPECT_EQ(2, fetched_flag_after->item->version);
+    EXPECT_EQ(fetched_flag_after->version, fetched_flag_after->item->version);
+    EXPECT_EQ(1, fetched_flag_after->item->variations.size());
+    EXPECT_EQ(std::string("potato"),
+              fetched_flag_after->item->variations[0].AsString());
+}
