@@ -12,10 +12,16 @@
 
 namespace launchdarkly::server_side::data_store {
 
+/**
+ * Class which can be used to tag a collection with the DataKind that collection
+ * is for. This is primarily to decrease the complexity of iterating collections
+ * allowing for a kvp style iteration, but with an array storage container.
+ * @tparam Storage
+ */
 template <typename Storage>
 class TaggedData {
    public:
-    TaggedData(DataKind kind) : kind_(kind) {}
+    explicit TaggedData(DataKind kind) : kind_(kind) {}
     [[nodiscard]] DataKind Kind() const { return kind_; }
     [[nodiscard]] Storage& Data() { return storage_; }
 
@@ -24,178 +30,128 @@ class TaggedData {
     Storage storage_;
 };
 
-template <typename Storage>
-class ScopedSet {
+/**
+ * Class used to maintain a set of dependencies. Each dependency may be either
+ * a flag or segment.
+ * For instance, if we have a flagA, which has a prerequisite of flagB, and
+ * a segmentMatch targeting segmentA, then its dependency set would be
+ * ```
+ * [{DataKind::kFlag, "flagB"}, {DataKind::kSegment, "segmentA"}]
+ * ```
+ */
+class DependencySet {
    public:
-    ScopedSet()
-        : data_{
-              TaggedData<std::set<Storage>>(DataKind::kFlag),
-              TaggedData<std::set<Storage>>(DataKind::kSegment),
-          } {}
-    using DataType = std::array<TaggedData<std::set<Storage>>,
+    DependencySet();
+    using DataType = std::array<TaggedData<std::set<std::string>>,
                                 static_cast<std::size_t>(DataKind::kKindCount)>;
-    void Set(DataKind kind, std::string key) {
-        data_[static_cast<std::size_t>(kind)].Data().emplace(std::move(key));
-    }
+    void Set(DataKind kind, std::string key);
 
-    void Remove(DataKind kind, std::string key) {
-        data_[static_cast<std::size_t>(kind)].Data().erase(key);
-    }
+    void Remove(DataKind kind, std::string const& key);
 
-    [[nodiscard]] bool Contains(DataKind kind, std::string key) {
-        return data_[static_cast<std::size_t>(kind)].Data().count(key) != 0;
-    }
+    [[nodiscard]] bool Contains(DataKind kind, const std::string& key);
 
     /**
      * Return the size of all the data kind sets.
      * @return The combined size of all the data kind sets.
      */
-    [[nodiscard]] std::size_t Size() {
-        std::size_t size = 0;
-        for(auto dk: data_) {
-            size += dk.Data().size();
-        }
-        return size;
-    }
+    [[nodiscard]] std::size_t Size();
 
-    [[nodiscard]] typename DataType::iterator begin() { return data_.begin(); }
+    [[nodiscard]] typename DataType::iterator begin();
 
-    [[nodiscard]] typename DataType::iterator end() { return data_.end(); }
+    [[nodiscard]] typename DataType::iterator end();
 
    private:
     DataType data_;
 };
 
-template <typename Storage>
-class ScopedMap {
+/**
+ * Class used to map flag/segments to their set of dependencies.
+ * For instance, if we have a flagA, which has a prerequisite of flagB, and
+ * a segmentMatch targeting segmentA, then a dependency map, containing
+ * this set, would be:
+ * ```
+ * {{DataKind::kFlag, "flagA"}, [{DataKind::kFlag, "flagB"},
+ *  {DataKind::kSegment, "segmentA"}]}
+ * ```
+ */
+class DependencyMap {
    public:
-    ScopedMap()
-        : data_{
-              TaggedData<std::unordered_map<std::string, Storage>>(
-                  DataKind::kFlag),
-              TaggedData<std::unordered_map<std::string, Storage>>(
-                  DataKind::kSegment),
-          } {}
+    DependencyMap();
     using DataType =
-        std::array<TaggedData<std::unordered_map<std::string, Storage>>,
+        std::array<TaggedData<std::unordered_map<std::string, DependencySet>>,
                    static_cast<std::size_t>(DataKind::kKindCount)>;
-    void Set(DataKind kind, std::string key, Storage val) {
-        data_[static_cast<std::size_t>(kind)].Data().emplace(std::move(key),
-                                                             std::move(val));
-    }
+    void Set(DataKind kind, std::string key, DependencySet val);
 
-    [[nodiscard]] std::optional<Storage> Get(DataKind kind, std::string key) {
-        auto scope = data_[static_cast<std::size_t>(kind)].Data();
-        auto found = scope.find(key);
-        if (found != scope.end()) {
-            return found->second;
-        }
-        return std::nullopt;
-    }
+    [[nodiscard]] std::optional<DependencySet> Get(DataKind kind,
+                                                   const std::string& key);
 
-    void Clear() {
-        for (auto& ns : data_) {
-            ns.Data().clear();
-        }
-    }
+    void Clear();
 
-    [[nodiscard]] typename DataType::iterator begin() { return data_.begin(); }
+    [[nodiscard]] typename DataType::iterator begin();
 
-    [[nodiscard]] typename DataType::iterator end() { return data_.end(); }
+    [[nodiscard]] typename DataType::iterator end();
 
    private:
     DataType data_;
 };
 
+/**
+ * This class implements a mechanism of tracking dependencies of flags and
+ * segments. Both the forward dependencies (flag A depends on flag B) but also
+ * the reverse (flag B is depended on by flagA).
+ */
 class DependencyTracker {
    public:
     using FlagDescriptor = data_model::ItemDescriptor<data_model::Flag>;
     using SegmentDescriptor = data_model::ItemDescriptor<data_model::Segment>;
 
-    void updateDependencies(std::string key, FlagDescriptor const& flag) {
-        ScopedSet<std::string> dependencies;
-        if (flag.item) {
-            for (auto const& prereq : flag.item->prerequisites) {
-                dependencies.Set(DataKind::kFlag, prereq.key);
-            }
+    /**
+     * Update the dependency tracker with a new or updated flag.
+     *
+     * @param key The key for the flag.
+     * @param flag A descriptor for the flag.
+     */
+    void UpdateDependencies(const std::string& key, FlagDescriptor const& flag);
 
-            for (auto const& rule : flag.item->rules) {
-                auto clauses = rule.clauses;
-                CalculateClauseDeps(dependencies, clauses);
-            }
-        }
-        updateDependencies(DataKind::kFlag, key, dependencies);
-    }
-    void updateDependencies(std::string key, SegmentDescriptor segment) {
-        ScopedSet<std::string> dependencies;
-        if (segment.item) {
-            for (auto const& rule : segment.item->rules) {
-                auto clauses = rule.clauses;
-                CalculateClauseDeps(dependencies, clauses);
-            }
-        }
-        updateDependencies(DataKind::kSegment, key, dependencies);
-    }
+    /**
+     * Update the dependency tracker with a new or updated segment.
+     *
+     * @param key The key for the segment.
+     * @param flag A descriptor for the segment.
+     */
+    void UpdateDependencies(const std::string& key, SegmentDescriptor const& segment);
 
-    void calculateChanges(DataKind kind, std::string key, ScopedSet<std::string>& dependencySet) {
-        if(!dependencySet.Contains(kind, key)) {
-            dependencySet.Set(kind, key);
-            auto affectedItems = dependenciesTo.Get(kind, key);
-            if(affectedItems) {
-                for (auto& depNs : *affectedItems) {
-                    for(auto& dep: depNs.Data()) {
-                        calculateChanges(depNs.Kind(), dep, dependencySet);
-                    }
-                }
-            }
-        }
-    }
+    /**
+     * Given the current dependencies, determine what flags or segments may be
+     * impacted by a change to the given flag/segment.
+     *
+     * @param kind The kind of data.
+     * @param key The key for the data.
+     * @param dependencySet A dependency set, which dependencies are
+     * accumulated in.
+     */
+    void CalculateChanges(DataKind kind,
+                          std::string const& key,
+                          DependencySet& dependencySet);
 
    private:
-    void updateDependencies(DataKind kind,
-                            std::string key,
-                            ScopedSet<std::string> deps) {
-        auto currentDeps = dependenciesFrom.Get(kind, key);
-        if (currentDeps) {
-            for (auto& depNs : *currentDeps) {
-                auto depKind = depNs.Kind();
-                for (auto& dep : depNs.Data()) {
-                    auto depsToThisDep = dependenciesTo.Get(depKind, dep);
-                    if (depsToThisDep) {
-                        depsToThisDep->Remove(depKind, key);
-                    }
-                }
-            }
-        }
+    /**
+     * Common logic for dependency updates used for both flags and segments.
+     */
+    void UpdateDependencies(DataKind kind,
+                            std::string const& key,
+                            DependencySet deps);
 
-        dependenciesFrom.Set(kind, key, deps);
-        for (auto& depNs : deps) {
-            for (auto& dep : depNs.Data()) {
-                auto depsToThisDep = dependenciesTo.Get(depNs.Kind(), dep);
-                if (!depsToThisDep) {
-                    auto newDepsToThisDep = ScopedSet<std::string>();
-                    newDepsToThisDep.Set(kind, key);
-                    dependenciesTo.Set(depNs.Kind(), dep, newDepsToThisDep);
-                } else {
-                    depsToThisDep->Set(kind, key);
-                }
-            }
-        }
-    }
+    DependencyMap dependenciesFrom_;
+    DependencyMap dependenciesTo_;
 
-    ScopedMap<ScopedSet<std::string>> dependenciesFrom;
-    ScopedMap<ScopedSet<std::string>> dependenciesTo;
-
-    void CalculateClauseDeps(ScopedSet<std::string>& dependencies,
-                             std::vector<data_model::Clause>& clauses) const {
-        for (auto const& clause : clauses) {
-            if (clause.op == data_model::Clause::Op::kSegmentMatch) {
-                for (auto const& value : clause.values) {
-                    dependencies.Set(DataKind::kSegment, value.AsString());
-                }
-            }
-        }
-    }
+    /**
+     * Determine dependencies for a set of clauses.
+     * @param dependencies A set of dependencies to extend.
+     * @param clauses The clauses to determine dependencies for.
+     */
+    static void CalculateClauseDeps(DependencySet& dependencies,
+                                    std::vector<data_model::Clause>& clauses);
 };
 
 }  // namespace launchdarkly::server_side::data_store

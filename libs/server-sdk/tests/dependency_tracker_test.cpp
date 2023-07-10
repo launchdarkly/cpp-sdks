@@ -2,8 +2,9 @@
 
 #include "data_store/dependency_tracker.hpp"
 
-using launchdarkly::server_side::data_store::ScopedSet;
-using launchdarkly::server_side::data_store::ScopedMap;
+using launchdarkly::server_side::data_store::DataKind;
+using launchdarkly::server_side::data_store::DependencyMap;
+using launchdarkly::server_side::data_store::DependencySet;
 using launchdarkly::server_side::data_store::DataKind;
 using launchdarkly::server_side::data_store::DependencyTracker;
 
@@ -15,12 +16,12 @@ using launchdarkly::Value;
 using launchdarkly::AttributeReference;
 
 TEST(ScopedSetTest, CanAddItem) {
-    ScopedSet<std::string> set;
+    DependencySet set;
     set.Set(DataKind::kFlag, "flagA");
 }
 
 TEST(ScopedSetTest, CanCheckIfContains) {
-    ScopedSet<std::string> set;
+    DependencySet set;
     set.Set(DataKind::kFlag, "flagA");
 
     EXPECT_TRUE(set.Contains(DataKind::kFlag, "flagA"));
@@ -29,14 +30,14 @@ TEST(ScopedSetTest, CanCheckIfContains) {
 }
 
 TEST(ScopedSetTest, CanRemoveItem) {
-    ScopedSet<std::string> set;
+    DependencySet set;
     set.Set(DataKind::kFlag, "flagA");
     set.Remove(DataKind::kFlag, "flagA");
     EXPECT_FALSE(set.Contains(DataKind::kFlag, "flagA"));
 }
 
 TEST(ScopedSetTest, CanIterate) {
-    ScopedSet<std::string> set;
+    DependencySet set;
     set.Set(DataKind::kFlag, "flagA");
     set.Set(DataKind::kFlag, "flagB");
     set.Set(DataKind::kSegment, "segmentA");
@@ -60,16 +61,16 @@ TEST(ScopedSetTest, CanIterate) {
 }
 
 TEST(ScopedMapTest, CanAddItem) {
-    ScopedMap<ScopedSet<std::string>> map;
-    ScopedSet<std::string> deps;
+    DependencyMap map;
+    DependencySet deps;
     deps.Set(DataKind::kSegment, "segmentA");
 
     map.Set(DataKind::kFlag, "flagA", deps);
 }
 
 TEST(ScopedMapTest, CanGetItem) {
-    ScopedMap<ScopedSet<std::string>> map;
-    ScopedSet<std::string> deps;
+    DependencyMap map;
+    DependencySet deps;
     deps.Set(DataKind::kSegment, "segmentA");
 
     map.Set(DataKind::kFlag, "flagA", deps);
@@ -78,13 +79,13 @@ TEST(ScopedMapTest, CanGetItem) {
 }
 
 TEST(ScopedMapTest, CanIterate) {
-    ScopedMap<ScopedSet<std::string>> map;
+    DependencyMap map;
 
-    ScopedSet<std::string> depFlags;
+    DependencySet depFlags;
     depFlags.Set(DataKind::kSegment, "segmentA");
     depFlags.Set(DataKind::kFlag, "flagB");
 
-    ScopedSet<std::string> depSegments;
+    DependencySet depSegments;
     depSegments.Set(DataKind::kSegment, "segmentB");
 
     map.Set(DataKind::kFlag, "flagA", depFlags);
@@ -115,13 +116,13 @@ TEST(ScopedMapTest, CanIterate) {
 }
 
 TEST(ScopedMapTest, CanClear) {
-    ScopedMap<ScopedSet<std::string>> map;
+    DependencyMap map;
 
-    ScopedSet<std::string> depFlags;
+    DependencySet depFlags;
     depFlags.Set(DataKind::kSegment, "segmentA");
     depFlags.Set(DataKind::kFlag, "flagB");
 
-    ScopedSet<std::string> depSegments;
+    DependencySet depSegments;
     depSegments.Set(DataKind::kSegment, "segmentB");
 
     map.Set(DataKind::kFlag, "flagA", depFlags);
@@ -157,12 +158,12 @@ TEST(DependencyTrackerTest, TreatsPrerequisitesAsDependencies) {
         0
     });
 
-    tracker.updateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.updateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.updateDependencies("flagC", ItemDescriptor<Flag>(flagC));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
+    tracker.UpdateDependencies("flagC", ItemDescriptor<Flag>(flagC));
 
-    ScopedSet<std::string> changes;
-    tracker.calculateChanges(DataKind::kFlag, "flagA", changes);
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kFlag, "flagA", changes);
 
     EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagB"));
     EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagA"));
@@ -203,14 +204,14 @@ TEST(DependencyTrackerTest, UsesSegmentRulesToCalculateDependencies) {
         }
     });
 
-    tracker.updateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.updateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
 
-    tracker.updateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.updateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
+    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
 
-    ScopedSet<std::string> changes;
-    tracker.calculateChanges(DataKind::kSegment, "segmentA", changes);
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
 
     EXPECT_TRUE(changes.Contains(DataKind::kFlag, "flagA"));
     EXPECT_TRUE(changes.Contains(DataKind::kSegment, "segmentA"));
@@ -250,12 +251,12 @@ TEST(DependencyTrackerTest, TracksSegmentDependencyOfPrerequisite) {
         0
     });
 
-    tracker.updateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.updateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.updateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
 
-    ScopedSet<std::string> changes;
-    tracker.calculateChanges(DataKind::kSegment, "segmentA", changes);
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
 
     // The segment itself was changed.
     EXPECT_TRUE(changes.Contains(DataKind::kSegment, "segmentA"));
@@ -298,12 +299,12 @@ TEST(DependencyTrackerTest, HandlesSegmentsDependentOnOtherSegments) {
         AttributeReference()
     });
 
-    tracker.updateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
-    tracker.updateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
-    tracker.updateDependencies("segmentC", ItemDescriptor<Segment>(segmentC));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
+    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
+    tracker.UpdateDependencies("segmentC", ItemDescriptor<Segment>(segmentC));
 
-    ScopedSet<std::string> changes;
-    tracker.calculateChanges(DataKind::kSegment, "segmentA", changes);
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
 
     EXPECT_TRUE(changes.Contains(DataKind::kSegment, "segmentB"));
     EXPECT_TRUE(changes.Contains(DataKind::kSegment, "segmentA"));
@@ -314,8 +315,8 @@ TEST(DependencyTrackerTest, HandlesUpdateForSomethingThatDoesNotExist) {
     // This shouldn't happen, but it should also not break.
     DependencyTracker tracker;
 
-    ScopedSet<std::string> changes;
-    tracker.calculateChanges(DataKind::kFlag, "potato", changes);
+    DependencySet changes;
+    tracker.CalculateChanges(DataKind::kFlag, "potato", changes);
 
     EXPECT_EQ(1, changes.Size());
     EXPECT_TRUE(changes.Contains(DataKind::kFlag, "potato"));
