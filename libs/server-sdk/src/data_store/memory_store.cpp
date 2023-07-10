@@ -8,7 +8,7 @@ std::shared_ptr<IDataStore::FlagDescriptor> MemoryStore::GetFlag(
     std::string key) const {
     std::lock_guard lock{data_mutex_};
     auto found = flags_.find(key);
-    if (found != flags_.end() && found->second->item) {
+    if (found != flags_.end()) {
         return found->second;
     }
     return nullptr;
@@ -18,7 +18,7 @@ std::shared_ptr<IDataStore::SegmentDescriptor> MemoryStore::GetSegment(
     std::string key) const {
     std::lock_guard lock{data_mutex_};
     auto found = segments_.find(key);
-    if (found != segments_.end() && found->second->item) {
+    if (found != segments_.end()) {
         return found->second;
     }
     return nullptr;

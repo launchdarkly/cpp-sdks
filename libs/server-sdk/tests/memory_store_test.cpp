@@ -2,13 +2,13 @@
 
 #include "data_store/memory_store.hpp"
 
-using launchdarkly::server_side::data_store::MemoryStore;
-using launchdarkly::server_side::data_store::IDataStore;
 using launchdarkly::data_model::SDKDataSet;
+using launchdarkly::server_side::data_store::IDataStore;
+using launchdarkly::server_side::data_store::MemoryStore;
 
+using launchdarkly::Value;
 using launchdarkly::data_model::Flag;
 using launchdarkly::data_model::Segment;
-using launchdarkly::Value;
 
 TEST(MemoryStoreTest, StartsUninitialized) {
     MemoryStore store;
@@ -36,8 +36,7 @@ TEST(MemoryStoreTest, CanGetFlag) {
     flag.fallthrough = 0;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flag)}
-        },
+            {"flagA", IDataStore::FlagDescriptor(flag)}},
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
@@ -62,8 +61,7 @@ TEST(MemoryStoreTest, CanGetAllFlags) {
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>{
             {"flagA", IDataStore::FlagDescriptor(flagA)},
-            {"flagB", IDataStore::FlagDescriptor(flagB)}
-        },
+            {"flagB", IDataStore::FlagDescriptor(flagB)}},
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
@@ -93,8 +91,7 @@ TEST(MemoryStoreTest, CanGetSegment) {
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor (segment)}
-        },
+            {"segmentA", IDataStore::SegmentDescriptor(segment)}},
     });
 
     auto fetchedSegment = store.GetSegment("segmentA");
@@ -118,9 +115,8 @@ TEST(MemoryStoreTest, CanGetAllSegments) {
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor (segmentA)},
-            {"segmentB", IDataStore::SegmentDescriptor (segmentB)}
-        },
+            {"segmentA", IDataStore::SegmentDescriptor(segmentA)},
+            {"segmentB", IDataStore::SegmentDescriptor(segmentB)}},
     });
 
     auto fetched = store.AllSegments();
@@ -177,8 +173,7 @@ TEST(MemoryStoreTest, CanUpsertExitingFlag) {
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flagA)}
-        },
+            {"flagA", IDataStore::FlagDescriptor(flagA)}},
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
@@ -206,7 +201,7 @@ TEST(MemoryStoreTest, CanUpsertNewSegment) {
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor (segmentA));
+    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segmentA));
 
     auto fetchedSegment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetchedSegment);
@@ -225,15 +220,14 @@ TEST(MemoryStoreTest, CanUpsertExitingSegment) {
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor (segmentA)}
-        },
+            {"segmentA", IDataStore::SegmentDescriptor(segmentA)}},
     });
 
     Segment segmentA2;
     segmentA2.version = 2;
     segmentA2.key = "segmentA";
 
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor (segmentA2));
+    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segmentA2));
 
     auto fetchedSegment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetchedSegment);

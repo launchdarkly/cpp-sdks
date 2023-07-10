@@ -74,7 +74,7 @@ void FlagUpdater::DispatchEvent(FlagValueChangeEvent event) {
     auto handler = signals_.find(event.FlagName());
     if (handler != signals_.end()) {
         if (handler->second.empty()) {
-            // Empty, remove it from the map so it doesn't count toward
+            // Empty, remove it from the map, so it doesn't count toward
             // future calculations.
             signals_.erase(event.FlagName());
         } else {
