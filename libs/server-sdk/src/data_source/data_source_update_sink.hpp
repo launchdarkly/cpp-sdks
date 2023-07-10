@@ -16,7 +16,7 @@ class IDataSourceUpdateSink {
     using SegmentDescriptor = launchdarkly::data_model::ItemDescriptor<
         launchdarkly::data_model::Segment>;
 
-    virtual void Init(launchdarkly::data_model::SDKDataSet dataSet) = 0;
+    virtual void Init(launchdarkly::data_model::SDKDataSet data_set) = 0;
     virtual void Upsert(std::string key, FlagDescriptor flag) = 0;
     virtual void Upsert(std::string key, SegmentDescriptor segment) = 0;
 

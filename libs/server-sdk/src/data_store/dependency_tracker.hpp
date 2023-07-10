@@ -48,7 +48,7 @@ class DependencySet {
 
     void Remove(DataKind kind, std::string const& key);
 
-    [[nodiscard]] bool Contains(DataKind kind, const std::string& key);
+    [[nodiscard]] bool Contains(DataKind kind, std::string const& key);
 
     [[nodiscard]] std::set<std::string> SetForKind(DataKind kind);
 
@@ -85,7 +85,7 @@ class DependencyMap {
     void Set(DataKind kind, std::string key, DependencySet val);
 
     [[nodiscard]] std::optional<DependencySet> Get(DataKind kind,
-                                                   const std::string& key);
+                                                   std::string const& key);
 
     void Clear();
 
@@ -113,7 +113,7 @@ class DependencyTracker {
      * @param key The key for the flag.
      * @param flag A descriptor for the flag.
      */
-    void UpdateDependencies(const std::string& key, FlagDescriptor const& flag);
+    void UpdateDependencies(std::string const& key, FlagDescriptor const& flag);
 
     /**
      * Update the dependency tracker with a new or updated segment.
@@ -121,7 +121,8 @@ class DependencyTracker {
      * @param key The key for the segment.
      * @param flag A descriptor for the segment.
      */
-    void UpdateDependencies(const std::string& key, SegmentDescriptor const& segment);
+    void UpdateDependencies(std::string const& key,
+                            SegmentDescriptor const& segment);
 
     /**
      * Given the current dependencies, determine what flags or segments may be
@@ -129,12 +130,12 @@ class DependencyTracker {
      *
      * @param kind The kind of data.
      * @param key The key for the data.
-     * @param dependencySet A dependency set, which dependencies are
+     * @param dependency_set A dependency set, which dependencies are
      * accumulated in.
      */
     void CalculateChanges(DataKind kind,
                           std::string const& key,
-                          DependencySet& dependencySet);
+                          DependencySet& dependency_set);
 
     /**
      * Clear all existing dependencies.
@@ -149,8 +150,8 @@ class DependencyTracker {
                             std::string const& key,
                             DependencySet deps);
 
-    DependencyMap dependenciesFrom_;
-    DependencyMap dependenciesTo_;
+    DependencyMap dependencies_from_;
+    DependencyMap dependencies_to_;
 
     /**
      * Determine dependencies for a set of clauses.

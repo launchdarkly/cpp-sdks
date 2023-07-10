@@ -40,28 +40,28 @@ TEST(MemoryStoreTest, CanGetFlag) {
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
-    auto fetchedFlag = store.GetFlag("flagA");
-    EXPECT_TRUE(fetchedFlag);
-    EXPECT_TRUE(fetchedFlag->item);
-    EXPECT_EQ("flagA", fetchedFlag->item->key);
-    EXPECT_EQ(1, fetchedFlag->item->version);
-    EXPECT_EQ(fetchedFlag->version, fetchedFlag->item->version);
+    auto fetched_flag = store.GetFlag("flagA");
+    EXPECT_TRUE(fetched_flag);
+    EXPECT_TRUE(fetched_flag->item);
+    EXPECT_EQ("flagA", fetched_flag->item->key);
+    EXPECT_EQ(1, fetched_flag->item->version);
+    EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 }
 
 TEST(MemoryStoreTest, CanGetAllFlags) {
-    Flag flagA;
-    flagA.version = 1;
-    flagA.key = "flagA";
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
 
-    Flag flagB;
-    flagB.version = 2;
-    flagB.key = "flagB";
+    Flag flag_b;
+    flag_b.version = 2;
+    flag_b.key = "flagB";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flagA)},
-            {"flagB", IDataStore::FlagDescriptor(flagB)}},
+            {"flagA", IDataStore::FlagDescriptor(flag_a)},
+            {"flagB", IDataStore::FlagDescriptor(flag_b)}},
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
@@ -94,29 +94,29 @@ TEST(MemoryStoreTest, CanGetSegment) {
             {"segmentA", IDataStore::SegmentDescriptor(segment)}},
     });
 
-    auto fetchedSegment = store.GetSegment("segmentA");
-    EXPECT_TRUE(fetchedSegment);
-    EXPECT_TRUE(fetchedSegment->item);
-    EXPECT_EQ("segmentA", fetchedSegment->item->key);
-    EXPECT_EQ(1, fetchedSegment->item->version);
-    EXPECT_EQ(fetchedSegment->version, fetchedSegment->item->version);
+    auto fetched_segment = store.GetSegment("segmentA");
+    EXPECT_TRUE(fetched_segment);
+    EXPECT_TRUE(fetched_segment->item);
+    EXPECT_EQ("segmentA", fetched_segment->item->key);
+    EXPECT_EQ(1, fetched_segment->item->version);
+    EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
 TEST(MemoryStoreTest, CanGetAllSegments) {
-    auto segmentA = Segment();
-    segmentA.version = 1;
-    segmentA.key = "segmentA";
+    auto segment_a = Segment();
+    segment_a.version = 1;
+    segment_a.key = "segmentA";
 
-    auto segmentB = Segment();
-    segmentB.version = 2;
-    segmentB.key = "segmentB";
+    auto segment_b = Segment();
+    segment_b.version = 2;
+    segment_b.key = "segmentB";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor(segmentA)},
-            {"segmentB", IDataStore::SegmentDescriptor(segmentB)}},
+            {"segmentA", IDataStore::SegmentDescriptor(segment_a)},
+            {"segmentB", IDataStore::SegmentDescriptor(segment_b)}},
     });
 
     auto fetched = store.AllSegments();
@@ -139,100 +139,100 @@ TEST(MemoryStoreTest, CanGetAllSegmentsWhenThereAreNoSegments) {
 
 TEST(MemoryStoreTest, GetMissingFlagOrSegment) {
     MemoryStore store;
-    auto fetchedFlag = store.GetFlag("flagA");
-    EXPECT_FALSE(fetchedFlag);
-    auto fetchedSegment = store.GetSegment("segmentA");
-    EXPECT_FALSE(fetchedSegment);
+    auto fetched_flag = store.GetFlag("flagA");
+    EXPECT_FALSE(fetched_flag);
+    auto fetched_segment = store.GetSegment("segmentA");
+    EXPECT_FALSE(fetched_segment);
 }
 
 TEST(MemoryStoreTest, CanUpsertNewFlag) {
-    Flag flagA;
-    flagA.version = 1;
-    flagA.key = "flagA";
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
-    store.Upsert("flagA", IDataStore::FlagDescriptor(flagA));
+    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a));
 
-    auto fetchedFlag = store.GetFlag("flagA");
-    EXPECT_TRUE(fetchedFlag);
-    EXPECT_TRUE(fetchedFlag->item);
-    EXPECT_EQ("flagA", fetchedFlag->item->key);
-    EXPECT_EQ(1, fetchedFlag->item->version);
-    EXPECT_EQ(fetchedFlag->version, fetchedFlag->item->version);
+    auto fetched_flag = store.GetFlag("flagA");
+    EXPECT_TRUE(fetched_flag);
+    EXPECT_TRUE(fetched_flag->item);
+    EXPECT_EQ("flagA", fetched_flag->item->key);
+    EXPECT_EQ(1, fetched_flag->item->version);
+    EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 }
 
 TEST(MemoryStoreTest, CanUpsertExitingFlag) {
-    Flag flagA;
-    flagA.version = 1;
-    flagA.key = "flagA";
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flagA)}},
+            {"flagA", IDataStore::FlagDescriptor(flag_a)}},
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
 
-    Flag flagA2;
-    flagA2.version = 2;
-    flagA2.key = "flagA";
+    Flag flag_a_2;
+    flag_a_2.version = 2;
+    flag_a_2.key = "flagA";
 
-    store.Upsert("flagA", IDataStore::FlagDescriptor(flagA2));
+    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a_2));
 
-    auto fetchedFlag = store.GetFlag("flagA");
-    EXPECT_TRUE(fetchedFlag);
-    EXPECT_TRUE(fetchedFlag->item);
-    EXPECT_EQ("flagA", fetchedFlag->item->key);
-    EXPECT_EQ(2, fetchedFlag->item->version);
-    EXPECT_EQ(fetchedFlag->version, fetchedFlag->item->version);
+    auto fetched_flag = store.GetFlag("flagA");
+    EXPECT_TRUE(fetched_flag);
+    EXPECT_TRUE(fetched_flag->item);
+    EXPECT_EQ("flagA", fetched_flag->item->key);
+    EXPECT_EQ(2, fetched_flag->item->version);
+    EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 }
 
 TEST(MemoryStoreTest, CanUpsertNewSegment) {
-    Segment segmentA;
-    segmentA.version = 1;
-    segmentA.key = "segmentA";
+    Segment segment_a;
+    segment_a.version = 1;
+    segment_a.key = "segmentA";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
     });
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segmentA));
+    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segment_a));
 
-    auto fetchedSegment = store.GetSegment("segmentA");
-    EXPECT_TRUE(fetchedSegment);
-    EXPECT_TRUE(fetchedSegment->item);
-    EXPECT_EQ("segmentA", fetchedSegment->item->key);
-    EXPECT_EQ(1, fetchedSegment->item->version);
-    EXPECT_EQ(fetchedSegment->version, fetchedSegment->item->version);
+    auto fetched_segment = store.GetSegment("segmentA");
+    EXPECT_TRUE(fetched_segment);
+    EXPECT_TRUE(fetched_segment->item);
+    EXPECT_EQ("segmentA", fetched_segment->item->key);
+    EXPECT_EQ(1, fetched_segment->item->version);
+    EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
 TEST(MemoryStoreTest, CanUpsertExitingSegment) {
-    Segment segmentA;
-    segmentA.version = 1;
-    segmentA.key = "segmentA";
+    Segment segment_a;
+    segment_a.version = 1;
+    segment_a.key = "segmentA";
 
     MemoryStore store;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
         std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor(segmentA)}},
+            {"segmentA", IDataStore::SegmentDescriptor(segment_a)}},
     });
 
-    Segment segmentA2;
-    segmentA2.version = 2;
-    segmentA2.key = "segmentA";
+    Segment segment_a_2;
+    segment_a_2.version = 2;
+    segment_a_2.key = "segmentA";
 
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segmentA2));
+    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segment_a_2));
 
-    auto fetchedSegment = store.GetSegment("segmentA");
-    EXPECT_TRUE(fetchedSegment);
-    EXPECT_TRUE(fetchedSegment->item);
-    EXPECT_EQ("segmentA", fetchedSegment->item->key);
-    EXPECT_EQ(2, fetchedSegment->item->version);
-    EXPECT_EQ(fetchedSegment->version, fetchedSegment->item->version);
+    auto fetched_segment = store.GetSegment("segmentA");
+    EXPECT_TRUE(fetched_segment);
+    EXPECT_TRUE(fetched_segment->item);
+    EXPECT_EQ("segmentA", fetched_segment->item->key);
+    EXPECT_EQ(2, fetched_segment->item->version);
+    EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }

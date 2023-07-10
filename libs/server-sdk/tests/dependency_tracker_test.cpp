@@ -81,14 +81,14 @@ TEST(ScopedMapTest, CanGetItem) {
 TEST(ScopedMapTest, CanIterate) {
     DependencyMap map;
 
-    DependencySet depFlags;
-    depFlags.Set(DataKind::kSegment, "segmentA");
-    depFlags.Set(DataKind::kFlag, "flagB");
+    DependencySet dep_flags;
+    dep_flags.Set(DataKind::kSegment, "segmentA");
+    dep_flags.Set(DataKind::kFlag, "flagB");
 
     DependencySet depSegments;
     depSegments.Set(DataKind::kSegment, "segmentB");
 
-    map.Set(DataKind::kFlag, "flagA", depFlags);
+    map.Set(DataKind::kFlag, "flagA", dep_flags);
     map.Set(DataKind::kSegment, "segmentA", depSegments);
 
     auto expectationKeys = std::set<std::string>{"segmentA", "flagB", "segmentB"};
@@ -118,19 +118,19 @@ TEST(ScopedMapTest, CanIterate) {
 TEST(ScopedMapTest, CanClear) {
     DependencyMap map;
 
-    DependencySet depFlags;
-    depFlags.Set(DataKind::kSegment, "segmentA");
-    depFlags.Set(DataKind::kFlag, "flagB");
+    DependencySet dep_flags;
+    dep_flags.Set(DataKind::kSegment, "segmentA");
+    dep_flags.Set(DataKind::kFlag, "flagB");
 
-    DependencySet depSegments;
-    depSegments.Set(DataKind::kSegment, "segmentB");
+    DependencySet dep_segments;
+    dep_segments.Set(DataKind::kSegment, "segmentB");
 
-    map.Set(DataKind::kFlag, "flagA", depFlags);
-    map.Set(DataKind::kSegment, "segmentA", depSegments);
+    map.Set(DataKind::kFlag, "flagA", dep_flags);
+    map.Set(DataKind::kSegment, "segmentA", dep_segments);
     map.Clear();
 
     for(auto& ns: map) {
-        for([[maybe_unused]] auto& _depSet: ns.Data()) {
+        for([[maybe_unused]] auto& set_set : ns.Data()) {
             GTEST_FAIL();
         }
     }
@@ -139,28 +139,28 @@ TEST(ScopedMapTest, CanClear) {
 TEST(DependencyTrackerTest, TreatsPrerequisitesAsDependencies) {
     DependencyTracker tracker;
 
-    Flag flagA;
-    Flag flagB;
-    Flag flagC;
+    Flag flag_a;
+    Flag flag_b;
+    Flag flag_c;
 
-    flagA.key = "flagA";
-    flagA.version = 1;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
 
-    flagB.key = "flagB";
-    flagB.version = 1;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
 
     // Unused, to make sure not everything is just included in the dependencies.
-    flagC.key = "flagC";
-    flagC.version = 1;
+    flag_c.key = "flagC";
+    flag_c.version = 1;
 
-    flagB.prerequisites.push_back(Flag::Prerequisite{
+    flag_b.prerequisites.push_back(Flag::Prerequisite{
         "flagA",
         0
     });
 
-    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.UpdateDependencies("flagC", ItemDescriptor<Flag>(flagC));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flag_a));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flag_b));
+    tracker.UpdateDependencies("flagC", ItemDescriptor<Flag>(flag_c));
 
     DependencySet changes;
     tracker.CalculateChanges(DataKind::kFlag, "flagA", changes);
@@ -173,26 +173,26 @@ TEST(DependencyTrackerTest, TreatsPrerequisitesAsDependencies) {
 TEST(DependencyTrackerTest, UsesSegmentRulesToCalculateDependencies) {
     DependencyTracker tracker;
 
-    Flag flagA;
-    Segment segmentA;
+    Flag flag_a;
+    Segment segment_a;
 
-    Flag flagB;
-    Segment segmentB;
+    Flag flag_b;
+    Segment segment_b;
 
-    flagA.key = "flagA";
-    flagA.version = 1;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
 
-    segmentA.key = "segmentA";
-    segmentA.version = 1;
+    segment_a.key = "segmentA";
+    segment_a.version = 1;
 
     // flagB and segmentB are unused.
-    flagB.key = "flagB";
-    flagB.version = 1;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
 
-    segmentB.key = "segmentB";
-    segmentB.version = 1;
+    segment_b.key = "segmentB";
+    segment_b.version = 1;
 
-    flagA.rules.push_back(Flag::Rule {
+    flag_a.rules.push_back(Flag::Rule {
         std::vector<Clause>{
             Clause{
                 Clause::Op::kSegmentMatch,
@@ -204,11 +204,11 @@ TEST(DependencyTrackerTest, UsesSegmentRulesToCalculateDependencies) {
         }
     });
 
-    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flag_a));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segment_a));
 
-    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flag_b));
+    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segment_b));
 
     DependencySet changes;
     tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
@@ -221,20 +221,20 @@ TEST(DependencyTrackerTest, UsesSegmentRulesToCalculateDependencies) {
 TEST(DependencyTrackerTest, TracksSegmentDependencyOfPrerequisite) {
     DependencyTracker tracker;
 
-    Flag flagA;
-    Flag flagB;
-    Segment segmentA;
+    Flag flag_a;
+    Flag flag_b;
+    Segment segment_a;
 
-    flagA.key = "flagA";
-    flagA.version = 1;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
 
-    flagB.key = "flagB";
-    flagB.version = 1;
+    flag_b.key = "flagB";
+    flag_b.version = 1;
 
-    segmentA.key = "segmentA";
-    segmentA.version = 1;
+    segment_a.key = "segmentA";
+    segment_a.version = 1;
 
-    flagA.rules.push_back(Flag::Rule {
+    flag_a.rules.push_back(Flag::Rule {
         std::vector<Clause>{
             Clause{
                 Clause::Op::kSegmentMatch,
@@ -246,14 +246,14 @@ TEST(DependencyTrackerTest, TracksSegmentDependencyOfPrerequisite) {
         }
     });
 
-    flagB.prerequisites.push_back(Flag::Prerequisite{
+    flag_b.prerequisites.push_back(Flag::Prerequisite{
         "flagA",
         0
     });
 
-    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flagA));
-    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flagB));
-    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
+    tracker.UpdateDependencies("flagA", ItemDescriptor<Flag>(flag_a));
+    tracker.UpdateDependencies("flagB", ItemDescriptor<Flag>(flag_b));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segment_a));
 
     DependencySet changes;
     tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);
@@ -270,20 +270,20 @@ TEST(DependencyTrackerTest, TracksSegmentDependencyOfPrerequisite) {
 TEST(DependencyTrackerTest, HandlesSegmentsDependentOnOtherSegments) {
     DependencyTracker tracker;
 
-    Segment segmentA;
-    Segment segmentB;
-    Segment segmentC;
+    Segment segment_a;
+    Segment segment_b;
+    Segment segment_c;
 
-    segmentA.key = "segmentA";
-    segmentA.version = 1;
+    segment_a.key = "segmentA";
+    segment_a.version = 1;
 
-    segmentB.key = "segmentB";
-    segmentB.version = 1;
+    segment_b.key = "segmentB";
+    segment_b.version = 1;
 
-    segmentC.key = "segmentC";
-    segmentC.version = 1;
+    segment_c.key = "segmentC";
+    segment_c.version = 1;
 
-    segmentB.rules.push_back(Segment::Rule {
+    segment_b.rules.push_back(Segment::Rule {
         std::vector<Clause>{
             Clause{
                 Clause::Op::kSegmentMatch,
@@ -299,9 +299,9 @@ TEST(DependencyTrackerTest, HandlesSegmentsDependentOnOtherSegments) {
         AttributeReference()
     });
 
-    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segmentA));
-    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segmentB));
-    tracker.UpdateDependencies("segmentC", ItemDescriptor<Segment>(segmentC));
+    tracker.UpdateDependencies("segmentA", ItemDescriptor<Segment>(segment_a));
+    tracker.UpdateDependencies("segmentB", ItemDescriptor<Segment>(segment_b));
+    tracker.UpdateDependencies("segmentC", ItemDescriptor<Segment>(segment_c));
 
     DependencySet changes;
     tracker.CalculateChanges(DataKind::kSegment, "segmentA", changes);

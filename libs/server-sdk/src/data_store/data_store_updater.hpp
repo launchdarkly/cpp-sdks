@@ -21,7 +21,7 @@ class DataStoreUpdater
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
-    void Init(launchdarkly::data_model::SDKDataSet dataSet) override;
+    void Init(launchdarkly::data_model::SDKDataSet data_set) override;
     void Upsert(std::string key, FlagDescriptor flag) override;
     void Upsert(std::string key, SegmentDescriptor segment) override;
     ~DataStoreUpdater() override = default;
@@ -34,17 +34,17 @@ class DataStoreUpdater
                       std::string key,
                       std::shared_ptr<FlagOrSegmentDescriptor> existing,
                       FlagOrSegmentDescriptor updated) {
-        if (existing && (existing->version > updated.version)) {
+        if (existing && (updated.version <= existing->version)) {
             // Out of order update, ignore it.
             return;
         }
 
-        dependencyTracker_.UpdateDependencies(key, updated);
+        dependency_tracker_.UpdateDependencies(key, updated);
 
         if (HasListeners()) {
-            auto updatedDeps = DependencySet();
-            dependencyTracker_.CalculateChanges(kind, key, updatedDeps);
-            NotifyChanges(updatedDeps);
+            auto updated_deps = DependencySet();
+            dependency_tracker_.CalculateChanges(kind, key, updated_deps);
+            NotifyChanges(updated_deps);
         }
 
         sink_->Upsert(key, updated);
@@ -55,16 +55,17 @@ class DataStoreUpdater
         DataKind kind,
         std::unordered_map<std::string,
                            std::shared_ptr<FlagOrSegmentDescriptor>>
-            existingFlagsOrSegments,
+            existing_flags_or_segments,
         std::unordered_map<std::string, FlagOrSegmentDescriptor>
             newFlagsOrSegments,
-        DependencySet& updatedItems) {
-        for (auto const& flagOrSegment : newFlagsOrSegments) {
-            auto oldItem = existingFlagsOrSegments.find(flagOrSegment.first);
-            if (oldItem != existingFlagsOrSegments.end()) {
-                if (flagOrSegment.second.version > oldItem->second->version) {
-                    dependencyTracker_.CalculateChanges(
-                        kind, flagOrSegment.first, updatedItems);
+        DependencySet& updated_items) {
+        for (auto const& flag_or_segment : newFlagsOrSegments) {
+            auto oldItem =
+                existing_flags_or_segments.find(flag_or_segment.first);
+            if (oldItem != existing_flags_or_segments.end()) {
+                if (flag_or_segment.second.version > oldItem->second->version) {
+                    dependency_tracker_.CalculateChanges(
+                        kind, flag_or_segment.first, updated_items);
                 }
             }
         }
@@ -87,6 +88,6 @@ class DataStoreUpdater
     // and dispatch of events.
     mutable std::recursive_mutex signal_mutex_;
 
-    DependencyTracker dependencyTracker_;
+    DependencyTracker dependency_tracker_;
 };
 }  // namespace launchdarkly::server_side::data_store

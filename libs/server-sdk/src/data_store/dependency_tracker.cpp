@@ -118,14 +118,14 @@ void DependencyTracker::UpdateDependencies(
 
 void DependencyTracker::CalculateChanges(DataKind kind,
                                          std::string const& key,
-                                         DependencySet& dependencySet) {
-    if (!dependencySet.Contains(kind, key)) {
-        dependencySet.Set(kind, key);
-        auto affectedItems = dependenciesTo_.Get(kind, key);
-        if (affectedItems) {
-            for (auto& depNs : *affectedItems) {
+                                         DependencySet& dependency_set) {
+    if (!dependency_set.Contains(kind, key)) {
+        dependency_set.Set(kind, key);
+        auto affected_items = dependencies_to_.Get(kind, key);
+        if (affected_items) {
+            for (auto& depNs : *affected_items) {
                 for (auto& dep : depNs.Data()) {
-                    CalculateChanges(depNs.Kind(), dep, dependencySet);
+                    CalculateChanges(depNs.Kind(), dep, dependency_set);
                 }
             }
         }
@@ -137,29 +137,30 @@ void DependencyTracker::CalculateChanges(DataKind kind,
 void DependencyTracker::UpdateDependencies(DataKind kind,
                                            std::string const& key,
                                            DependencySet deps) {
-    auto currentDeps = dependenciesFrom_.Get(kind, key);
-    if (currentDeps) {
-        for (auto& depNs : *currentDeps) {
-            auto depKind = depNs.Kind();
-            for (auto& dep : depNs.Data()) {
-                auto depsToThisDep = dependenciesTo_.Get(depKind, dep);
-                if (depsToThisDep) {
-                    depsToThisDep->Remove(depKind, key);
+    auto current_deps = dependencies_from_.Get(kind, key);
+    if (current_deps) {
+        for (auto& dep_kind : *current_deps) {
+            auto depKind = dep_kind.Kind();
+            for (auto& dep : dep_kind.Data()) {
+                auto deps_to_this_dep = dependencies_to_.Get(depKind, dep);
+                if (deps_to_this_dep) {
+                    deps_to_this_dep->Remove(depKind, key);
                 }
             }
         }
     }
 
-    dependenciesFrom_.Set(kind, key, deps);
-    for (auto& depNs : deps) {
-        for (auto& dep : depNs.Data()) {
-            auto depsToThisDep = dependenciesTo_.Get(depNs.Kind(), dep);
-            if (!depsToThisDep) {
-                auto newDepsToThisDep = DependencySet();
-                newDepsToThisDep.Set(kind, key);
-                dependenciesTo_.Set(depNs.Kind(), dep, newDepsToThisDep);
+    dependencies_from_.Set(kind, key, deps);
+    for (auto& dep_kind : deps) {
+        for (auto& dep : dep_kind.Data()) {
+            auto deps_to_this_dep = dependencies_to_.Get(dep_kind.Kind(), dep);
+            if (!deps_to_this_dep) {
+                auto new_deps_to_this_dep = DependencySet();
+                new_deps_to_this_dep.Set(kind, key);
+                dependencies_to_.Set(dep_kind.Kind(), dep,
+                                     new_deps_to_this_dep);
             } else {
-                depsToThisDep->Set(kind, key);
+                deps_to_this_dep->Set(kind, key);
             }
         }
     }
@@ -178,8 +179,8 @@ void DependencyTracker::CalculateClauseDeps(
 }
 
 void DependencyTracker::Clear() {
-    dependenciesTo_.Clear();
-    dependenciesFrom_.Clear();
+    dependencies_to_.Clear();
+    dependencies_from_.Clear();
 }
 
 }  // namespace launchdarkly::server_side::data_store
