@@ -6,6 +6,9 @@
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 
+#include <optional>
+#include <unordered_map>
+
 namespace launchdarkly {
 
 template <typename T>

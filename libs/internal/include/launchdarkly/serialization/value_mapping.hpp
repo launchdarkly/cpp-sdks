@@ -7,6 +7,9 @@
 #include <boost/json.hpp>
 #include <tl/expected.hpp>
 
+#include <optional>
+#include <type_traits>
+
 // Parses a field, propagating an error if the field's value is of the wrong
 // type. If the field was null or omitted in the data, it is set to
 // default_value.

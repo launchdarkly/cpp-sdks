@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
