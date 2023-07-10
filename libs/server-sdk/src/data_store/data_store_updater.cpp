@@ -14,6 +14,9 @@ std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
 }
 
 void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
+    // Optional outside the HasListeners() scope, this allows for the changes
+    // to be calculated before the update and then the notification to be
+    // sent after the update completes.
     std::optional<DependencySet> change_notifications;
     if (HasListeners()) {
         auto updated_items = DependencySet();
@@ -35,7 +38,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     // Data will move into the store, so we want to update dependencies before
     // it is moved.
     sink_->Init(data_set);
-    // After updating the sunk let listeners know of changes.
+    // After updating the sink let listeners know of changes.
     if (change_notifications) {
         NotifyChanges(*change_notifications);
     }
