@@ -15,6 +15,9 @@ using WeightedVariation = Flag::Rollout::WeightedVariation;
 // tests so much as consistency tests to guarantee that the implementation
 // is identical across SDKs.
 
+/**
+ * Tests may derive from this class to access shared constants.
+ */
 class BucketingTests : public ::testing::Test {
    public:
     const static double kBucketTolerance;
@@ -26,51 +29,72 @@ double const BucketingTests::kBucketTolerance = 0.0000001;
 std::string const BucketingTests::kHashKey = "hashKey";
 std::string const BucketingTests::kSalt = "saltyA";
 
-TEST_F(BucketingTests, VariationIndexForContext) {
+struct BucketTest {
+    std::string key;
+    std::string expectedBucket;
+    Flag::Variation expectedVariation;
+    bool expectedInExperiment;
+    Flag::Rollout rollout;
+    std::optional<std::string> customAttr;
+};
+
+class BucketVariationTest : public BucketingTests,
+                            public ::testing::WithParamInterface<BucketTest> {};
+
+static Flag::Rollout PercentRollout() {
     WeightedVariation wv0(0, 60'000);
     WeightedVariation wv1(1, 40'000);
+    return Flag::Rollout({wv0, wv1});
+}
 
-    Flag::VariationOrRollout rollout = Flag::Rollout({wv0, wv1});
+static Flag::Rollout ExperimentRollout() {
+    auto wv0 = WeightedVariation(0, 10'000);
+    auto wv1 = WeightedVariation(1, 20'000);
+    auto wv0_untracked = WeightedVariation::Untracked(0, 70'000);
+    Flag::Rollout rollout({wv0, wv1, wv0_untracked});
+    rollout.kind = Flag::Rollout::Kind::kExperiment;
+    rollout.seed = 61;
+    return rollout;
+}
+
+TEST_P(BucketVariationTest, VariationIndexForContext) {
+    auto const& param = GetParam();
 
     auto result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyA").Build(), kSalt);
+        Variation(param.rollout, kHashKey,
+                  ContextBuilder().Kind("user", param.key).Build(), kSalt);
 
-    ASSERT_TRUE(result)
-        << "userKeyA should be assigned a bucket result, but got: "
-        << result.error();
+    ASSERT_TRUE(result) << param.key
+                        << " should be assigned a bucket result, but got: "
+                        << result.error();
 
-    ASSERT_EQ(result->variation_index, 0)
-        << "userKeyA (bucket 0.42157587) should get variation 0";
-    ASSERT_EQ(result->in_experiment, false)
-        << "userKeyA should not be in experiment";
+    ASSERT_EQ(result->variation_index, param.expectedVariation)
+        << param.key << " (bucket " << param.expectedBucket
+        << ") should get variation " << param.expectedVariation << ", but got "
+        << result->variation_index;
 
-    result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyB").Build(), kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyB should be assigned a bucket result, but got: "
-        << result.error();
-
-    ASSERT_EQ(result->variation_index, 1)
-        << "userKeyB (bucket 0.6708485) should get variation 1";
-    ASSERT_EQ(result->in_experiment, false)
-        << "userKeyB should not be in experiment";
-
-    result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyC").Build(), kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyC should be assigned a bucket result, but got: "
-        << result.error();
-
-    ASSERT_EQ(result->variation_index, 0)
-        << "userKeyC (bucket 0.10343106) should get variation 0";
-    ASSERT_EQ(result->in_experiment, false)
-        << "userKeyC should not be in experiment";
+    ASSERT_EQ(result->in_experiment, param.expectedInExperiment)
+        << param.key
+        << (param.expectedInExperiment ? " should " : " should not ")
+        << "be in experiment";
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    PercentRollout,
+    BucketVariationTest,
+    ::testing::ValuesIn(
+        {BucketTest{"userKeyA", "0.42157587", 0, false, PercentRollout()},
+         BucketTest{"userKeyB", "0.6708485", 1, false, PercentRollout()},
+         BucketTest{"userKeyC", "0.10343106", 0, false, PercentRollout()}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ExperimentRollout,
+    BucketVariationTest,
+    ::testing::ValuesIn({
+        BucketTest{"userKeyA", "0.09801207", 0, true, ExperimentRollout()},
+        BucketTest{"userKeyB", "0.14483777", 1, true, ExperimentRollout()},
+        BucketTest{"userKeyC", "0.9242641", 0, false, ExperimentRollout()},
+    }));
 
 TEST_F(BucketingTests, VariationIndexForContextWithCustomAttribute) {
     WeightedVariation wv0(0, 60'000);
@@ -79,88 +103,29 @@ TEST_F(BucketingTests, VariationIndexForContextWithCustomAttribute) {
     Flag::Rollout rollout({wv0, wv1});
     rollout.bucketBy = "intAttr";
 
-    auto result = Variation(rollout, kHashKey,
-                            ContextBuilder()
-                                .Kind("user", "userKeyA")
-                                .Set("intAttr", 33'333)
-                                .Build(),
-                            kSalt);
+    auto tests = std::vector<std::tuple<int, int, char const*>>{
+        {33'333, 0, "0.54771423"}, {99'999, 1, "0.7309658"}};
 
-    ASSERT_TRUE(result)
-        << "userKeyA should be assigned a bucket result, but got: "
-        << result.error();
+    for (auto [bucketAttr, expectedVariation, expectedBucket] : tests) {
+        auto result = Variation(rollout, kHashKey,
+                                ContextBuilder()
+                                    .Kind("user", "userKeyA")
+                                    .Set("intAttr", bucketAttr)
+                                    .Build(),
+                                kSalt);
 
-    ASSERT_EQ(result->variation_index, 0)
-        << "userKeyA (bucket 0.54771423) should get variation 0";
+        ASSERT_TRUE(result)
+            << "userKeyA should be assigned a bucket result, but got: "
+            << result.error();
 
-    ASSERT_EQ(result->in_experiment, false)
-        << "userKeyA should not be in experiment";
+        ASSERT_EQ(result->variation_index, expectedVariation)
+            << "userKeyA (bucket " << expectedBucket
+            << ") should get variation " << expectedVariation << ", but got "
+            << result->variation_index;
 
-    result = Variation(rollout, kHashKey,
-                       ContextBuilder()
-                           .Kind("user", "userKeyA")
-                           .Set("intAttr", 99'999)
-                           .Build(),
-                       kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyA should be assigned a bucket result, but got: "
-        << result.error();
-    ASSERT_EQ(result->variation_index, 1)
-        << "userKeyA (bucket 0.7309658) should get variation 1";
-
-    ASSERT_EQ(result->in_experiment, false)
-        << "userKeyA should not be in experiment";
-}
-
-TEST_F(BucketingTests, VariationIndexForContextInExperiment) {
-    auto wv0 = WeightedVariation(0, 10'000);
-    auto wv1 = WeightedVariation(1, 20'000);
-    auto wv0_untracked = WeightedVariation::Untracked(0, 70'000);
-
-    Flag::Rollout rollout({wv0, wv1, wv0_untracked});
-    rollout.kind = Flag::Rollout::Kind::kExperiment;
-    rollout.seed = 61;
-
-    auto result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyA").Build(), kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyA should be assigned a bucket result, but got: "
-        << result.error();
-
-    ASSERT_EQ(result->variation_index, 0)
-        << "userKeyA (bucket 0.09801207) should get variation 0";
-
-    ASSERT_TRUE(result->in_experiment) << "userKeyA should be in experiment";
-
-    result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyB").Build(), kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyB should be assigned a bucket result, but got: "
-        << result.error();
-
-    ASSERT_EQ(result->variation_index, 1)
-        << "userKeyB (bucket 0.14483777)  should get variation 1";
-
-    ASSERT_TRUE(result->in_experiment) << "userKeyB should be in experiment";
-
-    result =
-        Variation(rollout, kHashKey,
-                  ContextBuilder().Kind("user", "userKeyC").Build(), kSalt);
-
-    ASSERT_TRUE(result)
-        << "userKeyC should be assigned a bucket result, but got: "
-        << result.error();
-
-    ASSERT_EQ(result->variation_index, 0)
-        << "userKeyC (bucket 0.9242641)   should get variation 1";
-
-    ASSERT_FALSE(result->in_experiment)
-        << "userKeyC should not be in experiment";
+        ASSERT_EQ(result->in_experiment, false)
+            << "userKeyA should not be in experiment";
+    }
 }
 
 struct ExperimentBucketTest {
@@ -215,54 +180,44 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(BucketingTests, BucketContextByKey) {
     auto const kPrefix = BucketPrefix(kHashKey, kSalt);
 
-    auto context = ContextBuilder().Kind("user", "userKeyA").Build();
-    auto result = Bucket(context, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyA should be bucketed but got "
-                        << result.error();
+    auto tests =
+        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.42157587},
+                                                    {"userKeyB", 0.6708485},
+                                                    {"userKeyC", 0.10343106}};
 
-    ASSERT_NEAR(result->first, 0.42157587, kBucketTolerance);
+    for (auto [key, bucket] : tests) {
+        auto context = ContextBuilder().Kind("user", key).Build();
+        auto result = Bucket(context, "key", kPrefix, false, "user");
+        ASSERT_TRUE(result)
+            << key << " should be bucketed but got " << result.error();
 
-    context = ContextBuilder().Kind("user", "userKeyB").Build();
-    result = Bucket(context, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyB should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.6708485, kBucketTolerance);
-
-    context = ContextBuilder().Kind("user", "userKeyC").Build();
-    result = Bucket(context, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyC should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.10343106, kBucketTolerance);
+        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
+    }
 }
 
 TEST_F(BucketingTests, BucketContextByKeyWithSeed) {
     auto const kPrefix = BucketPrefix::Seed(61);
 
-    auto contextA = ContextBuilder().Kind("user", "userKeyA").Build();
-    auto result = Bucket(contextA, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyA should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.09801207, kBucketTolerance);
+    auto tests =
+        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.09801207},
+                                                    {"userKeyB", 0.14483777},
+                                                    {"userKeyC", 0.9242641}};
 
-    auto contextB = ContextBuilder().Kind("user", "userKeyB").Build();
-    result = Bucket(contextB, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyB should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.14483777, kBucketTolerance);
+    for (auto [key, bucket] : tests) {
+        auto context = ContextBuilder().Kind("user", key).Build();
+        auto result = Bucket(context, "key", kPrefix, false, "user");
+        ASSERT_TRUE(result)
+            << key << " should be bucketed but got " << result.error();
 
-    auto contextC = ContextBuilder().Kind("user", "userKeyC").Build();
-    result = Bucket(contextC, "key", kPrefix, false, "user");
-    ASSERT_TRUE(result) << "userKeyC should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.9242641, kBucketTolerance);
+        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
 
-    // changing seed produces a different bucket value
-    result = Bucket(contextA, "key", BucketPrefix::Seed(60), false, "user");
-    ASSERT_TRUE(result)
-        << "userKeyA with seed of 60 should be bucketed but got "
-        << result.error();
+        auto result_diff_seed =
+            Bucket(context, "key", BucketPrefix::Seed(60), false, "user");
+        ASSERT_TRUE(result_diff_seed) << key << " should be bucketed but got "
+                                      << result_diff_seed.error();
 
-    ASSERT_NEAR(result->first, 0.7008816, kBucketTolerance);
+        ASSERT_NE(result_diff_seed->first, result->first);
+    }
 }
 
 TEST_F(BucketingTests, BucketContextByInvalidReference) {
