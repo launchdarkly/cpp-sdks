@@ -4,7 +4,7 @@
 
 #include <launchdarkly/connection.hpp>
 
-namespace launchdarkly::client_side {
+namespace launchdarkly::internal::signals {
 
 class SignalConnection : public IConnection {
    public:

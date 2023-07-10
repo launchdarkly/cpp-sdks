@@ -38,6 +38,10 @@ DependencySet::end() {
     return data_.end();
 }
 
+std::set<std::string> DependencySet::SetForKind(DataKind kind) {
+    return {data_[static_cast<std::size_t>(kind)].Data()};
+}
+
 DependencyMap::DependencyMap()
     : data_{
           TaggedData<std::unordered_map<std::string, DependencySet>>(
@@ -109,7 +113,6 @@ void DependencyTracker::UpdateDependencies(
     UpdateDependencies(DataKind::kSegment, key, dependencies);
 }
 
-
 // Function intentionally uses recursion.
 // NOLINTBEGIN misc-no-recursion
 
@@ -173,4 +176,10 @@ void DependencyTracker::CalculateClauseDeps(
         }
     }
 }
+
+void DependencyTracker::Clear() {
+    dependenciesTo_.Clear();
+    dependenciesFrom_.Clear();
+}
+
 }  // namespace launchdarkly::server_side::data_store

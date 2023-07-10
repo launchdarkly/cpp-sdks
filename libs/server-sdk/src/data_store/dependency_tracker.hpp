@@ -50,6 +50,8 @@ class DependencySet {
 
     [[nodiscard]] bool Contains(DataKind kind, const std::string& key);
 
+    [[nodiscard]] std::set<std::string> SetForKind(DataKind kind);
+
     /**
      * Return the size of all the data kind sets.
      * @return The combined size of all the data kind sets.
@@ -133,6 +135,11 @@ class DependencyTracker {
     void CalculateChanges(DataKind kind,
                           std::string const& key,
                           DependencySet& dependencySet);
+
+    /**
+     * Clear all existing dependencies.
+     */
+    void Clear();
 
    private:
     /**
