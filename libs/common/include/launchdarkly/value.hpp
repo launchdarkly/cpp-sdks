@@ -428,4 +428,24 @@ bool operator!=(Value::Array const& lhs, Value::Array const& rhs);
 bool operator==(Value::Object const& lhs, Value::Object const& rhs);
 bool operator!=(Value::Object const& lhs, Value::Object const& rhs);
 
+/* Returns true if both values are numbers and lhs < rhs. Returns false if
+ * either value is not a number.
+ */
+bool operator<(Value const& lhs, Value const& rhs);
+
+/* Returns true if both values are numbers and lhs > rhs. Returns false if
+ * either value is not a number.
+ */
+bool operator>(Value const& lhs, Value const& rhs);
+
+/* Returns true if both values are numbers and lhs <= rhs. Returns false if
+ * either value is not a number.
+ */
+bool operator<=(Value const& lhs, Value const& rhs);
+
+/* Returns true if both values are numbers and lhs >= rhs. Returns false if
+ * either value is not a number.
+ */
+bool operator>=(Value const& lhs, Value const& rhs);
+
 }  // namespace launchdarkly

@@ -33,7 +33,15 @@ class EvaluationDetail {
      * @param error_kind Kind of the error.
      * @param default_value Default value.
      */
-    EvaluationDetail(enum EvaluationReason::ErrorKind error_kind, T default_value);
+    EvaluationDetail(enum EvaluationReason::ErrorKind error_kind,
+                     T default_value);
+
+    /**
+     * Constructs an EvaluationDetail consisting of a reason but no value.
+     * This is used when a flag has no appropriate fallback value.
+     * @param reason The reason.
+     */
+    EvaluationDetail(EvaluationReason reason);
 
     /**
      * @return A reference to the variation value. For convenience, the *

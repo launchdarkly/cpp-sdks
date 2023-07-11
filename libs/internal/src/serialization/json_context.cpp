@@ -1,3 +1,4 @@
+#include <boost/json.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_attributes.hpp>
 #include <launchdarkly/serialization/json_context.hpp>

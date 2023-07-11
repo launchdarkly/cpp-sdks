@@ -57,8 +57,9 @@ class Context final {
      * @param ref The reference to the desired attribute.
      * @return The attribute Value or a Value representing null.
      */
-    Value const& Get(std::string const& kind,
-                     launchdarkly::AttributeReference const& ref);
+    [[nodiscard]] Value const& Get(
+        std::string const& kind,
+        launchdarkly::AttributeReference const& ref) const;
 
     /**
      * Check if a context is valid.

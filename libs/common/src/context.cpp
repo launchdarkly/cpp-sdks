@@ -40,7 +40,7 @@ Context::Context(std::map<std::string, launchdarkly::Attributes> attributes)
 }
 
 Value const& Context::Get(std::string const& kind,
-                          AttributeReference const& ref) {
+                          AttributeReference const& ref) const {
     auto found = attributes_.find(kind);
     if (found != attributes_.end()) {
         return found->second.Get(ref);
@@ -64,7 +64,7 @@ std::string Context::make_canonical_key() {
     if (kinds_to_keys_.size() == 1) {
         if (auto iterator = kinds_to_keys_.find("user");
             iterator != kinds_to_keys_.end()) {
-            return std::string(iterator->second);
+            return iterator->second;
         }
     }
     std::stringstream stream;

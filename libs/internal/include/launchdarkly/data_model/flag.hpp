@@ -16,6 +16,7 @@ namespace launchdarkly::data_model {
 
 struct Flag {
     using ContextKind = std::string;
+    using Variation = std::uint64_t;
 
     struct Rollout {
         enum class Kind {
@@ -28,6 +29,16 @@ struct Flag {
             std::uint64_t variation;
             std::uint64_t weight;
             bool untracked;
+
+            WeightedVariation() = default;
+            WeightedVariation(Variation index, std::uint64_t weight);
+            static WeightedVariation Untracked(Variation index,
+                                               std::uint64_t weight);
+
+           private:
+            WeightedVariation(Variation index,
+                              std::uint64_t weight,
+                              bool untracked);
         };
 
         std::vector<WeightedVariation> variations;
@@ -37,9 +48,11 @@ struct Flag {
 
         DEFINE_ATTRIBUTE_REFERENCE_FIELD(bucketBy)
         DEFINE_CONTEXT_KIND_FIELD(contextKind)
+
+        Rollout() = default;
+        Rollout(std::vector<WeightedVariation>);
     };
 
-    using Variation = std::uint64_t;
     using VariationOrRollout = std::variant<Variation, Rollout>;
 
     struct Prerequisite {
