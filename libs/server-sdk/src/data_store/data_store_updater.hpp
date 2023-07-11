@@ -16,6 +16,16 @@ class DataStoreUpdater
     : public launchdarkly::server_side::data_source::IDataSourceUpdateSink,
       public launchdarkly::server_side::IChangeNotifier {
    public:
+    template <typename Storage>
+    using Collection = data_model::SDKDataSet::Collection<std::string, Storage>;
+
+    template <typename Storage>
+    using SharedItem = std::shared_ptr<data_model::ItemDescriptor<Storage>>;
+
+    template <typename Storage>
+    using SharedCollection =
+        std::unordered_map<std::string, SharedItem<Storage>>;
+
     DataStoreUpdater(std::shared_ptr<IDataSourceUpdateSink> sink,
                      std::shared_ptr<IDataStore> store);
 
@@ -34,11 +44,12 @@ class DataStoreUpdater
    private:
     bool HasListeners() const;
 
-    template <typename FlagOrSegmentDescriptor>
-    void UpsertCommon(DataKind kind,
-                      std::string key,
-                      std::shared_ptr<FlagOrSegmentDescriptor> existing,
-                      FlagOrSegmentDescriptor updated) {
+    template <typename FlagOrSegment>
+    void UpsertCommon(
+        DataKind kind,
+        std::string key,
+        SharedItem<FlagOrSegment> existing,
+        launchdarkly::data_model::ItemDescriptor<FlagOrSegment> updated) {
         if (existing && (updated.version <= existing->version)) {
             // Out of order update, ignore it.
             return;
@@ -55,14 +66,11 @@ class DataStoreUpdater
         sink_->Upsert(key, updated);
     }
 
-    template <typename FlagOrSegmentDescriptor>
+    template <typename FlagOrSegment>
     void CalculateChanges(
         DataKind kind,
-        std::unordered_map<std::string,
-                           std::shared_ptr<FlagOrSegmentDescriptor>>
-            existing_flags_or_segments,
-        std::unordered_map<std::string, FlagOrSegmentDescriptor>
-            new_flags_or_segments,
+        SharedCollection<FlagOrSegment> existing_flags_or_segments,
+        Collection<FlagOrSegment> new_flags_or_segments,
         DependencySet& updated_items) {
         for (auto const& old_flag_or_segment : existing_flags_or_segments) {
             auto new_flag_or_segment =

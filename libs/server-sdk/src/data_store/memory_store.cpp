@@ -4,7 +4,7 @@
 
 namespace launchdarkly::server_side::data_store {
 
-std::shared_ptr<IDataStore::FlagDescriptor> MemoryStore::GetFlag(
+std::shared_ptr<FlagDescriptor> MemoryStore::GetFlag(
     std::string const& key) const {
     std::lock_guard lock{data_mutex_};
     auto found = flags_.find(key);
@@ -14,7 +14,7 @@ std::shared_ptr<IDataStore::FlagDescriptor> MemoryStore::GetFlag(
     return nullptr;
 }
 
-std::shared_ptr<IDataStore::SegmentDescriptor> MemoryStore::GetSegment(
+std::shared_ptr<SegmentDescriptor> MemoryStore::GetSegment(
     std::string const& key) const {
     std::lock_guard lock{data_mutex_};
     auto found = segments_.find(key);
@@ -24,13 +24,13 @@ std::shared_ptr<IDataStore::SegmentDescriptor> MemoryStore::GetSegment(
     return nullptr;
 }
 
-std::unordered_map<std::string, std::shared_ptr<IDataStore::FlagDescriptor>>
+std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>
 MemoryStore::AllFlags() const {
     std::lock_guard lock{data_mutex_};
     return {flags_};
 }
 
-std::unordered_map<std::string, std::shared_ptr<IDataStore::SegmentDescriptor>>
+std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
 MemoryStore::AllSegments() const {
     std::lock_guard lock{data_mutex_};
     return {segments_};
@@ -51,12 +51,12 @@ void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
     flags_.clear();
     segments_.clear();
     for (auto flag : dataSet.flags) {
-        flags_.emplace(flag.first, std::make_shared<IDataStore::FlagDescriptor>(
+        flags_.emplace(flag.first, std::make_shared<FlagDescriptor>(
                                        std::move(flag.second)));
     }
     for (auto segment : dataSet.segments) {
         segments_.emplace(segment.first,
-                          std::make_shared<IDataStore::SegmentDescriptor>(
+                          std::make_shared<SegmentDescriptor>(
                               std::move(segment.second)));
     }
 }
@@ -65,7 +65,7 @@ void MemoryStore::Upsert(
     std::string key,
     data_source::IDataSourceUpdateSink::FlagDescriptor flag) {
     std::lock_guard lock{data_mutex_};
-    flags_[key] = std::make_shared<IDataStore::FlagDescriptor>(std::move(flag));
+    flags_[key] = std::make_shared<FlagDescriptor>(std::move(flag));
 }
 
 void MemoryStore::Upsert(
@@ -73,7 +73,7 @@ void MemoryStore::Upsert(
     data_source::IDataSourceUpdateSink::SegmentDescriptor segment) {
     std::lock_guard lock{data_mutex_};
     segments_[key] =
-        std::make_shared<IDataStore::SegmentDescriptor>(std::move(segment));
+        std::make_shared<SegmentDescriptor>(std::move(segment));
 }
 
 }  // namespace launchdarkly::server_side::data_store

@@ -19,7 +19,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     // sent after the update completes.
     std::optional<DependencySet> change_notifications;
     if (HasListeners()) {
-        auto updated_items = DependencySet();
+        DependencySet updated_items;
 
         CalculateChanges(DataKind::kFlag, store_->AllFlags(), data_set.flags,
                          updated_items);
@@ -38,7 +38,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     // Data will move into the store, so we want to update dependencies before
     // it is moved.
     sink_->Init(data_set);
-    // After updating the sink let listeners know of changes.
+    // After updating the sink, let listeners know of changes.
     if (change_notifications) {
         NotifyChanges(*change_notifications);
     }
