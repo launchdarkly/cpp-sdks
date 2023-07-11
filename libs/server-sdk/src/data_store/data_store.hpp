@@ -28,7 +28,7 @@ class IDataStore {
      *
      * @param key The key for the flag.
      * @return Returns a shared_ptr to the FlagDescriptor, or a nullptr if there
-     * is not such flag, or the flag was deleted.
+     * is no such flag or the flag was deleted.
      */
     [[nodiscard]] virtual std::shared_ptr<FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
