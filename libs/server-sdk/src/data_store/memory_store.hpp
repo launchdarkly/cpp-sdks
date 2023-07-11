@@ -14,9 +14,9 @@ class MemoryStore : public IDataStore,
                     public data_source::IDataSourceUpdateSink {
    public:
     std::shared_ptr<IDataStore::FlagDescriptor> GetFlag(
-        std::string key) const override;
+        std::string const& key) const override;
     std::shared_ptr<IDataStore::SegmentDescriptor> GetSegment(
-        std::string key) const override;
+        std::string const& key) const override;
 
     std::unordered_map<std::string, std::shared_ptr<IDataStore::FlagDescriptor>>
     AllFlags() const override;

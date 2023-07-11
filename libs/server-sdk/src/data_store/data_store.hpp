@@ -31,7 +31,7 @@ class IDataStore {
      * is not such flag, or the flag was deleted.
      */
     [[nodiscard]] virtual std::shared_ptr<FlagDescriptor> GetFlag(
-        std::string key) const = 0;
+        std::string const& key) const = 0;
 
     /**
      * Get a segment from the store.
@@ -41,7 +41,7 @@ class IDataStore {
      * there is no such segment, or the segment was deleted.
      */
     [[nodiscard]] virtual std::shared_ptr<SegmentDescriptor> GetSegment(
-        std::string key) const = 0;
+        std::string const&  key) const = 0;
 
     /**
      * Get all of the flags.
