@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
+
+#include <launchdarkly/serialization/json_value.hpp>
+
+#include <boost/json.hpp>
+
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include <launchdarkly/serialization/json_value.hpp>
-#include <launchdarkly/value.hpp>
-
-#include <boost/json.hpp>
 
 // NOLINTBEGIN cppcoreguidelines-avoid-magic-numbers
 

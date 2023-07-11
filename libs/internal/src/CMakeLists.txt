@@ -18,6 +18,7 @@ add_library(${LIBNAME} OBJECT
         events/request_worker.cpp
         events/summarizer.cpp
         events/worker_pool.cpp
+        events/lru_cache.cpp
         logging/console_backend.cpp
         logging/null_logger.cpp
         logging/logger.cpp
@@ -31,6 +32,11 @@ add_library(${LIBNAME} OBJECT
         serialization/json_value.cpp
         serialization/value_mapping.cpp
         serialization/json_evaluation_result.cpp
+        serialization/json_sdk_data_set.cpp
+        serialization/json_segment.cpp
+        serialization/json_primitives.cpp
+        serialization/json_rule_clause.cpp
+        serialization/json_flag.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp)
 

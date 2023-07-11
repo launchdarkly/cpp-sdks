@@ -48,17 +48,17 @@ EvaluationResult::EvaluationResult(
 
 std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
     out << "{";
-    out << " version: " << result.version_;
-    out << " trackEvents: " << result.track_events_;
-    out << " trackReason: " << result.track_reason_;
+    out << " version: " << result.Version();
+    out << " trackEvents: " << result.TrackEvents();
+    out << " trackReason: " << result.TrackReason();
 
-    if (result.debug_events_until_date_.has_value()) {
+    if (result.DebugEventsUntilDate().has_value()) {
         std::time_t as_time_t = std::chrono::system_clock::to_time_t(
-            result.debug_events_until_date_.value());
+            result.DebugEventsUntilDate().value());
         out << " debugEventsUntilDate: "
             << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S");
     }
-    out << " detail: " << result.detail_;
+    out << " detail: " << result.Detail();
     out << "}";
     return out;
 }

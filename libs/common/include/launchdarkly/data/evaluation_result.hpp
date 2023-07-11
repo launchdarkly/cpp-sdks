@@ -57,9 +57,6 @@ class EvaluationResult {
             debug_events_until_date,
         EvaluationDetailInternal detail);
 
-    friend std::ostream& operator<<(std::ostream& out,
-                                    EvaluationResult const& result);
-
    private:
     uint64_t version_;
     std::optional<uint64_t> flag_version_;
@@ -69,6 +66,8 @@ class EvaluationResult {
         debug_events_until_date_;
     EvaluationDetailInternal detail_;
 };
+
+std::ostream& operator<<(std::ostream& out, EvaluationResult const& result);
 
 bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs);
 bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs);

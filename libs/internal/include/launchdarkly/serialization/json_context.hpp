@@ -1,11 +1,10 @@
 #pragma once
 
-#include <boost/json.hpp>
-
-#include <tl/expected.hpp>
-
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
+
+#include <boost/json/fwd.hpp>
+#include <tl/expected.hpp>
 
 namespace launchdarkly {
 /**

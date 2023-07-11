@@ -6,6 +6,7 @@
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/value.hpp>
 
@@ -65,8 +66,12 @@ static void BuildContextFromParams(launchdarkly::ContextBuilder& builder,
 
     if (single.custom) {
         for (auto const& [key, value] : *single.custom) {
-            attrs.Set(key, boost::json::value_to<launchdarkly::Value>(
-                               boost::json::parse(value.dump())));
+            auto maybe_attr = boost::json::value_to<
+                tl::expected<launchdarkly::Value, launchdarkly::JsonError>>(
+                boost::json::parse(value.dump()));
+            if (maybe_attr) {
+                attrs.Set(key, *maybe_attr);
+            }
         }
     }
 }
@@ -126,9 +131,16 @@ tl::expected<nlohmann::json, std::string> ContextConvert(
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
     CustomEventParams const& params) {
-    auto data = params.data ? boost::json::value_to<launchdarkly::Value>(
-                                  boost::json::parse(params.data->dump()))
-                            : launchdarkly::Value::Null();
+    auto data =
+        params.data
+            ? boost::json::value_to<
+                  tl::expected<launchdarkly::Value, launchdarkly::JsonError>>(
+                  boost::json::parse(params.data->dump()))
+            : launchdarkly::Value::Null();
+
+    if (!data) {
+        return tl::make_unexpected("couldn't parse custom event data");
+    }
 
     if (params.omitNullData.value_or(false) && !params.metricValue &&
         !params.data) {
@@ -137,11 +149,11 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
     }
 
     if (!params.metricValue) {
-        client_->Track(params.eventKey, std::move(data));
+        client_->Track(params.eventKey, std::move(*data));
         return nlohmann::json{};
     }
 
-    client_->Track(params.eventKey, std::move(data), *params.metricValue);
+    client_->Track(params.eventKey, std::move(*data), *params.metricValue);
     return nlohmann::json{};
 }
 
@@ -204,15 +216,19 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
         }
         case ValueType::Any:
         case ValueType::Unspecified: {
-            auto fallback = boost::json::value_to<launchdarkly::Value>(
+            auto maybe_fallback = boost::json::value_to<
+                tl::expected<launchdarkly::Value, launchdarkly::JsonError>>(
                 boost::json::parse(defaultVal.dump()));
+            if (!maybe_fallback) {
+                return tl::make_unexpected("unable to parse fallback value");
+            }
 
             /* This switcharoo from nlohmann/json to boost/json to Value, then
              * back is because we're using nlohmann/json for the test harness
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto detail = client_->JsonVariationDetail(key, fallback);
+            auto detail = client_->JsonVariationDetail(key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(*detail));
@@ -264,15 +280,18 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
         }
         case ValueType::Any:
         case ValueType::Unspecified: {
-            auto fallback = boost::json::value_to<launchdarkly::Value>(
+            auto maybe_fallback = boost::json::value_to<
+                tl::expected<launchdarkly::Value, launchdarkly::JsonError>>(
                 boost::json::parse(defaultVal.dump()));
-
+            if (!maybe_fallback) {
+                return tl::make_unexpected("unable to parse fallback value");
+            }
             /* This switcharoo from nlohmann/json to boost/json to Value, then
              * back is because we're using nlohmann/json for the test harness
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto evaluation = client_->JsonVariation(key, fallback);
+            auto evaluation = client_->JsonVariation(key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(evaluation));

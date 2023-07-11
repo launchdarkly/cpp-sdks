@@ -9,7 +9,6 @@ add_library(${LIBNAME}
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/data_source_event_handler.cpp
-        data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
         flag_manager/flag_store.cpp
         flag_manager/flag_updater.cpp
@@ -37,27 +36,25 @@ add_library(${LIBNAME}
         bindings/c/sdk.cpp
         data_sources/null_data_source.cpp
         flag_manager/context_index.cpp
-        serialization/json_all_flags.hpp
-        serialization/json_all_flags.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_persistence.cpp
         bindings/c/sdk.cpp)
 
-if(MSVC OR (NOT BUILD_SHARED_LIBS))
-        target_link_libraries(${LIBNAME}
-                PUBLIC launchdarkly::common
-                PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
-else()
-        # The default static lib builds, for linux, are positition independent.
-        # So they do not link into a shared object without issues. So, when
-        # building shared objects do not link the static libraries and instead
-        # use the "src.hpp" files for required libraries.
-        # macOS shares the same path for simplicity.
-        target_link_libraries(${LIBNAME}
-        PUBLIC launchdarkly::common
-        PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
+if (MSVC OR (NOT BUILD_SHARED_LIBS))
+    target_link_libraries(${LIBNAME}
+            PUBLIC launchdarkly::common
+            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
+else ()
+    # The default static lib builds, for linux, are positition independent.
+    # So they do not link into a shared object without issues. So, when
+    # building shared objects do not link the static libraries and instead
+    # use the "src.hpp" files for required libraries.
+    # macOS shares the same path for simplicity.
+    target_link_libraries(${LIBNAME}
+            PUBLIC launchdarkly::common
+            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
 
-        target_sources(${LIBNAME} PRIVATE boost.cpp)
+    target_sources(${LIBNAME} PRIVATE boost.cpp)
 endif ()
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
@@ -67,7 +64,7 @@ set_property(TARGET ${LIBNAME} PROPERTY
 
 install(TARGETS ${LIBNAME})
 if (BUILD_SHARED_LIBS AND MSVC)
-        install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
 endif ()
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.

@@ -1,8 +1,9 @@
 #include "data_source_event_handler.hpp"
-#include "../serialization/json_all_flags.hpp"
 
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
+#include <launchdarkly/serialization/json_item_descriptor.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/core/ignore_unused.hpp>
@@ -35,13 +36,14 @@ static tl::expected<DataSourceEventHandler::PatchData, JsonError> tag_invoke(
         auto const& obj = json_value.as_object();
         auto const* key_iter = obj.find("key");
         auto key = ValueAsOpt<std::string>(key_iter, obj.end());
-        auto result =
-            boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-                json_value);
+        auto result = boost::json::value_to<
+            tl::expected<std::optional<EvaluationResult>, JsonError>>(
+            json_value);
 
-        if (result.has_value() && key.has_value()) {
+        if (result.has_value() && result.value().has_value() &&
+            key.has_value()) {
             return DataSourceEventHandler::PatchData{key.value(),
-                                                     result.value()};
+                                                     result.value().value()};
         }
     }
     return tl::unexpected(JsonError::kSchemaFailure);
@@ -93,11 +95,15 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
-            std::unordered_map<std::string, ItemDescriptor>, JsonError>>(
-            parsed);
+            std::optional<std::unordered_map<std::string, ItemDescriptor>>,
+            JsonError>>(parsed);
 
         if (res.has_value()) {
-            handler_.Init(context_, res.value());
+            // If the map was null or omitted, treat it like an empty data set.
+            auto map = res.value().value_or(
+                std::unordered_map<std::string, ItemDescriptor>{});
+
+            handler_.Init(context_, std::move(map));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
