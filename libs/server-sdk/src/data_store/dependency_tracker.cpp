@@ -41,7 +41,7 @@ DependencySet::end() const {
 }
 
 std::set<std::string> const& DependencySet::SetForKind(DataKind kind) {
-    return data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data();
+    return Data(kind);
 }
 
 std::set<std::string> const& DependencySet::Data(DataKind kind) const {
