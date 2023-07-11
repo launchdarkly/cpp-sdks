@@ -32,8 +32,8 @@ class DataStoreUpdater
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
     void Init(launchdarkly::data_model::SDKDataSet data_set) override;
-    void Upsert(std::string key, FlagDescriptor flag) override;
-    void Upsert(std::string key, SegmentDescriptor segment) override;
+    void Upsert(std::string const& key, FlagDescriptor flag) override;
+    void Upsert(std::string const& key, SegmentDescriptor segment) override;
     ~DataStoreUpdater() override = default;
 
     DataStoreUpdater(DataStoreUpdater const& item) = delete;

@@ -44,17 +44,15 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
 }
 
-void DataStoreUpdater::Upsert(std::string key,
-                              launchdarkly::server_side::data_source::
-                                  IDataSourceUpdateSink::FlagDescriptor flag) {
-    UpsertCommon(DataKind::kFlag, key, store_->GetFlag(key), flag);
+void DataStoreUpdater::Upsert(std::string const& key,
+                              data_store::FlagDescriptor flag) {
+    UpsertCommon(DataKind::kFlag, key, store_->GetFlag(key), std::move(flag));
 }
 
-void DataStoreUpdater::Upsert(
-    std::string key,
-    launchdarkly::server_side::data_source::IDataSourceUpdateSink::
-        SegmentDescriptor segment) {
-    UpsertCommon(DataKind::kSegment, key, store_->GetSegment(key), segment);
+void DataStoreUpdater::Upsert(std::string const& key,
+                              data_store::SegmentDescriptor segment) {
+    UpsertCommon(DataKind::kSegment, key, store_->GetSegment(key),
+                 std::move(segment));
 }
 
 bool DataStoreUpdater::HasListeners() const {

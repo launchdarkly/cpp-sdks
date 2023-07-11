@@ -55,25 +55,21 @@ void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
                                        std::move(flag.second)));
     }
     for (auto segment : dataSet.segments) {
-        segments_.emplace(segment.first,
-                          std::make_shared<SegmentDescriptor>(
-                              std::move(segment.second)));
+        segments_.emplace(segment.first, std::make_shared<SegmentDescriptor>(
+                                             std::move(segment.second)));
     }
 }
 
-void MemoryStore::Upsert(
-    std::string key,
-    data_source::IDataSourceUpdateSink::FlagDescriptor flag) {
+void MemoryStore::Upsert(std::string const& key,
+                         data_store::FlagDescriptor flag) {
     std::lock_guard lock{data_mutex_};
     flags_[key] = std::make_shared<FlagDescriptor>(std::move(flag));
 }
 
-void MemoryStore::Upsert(
-    std::string key,
-    data_source::IDataSourceUpdateSink::SegmentDescriptor segment) {
+void MemoryStore::Upsert(std::string const& key,
+                         data_store::SegmentDescriptor segment) {
     std::lock_guard lock{data_mutex_};
-    segments_[key] =
-        std::make_shared<SegmentDescriptor>(std::move(segment));
+    segments_[key] = std::make_shared<SegmentDescriptor>(std::move(segment));
 }
 
 }  // namespace launchdarkly::server_side::data_store

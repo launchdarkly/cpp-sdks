@@ -107,8 +107,8 @@ TEST(ScopedMapTest, CanIterate) {
         } else {
             EXPECT_EQ(DataKind::kSegment, ns.Kind());
         }
-        for (auto& depSet : ns.Data()) {
-            for (auto& deps : depSet.second) {
+        for (auto const& depSet : ns.Data()) {
+            for (auto const& deps : depSet.second) {
                 for (auto& dep : deps.Data()) {
                     EXPECT_EQ(expectationKinds[count], deps.Kind());
                     EXPECT_TRUE(expectationKeys.count(dep) != 0);

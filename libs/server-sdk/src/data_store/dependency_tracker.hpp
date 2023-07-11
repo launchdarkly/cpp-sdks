@@ -23,6 +23,8 @@ class TaggedData {
    public:
     explicit TaggedData(DataKind kind) : kind_(kind) {}
     [[nodiscard]] DataKind Kind() const { return kind_; }
+    [[nodiscard]] Storage const& Data() const { return storage_; }
+
     [[nodiscard]] Storage& Data() { return storage_; }
 
    private:
@@ -48,9 +50,9 @@ class DependencySet {
 
     void Remove(DataKind kind, std::string const& key);
 
-    [[nodiscard]] bool Contains(DataKind kind, std::string const& key);
+    [[nodiscard]] bool Contains(DataKind kind, std::string const& key) const;
 
-    [[nodiscard]] std::set<std::string> SetForKind(DataKind kind);
+    [[nodiscard]] std::set<std::string> const& SetForKind(DataKind kind);
 
     /**
      * Return the size of all the data kind sets.
@@ -58,9 +60,9 @@ class DependencySet {
      */
     [[nodiscard]] std::size_t Size();
 
-    [[nodiscard]] typename DataType::iterator begin();
+    [[nodiscard]] typename DataType::const_iterator begin() const;
 
-    [[nodiscard]] typename DataType::iterator end();
+    [[nodiscard]] typename DataType::const_iterator end() const;
 
    private:
     DataType data_;
@@ -84,14 +86,15 @@ class DependencyMap {
                    static_cast<std::size_t>(DataKind::kKindCount)>;
     void Set(DataKind kind, std::string key, DependencySet val);
 
-    [[nodiscard]] std::optional<DependencySet> Get(DataKind kind,
-                                                   std::string const& key);
+    [[nodiscard]] std::optional<DependencySet> Get(
+        DataKind kind,
+        std::string const& key) const;
 
     void Clear();
 
-    [[nodiscard]] typename DataType::iterator begin();
+    [[nodiscard]] typename DataType::const_iterator begin() const;
 
-    [[nodiscard]] typename DataType::iterator end();
+    [[nodiscard]] typename DataType::const_iterator end() const;
 
    private:
     DataType data_;
@@ -158,8 +161,9 @@ class DependencyTracker {
      * @param dependencies A set of dependencies to extend.
      * @param clauses The clauses to determine dependencies for.
      */
-    static void CalculateClauseDeps(DependencySet& dependencies,
-                                    std::vector<data_model::Clause>& clauses);
+    static void CalculateClauseDeps(
+        DependencySet& dependencies,
+        std::vector<data_model::Clause> const& clauses);
 };
 
 }  // namespace launchdarkly::server_side::data_store
