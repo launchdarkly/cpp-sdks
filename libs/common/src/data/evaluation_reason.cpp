@@ -57,34 +57,32 @@ EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
                        std::nullopt) {}
 
 EvaluationReason EvaluationReason::Off() {
-    return EvaluationReason(Kind::kOff, std::nullopt, std::nullopt,
-                            std::nullopt, std::nullopt, false, std::nullopt);
+    return {Kind::kOff,   std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, false,        std::nullopt};
 }
 
 EvaluationReason EvaluationReason::PrerequisiteFailed(
     std::string prerequisite_key) {
-    return EvaluationReason(Kind::kPrerequisiteFailed, std::nullopt,
-                            std::nullopt, std::nullopt,
-                            std::move(prerequisite_key), false, std::nullopt);
+    return {
+        Kind::kPrerequisiteFailed,   std::nullopt, std::nullopt, std::nullopt,
+        std::move(prerequisite_key), false,        std::nullopt};
 }
 
 EvaluationReason EvaluationReason::TargetMatch() {
-    return EvaluationReason(Kind::kTargetMatch, std::nullopt, std::nullopt,
-                            std::nullopt, std::nullopt, false, std::nullopt);
+    return {Kind::kTargetMatch, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt,       false,        std::nullopt};
 }
 
 EvaluationReason EvaluationReason::Fallthrough(bool in_experiment) {
-    return EvaluationReason(Kind::kFallthrough, std::nullopt, std::nullopt,
-                            std::nullopt, std::nullopt, in_experiment,
-                            std::nullopt);
+    return {Kind::kFallthrough, std::nullopt,  std::nullopt, std::nullopt,
+            std::nullopt,       in_experiment, std::nullopt};
 }
 
 EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
                                              std::optional<std::string> rule_id,
                                              bool in_experiment) {
-    return EvaluationReason(Kind::kRuleMatch, std::nullopt, rule_index,
-                            std::move(rule_id), std::nullopt, in_experiment,
-                            std::nullopt);
+    return {Kind::kRuleMatch, std::nullopt,  rule_index,  std::move(rule_id),
+            std::nullopt,     in_experiment, std::nullopt};
 }
 
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {

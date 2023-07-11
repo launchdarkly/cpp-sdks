@@ -14,7 +14,8 @@ std::ostream& operator<<(std::ostream& out, Error const& err) {
             return out << "rolloutMissingVariations";
         case Error::kUnknownOperator:
             return out << "unknownOperator";
+        default:
+            return out << "unknownError";
     }
-    return out << "unknownError";
 }
 }  // namespace launchdarkly::server_side::evaluation

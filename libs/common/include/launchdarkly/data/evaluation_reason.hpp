@@ -120,31 +120,28 @@ class EvaluationReason {
     explicit EvaluationReason(enum ErrorKind error_kind);
 
     /**
-     * Represents the fact that the flag was off.
-     * */
+     * The flag was off.
+     */
     static EvaluationReason Off();
 
-    /*
-     * Represents the fact that the flag didn't return a
-     * variation due to a prerequisite failing.
+    /**
+     * The flag didn't return a variation due to a prerequisite failing.
      */
     static EvaluationReason PrerequisiteFailed(std::string prerequisite_key);
 
     /**
-     * Represents the fact that the flag evaluated to a particular variation
-     * due to a target match.
+     * The flag evaluated to a particular variation due to a target match.
      */
     static EvaluationReason TargetMatch();
 
     /**
-     * Represents the fact that the flag evaluated to its fallthrough value.
+     * The flag evaluated to its fallthrough value.
      * @param in_experiment Whether the flag is part of an experiment.
      */
     static EvaluationReason Fallthrough(bool in_experiment);
 
     /**
-     * Represents the fact that the flag evaluated to a particular variation
-     * because it matched a rule.
+     * The flag evaluated to a particular variation because it matched a rule.
      * @param rule_index Index of the rule.
      * @param rule_id ID of the rule.
      * @param in_experiment Whether the flag is part of an experiment.

@@ -14,7 +14,7 @@ Flag::Rollout::WeightedVariation::WeightedVariation(std::uint64_t variation_,
 Flag::Rollout::WeightedVariation Flag::Rollout::WeightedVariation::Untracked(
     Flag::Variation variation_,
     std::uint64_t weight_) {
-    return Flag::Rollout::WeightedVariation(variation_, weight_, true);
+    return {variation_, weight_, true};
 }
 
 Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)

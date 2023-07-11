@@ -16,12 +16,17 @@ using WeightedVariation = Flag::Rollout::WeightedVariation;
 // is identical across SDKs.
 
 /**
- * Tests may derive from this class to access shared constants.
+ * Tests in this file may derive from BucketingTests to gain access to shared
+ * constants.
  */
 class BucketingTests : public ::testing::Test {
    public:
+    // Bucket results must be no more than this distance from the expected
+    // value.
     const static double kBucketTolerance;
+    // An arbitrary hash key.
     const static std::string kHashKey;
+    // An arbitrary salt.
     const static std::string kSalt;
 };
 
@@ -29,14 +34,25 @@ double const BucketingTests::kBucketTolerance = 0.0000001;
 std::string const BucketingTests::kHashKey = "hashKey";
 std::string const BucketingTests::kSalt = "saltyA";
 
+// Parameterized tests may be instantiated with one or more BucketTests for
+// convenience.
 struct BucketTest {
+    // Context key.
     std::string key;
+    // Expected bucket value as a string; this is only used for printing on
+    // error.
     std::string expectedBucket;
+    // Expected computed variation index.
     Flag::Variation expectedVariation;
+    // Whether the context was determined to be in an experiment.
     bool expectedInExperiment;
+    // The rollout used for the test, which may be a percent rollout or an
+    // experiment.
     Flag::Rollout rollout;
-    std::optional<std::string> customAttr;
 };
+
+#define IN_EXPERIMENT true
+#define NOT_IN_EXPERIMENT false
 
 class BucketVariationTest : public BucketingTests,
                             public ::testing::WithParamInterface<BucketTest> {};
@@ -57,6 +73,14 @@ static Flag::Rollout ExperimentRollout() {
     return rollout;
 }
 
+static Flag::Rollout IncompleteWeighting() {
+    WeightedVariation wv0(0, 1);
+    WeightedVariation wv1(1, 2);
+    WeightedVariation wv2(2, 3);
+
+    return Flag::Rollout({wv0, wv1, wv2});
+}
+
 TEST_P(BucketVariationTest, VariationIndexForContext) {
     auto const& param = GetParam();
 
@@ -74,27 +98,42 @@ TEST_P(BucketVariationTest, VariationIndexForContext) {
         << result->variation_index;
 
     ASSERT_EQ(result->in_experiment, param.expectedInExperiment)
-        << param.key
-        << (param.expectedInExperiment ? " should " : " should not ")
-        << "be in experiment";
+        << param.key << " "
+        << (param.expectedInExperiment ? "should" : "should not")
+        << " be in experiment";
 }
 
 INSTANTIATE_TEST_SUITE_P(
     PercentRollout,
     BucketVariationTest,
-    ::testing::ValuesIn(
-        {BucketTest{"userKeyA", "0.42157587", 0, false, PercentRollout()},
-         BucketTest{"userKeyB", "0.6708485", 1, false, PercentRollout()},
-         BucketTest{"userKeyC", "0.10343106", 0, false, PercentRollout()}}));
+    ::testing::ValuesIn({BucketTest{"userKeyA", "0.42157587", 0,
+                                    NOT_IN_EXPERIMENT, PercentRollout()},
+                         BucketTest{"userKeyB", "0.6708485", 1,
+                                    NOT_IN_EXPERIMENT, PercentRollout()},
+                         BucketTest{"userKeyC", "0.10343106", 0,
+                                    NOT_IN_EXPERIMENT, PercentRollout()}}));
 
-INSTANTIATE_TEST_SUITE_P(
-    ExperimentRollout,
-    BucketVariationTest,
-    ::testing::ValuesIn({
-        BucketTest{"userKeyA", "0.09801207", 0, true, ExperimentRollout()},
-        BucketTest{"userKeyB", "0.14483777", 1, true, ExperimentRollout()},
-        BucketTest{"userKeyC", "0.9242641", 0, false, ExperimentRollout()},
-    }));
+INSTANTIATE_TEST_SUITE_P(ExperimentRollout,
+                         BucketVariationTest,
+                         ::testing::ValuesIn({
+                             BucketTest{"userKeyA", "0.09801207", 0,
+                                        IN_EXPERIMENT, ExperimentRollout()},
+                             BucketTest{"userKeyB", "0.14483777", 1,
+                                        IN_EXPERIMENT, ExperimentRollout()},
+                             BucketTest{"userKeyC", "0.9242641", 0,
+                                        NOT_IN_EXPERIMENT, ExperimentRollout()},
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(IncompleteWeightingDefaultsToLastVariation,
+                         BucketVariationTest,
+                         ::testing::ValuesIn({
+                             BucketTest{"userKeyD", "0.7816281", 2,
+                                        NOT_IN_EXPERIMENT,
+                                        IncompleteWeighting()},
+                         }));
+
+#undef IN_EXPERIMENT
+#undef NOT_IN_EXPERIMENT
 
 TEST_F(BucketingTests, VariationIndexForContextWithCustomAttribute) {
     WeightedVariation wv0(0, 60'000);
@@ -285,7 +324,7 @@ TEST_F(BucketingTests, BucketContextByFloatAttributeThatIsInteger) {
     ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
 }
 
-TEST_F(BucketingTests, BucketValueBeyongLastBucketIsPinnedToLastBucket) {
+TEST_F(BucketingTests, BucketValueBeyondLastBucketIsPinnedToLastBucket) {
     WeightedVariation wv0(0, 5'000);
     WeightedVariation wv1(1, 5'000);
 
@@ -323,25 +362,4 @@ TEST_F(BucketingTests,
     ASSERT_TRUE(result);
     ASSERT_EQ(result->variation_index, 1);
     ASSERT_TRUE(result->in_experiment);
-}
-
-TEST_F(BucketingTests, IncompleteWeightingDefaultsToLastVariation) {
-    WeightedVariation wv0(0, 1);
-    WeightedVariation wv1(1, 2);
-    WeightedVariation wv2(2, 3);
-
-    Flag::Rollout rollout({wv0, wv1, wv2});
-
-    auto context = ContextBuilder()
-                       .Kind("user", "userKeyD")
-                       .Set("intAttr", 99'999)
-                       .Build();
-
-    auto result = Variation(rollout, kHashKey, context, kSalt);
-
-    ASSERT_TRUE(result);
-    ASSERT_EQ(result->variation_index, 2)
-        << "userKeyD (bucket 0.7816281) should get variation 2, but got "
-        << result->variation_index;
-    ASSERT_FALSE(result->in_experiment);
 }

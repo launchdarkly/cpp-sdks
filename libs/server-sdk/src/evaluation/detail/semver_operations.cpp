@@ -17,6 +17,10 @@ namespace launchdarkly::server_side::evaluation::detail {
 char const* const kSemVerRegex =
     R"(^(?<major>0|[1-9]\d*)(\.(?<minor>0|[1-9]\d*))?(\.(?<patch>0|[1-9]\d*))?(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$)";
 
+/** From Boost docs:
+ * Class basic_regex and its typedefs regex and wregex are thread safe, in that
+ * compiled regular expressions can safely be shared between threads.
+ */
 static boost::regex const& SemVerRegex() {
     static boost::regex regex{kSemVerRegex, boost::regex_constants::no_except};
     LD_ASSERT(regex.status() == 0);
@@ -32,12 +36,15 @@ SemVer::SemVer(VersionType major,
 SemVer::VersionType SemVer::Major() const {
     return major_;
 }
+
 SemVer::VersionType SemVer::Minor() const {
     return minor_;
 }
+
 SemVer::VersionType SemVer::Patch() const {
     return patch_;
 }
+
 std::optional<std::vector<SemVer::Token>> const& SemVer::Prerelease() const {
     return prerelease_;
 }
@@ -99,8 +106,10 @@ std::optional<SemVer> ToSemVer(std::string const& value) {
     if (value.empty()) {
         return std::nullopt;
     }
+
     boost::regex const& semver_regex = SemVerRegex();
     boost::smatch match;
+
     try {
         if (!boost::regex_match(value, match, semver_regex)) {
             // Not a semantic version.

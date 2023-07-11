@@ -64,7 +64,7 @@ std::string Context::make_canonical_key() {
     if (kinds_to_keys_.size() == 1) {
         if (auto iterator = kinds_to_keys_.find("user");
             iterator != kinds_to_keys_.end()) {
-            return std::string(iterator->second);
+            return iterator->second;
         }
     }
     std::stringstream stream;

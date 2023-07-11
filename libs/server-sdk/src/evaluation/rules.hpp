@@ -47,7 +47,7 @@ namespace launchdarkly::server_side::evaluation {
     flag_manager::FlagStore const& store,
     detail::EvaluationStack& stack);
 
-[[nodiscard]] bool MaybeNegate(data_model::Clause const&, bool value);
+[[nodiscard]] bool MaybeNegate(data_model::Clause const& clause, bool value);
 
 [[nodiscard]] bool IsTargeted(Context const&,
                               std::vector<std::string> const&,

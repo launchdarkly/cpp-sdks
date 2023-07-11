@@ -2,13 +2,14 @@
 
 #include "timestamp.h"
 
+#include <cmath>
 #include <sstream>
 
 namespace launchdarkly::server_side::evaluation::detail {
 
 std::optional<Timepoint> ToTimepoint(Value const& value) {
     if (value.Type() == Value::Type::kNumber) {
-        double const& epoch_ms = value.AsDouble();
+        double const epoch_ms = value.AsDouble();
         return MillisecondsToTimepoint(epoch_ms);
     }
     if (value.Type() == Value::Type::kString) {

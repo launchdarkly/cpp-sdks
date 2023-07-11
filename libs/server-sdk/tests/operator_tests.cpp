@@ -79,7 +79,6 @@ TEST(OpTests, DateComparisonMicrosecondPrecision) {
     }
 }
 
-// Comparison should be effectively "equal" for all combinations.
 TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
     auto dates = std::vector<std::pair<std::string, std::string>>{
         // Using Zulu suffix.
@@ -87,19 +86,6 @@ TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
         // Using offset suffix.
         {"2023-10-08T02:00:00.0000000001+00:00",
          "2023-10-08T02:00:00.00000000011+00:00"}};
-
-    //
-    //    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate1, kDate2))
-    //        << kDate1 << " < " << kDate2;
-    //
-    //    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate1, kDate2))
-    //        << kDate1 << " not > " << kDate2;
-    //
-    //    EXPECT_FALSE(Match(Clause::Op::kBefore, kDate2, kDate1))
-    //        << kDate2 << " not < " << kDate1;
-    //
-    //    EXPECT_FALSE(Match(Clause::Op::kAfter, kDate2, kDate1))
-    //        << kDate2 << " > " << kDate1;
 
     for (auto const& [date1, date2] : dates) {
         EXPECT_FALSE(Match(Clause::Op::kBefore, date1, date2))
@@ -114,7 +100,6 @@ TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
         EXPECT_FALSE(Match(Clause::Op::kAfter, date2, date1))
             << date2 << " > " << date1;
     }
-    // Somehow date parsing is succeeding when we have the offset.
 }
 
 // Because RFC3339 timestamps may use 'Z' to indicate a 00:00 offset,

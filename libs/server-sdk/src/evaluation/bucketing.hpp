@@ -48,6 +48,9 @@ struct BucketResult {
 
     BucketResult(data_model::Flag::Variation variation, bool in_experiment)
         : variation_index(variation), in_experiment(in_experiment) {}
+
+    BucketResult(data_model::Flag::Variation variation)
+        : variation_index(variation), in_experiment(false) {}
 };
 
 std::optional<float> ComputeBucket(Value const& value,

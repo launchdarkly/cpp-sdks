@@ -1,6 +1,7 @@
 #include "evaluator.hpp"
 #include "rules.hpp"
 
+#include <boost/core/ignore_unused.hpp>
 #include <tl/expected.hpp>
 
 #include <algorithm>
@@ -8,31 +9,32 @@
 
 namespace launchdarkly::server_side::evaluation {
 
-EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
+using namespace data_model;
+
+EvaluationDetail<Value> FlagVariation(Flag const& flag,
                                       std::uint64_t variation_index,
                                       EvaluationReason reason);
 
-EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
-                                 EvaluationReason reason);
+EvaluationDetail<Value> OffValue(Flag const& flag, EvaluationReason reason);
 
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
-ResolveVariationOrRollout(data_model::Flag const& flag,
-                          data_model::Flag::VariationOrRollout const& vr,
+ResolveVariationOrRollout(Flag const& flag,
+                          Flag::VariationOrRollout const& vr,
                           Context const& context);
 
 std::optional<std::size_t> AnyTargetMatchVariation(
     launchdarkly::Context const& context,
-    data_model::Flag const& flag);
+    Flag const& flag);
 
 std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
-    data_model::Flag::Target const& target);
+    Flag::Target const& target);
 
 Evaluator::Evaluator(Logger& logger, flag_manager::FlagStore const& store)
     : logger_(logger), store_(store), stack_(20) {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
-    data_model::Flag const& flag,
+    Flag const& flag,
     launchdarkly::Context const& context) {
     // If the flag is off, return immediately.
     if (!flag.on) {
@@ -57,10 +59,10 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
         auto guard = stack_.NoticePrerequisite(flag.key);
 
-        for (data_model::Flag::Prerequisite const& prereq :
-             flag.prerequisites) {
+        for (Flag::Prerequisite const& prereq : flag.prerequisites) {
             flag_manager::FlagStore::FlagItem prereq_flag =
                 store_.GetFlag(prereq.key);
+
             if (!prereq_flag) {
                 return OffValue(
                     flag, EvaluationReason::PrerequisiteFailed(prereq.key));
@@ -80,24 +82,24 @@ EvaluationDetail<Value> Evaluator::Evaluate(
                     EvaluationReason::ErrorKind::kMalformedFlag, Value());
             }
 
-            EvaluationDetail<Value> prerequisite_result =
+            EvaluationDetail<Value> prereq_result =
                 Evaluate(*prereq_flag_ref.item, context);
 
-            if (prerequisite_result.Reason().has_value() &&
-                prerequisite_result.Reason().value().Kind() ==
+            if (prereq_result.Reason().has_value() &&
+                prereq_result.Reason().value().Kind() ==
                     EvaluationReason::Kind::kError) {
                 return EvaluationDetail<Value>(
                     EvaluationReason::ErrorKind::kMalformedFlag, Value());
             }
 
             std::optional<std::size_t> variation_index =
-                prerequisite_result.VariationIndex();
+                prereq_result.VariationIndex();
 
-            // todo(cwaldren) record prerequisite evaluation
+            // TODO(cwaldren) record prerequisite evaluation events.
 
             // Although it would seem we could immediately fail the prereq if it
-            // is off (after retrieving it from the store) that needs to be
-            // deferred until this point, in order to generate prerequisite
+            // is off (after retrieving it from the store), that check needs to
+            // be deferred until this point, in order to generate prerequisite
             // events.
 
             if (!prereq_flag_ref.item->on ||
@@ -118,11 +120,11 @@ EvaluationDetail<Value> Evaluator::Evaluate(
                              EvaluationReason::TargetMatch());
     }
 
-    // If there were no target matches, then evaluate against the
-    // flag's rules.
+    // If there were no target matches, then evaluate each of the flag's rules.
 
     for (std::size_t i = 0; i < flag.rules.size(); i++) {
         auto const& rule = flag.rules[i];
+
         tl::expected<bool, enum EvaluationReason::ErrorKind> rule_match =
             Match(rule, context, store_, stack_);
 
@@ -131,74 +133,85 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             return EvaluationDetail<Value>(
                 EvaluationReason::ErrorKind::kMalformedFlag, Value());
         }
-        if (!rule_match.value()) {
+
+        if (!(*rule_match)) {
             continue;
         }
-        auto result =
+
+        tl::expected<BucketResult, enum EvaluationReason::ErrorKind> result =
             ResolveVariationOrRollout(flag, rule.variationOrRollout, context);
+
         if (!result) {
             return EvaluationDetail<Value>(result.error(), Value());
         }
-        auto reason =
+
+        EvaluationReason reason =
             EvaluationReason::RuleMatch(i, rule.id, result->in_experiment);
+
         return FlagVariation(flag, result->variation_index, std::move(reason));
     }
 
     // If there were no rule matches, then return the fallthrough variation.
 
-    auto result = ResolveVariationOrRollout(flag, flag.fallthrough, context);
+    tl::expected<BucketResult, enum EvaluationReason::ErrorKind> result =
+        ResolveVariationOrRollout(flag, flag.fallthrough, context);
+
     if (!result) {
         return EvaluationDetail<Value>(result.error(), Value());
     }
-    auto reason = EvaluationReason::Fallthrough(result->in_experiment);
+
+    EvaluationReason reason =
+        EvaluationReason::Fallthrough(result->in_experiment);
+
     return FlagVariation(flag, result->variation_index, std::move(reason));
 }
 
-EvaluationDetail<Value> FlagVariation(data_model::Flag const& flag,
+EvaluationDetail<Value> FlagVariation(Flag const& flag,
                                       std::uint64_t variation_index,
                                       EvaluationReason reason) {
     if (variation_index >= flag.variations.size()) {
         return EvaluationDetail<Value>(
             EvaluationReason::ErrorKind::kMalformedFlag, Value());
     }
+
     auto const& variation = flag.variations.at(variation_index);
+
     return EvaluationDetail<Value>(variation, variation_index,
                                    std::move(reason));
 }
 
-EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
-                                 EvaluationReason reason) {
+EvaluationDetail<Value> OffValue(Flag const& flag, EvaluationReason reason) {
     if (flag.offVariation) {
         return FlagVariation(flag, *flag.offVariation, std::move(reason));
     }
+
     return EvaluationDetail<Value>(std::move(reason));
 }
 
 std::optional<std::size_t> AnyTargetMatchVariation(
     launchdarkly::Context const& context,
-    data_model::Flag const& flag) {
+    Flag const& flag) {
     if (flag.contextTargets.empty()) {
         for (auto const& target : flag.targets) {
             if (auto index = TargetMatchVariation(context, target)) {
                 return index;
             }
         }
-    } else {
-        for (auto const& context_target : flag.contextTargets) {
-            if (context_target.contextKind == "user" &&
-                context_target.values.empty()) {
-                for (auto const& target : flag.targets) {
-                    if (target.variation == context_target.variation) {
-                        if (auto index =
-                                TargetMatchVariation(context, target)) {
-                            return index;
-                        }
+        return std::nullopt;
+    }
+
+    for (auto const& context_target : flag.contextTargets) {
+        if (context_target.contextKind == "user" &&
+            context_target.values.empty()) {
+            for (auto const& target : flag.targets) {
+                if (target.variation == context_target.variation) {
+                    if (auto index = TargetMatchVariation(context, target)) {
+                        return index;
                     }
                 }
-            } else if (auto index =
-                           TargetMatchVariation(context, context_target)) {
-                return index;
             }
+        } else if (auto index = TargetMatchVariation(context, context_target)) {
+            return index;
         }
     }
 
@@ -207,7 +220,7 @@ std::optional<std::size_t> AnyTargetMatchVariation(
 
 std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
-    data_model::Flag::Target const& target) {
+    Flag::Target const& target) {
     Value key = context.Get(target.contextKind, "key");
     if (!key) {
         return std::nullopt;
@@ -222,37 +235,34 @@ std::optional<std::size_t> TargetMatchVariation(
     return std::nullopt;
 }
 
-tl::expected<BucketResult, Error> Variation(
-    data_model::Flag::VariationOrRollout const& vr,
-    std::string const& flag_key,
-    Context const& context,
-    std::string const& salt) {
+tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
+                                            std::string const& flag_key,
+                                            Context const& context,
+                                            std::string const& salt) {
     return std::visit(
         [&](auto&& arg) -> tl::expected<BucketResult, Error> {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, data_model::Flag::Variation>) {
-                return BucketResult(arg, false);
-            } else if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+            if constexpr (std::is_same_v<T, Flag::Variation>) {
+                return BucketResult(arg);
+            } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
                 if (arg.variations.empty()) {
                     return tl::make_unexpected(
                         Error::kRolloutMissingVariations);
                 }
 
                 bool is_experiment =
-                    arg.kind == data_model::Flag::Rollout::Kind::kExperiment;
+                    arg.kind == Flag::Rollout::Kind::kExperiment;
 
-                std::optional<BucketPrefix> prefix;
-                if (arg.seed) {
-                    prefix = BucketPrefix(*arg.seed);
-                } else {
-                    prefix = BucketPrefix(flag_key, salt);
-                }
+                std::optional<BucketPrefix> prefix =
+                    arg.seed ? BucketPrefix(*arg.seed)
+                             : BucketPrefix(flag_key, salt);
 
                 auto bucketing_result = Bucket(context, arg.bucketBy, *prefix,
                                                is_experiment, arg.contextKind);
                 if (!bucketing_result) {
                     return tl::make_unexpected(bucketing_result.error());
                 }
+
                 auto [bucket, lookup] = *bucketing_result;
 
                 double sum = 0.0;
@@ -274,21 +284,20 @@ tl::expected<BucketResult, Error> Variation(
         },
         vr);
 }
+
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
-ResolveVariationOrRollout(data_model::Flag const& flag,
-                          data_model::Flag::VariationOrRollout const& vr,
+ResolveVariationOrRollout(Flag const& flag,
+                          Flag::VariationOrRollout const& vr,
                           Context const& context) {
     if (!flag.salt) {
         return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
     }
 
-    const tl::expected<BucketResult, Error> result =
-        Variation(vr, flag.key, context, *flag.salt);
-
-    if (!result) {
-        return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
-    }
-    return *result;
+    return Variation(vr, flag.key, context, *flag.salt)
+        .map_error([](Error discarded) {
+            boost::ignore_unused(discarded);
+            return EvaluationReason::ErrorKind::kMalformedFlag;
+        });
 }
 
 }  // namespace launchdarkly::server_side::evaluation
