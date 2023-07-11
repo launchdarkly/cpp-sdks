@@ -35,22 +35,24 @@ class IDataStore {
      * there is no such segment, or the segment was deleted.
      */
     [[nodiscard]] virtual std::shared_ptr<SegmentDescriptor> GetSegment(
-        std::string const&  key) const = 0;
+        std::string const& key) const = 0;
 
     /**
      * Get all of the flags.
      *
      * @return Returns an unordered map of FlagDescriptors.
      */
-    [[nodiscard]] virtual std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>> AllFlags()
-        const = 0;
+    [[nodiscard]] virtual std::unordered_map<std::string,
+                                             std::shared_ptr<FlagDescriptor>>
+    AllFlags() const = 0;
 
     /**
      * Get all of the segments.
      *
      * @return Returns an unordered map of SegmentDescriptors.
      */
-    [[nodiscard]] virtual std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
+    [[nodiscard]] virtual std::unordered_map<std::string,
+                                             std::shared_ptr<SegmentDescriptor>>
     AllSegments() const = 0;
 
     /**

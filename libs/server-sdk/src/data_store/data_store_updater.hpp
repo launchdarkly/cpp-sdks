@@ -59,7 +59,9 @@ class DataStoreUpdater
 
         if (HasListeners()) {
             auto updated_deps = DependencySet();
-            dependency_tracker_.CalculateChanges(kind, key, updated_deps);
+            atus
+
+                dependency_tracker_.CalculateChanges(kind, key, updated_deps);
             NotifyChanges(updated_deps);
         }
 
@@ -69,8 +71,8 @@ class DataStoreUpdater
     template <typename FlagOrSegment>
     void CalculateChanges(
         DataKind kind,
-        SharedCollection<FlagOrSegment> existing_flags_or_segments,
-        Collection<FlagOrSegment> new_flags_or_segments,
+        SharedCollection<FlagOrSegment> const& existing_flags_or_segments,
+        Collection<FlagOrSegment> const& new_flags_or_segments,
         DependencySet& updated_items) {
         for (auto const& old_flag_or_segment : existing_flags_or_segments) {
             auto new_flag_or_segment =

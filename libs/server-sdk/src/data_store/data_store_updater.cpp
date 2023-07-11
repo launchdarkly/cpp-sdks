@@ -37,7 +37,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
     // Data will move into the store, so we want to update dependencies before
     // it is moved.
-    sink_->Init(data_set);
+    sink_->Init(std::move(data_set));
     // After updating the sink, let listeners know of changes.
     if (change_notifications) {
         NotifyChanges(*change_notifications);
