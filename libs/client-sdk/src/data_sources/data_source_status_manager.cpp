@@ -4,8 +4,8 @@
 #include <utility>
 
 #include <launchdarkly/connection.hpp>
+#include <launchdarkly/signals/boost_signal_connection.hpp>
 
-#include "../boost_signal_connection.hpp"
 #include "data_source_status_manager.hpp"
 
 namespace launchdarkly::client_side::data_sources {
@@ -104,7 +104,8 @@ DataSourceStatus DataSourceStatusManager::Status() const {
 std::unique_ptr<IConnection> DataSourceStatusManager::OnDataSourceStatusChange(
     std::function<void(data_sources::DataSourceStatus)> handler) {
     std::lock_guard lock{status_mutex_};
-    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
+    return std::make_unique<
+        ::launchdarkly::internal::signals::SignalConnection>(
         data_source_status_signal_.connect(handler));
 }
 
@@ -112,7 +113,7 @@ std::unique_ptr<IConnection>
 DataSourceStatusManager::OnDataSourceStatusChangeEx(
     std::function<bool(data_sources::DataSourceStatus)> handler) {
     std::lock_guard lock{status_mutex_};
-    return std::make_unique< ::launchdarkly::client_side::SignalConnection>(
+    return std::make_unique<launchdarkly::internal::signals::SignalConnection>(
         data_source_status_signal_.connect_extended(
             [handler](boost::signals2::connection const& conn,
                       data_sources::DataSourceStatus status) {
