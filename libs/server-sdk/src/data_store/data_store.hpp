@@ -14,9 +14,6 @@ namespace launchdarkly::server_side::data_store {
 
 /**
  * Interface for readonly access to SDK data.
- *
- * The data store is what the client uses to store feature flag data that has
- * been received from LaunchDarkly.
  */
 class IDataStore {
    public:
