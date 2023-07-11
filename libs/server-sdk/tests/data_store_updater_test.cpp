@@ -36,7 +36,8 @@ TEST(DataStoreUpdaterTest, InitPropagatesData) {
     flag.key = "flagA";
     flag.on = true;
     flag.variations = std::vector<Value>{true, false};
-    flag.fallthrough = 0;
+    Flag::Variation variation = 0;
+    flag.fallthrough = variation;
 
     auto segment = Segment();
     segment.version = 1;
@@ -72,21 +73,22 @@ TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
     flag_a_v1.key = "flagA";
     flag_a_v1.on = true;
     flag_a_v1.variations = std::vector<Value>{true, false};
-    flag_a_v1.fallthrough = 0;
+    Flag::Variation variation = 0;
+    flag_a_v1.fallthrough = variation;
 
     Flag flag_b_v1;
     flag_b_v1.version = 1;
     flag_b_v1.key = "flagA";
     flag_b_v1.on = true;
     flag_b_v1.variations = std::vector<Value>{true, false};
-    flag_b_v1.fallthrough = 0;
+    flag_b_v1.fallthrough = variation;
 
     Flag flab_c_v1;
     flab_c_v1.version = 1;
     flab_c_v1.key = "flagA";
     flab_c_v1.on = true;
     flab_c_v1.variations = std::vector<Value>{true, false};
-    flab_c_v1.fallthrough = 0;
+    flab_c_v1.fallthrough = variation;
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{
@@ -100,7 +102,7 @@ TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
     flag_a_v2.key = "flagA";
     flag_a_v2.on = true;
     flag_a_v2.variations = std::vector<Value>{true, false};
-    flag_a_v2.fallthrough = 0;
+    flag_a_v2.fallthrough = variation;
 
     // Not updated.
     Flag flag_c_v1_second;
@@ -108,7 +110,7 @@ TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
     flag_c_v1_second.key = "flagC";
     flag_c_v1_second.on = true;
     flag_c_v1_second.variations = std::vector<Value>{true, false};
-    flag_c_v1_second.fallthrough = 0;
+    flag_c_v1_second.fallthrough = variation;
 
     // New flag
     Flag flag_d;
@@ -116,7 +118,7 @@ TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
     flag_d.key = "flagD";
     flag_d.on = true;
     flag_d.variations = std::vector<Value>{true, false};
-    flag_d.fallthrough = 0;
+    flag_d.fallthrough = variation;
 
     std::atomic<bool> got_event(false);
     updater.OnFlagChange(

@@ -36,7 +36,8 @@ TEST(MemoryStoreTest, CanGetFlag) {
     flag.key = "flagA";
     flag.on = true;
     flag.variations = std::vector<Value>{true, false};
-    flag.fallthrough = 0;
+    Flag::Variation variation = 0;
+    flag.fallthrough = variation;
     store.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{
             {"flagA", FlagDescriptor(flag)}},

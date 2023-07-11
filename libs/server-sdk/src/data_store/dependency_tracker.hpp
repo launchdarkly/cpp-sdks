@@ -58,7 +58,7 @@ class DependencySet {
      * Return the size of all the data kind sets.
      * @return The combined size of all the data kind sets.
      */
-    [[nodiscard]] std::size_t Size();
+    [[nodiscard]] std::size_t Size() const;
 
     [[nodiscard]] typename DataType::const_iterator begin() const;
 

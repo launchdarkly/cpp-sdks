@@ -11,9 +11,8 @@ DependencySet::DependencySet()
       } {}
 
 void DependencySet::Set(DataKind kind, std::string key) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)]
-        .Data()
-        .emplace(std::move(key));
+    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().emplace(
+        std::move(key));
 }
 
 void DependencySet::Remove(DataKind kind, std::string const& key) {
@@ -27,7 +26,7 @@ bool DependencySet::Contains(DataKind kind, std::string const& key) const {
                .count(key) != 0;
 }
 
-std::size_t DependencySet::Size() {
+std::size_t DependencySet::Size() const {
     std::size_t size = 0;
     for (auto data_kind : data_) {
         size += data_kind.Data().size();
@@ -58,9 +57,8 @@ DependencyMap::DependencyMap()
       } {}
 
 void DependencyMap::Set(DataKind kind, std::string key, DependencySet val) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)]
-        .Data()
-        .emplace(std::move(key), std::move(val));
+    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().emplace(
+        std::move(key), std::move(val));
 }
 
 std::optional<DependencySet> DependencyMap::Get(DataKind kind,
