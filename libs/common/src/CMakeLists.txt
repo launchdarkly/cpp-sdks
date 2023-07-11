@@ -11,6 +11,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/built/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.

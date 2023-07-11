@@ -6,6 +6,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/signals/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
         )
 
 # Automatic library: static or dynamic based on user config.

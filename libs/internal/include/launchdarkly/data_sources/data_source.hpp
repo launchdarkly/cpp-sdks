@@ -1,6 +1,6 @@
 #pragma once
 #include <future>
-namespace launchdarkly::data_source {
+namespace launchdarkly::data_sources {
 
 class IDataSource {
    public:
