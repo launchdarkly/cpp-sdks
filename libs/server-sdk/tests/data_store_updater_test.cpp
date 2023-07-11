@@ -61,6 +61,84 @@ TEST(DataStoreUpdaterTest, InitPropagatesData) {
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
+TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
+    auto store = std::make_shared<MemoryStore>();
+    DataStoreUpdater updater(store, store);
+    Flag flag_a_v1;
+    flag_a_v1.version = 1;
+    flag_a_v1.key = "flagA";
+    flag_a_v1.on = true;
+    flag_a_v1.variations = std::vector<Value>{true, false};
+    flag_a_v1.fallthrough = 0;
+
+    Flag flag_b_v1;
+    flag_b_v1.version = 1;
+    flag_b_v1.key = "flagA";
+    flag_b_v1.on = true;
+    flag_b_v1.variations = std::vector<Value>{true, false};
+    flag_b_v1.fallthrough = 0;
+
+    Flag flab_c_v1;
+    flab_c_v1.version = 1;
+    flab_c_v1.key = "flagA";
+    flab_c_v1.on = true;
+    flab_c_v1.variations = std::vector<Value>{true, false};
+    flab_c_v1.fallthrough = 0;
+
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
+            {"flagA", IDataStore::FlagDescriptor(flag_a_v1)},
+            {"flagB", IDataStore::FlagDescriptor(flag_b_v1)}},
+        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+    });
+
+    Flag flag_a_v2;
+    flag_a_v2.version = 2;
+    flag_a_v2.key = "flagA";
+    flag_a_v2.on = true;
+    flag_a_v2.variations = std::vector<Value>{true, false};
+    flag_a_v2.fallthrough = 0;
+
+    // Not updated.
+    Flag flag_c_v1_second;
+    flag_c_v1_second.version = 1;
+    flag_c_v1_second.key = "flagC";
+    flag_c_v1_second.on = true;
+    flag_c_v1_second.variations = std::vector<Value>{true, false};
+    flag_c_v1_second.fallthrough = 0;
+
+    // New flag
+    Flag flag_d;
+    flag_d.version = 2;
+    flag_d.key = "flagD";
+    flag_d.on = true;
+    flag_d.variations = std::vector<Value>{true, false};
+    flag_d.fallthrough = 0;
+
+    std::atomic<bool> got_event(false);
+    updater.OnFlagChange(
+        [&got_event](std::shared_ptr<std::set<std::string>> changeset) {
+            got_event = true;
+            std::vector<std::string> diff;
+            auto expectedSet = std::set<std::string>{"flagA", "flagB", "flagD"};
+            std::set_difference(expectedSet.begin(), expectedSet.end(),
+                                changeset->begin(), changeset->end(),
+                                std::inserter(diff, diff.begin()));
+            EXPECT_EQ(0, diff.size());
+        });
+
+    // Updated flag A, deleted flag B, added flag C.
+    updater.Init(SDKDataSet{
+        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
+            {"flagA", IDataStore::FlagDescriptor(flag_a_v2)},
+            {"flagD", IDataStore::FlagDescriptor(flag_d)},
+            {"flagC", IDataStore::FlagDescriptor(flag_c_v1_second)}},
+        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+    });
+
+    EXPECT_TRUE(got_event);
+}
+
 TEST(DataStoreUpdaterTest, CanUpsertNewFlag) {
     auto store = std::make_shared<MemoryStore>();
     DataStoreUpdater updater(store, store);

@@ -62,17 +62,33 @@ class DataStoreUpdater
                            std::shared_ptr<FlagOrSegmentDescriptor>>
             existing_flags_or_segments,
         std::unordered_map<std::string, FlagOrSegmentDescriptor>
-            newFlagsOrSegments,
+            new_flags_or_segments,
         DependencySet& updated_items) {
-        for (auto const& flag_or_segment : newFlagsOrSegments) {
+        for (auto const& old_flag_or_segment : existing_flags_or_segments) {
+            auto new_flag_or_segment =
+                new_flags_or_segments.find(old_flag_or_segment.first);
+            if (new_flag_or_segment != new_flags_or_segments.end() &&
+                new_flag_or_segment->second.version <=
+                    old_flag_or_segment.second->version) {
+                continue;
+            }
+
+            // Deleted.
+            dependency_tracker_.CalculateChanges(
+                kind, old_flag_or_segment.first, updated_items);
+        }
+
+        for (auto const& flag_or_segment : new_flags_or_segments) {
             auto oldItem =
                 existing_flags_or_segments.find(flag_or_segment.first);
-            if (oldItem != existing_flags_or_segments.end()) {
-                if (flag_or_segment.second.version > oldItem->second->version) {
-                    dependency_tracker_.CalculateChanges(
-                        kind, flag_or_segment.first, updated_items);
-                }
+            if (oldItem != existing_flags_or_segments.end() &&
+                flag_or_segment.second.version <= oldItem->second->version) {
+                continue;
             }
+
+            // Updated or new.
+            dependency_tracker_.CalculateChanges(kind, flag_or_segment.first,
+                                                 updated_items);
         }
     }
 
