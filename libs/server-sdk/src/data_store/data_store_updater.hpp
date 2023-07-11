@@ -59,9 +59,7 @@ class DataStoreUpdater
 
         if (HasListeners()) {
             auto updated_deps = DependencySet();
-            atus
-
-                dependency_tracker_.CalculateChanges(kind, key, updated_deps);
+            dependency_tracker_.CalculateChanges(kind, key, updated_deps);
             NotifyChanges(updated_deps);
         }
 

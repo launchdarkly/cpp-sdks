@@ -65,6 +65,10 @@ class DependencySet {
     [[nodiscard]] typename DataType::const_iterator end() const;
 
    private:
+    [[nodiscard]] std::set<std::string> const& Data(DataKind kind) const;
+
+    [[nodiscard]] std::set<std::string>& Data(DataKind kind);
+
     DataType data_;
 };
 

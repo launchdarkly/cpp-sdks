@@ -11,19 +11,15 @@ DependencySet::DependencySet()
       } {}
 
 void DependencySet::Set(DataKind kind, std::string key) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().emplace(
-        std::move(key));
+    Data(kind).emplace(std::move(key));
 }
 
 void DependencySet::Remove(DataKind kind, std::string const& key) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().erase(
-        key);
+    Data(kind).erase(key);
 }
 
 bool DependencySet::Contains(DataKind kind, std::string const& key) const {
-    return data_[static_cast<std::underlying_type_t<DataKind>>(kind)]
-               .Data()
-               .count(key) != 0;
+    return Data(kind).count(key) != 0;
 }
 
 std::size_t DependencySet::Size() const {
@@ -45,6 +41,14 @@ DependencySet::end() const {
 }
 
 std::set<std::string> const& DependencySet::SetForKind(DataKind kind) {
+    return data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data();
+}
+
+std::set<std::string> const& DependencySet::Data(DataKind kind) const {
+    return data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data();
+}
+
+std::set<std::string>& DependencySet::Data(DataKind kind) {
     return data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data();
 }
 

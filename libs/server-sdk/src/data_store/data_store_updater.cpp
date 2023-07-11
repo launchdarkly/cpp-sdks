@@ -40,7 +40,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     sink_->Init(std::move(data_set));
     // After updating the sink, let listeners know of changes.
     if (change_notifications) {
-        NotifyChanges(*change_notifications);
+        NotifyChanges(std::move(*change_notifications));
     }
 }
 
