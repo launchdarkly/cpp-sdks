@@ -8,12 +8,13 @@
 // for backward compatibility.
 namespace launchdarkly::common::data_sources {
 
-template <typename DataSourceState>
+template <typename TDataSourceState>
 class DataSourceStatusBase {
    public:
     using ErrorKind = DataSourceStatusErrorKind;
     using ErrorInfo = DataSourceStatusErrorInfo;
     using DateTime = std::chrono::time_point<std::chrono::system_clock>;
+    using DataSourceState = TDataSourceState;
 
     /**
      * An enumerated value representing the overall current state of the data
@@ -64,7 +65,7 @@ class DataSourceStatusBase {
           state_since_(state_since),
           last_error_(std::move(last_error)) {}
 
-    virtual ~DataSourceStatusBase() = default;
+    ~DataSourceStatusBase() = default;
     DataSourceStatusBase(DataSourceStatusBase const& item) = default;
     DataSourceStatusBase(DataSourceStatusBase&& item) noexcept = default;
     DataSourceStatusBase& operator=(DataSourceStatusBase const&) = delete;

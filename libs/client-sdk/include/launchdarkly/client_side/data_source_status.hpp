@@ -69,24 +69,8 @@ enum class ClientDataSourceState {
     // functionality like this. kNetworkUnavailable,
 };
 
-class DataSourceStatus
-    : public common::data_sources::DataSourceStatusBase<ClientDataSourceState> {
-   public:
-    using DateTime = std::chrono::time_point<std::chrono::system_clock>;
-    using DataSourceState = ClientDataSourceState;
-
-    using ErrorInfo = DataSourceStatusBase::ErrorInfo;
-
-    DataSourceStatus(DataSourceState state,
-                     DateTime state_since,
-                     std::optional<ErrorInfo> last_error);
-
-    ~DataSourceStatus() override = default;
-    DataSourceStatus(DataSourceStatus const& item);
-    DataSourceStatus(DataSourceStatus&& item);
-    DataSourceStatus& operator=(DataSourceStatus const&) = delete;
-    DataSourceStatus& operator=(DataSourceStatus&&) = delete;
-};
+using DataSourceStatus =
+    common::data_sources::DataSourceStatusBase<ClientDataSourceState>;
 
 /**
  * Interface for accessing and listening to the data source status.
