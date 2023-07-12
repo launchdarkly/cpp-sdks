@@ -48,7 +48,6 @@ TEST(DataSourceStatusTest, OstreamBasicStatus) {
 
     std::stringstream ss;
     ss << status;
-    ss.flush();
     EXPECT_EQ("Status(kStateA, Since(1970-01-01 00:00:00))", ss.str());
 }
 
@@ -65,7 +64,6 @@ TEST(DataSourceStatusTest, OStreamErrorInfo) {
 
     std::stringstream ss;
     ss << status;
-    ss.flush();
     EXPECT_EQ(
         "Status(kStateC, Since(1970-01-01 00:00:00), Error(INVALID_DATA, Bad "
         "times, StatusCode(404), Since(1970-01-01 00:00:00)))",
