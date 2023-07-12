@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/data_sources/data_source_status_base.hpp>
-#include "data_source_status_error_kind.hpp"
 
 namespace test_things {
 enum class TestDataSourceStates { kStateA = 0, kStateB = 1, kStateC = 2 };

@@ -145,12 +145,12 @@ void DependencyTracker::CalculateChanges(DataKind kind,
 
 void DependencyTracker::UpdateDependencies(DataKind kind,
                                            std::string const& key,
-                                           DependencySet deps) {
+                                           DependencySet const& deps) {
     auto current_deps = dependencies_from_.Get(kind, key);
     if (current_deps) {
-        for (auto& deps_by_kind : *current_deps) {
+        for (auto const& deps_by_kind : *current_deps) {
             auto kind_of_dep = deps_by_kind.Kind();
-            for (auto& dep : deps_by_kind.Data()) {
+            for (auto const& dep : deps_by_kind.Data()) {
                 auto deps_to_this_dep = dependencies_to_.Get(kind_of_dep, dep);
                 if (deps_to_this_dep) {
                     deps_to_this_dep->Remove(kind_of_dep, key);
@@ -160,8 +160,8 @@ void DependencyTracker::UpdateDependencies(DataKind kind,
     }
 
     dependencies_from_.Set(kind, key, deps);
-    for (auto& deps_by_kind : deps) {
-        for (auto& dep : deps_by_kind.Data()) {
+    for (auto const& deps_by_kind : deps) {
+        for (auto const& dep : deps_by_kind.Data()) {
             auto deps_to_this_dep =
                 dependencies_to_.Get(deps_by_kind.Kind(), dep);
             if (!deps_to_this_dep) {
