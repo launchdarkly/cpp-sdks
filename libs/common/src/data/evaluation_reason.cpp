@@ -56,6 +56,35 @@ EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
                        false,
                        std::nullopt) {}
 
+EvaluationReason EvaluationReason::Off() {
+    return {Kind::kOff,   std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, false,        std::nullopt};
+}
+
+EvaluationReason EvaluationReason::PrerequisiteFailed(
+    std::string prerequisite_key) {
+    return {
+        Kind::kPrerequisiteFailed,   std::nullopt, std::nullopt, std::nullopt,
+        std::move(prerequisite_key), false,        std::nullopt};
+}
+
+EvaluationReason EvaluationReason::TargetMatch() {
+    return {Kind::kTargetMatch, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt,       false,        std::nullopt};
+}
+
+EvaluationReason EvaluationReason::Fallthrough(bool in_experiment) {
+    return {Kind::kFallthrough, std::nullopt,  std::nullopt, std::nullopt,
+            std::nullopt,       in_experiment, std::nullopt};
+}
+
+EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
+                                             std::optional<std::string> rule_id,
+                                             bool in_experiment) {
+    return {Kind::kRuleMatch, std::nullopt,  rule_index,  std::move(rule_id),
+            std::nullopt,     in_experiment, std::nullopt};
+}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;
