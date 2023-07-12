@@ -1,8 +1,8 @@
 #include <iomanip>
 
-#include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
 
-namespace launchdarkly::client_side::data_sources {
+namespace launchdarkly::server_side::data_sources {
 
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::DataSourceState const& state) {
@@ -16,11 +16,8 @@ std::ostream& operator<<(std::ostream& out,
         case DataSourceStatus::DataSourceState::kInterrupted:
             out << "INTERRUPTED";
             break;
-        case DataSourceStatus::DataSourceState::kSetOffline:
-            out << "OFFLINE";
-            break;
-        case DataSourceStatus::DataSourceState::kShutdown:
-            out << "OFF";
+        case DataSourceStatus::DataSourceState::kOff:
+            out << "SHUTDOWN";
             break;
     }
 
@@ -39,4 +36,4 @@ std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
     return out;
 }
 
-}  // namespace launchdarkly::client_side::data_sources
+}  // namespace launchdarkly::server_side::data_sources

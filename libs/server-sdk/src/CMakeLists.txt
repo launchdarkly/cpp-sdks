@@ -13,7 +13,13 @@ add_library(${LIBNAME}
         data_store/data_store_updater.cpp
         data_store/memory_store.cpp
         data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp data_store/descriptors.hpp)
+        data_store/dependency_tracker.cpp
+        data_store/descriptors.hpp
+        data_sources/data_source_event_handler.cpp
+        data_sources/data_source_event_handler.hpp
+        data_sources/data_source_status.cpp
+        data_sources/polling_data_source.hpp
+        data_sources/polling_data_source.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
