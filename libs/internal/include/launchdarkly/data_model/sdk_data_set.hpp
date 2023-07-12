@@ -13,10 +13,15 @@
 namespace launchdarkly::data_model {
 
 struct SDKDataSet {
+    template <typename KeyType, typename Storage>
+    using Collection = std::unordered_map<KeyType, ItemDescriptor<Storage>>;
     using FlagKey = std::string;
     using SegmentKey = std::string;
-    std::unordered_map<FlagKey, ItemDescriptor<Flag>> flags;
-    std::unordered_map<SegmentKey, ItemDescriptor<Segment>> segments;
+    using Flags = Collection<FlagKey, Flag>;
+    using Segments = Collection<SegmentKey, Segment>;
+
+    Flags flags;
+    Segments segments;
 };
 
 }  // namespace launchdarkly::data_model
