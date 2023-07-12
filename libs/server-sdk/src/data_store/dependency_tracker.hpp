@@ -155,7 +155,7 @@ class DependencyTracker {
      */
     void UpdateDependencies(DataKind kind,
                             std::string const& key,
-                            DependencySet deps);
+                            DependencySet const& deps);
 
     DependencyMap dependencies_from_;
     DependencyMap dependencies_to_;
