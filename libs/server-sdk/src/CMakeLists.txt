@@ -6,12 +6,13 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 # Automatic library: static or dynamic based on user config.
 
 add_library(${LIBNAME}
-        ${HEADER_LIST})
+        ${HEADER_LIST}
+        evaluation/detail/timestamp_operations.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
+            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 else ()
     # The default static lib builds, for linux, are positition independent.
     # So they do not link into a shared object without issues. So, when
@@ -20,7 +21,7 @@ else ()
     # macOS shares the same path for simplicity.
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
+            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy timestamp)
 
     target_sources(${LIBNAME} PRIVATE boost.cpp)
 endif ()
