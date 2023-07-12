@@ -7,7 +7,7 @@
 
 #include "data_source_status_manager.hpp"
 
-namespace launchdarkly::client_side::data_sources {
+namespace launchdarkly::server_side::data_sources {
 
 void DataSourceStatusManager::SetState(
     DataSourceStatus::DataSourceState state) {

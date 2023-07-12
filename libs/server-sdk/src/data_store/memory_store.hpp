@@ -11,7 +11,7 @@
 namespace launchdarkly::server_side::data_store {
 
 class MemoryStore : public IDataStore,
-                    public data_source::IDataSourceUpdateSink {
+                    public data_sources::IDataSourceUpdateSink {
    public:
     std::shared_ptr<FlagDescriptor> GetFlag(
         std::string const& key) const override;

@@ -5,11 +5,11 @@
 
 #include <boost/signals2.hpp>
 
-#include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/data_sources/data_source_status_manager.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
 
-namespace launchdarkly::client_side::data_sources {
+namespace launchdarkly::server_side::data_sources {
 
 /**
  * Class that manages updates to the data source status and implements an
@@ -86,4 +86,4 @@ class DataSourceStatusManager : public IDataSourceStatusProvider {
         manager_;
 };
 
-}  // namespace launchdarkly::client_side::data_sources
+}  // namespace launchdarkly::server_side::data_sources

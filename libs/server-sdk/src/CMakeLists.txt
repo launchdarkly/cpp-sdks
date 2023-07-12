@@ -19,7 +19,9 @@ add_library(${LIBNAME}
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status.cpp
         data_sources/polling_data_source.hpp
-        data_sources/polling_data_source.cpp)
+        data_sources/polling_data_source.cpp
+        data_sources/data_source_status_manager.hpp
+        data_sources/data_source_status_manager.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}

@@ -13,7 +13,7 @@
 namespace launchdarkly::server_side::data_store {
 
 class DataStoreUpdater
-    : public launchdarkly::server_side::data_source::IDataSourceUpdateSink,
+    : public launchdarkly::server_side::data_sources::IDataSourceUpdateSink,
       public launchdarkly::server_side::IChangeNotifier {
    public:
     template <typename Storage>
