@@ -77,6 +77,8 @@ AttributeReference const& Key() {
 }
 
 std::optional<float> ContextHash(Value const& value, BucketPrefix prefix) {
+    using namespace launchdarkly::encoding;
+
     std::optional<std::string> id = BucketValue(value);
     if (!id) {
         return std::nullopt;
@@ -86,16 +88,15 @@ std::optional<float> ContextHash(Value const& value, BucketPrefix prefix) {
     input << prefix << "." << *id;
 
     std::array<unsigned char, SHA_DIGEST_LENGTH> const sha1hash =
-        launchdarkly::encoding::Sha1String(input.str());
+        Sha1String(input.str());
 
-    std::string const sha1hash_hexed =
-        launchdarkly::encoding::Base16Encode(sha1hash);
+    std::string const sha1hash_hexed = Base16Encode(sha1hash);
 
     std::string const sha1hash_hexed_first_15 = sha1hash_hexed.substr(0, 15);
 
     try {
         unsigned long long as_number =
-            std::stoull(sha1hash_hexed_first_15.data(), nullptr, 16);
+            std::stoull(sha1hash_hexed_first_15.data(), nullptr, /* base */ 16);
 
         double as_double = static_cast<double>(as_number);
         return as_double / kBucketScale;
