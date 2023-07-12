@@ -1,9 +1,11 @@
 #include "data_source_event_handler.hpp"
 
 #include <launchdarkly/encoding/base_64.hpp>
-#include <launchdarkly/serialization/json_evaluation_result.hpp>
-#include <launchdarkly/serialization/json_item_descriptor.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_rule_clause.hpp>
+#include <launchdarkly/serialization/json_sdk_data_set.hpp>
+#include <launchdarkly/serialization/json_segment.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/core/ignore_unused.hpp>
@@ -87,10 +89,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
 
         if (res.has_value()) {
-            // If the map was null or omitted, treat it like an empty data set.
-            auto map = res.value().value_or(data_model::SDKDataSet());
-
-            handler_.Init(std::move(map));
+            handler_.Init(std::move(*res));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }

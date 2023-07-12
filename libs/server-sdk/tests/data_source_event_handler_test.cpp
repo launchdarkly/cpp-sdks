@@ -1,0 +1,63 @@
+#include <gtest/gtest.h>
+
+#include <launchdarkly/logging/null_logger.hpp>
+#include "data_sources/data_source_event_handler.hpp"
+#include "data_store/memory_store.hpp"
+
+using namespace launchdarkly;
+using namespace launchdarkly::server_side;
+using namespace launchdarkly::server_side::data_sources;
+using namespace launchdarkly::server_side::data_store;
+
+TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage("put", "{}");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
+    ASSERT_TRUE(store->Initialized());
+    EXPECT_EQ(0, store->AllFlags().size());
+    EXPECT_EQ(0, store->AllSegments().size());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
+              manager.Status().State());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesInvalidPut) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage("put", "{sorry");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
+    ASSERT_FALSE(store->Initialized());
+    EXPECT_EQ(0, store->AllFlags().size());
+    EXPECT_EQ(0, store->AllSegments().size());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+    auto payload =
+        R"({"segments":{"special":{"key":"special","included":["bob"],
+        "version":2}},"flags":{"HasBob":{"key":"HasBob","on":true,"fallthrough":
+        {"variation":1},"variations":[true,false],"version":4}}})";
+    auto res = event_handler.HandleMessage("put", payload);
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
+    ASSERT_TRUE(store->Initialized());
+    EXPECT_EQ(1, store->AllFlags().size());
+    EXPECT_EQ(1, store->AllSegments().size());
+    EXPECT_TRUE(store->GetFlag("HasBob"));
+    EXPECT_TRUE(store->GetSegment("special"));
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
+              manager.Status().State());
+}
