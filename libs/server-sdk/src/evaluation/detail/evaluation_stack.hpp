@@ -28,40 +28,27 @@ struct Guard {
 /**
  * EvaluationStack is used to track which segments and flags have been noticed
  * during evaluation in order to detect circular references.
- *
- * Intended usage is to first call Seen[Segment|Prerequisite] to check if the
- * segment/flag was already seen during this evaluation.
- *
- * If so, this indicates a circular reference. If not, call
- * Notice[Segment|Prerequisite] to mark it as seen for the duration of the
- * returned Guard's lifetime.
  */
 class EvaluationStack {
    public:
     EvaluationStack() = default;
 
     /**
-     * Marks a prerequisite as noticed. The prerequisite will be forgotten when
-     * the returned Guard destructs.
-     *
-     * Must only be called if Seen returns false.
+     * If the given prerequisite key has not been seen, marks it as seen
+     * and returns a Guard object. Otherwise, returns std::nullopt.
      *
      * @param prerequisite_key Key of the prerequisite.
-     * @return Guard object representing the fact that a prerequisite has been
-     * seen for the duration of the returned object's lifetime.
+     * @return Guard object if not seen before, otherwise std::nullopt.
      */
     [[nodiscard]] std::optional<Guard> NoticePrerequisite(
         std::string const& prerequisite_key);
 
     /**
-     * Marks a segment as noticed. The segment will be forgotten when the
-     * returned Guard destructs.
+     * If the given segment key has not been seen, marks it as seen
+     * and returns a Guard object. Otherwise, returns std::nullopt.
      *
-     * Must only be called if Seen returns false.
-     *
-     * @param segment_key Key of the segment.
-     * @return Guard object representing the fact that a segment has been seen
-     * for the duration of the returned object's lifetime.
+     * @param prerequisite_key Key of the segment.
+     * @return Guard object if not seen before, otherwise std::nullopt.
      */
     [[nodiscard]] std::optional<Guard> NoticeSegment(
         std::string const& segment_key);
