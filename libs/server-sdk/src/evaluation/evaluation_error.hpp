@@ -15,7 +15,7 @@ enum class Error {
     /* A rollout was missing variations. */
     kRolloutMissingVariations,
     /* An operator was supplied that isn't recognized by this SDK. */
-    kUnknownOperator,
+    kUnrecognizedOperator,
 };
 
 std::ostream& operator<<(std::ostream& out, Error const& arr);
