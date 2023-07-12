@@ -1,67 +1,81 @@
 #pragma once
-#include <launchdarkly/attribute_reference.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/data_model/flag.hpp>
-#include <limits>
-#include <optional>
-#include <string>
-#include <tl/expected.hpp>
-#include <variant>
 
 #include "evaluation_error.hpp"
 
+#include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/context.hpp>
+#include <launchdarkly/data_model/flag.hpp>
+
+#include <tl/expected.hpp>
+
+#include <limits>
+#include <optional>
+#include <ostream>
+#include <string>
+#include <variant>
+
 namespace launchdarkly::server_side::evaluation {
 
-enum RolloutKindPresence {
-    /* The rollout's contextKind was found in the current evaluation context. */
+enum RolloutKindLookup {
+    /* The rollout's context kind was found in the supplied evaluation context.
+     */
     kPresent,
-    /* The rollout's contextKind was not found in the current evaluation
+    /* The rollout's context kind was not found in the supplied evaluation
      * context. */
     kAbsent
 };
 
+/**
+ * Bucketing is performed by hashing an input string. This string
+ * may be comprised of a seed (if the flag rule has a seed) or a combined
+ * key/salt pair.
+ */
 class BucketPrefix {
    public:
     struct KeyAndSalt {
         std::string key;
         std::string salt;
     };
+
     using Seed = std::int64_t;
-    BucketPrefix(Seed seed);
+
+    /**
+     * Constructs a BucketPrefix from a seed value.
+     * @param seed Value of the seed.
+     */
+    explicit BucketPrefix(Seed seed);
+
+    /**
+     * Constructs a BucketPrefix from a key and salt.
+     * @param key Key to use.
+     * @param salt Salt to use.
+     */
     BucketPrefix(std::string key, std::string salt);
 
-    void Update(std::string* input) const;
+    friend std::ostream& operator<<(std::ostream& os,
+                                    BucketPrefix const& prefix);
 
    private:
     std::variant<KeyAndSalt, Seed> prefix_;
 };
 
-struct BucketResult {
-    std::size_t variation_index;
-    bool in_experiment;
-
-    BucketResult(
-        data_model::Flag::Rollout::WeightedVariation weighted_variation,
-        bool is_experiment)
-        : variation_index(weighted_variation.variation),
-          in_experiment(is_experiment && !weighted_variation.untracked) {}
-
-    BucketResult(data_model::Flag::Variation variation, bool in_experiment)
-        : variation_index(variation), in_experiment(in_experiment) {}
-
-    BucketResult(data_model::Flag::Variation variation)
-        : variation_index(variation), in_experiment(false) {}
-};
-
-std::optional<float> ComputeBucket(Value const& value,
-                                   BucketPrefix prefix,
-                                   bool is_experiment);
-
-std::optional<std::string> BucketValue(Value const& value);
-
 using ContextHashValue = float;
 
-tl::expected<std::pair<ContextHashValue, RolloutKindPresence>, Error> Bucket(
+/**
+ * Computes the context hash value for an attribute in the given context
+ * identified by the given attribute reference. The hash value is
+ * augmented with the supplied bucket prefix.
+ *
+ * @param context Context to query.
+ * @param by_attr Identifier of the attribute to hash. If is_experiment is true,
+ * then "key" will be used regardless of by_attr's value.
+ * @param prefix Prefix to use when hashing.
+ * @param is_experiment Whether this rollout is an experiment.
+ * @param context_kind Which kind to inspect in the context.
+ * @return A context hash value and indication of whether or not context_kind
+ * was found in the context.
+ */
+tl::expected<std::pair<ContextHashValue, RolloutKindLookup>, Error> Bucket(
     Context const& context,
     AttributeReference const& by_attr,
     BucketPrefix const& prefix,

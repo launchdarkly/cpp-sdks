@@ -1,38 +1,152 @@
-#include <gtest/gtest.h>
-#include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/data_model/flag.hpp>
 #include "evaluation/bucketing.hpp"
 #include "evaluation/evaluator.hpp"
+
+#include <gtest/gtest.h>
+#include <launchdarkly/context_builder.hpp>
 
 using namespace launchdarkly;
 using namespace launchdarkly::data_model;
 using namespace launchdarkly::server_side::evaluation;
 using WeightedVariation = Flag::Rollout::WeightedVariation;
 
+/**
+ * Note: These tests are meant to be exact duplicates of tests
+ * in other SDKs. Do not change any of the values unless they
+ * are also changed in other SDKs. These are not traditional behavioral
+ * tests so much as consistency tests to guarantee that the implementation
+ * is identical across SDKs.
+ *
+ * Tests in this file may derive from BucketingConsistencyTests to gain access
+ * to shared constants.
+ */
+class BucketingConsistencyTests : public ::testing::Test {
+   public:
+    // Bucket results must be no more than this distance from the expected
+    // value.
+    double const kBucketTolerance = 0.0000001;
+    const std::string kHashKey = "hashKey";
+    const std::string kSalt = "saltyA";
+};
+
+TEST_F(BucketingConsistencyTests, BucketContextByKey) {
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+
+    auto tests =
+        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.42157587},
+                                                    {"userKeyB", 0.6708485},
+                                                    {"userKeyC", 0.10343106}};
+
+    for (auto [key, bucket] : tests) {
+        auto context = ContextBuilder().Kind("user", key).Build();
+        auto result = Bucket(context, "key", kPrefix, false, "user");
+        ASSERT_TRUE(result)
+            << key << " should be bucketed but got " << result.error();
+
+        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
+    }
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByKeyWithSeed) {
+    const BucketPrefix kPrefix{61};
+
+    auto tests =
+        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.09801207},
+                                                    {"userKeyB", 0.14483777},
+                                                    {"userKeyC", 0.9242641}};
+
+    for (auto [key, bucket] : tests) {
+        auto context = ContextBuilder().Kind("user", key).Build();
+        auto result = Bucket(context, "key", kPrefix, false, "user");
+        ASSERT_TRUE(result)
+            << key << " should be bucketed but got " << result.error();
+
+        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
+
+        auto result_different_seed =
+            Bucket(context, "key", BucketPrefix{60}, false, "user");
+        ASSERT_TRUE(result_different_seed)
+            << key << " should be bucketed but got "
+            << result_different_seed.error();
+
+        ASSERT_NE(result_different_seed->first, result->first);
+    }
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByInvalidReference) {
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+    const AttributeReference kInvalidRef;
+
+    ASSERT_FALSE(kInvalidRef.Valid());
+
+    auto context = ContextBuilder().Kind("user", "userKeyA").Build();
+    auto result = Bucket(context, kInvalidRef, kPrefix, false, "user");
+
+    ASSERT_FALSE(result);
+    ASSERT_EQ(result.error(), Error::kInvalidAttributeReference);
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByIntAttribute) {
+    const std::string kUserKey = "userKeyD";
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+
+    auto context =
+        ContextBuilder().Kind("user", kUserKey).Set("intAttr", 33'333).Build();
+    auto result = Bucket(context, "intAttr", kPrefix, false, "user");
+
+    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
+                        << result.error();
+    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByStringifiedIntAttribute) {
+    const std::string kUserKey = "userKeyD";
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+
+    auto context = ContextBuilder()
+                       .Kind("user", kUserKey)
+                       .Set("stringAttr", "33333")
+                       .Build();
+    auto result = Bucket(context, "stringAttr", kPrefix, false, "user");
+    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
+                        << result.error();
+    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByFloatAttributeNotAllowed) {
+    const std::string kUserKey = "userKeyE";
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+
+    auto context = ContextBuilder()
+                       .Kind("user", kUserKey)
+                       .Set("floatAttr", 999.999)
+                       .Build();
+    auto result = Bucket(context, "floatAttr", kPrefix, false, "user");
+
+    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
+                        << result.error();
+    ASSERT_NEAR(result->first, 0.0, kBucketTolerance);
+}
+
+TEST_F(BucketingConsistencyTests, BucketContextByFloatAttributeThatIsInteger) {
+    const std::string kUserKey = "userKeyE";
+    const BucketPrefix kPrefix{kHashKey, kSalt};
+
+    auto context = ContextBuilder()
+                       .Kind("user", kUserKey)
+                       .Set("floatAttr", 33333.0)
+                       .Build();
+    auto result = Bucket(context, "floatAttr", kPrefix, false, "user");
+
+    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
+                        << result.error();
+    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
+}
+
 // Note: These tests are meant to be exact duplicates of tests
 // in other SDKs. Do not change any of the values unless they
 // are also changed in other SDKs. These are not traditional behavioral
 // tests so much as consistency tests to guarantee that the implementation
 // is identical across SDKs.
-
-/**
- * Tests in this file may derive from BucketingTests to gain access to shared
- * constants.
- */
-class BucketingTests : public ::testing::Test {
-   public:
-    // Bucket results must be no more than this distance from the expected
-    // value.
-    const static double kBucketTolerance;
-    // An arbitrary hash key.
-    const static std::string kHashKey;
-    // An arbitrary salt.
-    const static std::string kSalt;
-};
-
-double const BucketingTests::kBucketTolerance = 0.0000001;
-std::string const BucketingTests::kHashKey = "hashKey";
-std::string const BucketingTests::kSalt = "saltyA";
 
 // Parameterized tests may be instantiated with one or more BucketTests for
 // convenience.
@@ -54,7 +168,7 @@ struct BucketTest {
 #define IN_EXPERIMENT true
 #define NOT_IN_EXPERIMENT false
 
-class BucketVariationTest : public BucketingTests,
+class BucketVariationTest : public BucketingConsistencyTests,
                             public ::testing::WithParamInterface<BucketTest> {};
 
 static Flag::Rollout PercentRollout() {
@@ -92,12 +206,12 @@ TEST_P(BucketVariationTest, VariationIndexForContext) {
                         << " should be assigned a bucket result, but got: "
                         << result.error();
 
-    ASSERT_EQ(result->variation_index, param.expectedVariation)
+    ASSERT_EQ(result->VariationIndex(), param.expectedVariation)
         << param.key << " (bucket " << param.expectedBucket
         << ") should get variation " << param.expectedVariation << ", but got "
-        << result->variation_index;
+        << result->VariationIndex();
 
-    ASSERT_EQ(result->in_experiment, param.expectedInExperiment)
+    ASSERT_EQ(result->InExperiment(), param.expectedInExperiment)
         << param.key << " "
         << (param.expectedInExperiment ? "should" : "should not")
         << " be in experiment";
@@ -135,7 +249,7 @@ INSTANTIATE_TEST_SUITE_P(IncompleteWeightingDefaultsToLastVariation,
 #undef IN_EXPERIMENT
 #undef NOT_IN_EXPERIMENT
 
-TEST_F(BucketingTests, VariationIndexForContextWithCustomAttribute) {
+TEST_F(BucketingConsistencyTests, VariationIndexForContextWithCustomAttribute) {
     WeightedVariation wv0(0, 60'000);
     WeightedVariation wv1(1, 40'000);
 
@@ -157,12 +271,12 @@ TEST_F(BucketingTests, VariationIndexForContextWithCustomAttribute) {
             << "userKeyA should be assigned a bucket result, but got: "
             << result.error();
 
-        ASSERT_EQ(result->variation_index, expectedVariation)
+        ASSERT_EQ(result->VariationIndex(), expectedVariation)
             << "userKeyA (bucket " << expectedBucket
             << ") should get variation " << expectedVariation << ", but got "
-            << result->variation_index;
+            << result->VariationIndex();
 
-        ASSERT_EQ(result->in_experiment, false)
+        ASSERT_EQ(result->InExperiment(), false)
             << "userKeyA should not be in experiment";
     }
 }
@@ -174,7 +288,7 @@ struct ExperimentBucketTest {
 };
 
 class ExperimentBucketingTests
-    : public BucketingTests,
+    : public BucketingConsistencyTests,
       public ::testing::WithParamInterface<ExperimentBucketTest> {};
 
 TEST_P(ExperimentBucketingTests, VariationIndexForExperiment) {
@@ -198,7 +312,7 @@ TEST_P(ExperimentBucketingTests, VariationIndexForExperiment) {
 
     ASSERT_TRUE(result);
 
-    ASSERT_EQ(result->variation_index, params.expectedVariationIndex)
+    ASSERT_EQ(result->VariationIndex(), params.expectedVariationIndex)
         << params.key << " with seed "
         << (params.seed ? std::to_string(*params.seed) : "(none)")
         << " should get variation " << params.expectedVariationIndex;
@@ -216,115 +330,8 @@ INSTANTIATE_TEST_SUITE_P(
         ExperimentBucketTest{61, "userKeyC", 2}             // 0.9242641,
     }));
 
-TEST_F(BucketingTests, BucketContextByKey) {
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-
-    auto tests =
-        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.42157587},
-                                                    {"userKeyB", 0.6708485},
-                                                    {"userKeyC", 0.10343106}};
-
-    for (auto [key, bucket] : tests) {
-        auto context = ContextBuilder().Kind("user", key).Build();
-        auto result = Bucket(context, "key", kPrefix, false, "user");
-        ASSERT_TRUE(result)
-            << key << " should be bucketed but got " << result.error();
-
-        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
-    }
-}
-
-TEST_F(BucketingTests, BucketContextByKeyWithSeed) {
-    auto const kPrefix = BucketPrefix::Seed(61);
-
-    auto tests =
-        std::vector<std::pair<std::string, double>>{{"userKeyA", 0.09801207},
-                                                    {"userKeyB", 0.14483777},
-                                                    {"userKeyC", 0.9242641}};
-
-    for (auto [key, bucket] : tests) {
-        auto context = ContextBuilder().Kind("user", key).Build();
-        auto result = Bucket(context, "key", kPrefix, false, "user");
-        ASSERT_TRUE(result)
-            << key << " should be bucketed but got " << result.error();
-
-        ASSERT_NEAR(result->first, bucket, kBucketTolerance);
-
-        auto result_diff_seed =
-            Bucket(context, "key", BucketPrefix::Seed(60), false, "user");
-        ASSERT_TRUE(result_diff_seed) << key << " should be bucketed but got "
-                                      << result_diff_seed.error();
-
-        ASSERT_NE(result_diff_seed->first, result->first);
-    }
-}
-
-TEST_F(BucketingTests, BucketContextByInvalidReference) {
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-    auto const kInvalidRef = AttributeReference();
-    ASSERT_FALSE(kInvalidRef.Valid());
-
-    auto context = ContextBuilder().Kind("user", "userKeyA").Build();
-    auto result = Bucket(context, kInvalidRef, kPrefix, false, "user");
-    ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kInvalidAttributeReference);
-}
-
-TEST_F(BucketingTests, BucketContextByIntAttribute) {
-    auto const kUserKey = "userKeyD";
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-
-    auto context =
-        ContextBuilder().Kind("user", kUserKey).Set("intAttr", 33'333).Build();
-    auto result = Bucket(context, "intAttr", kPrefix, false, "user");
-    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
-}
-
-TEST_F(BucketingTests, BucketContextByStringifiedIntAttribute) {
-    auto const kUserKey = "userKeyD";
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-
-    auto context = ContextBuilder()
-                       .Kind("user", kUserKey)
-                       .Set("stringAttr", "33333")
-                       .Build();
-    auto result = Bucket(context, "stringAttr", kPrefix, false, "user");
-    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
-}
-
-TEST_F(BucketingTests, BucketContextByFloatAttributeNotAllowed) {
-    auto const kUserKey = "userKeyE";
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-
-    auto context = ContextBuilder()
-                       .Kind("user", kUserKey)
-                       .Set("floatAttr", 999.999)
-                       .Build();
-    auto result = Bucket(context, "floatAttr", kPrefix, false, "user");
-    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.0, kBucketTolerance);
-}
-
-TEST_F(BucketingTests, BucketContextByFloatAttributeThatIsInteger) {
-    auto const kUserKey = "userKeyE";
-    auto const kPrefix = BucketPrefix(kHashKey, kSalt);
-
-    auto context = ContextBuilder()
-                       .Kind("user", kUserKey)
-                       .Set("floatAttr", 33333.0)
-                       .Build();
-    auto result = Bucket(context, "floatAttr", kPrefix, false, "user");
-    ASSERT_TRUE(result) << kUserKey << " should be bucketed but got "
-                        << result.error();
-    ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
-}
-
-TEST_F(BucketingTests, BucketValueBeyondLastBucketIsPinnedToLastBucket) {
+TEST_F(BucketingConsistencyTests,
+       BucketValueBeyondLastBucketIsPinnedToLastBucket) {
     WeightedVariation wv0(0, 5'000);
     WeightedVariation wv1(1, 5'000);
 
@@ -339,11 +346,11 @@ TEST_F(BucketingTests, BucketValueBeyondLastBucketIsPinnedToLastBucket) {
     auto result = Variation(rollout, kHashKey, context, kSalt);
 
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->variation_index, 1);
-    ASSERT_FALSE(result->in_experiment);
+    ASSERT_EQ(result->VariationIndex(), 1);
+    ASSERT_FALSE(result->InExperiment());
 }
 
-TEST_F(BucketingTests,
+TEST_F(BucketingConsistencyTests,
        BucketValueBeyongLastBucketIsPinnedToLastBucketForExperiment) {
     WeightedVariation wv0(0, 5'000);
     WeightedVariation wv1(1, 5'000);
@@ -360,6 +367,6 @@ TEST_F(BucketingTests,
     auto result = Variation(rollout, kHashKey, context, kSalt);
 
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->variation_index, 1);
-    ASSERT_TRUE(result->in_experiment);
+    ASSERT_EQ(result->VariationIndex(), 1);
+    ASSERT_TRUE(result->InExperiment());
 }

@@ -28,6 +28,25 @@ class Evaluator {
     mutable detail::EvaluationStack stack_;
 };
 
+class BucketResult {
+   public:
+    BucketResult(
+        data_model::Flag::Rollout::WeightedVariation weighted_variation,
+        bool is_experiment);
+
+    BucketResult(data_model::Flag::Variation variation, bool in_experiment);
+
+    BucketResult(data_model::Flag::Variation variation);
+
+    [[nodiscard]] std::size_t VariationIndex() const;
+
+    [[nodiscard]] bool InExperiment() const;
+
+   private:
+    std::size_t variation_index_;
+    bool in_experiment_;
+};
+
 tl::expected<BucketResult, Error> Variation(
     data_model::Flag::VariationOrRollout const& vr,
     std::string const& flag_key,

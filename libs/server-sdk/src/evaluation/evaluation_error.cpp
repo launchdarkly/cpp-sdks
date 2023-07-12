@@ -5,17 +5,24 @@ namespace launchdarkly::server_side::evaluation {
 std::ostream& operator<<(std::ostream& out, Error const& err) {
     switch (err) {
         case Error::kCyclicReference:
-            return out << "cyclicReference";
+            out << "CYCLIC_REFERENCE";
+            break;
         case Error::kBigSegmentEncountered:
-            return out << "bigSegmentEncountered";
+            out << "BIG_SEGMENT_ENCOUNTERED";
+            break;
         case Error::kInvalidAttributeReference:
-            return out << "invalidAttributeReference";
+            out << "INVALID_ATTRIBUTE_REFERENCE";
+            break;
         case Error::kRolloutMissingVariations:
-            return out << "rolloutMissingVariations";
-        case Error::kUnknownOperator:
-            return out << "unknownOperator";
+            out << "ROLLOUT_MISSING_VARIATIONS";
+            break;
+        case Error::kUnrecognizedOperator:
+            out << "UNRECOGNIZED_OPERATOR";
+            break;
         default:
-            return out << "unknownError";
+            out << "UNKNOWN_ERROR";
+            break;
     }
+    return out;
 }
 }  // namespace launchdarkly::server_side::evaluation

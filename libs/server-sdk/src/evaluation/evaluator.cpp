@@ -11,6 +11,27 @@ namespace launchdarkly::server_side::evaluation {
 
 using namespace data_model;
 
+BucketResult::BucketResult(
+    data_model::Flag::Rollout::WeightedVariation weighted_variation,
+    bool is_experiment)
+    : variation_index_(weighted_variation.variation),
+      in_experiment_(is_experiment && !weighted_variation.untracked) {}
+
+BucketResult::BucketResult(data_model::Flag::Variation variation,
+                           bool in_experiment)
+    : variation_index_(variation), in_experiment_(in_experiment) {}
+
+BucketResult::BucketResult(data_model::Flag::Variation variation)
+    : variation_index_(variation), in_experiment_(false) {}
+
+std::size_t BucketResult::VariationIndex() const {
+    return variation_index_;
+}
+
+bool BucketResult::InExperiment() const {
+    return in_experiment_;
+}
+
 EvaluationDetail<Value> FlagVariation(Flag const& flag,
                                       std::uint64_t variation_index,
                                       EvaluationReason reason);
@@ -138,9 +159,9 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         }
 
         EvaluationReason reason =
-            EvaluationReason::RuleMatch(i, rule.id, result->in_experiment);
+            EvaluationReason::RuleMatch(i, rule.id, result->InExperiment());
 
-        return FlagVariation(flag, result->variation_index, std::move(reason));
+        return FlagVariation(flag, result->VariationIndex(), std::move(reason));
     }
 
     // If there were no rule matches, then return the fallthrough variation.
@@ -153,9 +174,9 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     }
 
     EvaluationReason reason =
-        EvaluationReason::Fallthrough(result->in_experiment);
+        EvaluationReason::Fallthrough(result->InExperiment());
 
-    return FlagVariation(flag, result->variation_index, std::move(reason));
+    return FlagVariation(flag, result->VariationIndex(), std::move(reason));
 }
 
 EvaluationDetail<Value> FlagVariation(Flag const& flag,
@@ -265,13 +286,13 @@ tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
                         return BucketResult(
                             variation,
                             is_experiment &&
-                                lookup == RolloutKindPresence::kPresent);
+                                lookup == RolloutKindLookup::kPresent);
                     }
                 }
 
                 return BucketResult(
                     arg.variations.back(),
-                    is_experiment && lookup == RolloutKindPresence::kPresent);
+                    is_experiment && lookup == RolloutKindLookup::kPresent);
             }
         },
         vr);
