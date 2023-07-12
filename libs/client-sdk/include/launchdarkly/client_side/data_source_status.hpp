@@ -70,23 +70,17 @@ enum class ClientDataSourceState {
 };
 
 class DataSourceStatus
-    : public ::launchdarkly::common::data_sources::DataSourceStatusBase<
-          ClientDataSourceState> {
+    : public common::data_sources::DataSourceStatusBase<ClientDataSourceState> {
    public:
     using DateTime = std::chrono::time_point<std::chrono::system_clock>;
     using DataSourceState = ClientDataSourceState;
 
-    using ErrorInfo =
-        ::launchdarkly::common::data_sources::DataSourceStatusBase<
-            ClientDataSourceState>::ErrorInfo;
+    using ErrorInfo = DataSourceStatusBase<ClientDataSourceState>::ErrorInfo;
 
     DataSourceStatus(DataSourceState state,
                      DateTime state_since,
                      std::optional<ErrorInfo> last_error)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
-              ClientDataSourceState>(state,
-                                     state_since,
-                                     std::move(last_error)) {}
+        : DataSourceStatusBase(state, state_since, std::move(last_error)) {}
 
     ~DataSourceStatus() override = default;
     DataSourceStatus(DataSourceStatus const& item) = default;
