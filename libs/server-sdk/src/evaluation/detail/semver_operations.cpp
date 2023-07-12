@@ -5,6 +5,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
+#include <iterator>
+
 namespace launchdarkly::server_side::evaluation::detail {
 
 /*
@@ -17,7 +19,10 @@ namespace launchdarkly::server_side::evaluation::detail {
 char const* const kSemVerRegex =
     R"(^(?<major>0|[1-9]\d*)(\.(?<minor>0|[1-9]\d*))?(\.(?<patch>0|[1-9]\d*))?(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$)";
 
-/** From Boost docs:
+/**
+ * Cache the parsed regex so it doesn't need to be rebuilt constantly.
+ *
+ * From Boost docs:
  * Class basic_regex and its typedefs regex and wregex are thread safe, in that
  * compiled regular expressions can safely be shared between threads.
  */
@@ -30,8 +35,13 @@ static boost::regex const& SemVerRegex() {
 SemVer::SemVer(VersionType major,
                VersionType minor,
                VersionType patch,
-               std::optional<std::vector<Token>> prerelease)
+               std::vector<Token> prerelease)
     : major_(major), minor_(minor), patch_(patch), prerelease_(prerelease) {}
+
+SemVer::SemVer(VersionType major, VersionType minor, VersionType patch)
+    : major_(major), minor_(minor), patch_(patch), prerelease_(std::nullopt) {}
+
+SemVer::SemVer() : SemVer(0, 0, 0) {}
 
 SemVer::VersionType SemVer::Major() const {
     return major_;
@@ -102,7 +112,7 @@ bool operator>(SemVer const& lhs, SemVer const& rhs) {
     return rhs < lhs;
 }
 
-std::optional<SemVer> ToSemVer(std::string const& value) {
+std::optional<SemVer> SemVer::Parse(std::string const& value) {
     if (value.empty()) {
         return std::nullopt;
     }
@@ -157,6 +167,7 @@ std::optional<SemVer> ToSemVer(std::string const& value) {
                                        return token;
                                    }
                                });
+                return SemVer{major, minor, patch, *prerelease};
             }
         }
     } catch (std::invalid_argument) {
@@ -167,7 +178,31 @@ std::optional<SemVer> ToSemVer(std::string const& value) {
         // Cannot represent the verison number / numeric tokens as ull.
         return std::nullopt;
     }
-    return SemVer{major, minor, patch, prerelease};
+    return SemVer{major, minor, patch};
 }
 
+std::ostream& operator<<(std::ostream& out, SemVer::Token const& sv) {
+    if (sv.index() == 0) {
+        out << std::get<0>(sv);
+    } else {
+        out << std::get<1>(sv);
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, SemVer const& sv) {
+    out << sv.Major() << "." << sv.Minor() << "." << sv.Patch();
+    if (sv.Prerelease()) {
+        out << "-";
+
+        for (auto it = sv.Prerelease()->begin(); it != sv.Prerelease()->end();
+             ++it) {
+            out << *it;
+            if (std::next(it) != sv.Prerelease()->end()) {
+                out << ".";
+            }
+        }
+    }
+    return out;
+}
 }  // namespace launchdarkly::server_side::evaluation::detail
