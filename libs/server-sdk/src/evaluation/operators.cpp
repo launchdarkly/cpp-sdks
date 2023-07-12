@@ -24,12 +24,12 @@ bool SemverOp(Value const& context_value,
     return StringOp(context_value, clause_value,
                     [op = std::move(op)](std::string const& context,
                                          std::string const& clause) {
-                        auto context_semver = detail::ToSemVer(context);
+                        auto context_semver = detail::SemVer::Parse(context);
                         if (!context_semver) {
                             return false;
                         }
 
-                        auto clause_semver = detail::ToSemVer(clause);
+                        auto clause_semver = detail::SemVer::Parse(clause);
                         if (!clause_semver) {
                             return false;
                         }
