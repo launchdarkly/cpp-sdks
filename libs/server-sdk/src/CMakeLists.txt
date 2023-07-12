@@ -7,6 +7,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 
 add_library(${LIBNAME}
         ${HEADER_LIST}
+        evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp)
 
