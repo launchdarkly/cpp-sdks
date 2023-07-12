@@ -51,7 +51,9 @@ add_library(${LIBNAME} OBJECT
         bindings/c/data/evaluation_detail.cpp
         bindings/c/memory_routines.cpp
         config/logging_builder.cpp
-        bindings/c/listener_connection.cpp)
+        bindings/c/listener_connection.cpp
+        data_sources/data_source_status_error_kind.cpp
+        data_sources/data_source_status_error_info.cpp)
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 

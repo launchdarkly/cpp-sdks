@@ -5,11 +5,9 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <ostream>
-#include <string>
 
 #include <launchdarkly/connection.hpp>
-#include <launchdarkly/data_sources/data_source_status.hpp>
+#include <launchdarkly/data_sources/data_source_status_base.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -70,26 +68,26 @@ enum class ClientDataSourceState {
     // functionality like this. kNetworkUnavailable,
 };
 
-class DataSourceStatus : public ::launchdarkly::common::data_sources::DataSourceStatusBase<
-                             ClientDataSourceState> {
+class DataSourceStatus
+    : public ::launchdarkly::common::data_sources::DataSourceStatusBase<
+          ClientDataSourceState> {
    public:
     using DateTime = std::chrono::time_point<std::chrono::system_clock>;
     using DataSourceState = ClientDataSourceState;
 
-    using ErrorInfo = ::launchdarkly::common::data_sources::DataSourceStatusBase<
-        ClientDataSourceState>::ErrorInfo;
+    using ErrorInfo =
+        ::launchdarkly::common::data_sources::DataSourceStatusBase<
+            ClientDataSourceState>::ErrorInfo;
 
     DataSourceStatus(DataSourceState state,
                      DateTime state_since,
                      std::optional<ErrorInfo> last_error)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<ClientDataSourceState>(
-              state,
-              state_since,
-              last_error) {}
+        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
+              ClientDataSourceState>(state, state_since, last_error) {}
 
     DataSourceStatus(DataSourceStatus const& status)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<ClientDataSourceState>(
-              status) {}
+        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
+              ClientDataSourceState>(status) {}
 };
 
 /**
@@ -137,12 +135,6 @@ class IDataSourceStatusProvider {
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::DataSourceState const& state);
 
-std::ostream& operator<<(std::ostream& out,
-                         DataSourceStatus::ErrorInfo::ErrorKind const& kind);
-
 std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status);
-
-std::ostream& operator<<(std::ostream& out,
-                         DataSourceStatus::ErrorInfo const& error);
 
 }  // namespace launchdarkly::client_side::data_sources
