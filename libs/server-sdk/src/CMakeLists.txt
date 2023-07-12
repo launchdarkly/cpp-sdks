@@ -6,7 +6,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 # Automatic library: static or dynamic based on user config.
 
 add_library(${LIBNAME}
-        ${HEADER_LIST})
+        ${HEADER_LIST}
+        evaluation/detail/evaluation_stack.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
