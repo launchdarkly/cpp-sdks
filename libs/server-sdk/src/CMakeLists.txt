@@ -9,7 +9,9 @@ add_library(${LIBNAME}
         ${HEADER_LIST}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
-        evaluation/detail/timestamp_operations.cpp)
+        evaluation/detail/timestamp_operations.cpp
+        evaluation/evaluation_error.cpp
+        evaluation/bucketing.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
