@@ -5,27 +5,9 @@
 namespace test_things {
 enum class TestDataSourceStates { kStateA = 0, kStateB = 1, kStateC = 2 };
 
-class DataSourceStatus
-    : public ::launchdarkly::common::data_sources::DataSourceStatusBase<
-          TestDataSourceStates> {
-   public:
-    using DateTime = std::chrono::time_point<std::chrono::system_clock>;
-    using DataSourceState = TestDataSourceStates;
-
-    using ErrorInfo =
-        ::launchdarkly::common::data_sources::DataSourceStatusBase<
-            TestDataSourceStates>::ErrorInfo;
-
-    DataSourceStatus(DataSourceState state,
-                     DateTime state_since,
-                     std::optional<ErrorInfo> last_error)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
-              TestDataSourceStates>(state, state_since, last_error) {}
-
-    DataSourceStatus(DataSourceStatus const& status)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
-              TestDataSourceStates>(status) {}
-};
+using DataSourceStatus =
+    launchdarkly::common::data_sources::DataSourceStatusBase<
+        TestDataSourceStates>;
 
 std::ostream& operator<<(std::ostream& out, TestDataSourceStates const& state) {
     switch (state) {
