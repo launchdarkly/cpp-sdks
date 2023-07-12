@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../data_source/data_source_update_sink.hpp"
+#include "../data_sources/data_source_update_sink.hpp"
 #include "data_store.hpp"
 
 #include <memory>

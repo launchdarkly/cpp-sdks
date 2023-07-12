@@ -20,7 +20,6 @@ add_library(${LIBNAME}
         client_impl.cpp
         client.cpp
         client_impl.hpp
-        data_sources/data_source.hpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status_manager.hpp
         data_sources/data_source_update_sink.hpp

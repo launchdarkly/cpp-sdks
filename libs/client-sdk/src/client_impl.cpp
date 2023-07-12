@@ -32,7 +32,7 @@ using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 
-static std::shared_ptr<IDataSource> MakeDataSource(
+static std::shared_ptr<::launchdarkly::data_sources::IDataSource> MakeDataSource(
     HttpProperties const& http_properties,
     Config const& config,
     Context const& context,
