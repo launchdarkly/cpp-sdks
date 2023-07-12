@@ -7,6 +7,10 @@
 
 namespace launchdarkly::server_side::evaluation::detail {
 
+std::optional<Timepoint> MillisecondsToTimepoint(double ms);
+
+std::optional<Timepoint> RFC3339ToTimepoint(std::string const& timestamp);
+
 std::optional<Timepoint> ToTimepoint(Value const& value) {
     if (value.Type() == Value::Type::kNumber) {
         double const epoch_ms = value.AsDouble();

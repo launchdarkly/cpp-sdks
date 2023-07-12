@@ -12,7 +12,6 @@ add_library(timestamp OBJECT
         ${timestamp_SOURCE_DIR}/timestamp_tm.c
         ${timestamp_SOURCE_DIR}/timestamp_valid.c
         ${timestamp_SOURCE_DIR}/timestamp_parse.c
-
         )
 
 if (BUILD_SHARED_LIBS)

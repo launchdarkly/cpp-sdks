@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 
+
 namespace launchdarkly::encoding {
 
 template <unsigned long N>

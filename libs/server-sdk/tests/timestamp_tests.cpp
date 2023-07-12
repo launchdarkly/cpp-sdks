@@ -1,13 +1,18 @@
 #include "evaluation/detail/timestamp_operations.hpp"
 
 #include <gtest/gtest.h>
+
 #include <unordered_map>
 
 using namespace launchdarkly::server_side::evaluation::detail;
 using namespace std::chrono_literals;
 
+static Timepoint BasicDate() {
+    return std::chrono::system_clock::from_time_t(1577836800);
+}
+
 struct TimestampTest {
-    std::variant<std::string, double> input;
+    launchdarkly::Value input;
     char const* explanation;
     std::optional<Timepoint> expected;
 };
@@ -16,21 +21,7 @@ class TimestampTests : public ::testing::TestWithParam<TimestampTest> {};
 TEST_P(TimestampTests, ExpectedTimestampIsParsed) {
     auto const& param = GetParam();
 
-    std::optional<Timepoint> result;
-    if (param.input.index() == 1) {
-        result = MillisecondsToTimepoint(std::get<double>(param.input));
-    } else {
-        result = RFC3339ToTimepoint(std::get<std::string>(param.input));
-    }
-
-    constexpr auto print_input =
-        [](std::variant<std::string, double> const& input) {
-            if (input.index() == 0) {
-                return std::get<std::string>(input);
-            } else {
-                return std::to_string(std::get<double>(input));
-            }
-        };
+    std::optional<Timepoint> result = ToTimepoint(param.input);
 
     constexpr auto print_tp =
         [](std::optional<Timepoint> const& expected) -> std::string {
@@ -42,13 +33,8 @@ TEST_P(TimestampTests, ExpectedTimestampIsParsed) {
     };
 
     ASSERT_EQ(result, param.expected)
-        << param.explanation << ": input was " << print_input(param.input)
-        << ", expected " << print_tp(param.expected) << " but got "
-        << print_tp(result);
-}
-
-static Timepoint BasicDate() {
-    return std::chrono::system_clock::from_time_t(1577836800);
+        << param.explanation << ": input was " << param.input << ", expected "
+        << print_tp(param.expected) << " but got " << print_tp(result);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -98,5 +84,11 @@ INSTANTIATE_TEST_SUITE_P(
                       std::nullopt},
         TimestampTest{"2020-01-01T00:00:00.0000000001Z",
                       "more than 9 digits of precision", std::nullopt},
+        TimestampTest{launchdarkly::Value::Null(), "not a number or string",
+                      std::nullopt},
+        TimestampTest{launchdarkly::Value::Array(), "not a number or string",
+                      std::nullopt},
+        TimestampTest{launchdarkly::Value::Object(), "not a number or string",
+                      std::nullopt},
 
     }));
