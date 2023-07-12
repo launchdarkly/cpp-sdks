@@ -19,7 +19,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     // sent after the update completes.
     std::optional<DependencySet> change_notifications;
     if (HasListeners()) {
-        auto updated_items = DependencySet();
+        DependencySet updated_items;
 
         CalculateChanges(DataKind::kFlag, store_->AllFlags(), data_set.flags,
                          updated_items);
@@ -37,24 +37,22 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
     // Data will move into the store, so we want to update dependencies before
     // it is moved.
-    sink_->Init(data_set);
-    // After updating the sink let listeners know of changes.
+    sink_->Init(std::move(data_set));
+    // After updating the sink, let listeners know of changes.
     if (change_notifications) {
-        NotifyChanges(*change_notifications);
+        NotifyChanges(std::move(*change_notifications));
     }
 }
 
-void DataStoreUpdater::Upsert(std::string key,
-                              launchdarkly::server_side::data_source::
-                                  IDataSourceUpdateSink::FlagDescriptor flag) {
-    UpsertCommon(DataKind::kFlag, key, store_->GetFlag(key), flag);
+void DataStoreUpdater::Upsert(std::string const& key,
+                              data_store::FlagDescriptor flag) {
+    UpsertCommon(DataKind::kFlag, key, store_->GetFlag(key), std::move(flag));
 }
 
-void DataStoreUpdater::Upsert(
-    std::string key,
-    launchdarkly::server_side::data_source::IDataSourceUpdateSink::
-        SegmentDescriptor segment) {
-    UpsertCommon(DataKind::kSegment, key, store_->GetSegment(key), segment);
+void DataStoreUpdater::Upsert(std::string const& key,
+                              data_store::SegmentDescriptor segment) {
+    UpsertCommon(DataKind::kSegment, key, store_->GetSegment(key),
+                 std::move(segment));
 }
 
 bool DataStoreUpdater::HasListeners() const {

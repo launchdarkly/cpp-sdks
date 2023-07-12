@@ -16,4 +16,4 @@ class SignalConnection : public IConnection {
     boost::signals2::connection connection_;
 };
 
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::internal::signals

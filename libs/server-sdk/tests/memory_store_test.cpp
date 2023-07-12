@@ -1,10 +1,13 @@
 #include <gtest/gtest.h>
 
+#include "data_store/descriptors.hpp"
 #include "data_store/memory_store.hpp"
 
 using launchdarkly::data_model::SDKDataSet;
+using launchdarkly::server_side::data_store::FlagDescriptor;
 using launchdarkly::server_side::data_store::IDataStore;
 using launchdarkly::server_side::data_store::MemoryStore;
+using launchdarkly::server_side::data_store::SegmentDescriptor;
 
 using launchdarkly::Value;
 using launchdarkly::data_model::Flag;
@@ -33,11 +36,12 @@ TEST(MemoryStoreTest, CanGetFlag) {
     flag.key = "flagA";
     flag.on = true;
     flag.variations = std::vector<Value>{true, false};
-    flag.fallthrough = 0;
+    Flag::Variation variation = 0;
+    flag.fallthrough = variation;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flag)}},
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
 
     auto fetched_flag = store.GetFlag("flagA");
@@ -59,10 +63,10 @@ TEST(MemoryStoreTest, CanGetAllFlags) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flag_a)},
-            {"flagB", IDataStore::FlagDescriptor(flag_b)}},
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)},
+            {"flagB", FlagDescriptor(flag_b)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
 
     auto fetched = store.AllFlags();
@@ -75,8 +79,8 @@ TEST(MemoryStoreTest, CanGetAllFlags) {
 TEST(MemoryStoreTest, CanGetAllFlagsWhenThereAreNoFlags) {
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
 
     auto fetched = store.AllFlags();
@@ -89,9 +93,9 @@ TEST(MemoryStoreTest, CanGetSegment) {
     segment.version = 1;
     segment.key = "segmentA";
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor(segment)}},
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment)}},
     });
 
     auto fetched_segment = store.GetSegment("segmentA");
@@ -113,10 +117,10 @@ TEST(MemoryStoreTest, CanGetAllSegments) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor(segment_a)},
-            {"segmentB", IDataStore::SegmentDescriptor(segment_b)}},
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment_a)},
+            {"segmentB", SegmentDescriptor(segment_b)}},
     });
 
     auto fetched = store.AllSegments();
@@ -129,8 +133,8 @@ TEST(MemoryStoreTest, CanGetAllSegments) {
 TEST(MemoryStoreTest, CanGetAllSegmentsWhenThereAreNoSegments) {
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
 
     auto fetched = store.AllSegments();
@@ -152,10 +156,10 @@ TEST(MemoryStoreTest, CanUpsertNewFlag) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
-    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a));
+    store.Upsert("flagA", FlagDescriptor(flag_a));
 
     auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
@@ -172,16 +176,16 @@ TEST(MemoryStoreTest, CanUpsertExitingFlag) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flag_a)}},
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
 
     Flag flag_a_2;
     flag_a_2.version = 2;
     flag_a_2.key = "flagA";
 
-    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a_2));
+    store.Upsert("flagA", FlagDescriptor(flag_a_2));
 
     auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
@@ -198,10 +202,10 @@ TEST(MemoryStoreTest, CanUpsertNewSegment) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segment_a));
+    store.Upsert("segmentA", SegmentDescriptor(segment_a));
 
     auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
@@ -218,16 +222,16 @@ TEST(MemoryStoreTest, CanUpsertExitingSegment) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>(),
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>{
-            {"segmentA", IDataStore::SegmentDescriptor(segment_a)}},
+        std::unordered_map<std::string, FlagDescriptor>(),
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment_a)}},
     });
 
     Segment segment_a_2;
     segment_a_2.version = 2;
     segment_a_2.key = "segmentA";
 
-    store.Upsert("segmentA", IDataStore::SegmentDescriptor(segment_a_2));
+    store.Upsert("segmentA", SegmentDescriptor(segment_a_2));
 
     auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
@@ -245,9 +249,9 @@ TEST(MemoryStoreTest, OriginalFlagValidAfterUpsertOfFlag) {
 
     MemoryStore store;
     store.Init(SDKDataSet{
-        std::unordered_map<std::string, IDataStore::FlagDescriptor>{
-            {"flagA", IDataStore::FlagDescriptor(flag_a)}},
-        std::unordered_map<std::string, IDataStore::SegmentDescriptor>(),
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
     });
     auto fetched_flag_before = store.GetFlag("flagA");
 
@@ -256,7 +260,7 @@ TEST(MemoryStoreTest, OriginalFlagValidAfterUpsertOfFlag) {
     flag_a_2.key = "flagA";
     flag_a_2.variations = std::vector<Value>{"potato"};
 
-    store.Upsert("flagA", IDataStore::FlagDescriptor(flag_a_2));
+    store.Upsert("flagA", FlagDescriptor(flag_a_2));
 
     auto fetched_flag_after = store.GetFlag("flagA");
 
