@@ -66,7 +66,7 @@ class DataSourceStatusBase {
 
     virtual ~DataSourceStatusBase() = default;
     DataSourceStatusBase(DataSourceStatusBase const& item) = default;
-    DataSourceStatusBase(DataSourceStatusBase&& item) = default;
+    DataSourceStatusBase(DataSourceStatusBase&& item)  noexcept = default;
     DataSourceStatusBase& operator=(DataSourceStatusBase const&) = delete;
     DataSourceStatusBase& operator=(DataSourceStatusBase&&) = delete;
 

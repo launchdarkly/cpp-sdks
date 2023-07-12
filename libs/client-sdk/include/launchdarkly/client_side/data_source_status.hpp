@@ -5,10 +5,10 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/data_sources/data_source_status_base.hpp>
-#include <utility>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -75,7 +75,7 @@ class DataSourceStatus
     using DateTime = std::chrono::time_point<std::chrono::system_clock>;
     using DataSourceState = ClientDataSourceState;
 
-    using ErrorInfo = DataSourceStatusBase<ClientDataSourceState>::ErrorInfo;
+    using ErrorInfo = DataSourceStatusBase::ErrorInfo;
 
     DataSourceStatus(DataSourceState state,
                      DateTime state_since,
