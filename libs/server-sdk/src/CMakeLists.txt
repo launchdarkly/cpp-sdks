@@ -8,6 +8,13 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         boost.cpp
+        data_sources/data_source_update_sink.hpp
+        data_store/data_store.hpp
+        data_store/data_store_updater.hpp
+        data_store/data_store_updater.cpp
+        data_store/memory_store.cpp
+        data_store/dependency_tracker.hpp
+        data_store/dependency_tracker.cpp data_store/descriptors.hpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp
@@ -24,7 +31,7 @@ if (MSVC OR (NOT BUILD_SHARED_LIBS))
             PUBLIC launchdarkly::common
             PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 else ()
-    # The default static lib builds, for linux, are positition independent.
+    # The default static lib builds, for linux, are position independent.
     # So they do not link into a shared object without issues. So, when
     # building shared objects do not link the static libraries and instead
     # use the "src.hpp" files for required libraries.

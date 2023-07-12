@@ -2,12 +2,13 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "data_source.hpp"
 #include "data_source_status_manager.hpp"
+
+#include <launchdarkly/data_sources/data_source.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
-class NullDataSource : public IDataSource {
+class NullDataSource : public ::launchdarkly::data_sources::IDataSource {
    public:
     explicit NullDataSource(boost::asio::any_io_executor exec,
                             DataSourceStatusManager& status_manager);

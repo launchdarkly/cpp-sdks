@@ -17,12 +17,9 @@ add_library(${LIBNAME}
         data_sources/data_source_status_manager.cpp
         event_processor/event_processor.cpp
         event_processor/null_event_processor.cpp
-        boost_signal_connection.cpp
         client_impl.cpp
         client.cpp
-        boost_signal_connection.hpp
         client_impl.hpp
-        data_sources/data_source.hpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status_manager.hpp
         data_sources/data_source_update_sink.hpp
