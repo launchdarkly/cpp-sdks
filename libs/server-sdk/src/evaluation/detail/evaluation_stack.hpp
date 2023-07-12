@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <unordered_set>
 
@@ -49,7 +50,8 @@ class EvaluationStack {
      * @return Guard object representing the fact that a prerequisite has been
      * seen for the duration of the returned object's lifetime.
      */
-    [[nodiscard]] Guard NoticePrerequisite(std::string const& prerequisite_key);
+    [[nodiscard]] std::optional<Guard> NoticePrerequisite(
+        std::string const& prerequisite_key);
 
     /**
      * Marks a segment as noticed. The segment will be forgotten when the
@@ -61,17 +63,8 @@ class EvaluationStack {
      * @return Guard object representing the fact that a segment has been seen
      * for the duration of the returned object's lifetime.
      */
-    [[nodiscard]] Guard NoticeSegment(std::string const& segment_key);
-
-    /**
-     * Returns true if the prerequisite has been seen.
-     */
-    bool SeenPrerequisite(std::string const& prerequisite_key) const;
-
-    /**
-     * Returns true if the segment has been seen.
-     */
-    bool SeenSegment(std::string const& segment_key) const;
+    [[nodiscard]] std::optional<Guard> NoticeSegment(
+        std::string const& segment_key);
 
    private:
     std::unordered_set<std::string> prerequisites_seen_;
