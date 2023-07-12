@@ -8,12 +8,12 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         boost.cpp
-        evaluation/detail/evaluation_stack.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp
         evaluation/operators.cpp
         evaluation/evaluation_error.cpp
+        evaluation/detail/evaluation_stack.cpp
         evaluation/detail/timestamp_operations.cpp
         evaluation/detail/semver_operations.cpp
         flag_manager/flag_store.cpp
