@@ -3,6 +3,7 @@
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
 #include <iterator>
@@ -139,46 +140,40 @@ std::optional<SemVer> SemVer::Parse(std::string const& value) {
     SemVer::VersionType minor = 0;
     SemVer::VersionType patch = 0;
 
-    std::optional<std::vector<SemVer::Token>> prerelease;
-
     try {
         if (match["major"].matched) {
-            major = std::stoull(match["major"]);
+            major = boost::lexical_cast<SemVer::VersionType>(match["major"]);
         }
         if (match["minor"].matched) {
-            minor = std::stoull(match["minor"]);
+            minor = boost::lexical_cast<SemVer::VersionType>(match["minor"]);
         }
         if (match["patch"].matched) {
-            patch = std::stoull(match["patch"]);
+            patch = boost::lexical_cast<SemVer::VersionType>(match["patch"]);
         }
-
-        if (match["prerelease"].matched) {
-            std::vector<std::string> tokens;
-            boost::split(tokens, match["prerelease"], boost::is_any_of("."));
-            if (!tokens.empty()) {
-                prerelease.emplace();
-                std::transform(tokens.begin(), tokens.end(),
-                               std::back_inserter(*prerelease),
-                               [](std::string const& token)
-                                   -> std::variant<uint64_t, std::string> {
-                                   try {
-                                       return std::stoull(token);
-                                   } catch (std::invalid_argument) {
-                                       return token;
-                                   }
-                               });
-                return SemVer{major, minor, patch, *prerelease};
-            }
-        }
-    } catch (std::invalid_argument) {
-        // Conversion of one of the major/minor/patch numbers - or a prerelease
-        // numeric token - failed.
-        return std::nullopt;
-    } catch (std::out_of_range) {
-        // Cannot represent the verison number / numeric tokens as ull.
+    } catch (boost::bad_lexical_cast) {
         return std::nullopt;
     }
-    return SemVer{major, minor, patch};
+
+    if (!match["prerelease"].matched) {
+        return SemVer{major, minor, patch};
+    }
+
+    std::vector<std::string> tokens;
+    boost::split(tokens, match["prerelease"], boost::is_any_of("."));
+
+    std::vector<SemVer::Token> prerelease;
+
+    std::transform(
+        tokens.begin(), tokens.end(), std::back_inserter(prerelease),
+        [](std::string const& token) -> SemVer::Token {
+            try {
+                return boost::lexical_cast<SemVer::VersionType>(token);
+            } catch (boost::bad_lexical_cast) {
+                return token;
+            }
+        });
+
+    return SemVer{major, minor, patch, prerelease};
 }
 
 std::ostream& operator<<(std::ostream& out, SemVer::Token const& sv) {

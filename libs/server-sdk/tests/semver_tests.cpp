@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-
 #include "evaluation/detail/semver_operations.hpp"
 
 using namespace launchdarkly::server_side::evaluation::detail;
@@ -39,6 +38,16 @@ TEST(SemVer, ParsePrereleaseVersion) {
     EXPECT_EQ(pre[0], SemVer::Token("alpha"));
     EXPECT_EQ(pre[1], SemVer::Token(123ull));
     EXPECT_EQ(pre[2], SemVer::Token("foo"));
+}
+
+TEST(SemVer, ParseInvalid) {
+    ASSERT_FALSE(SemVer::Parse(""));
+    ASSERT_FALSE(SemVer::Parse("v1.2.3"));
+    ASSERT_FALSE(SemVer::Parse("foo"));
+    ASSERT_FALSE(SemVer::Parse("1.2.3 "));
+    ASSERT_FALSE(SemVer::Parse("1.2.3.alpha.1"));
+    ASSERT_FALSE(SemVer::Parse("1.2.3.4"));
+    ASSERT_FALSE(SemVer::Parse("1.2.3-_"));
 }
 
 TEST(SemVer, BasicComparison) {

@@ -17,9 +17,9 @@ namespace launchdarkly::server_side::evaluation::detail {
  */
 class SemVer {
    public:
-    using VersionType = unsigned long long;
+    using VersionType = std::uint64_t;
 
-    using Token = std::variant<uint64_t, std::string>;
+    using Token = std::variant<VersionType, std::string>;
 
     /**
      * Constructs a SemVer representing "0.0.0".
