@@ -7,6 +7,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 
 add_library(${LIBNAME}
         ${HEADER_LIST}
+        client.cpp
+        client_impl.cpp
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/data_store_updater.hpp
