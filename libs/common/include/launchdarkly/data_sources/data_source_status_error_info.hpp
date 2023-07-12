@@ -2,6 +2,8 @@
 
 #include <launchdarkly/data_sources/data_source_status_error_kind.hpp>
 
+#include <cstdint>
+
 namespace launchdarkly::common::data_sources {
 
 /**
