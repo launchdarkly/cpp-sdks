@@ -145,11 +145,10 @@ tl::expected<bool, Error> Contains(Segment const& segment,
                                    Context const& context,
                                    flag_manager::FlagStore const& store,
                                    detail::EvaluationStack& stack) {
-    if (stack.SeenSegment(segment.key)) {
+    auto guard = stack.NoticeSegment(segment.key);
+    if (!guard) {
         return tl::make_unexpected(Error::kCyclicReference);
     }
-
-    auto guard = stack.NoticeSegment(segment.key);
 
     if (segment.unbounded) {
         return tl::make_unexpected(Error::kBigSegmentEncountered);

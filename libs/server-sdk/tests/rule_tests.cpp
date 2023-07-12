@@ -57,7 +57,7 @@ TEST_P(AllOperatorsTest, Matches) {
                        .Build();
     ASSERT_TRUE(context.Valid());
 
-    EvaluationStack stack{20};
+    EvaluationStack stack;
     server_side::flag_manager::FlagStore store;
 
     auto result = launchdarkly::server_side::evaluation::Match(clause, context,

@@ -31,33 +31,20 @@ std::optional<std::size_t> TargetMatchVariation(
     Flag::Target const& target);
 
 Evaluator::Evaluator(Logger& logger, flag_manager::FlagStore const& store)
-    : logger_(logger), store_(store), stack_(20) {}
+    : logger_(logger), store_(store), stack_() {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context) {
-    // If the flag is off, return immediately.
-    if (!flag.on) {
-        return OffValue(flag, EvaluationReason::Off());
-    }
+    if (auto guard = stack_.NoticePrerequisite(flag.key)) {
+        // If the flag is off, return immediately.
+        if (!flag.on) {
+            return OffValue(flag, EvaluationReason::Off());
+        }
 
-    // If this flag has already been seen in this branch of recursion, then
-    // it must be a circular reference.
-    if (stack_.SeenPrerequisite(flag.key)) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "prerequisite relationship to " << flag.key
-            << " caused a circular reference; this is probably a temporary "
-               "condition due to an incomplete update";
-        return OffValue(flag, EvaluationReason(
-                                  EvaluationReason::ErrorKind::kMalformedFlag));
-    }
-
-    {
         // Visit all prerequisites. Each prerequisite evaluation has an
         // opportunity to influence the evaluation result of the original
         // flag.
-
-        auto guard = stack_.NoticePrerequisite(flag.key);
 
         for (Flag::Prerequisite const& prereq : flag.prerequisites) {
             flag_manager::FlagStore::FlagItem prereq_flag =
@@ -75,11 +62,6 @@ EvaluationDetail<Value> Evaluator::Evaluate(
                 // This flag existed at some point, but has since been deleted.
                 return OffValue(
                     flag, EvaluationReason::PrerequisiteFailed(prereq.key));
-            }
-
-            if (stack_.SeenPrerequisite(prereq_flag->item->key)) {
-                return EvaluationDetail<Value>(
-                    EvaluationReason::ErrorKind::kMalformedFlag, Value());
             }
 
             EvaluationDetail<Value> prereq_result =
@@ -108,6 +90,16 @@ EvaluationDetail<Value> Evaluator::Evaluate(
                     flag, EvaluationReason::PrerequisiteFailed(prereq.key));
             }
         }
+    } else {
+        // If this flag has already been seen in this branch of recursion, then
+        // it must be a circular reference.
+
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "prerequisite relationship to " << flag.key
+            << " caused a circular reference; this is probably a temporary "
+               "condition due to an incomplete update";
+        return OffValue(flag, EvaluationReason(
+                                  EvaluationReason::ErrorKind::kMalformedFlag));
     }
 
     // If the flag is on, all prerequisites are on and valid, then
