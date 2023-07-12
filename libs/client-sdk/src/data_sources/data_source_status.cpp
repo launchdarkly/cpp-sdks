@@ -39,4 +39,14 @@ std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
     return out;
 }
 
+DataSourceStatus::DataSourceStatus(DataSourceStatus::DataSourceState state,
+                                   DataSourceStatus::DateTime state_since,
+                                   std::optional<ErrorInfo> last_error)
+    : DataSourceStatusBase(state, state_since, std::move(last_error)) {}
+
+DataSourceStatus::DataSourceStatus(DataSourceStatus const& item)
+    : DataSourceStatusBase(item) {}
+
+DataSourceStatus::DataSourceStatus(DataSourceStatus&& item)
+    : DataSourceStatusBase(std::move(item)) {}
 }  // namespace launchdarkly::client_side::data_sources

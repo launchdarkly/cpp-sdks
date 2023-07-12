@@ -79,12 +79,11 @@ class DataSourceStatus
 
     DataSourceStatus(DataSourceState state,
                      DateTime state_since,
-                     std::optional<ErrorInfo> last_error)
-        : DataSourceStatusBase(state, state_since, std::move(last_error)) {}
+                     std::optional<ErrorInfo> last_error);
 
     ~DataSourceStatus() override = default;
-    DataSourceStatus(DataSourceStatus const& item) = default;
-    DataSourceStatus(DataSourceStatus&& item) = default;
+    DataSourceStatus(DataSourceStatus const& item);
+    DataSourceStatus(DataSourceStatus&& item);
     DataSourceStatus& operator=(DataSourceStatus const&) = delete;
     DataSourceStatus& operator=(DataSourceStatus&&) = delete;
 };
