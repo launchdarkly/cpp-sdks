@@ -64,10 +64,11 @@ class DataSourceStatusBase {
           state_since_(state_since),
           last_error_(std::move(last_error)) {}
 
-    DataSourceStatusBase(DataSourceStatusBase const& status)
-        : state_(status.State()),
-          state_since_(status.StateSince()),
-          last_error_(status.LastError()) {}
+    virtual ~DataSourceStatusBase() = default;
+    DataSourceStatusBase(DataSourceStatusBase const& item) = default;
+    DataSourceStatusBase(DataSourceStatusBase&& item) = default;
+    DataSourceStatusBase& operator=(DataSourceStatusBase const&) = delete;
+    DataSourceStatusBase& operator=(DataSourceStatusBase&&) = delete;
 
    private:
     DataSourceState state_;

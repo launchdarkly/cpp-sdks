@@ -8,6 +8,7 @@
 
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/data_sources/data_source_status_base.hpp>
+#include <utility>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -83,11 +84,15 @@ class DataSourceStatus
                      DateTime state_since,
                      std::optional<ErrorInfo> last_error)
         : ::launchdarkly::common::data_sources::DataSourceStatusBase<
-              ClientDataSourceState>(state, state_since, last_error) {}
+              ClientDataSourceState>(state,
+                                     state_since,
+                                     std::move(last_error)) {}
 
-    DataSourceStatus(DataSourceStatus const& status)
-        : ::launchdarkly::common::data_sources::DataSourceStatusBase<
-              ClientDataSourceState>(status) {}
+    ~DataSourceStatus() override = default;
+    DataSourceStatus(DataSourceStatus const& item) = default;
+    DataSourceStatus(DataSourceStatus&& item) = default;
+    DataSourceStatus& operator=(DataSourceStatus const&) = delete;
+    DataSourceStatus& operator=(DataSourceStatus&&) = delete;
 };
 
 /**
@@ -99,7 +104,7 @@ class IDataSourceStatusProvider {
      * The current status of the data source. Suitable for broadcast to
      * data source status listeners.
      */
-    virtual DataSourceStatus Status() const = 0;
+    [[nodiscard]] virtual DataSourceStatus Status() const = 0;
 
     /**
      * Listen to changes to the data source status.
