@@ -3,7 +3,6 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
-#include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
@@ -47,6 +46,22 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> Patch(
         data_model::ItemDescriptor<TData>(data->value())};
 }
 
+tl::expected<DataSourceEventHandler::Put, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<DataSourceEventHandler::Put, JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
+    if (!json_value.is_object()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+
+    DataSourceEventHandler::Put put;
+    PARSE_REQUIRED_FIELD(put.data, json_value.as_object(), "data");
+
+    return put;
+}
+
 tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<DataSourceEventHandler::Patch, JsonError>> const& unused,
@@ -68,7 +83,6 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
                                                                        obj);
     }
 
-    // TODO: Implement
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
@@ -120,11 +134,10 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
                 kErrorParsingPut);
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
+        auto res = boost::json::value_to<tl::expected<Put, JsonError>>(parsed);
 
         if (res.has_value()) {
-            handler_.Init(std::move(*res));
+            handler_.Init(std::move(res->data));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
@@ -145,8 +158,8 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
 
-        auto res = boost::json::value_to<
-            tl::expected<DataSourceEventHandler::Patch, JsonError>>(parsed);
+        auto res =
+            boost::json::value_to<tl::expected<Patch, JsonError>>(parsed);
 
         if (res.has_value()) {
             auto const& key = res->key;
@@ -171,8 +184,8 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
 
-        auto res = boost::json::value_to<
-            tl::expected<DataSourceEventHandler::Delete, JsonError>>(parsed);
+        auto res =
+            boost::json::value_to<tl::expected<Delete, JsonError>>(parsed);
 
         if (res.has_value()) {
             switch (res->kind) {
@@ -195,27 +208,11 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
 
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-            kErrorPatchInvalid);
+            kErrorDeleteInvalid);
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
-    status_manager_.SetError(
-        DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-        kErrorPatchInvalid);
+
     return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
-
-// DataSourceEventHandler::StreamingDataKind::StreamingDataKind(
-//     data_store::DataKind kind,
-//     std::string path)
-//     : kind_(kind), path_(std::move(path)) {}
-//
-// data_store::DataKind DataSourceEventHandler::StreamingDataKind::Kind() const
-// {
-//     return kind_;
-// }
-//
-// std::string const& DataSourceEventHandler::StreamingDataKind::Path() const {
-//     return path_;
-// }
 
 }  // namespace launchdarkly::server_side::data_sources

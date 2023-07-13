@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+using namespace std::chrono_literals;
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -11,22 +12,25 @@
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/context.hpp>
+#include <launchdarkly/data/evaluation_result.hpp>
 #include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/sse/client.hpp>
 
 namespace launchdarkly::server_side::data_sources {
 
-class PollingDataSource
+class StreamingDataSource final
     : public ::launchdarkly::data_sources::IDataSource,
-      public std::enable_shared_from_this<PollingDataSource> {
+      public std::enable_shared_from_this<StreamingDataSource> {
    public:
-    PollingDataSource(
+    StreamingDataSource(
         config::shared::built::ServiceEndpoints const& endpoints,
         config::shared::built::DataSourceConfig<
             config::shared::ServerSDK> const& data_source_config,
-        config::shared::built::HttpProperties const& http_properties,
-        const boost::asio::any_io_executor& ioc,
+        config::shared::built::HttpProperties  http_properties,
+        boost::asio::any_io_executor ioc,
         IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
@@ -35,24 +39,17 @@ class PollingDataSource
     void ShutdownAsync(std::function<void()>) override;
 
    private:
-    void DoPoll();
-    void HandlePollResult(network::HttpResult const& res);
-
+    boost::asio::any_io_executor exec_;
     DataSourceStatusManager& status_manager_;
-    std::string polling_endpoint_;
+    DataSourceEventHandler data_source_handler_;
+    std::string streaming_endpoint_;
 
-    network::AsioRequester requester_;
+    config::shared::built::DataSourceConfig<config::shared::ServerSDK>
+        data_source_config_;
+
+    config::shared::built::HttpProperties http_config_;
+
     Logger const& logger_;
-    boost::asio::any_io_executor ioc_;
-    std::chrono::seconds polling_interval_;
-    network::HttpRequest request_;
-    std::optional<std::string> etag_;
-
-    boost::asio::steady_timer timer_;
-    std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
-    IDataSourceUpdateSink& update_sink_;
-
-    void StartPollingTimer();
+    std::shared_ptr<launchdarkly::sse::Client> client_;
 };
-
 }  // namespace launchdarkly::server_side::data_sources

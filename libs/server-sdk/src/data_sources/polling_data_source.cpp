@@ -4,12 +4,20 @@
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_rule_clause.hpp>
+#include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
 #include "data_source_update_sink.hpp"
 #include "polling_data_source.hpp"
 
 namespace launchdarkly::server_side::data_sources {
+
+static char const* const kErrorParsingPut = "Could not parse polling payload";
+static char const* const kErrorPutInvalid =
+    "polling payload contained invalid data";
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
@@ -42,15 +50,14 @@ PollingDataSource::PollingDataSource(
     config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
         data_source_config,
     config::shared::built::HttpProperties const& http_properties,
-    boost::asio::any_io_executor ioc,
+    boost::asio::any_io_executor const& ioc,
     IDataSourceUpdateSink& handler,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
       status_manager_(status_manager),
-      data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+      update_sink_(handler),
       requester_(ioc),
       timer_(ioc),
       polling_interval_(
@@ -78,7 +85,7 @@ void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
     auto weak_self = weak_from_this();
-    requester_.Request(request_, [weak_self](network::HttpResult res) {
+    requester_.Request(request_, [weak_self](network::HttpResult const& res) {
         if (auto self = weak_self.lock()) {
             self->HandlePollResult(res);
         }
@@ -123,7 +130,29 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                                                : "unknown error");
     } else if (res.Status() == 200) {
         if (res.Body().has_value()) {
-            data_source_handler_.HandleMessage("put", res.Body().value());
+            boost::json::error_code error_code;
+            auto parsed = boost::json::parse(res.Body().value(), error_code);
+            if (error_code) {
+                LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
+                status_manager_.SetError(
+                    DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                    kErrorParsingPut);
+                return;
+            }
+            auto poll_result = boost::json::value_to<
+                tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
+
+            if (poll_result.has_value()) {
+                update_sink_.Init(std::move(*poll_result));
+                status_manager_.SetState(
+                    DataSourceStatus::DataSourceState::kValid);
+                return;
+            }
+            LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorPutInvalid);
+            return;
         } else {
             status_manager_.SetState(
                 DataSourceStatus::DataSourceState::kInterrupted,

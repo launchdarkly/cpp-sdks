@@ -23,7 +23,6 @@ template <data_store::DataKind kind, char const* path>
 class StreamingDataKind {
    public:
     static data_store::DataKind Kind() { return kind; }
-    static char const* Path() { return path; }
     static bool IsKind(std::string const& patch_path) {
         return patch_path.rfind(path) == 0;
     }
@@ -60,8 +59,9 @@ struct StreamingDataKinds {
  * This class handles LaunchDarkly events, parses them, and then uses
  * a IDataSourceUpdateSink to process the parsed events.
  *
- * This can be used for streaming or for polling. For polling only "put" events
- * will be used.
+ * This is only used for streaming. For server polling the shape of the poll
+ * response is different than the put, so there is limited utility in
+ * sharing this handler.
  */
 class DataSourceEventHandler {
    public:
@@ -73,6 +73,10 @@ class DataSourceEventHandler {
         kMessageHandled,
         kInvalidMessage,
         kUnhandledVerb
+    };
+
+    struct Put {
+        data_model::SDKDataSet data;
     };
 
     struct Patch {
