@@ -28,4 +28,4 @@ class IDataSourceUpdateSink {
    protected:
     IDataSourceUpdateSink() = default;
 };
-}  // namespace launchdarkly::server_side::data_source
+}  // namespace launchdarkly::server_side::data_sources

@@ -14,12 +14,9 @@ namespace launchdarkly::internal::data_sources {
  * Class that manages updates to the data source status and implements an
  * interface to get the current status and listen to status changes.
  */
-template <typename TDataSourceStatus>
-class DataSourceStatusManagerBase {
+template <typename TDataSourceStatus, typename TInterface>
+class DataSourceStatusManagerBase: public TInterface {
    public:
-    using DataSourceStatusHandler =
-        std::function<void(TDataSourceStatus status)>;
-
     /**
      * Set the state.
      *
@@ -115,12 +112,12 @@ class DataSourceStatusManagerBase {
         data_source_status_signal_(Status());
     }
 
-    TDataSourceStatus Status() const {
+    TDataSourceStatus Status() const override {
         return {state_, state_since_, last_error_};
     }
 
     std::unique_ptr<IConnection> OnDataSourceStatusChange(
-        std::function<void(TDataSourceStatus status)> handler) {
+        std::function<void(TDataSourceStatus status)> handler) override {
         std::lock_guard lock{status_mutex_};
         return std::make_unique<
             ::launchdarkly::internal::signals::SignalConnection>(
@@ -128,7 +125,7 @@ class DataSourceStatusManagerBase {
     }
 
     std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
-        std::function<bool(TDataSourceStatus status)> handler) {
+        std::function<bool(TDataSourceStatus status)> handler) override {
         return std::make_unique<
             launchdarkly::internal::signals::SignalConnection>(
             data_source_status_signal_.connect_extended(
@@ -142,6 +139,13 @@ class DataSourceStatusManagerBase {
     DataSourceStatusManagerBase()
         : state_(TDataSourceStatus::DataSourceState::kInitializing),
           state_since_(std::chrono::system_clock::now()) {}
+
+    virtual ~DataSourceStatusManagerBase() = default;
+    DataSourceStatusManagerBase(DataSourceStatusManagerBase const& item) = delete;
+    DataSourceStatusManagerBase(DataSourceStatusManagerBase&& item) = delete;
+    DataSourceStatusManagerBase& operator=(DataSourceStatusManagerBase const&) =
+        delete;
+    DataSourceStatusManagerBase& operator=(DataSourceStatusManagerBase&&) = delete;
 
    private:
     typename TDataSourceStatus::DataSourceState state_;
