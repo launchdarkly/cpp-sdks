@@ -4,20 +4,22 @@
 
 namespace launchdarkly::server_side::evaluation {
 
-enum class Error {
-    /* A cyclic reference was detected within flags or segments. */
-    kCyclicReference,
-    /* A big segment was encountered; big segments are not supported in this
-     * SDK. */
-    kBigSegmentEncountered,
-    /* Encountered an invalid attribute reference. */
-    kInvalidAttributeReference,
-    /* A rollout was missing variations. */
-    kRolloutMissingVariations,
-    /* An operator was supplied that isn't recognized by this SDK. */
-    kUnrecognizedOperator,
-};
+class Error {
+   public:
+    static Error CyclicSegmentReference(std::string segment_key);
+    static Error InvalidAttributeReference(std::string ref);
+    static Error RolloutMissingVariations();
 
-std::ostream& operator<<(std::ostream& out, Error const& arr);
+    friend std::ostream& operator<<(std::ostream& out, Error const& arr);
+    friend bool operator==(Error const& lhs, Error const& rhs);
+
+   private:
+    Error(char const* format, std::string arg);
+    Error(char const* format, std::int64_t arg);
+    Error(char const* msg);
+
+    char const* format_;
+    std::optional<std::string> arg_;
+};
 
 }  // namespace launchdarkly::server_side::evaluation

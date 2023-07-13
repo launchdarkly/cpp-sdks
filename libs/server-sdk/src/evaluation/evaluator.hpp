@@ -18,11 +18,25 @@ namespace launchdarkly::server_side::evaluation {
 class Evaluator {
    public:
     Evaluator(Logger& logger, flag_manager::FlagStore const& store);
+
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
         launchdarkly::Context const& context);
 
    private:
+    [[nodiscard]] EvaluationDetail<Value> Evaluate(
+        std::string const& parent_key,
+        data_model::Flag const& flag,
+        launchdarkly::Context const& context);
+
+    [[nodiscard]] EvaluationDetail<Value> FlagVariation(
+        data_model::Flag const& flag,
+        data_model::Flag::Variation variation_index,
+        EvaluationReason reason);
+
+    [[nodiscard]] EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
+                                                   EvaluationReason reason);
+
     Logger& logger_;
     flag_manager::FlagStore const& store_;
     mutable detail::EvaluationStack stack_;

@@ -13,10 +13,11 @@
 
 namespace launchdarkly::server_side::evaluation {
 
-[[nodiscard]] bool Match(data_model::Flag::Rule const&,
-                         Context const&,
-                         flag_manager::FlagStore const& store,
-                         detail::EvaluationStack& stack);
+[[nodiscard]] tl::expected<bool, Error> Match(
+    data_model::Flag::Rule const&,
+    Context const&,
+    flag_manager::FlagStore const& store,
+    detail::EvaluationStack& stack);
 
 [[nodiscard]] tl::expected<bool, Error> Match(data_model::Clause const&,
                                               Context const&,

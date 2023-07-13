@@ -82,7 +82,8 @@ TEST_F(BucketingConsistencyTests, BucketContextByInvalidReference) {
     auto result = Bucket(context, kInvalidRef, kPrefix, false, "user");
 
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kInvalidAttributeReference);
+    ASSERT_EQ(result.error(),
+              Error::InvalidAttributeReference(kInvalidRef.RedactionName()));
 }
 
 TEST_F(BucketingConsistencyTests, BucketContextByIntAttribute) {

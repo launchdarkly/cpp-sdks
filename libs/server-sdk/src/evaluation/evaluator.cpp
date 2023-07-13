@@ -32,10 +32,6 @@ bool BucketResult::InExperiment() const {
     return in_experiment_;
 }
 
-EvaluationDetail<Value> FlagVariation(Flag const& flag,
-                                      std::uint64_t variation_index,
-                                      EvaluationReason reason);
-
 EvaluationDetail<Value> OffValue(Flag const& flag, EvaluationReason reason);
 
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
@@ -57,66 +53,57 @@ Evaluator::Evaluator(Logger& logger, flag_manager::FlagStore const& store)
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context) {
+    return Evaluate("", flag, context);
+}
+
+EvaluationDetail<Value> Evaluator::Evaluate(
+    std::string const& parent_key,
+    Flag const& flag,
+    launchdarkly::Context const& context) {
     if (auto guard = stack_.NoticePrerequisite(flag.key)) {
-        // If the flag is off, return immediately.
         if (!flag.on) {
             return OffValue(flag, EvaluationReason::Off());
         }
 
-        // Visit all prerequisites. Each prerequisite evaluation has an
-        // opportunity to influence the evaluation result of the original
-        // flag.
+        for (Flag::Prerequisite const& p : flag.prerequisites) {
+            flag_manager::FlagStore::FlagItem maybe_flag =
+                store_.GetFlag(p.key);
 
-        for (Flag::Prerequisite const& prereq : flag.prerequisites) {
-            flag_manager::FlagStore::FlagItem prereq_flag =
-                store_.GetFlag(prereq.key);
-
-            if (!prereq_flag) {
-                return OffValue(
-                    flag, EvaluationReason::PrerequisiteFailed(prereq.key));
+            if (!maybe_flag) {
+                return OffValue(flag,
+                                EvaluationReason::PrerequisiteFailed(p.key));
             }
 
-            flag_manager::FlagItemDescriptor const& prereq_flag_ref =
-                *prereq_flag;
+            flag_manager::FlagItemDescriptor const& descriptor = *maybe_flag;
 
-            if (!prereq_flag_ref.item) {
+            if (!descriptor.item) {
                 // This flag existed at some point, but has since been deleted.
-                return OffValue(
-                    flag, EvaluationReason::PrerequisiteFailed(prereq.key));
+                return OffValue(flag,
+                                EvaluationReason::PrerequisiteFailed(p.key));
             }
 
-            EvaluationDetail<Value> prereq_result =
-                Evaluate(*prereq_flag_ref.item, context);
+            // Recursive call; cycles are detected by the guard.
+            EvaluationDetail<Value> detailed_evaluation =
+                Evaluate(flag.key, *descriptor.item, context);
 
-            if (prereq_result.Reason().has_value() &&
-                prereq_result.Reason().value().Kind() ==
-                    EvaluationReason::Kind::kError) {
-                return EvaluationDetail<Value>(
-                    EvaluationReason::ErrorKind::kMalformedFlag, Value());
+            if (detailed_evaluation.IsError()) {
+                return detailed_evaluation;
             }
 
             std::optional<std::size_t> variation_index =
-                prereq_result.VariationIndex();
+                detailed_evaluation.VariationIndex();
 
-            // TODO(cwaldren) record prerequisite evaluation events.
+            // TODO(209589) prerequisite events.
 
-            // Although it would seem we could immediately fail the prereq if it
-            // is off (after retrieving it from the store), that check needs to
-            // be deferred until this point, in order to generate prerequisite
-            // events.
-
-            if (!prereq_flag_ref.item->on ||
-                variation_index != prereq.variation) {
-                return OffValue(
-                    flag, EvaluationReason::PrerequisiteFailed(prereq.key));
+            if (!descriptor.item->on || variation_index != p.variation) {
+                return OffValue(flag,
+                                EvaluationReason::PrerequisiteFailed(p.key));
             }
         }
     } else {
-        // If this flag has already been seen in this branch of recursion, then
-        // it must be a circular reference.
-
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "prerequisite relationship to " << flag.key
+        LD_LOG(logger_, LogLevel::kError)
+            << "Invalid flag configuration detected in flag \"" << parent_key
+            << "\": prerequisite relationship to " << flag.key
             << " caused a circular reference; this is probably a temporary "
                "condition due to an incomplete update";
         return OffValue(flag, EvaluationReason(
@@ -124,25 +111,27 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     }
 
     // If the flag is on, all prerequisites are on and valid, then
-    // determine if the context matches any targets. This happens before
-    // rule evaluation to ensure targets always have priority.
+    // determine if the context matches any targets.
+    //
+    // This happens before rule evaluation to ensure targets always have
+    // priority.
 
-    if (std::optional<std::size_t> variation_index =
-            AnyTargetMatchVariation(context, flag)) {
+    if (auto variation_index = AnyTargetMatchVariation(context, flag)) {
         return FlagVariation(flag, *variation_index,
                              EvaluationReason::TargetMatch());
     }
 
-    // If there were no target matches, then evaluate each of the flag's rules.
+    for (std::size_t rule_index = 0; rule_index < flag.rules.size();
+         rule_index++) {
+        auto const& rule = flag.rules[rule_index];
 
-    for (std::size_t i = 0; i < flag.rules.size(); i++) {
-        auto const& rule = flag.rules[i];
-
-        tl::expected<bool, enum EvaluationReason::ErrorKind> rule_match =
+        tl::expected<bool, Error> rule_match =
             Match(rule, context, store_, stack_);
 
         if (!rule_match) {
-            LD_LOG(logger_, LogLevel::kWarn) << rule_match.error();
+            LD_LOG(logger_, LogLevel::kError)
+                << "Invalid flag configuration detected in flag \"" << flag.key
+                << "\": " << rule_match.error();
             return EvaluationDetail<Value>(
                 EvaluationReason::ErrorKind::kMalformedFlag, Value());
         }
@@ -158,8 +147,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             return EvaluationDetail<Value>(result.error(), Value());
         }
 
-        EvaluationReason reason =
-            EvaluationReason::RuleMatch(i, rule.id, result->InExperiment());
+        EvaluationReason reason = EvaluationReason::RuleMatch(
+            rule_index, rule.id, result->InExperiment());
 
         return FlagVariation(flag, result->VariationIndex(), std::move(reason));
     }
@@ -179,21 +168,26 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     return FlagVariation(flag, result->VariationIndex(), std::move(reason));
 }
 
-EvaluationDetail<Value> FlagVariation(Flag const& flag,
-                                      std::uint64_t variation_index,
-                                      EvaluationReason reason) {
+EvaluationDetail<Value> Evaluator::FlagVariation(
+    Flag const& flag,
+    Flag::Variation variation_index,
+    EvaluationReason reason) {
     if (variation_index >= flag.variations.size()) {
+        LD_LOG(logger_, LogLevel::kError)
+            << "Invalid flag configuration detected in flag \"" << flag.key
+            << "\": rule, fallthrough, or target referenced a nonexistent "
+               "variation index ("
+            << variation_index << ")";
         return EvaluationDetail<Value>(
             EvaluationReason::ErrorKind::kMalformedFlag, Value());
     }
 
-    auto const& variation = flag.variations.at(variation_index);
-
-    return EvaluationDetail<Value>(variation, variation_index,
-                                   std::move(reason));
+    return EvaluationDetail<Value>(flag.variations.at(variation_index),
+                                   variation_index, std::move(reason));
 }
 
-EvaluationDetail<Value> OffValue(Flag const& flag, EvaluationReason reason) {
+EvaluationDetail<Value> Evaluator::OffValue(Flag const& flag,
+                                            EvaluationReason reason) {
     if (flag.offVariation) {
         return FlagVariation(flag, *flag.offVariation, std::move(reason));
     }
@@ -260,7 +254,7 @@ tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
             } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
                 if (arg.variations.empty()) {
                     return tl::make_unexpected(
-                        Error::kRolloutMissingVariations);
+                        Error::RolloutMissingVariations());
                 }
 
                 bool is_experiment =

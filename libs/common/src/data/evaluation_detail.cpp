@@ -44,6 +44,11 @@ T const& EvaluationDetail<T>::operator*() const {
     return value_;
 }
 
+template <typename T>
+[[nodiscard]] bool EvaluationDetail<T>::IsError() const {
+    return reason_.has_value() && reason_->ErrorKind().has_value();
+}
+
 template class EvaluationDetail<bool>;
 template class EvaluationDetail<int>;
 template class EvaluationDetail<double>;

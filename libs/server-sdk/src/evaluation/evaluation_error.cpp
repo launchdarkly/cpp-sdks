@@ -1,28 +1,43 @@
 #include "evaluation_error.hpp"
+#include <boost/format.hpp>
 
 namespace launchdarkly::server_side::evaluation {
 
+Error::Error(char const* format, std::string arg)
+    : format_{format}, arg_{std::move(arg)} {}
+
+Error::Error(char const* format, std::int64_t arg)
+    : Error(format, std::to_string(arg)) {}
+
+Error::Error(char const* msg) : format_{msg}, arg_{std::nullopt} {}
+
+Error Error::CyclicSegmentReference(std::string segment_key) {
+    return {
+        "segment rule referencing segment \"%1%\" caused a circular "
+        "reference; this is probably a temporary condition due to an "
+        "incomplete update",
+        std::move(segment_key)};
+}
+
+Error Error::RolloutMissingVariations() {
+    return {"rollout or experiment with no variations"};
+}
+
+Error Error::InvalidAttributeReference(std::string ref) {
+    return {"invalid attribute reference: \"%1%\"", std::move(ref)};
+}
+
 std::ostream& operator<<(std::ostream& out, Error const& err) {
-    switch (err) {
-        case Error::kCyclicReference:
-            out << "CYCLIC_REFERENCE";
-            break;
-        case Error::kBigSegmentEncountered:
-            out << "BIG_SEGMENT_ENCOUNTERED";
-            break;
-        case Error::kInvalidAttributeReference:
-            out << "INVALID_ATTRIBUTE_REFERENCE";
-            break;
-        case Error::kRolloutMissingVariations:
-            out << "ROLLOUT_MISSING_VARIATIONS";
-            break;
-        case Error::kUnrecognizedOperator:
-            out << "UNRECOGNIZED_OPERATOR";
-            break;
-        default:
-            out << "UNKNOWN_ERROR";
-            break;
+    if (err.arg_ == std::nullopt) {
+        out << err.format_;
+    } else {
+        out << boost::format(err.format_) % *err.arg_;
     }
     return out;
 }
+
+bool operator==(Error const& lhs, Error const& rhs) {
+    return lhs.format_ == rhs.format_ && lhs.arg_ == rhs.arg_;
+}
+
 }  // namespace launchdarkly::server_side::evaluation

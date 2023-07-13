@@ -61,6 +61,11 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
+     * @return True if evaluation failed.
+     */
+    [[nodiscard]] bool IsError() const;
+
+    /**
      * @return A reference to the variation value.
      */
     T const& operator*() const;

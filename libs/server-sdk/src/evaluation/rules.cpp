@@ -13,14 +13,20 @@ bool MaybeNegate(Clause const& clause, bool value) {
     return value;
 }
 
-bool Match(Flag::Rule const& rule,
-           launchdarkly::Context const& context,
-           flag_manager::FlagStore const& store,
-           detail::EvaluationStack& stack) {
-    return std::all_of(rule.clauses.begin(), rule.clauses.end(),
-                       [&](Clause const& clause) {
-                           return Match(clause, context, store, stack);
-                       });
+tl::expected<bool, Error> Match(Flag::Rule const& rule,
+                                launchdarkly::Context const& context,
+                                flag_manager::FlagStore const& store,
+                                detail::EvaluationStack& stack) {
+    for (Clause const& clause : rule.clauses) {
+        tl::expected<bool, Error> result = Match(clause, context, store, stack);
+        if (!result) {
+            return result;
+        }
+        if (!(*result)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 tl::expected<bool, Error> Match(Segment::Rule const& rule,
@@ -100,7 +106,8 @@ tl::expected<bool, Error> MatchNonSegment(
     Clause const& clause,
     launchdarkly::Context const& context) {
     if (!clause.attribute.Valid()) {
-        return tl::make_unexpected(Error::kInvalidAttributeReference);
+        return tl::make_unexpected(
+            Error::InvalidAttributeReference(clause.attribute.RedactionName()));
     }
 
     if (clause.attribute.IsKind()) {
@@ -147,11 +154,12 @@ tl::expected<bool, Error> Contains(Segment const& segment,
                                    detail::EvaluationStack& stack) {
     auto guard = stack.NoticeSegment(segment.key);
     if (!guard) {
-        return tl::make_unexpected(Error::kCyclicReference);
+        return tl::make_unexpected(Error::CyclicSegmentReference(segment.key));
     }
 
     if (segment.unbounded) {
-        return tl::make_unexpected(Error::kBigSegmentEncountered);
+        // TODO: set big segment status to NOT_CONFIGURED.
+        return false;
     }
 
     if (IsTargeted(context, segment.included, segment.includedContexts)) {

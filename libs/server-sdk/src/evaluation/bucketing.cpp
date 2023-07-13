@@ -48,7 +48,8 @@ tl::expected<std::pair<ContextHashValue, RolloutKindLookup>, Error> Bucket(
     AttributeReference const& ref = is_experiment ? Key() : by_attr;
 
     if (!ref.Valid()) {
-        return tl::make_unexpected(Error::kInvalidAttributeReference);
+        return tl::make_unexpected(
+            Error::InvalidAttributeReference(ref.RedactionName()));
     }
 
     Value value = context.Get(context_kind, ref);
