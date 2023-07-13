@@ -15,9 +15,17 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
 
 static network::HttpRequest MakeRequest(
+    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
+        data_source_config,
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::HttpProperties const& http_properties) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
+
+    auto const& polling_config = std::get<
+        config::shared::built::PollingConfig<config::shared::ServerSDK>>(
+        data_source_config.method);
+
+    url = network::AppendUrl(url, polling_config.polling_get_path);
 
     network::HttpRequest::BodyType body;
     network::HttpMethod method = network::HttpMethod::kGet;
@@ -50,7 +58,7 @@ PollingDataSource::PollingDataSource(
               config::shared::built::PollingConfig<config::shared::ServerSDK>>(
               data_source_config.method)
               .poll_interval),
-      request_(MakeRequest(endpoints, http_properties)) {
+      request_(MakeRequest(data_source_config, endpoints, http_properties)) {
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ServerSDK>>(
         data_source_config.method);
