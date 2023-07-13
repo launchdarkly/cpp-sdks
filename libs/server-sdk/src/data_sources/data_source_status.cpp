@@ -17,7 +17,7 @@ std::ostream& operator<<(std::ostream& out,
             out << "INTERRUPTED";
             break;
         case DataSourceStatus::DataSourceState::kOff:
-            out << "SHUTDOWN";
+            out << "OFF";
             break;
     }
 
