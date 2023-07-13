@@ -20,7 +20,7 @@ std::ostream& operator<<(std::ostream& out,
             out << "OFFLINE";
             break;
         case DataSourceStatus::DataSourceState::kShutdown:
-            out << "OFF";
+            out << "SHUTDOWN";
             break;
     }
 
