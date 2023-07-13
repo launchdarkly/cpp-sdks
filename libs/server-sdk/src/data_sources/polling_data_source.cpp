@@ -80,12 +80,12 @@ void PollingDataSource::DoPoll() {
     auto weak_self = weak_from_this();
     requester_.Request(request_, [weak_self](network::HttpResult res) {
         if (auto self = weak_self.lock()) {
-            self->HandlePollResult(std::move(res));
+            self->HandlePollResult(res);
         }
     });
 }
 
-void PollingDataSource::HandlePollResult(network::HttpResult res) {
+void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     auto header_etag = res.Headers().find("etag");
     bool has_etag = header_etag != res.Headers().end();
 
@@ -115,12 +115,21 @@ void PollingDataSource::HandlePollResult(network::HttpResult res) {
         status_manager_.SetState(
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-            res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+            res.ErrorMessage().has_value() ? *res.ErrorMessage()
+                                           : "unknown error");
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling for feature flag updates failed: "
-            << (res.ErrorMessage() ? *res.ErrorMessage() : "unknown error");
+            << (res.ErrorMessage().has_value() ? *res.ErrorMessage()
+                                               : "unknown error");
     } else if (res.Status() == 200) {
-        data_source_handler_.HandleMessage("put", res.Body().value());
+        if (res.Body().has_value()) {
+            data_source_handler_.HandleMessage("put", res.Body().value());
+        } else {
+            status_manager_.SetState(
+                DataSourceStatus::DataSourceState::kInterrupted,
+                DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+                "polling response contained no body.");
+        }
     } else if (res.Status() == 304) {
         // This should be handled ahead of here, but if we get a 304,
         // and it didn't have an etag, we still don't want to try to
@@ -159,7 +168,7 @@ void PollingDataSource::StartPollingTimer() {
         polling_interval_ - time_since_poll_seconds, std::chrono::seconds(0)));
 
     timer_.cancel();
-    timer_.expires_after(polling_interval_);
+    timer_.expires_after(delay);
 
     auto weak_self = weak_from_this();
 

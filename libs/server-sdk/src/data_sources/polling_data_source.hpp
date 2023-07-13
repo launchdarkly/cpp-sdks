@@ -36,7 +36,7 @@ class PollingDataSource
 
    private:
     void DoPoll();
-    void HandlePollResult(network::HttpResult res);
+    void HandlePollResult(network::HttpResult const& res);
 
     DataSourceStatusManager& status_manager_;
     DataSourceEventHandler data_source_handler_;
