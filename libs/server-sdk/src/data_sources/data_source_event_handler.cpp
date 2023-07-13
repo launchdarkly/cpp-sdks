@@ -72,25 +72,31 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-static tl::expected<std::optional<DataSourceEventHandler::DeleteData>,
-                    JsonError>
-tag_invoke(
-    boost::json::value_to_tag<tl::expected<DataSourceEventHandler::DeleteData,
-                                           JsonError>> const& unused,
+static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<DataSourceEventHandler::Delete, JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
-    REQUIRE_OBJECT(json_value);
+    if (!json_value.is_object()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
 
     auto const& obj = json_value.as_object();
-    auto const* key_iter = obj.find("key");
-    auto key = ValueAsOpt<std::string>(key_iter, obj.end());
+    auto const* path_iter = obj.find("path");
+    auto path = ValueAsOpt<std::string>(path_iter, obj.end());
     auto const* version_iter = obj.find("version");
     std::optional<uint64_t> version =
         ValueAsOpt<uint64_t>(version_iter, obj.end());
 
-    if (key.has_value() && version.has_value()) {
-        return DataSourceEventHandler::DeleteData{key.value(), version.value()};
+    if (path.has_value() && version.has_value()) {
+        auto kind = StreamingDataKinds::Kind(*path);
+        auto key = StreamingDataKinds::Key(*path);
+
+        if (kind.has_value() && key.has_value()) {
+            return DataSourceEventHandler::Delete{*key, *kind, *version};
+        }
+        return tl::unexpected(JsonError::kSchemaFailure);
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
@@ -149,9 +155,47 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
 
+        status_manager_.SetError(
+            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+            kErrorPatchInvalid);
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
     if (type == "delete") {
+        boost::json::error_code error_code;
+        auto parsed = boost::json::parse(data, error_code);
+        if (error_code) {
+            LD_LOG(logger_, LogLevel::kError) << kErrorParsingDelete;
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorParsingDelete);
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        }
+
+        auto res = boost::json::value_to<
+            tl::expected<DataSourceEventHandler::Delete, JsonError>>(parsed);
+
+        if (res.has_value()) {
+            switch (res->kind) {
+                case data_store::DataKind::kFlag: {
+                    handler_.Upsert(res->key,
+                                    data_store::FlagDescriptor(res->version));
+                    return DataSourceEventHandler::MessageStatus::
+                        kMessageHandled;
+                }
+                case data_store::DataKind::kSegment: {
+                    handler_.Upsert(
+                        res->key, data_store::SegmentDescriptor(res->version));
+                    return DataSourceEventHandler::MessageStatus::
+                        kMessageHandled;
+                }
+                default: {
+                } break;
+            }
+        }
+
+        status_manager_.SetError(
+            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+            kErrorPatchInvalid);
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
     status_manager_.SetError(

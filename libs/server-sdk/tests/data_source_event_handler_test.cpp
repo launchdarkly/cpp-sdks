@@ -41,6 +41,38 @@ TEST(DataSourceEventHandlerTests, HandlesInvalidPut) {
               manager.Status().State());
 }
 
+TEST(DataSourceEventHandlerTests, HandlesInvalidPatch) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage("put", "{sorry");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
+    ASSERT_FALSE(store->Initialized());
+    EXPECT_EQ(0, store->AllFlags().size());
+    EXPECT_EQ(0, store->AllSegments().size());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesInvalidDelete) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage("put", "{sorry");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kInvalidMessage, res);
+    ASSERT_FALSE(store->Initialized());
+    EXPECT_EQ(0, store->AllFlags().size());
+    EXPECT_EQ(0, store->AllSegments().size());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+}
+
 TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
@@ -96,4 +128,47 @@ TEST(DataSourceEventHandlerTests, HandlesValidSegmentPatch) {
               patch_res);
 
     EXPECT_EQ(1, store->AllSegments().size());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesDeleteFlag) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    event_handler.HandleMessage(
+        "put", R"({"segments":{})"
+               R"(, "flags":{"flagA": {"key":"flagA", "version": 0}}})");
+
+    ASSERT_TRUE(store->GetFlag("flagA")->item);
+
+    auto patch_res = event_handler.HandleMessage(
+        "delete", R"({"path": "/flags/flagA", "version": 1})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled,
+              patch_res);
+
+    ASSERT_FALSE(store->GetFlag("flagA")->item);
+}
+
+TEST(DataSourceEventHandlerTests, HandlesDeleteSegment) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    event_handler.HandleMessage(
+        "put",
+        R"({"flags":{})"
+        R"(, "segments":{"segmentA": {"key":"segmentA", "version": 0}}})");
+
+    ASSERT_TRUE(store->GetSegment("segmentA")->item);
+
+    auto patch_res = event_handler.HandleMessage(
+        "delete", R"({"path": "/segments/segmentA", "version": 1})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled,
+              patch_res);
+
+    ASSERT_FALSE(store->GetSegment("segmentA")->item);
 }

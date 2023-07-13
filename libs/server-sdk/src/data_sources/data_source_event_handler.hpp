@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include <boost/asio/any_io_executor.hpp>
 
 #include "../data_store/data_kind.hpp"
@@ -34,6 +36,24 @@ struct StreamingDataKinds {
     using Flag = StreamingDataKind<data_store::DataKind::kFlag, flags_path>;
     using Segment =
         StreamingDataKind<data_store::DataKind::kSegment, segments_path>;
+
+    static std::optional<data_store::DataKind> Kind(std::string const& path) {
+        if (Flag::IsKind(path)) {
+            return data_store::DataKind::kFlag;
+        } else if (Segment::IsKind(path)) {
+            return data_store::DataKind::kSegment;
+        }
+        return std::nullopt;
+    }
+
+    static std::optional<std::string> Key(std::string const& path) {
+        if (Flag::IsKind(path)) {
+            return Flag::Key(path);
+        } else if (Segment::IsKind(path)) {
+            return Segment::Key(path);
+        }
+        return std::nullopt;
+    }
 };
 
 /**
@@ -61,11 +81,9 @@ class DataSourceEventHandler {
             data;
     };
 
-    /**
-     * Represents delete JSON from the LaunchDarkly service.
-     */
-    struct DeleteData {
+    struct Delete {
         std::string key;
+        data_store::DataKind kind;
         uint64_t version;
     };
 
