@@ -15,7 +15,7 @@ namespace launchdarkly::internal::data_sources {
  * interface to get the current status and listen to status changes.
  */
 template <typename TDataSourceStatus, typename TInterface>
-class DataSourceStatusManagerBase: public TInterface {
+class DataSourceStatusManagerBase : public TInterface {
    public:
     /**
      * Set the state.
@@ -141,11 +141,13 @@ class DataSourceStatusManagerBase: public TInterface {
           state_since_(std::chrono::system_clock::now()) {}
 
     virtual ~DataSourceStatusManagerBase() = default;
-    DataSourceStatusManagerBase(DataSourceStatusManagerBase const& item) = delete;
+    DataSourceStatusManagerBase(DataSourceStatusManagerBase const& item) =
+        delete;
     DataSourceStatusManagerBase(DataSourceStatusManagerBase&& item) = delete;
     DataSourceStatusManagerBase& operator=(DataSourceStatusManagerBase const&) =
         delete;
-    DataSourceStatusManagerBase& operator=(DataSourceStatusManagerBase&&) = delete;
+    DataSourceStatusManagerBase& operator=(DataSourceStatusManagerBase&&) =
+        delete;
 
    private:
     typename TDataSourceStatus::DataSourceState state_;
