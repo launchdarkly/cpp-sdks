@@ -61,3 +61,39 @@ TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
               manager.Status().State());
 }
+
+TEST(DataSourceEventHandlerTests, HandlesValidFlagPatch) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    event_handler.HandleMessage("put", "{}");
+
+    auto patch_res = event_handler.HandleMessage(
+        "patch",
+        R"({"path": "/flags/flagA", "data":{"key": "flagA", "version":2}})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled,
+              patch_res);
+
+    EXPECT_EQ(1, store->AllFlags().size());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesValidSegmentPatch) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    event_handler.HandleMessage("put", "{}");
+
+    auto patch_res = event_handler.HandleMessage(
+        "patch",
+        R"({"path": "/segments/segmentA", "data":{"key": "segmentA", "version":2}})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled,
+              patch_res);
+
+    EXPECT_EQ(1, store->AllSegments().size());
+}

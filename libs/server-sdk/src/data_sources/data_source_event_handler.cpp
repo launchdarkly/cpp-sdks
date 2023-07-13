@@ -28,40 +28,69 @@ static char const* const kErrorParsingDelete = "Could not parse DELETE message";
 static char const* const kErrorDeleteInvalid =
     "DELETE message contained invalid data\"";
 
-static tl::expected<DataSourceEventHandler::FlagPatch, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<DataSourceEventHandler::FlagPatch,
-                                           JsonError>> const& unused,
+template <typename TStreamingDataKind, typename TData>
+tl::expected<DataSourceEventHandler::Patch, JsonError> Patch(
+    std::string const& path,
+    boost::json::object const& obj) {
+    auto const* data_iter = obj.find("data");
+    if (data_iter == obj.end()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+    auto data =
+        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
+            data_iter->value());
+    if (!data.has_value()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+    return DataSourceEventHandler::Patch{
+        TStreamingDataKind::Key(path),
+        data_model::ItemDescriptor<TData>(data->value())};
+}
+
+tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<DataSourceEventHandler::Patch, JsonError>> const& unused,
     boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+    if (!json_value.is_object()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
+
+    auto const& obj = json_value.as_object();
+
+    std::string path;
+    PARSE_FIELD(path, obj, "path");
+
+    if (StreamingDataKinds::Flag::IsKind(path)) {
+        return Patch<StreamingDataKinds::Flag, data_model::Flag>(path, obj);
+    } else if (StreamingDataKinds::Segment::IsKind(path)) {
+        return Patch<StreamingDataKinds::Segment, data_model::Segment>(path,
+                                                                       obj);
+    }
+
     // TODO: Implement
     return tl::unexpected(JsonError::kSchemaFailure);
 }
 
-static tl::expected<DataSourceEventHandler::SegmentPatch, JsonError> tag_invoke(
-    boost::json::value_to_tag<tl::expected<DataSourceEventHandler::SegmentPatch,
-                                           JsonError>> const& unused,
-    boost::json::value const& json_value) {
-    // TODO: Implement
-    return tl::unexpected(JsonError::kSchemaFailure);
-}
-
-static tl::expected<DataSourceEventHandler::DeleteData, JsonError> tag_invoke(
+static tl::expected<std::optional<DataSourceEventHandler::DeleteData>,
+                    JsonError>
+tag_invoke(
     boost::json::value_to_tag<tl::expected<DataSourceEventHandler::DeleteData,
                                            JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
-    if (json_value.is_object()) {
-        auto const& obj = json_value.as_object();
-        auto const* key_iter = obj.find("key");
-        auto key = ValueAsOpt<std::string>(key_iter, obj.end());
-        auto const* version_iter = obj.find("version");
-        std::optional<uint64_t> version =
-            ValueAsOpt<uint64_t>(version_iter, obj.end());
+    REQUIRE_OBJECT(json_value);
 
-        if (key.has_value() && version.has_value()) {
-            return DataSourceEventHandler::DeleteData{key.value(),
-                                                      version.value()};
-        }
+    auto const& obj = json_value.as_object();
+    auto const* key_iter = obj.find("key");
+    auto key = ValueAsOpt<std::string>(key_iter, obj.end());
+    auto const* version_iter = obj.find("version");
+    std::optional<uint64_t> version =
+        ValueAsOpt<uint64_t>(version_iter, obj.end());
+
+    if (key.has_value() && version.has_value()) {
+        return DataSourceEventHandler::DeleteData{key.value(), version.value()};
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
@@ -100,11 +129,49 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
     if (type == "patch") {
+        boost::json::error_code error_code;
+        auto parsed = boost::json::parse(data, error_code);
+        if (error_code) {
+            LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorParsingPatch);
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        }
+
+        auto res = boost::json::value_to<
+            tl::expected<DataSourceEventHandler::Patch, JsonError>>(parsed);
+
+        if (res.has_value()) {
+            auto const& key = res->key;
+            std::visit([this, &key](auto&& arg) { handler_.Upsert(key, arg); },
+                       res->data);
+            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+        }
+
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
     if (type == "delete") {
         return DataSourceEventHandler::MessageStatus::kInvalidMessage;
     }
+    status_manager_.SetError(
+        DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+        kErrorPatchInvalid);
     return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
+
+// DataSourceEventHandler::StreamingDataKind::StreamingDataKind(
+//     data_store::DataKind kind,
+//     std::string path)
+//     : kind_(kind), path_(std::move(path)) {}
+//
+// data_store::DataKind DataSourceEventHandler::StreamingDataKind::Kind() const
+// {
+//     return kind_;
+// }
+//
+// std::string const& DataSourceEventHandler::StreamingDataKind::Path() const {
+//     return path_;
+// }
+
 }  // namespace launchdarkly::server_side::data_sources

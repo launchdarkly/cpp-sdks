@@ -2,6 +2,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include "../data_store/data_kind.hpp"
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
@@ -11,7 +12,29 @@
 #include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
+char const flags_path[] = "/flags/";
+char const segments_path[] = "/segments/";
+
 namespace launchdarkly::server_side::data_sources {
+
+template <data_store::DataKind kind, char const* path>
+class StreamingDataKind {
+   public:
+    static data_store::DataKind Kind() { return kind; }
+    static char const* Path() { return path; }
+    static bool IsKind(std::string const& patch_path) {
+        return patch_path.rfind(path) == 0;
+    }
+    static std::string Key(std::string const& patch_path) {
+        return patch_path.substr(std::char_traits<char>::length(path));
+    }
+};
+
+struct StreamingDataKinds {
+    using Flag = StreamingDataKind<data_store::DataKind::kFlag, flags_path>;
+    using Segment =
+        StreamingDataKind<data_store::DataKind::kSegment, segments_path>;
+};
 
 /**
  * This class handles LaunchDarkly events, parses them, and then uses
@@ -32,20 +55,10 @@ class DataSourceEventHandler {
         kUnhandledVerb
     };
 
-    /**
-     * Represents a flag patch JSON from the LaunchDarkly service.
-     */
-    struct FlagPatch {
+    struct Patch {
         std::string key;
-        data_store::FlagDescriptor item;
-    };
-
-    /**
-     * Represents a segment patch JSON from the LaunchDarkly service.
-     */
-    struct SegmentPatch {
-        std::string key;
-        data_store::SegmentDescriptor item;
+        std::variant<data_store::FlagDescriptor, data_store::SegmentDescriptor>
+            data;
     };
 
     /**
