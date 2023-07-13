@@ -5,39 +5,58 @@ namespace launchdarkly::data_model {
 std::ostream& operator<<(std::ostream& os, Clause::Op op) {
     switch (op) {
         case Clause::Op::kUnrecognized:
-            return os << "unrecognized";
+            os << "unrecognized";
+            break;
         case Clause::Op::kIn:
-            return os << "in";
+            os << "in";
+            break;
         case Clause::Op::kStartsWith:
-            return os << "startsWith";
+            os << "startsWith";
+            break;
         case Clause::Op::kEndsWith:
-            return os << "endsWith";
+            os << "endsWith";
+            break;
         case Clause::Op::kMatches:
-            return os << "matches";
+            os << "matches";
+            break;
         case Clause::Op::kContains:
-            return os << "contains";
+            os << "contains";
+            break;
         case Clause::Op::kLessThan:
-            return os << "lessThan";
+            os << "lessThan";
+            break;
         case Clause::Op::kLessThanOrEqual:
-            return os << "lessThanOrEqual";
+            os << "lessThanOrEqual";
+            break;
         case Clause::Op::kGreaterThan:
-            return os << "greaterThan";
+            os << "greaterThan";
+            break;
         case Clause::Op::kGreaterThanOrEqual:
-            return os << "greaterThanOrEqual";
+            os << "greaterThanOrEqual";
+            break;
         case Clause::Op::kBefore:
-            return os << "before";
+            os << "before";
+            break;
         case Clause::Op::kAfter:
-            return os << "after";
+            os << "after";
+            break;
         case Clause::Op::kSemVerEqual:
-            return os << "semVerEqual";
+            os << "semVerEqual";
+            break;
         case Clause::Op::kSemVerLessThan:
-            return os << "semVerLessThan";
+            os << "semVerLessThan";
+            break;
         case Clause::Op::kSemVerGreaterThan:
-            return os << "semVerGreaterThan";
+            os << "semVerGreaterThan";
+            break;
         case Clause::Op::kSegmentMatch:
-            return os << "segmentMatch";
+            os << "segmentMatch";
+            break;
         default:
-            return os << "unknown";
+            os << "unknown";
+            break;
     }
+    return os;
 }
+
 }  // namespace launchdarkly::data_model

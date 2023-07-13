@@ -1,15 +1,13 @@
-#include <boost/json.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_attributes.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 
+#include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 
 #include <optional>
-
-#include <boost/core/ignore_unused.hpp>
 
 namespace launchdarkly {
 void tag_invoke(boost::json::value_from_tag const&,
