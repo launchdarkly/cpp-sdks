@@ -21,8 +21,8 @@ add_library(${LIBNAME}
         evaluation/operators.cpp
         evaluation/evaluation_error.cpp
         evaluation/detail/evaluation_stack.cpp
-        evaluation/detail/timestamp_operations.cpp
         evaluation/detail/semver_operations.cpp
+        evaluation/detail/timestamp_operations.cpp
         flag_manager/flag_store.cpp
         )
 
