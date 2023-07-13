@@ -16,7 +16,7 @@ class DataSourceStatusManager
           DataSourceStatus,
           IDataSourceStatusProvider> {
    public:
-    DataSourceStatusManager();
+    DataSourceStatusManager() = default;
 
     ~DataSourceStatusManager() override = default;
     DataSourceStatusManager(DataSourceStatusManager const& item) = delete;
