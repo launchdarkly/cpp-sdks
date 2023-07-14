@@ -14,6 +14,8 @@
 #include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
+namespace launchdarkly::server_side::data_sources {
+
 // The FlagsPath and SegmentsPath are made to turn a string literal into a type
 // for use in a template.
 // You can use a char array as a const char* template
@@ -26,8 +28,6 @@ struct FlagsPath {
 struct SegmentsPath {
     static constexpr std::string_view path = "/segments/";
 };
-
-namespace launchdarkly::server_side::data_sources {
 
 template <data_store::DataKind kind, typename TPath>
 class StreamingDataKind {
