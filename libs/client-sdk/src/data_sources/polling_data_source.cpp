@@ -185,7 +185,7 @@ void PollingDataSource::StartPollingTimer() {
         polling_interval_ - time_since_poll_seconds, std::chrono::seconds(0)));
 
     timer_.cancel();
-    timer_.expires_after(polling_interval_);
+    timer_.expires_after(delay);
 
     auto weak_self = weak_from_this();
 
