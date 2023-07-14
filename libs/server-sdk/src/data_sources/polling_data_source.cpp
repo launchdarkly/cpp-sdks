@@ -119,19 +119,19 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     }
 
     if (res.IsError()) {
+        auto const& error_message = res.ErrorMessage();
         status_manager_.SetState(
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
-            res.ErrorMessage().has_value() ? *res.ErrorMessage()
-                                           : "unknown error");
+            error_message.has_value() ? *error_message : "unknown error");
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling for feature flag updates failed: "
-            << (res.ErrorMessage().has_value() ? *res.ErrorMessage()
-                                               : "unknown error");
+            << (error_message.has_value() ? *error_message : "unknown error");
     } else if (res.Status() == 200) {
-        if (res.Body().has_value()) {
+        auto const& body = res.Body();
+        if (body.has_value()) {
             boost::json::error_code error_code;
-            auto parsed = boost::json::parse(res.Body().value(), error_code);
+            auto parsed = boost::json::parse(body.value(), error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
                 status_manager_.SetError(
@@ -153,12 +153,12 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorPutInvalid);
             return;
-        } else {
-            status_manager_.SetState(
-                DataSourceStatus::DataSourceState::kInterrupted,
-                DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
-                "polling response contained no body.");
         }
+        status_manager_.SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+            "polling response contained no body.");
+
     } else if (res.Status() == 304) {
         // This should be handled ahead of here, but if we get a 304,
         // and it didn't have an etag, we still don't want to try to

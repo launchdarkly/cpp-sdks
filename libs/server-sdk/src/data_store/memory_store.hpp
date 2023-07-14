@@ -30,10 +30,16 @@ class MemoryStore : public IDataStore,
     void Upsert(std::string const& key, FlagDescriptor flag) override;
     void Upsert(std::string const& key, SegmentDescriptor segment) override;
 
+    MemoryStore() = default;
     ~MemoryStore() override = default;
 
+    MemoryStore(MemoryStore const& item) = delete;
+    MemoryStore(MemoryStore&& item) = delete;
+    MemoryStore& operator=(MemoryStore const&) = delete;
+    MemoryStore& operator=(MemoryStore&&) = delete;
+
    private:
-    static inline std::string description_ = "memory";
+    static inline const std::string description_ = "memory";
     std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>> flags_;
     std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
         segments_;

@@ -42,18 +42,16 @@ StreamingDataSource::StreamingDataSource(
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)),
       http_config_(std::move(http_properties)),
-      data_source_config_(data_source_config),
+      streaming_config_(
+          std::get<config::shared::built::StreamingConfig<
+              config::shared::ServerSDK>>(data_source_config.method)),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
 
-    auto const& streaming_config = std::get<
-        config::shared::built::StreamingConfig<config::shared::ServerSDK>>(
-        data_source_config_.method);
-
     auto updated_url = network::AppendUrl(streaming_endpoint_,
-                                          streaming_config.streaming_path);
+                                          streaming_config_.streaming_path);
 
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {

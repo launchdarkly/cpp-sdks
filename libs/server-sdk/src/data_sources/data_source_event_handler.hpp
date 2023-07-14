@@ -14,32 +14,43 @@
 #include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
-char const flags_path[] = "/flags/";
-char const segments_path[] = "/segments/";
+// The FlagsPath and SegmentsPath are made to turn a string literal into a type
+// for use in a template.
+// You can use a char array as a const char* template
+// parameter, but this causes a number of issues with the clang linter.
+
+struct FlagsPath {
+    static constexpr std::string_view path = "/flags/";
+};
+
+struct SegmentsPath {
+    static constexpr std::string_view path = "/segments/";
+};
 
 namespace launchdarkly::server_side::data_sources {
 
-template <data_store::DataKind kind, char const* path>
+template <data_store::DataKind kind, typename TPath>
 class StreamingDataKind {
    public:
     static data_store::DataKind Kind() { return kind; }
     static bool IsKind(std::string const& patch_path) {
-        return patch_path.rfind(path) == 0;
+        return patch_path.rfind(TPath::path) == 0;
     }
     static std::string Key(std::string const& patch_path) {
-        return patch_path.substr(std::char_traits<char>::length(path));
+        return patch_path.substr(TPath::path.size());
     }
 };
 
 struct StreamingDataKinds {
-    using Flag = StreamingDataKind<data_store::DataKind::kFlag, flags_path>;
+    using Flag = StreamingDataKind<data_store::DataKind::kFlag, FlagsPath>;
     using Segment =
-        StreamingDataKind<data_store::DataKind::kSegment, segments_path>;
+        StreamingDataKind<data_store::DataKind::kSegment, SegmentsPath>;
 
     static std::optional<data_store::DataKind> Kind(std::string const& path) {
         if (Flag::IsKind(path)) {
             return data_store::DataKind::kFlag;
-        } else if (Segment::IsKind(path)) {
+        }
+        if (Segment::IsKind(path)) {
             return data_store::DataKind::kSegment;
         }
         return std::nullopt;
@@ -48,7 +59,8 @@ struct StreamingDataKinds {
     static std::optional<std::string> Key(std::string const& path) {
         if (Flag::IsKind(path)) {
             return Flag::Key(path);
-        } else if (Segment::IsKind(path)) {
+        }
+        if (Segment::IsKind(path)) {
             return Segment::Key(path);
         }
         return std::nullopt;

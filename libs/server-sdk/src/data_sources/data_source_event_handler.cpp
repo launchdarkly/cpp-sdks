@@ -57,7 +57,7 @@ tl::expected<DataSourceEventHandler::Put, JsonError> tag_invoke(
     }
 
     DataSourceEventHandler::Put put;
-    PARSE_REQUIRED_FIELD(put.data, json_value.as_object(), "data");
+    PARSE_FIELD(put.data, json_value.as_object(), "data");
 
     return put;
 }
@@ -78,7 +78,9 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
 
     if (StreamingDataKinds::Flag::IsKind(path)) {
         return Patch<StreamingDataKinds::Flag, data_model::Flag>(path, obj);
-    } else if (StreamingDataKinds::Segment::IsKind(path)) {
+    }
+
+    if (StreamingDataKinds::Segment::IsKind(path)) {
         return Patch<StreamingDataKinds::Segment, data_model::Segment>(path,
                                                                        obj);
     }

@@ -79,9 +79,9 @@ TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     DataSourceStatusManager manager;
     DataSourceEventHandler event_handler(*store, logger, manager);
     auto payload =
-        R"({"segments":{"special":{"key":"special","included":["bob"],
+        R"({"data":{"segments":{"special":{"key":"special","included":["bob"],
         "version":2}},"flags":{"HasBob":{"key":"HasBob","on":true,"fallthrough":
-        {"variation":1},"variations":[true,false],"version":4}}})";
+        {"variation":1},"variations":[true,false],"version":4}}}})";
     auto res = event_handler.HandleMessage("put", payload);
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
@@ -137,8 +137,8 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteFlag) {
     DataSourceEventHandler event_handler(*store, logger, manager);
 
     event_handler.HandleMessage(
-        "put", R"({"segments":{})"
-               R"(, "flags":{"flagA": {"key":"flagA", "version": 0}}})");
+        "put", R"({"data":{"segments":{})"
+               R"(, "flags":{"flagA": {"key":"flagA", "version": 0}}}})");
 
     ASSERT_TRUE(store->GetFlag("flagA")->item);
 
@@ -159,8 +159,8 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteSegment) {
 
     event_handler.HandleMessage(
         "put",
-        R"({"flags":{})"
-        R"(, "segments":{"segmentA": {"key":"segmentA", "version": 0}}})");
+        R"({"data":{"flags":{})"
+        R"(, "segments":{"segmentA": {"key":"segmentA", "version": 0}}}})");
 
     ASSERT_TRUE(store->GetSegment("segmentA")->item);
 

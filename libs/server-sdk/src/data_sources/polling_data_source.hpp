@@ -26,13 +26,13 @@ class PollingDataSource
         config::shared::built::DataSourceConfig<
             config::shared::ServerSDK> const& data_source_config,
         config::shared::built::HttpProperties const& http_properties,
-        const boost::asio::any_io_executor& ioc,
+        boost::asio::any_io_executor const& ioc,
         IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Start() override;
-    void ShutdownAsync(std::function<void()>) override;
+    void ShutdownAsync(std::function<void()> completion) override;
 
    private:
     void DoPoll();

@@ -29,14 +29,14 @@ class StreamingDataSource final
         config::shared::built::ServiceEndpoints const& endpoints,
         config::shared::built::DataSourceConfig<
             config::shared::ServerSDK> const& data_source_config,
-        config::shared::built::HttpProperties  http_properties,
+        config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Start() override;
-    void ShutdownAsync(std::function<void()>) override;
+    void ShutdownAsync(std::function<void()> completion) override;
 
    private:
     boost::asio::any_io_executor exec_;
@@ -44,8 +44,8 @@ class StreamingDataSource final
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
 
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK>
-        data_source_config_;
+    config::shared::built::StreamingConfig<config::shared::ServerSDK>
+        streaming_config_;
 
     config::shared::built::HttpProperties http_config_;
 
