@@ -21,7 +21,7 @@ data_store::FlagDescriptor Flag(char const* json) {
     return data_store::FlagDescriptor{val.value().value()};
 }
 
-std::unique_ptr<data_store::IDataStore> Make() {
+std::unique_ptr<data_store::IDataStore> TestData() {
     auto store = std::make_unique<data_store::MemoryStore>();
     store->Init({});
     store->Upsert("flagWithTarget", Flag(R"(
@@ -46,6 +46,79 @@ std::unique_ptr<data_store::IDataStore> Make() {
         "salt": "salty"
     })"));
 
+    store->Upsert("flagWithMatchesOpOnGroups", Flag(R"({
+        "key": "flagWithMatchesOpOnGroups",
+        "version": 42,
+        "on": true,
+        "targets": [],
+        "rules": [
+            {
+                "variation": 0,
+                "id": "6a7755ac-e47a-40ea-9579-a09dd5f061bd",
+                "clauses": [
+                    {
+                        "attribute": "groups",
+                        "op": "matches",
+                        "values": [
+                            "^\\w+"
+                        ],
+                        "negate": false
+                    }
+                ],
+                "trackEvents": true
+            }
+        ],
+        "prerequisites": [],
+        "fallthrough": {"variation": 1},
+        "offVariation": 0,
+        "variations": [false, true],
+        "clientSide": true,
+        "clientSideAvailability": {
+            "usingEnvironmentId": true,
+            "usingMobileKey": true
+        },
+        "salt": "salty",
+        "trackEvents": false,
+        "trackEventsFallthrough": true,
+        "debugEventsUntilDate": 1500000000
+    })"));
+
+    store->Upsert("flagWithMatchesOpOnKinds", Flag(R"({
+            "key": "flagWithMatchesOpOnKinds",
+            "version": 42,
+            "on": true,
+            "targets": [],
+            "rules": [
+                {
+                    "variation": 0,
+                    "id": "6a7755ac-e47a-40ea-9579-a09dd5f061bd",
+                    "clauses": [
+                        {
+                            "attribute": "kind",
+                            "op": "matches",
+                            "values": [
+                                "^[ou]"
+                            ],
+                            "negate": false
+                        }
+                    ],
+                    "trackEvents": true
+                }
+            ],
+            "prerequisites": [],
+            "fallthrough": {"variation": 1},
+            "offVariation": 0,
+            "variations": [false, true],
+            "clientSide": true,
+            "clientSideAvailability": {
+                "usingEnvironmentId": true,
+                "usingMobileKey": true
+            },
+            "salt": "salty",
+            "trackEvents": false,
+            "trackEventsFallthrough": true,
+            "debugEventsUntilDate": 1500000000
+        })"));
     return store;
 }
 

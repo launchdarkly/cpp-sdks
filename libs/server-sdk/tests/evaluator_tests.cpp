@@ -14,7 +14,7 @@ using namespace launchdarkly::server_side;
 TEST(EvaluatorTests, Instantiation) {
     auto logger = logging::NullLogger();
 
-    auto store = test_store::Make();
+    auto store = test_store::TestData();
 
     evaluation::Evaluator e(logger, store.get());
 
@@ -76,4 +76,80 @@ TEST(EvaluatorTests, Instantiation) {
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kTargetMatch);
+}
+
+TEST(EvaluatorTests, EvaluateWithMatchesOpGroups) {
+    auto logger = logging::NullLogger();
+
+    auto store = test_store::TestData();
+
+    evaluation::Evaluator e(logger, store.get());
+
+    auto alice = ContextBuilder().Kind("user", "alice").Build();
+    auto bob = ContextBuilder()
+                   .Kind("user", "bob")
+                   .Set("groups", {"my-group"})
+                   .Build();
+
+    auto maybe_flag = store->GetFlag("flagWithMatchesOpOnGroups")->item;
+    ASSERT_TRUE(maybe_flag);
+    data_model::Flag flag = maybe_flag.value();
+
+    auto detail = e.Evaluate(flag, alice);
+    ASSERT_FALSE(detail.IsError());
+    ASSERT_EQ(*detail, Value(true));
+    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
+    ASSERT_FALSE(detail.Reason()->InExperiment());
+
+    detail = e.Evaluate(flag, bob);
+    ASSERT_FALSE(detail.IsError());
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_EQ(detail.VariationIndex(), 0);
+    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
+    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
+    ASSERT_EQ(detail.Reason()->RuleId(),
+              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
+    ASSERT_FALSE(detail.Reason()->InExperiment());
+}
+
+TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
+    auto logger = logging::NullLogger();
+
+    auto store = test_store::TestData();
+
+    evaluation::Evaluator e(logger, store.get());
+
+    auto alice = ContextBuilder().Kind("user", "alice").Build();
+    auto bob = ContextBuilder().Kind("company", "bob").Build();
+
+    auto maybe_flag = store->GetFlag("flagWithMatchesOpOnKinds")->item;
+    ASSERT_TRUE(maybe_flag);
+    data_model::Flag flag = maybe_flag.value();
+
+    auto detail = e.Evaluate(flag, alice);
+    ASSERT_FALSE(detail.IsError());
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_EQ(detail.VariationIndex(), 0);
+    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
+    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
+    ASSERT_EQ(detail.Reason()->RuleId(),
+              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
+    ASSERT_FALSE(detail.Reason()->InExperiment());
+
+    detail = e.Evaluate(flag, bob);
+    ASSERT_FALSE(detail.IsError());
+    ASSERT_EQ(*detail, Value(true));
+    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
+    ASSERT_FALSE(detail.Reason()->InExperiment());
+
+    auto new_bob = ContextBuilder().Kind("org", "bob").Build();
+    detail = e.Evaluate(flag, new_bob);
+    ASSERT_FALSE(detail.IsError());
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_EQ(detail.VariationIndex(), 0);
+    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
+    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
+    ASSERT_EQ(detail.Reason()->RuleId(),
+              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
+    ASSERT_FALSE(detail.Reason()->InExperiment());
 }
