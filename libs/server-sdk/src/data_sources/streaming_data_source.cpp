@@ -13,7 +13,7 @@
 namespace launchdarkly::server_side::data_sources {
 
 static char const* const kCouldNotParseEndpoint =
-    "Could not parse streaming endpoint URL.";
+    "Could not parse streaming endpoint URL";
 
 static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
     switch (error) {
