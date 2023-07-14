@@ -17,7 +17,7 @@ namespace launchdarkly::server_side::data_sources {
 
 static char const* const kErrorParsingPut = "Could not parse polling payload";
 static char const* const kErrorPutInvalid =
-    "polling payload contained invalid data";
+    "Polling payload contained invalid data";
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL.";
