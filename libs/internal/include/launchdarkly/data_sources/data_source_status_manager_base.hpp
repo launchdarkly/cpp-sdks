@@ -25,7 +25,7 @@ class DataSourceStatusManagerBase : public TInterface {
     void SetState(typename TDataSourceStatus::DataSourceState state) {
         bool changed = UpdateState(state);
         if (changed) {
-            data_source_status_signal_(std::move(Status()));
+            data_source_status_signal_(Status());
         }
     }
 
@@ -50,7 +50,7 @@ class DataSourceStatusManagerBase : public TInterface {
                 message, std::chrono::system_clock::now());
         }
 
-        data_source_status_signal_(std::move(Status()));
+        data_source_status_signal_(Status());
     }
 
     /**
