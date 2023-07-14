@@ -15,7 +15,7 @@ TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
     DataSourceStatusManager manager;
     DataSourceEventHandler event_handler(*store, logger, manager);
 
-    auto res = event_handler.HandleMessage("put", "{}");
+    auto res = event_handler.HandleMessage("put", R"({"path":"/", "data":{}})");
 
     ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     ASSERT_TRUE(store->Initialized());
@@ -57,6 +57,34 @@ TEST(DataSourceEventHandlerTests, HandlesInvalidPatch) {
               manager.Status().State());
 }
 
+TEST(DataSourceEventHandlerTests, HandlesPatchForUnknownPath) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage(
+        "patch", R"({"path":"potato", "data": "SPUD"})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+}
+
+TEST(DataSourceEventHandlerTests, HandlesPutForUnknownPath) {
+    auto logger = launchdarkly::logging::NullLogger();
+    auto store = std::make_shared<MemoryStore>();
+    DataSourceStatusManager manager;
+    DataSourceEventHandler event_handler(*store, logger, manager);
+
+    auto res = event_handler.HandleMessage(
+        "put", R"({"path":"potato", "data": "SPUD"})");
+
+    ASSERT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInitializing,
+              manager.Status().State());
+}
+
 TEST(DataSourceEventHandlerTests, HandlesInvalidDelete) {
     auto logger = launchdarkly::logging::NullLogger();
     auto store = std::make_shared<MemoryStore>();
@@ -79,7 +107,7 @@ TEST(DataSourceEventHandlerTests, HandlesPayloadWithFlagAndSegment) {
     DataSourceStatusManager manager;
     DataSourceEventHandler event_handler(*store, logger, manager);
     auto payload =
-        R"({"data":{"segments":{"special":{"key":"special","included":["bob"],
+        R"({"path":"/","data":{"segments":{"special":{"key":"special","included":["bob"],
         "version":2}},"flags":{"HasBob":{"key":"HasBob","on":true,"fallthrough":
         {"variation":1},"variations":[true,false],"version":4}}}})";
     auto res = event_handler.HandleMessage("put", payload);
@@ -137,7 +165,7 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteFlag) {
     DataSourceEventHandler event_handler(*store, logger, manager);
 
     event_handler.HandleMessage(
-        "put", R"({"data":{"segments":{})"
+        "put", R"({"path":"/","data":{"segments":{})"
                R"(, "flags":{"flagA": {"key":"flagA", "version": 0}}}})");
 
     ASSERT_TRUE(store->GetFlag("flagA")->item);
@@ -159,7 +187,7 @@ TEST(DataSourceEventHandlerTests, HandlesDeleteSegment) {
 
     event_handler.HandleMessage(
         "put",
-        R"({"data":{"flags":{})"
+        R"({"path":"/","data":{"flags":{})"
         R"(, "segments":{"segmentA": {"key":"segmentA", "version": 0}}}})");
 
     ASSERT_TRUE(store->GetSegment("segmentA")->item);

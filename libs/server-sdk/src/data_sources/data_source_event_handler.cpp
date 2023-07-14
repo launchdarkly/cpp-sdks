@@ -2,15 +2,16 @@
 
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
+// #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
-#include <unordered_map>
 
+#include <optional>
+#include <unordered_map>
 #include <utility>
 
 #include "tl/expected.hpp"
@@ -46,9 +47,10 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> Patch(
         data_model::ItemDescriptor<TData>(data->value())};
 }
 
-tl::expected<DataSourceEventHandler::Put, JsonError> tag_invoke(
+tl::expected<std::optional<DataSourceEventHandler::Put>, JsonError> tag_invoke(
     boost::json::value_to_tag<
-        tl::expected<DataSourceEventHandler::Put, JsonError>> const& unused,
+        tl::expected<std::optional<DataSourceEventHandler::Put>,
+                     JsonError>> const& unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -57,15 +59,23 @@ tl::expected<DataSourceEventHandler::Put, JsonError> tag_invoke(
     }
 
     DataSourceEventHandler::Put put;
-    PARSE_FIELD(put.data, json_value.as_object(), "data");
+    std::string path;
+    auto const& obj = json_value.as_object();
+    PARSE_FIELD(path, obj, "path");
+    // We don't know what to do with a path other than "/".
+    if (path != "/") {
+        return std::nullopt;
+    }
+    PARSE_FIELD(put.data, obj, "data");
 
     return put;
 }
 
-tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<DataSourceEventHandler::Patch, JsonError>> const& unused,
-    boost::json::value const& json_value) {
+tl::expected<std::optional<DataSourceEventHandler::Patch>, JsonError>
+tag_invoke(boost::json::value_to_tag<
+               tl::expected<std::optional<DataSourceEventHandler::Patch>,
+                            JsonError>> const& unused,
+           boost::json::value const& json_value) {
     boost::ignore_unused(unused);
     if (!json_value.is_object()) {
         return tl::unexpected(JsonError::kSchemaFailure);
@@ -85,7 +95,7 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> tag_invoke(
                                                                        obj);
     }
 
-    return tl::unexpected(JsonError::kSchemaFailure);
+    return std::nullopt;
 }
 
 static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
@@ -99,20 +109,19 @@ static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
     }
 
     auto const& obj = json_value.as_object();
-    auto const* path_iter = obj.find("path");
-    auto path = ValueAsOpt<std::string>(path_iter, obj.end());
-    auto const* version_iter = obj.find("version");
-    std::optional<uint64_t> version =
-        ValueAsOpt<uint64_t>(version_iter, obj.end());
 
-    if (path.has_value() && version.has_value()) {
-        auto kind = StreamingDataKinds::Kind(*path);
-        auto key = StreamingDataKinds::Key(*path);
+    DataSourceEventHandler::Delete del;
+    PARSE_REQUIRED_FIELD(del.version, obj, "version");
+    std::string path;
+    PARSE_REQUIRED_FIELD(path, obj, "path");
 
-        if (kind.has_value() && key.has_value()) {
-            return DataSourceEventHandler::Delete{*key, *kind, *version};
-        }
-        return tl::unexpected(JsonError::kSchemaFailure);
+    auto kind = StreamingDataKinds::Kind(path);
+    auto key = StreamingDataKinds::Key(path);
+
+    if (kind.has_value() && key.has_value()) {
+        del.kind = *kind;
+        del.key = *key;
+        return del;
     }
     return tl::unexpected(JsonError::kSchemaFailure);
 }
@@ -136,18 +145,25 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
                 kErrorParsingPut);
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<tl::expected<Put, JsonError>>(parsed);
+        auto res =
+            boost::json::value_to<tl::expected<std::optional<Put>, JsonError>>(
+                parsed);
 
-        if (res.has_value()) {
-            handler_.Init(std::move(res->data));
+        if (!res.has_value()) {
+            LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorPutInvalid);
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        }
+
+        // Check the inner optional.
+        if (res->has_value()) {
+            handler_.Init(std::move((*res)->data));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return DataSourceEventHandler::MessageStatus::kMessageHandled;
         }
-        LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
-        status_manager_.SetError(
-            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-            kErrorPutInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        return DataSourceEventHandler::MessageStatus::kMessageHandled;
     }
     if (type == "patch") {
         boost::json::error_code error_code;
@@ -160,20 +176,26 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
 
-        auto res =
-            boost::json::value_to<tl::expected<Patch, JsonError>>(parsed);
+        auto res = boost::json::value_to<
+            tl::expected<std::optional<Patch>, JsonError>>(parsed);
 
-        if (res.has_value()) {
-            auto const& key = res->key;
-            std::visit([this, &key](auto&& arg) { handler_.Upsert(key, arg); },
-                       res->data);
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+        if (!res.has_value()) {
+            status_manager_.SetError(
+                DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
+                kErrorPatchInvalid);
+            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
         }
 
-        status_manager_.SetError(
-            DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
-            kErrorPatchInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        // This references the optional inside the expected.
+        if (res->has_value()) {
+            auto const& patch = (**res);
+            auto const& key = patch.key;
+            std::visit([this, &key](auto&& arg) { handler_.Upsert(key, arg); },
+                       patch.data);
+            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+        }
+        // We didn't recognize the type of the patch. So we ignore it.
+        return DataSourceEventHandler::MessageStatus::kMessageHandled;
     }
     if (type == "delete") {
         boost::json::error_code error_code;
