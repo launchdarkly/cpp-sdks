@@ -6,7 +6,7 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "../flag_manager/flag_store.hpp"
+#include "../data_store/data_store.hpp"
 #include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
@@ -17,7 +17,7 @@ namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
-    Evaluator(Logger& logger, flag_manager::FlagStore const& store);
+    Evaluator(Logger& logger, data_store::IDataStore const* store);
 
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
@@ -38,7 +38,7 @@ class Evaluator {
                                                    EvaluationReason reason);
 
     Logger& logger_;
-    flag_manager::FlagStore const& store_;
+    data_store::IDataStore const* store_;
     mutable detail::EvaluationStack stack_;
 };
 

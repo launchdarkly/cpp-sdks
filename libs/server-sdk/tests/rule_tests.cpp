@@ -5,9 +5,10 @@
 #include "evaluation/evaluator.hpp"
 #include "evaluation/rules.hpp"
 
-#include "flag_manager/flag_store.hpp"
+#include "test_store.hpp"
 
 using namespace launchdarkly::data_model;
+using namespace launchdarkly::server_side;
 using namespace launchdarkly;
 
 struct ClauseTest {
@@ -58,10 +59,11 @@ TEST_P(AllOperatorsTest, Matches) {
     ASSERT_TRUE(context.Valid());
 
     EvaluationStack stack;
-    server_side::flag_manager::FlagStore store;
 
-    auto result = launchdarkly::server_side::evaluation::Match(clause, context,
-                                                               store, stack);
+    auto store = test_store::Empty();
+
+    auto result = launchdarkly::server_side::evaluation::Match(
+        clause, context, store.get(), stack);
     ASSERT_EQ(result, param.expected)
         << context.Get("user", "attr") << " " << clause.op << " "
         << clause.values << " should be " << param.expected;

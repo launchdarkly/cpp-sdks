@@ -23,7 +23,6 @@ add_library(${LIBNAME}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
-        flag_manager/flag_store.cpp
         )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))

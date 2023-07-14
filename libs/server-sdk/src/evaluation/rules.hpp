@@ -3,7 +3,8 @@
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/data_model/segment.hpp>
-#include "../flag_manager/flag_store.hpp"
+
+#include "../data_store/data_store.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
 
@@ -16,18 +17,18 @@ namespace launchdarkly::server_side::evaluation {
 [[nodiscard]] tl::expected<bool, Error> Match(
     data_model::Flag::Rule const&,
     Context const&,
-    flag_manager::FlagStore const& store,
+    data_store::IDataStore const* store,
     detail::EvaluationStack& stack);
 
 [[nodiscard]] tl::expected<bool, Error> Match(data_model::Clause const&,
                                               Context const&,
-                                              flag_manager::FlagStore const&,
+                                              data_store::IDataStore const*,
                                               detail::EvaluationStack&);
 
 [[nodiscard]] tl::expected<bool, Error> Match(
     data_model::Segment::Rule const& rule,
     Context const& context,
-    flag_manager::FlagStore const& store,
+    data_store::IDataStore const* store,
     detail::EvaluationStack& stack,
     std::string const& key,
     std::string const& salt);
@@ -35,7 +36,7 @@ namespace launchdarkly::server_side::evaluation {
 [[nodiscard]] tl::expected<bool, Error> MatchSegment(
     data_model::Clause const&,
     Context const&,
-    flag_manager::FlagStore const&,
+    data_store::IDataStore const*,
     detail::EvaluationStack& stack);
 
 [[nodiscard]] tl::expected<bool, Error> MatchNonSegment(
@@ -45,7 +46,7 @@ namespace launchdarkly::server_side::evaluation {
 [[nodiscard]] tl::expected<bool, Error> Contains(
     data_model::Segment const&,
     Context const&,
-    flag_manager::FlagStore const& store,
+    data_store::IDataStore const* store,
     detail::EvaluationStack& stack);
 
 [[nodiscard]] bool MaybeNegate(data_model::Clause const& clause, bool value);

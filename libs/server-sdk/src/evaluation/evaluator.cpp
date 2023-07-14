@@ -32,8 +32,6 @@ bool BucketResult::InExperiment() const {
     return in_experiment_;
 }
 
-EvaluationDetail<Value> OffValue(Flag const& flag, EvaluationReason reason);
-
 tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
 ResolveVariationOrRollout(Flag const& flag,
                           Flag::VariationOrRollout const& vr,
@@ -47,7 +45,7 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target);
 
-Evaluator::Evaluator(Logger& logger, flag_manager::FlagStore const& store)
+Evaluator::Evaluator(Logger& logger, data_store::IDataStore const* store)
     : logger_(logger), store_(store), stack_() {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
@@ -66,15 +64,15 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         }
 
         for (Flag::Prerequisite const& p : flag.prerequisites) {
-            flag_manager::FlagStore::FlagItem maybe_flag =
-                store_.GetFlag(p.key);
+            std::shared_ptr<data_store::FlagDescriptor> maybe_flag =
+                store_->GetFlag(p.key);
 
             if (!maybe_flag) {
                 return OffValue(flag,
                                 EvaluationReason::PrerequisiteFailed(p.key));
             }
 
-            flag_manager::FlagItemDescriptor const& descriptor = *maybe_flag;
+            data_store::FlagDescriptor const& descriptor = *maybe_flag;
 
             if (!descriptor.item) {
                 // This flag existed at some point, but has since been deleted.
@@ -229,7 +227,7 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target) {
     Value key = context.Get(target.contextKind, "key");
-    if (!key) {
+    if (key.IsNull()) {
         return std::nullopt;
     }
 
