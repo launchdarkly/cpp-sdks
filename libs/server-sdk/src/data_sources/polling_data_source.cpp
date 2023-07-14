@@ -20,7 +20,7 @@ static char const* const kErrorPutInvalid =
     "Polling payload contained invalid data";
 
 static char const* const kCouldNotParseEndpoint =
-    "Could not parse polling endpoint URL.";
+    "Could not parse polling endpoint URL";
 
 static network::HttpRequest MakeRequest(
     config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
