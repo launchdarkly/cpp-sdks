@@ -164,7 +164,7 @@ class DataSourceStatusManagerBase : public TInterface {
 
         // Interrupted and initializing are common to server and client.
         // If logic specific to client or server states was needed, then
-        // the implementation would need re-organized to allow overriding the
+        // the implementation would need to be re-organized to allow overriding the
         // method.
 
         // If initializing, then interruptions remain initializing.
