@@ -37,6 +37,8 @@ class Evaluator {
     [[nodiscard]] EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
                                                    EvaluationReason reason);
 
+    void LogError(std::string const& key, Error const& error);
+
     Logger& logger_;
     data_store::IDataStore const& store_;
     mutable detail::EvaluationStack stack_;

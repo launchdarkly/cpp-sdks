@@ -11,11 +11,6 @@ namespace launchdarkly::server_side::evaluation {
 
 using namespace data_model;
 
-tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
-ResolveVariationOrRollout(Flag const& flag,
-                          Flag::VariationOrRollout const& vr,
-                          Context const& context);
-
 std::optional<std::size_t> AnyTargetMatchVariation(
     launchdarkly::Context const& context,
     Flag const& flag);
@@ -78,11 +73,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             }
         }
     } else {
-        LD_LOG(logger_, LogLevel::kError)
-            << "Invalid flag configuration detected in flag \"" << parent_key
-            << "\": " << Error::CyclicPrerequisiteReference(flag.key);
-        return OffValue(flag, EvaluationReason(
-                                  EvaluationReason::ErrorKind::kMalformedFlag));
+        LogError(parent_key, Error::CyclicPrerequisiteReference(flag.key));
+        return OffValue(flag, EvaluationReason::MalformedFlag());
     }
 
     // If the flag is on, all prerequisites are on and valid, then
@@ -104,22 +96,20 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             Match(rule, context, store_, stack_);
 
         if (!rule_match) {
-            LD_LOG(logger_, LogLevel::kError)
-                << "Invalid flag configuration detected in flag \"" << flag.key
-                << "\": " << rule_match.error();
-            return EvaluationDetail<Value>(
-                EvaluationReason::ErrorKind::kMalformedFlag, Value());
+            LogError(flag.key, rule_match.error());
+            return EvaluationReason::MalformedFlag();
         }
 
         if (!(*rule_match)) {
             continue;
         }
 
-        tl::expected<BucketResult, enum EvaluationReason::ErrorKind> result =
-            ResolveVariationOrRollout(flag, rule.variationOrRollout, context);
+        tl::expected<BucketResult, Error> result =
+            Variation(rule.variationOrRollout, flag.key, context, flag.salt);
 
         if (!result) {
-            return EvaluationDetail<Value>(result.error(), Value());
+            LogError(flag.key, result.error());
+            return EvaluationReason::MalformedFlag();
         }
 
         EvaluationReason reason = EvaluationReason::RuleMatch(
@@ -130,11 +120,12 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
     // If there were no rule matches, then return the fallthrough variation.
 
-    tl::expected<BucketResult, enum EvaluationReason::ErrorKind> result =
-        ResolveVariationOrRollout(flag, flag.fallthrough, context);
+    tl::expected<BucketResult, Error> result =
+        Variation(flag.fallthrough, flag.key, context, flag.salt);
 
     if (!result) {
-        return EvaluationDetail<Value>(result.error(), Value());
+        LogError(flag.key, result.error());
+        return EvaluationReason::MalformedFlag();
     }
 
     EvaluationReason reason =
@@ -148,15 +139,12 @@ EvaluationDetail<Value> Evaluator::FlagVariation(
     Flag::Variation variation_index,
     EvaluationReason reason) {
     if (variation_index >= flag.variations.size()) {
-        LD_LOG(logger_, LogLevel::kError)
-            << "Invalid flag configuration detected in flag \"" << flag.key
-            << "\": " << Error::NonexistentVariationIndex(variation_index);
-        return EvaluationDetail<Value>(
-            EvaluationReason::ErrorKind::kMalformedFlag, Value());
+        LogError(flag.key, Error::NonexistentVariationIndex(variation_index));
+        return EvaluationReason::MalformedFlag();
     }
 
-    return EvaluationDetail<Value>(flag.variations.at(variation_index),
-                                   variation_index, std::move(reason));
+    return {flag.variations.at(variation_index), variation_index,
+            std::move(reason)};
 }
 
 EvaluationDetail<Value> Evaluator::OffValue(Flag const& flag,
@@ -165,7 +153,7 @@ EvaluationDetail<Value> Evaluator::OffValue(Flag const& flag,
         return FlagVariation(flag, *flag.offVariation, std::move(reason));
     }
 
-    return EvaluationDetail<Value>(std::move(reason));
+    return reason;
 }
 
 std::optional<std::size_t> AnyTargetMatchVariation(
@@ -215,19 +203,10 @@ std::optional<std::size_t> TargetMatchVariation(
     return std::nullopt;
 }
 
-tl::expected<BucketResult, enum EvaluationReason::ErrorKind>
-ResolveVariationOrRollout(Flag const& flag,
-                          Flag::VariationOrRollout const& vr,
-                          Context const& context) {
-    if (!flag.salt) {
-        return tl::make_unexpected(EvaluationReason::ErrorKind::kMalformedFlag);
-    }
-
-    return Variation(vr, flag.key, context, *flag.salt)
-        .map_error([](Error discarded) {
-            boost::ignore_unused(discarded);
-            return EvaluationReason::ErrorKind::kMalformedFlag;
-        });
+void Evaluator::LogError(std::string const& key, Error const& error) {
+    LD_LOG(logger_, LogLevel::kError)
+        << "Invalid flag configuration detected in flag \"" << key
+        << "\": " << error;
 }
 
 }  // namespace launchdarkly::server_side::evaluation

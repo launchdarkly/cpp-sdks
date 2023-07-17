@@ -175,7 +175,7 @@ tl::expected<bool, Error> Contains(Segment const& segment,
 
     for (auto const& rule : segment.rules) {
         if (!segment.salt) {
-            return tl::make_unexpected(Error::MissingSegmentSalt(segment.key));
+            return tl::make_unexpected(Error::MissingSalt(segment.key));
         }
         if (Match(rule, context, store, stack, segment.key, *segment.salt)) {
             return true;

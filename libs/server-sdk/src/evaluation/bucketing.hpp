@@ -116,6 +116,6 @@ tl::expected<BucketResult, Error> Variation(
     data_model::Flag::VariationOrRollout const& vr,
     std::string const& flag_key,
     launchdarkly::Context const& context,
-    std::string const& salt);
+    std::optional<std::string> const& salt);
 
 }  // namespace launchdarkly::server_side::evaluation

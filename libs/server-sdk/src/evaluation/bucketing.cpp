@@ -149,10 +149,14 @@ bool IsIntegral(double f) {
     return std::trunc(f) == f;
 }
 
-tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
-                                            std::string const& flag_key,
-                                            Context const& context,
-                                            std::string const& salt) {
+tl::expected<BucketResult, Error> Variation(
+    Flag::VariationOrRollout const& vr,
+    std::string const& flag_key,
+    Context const& context,
+    std::optional<std::string> const& salt) {
+    if (!salt) {
+        return tl::make_unexpected(Error::MissingSalt(flag_key));
+    }
     return std::visit(
         [&](auto&& arg) -> tl::expected<BucketResult, Error> {
             using T = std::decay_t<decltype(arg)>;
@@ -169,7 +173,7 @@ tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
 
                 std::optional<BucketPrefix> prefix =
                     arg.seed ? BucketPrefix(*arg.seed)
-                             : BucketPrefix(flag_key, salt);
+                             : BucketPrefix(flag_key, *salt);
 
                 auto bucketing_result = Bucket(context, arg.bucketBy, *prefix,
                                                is_experiment, arg.contextKind);
