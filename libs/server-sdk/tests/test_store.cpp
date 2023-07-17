@@ -3,6 +3,7 @@
 #include "data_store/memory_store.hpp"
 
 #include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/serialization/json_segment.hpp>
 
 namespace launchdarkly::server_side::test_store {
 
@@ -21,9 +22,45 @@ data_store::FlagDescriptor Flag(char const* json) {
     return data_store::FlagDescriptor{val.value().value()};
 }
 
+data_store::SegmentDescriptor Segment(char const* json) {
+    auto val = boost::json::value_to<
+        tl::expected<std::optional<data_model::Segment>, JsonError>>(
+        boost::json::parse(json));
+    assert(val.has_value());
+    assert(val.value().has_value());
+    return data_store::SegmentDescriptor{val.value().value()};
+}
+
 std::unique_ptr<data_store::IDataStore> TestData() {
     auto store = std::make_unique<data_store::MemoryStore>();
     store->Init({});
+
+    store->Upsert("segmentWithNoRules", Segment(R"({
+        "key": "segmentWithNoRules",
+        "included": ["alice"],
+        "excluded": [],
+        "rules": [],
+        "salt": "salty",
+        "version": 1
+        })"));
+    store->Upsert("segmentWithRuleMatchesUserAlice", Segment(R"({
+        "key": "segmentWithRuleMatchesUserAlice",
+        "included": [],
+        "excluded": [],
+       "rules": [{
+             "id": "rule-1",
+             "clauses": [{
+                 "attribute": "key",
+                 "negate": false,
+                 "op": "in",
+                 "values": ["alice"],
+                 "contextKind": "user"
+             }]
+        }],
+        "salt": "salty",
+        "version": 1
+        })"));
+
     store->Upsert("flagWithTarget", Flag(R"(
     {
         "key": "flagWithTarget",
@@ -209,6 +246,60 @@ std::unique_ptr<data_store::IDataStore> TestData() {
                 "trackEvents": false,
                 "trackEventsFallthrough": false,
                 "debugEventsUntilDate": 1500000000
+        })"));
+    store->Upsert("flagWithSegmentMatchRule", Flag(R"({
+                "key": "flagWithSegmentMatchRule",
+                "version": 42,
+                "on": true,
+                "targets": [],
+                "rules": [{
+                   "id": "match-rule",
+                   "clauses": [{
+                       "contextKind": "user",
+                       "attribute": "key",
+                       "negate": false,
+                       "op": "segmentMatch",
+                       "values": ["segmentWithNoRules"]
+                   }],
+                   "variation": 0,
+                   "trackEvents": false
+                }],
+                "prerequisites": [],
+                "fallthrough": {"variation": 1},
+                "offVariation": 0,
+                "variations": [false, true],
+                "clientSide": true,
+                "clientSideAvailability": {
+                   "usingEnvironmentId": true,
+                   "usingMobileKey": true
+                },
+                "salt": "salty"
+        })"));
+
+    store->Upsert("flagWithSegmentMatchesUserAlice", Flag(R"({
+                "key": "flagWithSegmentMatchesUserAlice",
+                "version": 42,
+                "on": true,
+                "targets": [],
+                "rules": [{
+                   "id": "match-rule",
+                   "clauses": [{
+                       "op": "segmentMatch",
+                       "values": ["segmentWithRuleMatchesUserAlice"]
+                   }],
+                   "variation": 0,
+                   "trackEvents": false
+                }],
+                "prerequisites": [],
+                "fallthrough": {"variation": 1},
+                "offVariation": 0,
+                "variations": [false, true],
+                "clientSide": true,
+                "clientSideAvailability": {
+                   "usingEnvironmentId": true,
+                   "usingMobileKey": true
+                },
+                "salt": "salty"
         })"));
     return store;
 }

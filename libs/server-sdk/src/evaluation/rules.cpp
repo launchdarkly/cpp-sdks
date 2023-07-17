@@ -22,7 +22,7 @@ tl::expected<bool, Error> Match(Flag::Rule const& rule,
         if (!result) {
             return result;
         }
-        if (!(*result)) {
+        if (!(result.value())) {
             return false;
         }
     }
@@ -177,7 +177,12 @@ tl::expected<bool, Error> Contains(Segment const& segment,
         if (!segment.salt) {
             return tl::make_unexpected(Error::MissingSalt(segment.key));
         }
-        if (Match(rule, context, store, stack, segment.key, *segment.salt)) {
+        tl::expected<bool, Error> maybe_match =
+            Match(rule, context, store, stack, segment.key, *segment.salt);
+        if (!maybe_match) {
+            return tl::make_unexpected(maybe_match.error());
+        }
+        if (maybe_match.value()) {
             return true;
         }
     }

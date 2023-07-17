@@ -175,6 +175,43 @@ TEST_F(EvaluatorTestsWithLogs, PrerequisiteCycle) {
     ASSERT_TRUE(messages_->Contains(0, LogLevel::kError, "circular reference"));
 }
 
+TEST_F(EvaluatorTests, FlagWithSegment) {
+    auto alice = ContextBuilder().Kind("user", "alice").Build();
+    auto bob = ContextBuilder().Kind("user", "bob").Build();
+
+    auto flag = store_->GetFlag("flagWithSegmentMatchRule")->item.value();
+
+    auto detail = eval_.Evaluate(flag, alice);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_EQ(detail.Reason(),
+              EvaluationReason::RuleMatch(0, "match-rule", false));
+
+    detail = eval_.Evaluate(flag, bob);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(true));
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
+}
+
+TEST_F(EvaluatorTests, FlagWithSegmentContainingRules) {
+    auto alice = ContextBuilder().Kind("user", "alice").Build();
+    auto bob = ContextBuilder().Kind("user", "bob").Build();
+
+    auto flag =
+        store_->GetFlag("flagWithSegmentMatchesUserAlice")->item.value();
+
+    auto detail = eval_.Evaluate(flag, alice);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(detail.Reason(),
+              EvaluationReason::RuleMatch(0, "match-rule", false));
+    ASSERT_EQ(*detail, Value(false));
+
+    detail = eval_.Evaluate(flag, bob);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
+    ASSERT_EQ(*detail, Value(true));
+}
+
 TEST_F(EvaluatorTests, FlagWithExperiment) {
     auto user_a = ContextBuilder().Kind("user", "userKeyA").Build();
     auto user_b = ContextBuilder().Kind("user", "userKeyB").Build();
