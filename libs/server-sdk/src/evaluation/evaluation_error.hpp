@@ -7,6 +7,7 @@ namespace launchdarkly::server_side::evaluation {
 class Error {
    public:
     static Error CyclicSegmentReference(std::string segment_key);
+    static Error CyclicPrerequisiteReference(std::string prereq_key);
     static Error InvalidAttributeReference(std::string ref);
     static Error RolloutMissingVariations();
     static Error NonexistentVariationIndex(std::int64_t index);

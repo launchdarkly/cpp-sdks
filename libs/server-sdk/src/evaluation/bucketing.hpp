@@ -82,4 +82,40 @@ tl::expected<std::pair<ContextHashValue, RolloutKindLookup>, Error> Bucket(
     bool is_experiment,
     std::string const& context_kind);
 
+class BucketResult {
+   public:
+    BucketResult(
+        data_model::Flag::Rollout::WeightedVariation weighted_variation,
+        bool is_experiment);
+
+    BucketResult(data_model::Flag::Variation variation, bool in_experiment);
+
+    BucketResult(data_model::Flag::Variation variation);
+
+    [[nodiscard]] std::size_t VariationIndex() const;
+
+    [[nodiscard]] bool InExperiment() const;
+
+   private:
+    std::size_t variation_index_;
+    bool in_experiment_;
+};
+
+/**
+ * Given a variation or rollout and associated flag key, computes the proper
+ * variation index for the context. For a plain variation, this is simply the
+ * variation index. For a rollout, this utilizes the Bucket function.
+ *
+ * @param vr Variation or rollout.
+ * @param flag_key Key of flag.
+ * @param context Context to bucket.
+ * @param salt Salt to use when bucketing.
+ * @return A BucketResult on success, or an error if bucketing failed.
+ */
+tl::expected<BucketResult, Error> Variation(
+    data_model::Flag::VariationOrRollout const& vr,
+    std::string const& flag_key,
+    launchdarkly::Context const& context,
+    std::string const& salt);
+
 }  // namespace launchdarkly::server_side::evaluation

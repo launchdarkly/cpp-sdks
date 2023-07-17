@@ -9,6 +9,8 @@
 
 namespace launchdarkly::server_side::evaluation {
 
+using namespace launchdarkly::data_model;
+
 double const kBucketScale = static_cast<double>(0x0FFFFFFFFFFFFFFF);
 
 AttributeReference const& Key();
@@ -37,6 +39,25 @@ std::ostream& operator<<(std::ostream& os, BucketPrefix const& prefix) {
         },
         prefix.prefix_);
     return os;
+}
+
+BucketResult::BucketResult(Flag::Rollout::WeightedVariation weighted_variation,
+                           bool is_experiment)
+    : variation_index_(weighted_variation.variation),
+      in_experiment_(is_experiment && !weighted_variation.untracked) {}
+
+BucketResult::BucketResult(Flag::Variation variation, bool in_experiment)
+    : variation_index_(variation), in_experiment_(in_experiment) {}
+
+BucketResult::BucketResult(Flag::Variation variation)
+    : variation_index_(variation), in_experiment_(false) {}
+
+std::size_t BucketResult::VariationIndex() const {
+    return variation_index_;
+}
+
+bool BucketResult::InExperiment() const {
+    return in_experiment_;
 }
 
 tl::expected<std::pair<ContextHashValue, RolloutKindLookup>, Error> Bucket(
@@ -128,4 +149,53 @@ bool IsIntegral(double f) {
     return std::trunc(f) == f;
 }
 
+tl::expected<BucketResult, Error> Variation(Flag::VariationOrRollout const& vr,
+                                            std::string const& flag_key,
+                                            Context const& context,
+                                            std::string const& salt) {
+    return std::visit(
+        [&](auto&& arg) -> tl::expected<BucketResult, Error> {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, Flag::Variation>) {
+                return BucketResult(arg);
+            } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
+                if (arg.variations.empty()) {
+                    return tl::make_unexpected(
+                        Error::RolloutMissingVariations());
+                }
+
+                bool is_experiment =
+                    arg.kind == Flag::Rollout::Kind::kExperiment;
+
+                std::optional<BucketPrefix> prefix =
+                    arg.seed ? BucketPrefix(*arg.seed)
+                             : BucketPrefix(flag_key, salt);
+
+                auto bucketing_result = Bucket(context, arg.bucketBy, *prefix,
+                                               is_experiment, arg.contextKind);
+                if (!bucketing_result) {
+                    return tl::make_unexpected(bucketing_result.error());
+                }
+
+                auto [bucket, lookup] = *bucketing_result;
+
+                double sum = 0.0;
+
+                for (const auto& variation : arg.variations) {
+                    sum += variation.weight / 100000.0;
+                    if (bucket < sum) {
+                        return BucketResult(
+                            variation,
+                            is_experiment &&
+                                lookup == RolloutKindLookup::kPresent);
+                    }
+                }
+
+                return BucketResult(
+                    arg.variations.back(),
+                    is_experiment && lookup == RolloutKindLookup::kPresent);
+            }
+        },
+        vr);
+}
 }  // namespace launchdarkly::server_side::evaluation

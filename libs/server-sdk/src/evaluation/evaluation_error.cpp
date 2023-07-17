@@ -19,6 +19,14 @@ Error Error::CyclicSegmentReference(std::string segment_key) {
         std::move(segment_key)};
 }
 
+Error Error::CyclicPrerequisiteReference(std::string prereq_key) {
+    return {
+        "prerequisite relationship to \"%1%\" caused a circular "
+        "reference; this is probably a temporary condition due to an "
+        "incomplete update",
+        std::move(prereq_key)};
+}
+
 Error Error::RolloutMissingVariations() {
     return {"rollout or experiment with no variations"};
 }
