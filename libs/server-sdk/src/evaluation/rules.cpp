@@ -161,7 +161,7 @@ tl::expected<bool, Error> Contains(Segment const& segment,
     }
 
     if (segment.unbounded) {
-        // TODO: set big segment status to NOT_CONFIGURED.
+        // TODO(sc209881): set big segment status to NOT_CONFIGURED.
         return false;
     }
 
@@ -174,7 +174,9 @@ tl::expected<bool, Error> Contains(Segment const& segment,
     }
 
     for (auto const& rule : segment.rules) {
-        // TODO(cwaldren): return error if salt is missing
+        if (!segment.salt) {
+            return tl::make_unexpected(Error::MissingSegmentSalt(segment.key));
+        }
         if (Match(rule, context, store, stack, segment.key, *segment.salt)) {
             return true;
         }

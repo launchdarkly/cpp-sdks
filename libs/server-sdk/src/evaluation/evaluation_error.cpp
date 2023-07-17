@@ -27,6 +27,10 @@ Error Error::CyclicPrerequisiteReference(std::string prereq_key) {
         std::move(prereq_key)};
 }
 
+Error Error::MissingSegmentSalt(std::string segment_key) {
+    return {"segment \"%1%\" is missing a salt", std::move(segment_key)};
+}
+
 Error Error::RolloutMissingVariations() {
     return {"rollout or experiment with no variations"};
 }
