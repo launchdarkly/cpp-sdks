@@ -16,4 +16,4 @@ class IDataSource {
     IDataSource() = default;
 };
 
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::data_sources

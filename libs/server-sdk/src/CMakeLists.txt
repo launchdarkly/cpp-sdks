@@ -19,6 +19,16 @@ add_library(${LIBNAME}
         evaluation/detail/timestamp_operations.cpp
         evaluation/evaluation_error.cpp
         evaluation/bucketing.cpp
+        data_store/dependency_tracker.cpp
+        data_store/descriptors.hpp
+        data_sources/data_source_event_handler.cpp
+        data_sources/data_source_event_handler.hpp
+        data_sources/data_source_status.cpp
+        data_sources/polling_data_source.hpp
+        data_sources/polling_data_source.cpp
+        data_sources/data_source_status_manager.hpp
+        data_sources/streaming_data_source.hpp
+        data_sources/streaming_data_source.cpp
         )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
