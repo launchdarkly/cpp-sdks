@@ -21,23 +21,24 @@ class Evaluator {
 
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
-        launchdarkly::Context const& context);
+        launchdarkly::Context const& context) const;
 
    private:
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         std::string const& parent_key,
         data_model::Flag const& flag,
-        launchdarkly::Context const& context);
+        launchdarkly::Context const& context) const;
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
         data_model::Flag const& flag,
         data_model::Flag::Variation variation_index,
-        EvaluationReason reason);
+        EvaluationReason reason) const;
 
-    [[nodiscard]] EvaluationDetail<Value> OffValue(data_model::Flag const& flag,
-                                                   EvaluationReason reason);
+    [[nodiscard]] EvaluationDetail<Value> OffValue(
+        data_model::Flag const& flag,
+        EvaluationReason reason) const;
 
-    void LogError(std::string const& key, Error const& error);
+    void LogError(std::string const& key, Error const& error) const;
 
     Logger& logger_;
     data_store::IDataStore const& store_;

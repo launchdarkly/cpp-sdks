@@ -86,11 +86,7 @@ INSTANTIATE_TEST_SUITE_P(LDLoggerTest,
                          testing::Values(LogLevel::kDebug,
                                          LogLevel::kInfo,
                                          LogLevel::kWarn,
-                                         LogLevel::kError),
-                         [](testing::TestParamInfo<LogLevel> const& info) {
-                             return launchdarkly::GetLogLevelName(info.param,
-                                                                  "unknown");
-                         });
+                                         LogLevel::kError));
 
 TEST(LDLoggerTest, UsesOstreamForEnabledLevel) {
     Messages messages;

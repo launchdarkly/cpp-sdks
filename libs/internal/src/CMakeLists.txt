@@ -23,7 +23,6 @@ add_library(${LIBNAME} OBJECT
         events/lru_cache.cpp
         logging/console_backend.cpp
         logging/null_logger.cpp
-        logging/spy_logger.cpp
         logging/logger.cpp
         network/http_error_messages.cpp
         network/http_requester.cpp

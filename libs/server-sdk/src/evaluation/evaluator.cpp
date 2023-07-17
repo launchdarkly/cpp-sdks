@@ -24,14 +24,14 @@ Evaluator::Evaluator(Logger& logger, data_store::IDataStore const& store)
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
-    launchdarkly::Context const& context) {
+    launchdarkly::Context const& context) const {
     return Evaluate("", flag, context);
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     std::string const& parent_key,
     Flag const& flag,
-    launchdarkly::Context const& context) {
+    launchdarkly::Context const& context) const {
     if (auto guard = stack_.NoticePrerequisite(flag.key)) {
         if (!flag.on) {
             return OffValue(flag, EvaluationReason::Off());
@@ -137,7 +137,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 EvaluationDetail<Value> Evaluator::FlagVariation(
     Flag const& flag,
     Flag::Variation variation_index,
-    EvaluationReason reason) {
+    EvaluationReason reason) const {
     if (variation_index >= flag.variations.size()) {
         LogError(flag.key, Error::NonexistentVariationIndex(variation_index));
         return EvaluationReason::MalformedFlag();
@@ -148,7 +148,7 @@ EvaluationDetail<Value> Evaluator::FlagVariation(
 }
 
 EvaluationDetail<Value> Evaluator::OffValue(Flag const& flag,
-                                            EvaluationReason reason) {
+                                            EvaluationReason reason) const {
     if (flag.offVariation) {
         return FlagVariation(flag, *flag.offVariation, std::move(reason));
     }
@@ -203,7 +203,7 @@ std::optional<std::size_t> TargetMatchVariation(
     return std::nullopt;
 }
 
-void Evaluator::LogError(std::string const& key, Error const& error) {
+void Evaluator::LogError(std::string const& key, Error const& error) const {
     LD_LOG(logger_, LogLevel::kError)
         << "Invalid flag configuration detected in flag \"" << key
         << "\": " << error;
