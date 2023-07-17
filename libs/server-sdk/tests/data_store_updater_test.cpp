@@ -16,20 +16,20 @@ using launchdarkly::data_model::Flag;
 using launchdarkly::data_model::Segment;
 
 TEST(DataStoreUpdaterTest, DoesNotInitializeStoreUntilInit) {
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
-    EXPECT_FALSE(store->Initialized());
+    EXPECT_FALSE(store.Initialized());
 }
 
 TEST(DataStoreUpdaterTest, InitializesStore) {
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
     updater.Init(SDKDataSet());
-    EXPECT_TRUE(store->Initialized());
+    EXPECT_TRUE(store.Initialized());
 }
 
 TEST(DataStoreUpdaterTest, InitPropagatesData) {
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
     Flag flag;
     flag.version = 1;
@@ -50,14 +50,14 @@ TEST(DataStoreUpdaterTest, InitPropagatesData) {
             {"segmentA", SegmentDescriptor(segment)}},
     });
 
-    auto fetched_flag = store->GetFlag("flagA");
+    auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
     EXPECT_TRUE(fetched_flag->item);
     EXPECT_EQ("flagA", fetched_flag->item->key);
     EXPECT_EQ(1, fetched_flag->item->version);
     EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 
-    auto fetched_segment = store->GetSegment("segmentA");
+    auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
     EXPECT_TRUE(fetched_segment->item);
     EXPECT_EQ("segmentA", fetched_segment->item->key);
@@ -66,7 +66,7 @@ TEST(DataStoreUpdaterTest, InitPropagatesData) {
 }
 
 TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
     Flag flag_a_v1;
     flag_a_v1.version = 1;
@@ -145,7 +145,7 @@ TEST(DataStoreUpdaterTest, SecondInitProducesChanges) {
 }
 
 TEST(DataStoreUpdaterTest, CanUpsertNewFlag) {
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     Flag flag_a;
@@ -158,7 +158,7 @@ TEST(DataStoreUpdaterTest, CanUpsertNewFlag) {
     });
     updater.Upsert("flagA", FlagDescriptor(flag_a));
 
-    auto fetched_flag = store->GetFlag("flagA");
+    auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
     EXPECT_TRUE(fetched_flag->item);
     EXPECT_EQ("flagA", fetched_flag->item->key);
@@ -171,7 +171,7 @@ TEST(DataStoreUpdaterTest, CanUpsertExitingFlag) {
     flag_a.version = 1;
     flag_a.key = "flagA";
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -186,7 +186,7 @@ TEST(DataStoreUpdaterTest, CanUpsertExitingFlag) {
 
     updater.Upsert("flagA", FlagDescriptor(flag_a_2));
 
-    auto fetched_flag = store->GetFlag("flagA");
+    auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
     EXPECT_TRUE(fetched_flag->item);
     EXPECT_EQ("flagA", fetched_flag->item->key);
@@ -200,7 +200,7 @@ TEST(DataStoreUpdaterTest, OldVersionIsDiscardedOnUpsertFlag) {
     flag_a.key = "flagA";
     flag_a.variations = std::vector<Value>{"potato", "ham"};
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -216,7 +216,7 @@ TEST(DataStoreUpdaterTest, OldVersionIsDiscardedOnUpsertFlag) {
 
     updater.Upsert("flagA", FlagDescriptor(flag_a_2));
 
-    auto fetched_flag = store->GetFlag("flagA");
+    auto fetched_flag = store.GetFlag("flagA");
     EXPECT_TRUE(fetched_flag);
     EXPECT_TRUE(fetched_flag->item);
     EXPECT_EQ("flagA", fetched_flag->item->key);
@@ -233,7 +233,7 @@ TEST(DataStoreUpdaterTest, CanUpsertNewSegment) {
     segment_a.version = 1;
     segment_a.key = "segmentA";
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -242,7 +242,7 @@ TEST(DataStoreUpdaterTest, CanUpsertNewSegment) {
     });
     updater.Upsert("segmentA", SegmentDescriptor(segment_a));
 
-    auto fetched_segment = store->GetSegment("segmentA");
+    auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
     EXPECT_TRUE(fetched_segment->item);
     EXPECT_EQ("segmentA", fetched_segment->item->key);
@@ -255,7 +255,7 @@ TEST(DataStoreUpdaterTest, CanUpsertExitingSegment) {
     segment_a.version = 1;
     segment_a.key = "segmentA";
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -270,7 +270,7 @@ TEST(DataStoreUpdaterTest, CanUpsertExitingSegment) {
 
     updater.Upsert("segmentA", SegmentDescriptor(segment_a_2));
 
-    auto fetched_segment = store->GetSegment("segmentA");
+    auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
     EXPECT_TRUE(fetched_segment->item);
     EXPECT_EQ("segmentA", fetched_segment->item->key);
@@ -283,7 +283,7 @@ TEST(DataStoreUpdaterTest, OldVersionIsDiscardedOnUpsertSegment) {
     segment_a.version = 2;
     segment_a.key = "segmentA";
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -298,7 +298,7 @@ TEST(DataStoreUpdaterTest, OldVersionIsDiscardedOnUpsertSegment) {
 
     updater.Upsert("segmentA", SegmentDescriptor(segment_a_2));
 
-    auto fetched_segment = store->GetSegment("segmentA");
+    auto fetched_segment = store.GetSegment("segmentA");
     EXPECT_TRUE(fetched_segment);
     EXPECT_TRUE(fetched_segment->item);
     EXPECT_EQ("segmentA", fetched_segment->item->key);
@@ -318,7 +318,7 @@ TEST(DataStoreUpdaterTest, ProducesChangeEventsOnUpsert) {
 
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{
@@ -361,7 +361,7 @@ TEST(DataStoreUpdaterTest, ProducesNoEventIfNoFlagChanged) {
 
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     Segment segment_a;
@@ -404,7 +404,7 @@ TEST(DataStoreUpdaterTest, NoEventOnDiscardedUpsert) {
 
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
-    auto store = std::make_shared<MemoryStore>();
+    MemoryStore store;
     DataStoreUpdater updater(store, store);
 
     updater.Init(SDKDataSet{

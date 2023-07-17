@@ -13,7 +13,7 @@
 namespace launchdarkly::server_side::data_store {
 
 class DataStoreUpdater
-    : public launchdarkly::server_side::data_source::IDataSourceUpdateSink,
+    : public launchdarkly::server_side::data_sources::IDataSourceUpdateSink,
       public launchdarkly::server_side::IChangeNotifier {
    public:
     template <typename Storage>
@@ -26,8 +26,7 @@ class DataStoreUpdater
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(std::shared_ptr<IDataSourceUpdateSink> sink,
-                     std::shared_ptr<IDataStore> store);
+    DataStoreUpdater(IDataSourceUpdateSink& sink, IDataStore const& store);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
@@ -63,7 +62,7 @@ class DataStoreUpdater
             NotifyChanges(updated_deps);
         }
 
-        sink_->Upsert(key, updated);
+        sink_.Upsert(key, updated);
     }
 
     template <typename FlagOrSegment>
@@ -102,8 +101,8 @@ class DataStoreUpdater
 
     void NotifyChanges(DependencySet changes);
 
-    std::shared_ptr<IDataSourceUpdateSink> sink_;
-    std::shared_ptr<IDataStore> store_;
+    IDataSourceUpdateSink& sink_;
+    IDataStore const& store_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;
 
