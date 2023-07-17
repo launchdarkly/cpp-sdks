@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/logging/null_logger.hpp>
+#include <launchdarkly/logging/spy_logger.hpp>
 
 #include "evaluation/evaluator.hpp"
 #include "test_store.hpp"
@@ -11,11 +12,15 @@
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
-TEST(EvaluatorTests, Instantiation) {
-    auto logger = logging::NullLogger();
+class EvaluatorTests : public ::testing::Test {
+   public:
+    EvaluatorTests()
+        : store(test_store::TestData()), logger(logging::NullLogger()) {}
+    std::unique_ptr<data_store::IDataStore> store;
+    Logger logger;
+};
 
-    auto store = test_store::TestData();
-
+TEST_F(EvaluatorTests, BasicChanges) {
     evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
@@ -31,7 +36,7 @@ TEST(EvaluatorTests, Instantiation) {
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kOff);
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Off());
 
     // flip off variation
     flag.offVariation = 1;
@@ -53,14 +58,13 @@ TEST(EvaluatorTests, Instantiation) {
     ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 1);
     ASSERT_EQ(*detail, Value(true));
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
-    ASSERT_FALSE(detail.Reason()->InExperiment());
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     detail = e.Evaluate(flag, bob);
     ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kTargetMatch);
+    ASSERT_EQ(detail.Reason(), EvaluationReason::TargetMatch());
 
     // flip default variation
     flag.fallthrough = data_model::Flag::Variation{0};
@@ -75,14 +79,10 @@ TEST(EvaluatorTests, Instantiation) {
     ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kTargetMatch);
+    ASSERT_EQ(detail.Reason(), EvaluationReason::TargetMatch());
 }
 
-TEST(EvaluatorTests, EvaluateWithMatchesOpGroups) {
-    auto logger = logging::NullLogger();
-
-    auto store = test_store::TestData();
-
+TEST_F(EvaluatorTests, EvaluateWithMatchesOpGroups) {
     evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
@@ -98,25 +98,18 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpGroups) {
     auto detail = e.Evaluate(flag, alice);
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(true));
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
-    ASSERT_FALSE(detail.Reason()->InExperiment());
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     detail = e.Evaluate(flag, bob);
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
-    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
-    ASSERT_EQ(detail.Reason()->RuleId(),
-              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
-    ASSERT_FALSE(detail.Reason()->InExperiment());
+    ASSERT_EQ(detail.Reason(),
+              EvaluationReason::RuleMatch(
+                  0, "6a7755ac-e47a-40ea-9579-a09dd5f061bd", false));
 }
 
-TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
-    auto logger = logging::NullLogger();
-
-    auto store = test_store::TestData();
-
+TEST_F(EvaluatorTests, EvaluateWithMatchesOpKinds) {
     evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
@@ -130,26 +123,79 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
-    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
-    ASSERT_EQ(detail.Reason()->RuleId(),
-              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
-    ASSERT_FALSE(detail.Reason()->InExperiment());
+    ASSERT_EQ(detail.Reason(),
+              EvaluationReason::RuleMatch(
+                  0, "6a7755ac-e47a-40ea-9579-a09dd5f061bd", false));
 
     detail = e.Evaluate(flag, bob);
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(true));
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
-    ASSERT_FALSE(detail.Reason()->InExperiment());
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     auto new_bob = ContextBuilder().Kind("org", "bob").Build();
     detail = e.Evaluate(flag, new_bob);
     ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
-    ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
-    ASSERT_EQ(detail.Reason()->RuleIndex(), 0);
-    ASSERT_EQ(detail.Reason()->RuleId(),
-              "6a7755ac-e47a-40ea-9579-a09dd5f061bd");
+    ASSERT_EQ(detail.Reason(),
+              EvaluationReason::RuleMatch(
+                  0, "6a7755ac-e47a-40ea-9579-a09dd5f061bd", false));
+}
+
+TEST_F(EvaluatorTests, PrerequisiteCycle) {
+    std::vector<std::string> log_messages;
+    auto spy_logger = logging::SpyLogger(log_messages);
+
+    evaluation::Evaluator e(spy_logger, *store);
+
+    auto alice = ContextBuilder().Kind("user", "alice").Build();
+
+    auto maybe_flag = store->GetFlag("cycleFlagA")->item;
+    ASSERT_TRUE(maybe_flag);
+
+    auto detail = e.Evaluate(*maybe_flag, alice);
+    ASSERT_FALSE(detail);
+    ASSERT_EQ(detail.Reason(), EvaluationReason::MalformedFlag());
+    ASSERT_EQ(log_messages.size(), 1);
+    ASSERT_TRUE(log_messages[0].find("circular reference") !=
+                std::string::npos);
+}
+
+TEST_F(EvaluatorTests, FlagWithExperiment) {
+    evaluation::Evaluator e(logger, *store);
+
+    auto user_a = ContextBuilder().Kind("user", "userKeyA").Build();
+    auto user_b = ContextBuilder().Kind("user", "userKeyB").Build();
+    auto user_c = ContextBuilder().Kind("user", "userKeyC").Build();
+
+    auto flag = store->GetFlag("flagWithExperiment")->item.value();
+
+    auto detail = e.Evaluate(flag, user_a);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_TRUE(detail.Reason()->InExperiment());
+
+    detail = e.Evaluate(flag, user_b);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(true));
+    ASSERT_TRUE(detail.Reason()->InExperiment());
+
+    detail = e.Evaluate(flag, user_c);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(false));
     ASSERT_FALSE(detail.Reason()->InExperiment());
+}
+
+TEST_F(EvaluatorTests, FlagWithExperimentTargetingMissingContext) {
+    evaluation::Evaluator e(logger, *store);
+
+    auto flag =
+        store->GetFlag("flagWithExperimentTargetingContext")->item.value();
+
+    auto user_a = ContextBuilder().Kind("user", "userKeyA").Build();
+
+    auto detail = e.Evaluate(flag, user_a);
+    ASSERT_TRUE(detail);
+    ASSERT_EQ(*detail, Value(false));
+    ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 }

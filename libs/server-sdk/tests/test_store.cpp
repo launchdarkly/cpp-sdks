@@ -119,6 +119,97 @@ std::unique_ptr<data_store::IDataStore> TestData() {
             "trackEventsFallthrough": true,
             "debugEventsUntilDate": 1500000000
         })"));
+
+    store->Upsert("cycleFlagA", Flag(R"({
+               "key": "cycleFlagA",
+               "targets": [],
+               "rules": [],
+               "salt": "salty",
+               "prerequisites": [{
+                   "key": "cycleFlagB",
+                   "variation": 0
+               }],
+               "on": true,
+               "fallthrough": {"variation": 0},
+               "offVariation": 1,
+               "variations": [true, false]
+        })"));
+    store->Upsert("cycleFlagB", Flag(R"({
+                "key": "cycleFlagB",
+                "targets": [],
+                "rules": [],
+                "salt": "salty",
+                "prerequisites": [{
+                    "key": "cycleFlagA",
+                    "variation": 0
+                }],
+                "on": true,
+                "fallthrough": {"variation": 0},
+                "offVariation": 1,
+                "variations": [true, false]
+        })"));
+
+    store->Upsert("flagWithExperiment", Flag(R"({
+                "key": "flagWithExperiment",
+               "version": 42,
+               "on": true,
+               "targets": [],
+               "rules": [],
+               "prerequisites": [],
+               "fallthrough": {
+                 "rollout": {
+                   "kind": "experiment",
+                   "seed": 61,
+                   "variations": [
+                     {"variation": 0, "weight": 10000, "untracked": false},
+                     {"variation": 1, "weight": 20000, "untracked": false},
+                     {"variation": 0, "weight": 70000, "untracked": true}
+                   ]
+                 }
+               },
+               "offVariation": 0,
+               "variations": [false, true],
+               "clientSide": true,
+               "clientSideAvailability": {
+                   "usingEnvironmentId": true,
+                   "usingMobileKey": true
+               },
+               "salt": "salty",
+               "trackEvents": false,
+               "trackEventsFallthrough": false,
+               "debugEventsUntilDate": 1500000000
+        })"));
+    store->Upsert("flagWithExperimentTargetingContext", Flag(R"({
+                "key": "flagWithExperimentTargetingContext",
+                "version": 42,
+                "on": true,
+                "targets": [],
+                "rules": [],
+                "prerequisites": [],
+                "fallthrough": {
+                  "rollout": {
+                    "kind": "experiment",
+                    "contextKind": "org",
+                    "seed": 61,
+                    "variations": [
+                      {"variation": 0, "weight": 10000, "untracked": false},
+                      {"variation": 1, "weight": 20000, "untracked": false},
+                      {"variation": 0, "weight": 70000, "untracked": true}
+                    ]
+                  }
+                },
+                "offVariation": 0,
+                "variations": [false, true],
+                "clientSide": true,
+                "clientSideAvailability": {
+                    "usingEnvironmentId": true,
+                    "usingMobileKey": true
+                },
+                "salt": "salty",
+                "trackEvents": false,
+                "trackEventsFallthrough": false,
+                "debugEventsUntilDate": 1500000000
+        })"));
     return store;
 }
 
