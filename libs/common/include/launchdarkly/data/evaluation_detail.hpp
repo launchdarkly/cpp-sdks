@@ -61,7 +61,7 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
-     * @return True if evaluation failed.
+     * @return True if the evaluation resulted in an error.
      */
     [[nodiscard]] bool IsError() const;
 
@@ -70,6 +70,12 @@ class EvaluationDetail {
      */
     T const& operator*() const;
 
+    /**
+     * @return True if the evaluation was successful (i.e. IsError returns
+     * false.)
+     */
+    explicit operator bool() const;
+
    private:
     T value_;
     std::optional<std::size_t> variation_index_;
@@ -77,9 +83,10 @@ class EvaluationDetail {
 };
 
 /*
- * Holds details for the C bindings, omitting the generic type parameter that is
- * needed for EvaluationDetail<T>. Instead, the bindings will directly return
- * the evaluation result, and fill in a detail structure using an out parameter.
+ * Holds details for the C bindings, omitting the generic type parameter
+ * that is needed for EvaluationDetail<T>. Instead, the bindings will
+ * directly return the evaluation result, and fill in a detail structure
+ * using an out parameter.
  */
 struct CEvaluationDetail {
     template <typename T>

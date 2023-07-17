@@ -49,6 +49,11 @@ template <typename T>
     return reason_.has_value() && reason_->ErrorKind().has_value();
 }
 
+template <typename T>
+EvaluationDetail<T>::operator bool() const {
+    return !IsError();
+}
+
 template class EvaluationDetail<bool>;
 template class EvaluationDetail<int>;
 template class EvaluationDetail<double>;

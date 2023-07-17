@@ -28,7 +28,7 @@ TEST(EvaluatorTests, Instantiation) {
 
     auto detail = e.Evaluate(flag, alice);
 
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kOff);
@@ -36,28 +36,28 @@ TEST(EvaluatorTests, Instantiation) {
     // flip off variation
     flag.offVariation = 1;
     detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 1);
     ASSERT_EQ(*detail, Value(true));
 
     // off variation unspecified
     flag.offVariation = std::nullopt;
     detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), std::nullopt);
     ASSERT_EQ(*detail, Value::Null());
 
     // flip targeting on
     flag.on = true;
     detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 1);
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
     ASSERT_FALSE(detail.Reason()->InExperiment());
 
     detail = e.Evaluate(flag, bob);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kTargetMatch);
@@ -65,14 +65,14 @@ TEST(EvaluatorTests, Instantiation) {
     // flip default variation
     flag.fallthrough = data_model::Flag::Variation{0};
     detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
 
     // bob's reason should still be TargetMatch even though his value is now the
     // default
     detail = e.Evaluate(flag, bob);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kTargetMatch);
@@ -96,13 +96,13 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpGroups) {
     data_model::Flag flag = maybe_flag.value();
 
     auto detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
     ASSERT_FALSE(detail.Reason()->InExperiment());
 
     detail = e.Evaluate(flag, bob);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
@@ -127,7 +127,7 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
     data_model::Flag flag = maybe_flag.value();
 
     auto detail = e.Evaluate(flag, alice);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
@@ -137,14 +137,14 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
     ASSERT_FALSE(detail.Reason()->InExperiment());
 
     detail = e.Evaluate(flag, bob);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kFallthrough);
     ASSERT_FALSE(detail.Reason()->InExperiment());
 
     auto new_bob = ContextBuilder().Kind("org", "bob").Build();
     detail = e.Evaluate(flag, new_bob);
-    ASSERT_FALSE(detail.IsError());
+    ASSERT_TRUE(detail);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
