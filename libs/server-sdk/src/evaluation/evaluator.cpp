@@ -45,7 +45,7 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target);
 
-Evaluator::Evaluator(Logger& logger, data_store::IDataStore const* store)
+Evaluator::Evaluator(Logger& logger, data_store::IDataStore const& store)
     : logger_(logger), store_(store), stack_() {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
@@ -65,7 +65,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
         for (Flag::Prerequisite const& p : flag.prerequisites) {
             std::shared_ptr<data_store::FlagDescriptor> maybe_flag =
-                store_->GetFlag(p.key);
+                store_.GetFlag(p.key);
 
             if (!maybe_flag) {
                 return OffValue(flag,
@@ -173,9 +173,7 @@ EvaluationDetail<Value> Evaluator::FlagVariation(
     if (variation_index >= flag.variations.size()) {
         LD_LOG(logger_, LogLevel::kError)
             << "Invalid flag configuration detected in flag \"" << flag.key
-            << "\": rule, fallthrough, or target referenced a nonexistent "
-               "variation index ("
-            << variation_index << ")";
+            << "\": " << Error::NonexistentVariationIndex(variation_index);
         return EvaluationDetail<Value>(
             EvaluationReason::ErrorKind::kMalformedFlag, Value());
     }

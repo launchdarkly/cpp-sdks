@@ -17,7 +17,7 @@ namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
-    Evaluator(Logger& logger, data_store::IDataStore const* store);
+    Evaluator(Logger& logger, data_store::IDataStore const& store);
 
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
@@ -38,7 +38,7 @@ class Evaluator {
                                                    EvaluationReason reason);
 
     Logger& logger_;
-    data_store::IDataStore const* store_;
+    data_store::IDataStore const& store_;
     mutable detail::EvaluationStack stack_;
 };
 

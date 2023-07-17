@@ -62,8 +62,8 @@ TEST_P(AllOperatorsTest, Matches) {
 
     auto store = test_store::Empty();
 
-    auto result = launchdarkly::server_side::evaluation::Match(
-        clause, context, store.get(), stack);
+    auto result = launchdarkly::server_side::evaluation::Match(clause, context,
+                                                               *store, stack);
     ASSERT_EQ(result, param.expected)
         << context.Get("user", "attr") << " " << clause.op << " "
         << clause.values << " should be " << param.expected;

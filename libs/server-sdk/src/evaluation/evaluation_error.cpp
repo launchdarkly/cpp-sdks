@@ -27,6 +27,13 @@ Error Error::InvalidAttributeReference(std::string ref) {
     return {"invalid attribute reference: \"%1%\"", std::move(ref)};
 }
 
+Error Error::NonexistentVariationIndex(std::int64_t index) {
+    return {
+        "rule, fallthrough, or target referenced a nonexistent variation index "
+        "(%1%)",
+        index};
+}
+
 std::ostream& operator<<(std::ostream& out, Error const& err) {
     if (err.arg_ == std::nullopt) {
         out << err.format_;

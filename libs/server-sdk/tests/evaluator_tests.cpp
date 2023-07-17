@@ -16,7 +16,7 @@ TEST(EvaluatorTests, Instantiation) {
 
     auto store = test_store::TestData();
 
-    evaluation::Evaluator e(logger, store.get());
+    evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
     auto bob = ContextBuilder().Kind("user", "bob").Build();
@@ -83,7 +83,7 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpGroups) {
 
     auto store = test_store::TestData();
 
-    evaluation::Evaluator e(logger, store.get());
+    evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
     auto bob = ContextBuilder()
@@ -117,7 +117,7 @@ TEST(EvaluatorTests, EvaluateWithMatchesOpKinds) {
 
     auto store = test_store::TestData();
 
-    evaluation::Evaluator e(logger, store.get());
+    evaluation::Evaluator e(logger, *store);
 
     auto alice = ContextBuilder().Kind("user", "alice").Build();
     auto bob = ContextBuilder().Kind("company", "bob").Build();
