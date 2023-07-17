@@ -21,9 +21,9 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     if (HasListeners()) {
         DependencySet updated_items;
 
-        CalculateChanges(DataKind::kFlag, store_->AllFlags(), data_set.flags,
+        CalculateChanges(DataKind::kFlag, store_.AllFlags(), data_set.flags,
                          updated_items);
-        CalculateChanges(DataKind::kSegment, store_->AllSegments(),
+        CalculateChanges(DataKind::kSegment, store_.AllSegments(),
                          data_set.segments, updated_items);
         change_notifications = updated_items;
     }
@@ -37,7 +37,7 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
     // Data will move into the store, so we want to update dependencies before
     // it is moved.
-    sink_->Init(std::move(data_set));
+    sink_.Init(std::move(data_set));
     // After updating the sink, let listeners know of changes.
     if (change_notifications) {
         NotifyChanges(std::move(*change_notifications));
@@ -46,12 +46,12 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
 
 void DataStoreUpdater::Upsert(std::string const& key,
                               data_store::FlagDescriptor flag) {
-    UpsertCommon(DataKind::kFlag, key, store_->GetFlag(key), std::move(flag));
+    UpsertCommon(DataKind::kFlag, key, store_.GetFlag(key), std::move(flag));
 }
 
 void DataStoreUpdater::Upsert(std::string const& key,
                               data_store::SegmentDescriptor segment) {
-    UpsertCommon(DataKind::kSegment, key, store_->GetSegment(key),
+    UpsertCommon(DataKind::kSegment, key, store_.GetSegment(key),
                  std::move(segment));
 }
 
@@ -69,8 +69,8 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
     }
 }
 
-DataStoreUpdater::DataStoreUpdater(std::shared_ptr<IDataSourceUpdateSink> sink,
-                                   std::shared_ptr<IDataStore> store)
-    : sink_(std::move(sink)), store_(std::move(store)) {}
+DataStoreUpdater::DataStoreUpdater(IDataSourceUpdateSink& sink,
+                                   IDataStore const& store)
+    : sink_(sink), store_(store) {}
 
 }  // namespace launchdarkly::server_side::data_store
