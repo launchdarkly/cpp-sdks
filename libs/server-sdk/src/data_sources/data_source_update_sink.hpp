@@ -7,7 +7,7 @@
 
 #include "../data_store/descriptors.hpp"
 
-namespace launchdarkly::server_side::data_source {
+namespace launchdarkly::server_side::data_sources {
 /**
  * Interface for handling updates from LaunchDarkly.
  */
@@ -28,4 +28,4 @@ class IDataSourceUpdateSink {
    protected:
     IDataSourceUpdateSink() = default;
 };
-}  // namespace launchdarkly::server_side::data_source
+}  // namespace launchdarkly::server_side::data_sources
