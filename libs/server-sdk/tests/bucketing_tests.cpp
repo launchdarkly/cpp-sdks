@@ -143,12 +143,6 @@ TEST_F(BucketingConsistencyTests, BucketContextByFloatAttributeThatIsInteger) {
     ASSERT_NEAR(result->first, 0.54771423, kBucketTolerance);
 }
 
-// Note: These tests are meant to be exact duplicates of tests
-// in other SDKs. Do not change any of the values unless they
-// are also changed in other SDKs. These are not traditional behavioral
-// tests so much as consistency tests to guarantee that the implementation
-// is identical across SDKs.
-
 // Parameterized tests may be instantiated with one or more BucketTests for
 // convenience.
 struct BucketTest {

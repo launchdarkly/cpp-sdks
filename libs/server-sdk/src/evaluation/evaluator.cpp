@@ -100,7 +100,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             return EvaluationReason::MalformedFlag();
         }
 
-        if (!(*rule_match)) {
+        if (!(rule_match.value())) {
             continue;
         }
 

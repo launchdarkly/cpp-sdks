@@ -40,7 +40,7 @@ tl::expected<bool, Error> Match(Segment::Rule const& rule,
         if (!maybe_match) {
             return tl::make_unexpected(maybe_match.error());
         }
-        if (!(*maybe_match)) {
+        if (!(maybe_match.value())) {
             return false;
         }
     }
@@ -97,7 +97,7 @@ tl::expected<bool, Error> MatchSegment(Clause const& clause,
             return tl::make_unexpected(maybe_contains.error());
         }
 
-        if (*maybe_contains) {
+        if (maybe_contains.value()) {
             return MaybeNegate(clause, true);
         }
     }
