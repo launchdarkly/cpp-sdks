@@ -44,4 +44,9 @@ LogLevel GetLogLevelEnum(char const* level, LogLevel default_) {
     return default_;
 }
 
+std::ostream& operator<<(std::ostream& out, LogLevel const& level) {
+    out << GetLogLevelName(level, "unknown");
+    return out;
+}
+
 }  // namespace launchdarkly
