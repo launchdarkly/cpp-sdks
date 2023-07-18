@@ -1,6 +1,7 @@
 #pragma once
 
 #include <launchdarkly/data_model/context_aware_reference.hpp>
+#include <launchdarkly/data_model/context_kind.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 
@@ -15,7 +16,6 @@
 namespace launchdarkly::data_model {
 
 struct Flag {
-    using ContextKind = std::string;
     using Variation = std::uint64_t;
     using Weight = std::uint64_t;
 
