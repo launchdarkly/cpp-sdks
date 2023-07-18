@@ -62,6 +62,7 @@ class EvaluationDetail {
 
     /**
      * @return True if the evaluation resulted in an error.
+     * TODO(sc209960)
      */
     [[nodiscard]] bool IsError() const;
 
@@ -73,6 +74,7 @@ class EvaluationDetail {
     /**
      * @return True if the evaluation was successful (i.e. IsError returns
      * false.)
+     * TODO(sc209960)
      */
     explicit operator bool() const;
 
