@@ -18,7 +18,7 @@ tl::expected<std::optional<data_model::ContextKind>, JsonError> tag_invoke(
         /* Empty string is not a valid context kind. */
         return tl::make_unexpected(JsonError::kSchemaFailure);
     }
-    
+
     return data_model::ContextKind(str.c_str());
 }
 }  // namespace launchdarkly

@@ -52,6 +52,7 @@ struct ContextAwareReference<
     AttributeReference reference;
 };
 
+// NOLINTBEGIN cppcoreguidelines-macro-usage
 #define DEFINE_CONTEXT_KIND_FIELD(name) \
     ContextKind name;                   \
     constexpr static const char* kContextFieldName = #name;
@@ -59,5 +60,6 @@ struct ContextAwareReference<
 #define DEFINE_ATTRIBUTE_REFERENCE_FIELD(name) \
     AttributeReference name;                   \
     constexpr static const char* kReferenceFieldName = #name;
+// NOLINTEND cppcoreguidelines-macro-usage
 
 }  // namespace launchdarkly::data_model
