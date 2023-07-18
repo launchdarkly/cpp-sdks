@@ -280,5 +280,6 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
 }
 
 template class AsioEventProcessor<config::shared::ClientSDK>;
+template class AsioEventProcessor<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::events
