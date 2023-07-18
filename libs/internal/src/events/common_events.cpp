@@ -1,4 +1,4 @@
-#include "launchdarkly/events/data/common_events.hpp"
+#include <launchdarkly/events/data/common_events.hpp>
 
 namespace launchdarkly::events {
 FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)

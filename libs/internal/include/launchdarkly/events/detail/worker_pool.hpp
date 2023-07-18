@@ -1,5 +1,10 @@
 #pragma once
 
+#include <launchdarkly/events/detail/request_worker.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+
 #include <boost/asio/any_io_executor.hpp>
 
 #include <chrono>
@@ -7,13 +12,7 @@
 #include <optional>
 #include <vector>
 
-#include "launchdarkly/logging/logger.hpp"
-#include "launchdarkly/network/asio_requester.hpp"
-#include "launchdarkly/network/http_requester.hpp"
-
-#include "launchdarkly/events/detail/request_worker.hpp"
-
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 /**
  * WorkerPool represents a pool of workers capable of delivering event payloads
@@ -73,4 +72,4 @@ class WorkerPool {
     std::vector<std::unique_ptr<RequestWorker>> workers_;
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

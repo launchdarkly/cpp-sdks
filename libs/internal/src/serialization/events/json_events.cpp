@@ -100,7 +100,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 
 }  // namespace launchdarkly::events
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
@@ -135,4 +135,4 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
     obj.emplace("features", boost::json::value_from(summary.Features()));
 }
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

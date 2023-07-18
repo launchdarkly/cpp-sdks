@@ -115,7 +115,7 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 
 template <typename SDK>
 void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
-    workers_.Get([this](RequestWorker* worker) {
+    workers_.Get([this](detail::RequestWorker* worker) {
         if (worker == nullptr) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
@@ -130,10 +130,11 @@ void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
         }
         worker->AsyncDeliver(
             std::move(*batch),
-            [this](std::size_t count, RequestWorker::DeliveryResult result) {
+            [this](std::size_t count,
+                   detail::RequestWorker::DeliveryResult result) {
                 OnEventDeliveryResult(count, result);
             });
-        summarizer_ = Summarizer(Clock::now());
+        summarizer_ = detail::Summarizer(Clock::now());
     });
 
     if (flush_type == FlushTrigger::Automatic) {
@@ -144,7 +145,7 @@ void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
 template <typename SDK>
 void AsioEventProcessor<SDK>::OnEventDeliveryResult(
     std::size_t event_count,
-    RequestWorker::DeliveryResult result) {
+    detail::RequestWorker::DeliveryResult result) {
     boost::ignore_unused(event_count);
 
     std::visit(
@@ -189,7 +190,7 @@ void AsioEventProcessor<SDK>::ShutdownAsync() {
 }
 
 template <typename SDK>
-std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
+std::optional<detail::EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     auto events = boost::json::value_from(outbox_.Consume()).as_array();
 
     bool has_summary =
@@ -208,7 +209,7 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     props.Header(to_string(http::field::content_type), "application/json");
 
-    return EventBatch(url_, props.Build(), events);
+    return detail::EventBatch(url_, props.Build(), events);
 }
 
 template <typename SDK>

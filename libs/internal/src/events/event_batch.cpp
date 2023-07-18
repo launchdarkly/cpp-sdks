@@ -1,8 +1,8 @@
-#include "launchdarkly/events/detail/event_batch.hpp"
+#include <launchdarkly/events/detail/event_batch.hpp>
 
 #include <boost/json/serialize.hpp>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 EventBatch::EventBatch(std::string url,
                        config::shared::built::HttpProperties http_props,
                        boost::json::value const& events)
@@ -24,4 +24,4 @@ std::string EventBatch::Target() const {
     return request_.Url();
 }
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <launchdarkly/events/data/events.hpp>
+
 #include <mutex>
 #include <queue>
 #include <string>
-#include "launchdarkly/events/data/events.hpp"
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 /**
  * Represents a fixed-size queue for holding output events, which are events
@@ -49,4 +50,4 @@ class Outbox {
     bool Push(OutputEvent item);
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

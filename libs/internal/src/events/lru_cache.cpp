@@ -1,6 +1,6 @@
-#include "launchdarkly/events/detail/lru_cache.hpp"
+#include <launchdarkly/events/detail/lru_cache.hpp>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 LRUCache::LRUCache(std::size_t capacity)
     : capacity_(capacity), map_(), list_() {}
 
@@ -29,4 +29,4 @@ std::size_t LRUCache::Size() const {
     return list_.size();
 }
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

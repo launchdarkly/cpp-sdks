@@ -9,6 +9,7 @@
 #include "launchdarkly/events/detail/summarizer.hpp"
 
 using namespace launchdarkly::events;
+using namespace launchdarkly::events::detail;
 
 static std::chrono::system_clock::time_point TimeZero() {
     return std::chrono::system_clock::time_point{};

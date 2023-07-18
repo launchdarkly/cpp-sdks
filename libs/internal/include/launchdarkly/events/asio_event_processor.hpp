@@ -50,8 +50,8 @@ class AsioEventProcessor : public IEventProcessor {
     };
 
     boost::asio::any_io_executor io_;
-    Outbox outbox_;
-    Summarizer summarizer_;
+    detail::Outbox outbox_;
+    detail::Summarizer summarizer_;
 
     std::chrono::milliseconds flush_interval_;
     boost::asio::steady_timer timer_;
@@ -62,7 +62,7 @@ class AsioEventProcessor : public IEventProcessor {
 
     boost::uuids::random_generator uuids_;
 
-    WorkerPool workers_;
+    detail::WorkerPool workers_;
 
     std::size_t inbox_capacity_;
     std::size_t inbox_size_;
@@ -76,13 +76,13 @@ class AsioEventProcessor : public IEventProcessor {
 
     launchdarkly::ContextFilter filter_;
 
-    LRUCache context_key_cache_;
+    detail::LRUCache context_key_cache_;
 
     Logger& logger_;
 
     void HandleSend(InputEvent event);
 
-    std::optional<EventBatch> CreateBatch();
+    std::optional<detail::EventBatch> CreateBatch();
 
     void Flush(FlushTrigger flush_type);
 
@@ -94,7 +94,7 @@ class AsioEventProcessor : public IEventProcessor {
     void InboxDecrement();
 
     void OnEventDeliveryResult(std::size_t count,
-                               RequestWorker::DeliveryResult);
+                               detail::RequestWorker::DeliveryResult);
 };
 
 }  // namespace launchdarkly::events

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <boost/json.hpp>
+#include <launchdarkly/events/data/events.hpp>
+#include <launchdarkly/events/detail/summarizer.hpp>
 
-#include "launchdarkly/events/data/events.hpp"
-#include "launchdarkly/events/detail/summarizer.hpp"
+#include <boost/json.hpp>
 
 namespace launchdarkly::events::server_side {
 
@@ -44,7 +44,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 }  // namespace launchdarkly::events
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -52,4 +52,4 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer const& summary);
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail
