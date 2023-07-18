@@ -3,11 +3,9 @@
 #include <boost/json.hpp>
 
 #include <launchdarkly/context_builder.hpp>
-#include "launchdarkly/events/data/events.hpp"
-
 #include <launchdarkly/context_filter.hpp>
+#include <launchdarkly/events/data/events.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
-#include <launchdarkly/value.hpp>
 
 namespace launchdarkly::events {
 

@@ -106,14 +106,15 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
+// TODO: audit if this is correct for server
 // Was an attempt made to initialize the data source, and did that attempt
 // succeed? The data source being connected, or not being connected due to
 // offline mode, both represent successful terminal states.
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
-    return (state == DataSourceStatus::DataSourceState::kValid ||
-            state == DataSourceStatus::DataSourceState::kSetOffline);
+    return state == DataSourceStatus::DataSourceState::kValid;
 }
 
+// TODO: audit if this is correct for server
 // Was any attempt made to initialize the data source (with a successful or
 // permanent failure outcome?)
 static bool IsInitialized(DataSourceStatus::DataSourceState state) {
@@ -136,8 +137,8 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             auto state = status.State();
             if (IsInitialized(state)) {
                 pr->set_value(result_predicate(status.State()));
-                return true; /* delete this change listener since the desired
-                                state was reached */
+                return true; /* delete this change listener since the
+                                desired state was reached */
             }
             return false; /* keep the change listener */
         });
@@ -218,7 +219,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
     //    if (!desc || !desc->item) {
     //        if (!Initialized()) {
     //            LD_LOG(logger_, LogLevel::kWarn)
-    //                << "LaunchDarkly client has not yet been initialized. "
+    //                << "LaunchDarkly client has not yet been initialized.
+    //                "
     //                   "Returning default value";
     //
     //            auto error_reason =
@@ -280,7 +282,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
     //
     //    event_processor_->SendAsync(std::move(event));
     //
-    //    return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
+    //    return EvaluationDetail<T>(detail.Value(),
+    //    detail.VariationIndex(),
     //                               detail.Reason());
 
     return EvaluationDetail<T>(EvaluationReason::ErrorKind::kFlagNotFound,

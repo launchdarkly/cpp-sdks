@@ -5,7 +5,7 @@
 namespace launchdarkly::server_side::data_sources {
 
 void NullDataSource::Start() {
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kSetOffline);
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
 }
 
 void NullDataSource::ShutdownAsync(std::function<void()> complete) {
