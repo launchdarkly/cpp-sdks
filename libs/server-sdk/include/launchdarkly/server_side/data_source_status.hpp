@@ -61,6 +61,12 @@ enum class ServerDataSourceState {
      * explicitly closed.
      */
     kOff = 3,
+
+    /**
+     * Indicates that the application has told the SDK to stay offline.
+     */
+    kSetOffline = 4,
+
 };
 
 using DataSourceStatus =

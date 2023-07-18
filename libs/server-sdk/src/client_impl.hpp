@@ -1,7 +1,24 @@
 #pragma once
 
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/context.hpp>
+#include <launchdarkly/data/evaluation_detail.hpp>
+#include <launchdarkly/data_sources/data_source.hpp>
+#include <launchdarkly/error.hpp>
+#include <launchdarkly/events/event_processor_interface.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/server_side/client.hpp>
+#include <launchdarkly/value.hpp>
+
+#include "data_sources/data_source_status_manager.hpp"
+#include "data_sources/data_source_update_sink.hpp"
+
+#include "data_store/memory_store.hpp"
+
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
+
+#include <tl/expected.hpp>
 
 #include <condition_variable>
 #include <cstdint>
@@ -10,20 +27,6 @@
 #include <shared_mutex>
 #include <thread>
 #include <tuple>
-
-#include <tl/expected.hpp>
-
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/data/evaluation_detail.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
-#include <launchdarkly/error.hpp>
-#include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/server_side/client.hpp>
-#include <launchdarkly/value.hpp>
-
-#include "data_sources/data_source_status_manager.hpp"
-#include "event_processor.hpp"
 
 namespace launchdarkly::server_side {
 
@@ -126,12 +129,11 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    std::function<std::shared_ptr<::launchdarkly::data_sources::IDataSource>()>
-        data_source_factory_;
+    data_store::MemoryStore memory_store_;
 
     std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
 
-    std::unique_ptr<IEventProcessor> event_processor_;
+    std::unique_ptr<events::IEventProcessor> event_processor_;
 
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
@@ -139,7 +141,5 @@ class ClientImpl : public IClient {
     data_sources::DataSourceStatusManager status_manager_;
 
     std::thread run_thread_;
-
-    bool eval_reasons_available_;
 };
 }  // namespace launchdarkly::server_side

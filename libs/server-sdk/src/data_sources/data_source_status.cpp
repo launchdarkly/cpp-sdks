@@ -19,6 +19,9 @@ std::ostream& operator<<(std::ostream& out,
         case DataSourceStatus::DataSourceState::kOff:
             out << "OFF";
             break;
+        case DataSourceStatus::DataSourceState::kSetOffline:
+            out << "OFFLINE";
+            break;
     }
 
     return out;
