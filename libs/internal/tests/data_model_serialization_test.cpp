@@ -7,6 +7,7 @@
 #include <launchdarkly/serialization/json_segment.hpp>
 
 using namespace launchdarkly;
+using launchdarkly::data_model::ContextKind;
 
 TEST(SDKDataSetTests, DeserializesEmptyDataSet) {
     auto result =
@@ -87,7 +88,7 @@ TEST(SegmentRuleTests, DeserializesSimpleAttributeReference) {
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "bar", "clauses": []})"));
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->rolloutContextKind, ContextKind("foo"));
     ASSERT_EQ(result->bucketBy, AttributeReference("bar"));
 }
 
@@ -96,7 +97,7 @@ TEST(SegmentRuleTests, DeserializesPointerAttributeReference) {
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "/foo/bar", "clauses": []})"));
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->rolloutContextKind, ContextKind("foo"));
     ASSERT_EQ(result->bucketBy, AttributeReference("/foo/bar"));
 }
 
@@ -105,8 +106,15 @@ TEST(SegmentRuleTests, DeserializesEscapedReference) {
         tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
         R"({"rolloutContextKind" : "foo", "bucketBy" : "/~1foo~1bar", "clauses": []})"));
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->rolloutContextKind, "foo");
+    ASSERT_EQ(result->rolloutContextKind, ContextKind("foo"));
     ASSERT_EQ(result->bucketBy, AttributeReference("/~1foo~1bar"));
+}
+
+TEST(SegmentRuleTests, RejectsEmptyContextKind) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Segment::Rule, JsonError>>(boost::json::parse(
+        R"({"rolloutContextKind" : "", "bucketBy" : "/~1foo~1bar", "clauses": []})"));
+    ASSERT_FALSE(result);
 }
 
 TEST(SegmentRuleTests, DeserializesLiteralAttributeName) {
@@ -176,6 +184,13 @@ TEST(ClauseTests, DeserializesEscapedReference) {
     ASSERT_EQ(result->attribute, AttributeReference("/~1foo~1bar"));
 }
 
+TEST(ClauseTests, RejectsEmptyContextKind) {
+    auto result = boost::json::value_to<
+        tl::expected<data_model::Clause, JsonError>>(boost::json::parse(
+        R"({"attribute": "/~1foo~1bar", "op": "in", "values": ["a"], "contextKind" : ""})"));
+    ASSERT_FALSE(result);
+}
+
 TEST(ClauseTests, DeserializesLiteralAttributeName) {
     auto result =
         boost::json::value_to<tl::expected<data_model::Clause, JsonError>>(
@@ -192,7 +207,7 @@ TEST(RolloutTests, DeserializesMinimumValid) {
         boost::json::parse(R"({})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kRollout);
-    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->contextKind, ContextKind("user"));
     ASSERT_EQ(result->bucketBy, "key");
 }
 
@@ -202,7 +217,7 @@ TEST(RolloutTests, DeserializesAllFieldsWithAttributeReference) {
         R"({"kind": "experiment", "contextKind": "org", "bucketBy": "/foo/bar", "seed" : 123, "variations" : []})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kExperiment);
-    ASSERT_EQ(result->contextKind, "org");
+    ASSERT_EQ(result->contextKind, ContextKind("org"));
     ASSERT_EQ(result->bucketBy, "/foo/bar");
     ASSERT_EQ(result->seed, 123);
     ASSERT_TRUE(result->variations.empty());
@@ -214,7 +229,7 @@ TEST(RolloutTests, DeserializesAllFieldsWithLiteralAttributeName) {
         R"({"kind": "experiment", "bucketBy": "/foo/bar", "seed" : 123, "variations" : []})"));
     ASSERT_TRUE(result);
     ASSERT_EQ(result->kind, data_model::Flag::Rollout::Kind::kExperiment);
-    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->contextKind, ContextKind("user"));
     ASSERT_EQ(result->bucketBy, "/~1foo~1bar");
     ASSERT_EQ(result->seed, 123);
     ASSERT_TRUE(result->variations.empty());
@@ -278,7 +293,7 @@ TEST(TargetTests, DeserializesMinimumValid) {
         tl::expected<data_model::Flag::Target, JsonError>>(
         boost::json::parse(R"({})"));
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->contextKind, "user");
+    ASSERT_EQ(result->contextKind, ContextKind("user"));
     ASSERT_EQ(result->variation, 0);
     ASSERT_TRUE(result->values.empty());
 }
@@ -295,7 +310,7 @@ TEST(TargetTests, DeserializesAllFields) {
         tl::expected<data_model::Flag::Target, JsonError>>(boost::json::parse(
         R"({"variation" : 123, "values" : ["a"], "contextKind" : "org"})"));
     ASSERT_TRUE(result);
-    ASSERT_EQ(result->contextKind, "org");
+    ASSERT_EQ(result->contextKind, ContextKind("org"));
     ASSERT_EQ(result->variation, 123);
     ASSERT_EQ(result->values.size(), 1);
     ASSERT_EQ(result->values[0], "a");

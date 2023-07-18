@@ -169,7 +169,7 @@ std::optional<std::size_t> AnyTargetMatchVariation(
     }
 
     for (auto const& context_target : flag.contextTargets) {
-        if (context_target.contextKind == "user" &&
+        if (IsUser(context_target.contextKind) &&
             context_target.values.empty()) {
             for (auto const& target : flag.targets) {
                 if (target.variation == context_target.variation) {

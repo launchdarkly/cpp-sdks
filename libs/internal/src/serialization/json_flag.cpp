@@ -1,5 +1,6 @@
 #include <boost/json.hpp>
 #include <launchdarkly/serialization/json_context_aware_reference.hpp>
+#include <launchdarkly/serialization/json_context_kind.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
@@ -100,7 +101,8 @@ tl::expected<std::optional<data_model::Flag::Target>, JsonError> tag_invoke(
     data_model::Flag::Target target;
     PARSE_FIELD(target.values, obj, "values");
     PARSE_FIELD(target.variation, obj, "variation");
-    PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind", "user");
+    PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind",
+                        data_model::ContextKind("user"));
     return target;
 }
 

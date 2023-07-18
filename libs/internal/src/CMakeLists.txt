@@ -26,6 +26,8 @@ add_library(${LIBNAME} OBJECT
         logging/logger.cpp
         network/http_error_messages.cpp
         network/http_requester.cpp
+        data_model/rule_clause.cpp
+        data_model/flag.cpp
         serialization/events/json_events.cpp
         serialization/json_attributes.cpp
         serialization/json_context.cpp
@@ -39,8 +41,7 @@ add_library(${LIBNAME} OBJECT
         serialization/json_primitives.cpp
         serialization/json_rule_clause.cpp
         serialization/json_flag.cpp
-        data_model/rule_clause.cpp
-        data_model/flag.cpp
+        serialization/json_context_kind.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp
         encoding/sha_1.cpp
