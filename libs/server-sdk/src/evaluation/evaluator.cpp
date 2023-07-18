@@ -189,7 +189,7 @@ std::optional<std::size_t> AnyTargetMatchVariation(
 std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target) {
-    Value key = context.Get(target.contextKind, "key");
+    Value const& key = context.Get(target.contextKind, "key");
     if (key.IsNull()) {
         return std::nullopt;
     }

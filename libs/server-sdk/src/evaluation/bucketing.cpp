@@ -73,7 +73,7 @@ tl::expected<std::pair<ContextHashValue, RolloutKindLookup>, Error> Bucket(
             Error::InvalidAttributeReference(ref.RedactionName()));
     }
 
-    Value value = context.Get(context_kind, ref);
+    Value const& value = context.Get(context_kind, ref);
 
     bool is_bucketable = value.Type() == Value::Type::kNumber ||
                          value.Type() == Value::Type::kString;
