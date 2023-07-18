@@ -50,7 +50,8 @@ TEST_P(AllOperatorsTest, Matches) {
         clauseValues.push_back(param.clauseValue);
     }
 
-    Clause clause{param.op, std::move(clauseValues), false, "user", "attr"};
+    Clause clause{param.op, std::move(clauseValues), false, ContextKind("user"),
+                  "attr"};
 
     auto context = launchdarkly::ContextBuilder()
                        .Kind("user", "key")
