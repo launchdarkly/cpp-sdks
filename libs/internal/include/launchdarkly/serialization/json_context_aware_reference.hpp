@@ -2,6 +2,7 @@
 
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
+#include <launchdarkly/serialization/json_context_kind.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
@@ -25,14 +26,9 @@ tl::expected<data_model::ContextAwareReference<Fields>, JsonError> tag_invoke(
 
     auto const& obj = json_value.as_object();
 
-    std::optional<std::string> kind;
+    std::optional<data_model::ContextKind> kind;
 
     PARSE_CONDITIONAL_FIELD(kind, obj, Type::fields::kContextFieldName);
-
-    if (kind && *kind == "") {
-        // Empty string is not a valid kind.
-        return tl::make_unexpected(JsonError::kSchemaFailure);
-    }
 
     std::string attr_ref_or_name;
     PARSE_FIELD_DEFAULT(attr_ref_or_name, obj,
@@ -43,7 +39,8 @@ tl::expected<data_model::ContextAwareReference<Fields>, JsonError> tag_invoke(
                     AttributeReference::FromReferenceStr(attr_ref_or_name)};
     }
 
-    return Type{"user", AttributeReference::FromLiteralStr(attr_ref_or_name)};
+    return Type{data_model::ContextKind("user"),
+                AttributeReference::FromLiteralStr(attr_ref_or_name)};
 }
 
 }  // namespace launchdarkly
