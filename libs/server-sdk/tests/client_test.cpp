@@ -9,7 +9,7 @@ using namespace launchdarkly::server_side;
 TEST(ClientTestT, ClientConstructedWithMinimalConfigAndContextT) {
     tl::expected<Config, Error> config = ConfigBuilder("sdk-123").Build();
     ASSERT_TRUE(config);
-    
+
     Client client(*config);
 
     char const* version = client.Version();
