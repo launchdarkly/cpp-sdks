@@ -7,6 +7,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 
 add_library(${LIBNAME}
         ${HEADER_LIST}
+        boost.cpp
         client.cpp
         client_impl.cpp
         data_sources/data_source_update_sink.hpp
@@ -25,12 +26,21 @@ add_library(${LIBNAME}
         data_sources/data_source_status_manager.hpp
         data_sources/streaming_data_source.hpp
         data_sources/streaming_data_source.cpp
-        data_sources/null_data_source.cpp)
+        data_sources/null_data_source.cpp
+        evaluation/evaluator.cpp
+        evaluation/rules.cpp
+        evaluation/bucketing.cpp
+        evaluation/operators.cpp
+        evaluation/evaluation_error.cpp
+        evaluation/detail/evaluation_stack.cpp
+        evaluation/detail/semver_operations.cpp
+        evaluation/detail/timestamp_operations.cpp
+        )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
+            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 else ()
     # The default static lib builds, for linux, are position independent.
     # So they do not link into a shared object without issues. So, when
@@ -39,7 +49,7 @@ else ()
     # macOS shares the same path for simplicity.
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
-            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy)
+            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy timestamp)
 
     target_sources(${LIBNAME} PRIVATE boost.cpp)
 endif ()

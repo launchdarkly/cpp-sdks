@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 
-#include "openssl/sha.h"
+#include <openssl/sha.h>
 
 namespace launchdarkly::encoding {
 

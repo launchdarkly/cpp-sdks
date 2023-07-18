@@ -27,6 +27,9 @@ endif ()
 # Needed to fetch external dependencies. 
 include(FetchContent)
 
+# Needed to parse RFC3339 dates in flag rules.
+include(${CMAKE_FILES}/rfc3339_timestamp.cmake)
+
 # Add main SDK sources.
 add_subdirectory(src)
 
