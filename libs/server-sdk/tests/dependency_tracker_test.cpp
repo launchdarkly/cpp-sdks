@@ -13,6 +13,7 @@ using launchdarkly::server_side::data_store::SegmentDescriptor;
 using launchdarkly::AttributeReference;
 using launchdarkly::Value;
 using launchdarkly::data_model::Clause;
+using launchdarkly::data_model::ContextKind;
 using launchdarkly::data_model::Flag;
 using launchdarkly::data_model::ItemDescriptor;
 using launchdarkly::data_model::Segment;
@@ -197,7 +198,7 @@ TEST(DependencyTrackerTest, UsesSegmentRulesToCalculateDependencies) {
 
     flag_a.rules.push_back(Flag::Rule{std::vector<Clause>{
         Clause{Clause::Op::kSegmentMatch, std::vector<Value>{"segmentA"}, false,
-               "user", AttributeReference()}}});
+               ContextKind("user"), AttributeReference()}}});
 
     tracker.UpdateDependencies("flagA", FlagDescriptor(flag_a));
     tracker.UpdateDependencies("segmentA", SegmentDescriptor(segment_a));
@@ -231,7 +232,7 @@ TEST(DependencyTrackerTest, TracksSegmentDependencyOfPrerequisite) {
 
     flag_a.rules.push_back(Flag::Rule{std::vector<Clause>{
         Clause{Clause::Op::kSegmentMatch, std::vector<Value>{"segmentA"}, false,
-               "", AttributeReference()}}});
+               ContextKind(""), AttributeReference()}}});
 
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
@@ -270,8 +271,8 @@ TEST(DependencyTrackerTest, HandlesSegmentsDependentOnOtherSegments) {
     segment_b.rules.push_back(Segment::Rule{
         std::vector<Clause>{Clause{Clause::Op::kSegmentMatch,
                                    std::vector<Value>{"segmentA"}, false,
-                                   "user", AttributeReference()}},
-        std::nullopt, std::nullopt, "", AttributeReference()});
+                                   ContextKind("user"), AttributeReference()}},
+        std::nullopt, std::nullopt, ContextKind(""), AttributeReference()});
 
     tracker.UpdateDependencies("segmentA", SegmentDescriptor(segment_a));
     tracker.UpdateDependencies("segmentB", SegmentDescriptor(segment_b));

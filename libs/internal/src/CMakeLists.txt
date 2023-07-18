@@ -39,6 +39,7 @@ add_library(${LIBNAME} OBJECT
         serialization/json_primitives.cpp
         serialization/json_rule_clause.cpp
         serialization/json_flag.cpp
+        serialization/json_context_kind.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp
         signals/boost_signal_connection.cpp)
