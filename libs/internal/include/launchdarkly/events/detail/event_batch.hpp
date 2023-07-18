@@ -1,9 +1,9 @@
 #pragma once
 
 #include <boost/json/value.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/network/http_requester.hpp>
 #include <string>
+#include "launchdarkly/config/shared/built/http_properties.hpp"
+#include "launchdarkly/network/http_requester.hpp"
 
 namespace launchdarkly::events {
 

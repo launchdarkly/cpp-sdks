@@ -1,7 +1,7 @@
 #include <memory>
 
-#include <launchdarkly/events/request_worker.hpp>
-#include <launchdarkly/events/worker_pool.hpp>
+#include "launchdarkly/events/detail/request_worker.hpp"
+#include "launchdarkly/events/detail/worker_pool.hpp"
 
 namespace launchdarkly::events {
 

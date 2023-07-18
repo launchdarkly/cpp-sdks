@@ -7,9 +7,7 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
-#include <launchdarkly/events/client_events.hpp>
-#include <launchdarkly/events/parse_date_header.hpp>
-#include <launchdarkly/events/worker_pool.hpp>
+#include <launchdarkly/events/detail/parse_date_header.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 
 using namespace launchdarkly::events;
@@ -82,16 +80,16 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     auto context = launchdarkly::ContextBuilder().Kind("org", "ld").Build();
     ASSERT_TRUE(context.Valid());
 
-    auto identify_event = events::client::IdentifyEventParams{
+    auto identify_event = events::IdentifyEventParams{
         std::chrono::system_clock::now(),
         context,
     };
 
     for (std::size_t i = 0; i < 10; i++) {
-        processor.AsyncSend(identify_event);
+        processor.SendAsync(identify_event);
     }
 
-    processor.AsyncClose();
+    processor.ShutdownAsync();
     ioc_thread.join();
 }
 

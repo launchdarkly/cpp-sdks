@@ -2,7 +2,7 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 
-namespace launchdarkly::events::client {
+namespace launchdarkly::events {
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEvent const& event) {
@@ -49,9 +49,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", event.context);
 }
-}  // namespace launchdarkly::events::client
+}  // namespace launchdarkly::events
 
-namespace launchdarkly::events::server {
+namespace launchdarkly::events::server_side {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -61,7 +61,7 @@ void tag_invoke(boost::json::value_from_tag const&,
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", event.context);
 }
-}  // namespace launchdarkly::events::server
+}  // namespace launchdarkly::events::server_side
 
 namespace launchdarkly::events {
 

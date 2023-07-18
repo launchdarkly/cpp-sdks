@@ -3,7 +3,7 @@
 #include <mutex>
 #include <queue>
 #include <string>
-#include "events.hpp"
+#include "launchdarkly/events/data/events.hpp"
 
 namespace launchdarkly::events {
 

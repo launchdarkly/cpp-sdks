@@ -109,7 +109,7 @@ class IClient {
      * @param context The new evaluation context.
      */
 
-    virtual void Identify(Context const& context) = 0;
+    virtual void Identify(Context context) = 0;
 
     /**
      * Returns the boolean value of a feature flag for a given flag key.

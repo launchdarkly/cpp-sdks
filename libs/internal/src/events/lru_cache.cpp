@@ -1,4 +1,4 @@
-#include <launchdarkly/events/lru_cache.hpp>
+#include "launchdarkly/events/detail/lru_cache.hpp"
 
 namespace launchdarkly::events {
 LRUCache::LRUCache(std::size_t capacity)

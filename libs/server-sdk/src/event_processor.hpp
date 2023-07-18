@@ -2,7 +2,7 @@
 
 #include "launchdarkly/events/data/events.hpp"
 
-namespace launchdarkly::client_side {
+namespace launchdarkly::server_side {
 
 class IEventProcessor {
    public:
@@ -34,4 +34,4 @@ class IEventProcessor {
     IEventProcessor() = default;
 };
 
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::server_side

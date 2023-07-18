@@ -16,6 +16,7 @@
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
+#include "launchdarkly/events/data/common_events.hpp"
 
 namespace launchdarkly::server_side {
 
@@ -29,9 +30,9 @@ auto const kAsioConcurrencyHint = 1;
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
 using config::shared::ClientSDK;
-using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
+using launchdarkly::server_side::data_sources::DataSourceStatus;
 
 static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
 MakeDataSource(HttpProperties const& http_properties,
@@ -136,7 +137,7 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 }
 
 void ClientImpl::Identify(Context context) {
-    event_processor_->SendAsync(events::client::IdentifyEventParams{
+    event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
     return StartAsyncInternal(IsInitializedSuccessfully);
@@ -187,24 +188,24 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::optional<double> metric_value) {
     event_processor_->SendAsync(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
-        ReadContextSynchronized(
-            [](Context const& c) { return c.KindsToKeys(); }),
-        std::move(data), metric_value});
+        ctx.KindsToKeys(), std::move(data), metric_value});
 }
 
 void ClientImpl::Track(Context const& ctx,
                        std::string event_name,
                        Value data,
                        double metric_value) {
-    this->TrackInternal(std::move(event_name), std::move(data), metric_value);
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        metric_value);
 }
 
 void ClientImpl::Track(Context const& ctx, std::string event_name, Value data) {
-    this->TrackInternal(std::move(event_name), std::move(data), std::nullopt);
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        std::nullopt);
 }
 
 void ClientImpl::Track(Context const& ctx, std::string event_name) {
-    this->TrackInternal(std::move(event_name), std::nullopt, std::nullopt);
+    this->TrackInternal(ctx, std::move(event_name), std::nullopt, std::nullopt);
 }
 
 void ClientImpl::FlushAsync() {
@@ -219,7 +220,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
                                                   bool detailed) {
     auto desc = flag_manager_.Store().Get(key);
 
-    events::client::FeatureEventParams event = {
+    events::FeatureEventParams event = {
         std::chrono::system_clock::now(),
         key,
         ReadContextSynchronized([](Context const& c) { return c; }),

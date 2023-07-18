@@ -1,5 +1,19 @@
 #pragma once
 
+#include <launchdarkly/config/shared/built/events.hpp>
+#include <launchdarkly/config/shared/built/service_endpoints.hpp>
+#include <launchdarkly/context_filter.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+
+#include <launchdarkly/events/data/events.hpp>
+#include <launchdarkly/events/detail/event_batch.hpp>
+#include <launchdarkly/events/detail/lru_cache.hpp>
+#include <launchdarkly/events/detail/outbox.hpp>
+#include <launchdarkly/events/detail/summarizer.hpp>
+#include <launchdarkly/events/detail/worker_pool.hpp>
+#include <launchdarkly/events/event_processor_interface.hpp>
+
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -10,23 +24,10 @@
 #include <optional>
 #include <tuple>
 
-#include <launchdarkly/config/shared/built/events.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include <launchdarkly/context_filter.hpp>
-#include <launchdarkly/events/lru_cache.hpp>
-#include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/http_requester.hpp>
-
-#include "event_batch.hpp"
-#include "events.hpp"
-#include "outbox.hpp"
-#include "summarizer.hpp"
-#include "worker_pool.hpp"
-
 namespace launchdarkly::events {
 
 template <typename SDK>
-class AsioEventProcessor {
+class AsioEventProcessor : public IEventProcessor {
    public:
     AsioEventProcessor(
         boost::asio::any_io_executor const& io,
@@ -35,11 +36,11 @@ class AsioEventProcessor {
         config::shared::built::HttpProperties const& http_properties,
         Logger& logger);
 
-    void AsyncFlush();
+    virtual void FlushAsync() override;
 
-    void AsyncSend(InputEvent event);
+    virtual void SendAsync(events::InputEvent event) override;
 
-    void AsyncClose();
+    virtual void ShutdownAsync() override;
 
    private:
     using Clock = std::chrono::system_clock;

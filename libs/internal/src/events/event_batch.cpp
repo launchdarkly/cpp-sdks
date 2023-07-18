@@ -1,4 +1,4 @@
-#include <launchdarkly/events/event_batch.hpp>
+#include "launchdarkly/events/detail/event_batch.hpp"
 
 #include <boost/json/serialize.hpp>
 

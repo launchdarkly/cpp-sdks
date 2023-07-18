@@ -7,11 +7,11 @@
 #include <optional>
 #include <vector>
 
-#include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
-#include <launchdarkly/network/http_requester.hpp>
+#include "launchdarkly/logging/logger.hpp"
+#include "launchdarkly/network/asio_requester.hpp"
+#include "launchdarkly/network/http_requester.hpp"
 
-#include "request_worker.hpp"
+#include "launchdarkly/events/detail/request_worker.hpp"
 
 namespace launchdarkly::events {
 

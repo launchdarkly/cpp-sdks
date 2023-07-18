@@ -14,8 +14,6 @@ add_library(${LIBNAME}
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
-        event_processor/event_processor.cpp
-        event_processor/null_event_processor.cpp
         client_impl.cpp
         client.cpp
         client_impl.hpp
@@ -24,8 +22,6 @@ add_library(${LIBNAME}
         data_sources/data_source_update_sink.hpp
         data_sources/polling_data_source.hpp
         data_sources/streaming_data_source.hpp
-        event_processor/event_processor.hpp
-        event_processor/null_event_processor.hpp
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         event_processor.hpp

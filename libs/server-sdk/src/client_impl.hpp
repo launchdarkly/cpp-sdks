@@ -11,7 +11,7 @@
 #include <thread>
 #include <tuple>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
@@ -24,13 +24,12 @@
 
 #include "data_sources/data_source_status_manager.hpp"
 #include "event_processor.hpp"
-#include "flag_manager/flag_manager.hpp"
 
 namespace launchdarkly::server_side {
 
 class ClientImpl : public IClient {
    public:
-    ClientImpl(Config config, Context context, std::string const& version);
+    ClientImpl(Config config, std::string const& version);
 
     ClientImpl(ClientImpl&&) = delete;
     ClientImpl(ClientImpl const&) = delete;
@@ -127,7 +126,6 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    flag_manager::FlagManager flag_manager_;
     std::function<std::shared_ptr<::launchdarkly::data_sources::IDataSource>()>
         data_source_factory_;
 

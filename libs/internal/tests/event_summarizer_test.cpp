@@ -2,14 +2,12 @@
 #include <chrono>
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/events/client_events.hpp>
-#include <launchdarkly/events/summarizer.hpp>
+#include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 #include <thread>
 #include <unordered_map>
+#include "launchdarkly/events/detail/summarizer.hpp"
 
-using namespace launchdarkly::events;
-using namespace launchdarkly::events::client;
 using namespace launchdarkly::events;
 
 static std::chrono::system_clock::time_point TimeZero() {
@@ -292,7 +290,7 @@ INSTANTIATE_TEST_SUITE_P(
                            {Summarizer::VariationKey(1, 1), 1}}}}}));
 
 TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
-    using namespace launchdarkly::events::client;
+    using namespace launchdarkly::events;
     using namespace launchdarkly;
     Summarizer summarizer;
 
@@ -340,7 +338,7 @@ TEST(SummarizerTests, MissingFlagCreatesCounterUsingDefaultValue) {
 }
 
 TEST(SummarizerTests, JsonSerialization) {
-    using namespace launchdarkly::events::client;
+    using namespace launchdarkly::events;
     using namespace launchdarkly;
     Summarizer summarizer;
 

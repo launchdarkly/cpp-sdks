@@ -11,7 +11,7 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 
-#include <launchdarkly/events/server_events.hpp>
+#include <launchdarkly/events/data/server_events.hpp>
 
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
@@ -90,7 +90,7 @@ void AsioEventProcessor<SDK>::InboxDecrement() {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncSend(InputEvent input_event) {
+void AsioEventProcessor<SDK>::SendAsync(InputEvent input_event) {
     if (!InboxIncrement()) {
         return;
     }
@@ -179,12 +179,12 @@ void AsioEventProcessor<SDK>::ScheduleFlush() {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncFlush() {
+void AsioEventProcessor<SDK>::FlushAsync() {
     boost::asio::post(io_, [=] { Flush(FlushTrigger::Manual); });
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncClose() {
+void AsioEventProcessor<SDK>::ShutdownAsync() {
     timer_.cancel();
 }
 
@@ -217,20 +217,20 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     std::vector<OutputEvent> out;
     std::visit(
         overloaded{
-            [&](client::FeatureEventParams&& event) {
+            [&](FeatureEventParams&& event) {
                 summarizer_.Update(event);
 
                 if constexpr (std::is_same<SDK,
                                            config::shared::ServerSDK>::value) {
                     if (!context_key_cache_.Notice(
                             event.context.CanonicalKey())) {
-                        out.emplace_back(
-                            server::IndexEvent{event.creation_date,
-                                               filter_.filter(event.context)});
+                        out.emplace_back(server_side::IndexEvent{
+                            event.creation_date,
+                            filter_.filter(event.context)});
                     }
                 }
 
-                client::FeatureEventBase base{event};
+                FeatureEventBase base{event};
 
                 auto debug_until_date = event.debug_events_until_date;
 
@@ -248,16 +248,16 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                     debug_until_date && conservative_now < debug_until_date->t;
 
                 if (emit_debug_event) {
-                    out.emplace_back(client::DebugEvent{
-                        base, filter_.filter(event.context)});
+                    out.emplace_back(
+                        DebugEvent{base, filter_.filter(event.context)});
                 }
 
                 if (event.require_full_event) {
-                    out.emplace_back(client::FeatureEvent{
-                        std::move(base), event.context.KindsToKeys()});
+                    out.emplace_back(FeatureEvent{std::move(base),
+                                                  event.context.KindsToKeys()});
                 }
             },
-            [&](client::IdentifyEventParams&& event) {
+            [&](IdentifyEventParams&& event) {
                 // Contexts should already have been checked for
                 // validity by this point.
                 assert(event.context.Valid());
@@ -267,8 +267,8 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                     context_key_cache_.Notice(event.context.CanonicalKey());
                 }
 
-                out.emplace_back(client::IdentifyEvent{
-                    event.creation_date, filter_.filter(event.context)});
+                out.emplace_back(IdentifyEvent{event.creation_date,
+                                               filter_.filter(event.context)});
             },
             [&](TrackEventParams&& event) {
                 out.emplace_back(std::move(event));
