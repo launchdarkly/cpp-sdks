@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.2...launchdarkly-cpp-client-v3.0.3) (2023-07-14)
+
+
+### Bug Fixes
+
+* Use correctly calculated polling delay instead of base interval. ([#178](https://github.com/launchdarkly/cpp-sdks/issues/178)) ([8f70f71](https://github.com/launchdarkly/cpp-sdks/commit/8f70f71a893f5a341380691d4896daf43bca271d))
+
 ## [3.0.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.1...launchdarkly-cpp-client-v3.0.2) (2023-06-30)
 
 
