@@ -24,7 +24,6 @@ add_library(${LIBNAME}
         data_sources/streaming_data_source.hpp
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
-        event_processor.hpp
         bindings/c/sdk.cpp
         data_sources/null_data_source.cpp
         flag_manager/context_index.cpp
