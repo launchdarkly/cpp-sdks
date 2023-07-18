@@ -149,7 +149,12 @@ class EvaluationReason {
     static EvaluationReason RuleMatch(std::size_t rule_index,
                                       std::optional<std::string> rule_id,
                                       bool in_experiment);
-    
+
+    /**
+     * The flag data was malformed.
+     */
+    static EvaluationReason MalformedFlag();
+
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 

@@ -7,18 +7,13 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 
 add_library(${LIBNAME}
         ${HEADER_LIST}
+        boost.cpp
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/data_store_updater.hpp
         data_store/data_store_updater.cpp
         data_store/memory_store.cpp
         data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp data_store/descriptors.hpp
-        evaluation/detail/evaluation_stack.cpp
-        evaluation/detail/semver_operations.cpp
-        evaluation/detail/timestamp_operations.cpp
-        evaluation/evaluation_error.cpp
-        evaluation/bucketing.cpp
         data_store/dependency_tracker.cpp
         data_store/descriptors.hpp
         data_sources/data_source_event_handler.cpp
@@ -29,6 +24,14 @@ add_library(${LIBNAME}
         data_sources/data_source_status_manager.hpp
         data_sources/streaming_data_source.hpp
         data_sources/streaming_data_source.cpp
+        evaluation/evaluator.cpp
+        evaluation/rules.cpp
+        evaluation/bucketing.cpp
+        evaluation/operators.cpp
+        evaluation/evaluation_error.cpp
+        evaluation/detail/evaluation_stack.cpp
+        evaluation/detail/semver_operations.cpp
+        evaluation/detail/timestamp_operations.cpp
         )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))

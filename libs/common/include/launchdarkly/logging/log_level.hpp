@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace launchdarkly {
 /**
  * Log levels with kDebug being lowest severity and kError being highest
@@ -27,5 +29,7 @@ char const* GetLogLevelName(LogLevel level, char const* default_);
  * @return LogLevel matching the name, or default_ if not recognized.
  */
 LogLevel GetLogLevelEnum(char const* name, LogLevel default_);
+
+std::ostream& operator<<(std::ostream& out, LogLevel const& level);
 
 }  // namespace launchdarkly

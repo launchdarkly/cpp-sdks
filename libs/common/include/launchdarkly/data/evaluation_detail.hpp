@@ -33,7 +33,15 @@ class EvaluationDetail {
      * @param error_kind Kind of the error.
      * @param default_value Default value.
      */
-    EvaluationDetail(enum EvaluationReason::ErrorKind error_kind, T default_value);
+    EvaluationDetail(enum EvaluationReason::ErrorKind error_kind,
+                     T default_value);
+
+    /**
+     * Constructs an EvaluationDetail consisting of a reason but no value.
+     * This is used when a flag has no appropriate fallback value.
+     * @param reason The reason.
+     */
+    EvaluationDetail(EvaluationReason reason);
 
     /**
      * @return A reference to the variation value. For convenience, the *
@@ -53,9 +61,20 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
+     * @return True if the evaluation resulted in an error.
+     */
+    [[nodiscard]] bool IsError() const;
+
+    /**
      * @return A reference to the variation value.
      */
     T const& operator*() const;
+
+    /**
+     * @return True if the evaluation was successful (i.e. IsError returns
+     * false.)
+     */
+    explicit operator bool() const;
 
    private:
     T value_;
@@ -64,9 +83,10 @@ class EvaluationDetail {
 };
 
 /*
- * Holds details for the C bindings, omitting the generic type parameter that is
- * needed for EvaluationDetail<T>. Instead, the bindings will directly return
- * the evaluation result, and fill in a detail structure using an out parameter.
+ * Holds details for the C bindings, omitting the generic type parameter
+ * that is needed for EvaluationDetail<T>. Instead, the bindings will
+ * directly return the evaluation result, and fill in a detail structure
+ * using an out parameter.
  */
 struct CEvaluationDetail {
     template <typename T>

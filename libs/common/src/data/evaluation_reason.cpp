@@ -85,6 +85,10 @@ EvaluationReason EvaluationReason::RuleMatch(std::size_t rule_index,
             std::nullopt,     in_experiment, std::nullopt};
 }
 
+EvaluationReason EvaluationReason::MalformedFlag() {
+    return EvaluationReason{ErrorKind::kMalformedFlag};
+}
+
 std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
     out << "{";
     out << " kind: " << reason.kind_;

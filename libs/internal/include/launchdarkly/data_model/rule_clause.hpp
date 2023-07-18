@@ -3,6 +3,8 @@
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/value.hpp>
 
+#include "context_aware_reference.hpp"
+
 #include <optional>
 #include <string>
 #include <vector>
@@ -35,4 +37,7 @@ struct Clause {
     DEFINE_CONTEXT_KIND_FIELD(contextKind)
     DEFINE_ATTRIBUTE_REFERENCE_FIELD(attribute)
 };
+
+std::ostream& operator<<(std::ostream& os, Clause::Op op);
+
 }  // namespace launchdarkly::data_model
