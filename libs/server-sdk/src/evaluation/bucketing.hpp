@@ -16,6 +16,8 @@
 
 namespace launchdarkly::server_side::evaluation {
 
+double const kBucketScale = 100'000.0;
+
 enum RolloutKindLookup {
     /* The rollout's context kind was found in the supplied evaluation context.
      */

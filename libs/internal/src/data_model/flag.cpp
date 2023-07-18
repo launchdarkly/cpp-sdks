@@ -19,9 +19,9 @@ Flag::Rollout::WeightedVariation Flag::Rollout::WeightedVariation::Untracked(
 
 Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)
     : variations(std::move(variations_)),
-      bucketBy("key"),
-      contextKind("user"),
       kind(Kind::kRollout),
-      seed(std::nullopt) {}
+      seed(std::nullopt),
+      bucketBy("key"),
+      contextKind("user") {}
 
 }  // namespace launchdarkly::data_model

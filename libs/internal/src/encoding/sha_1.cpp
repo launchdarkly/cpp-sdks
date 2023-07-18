@@ -6,7 +6,7 @@ namespace launchdarkly::encoding {
 
 std::array<unsigned char, SHA_DIGEST_LENGTH> Sha1String(
     std::string const& input) {
-    std::array<unsigned char, SHA_DIGEST_LENGTH> hash;
+    std::array<unsigned char, SHA_DIGEST_LENGTH> hash{};
 
     SHA_CTX sha;
     SHA1_Init(&sha);

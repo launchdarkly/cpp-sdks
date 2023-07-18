@@ -18,7 +18,9 @@ class SpyLoggerBackend : public launchdarkly::ILogBackend {
     /**
      * Always returns true.
      */
-    bool Enabled(LogLevel level) noexcept override { return true; }
+    [[nodiscard]] bool Enabled(LogLevel level) noexcept override {
+        return true;
+    }
 
     /**
      * Records the message internally.
@@ -31,7 +33,7 @@ class SpyLoggerBackend : public launchdarkly::ILogBackend {
      * Asserts that 'count' messages were recorded.
      * @param count Number of expected messages.
      */
-    testing::AssertionResult Count(std::size_t count) const {
+    [[nodiscard]] testing::AssertionResult Count(std::size_t count) const {
         if (messages_.size() == count) {
             return testing::AssertionSuccess();
         }
@@ -39,9 +41,10 @@ class SpyLoggerBackend : public launchdarkly::ILogBackend {
                << "Expected " << count << " messages, got " << messages_.size();
     }
 
-    testing::AssertionResult Equals(std::size_t index,
-                                    LogLevel level,
-                                    std::string const& expected) const {
+    [[nodiscard]] testing::AssertionResult Equals(
+        std::size_t index,
+        LogLevel level,
+        std::string const& expected) const {
         return GetIndex(index, level, [&](auto const& actual) {
             if (actual.second != expected) {
                 return testing::AssertionFailure()
@@ -52,9 +55,10 @@ class SpyLoggerBackend : public launchdarkly::ILogBackend {
         });
     }
 
-    testing::AssertionResult Contains(std::size_t index,
-                                      LogLevel level,
-                                      std::string const& expected) const {
+    [[nodiscard]] testing::AssertionResult Contains(
+        std::size_t index,
+        LogLevel level,
+        std::string const& expected) const {
         return GetIndex(
             index, level, [&](auto const& actual) -> testing::AssertionResult {
                 if (actual.second.find(expected) != std::string::npos) {
@@ -67,7 +71,7 @@ class SpyLoggerBackend : public launchdarkly::ILogBackend {
     }
 
    private:
-    testing::AssertionResult GetIndex(
+    [[nodiscard]] testing::AssertionResult GetIndex(
         std::size_t index,
         LogLevel level,
         std::function<testing::AssertionResult(Record const&)> const& f) const {

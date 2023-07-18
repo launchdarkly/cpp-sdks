@@ -53,7 +53,7 @@ tl::expected<bool, Error> Match(Segment::Rule const& rule,
             return tl::make_unexpected(maybe_bucket.error());
         }
         auto [bucket, ignored] = *maybe_bucket;
-        return bucket < (*rule.weight / 100000.0);
+        return bucket < (*rule.weight / kBucketScale);
     }
 
     return true;

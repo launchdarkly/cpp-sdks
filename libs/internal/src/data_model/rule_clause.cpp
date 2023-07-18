@@ -2,8 +2,8 @@
 
 namespace launchdarkly::data_model {
 
-std::ostream& operator<<(std::ostream& os, Clause::Op op) {
-    switch (op) {
+std::ostream& operator<<(std::ostream& os, Clause::Op operator_) {
+    switch (operator_) {
         case Clause::Op::kUnrecognized:
             os << "unrecognized";
             break;

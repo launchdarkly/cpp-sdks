@@ -11,7 +11,7 @@ namespace launchdarkly::server_side::evaluation {
 
 using namespace launchdarkly::data_model;
 
-double const kBucketScale = static_cast<double>(0x0FFFFFFFFFFFFFFF);
+double const kBucketHashScale = static_cast<double>(0x0FFFFFFFFFFFFFFF);
 
 AttributeReference const& Key();
 
@@ -121,7 +121,7 @@ std::optional<float> ContextHash(Value const& value, BucketPrefix prefix) {
             std::stoull(sha1hash_hexed_first_15.data(), nullptr, /* base */ 16);
 
         double as_double = static_cast<double>(as_number);
-        return as_double / kBucketScale;
+        return as_double / kBucketHashScale;
 
     } catch (std::invalid_argument) {
         return std::nullopt;
@@ -186,7 +186,7 @@ tl::expected<BucketResult, Error> Variation(
                 double sum = 0.0;
 
                 for (const auto& variation : arg.variations) {
-                    sum += variation.weight / 100000.0;
+                    sum += variation.weight / kBucketScale;
                     if (bucket < sum) {
                         return BucketResult(
                             variation,

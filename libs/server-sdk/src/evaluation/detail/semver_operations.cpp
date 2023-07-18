@@ -176,24 +176,24 @@ std::optional<SemVer> SemVer::Parse(std::string const& value) {
     return SemVer{major, minor, patch, prerelease};
 }
 
-std::ostream& operator<<(std::ostream& out, SemVer::Token const& sv) {
-    if (sv.index() == 0) {
-        out << std::get<0>(sv);
+std::ostream& operator<<(std::ostream& out, SemVer::Token const& token) {
+    if (token.index() == 0) {
+        out << std::get<0>(token);
     } else {
-        out << std::get<1>(sv);
+        out << std::get<1>(token);
     }
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, SemVer const& sv) {
-    out << sv.Major() << "." << sv.Minor() << "." << sv.Patch();
-    if (sv.Prerelease()) {
+std::ostream& operator<<(std::ostream& out, SemVer const& ver) {
+    out << ver.Major() << "." << ver.Minor() << "." << ver.Patch();
+    if (ver.Prerelease()) {
         out << "-";
 
-        for (auto it = sv.Prerelease()->begin(); it != sv.Prerelease()->end();
+        for (auto it = ver.Prerelease()->begin(); it != ver.Prerelease()->end();
              ++it) {
             out << *it;
-            if (std::next(it) != sv.Prerelease()->end()) {
+            if (std::next(it) != ver.Prerelease()->end()) {
                 out << ".";
             }
         }

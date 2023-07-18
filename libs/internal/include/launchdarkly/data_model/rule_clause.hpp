@@ -38,6 +38,6 @@ struct Clause {
     DEFINE_ATTRIBUTE_REFERENCE_FIELD(attribute)
 };
 
-std::ostream& operator<<(std::ostream& os, Clause::Op op);
+std::ostream& operator<<(std::ostream& os, Clause::Op operator_);
 
 }  // namespace launchdarkly::data_model
