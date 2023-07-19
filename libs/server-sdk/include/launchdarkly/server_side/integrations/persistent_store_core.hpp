@@ -51,6 +51,15 @@ class IPersistentKind {
      * @return The version of the data.
      */
     [[nodiscard]] virtual uint64_t Version(std::string const& data);
+
+    IPersistentKind(IPersistentKind const& item) = delete;
+    IPersistentKind(IPersistentKind&& item) = delete;
+    IPersistentKind& operator=(IPersistentKind const&) = delete;
+    IPersistentKind& operator=(IPersistentKind&&) = delete;
+    virtual ~IPersistentKind() = default;
+
+   protected:
+    IPersistentKind() = default;
 };
 
 /**
@@ -190,5 +199,14 @@ class IPersistentStoreCore {
      * @return A short description of the sore.
      */
     virtual std::string const& Description() const = 0;
+
+    IPersistentStoreCore(IPersistentStoreCore const& item) = delete;
+    IPersistentStoreCore(IPersistentStoreCore&& item) = delete;
+    IPersistentStoreCore& operator=(IPersistentStoreCore const&) = delete;
+    IPersistentStoreCore& operator=(IPersistentStoreCore&&) = delete;
+    virtual ~IPersistentStoreCore() = default;
+
+   protected:
+    IPersistentStoreCore() = default;
 };
 }  // namespace launchdarkly::server_side::integrations
