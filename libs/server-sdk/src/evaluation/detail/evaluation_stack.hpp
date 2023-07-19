@@ -11,7 +11,7 @@ namespace launchdarkly::server_side::evaluation::detail {
  * Upon destruction, the key is forgotten.
  */
 struct Guard {
-    Guard(std::unordered_set<std::string>& set, std::string const& key);
+    Guard(std::unordered_set<std::string>& set, std::string key);
     ~Guard();
 
     Guard(Guard const&) = delete;
@@ -22,7 +22,7 @@ struct Guard {
 
    private:
     std::unordered_set<std::string>& set_;
-    std::string const& key_;
+    std::string const key_;
 };
 
 /**
@@ -41,7 +41,7 @@ class EvaluationStack {
      * @return Guard object if not seen before, otherwise std::nullopt.
      */
     [[nodiscard]] std::optional<Guard> NoticePrerequisite(
-        std::string const& prerequisite_key);
+        std::string prerequisite_key);
 
     /**
      * If the given segment key has not been seen, marks it as seen
@@ -50,8 +50,7 @@ class EvaluationStack {
      * @param prerequisite_key Key of the segment.
      * @return Guard object if not seen before, otherwise std::nullopt.
      */
-    [[nodiscard]] std::optional<Guard> NoticeSegment(
-        std::string const& segment_key);
+    [[nodiscard]] std::optional<Guard> NoticeSegment(std::string segment_key);
 
    private:
     std::unordered_set<std::string> prerequisites_seen_;
