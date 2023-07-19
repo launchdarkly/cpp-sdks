@@ -3,7 +3,7 @@
 namespace launchdarkly::server_side::evaluation::detail {
 
 Guard::Guard(std::unordered_set<std::string>& set, std::string key)
-    : set_(set), key_(key) {
+    : set_(set), key_(std::move(key)) {
     set_.insert(key_);
 }
 
