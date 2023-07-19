@@ -1,10 +1,11 @@
 #include <launchdarkly/bindings/c/status.h>
-#include <cassert>
-#include <functional>
 #include <launchdarkly/error.hpp>
-#include <optional>
 
 #include <tl/expected.hpp>
+
+#include <cassert>
+#include <functional>
+#include <optional>
 
 namespace launchdarkly {
 template <typename T, typename = void>

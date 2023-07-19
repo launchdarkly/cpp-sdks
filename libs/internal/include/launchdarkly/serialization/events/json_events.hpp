@@ -1,11 +1,19 @@
 #pragma once
 
+#include <launchdarkly/events/data/events.hpp>
+#include <launchdarkly/events/detail/summarizer.hpp>
+
 #include <boost/json.hpp>
 
-#include <launchdarkly/events/events.hpp>
-#include <launchdarkly/events/summarizer.hpp>
+namespace launchdarkly::events::server_side {
 
-namespace launchdarkly::events::client {
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IndexEvent const& event);
+}  // namespace launchdarkly::events::server_side
+
+namespace launchdarkly::events {
+
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 FeatureEvent const& event);
@@ -21,16 +29,6 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 DebugEvent const& event);
-}  // namespace launchdarkly::events::client
-
-namespace launchdarkly::events::server {
-
-void tag_invoke(boost::json::value_from_tag const&,
-                boost::json::value& json_value,
-                IndexEvent const& event);
-}  // namespace launchdarkly::events::server
-
-namespace launchdarkly::events {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -46,7 +44,7 @@ void tag_invoke(boost::json::value_from_tag const&,
 
 }  // namespace launchdarkly::events
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
@@ -54,4 +52,4 @@ void tag_invoke(boost::json::value_from_tag const&,
 void tag_invoke(boost::json::value_from_tag const&,
                 boost::json::value& json_value,
                 Summarizer const& summary);
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

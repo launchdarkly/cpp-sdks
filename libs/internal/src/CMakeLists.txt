@@ -14,7 +14,8 @@ add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         context_filter.cpp
         events/asio_event_processor.cpp
-        events/client_events.cpp
+        events/null_event_processor.cpp
+        events/common_events.cpp
         events/event_batch.cpp
         events/outbox.cpp
         events/request_worker.cpp
@@ -39,8 +40,12 @@ add_library(${LIBNAME} OBJECT
         serialization/json_primitives.cpp
         serialization/json_rule_clause.cpp
         serialization/json_flag.cpp
+        serialization/json_context_kind.cpp
+        data_model/rule_clause.cpp
+        data_model/flag.cpp
         encoding/base_64.cpp
         encoding/sha_256.cpp
+        encoding/sha_1.cpp
         signals/boost_signal_connection.cpp)
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})

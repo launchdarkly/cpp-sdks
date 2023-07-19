@@ -1,8 +1,9 @@
+#include "launchdarkly/events/detail/request_worker.hpp"
 #include <gtest/gtest.h>
-#include <launchdarkly/events/request_worker.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
 using namespace launchdarkly::events;
+using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network;
 
 struct TestCase {

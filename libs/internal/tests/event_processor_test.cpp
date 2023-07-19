@@ -7,12 +7,11 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
-#include <launchdarkly/events/client_events.hpp>
-#include <launchdarkly/events/parse_date_header.hpp>
-#include <launchdarkly/events/worker_pool.hpp>
+#include <launchdarkly/events/detail/parse_date_header.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 
 using namespace launchdarkly::events;
+using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network;
 
 static std::chrono::system_clock::time_point TimeZero() {
@@ -82,16 +81,16 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     auto context = launchdarkly::ContextBuilder().Kind("org", "ld").Build();
     ASSERT_TRUE(context.Valid());
 
-    auto identify_event = events::client::IdentifyEventParams{
+    auto identify_event = events::IdentifyEventParams{
         std::chrono::system_clock::now(),
         context,
     };
 
     for (std::size_t i = 0; i < 10; i++) {
-        processor.AsyncSend(identify_event);
+        processor.SendAsync(identify_event);
     }
 
-    processor.AsyncClose();
+    processor.ShutdownAsync();
     ioc_thread.join();
 }
 
@@ -99,7 +98,7 @@ TEST(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
 
     using Clock = std::chrono::system_clock;
-    auto date = events::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
+    auto date = detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
 
     ASSERT_TRUE(date);
 
@@ -110,17 +109,17 @@ TEST(EventProcessorTests, ParseValidDateHeader) {
 TEST(EventProcessorTests, ParseInvalidDateHeader) {
     using namespace launchdarkly;
 
-    auto not_a_date = events::ParseDateHeader<std::chrono::system_clock>(
+    auto not_a_date = detail::ParseDateHeader<std::chrono::system_clock>(
         "this is definitely not a date");
 
     ASSERT_FALSE(not_a_date);
 
-    auto not_gmt = events::ParseDateHeader<std::chrono::system_clock>(
+    auto not_gmt = detail::ParseDateHeader<std::chrono::system_clock>(
         "Wed, 21 Oct 2015 07:28:00 PST");
 
     ASSERT_FALSE(not_gmt);
 
-    auto missing_year = events::ParseDateHeader<std::chrono::system_clock>(
+    auto missing_year = detail::ParseDateHeader<std::chrono::system_clock>(
         "Wed, 21 Oct 07:28:00 GMT");
 
     ASSERT_FALSE(missing_year);
