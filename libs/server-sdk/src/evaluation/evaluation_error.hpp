@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <ostream>
 
 namespace launchdarkly::server_side::evaluation {
