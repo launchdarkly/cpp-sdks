@@ -5,7 +5,11 @@
 #include "../memory_store.hpp"
 #include "expiration_tracker.hpp"
 
+<<<<<<< HEAD
 #include <launchdarkly/persistence/persistent_store_core.hpp>
+=======
+#include <launchdarkly/server_side/integrations/persistent_store_core.hpp>
+>>>>>>> server-side
 
 #include <memory>
 #include <mutex>
@@ -44,7 +48,11 @@ class PersistentStore : public IDataStore,
 
    private:
     MemoryStore memory_store_;
+<<<<<<< HEAD
     std::shared_ptr<persistence::IPersistentStoreCore> persistent_store_core_;
+=======
+    std::shared_ptr<integrations::IPersistentStoreCore> persistent_store_core_;
+>>>>>>> server-side
     ExpirationTracker ttl_tracker_;
 };
 

@@ -1,7 +1,7 @@
+#include "launchdarkly/events/detail/lru_cache.hpp"
 #include <gtest/gtest.h>
-#include <launchdarkly/events/lru_cache.hpp>
 
-using namespace launchdarkly::events;
+using namespace launchdarkly::events::detail;
 
 TEST(ContextKeyCacheTests, CacheSizeOne) {
     LRUCache cache(1);

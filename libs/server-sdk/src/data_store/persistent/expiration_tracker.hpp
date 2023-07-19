@@ -119,7 +119,9 @@ class ExpirationTracker {
 
         using DataType =
             std::array<TaggedData<TtlMap>,
-                       static_cast<std::size_t>(DataKind::kKindCount)>;
+                       static_cast<std::underlying_type_t<DataKind>>(
+                           DataKind::kKindCount)>;
+
         void Set(DataKind kind, std::string const& key, TimePoint expiration);
         void Remove(DataKind kind, std::string const& key);
         std::optional<TimePoint> Get(DataKind kind,

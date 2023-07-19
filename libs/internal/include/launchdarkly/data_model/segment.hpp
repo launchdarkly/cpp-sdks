@@ -46,8 +46,8 @@ struct Segment {
     std::optional<Kind> unboundedContextKind;
     std::optional<std::uint64_t> generation;
 
-    // TODO(cwaldren): make Kind a real type that is deserialized, so we can
-    // make empty string an error.
+    // TODO(sc209882): in data model, ensure empty Kind string is error
+    // condition.
 
     /**
      * Returns the segment's version. Satisfies ItemDescriptor template

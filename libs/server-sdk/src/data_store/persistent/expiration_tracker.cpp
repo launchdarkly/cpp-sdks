@@ -56,14 +56,14 @@ ExpirationTracker::Prune(ExpirationTracker::TimePoint current_time) {
     for (auto const& item : unscoped_) {
         if (State(item.second, current_time) ==
             ExpirationTracker::TrackState::kStale) {
-            pruned.push_back({std::nullopt, item.first});
+            pruned.emplace_back(std::nullopt, item.first);
         }
     }
     for (auto const& scope : scoped_) {
         for (auto const& item : scope.Data()) {
             if (State(item.second, current_time) ==
                 ExpirationTracker::TrackState::kStale) {
-                pruned.push_back({scope.Kind(), item.first});
+                pruned.emplace_back(scope.Kind(), item.first);
             }
         }
     }

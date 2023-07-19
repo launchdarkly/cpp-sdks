@@ -1,6 +1,8 @@
 #pragma once
 
 #include <launchdarkly/attribute_reference.hpp>
+#include <launchdarkly/data_model/context_kind.hpp>
+
 #include <string>
 
 namespace launchdarkly::data_model {
@@ -46,16 +48,18 @@ struct ContextAwareReference<
         std::is_same<char const* const,
                      decltype(FieldNames::kReferenceFieldName)>::value>::type> {
     using fields = FieldNames;
-    std::string contextKind;
+    ContextKind contextKind;
     AttributeReference reference;
 };
 
+// NOLINTBEGIN cppcoreguidelines-macro-usage
 #define DEFINE_CONTEXT_KIND_FIELD(name) \
-    std::string name;                   \
+    ContextKind name;                   \
     constexpr static const char* kContextFieldName = #name;
 
 #define DEFINE_ATTRIBUTE_REFERENCE_FIELD(name) \
     AttributeReference name;                   \
     constexpr static const char* kReferenceFieldName = #name;
+// NOLINTEND cppcoreguidelines-macro-usage
 
 }  // namespace launchdarkly::data_model

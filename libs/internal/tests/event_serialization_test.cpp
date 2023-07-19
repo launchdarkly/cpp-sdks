@@ -3,18 +3,16 @@
 #include <boost/json.hpp>
 
 #include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/events/events.hpp>
-
 #include <launchdarkly/context_filter.hpp>
+#include <launchdarkly/events/data/events.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
-#include <launchdarkly/value.hpp>
 
 namespace launchdarkly::events {
 
 TEST(EventSerialization, FeatureEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
-    auto event = events::client::FeatureEvent{
-        client::FeatureEventBase(client::FeatureEventParams{
+    auto event = events::FeatureEvent{
+        events::FeatureEventBase(events::FeatureEventParams{
             creation_date,
             "key",
             ContextBuilder().Kind("foo", "bar").Build(),
@@ -42,9 +40,9 @@ TEST(EventSerialization, DebugEvent) {
     AttributeReference::SetType attrs;
     ContextFilter filter(false, attrs);
     auto context = ContextBuilder().Kind("foo", "bar").Build();
-    auto event = events::client::DebugEvent{
-        client::FeatureEventBase(
-            client::FeatureEventBase(client::FeatureEventParams{
+    auto event = events::DebugEvent{
+        events::FeatureEventBase(
+            events::FeatureEventBase(events::FeatureEventParams{
                 creation_date,
                 "key",
                 ContextBuilder().Kind("foo", "bar").Build(),
@@ -71,7 +69,7 @@ TEST(EventSerialization, IdentifyEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
     AttributeReference::SetType attrs;
     ContextFilter filter(false, attrs);
-    auto event = events::client::IdentifyEvent{
+    auto event = events::IdentifyEvent{
         creation_date,
         filter.filter(ContextBuilder().Kind("foo", "bar").Build())};
 
@@ -86,7 +84,7 @@ TEST(EventSerialization, IndexEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
     AttributeReference::SetType attrs;
     ContextFilter filter(false, attrs);
-    auto event = events::server::IndexEvent{
+    auto event = events::server_side::IndexEvent{
         creation_date,
         filter.filter(ContextBuilder().Kind("foo", "bar").Build())};
 

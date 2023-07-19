@@ -13,6 +13,7 @@ tl::expected<enum EvaluationReason::Kind, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<enum EvaluationReason::Kind, JsonError>> const& unused,
     boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
@@ -41,6 +42,7 @@ tl::expected<enum EvaluationReason::Kind, JsonError> tag_invoke(
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 enum EvaluationReason::Kind const& kind) {
+    boost::ignore_unused(unused);
     auto& str = json_value.emplace_string();
     switch (kind) {
         case EvaluationReason::Kind::kOff:
@@ -68,6 +70,8 @@ tl::expected<enum EvaluationReason::ErrorKind, JsonError> tag_invoke(
     boost::json::value_to_tag<tl::expected<enum EvaluationReason::ErrorKind,
                                            JsonError>> const& unused,
     boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
     if (!json_value.is_string()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
@@ -96,6 +100,8 @@ tl::expected<enum EvaluationReason::ErrorKind, JsonError> tag_invoke(
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 enum EvaluationReason::ErrorKind const& kind) {
+    boost::ignore_unused(unused);
+
     auto& str = json_value.emplace_string();
     switch (kind) {
         case EvaluationReason::ErrorKind::kClientNotReady:
@@ -184,6 +190,8 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 EvaluationReason const& reason) {
+    boost::ignore_unused(unused);
+
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", boost::json::value_from(reason.Kind()));
     if (auto error_kind = reason.ErrorKind()) {
