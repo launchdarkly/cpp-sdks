@@ -1,8 +1,8 @@
 #pragma once
 
-#include <launchdarkly/events/events.hpp>
+#include <launchdarkly/events/data/events.hpp>
 
-namespace launchdarkly::client_side {
+namespace launchdarkly::events {
 
 class IEventProcessor {
    public:
@@ -34,4 +34,4 @@ class IEventProcessor {
     IEventProcessor() = default;
 };
 
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::events

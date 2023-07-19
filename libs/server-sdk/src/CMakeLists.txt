@@ -8,6 +8,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME}
         ${HEADER_LIST}
         boost.cpp
+        client.cpp
+        client_impl.cpp
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/data_store_updater.hpp
@@ -24,6 +26,7 @@ add_library(${LIBNAME}
         data_sources/data_source_status_manager.hpp
         data_sources/streaming_data_source.hpp
         data_sources/streaming_data_source.cpp
+        data_sources/null_data_source.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

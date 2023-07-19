@@ -19,15 +19,19 @@ class Evaluator {
    public:
     Evaluator(Logger& logger, data_store::IDataStore const& store);
 
+    /**
+     * Evaluates a flag for a given context.
+     * Warning: not thread safe.
+     */
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
-        launchdarkly::Context const& context) const;
+        launchdarkly::Context const& context);
 
    private:
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         std::string const& parent_key,
         data_model::Flag const& flag,
-        launchdarkly::Context const& context) const;
+        launchdarkly::Context const& context);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
         data_model::Flag const& flag,
@@ -42,6 +46,6 @@ class Evaluator {
 
     Logger& logger_;
     data_store::IDataStore const& store_;
-    mutable detail::EvaluationStack stack_;
+    detail::EvaluationStack stack_;
 };
 }  // namespace launchdarkly::server_side::evaluation

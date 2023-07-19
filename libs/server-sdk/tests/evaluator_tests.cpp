@@ -26,7 +26,7 @@ class EvaluatorTests : public ::testing::Test {
 
    protected:
     std::unique_ptr<data_store::IDataStore const> store_;
-    evaluation::Evaluator const eval_;
+    evaluation::Evaluator eval_;
 };
 
 /**
@@ -49,7 +49,7 @@ class EvaluatorTestsWithLogs : public ::testing::Test {
 
    protected:
     std::unique_ptr<data_store::IDataStore const> store_;
-    evaluation::Evaluator const eval_;
+    evaluation::Evaluator eval_;
 };
 
 TEST_F(EvaluatorTests, BasicChanges) {

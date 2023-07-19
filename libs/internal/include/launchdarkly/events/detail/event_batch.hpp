@@ -1,11 +1,13 @@
 #pragma once
 
-#include <boost/json/value.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/network/http_requester.hpp>
+
+#include <boost/json/value.hpp>
+
 #include <string>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 /**
  * EventBatch represents a batch of events being sent to LaunchDarkly as
@@ -43,4 +45,4 @@ class EventBatch {
     network::HttpRequest request_;
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

@@ -11,7 +11,7 @@
 #include <thread>
 #include <tuple>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/client_side/data_source_status.hpp>
@@ -24,8 +24,9 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <launchdarkly/events/event_processor_interface.hpp>
+
 #include "data_sources/data_source_status_manager.hpp"
-#include "event_processor.hpp"
 #include "flag_manager/flag_manager.hpp"
 
 namespace launchdarkly::client_side {
@@ -134,7 +135,7 @@ class ClientImpl : public IClient {
 
     std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
 
-    std::unique_ptr<IEventProcessor> event_processor_;
+    std::unique_ptr<events::IEventProcessor> event_processor_;
 
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;

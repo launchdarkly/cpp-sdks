@@ -14,7 +14,8 @@ add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         context_filter.cpp
         events/asio_event_processor.cpp
-        events/client_events.cpp
+        events/null_event_processor.cpp
+        events/common_events.cpp
         events/event_batch.cpp
         events/outbox.cpp
         events/request_worker.cpp

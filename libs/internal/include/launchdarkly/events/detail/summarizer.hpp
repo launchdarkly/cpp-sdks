@@ -7,11 +7,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <launchdarkly/value.hpp>
+#include "launchdarkly/value.hpp"
 
-#include "events.hpp"
+#include "launchdarkly/events/data/events.hpp"
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 /**
  * Summarizer is responsible for accepting FeatureEventParams (the context
@@ -39,7 +39,7 @@ class Summarizer {
      * Updates the summary with a feature event.
      * @param event Feature event.
      */
-    void Update(client::FeatureEventParams const& event);
+    void Update(events::FeatureEventParams const& event);
 
     /**
      * Marks the summary as finished at a given timestamp.
@@ -111,4 +111,4 @@ class Summarizer {
     std::unordered_map<FlagKey, State> features_;
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

@@ -9,9 +9,9 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
-#include "event_batch.hpp"
+#include <launchdarkly/events/detail/event_batch.hpp>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 enum class State {
     /* Worker is ready for a new job. */
@@ -168,4 +168,4 @@ class RequestWorker {
     void OnDeliveryAttempt(network::HttpResult request, ResultCallback cb);
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

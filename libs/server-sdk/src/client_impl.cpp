@@ -1,20 +1,24 @@
-#include "client_impl.hpp"
-#include "data_sources/null_data_source.hpp"
-#include "data_sources/polling_data_source.hpp"
-#include "data_sources/streaming_data_source.hpp"
-
-#include <launchdarkly/events/asio_event_processor.hpp>
-#include <launchdarkly/events/null_event_processor.hpp>
-
-#include <launchdarkly/encoding/sha_256.hpp>
-#include <launchdarkly/logging/console_backend.hpp>
-#include <launchdarkly/logging/null_logger.hpp>
 
 #include <chrono>
+
 #include <optional>
 #include <utility>
 
-namespace launchdarkly::client_side {
+#include "client_impl.hpp"
+
+#include "data_sources/null_data_source.hpp"
+#include "data_sources/polling_data_source.hpp"
+#include "data_sources/streaming_data_source.hpp"
+#include "data_store/memory_store.hpp"
+
+#include <launchdarkly/encoding/sha_256.hpp>
+#include <launchdarkly/events/asio_event_processor.hpp>
+#include <launchdarkly/events/data/common_events.hpp>
+#include <launchdarkly/events/null_event_processor.hpp>
+#include <launchdarkly/logging/console_backend.hpp>
+#include <launchdarkly/logging/null_logger.hpp>
+
+namespace launchdarkly::server_side {
 
 // The ASIO implementation assumes that the io_context will be run from a
 // single thread, and applies several optimisations based on this
@@ -25,17 +29,16 @@ auto const kAsioConcurrencyHint = 1;
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
-using config::shared::ClientSDK;
-using launchdarkly::client_side::data_sources::DataSourceStatus;
+using config::shared::ServerSDK;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
+using launchdarkly::server_side::data_sources::DataSourceStatus;
 
 static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
 MakeDataSource(HttpProperties const& http_properties,
                Config const& config,
-               Context const& context,
                boost::asio::any_io_executor const& executor,
-               IDataSourceUpdateSink& flag_updater,
+               data_sources::IDataSourceUpdateSink& flag_updater,
                data_sources::DataSourceStatusManager& status_manager,
                Logger& logger) {
     if (config.Offline()) {
@@ -50,16 +53,15 @@ MakeDataSource(HttpProperties const& http_properties,
     if (config.DataSourceConfig().method.index() == 0) {
         // TODO: use initial reconnect delay.
         return std::make_shared<
-            launchdarkly::client_side::data_sources::StreamingDataSource>(
+            launchdarkly::server_side::data_sources::StreamingDataSource>(
             config.ServiceEndpoints(), config.DataSourceConfig(),
-            data_source_properties, executor, context, flag_updater,
-            status_manager, logger);
+            data_source_properties, executor, flag_updater, status_manager,
+            logger);
     }
     return std::make_shared<
-        launchdarkly::client_side::data_sources::PollingDataSource>(
+        launchdarkly::server_side::data_sources::PollingDataSource>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, context, flag_updater, status_manager,
-        logger);
+        data_source_properties, executor, flag_updater, status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -73,17 +75,7 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-static std::shared_ptr<IPersistence> MakePersistence(Config const& config) {
-    auto persistence = config.Persistence();
-    if (persistence.disable_persistence) {
-        return nullptr;
-    }
-    return persistence.implementation;
-}
-
-ClientImpl::ClientImpl(Config config,
-                       Context context,
-                       std::string const& version)
+ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
       http_properties_(
           HttpPropertiesBuilder(config.HttpProperties())
@@ -94,69 +86,46 @@ ClientImpl::ClientImpl(Config config,
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
-      context_(std::move(context)),
-      flag_manager_(config.SdkKey(),
-                    logger_,
-                    config.Persistence().max_contexts_,
-                    MakePersistence(config)),
-      data_source_factory_([this]() {
-          return MakeDataSource(http_properties_, config_, context_,
-                                ioc_.get_executor(), flag_manager_.Updater(),
-                                status_manager_, logger_);
-      }),
-      data_source_(nullptr),
+      memory_store_(),
+      data_source_(MakeDataSource(http_properties_,
+                                  config_,
+                                  ioc_.get_executor(),
+                                  memory_store_,
+                                  status_manager_,
+                                  logger_)),
       event_processor_(nullptr),
-      eval_reasons_available_(config.DataSourceConfig().with_reasons) {
-    flag_manager_.LoadCache(context_);
-
+      evaluator_(logger_, memory_store_) {
     if (config.Events().Enabled() && !config.Offline()) {
         event_processor_ =
-            std::make_unique<events::AsioEventProcessor<ClientSDK>>(
+            std::make_unique<events::AsioEventProcessor<ServerSDK>>(
                 ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
                 http_properties_, logger_);
     } else {
         event_processor_ = std::make_unique<events::NullEventProcessor>();
     }
 
-    event_processor_->SendAsync(events::IdentifyEventParams{
-        std::chrono::system_clock::now(), context_});
-
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
+// TODO: audit if this is correct for server
 // Was an attempt made to initialize the data source, and did that attempt
 // succeed? The data source being connected, or not being connected due to
 // offline mode, both represent successful terminal states.
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
-    return (state == DataSourceStatus::DataSourceState::kValid ||
-            state == DataSourceStatus::DataSourceState::kSetOffline);
+    return state == DataSourceStatus::DataSourceState::kValid;
 }
 
+// TODO: audit if this is correct for server
 // Was any attempt made to initialize the data source (with a successful or
 // permanent failure outcome?)
 static bool IsInitialized(DataSourceStatus::DataSourceState state) {
     return IsInitializedSuccessfully(state) ||
-           (state == DataSourceStatus::DataSourceState::kShutdown);
+           (state == DataSourceStatus::DataSourceState::kOff);
 }
 
-std::future<bool> ClientImpl::IdentifyAsync(Context context) {
-    UpdateContextSynchronized(context);
-    flag_manager_.LoadCache(context);
+void ClientImpl::Identify(Context context) {
     event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
-
-    return StartAsyncInternal(IsInitializedSuccessfully);
-}
-
-void ClientImpl::RestartDataSource() {
-    auto start_op = [this]() {
-        data_source_ = data_source_factory_();
-        data_source_->Start();
-    };
-    if (!data_source_) {
-        return start_op();
-    }
-    data_source_->ShutdownAsync(start_op);
 }
 
 std::future<bool> ClientImpl::StartAsyncInternal(
@@ -169,13 +138,11 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             auto state = status.State();
             if (IsInitialized(state)) {
                 pr->set_value(result_predicate(status.State()));
-                return true; /* delete this change listener since the desired
-                                state was reached */
+                return true; /* delete this change listener since the
+                                desired state was reached */
             }
             return false; /* keep the change listener */
         });
-
-    RestartDataSource();
 
     return fut;
 }
@@ -188,38 +155,41 @@ bool ClientImpl::Initialized() const {
     return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
-std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
+std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlagsState() const {
     std::unordered_map<Client::FlagKey, Value> result;
-    for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
-        if (descriptor->item) {
-            result.try_emplace(key, descriptor->item->Detail().Value());
-        }
-    }
+    // TODO: implement all flags state (and update signature).
+    //    for (auto& [key, descriptor] : memory_store_.AllFlags()) {
+    //        if (descriptor->item) {
+    //            result.try_emplace(key, descriptor->item->Value());
+    //        }
+    //    }
     return result;
 }
 
-void ClientImpl::TrackInternal(std::string event_name,
+void ClientImpl::TrackInternal(Context const& ctx,
+                               std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
     event_processor_->SendAsync(events::TrackEventParams{
         std::chrono::system_clock::now(), std::move(event_name),
-        ReadContextSynchronized(
-            [](Context const& c) { return c.KindsToKeys(); }),
-        std::move(data), metric_value});
+        ctx.KindsToKeys(), std::move(data), metric_value});
 }
 
-void ClientImpl::Track(std::string event_name,
+void ClientImpl::Track(Context const& ctx,
+                       std::string event_name,
                        Value data,
                        double metric_value) {
-    this->TrackInternal(std::move(event_name), std::move(data), metric_value);
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        metric_value);
 }
 
-void ClientImpl::Track(std::string event_name, Value data) {
-    this->TrackInternal(std::move(event_name), std::move(data), std::nullopt);
+void ClientImpl::Track(Context const& ctx, std::string event_name, Value data) {
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        std::nullopt);
 }
 
-void ClientImpl::Track(std::string event_name) {
-    this->TrackInternal(std::move(event_name), std::nullopt, std::nullopt);
+void ClientImpl::Track(Context const& ctx, std::string event_name) {
+    this->TrackInternal(ctx, std::move(event_name), std::nullopt, std::nullopt);
 }
 
 void ClientImpl::FlushAsync() {
@@ -227,24 +197,11 @@ void ClientImpl::FlushAsync() {
 }
 
 template <typename T>
-EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
+EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
+                                                  FlagKey const& key,
                                                   Value default_value,
-                                                  bool check_type,
-                                                  bool detailed) {
-    auto desc = flag_manager_.Store().Get(key);
-
-    events::FeatureEventParams event = {
-        std::chrono::system_clock::now(),
-        key,
-        ReadContextSynchronized([](Context const& c) { return c; }),
-        default_value,
-        default_value,
-        std::nullopt,
-        std::nullopt,
-        std::nullopt,
-        false,
-        std::nullopt,
-    };
+                                                  bool check_type) {
+    auto desc = memory_store_.GetFlag(key);
 
     if (!desc || !desc->item) {
         if (!Initialized()) {
@@ -252,14 +209,9 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                 << "LaunchDarkly client has not yet been initialized. "
                    "Returning default value";
 
-            // TODO: SC-199918
             auto error_reason =
                 EvaluationReason(EvaluationReason::ErrorKind::kClientNotReady);
-            if (eval_reasons_available_) {
-                event.reason = error_reason;
-            }
-            event_processor_->SendAsync(std::move(event));
-            return EvaluationDetail<T>(default_value, std::nullopt,
+            return EvaluationDetail<T>(std::move(default_value), std::nullopt,
                                        std::move(error_reason));
         }
 
@@ -268,11 +220,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
 
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kFlagNotFound);
-        if (eval_reasons_available_) {
-            event.reason = error_reason;
-        }
-        event_processor_->SendAsync(std::move(event));
-        return EvaluationDetail<T>(default_value, std::nullopt,
+        return EvaluationDetail<T>(std::move(default_value), std::nullopt,
                                    std::move(error_reason));
 
     } else if (!Initialized()) {
@@ -284,107 +232,96 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     assert(desc->item);
 
     auto const& flag = *(desc->item);
-    auto const& detail = flag.Detail();
+
+    EvaluationDetail<Value> const detail = evaluator_.Evaluate(flag, ctx);
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
         detail.Value().Type() != default_value.Type()) {
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
-        if (eval_reasons_available_) {
-            event.reason = error_reason;
-        }
-        event_processor_->SendAsync(std::move(event));
-        return EvaluationDetail<T>(default_value, std::nullopt, error_reason);
+
+        return EvaluationDetail<T>(std::move(default_value), std::nullopt,
+                                   error_reason);
     }
-
-    event.value = detail.Value();
-    event.variation = detail.VariationIndex();
-
-    if (detailed || flag.TrackReason()) {
-        event.reason = detail.Reason();
-    }
-
-    event.version = flag.FlagVersion().value_or(flag.Version());
-    event.require_full_event = flag.TrackEvents();
-    if (auto date = flag.DebugEventsUntilDate()) {
-        event.debug_events_until_date = events::Date{*date};
-    }
-
-    event_processor_->SendAsync(std::move(event));
 
     return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
                                detail.Reason());
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
+    Context const& ctx,
     IClient::FlagKey const& key,
     bool default_value) {
-    return VariationInternal<bool>(key, default_value, true, true);
+    return VariationInternal<bool>(ctx, key, default_value, true);
 }
 
-bool ClientImpl::BoolVariation(IClient::FlagKey const& key,
+bool ClientImpl::BoolVariation(Context const& ctx,
+                               IClient::FlagKey const& key,
                                bool default_value) {
-    return *VariationInternal<bool>(key, default_value, true, false);
+    return *VariationInternal<bool>(ctx, key, default_value, true);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
+    Context const& ctx,
     ClientImpl::FlagKey const& key,
     std::string default_value) {
-    return VariationInternal<std::string>(key, std::move(default_value), true,
+    return VariationInternal<std::string>(ctx, key, std::move(default_value),
                                           true);
 }
 
-std::string ClientImpl::StringVariation(IClient::FlagKey const& key,
+std::string ClientImpl::StringVariation(Context const& ctx,
+                                        IClient::FlagKey const& key,
                                         std::string default_value) {
-    return *VariationInternal<std::string>(key, std::move(default_value), true,
-                                           false);
+    return *VariationInternal<std::string>(ctx, key, std::move(default_value),
+                                           true);
 }
 
 EvaluationDetail<double> ClientImpl::DoubleVariationDetail(
+    Context const& ctx,
     ClientImpl::FlagKey const& key,
     double default_value) {
-    return VariationInternal<double>(key, default_value, true, true);
+    return VariationInternal<double>(ctx, key, default_value, true);
 }
 
-double ClientImpl::DoubleVariation(IClient::FlagKey const& key,
+double ClientImpl::DoubleVariation(Context const& ctx,
+                                   IClient::FlagKey const& key,
                                    double default_value) {
-    return *VariationInternal<double>(key, default_value, true, false);
+    return *VariationInternal<double>(ctx, key, default_value, true);
 }
 
 EvaluationDetail<int> ClientImpl::IntVariationDetail(
+    Context const& ctx,
     IClient::FlagKey const& key,
     int default_value) {
-    return VariationInternal<int>(key, default_value, true, true);
+    return VariationInternal<int>(ctx, key, default_value, true);
 }
 
-int ClientImpl::IntVariation(IClient::FlagKey const& key, int default_value) {
-    return *VariationInternal<int>(key, default_value, true, false);
+int ClientImpl::IntVariation(Context const& ctx,
+                             IClient::FlagKey const& key,
+                             int default_value) {
+    return *VariationInternal<int>(ctx, key, default_value, true);
 }
 
 EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
+    Context const& ctx,
     IClient::FlagKey const& key,
     Value default_value) {
-    return VariationInternal<Value>(key, std::move(default_value), false, true);
+    return VariationInternal<Value>(ctx, key, std::move(default_value), false);
 }
 
-Value ClientImpl::JsonVariation(IClient::FlagKey const& key,
+Value ClientImpl::JsonVariation(Context const& ctx,
+                                IClient::FlagKey const& key,
                                 Value default_value) {
-    return *VariationInternal<Value>(key, std::move(default_value), false,
-                                     false);
+    return *VariationInternal<Value>(ctx, key, std::move(default_value), false);
 }
 
-data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
-    return status_manager_;
-}
-
-flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
-    return flag_manager_.Notifier();
-}
-
-void ClientImpl::UpdateContextSynchronized(Context context) {
-    std::unique_lock lock(context_mutex_);
-    context_ = std::move(context);
-}
+// data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
+//     return status_manager_;
+// }
+//
+// flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
+//     return flag_manager_.Notifier();
+// }
 
 ClientImpl::~ClientImpl() {
     ioc_.stop();
@@ -392,4 +329,4 @@ ClientImpl::~ClientImpl() {
     run_thread_.join();
 }
 
-}  // namespace launchdarkly::client_side
+}  // namespace launchdarkly::server_side

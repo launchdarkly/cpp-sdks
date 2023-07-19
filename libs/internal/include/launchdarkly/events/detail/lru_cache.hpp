@@ -1,8 +1,10 @@
 #pragma once
+
 #include <list>
 #include <string>
 #include <unordered_map>
-namespace launchdarkly::events {
+
+namespace launchdarkly::events::detail {
 
 class LRUCache {
    public:
@@ -38,4 +40,4 @@ class LRUCache {
     KeyList list_;
 };
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail
