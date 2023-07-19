@@ -84,6 +84,9 @@ class PersistenceBuilder<ClientSDK> {
 template <>
 class PersistenceBuilder<ServerSDK> {
    public:
+    PersistenceBuilder()
+        : persistence_(Defaults<ServerSDK>::PersistenceConfig()) {}
+
     /**
      * Set the core persistence implementation.
      *
@@ -113,6 +116,7 @@ class PersistenceBuilder<ServerSDK> {
     PersistenceBuilder& CacheRefreshTime(
         std::chrono::seconds cache_refresh_time) {
         persistence_.cache_refresh_time = cache_refresh_time;
+        return *this;
     }
 
     /**
@@ -124,6 +128,7 @@ class PersistenceBuilder<ServerSDK> {
      */
     PersistenceBuilder& ActiveEviction(bool active_eviction) {
         persistence_.active_eviction = active_eviction;
+        return *this;
     }
 
     /**
@@ -135,11 +140,13 @@ class PersistenceBuilder<ServerSDK> {
     PersistenceBuilder& EvictionInterval(
         std::chrono::seconds eviction_interval) {
         persistence_.eviction_interval = eviction_interval;
+        return *this;
     }
 
     [[nodiscard]] built::Persistence<ServerSDK> Build() const {
         return persistence_;
     }
+
    private:
     built::Persistence<ServerSDK> persistence_;
 };

@@ -114,7 +114,10 @@ struct Defaults<ServerSDK> {
                 std::chrono::seconds{30}};
     }
 
-    static auto PersistenceConfig() -> shared::built::Per
+    static auto PersistenceConfig() -> shared::built::Persistence<ServerSDK> {
+        return {nullptr, std::chrono::seconds{30}, false,
+                std::chrono::seconds{10}};
+    }
 };
 
 }  // namespace launchdarkly::config::shared
