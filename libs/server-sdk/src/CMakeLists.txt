@@ -23,7 +23,11 @@ add_library(${LIBNAME}
         data_sources/polling_data_source.cpp
         data_sources/data_source_status_manager.hpp
         data_sources/streaming_data_source.hpp
-        data_sources/streaming_data_source.cpp)
+        data_sources/streaming_data_source.cpp
+        data_store/persistent/persistent_data_store.hpp
+        data_store/persistent/expiration_tracker.hpp
+        data_store/persistent/persistent_data_store.cpp
+        data_store/persistent/expiration_tracker.cpp)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}

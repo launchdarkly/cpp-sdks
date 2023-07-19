@@ -1,4 +1,5 @@
 #include "dependency_tracker.hpp"
+#include "tagged_data.hpp"
 
 #include <type_traits>
 
