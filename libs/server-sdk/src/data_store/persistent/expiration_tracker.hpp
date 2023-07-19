@@ -137,6 +137,7 @@ class ExpirationTracker {
     ScopedTtls scoped_;
 };
 
-std::ostream& operator<<(std::ostream& out, ExpirationTracker::TrackState const& state);
+std::ostream& operator<<(std::ostream& out,
+                         ExpirationTracker::TrackState const& state);
 
 }  // namespace launchdarkly::server_side::data_store::persistent
