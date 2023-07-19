@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <ostream>
+#include <optional>
 
 namespace launchdarkly::server_side::evaluation {
 
