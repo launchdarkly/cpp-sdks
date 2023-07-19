@@ -24,14 +24,14 @@ Evaluator::Evaluator(Logger& logger, data_store::IDataStore const& store)
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
-    launchdarkly::Context const& context) const {
+    launchdarkly::Context const& context) {
     return Evaluate("", flag, context);
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     std::string const& parent_key,
     Flag const& flag,
-    launchdarkly::Context const& context) const {
+    launchdarkly::Context const& context) {
     if (auto guard = stack_.NoticePrerequisite(flag.key)) {
         if (!flag.on) {
             return OffValue(flag, EvaluationReason::Off());

@@ -15,6 +15,8 @@
 
 #include "data_store/memory_store.hpp"
 
+#include "evaluation/evaluator.hpp"
+
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
@@ -109,8 +111,7 @@ class ClientImpl : public IClient {
     [[nodiscard]] EvaluationDetail<T> VariationInternal(Context const& ctx,
                                                         FlagKey const& key,
                                                         Value default_value,
-                                                        bool check_type,
-                                                        bool detailed);
+                                                        bool check_type);
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,
@@ -139,6 +140,8 @@ class ClientImpl : public IClient {
     std::condition_variable init_waiter_;
 
     data_sources::DataSourceStatusManager status_manager_;
+
+    evaluation::Evaluator evaluator_;
 
     std::thread run_thread_;
 };
