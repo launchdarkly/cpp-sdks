@@ -17,6 +17,13 @@ namespace launchdarkly::server_side::data_store::persistent {
 class PersistentStore : public IDataStore,
                         public data_sources::IDataSourceUpdateSink {
    public:
+    PersistentStore(
+        std::shared_ptr<persistence::IPersistentStoreCore> core,
+        std::chrono::seconds cache_refresh_time,
+        std::optional<std::chrono::seconds> eviction_interval,
+        std::function<std::chrono::time_point<std::chrono::steady_clock>()>
+            time = []() { return std::chrono::steady_clock::now(); });
+
     std::shared_ptr<FlagDescriptor> GetFlag(
         std::string const& key) const override;
     std::shared_ptr<SegmentDescriptor> GetSegment(
@@ -43,9 +50,61 @@ class PersistentStore : public IDataStore,
     PersistentStore& operator=(PersistentStore&&) = delete;
 
    private:
-    MemoryStore memory_store_;
-    std::shared_ptr<persistence::IPersistentStoreCore> persistent_store_core_;
-    ExpirationTracker ttl_tracker_;
+    void RefreshAllFlags() const;
+    void RefreshAllSegments() const;
+    void RefreshInitState() const;
+    void RefreshFlag(std::string const& key) const;
+    void RefreshSegment(std::string const& key) const;
+
+    template <typename TResult>
+    static TResult Get(ExpirationTracker::TrackState state,
+                       std::function<void(void)> refresh,
+                       std::function<TResult(void)> get) {
+        switch (state) {
+            case ExpirationTracker::TrackState::kStale:
+                [[fallthrough]];
+            case ExpirationTracker::TrackState::kNotTracked:
+                refresh();
+                [[fallthrough]];
+            case ExpirationTracker::TrackState::kFresh:
+                return get();
+        }
+    }
+
+    mutable MemoryStore memory_store_;
+    std::shared_ptr<persistence::IPersistentStoreCore> core_;
+    mutable ExpirationTracker tracker_;
+    std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
+    mutable std::optional<bool> initialized_;
+
+    class SegmentKind : public persistence::IPersistentKind {
+       public:
+        std::string const& Namespace() const override;
+        uint64_t Version(std::string const& data) const override;
+
+       private:
+        static const inline std::string namespace_ = "segments";
+    };
+
+    class FlagKind : public persistence::IPersistentKind {
+       public:
+        std::string const& Namespace() const override;
+        uint64_t Version(std::string const& data) const override;
+
+       private:
+        static const inline std::string namespace_ = "features";
+    };
+
+    struct Kinds {
+        static const FlagKind Flag;
+        static const SegmentKind Segment;
+    };
+
+    struct Keys {
+        static const inline std::string kAllFlags = "allFlags";
+        static const inline std::string kAllSegments = "allSegments";
+        static const inline std::string kInitialized = "initialized";
+    };
 };
 
 }  // namespace launchdarkly::server_side::data_store::persistent

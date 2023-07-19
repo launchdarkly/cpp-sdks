@@ -39,7 +39,7 @@ class IPersistentKind {
     /**
      * The namespace for the data.
      */
-    [[nodiscard]] virtual std::string const& Namespace();
+    [[nodiscard]] virtual std::string const& Namespace() const;
 
     /**
      * Deserialize data and return the version of the data.
@@ -51,7 +51,7 @@ class IPersistentKind {
      * @param data The data to deserialize.
      * @return The version of the data.
      */
-    [[nodiscard]] virtual uint64_t Version(std::string const& data);
+    [[nodiscard]] virtual uint64_t Version(std::string const& data) const;
 
     IPersistentKind(IPersistentKind const& item) = delete;
     IPersistentKind(IPersistentKind&& item) = delete;
