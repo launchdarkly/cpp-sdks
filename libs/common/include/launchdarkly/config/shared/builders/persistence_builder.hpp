@@ -88,7 +88,7 @@ class PersistenceBuilder<ServerSDK> {
      * Set the core persistence implementation.
      *
      * @param core The core persistence implementation.
-     * @return  A reference to this builder.
+     * @return A reference to this builder.
      */
     PersistenceBuilder& Core(
         std::shared_ptr<persistence::IPersistentStoreCore> core);
@@ -106,20 +106,42 @@ class PersistenceBuilder<ServerSDK> {
      * If ActiveEviction is set to true, then expired items will be periodically
      * removed from the cache.
      *
-     * @param cache_refresh_time
-     * @return
+     * @param cache_refresh_time The time, in seconds, cached data remains
+     * fresh.
+     * @return A reference to this builder.
      */
     PersistenceBuilder& CacheRefreshTime(
-        std::chrono::seconds cache_refresh_time);
+        std::chrono::seconds cache_refresh_time) {
+        persistence_.cache_refresh_time = cache_refresh_time;
+    }
 
-    PersistenceBuilder& ActiveEviction(bool active_eviction);
+    /**
+     * Enable/disable active eviction.
+     *
+     * Defaults to disabled.
+     * @param active_eviction True to enable.
+     * @return A reference to this builder.
+     */
+    PersistenceBuilder& ActiveEviction(bool active_eviction) {
+        persistence_.active_eviction = active_eviction;
+    }
 
+    /**
+     * If active eviction is enabled, then this specifies the time between
+     * active evictions.
+     * @param eviction_interval The interval, in seconds, between cache flushes.
+     * @return A reference to this builder.
+     */
     PersistenceBuilder& EvictionInterval(
-        std::chrono::seconds eviction_interval);
+        std::chrono::seconds eviction_interval) {
+        persistence_.eviction_interval = eviction_interval;
+    }
 
     [[nodiscard]] built::Persistence<ServerSDK> Build() const {
-        return built::Persistence<ServerSDK>();
+        return persistence_;
     }
+   private:
+    built::Persistence<ServerSDK> persistence_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

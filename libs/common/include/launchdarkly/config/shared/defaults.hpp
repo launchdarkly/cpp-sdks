@@ -3,6 +3,7 @@
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/logging/log_level.hpp>
@@ -112,6 +113,8 @@ struct Defaults<ServerSDK> {
         return {std::chrono::seconds{30}, "/sdk/latest-all",
                 std::chrono::seconds{30}};
     }
+
+    static auto PersistenceConfig() -> shared::built::Per
 };
 
 }  // namespace launchdarkly::config::shared
