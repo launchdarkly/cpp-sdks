@@ -8,7 +8,7 @@
 
 #include <tl/expected.hpp>
 
-namespace launchdarkly::server_side::integrations {
+namespace launchdarkly::persistence {
 
 /**
  * A versioned item which can be stored in a persistent store.
@@ -209,4 +209,4 @@ class IPersistentStoreCore {
    protected:
     IPersistentStoreCore() = default;
 };
-}  // namespace launchdarkly::server_side::integrations
+}  // namespace launchdarkly::persistence

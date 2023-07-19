@@ -84,6 +84,39 @@ class PersistenceBuilder<ClientSDK> {
 template <>
 class PersistenceBuilder<ServerSDK> {
    public:
+    /**
+     * Set the core persistence implementation.
+     *
+     * @param core The core persistence implementation.
+     * @return  A reference to this builder.
+     */
+    PersistenceBuilder& Core(
+        std::shared_ptr<persistence::IPersistentStoreCore> core);
+
+    /**
+     * How long something in the cache is considered fresh.
+     *
+     * Each item that is cached will have its age tracked. If the age of
+     * the item exceeds the cache refresh time, then an attempt will be made
+     * to refresh the item next time it is requested.
+     *
+     * When ActiveEviction is set to false then the item will remain cached
+     * and that cached value will be used if attempts to refresh the value fail.
+     *
+     * If ActiveEviction is set to true, then expired items will be periodically
+     * removed from the cache.
+     *
+     * @param cache_refresh_time
+     * @return
+     */
+    PersistenceBuilder& CacheRefreshTime(
+        std::chrono::seconds cache_refresh_time);
+
+    PersistenceBuilder& ActiveEviction(bool active_eviction);
+
+    PersistenceBuilder& EvictionInterval(
+        std::chrono::seconds eviction_interval);
+
     [[nodiscard]] built::Persistence<ServerSDK> Build() const {
         return built::Persistence<ServerSDK>();
     }
