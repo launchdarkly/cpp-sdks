@@ -19,7 +19,7 @@ classDiagram
     DataStoreUpdater --> IDataStore
     
     PersistentStore --* MemoryStore : PersistentStore contains a MemoryStore
-    PersistentStore --* TtlTracker
+    PersistentStore --* ExpirationTracker
 
     IPersistentStoreCore <|-- RedisPersistentStore
 
@@ -74,7 +74,7 @@ classDiagram
         +const Description() string
     }
 
-    class TtlTracker{
+    class ExpirationTracker{
     }
 
     class MemoryStore{
