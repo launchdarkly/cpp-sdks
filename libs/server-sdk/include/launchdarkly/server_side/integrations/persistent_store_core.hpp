@@ -35,6 +35,7 @@ struct SerializedItemDescriptor {
  * Represents a namespace of persistent data.
  */
 class IPersistentKind {
+   public:
     /**
      * The namespace for the data.
      */
@@ -79,6 +80,7 @@ class IPersistentKind {
  * Implementations must be thread-safe.
  */
 class IPersistentStoreCore {
+   public:
     enum class InitResult {
         /**
          * The init operation completed successfully.
