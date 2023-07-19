@@ -56,6 +56,16 @@ class PersistentStore : public IDataStore,
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
+    static persistence::SerializedItemDescriptor Serialize(FlagDescriptor flag);
+    static persistence::SerializedItemDescriptor Serialize(
+        SegmentDescriptor segment);
+
+    static std::optional<FlagDescriptor> DeserializeFlag(
+        persistence::SerializedItemDescriptor flag);
+
+    static std::optional<SegmentDescriptor> DeserializeSegment(
+        persistence::SerializedItemDescriptor segment);
+
     template <typename TResult>
     static TResult Get(ExpirationTracker::TrackState state,
                        std::function<void(void)> refresh,
