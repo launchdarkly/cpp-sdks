@@ -271,6 +271,97 @@ void tag_invoke(
         variation_or_rollout);
 }
 
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Prerequisite const& prerequisite) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("key", prerequisite.key);
+    obj.emplace("variation", prerequisite.variation);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Target const& target) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("values", boost::json::value_from(target.values));
+    obj.emplace("variation", target.variation);
+    obj.emplace("contextKind", target.contextKind.t);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::ClientSideAvailability const& availability) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "usingEnvironmentId", availability.usingEnvironmentId);
+    WriteMinimal(obj, "usingMobileKey", availability.usingMobileKey);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rule const& rule) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "trackEvents", rule.trackEvents);
+    WriteMinimal(obj, "id", rule.id);
+    std::visit(
+        [&obj](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+                obj.emplace("rollout", boost::json::value_from(arg));
+            } else if constexpr (std::is_same_v<T,
+                                                data_model::Flag::Variation>) {
+                obj.emplace("variation", arg);
+            }
+        },
+        rule.variationOrRollout);
+    obj.emplace("clauses", boost::json::value_from(rule.clauses));
+}
+
+// The "targets" array in a flag cannot have a contextKind, so this intermediate
+// representation allows the flag data model to use Flag::Target, but still
+// serialize a user target correctly.
+struct UserTarget {
+    std::vector<std::string> values;
+    std::uint64_t variation;
+    UserTarget(data_model::Flag::Target const& target)
+        : values(target.values), variation(target.variation) {}
+};
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                UserTarget const& target) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("values", boost::json::value_from(target.values));
+    obj.emplace("variation", target.variation);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag const& flag) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "trackEvents", flag.trackEvents);
+    WriteMinimal(obj, "clientSide", flag.clientSide);
+    WriteMinimal(obj, "on", flag.on);
+    WriteMinimal(obj, "trackEventsFallthrough", flag.trackEventsFallthrough);
+    WriteMinimal(obj, "debugEventsUntilDate", flag.debugEventsUntilDate);
+    WriteMinimal(obj, "salt", flag.salt);
+    WriteMinimal(obj, "offVariation", flag.offVariation);
+    obj.emplace("key", flag.key);
+    obj.emplace("version", flag.version);
+    obj.emplace("variations", boost::json::value_from(flag.variations));
+    obj.emplace("rules", boost::json::value_from(flag.rules));
+    obj.emplace("prerequisites", boost::json::value_from(flag.prerequisites));
+    obj.emplace("fallthrough", boost::json::value_from(flag.fallthrough));
+    obj.emplace("clientSideAvailability",
+                boost::json::value_from(flag.clientSideAvailability));
+    obj.emplace("contextTargets", boost::json::value_from(flag.contextTargets));
+
+    std::vector<UserTarget> user_targets;
+    for (auto const& target : flag.targets) {
+        user_targets.emplace_back(target);
+    }
+    obj.emplace("targets", boost::json::value_from(user_targets));
+}
+
 }  // namespace data_model
 
 }  // namespace launchdarkly
