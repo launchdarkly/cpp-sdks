@@ -34,7 +34,7 @@ std::vector<OutputEvent> Outbox::Consume() {
     return out;
 }
 
-bool Outbox::Empty() {
+bool Outbox::Empty() const {
     return items_.empty();
 }
 

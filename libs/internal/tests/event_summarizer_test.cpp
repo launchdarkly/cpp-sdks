@@ -26,13 +26,13 @@ TEST(SummarizerTests, IsEmptyOnConstruction) {
 
 TEST(SummarizerTests, DefaultConstructionUsesZeroStartTime) {
     Summarizer summarizer;
-    ASSERT_EQ(summarizer.start_time(), TimeZero());
+    ASSERT_EQ(summarizer.StartTime(), TimeZero());
 }
 
 TEST(SummarizerTests, ExplicitStartTimeIsCorrect) {
     auto start = std::chrono::system_clock::from_time_t(12345);
     Summarizer summarizer(start);
-    ASSERT_EQ(summarizer.start_time(), start);
+    ASSERT_EQ(summarizer.StartTime(), start);
 }
 
 struct EvaluationParams {

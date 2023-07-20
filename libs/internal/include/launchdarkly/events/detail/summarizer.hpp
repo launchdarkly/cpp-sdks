@@ -55,12 +55,12 @@ class Summarizer {
     /**
      * Returns the summary's start time as given in the constructor.
      */
-    [[nodiscard]] Time start_time() const;
+    [[nodiscard]] Time StartTime() const;
 
     /**
      * Returns the summary's end time as specified using Finish.
      */
-    [[nodiscard]] Time end_time() const;
+    [[nodiscard]] Time EndTime() const;
 
     struct VariationSummary {
        public:
