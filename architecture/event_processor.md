@@ -17,9 +17,10 @@ classDiagram
     WorkerPool *-- "5" RequestWorker
 
     TrackEvent -- TrackEventParams
-    InputEvent *-- FeatureEventParams
     InputEvent *-- IdentifyEventParams
+    InputEvent *-- FeatureEventParams
     InputEvent *-- TrackEventParams
+
 
     OutputEvent *-- IndexEvent
     OutputEvent *-- FeatureEvent
@@ -27,11 +28,13 @@ classDiagram
     OutputEvent *-- IdentifyEvent
     OutputEvent *-- TrackEvent
 
-    EventBatch --> Summarizer: Pulls summary events from..
     EventBatch --> Outbox: Pulls individual events from..
+    EventBatch --> Summarizer: Pulls summary events from..
 
     IEventProcessor --> InputEvent
     Outbox --> OutputEvent
+
+    Summarizer --> FeatureEventParams
 
 
     class IEventProcessor {
