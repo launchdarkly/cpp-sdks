@@ -39,7 +39,7 @@ class IPersistentKind {
     /**
      * The namespace for the data.
      */
-    [[nodiscard]] virtual std::string const& Namespace() const;
+    [[nodiscard]] virtual std::string const& Namespace() const = 0;
 
     /**
      * Deserialize data and return the version of the data.
@@ -48,10 +48,12 @@ class IPersistentKind {
      * data to determine its version. For instance a Redis store where
      * the only columns are the prefixed key and the serialized data.
      *
+     * If the data cannot be deserialized, then 0 will be returned.
+     *
      * @param data The data to deserialize.
      * @return The version of the data.
      */
-    [[nodiscard]] virtual uint64_t Version(std::string const& data) const;
+    [[nodiscard]] virtual uint64_t Version(std::string const& data) const = 0;
 
     IPersistentKind(IPersistentKind const& item) = delete;
     IPersistentKind(IPersistentKind&& item) = delete;

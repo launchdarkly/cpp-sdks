@@ -14,6 +14,33 @@
 
 namespace launchdarkly::server_side::data_store::persistent {
 
+class SegmentKind : public persistence::IPersistentKind {
+   public:
+    std::string const& Namespace() const override;
+    uint64_t Version(std::string const& data) const override;
+
+    ~SegmentKind() override = default;
+
+   private:
+    static const inline std::string namespace_ = "segments";
+};
+
+class FlagKind : public persistence::IPersistentKind {
+   public:
+    std::string const& Namespace() const override;
+    uint64_t Version(std::string const& data) const override;
+
+    ~FlagKind() override = default;
+
+   private:
+    static const inline std::string namespace_ = "features";
+};
+
+struct Kinds {
+    static const FlagKind Flag;
+    static const SegmentKind Segment;
+};
+
 class PersistentStore : public IDataStore,
                         public data_sources::IDataSourceUpdateSink {
    public:
@@ -92,6 +119,8 @@ class PersistentStore : public IDataStore,
         std::string const& Namespace() const override;
         uint64_t Version(std::string const& data) const override;
 
+        ~SegmentKind() override = default;
+
        private:
         static const inline std::string namespace_ = "segments";
     };
@@ -100,6 +129,8 @@ class PersistentStore : public IDataStore,
        public:
         std::string const& Namespace() const override;
         uint64_t Version(std::string const& data) const override;
+
+        ~FlagKind() override = default;
 
        private:
         static const inline std::string namespace_ = "features";

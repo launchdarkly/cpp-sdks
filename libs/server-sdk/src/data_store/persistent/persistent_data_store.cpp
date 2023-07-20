@@ -1,6 +1,13 @@
 #include "persistent_data_store.hpp"
+#include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/serialization/json_segment.hpp>
 
 namespace launchdarkly::server_side::data_store::persistent {
+
+const PersistentStore::FlagKind PersistentStore::Kinds::Flag = FlagKind();
+const PersistentStore::SegmentKind PersistentStore::Kinds::Segment =
+    SegmentKind();
+
 PersistentStore::PersistentStore(
     std::shared_ptr<persistence::IPersistentStoreCore> core,
     std::chrono::seconds cache_refresh_time,
@@ -129,16 +136,60 @@ persistence::SerializedItemDescriptor PersistentStore::Serialize(
     return persistence::SerializedItemDescriptor();
 }
 
+template <typename TData>
+static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
+    persistence::SerializedItemDescriptor item) {
+    if (item.deleted) {
+        return data_model::ItemDescriptor<TData>(item.version);
+    }
+
+    boost::json::error_code error_code;
+    if (!item.serializedItem.has_value()) {
+        return std::nullopt;
+    }
+    auto parsed = boost::json::parse(item.serializedItem.value(), error_code);
+
+    if (error_code) {
+        return std::nullopt;
+    }
+
+    auto res =
+        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
+            parsed);
+
+    if (res.has_value() && res->has_value()) {
+        return data_model::ItemDescriptor(res->value());
+    }
+
+    return std::nullopt;
+}
+
 std::optional<FlagDescriptor> PersistentStore::DeserializeFlag(
     persistence::SerializedItemDescriptor flag) {
-    // TODO: Implement
-    return launchdarkly::server_side::data_store::FlagDescriptor(0);
+    return Deserialize<data_model::Flag>(flag);
 }
 
 std::optional<SegmentDescriptor> PersistentStore::DeserializeSegment(
     persistence::SerializedItemDescriptor segment) {
-    // TODO: Implement
-    return launchdarkly::server_side::data_store::SegmentDescriptor(0);
+    return Deserialize<data_model::Segment>(segment);
+}
+
+template <typename TData>
+static uint64_t GetVersion(std::string data) {
+    boost::json::error_code error_code;
+    auto parsed = boost::json::parse(data, error_code);
+
+    if (error_code) {
+        return 0;
+    }
+    auto res =
+        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
+            parsed);
+
+    if (res.has_value() && res->has_value()) {
+        return res->value().version;
+    }
+    return 0;
 }
 
 std::string const& PersistentStore::SegmentKind::Namespace() const {
@@ -146,8 +197,7 @@ std::string const& PersistentStore::SegmentKind::Namespace() const {
 }
 
 uint64_t PersistentStore::SegmentKind::Version(std::string const& data) const {
-    // TODO: Deserialize.
-    return 0;
+    return GetVersion<data_model::Segment>(data);
 }
 
 std::string const& PersistentStore::FlagKind::Namespace() const {
@@ -155,8 +205,7 @@ std::string const& PersistentStore::FlagKind::Namespace() const {
 }
 
 uint64_t PersistentStore::FlagKind::Version(std::string const& data) const {
-    // TODO: Deserialize.
-    return 0;
+    return GetVersion<data_model::Flag>(data);
 }
 
 }  // namespace launchdarkly::server_side::data_store::persistent
