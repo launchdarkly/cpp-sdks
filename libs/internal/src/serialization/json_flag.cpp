@@ -208,4 +208,69 @@ tag_invoke(boost::json::value_to_tag<
     return std::make_optional(variation);
 }
 
+namespace data_model {
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::Rollout::WeightedVariation const& weighted_variation) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("variation", weighted_variation.variation);
+    obj.emplace("weight", weighted_variation.weight);
+
+    WriteMinimal(obj, "untracked", weighted_variation.untracked);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout::Kind const& kind) {
+    switch (kind) {
+        case Flag::Rollout::Kind::kUnrecognized:
+            // TODO: Should we be preserving the original string.
+            break;
+        case Flag::Rollout::Kind::kExperiment:
+            json_value.emplace_string() = "experiment";
+            break;
+        case Flag::Rollout::Kind::kRollout:
+            json_value.emplace_string() = "rollout";
+            break;
+    }
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout const& rollout) {
+    auto& obj = json_value.emplace_object();
+
+    obj.emplace("variations", boost::json::value_from(rollout.variations));
+    if (rollout.kind != Flag::Rollout::Kind::kUnrecognized) {
+        // TODO: Should we be preserving the original string and putting it in.
+        obj.emplace("kind", boost::json::value_from(rollout.kind));
+    }
+    WriteMinimal(obj, "seed", rollout.seed);
+    if (rollout.bucketBy.Valid()) {
+        obj.emplace("bucketBy", rollout.bucketBy.RedactionName());
+    }
+    obj.emplace("contextKind", rollout.contextKind.t);
+}
+
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout) {
+    auto& obj = json_value.emplace_object();
+    std::visit(
+        [&obj](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+                obj.emplace("rollout", boost::json::value_from(arg));
+            } else if constexpr (std::is_same_v<T,
+                                                data_model::Flag::Variation>) {
+                obj.emplace("variation", arg);
+            }
+        },
+        variation_or_rollout);
+}
+
+}  // namespace data_model
+
 }  // namespace launchdarkly

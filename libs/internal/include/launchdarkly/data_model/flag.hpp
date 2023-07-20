@@ -31,7 +31,8 @@ struct Flag {
             Weight weight;
             bool untracked;
 
-            WeightedVariation() = default;
+            WeightedVariation();
+
             WeightedVariation(Variation index, Weight weight);
             static WeightedVariation Untracked(Variation index, Weight weight);
 
@@ -48,7 +49,7 @@ struct Flag {
         DEFINE_CONTEXT_KIND_FIELD(contextKind)
 
         Rollout() = default;
-        Rollout(std::vector<WeightedVariation>);
+        explicit Rollout(std::vector<WeightedVariation>);
     };
 
     using VariationOrRollout = std::variant<Variation, Rollout>;

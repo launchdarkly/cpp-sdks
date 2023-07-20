@@ -16,6 +16,8 @@ Flag::Rollout::WeightedVariation Flag::Rollout::WeightedVariation::Untracked(
     Flag::Weight weight_) {
     return {variation_, weight_, true};
 }
+Flag::Rollout::WeightedVariation::WeightedVariation()
+    : variation(0), weight(0), untracked(false) {}
 
 Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)
     : variations(std::move(variations_)),

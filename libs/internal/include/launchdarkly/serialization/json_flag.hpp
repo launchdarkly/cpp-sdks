@@ -62,4 +62,56 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
         tl::expected<std::optional<data_model::Flag>, JsonError>> const& unused,
     boost::json::value const& json_value);
 
+/////////////////////////////////////////////////
+// Serializers need to be in launchdarkly::data_model for ADL.
+namespace data_model {
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout const& rollout);
+
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout);
+
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::Rollout::WeightedVariation const& weighted_variation);
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout::Kind const& kind);
+//
+//  tl::expected<std::optional<data_model::Flag::Prerequisite>, JsonError>
+//  tag_invoke(boost::json::value_to_tag<
+//                tl::expected<std::optional<data_model::Flag::Prerequisite>,
+//                             JsonError>> const& unused,
+//            boost::json::value const& json_value);
+//
+//  tl::expected<std::optional<data_model::Flag::Target>, JsonError> tag_invoke(
+//     boost::json::value_to_tag<
+//         tl::expected<std::optional<data_model::Flag::Target>, JsonError>>
+//         const& unused,
+//     boost::json::value const& json_value);
+//
+//  tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
+//     boost::json::value_to_tag<
+//         tl::expected<std::optional<data_model::Flag::Rule>, JsonError>>
+//         const& unused,
+//     boost::json::value const& json_value);
+//
+//  tl::expected<std::optional<data_model::Flag::ClientSideAvailability>,
+//  JsonError> tag_invoke(
+//     boost::json::value_to_tag<
+//         tl::expected<std::optional<data_model::Flag::ClientSideAvailability>,
+//                      JsonError>> const& unused,
+//     boost::json::value const& json_value);
+//
+//  tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
+//     boost::json::value_to_tag<
+//         tl::expected<std::optional<data_model::Flag>, JsonError>> const&
+//         unused,
+//     boost::json::value const& json_value);
+}  // namespace data_model
 }  // namespace launchdarkly

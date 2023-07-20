@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <boost/json/value_from.hpp>
+
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
@@ -367,4 +369,85 @@ TEST(ClientSideAvailabilityTests, DeserializesAllFields) {
     ASSERT_TRUE(result);
     ASSERT_TRUE(result->usingMobileKey);
     ASSERT_TRUE(result->usingEnvironmentId);
+}
+
+TEST(WeightedVariationTests, SerializeAllFields) {
+    data_model::Flag::Rollout::WeightedVariation variation(1, 2);
+    variation.untracked = true;
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(
+        R"({"variation": 1, "weight": 2, "untracked": true})");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(WeightedVariationTests, SerializeUntrackedOnlyTrue) {
+    data_model::Flag::Rollout::WeightedVariation variation(1, 2);
+    variation.untracked = false;
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(R"({"variation": 1, "weight": 2})");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(RolloutTests, SerializeAllFields) {
+    using Rollout = data_model::Flag::Rollout;
+    Rollout rollout;
+    rollout.kind = Rollout::Kind::kExperiment;
+    rollout.contextKind = "user";
+    rollout.bucketBy = AttributeReference("ham");
+    rollout.seed = 42;
+    rollout.variations = {
+        data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
+
+    auto json = boost::json::value_from(rollout);
+
+    auto expected = boost::json::parse(R"({
+        "kind": "experiment",
+        "contextKind": "user",
+        "bucketBy": "ham",
+        "seed": 42,
+        "variations": [
+            {"variation": 1, "weight": 2, "untracked": true},
+            {"variation": 3, "weight": 4}
+        ]
+    })");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(VariationOrRollout, SerializeVariation) {
+    data_model::Flag::VariationOrRollout variation = 5;
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(R"({"variation":5})");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(VariationOrRollout, SerializeRollout) {
+    using Rollout = data_model::Flag::Rollout;
+    Rollout rollout;
+    rollout.kind = Rollout::Kind::kExperiment;
+    rollout.contextKind = "user";
+    rollout.bucketBy = AttributeReference("ham");
+    rollout.seed = 42;
+    rollout.variations = {
+        data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
+    data_model::Flag::VariationOrRollout var_or_roll = rollout;
+    auto json = boost::json::value_from(var_or_roll);
+
+    auto expected = boost::json::parse(R"({
+    "rollout":{
+        "kind": "experiment",
+        "contextKind": "user",
+        "bucketBy": "ham",
+        "seed": 42,
+        "variations": [
+            {"variation": 1, "weight": 2, "untracked": true},
+            {"variation": 3, "weight": 4}
+        ]
+    }})");
+    EXPECT_EQ(expected, json);
 }
