@@ -27,8 +27,8 @@ classDiagram
     OutputEvent *-- IdentifyEvent
     OutputEvent *-- TrackEvent
 
-    IEventProcessor <-- InputEvent
-    Outbox <-- OutputEvent
+    IEventProcessor --> InputEvent
+    Outbox --> OutputEvent
 
     class IEventProcessor {
         <<interface>>
