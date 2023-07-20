@@ -13,7 +13,7 @@ classDiagram
     AsioEventProcessor *-- WorkerPool
     AsioEventProcessor *-- Summarizer
 
-    RequestWorker *-- "1" EventBatch
+    RequestWorker *-- EventBatch
     WorkerPool *-- "5" RequestWorker
 
     TrackEvent -- TrackEventParams
@@ -27,8 +27,12 @@ classDiagram
     OutputEvent *-- IdentifyEvent
     OutputEvent *-- TrackEvent
 
+    EventBatch --> Summarizer: Pulls summary events from..
+    EventBatch --> Outbox: Pulls individual events from..
+
     IEventProcessor --> InputEvent
     Outbox --> OutputEvent
+
 
     class IEventProcessor {
         <<interface>>
@@ -59,7 +63,7 @@ classDiagram
 
     class Outbox {
         +PushDiscardingOverflow(std:: vector~OutputEvent~ events) bool
-        +Consume() std:: vector events
+        +Consume() std:: vector~OutputEvent~
         +const Empty() bool
     }
 
@@ -121,6 +125,7 @@ classDiagram
     class TrackEvent {
 
     }
+
 %% }
 ```
 
