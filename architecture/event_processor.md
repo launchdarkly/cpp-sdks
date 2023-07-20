@@ -4,7 +4,6 @@ The Event Processor is responsible for consuming, batching, and delivering event
 by the server and client-side LaunchDarkly SDKs.
 
 ```mermaid
-
 classDiagram
     IEventProcessor <|-- NullEventProcessor
     IEventProcessor <|-- AsioEventProcessor
@@ -69,12 +68,12 @@ classDiagram
 
     namespace events {
         class InputEvent {
-            std:: variant
+            +std:: variant
         }
 
 
         class OutputEvent {
-            std:: variant
+            +std:: variant
         }
 
         class FeatureEventParams
@@ -89,9 +88,6 @@ classDiagram
         class IndexEvent
 
         class TrackEvent
-
-
-
     }
 
 
@@ -110,8 +106,6 @@ classDiagram
 
     IEventProcessor <-- InputEvent
     Outbox <-- OutputEvent
-
-
 ```
 
 ### Notes
