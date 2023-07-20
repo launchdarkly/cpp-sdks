@@ -14,8 +14,21 @@ classDiagram
     AsioEventProcessor *-- Summarizer
 
     RequestWorker *-- "1" EventBatch
-
     WorkerPool *-- "5" RequestWorker
+
+    TrackEvent -- TrackEventParams
+    InputEvent *-- FeatureEventParams
+    InputEvent *-- IdentifyEventParams
+    InputEvent *-- TrackEventParams
+
+    OutputEvent *-- IndexEvent
+    OutputEvent *-- FeatureEvent
+    OutputEvent *-- DebugEvent
+    OutputEvent *-- IdentifyEvent
+    OutputEvent *-- TrackEvent
+
+    IEventProcessor <-- InputEvent
+    Outbox <-- OutputEvent
 
     class IEventProcessor {
         <<interface>>
@@ -76,36 +89,38 @@ classDiagram
             +std:: variant
         }
 
-        class FeatureEventParams
-        class IdentifyEventParams
-        class TrackEventParams
+        class FeatureEventParams {
 
-        class FeatureEvent
-        class DebugEvent
-        class IdentifyEvent
+        }
 
+        class IdentifyEventParams {
 
-        class IndexEvent
+        }
 
-        class TrackEvent
+        class TrackEventParams {
+
+        }
+
+        class FeatureEvent {
+
+        }
+
+        class DebugEvent {
+
+        }
+
+        class IdentifyEvent {
+
+        }
+
+        class IndexEvent {
+
+        }
+
+        class TrackEvent {
+
+        }
     }
-
-
-    TrackEvent -- TrackEventParams
-
-
-    InputEvent *-- FeatureEventParams
-    InputEvent *-- IdentifyEventParams
-    InputEvent *-- TrackEventParams
-
-    OutputEvent *-- IndexEvent
-    OutputEvent *-- FeatureEvent
-    OutputEvent *-- DebugEvent
-    OutputEvent *-- IdentifyEvent
-    OutputEvent *-- TrackEvent
-
-    IEventProcessor <-- InputEvent
-    Outbox <-- OutputEvent
 ```
 
 ### Notes
