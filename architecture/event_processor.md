@@ -79,48 +79,49 @@ classDiagram
         +const EndTime() Time
     }
 
-    namespace events {
-        class InputEvent {
-            +std:: variant
-        }
-
-
-        class OutputEvent {
-            +std:: variant
-        }
-
-        class FeatureEventParams {
-
-        }
-
-        class IdentifyEventParams {
-
-        }
-
-        class TrackEventParams {
-
-        }
-
-        class FeatureEvent {
-
-        }
-
-        class DebugEvent {
-
-        }
-
-        class IdentifyEvent {
-
-        }
-
-        class IndexEvent {
-
-        }
-
-        class TrackEvent {
-
-        }
+%% note: the 'namespace' feature isn't supported on Github yet
+%% namespace events { 
+    class InputEvent {
+        +std:: variant
     }
+
+
+    class OutputEvent {
+        +std:: variant
+    }
+
+    class FeatureEventParams {
+
+    }
+
+    class IdentifyEventParams {
+
+    }
+
+    class TrackEventParams {
+
+    }
+
+    class FeatureEvent {
+
+    }
+
+    class DebugEvent {
+
+    }
+
+    class IdentifyEvent {
+
+    }
+
+    class IndexEvent {
+
+    }
+
+    class TrackEvent {
+
+    }
+%% }
 ```
 
 ### Notes
