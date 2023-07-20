@@ -16,7 +16,7 @@ classDiagram
     RequestWorker *-- EventBatch
     WorkerPool *-- "5" RequestWorker
 
-    TrackEvent -- TrackEventParams
+    TrackEvent -- TrackEventParams: (alias)
     InputEvent *-- IdentifyEventParams
     InputEvent *-- FeatureEventParams
     InputEvent *-- TrackEventParams
