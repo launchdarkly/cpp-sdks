@@ -28,18 +28,18 @@ class Outbox {
      * @return True if all events were accepted; false if >= 1 events were
      * dropped.
      */
-    bool PushDiscardingOverflow(std::vector<OutputEvent> events);
+    [[nodiscard]] bool PushDiscardingOverflow(std::vector<OutputEvent> events);
 
     /**
      * Consumes all events in the outbox.
      * @return All events in the outbox, in the order they were pushed.
      */
-    std::vector<OutputEvent> Consume();
+    [[nodiscard]] std::vector<OutputEvent> Consume();
 
     /**
      * True if the outbox is empty.
      */
-    bool Empty();
+    [[nodiscard]] bool Empty() const;
 
    private:
     std::queue<OutputEvent> items_;
