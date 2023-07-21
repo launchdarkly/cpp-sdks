@@ -157,17 +157,17 @@ std::string ValueOrDefault(boost::json::object::const_iterator iterator,
                            boost::json::object::const_iterator end,
                            std::string default_value);
 
-template<typename T>
+template <typename T>
 void WriteMinimal(boost::json::object& obj,
-                  std::string const& key, //No copy when not used.
+                  std::string const& key,  // No copy when not used.
                   std::optional<T> val) {
-    if(val.has_value()) {
+    if (val.has_value()) {
         obj.emplace(key, val.value());
     }
 }
 
 void WriteMinimal(boost::json::object& obj,
-                  std::string const& key, //No copy when not used.
+                  std::string const& key,  // No copy when not used.
                   bool val);
 
 }  // namespace launchdarkly
