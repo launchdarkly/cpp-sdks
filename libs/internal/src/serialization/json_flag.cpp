@@ -247,9 +247,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
         obj.emplace("kind", boost::json::value_from(rollout.kind));
     }
     WriteMinimal(obj, "seed", rollout.seed);
-    if (rollout.bucketBy.Valid()) {
-        obj.emplace("bucketBy", rollout.bucketBy.RedactionName());
-    }
+    obj.emplace("bucketBy", rollout.bucketBy.RedactionName());
     obj.emplace("contextKind", rollout.contextKind.t);
 }
 

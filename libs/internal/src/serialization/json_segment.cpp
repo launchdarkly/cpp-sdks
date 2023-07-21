@@ -135,9 +135,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     WriteMinimal(obj, "weight", rule.weight);
     WriteMinimal(obj, "id", rule.id);
     obj.emplace("clauses", boost::json::value_from(rule.clauses));
-    if (rule.bucketBy.Valid()) {
-        obj.emplace("bucketBy", rule.bucketBy.RedactionName());
-    }
+    obj.emplace("bucketBy", rule.bucketBy.RedactionName());
     obj.emplace("rolloutContextKind", rule.rolloutContextKind.t);
 }
 
