@@ -419,7 +419,7 @@ TEST(RolloutTests, SerializeAllFields) {
 }
 
 TEST(VariationOrRolloutTests, SerializeVariation) {
-    data_model::Flag::VariationOrRollout variation(5);
+    uint64_t variation(5);
     auto json = boost::json::value_from(variation);
 
     auto expected = boost::json::parse(R"({"variation":5})");
@@ -576,7 +576,7 @@ TEST(FlagRuleTests, SerializeAllRollout) {
 }
 
 TEST(FlagTests, SerializeAll) {
-    data_model::Flag::VariationOrRollout fallthrough(42);
+    uint64_t fallthrough(42);
     data_model::Flag flag{
         "the-key",
         21,                                // version
