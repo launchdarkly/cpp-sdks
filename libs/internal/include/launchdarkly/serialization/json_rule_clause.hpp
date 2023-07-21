@@ -23,4 +23,17 @@ tl::expected<data_model::Clause::Op, JsonError> tag_invoke(
         tl::expected<data_model::Clause::Op, JsonError>> const& unused,
     boost::json::value const& json_value);
 
+// Serialization needs to be in launchdarkly::data_model for ADL.
+namespace data_model {
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Clause const& clause);
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Clause::Op const& op);
+
+}  // namespace data_model
+
 }  // namespace launchdarkly

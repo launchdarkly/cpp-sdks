@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <boost/json/value_from.hpp>
+
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
@@ -367,4 +369,384 @@ TEST(ClientSideAvailabilityTests, DeserializesAllFields) {
     ASSERT_TRUE(result);
     ASSERT_TRUE(result->usingMobileKey);
     ASSERT_TRUE(result->usingEnvironmentId);
+}
+
+TEST(WeightedVariationTests, SerializeAllFields) {
+    data_model::Flag::Rollout::WeightedVariation variation(1, 2);
+    variation.untracked = true;
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(
+        R"({"variation": 1, "weight": 2, "untracked": true})");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(WeightedVariationTests, SerializeUntrackedOnlyTrue) {
+    data_model::Flag::Rollout::WeightedVariation variation(1, 2);
+    variation.untracked = false;
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(R"({"variation": 1, "weight": 2})");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(RolloutTests, SerializeAllFields) {
+    using Rollout = data_model::Flag::Rollout;
+    Rollout rollout;
+    rollout.kind = Rollout::Kind::kExperiment;
+    rollout.contextKind = "user";
+    rollout.bucketBy = AttributeReference("ham");
+    rollout.seed = 42;
+    rollout.variations = {
+        data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
+
+    auto json = boost::json::value_from(rollout);
+
+    auto expected = boost::json::parse(R"({
+        "kind": "experiment",
+        "contextKind": "user",
+        "bucketBy": "ham",
+        "seed": 42,
+        "variations": [
+            {"variation": 1, "weight": 2, "untracked": true},
+            {"variation": 3, "weight": 4}
+        ]
+    })");
+
+    EXPECT_EQ(expected, json);
+}
+
+TEST(VariationOrRolloutTests, SerializeVariation) {
+    uint64_t value(5);
+    data_model::Flag::VariationOrRollout variation = value;
+
+    auto json = boost::json::value_from(variation);
+
+    auto expected = boost::json::parse(R"({"variation":5})");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(VariationOrRolloutTests, SerializeRollout) {
+    using Rollout = data_model::Flag::Rollout;
+    Rollout rollout;
+    rollout.kind = Rollout::Kind::kExperiment;
+    rollout.contextKind = "user";
+    rollout.bucketBy = AttributeReference("ham");
+    rollout.seed = 42;
+    rollout.variations = {
+        data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
+    data_model::Flag::VariationOrRollout var_or_roll = rollout;
+    auto json = boost::json::value_from(var_or_roll);
+
+    auto expected = boost::json::parse(R"({
+    "rollout":{
+        "kind": "experiment",
+        "contextKind": "user",
+        "bucketBy": "ham",
+        "seed": 42,
+        "variations": [
+            {"variation": 1, "weight": 2, "untracked": true},
+            {"variation": 3, "weight": 4}
+        ]
+    }})");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(PrerequisiteTests, SerializeAll) {
+    data_model::Flag::Prerequisite prerequisite{"potato", 6};
+    auto json = boost::json::value_from(prerequisite);
+
+    auto expected = boost::json::parse(R"({"key":"potato","variation":6})");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(TargetTests, SerializeAll) {
+    data_model::Flag::Target target{{"a", "b"}, 42, ContextKind("taco_stand")};
+    auto json = boost::json::value_from(target);
+
+    auto expected = boost::json::parse(
+        R"({"values":["a", "b"], "variation": 42, "contextKind":"taco_stand"})");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(ClientSideAvailabilityTests, SerializeAll) {
+    data_model::Flag::ClientSideAvailability availability{true, true};
+
+    auto json = boost::json::value_from(availability);
+
+    auto expected = boost::json::parse(
+        R"({"usingMobileKey": true, "usingEnvironmentId": true})");
+    EXPECT_EQ(expected, json);
+}
+
+class ClauseOperatorsFixture
+    : public ::testing::TestWithParam<data_model::Clause::Op> {};
+
+INSTANTIATE_TEST_SUITE_P(
+    ClauseTests,
+    ClauseOperatorsFixture,
+    testing::Values(data_model::Clause::Op::kSegmentMatch,
+                    data_model::Clause::Op::kAfter,
+                    data_model::Clause::Op::kBefore,
+                    data_model::Clause::Op::kContains,
+                    data_model::Clause::Op::kEndsWith,
+                    data_model::Clause::Op::kGreaterThan,
+                    data_model::Clause::Op::kGreaterThanOrEqual,
+                    data_model::Clause::Op::kIn,
+                    data_model::Clause::Op::kLessThan,
+                    data_model::Clause::Op::kLessThanOrEqual,
+                    data_model::Clause::Op::kMatches,
+                    data_model::Clause::Op::kSemVerEqual,
+                    data_model::Clause::Op::kSemVerGreaterThan,
+                    data_model::Clause::Op::kSemVerLessThan,
+                    data_model::Clause::Op::kStartsWith));
+
+TEST_P(ClauseOperatorsFixture, AllOperatorsSerializeDeserialize) {
+    auto op = GetParam();
+
+    auto serialized = boost::json::serialize(boost::json::value_from(op));
+    auto parsed = boost::json::parse(serialized);
+    auto deserialized = boost::json::value_to<
+        tl::expected<std::optional<data_model::Clause::Op>, JsonError>>(parsed);
+
+    EXPECT_EQ(op, **deserialized);
+}
+
+TEST(ClauseTests, SerializeAll) {
+    data_model::Clause clause{data_model::Clause::Op::kIn,
+                              {"a", "b"},
+                              true,
+                              ContextKind("bob"),
+                              "/potato"};
+
+    auto json = boost::json::value_from(clause);
+    auto expected = boost::json::parse(
+        R"({
+            "op": "in",
+            "negate": true,
+            "values": ["a", "b"],
+            "contextKind": "bob",
+            "attribute": "/potato"
+        })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(FlagRuleTests, SerializeAllRollout) {
+    using Rollout = data_model::Flag::Rollout;
+    Rollout rollout;
+    rollout.kind = Rollout::Kind::kExperiment;
+    rollout.contextKind = "user";
+    rollout.bucketBy = AttributeReference("ham");
+    rollout.seed = 42;
+    rollout.variations = {
+        data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
+    data_model::Flag::Rule rule{{{data_model::Clause::Op::kIn,
+                                  {"a", "b"},
+                                  true,
+                                  ContextKind("bob"),
+                                  "/potato"}},
+                                rollout,
+                                true,
+                                "therule"};
+
+    auto json = boost::json::value_from(rule);
+    auto expected = boost::json::parse(
+        R"({
+            "clauses":[{
+                "op": "in",
+                "negate": true,
+                "values": ["a", "b"],
+                "contextKind": "bob",
+                "attribute": "/potato"
+            }],
+            "rollout": {
+                "kind": "experiment",
+                "contextKind": "user",
+                "bucketBy": "ham",
+                "seed": 42,
+                "variations": [
+                    {"variation": 1, "weight": 2, "untracked": true},
+                    {"variation": 3, "weight": 4}
+                ]
+            },
+            "trackEvents": true,
+            "id": "therule"
+        })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(FlagTests, SerializeAll) {
+    uint64_t fallthrough(42);
+    data_model::Flag flag{
+        "the-key",
+        21,                                // version
+        true,                              // on
+        fallthrough,                       // fallthrough
+        {"a", "b"},                        // variations
+        {{"prereqA", 2}, {"prereqB", 3}},  // prerequisites
+        {{{
+              "1",
+              "2",
+              "3",
+          },
+          12,
+          ContextKind("user")}},  // targets
+        {{{
+              "4",
+              "5",
+              "6",
+          },
+          24,
+          ContextKind("bob")}},  // contextTargets
+        {},                      // rules
+        84,                      // offVariation
+        true,                    // clientSide
+        data_model::Flag::ClientSideAvailability{true, true},
+        "4242",  // salt
+        true,    // trackEvents
+        true,    // trackEventsFalltrhough
+        900      // debugEventsUntilDate
+    };
+
+    auto json = boost::json::value_from(flag);
+    auto expected = boost::json::parse(
+        R"({
+            "trackEvents":true,
+            "clientSide":true,
+            "on":true,
+            "trackEventsFallthrough":true,
+            "debugEventsUntilDate":900,
+            "salt":"4242",
+            "offVariation":84,
+            "key":"the-key",
+            "version":21,
+            "variations":["a","b"],
+            "rules":[],
+            "prerequisites":[{"key":"prereqA","variation":2},
+                {"key":"prereqB","variation":3}],
+            "fallthrough":{"variation":42},
+            "clientSideAvailability":
+                {"usingEnvironmentId":true,"usingMobileKey":true},
+            "contextTargets":
+                [{"values":["4","5","6"],"variation":24,"contextKind":"bob"}],
+            "targets":[{"values":["1","2","3"],"variation":12}]
+    })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(SegmentTargetTests, SerializeAll) {
+    data_model::Segment::Target target{"bob", {"bill", "sam"}};
+
+    auto json = boost::json::value_from(target);
+    auto expected = boost::json::parse(
+        R"({
+            "contextKind": "bob",
+            "values": ["bill", "sam"]
+        })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(SegmentRuleTests, SerializeAll) {
+    data_model::Segment::Rule rule{{{data_model::Clause::Op::kIn,
+                                     {"a", "b"},
+                                     true,
+                                     ContextKind("bob"),
+                                     "/potato"}},
+                                   "ididid",
+                                   300,
+                                   ContextKind("bob"),
+                                   "/happy"};
+
+    auto json = boost::json::value_from(rule);
+    auto expected = boost::json::parse(
+        R"({
+            "clauses": [{
+                "op": "in",
+                "negate": true,
+                "values": ["a", "b"],
+                "contextKind": "bob",
+                "attribute": "/potato"
+            }],
+            "id": "ididid",
+            "weight": 300,
+            "rolloutContextKind": "bob",
+            "bucketBy": "/happy"
+        })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(SegmentTests, SerializeBasicAll) {
+    data_model::Segment segment{
+        "my-segment",
+        87,
+        {"bob", "sam"},
+        {"sally", "johan"},
+        {{"vegetable", {"potato", "yam"}}},
+        {{"material", {"cardboard", "plastic"}}},
+        {{{{data_model::Clause::Op::kIn,
+            {"a", "b"},
+            true,
+            ContextKind("bob"),
+            "/potato"}},
+          "ididid",
+          300,
+          ContextKind("bob"),
+          "/happy"}},
+        "salty",
+        false,
+        std::nullopt,
+        std::nullopt,
+    };
+
+    auto json = boost::json::value_from(segment);
+    auto expected = boost::json::parse(
+        R"({
+            "key": "my-segment",
+            "version": 87,
+            "included": ["bob", "sam"],
+            "excluded": ["sally", "johan"],
+            "includedContexts":
+                [{"contextKind": "vegetable", "values":["potato", "yam"]}],
+            "excludedContexts":
+                [{"contextKind": "material", "values":["cardboard", "plastic"]}],
+            "salt": "salty",
+            "rules":[{
+                "clauses": [{
+                    "op": "in",
+                    "negate": true,
+                    "values": ["a", "b"],
+                    "contextKind": "bob",
+                    "attribute": "/potato"
+                }],
+                "id": "ididid",
+                "weight": 300,
+                "rolloutContextKind": "bob",
+                "bucketBy": "/happy"
+            }]
+    })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(SegmentTests, SerializeUnbounded) {
+    data_model::Segment segment{"my-segment", 87,      {},   {},        {}, {},
+                                {},           "salty", true, "company", 12};
+
+    auto json = boost::json::value_from(segment);
+    auto expected = boost::json::parse(
+        R"({
+            "key": "my-segment",
+            "version": 87,
+            "included": [],
+            "excluded": [],
+            "includedContexts": [],
+            "excludedContexts": [],
+            "salt": "salty",
+            "rules":[],
+            "unbounded": true,
+            "unboundedContextKind": "company",
+            "generation": 12
+    })");
+    EXPECT_EQ(expected, json);
 }

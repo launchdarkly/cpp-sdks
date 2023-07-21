@@ -70,4 +70,9 @@ uint64_t ValueOrDefault(boost::json::object::const_iterator iterator,
     return default_value;
 }
 
+void WriteMinimal(boost::json::object& obj, std::string const& key, bool val) {
+    if (val) {
+        obj.emplace(key, val);
+    }
+}
 }  // namespace launchdarkly

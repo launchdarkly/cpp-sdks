@@ -97,4 +97,48 @@ tl::expected<std::optional<data_model::Segment>, JsonError> tag_invoke(
     return segment;
 }
 
+// Serializers need to be in launchdarkly::data_model for ADL.
+namespace data_model {
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Segment const& segment) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("key", segment.key);
+    obj.emplace("version", segment.version);
+    WriteMinimal(obj, "salt", segment.salt);
+    WriteMinimal(obj, "generation", segment.generation);
+    WriteMinimal(obj, "unboundedContextKind", segment.unboundedContextKind);
+    WriteMinimal(obj, "unbounded", segment.unbounded);
+
+    obj.emplace("rules", boost::json::value_from(segment.rules));
+    obj.emplace("excluded", boost::json::value_from(segment.excluded));
+    obj.emplace("excludedContexts",
+                boost::json::value_from(segment.excludedContexts));
+    obj.emplace("included", boost::json::value_from(segment.included));
+    obj.emplace("includedContexts",
+                boost::json::value_from(segment.includedContexts));
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Segment::Target const& target) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("values", boost::json::value_from(target.values));
+    obj.emplace("contextKind", target.contextKind);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Segment::Rule const& rule) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "weight", rule.weight);
+    WriteMinimal(obj, "id", rule.id);
+    obj.emplace("clauses", boost::json::value_from(rule.clauses));
+    obj.emplace("bucketBy", rule.bucketBy.RedactionName());
+    obj.emplace("rolloutContextKind", rule.rolloutContextKind.t);
+}
+
+}  // namespace data_model
+
 }  // namespace launchdarkly
