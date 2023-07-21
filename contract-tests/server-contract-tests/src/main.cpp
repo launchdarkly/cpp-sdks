@@ -34,12 +34,12 @@ int main(int argc, char* argv[]) {
         auto p = boost::lexical_cast<unsigned short>(port);
         server srv(ioc, "0.0.0.0", p, logger);
 
-        srv.add_capability("client-side");
-        srv.add_capability("mobile");
+        srv.add_capability("server-side");
         srv.add_capability("strongly-typed");
         srv.add_capability("context-type");
         srv.add_capability("service-endpoints");
         srv.add_capability("tags");
+        srv.add_capability("server-side-polling");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

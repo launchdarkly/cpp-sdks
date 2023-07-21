@@ -14,7 +14,6 @@ add_executable(client-tests
         src/main.cpp
         src/server.cpp
         src/session.cpp
-        src/definitions.cpp
         src/entity_manager.cpp
         src/client_entity.cpp
         )
@@ -25,6 +24,7 @@ target_link_libraries(client-tests PRIVATE
         foxy
         nlohmann_json::nlohmann_json
         Boost::coroutine
+        contract-test-data-model
         )
 
 target_include_directories(client-tests PUBLIC include)

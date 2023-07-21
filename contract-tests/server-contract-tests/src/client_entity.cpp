@@ -46,7 +46,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
     // the problematic tests, this eventually does unblock and let the test
     // proceed.
     // TODO: SC-204250
-    client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
+    // client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
     return nlohmann::json{};
 }
 
@@ -144,16 +144,16 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
 
     if (params.omitNullData.value_or(false) && !params.metricValue &&
         !params.data) {
-        client_->Track(params.eventKey);
+        // client_->Track(params.eventKey);
         return nlohmann::json{};
     }
 
     if (!params.metricValue) {
-        client_->Track(params.eventKey, std::move(*data));
+        //  client_->Track(params.eventKey, std::move(*data));
         return nlohmann::json{};
     }
 
-    client_->Track(params.eventKey, std::move(*data), *params.metricValue);
+    //   client_->Track(params.eventKey, std::move(*data), *params.metricValue);
     return nlohmann::json{};
 }
 

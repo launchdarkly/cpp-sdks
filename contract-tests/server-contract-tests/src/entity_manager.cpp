@@ -10,18 +10,18 @@ using namespace launchdarkly::server_side;
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
                              launchdarkly::Logger& logger)
-    : entities_(),
+    :
       counter_{0},
       executor_{std::move(executor)},
       logger_{logger} {}
 
-static tl::expected<launchdarkly::Context, launchdarkly::JsonError>
-ParseContext(nlohmann::json value) {
-    auto boost_json_val = boost::json::parse(value.dump());
-    return boost::json::value_to<
-        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
-        boost_json_val);
-}
+//static tl::expected<launchdarkly::Context, launchdarkly::JsonError>
+//ParseContext(nlohmann::json value) {
+//    auto boost_json_val = boost::json::parse(value.dump());
+//    return boost::json::value_to<
+//        tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
+//        boost_json_val);
+//}
 
 std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     std::string id = std::to_string(counter_++);
@@ -107,11 +107,11 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     }
 
     if (in.clientSide->evaluationReasons) {
-        datasource.WithReasons(*in.clientSide->evaluationReasons);
+       // datasource.WithReasons(*in.clientSide->evaluationReasons);
     }
 
     if (in.clientSide->useReport) {
-        datasource.UseReport(*in.clientSide->useReport);
+        //datasource.UseReport(*in.clientSide->useReport);
     }
 
     if (in.tags) {
@@ -130,14 +130,14 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         return std::nullopt;
     }
 
-    auto maybe_context = ParseContext(in.clientSide->initialContext);
-    if (!maybe_context) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "entity_manager: initial context provided was invalid";
-        return std::nullopt;
-    }
+//    auto maybe_context = ParseContext(in.clientSide->initialContext);
+//    if (!maybe_context) {
+//        LD_LOG(logger_, LogLevel::kWarn)
+//            << "entity_manager: initial context provided was invalid";
+//        return std::nullopt;
+//    }
 
-    auto client = std::make_unique<Client>(std::move(*config), *maybe_context);
+    auto client = std::make_unique<Client>(std::move(*config));
 
     std::chrono::milliseconds waitForClient = std::chrono::seconds(5);
     if (in.startWaitTimeMs) {
@@ -147,27 +147,28 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     auto init = client->StartAsync();
     init.wait_for(waitForClient);
 
-    entities_.try_emplace(id, std::move(client));
+    //entities_.try_emplace(id, std::move(client));
 
     return id;
 }
 
 bool EntityManager::destroy(std::string const& id) {
-    auto it = entities_.find(id);
-    if (it == entities_.end()) {
-        return false;
-    }
-
-    entities_.erase(it);
+//    auto it = entities_.find(id);
+//    if (it == entities_.end()) {
+//        return false;
+//    }
+//
+//    entities_.erase(it);
     return true;
 }
 
 tl::expected<nlohmann::json, std::string> EntityManager::command(
     std::string const& id,
     CommandParams const& params) {
-    auto it = entities_.find(id);
-    if (it == entities_.end()) {
-        return tl::make_unexpected("entity not found");
-    }
-    return it->second.Command(params);
+//    auto it = entities_.find(id);
+//    if (it == entities_.end()) {
+//        return tl::make_unexpected("entity not found");
+//    }
+//    return it->second.Command(params);
+    return tl::make_unexpected("not supported");
 }

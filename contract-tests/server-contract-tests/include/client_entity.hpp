@@ -1,8 +1,8 @@
 #pragma once
 
+#include <data_model/data_model.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <memory>
-#include "definitions.hpp"
 
 class ClientEntity {
    public:
