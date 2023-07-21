@@ -634,13 +634,116 @@ TEST(FlagTests, SerializeAll) {
 }
 
 TEST(SegmentTargetTests, SerializeAll) {
-    EXPECT_TRUE(false);
+    data_model::Segment::Target target{"bob", {"bill", "sam"}};
+
+    auto json = boost::json::value_from(target);
+    auto expected = boost::json::parse(
+        R"({
+            "contextKind": "bob",
+            "values": ["bill", "sam"]
+        })");
+    EXPECT_EQ(expected, json);
 }
 
 TEST(SegmentRuleTests, SerializeAll) {
-    EXPECT_TRUE(false);
+    data_model::Segment::Rule rule{{{data_model::Clause::Op::kIn,
+                                     {"a", "b"},
+                                     true,
+                                     ContextKind("bob"),
+                                     "/potato"}},
+                                   "ididid",
+                                   300,
+                                   ContextKind("bob"),
+                                   "/happy"};
+
+    auto json = boost::json::value_from(rule);
+    auto expected = boost::json::parse(
+        R"({
+            "clauses": [{
+                "op": "in",
+                "negate": true,
+                "values": ["a", "b"],
+                "contextKind": "bob",
+                "attribute": "/potato"
+            }],
+            "id": "ididid",
+            "weight": 300,
+            "rolloutContextKind": "bob",
+            "bucketBy": "/happy"
+        })");
+    EXPECT_EQ(expected, json);
 }
 
-TEST(SegmentTests, SerializeAll) {
-    EXPECT_TRUE(false);
+TEST(SegmentTests, SerializeBasicAll) {
+    data_model::Segment segment{
+        "my-segment",
+        87,
+        {"bob", "sam"},
+        {"sally", "johan"},
+        {{"vegetable", {"potato", "yam"}}},
+        {{"material", {"cardboard", "plastic"}}},
+        {{{{data_model::Clause::Op::kIn,
+            {"a", "b"},
+            true,
+            ContextKind("bob"),
+            "/potato"}},
+          "ididid",
+          300,
+          ContextKind("bob"),
+          "/happy"}},
+        "salty",
+        false,
+        std::nullopt,
+        std::nullopt,
+    };
+
+    auto json = boost::json::value_from(segment);
+    auto expected = boost::json::parse(
+        R"({
+            "key": "my-segment",
+            "version": 87,
+            "included": ["bob", "sam"],
+            "excluded": ["sally", "johan"],
+            "includedContexts":
+                [{"contextKind": "vegetable", "values":["potato", "yam"]}],
+            "excludedContexts":
+                [{"contextKind": "material", "values":["cardboard", "plastic"]}],
+            "salt": "salty",
+            "rules":[{
+                "clauses": [{
+                    "op": "in",
+                    "negate": true,
+                    "values": ["a", "b"],
+                    "contextKind": "bob",
+                    "attribute": "/potato"
+                }],
+                "id": "ididid",
+                "weight": 300,
+                "rolloutContextKind": "bob",
+                "bucketBy": "/happy"
+            }]
+    })");
+    EXPECT_EQ(expected, json);
+}
+
+TEST(SegmentTests, SerializeUnbounded) {
+    data_model::Segment segment{"my-segment", 87,      {},   {},        {}, {},
+                                {},           "salty", true, "company", 12};
+
+    auto json = boost::json::value_from(segment);
+    auto expected = boost::json::parse(
+        R"({
+            "key": "my-segment",
+            "version": 87,
+            "included": [],
+            "excluded": [],
+            "includedContexts": [],
+            "excludedContexts": [],
+            "salt": "salty",
+            "rules":[],
+            "unbounded": true,
+            "unboundedContextKind": "company",
+            "generation": 12
+    })");
+    EXPECT_EQ(expected, json);
 }
