@@ -419,7 +419,8 @@ TEST(RolloutTests, SerializeAllFields) {
 }
 
 TEST(VariationOrRolloutTests, SerializeVariation) {
-    data_model::Flag::VariationOrRollout variation = 5;
+    data_model::Flag::VariationOrRollout variation =
+        data_model::Flag::VariationOrRollout(5);
     auto json = boost::json::value_from(variation);
 
     auto expected = boost::json::parse(R"({"variation":5})");
