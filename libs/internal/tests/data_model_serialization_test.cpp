@@ -632,3 +632,15 @@ TEST(FlagTests, SerializeAll) {
     })");
     EXPECT_EQ(expected, json);
 }
+
+TEST(SegmentTargetTests, SerializeAll) {
+    EXPECT_TRUE(false);
+}
+
+TEST(SegmentRuleTests, SerializeAll) {
+    EXPECT_TRUE(false);
+}
+
+TEST(SegmentTests, SerializeAll) {
+    EXPECT_TRUE(false);
+}
