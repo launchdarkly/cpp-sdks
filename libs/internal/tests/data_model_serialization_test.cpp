@@ -579,11 +579,11 @@ TEST(FlagRuleTests, SerializeAllRollout) {
 TEST(FlagTests, SerializeAll) {
     data_model::Flag flag{
         "the-key",
-        21,                                // version
-        true,                              // on
-        42,                                // fallthrough
-        {"a", "b"},                        // variations
-        {{"prereqA", 2}, {"prereqB", 3}},  // prerequisites
+        21,                                        // version
+        true,                                      // on
+        data_model::Flag::VariationOrRollout(42),  // fallthrough
+        {"a", "b"},                                // variations
+        {{"prereqA", 2}, {"prereqB", 3}},          // prerequisites
         {{{
               "1",
               "2",
