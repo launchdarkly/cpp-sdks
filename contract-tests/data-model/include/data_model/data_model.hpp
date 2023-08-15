@@ -188,6 +188,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ValueType,
 
 struct EvaluateFlagParams {
     std::string flagKey;
+    std::optional<nlohmann::json> context;
     ValueType valueType;
     nlohmann::json defaultValue;
     bool detail;
@@ -195,6 +196,7 @@ struct EvaluateFlagParams {
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagParams,
                                                 flagKey,
+                                                context,
                                                 valueType,
                                                 defaultValue,
                                                 detail);

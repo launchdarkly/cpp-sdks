@@ -16,7 +16,8 @@ class ClientEntity {
         EvaluateFlagParams const&);
 
     tl::expected<nlohmann::json, std::string> EvaluateDetail(
-        EvaluateFlagParams const&);
+        EvaluateFlagParams const&,
+        launchdarkly::Context const&);
 
     tl::expected<nlohmann::json, std::string> EvaluateAll(
         EvaluateAllFlagParams const&);

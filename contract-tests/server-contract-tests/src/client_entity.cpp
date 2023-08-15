@@ -13,40 +13,45 @@
 #include <chrono>
 #include <future>
 
-ClientEntity::ClientEntity(
-    std::unique_ptr<launchdarkly::server_side::Client> client)
-    : client_(std::move(client)) {}
-
-tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
-    IdentifyEventParams const& params) {
+tl::expected<launchdarkly::Context, std::string>
+ParseContext(nlohmann::json value) {
     boost::system::error_code ec;
-    auto json_value = boost::json::parse(params.context.dump(), ec);
+    auto boost_json_val = boost::json::parse(value.dump(), ec);
     if (ec) {
         return tl::make_unexpected(ec.what());
     }
 
-    auto maybe_ctx = boost::json::value_to<
+   auto maybe_ctx = boost::json::value_to<
         tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
-        json_value);
+        boost_json_val);
+   if (!maybe_ctx) {
+       return tl::make_unexpected(
+           launchdarkly::ErrorToString(maybe_ctx.error()));
+   }
 
+   if (!maybe_ctx->Valid()) {
+       return tl::make_unexpected(maybe_ctx->errors());
+   }
+
+   return *maybe_ctx;
+}
+
+
+ClientEntity::ClientEntity(
+    std::unique_ptr<launchdarkly::server_side::Client> client)
+    : client_(std::move(client)) {}
+
+
+tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
+    IdentifyEventParams const& params) {
+    boost::system::error_code ec;
+
+    auto maybe_ctx = ParseContext(params.context);
     if (!maybe_ctx) {
         return tl::make_unexpected(
-            launchdarkly::ErrorToString(maybe_ctx.error()));
+            maybe_ctx.error());
     }
-
-    if (!maybe_ctx->Valid()) {
-        return tl::make_unexpected(maybe_ctx->errors());
-    }
-
-    // The typical way to identify in contract tests would be .wait(), to ensure
-    // identify completes fully before proceeding. Some of the contract tests
-    // send invalid data to the data source though, so identify will never
-    // complete because the data source can't start. So, limit the amount of
-    // time such that: 1) For most tests, this is *basically* synchronous 2) For
-    // the problematic tests, this eventually does unblock and let the test
-    // proceed.
-    // TODO: SC-204250
-    // client_->IdentifyAsync(*maybe_ctx).wait_for(std::chrono::seconds(5));
+    client_->Identify(*maybe_ctx);
     return nlohmann::json{};
 }
 
@@ -163,16 +168,17 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
 
     boost::ignore_unused(params);
 
-    for (auto& [key, value] : client_->AllFlags()) {
-        resp.state[key] = nlohmann::json::parse(
-            boost::json::serialize(boost::json::value_from(value)));
-    }
+    // TODO: fix when AllFlags available
+//    for (auto& [key, value] : client_->AllFlags()) {
+//        resp.state[key] = nlohmann::json::parse(
+//            boost::json::serialize(boost::json::value_from(value)));
+//    }
 
     return resp;
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
-    EvaluateFlagParams const& params) {
+    EvaluateFlagParams const& params, launchdarkly::Context const& ctx  ) {
     auto const& key = params.flagKey;
 
     auto const& defaultVal = params.defaultValue;
@@ -184,7 +190,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
     switch (params.valueType) {
         case ValueType::Bool: {
             auto detail =
-                client_->BoolVariationDetail(key, defaultVal.get<bool>());
+                client_->BoolVariationDetail(ctx, key, defaultVal.get<bool>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
@@ -192,7 +198,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
         }
         case ValueType::Int: {
             auto detail =
-                client_->IntVariationDetail(key, defaultVal.get<int>());
+                client_->IntVariationDetail(ctx,key, defaultVal.get<int>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
@@ -200,14 +206,14 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
         }
         case ValueType::Double: {
             auto detail =
-                client_->DoubleVariationDetail(key, defaultVal.get<double>());
+                client_->DoubleVariationDetail(ctx,key, defaultVal.get<double>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
             break;
         }
         case ValueType::String: {
-            auto detail = client_->StringVariationDetail(
+            auto detail = client_->StringVariationDetail(ctx,
                 key, defaultVal.get<std::string>());
             result.value = *detail;
             reason = detail.Reason();
@@ -228,7 +234,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto detail = client_->JsonVariationDetail(key, *maybe_fallback);
+            auto detail = client_->JsonVariationDetail(ctx, key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(*detail));
@@ -252,30 +258,37 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
 }
 tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
     EvaluateFlagParams const& params) {
+
+    auto maybe_ctx = ParseContext(params.context);
+    if (!maybe_ctx) {
+        return tl::make_unexpected(maybe_ctx.error());
+    }
+
     if (params.detail) {
-        return EvaluateDetail(params);
+        return EvaluateDetail(params, *maybe_ctx);
     }
 
     auto const& key = params.flagKey;
 
     auto const& defaultVal = params.defaultValue;
 
+
     EvaluateFlagResponse result;
 
     switch (params.valueType) {
         case ValueType::Bool:
-            result.value = client_->BoolVariation(key, defaultVal.get<bool>());
+            result.value = client_->BoolVariation(*maybe_ctx, key, defaultVal.get<bool>());
             break;
         case ValueType::Int:
-            result.value = client_->IntVariation(key, defaultVal.get<int>());
+            result.value = client_->IntVariation(*maybe_ctx, key, defaultVal.get<int>());
             break;
         case ValueType::Double:
             result.value =
-                client_->DoubleVariation(key, defaultVal.get<double>());
+                client_->DoubleVariation(*maybe_ctx,key, defaultVal.get<double>());
             break;
         case ValueType::String: {
             result.value =
-                client_->StringVariation(key, defaultVal.get<std::string>());
+                client_->StringVariation(*maybe_ctx,key, defaultVal.get<std::string>());
             break;
         }
         case ValueType::Any:
@@ -291,7 +304,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto evaluation = client_->JsonVariation(key, *maybe_fallback);
+            auto evaluation = client_->JsonVariation(*maybe_ctx,key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(evaluation));

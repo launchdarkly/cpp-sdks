@@ -15,6 +15,7 @@ add_executable(server-tests
         src/server.cpp
         src/session.cpp
         src/entity_manager.cpp
+        src/client_entity.cpp
         )
 
 target_link_libraries(server-tests PRIVATE
