@@ -1,6 +1,10 @@
 #include "session.hpp"
+
+#include <launchdarkly/client_side/client.hpp>
+
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/asio/dispatch.hpp>
+
 #include <iostream>
 
 const std::string kEntityPath = "/entity/";
@@ -81,7 +85,7 @@ std::optional<Session::Response> Session::generate_response(Request& req) {
     };
 
     if (req.method() == http::verb::get && req.target() == "/") {
-        return capabilities_response(caps_, "c-client-sdk", "0.0.0");
+        return capabilities_response(caps_, "cpp-client-sdk", launchdarkly::client_side::Client::Version());
     }
 
     if (req.method() == http::verb::head && req.target() == "/") {

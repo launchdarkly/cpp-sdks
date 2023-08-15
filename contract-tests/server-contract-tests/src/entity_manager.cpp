@@ -106,14 +106,6 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         event_config.Disable();
     }
 
-    if (in.clientSide->evaluationReasons) {
-       // datasource.WithReasons(*in.clientSide->evaluationReasons);
-    }
-
-    if (in.clientSide->useReport) {
-        //datasource.UseReport(*in.clientSide->useReport);
-    }
-
     if (in.tags) {
         if (in.tags->applicationId) {
             config_builder.AppInfo().Identifier(*in.tags->applicationId);
@@ -129,13 +121,6 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             << "entity_manager: couldn't build config: " << config.error();
         return std::nullopt;
     }
-
-//    auto maybe_context = ParseContext(in.clientSide->initialContext);
-//    if (!maybe_context) {
-//        LD_LOG(logger_, LogLevel::kWarn)
-//            << "entity_manager: initial context provided was invalid";
-//        return std::nullopt;
-//    }
 
     auto client = std::make_unique<Client>(std::move(*config));
 
