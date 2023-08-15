@@ -63,6 +63,8 @@ class AttributesBuilder final {
     AttributesBuilder& operator=(AttributesBuilder const&) = delete;
     AttributesBuilder& operator=(AttributesBuilder&&) = delete;
 
+    // This cannot be noexcept because of:
+    // https://developercommunity.visualstudio.com/t/bug-in-stdmapstdpair-implementation-with-move-only/840554
     AttributesBuilder(AttributesBuilder&& builder) = default;
     ~AttributesBuilder() = default;
 
