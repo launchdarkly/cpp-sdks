@@ -63,7 +63,7 @@ class AttributesBuilder final {
     AttributesBuilder& operator=(AttributesBuilder const&) = delete;
     AttributesBuilder& operator=(AttributesBuilder&&) = delete;
 
-    AttributesBuilder(AttributesBuilder&& builder) noexcept = default;
+    AttributesBuilder(AttributesBuilder&& builder) = default;
     ~AttributesBuilder() = default;
 
     /**
