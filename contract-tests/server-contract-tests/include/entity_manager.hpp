@@ -1,5 +1,7 @@
 #pragma once
 
+#include "client_entity.hpp"
+
 #include <boost/asio/any_io_executor.hpp>
 
 #include <launchdarkly/logging/logger.hpp>
@@ -16,7 +18,7 @@
 class EventOutbox;
 
 class EntityManager {
-    //std::unordered_map<std::string, ClientEntity> entities_;
+    std::unordered_map<std::string, ClientEntity> entities_;
 
     std::size_t counter_;
     boost::asio::any_io_executor executor_;

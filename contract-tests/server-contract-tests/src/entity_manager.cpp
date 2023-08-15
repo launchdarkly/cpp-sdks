@@ -126,28 +126,27 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     auto init = client->StartAsync();
     init.wait_for(waitForClient);
 
-    //entities_.try_emplace(id, std::move(client));
+    entities_.try_emplace(id, std::move(client));
 
     return id;
 }
 
 bool EntityManager::destroy(std::string const& id) {
-//    auto it = entities_.find(id);
-//    if (it == entities_.end()) {
-//        return false;
-//    }
-//
-//    entities_.erase(it);
+    auto it = entities_.find(id);
+    if (it == entities_.end()) {
+        return false;
+    }
+
+    entities_.erase(it);
     return true;
 }
 
 tl::expected<nlohmann::json, std::string> EntityManager::command(
     std::string const& id,
     CommandParams const& params) {
-//    auto it = entities_.find(id);
-//    if (it == entities_.end()) {
-//        return tl::make_unexpected("entity not found");
-//    }
-//    return it->second.Command(params);
-    return tl::make_unexpected("not supported");
+    auto it = entities_.find(id);
+    if (it == entities_.end()) {
+        return tl::make_unexpected("entity not found");
+    }
+    return it->second.Command(params);
 }
