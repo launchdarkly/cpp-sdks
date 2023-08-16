@@ -56,6 +56,7 @@ jobs:
     runs-on: windows-2022
     steps:
       - run: echo $PATH
+      - run: ls '/c/Program Files'
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
