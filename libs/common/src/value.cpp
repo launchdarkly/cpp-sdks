@@ -7,6 +7,9 @@
 
 namespace launchdarkly {
 
+const std::string Value::empty_string_;
+const Value::Array Value::empty_vector_;
+const Value::Object Value::empty_map_;
 const Value Value::null_value_;
 
 Value::Value() : type_(Value::Type::kNull), storage_{0.0} {}

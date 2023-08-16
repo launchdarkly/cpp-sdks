@@ -413,9 +413,11 @@ class Value final {
     enum Type type_;
 
     // Empty constants used when accessing the wrong type.
-    inline static const std::string empty_string_;
-    inline static const Array empty_vector_;
-    inline static const Object empty_map_;
+    // These are not inline static const because of this bug:
+    // https://developercommunity.visualstudio.com/t/inline-static-destructors-are-called-multiple-time/1157794
+    static const std::string empty_string_;
+    static const Array empty_vector_;
+    static const Object empty_map_;
     static const Value null_value_;
 };
 
