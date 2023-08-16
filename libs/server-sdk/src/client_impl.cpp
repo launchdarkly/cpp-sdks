@@ -144,6 +144,8 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             return false; /* keep the change listener */
         });
 
+    data_source_->Start();
+
     return fut;
 }
 

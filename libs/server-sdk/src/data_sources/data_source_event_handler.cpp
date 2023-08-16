@@ -148,7 +148,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             boost::json::value_to<tl::expected<std::optional<Put>, JsonError>>(
                 parsed);
 
-        if (!res.has_value()) {
+        if (!res) {
             LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,

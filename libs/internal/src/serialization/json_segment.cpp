@@ -18,7 +18,7 @@ tl::expected<std::optional<data_model::Segment::Target>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Segment::Target target;
+    data_model::Segment::Target target{};
 
     PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind", "user");
 
