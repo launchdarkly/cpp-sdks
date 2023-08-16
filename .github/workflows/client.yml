@@ -55,6 +55,7 @@ jobs:
   build-test-windows:
     runs-on: windows-2022
     steps:
+      - run: echo $PATH
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
