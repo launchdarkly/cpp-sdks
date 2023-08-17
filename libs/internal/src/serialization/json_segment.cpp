@@ -37,7 +37,7 @@ tl::expected<std::optional<data_model::Segment::Rule>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Segment::Rule rule;
+    data_model::Segment::Rule rule{};
 
     PARSE_FIELD(rule.clauses, obj, "clauses");
 
@@ -77,7 +77,7 @@ tl::expected<std::optional<data_model::Segment>, JsonError> tag_invoke(
 
     auto const& obj = json_value.as_object();
 
-    data_model::Segment segment;
+    data_model::Segment segment{};
 
     PARSE_REQUIRED_FIELD(segment.key, obj, "key");
     PARSE_REQUIRED_FIELD(segment.version, obj, "version");

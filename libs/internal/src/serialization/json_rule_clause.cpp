@@ -16,7 +16,7 @@ tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Clause clause;
+    data_model::Clause clause{};
 
     PARSE_REQUIRED_FIELD(clause.op, obj, "op");
     PARSE_FIELD(clause.values, obj, "values");
