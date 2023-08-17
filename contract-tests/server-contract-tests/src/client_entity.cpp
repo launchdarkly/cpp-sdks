@@ -147,18 +147,27 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
         return tl::make_unexpected("couldn't parse custom event data");
     }
 
+    if (!params.context) {
+        return tl::make_unexpected("context is required");
+    }
+
+    auto maybe_ctx = ParseContext(*params.context);
+    if (!maybe_ctx) {
+        return tl::make_unexpected(maybe_ctx.error());
+    }
+
     if (params.omitNullData.value_or(false) && !params.metricValue &&
         !params.data) {
-        // client_->Track(params.eventKey);
+        client_->Track(*maybe_ctx, params.eventKey);
         return nlohmann::json{};
     }
 
     if (!params.metricValue) {
-        //  client_->Track(params.eventKey, std::move(*data));
+        client_->Track(*maybe_ctx, params.eventKey, std::move(*data));
         return nlohmann::json{};
     }
 
-    //   client_->Track(params.eventKey, std::move(*data), *params.metricValue);
+    client_->Track(*maybe_ctx, params.eventKey, std::move(*data), *params.metricValue);
     return nlohmann::json{};
 }
 

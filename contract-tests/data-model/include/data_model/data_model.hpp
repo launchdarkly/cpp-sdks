@@ -228,12 +228,14 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagsResponse,
 
 struct CustomEventParams {
     std::string eventKey;
+    std::optional<nlohmann::json> context;
     std::optional<nlohmann::json> data;
     std::optional<bool> omitNullData;
     std::optional<double> metricValue;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CustomEventParams,
                                                 eventKey,
+                                                context,
                                                 data,
                                                 omitNullData,
                                                 metricValue);

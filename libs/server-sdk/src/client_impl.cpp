@@ -172,9 +172,10 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
-    event_processor_->SendAsync(events::TrackEventParams{
-        std::chrono::system_clock::now(), std::move(event_name),
-        ctx.KindsToKeys(), std::move(data), metric_value});
+    event_processor_->SendAsync(events::ServerTrackEventParams{
+        {std::chrono::system_clock::now(), std::move(event_name),
+         ctx.KindsToKeys(), std::move(data), metric_value},
+        ctx});
 }
 
 void ClientImpl::Track(Context const& ctx,
