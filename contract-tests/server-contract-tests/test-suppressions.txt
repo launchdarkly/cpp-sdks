@@ -725,6 +725,11 @@ evaluation/parameterized/variation value types (any)/fallthrough/fallthrough/eva
 evaluation/parameterized/variation value types (any)/match variation 1/match variation 1/evaluate all flags
 evaluation/parameterized/variation value types (any)/match variation 2/match variation 2/evaluate all flags
 evaluation/bucketing/bucket by non-key attribute/in rollouts/attribute not found
+evaluation/parameterized/segment match/user matched via include can be negated/user matched via include can be negated/evaluate all flags
+evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
+evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
+evaluation/parameterized/segment match/user does not match and can be negated/user does not match and can be negated/evaluate all flags
+polling/payload/large payloads
 evaluation/all flags state/default behavior
 evaluation/all flags state/experimentation
 evaluation/all flags state/error in flag/without reasons
