@@ -30,6 +30,8 @@ enum class AllFlagsStateOptions : std::uint8_t {
     ClientSideOnly = (1 << 2)
 };
 
+void operator|=(AllFlagsStateOptions& lhs, AllFlagsStateOptions rhs);
+
 /**
  *  Interface for the standard SDK client methods and properties.
  */

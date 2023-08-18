@@ -8,39 +8,40 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/server_side/json_feature_flags_state.hpp>
 #include <launchdarkly/value.hpp>
 
 #include <chrono>
 #include <future>
 
-tl::expected<launchdarkly::Context, std::string>
-ParseContext(nlohmann::json value) {
+using namespace launchdarkly::server_side;
+
+tl::expected<launchdarkly::Context, std::string> ParseContext(
+    nlohmann::json value) {
     boost::system::error_code ec;
     auto boost_json_val = boost::json::parse(value.dump(), ec);
     if (ec) {
         return tl::make_unexpected(ec.what());
     }
 
-   auto maybe_ctx = boost::json::value_to<
+    auto maybe_ctx = boost::json::value_to<
         tl::expected<launchdarkly::Context, launchdarkly::JsonError>>(
         boost_json_val);
-   if (!maybe_ctx) {
-       return tl::make_unexpected(
-           launchdarkly::ErrorToString(maybe_ctx.error()));
-   }
+    if (!maybe_ctx) {
+        return tl::make_unexpected(
+            launchdarkly::ErrorToString(maybe_ctx.error()));
+    }
 
-   if (!maybe_ctx->Valid()) {
-       return tl::make_unexpected(maybe_ctx->errors());
-   }
+    if (!maybe_ctx->Valid()) {
+        return tl::make_unexpected(maybe_ctx->errors());
+    }
 
-   return *maybe_ctx;
+    return *maybe_ctx;
 }
-
 
 ClientEntity::ClientEntity(
     std::unique_ptr<launchdarkly::server_side::Client> client)
     : client_(std::move(client)) {}
-
 
 tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
     IdentifyEventParams const& params) {
@@ -48,8 +49,7 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Identify(
 
     auto maybe_ctx = ParseContext(params.context);
     if (!maybe_ctx) {
-        return tl::make_unexpected(
-            maybe_ctx.error());
+        return tl::make_unexpected(maybe_ctx.error());
     }
     client_->Identify(*maybe_ctx);
     return nlohmann::json{};
@@ -167,7 +167,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
         return nlohmann::json{};
     }
 
-    client_->Track(*maybe_ctx, params.eventKey, std::move(*data), *params.metricValue);
+    client_->Track(*maybe_ctx, params.eventKey, std::move(*data),
+                   *params.metricValue);
     return nlohmann::json{};
 }
 
@@ -177,17 +178,37 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
 
     boost::ignore_unused(params);
 
-    // TODO: fix when AllFlags available
-//    for (auto& [key, value] : client_->AllFlags()) {
-//        resp.state[key] = nlohmann::json::parse(
-//            boost::json::serialize(boost::json::value_from(value)));
-//    }
+    if (!params.context) {
+        return tl::make_unexpected("context is required");
+    }
+
+    auto maybe_ctx = ParseContext(*params.context);
+    if (!maybe_ctx) {
+        return tl::make_unexpected(maybe_ctx.error());
+    }
+
+    AllFlagsStateOptions options = AllFlagsStateOptions::Default;
+    if (params.withReasons.value_or(false)) {
+        options |= AllFlagsStateOptions::IncludeReasons;
+    }
+    if (params.clientSideOnly.value_or(false)) {
+        options |= AllFlagsStateOptions::ClientSideOnly;
+    }
+    if (params.detailsOnlyForTrackedFlags.value_or(false)) {
+        options |= AllFlagsStateOptions::DetailsOnlyForTrackedFlags;
+    }
+
+    auto state = client_->AllFlagsState(*maybe_ctx, options);
+
+    resp.state = nlohmann::json::parse(
+        boost::json::serialize(boost::json::value_from(state)));
 
     return resp;
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
-    EvaluateFlagParams const& params, launchdarkly::Context const& ctx  ) {
+    EvaluateFlagParams const& params,
+    launchdarkly::Context const& ctx) {
     auto const& key = params.flagKey;
 
     auto const& defaultVal = params.defaultValue;
@@ -207,23 +228,23 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
         }
         case ValueType::Int: {
             auto detail =
-                client_->IntVariationDetail(ctx,key, defaultVal.get<int>());
+                client_->IntVariationDetail(ctx, key, defaultVal.get<int>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
             break;
         }
         case ValueType::Double: {
-            auto detail =
-                client_->DoubleVariationDetail(ctx,key, defaultVal.get<double>());
+            auto detail = client_->DoubleVariationDetail(
+                ctx, key, defaultVal.get<double>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
             break;
         }
         case ValueType::String: {
-            auto detail = client_->StringVariationDetail(ctx,
-                key, defaultVal.get<std::string>());
+            auto detail = client_->StringVariationDetail(
+                ctx, key, defaultVal.get<std::string>());
             result.value = *detail;
             reason = detail.Reason();
             result.variationIndex = detail.VariationIndex();
@@ -243,7 +264,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto detail = client_->JsonVariationDetail(ctx, key, *maybe_fallback);
+            auto detail =
+                client_->JsonVariationDetail(ctx, key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(*detail));
@@ -267,7 +289,6 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateDetail(
 }
 tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
     EvaluateFlagParams const& params) {
-
     auto maybe_ctx = ParseContext(params.context);
     if (!maybe_ctx) {
         return tl::make_unexpected(maybe_ctx.error());
@@ -281,23 +302,24 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
 
     auto const& defaultVal = params.defaultValue;
 
-
     EvaluateFlagResponse result;
 
     switch (params.valueType) {
         case ValueType::Bool:
-            result.value = client_->BoolVariation(*maybe_ctx, key, defaultVal.get<bool>());
+            result.value =
+                client_->BoolVariation(*maybe_ctx, key, defaultVal.get<bool>());
             break;
         case ValueType::Int:
-            result.value = client_->IntVariation(*maybe_ctx, key, defaultVal.get<int>());
+            result.value =
+                client_->IntVariation(*maybe_ctx, key, defaultVal.get<int>());
             break;
         case ValueType::Double:
-            result.value =
-                client_->DoubleVariation(*maybe_ctx,key, defaultVal.get<double>());
+            result.value = client_->DoubleVariation(*maybe_ctx, key,
+                                                    defaultVal.get<double>());
             break;
         case ValueType::String: {
-            result.value =
-                client_->StringVariation(*maybe_ctx,key, defaultVal.get<std::string>());
+            result.value = client_->StringVariation(
+                *maybe_ctx, key, defaultVal.get<std::string>());
             break;
         }
         case ValueType::Any:
@@ -313,7 +335,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Evaluate(
              * protocol, but boost::json in the SDK. We could swap over to
              * boost::json entirely here to remove the awkwardness. */
 
-            auto evaluation = client_->JsonVariation(*maybe_ctx,key, *maybe_fallback);
+            auto evaluation =
+                client_->JsonVariation(*maybe_ctx, key, *maybe_fallback);
 
             auto serialized =
                 boost::json::serialize(boost::json::value_from(evaluation));

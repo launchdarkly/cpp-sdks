@@ -6,7 +6,7 @@
 
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
-#include <launchdarkly/server_side/feature_flags_state_json.hpp>
+#include <launchdarkly/server_side/json_feature_flags_state.hpp>
 
 #include <memory>
 

@@ -4,6 +4,12 @@
 
 namespace launchdarkly::server_side {
 
+void operator|=(AllFlagsStateOptions& lhs, AllFlagsStateOptions rhs) {
+    lhs = static_cast<AllFlagsStateOptions>(
+        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(lhs) |
+        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(rhs));
+}
+
 Client::Client(Config config)
     : client(std::make_unique<ClientImpl>(std::move(config), kVersion)) {}
 

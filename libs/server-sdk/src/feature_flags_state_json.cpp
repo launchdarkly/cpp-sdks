@@ -1,13 +1,16 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
-#include <launchdarkly/server_side/feature_flags_state_json.hpp>
+#include <launchdarkly/server_side/json_feature_flags_state.hpp>
+
+#include <boost/core/ignore_unused.hpp>
 
 namespace launchdarkly::server_side {
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 server_side::FeatureFlagsState::FlagState const& state) {
+    boost::ignore_unused(unused);
     auto& obj = json_value.emplace_object();
     if (state.version) {
         obj.emplace("version", *state.version);
@@ -19,13 +22,13 @@ void tag_invoke(boost::json::value_from_tag const& unused,
         obj.emplace("reason", boost::json::value_from(*state.reason));
     }
     if (state.track_events) {
-        obj.emplace("track_events", true);
+        obj.emplace("trackEvents", true);
     }
     if (state.track_reason) {
-        obj.emplace("track_reason", true);
+        obj.emplace("trackReason", true);
     }
     if (state.debug_events_until_date) {
-        obj.emplace("debug_events_until_date",
+        obj.emplace("debugEventsUntilDate",
                     boost::json::value_from(*state.debug_events_until_date));
     }
 }
@@ -33,6 +36,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 server_side::FeatureFlagsState const& state) {
+    boost::ignore_unused(unused);
     auto& obj = json_value.emplace_object();
     obj.emplace("$valid", state.Valid());
 
