@@ -280,6 +280,10 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
     event.variation = detail.VariationIndex();
     event.version = flag.Version();
 
+    if (detailed) {
+        event.reason = detail.Reason();
+    }
+
     if (flag.debugEventsUntilDate) {
         event.debug_events_until_date =
             events::Date{std::chrono::system_clock::time_point{
@@ -308,9 +312,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
             flag.rules.at(*detail.Reason()->RuleIndex()).trackEvents;
     }
 
-    if (detailed || flag.trackEvents || track_fallthrough || track_rule_match) {
-        event.reason = detail.Reason();
-    }
+    event.require_full_event =
+        flag.trackEvents || track_fallthrough || track_rule_match;
     event_processor_->SendAsync(std::move(event));
     return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
                                detail.Reason());
