@@ -16,4 +16,16 @@ std::unique_ptr<data_store::IDataStore> TestData();
  */
 std::unique_ptr<data_store::IDataStore> Empty();
 
+/**
+ * Returns a flag suitable for inserting into a memory store, parsed from the
+ * given JSON representation.
+ */
+data_store::FlagDescriptor Flag(char const* json);
+
+/**
+ * Returns a segment suitable for inserting into a memory store, parsed from the
+ * given JSON representation.
+ */
+data_store::SegmentDescriptor Segment(char const* json);
+
 }  // namespace launchdarkly::server_side::test_store
