@@ -16,8 +16,10 @@ std::future<bool> Client::StartAsync() {
 }
 
 using FlagKey = std::string;
-[[nodiscard]] std::unordered_map<FlagKey, Value> Client::AllFlagsState() const {
-    return client->AllFlagsState();
+[[nodiscard]] FeatureFlagsState Client::AllFlagsState(
+    Context const& context,
+    enum AllFlagsStateOptions options) {
+    return client->AllFlagsState(context, options);
 }
 
 void Client::Track(Context const& ctx,

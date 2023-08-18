@@ -68,3 +68,8 @@ TEST_F(ClientTest, JsonVariationDefaultPassesThrough) {
         ASSERT_EQ(*client_.JsonVariationDetail(context_, flag, v), v);
     }
 }
+
+TEST_F(ClientTest, AllFlagsStateDefaultOptions) {
+    auto flags = client_.AllFlagsState(context_);
+    ASSERT_FALSE(flags.Valid());
+}

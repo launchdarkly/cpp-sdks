@@ -11,6 +11,8 @@ add_library(${LIBNAME}
         boost.cpp
         client.cpp
         client_impl.cpp
+        feature_flags_state.cpp
+        feature_flags_state_json.cpp
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/data_store_updater.hpp

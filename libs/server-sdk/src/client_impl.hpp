@@ -44,8 +44,10 @@ class ClientImpl : public IClient {
     bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] FeatureFlagsState AllFlagsState(
+        Context const& context,
+        enum AllFlagsStateOptions options =
+            AllFlagsStateOptions::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,

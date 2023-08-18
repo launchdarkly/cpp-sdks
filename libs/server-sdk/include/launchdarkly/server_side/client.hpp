@@ -5,6 +5,8 @@
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <launchdarkly/server_side/feature_flags_state.hpp>
+
 #include <chrono>
 #include <future>
 #include <memory>
@@ -12,6 +14,21 @@
 #include <unordered_map>
 
 namespace launchdarkly::server_side {
+
+enum class AllFlagsStateOptions : std::uint8_t {
+    /** @brief Use default behavior. */
+    Default = 0,
+    /** @brief Include evaluation reasons in the state object. By default, they
+       are not. */
+    IncludeReasons = (1 << 0),
+    /** @brief Include detailed flag metadata only for flags with event tracking
+     * or debugging turned on. This reduces the size of the JSON data if you are
+     * passing the flag state to the front end. */
+    DetailsOnlyForTrackedFlags = (1 << 1),
+    /** @brief Include only flags marked for use with the client-side SDK. By
+       default, all flags are included. */
+    ClientSideOnly = (1 << 2)
+};
 
 /**
  *  Interface for the standard SDK client methods and properties.
@@ -58,8 +75,9 @@ class IClient {
      *
      * @return A map from feature flag keys to values for the current context.
      */
-    [[nodiscard]] virtual std::unordered_map<FlagKey, Value> AllFlagsState()
-        const = 0;
+    [[nodiscard]] virtual FeatureFlagsState AllFlagsState(
+        Context const& context,
+        enum AllFlagsStateOptions options = AllFlagsStateOptions::Default) = 0;
 
     /**
      * Tracks that the current context performed an event for the given event
@@ -258,8 +276,10 @@ class Client : public IClient {
     [[nodiscard]] bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] FeatureFlagsState AllFlagsState(
+        Context const& context,
+        enum AllFlagsStateOptions options =
+            AllFlagsStateOptions::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,
