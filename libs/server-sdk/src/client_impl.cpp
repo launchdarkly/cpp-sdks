@@ -280,6 +280,12 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
     event.variation = detail.VariationIndex();
     event.version = flag.Version();
 
+    if (flag.debugEventsUntilDate) {
+        event.debug_events_until_date =
+            events::Date{std::chrono::system_clock::time_point{
+                std::chrono::milliseconds{*flag.debugEventsUntilDate}}};
+    }
+
     bool track_fallthrough =
         flag.trackEventsFallthrough &&
         detail.ReasonKindIs(EvaluationReason::Kind::kFallthrough);

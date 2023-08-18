@@ -1,4 +1,3 @@
-events/debug events
 evaluation/parameterized/bad attribute reference errors - tilde followed by nothing/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - tilde followed by invalid escape character/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - empty path component/test-flag/evaluate flag with detail
