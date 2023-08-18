@@ -733,10 +733,7 @@ evaluation/all flags state/experimentation
 evaluation/all flags state/error in flag/without reasons
 evaluation/all flags state/error in flag/with reasons
 evaluation/all flags state/client not ready
-events/summary events/basic counter behavior
-events/summary events/reset after each flush
 events/summary events/prerequisites
-events/summary events/flag versions
 events/feature prerequisite events/without reasons
 events/feature prerequisite events/with reasons
 events/experimentation/experiment in rule

@@ -278,6 +278,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
 
     event.value = detail.Value();
     event.variation = detail.VariationIndex();
+    event.version = flag.Version();
 
     bool track_fallthrough =
         flag.trackEventsFallthrough &&
