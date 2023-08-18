@@ -88,7 +88,7 @@ struct Flag {
     std::vector<Target> targets;
     std::vector<Target> contextTargets;
     std::vector<Rule> rules;
-    std::optional<std::uint64_t> offVariation;
+    std::optional<std::int64_t> offVariation;
     bool clientSide;
     ClientSideAvailability clientSideAvailability;
     std::optional<std::string> salt;

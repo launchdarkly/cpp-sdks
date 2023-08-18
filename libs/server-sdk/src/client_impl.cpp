@@ -203,7 +203,21 @@ template <typename T>
 EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
                                                   FlagKey const& key,
                                                   Value default_value,
-                                                  bool check_type) {
+                                                  bool check_type,
+                                                  bool detailed) {
+    events::FeatureEventParams event = {
+        std::chrono::system_clock::now(),
+        key,
+        ctx,
+        default_value,
+        default_value,
+        std::nullopt,
+        std::nullopt,
+        std::nullopt,
+        false,
+        std::nullopt,
+    };
+
     auto desc = memory_store_.GetFlag(key);
 
     if (!desc || !desc->item) {
@@ -214,6 +228,12 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
 
             auto error_reason =
                 EvaluationReason(EvaluationReason::ErrorKind::kClientNotReady);
+
+            if (detailed) {
+                event.reason = error_reason;
+            }
+
+            event_processor_->SendAsync(std::move(event));
             return EvaluationDetail<T>(std::move(default_value), std::nullopt,
                                        std::move(error_reason));
         }
@@ -223,6 +243,11 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
 
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kFlagNotFound);
+
+        if (detailed) {
+            event.reason = error_reason;
+        }
+        event_processor_->SendAsync(std::move(event));
         return EvaluationDetail<T>(std::move(default_value), std::nullopt,
                                    std::move(error_reason));
 
@@ -243,10 +268,43 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
         auto error_reason =
             EvaluationReason(EvaluationReason::ErrorKind::kWrongType);
 
+        if (detailed) {
+            event.reason = error_reason;
+        }
+        event_processor_->SendAsync(std::move(event));
         return EvaluationDetail<T>(std::move(default_value), std::nullopt,
                                    error_reason);
     }
 
+    event.value = detail.Value();
+    event.variation = detail.VariationIndex();
+
+    bool track_fallthrough =
+        flag.trackEventsFallthrough &&
+        detail.ReasonKindIs(EvaluationReason::Kind::kFallthrough);
+
+    bool track_rule_match =
+        detail.ReasonKindIs(EvaluationReason::Kind::kRuleMatch);
+
+    if (track_rule_match) {
+        assert(detail.Reason()->RuleIndex().has_value() &&
+               "evaluation algorithm must produce a rule index in the case of "
+               "rule "
+               "match");
+
+        assert(*detail.Reason()->RuleIndex() < flag.rules.size() &&
+               "evaluation algorithm must produce a valid rule index in the "
+               "case of "
+               "rule match");
+
+        track_rule_match =
+            flag.rules.at(*detail.Reason()->RuleIndex()).trackEvents;
+    }
+
+    if (detailed || flag.trackEvents || track_fallthrough || track_rule_match) {
+        event.reason = detail.Reason();
+    }
+    event_processor_->SendAsync(std::move(event));
     return EvaluationDetail<T>(detail.Value(), detail.VariationIndex(),
                                detail.Reason());
 }
@@ -255,13 +313,13 @@ EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     bool default_value) {
-    return VariationInternal<bool>(ctx, key, default_value, true);
+    return VariationInternal<bool>(ctx, key, default_value, true, true);
 }
 
 bool ClientImpl::BoolVariation(Context const& ctx,
                                IClient::FlagKey const& key,
                                bool default_value) {
-    return *VariationInternal<bool>(ctx, key, default_value, true);
+    return *VariationInternal<bool>(ctx, key, default_value, true, false);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
@@ -269,53 +327,55 @@ EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
     ClientImpl::FlagKey const& key,
     std::string default_value) {
     return VariationInternal<std::string>(ctx, key, std::move(default_value),
-                                          true);
+                                          true, true);
 }
 
 std::string ClientImpl::StringVariation(Context const& ctx,
                                         IClient::FlagKey const& key,
                                         std::string default_value) {
     return *VariationInternal<std::string>(ctx, key, std::move(default_value),
-                                           true);
+                                           true, false);
 }
 
 EvaluationDetail<double> ClientImpl::DoubleVariationDetail(
     Context const& ctx,
     ClientImpl::FlagKey const& key,
     double default_value) {
-    return VariationInternal<double>(ctx, key, default_value, true);
+    return VariationInternal<double>(ctx, key, default_value, true, true);
 }
 
 double ClientImpl::DoubleVariation(Context const& ctx,
                                    IClient::FlagKey const& key,
                                    double default_value) {
-    return *VariationInternal<double>(ctx, key, default_value, true);
+    return *VariationInternal<double>(ctx, key, default_value, true, false);
 }
 
 EvaluationDetail<int> ClientImpl::IntVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     int default_value) {
-    return VariationInternal<int>(ctx, key, default_value, true);
+    return VariationInternal<int>(ctx, key, default_value, true, true);
 }
 
 int ClientImpl::IntVariation(Context const& ctx,
                              IClient::FlagKey const& key,
                              int default_value) {
-    return *VariationInternal<int>(ctx, key, default_value, true);
+    return *VariationInternal<int>(ctx, key, default_value, true, false);
 }
 
 EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     Value default_value) {
-    return VariationInternal<Value>(ctx, key, std::move(default_value), false);
+    return VariationInternal<Value>(ctx, key, std::move(default_value), false,
+                                    true);
 }
 
 Value ClientImpl::JsonVariation(Context const& ctx,
                                 IClient::FlagKey const& key,
                                 Value default_value) {
-    return *VariationInternal<Value>(ctx, key, std::move(default_value), false);
+    return *VariationInternal<Value>(ctx, key, std::move(default_value), false,
+                                     false);
 }
 
 // data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {

@@ -111,7 +111,8 @@ class ClientImpl : public IClient {
     [[nodiscard]] EvaluationDetail<T> VariationInternal(Context const& ctx,
                                                         FlagKey const& key,
                                                         Value default_value,
-                                                        bool check_type);
+                                                        bool check_type,
+                                                        bool detailed);
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,

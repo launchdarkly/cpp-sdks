@@ -252,7 +252,6 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                 << "LaunchDarkly client has not yet been initialized. "
                    "Returning default value";
 
-            // TODO: SC-199918
             auto error_reason =
                 EvaluationReason(EvaluationReason::ErrorKind::kClientNotReady);
             if (eval_reasons_available_) {

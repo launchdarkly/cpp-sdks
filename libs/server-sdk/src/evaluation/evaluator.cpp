@@ -138,7 +138,7 @@ EvaluationDetail<Value> Evaluator::FlagVariation(
     Flag const& flag,
     Flag::Variation variation_index,
     EvaluationReason reason) const {
-    if (variation_index >= flag.variations.size()) {
+    if (variation_index < 0 || variation_index >= flag.variations.size()) {
         LogError(flag.key, Error::NonexistentVariationIndex(variation_index));
         return EvaluationReason::MalformedFlag();
     }
