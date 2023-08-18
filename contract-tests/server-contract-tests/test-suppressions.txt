@@ -1,5 +1,4 @@
 events/debug events
-evaluation/bucketing/bucket by non-key attribute/in rollouts/invalid value type
 evaluation/parameterized/bad attribute reference errors - tilde followed by nothing/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - tilde followed by invalid escape character/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - empty path component/test-flag/evaluate flag with detail
@@ -55,6 +54,8 @@ evaluation/parameterized/evaluation failures (bool)/target variation too low/tar
 evaluation/parameterized/evaluation failures (bool)/target variation too high/target variation too high/evaluate flag with detail
 evaluation/parameterized/evaluation failures (bool)/rule variation too low/rule variation too low/evaluate flag with detail
 evaluation/parameterized/evaluation failures (bool)/rule variation too high/rule variation too high/evaluate flag with detail
+evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag without detail
+evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag without detail
 evaluation/parameterized/evaluation failures (int)/flag not found/flag not found/evaluate flag with detail
 evaluation/parameterized/evaluation failures (int)/off variation too low/off variation too low/evaluate flag with detail
 evaluation/parameterized/evaluation failures (int)/off variation too high/off variation too high/evaluate flag with detail
@@ -723,20 +724,16 @@ evaluation/parameterized/variation value types (any)/off/off/evaluate all flags
 evaluation/parameterized/variation value types (any)/fallthrough/fallthrough/evaluate all flags
 evaluation/parameterized/variation value types (any)/match variation 1/match variation 1/evaluate all flags
 evaluation/parameterized/variation value types (any)/match variation 2/match variation 2/evaluate all flags
-evaluation/bucketing/bucket by non-key attribute/in rollouts/attribute not found
 evaluation/parameterized/segment match/user matched via include can be negated/user matched via include can be negated/evaluate all flags
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user does not match and can be negated/user does not match and can be negated/evaluate all flags
-polling/payload/large payloads
 evaluation/all flags state/default behavior
 evaluation/all flags state/experimentation
 evaluation/all flags state/error in flag/without reasons
 evaluation/all flags state/error in flag/with reasons
 evaluation/all flags state/client not ready
 events/summary events/basic counter behavior
-events/summary events/contextKinds
-events/summary events/unknown flag
 events/summary events/reset after each flush
 events/summary events/prerequisites
 events/summary events/flag versions
@@ -744,12 +741,6 @@ events/feature prerequisite events/without reasons
 events/feature prerequisite events/with reasons
 events/experimentation/experiment in rule
 events/experimentation/experiment in fallthrough
-events/identify events/identify event makes index event for same user unnecessary/single kind default
-events/identify events/identify event makes index event for same user unnecessary/single kind non-default
-events/identify events/identify event makes index event for same user unnecessary/multi-kind
-events/index events/basic properties
-events/index events/only one index event per evaluation context/from feature event
-events/index events/only one index event per evaluation context/from custom event
 events/context properties/single-kind minimal
 events/context properties/multi-kind minimal
 events/context properties/single-kind with attributes, nothing private
@@ -770,15 +761,6 @@ events/context properties/custom attribute with value []
 events/context properties/custom attribute with value ["a","b"]
 events/context properties/custom attribute with value {}
 events/context properties/custom attribute with value {"a":1}
-events/event capacity/capacity is enforced
-events/event capacity/buffer is reset after flush
-events/event capacity/summary event is still included even if buffer was full
-events/disabling/evaluation
-events/disabling/identify event
-events/disabling/custom event
-streaming/requests/method and headers/GET
-streaming/requests/URL path is computed correctly/no environment filter/base URI has no trailing slash/GET
-streaming/requests/URL path is computed correctly/no environment filter/base URI has a trailing slash/GET
 streaming/updates/flag patch with higher version is applied
 streaming/updates/segment patch with higher version is applied
 streaming/updates/flag patch with same version is not applied
@@ -824,48 +806,6 @@ streaming/validation/drop and reconnect if stream event has well-formed JSON not
 streaming/validation/unrecognized data that can be safely ignored/unknown event name with JSON body
 streaming/validation/unrecognized data that can be safely ignored/unknown event name with non-JSON body
 streaming/validation/unrecognized data that can be safely ignored/patch event with unrecognized path kind
-polling/requests/method and headers/GET
-polling/requests/URL path is computed correctly/no environment filter/base URI has no trailing slash/GET
-polling/requests/URL path is computed correctly/no environment filter/base URI has a trailing slash/GET
-service endpoints/using per-component configuration/streaming
-service endpoints/using per-component configuration/events
-service endpoints/using separate service endpoints properties/streaming
-service endpoints/using separate service endpoints properties/events
-tags/stream requests/{"applicationId":null,"applicationVersion":null}
-tags/stream requests/{"applicationId":null,"applicationVersion":""}
-tags/stream requests/{"applicationId":null,"applicationVersion":""}
-tags/stream requests/{"applicationId":null,"applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":null}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":null}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":null}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/stream requests/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":null,"applicationVersion":null}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":null,"applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":null}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/event posts/{"applicationId":"","applicationVersion":""}
-tags/disallowed characters
-context type/build
-context type/convert
 events/feature events/full feature event for tracked flag/without reason/single kind default/valid flag/type: bool
 events/feature events/full feature event for tracked flag/without reason/single kind default/valid flag/type: int
 events/feature events/full feature event for tracked flag/without reason/single kind default/valid flag/type: double
@@ -927,3 +867,37 @@ events/feature events/full feature event for tracked flag/with reason/multi-kind
 events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: string
 events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: any
 events/feature events/evaluating all flags generates no events
+
+# The Server doesn't need to know how to deserialize users.
+context type/convert/old user to context/{"key": ""}
+context type/convert/old user to context/{"key": "a"}
+context type/convert/old user to context/{"key": "a"}
+context type/convert/old user to context/{"key": "a", "custom": {"b": true}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": 1}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": "c"}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": [1, 2]}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": {"c": 1}}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": 1, "c": 2}}
+context type/convert/old user to context/{"key": "a", "custom": {"b": 1, "c": null}}
+context type/convert/old user to context/{"key": "a", "custom": {}}
+context type/convert/old user to context/{"key": "a", "custom": null}
+context type/convert/old user to context/{"key": "a", "anonymous": true}
+context type/convert/old user to context/{"key": "a", "anonymous": false}
+context type/convert/old user to context/{"key": "a", "anonymous": null}
+context type/convert/old user to context/{"key": "a", "privateAttributeNames": ["b"]}
+context type/convert/old user to context/{"key": "a", "privateAttributeNames": []}
+context type/convert/old user to context/{"key": "a", "privateAttributeNames": null}
+context type/convert/old user to context/{"key": "a", "name": "b"}
+context type/convert/old user to context/{"key": "a", "name": null}
+context type/convert/old user to context/{"key": "a", "firstName": "b"}
+context type/convert/old user to context/{"key": "a", "firstName": null}
+context type/convert/old user to context/{"key": "a", "lastName": "b"}
+context type/convert/old user to context/{"key": "a", "lastName": null}
+context type/convert/old user to context/{"key": "a", "email": "b"}
+context type/convert/old user to context/{"key": "a", "email": null}
+context type/convert/old user to context/{"key": "a", "country": "b"}
+context type/convert/old user to context/{"key": "a", "country": null}
+context type/convert/old user to context/{"key": "a", "avatar": "b"}
+context type/convert/old user to context/{"key": "a", "avatar": null}
+context type/convert/old user to context/{"key": "a", "ip": "b"}
+context type/convert/old user to context/{"key": "a", "ip": null}
