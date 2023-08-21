@@ -59,7 +59,7 @@ class IClient {
      *
      * @return A map from feature flag keys to values for the current context.
      */
-    [[nodiscard]] virtual AllFlagsState AllFlagsState(
+    [[nodiscard]] virtual class AllFlagsState AllFlagsState(
         Context const& context,
         AllFlagsState::Options options = AllFlagsState::Options::Default) = 0;
 
