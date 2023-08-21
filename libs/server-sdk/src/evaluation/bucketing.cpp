@@ -98,7 +98,7 @@ AttributeReference const& Key() {
     return key;
 }
 
-std::optional<float> ContextHash(Value const& value, BucketPrefix prefix) {
+std::optional<double> ContextHash(Value const& value, BucketPrefix prefix) {
     using namespace launchdarkly::encoding;
 
     std::optional<std::string> id = BucketValue(value);

@@ -67,7 +67,7 @@ TEST_P(AllOperatorsTest, Matches) {
                                                                *store, stack);
     ASSERT_EQ(result, param.expected)
         << context.Get("user", "attr") << " " << clause.op << " "
-        << clause.values << " should be " << param.expected;
+        << Value(clause.values) << " should be " << param.expected;
 }
 
 #define MATCH true

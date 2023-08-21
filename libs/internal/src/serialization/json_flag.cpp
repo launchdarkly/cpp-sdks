@@ -19,7 +19,7 @@ tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rollout rollout;
+    data_model::Flag::Rollout rollout{};
 
     PARSE_FIELD(rollout.variations, obj, "variations");
     PARSE_FIELD_DEFAULT(rollout.kind, obj, "kind",
@@ -49,7 +49,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rollout::WeightedVariation weighted_variation;
+    data_model::Flag::Rollout::WeightedVariation weighted_variation{};
     PARSE_FIELD(weighted_variation.variation, obj, "variation");
     PARSE_FIELD(weighted_variation.weight, obj, "weight");
     PARSE_FIELD(weighted_variation.untracked, obj, "untracked");
@@ -83,7 +83,7 @@ tag_invoke(boost::json::value_to_tag<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Prerequisite prerequisite;
+    data_model::Flag::Prerequisite prerequisite{};
     PARSE_REQUIRED_FIELD(prerequisite.key, obj, "key");
     PARSE_FIELD(prerequisite.variation, obj, "variation");
     return prerequisite;
@@ -98,7 +98,7 @@ tl::expected<std::optional<data_model::Flag::Target>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Target target;
+    data_model::Flag::Target target{};
     PARSE_FIELD(target.values, obj, "values");
     PARSE_FIELD(target.variation, obj, "variation");
     PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind",
@@ -115,7 +115,7 @@ tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rule rule;
+    data_model::Flag::Rule rule{};
 
     PARSE_FIELD(rule.trackEvents, obj, "trackEvents");
     PARSE_FIELD(rule.clauses, obj, "clauses");
@@ -144,7 +144,7 @@ tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::ClientSideAvailability client_side_availability;
+    data_model::Flag::ClientSideAvailability client_side_availability{};
     PARSE_FIELD(client_side_availability.usingEnvironmentId, obj,
                 "usingEnvironmentId");
     PARSE_FIELD(client_side_availability.usingMobileKey, obj, "usingMobileKey");
@@ -161,7 +161,7 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
 
     auto const& obj = json_value.as_object();
 
-    data_model::Flag flag;
+    data_model::Flag flag{};
 
     PARSE_REQUIRED_FIELD(flag.key, obj, "key");
 
@@ -195,14 +195,14 @@ tag_invoke(boost::json::value_to_tag<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    std::optional<data_model::Flag::Rollout> rollout;
+    std::optional<data_model::Flag::Rollout> rollout{};
     PARSE_CONDITIONAL_FIELD(rollout, obj, "rollout");
 
     if (rollout) {
         return std::make_optional(*rollout);
     }
 
-    data_model::Flag::Variation variation;
+    data_model::Flag::Variation variation{};
     PARSE_REQUIRED_FIELD(variation, obj, "variation");
 
     return std::make_optional(variation);

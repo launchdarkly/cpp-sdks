@@ -61,7 +61,7 @@ class BucketPrefix {
     std::variant<KeyAndSalt, Seed> prefix_;
 };
 
-using ContextHashValue = float;
+using ContextHashValue = double;
 
 /**
  * Computes the context hash value for an attribute in the given context

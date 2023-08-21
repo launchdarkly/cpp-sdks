@@ -79,7 +79,11 @@ TEST(OpTests, DateComparisonMicrosecondPrecision) {
     }
 }
 
-TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
+// This test is meant to verify that platforms with > microsecond precision
+// still compare dates correctly. If the platform doesn't support > microsecond
+// precision, then we try to verify that the reverse comparison is also false
+// (if we had an equal operator we'd use that instead.)
+TEST(OpTests, DateComparisonWithMoreThanMicrosecondPrecision) {
     auto dates = std::vector<std::pair<std::string, std::string>>{
         // Using Zulu suffix.
         {"2023-10-08T02:00:00.000001Z", "2023-10-08T02:00:00.0000011Z"},
@@ -88,17 +92,15 @@ TEST(OpTests, DateComparisonFailsWithMoreThanMicrosecondPrecision) {
          "2023-10-08T02:00:00.00000000011+00:00"}};
 
     for (auto const& [date1, date2] : dates) {
-        EXPECT_FALSE(Match(Clause::Op::kBefore, date1, date2))
-            << date1 << " < " << date2;
-
-        EXPECT_FALSE(Match(Clause::Op::kAfter, date1, date2))
-            << date1 << " not > " << date2;
-
-        EXPECT_FALSE(Match(Clause::Op::kBefore, date2, date1))
-            << date2 << " not < " << date1;
-
-        EXPECT_FALSE(Match(Clause::Op::kAfter, date2, date1))
-            << date2 << " > " << date1;
+        bool date1_before_date2 = Match(Clause::Op::kBefore, date1, date2);
+        if (date1_before_date2) {
+            // Platform seems to support > microsecond precision.
+            EXPECT_TRUE(Match(Clause::Op::kAfter, date2, date1))
+                << date1 << " > " << date2;
+        } else {
+            EXPECT_FALSE(Match(Clause::Op::kBefore, date2, date1))
+                << date2 << " not < " << date1;
+        }
     }
 }
 
