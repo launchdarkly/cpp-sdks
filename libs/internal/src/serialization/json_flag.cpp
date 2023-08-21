@@ -204,8 +204,8 @@ tag_invoke(boost::json::value_to_tag<
 
     data_model::Flag::Variation variation{};
     /* If there's no rollout, this must be a variation. If there's no
-     * data at all, we treat it as variation 0 (since upstream encoders may
-     * omit it. */
+     * data at all, we must treat it as variation 0 (since upstream encoders may
+     * omit 0.) */
     PARSE_FIELD_DEFAULT(variation, obj, "variation", 0);
 
     return std::make_optional(variation);
