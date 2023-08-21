@@ -62,6 +62,9 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
             "myFlagTracked": {
                 "version": 42,
                 "variation": 1,
+                "reason":{
+                    "kind" : "FALLTHROUGH"
+                },
                 "trackReason" : true,
                 "trackEvents" : true
             },
