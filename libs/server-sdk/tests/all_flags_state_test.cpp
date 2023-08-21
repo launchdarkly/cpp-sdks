@@ -8,7 +8,7 @@ using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
 TEST(AllFlagsTest, Empty) {
-    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
     auto state = builder.Build();
     ASSERT_TRUE(state.Valid());
     ASSERT_TRUE(state.States().empty());
@@ -16,7 +16,7 @@ TEST(AllFlagsTest, Empty) {
 }
 
 TEST(AllFlagsTest, DefaultOptions) {
-    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
     builder.AddFlag(
         "myFlag", true,
@@ -42,7 +42,7 @@ TEST(AllFlagsTest, DefaultOptions) {
 
 TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
     AllFlagsStateBuilder builder{
-        AllFlagsStateOptions::DetailsOnlyForTrackedFlags};
+        AllFlagsState::Options::DetailsOnlyForTrackedFlags};
     builder.AddFlag(
         "myFlagTracked", true,
         AllFlagsState::State{42, 1, EvaluationReason::Fallthrough(false), true,
@@ -62,9 +62,6 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
             "myFlagTracked": {
                 "version": 42,
                 "variation": 1,
-                "reason" : {
-                    "kind": "FALLTHROUGH"
-                },
                 "trackReason" : true,
                 "trackEvents" : true
             },
@@ -80,7 +77,7 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
 }
 
 TEST(AllFlagsTest, IncludeReasons) {
-    AllFlagsStateBuilder builder{AllFlagsStateOptions::IncludeReasons};
+    AllFlagsStateBuilder builder{AllFlagsState::Options::IncludeReasons};
     builder.AddFlag(
         "myFlag", true,
         AllFlagsState::State{42, 1, EvaluationReason::Fallthrough(false), false,
@@ -107,7 +104,7 @@ TEST(AllFlagsTest, IncludeReasons) {
 }
 
 TEST(AllFlagsTest, FlagValues) {
-    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
     const std::size_t kNumFlags = 10;
 
@@ -129,7 +126,7 @@ TEST(AllFlagsTest, FlagValues) {
 }
 
 TEST(AllFlagsTest, FlagState) {
-    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
     const std::size_t kNumFlags = 10;
 

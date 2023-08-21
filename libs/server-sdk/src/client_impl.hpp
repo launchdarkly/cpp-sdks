@@ -46,8 +46,8 @@ class ClientImpl : public IClient {
     using FlagKey = std::string;
     [[nodiscard]] class AllFlagsState AllFlagsState(
         Context const& context,
-        enum AllFlagsStateOptions options =
-            AllFlagsStateOptions::Default) override;
+        AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,

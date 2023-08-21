@@ -10,8 +10,8 @@ namespace launchdarkly::server_side {
 bool IsExperimentationEnabled(data_model::Flag const& flag,
                               std::optional<EvaluationReason> const& reason);
 
-bool IsSet(AllFlagsStateOptions options, AllFlagsStateOptions flag);
-bool NotSet(AllFlagsStateOptions options, AllFlagsStateOptions flag);
+bool IsSet(AllFlagsState::Options options, AllFlagsState::Options flag);
+bool NotSet(AllFlagsState::Options options, AllFlagsState::Options flag);
 
 class AllFlagsStateBuilder {
    public:
@@ -19,7 +19,7 @@ class AllFlagsStateBuilder {
      * Constructs a builder capable of generating a AllFlagsState structure.
      * @param options Options affecting the behavior of the builder.
      */
-    AllFlagsStateBuilder(enum AllFlagsStateOptions options);
+    AllFlagsStateBuilder(AllFlagsState::Options options);
 
     /**
      * Adds a flag, including its evaluation result and additional state.
@@ -39,7 +39,7 @@ class AllFlagsStateBuilder {
     [[nodiscard]] AllFlagsState Build();
 
    private:
-    enum AllFlagsStateOptions options_;
+    enum AllFlagsState::Options options_;
     std::unordered_map<std::string, AllFlagsState::State> flags_state_;
     std::unordered_map<std::string, Value> evaluations_;
 };

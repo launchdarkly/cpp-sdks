@@ -24,6 +24,31 @@ namespace launchdarkly::server_side {
  */
 class AllFlagsState {
    public:
+    enum class Options : std::uint8_t {
+        /**
+         * Default behavior.
+         */
+        Default = 0,
+        /**
+         * Include evaluation reasons in the state object. By default, they
+         * are not.
+         */
+        IncludeReasons = (1 << 0),
+        /**
+         * Include detailed flag metadata only for flags with event tracking
+         * or debugging turned on.
+         *
+         * This reduces the size of the JSON data if you are
+         * passing the flag state to the front end.
+         */
+        DetailsOnlyForTrackedFlags = (1 << 1),
+        /**
+         * Include only flags marked for use with the client-side SDK.
+         * By default, all flags are included.
+         */
+        ClientSideOnly = (1 << 2)
+    };
+
     /**
      * State contains information pertaining to a single feature flag.
      */
@@ -131,6 +156,13 @@ class AllFlagsState {
     const std::unordered_map<std::string, class State> flags_state_;
     const std::unordered_map<std::string, Value> evaluations_;
 };
+
+void operator|=(AllFlagsState::Options& lhs, AllFlagsState::Options rhs);
+AllFlagsState::Options operator|(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs);
+
+AllFlagsState::Options operator&(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs);
 
 bool operator==(class AllFlagsState::State const& lhs,
                 class AllFlagsState::State const& rhs);

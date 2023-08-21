@@ -4,22 +4,22 @@
 
 namespace launchdarkly::server_side {
 
-void operator|=(AllFlagsStateOptions& lhs, AllFlagsStateOptions rhs) {
+void operator|=(AllFlagsState::Options& lhs, AllFlagsState::Options rhs) {
     lhs = lhs | rhs;
 }
 
-AllFlagsStateOptions operator|(AllFlagsStateOptions lhs,
-                               AllFlagsStateOptions rhs) {
-    return static_cast<AllFlagsStateOptions>(
-        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(lhs) |
-        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(rhs));
+AllFlagsState::Options operator|(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs) {
+    return static_cast<AllFlagsState::Options>(
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(lhs) |
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(rhs));
 }
 
-AllFlagsStateOptions operator&(AllFlagsStateOptions lhs,
-                               AllFlagsStateOptions rhs) {
-    return static_cast<AllFlagsStateOptions>(
-        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(lhs) &
-        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(rhs));
+AllFlagsState::Options operator&(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs) {
+    return static_cast<AllFlagsState::Options>(
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(lhs) &
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(rhs));
 }
 
 Client::Client(Config config)
@@ -36,7 +36,7 @@ std::future<bool> Client::StartAsync() {
 using FlagKey = std::string;
 [[nodiscard]] AllFlagsState Client::AllFlagsState(
     Context const& context,
-    enum AllFlagsStateOptions options) {
+    enum AllFlagsState::Options options) {
     return client->AllFlagsState(context, options);
 }
 

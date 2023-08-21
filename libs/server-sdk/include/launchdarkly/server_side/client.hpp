@@ -14,39 +14,6 @@
 #include <unordered_map>
 
 namespace launchdarkly::server_side {
-
-enum class AllFlagsStateOptions : std::uint8_t {
-    /**
-     * Default behavior.
-     */
-    Default = 0,
-    /**
-     * Include evaluation reasons in the state object. By default, they
-     * are not.
-     */
-    IncludeReasons = (1 << 0),
-    /**
-     * Include detailed flag metadata only for flags with event tracking
-     * or debugging turned on.
-     *
-     * This reduces the size of the JSON data if you are
-     * passing the flag state to the front end.
-     */
-    DetailsOnlyForTrackedFlags = (1 << 1),
-    /**
-     * Include only flags marked for use with the client-side SDK.
-     * By default, all flags are included.
-     */
-    ClientSideOnly = (1 << 2)
-};
-
-void operator|=(AllFlagsStateOptions& lhs, AllFlagsStateOptions rhs);
-AllFlagsStateOptions operator|(AllFlagsStateOptions lhs,
-                               AllFlagsStateOptions rhs);
-
-AllFlagsStateOptions operator&(AllFlagsStateOptions lhs,
-                               AllFlagsStateOptions rhs);
-
 /**
  *  Interface for the standard SDK client methods and properties.
  */
@@ -94,7 +61,7 @@ class IClient {
      */
     [[nodiscard]] virtual AllFlagsState AllFlagsState(
         Context const& context,
-        enum AllFlagsStateOptions options = AllFlagsStateOptions::Default) = 0;
+        AllFlagsState::Options options = AllFlagsState::Options::Default) = 0;
 
     /**
      * Tracks that the current context performed an event for the given event
@@ -295,8 +262,8 @@ class Client : public IClient {
     using FlagKey = std::string;
     [[nodiscard]] class AllFlagsState AllFlagsState(
         Context const& context,
-        enum AllFlagsStateOptions options =
-            AllFlagsStateOptions::Default) override;
+        enum AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,

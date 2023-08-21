@@ -187,15 +187,15 @@ tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
         return tl::make_unexpected(maybe_ctx.error());
     }
 
-    AllFlagsStateOptions options = AllFlagsStateOptions::Default;
+    AllFlagsState::Options options = AllFlagsState::Options::Default;
     if (params.withReasons.value_or(false)) {
-        options |= AllFlagsStateOptions::IncludeReasons;
+        options |= AllFlagsState::Options::IncludeReasons;
     }
     if (params.clientSideOnly.value_or(false)) {
-        options |= AllFlagsStateOptions::ClientSideOnly;
+        options |= AllFlagsState::Options::ClientSideOnly;
     }
     if (params.detailsOnlyForTrackedFlags.value_or(false)) {
-        options |= AllFlagsStateOptions::DetailsOnlyForTrackedFlags;
+        options |= AllFlagsState::Options::DetailsOnlyForTrackedFlags;
     }
 
     auto state = client_->AllFlagsState(*maybe_ctx, options);

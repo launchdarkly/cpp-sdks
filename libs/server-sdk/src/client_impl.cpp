@@ -159,7 +159,7 @@ bool ClientImpl::Initialized() const {
 }
 
 AllFlagsState ClientImpl::AllFlagsState(Context const& context,
-                                        enum AllFlagsStateOptions options) {
+                                        AllFlagsState::Options options) {
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (config_.Offline()) {
@@ -186,7 +186,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
         auto const& flag = *(v->item);
 
-        if (IsSet(options, AllFlagsStateOptions::ClientSideOnly) &&
+        if (IsSet(options, AllFlagsState::Options::ClientSideOnly) &&
             !flag.clientSideAvailability.usingEnvironmentId) {
             continue;
         }
