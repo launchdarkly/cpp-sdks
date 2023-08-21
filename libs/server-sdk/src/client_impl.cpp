@@ -158,15 +158,15 @@ bool ClientImpl::Initialized() const {
     return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
-FeatureFlagsState ClientImpl::AllFlagsState(Context const& context,
-                                            enum AllFlagsStateOptions options) {
+AllFlagsState ClientImpl::AllFlagsState(Context const& context,
+                                        enum AllFlagsStateOptions options) {
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (config_.Offline()) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "AllFlagsState() called, but client is in offline mode. "
                "Returning empty state";
-        return FeatureFlagsState{};
+        return {};
     }
 
     if (!Initialized()) {
@@ -174,12 +174,34 @@ FeatureFlagsState ClientImpl::AllFlagsState(Context const& context,
             << "AllFlagsState() called before client has finished "
                "initializing! Feature store unavailable - returning empty "
                "state";
-        return FeatureFlagsState{};
+        return {};
     }
 
-    AllFlagsStateBuilder builder{evaluator_, memory_store_};
+    AllFlagsStateBuilder builder{options};
 
-    return builder.Build(context, options);
+    for (auto const& [k, v] : memory_store_.AllFlags()) {
+        if (!v || !v->item) {
+            continue;
+        }
+
+        auto const& flag = *(v->item);
+
+        if (IsSet(options, AllFlagsStateOptions::ClientSideOnly) &&
+            !flag.clientSideAvailability.usingEnvironmentId) {
+            continue;
+        }
+
+        EvaluationDetail<Value> detail = evaluator_.Evaluate(flag, context);
+
+        bool in_experiment = IsExperimentationEnabled(flag, detail.Reason());
+        builder.AddFlag(k, detail.Value(),
+                        AllFlagsState::Metadata{
+                            flag.Version(), detail.VariationIndex(),
+                            detail.Reason(), flag.trackEvents || in_experiment,
+                            in_experiment, flag.debugEventsUntilDate});
+    }
+
+    return builder.Build();
 }
 
 void ClientImpl::TrackInternal(Context const& ctx,

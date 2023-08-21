@@ -44,7 +44,7 @@ class ClientImpl : public IClient {
     bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] FeatureFlagsState AllFlagsState(
+    [[nodiscard]] class AllFlagsState AllFlagsState(
         Context const& context,
         enum AllFlagsStateOptions options =
             AllFlagsStateOptions::Default) override;

@@ -72,6 +72,8 @@ TEST_F(ClientTest, JsonVariationDefaultPassesThrough) {
 TEST_F(ClientTest, AllFlagsStateNotValid) {
     // Since we don't have any ability to insert into the data store at the time
     // this test is written, just check that the result is not valid.
-    auto flags = client_.AllFlagsState(context_);
+    auto flags = client_.AllFlagsState(
+        context_, AllFlagsStateOptions::IncludeReasons |
+                      AllFlagsStateOptions::ClientSideOnly);
     ASSERT_FALSE(flags.Valid());
 }

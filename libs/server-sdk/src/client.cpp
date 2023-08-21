@@ -5,8 +5,20 @@
 namespace launchdarkly::server_side {
 
 void operator|=(AllFlagsStateOptions& lhs, AllFlagsStateOptions rhs) {
-    lhs = static_cast<AllFlagsStateOptions>(
+    lhs = lhs | rhs;
+}
+
+AllFlagsStateOptions operator|(AllFlagsStateOptions lhs,
+                               AllFlagsStateOptions rhs) {
+    return static_cast<AllFlagsStateOptions>(
         static_cast<std::underlying_type_t<AllFlagsStateOptions>>(lhs) |
+        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(rhs));
+}
+
+AllFlagsStateOptions operator&(AllFlagsStateOptions lhs,
+                               AllFlagsStateOptions rhs) {
+    return static_cast<AllFlagsStateOptions>(
+        static_cast<std::underlying_type_t<AllFlagsStateOptions>>(lhs) &
         static_cast<std::underlying_type_t<AllFlagsStateOptions>>(rhs));
 }
 
@@ -22,7 +34,7 @@ std::future<bool> Client::StartAsync() {
 }
 
 using FlagKey = std::string;
-[[nodiscard]] FeatureFlagsState Client::AllFlagsState(
+[[nodiscard]] AllFlagsState Client::AllFlagsState(
     Context const& context,
     enum AllFlagsStateOptions options) {
     return client->AllFlagsState(context, options);

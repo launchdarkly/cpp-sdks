@@ -135,7 +135,7 @@ streaming/validation/drop and reconnect if stream event has well-formed JSON not
 streaming/validation/drop and reconnect if stream event has well-formed JSON not matching schema/patch event
 streaming/validation/drop and reconnect if stream event has well-formed JSON not matching schema/delete event
 
-# The server-side SDK doesn't need to know how to serialize old-style users.
+# The Server doesn't need to know how to deserialize users.
 context type/convert/old user to context/{"key": ""}
 context type/convert/old user to context/{"key": "a"}
 context type/convert/old user to context/{"key": "a"}

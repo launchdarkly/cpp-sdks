@@ -11,8 +11,8 @@ add_library(${LIBNAME}
         boost.cpp
         client.cpp
         client_impl.cpp
-        feature_flags_state.cpp
-        feature_flags_state_json.cpp
+        all_flags_state/all_flags_state.cpp
+        all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
