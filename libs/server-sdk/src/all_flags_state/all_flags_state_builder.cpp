@@ -16,8 +16,8 @@ void AllFlagsStateBuilder::AddFlag(std::string const& key,
             flag.omit_details_ = true;
         }
     }
-    if (NotSet(options_, AllFlagsState::Options::IncludeReasons) ||
-        flag.TrackReason()) {
+    if (NotSet(options_, AllFlagsState::Options::IncludeReasons) &&
+        !flag.TrackReason()) {
         flag.reason_ = std::nullopt;
     }
     flags_state_.emplace(key, std::move(flag));
