@@ -8,7 +8,7 @@ namespace launchdarkly::server_side {
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                server_side::AllFlagsState::Metadata const& state);
+                server_side::AllFlagsState::State const& state);
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,

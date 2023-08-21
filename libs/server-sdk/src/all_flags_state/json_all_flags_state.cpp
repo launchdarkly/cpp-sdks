@@ -1,15 +1,15 @@
-#include "launchdarkly/serialization/json_evaluation_reason.hpp"
-#include "launchdarkly/serialization/json_primitives.hpp"
-#include "launchdarkly/serialization/json_value.hpp"
-#include "launchdarkly/server_side/json_feature_flags_state.hpp"
+#include <launchdarkly/serialization/json_evaluation_reason.hpp>
+#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 
 #include <boost/core/ignore_unused.hpp>
+#include <boost/json.hpp>
 
 namespace launchdarkly::server_side {
 
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
-                server_side::AllFlagsState::Metadata const& state) {
+                server_side::AllFlagsState::State const& state) {
     boost::ignore_unused(unused);
     auto& obj = json_value.emplace_object();
 
@@ -47,9 +47,9 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     auto& obj = json_value.emplace_object();
     obj.emplace("$valid", state.Valid());
 
-    obj.emplace("$flagsState", boost::json::value_from(state.FlagsState()));
+    obj.emplace("$flagsState", boost::json::value_from(state.States()));
 
-    for (auto const& [k, v] : state.Evaluations()) {
+    for (auto const& [k, v] : state.Values()) {
         obj.emplace(k, boost::json::value_from(v));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace launchdarkly::server_side {
 
-AllFlagsState::Metadata::Metadata(
+AllFlagsState::State::State(
     std::uint64_t version,
     std::optional<std::int64_t> variation,
     std::optional<EvaluationReason> reason,
@@ -17,41 +17,40 @@ AllFlagsState::Metadata::Metadata(
       debug_events_until_date_(debug_events_until_date),
       omit_details_(false) {}
 
-std::uint64_t AllFlagsState::Metadata::Version() const {
+std::uint64_t AllFlagsState::State::Version() const {
     return version_;
 }
 
-std::optional<std::int64_t> AllFlagsState::Metadata::Variation() const {
+std::optional<std::int64_t> AllFlagsState::State::Variation() const {
     return variation_;
 }
 
-std::optional<EvaluationReason> const& AllFlagsState::Metadata::Reason() const {
+std::optional<EvaluationReason> const& AllFlagsState::State::Reason() const {
     return reason_;
 }
 
-bool AllFlagsState::Metadata::TrackEvents() const {
+bool AllFlagsState::State::TrackEvents() const {
     return track_events_;
 }
 
-bool AllFlagsState::Metadata::TrackReason() const {
+bool AllFlagsState::State::TrackReason() const {
     return track_reason_;
 }
 
-std::optional<std::uint64_t> const&
-AllFlagsState::Metadata::DebugEventsUntilDate() const {
+std::optional<std::uint64_t> const& AllFlagsState::State::DebugEventsUntilDate()
+    const {
     return debug_events_until_date_;
 }
 
-bool AllFlagsState::Metadata::OmitDetails() const {
+bool AllFlagsState::State::OmitDetails() const {
     return omit_details_;
 }
 
 AllFlagsState::AllFlagsState()
     : valid_(false), evaluations_(), flags_state_() {}
 
-AllFlagsState::AllFlagsState(
-    std::unordered_map<std::string, Value> evaluations,
-    std::unordered_map<std::string, Metadata> flags_state)
+AllFlagsState::AllFlagsState(std::unordered_map<std::string, Value> evaluations,
+                             std::unordered_map<std::string, State> flags_state)
     : valid_(true),
       evaluations_(std::move(evaluations)),
       flags_state_(std::move(flags_state)) {}
@@ -60,24 +59,22 @@ bool AllFlagsState::Valid() const {
     return valid_;
 }
 
-std::unordered_map<std::string, AllFlagsState::Metadata> const&
-AllFlagsState::FlagsState() const {
+std::unordered_map<std::string, AllFlagsState::State> const&
+AllFlagsState::States() const {
     return flags_state_;
 }
 
-std::unordered_map<std::string, Value> const& AllFlagsState::Evaluations()
-    const {
+std::unordered_map<std::string, Value> const& AllFlagsState::Values() const {
     return evaluations_;
 }
 
 bool operator==(AllFlagsState const& lhs, AllFlagsState const& rhs) {
-    return lhs.Valid() == rhs.Valid() &&
-           lhs.Evaluations() == rhs.Evaluations() &&
-           lhs.FlagsState() == rhs.FlagsState();
+    return lhs.Valid() == rhs.Valid() && lhs.Values() == rhs.Values() &&
+           lhs.States() == rhs.States();
 }
 
-bool operator==(AllFlagsState::Metadata const& lhs,
-                AllFlagsState::Metadata const& rhs) {
+bool operator==(AllFlagsState::State const& lhs,
+                AllFlagsState::State const& rhs) {
     return lhs.Version() == rhs.Version() &&
            lhs.Variation() == rhs.Variation() && lhs.Reason() == rhs.Reason() &&
            lhs.TrackEvents() == rhs.TrackEvents() &&

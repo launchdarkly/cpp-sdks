@@ -1,6 +1,5 @@
 #pragma once
 
-#include <launchdarkly/server_side/all_flags_state.hpp>
 #include <launchdarkly/server_side/client.hpp>
 
 #include "../data_store/data_store.hpp"
@@ -30,7 +29,7 @@ class AllFlagsStateBuilder {
      */
     void AddFlag(std::string const& key,
                  Value value,
-                 AllFlagsState::Metadata state);
+                 AllFlagsState::State state);
 
     /**
      * Builds a AllFlagsState structure from the flags added to the builder.
@@ -41,7 +40,7 @@ class AllFlagsStateBuilder {
 
    private:
     enum AllFlagsStateOptions options_;
-    std::unordered_map<std::string, AllFlagsState::Metadata> flags_state_;
+    std::unordered_map<std::string, AllFlagsState::State> flags_state_;
     std::unordered_map<std::string, Value> evaluations_;
 };
 }  // namespace launchdarkly::server_side

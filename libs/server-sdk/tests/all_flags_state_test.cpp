@@ -1,14 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "all_flags_state/all_flags_state_builder.hpp"
-#include "data_store/memory_store.hpp"
-#include "test_store.hpp"
 
-#include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/logging/null_logger.hpp>
-#include <launchdarkly/server_side/json_feature_flags_state.hpp>
-
-#include <memory>
+#include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
@@ -17,16 +11,16 @@ TEST(AllFlagsTest, Empty) {
     AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
     auto state = builder.Build();
     ASSERT_TRUE(state.Valid());
-    ASSERT_TRUE(state.FlagsState().empty());
-    ASSERT_TRUE(state.Evaluations().empty());
+    ASSERT_TRUE(state.States().empty());
+    ASSERT_TRUE(state.Values().empty());
 }
 
 TEST(AllFlagsTest, DefaultOptions) {
     AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
 
-    builder.AddFlag("myFlag", true,
-                    AllFlagsState::Metadata{42, 1, std::nullopt, false, false,
-                                            std::nullopt});
+    builder.AddFlag(
+        "myFlag", true,
+        AllFlagsState::State{42, 1, std::nullopt, false, false, std::nullopt});
 
     auto state = builder.Build();
     ASSERT_TRUE(state.Valid());
@@ -51,12 +45,12 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
         AllFlagsStateOptions::DetailsOnlyForTrackedFlags};
     builder.AddFlag(
         "myFlagTracked", true,
-        AllFlagsState::Metadata{42, 1, EvaluationReason::Fallthrough(false),
-                                true, true, std::nullopt});
+        AllFlagsState::State{42, 1, EvaluationReason::Fallthrough(false), true,
+                             true, std::nullopt});
     builder.AddFlag(
         "myFlagUntracked", true,
-        AllFlagsState::Metadata{42, 1, EvaluationReason::Fallthrough(false),
-                                false, false, std::nullopt});
+        AllFlagsState::State{42, 1, EvaluationReason::Fallthrough(false), false,
+                             false, std::nullopt});
 
     auto state = builder.Build();
     ASSERT_TRUE(state.Valid());
@@ -85,12 +79,12 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
     ASSERT_EQ(got, expected);
 }
 
-TEST(AllFlagsTest, ClientSide) {
+TEST(AllFlagsTest, IncludeReasons) {
     AllFlagsStateBuilder builder{AllFlagsStateOptions::IncludeReasons};
     builder.AddFlag(
         "myFlag", true,
-        AllFlagsState::Metadata{42, 1, EvaluationReason::Fallthrough(false),
-                                false, false, std::nullopt});
+        AllFlagsState::State{42, 1, EvaluationReason::Fallthrough(false), false,
+                             false, std::nullopt});
     auto state = builder.Build();
     ASSERT_TRUE(state.Valid());
 
@@ -110,4 +104,47 @@ TEST(AllFlagsTest, ClientSide) {
 
     auto got = boost::json::value_from(state);
     ASSERT_EQ(got, expected);
+}
+
+TEST(AllFlagsTest, FlagValues) {
+    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+
+    const std::size_t kNumFlags = 10;
+
+    for (std::size_t i = 0; i < kNumFlags; i++) {
+        builder.AddFlag("myFlag" + std::to_string(i), "value",
+                        AllFlagsState::State{42, 1, std::nullopt, false, false,
+                                             std::nullopt});
+    }
+
+    auto state = builder.Build();
+
+    auto const& vals = state.Values();
+
+    ASSERT_EQ(vals.size(), kNumFlags);
+
+    ASSERT_TRUE(std::all_of(vals.begin(), vals.end(), [](auto const& kvp) {
+        return kvp.second.AsString() == "value";
+    }));
+}
+
+TEST(AllFlagsTest, FlagState) {
+    AllFlagsStateBuilder builder{AllFlagsStateOptions::Default};
+
+    const std::size_t kNumFlags = 10;
+
+    AllFlagsState::State state{42, 1, std::nullopt, false, false, std::nullopt};
+    for (std::size_t i = 0; i < kNumFlags; i++) {
+        builder.AddFlag("myFlag" + std::to_string(i), "value", state);
+    }
+
+    auto all_flags_state = builder.Build();
+
+    auto const& states = all_flags_state.States();
+
+    ASSERT_EQ(states.size(), kNumFlags);
+
+    ASSERT_TRUE(std::all_of(states.begin(), states.end(), [&](auto const& kvp) {
+        return kvp.second == state;
+    }));
 }

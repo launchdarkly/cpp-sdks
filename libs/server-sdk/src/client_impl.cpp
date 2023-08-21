@@ -195,7 +195,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
         bool in_experiment = IsExperimentationEnabled(flag, detail.Reason());
         builder.AddFlag(k, detail.Value(),
-                        AllFlagsState::Metadata{
+                        AllFlagsState::State{
                             flag.Version(), detail.VariationIndex(),
                             detail.Reason(), flag.trackEvents || in_experiment,
                             in_experiment, flag.debugEventsUntilDate});

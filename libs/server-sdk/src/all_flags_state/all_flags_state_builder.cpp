@@ -9,7 +9,7 @@ AllFlagsStateBuilder::AllFlagsStateBuilder(enum AllFlagsStateOptions options)
 
 void AllFlagsStateBuilder::AddFlag(std::string const& key,
                                    Value value,
-                                   AllFlagsState::Metadata flag) {
+                                   AllFlagsState::State flag) {
     if (IsSet(options_, AllFlagsStateOptions::DetailsOnlyForTrackedFlags)) {
         if (!flag.TrackEvents() && !flag.TrackReason() &&
             !IsDebuggingEnabled(flag.DebugEventsUntilDate())) {

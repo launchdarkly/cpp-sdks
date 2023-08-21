@@ -16,20 +16,25 @@ namespace launchdarkly::server_side {
  * Serializing this object to JSON using boost::json::value_from will produce
  * the appropriate data structure for bootstrapping the LaunchDarkly JavaScript
  * client.
+ *
+ * To do this, the header
+ * <launchdarkly/server_side/serialization/json_all_flags_state.hpp> must be
+ * included to make the appropriate `tag_invoke` implementations available to
+ * boost.
  */
 class AllFlagsState {
    public:
     /**
-     * Metadata contains information pertaining to a single feature flag.
+     * State contains information pertaining to a single feature flag.
      */
-    class Metadata {
+    class State {
        public:
-        Metadata(std::uint64_t version,
-                 std::optional<std::int64_t> variation,
-                 std::optional<EvaluationReason> reason,
-                 bool track_events,
-                 bool track_reason,
-                 std::optional<std::uint64_t> debug_events_until_date);
+        State(std::uint64_t version,
+              std::optional<std::int64_t> variation,
+              std::optional<EvaluationReason> reason,
+              bool track_events,
+              bool track_reason,
+              std::optional<std::uint64_t> debug_events_until_date);
 
         /**
          * @return The flag's version number when it was evaluated.
@@ -101,14 +106,12 @@ class AllFlagsState {
     /**
      * @return A map of metadata for each flag.
      */
-    [[nodiscard]] std::unordered_map<std::string, Metadata> const& FlagsState()
-        const;
+    [[nodiscard]] std::unordered_map<std::string, State> const& States() const;
 
     /**
      * @return A map of evaluation results for each flag.
      */
-    [[nodiscard]] std::unordered_map<std::string, Value> const& Evaluations()
-        const;
+    [[nodiscard]] std::unordered_map<std::string, Value> const& Values() const;
 
     /**
      * Constructs an invalid instance of AllFlagsState.
@@ -121,16 +124,16 @@ class AllFlagsState {
      * @param flags_state A map of metadata for each flag.
      */
     AllFlagsState(std::unordered_map<std::string, Value> evaluations,
-                  std::unordered_map<std::string, Metadata> flags_state);
+                  std::unordered_map<std::string, class State> flags_state);
 
    private:
     bool const valid_;
-    const std::unordered_map<std::string, Metadata> flags_state_;
+    const std::unordered_map<std::string, class State> flags_state_;
     const std::unordered_map<std::string, Value> evaluations_;
 };
 
-bool operator==(AllFlagsState::Metadata const& lhs,
-                AllFlagsState::Metadata const& rhs);
+bool operator==(class AllFlagsState::State const& lhs,
+                class AllFlagsState::State const& rhs);
 
 bool operator==(AllFlagsState const& lhs, AllFlagsState const& rhs);
 
