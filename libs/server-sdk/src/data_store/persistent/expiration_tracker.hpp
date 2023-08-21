@@ -1,10 +1,10 @@
 #pragma once
 
+#include <array>
 #include <chrono>
 #include <functional>
 #include <memory>
 #include <optional>
-#include <array>
 #include <string>
 
 #include <launchdarkly/connection.hpp>

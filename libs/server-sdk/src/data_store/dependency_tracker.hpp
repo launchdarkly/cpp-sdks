@@ -1,8 +1,8 @@
 #pragma once
 
+#include <array>
 #include <set>
 #include <string>
-#include <array>
 
 #include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
