@@ -162,19 +162,18 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
                                         AllFlagsState::Options options) {
     std::unordered_map<Client::FlagKey, Value> result;
 
-    if (config_.Offline()) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "AllFlagsState() called, but client is in offline mode. "
-               "Returning empty state";
-        return {};
-    }
-
     if (!Initialized()) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "AllFlagsState() called before client has finished "
-               "initializing! Feature store unavailable - returning empty "
-               "state";
-        return {};
+        if (memory_store_.Initialized()) {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before client has finished "
+                   "initializing; using last known values from data store";
+        } else {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before client has finished "
+                   "initializing. Data store not available. Returning empty "
+                   "state";
+            return {};
+        }
     }
 
     AllFlagsStateBuilder builder{options};
