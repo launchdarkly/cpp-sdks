@@ -198,7 +198,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
         EvaluationDetail<Value> detail = evaluator_.Evaluate(flag, context);
 
-        bool in_experiment = IsExperimentationEnabled(flag, detail.Reason());
+        bool in_experiment = flag.IsExperimentationEnabled(detail.Reason());
         builder.AddFlag(k, detail.Value(),
                         AllFlagsState::State{
                             flag.Version(), detail.VariationIndex(),

@@ -3,28 +3,6 @@
 #include <chrono>
 namespace launchdarkly::server_side {
 
-bool IsExperimentationEnabled(data_model::Flag const& flag,
-                              std::optional<EvaluationReason> const& reason) {
-    if (!reason) {
-        return false;
-    }
-    if (reason->InExperiment()) {
-        return true;
-    }
-    switch (reason->Kind()) {
-        case EvaluationReason::Kind::kFallthrough:
-            return flag.trackEventsFallthrough;
-        case EvaluationReason::Kind::kRuleMatch:
-            if (!reason->RuleIndex() ||
-                reason->RuleIndex() >= flag.rules.size()) {
-                return false;
-            }
-            return flag.rules.at(*reason->RuleIndex()).trackEvents;
-        default:
-            return false;
-    }
-}
-
 events::Date Now() {
     return events::Date{std::chrono::system_clock::now()};
 }
@@ -78,7 +56,7 @@ events::InputEvent EventFactory::FeatureRequest(
     if (flag.has_value()) {
         flag_track_events = flag->trackEvents;
         require_experiment_data =
-            IsExperimentationEnabled(*flag, detail.Reason());
+            flag->IsExperimentationEnabled(detail.Reason());
         if (flag->debugEventsUntilDate) {
             debug_events_until_date =
                 events::Date{std::chrono::system_clock::time_point{

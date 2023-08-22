@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/context_kind.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
@@ -104,5 +105,8 @@ struct Flag {
      * @return Version of this flag.
      */
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
+
+    [[nodiscard]] bool IsExperimentationEnabled(
+        std::optional<EvaluationReason> const& reason) const;
 };
 }  // namespace launchdarkly::data_model

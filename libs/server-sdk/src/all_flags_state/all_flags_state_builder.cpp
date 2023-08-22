@@ -28,28 +28,6 @@ AllFlagsState AllFlagsStateBuilder::Build() {
     return AllFlagsState{std::move(evaluations_), std::move(flags_state_)};
 }
 
-bool IsExperimentationEnabled(data_model::Flag const& flag,
-                              std::optional<EvaluationReason> const& reason) {
-    if (!reason) {
-        return false;
-    }
-    if (reason->InExperiment()) {
-        return true;
-    }
-    switch (reason->Kind()) {
-        case EvaluationReason::Kind::kFallthrough:
-            return flag.trackEventsFallthrough;
-        case EvaluationReason::Kind::kRuleMatch:
-            if (!reason->RuleIndex() ||
-                reason->RuleIndex() >= flag.rules.size()) {
-                return false;
-            }
-            return flag.rules.at(*reason->RuleIndex()).trackEvents;
-        default:
-            return false;
-    }
-}
-
 bool IsSet(AllFlagsState::Options options, AllFlagsState::Options flag) {
     return (options & flag) == flag;
 }
