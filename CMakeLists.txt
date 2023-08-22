@@ -69,7 +69,7 @@ endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.80 REQUIRED COMPONENTS json url coroutine)
+find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 add_subdirectory(libs/client-sdk)
