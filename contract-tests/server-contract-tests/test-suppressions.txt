@@ -1,61 +1,3 @@
-evaluation/parameterized/bad attribute reference errors - clause with no attribute/test-flag/evaluate flag with detail
-evaluation/parameterized/bad attribute reference errors - empty path component/test-flag/evaluate flag with detail
-evaluation/parameterized/bad attribute reference errors - tilde followed by invalid escape character/test-flag/evaluate flag with detail
-evaluation/parameterized/bad attribute reference errors - tilde followed by nothing/test-flag/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/off variation too low/off variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/off variation too high/off variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/fallthrough variation too low/fallthrough variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/fallthrough variation too high/fallthrough variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/target variation too low/target variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/target variation too high/target variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/rule variation too low/rule variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (bool)/rule variation too high/rule variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/off variation too low/off variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/off variation too high/off variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/fallthrough variation too low/fallthrough variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/fallthrough variation too high/fallthrough variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/target variation too low/target variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/target variation too high/target variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/rule variation too low/rule variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (int)/rule variation too high/rule variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/off variation too low/off variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/off variation too high/off variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/fallthrough variation too low/fallthrough variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/fallthrough variation too high/fallthrough variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/target variation too low/target variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/target variation too high/target variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/rule variation too low/rule variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (double)/rule variation too high/rule variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/off variation too low/off variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/off variation too high/off variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/fallthrough variation too low/fallthrough variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/fallthrough variation too high/fallthrough variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/target variation too low/target variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/target variation too high/target variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/rule variation too low/rule variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (string)/rule variation too high/rule variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/off variation too low/off variation too low/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/off variation too low/off variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/off variation too high/off variation too high/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/off variation too high/off variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/flag is off but has no off variation/flag is off but has no off variation/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/fallthrough variation too low/fallthrough variation too low/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/fallthrough variation too low/fallthrough variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/fallthrough variation too high/fallthrough variation too high/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/fallthrough variation too high/fallthrough variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/target variation too low/target variation too low/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/target variation too low/target variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/target variation too high/target variation too high/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/target variation too high/target variation too high/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/rule variation too low/rule variation too low/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/rule variation too low/rule variation too low/evaluate flag with detail
-evaluation/parameterized/evaluation failures (any)/rule variation too high/rule variation too high/evaluate flag without detail
-evaluation/parameterized/evaluation failures (any)/rule variation too high/rule variation too high/evaluate flag with detail
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at top level, recursion stops/prerequisite cycle is detected at top level, recursion stops/evaluate flag with detail
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at top level, recursion stops/prerequisite cycle is detected at top level, recursion stops/evaluate all flags
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate flag with detail
@@ -69,8 +11,7 @@ evaluation/parameterized/rollout or experiment - error for empty variations list
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
-evaluation/parameterized/segment recursion/cycle is detected at top level, recursion stops/cycle is detected at top level, recursion stops/evaluate flag with detail
-evaluation/parameterized/segment recursion/cycle is detected below top level, recursion stops/cycle is detected below top level, recursion stops/evaluate flag with detail
+
 events/summary events/prerequisites
 events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: bool
 events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: int
