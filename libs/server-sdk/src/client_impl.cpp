@@ -127,12 +127,9 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 }
 
 void ClientImpl::Identify(Context context) {
-    if (events_default_.disabled) {
-        return;
-    }
-
-    event_processor_->SendAsync(
-        events_default_.factory.Identify(std::move(context)));
+    events_default_.Get([&](EventFactory const& factory) {
+        event_processor_->SendAsync(factory.Identify(std::move(context)));
+    });
 }
 
 std::future<bool> ClientImpl::StartAsyncInternal(
@@ -213,10 +210,10 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
-    event_processor_->SendAsync(events::ServerTrackEventParams{
-        {std::chrono::system_clock::now(), std::move(event_name),
-         ctx.KindsToKeys(), std::move(data), metric_value},
-        ctx});
+    events_default_.Get([&](EventFactory const& factory) {
+        event_processor_->SendAsync(factory.Custom(
+            ctx, std::move(event_name), std::move(data), metric_value));
+    });
 }
 
 void ClientImpl::Track(Context const& ctx,
@@ -266,22 +263,6 @@ void ClientImpl::FlushAsync() {
 //     }
 // }
 
-// TO evaluate internally:
-// 1. Try to get the flag from the memory store.
-// 2. Conditionally emit a log message based on the result of step 1 and the
-// initialization status of the client.
-// 3. Evaluate the flag.
-// 4. If the detail value is NULL, then:
-//    - Substitute in the default value,
-//    - Propagate the error reason
-//    - wipe out the variation index
-// 3. Conditionally emit an event based on 2:
-//    a) If the flag was found: emit an eval event.
-//    b) If the flag wasn't found: emit an "unknown flag" event.
-// 4. In detail methods, do the typechecking. If the type is correct, then go
-// ahead and return it.
-//    Otherwise, substitute in the default value with the kWrongType.
-
 bool FlagNotFound(
     std::shared_ptr<data_store::FlagDescriptor> const& flag_desc) {
     return !flag_desc || !flag_desc->item;
@@ -312,11 +293,12 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
             // VARIANT - ErrorKind
             if constexpr (std::is_same_v<T, enum EvaluationReason::ErrorKind>) {
                 auto ret = EvaluationDetail<Value>{arg, default_value};
-                if (!event_scope.disabled &&
-                    arg == EvaluationReason::ErrorKind::kFlagNotFound) {
-                    event_processor_->SendAsync(event_scope.factory.UnknownFlag(
-                        key, context, ret, default_value));
-                }
+
+                event_scope.Get([&](EventFactory const& factory) {
+                    event_processor_->SendAsync(
+                        factory.UnknownFlag(key, context, ret, default_value));
+                });
+
                 return ret;
             }
             // VARIANT: EvaluationDetail
@@ -325,8 +307,11 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
                     (!arg.VariationIndex() ? default_value : arg.Value()),
                     arg.VariationIndex(), arg.Reason()};
 
-                event_processor_->SendAsync(event_scope.factory.Eval(
-                    key, context, flag, ret, default_value, std::nullopt));
+                event_scope.Get([&](EventFactory const& factory) {
+                    event_processor_->SendAsync(factory.Eval(
+                        key, context, flag, ret, default_value, std::nullopt));
+                });
+
                 return ret;
             }
         },

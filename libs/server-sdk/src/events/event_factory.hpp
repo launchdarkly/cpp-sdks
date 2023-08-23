@@ -23,7 +23,7 @@ class EventFactory {
     [[nodiscard]] events::InputEvent UnknownFlag(std::string const& key,
                                                  Context const& ctx,
                                                  EvaluationDetail<Value> detail,
-                                                 Value default_val);
+                                                 Value default_val) const;
 
     [[nodiscard]] events::InputEvent Eval(
         std::string const& key,
@@ -31,9 +31,15 @@ class EventFactory {
         std::optional<data_model::Flag> const& flag,
         EvaluationDetail<Value> detail,
         Value default_value,
-        std::optional<std::string> prereq_of);
+        std::optional<std::string> prereq_of) const;
 
-    [[nodiscard]] events::InputEvent Identify(Context ctx);
+    [[nodiscard]] events::InputEvent Identify(Context ctx) const;
+
+    [[nodiscard]] events::InputEvent Custom(
+        Context const& ctx,
+        std::string event_name,
+        std::optional<Value> data,
+        std::optional<double> metric_value) const;
 
    private:
     EventFactory(ReasonPolicy reason_policy);
@@ -43,8 +49,9 @@ class EventFactory {
         std::optional<data_model::Flag> const& flag,
         EvaluationDetail<Value> detail,
         Value default_val,
-        std::optional<std::string> prereq_of);
+        std::optional<std::string> prereq_of) const;
 
     ReasonPolicy reason_policy_;
+    std::function<events::Date()> now_;
 };
 }  // namespace launchdarkly::server_side

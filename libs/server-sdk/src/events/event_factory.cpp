@@ -3,13 +3,10 @@
 #include <chrono>
 namespace launchdarkly::server_side {
 
-events::Date Now() {
-    return events::Date{std::chrono::system_clock::now()};
-}
-
 EventFactory::EventFactory(
     launchdarkly::server_side::EventFactory::ReasonPolicy reason_policy)
-    : reason_policy_(reason_policy) {}
+    : reason_policy_(reason_policy),
+      now_([]() { return events::Date{std::chrono::system_clock::now()}; }) {}
 
 EventFactory EventFactory::WithReasons() {
     return {ReasonPolicy::Send};
@@ -23,7 +20,7 @@ events::InputEvent EventFactory::UnknownFlag(
     std::string const& key,
     launchdarkly::Context const& ctx,
     EvaluationDetail<launchdarkly::Value> detail,
-    launchdarkly::Value default_val) {
+    launchdarkly::Value default_val) const {
     return FeatureRequest(key, ctx, std::nullopt, detail, default_val,
                           std::nullopt);
 }
@@ -34,12 +31,23 @@ events::InputEvent EventFactory::Eval(
     std::optional<data_model::Flag> const& flag,
     EvaluationDetail<Value> detail,
     Value default_value,
-    std::optional<std::string> prereq_of) {
+    std::optional<std::string> prereq_of) const {
     return FeatureRequest(key, ctx, flag, detail, default_value, prereq_of);
 }
 
-events::InputEvent EventFactory::Identify(launchdarkly::Context ctx) {
-    return events::IdentifyEventParams{Now(), std::move(ctx)};
+events::InputEvent EventFactory::Identify(launchdarkly::Context ctx) const {
+    return events::IdentifyEventParams{now_(), std::move(ctx)};
+}
+
+events::InputEvent EventFactory::Custom(
+    Context const& ctx,
+    std::string event_name,
+    std::optional<Value> data,
+    std::optional<double> metric_value) const {
+    return events::ServerTrackEventParams{
+        {now_(), std::move(event_name), ctx.KindsToKeys(), std::move(data),
+         metric_value},
+        ctx};
 }
 
 events::InputEvent EventFactory::FeatureRequest(
@@ -48,7 +56,7 @@ events::InputEvent EventFactory::FeatureRequest(
     std::optional<data_model::Flag> const& flag,
     EvaluationDetail<launchdarkly::Value> detail,
     launchdarkly::Value default_val,
-    std::optional<std::string> prereq_of) {
+    std::optional<std::string> prereq_of) const {
     bool flag_track_events = false;
     bool require_experiment_data = false;
     std::optional<events::Date> debug_events_until_date;
@@ -73,7 +81,7 @@ events::InputEvent EventFactory::FeatureRequest(
     }
 
     return events::FeatureEventParams{
-        events::Date{std::chrono::system_clock::now()},
+        now_(),
         key,
         context,
         detail.Value(),
