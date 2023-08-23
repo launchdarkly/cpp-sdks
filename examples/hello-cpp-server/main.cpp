@@ -1,5 +1,5 @@
-#include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/server_side/client.hpp>
 
 #include <cstring>
 #include <iostream>
@@ -23,16 +23,13 @@ int main() {
         return 1;
     }
 
-    auto config = client_side::ConfigBuilder(MOBILE_KEY).Build();
+    auto config = server_side::ConfigBuilder(MOBILE_KEY).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
     }
 
-    auto context =
-        ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
-
-    auto client = client_side::Client(std::move(*config), std::move(context));
+    auto client = server_side::Client(std::move(*config));
 
     auto start_result = client.StartAsync();
     auto status = start_result.wait_for(
@@ -50,7 +47,10 @@ int main() {
         return 1;
     }
 
-    bool flag_value = client.BoolVariation(FEATURE_FLAG_KEY, false);
+    auto context =
+        ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
+
+    bool flag_value = client.BoolVariation(context, FEATURE_FLAG_KEY, false);
 
     std::cout << "*** Feature flag '" << FEATURE_FLAG_KEY << "' is "
               << (flag_value ? "true" : "false") << " for this user\n\n";
