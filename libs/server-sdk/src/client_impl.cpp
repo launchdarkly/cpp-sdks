@@ -76,6 +76,23 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
+bool EventsEnabled(Config const& config) {
+    return config.Events().Enabled() && !config.Offline();
+}
+
+std::unique_ptr<events::IEventProcessor> MakeEventProcessor(
+    Config const& config,
+    boost::asio::any_io_executor exec,
+    HttpProperties const& http_properties,
+    Logger& logger) {
+    if (EventsEnabled(config)) {
+        return std::make_unique<events::AsioEventProcessor<ServerSDK>>(
+            exec, config.ServiceEndpoints(), config.Events(), http_properties,
+            logger);
+    }
+    return std::make_unique<events::NullEventProcessor>();
+}
+
 /**
  * Returns true if the flag pointer is valid and the underlying item is present.
  */
@@ -100,19 +117,17 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                                   memory_store_,
                                   status_manager_,
                                   logger_)),
-      event_processor_(nullptr),
+      event_processor_(MakeEventProcessor(config,
+                                          ioc_.get_executor(),
+                                          http_properties_,
+                                          logger_)),
       evaluator_(logger_, memory_store_),
-      events_default_{config_.Offline(), EventFactory::WithoutReasons()},
-      events_with_reasons_{config_.Offline(), EventFactory::WithReasons()} {
-    if (config.Events().Enabled() && !config.Offline()) {
-        event_processor_ =
-            std::make_unique<events::AsioEventProcessor<ServerSDK>>(
-                ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
-                http_properties_, logger_);
-    } else {
-        event_processor_ = std::make_unique<events::NullEventProcessor>();
-    }
-
+      events_default_(EventsEnabled(config),
+                      *event_processor_.get(),
+                      EventFactory::WithoutReasons()),
+      events_with_reasons_(EventsEnabled(config),
+                           *event_processor_.get(),
+                           EventFactory::WithReasons()) {
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
@@ -133,9 +148,10 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 }
 
 void ClientImpl::Identify(Context context) {
-    events_default_.Get([&](EventFactory const& factory) {
-        event_processor_->SendAsync(factory.Identify(std::move(context)));
-    });
+    events_default_.Get(
+        [&](events::IEventProcessor& processor, EventFactory const& factory) {
+            processor.SendAsync(factory.Identify(std::move(context)));
+        });
 }
 
 std::future<bool> ClientImpl::StartAsyncInternal(
@@ -216,10 +232,11 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
-    events_default_.Get([&](EventFactory const& factory) {
-        event_processor_->SendAsync(factory.Custom(
-            ctx, std::move(event_name), std::move(data), metric_value));
-    });
+    events_default_.Get(
+        [&](events::IEventProcessor& processor, EventFactory const& factory) {
+            processor.SendAsync(factory.Custom(ctx, std::move(event_name),
+                                               std::move(data), metric_value));
+        });
 }
 
 void ClientImpl::Track(Context const& ctx,
@@ -331,8 +348,9 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
             if constexpr (std::is_same_v<T, enum EvaluationReason::ErrorKind>) {
                 auto detail = EvaluationDetail<Value>{arg, default_value};
 
-                event_scope.Get([&](EventFactory const& factory) {
-                    event_processor_->SendAsync(factory.UnknownFlag(
+                event_scope.Get([&](events::IEventProcessor& processor,
+                                    EventFactory const& factory) {
+                    processor.SendAsync(factory.UnknownFlag(
                         key, context, detail, default_value));
                 });
 
@@ -344,10 +362,11 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
                     (!arg.VariationIndex() ? default_value : arg.Value()),
                     arg.VariationIndex(), arg.Reason()};
 
-                event_scope.Get([&](EventFactory const& factory) {
-                    event_processor_->SendAsync(
-                        factory.Eval(key, context, flag, detail, default_value,
-                                     std::nullopt));
+                event_scope.Get([&](events::IEventProcessor& processor,
+                                    EventFactory const& factory) {
+                    processor.SendAsync(factory.Eval(key, context, flag, detail,
+                                                     default_value,
+                                                     std::nullopt));
                 });
 
                 return detail;

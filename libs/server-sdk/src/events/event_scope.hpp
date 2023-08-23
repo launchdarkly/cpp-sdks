@@ -1,23 +1,30 @@
 #pragma once
 
+#include <launchdarkly/events/event_processor_interface.hpp>
+
 #include "event_factory.hpp"
 
 namespace launchdarkly::server_side {
 
 class EventScope {
    public:
-    EventScope(bool disabled, EventFactory factory)
-        : disabled_(disabled), factory_(std::move(factory)) {}
+    EventScope(bool enabled,
+               events::IEventProcessor& processor,
+               EventFactory factory)
+        : enabled_(enabled),
+          processor_(processor),
+          factory_(std::move(factory)) {}
 
     template <typename Callable>
     void Get(Callable&& callable) const {
-        if (!disabled_) {
-            callable(factory_);
+        if (enabled_) {
+            callable(processor_, factory_);
         }
     }
 
    private:
-    bool const disabled_;
+    bool const enabled_;
+    events::IEventProcessor& processor_;
     EventFactory const factory_;
 };
 
