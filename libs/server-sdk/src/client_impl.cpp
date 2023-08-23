@@ -76,6 +76,12 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
+/**
+ * Returns true if the flag pointer is valid and the underlying item is present.
+ */
+bool IsFlagPresent(
+    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc);
+
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
       http_properties_(
@@ -237,35 +243,65 @@ void ClientImpl::FlushAsync() {
     event_processor_->FlushAsync();
 }
 
-// void ClientImpl::LogVariationCall(std::string const& key,
-//                                   data_store::FlagDescriptor const*
-//                                   flag_desc, bool initialized) {
-//     bool flag_found = flag_desc != nullptr && flag_desc->item.has_value();
-//
-//     if (initialized) {
-//         if (!flag_found) {
-//             LD_LOG(logger_, LogLevel::kInfo) << "Unknown feature flag " <<
-//             key
-//                                              << "; returning default value";
-//         }
-//     } else {
-//         if (flag_found) {
-//             LD_LOG(logger_, LogLevel::kInfo)
-//                 << "LaunchDarkly client has not yet been initialized; using "
-//                    "last "
-//                    "known flag rules from data store";
-//         } else {
-//             LD_LOG(logger_, LogLevel::kInfo)
-//                 << "LaunchDarkly client has not yet been initialize;
-//                 returning "
-//                    "default value";
-//         }
-//     }
-// }
+void ClientImpl::LogVariationCall(std::string const& key, bool flag_present) {
+    if (Initialized()) {
+        if (!flag_present) {
+            LD_LOG(logger_, LogLevel::kInfo) << "Unknown feature flag " << key
+                                             << "; returning default value";
+        }
+    } else {
+        if (flag_present) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << "LaunchDarkly client has not yet been initialized; using "
+                   "last "
+                   "known flag rules from data store";
+        } else {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << "LaunchDarkly client has not yet been initialized; "
+                   "returning default value";
+        }
+    }
+}
 
-bool FlagNotFound(
-    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc) {
-    return !flag_desc || !flag_desc->item;
+Value ClientImpl::Variation(Context const& ctx,
+                            IClient::FlagKey const& key,
+                            Value const& default_value) {
+    return *VariationInternal(ctx, key, default_value, events_default_);
+}
+
+EvaluationDetail<Value> ClientImpl::VariationDetail(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    Value const& default_value) {
+    return VariationInternal(ctx, key, default_value, events_with_reasons_);
+}
+
+EvaluationDetail<Value> ClientImpl::VariationInternal(
+    Context const& context,
+    IClient::FlagKey const& key,
+    Value const& default_value,
+    EventScope& scope) {
+    if (auto error = PreEvaluationChecks(context)) {
+        return PostEvaluation(key, context, default_value, *error, scope,
+                              std::nullopt);
+    }
+
+    auto flag_rule = memory_store_.GetFlag(key);
+
+    bool flag_present = IsFlagPresent(flag_rule);
+
+    LogVariationCall(key, flag_present);
+
+    if (!flag_present) {
+        return PostEvaluation(key, context, default_value,
+                              EvaluationReason::ErrorKind::kFlagNotFound, scope,
+                              std::nullopt);
+    }
+
+    EvaluationDetail<Value> result =
+        evaluator_.Evaluate(*flag_rule->item, context);
+    return PostEvaluation(key, context, default_value, result, scope,
+                          flag_rule.get()->item);
 }
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
@@ -290,69 +326,38 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
     return std::visit(
         [&](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
-            // VARIANT - ErrorKind
+            // VARIANT: ErrorKind
             if constexpr (std::is_same_v<T, enum EvaluationReason::ErrorKind>) {
-                auto ret = EvaluationDetail<Value>{arg, default_value};
+                auto detail = EvaluationDetail<Value>{arg, default_value};
 
                 event_scope.Get([&](EventFactory const& factory) {
-                    event_processor_->SendAsync(
-                        factory.UnknownFlag(key, context, ret, default_value));
+                    event_processor_->SendAsync(factory.UnknownFlag(
+                        key, context, detail, default_value));
                 });
 
-                return ret;
+                return detail;
             }
             // VARIANT: EvaluationDetail
             else if constexpr (std::is_same_v<T, EvaluationDetail<Value>>) {
-                auto ret = EvaluationDetail<Value>{
+                auto detail = EvaluationDetail<Value>{
                     (!arg.VariationIndex() ? default_value : arg.Value()),
                     arg.VariationIndex(), arg.Reason()};
 
                 event_scope.Get([&](EventFactory const& factory) {
-                    event_processor_->SendAsync(factory.Eval(
-                        key, context, flag, ret, default_value, std::nullopt));
+                    event_processor_->SendAsync(
+                        factory.Eval(key, context, flag, detail, default_value,
+                                     std::nullopt));
                 });
 
-                return ret;
+                return detail;
             }
         },
         std::move(error_or_detail));
 }
 
-EvaluationDetail<Value> ClientImpl::VariationInternal(
-    Context const& context,
-    IClient::FlagKey const& key,
-    Value const& default_value,
-    EventScope& scope) {
-    if (auto error = PreEvaluationChecks(context)) {
-        return PostEvaluation(key, context, default_value, *error, scope,
-                              std::nullopt);
-    }
-
-    auto flag_rule = memory_store_.GetFlag(key);
-
-    if (FlagNotFound(flag_rule)) {
-        return PostEvaluation(key, context, default_value,
-                              EvaluationReason::ErrorKind::kFlagNotFound, scope,
-                              std::nullopt);
-    }
-
-    EvaluationDetail<Value> result =
-        evaluator_.Evaluate(*flag_rule->item, context);
-    return PostEvaluation(key, context, default_value, result, scope,
-                          flag_rule.get()->item);
-}
-
-EvaluationDetail<Value> ClientImpl::VariationDetail(
-    Context const& ctx,
-    IClient::FlagKey const& key,
-    Value const& default_value) {
-    return VariationInternal(ctx, key, default_value, events_with_reasons_);
-}
-
-Value ClientImpl::Variation(Context const& ctx,
-                            IClient::FlagKey const& key,
-                            Value const& default_value) {
-    return *VariationInternal(ctx, key, default_value, events_default_);
+bool IsFlagPresent(
+    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc) {
+    return flag_desc && flag_desc->item;
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
