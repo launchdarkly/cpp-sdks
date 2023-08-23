@@ -15,7 +15,6 @@
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/events/data/common_events.hpp>
-#include <launchdarkly/events/null_event_processor.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
 
@@ -80,7 +79,7 @@ bool EventsEnabled(Config const& config) {
     return config.Events().Enabled() && !config.Offline();
 }
 
-std::unique_ptr<events::IEventProcessor> MakeEventProcessor(
+std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
     Config const& config,
     boost::asio::any_io_executor exec,
     HttpProperties const& http_properties,
@@ -90,7 +89,7 @@ std::unique_ptr<events::IEventProcessor> MakeEventProcessor(
             exec, config.ServiceEndpoints(), config.Events(), http_properties,
             logger);
     }
-    return std::make_unique<events::NullEventProcessor>();
+    return nullptr;
 }
 
 /**
@@ -122,8 +121,8 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                                           http_properties_,
                                           logger_)),
       evaluator_(logger_, memory_store_),
-      events_default_(*event_processor_.get(), EventFactory::WithoutReasons()),
-      events_with_reasons_(*event_processor_.get(),
+      events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
+      events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
@@ -252,7 +251,9 @@ void ClientImpl::Track(Context const& ctx, std::string event_name) {
 }
 
 void ClientImpl::FlushAsync() {
-    event_processor_->FlushAsync();
+    if (event_processor_) {
+        event_processor_->FlushAsync();
+    }
 }
 
 void ClientImpl::LogVariationCall(std::string const& key,
