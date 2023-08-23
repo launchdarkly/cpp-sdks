@@ -8,22 +8,15 @@ namespace launchdarkly::server_side {
 
 class EventScope {
    public:
-    EventScope(bool enabled,
-               events::IEventProcessor& processor,
-               EventFactory factory)
-        : enabled_(enabled),
-          processor_(processor),
-          factory_(std::move(factory)) {}
+    EventScope(events::IEventProcessor& processor, EventFactory factory)
+        : processor_(processor), factory_(std::move(factory)) {}
 
     template <typename Callable>
     void Get(Callable&& callable) const {
-        if (enabled_) {
-            callable(processor_, factory_);
-        }
+        processor_.SendAsync(callable(factory_));
     }
 
    private:
-    bool const enabled_;
     events::IEventProcessor& processor_;
     EventFactory const factory_;
 };
