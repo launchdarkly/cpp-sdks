@@ -23,8 +23,8 @@ class SpyEventProcessor : public events::IEventProcessor {
     void ShutdownAsync() override {}
 
     /**
-     * Asserts that 'count' events/commands were recorded.
-     * @param count Number of expected events/commands.
+     * Asserts that 'count' events were recorded.
+     * @param count Number of expected events.
      */
     [[nodiscard]] testing::AssertionResult Count(std::size_t count) const {
         if (events_.size() == count) {
@@ -47,7 +47,7 @@ class SpyEventProcessor : public events::IEventProcessor {
             }
         });
     }
-    
+
    private:
     [[nodiscard]] testing::AssertionResult GetIndex(
         std::size_t index,
