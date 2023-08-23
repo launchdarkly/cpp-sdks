@@ -81,7 +81,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     } else {
         LogError(parent_key.value_or("(no parent)"),
                  Error::CyclicPrerequisiteReference(flag.key));
-        return OffValue(flag, EvaluationReason::MalformedFlag());
+        return EvaluationReason::MalformedFlag();
     }
 
     // If the flag is on, all prerequisites are on and valid, then
