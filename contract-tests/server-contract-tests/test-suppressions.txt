@@ -12,39 +12,11 @@ evaluation/parameterized/segment match/user matches via include in multi-kind us
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
 
+# SC-209589: Prerequisites events not yet supported.
 events/summary events/prerequisites
-events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: int
-events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: double
-events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: string
-events/feature events/full feature event for tracked flag/without reason/single kind default/malformed flag/type: any
-events/feature events/full feature event for tracked flag/without reason/single kind non-default/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/without reason/single kind non-default/malformed flag/type: int
-events/feature events/full feature event for tracked flag/without reason/single kind non-default/malformed flag/type: double
-events/feature events/full feature event for tracked flag/without reason/single kind non-default/malformed flag/type: string
-events/feature events/full feature event for tracked flag/without reason/single kind non-default/malformed flag/type: any
-events/feature events/full feature event for tracked flag/without reason/multi-kind/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/without reason/multi-kind/malformed flag/type: int
-events/feature events/full feature event for tracked flag/without reason/multi-kind/malformed flag/type: double
-events/feature events/full feature event for tracked flag/without reason/multi-kind/malformed flag/type: string
-events/feature events/full feature event for tracked flag/without reason/multi-kind/malformed flag/type: any
-events/feature events/full feature event for tracked flag/with reason/single kind default/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/with reason/single kind default/malformed flag/type: int
-events/feature events/full feature event for tracked flag/with reason/single kind default/malformed flag/type: double
-events/feature events/full feature event for tracked flag/with reason/single kind default/malformed flag/type: string
-events/feature events/full feature event for tracked flag/with reason/single kind default/malformed flag/type: any
-events/feature events/full feature event for tracked flag/with reason/single kind non-default/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/with reason/single kind non-default/malformed flag/type: int
-events/feature events/full feature event for tracked flag/with reason/single kind non-default/malformed flag/type: double
-events/feature events/full feature event for tracked flag/with reason/single kind non-default/malformed flag/type: string
-events/feature events/full feature event for tracked flag/with reason/single kind non-default/malformed flag/type: any
-events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: bool
-events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: int
-events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: double
-events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: string
-events/feature events/full feature event for tracked flag/with reason/multi-kind/malformed flag/type: any
 events/feature prerequisite events/without reasons
 events/feature prerequisite events/with reasons
+
 streaming/updates/flag patch with same version is not applied
 streaming/updates/segment patch with same version is not applied
 streaming/updates/flag patch with lower version is not applied

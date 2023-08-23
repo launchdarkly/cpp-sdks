@@ -303,38 +303,34 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
     Context const& context,
     Value const& default_value,
     std::variant<enum EvaluationReason::ErrorKind, EvaluationDetail<Value>>
-        result,
+        error_or_detail,
     EventScope& event_scope,
     std::optional<data_model::Flag> const& flag) {
-    if (!event_scope.disabled) {
-        if (auto const error(
-                std::get_if<enum EvaluationReason::ErrorKind>(&result));
-            error) {
-            if (*error == EvaluationReason::ErrorKind::kFlagNotFound) {
-                event_processor_->SendAsync(event_scope.factory.UnknownFlag(
-                    key, context,
-                    EvaluationDetail<Value>{*error, default_value},
-                    default_value));
+    return std::visit(
+        [&](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            // VARIANT - ErrorKind
+            if constexpr (std::is_same_v<T, enum EvaluationReason::ErrorKind>) {
+                auto ret = EvaluationDetail<Value>{arg, default_value};
+                if (!event_scope.disabled &&
+                    arg == EvaluationReason::ErrorKind::kFlagNotFound) {
+                    event_processor_->SendAsync(event_scope.factory.UnknownFlag(
+                        key, context, ret, default_value));
+                }
+                return ret;
             }
-        } else {
-            event_processor_->SendAsync(event_scope.factory.Eval(
-                key, context, flag, std::get<EvaluationDetail<Value>>(result),
-                default_value, std::nullopt));
-        }
-    }
+            // VARIANT: EvaluationDetail
+            else if constexpr (std::is_same_v<T, EvaluationDetail<Value>>) {
+                auto ret = EvaluationDetail<Value>{
+                    (!arg.VariationIndex() ? default_value : arg.Value()),
+                    arg.VariationIndex(), arg.Reason()};
 
-    if (auto const error(
-            std::get_if<enum EvaluationReason::ErrorKind>(&result));
-        error) {
-        return EvaluationDetail<Value>{*error, default_value};
-    }
-
-    EvaluationDetail<Value> res = std::get<EvaluationDetail<Value>>(result);
-    if (res.Value().IsNull()) {
-        return EvaluationDetail<Value>{default_value, res.VariationIndex(),
-                                       res.Reason()};
-    }
-    return res;
+                event_processor_->SendAsync(event_scope.factory.Eval(
+                    key, context, flag, ret, default_value, std::nullopt));
+                return ret;
+            }
+        },
+        std::move(error_or_detail));
 }
 
 EvaluationDetail<Value> ClientImpl::VariationInternal(
