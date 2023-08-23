@@ -28,6 +28,11 @@ class EventScope {
      */
     EventScope() : EventScope(nullptr, EventFactory::WithoutReasons()) {}
 
+    /**
+     * Sends an event created by the given callable. The callable will be
+     * passed an EventFactory.
+     * @param callable Returns an InputEvent.
+     */
     template <typename Callable>
     void Send(Callable&& callable) const {
         if (processor_) {
