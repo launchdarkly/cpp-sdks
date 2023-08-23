@@ -9,7 +9,7 @@ EventFactory::EventFactory(
       now_([]() { return events::Date{std::chrono::system_clock::now()}; }) {}
 
 EventFactory EventFactory::WithReasons() {
-    return {ReasonPolicy::Send};
+    return {ReasonPolicy::Require};
 }
 
 EventFactory EventFactory::WithoutReasons() {
@@ -73,7 +73,7 @@ events::InputEvent EventFactory::FeatureRequest(
     }
 
     std::optional<launchdarkly::EvaluationReason> reason;
-    if (reason_policy_ == ReasonPolicy::Send || require_experiment_data) {
+    if (reason_policy_ == ReasonPolicy::Require || require_experiment_data) {
         reason = detail.Reason();
     }
 

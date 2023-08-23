@@ -13,7 +13,7 @@ namespace launchdarkly::server_side {
 class EventFactory {
     enum class ReasonPolicy {
         Default = 0,
-        Send = 1,
+        Require = 1,
     };
 
    public:

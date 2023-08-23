@@ -12,7 +12,7 @@ class EventScope {
         : processor_(processor), factory_(std::move(factory)) {}
 
     template <typename Callable>
-    void Get(Callable&& callable) const {
+    void Send(Callable&& callable) const {
         processor_.SendAsync(callable(factory_));
     }
 
