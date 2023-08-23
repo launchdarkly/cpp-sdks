@@ -39,6 +39,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
         obj.emplace("reason", boost::json::value_from(*event.reason));
     }
     obj.emplace("default", boost::json::value_from(event.default_));
+    if (event.prereq_of) {
+        obj.emplace("prereqOf", *event.prereq_of);
+    }
 }
 
 void tag_invoke(boost::json::value_from_tag const& tag,

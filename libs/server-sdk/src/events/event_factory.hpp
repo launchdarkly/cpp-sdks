@@ -43,7 +43,7 @@ class EventFactory {
 
    private:
     EventFactory(ReasonPolicy reason_policy);
-    [[nodiscard]] events::InputEvent FeatureRequest(
+    events::InputEvent FeatureRequest(
         std::string const& key,
         Context const& ctx,
         std::optional<data_model::Flag> const& flag,

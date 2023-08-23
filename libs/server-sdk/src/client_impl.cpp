@@ -198,6 +198,8 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     AllFlagsStateBuilder builder{options};
 
+    EventScope no_events;
+
     for (auto const& [k, v] : memory_store_.AllFlags()) {
         if (!v || !v->item) {
             continue;
@@ -210,7 +212,8 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
             continue;
         }
 
-        EvaluationDetail<Value> detail = evaluator_.Evaluate(flag, context);
+        EvaluationDetail<Value> detail =
+            evaluator_.Evaluate(flag, context, no_events);
 
         bool in_experiment = flag.IsExperimentationEnabled(detail.Reason());
         builder.AddFlag(k, detail.Value(),
@@ -294,9 +297,9 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     Context const& context,
     IClient::FlagKey const& key,
     Value const& default_value,
-    EventScope const& scope) {
+    EventScope const& event_scope) {
     if (auto error = PreEvaluationChecks(context)) {
-        return PostEvaluation(key, context, default_value, *error, scope,
+        return PostEvaluation(key, context, default_value, *error, event_scope,
                               std::nullopt);
     }
 
@@ -308,13 +311,13 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
     if (!flag_present) {
         return PostEvaluation(key, context, default_value,
-                              EvaluationReason::ErrorKind::kFlagNotFound, scope,
-                              std::nullopt);
+                              EvaluationReason::ErrorKind::kFlagNotFound,
+                              event_scope, std::nullopt);
     }
 
     EvaluationDetail<Value> result =
-        evaluator_.Evaluate(*flag_rule->item, context);
-    return PostEvaluation(key, context, default_value, result, scope,
+        evaluator_.Evaluate(*flag_rule->item, context, event_scope);
+    return PostEvaluation(key, context, default_value, result, event_scope,
                           flag_rule.get()->item);
 }
 
