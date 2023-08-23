@@ -271,7 +271,23 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                 out.emplace_back(IdentifyEvent{event.creation_date,
                                                filter_.filter(event.context)});
             },
-            [&](TrackEventParams&& event) {
+            [&](ClientTrackEventParams&& event) {
+                out.emplace_back(std::move(event));
+            },
+            [&](ServerTrackEventParams&& event) {
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    if (!context_key_cache_.Notice(
+                            event.context.CanonicalKey())) {
+                        out.emplace_back(server_side::IndexEvent{
+                            event.creation_date,
+                            filter_.filter(event.context)});
+                    }
+                }
+
+                // Object slicing on purpose; the context will be stripped out
+                // of the ServerTrackEventParams when converted to a
+                // TrackEventParams.
                 out.emplace_back(std::move(event));
             }},
         std::move(input_event));

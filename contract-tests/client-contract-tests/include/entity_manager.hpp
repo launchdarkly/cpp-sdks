@@ -5,8 +5,8 @@
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
+#include <data_model/data_model.hpp>
 #include "client_entity.hpp"
-#include "definitions.hpp"
 
 #include <memory>
 #include <mutex>

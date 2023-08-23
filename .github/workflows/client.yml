@@ -16,12 +16,12 @@ jobs:
     env:
       # Port the test service (implemented in this repo) should bind to.
       TEST_SERVICE_PORT: 8123
-      TEST_SERVICE_BINARY: ./build/contract-tests/sdk-contract-tests/sdk-tests
+      TEST_SERVICE_BINARY: ./build/contract-tests/client-contract-tests/client-tests
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
         with:
-          cmake_target: sdk-tests
+          cmake_target: client-tests
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
@@ -29,7 +29,7 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip-from ./contract-tests/sdk-contract-tests/test-suppressions.txt'
+          extra_params: '-skip-from ./contract-tests/client-contract-tests/test-suppressions.txt'
   build-test-client:
     runs-on: ubuntu-22.04
     steps:

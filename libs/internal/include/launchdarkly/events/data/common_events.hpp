@@ -33,7 +33,12 @@ struct TrackEventParams {
     std::optional<double> metric_value;
 };
 
-// Track (custom) events are directly serialized from their parameters.
+struct ServerTrackEventParams : public TrackEventParams {
+    Context context;
+};
+
+using ClientTrackEventParams = TrackEventParams;
+
 using TrackEvent = TrackEventParams;
 
 struct IdentifyEventParams {

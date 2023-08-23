@@ -283,11 +283,11 @@ TEST(PrerequisiteTests, DeserializesAllFields) {
     ASSERT_EQ(result->variation, 123);
 }
 
-TEST(PrerequisiteTests, DeserializeFailsWithNegativeVariation) {
+TEST(PrerequisiteTests, DeserializeSucceedsWithNegativeVariation) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Flag::Prerequisite, JsonError>>(
         boost::json::parse(R"({"key" : "foo", "variation" : -123})"));
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
 }
 
 TEST(TargetTests, DeserializesMinimumValid) {
@@ -300,11 +300,11 @@ TEST(TargetTests, DeserializesMinimumValid) {
     ASSERT_TRUE(result->values.empty());
 }
 
-TEST(TargetTests, DeserializesFailsWithNegativeVariation) {
+TEST(TargetTests, DeserializesSucceedsWithNegativeVariation) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Flag::Target, JsonError>>(
         boost::json::parse(R"({"variation" : -123})"));
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
 }
 
 TEST(TargetTests, DeserializesAllFields) {
@@ -419,8 +419,7 @@ TEST(RolloutTests, SerializeAllFields) {
 }
 
 TEST(VariationOrRolloutTests, SerializeVariation) {
-    uint64_t value(5);
-    data_model::Flag::VariationOrRollout variation = value;
+    data_model::Flag::VariationOrRollout variation = 5;
 
     auto json = boost::json::value_from(variation);
 
@@ -578,12 +577,11 @@ TEST(FlagRuleTests, SerializeAllRollout) {
 }
 
 TEST(FlagTests, SerializeAll) {
-    uint64_t fallthrough(42);
     data_model::Flag flag{
         "the-key",
         21,                                // version
         true,                              // on
-        fallthrough,                       // fallthrough
+        42,                                // fallthrough
         {"a", "b"},                        // variations
         {{"prereqA", 2}, {"prereqB", 3}},  // prerequisites
         {{{

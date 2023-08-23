@@ -6,11 +6,30 @@ on:
     paths-ignore:
       - '**.md' #Do not need to run CI for markdown changes.
   pull_request:
-    branches: [ main, server-side ]
+    branches: [ main, server-side, cw/sc-206687/contract-tests ]
     paths-ignore:
       - '**.md'
 
 jobs:
+  contract-tests:
+    runs-on: ubuntu-22.04
+    env:
+      # Port the test service (implemented in this repo) should bind to.
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: server-tests
+          run_tests: false
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      - uses: ./.github/actions/contract-tests
+        with:
+          # Inform the test harness of test service's port.
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          extra_params: '-skip-from ./contract-tests/server-contract-tests/test-suppressions.txt'
   build-test-server:
     runs-on: ubuntu-22.04
     steps:

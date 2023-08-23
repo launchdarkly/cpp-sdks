@@ -5,8 +5,10 @@
 
 namespace launchdarkly::events {
 
-using InputEvent =
-    std::variant<FeatureEventParams, IdentifyEventParams, TrackEventParams>;
+using InputEvent = std::variant<FeatureEventParams,
+                                IdentifyEventParams,
+                                ClientTrackEventParams,
+                                ServerTrackEventParams>;
 
 using OutputEvent = std::variant<FeatureEvent,
                                  DebugEvent,

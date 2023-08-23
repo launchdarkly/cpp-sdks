@@ -5,6 +5,8 @@
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <launchdarkly/server_side/all_flags_state.hpp>
+
 #include <chrono>
 #include <future>
 #include <memory>
@@ -12,7 +14,6 @@
 #include <unordered_map>
 
 namespace launchdarkly::server_side {
-
 /**
  *  Interface for the standard SDK client methods and properties.
  */
@@ -58,8 +59,9 @@ class IClient {
      *
      * @return A map from feature flag keys to values for the current context.
      */
-    [[nodiscard]] virtual std::unordered_map<FlagKey, Value> AllFlagsState()
-        const = 0;
+    [[nodiscard]] virtual class AllFlagsState AllFlagsState(
+        Context const& context,
+        AllFlagsState::Options options = AllFlagsState::Options::Default) = 0;
 
     /**
      * Tracks that the current context performed an event for the given event
@@ -258,8 +260,10 @@ class Client : public IClient {
     [[nodiscard]] bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] class AllFlagsState AllFlagsState(
+        Context const& context,
+        enum AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,

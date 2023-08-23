@@ -9,5 +9,4 @@ FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)
       value(params.value),
       reason(params.reason),
       default_(params.default_) {}
-
 }  // namespace launchdarkly::events

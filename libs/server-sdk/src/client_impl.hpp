@@ -44,8 +44,10 @@ class ClientImpl : public IClient {
     bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] class AllFlagsState AllFlagsState(
+        Context const& context,
+        AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,
@@ -111,7 +113,8 @@ class ClientImpl : public IClient {
     [[nodiscard]] EvaluationDetail<T> VariationInternal(Context const& ctx,
                                                         FlagKey const& key,
                                                         Value default_value,
-                                                        bool check_type);
+                                                        bool check_type,
+                                                        bool detailed);
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,

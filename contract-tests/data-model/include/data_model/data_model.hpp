@@ -188,6 +188,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(ValueType,
 
 struct EvaluateFlagParams {
     std::string flagKey;
+    std::optional<nlohmann::json> context;
     ValueType valueType;
     nlohmann::json defaultValue;
     bool detail;
@@ -195,6 +196,7 @@ struct EvaluateFlagParams {
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagParams,
                                                 flagKey,
+                                                context,
                                                 valueType,
                                                 defaultValue,
                                                 detail);
@@ -210,11 +212,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagResponse,
                                                 reason);
 
 struct EvaluateAllFlagParams {
+    std::optional<nlohmann::json> context;
     std::optional<bool> withReasons;
     std::optional<bool> clientSideOnly;
     std::optional<bool> detailsOnlyForTrackedFlags;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagParams,
+                                                context,
                                                 withReasons,
                                                 clientSideOnly,
                                                 detailsOnlyForTrackedFlags);
@@ -226,12 +230,14 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagsResponse,
 
 struct CustomEventParams {
     std::string eventKey;
+    std::optional<nlohmann::json> context;
     std::optional<nlohmann::json> data;
     std::optional<bool> omitNullData;
     std::optional<double> metricValue;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CustomEventParams,
                                                 eventKey,
+                                                context,
                                                 data,
                                                 omitNullData,
                                                 metricValue);

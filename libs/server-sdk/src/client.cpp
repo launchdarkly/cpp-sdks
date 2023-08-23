@@ -4,6 +4,24 @@
 
 namespace launchdarkly::server_side {
 
+void operator|=(AllFlagsState::Options& lhs, AllFlagsState::Options rhs) {
+    lhs = lhs | rhs;
+}
+
+AllFlagsState::Options operator|(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs) {
+    return static_cast<AllFlagsState::Options>(
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(lhs) |
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(rhs));
+}
+
+AllFlagsState::Options operator&(AllFlagsState::Options lhs,
+                                 AllFlagsState::Options rhs) {
+    return static_cast<AllFlagsState::Options>(
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(lhs) &
+        static_cast<std::underlying_type_t<AllFlagsState::Options>>(rhs));
+}
+
 Client::Client(Config config)
     : client(std::make_unique<ClientImpl>(std::move(config), kVersion)) {}
 
@@ -16,8 +34,10 @@ std::future<bool> Client::StartAsync() {
 }
 
 using FlagKey = std::string;
-[[nodiscard]] std::unordered_map<FlagKey, Value> Client::AllFlagsState() const {
-    return client->AllFlagsState();
+[[nodiscard]] AllFlagsState Client::AllFlagsState(
+    Context const& context,
+    enum AllFlagsState::Options options) {
+    return client->AllFlagsState(context, options);
 }
 
 void Client::Track(Context const& ctx,
