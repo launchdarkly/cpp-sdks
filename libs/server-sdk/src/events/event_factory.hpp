@@ -51,7 +51,7 @@ class EventFactory {
         Value default_val,
         std::optional<std::string> prereq_of) const;
 
-    ReasonPolicy reason_policy_;
+    ReasonPolicy const reason_policy_;
     std::function<events::Date()> now_;
 };
 }  // namespace launchdarkly::server_side

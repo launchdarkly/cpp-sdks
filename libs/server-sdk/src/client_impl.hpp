@@ -147,7 +147,7 @@ class ClientImpl : public IClient {
         std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
             predicate);
 
-    void LogVariationCall(std::string const& key, bool flag_present);
+    void LogVariationCall(std::string const& key, bool flag_present) const;
 
     Config config_;
     Logger logger_;

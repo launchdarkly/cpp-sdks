@@ -70,9 +70,6 @@ events::InputEvent EventFactory::FeatureRequest(
                 events::Date{std::chrono::system_clock::time_point{
                     std::chrono::milliseconds(*flag->debugEventsUntilDate)}};
         }
-    } else {
-        flag_track_events = false;
-        require_experiment_data = false;
     }
 
     std::optional<launchdarkly::EvaluationReason> reason;

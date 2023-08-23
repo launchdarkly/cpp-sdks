@@ -243,7 +243,8 @@ void ClientImpl::FlushAsync() {
     event_processor_->FlushAsync();
 }
 
-void ClientImpl::LogVariationCall(std::string const& key, bool flag_present) {
+void ClientImpl::LogVariationCall(std::string const& key,
+                                  bool flag_present) const {
     if (Initialized()) {
         if (!flag_present) {
             LD_LOG(logger_, LogLevel::kInfo) << "Unknown feature flag " << key
