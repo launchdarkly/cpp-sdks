@@ -1,18 +1,23 @@
+# Server doesn't yet support prerequisite event recording.
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at top level, recursion stops/prerequisite cycle is detected at top level, recursion stops/evaluate flag with detail
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at top level, recursion stops/prerequisite cycle is detected at top level, recursion stops/evaluate all flags
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate flag with detail
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate all flags
+
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag without detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag with detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate all flags
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag without detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag with detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate all flags
+
+
+# SC-214431
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
 
-# SC-209589: Prerequisites events not yet supported.
+# Server doesn't yet support prerequisite event recording.
 events/summary events/prerequisites
 events/feature prerequisite events/without reasons
 events/feature prerequisite events/with reasons
@@ -73,7 +78,3 @@ context type/convert/old user to context/{"key": "a", "avatar": "b"}
 context type/convert/old user to context/{"key": "a", "avatar": null}
 context type/convert/old user to context/{"key": "a", "ip": "b"}
 context type/convert/old user to context/{"key": "a", "ip": null}
-
-# These appear to only fail in CI, but not locally on Mac. Requires investigation.
-evaluation/bucketing/bucket by non-key attribute/in rollouts/invalid value type
-evaluation/bucketing/bucket by non-key attribute/in rollouts/attribute not found
