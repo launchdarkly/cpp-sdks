@@ -6,6 +6,7 @@
 
 #include "client_impl.hpp"
 
+#include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
@@ -157,15 +158,49 @@ bool ClientImpl::Initialized() const {
     return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
-std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlagsState() const {
+AllFlagsState ClientImpl::AllFlagsState(Context const& context,
+                                        AllFlagsState::Options options) {
     std::unordered_map<Client::FlagKey, Value> result;
-    // TODO: implement all flags state (and update signature).
-    //    for (auto& [key, descriptor] : memory_store_.AllFlags()) {
-    //        if (descriptor->item) {
-    //            result.try_emplace(key, descriptor->item->Value());
-    //        }
-    //    }
-    return result;
+
+    if (!Initialized()) {
+        if (memory_store_.Initialized()) {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before client has finished "
+                   "initializing; using last known values from data store";
+        } else {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before client has finished "
+                   "initializing. Data store not available. Returning empty "
+                   "state";
+            return {};
+        }
+    }
+
+    AllFlagsStateBuilder builder{options};
+
+    for (auto const& [k, v] : memory_store_.AllFlags()) {
+        if (!v || !v->item) {
+            continue;
+        }
+
+        auto const& flag = *(v->item);
+
+        if (IsSet(options, AllFlagsState::Options::ClientSideOnly) &&
+            !flag.clientSideAvailability.usingEnvironmentId) {
+            continue;
+        }
+
+        EvaluationDetail<Value> detail = evaluator_.Evaluate(flag, context);
+
+        bool in_experiment = IsExperimentationEnabled(flag, detail.Reason());
+        builder.AddFlag(k, detail.Value(),
+                        AllFlagsState::State{
+                            flag.Version(), detail.VariationIndex(),
+                            detail.Reason(), flag.trackEvents || in_experiment,
+                            in_experiment, flag.debugEventsUntilDate});
+    }
+
+    return builder.Build();
 }
 
 void ClientImpl::TrackInternal(Context const& ctx,
@@ -298,18 +333,18 @@ EvaluationDetail<T> ClientImpl::VariationInternal(Context const& ctx,
         detail.ReasonKindIs(EvaluationReason::Kind::kRuleMatch);
 
     if (track_rule_match) {
-        assert(detail.Reason()->RuleIndex().has_value() &&
+        auto const& rule_index = detail.Reason()->RuleIndex();
+        assert(rule_index &&
                "evaluation algorithm must produce a rule index in the case of "
                "rule "
                "match");
 
-        assert(*detail.Reason()->RuleIndex() < flag.rules.size() &&
+        assert(*rule_index < flag.rules.size() &&
                "evaluation algorithm must produce a valid rule index in the "
                "case of "
                "rule match");
 
-        track_rule_match =
-            flag.rules.at(*detail.Reason()->RuleIndex()).trackEvents;
+        track_rule_match = flag.rules.at(*rule_index).trackEvents;
     }
 
     event.require_full_event =
@@ -401,5 +436,4 @@ ClientImpl::~ClientImpl() {
     // TODO: Probably not the best.
     run_thread_.join();
 }
-
 }  // namespace launchdarkly::server_side

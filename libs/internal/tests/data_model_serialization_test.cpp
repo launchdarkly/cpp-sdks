@@ -419,8 +419,7 @@ TEST(RolloutTests, SerializeAllFields) {
 }
 
 TEST(VariationOrRolloutTests, SerializeVariation) {
-    uint64_t value(5);
-    data_model::Flag::VariationOrRollout variation = value;
+    data_model::Flag::VariationOrRollout variation = 5;
 
     auto json = boost::json::value_from(variation);
 
@@ -578,12 +577,11 @@ TEST(FlagRuleTests, SerializeAllRollout) {
 }
 
 TEST(FlagTests, SerializeAll) {
-    uint64_t fallthrough(42);
     data_model::Flag flag{
         "the-key",
         21,                                // version
         true,                              // on
-        fallthrough,                       // fallthrough
+        42,                                // fallthrough
         {"a", "b"},                        // variations
         {{"prereqA", 2}, {"prereqB", 3}},  // prerequisites
         {{{

@@ -212,11 +212,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagResponse,
                                                 reason);
 
 struct EvaluateAllFlagParams {
+    std::optional<nlohmann::json> context;
     std::optional<bool> withReasons;
     std::optional<bool> clientSideOnly;
     std::optional<bool> detailsOnlyForTrackedFlags;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagParams,
+                                                context,
                                                 withReasons,
                                                 clientSideOnly,
                                                 detailsOnlyForTrackedFlags);
