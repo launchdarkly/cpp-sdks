@@ -7,16 +7,16 @@
 namespace launchdarkly::server_side {
 
 /**
- * EventScope is responsible for forwarding events, created by a factory, to an
- * event processor interface. If the interface is nullptr, then events will not
+ * EventScope is responsible for forwarding events to an
+ * IEventProcessor. If the given interface is nullptr, then events will not
  * be forwarded at all.
  */
 class EventScope {
    public:
     /**
      * Constructs an EventScope with a non-owned IEventProcessor and factory.
-     * When Get is called, the factory will be passed to the caller who may then
-     * select a particular event to construct.
+     * When Send is called, the factory will be passed to the caller, which must
+     * return a constructed event.
      * @param processor The event processor to forward events to.
      * @param factory The factory used for generating events.
      */
@@ -29,7 +29,7 @@ class EventScope {
     EventScope() : EventScope(nullptr, EventFactory::WithoutReasons()) {}
 
     template <typename Callable>
-    void Get(Callable&& callable) const {
+    void Send(Callable&& callable) const {
         if (processor_) {
             processor_->SendAsync(callable(factory_));
         }

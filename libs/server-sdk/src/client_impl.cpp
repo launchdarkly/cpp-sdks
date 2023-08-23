@@ -145,7 +145,7 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 }
 
 void ClientImpl::Identify(Context context) {
-    events_default_.Get([&](EventFactory const& factory) {
+    events_default_.Send([&](EventFactory const& factory) {
         return factory.Identify(std::move(context));
     });
 }
@@ -231,7 +231,7 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
-    events_default_.Get([&](EventFactory const& factory) {
+    events_default_.Send([&](EventFactory const& factory) {
         return factory.Custom(ctx, std::move(event_name), std::move(data),
                               metric_value);
     });
@@ -346,7 +346,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
             if constexpr (std::is_same_v<T, enum EvaluationReason::ErrorKind>) {
                 auto detail = EvaluationDetail<Value>{arg, default_value};
 
-                event_scope.Get([&](EventFactory const& factory) {
+                event_scope.Send([&](EventFactory const& factory) {
                     return factory.UnknownFlag(key, context, detail,
                                                default_value);
                 });
@@ -359,7 +359,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
                     (!arg.VariationIndex() ? default_value : arg.Value()),
                     arg.VariationIndex(), arg.Reason()};
 
-                event_scope.Get([&](EventFactory const& factory) {
+                event_scope.Send([&](EventFactory const& factory) {
                     return factory.Eval(key, context, flag, detail,
                                         default_value, std::nullopt);
                 });

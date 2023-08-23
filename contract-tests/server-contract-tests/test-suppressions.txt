@@ -4,10 +4,12 @@ evaluation/parameterized/rollout or experiment - error for empty variations list
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag without detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag with detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate all flags
+
+
+# SC-214431
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
-
 
 streaming/updates/flag patch with same version is not applied
 streaming/updates/segment patch with same version is not applied
@@ -65,7 +67,3 @@ context type/convert/old user to context/{"key": "a", "avatar": "b"}
 context type/convert/old user to context/{"key": "a", "avatar": null}
 context type/convert/old user to context/{"key": "a", "ip": "b"}
 context type/convert/old user to context/{"key": "a", "ip": null}
-
-# These appear to only fail in CI, but not locally on Mac. Requires investigation.
-evaluation/bucketing/bucket by non-key attribute/in rollouts/invalid value type
-evaluation/bucketing/bucket by non-key attribute/in rollouts/attribute not found

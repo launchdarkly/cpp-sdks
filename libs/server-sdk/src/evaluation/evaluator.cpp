@@ -67,7 +67,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             std::optional<std::size_t> variation_index =
                 detailed_evaluation.VariationIndex();
 
-            event_scope.Get([&](EventFactory const& factory) {
+            event_scope.Send([&](EventFactory const& factory) {
                 return factory.Eval(p.key, context, *descriptor.item,
                                     detailed_evaluation, Value::Null(),
                                     flag.key);

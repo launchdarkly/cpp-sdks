@@ -283,11 +283,11 @@ TEST(PrerequisiteTests, DeserializesAllFields) {
     ASSERT_EQ(result->variation, 123);
 }
 
-TEST(PrerequisiteTests, DeserializeFailsWithNegativeVariation) {
+TEST(PrerequisiteTests, DeserializeSucceedsWithNegativeVariation) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Flag::Prerequisite, JsonError>>(
         boost::json::parse(R"({"key" : "foo", "variation" : -123})"));
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
 }
 
 TEST(TargetTests, DeserializesMinimumValid) {
@@ -300,11 +300,11 @@ TEST(TargetTests, DeserializesMinimumValid) {
     ASSERT_TRUE(result->values.empty());
 }
 
-TEST(TargetTests, DeserializesFailsWithNegativeVariation) {
+TEST(TargetTests, DeserializesSucceedsWithNegativeVariation) {
     auto result = boost::json::value_to<
         tl::expected<data_model::Flag::Target, JsonError>>(
         boost::json::parse(R"({"variation" : -123})"));
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
 }
 
 TEST(TargetTests, DeserializesAllFields) {
