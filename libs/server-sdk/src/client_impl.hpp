@@ -115,7 +115,7 @@ class ClientImpl : public IClient {
         Context const& ctx,
         FlagKey const& key,
         Value const& default_value,
-        EventScope& scope);
+        EventScope const& scope);
 
     [[nodiscard]] EvaluationDetail<Value> VariationDetail(
         Context const& ctx,
@@ -132,7 +132,7 @@ class ClientImpl : public IClient {
         Value const& default_value,
         std::variant<enum EvaluationReason::ErrorKind, EvaluationDetail<Value>>
             result,
-        EventScope& event_scope,
+        EventScope const& event_scope,
         std::optional<data_model::Flag> const& flag);
 
     [[nodiscard]] std::optional<enum EvaluationReason::ErrorKind>
@@ -171,8 +171,8 @@ class ClientImpl : public IClient {
 
     evaluation::Evaluator evaluator_;
 
-    EventScope events_default_;
-    EventScope events_with_reasons_;
+    EventScope const events_default_;
+    EventScope const events_with_reasons_;
 
     std::thread run_thread_;
 };

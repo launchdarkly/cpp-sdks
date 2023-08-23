@@ -280,7 +280,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     Context const& context,
     IClient::FlagKey const& key,
     Value const& default_value,
-    EventScope& scope) {
+    EventScope const& scope) {
     if (auto error = PreEvaluationChecks(context)) {
         return PostEvaluation(key, context, default_value, *error, scope,
                               std::nullopt);
@@ -321,7 +321,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
     Value const& default_value,
     std::variant<enum EvaluationReason::ErrorKind, EvaluationDetail<Value>>
         error_or_detail,
-    EventScope& event_scope,
+    EventScope const& event_scope,
     std::optional<data_model::Flag> const& flag) {
     return std::visit(
         [&](auto&& arg) {

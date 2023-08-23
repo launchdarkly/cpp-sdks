@@ -10,7 +10,7 @@ class EventScope {
         : disabled_(disabled), factory_(std::move(factory)) {}
 
     template <typename Callable>
-    void Get(Callable&& callable) {
+    void Get(Callable&& callable) const {
         if (!disabled_) {
             callable(factory_);
         }
