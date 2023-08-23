@@ -87,7 +87,8 @@ events::InputEvent EventFactory::FeatureRequest(
         detail.VariationIndex(),
         reason,
         flag_track_events || require_experiment_data,
-        debug_events_until_date};
+        debug_events_until_date,
+        prereq_of};
 }
 
 }  // namespace launchdarkly::server_side

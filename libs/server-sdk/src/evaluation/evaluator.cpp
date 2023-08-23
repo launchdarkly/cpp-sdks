@@ -24,14 +24,16 @@ Evaluator::Evaluator(Logger& logger, data_store::IDataStore const& store)
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
-    launchdarkly::Context const& context) {
-    return Evaluate("", flag, context);
+    launchdarkly::Context const& context,
+    EventScope const& event_scope) {
+    return Evaluate(std::nullopt, flag, context, event_scope);
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
-    std::string const& parent_key,
+    std::optional<std::string> parent_key,
     Flag const& flag,
-    launchdarkly::Context const& context) {
+    launchdarkly::Context const& context,
+    EventScope const& event_scope) {
     if (auto guard = stack_.NoticePrerequisite(flag.key)) {
         if (!flag.on) {
             return OffValue(flag, EvaluationReason::Off());
@@ -56,7 +58,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
 
             // Recursive call; cycles are detected by the guard.
             EvaluationDetail<Value> detailed_evaluation =
-                Evaluate(flag.key, *descriptor.item, context);
+                Evaluate(flag.key, *descriptor.item, context, event_scope);
 
             if (detailed_evaluation.IsError()) {
                 return detailed_evaluation;
@@ -65,7 +67,11 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             std::optional<std::size_t> variation_index =
                 detailed_evaluation.VariationIndex();
 
-            // TODO(209589) prerequisite events.
+            event_scope.Get([&](EventFactory const& factory) {
+                return factory.Eval(p.key, context, *descriptor.item,
+                                    detailed_evaluation, Value::Null(),
+                                    flag.key);
+            });
 
             if (!descriptor.item->on || variation_index != p.variation) {
                 return OffValue(flag,
@@ -73,7 +79,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             }
         }
     } else {
-        LogError(parent_key, Error::CyclicPrerequisiteReference(flag.key));
+        LogError(parent_key.value_or("(no parent)"),
+                 Error::CyclicPrerequisiteReference(flag.key));
         return OffValue(flag, EvaluationReason::MalformedFlag());
     }
 

@@ -12,11 +12,6 @@ evaluation/parameterized/segment match/user matches via include in multi-kind us
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
 evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
 
-# SC-209589: Prerequisites events not yet supported.
-events/summary events/prerequisites
-events/feature prerequisite events/without reasons
-events/feature prerequisite events/with reasons
-
 streaming/updates/flag patch with same version is not applied
 streaming/updates/segment patch with same version is not applied
 streaming/updates/flag patch with lower version is not applied
