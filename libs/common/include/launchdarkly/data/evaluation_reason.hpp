@@ -141,18 +141,6 @@ class EvaluationReason {
     static EvaluationReason Fallthrough(bool in_experiment);
 
     /**
-     * The client wasn't ready.
-     */
-    static EvaluationReason ClientNotReady();
-
-    /**
-     * The context wasn't valid.
-     */
-    static EvaluationReason ContextNotSpecified();
-
-    static EvaluationReason FlagNotFound();
-
-    /**
      * The flag evaluated to a particular variation because it matched a rule.
      * @param rule_index Index of the rule.
      * @param rule_id ID of the rule.
