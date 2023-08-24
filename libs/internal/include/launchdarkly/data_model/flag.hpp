@@ -55,7 +55,7 @@ struct Flag {
         explicit Rollout(std::vector<WeightedVariation>);
     };
 
-    using VariationOrRollout = std::variant<Variation, Rollout>;
+    using VariationOrRollout = std::variant<std::optional<Variation>, Rollout>;
 
     struct Prerequisite {
         std::string key;

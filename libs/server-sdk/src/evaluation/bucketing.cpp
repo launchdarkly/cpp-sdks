@@ -160,8 +160,12 @@ tl::expected<BucketResult, Error> Variation(
     return std::visit(
         [&](auto&& arg) -> tl::expected<BucketResult, Error> {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, Flag::Variation>) {
-                return BucketResult(arg);
+            if constexpr (std::is_same_v<T, std::optional<Flag::Variation>>) {
+                if (!arg) {
+                    return tl::make_unexpected(
+                        Error::RolloutMissingVariations());
+                }
+                return BucketResult(*arg);
             } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
                 if (arg.variations.empty()) {
                     return tl::make_unexpected(

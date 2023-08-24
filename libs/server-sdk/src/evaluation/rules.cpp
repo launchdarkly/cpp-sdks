@@ -191,14 +191,9 @@ tl::expected<bool, Error> Contains(Segment const& segment,
 }
 
 bool IsTargeted(Context const& context,
-                std::vector<std::string> const& keys,
-                std::vector<Segment::Target> const& targets) {
-    if (IsUser(context) && targets.empty()) {
-        return std::find(keys.begin(), keys.end(), context.CanonicalKey()) !=
-               keys.end();
-    }
-
-    for (auto const& target : targets) {
+                std::vector<std::string> const& user_keys,
+                std::vector<Segment::Target> const& context_targets) {
+    for (auto const& target : context_targets) {
         Value const& key = context.Get(target.contextKind, "key");
         if (!key.IsString()) {
             continue;
@@ -209,12 +204,11 @@ bool IsTargeted(Context const& context,
         }
     }
 
+    if (auto key = context.Get("user", "key"); !key.IsNull()) {
+        return std::find(user_keys.begin(), user_keys.end(), key.AsString()) !=
+               user_keys.end();
+    }
+
     return false;
 }
-
-bool IsUser(Context const& context) {
-    auto const& kinds = context.Kinds();
-    return kinds.size() == 1 && kinds[0] == "user";
-}
-
 }  // namespace launchdarkly::server_side::evaluation
