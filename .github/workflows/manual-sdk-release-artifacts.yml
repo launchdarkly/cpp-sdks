@@ -19,8 +19,12 @@ name: Publish SDK Artifacts
 jobs:
   split-input:
     runs-on: ubuntu-latest
+    outputs:
+      sdk_path: ${{ steps.split-string.outputs.SDK_PATH }}
+      sdk_cmake_target: ${{ steps.split-string.outputs.SDK_CMAKE_TARGET }}
     steps:
       - name: Determine CMake target and SDK library path
+        id: split-string
         run: |
           INPUT="${{ inputs.sdk_target }}"
           IFS=':' read -ra PATH_AND_TARGET <<< "$INPUT"
@@ -38,11 +42,11 @@ jobs:
         with:
           ref: ${{ inputs.tag }}
       - id: release-sdk
-        name: Full release of ${{ needs.split-input.outputs.SDK_PATH }}
+        name: Full release of ${{ needs.split-input.outputs.sdk_path }}
         uses: ./.github/actions/sdk-release
         with:
           # The tag of the release to upload artifacts to.
           tag_name: ${{ inputs.tag }}
           github_token: ${{secrets.GITHUB_TOKEN}}
-          sdk_path: ${{ needs.split-input.outputs.SDK_PATH }}
-          sdk_cmake_target: ${{ needs.split-input.outputs.SDK_CMAKE_TARGET }}
+          sdk_path: ${{ needs.split-input.outputs.sdk_path}}
+          sdk_cmake_target: ${{ needs.split-input.outputs.sdk_cmake_target}}
