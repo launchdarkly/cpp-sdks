@@ -63,9 +63,6 @@ evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper 
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate all flags
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag with detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag with detail
-evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag without detail
-evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate flag with detail
-evaluation/parameterized/segment match/user matches via include in multi-kind user/user matches via include in multi-kind user/evaluate all flags
 evaluation/parameterized/segment recursion/cycle is detected at top level, recursion stops/cycle is detected at top level, recursion stops/evaluate flag with detail
 evaluation/parameterized/segment recursion/cycle is detected below top level, recursion stops/cycle is detected below top level, recursion stops/evaluate flag with detail
 events/summary events/prerequisites
