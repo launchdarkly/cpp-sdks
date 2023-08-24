@@ -203,7 +203,7 @@ tag_invoke(boost::json::value_to_tag<
     }
 
     std::optional<data_model::Flag::Variation> variation;
-    
+
     /* If there's no rollout, this must be a variation. If there's no variation,
      * then this will be detected as a malformed flag at evaluation time. */
     PARSE_CONDITIONAL_FIELD(variation, obj, "variation");
@@ -264,9 +264,12 @@ void tag_invoke(
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
                 obj.emplace("rollout", boost::json::value_from(arg));
-            } else if constexpr (std::is_same_v<T,
-                                                data_model::Flag::Variation>) {
-                obj.emplace("variation", arg);
+            } else if constexpr (std::is_same_v<
+                                     T, std::optional<
+                                            data_model::Flag::Variation>>) {
+                if (arg) {
+                    obj.emplace("variation", *arg);
+                }
             }
         },
         variation_or_rollout);

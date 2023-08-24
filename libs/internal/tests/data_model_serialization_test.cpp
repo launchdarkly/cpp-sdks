@@ -326,7 +326,8 @@ TEST(FlagRuleTests, DeserializesMinimumValid) {
     ASSERT_FALSE(result->trackEvents);
     ASSERT_TRUE(result->clauses.empty());
     ASSERT_FALSE(result->id);
-    ASSERT_EQ(std::get<data_model::Flag::Variation>(result->variationOrRollout),
+    ASSERT_EQ(std::get<std::optional<data_model::Flag::Variation>>(
+                  result->variationOrRollout),
               data_model::Flag::Variation(123));
 }
 
@@ -348,7 +349,8 @@ TEST(FlagRuleTests, DeserializesAllFields) {
     ASSERT_TRUE(result->trackEvents);
     ASSERT_TRUE(result->clauses.empty());
     ASSERT_EQ(result->id, "foo");
-    ASSERT_EQ(std::get<data_model::Flag::Variation>(result->variationOrRollout),
+    ASSERT_EQ(std::get<std::optional<data_model::Flag::Variation>>(
+                  result->variationOrRollout),
               data_model::Flag::Variation(123));
 }
 
