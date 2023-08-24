@@ -81,7 +81,7 @@ bool EventsEnabled(Config const& config) {
 
 std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
     Config const& config,
-    boost::asio::any_io_executor exec,
+    boost::asio::any_io_executor const& exec,
     HttpProperties const& http_properties,
     Logger& logger) {
     if (EventsEnabled(config)) {
