@@ -22,8 +22,10 @@ jobs:
           ref: ${{ inputs.tag }}
       - id: release-client
         name: Full release of libs/client-sdk
-        uses: ./.github/actions/client-release
+        uses: ./.github/actions/sdk-release
         with:
           # The tag of the release to upload artifacts to.
           tag_name: ${{ inputs.tag }}
           github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/client-sdk'
+          sdk_cmake_target: 'launchdarkly-cpp-client'
