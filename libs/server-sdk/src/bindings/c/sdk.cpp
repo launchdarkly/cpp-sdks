@@ -5,6 +5,7 @@
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/server_side/client.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <boost/core/ignore_unused.hpp>
 #include <cstring>
@@ -19,6 +20,9 @@ struct Detail;
 
 #define TO_CONTEXT(ptr) (reinterpret_cast<Context*>(ptr))
 #define FROM_CONTEXT(ptr) (reinterpret_cast<LDContext>(ptr))
+
+#define TO_VALUE(ptr) (reinterpret_cast<Value*>(ptr))
+#define FROM_VALUE(ptr) (reinterpret_cast<LDValue>(ptr))
 
 #define FROM_DETAIL(ptr) (reinterpret_cast<LDEvalDetail>(ptr))
 
@@ -124,7 +128,7 @@ LDServerSDK_TrackMetric(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(event_name);
     LD_ASSERT_NOT_NULL(value);
 
-    auto as_value = reinterpret_cast<Value*>(value);
+    Value* as_value = TO_VALUE(value);
 
     TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, metric_value,
                        std::move(*as_value));
@@ -142,7 +146,7 @@ LDServerSDK_TrackData(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(event_name);
     LD_ASSERT_NOT_NULL(value);
 
-    auto as_value = reinterpret_cast<Value*>(value);
+    Value* as_value = TO_VALUE(value);
 
     TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, std::move(*as_value));
 
@@ -295,7 +299,7 @@ LDServerSDK_JsonVariation(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(flag_key);
     LD_ASSERT(default_value);
 
-    auto as_value = reinterpret_cast<Value*>(default_value);
+    Value* as_value = TO_VALUE(default_value);
 
     return reinterpret_cast<LDValue>(new Value(
         TO_SDK(sdk)->JsonVariation(*TO_CONTEXT(context), flag_key, *as_value)));
@@ -312,7 +316,7 @@ LDServerSDK_JsonVariationDetail(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(flag_key);
     LD_ASSERT(default_value);
 
-    auto as_value = reinterpret_cast<Value*>(default_value);
+    Value* as_value = TO_VALUE(default_value);
 
     return reinterpret_cast<LDValue>(
         new Value(MaybeDetail(sdk, out_detail, [&](Client* client) {
@@ -332,22 +336,23 @@ LDServerSDK_FlagNotifier_OnFlagChange(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(sdk);
     LD_ASSERT_NOT_NULL(flag_key);
 
-    if (listener.FlagChanged) {
-        auto connection = TO_SDK(sdk)->FlagNotifier().OnFlagChange(
-            flag_key,
-            [listener](std::shared_ptr<launchdarkly::client_side::flag_manager::
-                                           FlagValueChangeEvent> event) {
-                listener.FlagChanged(
-                    event->FlagName().c_str(),
-                    reinterpret_cast<LDValue>(
-                        const_cast<Value*>(&event->NewValue())),
-                    reinterpret_cast<LDValue>(
-                        const_cast<Value*>(&event->OldValue())),
-                    event->Deleted(), listener.UserData);
-            });
-
-        return reinterpret_cast<LDListenerConnection>(connection.release());
-    }
+    //     if (listener.FlagChanged) {
+    //         auto connection = TO_SDK(sdk)->FlagNotifier().OnFlagChange(
+    //             flag_key,
+    //             [listener](std::shared_ptr<launchdarkly::client_side::flag_manager::
+    //                                            FlagValueChangeEvent> event) {
+    //                 listener.FlagChanged(
+    //                     event->FlagName().c_str(),
+    //                     reinterpret_cast<LDValue>(
+    //                         const_cast<Value*>(&event->NewValue())),
+    //                     reinterpret_cast<LDValue>(
+    //                         const_cast<Value*>(&event->OldValue())),
+    //                     event->Deleted(), listener.UserData);
+    //             });
+    //
+    //         return
+    //         reinterpret_cast<LDListenerConnection>(connection.release());
+    //     }
 
     return nullptr;
 }
@@ -427,17 +432,18 @@ LDServerSDK_DataSourceStatus_OnStatusChange(
     LDServerSDK sdk,
     struct LDDataSourceStatusListener listener) {
     LD_ASSERT_NOT_NULL(sdk);
-
-    if (listener.StatusChanged) {
-        auto connection =
-            TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
-                [listener](data_sources::DataSourceStatus status) {
-                    listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
-                                           listener.UserData);
-                });
-
-        return reinterpret_cast<LDListenerConnection>(connection.release());
-    }
+    //
+    //     if (listener.StatusChanged) {
+    //         auto connection =
+    //             TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
+    //                 [listener](data_sources::DataSourceStatus status) {
+    //                     listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
+    //                                            listener.UserData);
+    //                 });
+    //
+    //         return
+    //         reinterpret_cast<LDListenerConnection>(connection.release());
+    //     }
     return nullptr;
 }
 
@@ -445,8 +451,9 @@ LD_EXPORT(LDDataSourceStatus)
 LDServerSDK_DataSourceStatus_Status(LDServerSDK sdk) {
     LD_ASSERT_NOT_NULL(sdk);
 
-    return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
-        TO_SDK(sdk)->DataSourceStatus().Status()));
+    //         return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
+    //             TO_SDK(sdk)->DataSourceStatus().Status()));
+    return nullptr;
 }
 
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
