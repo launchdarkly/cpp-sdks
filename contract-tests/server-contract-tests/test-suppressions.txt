@@ -1,3 +1,4 @@
+# SC-214431
 evaluation/parameterized/bad attribute reference errors - clause with no attribute/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - empty path component/test-flag/evaluate flag with detail
 evaluation/parameterized/bad attribute reference errors - tilde followed by invalid escape character/test-flag/evaluate flag with detail
@@ -60,12 +61,8 @@ evaluation/parameterized/prerequisites/prerequisite cycle is detected at top lev
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at top level, recursion stops/prerequisite cycle is detected at top level, recursion stops/evaluate all flags
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate flag with detail
 evaluation/parameterized/prerequisites/prerequisite cycle is detected at deeper level, recursion stops/prerequisite cycle is detected at deeper level, recursion stops/evaluate all flags
-evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag without detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate flag with detail
-evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/fallthrough rollout/fallthrough rollout/evaluate all flags
-evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag without detail
 evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate flag with detail
-evaluation/parameterized/rollout or experiment - error for empty variations list in rollout/rule rollout/rule rollout/evaluate all flags
 evaluation/parameterized/segment recursion/cycle is detected at top level, recursion stops/cycle is detected at top level, recursion stops/evaluate flag with detail
 evaluation/parameterized/segment recursion/cycle is detected below top level, recursion stops/cycle is detected below top level, recursion stops/evaluate flag with detail
 events/summary events/prerequisites

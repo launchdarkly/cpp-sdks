@@ -202,13 +202,13 @@ tag_invoke(boost::json::value_to_tag<
         return std::make_optional(*rollout);
     }
 
-    data_model::Flag::Variation variation{};
-    /* If there's no rollout, this must be a variation. If there's no
-     * data at all, we must treat it as variation 0 (since upstream encoders may
-     * omit 0.) */
-    PARSE_FIELD_DEFAULT(variation, obj, "variation", 0);
+    std::optional<data_model::Flag::Variation> variation;
 
-    return std::make_optional(variation);
+    /* If there's no rollout, this must be a variation. If there's no variation,
+     * then this will be detected as a malformed flag at evaluation time. */
+    PARSE_CONDITIONAL_FIELD(variation, obj, "variation");
+
+    return variation;
 }
 
 namespace data_model {
@@ -264,9 +264,12 @@ void tag_invoke(
             using T = std::decay_t<decltype(arg)>;
             if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
                 obj.emplace("rollout", boost::json::value_from(arg));
-            } else if constexpr (std::is_same_v<T,
-                                                data_model::Flag::Variation>) {
-                obj.emplace("variation", arg);
+            } else if constexpr (std::is_same_v<
+                                     T, std::optional<
+                                            data_model::Flag::Variation>>) {
+                if (arg) {
+                    obj.emplace("variation", *arg);
+                }
             }
         },
         variation_or_rollout);
