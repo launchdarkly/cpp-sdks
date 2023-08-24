@@ -15,9 +15,7 @@ using SDK = config::shared::ClientSDK;
 using Defaults = config::shared::Defaults<SDK>;
 using AppInfoBuilder = config::shared::builders::AppInfoBuilder;
 using EndpointsBuilder = config::shared::builders::EndpointsBuilder<SDK>;
-
 using ConfigBuilder = config::shared::builders::ConfigBuilder<SDK>;
-
 using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;

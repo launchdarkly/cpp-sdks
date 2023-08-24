@@ -27,8 +27,12 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientSDK* LDClientSDK;
 
+#ifndef LD_NONBLOCKING
 #define LD_NONBLOCKING 0
+#endif
+#ifndef LD_DISCARD_DETAIL
 #define LD_DISCARD_DETAIL NULL
+#endif
 
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
