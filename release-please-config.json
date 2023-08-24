@@ -11,6 +11,13 @@
         "CMakeLists.txt"
       ]
     },
+    "libs/server-sdk": {
+      "extra-files": [
+        "include/launchdarkly/server_side/client.hpp",
+        "tests/client_test.cpp",
+        "CMakeLists.txt"
+      ]
+    },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
     },
