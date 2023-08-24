@@ -1,0 +1,48 @@
+# Checks out the tag, builds release builds, and attaches them to the release for the tag.
+# If you need to change build scripts, then update the tag to include the modifications.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag to create release artifacts for.'
+        required: true
+      sdk_target:
+        description: 'The library/cmake target to release (delimited by ":").'
+        required: true
+        default: 'libs/client-sdk:launchdarkly-cpp-client'
+        type: choice
+        options:
+          - libs/client-sdk:launchdarkly-cpp-client
+
+name: Publish SDK Artifacts
+
+jobs:
+  split-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine CMake target and SDK library path
+        run: |
+          INPUT="${{ inputs.sdk_target }}"
+          IFS=':' read -ra PATH_AND_TARGET <<< "$INPUT"
+          echo "SDK_PATH=${PATH_AND_TARGET[0]}" >> $GITHUB_OUTPUT
+          echo "SDK_CMAKE_TARGET=${PATH_AND_TARGET[1]}" >> $GITHUB_OUTPUT
+  release-sdk:
+    needs: split-input
+    strategy:
+      matrix:
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ ubuntu-latest, windows-2022, macos-12 ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.tag }}
+      - id: release-sdk
+        name: Full release of ${{ needs.split-input.outputs.SDK_PATH }}
+        uses: ./.github/actions/sdk-release
+        with:
+          # The tag of the release to upload artifacts to.
+          tag_name: ${{ inputs.tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: ${{ needs.split-input.outputs.SDK_PATH }}
+          sdk_cmake_target: ${{ needs.split-input.outputs.SDK_CMAKE_TARGET }}
