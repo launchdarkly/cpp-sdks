@@ -7,6 +7,7 @@
 #include <launchdarkly/value.hpp>
 
 #include "../data_store/data_store.hpp"
+#include "../events/event_scope.hpp"
 #include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
@@ -22,6 +23,23 @@ class Evaluator {
     /**
      * Evaluates a flag for a given context.
      * Warning: not thread safe.
+     *
+     * @param flag The flag to evaluate.
+     * @param context The context to evaluate the flag against.
+     * @param event_scope The event scope used for recording prerequisite
+     * events.
+     */
+    [[nodiscard]] EvaluationDetail<Value> Evaluate(
+        data_model::Flag const& flag,
+        launchdarkly::Context const& context,
+        EventScope const& event_scope);
+
+    /**
+     * Evaluates a flag for a given context. Does not record prerequisite
+     * events. Warning: not thread safe.
+     *
+     * @param flag The flag to evaluate.
+     * @param context The context to evaluate the flag against.
      */
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
@@ -29,9 +47,10 @@ class Evaluator {
 
    private:
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
-        std::string const& parent_key,
+        std::optional<std::string> parent_key,
         data_model::Flag const& flag,
-        launchdarkly::Context const& context);
+        launchdarkly::Context const& context,
+        EventScope const& event_scope);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
         data_model::Flag const& flag,

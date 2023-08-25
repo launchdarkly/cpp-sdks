@@ -17,6 +17,8 @@
 
 #include "evaluation/evaluator.hpp"
 
+#include "events/event_scope.hpp"
+
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
@@ -109,12 +111,33 @@ class ClientImpl : public IClient {
     std::future<bool> StartAsync() override;
 
    private:
-    template <typename T>
-    [[nodiscard]] EvaluationDetail<T> VariationInternal(Context const& ctx,
-                                                        FlagKey const& key,
-                                                        Value default_value,
-                                                        bool check_type,
-                                                        bool detailed);
+    [[nodiscard]] EvaluationDetail<Value> VariationInternal(
+        Context const& ctx,
+        FlagKey const& key,
+        Value const& default_value,
+        EventScope const& scope);
+
+    [[nodiscard]] EvaluationDetail<Value> VariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        Value const& default_value);
+
+    [[nodiscard]] Value Variation(Context const& ctx,
+                                  std::string const& key,
+                                  Value const& default_value);
+
+    [[nodiscard]] EvaluationDetail<Value> PostEvaluation(
+        std::string const& key,
+        Context const& context,
+        Value const& default_value,
+        std::variant<enum EvaluationReason::ErrorKind, EvaluationDetail<Value>>
+            result,
+        EventScope const& event_scope,
+        std::optional<data_model::Flag> const& flag);
+
+    [[nodiscard]] std::optional<enum EvaluationReason::ErrorKind>
+    PreEvaluationChecks(Context const& context);
+
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,
@@ -123,6 +146,8 @@ class ClientImpl : public IClient {
     std::future<bool> StartAsyncInternal(
         std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
             predicate);
+
+    void LogVariationCall(std::string const& key, bool flag_present) const;
 
     Config config_;
     Logger logger_;
@@ -145,6 +170,9 @@ class ClientImpl : public IClient {
     data_sources::DataSourceStatusManager status_manager_;
 
     evaluation::Evaluator evaluator_;
+
+    EventScope const events_default_;
+    EventScope const events_with_reasons_;
 
     std::thread run_thread_;
 };

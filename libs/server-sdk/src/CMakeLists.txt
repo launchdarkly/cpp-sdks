@@ -43,6 +43,7 @@ add_library(${LIBNAME}
         data_store/persistent/expiration_tracker.hpp
         data_store/persistent/persistent_data_store.cpp
         data_store/persistent/expiration_tracker.cpp
+        events/event_factory.cpp
         )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))

@@ -7,9 +7,6 @@
 
 namespace launchdarkly::server_side {
 
-bool IsExperimentationEnabled(data_model::Flag const& flag,
-                              std::optional<EvaluationReason> const& reason);
-
 bool IsSet(AllFlagsState::Options options, AllFlagsState::Options flag);
 bool NotSet(AllFlagsState::Options options, AllFlagsState::Options flag);
 
