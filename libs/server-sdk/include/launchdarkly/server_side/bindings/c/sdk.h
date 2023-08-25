@@ -4,7 +4,8 @@
 // NOLINTBEGIN modernize-use-using
 #pragma once
 
-#include <launchdarkly/bindings/c/config/config.h>
+#include <launchdarkly/server_side/bindings/c/config/config.h>
+
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>
@@ -38,7 +39,7 @@ typedef struct _LDServerSDK* LDServerSDK;
  * @return New SDK instance.
  */
 LD_EXPORT(LDServerSDK)
-LDServerSDK_New(LDClientConfig config);
+LDServerSDK_New(LDServerConfig config);
 
 /**
  * Returns the version of the SDK.

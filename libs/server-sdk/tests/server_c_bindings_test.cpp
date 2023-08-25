@@ -1,19 +1,20 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/bindings/c/config/builder.h>
-#include <launchdarkly/bindings/c/context_builder.h>
+#include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/data_source_status.hpp>
+
+#include <launchdarkly/bindings/c/context_builder.h>
 
 #include <chrono>
 
 using launchdarkly::server_side::data_sources::DataSourceStatus;
 
 TEST(ClientBindings, MinimalInstantiation) {
-    LDClientConfigBuilder cfg_builder = LDClientConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
 
-    LDClientConfig config;
-    LDStatus status = LDClientConfigBuilder_Build(cfg_builder, &config);
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerSDK sdk = LDServerSDK_New(config);
@@ -34,11 +35,11 @@ void FlagListenerFunction(char const* flag_key,
 // This test registers a listener. It doesn't use the listener, but it
 // will at least ensure 1.) Compilation, and 2.) Allow sanitizers to run.
 TEST(ClientBindings, RegisterFlagListener) {
-    LDClientConfigBuilder cfg_builder = LDClientConfigBuilder_New("sdk-123");
-    LDClientConfigBuilder_Offline(cfg_builder, true);
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
 
-    LDClientConfig config;
-    LDStatus status = LDClientConfigBuilder_Build(cfg_builder, &config);
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerSDK sdk = LDServerSDK_New(config);
@@ -68,11 +69,11 @@ void StatusListenerFunction(LDDataSourceStatus status, void* user_data) {
 // This test registers a listener. It doesn't use the listener, but it
 // will at least ensure 1.) Compilation, and 2.) Allow sanitizers to run.
 TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
-    LDClientConfigBuilder cfg_builder = LDClientConfigBuilder_New("sdk-123");
-    LDClientConfigBuilder_Offline(cfg_builder, true);
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
 
-    LDClientConfig config;
-    LDStatus status = LDClientConfigBuilder_Build(cfg_builder, &config);
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerSDK sdk = LDServerSDK_New(config);
@@ -97,11 +98,11 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 }
 
 TEST(ClientBindings, GetStatusOfOfflineClient) {
-    LDClientConfigBuilder cfg_builder = LDClientConfigBuilder_New("sdk-123");
-    LDClientConfigBuilder_Offline(cfg_builder, true);
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
 
-    LDClientConfig config;
-    LDStatus status = LDClientConfigBuilder_Build(cfg_builder, &config);
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerSDK sdk = LDServerSDK_New(config);

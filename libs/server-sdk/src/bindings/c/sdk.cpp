@@ -61,13 +61,13 @@ inline static auto MaybeDetail(LDServerSDK sdk,
 }
 
 LD_EXPORT(LDServerSDK)
-LDServerSDK_New(LDClientConfig config) {
+LDServerSDK_New(LDServerConfig config) {
     LD_ASSERT_NOT_NULL(config);
 
     auto as_cfg = reinterpret_cast<Config*>(config);
     auto sdk = new Client(std::move(*as_cfg));
 
-    LDClientConfig_Free(config);
+    LDServerConfig_Free(config);
 
     return FROM_SDK(sdk);
 }
