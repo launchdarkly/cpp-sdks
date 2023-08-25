@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - '**.md' #Do not need to run CI for markdown changes.
   pull_request:
-    branches: [ main, server-side, cw/sc-206687/contract-tests ]
+    branches: [ main, server-side ]
     paths-ignore:
       - '**.md'
 
