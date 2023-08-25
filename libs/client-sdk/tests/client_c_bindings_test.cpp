@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/bindings/c/config/builder.h>
+#include <launchdarkly/bindings/c/config/client_side/builder.h>
 #include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/client_side/bindings/c/sdk.h>
 #include <launchdarkly/client_side/data_source_status.hpp>

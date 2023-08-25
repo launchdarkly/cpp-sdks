@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "launchdarkly/bindings/c/config/builder.h"
+#include <launchdarkly/bindings/c/config/client_side/builder.h>
 #include "launchdarkly/config/client.hpp"
 
 TEST(ClientConfigBindings, ConfigBuilderNewFree) {

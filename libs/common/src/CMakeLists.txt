@@ -43,8 +43,9 @@ add_library(${LIBNAME} OBJECT
         bindings/c/context_builder.cpp
         bindings/c/status.cpp
         bindings/c/context.cpp
-        bindings/c/config/builder.cpp
-        bindings/c/config/config.cpp
+        bindings/c/config/client_side/builder.cpp
+        bindings/c/config/client_side/config.cpp
+        bindings/c/config/common/logging_builder.cpp
         log_level.cpp
         config/persistence_builder.cpp
         bindings/c/data/evaluation_detail.cpp
