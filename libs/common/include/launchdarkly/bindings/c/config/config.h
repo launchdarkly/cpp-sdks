@@ -1,27 +1,14 @@
-/** @file */
-// NOLINTBEGIN modernize-use-using
-
+/** @file
+ * This header for the LaunchDarkly C++ Client-side SDK has moved!
+ *
+ * Please use 'launchdarkly/client_side/bindings/c/config/config.h' instead.
+ *
+ * The original C++ Client-side 1.0 release shipped config.h at this location,
+ * but it was moved to the client_side subdirectory to accommodate the C++
+ * Server-side SDK. */
 #pragma once
 
-#include <launchdarkly/bindings/c/export.h>
-#include <launchdarkly/bindings/c/status.h>
-
-#ifdef __cplusplus
-extern "C" {  // only need to export C interface if
-// used by C++ source code
-#endif
-
-typedef struct _LDClientConfig* LDClientConfig;
-
-/**
- * Free the configuration. Configurations passed into an LDClient do not need to
- * be freed.
- * @param config Config to free.
- */
-LD_EXPORT(void) LDClientConfig_Free(LDClientConfig config);
-
-#ifdef __cplusplus
-}
-#endif
-
-// NOLINTEND modernize-use-using
+#pragma message( \
+    "LaunchDarkly Client-side C++ SDK: ACTION REQUIRED: This header has moved!")
+#pragma message( \
+    "LaunchDarkly Client-side C++ SDK: Please include 'launchdarkly/client_side/bindings/c/config/config.h' instead")

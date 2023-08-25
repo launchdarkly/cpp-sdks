@@ -1,7 +1,7 @@
 #include <launchdarkly/client_side/bindings/c/sdk.h>
 
-#include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/bindings/c/context_builder.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
 
 #include <stdbool.h>
 #include <stdio.h>
