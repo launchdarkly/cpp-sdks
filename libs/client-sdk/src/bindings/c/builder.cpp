@@ -1,7 +1,8 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include <launchdarkly/bindings/c/config/builder.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
+
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/persistence/persistence.hpp>
@@ -39,27 +40,6 @@ using namespace launchdarkly::client_side;
 
 #define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
     (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
-
-/**
- * Utility class to allow user-provided backends to satisfy the ILogBackend
- * interface.
- */
-class LogBackendWrapper : public launchdarkly::ILogBackend {
-   public:
-    explicit LogBackendWrapper(LDLogBackend backend) : backend_(backend) {}
-    bool Enabled(launchdarkly::LogLevel level) noexcept override {
-        return backend_.Enabled(static_cast<LDLogLevel>(level),
-                                backend_.UserData);
-    }
-    void Write(launchdarkly::LogLevel level,
-               std::string message) noexcept override {
-        return backend_.Write(static_cast<LDLogLevel>(level), message.c_str(),
-                              backend_.UserData);
-    }
-
-   private:
-    LDLogBackend backend_;
-};
 
 class PersistenceImplementationWrapper : public IPersistence {
    public:
@@ -326,35 +306,11 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     TO_BUILDER(b)->HttpProperties().Header(key, value);
 }
 
-LD_EXPORT(LDLoggingBasicBuilder) LDLoggingBasicBuilder_New() {
-    return FROM_BASIC_LOGGING_BUILDER(new LoggingBuilder::BasicLogging());
-}
-
-LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b) {
-    delete TO_BASIC_LOGGING_BUILDER(b);
-}
-
 LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b) {
     LD_ASSERT_NOT_NULL(b);
 
     TO_BUILDER(b)->Logging().Logging(LoggingBuilder::NoLogging());
-}
-
-LD_EXPORT(void)
-LDLoggingBasicBuilder_Level(LDLoggingBasicBuilder b, enum LDLogLevel level) {
-    using launchdarkly::LogLevel;
-    LD_ASSERT_NOT_NULL(b);
-
-    LoggingBuilder::BasicLogging* logger = TO_BASIC_LOGGING_BUILDER(b);
-    logger->Level(static_cast<LogLevel>(level));
-}
-
-void LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag) {
-    LD_ASSERT_NOT_NULL(b);
-    LD_ASSERT_NOT_NULL(tag);
-
-    TO_BASIC_LOGGING_BUILDER(b)->Tag(tag);
 }
 
 LD_EXPORT(void)
@@ -366,12 +322,6 @@ LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
     LoggingBuilder::BasicLogging* bb = TO_BASIC_LOGGING_BUILDER(basic_builder);
     TO_BUILDER(b)->Logging().Logging(*bb);
     LDLoggingBasicBuilder_Free(basic_builder);
-}
-
-LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend) {
-    backend->Enabled = [](enum LDLogLevel, void*) { return false; };
-    backend->Write = [](enum LDLogLevel, char const*, void*) {};
-    backend->UserData = nullptr;
 }
 
 LD_EXPORT(void) LDPersistence_Init(struct LDPersistence* impl) {
@@ -388,14 +338,6 @@ LD_EXPORT(void) LDPersistence_Init(struct LDPersistence* impl) {
     impl->UserData = nullptr;
 }
 
-LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New() {
-    return FROM_CUSTOM_LOGGING_BUILDER(new LoggingBuilder::CustomLogging());
-}
-
-LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b) {
-    delete TO_CUSTOM_LOGGING_BUILDER(b);
-}
-
 LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
                                      LDLoggingCustomBuilder custom_builder) {
@@ -406,14 +348,6 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
         TO_CUSTOM_LOGGING_BUILDER(custom_builder);
     TO_BUILDER(b)->Logging().Logging(*cb);
     LDLoggingCustomBuilder_Free(custom_builder);
-}
-
-LD_EXPORT(void)
-LDLoggingCustomBuilder_Backend(LDLoggingCustomBuilder b, LDLogBackend backend) {
-    LD_ASSERT_NOT_NULL(b);
-
-    TO_CUSTOM_LOGGING_BUILDER(b)->Backend(
-        std::make_shared<LogBackendWrapper>(backend));
 }
 
 LD_EXPORT(LDPersistenceCustomBuilder) LDPersistenceCustomBuilder_New() {
