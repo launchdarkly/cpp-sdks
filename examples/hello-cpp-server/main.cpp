@@ -4,8 +4,8 @@
 #include <cstring>
 #include <iostream>
 
-// Set MOBILE_KEY to your LaunchDarkly mobile key.
-#define MOBILE_KEY ""
+// Set SDK_KEY to your LaunchDarkly SDK key.
+#define SDK_KEY ""
 
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
@@ -16,14 +16,14 @@
 
 using namespace launchdarkly;
 int main() {
-    if (!strlen(MOBILE_KEY)) {
+    if (!strlen(SDK_KEY)) {
         printf(
-            "*** Please edit main.cpp to set MOBILE_KEY to your LaunchDarkly "
-            "mobile key first\n\n");
+            "*** Please edit main.cpp to set SDK_KEY to your LaunchDarkly "
+            "SDK key first\n\n");
         return 1;
     }
 
-    auto config = server_side::ConfigBuilder(MOBILE_KEY).Build();
+    auto config = server_side::ConfigBuilder(SDK_KEY).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
