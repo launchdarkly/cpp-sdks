@@ -11,4 +11,4 @@
 #pragma message( \
     "LaunchDarkly Client-side C++ SDK: ACTION REQUIRED: This header has moved!")
 #pragma message( \
-    "LaunchDarkly Client-side C++ SDK: Please import 'launchdarkly/client_side/bindings/c/config/config.h' instead")
+    "LaunchDarkly Client-side C++ SDK: Please include 'launchdarkly/client_side/bindings/c/config/config.h' instead")
