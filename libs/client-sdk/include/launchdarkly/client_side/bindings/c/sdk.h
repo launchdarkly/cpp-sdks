@@ -4,7 +4,8 @@
 // NOLINTBEGIN modernize-use-using
 #pragma once
 
-#include <launchdarkly/bindings/c/config/client_side/config.h>
+#include <launchdarkly/client_side/bindings/c/config/config.h>
+
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>

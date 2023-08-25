@@ -11,7 +11,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/built/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
-        )
+)
 
 # Automatic library: static or dynamic based on user config.
 add_library(${LIBNAME} OBJECT
@@ -43,15 +43,14 @@ add_library(${LIBNAME} OBJECT
         bindings/c/context_builder.cpp
         bindings/c/status.cpp
         bindings/c/context.cpp
-        bindings/c/config/client_side/builder.cpp
-        bindings/c/config/client_side/config.cpp
-        bindings/c/config/common/logging_builder.cpp
+        bindings/c/config/logging_builder.cpp
+        bindings/c/data/evaluation_detail.cpp
+        bindings/c/listener_connection.cpp
+        bindings/c/memory_routines.cpp
         log_level.cpp
         config/persistence_builder.cpp
-        bindings/c/data/evaluation_detail.cpp
-        bindings/c/memory_routines.cpp
         config/logging_builder.cpp
-        bindings/c/listener_connection.cpp)
+)
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
@@ -64,7 +63,7 @@ install(TARGETS ${LIBNAME})
 # This will preserve it, but dependencies must do the same.
 install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly"
         DESTINATION "include"
-        )
+)
 
 message(STATUS "LaunchDarklyCommonSdk_SOURCE_DIR=${LaunchDarklyCommonSdk_SOURCE_DIR}")
 

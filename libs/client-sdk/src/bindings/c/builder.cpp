@@ -1,12 +1,11 @@
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTBEGIN OCInconsistentNamingInspection
 
-#include <launchdarkly/bindings/c/config/client_side/builder.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
+
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/persistence/persistence.hpp>
-
-#include "../common/log_backend_wrapper.hpp"
 
 using namespace launchdarkly::client_side;
 

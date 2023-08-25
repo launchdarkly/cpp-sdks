@@ -1,5 +1,7 @@
 #pragma once
 
+#include <launchdarkly/bindings/c/config/logging_builder.h>
+#include <launchdarkly/logging/log_backend.hpp>
 /**
  * Utility class to allow user-provided backends to satisfy the ILogBackend
  * interface.

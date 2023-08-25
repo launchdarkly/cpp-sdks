@@ -1,4 +1,4 @@
-#include <launchdarkly/bindings/c/config/common/logging_builder.h>
+#include <launchdarkly/bindings/c/config/logging_builder.h>
 #include <launchdarkly/config/shared/builders/logging_builder.hpp>
 
 #include <launchdarkly/detail/c_binding_helpers.hpp>
