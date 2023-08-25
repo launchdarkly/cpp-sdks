@@ -14,6 +14,7 @@ on:
         type: choice
         options:
           - libs/client-sdk:launchdarkly-cpp-client
+          - libs/server-sdk:launchdarkly-cpp-server
 
 name: Publish SDK Artifacts
 
