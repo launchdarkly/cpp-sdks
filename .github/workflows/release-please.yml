@@ -26,6 +26,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released }}
+    outputs:
+      hashes-linux: ${{ steps.release-client.outputs.hashes-linux }}
+      hashes-windows: ${{ steps.release-client.outputs.hashes-windows }}
+      hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
     steps:
       - uses: actions/checkout@v3
       - id: release-client
@@ -37,3 +41,17 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
+
+  release-client-provenance:
+    needs: ['release-client']
+    strategy:
+      matrix:
+        # Generates a combined attestation for each platform
+        os: [ linux, windows, macos ]
+    permissions: 
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
+    with:
+      base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
