@@ -377,11 +377,6 @@ LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status) {
         .count();
 }
 
-LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener) {
-    listener.FlagChanged = nullptr;
-    listener.UserData = nullptr;
-}
-
 LD_EXPORT(LDDataSourceStatus_ErrorKind)
 LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info) {
     LD_ASSERT_NOT_NULL(info);
