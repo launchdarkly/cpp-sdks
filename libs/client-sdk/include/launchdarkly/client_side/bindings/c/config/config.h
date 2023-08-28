@@ -14,8 +14,9 @@ extern "C" {  // only need to export C interface if
 typedef struct _LDClientConfig* LDClientConfig;
 
 /**
- * Free the configuration. Configurations passed into an LDClient do not need to
- * be freed.
+ * Frees an unused configuration. Configurations passed into an LDClient must
+ * not be be freed.
+ *
  * @param config Config to free.
  */
 LD_EXPORT(void) LDClientConfig_Free(LDClientConfig config);
