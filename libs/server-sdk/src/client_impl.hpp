@@ -117,12 +117,24 @@ class ClientImpl : public IClient {
         Value const& default_value,
         EventScope const& scope);
 
-    [[nodiscard]] EvaluationDetail<Value> VariationDetail(
+    template <typename T>
+    [[nodiscard]] EvaluationDetail<T> VariationDetail(
         Context const& ctx,
-        FlagKey const& key,
-        Value const& default_value);
+        enum Value::Type value_type,
+        IClient::FlagKey const& key,
+        Value const& default_value) {
+        auto result =
+            VariationInternal(ctx, key, default_value, events_with_reasons_);
+        if (result.Value().Type() == value_type) {
+            return EvaluationDetail<T>{result.Value(), result.VariationIndex(),
+                                       result.Reason()};
+        }
+        return EvaluationDetail<T>{EvaluationReason::ErrorKind::kWrongType,
+                                   default_value};
+    }
 
     [[nodiscard]] Value Variation(Context const& ctx,
+                                  enum Value::Type value_type,
                                   std::string const& key,
                                   Value const& default_value);
 

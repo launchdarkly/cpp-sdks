@@ -281,16 +281,14 @@ void ClientImpl::LogVariationCall(std::string const& key,
 }
 
 Value ClientImpl::Variation(Context const& ctx,
+                            enum Value::Type value_type,
                             IClient::FlagKey const& key,
                             Value const& default_value) {
-    return *VariationInternal(ctx, key, default_value, events_default_);
-}
-
-EvaluationDetail<Value> ClientImpl::VariationDetail(
-    Context const& ctx,
-    IClient::FlagKey const& key,
-    Value const& default_value) {
-    return VariationInternal(ctx, key, default_value, events_with_reasons_);
+    auto result = *VariationInternal(ctx, key, default_value, events_default_);
+    if (result.Type() != value_type) {
+        return default_value;
+    }
+    return result;
 }
 
 EvaluationDetail<Value> ClientImpl::VariationInternal(
@@ -380,105 +378,67 @@ EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     bool default_value) {
-    auto result = VariationDetail(ctx, key, default_value);
-    if (result.Value().IsBool()) {
-        return EvaluationDetail<bool>{result.Value(), result.VariationIndex(),
-                                      result.Reason()};
-    }
-    return EvaluationDetail<bool>{EvaluationReason::ErrorKind::kWrongType,
-                                  default_value};
+    return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value);
 }
 
 bool ClientImpl::BoolVariation(Context const& ctx,
                                IClient::FlagKey const& key,
                                bool default_value) {
-    auto result = Variation(ctx, key, default_value);
-    if (result.IsBool()) {
-        return result;
-    }
-    return default_value;
+    return Variation(ctx, Value::Type::kBool, key, default_value);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
     Context const& ctx,
     ClientImpl::FlagKey const& key,
     std::string default_value) {
-    auto result = VariationDetail(ctx, key, default_value);
-    if (result.Value().IsString()) {
-        return EvaluationDetail<std::string>{
-            result.Value(), result.VariationIndex(), result.Reason()};
-    }
-    return EvaluationDetail<std::string>{
-        EvaluationReason::ErrorKind::kWrongType, default_value};
+    return VariationDetail<std::string>(ctx, Value::Type::kString, key,
+                                        default_value);
 }
 
 std::string ClientImpl::StringVariation(Context const& ctx,
                                         IClient::FlagKey const& key,
                                         std::string default_value) {
-    auto result = Variation(ctx, key, default_value);
-    if (result.IsString()) {
-        return result;
-    }
-    return default_value;
+    return Variation(ctx, Value::Type::kString, key, default_value);
 }
 
 EvaluationDetail<double> ClientImpl::DoubleVariationDetail(
     Context const& ctx,
     ClientImpl::FlagKey const& key,
     double default_value) {
-    auto result = VariationDetail(ctx, key, default_value);
-    if (result.Value().IsNumber()) {
-        return EvaluationDetail<double>{result.Value(), result.VariationIndex(),
-                                        result.Reason()};
-    }
-    return EvaluationDetail<double>{EvaluationReason::ErrorKind::kWrongType,
-                                    default_value};
+    return VariationDetail<double>(ctx, Value::Type::kNumber, key,
+                                   default_value);
 }
 
 double ClientImpl::DoubleVariation(Context const& ctx,
                                    IClient::FlagKey const& key,
                                    double default_value) {
-    auto result = Variation(ctx, key, default_value);
-    if (result.IsNumber()) {
-        return result;
-    }
-    return default_value;
+    return Variation(ctx, Value::Type::kNumber, key, default_value);
 }
 
 EvaluationDetail<int> ClientImpl::IntVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     int default_value) {
-    auto result = VariationDetail(ctx, key, default_value);
-    if (result.Value().IsNumber()) {
-        return EvaluationDetail<int>{result.Value(), result.VariationIndex(),
-                                     result.Reason()};
-    }
-    return EvaluationDetail<int>{EvaluationReason::ErrorKind::kWrongType,
-                                 default_value};
+    return VariationDetail<int>(ctx, Value::Type::kNumber, key, default_value);
 }
 
 int ClientImpl::IntVariation(Context const& ctx,
                              IClient::FlagKey const& key,
                              int default_value) {
-    auto result = Variation(ctx, key, default_value);
-    if (result.IsNumber()) {
-        return result;
-    }
-    return default_value;
+    return Variation(ctx, Value::Type::kNumber, key, default_value);
 }
 
 EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     Value default_value) {
-    return VariationDetail(ctx, key, default_value);
+    return VariationInternal(ctx, key, default_value, events_with_reasons_);
 }
 
 Value ClientImpl::JsonVariation(Context const& ctx,
                                 IClient::FlagKey const& key,
                                 Value default_value) {
-    return Variation(ctx, key, default_value);
+    return *VariationInternal(ctx, key, default_value, events_default_);
 }
 
 // data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
