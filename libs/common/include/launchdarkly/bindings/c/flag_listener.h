@@ -4,6 +4,7 @@
 #pragma once
 
 #include <launchdarkly/bindings/c/export.h>
+#include <launchdarkly/bindings/c/value.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -54,7 +55,7 @@ struct LDFlagListener {
  *
  * @param listener Listener to initialize.
  */
-LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
+LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener* listener);
 
 #ifdef __cplusplus
 }
