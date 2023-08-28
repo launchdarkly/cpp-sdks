@@ -27,7 +27,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDClientSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.0.3");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.0.5");  // {x-release-please-version}
 
     LDClientSDK_Free(sdk);
 }
@@ -59,8 +59,15 @@ TEST(ClientBindings, RegisterFlagListener) {
     LDClientSDK_Start(sdk, 3000, &success);
     EXPECT_TRUE(success);
 
-    struct LDFlagListener listener {};
-    LDFlagListener_Init(listener);
+    struct LDFlagListener listener {
+        reinterpret_cast<FlagChangedCallbackFn>(0x123),
+            reinterpret_cast<void*>(0x456)
+    };
+
+    LDFlagListener_Init(&listener);
+    ASSERT_EQ(listener.FlagChanged, nullptr);
+    ASSERT_EQ(listener.UserData, nullptr);
+
     listener.UserData = const_cast<char*>("Potato");
     listener.FlagChanged = FlagListenerFunction;
 
