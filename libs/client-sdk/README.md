@@ -28,7 +28,7 @@ Download a release archive from
 the [Github releases](https://github.com/launchdarkly/cpp-sdks/releases?q=cpp-client&expanded=true) for use in your
 project.
 
-Refer to the [SDK documentation](https://docs.launchdarkly.com/sdk/client-side/c-c--) for complete instructions on
+Refer to the [SDK documentation][reference-guide] for complete instructions on
 installing and using the SDK.
 
 ### Incorporating the SDK
@@ -74,7 +74,7 @@ Learn more
 
 Read our [documentation](https://docs.launchdarkly.com) for in-depth instructions on configuring and using LaunchDarkly.
 You can also head straight to
-the [complete reference guide for this SDK](https://docs.launchdarkly.com/sdk/client-side/c-c--).
+the [complete reference guide for this SDK][reference-guide].
 
 Testing
 -------
@@ -115,3 +115,5 @@ About LaunchDarkly
       documentation
     * [blog.launchdarkly.com](https://blog.launchdarkly.com/  "LaunchDarkly Blog Documentation") for the latest product
       updates
+
+[reference-guide]: https://docs.launchdarkly.com/sdk/client-side/c-c--
