@@ -49,7 +49,7 @@ TEST(ClientBindings, RegisterFlagListener) {
     EXPECT_TRUE(success);
 
     struct LDFlagListener listener {};
-    LDFlagListener_Init(listener);
+    LDFlagListener_Init(&listener);
     listener.UserData = const_cast<char*>("Potato");
     listener.FlagChanged = FlagListenerFunction;
 
