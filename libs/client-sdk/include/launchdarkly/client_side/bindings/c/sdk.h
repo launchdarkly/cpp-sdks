@@ -32,9 +32,14 @@ typedef struct _LDClientSDK* LDClientSDK;
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
  * context.
- * @param config The configuration. Must not be NULL.
- * @param context The initial context. Must not be NULL.
- * @return New SDK instance.
+ * @param config The configuration. Ownership is transferred. Do not free or
+ * access the LDClientConfig in any way after this call; behavior is undefined.
+ * Must not be NULL.
+ * @param context The initial context. Ownership is transferred. Do not free or
+ * access the LDContext in any way after this call; behavior is undefined. Must
+ * not be NULL.
+ * @return New SDK instance. Must be freed with LDClientSDK_Free when no longer
+ * needed.
  */
 LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context);
@@ -135,7 +140,9 @@ LD_EXPORT(void) LDClientSDK_TrackEvent(LDClientSDK sdk, char const* event_name);
  * feature in numeric custom metrics, and will also be returned as part of the
  * custom event for Data Export.
  * @param data A JSON value containing additional data associated with the
- * event. Must not be NULL.
+ * event. Ownership is transferred. Do not free or
+ * access the LDValue in any way after this call; behavior is undefined. Must
+ * not be NULL.
  */
 LD_EXPORT(void)
 LDClientSDK_TrackMetric(LDClientSDK sdk,
@@ -149,7 +156,9 @@ LDClientSDK_TrackMetric(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param event_name Must not be NULL.
  * @param data A JSON value containing additional data associated with the
- * event. Must not be NULL.
+ * event. Do not free or
+ * access the LDValue in any way after this call; behavior is undefined. Must
+ * not be NULL.
  */
 LD_EXPORT(void)
 LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
@@ -354,7 +363,8 @@ LDClientSDK_DoubleVariationDetail(LDClientSDK sdk,
  * Returns the JSON value of a feature flag for a given flag key.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
- * @param default_value The default value of the flag. The value is copied.
+ * @param default_value The default value of the flag. Ownership is retained by
+ * the caller; a copy is made internally. Must not be NULL.
  * @return The variation for the current context, or a copy of default_value if
  * the flag is disabled in the LaunchDarkly control panel. The returned value
  * must be freed using LDValue_Free.
@@ -369,7 +379,8 @@ LDClientSDK_JsonVariation(LDClientSDK sdk,
  * that also describes the way the value was determined.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
- * @param default_value The default value of the flag. The value is copied.
+ * @param default_value The default value of the flag. Ownership is retained by
+ * the caller; a copy is made internally. Must not be NULL.
  * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
  * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
@@ -402,7 +413,7 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
  * }
  * @endcode
  * @param sdk SDK. Must not be NULL.
- * @return Value of type Object.
+ * @return Value of type Object. Must be freed with LDValue_Free.
  */
 LD_EXPORT(LDValue)
 LDClientSDK_AllFlags(LDClientSDK sdk);
