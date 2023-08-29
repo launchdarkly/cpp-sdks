@@ -101,8 +101,14 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    struct LDDataSourceStatusListener listener {};
-    LDDataSourceStatusListener_Init(listener);
+    struct LDDataSourceStatusListener listener {
+        reinterpret_cast<DataSourceStatusCallbackFn>(0x123),
+            reinterpret_cast<void*>(0x456)
+    };
+    LDDataSourceStatusListener_Init(&listener);
+
+    ASSERT_EQ(listener.StatusChanged, nullptr);
+    ASSERT_EQ(listener.UserData, nullptr);
 
     listener.UserData = const_cast<char*>("Potato");
     listener.StatusChanged = StatusListenerFunction;
