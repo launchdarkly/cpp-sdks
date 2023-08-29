@@ -2,6 +2,13 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.6](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.5...launchdarkly-cpp-client-v3.0.6) (2023-08-29)
+
+
+### Bug Fixes
+
+* LDDataSourceStatusListener_Init should take pointer ([#222](https://github.com/launchdarkly/cpp-sdks/issues/222)) ([0aa3d14](https://github.com/launchdarkly/cpp-sdks/commit/0aa3d1442cbfea3cc32d2ec981590137f0284a46))
+
 ## [3.0.5](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.4...launchdarkly-cpp-client-v3.0.5) (2023-08-28)
 
 
