@@ -1,81 +1,46 @@
-#include <launchdarkly/client_side/bindings/c/sdk.h>
+/**
+ * This application intends to verify that the symbols from the
+ * client-side and server-side SDKs do not clash, thus enabling both SDKs to be
+ * used within the same application.
+ */
 
+#include <launchdarkly/client_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 
-#include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/client_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Set MOBILE_KEY to your LaunchDarkly mobile key.
-#define MOBILE_KEY ""
-
-// Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
-#define FEATURE_FLAG_KEY "my-boolean-flag"
-
-// Set INIT_TIMEOUT_MILLISECONDS to the amount of time you will wait for
-// the client to become initialized.
-#define INIT_TIMEOUT_MILLISECONDS 3000
+#include <launchdarkly/bindings/c/context_builder.h>
 
 int main() {
-    if (!strlen(MOBILE_KEY)) {
-        printf(
-            "*** Please edit main.c to set MOBILE_KEY to your LaunchDarkly "
-            "mobile key first\n\n");
-        return 1;
-    }
-
-    LDClientConfigBuilder config_builder =
-        LDClientConfigBuilder_New(MOBILE_KEY);
-
-    LDClientConfig config;
-    LDStatus config_status =
-        LDClientConfigBuilder_Build(config_builder, &config);
-    if (!LDStatus_Ok(config_status)) {
-        printf("error: config is invalid: %s", LDStatus_Error(config_status));
-        return 1;
-    }
-
     LDContextBuilder context_builder = LDContextBuilder_New();
     LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
     LDContextBuilder_Attributes_SetName(context_builder, "user", "Sandy");
     LDContext context = LDContextBuilder_Build(context_builder);
 
-    LDClientSDK client = LDClientSDK_New(config, context);
+    LDClientConfigBuilder client_config_builder =
+        LDClientConfigBuilder_New("foo");
+    LDClientConfig client_config;
 
-    bool initialized_successfully;
-    if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
-                          &initialized_successfully)) {
-        if (initialized_successfully) {
-            printf("*** SDK successfully initialized!\n\n");
-        } else {
-            printf("*** SDK failed to initialize\n");
-            return 1;
-        }
-    } else {
-        printf("SDK initialization didn't complete in %dms\n",
-               INIT_TIMEOUT_MILLISECONDS);
-        return 1;
+    LDStatus client_config_status =
+        LDClientConfigBuilder_Build(client_config_builder, &client_config);
+
+    if (LDStatus_Ok(client_config_status)) {
+        LDClientSDK client_sdk = LDClientSDK_New(client_config, context);
+        LDClientSDK_Free(client_sdk);
     }
 
-    bool flag_value =
-        LDClientSDK_BoolVariation(client, FEATURE_FLAG_KEY, false);
+    LDServerConfigBuilder server_config_builder =
+        LDServerConfigBuilder_New("foo");
+    LDServerConfig server_config;
 
-    printf("*** Feature flag '%s' is %s for this user\n\n", FEATURE_FLAG_KEY,
-           flag_value ? "true" : "false");
+    LDStatus server_config_status =
+        LDServerConfigBuilder_Build(server_config_builder, &server_config);
 
-    // Here we ensure that the SDK shuts down cleanly and has a chance to
-    // deliver analytics events to LaunchDarkly before the program exits. If
-    // analytics events are not delivered, the user properties and flag usage
-    // statistics will not appear on your dashboard. In a normal long-running
-    // application, the SDK would continue running and events would be delivered
-    // automatically in the background.
-
-    LDClientSDK_Free(client);
+    if (LDStatus_Ok(server_config_status)) {
+        LDServerSDK server_sdk = LDServerSDK_New(server_config);
+        LDServerSDK_Free(server_sdk);
+    }
 
     return 0;
 }
