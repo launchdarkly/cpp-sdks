@@ -49,6 +49,7 @@ add_library(${LIBNAME} OBJECT
         bindings/c/listener_connection.cpp
         bindings/c/flag_listener.cpp
         bindings/c/memory_routines.cpp
+        bindings/c/data_source/error_info.cpp
         log_level.cpp
         config/persistence_builder.cpp
         config/logging_builder.cpp

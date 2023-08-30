@@ -8,6 +8,7 @@
 
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
+#include <launchdarkly/bindings/c/data_source/error_info.h>
 #include <launchdarkly/bindings/c/export.h>
 #include <launchdarkly/bindings/c/flag_listener.h>
 #include <launchdarkly/bindings/c/listener_connection.h>
@@ -447,7 +448,6 @@ LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
                                       struct LDFlagListener listener);
 
 typedef struct _LDDataSourceStatus* LDDataSourceStatus;
-typedef struct _LDDataSourceStatus_ErrorInfo* LDDataSourceStatus_ErrorInfo;
 
 /**
  * Enumeration of possible data source states.
@@ -504,40 +504,6 @@ enum LDDataSourceStatus_State {
 };
 
 /**
- * A description of an error condition that the data source encountered.
- */
-enum LDDataSourceStatus_ErrorKind {
-    /**
-     * An unexpected error, such as an uncaught exception, further
-     * described by the error message.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_UNKNOWN = 0,
-
-    /**
-     * An I/O error such as a dropped connection.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_NETWORK_ERROR = 1,
-
-    /**
-     * The LaunchDarkly service returned an HTTP response with an error
-     * status, available in the status code.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE = 2,
-
-    /**
-     * The SDK received malformed data from the LaunchDarkly service.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_INVALID_DATA = 3,
-
-    /**
-     * The data source itself is working, but when it tried to put an
-     * update into the data store, the data store failed (so the SDK may
-     * not have the latest data).
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_STORE_ERROR = 4,
-};
-
-/**
  * Get an enumerated value representing the overall current state of the data
  * source.
  */
@@ -582,34 +548,6 @@ LDDataSourceStatus_GetLastError(LDDataSourceStatus status);
  * down.
  */
 LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
-
-/**
- * Get an enumerated value representing the general category of the error.
- */
-LD_EXPORT(enum LDDataSourceStatus_ErrorKind)
-LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * The HTTP status code if the error was
- * LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE.
- */
-LD_EXPORT(uint64_t)
-LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * Any additional human-readable information relevant to the error.
- *
- * The format is subject to change and should not be relied on
- * programmatically.
- */
-LD_EXPORT(char const*)
-LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * The date/time that the error occurred, in seconds since epoch.
- */
-LD_EXPORT(time_t)
-LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info);
 
 typedef void (*DataSourceStatusCallbackFn)(LDDataSourceStatus status,
                                            void* user_data);
@@ -684,13 +622,6 @@ LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
  * @param status The data source status to free.
  */
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
-
-/**
- * Frees the data source status error information.
- * @param status The error information to free.
- */
-LD_EXPORT(void)
-LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info);
 
 #ifdef __cplusplus
 }
