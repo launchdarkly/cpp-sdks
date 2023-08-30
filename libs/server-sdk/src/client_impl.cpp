@@ -110,6 +110,7 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
       memory_store_(),
+      status_manager_(),
       data_source_(MakeDataSource(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
@@ -441,10 +442,10 @@ Value ClientImpl::JsonVariation(Context const& ctx,
     return *VariationInternal(ctx, key, default_value, events_default_);
 }
 
-// data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
-//     return status_manager_;
-// }
-//
+data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
+    return status_manager_;
+}
+
 // flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
 //     return flag_manager_.Notifier();
 // }

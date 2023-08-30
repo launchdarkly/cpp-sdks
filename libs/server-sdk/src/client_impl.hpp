@@ -106,6 +106,8 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
+
     ~ClientImpl();
 
     std::future<bool> StartAsync() override;
@@ -172,14 +174,14 @@ class ClientImpl : public IClient {
 
     data_store::MemoryStore memory_store_;
 
+    data_sources::DataSourceStatusManager status_manager_;
+
     std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
-
-    data_sources::DataSourceStatusManager status_manager_;
 
     evaluation::Evaluator evaluator_;
 

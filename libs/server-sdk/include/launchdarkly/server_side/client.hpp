@@ -6,6 +6,7 @@
 #include <launchdarkly/value.hpp>
 
 #include <launchdarkly/server_side/all_flags_state.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <chrono>
 #include <future>
@@ -236,6 +237,13 @@ class IClient {
         FlagKey const& key,
         Value default_value) = 0;
 
+    /**
+     * Returns an interface which provides methods for subscribing to data
+     * source status.
+     * @return A data source status provider.
+     */
+    virtual data_sources::IDataSourceStatusProvider& DataSourceStatus() = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -319,6 +327,8 @@ class Client : public IClient {
     EvaluationDetail<Value> JsonVariationDetail(Context const& ctx,
                                                 FlagKey const& key,
                                                 Value default_value) override;
+
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
     /**
      * Returns the version of the SDK.
