@@ -408,10 +408,10 @@ enum LDServerDataSourceStatus_State {
      *
      * If it encounters an error that requires it to retry initialization,
      * the state will remain at kInitializing until it either succeeds and
-     * becomes LD_DATASOURCESTATUS_STATE_VALID, or permanently fails and becomes
-     * LD_DATASOURCESTATUS_STATE_SHUTDOWN.
+     * becomes LD_SERVERDATASOURCESTATUS_STATE_VALID, or permanently fails and
+     * becomes LD_SERVERDATASOURCESTATUS_STATE_SHUTDOWN.
      */
-    LD_DATASOURCESTATUS_STATE_INITIALIZING = 0,
+    LD_SERVERDATASOURCESTATUS_STATE_INITIALIZING = 0,
 
     /**
      * Indicates that the data source is currently operational and has not
@@ -422,7 +422,7 @@ enum LDServerDataSourceStatus_State {
      * the stream. In polling mode, it means that the last poll request
      * succeeded.
      */
-    LD_DATASOURCESTATUS_STATE_VALID = 1,
+    LD_SERVERDATASOURCESTATUS_STATE_VALID = 1,
 
     /**
      * Indicates that the data source encountered an error that it will
@@ -434,7 +434,7 @@ enum LDServerDataSourceStatus_State {
      * failed, and a new poll request will be made after the configured
      * polling interval.
      */
-    LD_DATASOURCESTATUS_STATE_INTERRUPTED = 2,
+    LD_SERVERDATASOURCESTATUS_STATE_INTERRUPTED = 2,
 
     /**
      * Indicates that the data source has been permanently shut down.
@@ -444,7 +444,7 @@ enum LDServerDataSourceStatus_State {
      * SDK key will never become valid), or because the SDK client was
      * explicitly shut down.
      */
-    LD_DATASOURCESTATUS_STATE_OFF = 3
+    LD_SERVERDATASOURCESTATUS_STATE_OFF = 3
 };
 
 /**
@@ -464,11 +464,12 @@ LDServerDataSourceStatus_GetState(LDServerDataSourceStatus status);
  * This property should be updated whenever the data source encounters a
  * problem, even if it does not cause the state to change. For instance, if
  * a stream connection fails and the state changes to
- * LD_DATASOURCESTATUS_STATE_INTERRUPTED, and then subsequent attempts to
+ * LD_SERVERDATASOURCESTATUS_STATE_INTERRUPTED, and then subsequent attempts to
  * restart the connection also fail, the state will remain
- * LD_DATASOURCESTATUS_STATE_INTERRUPTED but the error information will be
+ * LD_SERVERDATASOURCESTATUS_STATE_INTERRUPTED but the error information will be
  * updated each time-- and the last error will still be reported in this
- * property even if the state later becomes LD_DATASOURCESTATUS_STATE_VALID.
+ * property even if the state later becomes
+ * LD_SERVERDATASOURCESTATUS_STATE_VALID.
  */
 LD_EXPORT(LDDataSourceStatus_ErrorInfo)
 LDServerDataSourceStatus_GetLastError(LDServerDataSourceStatus status);
@@ -478,24 +479,25 @@ LDServerDataSourceStatus_GetLastError(LDServerDataSourceStatus status);
  * since epoch.
  *
  * The meaning of this depends on the current state:
- * - For LD_DATASOURCESTATUS_STATE_INITIALIZING, it is the time that the SDK
- * started initializing.
- * - For LD_DATASOURCESTATUS_STATE_VALID, it is the time that the data
+ * - For LD_SERVERDATASOURCESTATUS_STATE_INITIALIZING, it is the time that the
+ * SDK started initializing.
+ * - For LD_SERVERDATASOURCESTATUS_STATE_VALID, it is the time that the data
  * source most recently entered a valid state, after previously having been
- * LD_DATASOURCESTATUS_STATE_INITIALIZING or an invalid state such as
- * LD_DATASOURCESTATUS_STATE_INTERRUPTED.
- * - For LD_DATASOURCESTATUS_STATE_INTERRUPTED, it is the time that the data
- * source most recently entered an error state, after previously having been
- * DataSourceState::kValid.
- * - For LD_DATASOURCESTATUS_STATE_SHUTDOWN, it is the time that the data source
- * encountered an unrecoverable error or that the SDK was explicitly shut
+ * LD_SERVERDATASOURCESTATUS_STATE_INITIALIZING or an invalid state such as
+ * LD_SERVERDATASOURCESTATUS_STATE_INTERRUPTED.
+ * - For LD_SERVERDATASOURCESTATUS_STATE_INTERRUPTED, it is the time that the
+ * data source most recently entered an error state, after previously having
+ * been DataSourceState::kValid.
+ * - For LD_SERVERDATASOURCESTATUS_STATE_SHUTDOWN, it is the time that the data
+ * source encountered an unrecoverable error or that the SDK was explicitly shut
  * down.
  */
 LD_EXPORT(time_t)
 LDServerDataSourceStatus_StateSince(LDServerDataSourceStatus status);
 
-typedef void (*DataSourceStatusCallbackFn)(LDServerDataSourceStatus status,
-                                           void* user_data);
+typedef void (*ServerDataSourceStatusCallbackFn)(
+    LDServerDataSourceStatus status,
+    void* user_data);
 
 /**
  * Defines a data source status listener which may be used to listen for
@@ -512,7 +514,7 @@ struct LDServerDataSourceStatusListener {
      *
      * @param status The updated data source status.
      */
-    DataSourceStatusCallbackFn StatusChanged;
+    ServerDataSourceStatusCallbackFn StatusChanged;
 
     /**
      * UserData is forwarded into callback functions.

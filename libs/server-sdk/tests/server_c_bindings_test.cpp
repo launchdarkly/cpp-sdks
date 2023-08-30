@@ -29,7 +29,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 }
 
 void StatusListenerFunction(LDServerDataSourceStatus status, void* user_data) {
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
+    EXPECT_EQ(LD_SERVERDATASOURCESTATUS_STATE_VALID,
               LDServerDataSourceStatus_GetState(status));
 }
 
@@ -76,7 +76,7 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 
     LDServerDataSourceStatus status_1 =
         LDServerSDK_DataSourceStatus_Status(sdk);
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_INITIALIZING,
+    EXPECT_EQ(LD_SERVERDATASOURCESTATUS_STATE_INITIALIZING,
               LDServerDataSourceStatus_GetState(status_1));
 
     bool success = false;
@@ -84,7 +84,7 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 
     LDServerDataSourceStatus status_2 =
         LDServerSDK_DataSourceStatus_Status(sdk);
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
+    EXPECT_EQ(LD_SERVERDATASOURCESTATUS_STATE_VALID,
               LDServerDataSourceStatus_GetState(status_2));
 
     EXPECT_EQ(nullptr, LDServerDataSourceStatus_GetLastError(status_2));
@@ -107,7 +107,7 @@ TEST(ClientBindings, ComplexDataSourceStatus) {
             std::chrono::time_point<std::chrono::system_clock>{
                 std::chrono::seconds{100}}));
 
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
+    EXPECT_EQ(LD_SERVERDATASOURCESTATUS_STATE_VALID,
               LDServerDataSourceStatus_GetState(
                   reinterpret_cast<LDServerDataSourceStatus>(&status)));
 
