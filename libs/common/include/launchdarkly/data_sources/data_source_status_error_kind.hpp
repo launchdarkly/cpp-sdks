@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace launchdarkly::common::data_sources {
 
 /**
