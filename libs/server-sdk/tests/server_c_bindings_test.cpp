@@ -6,6 +6,8 @@
 
 #include <launchdarkly/bindings/c/context_builder.h>
 
+#include <boost/json/parse.hpp>
+
 #include <chrono>
 
 using launchdarkly::server_side::data_sources::DataSourceStatus;
@@ -178,6 +180,10 @@ TEST(ClientBindings, AllFlagsState) {
         LDServerSDK_AllFlagsState(sdk, context, LD_ALLFLAGSSTATE_DEFAULT);
 
     ASSERT_FALSE(LDAllFlagsState_Valid(state));
+
+    char* json = LDAllFlagsState_SerializeJSON(state);
+    ASSERT_STREQ(json, "{\"$valid\":false,\"$flagsState\":{}}");
+    LDMemory_FreeString(json);
 
     LDAllFlagsState_Free(state);
     LDContext_Free(context);

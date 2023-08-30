@@ -27,21 +27,34 @@ LD_EXPORT(void) LDAllFlagsState_Free(LDAllFlagsState state);
  * An invalid AllFlagsState can still be serialized successfully to a JSON
  * string.
  *
- * @param state The AllFlagState to check for validity.
+ * @param state The AllFlagState to check for validity. Must not be NULL.
  * @return True if the state is valid, false otherwise.
  */
 LD_EXPORT(bool) LDAllFlagsState_Valid(LDAllFlagsState state);
 
 /**
- * Defines options that may be used with LDServerSDK_AllFlagsState. To obtain
- * default behavior, pass LD_ALLFLAGSSTATE_DEFAULT.
+ * Serializes the AllFlagsState to a JSON string.
+ *
+ * This JSON is suitable for bootstrapping a client-side SDK.
+ *
+ * @param state The AllFlagState to serialize. Must not be NULL.
+ * @return A JSON string representing the AllFlagsState. The caller must free
+ * the string using LDMemory_FreeString.
+ */
+LD_EXPORT(char*)
+LDAllFlagsState_SerializeJSON(LDAllFlagsState state);
+
+/**
+ * Defines options that may be used with LDServerSDK_AllFlagsState. To
+ * obtain default behavior, pass LD_ALLFLAGSSTATE_DEFAULT.
  *
  * It is possible to combine multiple options by ORing them together.
  *
  * Example:
  * @code
  * LDAllFlagsState state = LDServerSDK_AllFlagsState(sdk, context,
- *          LD_ALLFLAGSSTATE_INCLUDE_REASONS | LD_ALLFLAGSSTATE_CLIENT_SIDE_ONLY
+ *          LD_ALLFLAGSSTATE_INCLUDE_REASONS |
+ * LD_ALLFLAGSSTATE_CLIENT_SIDE_ONLY
  * );
  * @endcode
  */
