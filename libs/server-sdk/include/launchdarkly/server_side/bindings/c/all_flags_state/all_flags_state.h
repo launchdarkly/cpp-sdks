@@ -22,8 +22,7 @@ LD_EXPORT(void) LDAllFlagsState_Free(LDAllFlagsState state);
 
 /**
  * True if the LDAllFlagsState is valid.  False if there was
- * an error, such as the data store being unavailable. When false, the other
- * accessors will not return data.
+ * an error, such as the data store being unavailable.
  *
  * An invalid LDAllFlagsState can still be serialized successfully to a JSON
  * string.
@@ -49,19 +48,19 @@ LDAllFlagsState_SerializeJSON(LDAllFlagsState state);
  * Returns the flag value for the context used to generate this
  * LDAllFlagsState.
  *
- * In order to avoid copying large amounts of data when a value is accessed,
+ * In order to avoid copying when a large value is accessed,
  * the returned LDValue is a reference and NOT DIRECTLY OWNED by the caller. Its
  * lifetime is managed by the parent LDAllFlagsState object.
  *
  * WARNING!
  * Do not free the returned LDValue.
- * Do not access in any way the returned LDValue after the LDAllFlagsState has
+ * Do not in any way access the returned LDValue after the LDAllFlagsState has
  * been freed.
  *
  * If the flag has no value, returns an LDValue of type LDValueType_Null.
  *
- * To obtain an owned copy not subject to these restrictions, call
- * LDValue_NewValue on the result.
+ * To obtain a caller-owned copy of the LDValue not subject to these
+ * restrictions, call LDValue_NewValue on the result.
  *
  * @param state An LDAllFlagsState. Must not be NULL.
  * @param flag_key Key of the flag. Must not be NULL.
@@ -81,8 +80,7 @@ LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key);
  * Example:
  * @code
  * LDAllFlagsState state = LDServerSDK_AllFlagsState(sdk, context,
- *          LD_ALLFLAGSSTATE_INCLUDE_REASONS |
- * LD_ALLFLAGSSTATE_CLIENT_SIDE_ONLY
+ *    LD_ALLFLAGSSTATE_INCLUDE_REASONS | LD_ALLFLAGSSTATE_CLIENT_SIDE_ONLY
  * );
  * @endcode
  */
