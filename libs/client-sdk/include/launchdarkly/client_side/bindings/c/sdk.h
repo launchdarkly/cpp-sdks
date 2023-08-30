@@ -653,7 +653,7 @@ struct LDDataSourceStatusListener {
  * @param listener Listener to initialize.
  */
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener listener);
+LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener* listener);
 
 /**
  * Listen for changes to the data source status.

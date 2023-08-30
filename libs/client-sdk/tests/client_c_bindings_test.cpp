@@ -27,7 +27,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDClientSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.0.5");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.0.6");  // {x-release-please-version}
 
     LDClientSDK_Free(sdk);
 }
@@ -101,8 +101,14 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    struct LDDataSourceStatusListener listener {};
-    LDDataSourceStatusListener_Init(listener);
+    struct LDDataSourceStatusListener listener {
+        reinterpret_cast<DataSourceStatusCallbackFn>(0x123),
+            reinterpret_cast<void*>(0x456)
+    };
+    LDDataSourceStatusListener_Init(&listener);
+
+    ASSERT_EQ(listener.StatusChanged, nullptr);
+    ASSERT_EQ(listener.UserData, nullptr);
 
     listener.UserData = const_cast<char*>("Potato");
     listener.StatusChanged = StatusListenerFunction;

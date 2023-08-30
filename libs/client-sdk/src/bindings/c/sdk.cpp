@@ -409,9 +409,9 @@ LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info) {
 }
 
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(LDDataSourceStatusListener listener) {
-    listener.StatusChanged = nullptr;
-    listener.UserData = nullptr;
+LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener* listener) {
+    listener->StatusChanged = nullptr;
+    listener->UserData = nullptr;
 }
 
 LD_EXPORT(LDListenerConnection)
