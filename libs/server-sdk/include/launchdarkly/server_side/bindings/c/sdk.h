@@ -4,6 +4,7 @@
 // NOLINTBEGIN modernize-use-using
 #pragma once
 
+#include <launchdarkly/server_side/bindings/c/all_flags_state/all_flags_state.h>
 #include <launchdarkly/server_side/bindings/c/config/config.h>
 
 #include <launchdarkly/bindings/c/context.h>
@@ -369,6 +370,31 @@ LDServerSDK_JsonVariationDetail(LDServerSDK sdk,
                                 char const* flag_key,
                                 LDValue default_value,
                                 LDEvalDetail* out_detail);
+
+/**
+ * Evaluates all flags for a context, returning a data structure containing
+ * the results and additional flag metadata.
+ *
+ * The method's behavior can be controlled by passing a combination of
+ * one or more options.
+ *
+ * A common use-case for AllFlagsState is to generate data suitable for
+ * bootstrapping the client-side JavaScript SDK.
+ *
+ * This method will not send analytics events back to LaunchDarkly.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context against which all flags will be evaluated.
+ * Ownership is NOT transferred. Must not be NULL.
+ * @param options A combination of one or more options. Pass
+ * LD_ALLFLAGSSTATE_DEFAULT for default behavior.
+ * @return An AllFlagsState data structure. Must be freed with
+ * LDAllFlagsState_Free.
+ */
+LD_EXPORT(LDAllFlagsState)
+LDServerSDK_AllFlagsState(LDServerSDK sdk,
+                          LDContext context,
+                          enum LDAllFlagsState_Options options);
 
 /**
  * Frees the SDK's resources, shutting down any connections. May block.

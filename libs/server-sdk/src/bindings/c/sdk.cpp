@@ -37,6 +37,9 @@ struct Detail;
 #define FROM_DATASOURCESTATUS_ERRORINFO(ptr) \
     (reinterpret_cast<LDDataSourceStatus_ErrorInfo>(ptr))
 
+#define TO_ALLFLAGS(ptr) (reinterpret_cast<AllFlagsState*>(ptr))
+#define FROM_ALLFLAGS(ptr) (reinterpret_cast<LDAllFlagsState>(ptr))
+
 /*
  * Helper to perform the common functionality of checking if the user
  * requested a detail out parameter. If so, we allocate a copy of it
@@ -301,7 +304,7 @@ LDServerSDK_JsonVariation(LDServerSDK sdk,
 
     Value* as_value = TO_VALUE(default_value);
 
-    return reinterpret_cast<LDValue>(new Value(
+    return FROM_VALUE(new Value(
         TO_SDK(sdk)->JsonVariation(*TO_CONTEXT(context), flag_key, *as_value)));
 }
 
@@ -318,11 +321,24 @@ LDServerSDK_JsonVariationDetail(LDServerSDK sdk,
 
     Value* as_value = TO_VALUE(default_value);
 
-    return reinterpret_cast<LDValue>(
+    return FROM_VALUE(
         new Value(MaybeDetail(sdk, out_detail, [&](Client* client) {
             return client->JsonVariationDetail(*TO_CONTEXT(context), flag_key,
                                                *as_value);
         })));
+}
+
+LD_EXPORT(LDAllFlagsState)
+LDServerSDK_AllFlagsState(LDServerSDK sdk,
+                          LDContext context,
+                          enum LDAllFlagsState_Options options) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+
+    AllFlagsState state = TO_SDK(sdk)->AllFlagsState(
+        *TO_CONTEXT(context), static_cast<AllFlagsState::Options>(options));
+
+    return FROM_ALLFLAGS(new AllFlagsState(std::move(state)));
 }
 
 LD_EXPORT(void) LDServerSDK_Free(LDServerSDK sdk) {

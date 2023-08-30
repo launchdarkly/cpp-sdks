@@ -160,3 +160,26 @@ TEST(ClientBindings, ComplexDataSourceStatus) {
 
     LDDataSourceStatus_ErrorInfo_Free(info);
 }
+
+TEST(ClientBindings, AllFlagsState) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    LDContextBuilder ctx_builder = LDContextBuilder_New();
+    LDContextBuilder_AddKind(ctx_builder, "user", "shadow");
+    LDContext context = LDContextBuilder_Build(ctx_builder);
+
+    LDAllFlagsState state =
+        LDServerSDK_AllFlagsState(sdk, context, LD_ALLFLAGSSTATE_DEFAULT);
+
+    ASSERT_FALSE(LDAllFlagsState_Valid(state));
+
+    LDAllFlagsState_Free(state);
+    LDContext_Free(context);
+    LDServerSDK_Free(sdk);
+}

@@ -4,7 +4,6 @@
 #pragma once
 
 #include <launchdarkly/bindings/c/export.h>
-#include <launchdarkly/bindings/c/status.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if

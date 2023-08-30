@@ -49,7 +49,7 @@ TEST(ClientBindings, RegisterFlagListener) {
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDContextBuilder ctx_builder = LDContextBuilder_New();
-    LDContextBuilder_AddKind(ctx_builder, "`user", "shadow");
+    LDContextBuilder_AddKind(ctx_builder, "user", "shadow");
 
     LDContext context = LDContextBuilder_Build(ctx_builder);
 

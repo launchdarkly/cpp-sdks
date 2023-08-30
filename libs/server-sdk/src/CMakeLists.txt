@@ -47,6 +47,7 @@ add_library(${LIBNAME}
         bindings/c/sdk.cpp
         bindings/c/builder.cpp
         bindings/c/config.cpp
+        bindings/c/all_flags_state/all_flags_state.cpp
 )
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))

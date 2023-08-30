@@ -53,12 +53,22 @@ class IClient {
     [[nodiscard]] virtual bool Initialized() const = 0;
 
     /**
-     * Returns a map from feature flag keys to feature
-     * flag values for the current context.
+     * Evaluates all flags for a context, returning a data structure containing
+     * the results and additional flag metadata.
+     *
+     * The method's behavior can be controlled by passing a combination of
+     * one or more options.
+     *
+     * A common use-case for AllFlagsState is to generate data suitable for
+     * bootstrapping the client-side JavaScript SDK.
      *
      * This method will not send analytics events back to LaunchDarkly.
      *
-     * @return A map from feature flag keys to values for the current context.
+     * @param context  The context against which all flags will be
+     * evaluated.
+     * @param options A combination of one or more options. Omitting this
+     * argument is equivalent to passing AllFlagsState::Options::Default.
+     * @return An AllFlagsState data structure.
      */
     [[nodiscard]] virtual class AllFlagsState AllFlagsState(
         Context const& context,
