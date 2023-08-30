@@ -29,7 +29,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 }
 
 void StatusListenerFunction(LDDataSourceStatus status, void* user_data) {
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_OFFLINE,
+    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
               LDDataSourceStatus_GetState(status));
 }
 
@@ -82,7 +82,7 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
     LDServerSDK_Start(sdk, 3000, &success);
 
     LDDataSourceStatus status_2 = LDServerSDK_DataSourceStatus_Status(sdk);
-    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_OFFLINE,
+    EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
               LDDataSourceStatus_GetState(status_2));
 
     EXPECT_EQ(nullptr, LDDataSourceStatus_GetLastError(status_2));

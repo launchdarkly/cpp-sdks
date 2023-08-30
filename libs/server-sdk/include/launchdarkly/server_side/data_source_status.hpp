@@ -31,7 +31,8 @@ enum class ServerDataSourceState {
 
     /**
      * Indicates that the data source is currently operational and has not
-     * had any problems since the last time it received data.
+     * had any problems since the last time it received data. Alternatively if
+     * the client was configured for offline mode, the state will be kValid.
      *
      * In streaming mode, this means that there is currently an open stream
      * connection and that at least one initial message has been received on

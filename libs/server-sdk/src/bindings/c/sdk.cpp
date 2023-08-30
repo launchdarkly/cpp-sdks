@@ -415,18 +415,18 @@ LDServerSDK_DataSourceStatus_OnStatusChange(
     LDServerSDK sdk,
     struct LDDataSourceStatusListener listener) {
     LD_ASSERT_NOT_NULL(sdk);
-    //
-    //     if (listener.StatusChanged) {
-    //         auto connection =
-    //             TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
-    //                 [listener](data_sources::DataSourceStatus status) {
-    //                     listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
-    //                                            listener.UserData);
-    //                 });
-    //
-    //         return
-    //         reinterpret_cast<LDListenerConnection>(connection.release());
-    //     }
+
+    if (listener.StatusChanged) {
+        auto connection =
+            TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
+                [listener](data_sources::DataSourceStatus status) {
+                    listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
+                                           listener.UserData);
+                });
+
+        return reinterpret_cast<LDListenerConnection>(connection.release());
+    }
+
     return nullptr;
 }
 
@@ -434,9 +434,8 @@ LD_EXPORT(LDDataSourceStatus)
 LDServerSDK_DataSourceStatus_Status(LDServerSDK sdk) {
     LD_ASSERT_NOT_NULL(sdk);
 
-    //         return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
-    //             TO_SDK(sdk)->DataSourceStatus().Status()));
-    return nullptr;
+    return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
+        TO_SDK(sdk)->DataSourceStatus().Status()));
 }
 
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
