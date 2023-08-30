@@ -1,14 +1,14 @@
-LaunchDarkly Client-Side SDK for C/C++
+LaunchDarkly Server-Side SDK for C/C++
 ===================================
 
-[![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml)
-[![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/)
+[![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml)
+[![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/server-sdk/docs/html/)
 
-The LaunchDarkly Client-Side SDK for C/C++ is designed primarily for use in desktop and embedded systems applications.
-It follows the client-side LaunchDarkly model for single-user contexts (much like our mobile or JavaScript SDKs). It is
-not intended for use in multi-user systems such as web servers and applications.
+The LaunchDarkly Server-Side SDK for C/C++ is designed primarily for use in in multi-user systems such as web servers
+and applications. It follows the server-side LaunchDarkly model for multi-user contexts.
+It is not intended for use in desktop and embedded systems applications.
 
-For using LaunchDarkly in server-side C/C++ applications, refer to our [Server-Side C/C++ SDK](../server-sdk/README.md).
+For using LaunchDarkly in client-side C/C++ applications, refer to our [Client-Side C/C++ SDK](../client-sdk/README.md).
 
 LaunchDarkly overview
 -------------------------
@@ -27,7 +27,7 @@ Getting started
 ---------------
 
 Download a release archive from
-the [Github releases](https://github.com/launchdarkly/cpp-sdks/releases?q=cpp-client&expanded=true) for use in your
+the [Github releases](https://github.com/launchdarkly/cpp-sdks/releases?q=cpp-server&expanded=true) for use in your
 project.
 
 Refer to the [SDK documentation][reference-guide] for complete instructions on
@@ -50,13 +50,13 @@ The C++ API does not have a stable ABI, so if this is important to you, consider
 Example of basic compilation using the C++ API with a static library using gcc:
 
 ```shell
-g++ -I path_to_the_sdk_install/include -O3 -std=c++17 -Llib -fPIE -g main.cpp path_to_the_sdk_install/lib/liblaunchdarkly-cpp-client.a -lpthread -lstdc++ -lcrypto -lssl -lboost_json -lboost_url
+g++ -I path_to_the_sdk_install/include -O3 -std=c++17 -Llib -fPIE -g main.cpp path_to_the_sdk_install/lib/liblaunchdarkly-cpp-server.a -lpthread -lstdc++ -lcrypto -lssl -lboost_json -lboost_url
 ```
 
 Example of basic compilation using the C API with a static library using msvc:
 
 ```shell
-cl /I include /Fe: hello.exe main.cpp /link lib/launchdarkly-cpp-client.lib
+cl /I include /Fe: hello.exe main.cpp /link lib/launchdarkly-cpp-server.lib
 ```
 
 The shared library (so, DLL, dylib), only supports the C interface. The shared object does not require you to have Boost
@@ -65,7 +65,7 @@ or OpenSSL available when linking the shared object to your project.
 Example of basic compilation using the C API with a shared library using gcc:
 
 ```shell
-gcc -I $(pwd)/include -Llib -fPIE -g main.c liblaunchdarkly-cpp-client.so
+gcc -I $(pwd)/include -Llib -fPIE -g main.c liblaunchdarkly-cpp-server.so
 ```
 
 The examples here are to help with getting started, but generally speaking the SDK should be incorporated using your
@@ -118,4 +118,4 @@ About LaunchDarkly
     * [blog.launchdarkly.com](https://blog.launchdarkly.com/  "LaunchDarkly Blog Documentation") for the latest product
       updates
 
-[reference-guide]: https://docs.launchdarkly.com/sdk/client-side/c-c--
+[reference-guide]: https://docs.launchdarkly.com/sdk/server-side/c-c--
