@@ -11,6 +11,9 @@
 #define TO_ALLFLAGS(ptr) (reinterpret_cast<AllFlagsState*>(ptr))
 #define FROM_ALLFLAGS(ptr) (reinterpret_cast<LDAllFlagsState>(ptr))
 
+#define TO_VALUE(ptr) (reinterpret_cast<Value*>(ptr))
+#define FROM_VALUE(ptr) (reinterpret_cast<LDValue>(ptr))
+
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
@@ -32,4 +35,22 @@ LDAllFlagsState_SerializeJSON(LDAllFlagsState state) {
     std::string json_str = boost::json::serialize(json_value);
 
     return strdup(json_str.c_str());
+}
+
+LD_EXPORT(LDValue)
+LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key) {
+    LD_ASSERT_NOT_NULL(state);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    auto const& values = TO_ALLFLAGS(state)->Values();
+
+    std::unordered_map<std::string, Value>::const_iterator iter =
+        values.find(flag_key);
+    if (iter == values.end()) {
+        return FROM_VALUE(const_cast<Value*>(&Value::Null()));
+    }
+
+    Value const& val_ref = iter->second;
+
+    return FROM_VALUE(const_cast<Value*>(&val_ref));
 }

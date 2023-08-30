@@ -185,6 +185,9 @@ TEST(ClientBindings, AllFlagsState) {
     ASSERT_STREQ(json, "{\"$valid\":false,\"$flagsState\":{}}");
     LDMemory_FreeString(json);
 
+    LDValue nonexistent_flag = LDAllFlagsState_Value(state, "nonexistent_flag");
+    ASSERT_EQ(LDValue_Type(nonexistent_flag), LDValueType_Null);
+
     LDAllFlagsState_Free(state);
     LDContext_Free(context);
     LDServerSDK_Free(sdk);
