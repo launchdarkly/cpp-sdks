@@ -28,9 +28,9 @@ TEST(ClientBindings, MinimalInstantiation) {
     LDServerSDK_Free(sdk);
 }
 
-void StatusListenerFunction(LDDataSourceStatus status, void* user_data) {
+void StatusListenerFunction(LDServerDataSourceStatus status, void* user_data) {
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
-              LDDataSourceStatus_GetState(status));
+              LDServerDataSourceStatus_GetState(status));
 }
 
 // This test registers a listener. It doesn't use the listener, but it
@@ -45,8 +45,8 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    struct LDDataSourceStatusListener listener {};
-    LDDataSourceStatusListener_Init(listener);
+    struct LDServerDataSourceStatusListener listener {};
+    LDServerDataSourceStatusListener_Init(&listener);
 
     listener.UserData = const_cast<char*>("Potato");
     listener.StatusChanged = StatusListenerFunction;
@@ -74,23 +74,25 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    LDDataSourceStatus status_1 = LDServerSDK_DataSourceStatus_Status(sdk);
+    LDServerDataSourceStatus status_1 =
+        LDServerSDK_DataSourceStatus_Status(sdk);
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_INITIALIZING,
-              LDDataSourceStatus_GetState(status_1));
+              LDServerDataSourceStatus_GetState(status_1));
 
     bool success = false;
     LDServerSDK_Start(sdk, 3000, &success);
 
-    LDDataSourceStatus status_2 = LDServerSDK_DataSourceStatus_Status(sdk);
+    LDServerDataSourceStatus status_2 =
+        LDServerSDK_DataSourceStatus_Status(sdk);
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
-              LDDataSourceStatus_GetState(status_2));
+              LDServerDataSourceStatus_GetState(status_2));
 
-    EXPECT_EQ(nullptr, LDDataSourceStatus_GetLastError(status_2));
+    EXPECT_EQ(nullptr, LDServerDataSourceStatus_GetLastError(status_2));
 
-    EXPECT_NE(0, LDDataSourceStatus_StateSince(status_2));
+    EXPECT_NE(0, LDServerDataSourceStatus_StateSince(status_2));
 
-    LDDataSourceStatus_Free(status_1);
-    LDDataSourceStatus_Free(status_2);
+    LDServerDataSourceStatus_Free(status_1);
+    LDServerDataSourceStatus_Free(status_2);
     LDServerSDK_Free(sdk);
 }
 
@@ -106,14 +108,14 @@ TEST(ClientBindings, ComplexDataSourceStatus) {
                 std::chrono::seconds{100}}));
 
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_VALID,
-              LDDataSourceStatus_GetState(
-                  reinterpret_cast<LDDataSourceStatus>(&status)));
+              LDServerDataSourceStatus_GetState(
+                  reinterpret_cast<LDServerDataSourceStatus>(&status)));
 
-    EXPECT_EQ(200, LDDataSourceStatus_StateSince(
-                       reinterpret_cast<LDDataSourceStatus>(&status)));
+    EXPECT_EQ(200, LDServerDataSourceStatus_StateSince(
+                       reinterpret_cast<LDServerDataSourceStatus>(&status)));
 
-    LDDataSourceStatus_ErrorInfo info = LDDataSourceStatus_GetLastError(
-        reinterpret_cast<LDDataSourceStatus>(&status));
+    LDDataSourceStatus_ErrorInfo info = LDServerDataSourceStatus_GetLastError(
+        reinterpret_cast<LDServerDataSourceStatus>(&status));
 
     EXPECT_EQ(LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE,
               LDDataSourceStatus_ErrorInfo_GetKind(info));
