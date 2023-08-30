@@ -31,8 +31,11 @@ typedef struct _LDServerSDK* LDServerSDK;
 /**
  * Constructs a new server-side LaunchDarkly SDK from a configuration.
  *
- * @param config The configuration. Must not be NULL.
- * @return New SDK instance.
+ * @param config The configuration. Ownership is transferred. Do not free or
+ * access the LDServerConfig in any way after this call, otherwise behavior is
+ * undefined. Must not be NULL.
+ * @return New SDK instance. Must be freed with LDServerSDK_Free when no longer
+ * needed.
  */
 LD_EXPORT(LDServerSDK)
 LDServerSDK_New(LDServerConfig config);
@@ -132,7 +135,7 @@ LDServerSDK_TrackEvent(LDServerSDK sdk,
  * name, and associates it with a numeric metric and value.
  *
  * @param sdk SDK. Must not be NULL.
- * @param context The context. Ownership is NOT transferred.Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
  * @param event_name The name of the event. Must not be NULL.
  * @param metric_value This value is used by the LaunchDarkly experimentation
  * feature in numeric custom metrics, and will also be returned as part of the
