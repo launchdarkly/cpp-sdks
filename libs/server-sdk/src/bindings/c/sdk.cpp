@@ -345,34 +345,6 @@ LD_EXPORT(void) LDServerSDK_Free(LDServerSDK sdk) {
     delete TO_SDK(sdk);
 }
 
-LD_EXPORT(LDListenerConnection)
-LDServerSDK_FlagNotifier_OnFlagChange(LDServerSDK sdk,
-                                      char const* flag_key,
-                                      struct LDFlagListener listener) {
-    LD_ASSERT_NOT_NULL(sdk);
-    LD_ASSERT_NOT_NULL(flag_key);
-
-    //     if (listener.FlagChanged) {
-    //         auto connection = TO_SDK(sdk)->FlagNotifier().OnFlagChange(
-    //             flag_key,
-    //             [listener](std::shared_ptr<launchdarkly::client_side::flag_manager::
-    //                                            FlagValueChangeEvent> event) {
-    //                 listener.FlagChanged(
-    //                     event->FlagName().c_str(),
-    //                     reinterpret_cast<LDValue>(
-    //                         const_cast<Value*>(&event->NewValue())),
-    //                     reinterpret_cast<LDValue>(
-    //                         const_cast<Value*>(&event->OldValue())),
-    //                     event->Deleted(), listener.UserData);
-    //             });
-    //
-    //         return
-    //         reinterpret_cast<LDListenerConnection>(connection.release());
-    //     }
-
-    return nullptr;
-}
-
 LD_EXPORT(LDDataSourceStatus_State)
 LDDataSourceStatus_GetState(LDDataSourceStatus status) {
     LD_ASSERT_NOT_NULL(status);
@@ -399,11 +371,6 @@ LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status) {
     return std::chrono::duration_cast<std::chrono::seconds>(
                TO_DATASOURCESTATUS(status)->StateSince().time_since_epoch())
         .count();
-}
-
-LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener) {
-    listener.FlagChanged = nullptr;
-    listener.UserData = nullptr;
 }
 
 LD_EXPORT(LDDataSourceStatus_ErrorKind)

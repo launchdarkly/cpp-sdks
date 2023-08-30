@@ -10,7 +10,6 @@
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/export.h>
-#include <launchdarkly/bindings/c/flag_listener.h>
 #include <launchdarkly/bindings/c/listener_connection.h>
 #include <launchdarkly/bindings/c/memory_routines.h>
 #include <launchdarkly/bindings/c/status.h>
@@ -401,28 +400,6 @@ LDServerSDK_AllFlagsState(LDServerSDK sdk,
  * @param sdk SDK.
  */
 LD_EXPORT(void) LDServerSDK_Free(LDServerSDK sdk);
-
-/**
- * Listen for changes for the specific flag.
- *
- * If the FlagChanged member of the listener struct is not set (NULL), then the
- * function will not register a listener. In that case the return value
- * will be NULL.
- *
- * @param sdk SDK. Must not be NULL.
- * @param flag_key The unique key for the feature flag. Must not be NULL.
- * @param listener The listener, whose FlagChanged callback will be invoked,
- * when the flag changes. Must not be NULL.
- *
- * @return A LDListenerConnection. The connection can be freed using
- * LDListenerConnection_Free and the listener can be disconnected using
- * LDListenerConnection_Disconnect. NULL will be returned if the FlagChanged
- * member of the listener struct is NULL.
- */
-LD_EXPORT(LDListenerConnection)
-LDServerSDK_FlagNotifier_OnFlagChange(LDServerSDK sdk,
-                                      char const* flag_key,
-                                      struct LDFlagListener listener);
 
 typedef struct _LDDataSourceStatus* LDDataSourceStatus;
 typedef struct _LDDataSourceStatus_ErrorInfo* LDDataSourceStatus_ErrorInfo;
