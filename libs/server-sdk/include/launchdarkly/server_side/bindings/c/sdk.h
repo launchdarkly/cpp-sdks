@@ -437,11 +437,6 @@ enum LDServerDataSourceStatus_State {
     LD_DATASOURCESTATUS_STATE_INTERRUPTED = 2,
 
     /**
-     * Indicates that the application has told the SDK to stay offline.
-     */
-    LD_DATASOURCESTATUS_STATE_OFFLINE = 3,
-
-    /**
      * Indicates that the data source has been permanently shut down.
      *
      * This could be because it encountered an unrecoverable error (for
@@ -449,7 +444,7 @@ enum LDServerDataSourceStatus_State {
      * SDK key will never become valid), or because the SDK client was
      * explicitly shut down.
      */
-    LD_DATASOURCESTATUS_STATE_SHUTDOWN = 4
+    LD_DATASOURCESTATUS_STATE_OFF = 3
 };
 
 /**
