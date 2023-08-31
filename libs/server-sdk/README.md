@@ -89,7 +89,7 @@ behave correctly.
 Contributing
 ------------
 
-We encourage pull requests and other contributions from the community. Check out
+We encourage pull requests and other contributions from the community. Read
 our [contributing guidelines](../../CONTRIBUTING.md) for instructions on how to contribute to this SDK.
 
 About LaunchDarkly
