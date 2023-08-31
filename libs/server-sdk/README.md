@@ -4,7 +4,7 @@ LaunchDarkly Server-Side SDK for C/C++
 [![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml)
 [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/server-sdk/docs/html/)
 
-The LaunchDarkly Server-Side SDK for C/C++ is designed primarily for use in in multi-user systems such as web servers
+The LaunchDarkly Server-Side SDK for C/C++ is designed primarily for use in multi-user systems such as web servers
 and applications. It follows the server-side LaunchDarkly model for multi-user contexts.
 It is not intended for use in desktop and embedded systems applications.
 
