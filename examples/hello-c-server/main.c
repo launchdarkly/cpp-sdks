@@ -28,7 +28,7 @@ int main() {
 
     LDServerConfigBuilder config_builder = LDServerConfigBuilder_New(SDK_KEY);
 
-    LDServerConfig config;
+    LDServerConfig config = NULL;
     LDStatus config_status =
         LDServerConfigBuilder_Build(config_builder, &config);
     if (!LDStatus_Ok(config_status)) {
@@ -38,7 +38,7 @@ int main() {
 
     LDServerSDK client = LDServerSDK_New(config);
 
-    bool initialized_successfully;
+    bool initialized_successfully = false;
     if (LDServerSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
                           &initialized_successfully)) {
         if (initialized_successfully) {

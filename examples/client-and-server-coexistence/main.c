@@ -20,7 +20,7 @@ int main() {
 
     LDClientConfigBuilder client_config_builder =
         LDClientConfigBuilder_New("foo");
-    LDClientConfig client_config;
+    LDClientConfig client_config = NULL;
 
     LDStatus client_config_status =
         LDClientConfigBuilder_Build(client_config_builder, &client_config);
@@ -32,7 +32,7 @@ int main() {
 
     LDServerConfigBuilder server_config_builder =
         LDServerConfigBuilder_New("foo");
-    LDServerConfig server_config;
+    LDServerConfig server_config = NULL;
 
     LDStatus server_config_status =
         LDServerConfigBuilder_Build(server_config_builder, &server_config);
