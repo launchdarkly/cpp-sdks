@@ -10,7 +10,7 @@ not intended for use in multi-user systems such as web servers and applications.
 
 LaunchDarkly overview
 -------------------------
-[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves over 100 billion feature flags
+[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves trillions of feature flags
 daily to help teams build better software, faster. [Get started](https://docs.launchdarkly.com/docs/getting-started)
 using LaunchDarkly today!
 
@@ -34,7 +34,7 @@ installing and using the SDK.
 ### Incorporating the SDK
 
 The SDK can be used via a C++ or C interface and can be incorporated via a static library or shared object. The static
-library and shared object each have their on use cases and limitations.
+library and shared object each have their own use cases and limitations.
 
 The static library supports both the C++ and C interface. When using the static library, you should ensure that it is
 compiled using a compatible configuration and toolchain. For instance, when using MSVC, it needs to be using the same
@@ -87,7 +87,7 @@ behave correctly.
 Contributing
 ------------
 
-We encourage pull requests and other contributions from the community. Check out
+We encourage pull requests and other contributions from the community. Read
 our [contributing guidelines](../../CONTRIBUTING.md) for instructions on how to contribute to this SDK.
 
 About LaunchDarkly
