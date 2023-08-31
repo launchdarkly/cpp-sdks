@@ -208,7 +208,6 @@ LDServerSDK_StringVariation(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(flag_key);
     LD_ASSERT_NOT_NULL(default_value);
 
-    // TODO: custom allocation / free routines
     return strdup(
         TO_SDK(sdk)
             ->StringVariation(*TO_CONTEXT(context), flag_key, default_value)

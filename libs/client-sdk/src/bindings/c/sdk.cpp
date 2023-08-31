@@ -203,7 +203,6 @@ LDClientSDK_StringVariation(LDClientSDK sdk,
     LD_ASSERT_NOT_NULL(flag_key);
     LD_ASSERT_NOT_NULL(default_value);
 
-    // TODO: custom allocation / free routines
     return strdup(
         TO_SDK(sdk)->StringVariation(flag_key, default_value).c_str());
 }

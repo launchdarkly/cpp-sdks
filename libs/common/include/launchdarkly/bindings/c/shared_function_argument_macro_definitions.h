@@ -1,5 +1,4 @@
 /** @file */
-// NOLINTBEGIN modernize-use-using
 #pragma once
 
 /* Function should operate asynchronously. */
