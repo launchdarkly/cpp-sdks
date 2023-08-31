@@ -91,7 +91,6 @@ void StreamingDataSource::Start() {
         return;
     }
 
-    // TODO: Initial reconnect delay. sc-204393
     boost::urls::url url = uri_components.value();
 
     if (data_source_config_.with_reasons) {
@@ -116,6 +115,9 @@ void StreamingDataSource::Start() {
     client_builder.write_timeout(http_config_.WriteTimeout());
 
     client_builder.connect_timeout(http_config_.ConnectTimeout());
+
+    client_builder.initial_reconnect_delay(
+        streaming_config.initial_reconnect_delay);
 
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
