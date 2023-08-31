@@ -48,14 +48,19 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.EventsBaseUrl(*in.serviceEndpoints->events);
         }
     }
+    auto& datasource = config_builder.DataSource();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
+        if (in.streaming->initialRetryDelayMs) {
+            auto streaming = DataSourceBuilder::Streaming();
+            streaming.InitialReconnectDelay(
+                std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
+            datasource.Method(std::move(streaming));
+        }
     }
-
-    auto& datasource = config_builder.DataSource();
 
     if (in.polling) {
         if (in.polling->baseUri) {
