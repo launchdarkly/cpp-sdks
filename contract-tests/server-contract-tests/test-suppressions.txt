@@ -1,13 +1,3 @@
-streaming/updates/flag patch with same version is not applied
-streaming/updates/segment patch with same version is not applied
-streaming/updates/flag patch with lower version is not applied
-streaming/updates/segment patch with lower version is not applied
-streaming/updates/flag delete with same version is not applied
-streaming/updates/segment delete with same version is not applied
-streaming/updates/flag delete with lower version is not applied
-streaming/updates/segment delete with lower version is not applied
-streaming/updates/flag delete for previously nonexistent flag is applied
-streaming/updates/segment delete for previously nonexistent segment is applied
 streaming/retry behavior/retry after IO error on reconnect
 streaming/retry behavior/retry after recoverable HTTP error on reconnect/error 400
 streaming/retry behavior/retry after recoverable HTTP error on reconnect/error 408
