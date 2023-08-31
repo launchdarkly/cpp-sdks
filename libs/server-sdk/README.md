@@ -12,7 +12,7 @@ For using LaunchDarkly in client-side C/C++ applications, refer to our [Client-S
 
 LaunchDarkly overview
 -------------------------
-[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves over 100 billion feature flags
+[LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves trillions of feature flags
 daily to help teams build better software, faster. [Get started](https://docs.launchdarkly.com/docs/getting-started)
 using LaunchDarkly today!
 
