@@ -36,7 +36,7 @@ installing and using the SDK.
 ### Incorporating the SDK
 
 The SDK can be used via a C++ or C interface and can be incorporated via a static library or shared object. The static
-library and shared object each have their on use cases and limitations.
+library and shared object each have their own use cases and limitations.
 
 The static library supports both the C++ and C interface. When using the static library, you should ensure that it is
 compiled using a compatible configuration and toolchain. For instance, when using MSVC, it needs to be using the same
