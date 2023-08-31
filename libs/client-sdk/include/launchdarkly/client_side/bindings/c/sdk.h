@@ -13,6 +13,7 @@
 #include <launchdarkly/bindings/c/flag_listener.h>
 #include <launchdarkly/bindings/c/listener_connection.h>
 #include <launchdarkly/bindings/c/memory_routines.h>
+#include <launchdarkly/bindings/c/shared_function_argument_macro_definitions.h>
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
 
@@ -26,9 +27,6 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef struct _LDClientSDK* LDClientSDK;
-
-#define LD_NONBLOCKING 0
-#define LD_DISCARD_DETAIL NULL
 
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and

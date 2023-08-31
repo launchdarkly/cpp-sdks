@@ -4,22 +4,20 @@
 #pragma once
 
 #include <launchdarkly/bindings/c/export.h>
-#include <launchdarkly/bindings/c/status.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
 // used by C++ source code
 #endif
 
-typedef struct _LDClientConfig* LDClientConfig;
+typedef struct _LDCServerConfig* LDServerConfig;
 
 /**
- * Free an unused configuration. Configurations used to construct an LDClientSDK
- * must not be be freed.
- *
+ * Free the configuration. Configurations passed into an LDServerSDK_New call do
+ * not need to be freed.
  * @param config Config to free.
  */
-LD_EXPORT(void) LDClientConfig_Free(LDClientConfig config);
+LD_EXPORT(void) LDServerConfig_Free(LDServerConfig config);
 
 #ifdef __cplusplus
 }

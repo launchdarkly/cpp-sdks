@@ -1,15 +1,15 @@
-#include <launchdarkly/client_side/bindings/c/sdk.h>
+#include <launchdarkly/server_side/bindings/c/config/builder.h>
+#include <launchdarkly/server_side/bindings/c/sdk.h>
 
 #include <launchdarkly/bindings/c/context_builder.h>
-#include <launchdarkly/client_side/bindings/c/config/builder.h>
 
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Set MOBILE_KEY to your LaunchDarkly mobile key.
-#define MOBILE_KEY ""
+// Set SDK_KEY to your LaunchDarkly SKD key.
+#define SDK_KEY ""
 
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
@@ -19,33 +19,27 @@
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
 int main() {
-    if (!strlen(MOBILE_KEY)) {
+    if (!strlen(SDK_KEY)) {
         printf(
-            "*** Please edit main.c to set MOBILE_KEY to your LaunchDarkly "
-            "mobile key first\n\n");
+            "*** Please edit main.c to set SDK_KEY to your LaunchDarkly "
+            "SDK key first\n\n");
         return 1;
     }
 
-    LDClientConfigBuilder config_builder =
-        LDClientConfigBuilder_New(MOBILE_KEY);
+    LDServerConfigBuilder config_builder = LDServerConfigBuilder_New(SDK_KEY);
 
-    LDClientConfig config = NULL;
+    LDServerConfig config = NULL;
     LDStatus config_status =
-        LDClientConfigBuilder_Build(config_builder, &config);
+        LDServerConfigBuilder_Build(config_builder, &config);
     if (!LDStatus_Ok(config_status)) {
         printf("error: config is invalid: %s", LDStatus_Error(config_status));
         return 1;
     }
 
-    LDContextBuilder context_builder = LDContextBuilder_New();
-    LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
-    LDContextBuilder_Attributes_SetName(context_builder, "user", "Sandy");
-    LDContext context = LDContextBuilder_Build(context_builder);
-
-    LDClientSDK client = LDClientSDK_New(config, context);
+    LDServerSDK client = LDServerSDK_New(config);
 
     bool initialized_successfully = false;
-    if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
+    if (LDServerSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
                           &initialized_successfully)) {
         if (initialized_successfully) {
             printf("*** SDK successfully initialized!\n\n");
@@ -59,8 +53,13 @@ int main() {
         return 1;
     }
 
+    LDContextBuilder context_builder = LDContextBuilder_New();
+    LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
+    LDContextBuilder_Attributes_SetName(context_builder, "user", "Sandy");
+    LDContext context = LDContextBuilder_Build(context_builder);
+
     bool flag_value =
-        LDClientSDK_BoolVariation(client, FEATURE_FLAG_KEY, false);
+        LDServerSDK_BoolVariation(client, context, FEATURE_FLAG_KEY, false);
 
     printf("*** Feature flag '%s' is %s for this user\n\n", FEATURE_FLAG_KEY,
            flag_value ? "true" : "false");
@@ -72,7 +71,8 @@ int main() {
     // application, the SDK would continue running and events would be delivered
     // automatically in the background.
 
-    LDClientSDK_Free(client);
+    LDContext_Free(context);
+    LDServerSDK_Free(client);
 
     return 0;
 }

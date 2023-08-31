@@ -2,7 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/*.hpp"
-        )
+)
 
 # Automatic library: static or dynamic based on user config.
 
@@ -44,7 +44,11 @@ add_library(${LIBNAME}
         data_store/persistent/persistent_data_store.cpp
         data_store/persistent/expiration_tracker.cpp
         events/event_factory.cpp
-        )
+        bindings/c/sdk.cpp
+        bindings/c/builder.cpp
+        bindings/c/config.cpp
+        bindings/c/all_flags_state/all_flags_state.cpp
+)
 
 if (MSVC OR (NOT BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
@@ -77,7 +81,7 @@ endif ()
 
 install(DIRECTORY "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly"
         DESTINATION "include"
-        )
+)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)
