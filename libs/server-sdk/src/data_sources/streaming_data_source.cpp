@@ -77,7 +77,6 @@ void StreamingDataSource::Start() {
         return;
     }
 
-    // TODO: Initial reconnect delay. sc-204393
     boost::urls::url url = uri_components.value();
 
     auto client_builder = launchdarkly::sse::Builder(exec_, url.buffer());
@@ -92,6 +91,9 @@ void StreamingDataSource::Start() {
     client_builder.write_timeout(http_config_.WriteTimeout());
 
     client_builder.connect_timeout(http_config_.ConnectTimeout());
+
+    client_builder.initial_reconnect_delay(
+        streaming_config_.initial_reconnect_delay);
 
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
