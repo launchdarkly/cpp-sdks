@@ -2,6 +2,21 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.7](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.6...launchdarkly-cpp-client-v3.0.7) (2023-08-31)
+
+
+### Bug Fixes
+
+* allow for specification of initial reconnect delay in streaming data source ([#229](https://github.com/launchdarkly/cpp-sdks/issues/229)) ([d1dde79](https://github.com/launchdarkly/cpp-sdks/commit/d1dde79fde80cc32e19cf384140e138ce64ca02b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.7 to 0.1.8
+    * launchdarkly-cpp-common bumped from 0.3.4 to 0.3.5
+
 ## [3.0.6](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.5...launchdarkly-cpp-client-v3.0.6) (2023-08-29)
 
 
