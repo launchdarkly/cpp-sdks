@@ -1,0 +1,142 @@
+\hypertarget{classlaunchdarkly_1_1Context}{}\doxysection{launchdarkly\+::Context Class Reference}
+\label{classlaunchdarkly_1_1Context}\index{launchdarkly::Context@{launchdarkly::Context}}
+
+
+{\ttfamily \#include $<$context.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ std\+::string $>$ const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a47ea2fc02b48fcf0a9a3e6c6e708546c}{Kinds}} () const
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{launchdarkly\+::\+Attributes}} const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a43cc6bfa36a0793ee0d819f5d8e27cc3}{Attributes}} (std\+::string const \&kind) const
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a593ff58b16bc9fce3c5b171a250b2685}{Get}} (std\+::string const \&kind, \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{launchdarkly\+::\+Attribute\+Reference}} const \&ref)
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1Context_a35673de824588131cb16f1f4f8094a76}{Valid}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a4ec976736f8370ef5acc94b36adb5187}{Canonical\+Key}} () const
+\item 
+std\+::map$<$ std\+::string, std\+::string $>$ const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a476d61b2aa297bc3b965743e277b43d5}{Kinds\+To\+Keys}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1Context_a6a6edbc002572d458143ca0143fc526c}{errors}} ()
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_aa06337f487da68219fbd510bbc5d4346}\label{classlaunchdarkly_1_1Context_aa06337f487da68219fbd510bbc5d4346}} 
+{\bfseries Context} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)=default
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a4b836e3dfa7896360496af9f82944ec1}\label{classlaunchdarkly_1_1Context_a4b836e3dfa7896360496af9f82944ec1}} 
+{\bfseries Context} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} \&\&context)=default
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a332c051ab6d49c74532b1c9e1e2f0bb7}\label{classlaunchdarkly_1_1Context_a332c051ab6d49c74532b1c9e1e2f0bb7}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&)=default
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_abd5c3c2fe4fdd836dcac6c2c812641a6}\label{classlaunchdarkly_1_1Context_abd5c3c2fe4fdd836dcac6c2c812641a6}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} \&\&)=default
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a528d730eed168c7dd3a6f53bce42cbcf}\label{classlaunchdarkly_1_1Context_a528d730eed168c7dd3a6f53bce42cbcf}} 
+class {\bfseries Context\+Builder}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_ab13fcbfb7b63f0c6a05563cb02b48a79}\label{classlaunchdarkly_1_1Context_ab13fcbfb7b63f0c6a05563cb02b48a79}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A Launch\+Darkly context. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a43cc6bfa36a0793ee0d819f5d8e27cc3}\label{classlaunchdarkly_1_1Context_a43cc6bfa36a0793ee0d819f5d8e27cc3}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!Attributes@{Attributes}}
+\index{Attributes@{Attributes}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{Attributes()}{Attributes()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{Attributes}} const  \& launchdarkly\+::\+Context\+::\+Attributes (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{kind }\end{DoxyParamCaption}) const}
+
+Get a set of attributes associated with a kind.
+
+Only call this function if you have checked that the kind is present.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind to get attributes for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The attributes if they exist. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a4ec976736f8370ef5acc94b36adb5187}\label{classlaunchdarkly_1_1Context_a4ec976736f8370ef5acc94b36adb5187}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!CanonicalKey@{CanonicalKey}}
+\index{CanonicalKey@{CanonicalKey}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{CanonicalKey()}{CanonicalKey()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::\+Context\+::\+Canonical\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the canonical key for this context. \mbox{\Hypertarget{classlaunchdarkly_1_1Context_a6a6edbc002572d458143ca0143fc526c}\label{classlaunchdarkly_1_1Context_a6a6edbc002572d458143ca0143fc526c}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!errors@{errors}}
+\index{errors@{errors}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{errors()}{errors()}}
+{\footnotesize\ttfamily std\+::string const\& launchdarkly\+::\+Context\+::errors (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Get a string containing errors the context encountered during construction.
+
+\begin{DoxyReturn}{Returns}
+A string containing errors, or an empty string if there are no errors. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a593ff58b16bc9fce3c5b171a250b2685}\label{classlaunchdarkly_1_1Context_a593ff58b16bc9fce3c5b171a250b2685}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!Get@{Get}}
+\index{Get@{Get}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} const  \& launchdarkly\+::\+Context\+::\+Get (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{kind,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{launchdarkly\+::\+Attribute\+Reference}} const \&}]{ref }\end{DoxyParamCaption})}
+
+Get an attribute value by kind and attribute reference. If the kind is not present, or the attribute not present in the kind, then Value\+::null() will be returned.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind to get the value for. \\
+\hline
+{\em ref} & The reference to the desired attribute. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The attribute \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} or a \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} representing null. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a47ea2fc02b48fcf0a9a3e6c6e708546c}\label{classlaunchdarkly_1_1Context_a47ea2fc02b48fcf0a9a3e6c6e708546c}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!Kinds@{Kinds}}
+\index{Kinds@{Kinds}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{Kinds()}{Kinds()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ const  \& launchdarkly\+::\+Context\+::\+Kinds (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the kinds the context contains.
+
+\begin{DoxyReturn}{Returns}
+A vector of kinds. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a476d61b2aa297bc3b965743e277b43d5}\label{classlaunchdarkly_1_1Context_a476d61b2aa297bc3b965743e277b43d5}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!KindsToKeys@{KindsToKeys}}
+\index{KindsToKeys@{KindsToKeys}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{KindsToKeys()}{KindsToKeys()}}
+{\footnotesize\ttfamily std\+::map$<$ std\+::string, std\+::string $>$ const  \& launchdarkly\+::\+Context\+::\+Kinds\+To\+Keys (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get a collection containing the kinds and their associated keys.
+
+\begin{DoxyReturn}{Returns}
+Returns a map of kinds to keys. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1Context_a35673de824588131cb16f1f4f8094a76}\label{classlaunchdarkly_1_1Context_a35673de824588131cb16f1f4f8094a76}} 
+\index{launchdarkly::Context@{launchdarkly::Context}!Valid@{Valid}}
+\index{Valid@{Valid}!launchdarkly::Context@{launchdarkly::Context}}
+\doxysubsubsection{\texorpdfstring{Valid()}{Valid()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Context\+::\+Valid (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Check if a context is valid.
+
+\begin{DoxyReturn}{Returns}
+Returns true if the context is valid. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/context.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/context.\+cpp\end{DoxyCompactItemize}
