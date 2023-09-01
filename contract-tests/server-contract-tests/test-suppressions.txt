@@ -1,3 +1,4 @@
+# SC-204387
 streaming/validation/drop and reconnect if stream event has malformed JSON/put event
 streaming/validation/drop and reconnect if stream event has malformed JSON/patch event
 streaming/validation/drop and reconnect if stream event has malformed JSON/delete event
