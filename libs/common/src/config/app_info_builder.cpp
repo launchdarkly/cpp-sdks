@@ -21,9 +21,9 @@ tl::expected<std::string, Error> AppInfoBuilder::Tag::Build() const {
 }
 
 bool ValidChar(char c) {
-    if(c > 0 && c < 255) {
-        // The MSVC implementation of isalnum will assert if the number it outside
-        // its lookup table.
+    if (c > 0) {
+        // The MSVC implementation of isalnum will assert if the number is
+        // outside its lookup table (0-0xFF, inclusive.)
         // iswalnum would not, but is less restrictive than desired.
         return std::isalnum(c) != 0 || c == '-' || c == '.' || c == '_';
     }
