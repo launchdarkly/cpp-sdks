@@ -8,6 +8,6 @@ FeatureEventBase::FeatureEventBase(FeatureEventParams const& params)
       variation(params.variation),
       value(params.value),
       reason(params.reason),
-      default_(params.default_) {}
-
+      default_(params.default_),
+      prereq_of(params.prereq_of) {}
 }  // namespace launchdarkly::events

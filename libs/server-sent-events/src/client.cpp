@@ -37,6 +37,13 @@ auto const kDefaultUserAgent = BOOST_BEAST_VERSION_STRING;
 // Time duration used when no timeout is specified (1 year).
 auto const kNoTimeout = std::chrono::hours(8760);
 
+// Time duration that the backoff algorithm uses before initiating a new
+// connection, the first time a failure is detected.
+auto const kDefaultInitialReconnectDelay = std::chrono::seconds(1);
+
+// Maximum duration between backoff attempts.
+auto const kDefaultMaxBackoffDelay = std::chrono::seconds(30);
+
 static boost::optional<net::ssl::context&> ToOptRef(
     std::optional<net::ssl::context>& maybe_val) {
     if (maybe_val) {
@@ -60,6 +67,7 @@ class FoxyClient : public Client,
                std::optional<std::chrono::milliseconds> connect_timeout,
                std::optional<std::chrono::milliseconds> read_timeout,
                std::optional<std::chrono::milliseconds> write_timeout,
+               std::optional<std::chrono::milliseconds> initial_reconnect_delay,
                Builder::EventReceiver receiver,
                Builder::LogCallback logger,
                Builder::ErrorCallback errors,
@@ -75,7 +83,9 @@ class FoxyClient : public Client,
                    launchdarkly::foxy::session_opts{
                        ToOptRef(ssl_context_),
                        connect_timeout.value_or(kNoTimeout)}),
-          backoff_(std::chrono::seconds(1), std::chrono::seconds(30)),
+          backoff_(
+              initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
+              kDefaultMaxBackoffDelay),
           last_event_id_(std::nullopt),
           backoff_timer_(session_.get_executor()),
           event_receiver_(std::move(receiver)),
@@ -347,6 +357,7 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       read_timeout_{std::nullopt},
       write_timeout_{std::nullopt},
       connect_timeout_{std::nullopt},
+      initial_reconnect_delay_{std::nullopt},
       logging_cb_([](auto msg) {}),
       receiver_([](launchdarkly::sse::Event const&) {}),
       error_cb_([](auto err) {}) {
@@ -379,6 +390,11 @@ Builder& Builder::read_timeout(std::chrono::milliseconds timeout) {
 
 Builder& Builder::write_timeout(std::chrono::milliseconds timeout) {
     write_timeout_ = timeout;
+    return *this;
+}
+
+Builder& Builder::initial_reconnect_delay(std::chrono::milliseconds delay) {
+    initial_reconnect_delay_ = delay;
     return *this;
 }
 
@@ -441,8 +457,8 @@ std::shared_ptr<Client> Builder::build() {
 
     return std::make_shared<FoxyClient>(
         net::make_strand(executor_), request, host, service, connect_timeout_,
-        read_timeout_, write_timeout_, receiver_, logging_cb_, error_cb_,
-        std::move(ssl));
+        read_timeout_, write_timeout_, initial_reconnect_delay_, receiver_,
+        logging_cb_, error_cb_, std::move(ssl));
 }
 
 }  // namespace launchdarkly::sse

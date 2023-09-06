@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/data_model/context_kind.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
@@ -16,8 +17,10 @@
 namespace launchdarkly::data_model {
 
 struct Flag {
-    using Variation = std::uint64_t;
-    using Weight = std::uint64_t;
+    using Variation = std::int64_t;
+    using Weight = std::int64_t;
+    using FlagVersion = std::uint64_t;
+    using Date = std::uint64_t;
 
     struct Rollout {
         enum class Kind {
@@ -31,7 +34,8 @@ struct Flag {
             Weight weight;
             bool untracked;
 
-            WeightedVariation() = default;
+            WeightedVariation();
+
             WeightedVariation(Variation index, Weight weight);
             static WeightedVariation Untracked(Variation index, Weight weight);
 
@@ -48,19 +52,19 @@ struct Flag {
         DEFINE_CONTEXT_KIND_FIELD(contextKind)
 
         Rollout() = default;
-        Rollout(std::vector<WeightedVariation>);
+        explicit Rollout(std::vector<WeightedVariation>);
     };
 
-    using VariationOrRollout = std::variant<Variation, Rollout>;
+    using VariationOrRollout = std::variant<std::optional<Variation>, Rollout>;
 
     struct Prerequisite {
         std::string key;
-        std::uint64_t variation;
+        Variation variation;
     };
 
     struct Target {
         std::vector<std::string> values;
-        std::uint64_t variation;
+        Variation variation;
         ContextKind contextKind;
     };
 
@@ -78,7 +82,7 @@ struct Flag {
     };
 
     std::string key;
-    std::uint64_t version;
+    FlagVersion version;
     bool on;
     VariationOrRollout fallthrough;
     std::vector<Value> variations;
@@ -87,13 +91,13 @@ struct Flag {
     std::vector<Target> targets;
     std::vector<Target> contextTargets;
     std::vector<Rule> rules;
-    std::optional<std::uint64_t> offVariation;
+    std::optional<Variation> offVariation;
     bool clientSide;
     ClientSideAvailability clientSideAvailability;
     std::optional<std::string> salt;
     bool trackEvents;
     bool trackEventsFallthrough;
-    std::optional<std::uint64_t> debugEventsUntilDate;
+    std::optional<Date> debugEventsUntilDate;
 
     /**
      * Returns the flag's version. Satisfies ItemDescriptor template
@@ -101,5 +105,8 @@ struct Flag {
      * @return Version of this flag.
      */
     [[nodiscard]] inline std::uint64_t Version() const { return version; }
+
+    [[nodiscard]] bool IsExperimentationEnabled(
+        std::optional<EvaluationReason> const& reason) const;
 };
 }  // namespace launchdarkly::data_model

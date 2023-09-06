@@ -5,6 +5,9 @@
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <launchdarkly/server_side/all_flags_state.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
+
 #include <chrono>
 #include <future>
 #include <memory>
@@ -12,7 +15,6 @@
 #include <unordered_map>
 
 namespace launchdarkly::server_side {
-
 /**
  *  Interface for the standard SDK client methods and properties.
  */
@@ -51,15 +53,26 @@ class IClient {
     [[nodiscard]] virtual bool Initialized() const = 0;
 
     /**
-     * Returns a map from feature flag keys to feature
-     * flag values for the current context.
+     * Evaluates all flags for a context, returning a data structure containing
+     * the results and additional flag metadata.
+     *
+     * The method's behavior can be controlled by passing a combination of
+     * one or more options.
+     *
+     * A common use-case for AllFlagsState is to generate data suitable for
+     * bootstrapping the client-side JavaScript SDK.
      *
      * This method will not send analytics events back to LaunchDarkly.
      *
-     * @return A map from feature flag keys to values for the current context.
+     * @param context  The context against which all flags will be
+     * evaluated.
+     * @param options A combination of one or more options. Omitting this
+     * argument is equivalent to passing AllFlagsState::Options::Default.
+     * @return An AllFlagsState data structure.
      */
-    [[nodiscard]] virtual std::unordered_map<FlagKey, Value> AllFlagsState()
-        const = 0;
+    [[nodiscard]] virtual class AllFlagsState AllFlagsState(
+        Context const& context,
+        AllFlagsState::Options options = AllFlagsState::Options::Default) = 0;
 
     /**
      * Tracks that the current context performed an event for the given event
@@ -234,6 +247,13 @@ class IClient {
         FlagKey const& key,
         Value default_value) = 0;
 
+    /**
+     * Returns an interface which provides methods for subscribing to data
+     * source status.
+     * @return A data source status provider.
+     */
+    virtual data_sources::IDataSourceStatusProvider& DataSourceStatus() = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -258,8 +278,10 @@ class Client : public IClient {
     [[nodiscard]] bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] class AllFlagsState AllFlagsState(
+        Context const& context,
+        enum AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,
@@ -315,6 +337,8 @@ class Client : public IClient {
     EvaluationDetail<Value> JsonVariationDetail(Context const& ctx,
                                                 FlagKey const& key,
                                                 Value default_value) override;
+
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
     /**
      * Returns the version of the SDK.

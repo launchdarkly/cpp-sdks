@@ -16,6 +16,8 @@ Flag::Rollout::WeightedVariation Flag::Rollout::WeightedVariation::Untracked(
     Flag::Weight weight_) {
     return {variation_, weight_, true};
 }
+Flag::Rollout::WeightedVariation::WeightedVariation()
+    : variation(0), weight(0), untracked(false) {}
 
 Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)
     : variations(std::move(variations_)),
@@ -23,5 +25,27 @@ Flag::Rollout::Rollout(std::vector<WeightedVariation> variations_)
       seed(std::nullopt),
       bucketBy("key"),
       contextKind("user") {}
+
+bool Flag::IsExperimentationEnabled(
+    std::optional<EvaluationReason> const& reason) const {
+    if (!reason) {
+        return false;
+    }
+    if (reason->InExperiment()) {
+        return true;
+    }
+    switch (reason->Kind()) {
+        case EvaluationReason::Kind::kFallthrough:
+            return this->trackEventsFallthrough;
+        case EvaluationReason::Kind::kRuleMatch:
+            if (!reason->RuleIndex() ||
+                reason->RuleIndex() >= this->rules.size()) {
+                return false;
+            }
+            return this->rules.at(*reason->RuleIndex()).trackEvents;
+        default:
+            return false;
+    }
+}
 
 }  // namespace launchdarkly::data_model

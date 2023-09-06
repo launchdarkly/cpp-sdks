@@ -2,7 +2,9 @@
 
 #include <launchdarkly/data_sources/data_source_status_error_kind.hpp>
 
+#include <chrono>
 #include <cstdint>
+#include <string>
 
 namespace launchdarkly::common::data_sources {
 
@@ -11,7 +13,7 @@ namespace launchdarkly::common::data_sources {
  */
 class DataSourceStatusErrorInfo {
    public:
-    using StatusCodeType = uint64_t;
+    using StatusCodeType = std::uint64_t;
     using ErrorKind = DataSourceStatusErrorKind;
     using DateTime = std::chrono::time_point<std::chrono::system_clock>;
 

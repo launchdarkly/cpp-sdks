@@ -19,7 +19,7 @@ tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rollout rollout;
+    data_model::Flag::Rollout rollout{};
 
     PARSE_FIELD(rollout.variations, obj, "variations");
     PARSE_FIELD_DEFAULT(rollout.kind, obj, "kind",
@@ -49,7 +49,7 @@ tag_invoke(boost::json::value_to_tag<tl::expected<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rollout::WeightedVariation weighted_variation;
+    data_model::Flag::Rollout::WeightedVariation weighted_variation{};
     PARSE_FIELD(weighted_variation.variation, obj, "variation");
     PARSE_FIELD(weighted_variation.weight, obj, "weight");
     PARSE_FIELD(weighted_variation.untracked, obj, "untracked");
@@ -83,7 +83,7 @@ tag_invoke(boost::json::value_to_tag<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Prerequisite prerequisite;
+    data_model::Flag::Prerequisite prerequisite{};
     PARSE_REQUIRED_FIELD(prerequisite.key, obj, "key");
     PARSE_FIELD(prerequisite.variation, obj, "variation");
     return prerequisite;
@@ -98,7 +98,7 @@ tl::expected<std::optional<data_model::Flag::Target>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Target target;
+    data_model::Flag::Target target{};
     PARSE_FIELD(target.values, obj, "values");
     PARSE_FIELD(target.variation, obj, "variation");
     PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind",
@@ -115,7 +115,7 @@ tl::expected<std::optional<data_model::Flag::Rule>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::Rule rule;
+    data_model::Flag::Rule rule{};
 
     PARSE_FIELD(rule.trackEvents, obj, "trackEvents");
     PARSE_FIELD(rule.clauses, obj, "clauses");
@@ -144,7 +144,7 @@ tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Flag::ClientSideAvailability client_side_availability;
+    data_model::Flag::ClientSideAvailability client_side_availability{};
     PARSE_FIELD(client_side_availability.usingEnvironmentId, obj,
                 "usingEnvironmentId");
     PARSE_FIELD(client_side_availability.usingMobileKey, obj, "usingMobileKey");
@@ -161,7 +161,7 @@ tl::expected<std::optional<data_model::Flag>, JsonError> tag_invoke(
 
     auto const& obj = json_value.as_object();
 
-    data_model::Flag flag;
+    data_model::Flag flag{};
 
     PARSE_REQUIRED_FIELD(flag.key, obj, "key");
 
@@ -195,17 +195,177 @@ tag_invoke(boost::json::value_to_tag<
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    std::optional<data_model::Flag::Rollout> rollout;
+    std::optional<data_model::Flag::Rollout> rollout{};
     PARSE_CONDITIONAL_FIELD(rollout, obj, "rollout");
 
     if (rollout) {
         return std::make_optional(*rollout);
     }
 
-    data_model::Flag::Variation variation;
-    PARSE_REQUIRED_FIELD(variation, obj, "variation");
+    std::optional<data_model::Flag::Variation> variation;
 
-    return std::make_optional(variation);
+    /* If there's no rollout, this must be a variation. If there's no variation,
+     * then this will be detected as a malformed flag at evaluation time. */
+    PARSE_CONDITIONAL_FIELD(variation, obj, "variation");
+
+    return variation;
 }
+
+namespace data_model {
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::Rollout::WeightedVariation const& weighted_variation) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("variation", weighted_variation.variation);
+    obj.emplace("weight", weighted_variation.weight);
+
+    WriteMinimal(obj, "untracked", weighted_variation.untracked);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout::Kind const& kind) {
+    switch (kind) {
+        case Flag::Rollout::Kind::kUnrecognized:
+            // TODO: Should we be preserving the original string.
+            break;
+        case Flag::Rollout::Kind::kExperiment:
+            json_value.emplace_string() = "experiment";
+            break;
+        case Flag::Rollout::Kind::kRollout:
+            json_value.emplace_string() = "rollout";
+            break;
+    }
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rollout const& rollout) {
+    auto& obj = json_value.emplace_object();
+
+    obj.emplace("variations", boost::json::value_from(rollout.variations));
+    if (rollout.kind != Flag::Rollout::Kind::kUnrecognized) {
+        // TODO: Should we be preserving the original string and putting it in.
+        obj.emplace("kind", boost::json::value_from(rollout.kind));
+    }
+    WriteMinimal(obj, "seed", rollout.seed);
+    obj.emplace("bucketBy", rollout.bucketBy.RedactionName());
+    obj.emplace("contextKind", rollout.contextKind.t);
+}
+
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout) {
+    auto& obj = json_value.emplace_object();
+    std::visit(
+        [&obj](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+                obj.emplace("rollout", boost::json::value_from(arg));
+            } else if constexpr (std::is_same_v<
+                                     T, std::optional<
+                                            data_model::Flag::Variation>>) {
+                if (arg) {
+                    obj.emplace("variation", *arg);
+                }
+            }
+        },
+        variation_or_rollout);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Prerequisite const& prerequisite) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("key", prerequisite.key);
+    obj.emplace("variation", prerequisite.variation);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Target const& target) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("values", boost::json::value_from(target.values));
+    obj.emplace("variation", target.variation);
+    obj.emplace("contextKind", target.contextKind.t);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::ClientSideAvailability const& availability) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "usingEnvironmentId", availability.usingEnvironmentId);
+    WriteMinimal(obj, "usingMobileKey", availability.usingMobileKey);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag::Rule const& rule) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "trackEvents", rule.trackEvents);
+    WriteMinimal(obj, "id", rule.id);
+    std::visit(
+        [&obj](auto&& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, data_model::Flag::Rollout>) {
+                obj.emplace("rollout", boost::json::value_from(arg));
+            } else if constexpr (std::is_same_v<T,
+                                                data_model::Flag::Variation>) {
+                obj.emplace("variation", arg);
+            }
+        },
+        rule.variationOrRollout);
+    obj.emplace("clauses", boost::json::value_from(rule.clauses));
+}
+
+// The "targets" array in a flag cannot have a contextKind, so this intermediate
+// representation allows the flag data model to use Flag::Target, but still
+// serialize a user target correctly.
+struct UserTarget {
+    std::vector<std::string> values;
+    std::uint64_t variation;
+    UserTarget(data_model::Flag::Target const& target)
+        : values(target.values), variation(target.variation) {}
+};
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                UserTarget const& target) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("values", boost::json::value_from(target.values));
+    obj.emplace("variation", target.variation);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Flag const& flag) {
+    auto& obj = json_value.emplace_object();
+    WriteMinimal(obj, "trackEvents", flag.trackEvents);
+    WriteMinimal(obj, "clientSide", flag.clientSide);
+    WriteMinimal(obj, "on", flag.on);
+    WriteMinimal(obj, "trackEventsFallthrough", flag.trackEventsFallthrough);
+    WriteMinimal(obj, "debugEventsUntilDate", flag.debugEventsUntilDate);
+    WriteMinimal(obj, "salt", flag.salt);
+    WriteMinimal(obj, "offVariation", flag.offVariation);
+    obj.emplace("key", flag.key);
+    obj.emplace("version", flag.version);
+    obj.emplace("variations", boost::json::value_from(flag.variations));
+    obj.emplace("rules", boost::json::value_from(flag.rules));
+    obj.emplace("prerequisites", boost::json::value_from(flag.prerequisites));
+    obj.emplace("fallthrough", boost::json::value_from(flag.fallthrough));
+    obj.emplace("clientSideAvailability",
+                boost::json::value_from(flag.clientSideAvailability));
+    obj.emplace("contextTargets", boost::json::value_from(flag.contextTargets));
+
+    std::vector<UserTarget> user_targets;
+    for (auto const& target : flag.targets) {
+        user_targets.emplace_back(target);
+    }
+    obj.emplace("targets", boost::json::value_from(user_targets));
+}
+
+}  // namespace data_model
 
 }  // namespace launchdarkly

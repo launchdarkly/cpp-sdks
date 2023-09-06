@@ -91,6 +91,14 @@ class Builder {
     Builder& write_timeout(std::chrono::milliseconds timeout);
 
     /**
+     * Specifies the initial delay before reconnection when backoff takes place
+     * due to an error on the connection.
+     * @param timeout
+     * @return Reference to this builder.
+     */
+    Builder& initial_reconnect_delay(std::chrono::milliseconds delay);
+
+    /**
      * Specify the method for the initial request. The default method is GET.
      * @param verb The HTTP method.
      * @return Reference to this builder.
@@ -138,6 +146,7 @@ class Builder {
     std::optional<std::chrono::milliseconds> read_timeout_;
     std::optional<std::chrono::milliseconds> write_timeout_;
     std::optional<std::chrono::milliseconds> connect_timeout_;
+    std::optional<std::chrono::milliseconds> initial_reconnect_delay_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
     ErrorCallback error_cb_;

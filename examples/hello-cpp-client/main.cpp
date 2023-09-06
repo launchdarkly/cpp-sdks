@@ -1,8 +1,8 @@
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
 // Set MOBILE_KEY to your LaunchDarkly mobile key.
 #define MOBILE_KEY ""
@@ -18,7 +18,7 @@ using namespace launchdarkly;
 int main() {
     if (!strlen(MOBILE_KEY)) {
         printf(
-            "*** Please edit main.c to set MOBILE_KEY to your LaunchDarkly "
+            "*** Please edit main.cpp to set MOBILE_KEY to your LaunchDarkly "
             "mobile key first\n\n");
         return 1;
     }

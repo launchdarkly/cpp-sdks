@@ -89,9 +89,6 @@ bool RegexMatch(std::string const& context_value,
         // boost::bad_expression can be thrown by basic_regex when compiling a
         // regular expression.
         return false;
-    } catch (boost::regex_error) {
-        // boost::regex_error thrown on stack exhaustion
-        return false;
     } catch (std::runtime_error) {
         // std::runtime_error can be thrown when a call
         // to regex_search results in an "everlasting" search

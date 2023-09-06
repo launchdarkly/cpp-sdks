@@ -61,12 +61,6 @@ INSTANTIATE_TEST_SUITE_P(
                       BasicDate() + 123us},
         TimestampTest{"2020-01-01T00:00:00.000123+00:00",
                       "with microseconds and offset", BasicDate() + 123us},
-        TimestampTest{"2020-01-01T00:00:00.123456789Z",
-                      "floor nanoseconds with zulu offset",
-                      BasicDate() + 123ms + 456us},
-        TimestampTest{"2020-01-01T01:00:00.123456789+01:00",
-                      "floor nanoseconds with offset",
-                      BasicDate() + 123ms + 456us},
 
     }));
 

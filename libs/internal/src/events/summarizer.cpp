@@ -37,11 +37,11 @@ Summarizer& Summarizer::Finish(Time end_time) {
     return *this;
 }
 
-Summarizer::Time Summarizer::start_time() const {
+Summarizer::Time Summarizer::StartTime() const {
     return start_time_;
 }
 
-Summarizer::Time Summarizer::end_time() const {
+Summarizer::Time Summarizer::EndTime() const {
     return end_time_;
 }
 

@@ -16,7 +16,7 @@ tl::expected<std::optional<data_model::Clause>, JsonError> tag_invoke(
     REQUIRE_OBJECT(json_value);
     auto const& obj = json_value.as_object();
 
-    data_model::Clause clause;
+    data_model::Clause clause{};
 
     PARSE_REQUIRED_FIELD(clause.op, obj, "op");
     PARSE_FIELD(clause.values, obj, "values");
@@ -97,5 +97,82 @@ tl::expected<data_model::Clause::Op, JsonError> tag_invoke(
     }
     return maybe_op.value().value_or(data_model::Clause::Op::kUnrecognized);
 }
+
+namespace data_model {
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Clause const& clause) {
+    auto& obj = json_value.emplace_object();
+
+    obj.emplace("values", boost::json::value_from(clause.values));
+
+    WriteMinimal(obj, "negate", clause.negate);
+
+    if (clause.op != data_model::Clause::Op::kUnrecognized) {
+        // TODO: Should we store the original value?
+        obj.emplace("op", boost::json::value_from(clause.op));
+    }
+    if (clause.attribute.Valid()) {
+        obj.emplace("attribute", clause.attribute.RedactionName());
+    }
+    obj.emplace("contextKind", clause.contextKind.t);
+}
+
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::Clause::Op const& op) {
+    switch (op) {
+        case data_model::Clause::Op::kUnrecognized:
+            // TODO: Should we do anything?
+            break;
+        case data_model::Clause::Op::kIn:
+            json_value.emplace_string() = "in";
+            break;
+        case data_model::Clause::Op::kStartsWith:
+            json_value.emplace_string() = "startsWith";
+            break;
+        case data_model::Clause::Op::kEndsWith:
+            json_value.emplace_string() = "endsWith";
+            break;
+        case data_model::Clause::Op::kMatches:
+            json_value.emplace_string() = "matches";
+            break;
+        case data_model::Clause::Op::kContains:
+            json_value.emplace_string() = "contains";
+            break;
+        case data_model::Clause::Op::kLessThan:
+            json_value.emplace_string() = "lessThan";
+            break;
+        case data_model::Clause::Op::kLessThanOrEqual:
+            json_value.emplace_string() = "lessThanOrEqual";
+            break;
+        case data_model::Clause::Op::kGreaterThan:
+            json_value.emplace_string() = "greaterThan";
+            break;
+        case data_model::Clause::Op::kGreaterThanOrEqual:
+            json_value.emplace_string() = "greaterThanOrEqual";
+            break;
+        case data_model::Clause::Op::kBefore:
+            json_value.emplace_string() = "before";
+            break;
+        case data_model::Clause::Op::kAfter:
+            json_value.emplace_string() = "after";
+            break;
+        case data_model::Clause::Op::kSemVerEqual:
+            json_value.emplace_string() = "semVerEqual";
+            break;
+        case data_model::Clause::Op::kSemVerLessThan:
+            json_value.emplace_string() = "semVerLessThan";
+            break;
+        case data_model::Clause::Op::kSemVerGreaterThan:
+            json_value.emplace_string() = "semVerGreaterThan";
+            break;
+        case data_model::Clause::Op::kSegmentMatch:
+            json_value.emplace_string() = "segmentMatch";
+            break;
+    }
+}
+}  // namespace data_model
 
 }  // namespace launchdarkly

@@ -1,7 +1,7 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/*.hpp"
-        )
+)
 
 # Automatic library: static or dynamic based on user config.
 
@@ -25,6 +25,8 @@ add_library(${LIBNAME}
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
         bindings/c/sdk.cpp
+        bindings/c/builder.cpp
+        bindings/c/config.cpp
         data_sources/null_data_source.cpp
         flag_manager/context_index.cpp
         flag_manager/flag_manager.cpp
@@ -62,7 +64,7 @@ endif ()
 
 install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
         DESTINATION "include"
-        )
+)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME} PUBLIC ../include)

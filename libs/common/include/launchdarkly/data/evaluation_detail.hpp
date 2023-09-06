@@ -61,6 +61,14 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
+     * Check if an evaluation reason exists, and if so, if it is of a particular
+     * kind.
+     * @param kind Kind to check.
+     * @return True if a reason exists and matches the given kind.
+     */
+    [[nodiscard]] bool ReasonKindIs(enum EvaluationReason::Kind kind) const;
+
+    /**
      * @return True if the evaluation resulted in an error.
      * TODO(sc209960)
      */

@@ -4,12 +4,16 @@
 // NOLINTBEGIN modernize-use-using
 #pragma once
 
-#include <launchdarkly/bindings/c/config/config.h>
+#include <launchdarkly/client_side/bindings/c/config/config.h>
+
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
+#include <launchdarkly/bindings/c/data_source/error_info.h>
 #include <launchdarkly/bindings/c/export.h>
+#include <launchdarkly/bindings/c/flag_listener.h>
 #include <launchdarkly/bindings/c/listener_connection.h>
 #include <launchdarkly/bindings/c/memory_routines.h>
+#include <launchdarkly/bindings/c/shared_function_argument_macro_definitions.h>
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
 
@@ -24,15 +28,17 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDClientSDK* LDClientSDK;
 
-#define LD_NONBLOCKING 0
-#define LD_DISCARD_DETAIL NULL
-
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
  * context.
- * @param config The configuration. Must not be NULL.
- * @param context The initial context. Must not be NULL.
- * @return New SDK instance.
+ * @param config The configuration. Ownership is transferred. Do not free or
+ * access the LDClientConfig in any way after this call; behavior is undefined.
+ * Must not be NULL.
+ * @param context The initial context. Ownership is transferred. Do not free or
+ * access the LDContext in any way after this call; behavior is undefined. Must
+ * not be NULL.
+ * @return New SDK instance. Must be freed with LDClientSDK_Free when no longer
+ * needed.
  */
 LD_EXPORT(LDClientSDK)
 LDClientSDK_New(LDClientConfig config, LDContext context);
@@ -133,7 +139,9 @@ LD_EXPORT(void) LDClientSDK_TrackEvent(LDClientSDK sdk, char const* event_name);
  * feature in numeric custom metrics, and will also be returned as part of the
  * custom event for Data Export.
  * @param data A JSON value containing additional data associated with the
- * event. Must not be NULL.
+ * event. Ownership is transferred. Do not free or
+ * access the LDValue in any way after this call; behavior is undefined. Must
+ * not be NULL.
  */
 LD_EXPORT(void)
 LDClientSDK_TrackMetric(LDClientSDK sdk,
@@ -147,7 +155,9 @@ LDClientSDK_TrackMetric(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @param event_name Must not be NULL.
  * @param data A JSON value containing additional data associated with the
- * event. Must not be NULL.
+ * event. Do not free or
+ * access the LDValue in any way after this call; behavior is undefined. Must
+ * not be NULL.
  */
 LD_EXPORT(void)
 LDClientSDK_TrackData(LDClientSDK sdk, char const* event_name, LDValue data);
@@ -352,7 +362,8 @@ LDClientSDK_DoubleVariationDetail(LDClientSDK sdk,
  * Returns the JSON value of a feature flag for a given flag key.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
- * @param default_value The default value of the flag. The value is copied.
+ * @param default_value The default value of the flag. Ownership is retained by
+ * the caller; a copy is made internally. Must not be NULL.
  * @return The variation for the current context, or a copy of default_value if
  * the flag is disabled in the LaunchDarkly control panel. The returned value
  * must be freed using LDValue_Free.
@@ -367,7 +378,8 @@ LDClientSDK_JsonVariation(LDClientSDK sdk,
  * that also describes the way the value was determined.
  * @param sdk SDK. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
- * @param default_value The default value of the flag. The value is copied.
+ * @param default_value The default value of the flag. Ownership is retained by
+ * the caller; a copy is made internally. Must not be NULL.
  * @param detail Out parameter to store the details. May pass LD_DISCARD_DETAILS
  * or NULL to discard the details. The details object must be freed with
  * LDEvalDetail_Free.
@@ -400,7 +412,7 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
  * }
  * @endcode
  * @param sdk SDK. Must not be NULL.
- * @return Value of type Object.
+ * @return Value of type Object. Must be freed with LDValue_Free.
  */
 LD_EXPORT(LDValue)
 LDClientSDK_AllFlags(LDClientSDK sdk);
@@ -410,52 +422,6 @@ LDClientSDK_AllFlags(LDClientSDK sdk);
  * @param sdk SDK.
  */
 LD_EXPORT(void) LDClientSDK_Free(LDClientSDK sdk);
-
-typedef void (*FlagChangedCallbackFn)(char const* flag_key,
-                                      LDValue new_value,
-                                      LDValue old_value,
-                                      bool deleted,
-                                      void* user_data);
-
-/**
- * Defines a feature flag listener which may be used to listen for flag changes.
- * The struct should be initialized using LDFlagListener_Init before use.
- */
-struct LDFlagListener {
-    /**
-     * Callback function which is invoked for flag changes.
-     *
-     * The provided pointers are only valid for the duration of the function
-     * call (excluding UserData, whose lifetime is controlled by the caller).
-     *
-     * @param flag_key The name of the flag that changed.
-     * @param new_value The new value of the flag. If there was not an new
-     * value, because the flag was deleted, then the LDValue will be of a null
-     * type. Check the deleted parameter to see if a flag was deleted.
-     * @param old_value The old value of the flag. If there was not an old
-     * value, for instance a newly created flag, then the Value will be of a
-     * null type.
-     * @param deleted True if the flag has been deleted.
-     */
-    FlagChangedCallbackFn FlagChanged;
-
-    /**
-     * UserData is forwarded into callback functions.
-     */
-    void* UserData;
-};
-
-/**
- * Initializes a flag listener. Must be called before passing the listener
- * to LDClientSDK_FlagNotifier_OnFlagChange.
- *
- * Create the struct, initialize the struct, set the FlagChanged handler
- * and optionally UserData, and then pass the struct to
- * LDClientSDK_FlagNotifier_OnFlagChange.
- *
- * @param listener Listener to initialize.
- */
-LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener listener);
 
 /**
  * Listen for changes for the specific flag.
@@ -480,7 +446,6 @@ LDClientSDK_FlagNotifier_OnFlagChange(LDClientSDK sdk,
                                       struct LDFlagListener listener);
 
 typedef struct _LDDataSourceStatus* LDDataSourceStatus;
-typedef struct _LDDataSourceStatus_ErrorInfo* LDDataSourceStatus_ErrorInfo;
 
 /**
  * Enumeration of possible data source states.
@@ -537,40 +502,6 @@ enum LDDataSourceStatus_State {
 };
 
 /**
- * A description of an error condition that the data source encountered.
- */
-enum LDDataSourceStatus_ErrorKind {
-    /**
-     * An unexpected error, such as an uncaught exception, further
-     * described by the error message.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_UNKNOWN = 0,
-
-    /**
-     * An I/O error such as a dropped connection.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_NETWORK_ERROR = 1,
-
-    /**
-     * The LaunchDarkly service returned an HTTP response with an error
-     * status, available in the status code.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE = 2,
-
-    /**
-     * The SDK received malformed data from the LaunchDarkly service.
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_INVALID_DATA = 3,
-
-    /**
-     * The data source itself is working, but when it tried to put an
-     * update into the data store, the data store failed (so the SDK may
-     * not have the latest data).
-     */
-    LD_DATASOURCESTATUS_ERRORKIND_STORE_ERROR = 4,
-};
-
-/**
  * Get an enumerated value representing the overall current state of the data
  * source.
  */
@@ -616,34 +547,6 @@ LDDataSourceStatus_GetLastError(LDDataSourceStatus status);
  */
 LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
 
-/**
- * Get an enumerated value representing the general category of the error.
- */
-LD_EXPORT(enum LDDataSourceStatus_ErrorKind)
-LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * The HTTP status code if the error was
- * LD_DATASOURCESTATUS_ERRORKIND_ERROR_RESPONSE.
- */
-LD_EXPORT(uint64_t)
-LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * Any additional human-readable information relevant to the error.
- *
- * The format is subject to change and should not be relied on
- * programmatically.
- */
-LD_EXPORT(char const*)
-LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info);
-
-/**
- * The date/time that the error occurred, in seconds since epoch.
- */
-LD_EXPORT(time_t)
-LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info);
-
 typedef void (*DataSourceStatusCallbackFn)(LDDataSourceStatus status,
                                            void* user_data);
 
@@ -686,7 +589,7 @@ struct LDDataSourceStatusListener {
  * @param listener Listener to initialize.
  */
 LD_EXPORT(void)
-LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener listener);
+LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener* listener);
 
 /**
  * Listen for changes to the data source status.
@@ -717,13 +620,6 @@ LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
  * @param status The data source status to free.
  */
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
-
-/**
- * Frees the data source status error information.
- * @param status The error information to free.
- */
-LD_EXPORT(void)
-LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info);
 
 #ifdef __cplusplus
 }

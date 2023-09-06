@@ -2,6 +2,40 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+## [3.0.6](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.5...launchdarkly-cpp-client-v3.0.6) (2023-08-29)
+
+
+### Bug Fixes
+
+* LDDataSourceStatusListener_Init should take pointer ([#222](https://github.com/launchdarkly/cpp-sdks/issues/222)) ([0aa3d14](https://github.com/launchdarkly/cpp-sdks/commit/0aa3d1442cbfea3cc32d2ec981590137f0284a46))
+
+## [3.0.5](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.4...launchdarkly-cpp-client-v3.0.5) (2023-08-28)
+
+
+### Bug Fixes
+
+* initialization of LDFlagListener  ([#218](https://github.com/launchdarkly/cpp-sdks/issues/218)) ([6c263dd](https://github.com/launchdarkly/cpp-sdks/commit/6c263dd9110e4da188a56cabc54f783190e1114c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.6 to 0.1.7
+    * launchdarkly-cpp-common bumped from 0.3.3 to 0.3.4
+
+## [3.0.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.3...launchdarkly-cpp-client-v3.0.4) (2023-08-16)
+
+### Bug Fixes
+Fixes required to run with msvc 14.1 (vs2017) (https://github.com/launchdarkly/cpp-sdks/issues/195) ([d16b2ea](https://github.com/launchdarkly/cpp-sdks/commit/d16b2ea1131b2a99efcec99b96c90b9384c33dc7))
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.5 to 0.1.6
+    * launchdarkly-cpp-common bumped from 0.3.2 to 0.3.3
+
 ## [3.0.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.2...launchdarkly-cpp-client-v3.0.3) (2023-07-14)
 
 

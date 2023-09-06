@@ -1,7 +1,7 @@
 #include <launchdarkly/client_side/bindings/c/sdk.h>
 
-#include <launchdarkly/bindings/c/config/builder.h>
 #include <launchdarkly/bindings/c/context_builder.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,7 +29,7 @@ int main() {
     LDClientConfigBuilder config_builder =
         LDClientConfigBuilder_New(MOBILE_KEY);
 
-    LDClientConfig config;
+    LDClientConfig config = NULL;
     LDStatus config_status =
         LDClientConfigBuilder_Build(config_builder, &config);
     if (!LDStatus_Ok(config_status)) {
@@ -44,7 +44,7 @@ int main() {
 
     LDClientSDK client = LDClientSDK_New(config, context);
 
-    bool initialized_successfully;
+    bool initialized_successfully = false;
     if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
                           &initialized_successfully)) {
         if (initialized_successfully) {

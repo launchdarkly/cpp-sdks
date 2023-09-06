@@ -39,6 +39,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
         obj.emplace("reason", boost::json::value_from(*event.reason));
     }
     obj.emplace("default", boost::json::value_from(event.default_));
+    if (event.prereq_of) {
+        obj.emplace("prereqOf", *event.prereq_of);
+    }
 }
 
 void tag_invoke(boost::json::value_from_tag const& tag,
@@ -131,8 +134,8 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "summary");
     obj.emplace("startDate",
-                boost::json::value_from(Date{summary.start_time()}));
-    obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
+                boost::json::value_from(Date{summary.StartTime()}));
+    obj.emplace("endDate", boost::json::value_from(Date{summary.EndTime()}));
     obj.emplace("features", boost::json::value_from(summary.Features()));
 }
 }  // namespace launchdarkly::events::detail

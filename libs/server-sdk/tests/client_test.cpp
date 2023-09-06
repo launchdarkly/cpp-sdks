@@ -68,3 +68,12 @@ TEST_F(ClientTest, JsonVariationDefaultPassesThrough) {
         ASSERT_EQ(*client_.JsonVariationDetail(context_, flag, v), v);
     }
 }
+
+TEST_F(ClientTest, AllFlagsStateNotValid) {
+    // Since we don't have any ability to insert into the data store, assert
+    // only that the state is not valid.
+    auto flags = client_.AllFlagsState(
+        context_, AllFlagsState::Options::IncludeReasons |
+                      AllFlagsState::Options::ClientSideOnly);
+    ASSERT_FALSE(flags.Valid());
+}

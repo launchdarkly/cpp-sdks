@@ -18,7 +18,7 @@ tl::expected<std::optional<data_model::SDKDataSet>, JsonError> tag_invoke(
 
     auto const& obj = json_value.as_object();
 
-    data_model::SDKDataSet data_set;
+    data_model::SDKDataSet data_set{};
 
     PARSE_FIELD(data_set.flags, obj, "flags");
     PARSE_FIELD(data_set.segments, obj, "segments");

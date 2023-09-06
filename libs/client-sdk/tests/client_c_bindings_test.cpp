@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/bindings/c/config/builder.h>
-#include <launchdarkly/bindings/c/context_builder.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
 #include <launchdarkly/client_side/bindings/c/sdk.h>
+
+#include <launchdarkly/bindings/c/context_builder.h>
+
 #include <launchdarkly/client_side/data_source_status.hpp>
 
 #include <chrono>
@@ -25,7 +27,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDClientSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.0.3");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.0.6");  // {x-release-please-version}
 
     LDClientSDK_Free(sdk);
 }
@@ -47,7 +49,7 @@ TEST(ClientBindings, RegisterFlagListener) {
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDContextBuilder ctx_builder = LDContextBuilder_New();
-    LDContextBuilder_AddKind(ctx_builder, "`user", "shadow");
+    LDContextBuilder_AddKind(ctx_builder, "user", "shadow");
 
     LDContext context = LDContextBuilder_Build(ctx_builder);
 
@@ -57,8 +59,15 @@ TEST(ClientBindings, RegisterFlagListener) {
     LDClientSDK_Start(sdk, 3000, &success);
     EXPECT_TRUE(success);
 
-    struct LDFlagListener listener {};
-    LDFlagListener_Init(listener);
+    struct LDFlagListener listener {
+        reinterpret_cast<FlagChangedCallbackFn>(0x123),
+            reinterpret_cast<void*>(0x456)
+    };
+
+    LDFlagListener_Init(&listener);
+    ASSERT_EQ(listener.FlagChanged, nullptr);
+    ASSERT_EQ(listener.UserData, nullptr);
+
     listener.UserData = const_cast<char*>("Potato");
     listener.FlagChanged = FlagListenerFunction;
 
@@ -92,8 +101,14 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDClientSDK sdk = LDClientSDK_New(config, context);
 
-    struct LDDataSourceStatusListener listener {};
-    LDDataSourceStatusListener_Init(listener);
+    struct LDDataSourceStatusListener listener {
+        reinterpret_cast<DataSourceStatusCallbackFn>(0x123),
+            reinterpret_cast<void*>(0x456)
+    };
+    LDDataSourceStatusListener_Init(&listener);
+
+    ASSERT_EQ(listener.StatusChanged, nullptr);
+    ASSERT_EQ(listener.UserData, nullptr);
 
     listener.UserData = const_cast<char*>("Potato");
     listener.StatusChanged = StatusListenerFunction;

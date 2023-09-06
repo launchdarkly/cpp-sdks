@@ -126,7 +126,7 @@ class AttributeReference {
     /**
      * Default constructs an invalid attribute reference.
      */
-    explicit AttributeReference();
+    AttributeReference();
 
     bool operator==(AttributeReference const& other) const {
         return components_ == other.components_;

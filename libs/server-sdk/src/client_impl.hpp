@@ -13,9 +13,12 @@
 #include "data_sources/data_source_status_manager.hpp"
 #include "data_sources/data_source_update_sink.hpp"
 
+#include "data_store/data_store_updater.hpp"
 #include "data_store/memory_store.hpp"
 
 #include "evaluation/evaluator.hpp"
+
+#include "events/event_scope.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -44,8 +47,10 @@ class ClientImpl : public IClient {
     bool Initialized() const override;
 
     using FlagKey = std::string;
-    [[nodiscard]] std::unordered_map<FlagKey, Value> AllFlagsState()
-        const override;
+    [[nodiscard]] class AllFlagsState AllFlagsState(
+        Context const& context,
+        AllFlagsState::Options options =
+            AllFlagsState::Options::Default) override;
 
     void Track(Context const& ctx,
                std::string event_name,
@@ -102,16 +107,52 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
+
     ~ClientImpl();
 
     std::future<bool> StartAsync() override;
 
    private:
+    [[nodiscard]] EvaluationDetail<Value> VariationInternal(
+        Context const& ctx,
+        FlagKey const& key,
+        Value const& default_value,
+        EventScope const& scope);
+
     template <typename T>
-    [[nodiscard]] EvaluationDetail<T> VariationInternal(Context const& ctx,
-                                                        FlagKey const& key,
-                                                        Value default_value,
-                                                        bool check_type);
+    [[nodiscard]] EvaluationDetail<T> VariationDetail(
+        Context const& ctx,
+        enum Value::Type value_type,
+        IClient::FlagKey const& key,
+        Value const& default_value) {
+        auto result =
+            VariationInternal(ctx, key, default_value, events_with_reasons_);
+        if (result.Value().Type() == value_type) {
+            return EvaluationDetail<T>{result.Value(), result.VariationIndex(),
+                                       result.Reason()};
+        }
+        return EvaluationDetail<T>{EvaluationReason::ErrorKind::kWrongType,
+                                   default_value};
+    }
+
+    [[nodiscard]] Value Variation(Context const& ctx,
+                                  enum Value::Type value_type,
+                                  std::string const& key,
+                                  Value const& default_value);
+
+    [[nodiscard]] EvaluationDetail<Value> PostEvaluation(
+        std::string const& key,
+        Context const& context,
+        Value const& default_value,
+        std::variant<enum EvaluationReason::ErrorKind, EvaluationDetail<Value>>
+            result,
+        EventScope const& event_scope,
+        std::optional<data_model::Flag> const& flag);
+
+    [[nodiscard]] std::optional<enum EvaluationReason::ErrorKind>
+    PreEvaluationChecks(Context const& context);
+
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,
@@ -120,6 +161,8 @@ class ClientImpl : public IClient {
     std::future<bool> StartAsyncInternal(
         std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
             predicate);
+
+    void LogVariationCall(std::string const& key, bool flag_present) const;
 
     Config config_;
     Logger logger_;
@@ -132,6 +175,9 @@ class ClientImpl : public IClient {
 
     data_store::MemoryStore memory_store_;
 
+    data_sources::DataSourceStatusManager status_manager_;
+    data_store::DataStoreUpdater data_store_updater_;
+
     std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
@@ -139,9 +185,10 @@ class ClientImpl : public IClient {
     mutable std::mutex init_mutex_;
     std::condition_variable init_waiter_;
 
-    data_sources::DataSourceStatusManager status_manager_;
-
     evaluation::Evaluator evaluator_;
+
+    EventScope const events_default_;
+    EventScope const events_with_reasons_;
 
     std::thread run_thread_;
 };

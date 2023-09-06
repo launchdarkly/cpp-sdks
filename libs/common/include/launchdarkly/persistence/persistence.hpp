@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 /**
  * Interface for a data store that holds feature flag data and other SDK
  * properties in a serialized form.

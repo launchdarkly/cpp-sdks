@@ -62,7 +62,7 @@ tl::expected<std::optional<DataSourceEventHandler::Put>, JsonError> tag_invoke(
     auto const& obj = json_value.as_object();
     PARSE_FIELD(path, obj, "path");
     // We don't know what to do with a path other than "/".
-    if (path != "/") {
+    if (!(path == "/" || path.empty())) {
         return std::nullopt;
     }
     PARSE_FIELD(put.data, obj, "data");
@@ -148,7 +148,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             boost::json::value_to<tl::expected<std::optional<Put>, JsonError>>(
                 parsed);
 
-        if (!res.has_value()) {
+        if (!res) {
             LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
