@@ -55,3 +55,5 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
     with:
       base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
+      upload-assets: true 
+      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
