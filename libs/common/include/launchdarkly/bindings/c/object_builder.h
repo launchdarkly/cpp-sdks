@@ -36,7 +36,7 @@ LD_EXPORT(void) LDObjectBuilder_Free(LDObjectBuilder builder);
  * be accessed, and the caller doesn't need to call LDValue_Free. The key will
  * be copied.
  *
- * @param array_builder The object builder to add the value to.
+ * @param builder The object builder to add the value to.
  * @param key The key for the value being added. Must not be NULL.
  * @param val The value to add. Must not be NULL.
  */

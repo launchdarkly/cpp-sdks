@@ -65,20 +65,21 @@ LDContextBuilder_AddKind(LDContextBuilder builder,
                          char const* key);
 
 /**
- * Add or update an attribute in the specified kind.
+ * Add or update a top-level attribute in the specified kind.
  *
  * Adding a LDValue to the builder will consume that value.
  * You should not access the value after adding it to the builder, and you
  * do not need to call LDValue_Free on the value.
  *
+ * @param builder. The builder. Must not be NULL.
  * @param kind The kind to add the attribute to. Must not be NULL.
- * @param attr_key The key of the attribute to add. Must not be NULL.
+ * @param attr_name The name of the attribute to add. Must not be NULL.
  * @param val The value of the attribute to add. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_Set(LDContextBuilder builder,
                                 char const* kind,
-                                char const* attr_key,
+                                char const* attr_name,
                                 LDValue val);
 
 /**
@@ -96,6 +97,7 @@ LDContextBuilder_Attributes_Set(LDContextBuilder builder,
  * convenience which also adds the attribute to the private attributes list,
  * as if using LDContextBuilder_Attributes_AddPrivateAttribute.
  *
+ * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the private attribute for. Must not be NULL.
  * @param attr_key The key of the private attribute. Must not be NULL.
  * @param val The value of the private attribute. Must not be NULL.
@@ -114,6 +116,7 @@ LDContextBuilder_Attributes_SetPrivate(LDContextBuilder builder,
  * This method will make a copy of the name string, and the caller remains
  * responsible for the original name string.
  *
+ * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the name for. Must not be NULL.
  * @param name The name to set. Must not be NULL.
  */
@@ -128,6 +131,7 @@ LDContextBuilder_Attributes_SetName(LDContextBuilder builder,
  * If true, the context will _not_ appear on the Contexts page in the
  * LaunchDarkly dashboard.
  *
+ * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the anonymous attribute for. Must not be NULL.
  * @param anonymous The value to set the anonymous attribute to.
  */
@@ -166,27 +170,14 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * The attributes "kind" and "key", and the "_meta" attributes cannot be
  * made private.
  *
- * In this example, firstName is marked as private, but lastName is not:
- *
- * ```
- * [TODO]
- * ```
- *
- * This is a metadata property, rather than an attribute that can be
- * addressed in evaluations: that is, a rule clause that references the
- * attribute name "privateAttributes", will not use this value, but would
- * use a "privateAttributes" attribute set on the context.
- *
- * This method will make a copy of the attr_ref string, and the caller remains
- * responsible for the original name string.
- *
+ * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the attribute as private for. Must not be NULL.
  * @param attr_ref An attribute reference. Must not be NULL.
  */
 LD_EXPORT(bool)
 LDContextBuilder_Attributes_AddPrivateAttribute(LDContextBuilder builder,
                                                 char const* kind,
-                                                char const* attr_key);
+                                                char const* attr_ref);
 #ifdef __cplusplus
 }
 #endif
