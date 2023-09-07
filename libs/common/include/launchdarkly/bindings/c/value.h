@@ -41,7 +41,11 @@ enum LDValueType {
     /**
      * The value is an object.
      */
-    LDValueType_Object
+    LDValueType_Object,
+    /**
+     * The value's type cannot be determined.
+     */
+    LDValueType_Unknown
 };
 
 /**
@@ -136,7 +140,7 @@ LD_EXPORT(void) LDValue_Free(LDValue val);
 
 /**
  * Returns the type of an LDValue.
- * @param value LDValue to inspect. Must not be NULL.
+ * @param val LDValue to inspect. Must not be NULL.
  * @return Type of the LDValue, or LDValueType_Unrecognized if the type is
  * unrecognized.
  */
