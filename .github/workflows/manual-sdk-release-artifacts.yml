@@ -37,6 +37,10 @@ jobs:
         # Each of the platforms for which release-artifacts need generated.
         os: [ ubuntu-latest, windows-2022, macos-12 ]
     runs-on: ${{ matrix.os }}
+    outputs:
+      hashes-linux: ${{ steps.release-sdk.outputs.hashes-linux }}
+      hashes-windows: ${{ steps.release-sdk.outputs.hashes-windows }}
+      hashes-macos: ${{ steps.release-sdk.outputs.hashes-macos }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -50,3 +54,16 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: ${{ needs.split-input.outputs.sdk_path}}
           sdk_cmake_target: ${{ needs.split-input.outputs.sdk_cmake_target}}
+  release-sdk-provenance:
+    needs: ['release-sdk']
+    strategy:
+      matrix:
+        # Generates a combined attestation for each platform
+        os: [ linux, windows, macos ]
+    permissions: 
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
+    with:
+      base64-subjects: "${{ needs.release-sdk.outputs[format('hashes-{0}', matrix.os)] }}"
