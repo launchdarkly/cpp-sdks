@@ -1,0 +1,78 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1EventProcessor}{}\doxysection{launchdarkly\+::client\+\_\+side\+::Event\+Processor Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1EventProcessor}\index{launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::Event\+Processor\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=206pt]{classlaunchdarkly_1_1client__side_1_1EventProcessor__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::Event\+Processor\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=206pt]{classlaunchdarkly_1_1client__side_1_1EventProcessor__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1EventProcessor_ae4d606181a08eeeb8a639a52ffb5c4a4}\label{classlaunchdarkly_1_1client__side_1_1EventProcessor_ae4d606181a08eeeb8a639a52ffb5c4a4}} 
+{\bfseries Event\+Processor} (boost\+::asio\+::any\+\_\+io\+\_\+executor const \&io, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config\+::shared\+::built\+::\+Service\+Endpoints}} const \&endpoints, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{config\+::shared\+::built\+::\+Events}} const \&events\+\_\+config, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::shared\+::built\+::\+Http\+Properties}} const \&http\+\_\+properties, Logger \&logger)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1EventProcessor_abec0989e4111b8970212788cd1eeb033}{Send\+Async}} (events\+::\+Input\+Event event) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1EventProcessor_a17df7e8bdc0f1d82d878c53962c19e5b}{Flush\+Async}} () override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1EventProcessor_ac6b8fac606da683872609a65f90fab2c}{Shutdown\+Async}} () override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1EventProcessor_a17df7e8bdc0f1d82d878c53962c19e5b}\label{classlaunchdarkly_1_1client__side_1_1EventProcessor_a17df7e8bdc0f1d82d878c53962c19e5b}} 
+\index{launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}!FlushAsync@{FlushAsync}}
+\index{FlushAsync@{FlushAsync}!launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}}
+\doxysubsubsection{\texorpdfstring{FlushAsync()}{FlushAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Event\+Processor\+::\+Flush\+Async (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Asynchronously flush\textquotesingle{}s the processor\textquotesingle{}s events, returning as soon as possible. Flushing may be a no-\/op if a flush is ongoing. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IEventProcessor_aa6ab3c0dac798eebfa9a8949f5f65f15}{launchdarkly\+::client\+\_\+side\+::\+IEvent\+Processor}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1EventProcessor_abec0989e4111b8970212788cd1eeb033}\label{classlaunchdarkly_1_1client__side_1_1EventProcessor_abec0989e4111b8970212788cd1eeb033}} 
+\index{launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}!SendAsync@{SendAsync}}
+\index{SendAsync@{SendAsync}!launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}}
+\doxysubsubsection{\texorpdfstring{SendAsync()}{SendAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Event\+Processor\+::\+Send\+Async (\begin{DoxyParamCaption}\item[{events\+::\+Input\+Event}]{event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Asynchronously delivers an event to the processor, returning as soon as possible. The event may be dropped if the processor lacks capacity. 
+\begin{DoxyParams}{Parameters}
+{\em event} & Input\+Event to deliver. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IEventProcessor_ab3d24ec60a52f23e75fccde2ebd52573}{launchdarkly\+::client\+\_\+side\+::\+IEvent\+Processor}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1EventProcessor_ac6b8fac606da683872609a65f90fab2c}\label{classlaunchdarkly_1_1client__side_1_1EventProcessor_ac6b8fac606da683872609a65f90fab2c}} 
+\index{launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}!ShutdownAsync@{ShutdownAsync}}
+\index{ShutdownAsync@{ShutdownAsync}!launchdarkly::client\_side::EventProcessor@{launchdarkly::client\_side::EventProcessor}}
+\doxysubsubsection{\texorpdfstring{ShutdownAsync()}{ShutdownAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Event\+Processor\+::\+Shutdown\+Async (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Asynchronously shutdown the processor. The processor should attempt to flush all events before shutting down. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IEventProcessor_a30b1e1a012486e8ca80a38e4396a2ea0}{launchdarkly\+::client\+\_\+side\+::\+IEvent\+Processor}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/event\+\_\+processor/event\+\_\+processor.\+hpp\item 
+src/event\+\_\+processor/event\+\_\+processor.\+cpp\end{DoxyCompactItemize}
