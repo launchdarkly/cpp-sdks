@@ -27,6 +27,8 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
             return "server responded with an invalid redirection";
         case sse::Error::UnrecoverableClientError:
             return "unrecoverable client-side error";
+        default:
+            return "unrecognized network error";
     }
 }
 

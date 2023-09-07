@@ -44,6 +44,10 @@ static bool NeedsRedirect(HttpResult const& res) {
            res.Status() == 308 && res.Headers().count("location") != 0;
 }
 
+/**
+ * Converts the given HttpMethod to a boost beast HTTP verb.
+ * If the verb is unrecognized, returns http::verb::get.
+ */
 static http::verb ConvertMethod(HttpMethod method) {
     switch (method) {
         case HttpMethod::kPost:
@@ -54,8 +58,10 @@ static http::verb ConvertMethod(HttpMethod method) {
             return http::verb::report;
         case HttpMethod::kPut:
             return http::verb::put;
+        default:
+            assert(!"Method not found. Ensure all method cases covered.");
+            return http::verb::get;
     }
-    assert(!"Method not found. Ensure all method cases covered.");
 }
 
 static http::request<http::string_body> MakeBeastRequest(
