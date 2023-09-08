@@ -185,7 +185,7 @@ runs:
       shell: bash
       id: hash-macos
       run: |
-        echo "hashes-macos=$(sha256sum mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
+        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Mac Build Artifacts
       if: runner.os == 'macOS'
