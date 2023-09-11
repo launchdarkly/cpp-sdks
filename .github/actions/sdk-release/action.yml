@@ -18,6 +18,16 @@ inputs:
     required: true
   sdk_cmake_target:
     description: 'CMake target of the sdk, e.g. launchdarkly-cpp-client.'
+outputs:
+  hashes-linux:
+    description: "base64-encoded sha256 hash of linux build artifacts"
+    value: ${{ steps.hash-linux.outputs.hashes-linux }}
+  hashes-windows:
+    description: "base64-encoded sha256 hash of windows build artifacts"
+    value: ${{ steps.hash-windows.outputs.hashes-windows }}
+  hashes-macos:
+    description: "base64-encoded sha256 hash of macos build artifacts"
+    value: ${{ steps.hash-macos.outputs.hashes-macos }}
 
 runs:
   using: composite
@@ -56,6 +66,12 @@ runs:
         type: 'zip'
         filename: 'linux-gcc-x64-dynamic.zip'
 
+    - name: Hash Linux Build Artifacts for provenance
+      if: runner.os == 'Linux'
+      shell: bash
+      id: hash-linux
+      run: |
+        echo "hashes-linux=$(sha256sum linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Linux Build Artifacts
       if: runner.os == 'Linux'
@@ -118,6 +134,13 @@ runs:
         type: 'zip'
         filename: 'windows-msvc-x64-dynamic-debug.zip'
 
+    - name: Hash Windows Build Artifacts for provenance
+      if: runner.os == 'Windows'
+      shell: bash
+      id: hash-windows
+      run: |
+        echo "hashes-windows=$(sha256sum windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
+
     - name: Upload Windows Build Artifacts
       if: runner.os == 'Windows'
       shell: bash
@@ -156,6 +179,13 @@ runs:
         path: 'build-dynamic/release'
         type: 'zip'
         filename: 'mac-clang-x64-dynamic.zip'
+
+    - name: Hash Mac Build Artifacts for provenance
+      if: runner.os == 'macOS'
+      shell: bash
+      id: hash-macos
+      run: |
+        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Mac Build Artifacts
       if: runner.os == 'macOS'

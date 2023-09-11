@@ -136,7 +136,7 @@ LD_EXPORT(void) LDValue_Free(LDValue val);
 
 /**
  * Returns the type of an LDValue.
- * @param value LDValue to inspect. Must not be NULL.
+ * @param val LDValue to inspect. Must not be NULL.
  * @return Type of the LDValue, or LDValueType_Unrecognized if the type is
  * unrecognized.
  */
