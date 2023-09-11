@@ -25,9 +25,9 @@ outputs:
   hashes-windows:
     description: "base64-encoded sha256 hash of windows build artifacts"
     value: ${{ steps.hash-windows.outputs.hashes-windows }}
-  hashes-macos:
+  hashes-mac:
     description: "base64-encoded sha256 hash of macos build artifacts"
-    value: ${{ steps.hash-macos.outputs.hashes-macos }}
+    value: ${{ steps.hash-mac.outputs.hashes-mac }}
 
 runs:
   using: composite
@@ -183,9 +183,9 @@ runs:
     - name: Hash Mac Build Artifacts for provenance
       if: runner.os == 'macOS'
       shell: bash
-      id: hash-macos
+      id: hash-mac
       run: |
-        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
+        echo "hashes-mac=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Mac Build Artifacts
       if: runner.os == 'macOS'
