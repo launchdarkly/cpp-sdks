@@ -2,6 +2,8 @@
 
 #include "http_requester.hpp"
 
+#include <launchdarkly/detail/unreachable.hpp>
+
 #include <boost/asio.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
@@ -58,10 +60,8 @@ static http::verb ConvertMethod(HttpMethod method) {
             return http::verb::report;
         case HttpMethod::kPut:
             return http::verb::put;
-        default:
-            assert(!"Method not found. Ensure all method cases covered.");
-            return http::verb::get;
     }
+    launchdarkly::detail::unreachable();
 }
 
 static http::request<http::string_body> MakeBeastRequest(

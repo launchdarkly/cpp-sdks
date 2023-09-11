@@ -11,6 +11,7 @@
 #define FROM_REASON(ptr) (reinterpret_cast<LDEvalReason>(ptr));
 
 using namespace launchdarkly;
+using namespace launchdarkly::detail;
 
 LD_EXPORT(void)
 LDEvalDetail_Free(LDEvalDetail detail) {
