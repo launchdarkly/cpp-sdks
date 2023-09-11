@@ -59,7 +59,6 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
         case Value::Type::kArray:
             return LDValueType_Array;
     }
-    LD_ASSERT(!"Unsupported value type.");
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {
