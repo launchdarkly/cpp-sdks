@@ -41,11 +41,7 @@ enum LDValueType {
     /**
      * The value is an object.
      */
-    LDValueType_Object,
-    /**
-     * The value type cannot be determined.
-     */
-    LDValueType_Unknown
+    LDValueType_Object
 };
 
 /**

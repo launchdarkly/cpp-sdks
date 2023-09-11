@@ -35,21 +35,22 @@ enum Value::Type Value::Type() const {
     return std::visit(
         [](auto const& arg) {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, null_type>)
+            if constexpr (std::is_same_v<T, null_type>) {
                 return Type::kNull;
-            else if constexpr (std::is_same_v<T, bool>)
+            } else if constexpr (std::is_same_v<T, bool>) {
                 return Type::kBool;
-            else if constexpr (std::is_same_v<T, double>)
+            } else if constexpr (std::is_same_v<T, double>) {
                 return Type::kNumber;
-            else if constexpr (std::is_same_v<T, std::string>)
+            } else if constexpr (std::is_same_v<T, std::string>) {
                 return Type::kString;
-            else if constexpr (std::is_same_v<T, Value::Array>)
+            } else if constexpr (std::is_same_v<T, Value::Array>) {
                 return Type::kArray;
-            else if constexpr (std::is_same_v<T, Value::Object>)
+            } else if constexpr (std::is_same_v<T, Value::Object>) {
                 return Type::kObject;
-            else
+            } else {
                 static_assert(always_false_v<T>,
                               "all value types must be visited");
+            }
         },
         storage_);
 }
