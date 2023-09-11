@@ -42,6 +42,8 @@ LD_EXPORT(void) LDValue_Free(LDValue val) {
     delete AS_VALUE(val);
 }
 
+void foo() {}
+
 LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
     LD_ASSERT_NOT_NULL(val);
 
