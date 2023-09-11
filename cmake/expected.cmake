@@ -10,6 +10,8 @@ endif ()
 FetchContent_Declare(tl-expected
         GIT_REPOSITORY https://github.com/TartanLlama/expected.git
         GIT_TAG 292eff8bd8ee230a7df1d6a1c00c4ea0eb2f0362
-        )
+)
 
 FetchContent_MakeAvailable(tl-expected)
+
+set_property(TARGET expected PROPERTY COMPILE_WARNINGS_AS_ERROR FALSE)
