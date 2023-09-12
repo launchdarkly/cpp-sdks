@@ -90,8 +90,34 @@ class FoxyClient : public Client,
           backoff_timer_(session_.get_executor()),
           event_receiver_(std::move(receiver)),
           logger_(std::move(logger)),
-          errors_(std::move(errors)) {
+          errors_(std::move(errors)),
+          last_read_(std::nullopt) {
         create_parser();
+    }
+
+    /** Logs a message indicating that an async_read_some operation
+     * on the response's body has completed, and how long that operation took
+     * (using a monotonic clock.)
+     *
+     * This is useful for debugging timeout-related issues, like receiving a
+     * heartbeat message.
+     *
+     * The timestamp of the last read is initialized after receiving successful
+     * headers, but before initiating the first body read. Future reads then
+     * update the timestamp.
+     */
+    void log_and_update_last_read(std::size_t amount) {
+        if (last_read_) {
+            auto sec_since_last_read =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::steady_clock::now() - *last_read_)
+                    .count();
+            logger_("read (" + std::to_string(amount) + ") bytes in (" +
+                    std::to_string(sec_since_last_read) + ") sec");
+        } else {
+            logger_("read (" + std::to_string(amount) + ") bytes");
+        }
+        last_read_ = std::chrono::steady_clock::now();
     }
 
     /** The body parser is recreated each time a connection is made because
@@ -216,7 +242,9 @@ class FoxyClient : public Client,
             }
 
             backoff_.succeed();
-            return session_.async_read(
+
+            last_read_ = std::chrono::steady_clock::now();
+            return session_.async_read_some(
                 *body_parser_,
                 beast::bind_front_handler(&FoxyClient::on_read_body,
                                           shared_from_this()));
@@ -263,7 +291,15 @@ class FoxyClient : public Client,
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec == boost::asio::error::operation_aborted) {
+            logger_("read HTTP response body aborted");
             return;
+        }
+        if (!ec) {
+            log_and_update_last_read(amount);
+            return session_.async_read_some(
+                *body_parser_,
+                beast::bind_front_handler(&FoxyClient::on_read_body,
+                                          shared_from_this()));
         }
         do_backoff(ec.what());
     }
@@ -349,6 +385,8 @@ class FoxyClient : public Client,
     std::optional<std::string> last_event_id_;
     Backoff backoff_;
     boost::asio::steady_timer backoff_timer_;
+
+    std::optional<std::chrono::steady_clock::time_point> last_read_;
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)

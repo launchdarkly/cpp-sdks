@@ -138,7 +138,7 @@ void StreamingDataSource::Start() {
 
     client_builder.logger([weak_self](auto msg) {
         if (auto self = weak_self.lock()) {
-            LD_LOG(self->logger_, LogLevel::kDebug) << msg;
+            LD_LOG(self->logger_, LogLevel::kDebug) << "sse-client: " << msg;
         }
     });
 
