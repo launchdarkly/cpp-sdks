@@ -175,10 +175,16 @@ class FoxyClient : public Client,
         if (ec == boost::asio::error::operation_aborted) {
             return;
         }
-        run();
+        do_run();
     }
 
-    void run() override {
+    void async_connect() override {
+        boost::asio::post(
+            session_->get_executor(),
+            beast::bind_front_handler(&FoxyClient::do_run, shared_from_this()));
+    }
+
+    void do_run() {
         session_->async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,

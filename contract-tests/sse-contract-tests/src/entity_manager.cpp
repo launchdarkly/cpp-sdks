@@ -53,7 +53,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
         return std::nullopt;
     }
 
-    client->run();
+    client->async_connect();
 
     entities_.emplace(id, std::make_pair(client, poster));
     return id;

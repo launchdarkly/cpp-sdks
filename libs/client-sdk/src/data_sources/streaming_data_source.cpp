@@ -163,7 +163,7 @@ void StreamingDataSource::Start() {
             kCouldNotParseEndpoint);
         return;
     }
-    client_->run();
+    client_->async_connect();
 }
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
