@@ -67,7 +67,7 @@ EventOutbox::RequestType EventOutbox::build_request(
     RequestType req;
 
     req.set(http::field::host, callback_host_);
-    req.method(http::verb::get);
+    req.method(http::verb::post);
     req.target(callback_url_ + "/" + std::to_string(counter));
 
     nlohmann::json json;

@@ -303,6 +303,12 @@ class FoxyClient : public Client,
             logger_("read HTTP response body aborted (shutting down)");
             return;
         }
+        if (body_parser_->is_done()) {
+            // The server can indicate that the chunk encoded response is done
+            // by sending a final chunk + CRLF. The body parser will have
+            // detected this. The correct response is to attempt to reconnect.
+            return do_backoff("receiving final chunk");
+        }
         if (!ec) {
             log_and_update_last_read(amount);
             return session_->async_read_some(
