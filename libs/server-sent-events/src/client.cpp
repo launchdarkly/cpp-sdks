@@ -89,7 +89,8 @@ class FoxyClient : public Client,
               initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
               kDefaultMaxBackoffDelay),
           backoff_timer_(std::move(executor)),
-          last_read_(std::nullopt) {
+          last_read_(std::nullopt),
+          shutting_down_(false) {
         create_session();
         create_parser();
     }
@@ -299,6 +300,9 @@ class FoxyClient : public Client,
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec == boost::asio::error::operation_aborted) {
+            if (shutting_down_) {
+                return;
+            }
             return do_backoff(
                 "aborting read of response body (timeout/shutdown)");
         }
@@ -326,6 +330,7 @@ class FoxyClient : public Client,
     }
 
     void do_shutdown(std::function<void()> completion) {
+        shutting_down_ = true;
         backoff_timer_.cancel();
         session_->async_shutdown(beast::bind_front_handler(
             &FoxyClient::on_shutdown, std::move(completion)));
@@ -402,6 +407,8 @@ class FoxyClient : public Client,
     boost::asio::steady_timer backoff_timer_;
 
     std::optional<std::chrono::steady_clock::time_point> last_read_;
+
+    bool shutting_down_;
 };
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
