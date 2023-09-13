@@ -40,7 +40,7 @@ jobs:
     outputs:
       hashes-linux: ${{ steps.release-sdk.outputs.hashes-linux }}
       hashes-windows: ${{ steps.release-sdk.outputs.hashes-windows }}
-      hashes-mac: ${{ steps.release-sdk.outputs.hashes-mac }}
+      hashes-macos: ${{ steps.release-sdk.outputs.hashes-macos }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         # Generates a combined attestation for each platform
-        os: [ linux, windows, mac ]
+        os: [ linux, windows, macos ]
     permissions: 
       actions: read
       id-token: write
