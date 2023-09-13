@@ -57,4 +57,4 @@ jobs:
       base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
       upload-assets: true 
       upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
-      provenance-name: ${{ format('{0}-multiple.intoto.jsonl', matrix.os) }}
+      provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
