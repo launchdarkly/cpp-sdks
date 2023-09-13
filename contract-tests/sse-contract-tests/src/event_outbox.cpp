@@ -93,6 +93,8 @@ EventOutbox::RequestType EventOutbox::build_request(
                         break;
                     case Error::UnrecoverableClientError:
                         msg.comment = "unrecoverable client error";
+                    case Error::ReadTimeout:
+                        msg.comment = "read timeout";
                     default:
                         msg.comment = "unspecified error";
                 }

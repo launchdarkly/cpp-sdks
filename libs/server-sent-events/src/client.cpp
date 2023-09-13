@@ -309,6 +309,7 @@ class FoxyClient : public Client,
             if (shutting_down_) {
                 return;
             }
+            errors_(Error::ReadTimeout);
             return do_backoff(
                 "aborting read of response body (timeout/shutdown)");
         }

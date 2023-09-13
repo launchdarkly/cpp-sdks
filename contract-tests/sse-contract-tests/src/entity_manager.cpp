@@ -35,6 +35,11 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
             std::chrono::milliseconds(*params.readTimeoutMs));
     }
 
+    if (params.initialDelayMs) {
+        client_builder.initial_reconnect_delay(
+            std::chrono::milliseconds(*params.initialDelayMs));
+    }
+
     client_builder.logger([this](std::string msg) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });
