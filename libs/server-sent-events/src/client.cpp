@@ -95,43 +95,17 @@ class FoxyClient : public Client,
         create_parser();
     }
 
-    /** Logs a message indicating that an async_read_some operation
-     * on the response's body has completed, and how long that operation took
-     * (using a monotonic clock.)
-     *
-     * This is useful for debugging timeout-related issues, like receiving a
-     * heartbeat message.
-     *
-     * The timestamp of the last read is initialized after receiving successful
-     * headers, but before initiating the first body read. Future reads then
-     * update the timestamp.
-     */
-    void log_and_update_last_read(std::size_t amount) {
-        if (last_read_) {
-            auto sec_since_last_read =
-                std::chrono::duration_cast<std::chrono::seconds>(
-                    std::chrono::steady_clock::now() - *last_read_)
-                    .count();
-            logger_("read (" + std::to_string(amount) + ") bytes in (" +
-                    std::to_string(sec_since_last_read) + ") sec");
-        } else {
-            logger_("read (" + std::to_string(amount) + ") bytes");
-        }
-        last_read_ = std::chrono::steady_clock::now();
-    }
-
-    /** The body parser is recreated each time a connection is made because
-     * its internal state cannot be explicitly reset.
-     *
-     * Since SSE body will never end unless
-     * an error occurs, the body size limit must be removed.
-     */
+    // The body parser is recreated each time a connection is made because
+    // its internal state cannot be explicitly reset.
     void create_parser() {
         body_parser_.emplace();
+        // Remove body read limit because an SSE stream can be infinite.
         body_parser_->body_limit(boost::none);
         body_parser_->get().body().on_event(event_receiver_);
     }
 
+    // The session is recreated each time a connection is made because its
+    // internal state cannot be explicitly reset.
     void create_session() {
         session_.emplace(
             backoff_timer_.get_executor(),
@@ -146,7 +120,7 @@ class FoxyClient : public Client,
      * The body parser's last SSE event ID must be cached so it can be added
      * as a header on the next request (since the parser is destroyed.)
      */
-    void do_backoff(std::string const& reason) {
+    void async_backoff(std::string const& reason) {
         backoff_.fail();
 
         if (auto id = body_parser_->get().body().last_event_id()) {
@@ -196,7 +170,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff(ec.what());
+            return async_backoff(ec.what());
         }
 
         if (last_event_id_) {
@@ -216,7 +190,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff(ec.what());
+            return async_backoff(ec.what());
         }
 
         session_->opts.timeout = read_timeout_.value_or(kNoTimeout);
@@ -231,7 +205,7 @@ class FoxyClient : public Client,
             return;
         }
         if (ec) {
-            return do_backoff(ec.what());
+            return async_backoff(ec.what());
         }
 
         if (!body_parser_->is_header_done()) {
@@ -252,7 +226,7 @@ class FoxyClient : public Client,
                 return;
             }
             if (!correct_content_type(response)) {
-                return do_backoff("invalid Content-Type");
+                return async_backoff("invalid Content-Type");
             }
 
             logger_("connected");
@@ -287,14 +261,14 @@ class FoxyClient : public Client,
 
         if (status_class == beast::http::status_class::client_error) {
             if (recoverable_client_error(response.result())) {
-                return do_backoff(backoff_reason(response.result()));
+                return async_backoff(backoff_reason(response.result()));
             }
 
             errors_(Error::UnrecoverableClientError);
             return;
         }
 
-        do_backoff(backoff_reason(response.result()));
+        async_backoff(backoff_reason(response.result()));
     }
 
     static std::string backoff_reason(beast::http::status status) {
@@ -305,31 +279,59 @@ class FoxyClient : public Client,
 
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
-        if (ec == boost::asio::error::operation_aborted) {
-            if (shutting_down_) {
-                return;
+        if (ec) {
+            if (ec == boost::asio::error::operation_aborted) {
+                // operation_aborted can occur if the read timeout is reached or
+                // if we're shutting down, so shutting_down_ is needed to
+                // disambiguate.
+                if (shutting_down_) {
+                    // End the chain of async operations.
+                    return;
+                }
+                errors_(Error::ReadTimeout);
+                return async_backoff(
+                    "aborting read of response body (timeout)");
             }
-            errors_(Error::ReadTimeout);
-            return do_backoff(
-                "aborting read of response body (timeout/shutdown)");
+            return async_backoff(ec.what());
         }
+
+        // The server can indicate that the chunk encoded response is done
+        // by sending a final chunk + CRLF. The body parser will have
+        // detected this.
         if (body_parser_->is_done()) {
-            // The server can indicate that the chunk encoded response is done
-            // by sending a final chunk + CRLF. The body parser will have
-            // detected this. The correct response is to attempt to reconnect.
-            return do_backoff("receiving final chunk");
+            return async_backoff("receiving final chunk");
         }
-        if (!ec) {
-            log_and_update_last_read(amount);
-            return session_->async_read_some(
-                *body_parser_,
-                beast::bind_front_handler(&FoxyClient::on_read_body,
-                                          shared_from_this()));
+
+        log_and_update_last_read(amount);
+        return session_->async_read_some(
+            *body_parser_, beast::bind_front_handler(&FoxyClient::on_read_body,
+                                                     shared_from_this()));
+    }
+
+    /** Logs a message indicating that an async_read_some operation
+     * on the response's body has completed, and how long that operation took
+     * (using a monotonic clock.)
+     *
+     * This is useful for debugging timeout-related issues, like receiving a
+     * heartbeat message.
+     */
+    void log_and_update_last_read(std::size_t amount) {
+        if (last_read_) {
+            auto sec_since_last_read =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::steady_clock::now() - *last_read_)
+                    .count();
+            logger_("read (" + std::to_string(amount) + ") bytes in (" +
+                    std::to_string(sec_since_last_read) + ") sec");
+        } else {
+            logger_("read (" + std::to_string(amount) + ") bytes");
         }
-        do_backoff(ec.what());
+        last_read_ = std::chrono::steady_clock::now();
     }
 
     void async_shutdown(std::function<void()> completion) override {
+        // Get on the session's executor, otherwise the code in the completion
+        // handler could race.
         boost::asio::post(session_->get_executor(),
                           beast::bind_front_handler(&FoxyClient::do_shutdown,
                                                     shared_from_this(),
@@ -345,18 +347,25 @@ class FoxyClient : public Client,
 
     static void on_shutdown(std::function<void()> completion,
                             boost::system::error_code ec) {
+        // Because do_shutdown doesn't use shared_from_this() when initiating
+        // the async_shutdown op, the client may already be destroyed - hence
+        // this static method.
         boost::ignore_unused(ec);
         if (completion) {
             completion();
         }
     }
 
+    // Some client errors are considered recoverable, meaning they could be
+    // resolved by reconnecting. Returns true if the status is one of those.
     static bool recoverable_client_error(beast::http::status status) {
         return (status == beast::http::status::bad_request ||
                 status == beast::http::status::request_timeout ||
                 status == beast::http::status::too_many_requests);
     }
 
+    // A naive comparison of content-type to 'text/event-stream' is incorrect
+    // because multiple content types may be present.
     static bool correct_content_type(FoxyClient::response const& response) {
         if (auto content_type = response.find("content-type");
             content_type != response.end()) {
@@ -366,12 +375,16 @@ class FoxyClient : public Client,
         return false;
     }
 
+    // If the server redirects, ensure the location header is present.
     static bool can_redirect(FoxyClient::response const& response) {
         return (response.result() == beast::http::status::moved_permanently ||
                 response.result() == beast::http::status::temporary_redirect) &&
                response.find("location") != response.end();
     }
 
+    // Generates a redirect URL from a base and provided location. Since the
+    // location might not be absolute, it may be necessary to resolve it against
+    // the base.
     static std::optional<boost::urls::url> redirect_url(
         std::string orig_base,
         std::string orig_location) {
@@ -393,28 +406,76 @@ class FoxyClient : public Client,
     }
 
    private:
+    // Optional, but necessary for establishing TLS connections. If it is
+    // omitted and the scheme is https://, the connection will fail. Can be
+    // reused across connections.
     std::optional<net::ssl::context> ssl_context_;
+
     std::string host_;
     std::string port_;
 
+    // If present, the max amount of time that can be spent resolving DNS
+    // and setting up the initial connection. This doesn't include writing the
+    // request nor receiving the response.
     std::optional<std::chrono::milliseconds> connect_timeout_;
+
+    // If present, the max amount of time that can be spent after reading bytes
+    // before more bytes must be read. Applies after sending the request, but
+    // before receiving the response headers. Intended to terminate connections
+    // where the sender has hung up. LaunchDarkly sends a heartbeat every 180
+    // seconds, so the read timeout must be greater than this.
     std::optional<std::chrono::milliseconds> read_timeout_;
+
+    // If present, the max amount of time that can be spent sending the request.
     std::optional<std::chrono::milliseconds> write_timeout_;
 
+    // The request sent to the server, which persists across reconnection
+    // attempts.
     http::request<http::string_body> req_;
 
+    // Callback which executed whenever an SSE event is received. This is
+    // passed into the body_parser whenever it is constructed, so it needs to be
+    // stored here for future use.
     Builder::EventReceiver event_receiver_;
+
+    // Callback executed when log messages must be generated. The provider of
+    // the callback dictates the log level, which at the moment of writing is
+    // 'debug'.
     Builder::LogCallback logger_;
+
+    // Callback executed to report errors. This is the primary mechanism by
+    // which the client communicates error conditions to the user.
     Builder::ErrorCallback errors_;
 
+    // Customized parser (see parser.hpp) which repeatedly receives chunks of
+    // data and parses them into SSE events. It cannot be reused across
+    // connections, hence the optional so it can be destroyed easily.
     std::optional<http::response_parser<body>> body_parser_;
+
+    // The primary network primitive used to read/write to the server. It is our
+    // responsibility to ensure it is called from only one thread at a time. It
+    // cannot be reused across connections, similar to the body_parser.
     std::optional<launchdarkly::foxy::client_session> session_;
+
+    // Stores the last known SSE event ID, which can be provided to the server
+    // upon reconnection.
     std::optional<std::string> last_event_id_;
+
+    // Computes the backoff delays used whenever the connection drops
+    // unnaturally.
     Backoff backoff_;
+
+    // Used in concert with the backoff member to delay reconnection attempts.
+    // The timer must be cancelled when shutdown is requested, because an
+    // outstanding backoff delay might be in progress.
     boost::asio::steady_timer backoff_timer_;
 
+    // Stores the timestamp of the last read in order to augment debug logging.
     std::optional<std::chrono::steady_clock::time_point> last_read_;
 
+    // Upon completing a read, a new async read is generally initiated. This
+    // determines whether to return and thus end the operation gracefully (true)
+    // or to perform backoff (false).
     bool shutting_down_;
 };
 
