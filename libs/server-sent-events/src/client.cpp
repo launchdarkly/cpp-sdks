@@ -79,20 +79,22 @@ class FoxyClient : public Client,
           read_timeout_(read_timeout),
           write_timeout_(write_timeout),
           req_(std::move(req)),
-          backoff_(
-              initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
-              kDefaultMaxBackoffDelay),
-          last_event_id_(std::nullopt),
-          backoff_timer_(std::move(executor)),
           event_receiver_(std::move(receiver)),
           logger_(std::move(logger)),
           errors_(std::move(errors)),
-          last_read_(std::nullopt),
-          shutting_down_(false),
           body_parser_(std::nullopt),
-          session_(std::nullopt) {
+          session_(std::move(executor),
+                   launchdarkly::foxy::session_opts{
+                       ToOptRef(ssl_context_),
+                       connect_timeout_.value_or(kNoTimeout)}),
+          last_event_id_(std::nullopt),
+          backoff_(
+              initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
+              kDefaultMaxBackoffDelay),
+          backoff_timer_(session_.get_executor()),
+          last_read_(std::nullopt),
+          shutting_down_(false) {
         create_parser();
-        create_session();
     }
 
     /** Logs a message indicating that an async_read_some operation
@@ -132,13 +134,6 @@ class FoxyClient : public Client,
         body_parser_->get().body().on_event(event_receiver_);
     }
 
-    void create_session() {
-        session_.emplace(
-            backoff_timer_.get_executor(),
-            launchdarkly::foxy::session_opts{
-                ToOptRef(ssl_context_), connect_timeout_.value_or(kNoTimeout)});
-    }
-
     /**
      * Called whenever the connection needs to be reattempted, triggering
      * a timed wait for the current backoff duration.
@@ -165,7 +160,6 @@ class FoxyClient : public Client,
         logger_(msg.str());
 
         create_parser();
-        create_session();
 
         backoff_timer_.expires_from_now(backoff_.delay());
         backoff_timer_.async_wait(beast::bind_front_handler(
@@ -180,7 +174,7 @@ class FoxyClient : public Client,
     }
 
     void run() override {
-        session_->async_connect(
+        session_.async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,
                                       shared_from_this()));
@@ -199,10 +193,10 @@ class FoxyClient : public Client,
         } else {
             req_.erase("last-event-id");
         }
-        session_->opts.timeout = write_timeout_.value_or(kNoTimeout);
-        session_->async_write(req_,
-                              beast::bind_front_handler(&FoxyClient::on_write,
-                                                        shared_from_this()));
+        session_.opts.timeout = write_timeout_.value_or(kNoTimeout);
+        session_.async_write(req_,
+                             beast::bind_front_handler(&FoxyClient::on_write,
+                                                       shared_from_this()));
     }
 
     void on_write(boost::system::error_code ec, std::size_t amount) {
@@ -214,8 +208,8 @@ class FoxyClient : public Client,
             return do_backoff(ec.what());
         }
 
-        session_->opts.timeout = read_timeout_.value_or(kNoTimeout);
-        session_->async_read_header(
+        session_.opts.timeout = read_timeout_.value_or(kNoTimeout);
+        session_.async_read_header(
             *body_parser_, beast::bind_front_handler(&FoxyClient::on_headers,
                                                      shared_from_this()));
     }
@@ -231,7 +225,7 @@ class FoxyClient : public Client,
 
         if (!body_parser_->is_header_done()) {
             /* keep reading headers */
-            return session_->async_read_header(
+            return session_.async_read_header(
                 *body_parser_,
                 beast::bind_front_handler(&FoxyClient::on_headers,
                                           shared_from_this()));
@@ -253,7 +247,7 @@ class FoxyClient : public Client,
             backoff_.succeed();
 
             last_read_ = std::chrono::steady_clock::now();
-            return session_->async_read_some(
+            return session_.async_read_some(
                 *body_parser_,
                 beast::bind_front_handler(&FoxyClient::on_read_body,
                                           shared_from_this()));
@@ -311,7 +305,7 @@ class FoxyClient : public Client,
         }
         if (!ec) {
             log_and_update_last_read(amount);
-            return session_->async_read_some(
+            return session_.async_read_some(
                 *body_parser_,
                 beast::bind_front_handler(&FoxyClient::on_read_body,
                                           shared_from_this()));
@@ -320,7 +314,7 @@ class FoxyClient : public Client,
     }
 
     void async_shutdown(std::function<void()> completion) override {
-        boost::asio::post(session_->get_executor(),
+        boost::asio::post(session_.get_executor(),
                           beast::bind_front_handler(&FoxyClient::do_shutdown,
                                                     shared_from_this(),
                                                     std::move(completion)));
@@ -329,7 +323,7 @@ class FoxyClient : public Client,
     void do_shutdown(std::function<void()> completion) {
         shutting_down_ = true;
         backoff_timer_.cancel();
-        session_->async_shutdown(beast::bind_front_handler(
+        session_.async_shutdown(beast::bind_front_handler(
             &FoxyClient::on_shutdown, std::move(completion)));
     }
 
@@ -398,7 +392,7 @@ class FoxyClient : public Client,
     Builder::ErrorCallback errors_;
 
     std::optional<http::response_parser<body>> body_parser_;
-    std::optional<launchdarkly::foxy::client_session> session_;
+    launchdarkly::foxy::client_session session_;
     std::optional<std::string> last_event_id_;
     Backoff backoff_;
     boost::asio::steady_timer backoff_timer_;
