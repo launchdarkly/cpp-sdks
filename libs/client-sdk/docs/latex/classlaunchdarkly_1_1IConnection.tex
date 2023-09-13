@@ -1,0 +1,54 @@
+\hypertarget{classlaunchdarkly_1_1IConnection}{}\doxysection{launchdarkly\+::IConnection Class Reference}
+\label{classlaunchdarkly_1_1IConnection}\index{launchdarkly::IConnection@{launchdarkly::IConnection}}
+
+
+{\ttfamily \#include $<$connection.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::IConnection\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=223pt]{classlaunchdarkly_1_1IConnection__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1IConnection_a3a94423d31246518606453f71f67d93e}{Disconnect}} ()=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1IConnection_aae7a3c687f28da207d2158f14795d104}\label{classlaunchdarkly_1_1IConnection_aae7a3c687f28da207d2158f14795d104}} 
+{\bfseries IConnection} (\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1IConnection_af4d65861ecc83b7b9b3d8ab7fdf0fe45}\label{classlaunchdarkly_1_1IConnection_af4d65861ecc83b7b9b3d8ab7fdf0fe45}} 
+{\bfseries IConnection} (\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1IConnection_acefb129416c4798825733e16d430ac66}\label{classlaunchdarkly_1_1IConnection_acefb129416c4798825733e16d430ac66}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1IConnection_ab6b22e25a5432e04f1bfabb2b4f02532}\label{classlaunchdarkly_1_1IConnection_ab6b22e25a5432e04f1bfabb2b4f02532}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents the connection of a listener. Disconnecting the connection will cause the listener to stop receiving events. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1IConnection_a3a94423d31246518606453f71f67d93e}\label{classlaunchdarkly_1_1IConnection_a3a94423d31246518606453f71f67d93e}} 
+\index{launchdarkly::IConnection@{launchdarkly::IConnection}!Disconnect@{Disconnect}}
+\index{Disconnect@{Disconnect}!launchdarkly::IConnection@{launchdarkly::IConnection}}
+\doxysubsubsection{\texorpdfstring{Disconnect()}{Disconnect()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::\+IConnection\+::\+Disconnect (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Disconnect the listener and stop receiving events. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1SignalConnection_a68f5cdd62a700fb0169408198c625192}{launchdarkly\+::client\+\_\+side\+::\+Signal\+Connection}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/connection.\+hpp\end{DoxyCompactItemize}
