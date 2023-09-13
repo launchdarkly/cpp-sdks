@@ -72,11 +72,11 @@ class EventOutbox : public std::enable_shared_from_this<EventOutbox> {
    private:
     RequestType build_request(
         std::size_t counter,
-        std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> ev);
+        std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> event);
     void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
     void on_connect(beast::error_code ec,
                     tcp::resolver::results_type::endpoint_type);
     void on_flush_timer(boost::system::error_code ec);
     void on_write(beast::error_code ec, std::size_t);
-    void do_shutdown(beast::error_code ec, std::string what);
+    void do_shutdown(beast::error_code ec);
 };

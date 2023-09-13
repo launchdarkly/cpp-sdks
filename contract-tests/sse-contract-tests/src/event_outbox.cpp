@@ -14,8 +14,6 @@ auto const kOutboxCapacity = 1023;
 EventOutbox::EventOutbox(net::any_io_executor executor,
                          std::string callback_url)
     : callback_url_{std::move(callback_url)},
-      callback_port_{},
-      callback_host_{},
       callback_counter_{0},
       executor_{executor},
       resolver_{executor},
@@ -29,7 +27,7 @@ EventOutbox::EventOutbox(net::any_io_executor executor,
     callback_port_ = uri_components->port();
 }
 
-void EventOutbox::do_shutdown(beast::error_code ec, std::string what) {
+void EventOutbox::do_shutdown(beast::error_code ec) {
     event_stream_.socket().shutdown(tcp::socket::shutdown_both, ec);
     flush_timer_.cancel();
 }
@@ -54,16 +52,14 @@ void EventOutbox::run() {
 
 void EventOutbox::stop() {
     beast::error_code ec = net::error::basic_errors::operation_aborted;
-    std::string reason = "stop";
     shutdown_ = true;
-    net::post(executor_,
-              beast::bind_front_handler(&EventOutbox::do_shutdown,
-                                        shared_from_this(), ec, reason));
+    net::post(executor_, beast::bind_front_handler(&EventOutbox::do_shutdown,
+                                                   shared_from_this(), ec));
 }
 
 EventOutbox::RequestType EventOutbox::build_request(
     std::size_t counter,
-    std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> ev) {
+    std::variant<launchdarkly::sse::Event, launchdarkly::sse::Error> event) {
     RequestType req;
 
     req.set(http::field::host, callback_host_);
@@ -101,7 +97,7 @@ EventOutbox::RequestType EventOutbox::build_request(
                 json = msg;
             }
         },
-        std::move(ev));
+        std::move(event));
 
     req.body() = json.dump();
     req.prepare_payload();
@@ -111,7 +107,7 @@ EventOutbox::RequestType EventOutbox::build_request(
 void EventOutbox::on_resolve(beast::error_code ec,
                              tcp::resolver::results_type results) {
     if (ec) {
-        return do_shutdown(ec, "resolve");
+        return do_shutdown(ec);
     }
 
     beast::get_lowest_layer(event_stream_)
@@ -123,7 +119,7 @@ void EventOutbox::on_resolve(beast::error_code ec,
 void EventOutbox::on_connect(beast::error_code ec,
                              tcp::resolver::results_type::endpoint_type) {
     if (ec) {
-        return do_shutdown(ec, "connect");
+        return do_shutdown(ec);
     }
 
     boost::system::error_code dummy;
@@ -133,7 +129,7 @@ void EventOutbox::on_connect(beast::error_code ec,
 
 void EventOutbox::on_flush_timer(boost::system::error_code ec) {
     if (ec && shutdown_) {
-        return do_shutdown(ec, "flush");
+        return do_shutdown(ec);
     }
 
     if (!outbox_.empty()) {
@@ -156,7 +152,7 @@ void EventOutbox::on_flush_timer(boost::system::error_code ec) {
 
 void EventOutbox::on_write(beast::error_code ec, std::size_t) {
     if (ec) {
-        return do_shutdown(ec, "write");
+        return do_shutdown(ec);
     }
     outbox_.pop();
     on_flush_timer(boost::system::error_code{});

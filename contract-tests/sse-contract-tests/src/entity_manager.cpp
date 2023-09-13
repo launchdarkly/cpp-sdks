@@ -27,7 +27,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
     }
 
     if (params.body) {
-        client_builder.body(std::move(*params.body));
+        client_builder.body(*params.body);
     }
 
     if (params.readTimeoutMs) {
@@ -44,12 +44,13 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
         LD_LOG(logger_, LogLevel::kDebug) << std::move(msg);
     });
 
-    client_builder.receiver([copy = poster](launchdarkly::sse::Event e) {
-        copy->post_event(std::move(e));
+    client_builder.receiver([copy = poster](launchdarkly::sse::Event event) {
+        copy->post_event(std::move(event));
     });
 
-    client_builder.errors(
-        [copy = poster](launchdarkly::sse::Error e) { copy->post_error(e); });
+    client_builder.errors([copy = poster](launchdarkly::sse::Error event) {
+        copy->post_error(event);
+    });
 
     auto client = client_builder.build();
     if (!client) {
