@@ -160,7 +160,7 @@ class Builder {
 class Client {
    public:
     virtual ~Client() = default;
-    virtual void run() = 0;
+    virtual void async_connect() = 0;
     virtual void async_shutdown(std::function<void()> completion) = 0;
 };
 
