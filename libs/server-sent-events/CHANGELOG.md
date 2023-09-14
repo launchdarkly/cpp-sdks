@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.1.2...launchdarkly-cpp-sse-client-v0.1.3) (2023-09-13)
+
+
+### Bug Fixes
+
+* stream connections longer than 5 minutes are dropped  ([#244](https://github.com/launchdarkly/cpp-sdks/issues/244)) ([e12664f](https://github.com/launchdarkly/cpp-sdks/commit/e12664f830c84c17242fe9f032d570796555f3d1))
+
 ## [0.1.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.1.1...launchdarkly-cpp-sse-client-v0.1.2) (2023-08-31)
 
 

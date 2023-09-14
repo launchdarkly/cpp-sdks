@@ -36,6 +36,28 @@ basic_session<Stream, DynamicBuffer>::async_read(Parser& parser, ReadHandler&& h
     *this, std::forward<ReadHandler>(handler));
 }
 
+template <class Stream, class DynamicBuffer>
+template <class Parser, class ReadHandler>
+auto
+basic_session<Stream, DynamicBuffer>::async_read_some(Parser& parser, ReadHandler&& handler) & ->
+  typename boost::asio::async_result<std::decay_t<ReadHandler>,
+                                     void(boost::system::error_code, std::size_t)>::return_type
+{
+  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code, std::size_t)>(
+    [&parser, self = this, coro = boost::asio::coroutine()](
+      auto& cb, boost::system::error_code ec = {}, std::size_t bytes_transferrred = 0) mutable {
+      BOOST_ASIO_CORO_REENTER(coro)
+      {
+        BOOST_ASIO_CORO_YIELD boost::beast::http::async_read_some(self->stream, self->buffer, parser,
+                                                             std::move(cb));
+
+        cb.complete(ec, bytes_transferrred);
+      }
+    },
+    *this, std::forward<ReadHandler>(handler));
+}
+
+
 } // namespace launchdarkly::foxy
 
 #endif // FOXY_IMPL_SESSION_ASYNC_READ_IMPL_HPP_
