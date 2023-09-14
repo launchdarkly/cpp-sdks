@@ -43,7 +43,7 @@ jobs:
           sdk_cmake_target: 'launchdarkly-cpp-client'
 
   release-client-provenance:
-    needs: ['release-client']
+    needs: ['release-please', 'release-client']
     strategy:
       matrix:
         # Generates a combined attestation for each platform
