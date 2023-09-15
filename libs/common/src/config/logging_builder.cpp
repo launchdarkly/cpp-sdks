@@ -60,7 +60,9 @@ LoggingBuilder::BasicLogging& LoggingBuilder::BasicLogging::Tag(
     return *this;
 }
 LoggingBuilder::BasicLogging::BasicLogging()
-    : level_(Defaults<AnySDK>::LogLevel()), tag_(Defaults<AnySDK>::LogTag()) {}
+    : level_(GetLogLevelEnum(std::getenv("LD_LOG_LEVEL"),
+                             Defaults<AnySDK>::LogLevel())),
+      tag_(Defaults<AnySDK>::LogTag()) {}
 
 LoggingBuilder::CustomLogging& LoggingBuilder::CustomLogging::Backend(
     std::shared_ptr<ILogBackend> backend) {

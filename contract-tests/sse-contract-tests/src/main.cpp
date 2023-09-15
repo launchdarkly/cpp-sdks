@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{
         std::make_unique<ConsoleBackend>("sse-contract-tests")};
 
-    const std::string default_port = "8123";
+    std::string const default_port = "8123";
     std::string port = default_port;
     if (argc == 2) {
         port =
@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("report");
         srv.add_capability("post");
         srv.add_capability("reconnection");
+        srv.add_capability("read-timeout");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
