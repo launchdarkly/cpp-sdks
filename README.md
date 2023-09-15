@@ -34,7 +34,7 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 1. CMake 3.19 or higher
 1. Ninja (if using the included build scripts)
 1. Boost version 1.81 or higher
-1. OpenSSL
+1. OpenSSL 1.1
 
 Additional dependencies are fetched via CMake. For details see the `cmake` folder.
 
