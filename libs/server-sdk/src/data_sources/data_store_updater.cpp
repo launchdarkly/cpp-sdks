@@ -69,7 +69,7 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
     }
 }
 
-DataStoreUpdater::DataStoreUpdater(IDataSourceUpdateSink& sink,
+DataStoreUpdater::DataStoreUpdater(IDataDestination& sink,
                                    data_sources::IDataSource const& source)
     : sink_(sink), source_(source) {}
 

@@ -126,7 +126,7 @@ static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
 }
 
 DataSourceEventHandler::DataSourceEventHandler(
-    IDataSourceUpdateSink& handler,
+    IDataDestination& handler,
     Logger const& logger,
     DataSourceStatusManager& status_manager)
     : handler_(handler), logger_(logger), status_manager_(status_manager) {}

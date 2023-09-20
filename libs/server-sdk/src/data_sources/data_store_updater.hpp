@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../data_sources/data_destination_interface.hpp"
 #include "../data_sources/data_source_interface.hpp"
-#include "../data_sources/data_source_update_sink.hpp"
 #include "dependency_tracker.hpp"
 
 #include <launchdarkly/server_side/change_notifier.hpp>
@@ -13,7 +13,7 @@
 namespace launchdarkly::server_side::data_store {
 
 class DataStoreUpdater
-    : public launchdarkly::server_side::data_sources::IDataSourceUpdateSink,
+    : public launchdarkly::server_side::data_sources::IDataDestination,
       public launchdarkly::server_side::IChangeNotifier {
    public:
     template <typename Storage>
@@ -26,7 +26,7 @@ class DataStoreUpdater
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDataSourceUpdateSink& sink,
+    DataStoreUpdater(IDataDestination& sink,
                      data_sources::IDataSource const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
@@ -104,7 +104,7 @@ class DataStoreUpdater
 
     void NotifyChanges(DependencySet changes);
 
-    IDataSourceUpdateSink& sink_;
+    IDataDestination& sink_;
     data_sources::IDataSource const& source_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;

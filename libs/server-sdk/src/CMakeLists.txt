@@ -22,24 +22,20 @@ target_sources(${LIBNAME}
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
-        data_sources/data_source_update_sink.hpp
-        data_store/data_store_updater.hpp
-        data_store/data_store_updater.cpp
-        data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp
+        data_sources/data_store_updater.cpp
+        data_sources/dependency_tracker.hpp
+        data_sources/dependency_tracker.cpp
         data_sources/descriptors.hpp
         data_sources/memory_store/memory_store.cpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status.cpp
-        data_sources/polling_data_source.hpp
-        data_sources/polling_data_source.cpp
+        data_sources/implementations/polling/polling_data_source.cpp
+        data_sources/implementations/streaming/streaming_data_source.cpp
+        data_sources/implementations/noop/null_data_source.cpp
         data_sources/data_source_status_manager.hpp
-        data_sources/streaming_data_source.hpp
-        data_sources/streaming_data_source.cpp
         data_sources/pull_mode/pull_mode_data_source.cpp
         data_sources/push_mode/push_mode_data_source.cpp
-        data_sources/null_data_source.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp
@@ -48,10 +44,6 @@ target_sources(${LIBNAME}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
-        #        data_store/persistent/persistent_data_store.hpp
-        #        data_store/persistent/expiration_tracker.hpp
-        #        data_store/persistent/persistent_data_store.cpp
-        #        data_store/persistent/expiration_tracker.cpp
         events/event_factory.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp

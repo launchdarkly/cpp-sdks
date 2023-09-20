@@ -5,8 +5,8 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include "../data_store/data_kind.hpp"
+#include "data_destination_interface.hpp"
 #include "data_source_status_manager.hpp"
-#include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
@@ -102,7 +102,7 @@ class DataSourceEventHandler {
         uint64_t version;
     };
 
-    DataSourceEventHandler(IDataSourceUpdateSink& handler,
+    DataSourceEventHandler(IDataDestination& handler,
                            Logger const& logger,
                            DataSourceStatusManager& status_manager);
 
@@ -116,7 +116,7 @@ class DataSourceEventHandler {
                                 std::string const& data);
 
    private:
-    IDataSourceUpdateSink& handler_;
+    IDataDestination& handler_;
     Logger const& logger_;
     DataSourceStatusManager& status_manager_;
 };

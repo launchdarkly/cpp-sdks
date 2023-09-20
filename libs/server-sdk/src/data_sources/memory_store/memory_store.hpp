@@ -4,11 +4,11 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include "../data_source_update_sink.hpp"
+#include "../data_destination_interface.hpp"
 
 namespace launchdarkly::server_side::data_sources {
 
-class MemoryStore : public data_sources::IDataSourceUpdateSink {
+class MemoryStore : public data_sources::IDataDestination {
    public:
     std::shared_ptr<FlagDescriptor> GetFlag(std::string const& key) const;
     std::shared_ptr<SegmentDescriptor> GetSegment(std::string const& key) const;

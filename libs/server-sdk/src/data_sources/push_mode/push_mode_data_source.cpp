@@ -39,7 +39,7 @@ PushModeSource::PushModeSource(
 
 std::string PushModeSource::Identity() const {
     // TODO: Obtain more specific info
-    return "generic pull-mode source";
+    return "generic push-mode source";
 }
 
 std::weak_ptr<ISynchronizer> PushModeSource::GetSynchronizer() const {

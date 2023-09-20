@@ -5,10 +5,10 @@
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
+#include "../data_destination_interface.hpp"
 #include "../data_source_event_handler.hpp"
 #include "../data_source_interface.hpp"
 #include "../data_source_status_manager.hpp"
-#include "../data_source_update_sink.hpp"
 
 #include "../memory_store/memory_store.hpp"
 
@@ -33,8 +33,8 @@ class PushModeSource : public IDataSource {
 
     std::string Identity() const override;
 
-    std::weak_ptr<ISynchronizer> GetSynchronizer() const override;
-    std::weak_ptr<IBootstrapper> GetBootstrapper() const override;
+    ISynchronizer* GetSynchronizer() const override;
+    IBootstrapper* GetBootstrapper() const override;
 
     std::shared_ptr<FlagDescriptor> GetFlag(
         std::string const& key) const override;

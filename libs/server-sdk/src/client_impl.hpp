@@ -10,8 +10,8 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
 
+#include "data_sources/data_destination_interface.hpp"
 #include "data_sources/data_source_status_manager.hpp"
-#include "data_sources/data_source_update_sink.hpp"
 
 #include "data_sources/data_source_interface.hpp"
 #include "data_store/data_store_updater.hpp"
