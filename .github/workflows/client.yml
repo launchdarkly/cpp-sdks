@@ -41,7 +41,6 @@ jobs:
     runs-on: macos-12
     steps:
       - run: |
-          brew link --overwrite openssl@3
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
           # For debugging
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)"
@@ -55,6 +54,10 @@ jobs:
   build-test-windows:
     runs-on: windows-2022
     steps:
+      - name: Upgrade OpenSSL
+        shell: bash
+        run: |
+          choco upgrade openssl
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
