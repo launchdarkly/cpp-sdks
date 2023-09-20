@@ -9,7 +9,7 @@
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
-#include "data_sources/pull_mode/pull_mode_data_source.hpp"
+#include "data_sources/push_mode/push_mode_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
@@ -76,9 +76,9 @@ static std::unique_ptr<data_sources::IDataSource> MakeDataSource(
     auto data_source_properties = builder.Build();
 
     // TODO: Check if config is a persistent Store (so, if 'method' is
-    // Persistent). If so, return a data_sources::PushModeSource instead.
+    // Persistent). If so, return a data_sources::PullModeSource instead.
 
-    return std::make_unique<data_sources::PullModeSource>(
+    return std::make_unique<data_sources::PushModeSource>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
         data_source_properties, executor, status_manager, logger);
 }

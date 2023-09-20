@@ -38,6 +38,7 @@ target_sources(${LIBNAME}
         data_sources/streaming_data_source.hpp
         data_sources/streaming_data_source.cpp
         data_sources/pull_mode/pull_mode_data_source.cpp
+        data_sources/push_mode/push_mode_data_source.cpp
         data_sources/null_data_source.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp

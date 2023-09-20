@@ -21,6 +21,9 @@ class IDataSource {
     [[nodiscard]] virtual std::weak_ptr<ISynchronizer> GetSynchronizer() const;
     [[nodiscard]] virtual std::weak_ptr<IBootstrapper> GetBootstrapper() const;
 
+    // TODO: Have a GetDataStore() interface? That way we don't need to forward
+    // methods.
+
     [[nodiscard]] virtual std::shared_ptr<FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
