@@ -24,12 +24,19 @@ int main() {
     }
 
     auto cfg_builder = server_side::ConfigBuilder(SDK_KEY);
-    cfg_builder.DataSource()
+    cfg_builder.DataSources()
+        .Source()
         .Method(
             server_side::DataSourceBuilder::Streaming().InitialReconnectDelay(
                 std::chrono::seconds(1)))
         .Bootstrap(true)
         .Order(3);
+
+    cfg_builder.DataSources()
+        .Bootstrap()
+        .Order(launchdarkly::config::shared::builders::BootstrapBuilder::Order::
+                   Random)
+        .RandomSeed(1234);
 
     auto config = cfg_builder.Build();
     if (!config) {
