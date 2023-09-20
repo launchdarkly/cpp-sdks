@@ -2,6 +2,7 @@
 
 #include <launchdarkly/config/shared/builders/app_info_builder.hpp>
 #include <launchdarkly/config/shared/builders/data_source_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_sources_builder.hpp>
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
@@ -31,6 +32,8 @@ class ConfigBuilder {
         launchdarkly::config::shared::builders::EventsBuilder<SDK>;
     using DataSourceBuilder =
         launchdarkly::config::shared::builders::DataSourceBuilder<SDK>;
+    using DataSourcesBuilder =
+        launchdarkly::config::shared::builders::DataSourcesBuilder<SDK>;
     using HttpPropertiesBuilder =
         launchdarkly::config::shared::builders::HttpPropertiesBuilder<SDK>;
     using PersistenceBuilder =
@@ -83,6 +86,8 @@ class ConfigBuilder {
      */
     DataSourceBuilder& DataSource();
 
+    DataSourcesBuilder& DataSources();
+
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
      * The builder has methods for setting individual HTTP-related properties.
@@ -119,6 +124,7 @@ class ConfigBuilder {
     AppInfoBuilder app_info_builder_;
     EventsBuilder events_builder_;
     DataSourceBuilder data_source_builder_;
+    DataSourcesBuilder data_sources_builder_;
     HttpPropertiesBuilder http_properties_builder_;
     LoggingBuilder logging_config_builder_;
     PersistenceBuilder persistence_builder_;

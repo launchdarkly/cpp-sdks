@@ -23,7 +23,15 @@ int main() {
         return 1;
     }
 
-    auto config = server_side::ConfigBuilder(SDK_KEY).Build();
+    auto cfg_builder = server_side::ConfigBuilder(SDK_KEY);
+    cfg_builder.DataSource()
+        .Method(
+            server_side::DataSourceBuilder::Streaming().InitialReconnectDelay(
+                std::chrono::seconds(1)))
+        .Bootstrap(true)
+        .Order(3);
+
+    auto config = cfg_builder.Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;

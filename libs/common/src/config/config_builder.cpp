@@ -36,6 +36,12 @@ ConfigBuilder<SDK>::DataSource() {
 }
 
 template <typename SDK>
+typename ConfigBuilder<SDK>::DataSourcesBuilder&
+ConfigBuilder<SDK>::DataSources() {
+    return data_sources_builder_;
+}
+
+template <typename SDK>
 typename ConfigBuilder<SDK>::HttpPropertiesBuilder&
 ConfigBuilder<SDK>::HttpProperties() {
     return http_properties_builder_;
