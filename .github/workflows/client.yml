@@ -41,10 +41,10 @@ jobs:
     runs-on: macos-12
     steps:
       - run: |
-          brew link --overwrite openssl@1.1
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)" >> "$GITHUB_ENV"
+          brew link --overwrite openssl@3
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
           # For debugging
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)"
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
         env:
