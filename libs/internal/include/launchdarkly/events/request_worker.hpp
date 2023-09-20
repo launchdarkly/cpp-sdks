@@ -99,6 +99,7 @@ class RequestWorker {
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
                   std::size_t id,
+                  std::optional<std::locale> date_header_locale,
                   Logger& logger);
 
     /**
@@ -162,6 +163,10 @@ class RequestWorker {
 
     /* Tag used in logs. */
     std::string tag_;
+
+    /* The en_US locale is used to parse the Date header from HTTP responses.
+     * On some platforms, this may not be available hence the optional. */
+    std::optional<std::locale> date_header_locale_;
 
     Logger& logger_;
 

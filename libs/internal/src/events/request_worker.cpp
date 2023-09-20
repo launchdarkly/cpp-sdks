@@ -6,6 +6,7 @@ namespace launchdarkly::events {
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
                              std::size_t id,
+                             std::optional<std::locale> date_header_locale,
                              Logger& logger)
     : timer_(io),
       retry_delay_(retry_after),
@@ -13,6 +14,7 @@ RequestWorker::RequestWorker(boost::asio::any_io_executor io,
       requester_(timer_.get_executor()),
       batch_(std::nullopt),
       tag_("flush-worker[" + std::to_string(id) + "]: "),
+      date_header_locale_(std::move(date_header_locale)),
       logger_(logger) {}
 
 bool RequestWorker::Available() const {
@@ -81,11 +83,15 @@ void RequestWorker::OnDeliveryAttempt(network::HttpResult result,
             batch_.reset();
             break;
         case Action::ParseDateAndReset: {
+            if (!date_header_locale_) {
+                batch_.reset();
+                break;
+            }
             auto headers = result.Headers();
             if (auto date = headers.find("Date"); date != headers.end()) {
                 if (auto server_time =
                         ParseDateHeader<std::chrono::system_clock>(
-                            date->second)) {
+                            date->second, *date_header_locale_)) {
                     callback(batch_->Count(), *server_time);
                 }
             }
