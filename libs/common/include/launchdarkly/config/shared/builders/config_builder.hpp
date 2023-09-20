@@ -37,7 +37,6 @@ class ConfigBuilder {
         launchdarkly::config::shared::builders::PersistenceBuilder<SDK>;
     using LoggingBuilder =
         launchdarkly::config::shared::builders::LoggingBuilder;
-
     /**
      * A minimal configuration consists of a LaunchDarkly SDK Key.
      * @param sdk_key SDK Key.

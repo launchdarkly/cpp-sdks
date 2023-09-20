@@ -57,6 +57,9 @@ struct DataSourceConfig<ClientSDK> {
 template <>
 struct DataSourceConfig<ServerSDK> {
     std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
+    bool enable_bootstrap;
+    bool enable_sync;
+    std::uint64_t order;
 };
 
 }  // namespace launchdarkly::config::shared::built

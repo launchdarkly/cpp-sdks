@@ -198,6 +198,12 @@ class DataSourceBuilder<ServerSDK> {
      */
     DataSourceBuilder& Method(Polling polling_builder);
 
+    DataSourceBuilder& Bootstrap(bool enable_bootstrap);
+
+    DataSourceBuilder& Sync(bool enable_sync);
+
+    DataSourceBuilder& Order(std::uint64_t bootstrap_order);
+
     /**
      * Build a data source config. This is used internal to the SDK.
      *
@@ -207,8 +213,9 @@ class DataSourceBuilder<ServerSDK> {
 
    private:
     std::variant<Streaming, Polling> method_;
-    bool with_reasons_;
-    bool use_report_;
+    bool enable_bootstrap_;
+    bool enable_sync_;
+    std::uint64_t order_;
 };
 
 }  // namespace launchdarkly::config::shared::builders
