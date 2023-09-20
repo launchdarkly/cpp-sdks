@@ -21,9 +21,9 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     if (HasListeners()) {
         DependencySet updated_items;
 
-        CalculateChanges(DataKind::kFlag, store_.AllFlags(), data_set.flags,
+        CalculateChanges(DataKind::kFlag, source_.AllFlags(), data_set.flags,
                          updated_items);
-        CalculateChanges(DataKind::kSegment, store_.AllSegments(),
+        CalculateChanges(DataKind::kSegment, source_.AllSegments(),
                          data_set.segments, updated_items);
         change_notifications = updated_items;
     }
@@ -45,13 +45,13 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
 }
 
 void DataStoreUpdater::Upsert(std::string const& key,
-                              data_store::FlagDescriptor flag) {
-    UpsertCommon(DataKind::kFlag, key, store_.GetFlag(key), std::move(flag));
+                              data_sources::FlagDescriptor flag) {
+    UpsertCommon(DataKind::kFlag, key, source_.GetFlag(key), std::move(flag));
 }
 
 void DataStoreUpdater::Upsert(std::string const& key,
-                              data_store::SegmentDescriptor segment) {
-    UpsertCommon(DataKind::kSegment, key, store_.GetSegment(key),
+                              data_sources::SegmentDescriptor segment) {
+    UpsertCommon(DataKind::kSegment, key, source_.GetSegment(key),
                  std::move(segment));
 }
 
@@ -70,7 +70,7 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
 }
 
 DataStoreUpdater::DataStoreUpdater(IDataSourceUpdateSink& sink,
-                                   IDataStore const& store)
-    : sink_(sink), store_(store) {}
+                                   data_sources::IDataSource const& source)
+    : sink_(sink), source_(source) {}
 
 }  // namespace launchdarkly::server_side::data_store

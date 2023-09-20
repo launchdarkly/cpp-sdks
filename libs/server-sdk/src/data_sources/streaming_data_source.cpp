@@ -30,7 +30,7 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
 
 StreamingDataSource::StreamingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
+    config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
         data_source_config,
     config::shared::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
@@ -43,10 +43,14 @@ StreamingDataSource::StreamingDataSource(
       data_source_handler_(
           DataSourceEventHandler(handler, logger, status_manager_)),
       http_config_(std::move(http_properties)),
-      streaming_config_(
-          std::get<config::shared::built::StreamingConfig<
-              config::shared::ServerSDK>>(data_source_config.method)),
+      streaming_config_(data_source_config),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
+
+void StreamingDataSource::Init(
+    std::optional<data_model::SDKDataSet> initial_data,
+    IDataDestination& destination) {
+    // TODO: implement
+}
 
 void StreamingDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);

@@ -1,30 +1,25 @@
 #pragma once
 
-#include "../data_sources/data_source_update_sink.hpp"
-#include "data_store.hpp"
-
 #include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include "../data_source_update_sink.hpp"
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_sources {
 
-class MemoryStore : public IDataStore,
-                    public data_sources::IDataSourceUpdateSink {
+class MemoryStore : public data_sources::IDataSourceUpdateSink {
    public:
-    std::shared_ptr<FlagDescriptor> GetFlag(
-        std::string const& key) const override;
-    std::shared_ptr<SegmentDescriptor> GetSegment(
-        std::string const& key) const override;
+    std::shared_ptr<FlagDescriptor> GetFlag(std::string const& key) const;
+    std::shared_ptr<SegmentDescriptor> GetSegment(std::string const& key) const;
 
     std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>> AllFlags()
-        const override;
+        const;
     std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
-    AllSegments() const override;
+    AllSegments() const;
 
-    bool Initialized() const override;
-    std::string const& Description() const override;
+    bool Initialized() const;
+    std::string const& Description() const;
 
     void Init(launchdarkly::data_model::SDKDataSet dataSet) override;
     void Upsert(std::string const& key, FlagDescriptor flag) override;
@@ -39,7 +34,7 @@ class MemoryStore : public IDataStore,
     MemoryStore& operator=(MemoryStore&&) = delete;
 
    private:
-    static inline const std::string description_ = "memory";
+    static inline std::string const description_ = "memory";
     std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>> flags_;
     std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
         segments_;
@@ -47,4 +42,4 @@ class MemoryStore : public IDataStore,
     mutable std::mutex data_mutex_;
 };
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_sources

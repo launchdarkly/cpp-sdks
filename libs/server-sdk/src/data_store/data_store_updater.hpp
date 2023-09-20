@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../data_sources/data_source_interface.hpp"
 #include "../data_sources/data_source_update_sink.hpp"
-#include "data_store.hpp"
 #include "dependency_tracker.hpp"
 
 #include <launchdarkly/server_side/change_notifier.hpp>
@@ -26,13 +26,16 @@ class DataStoreUpdater
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDataSourceUpdateSink& sink, IDataStore const& store);
+    DataStoreUpdater(IDataSourceUpdateSink& sink,
+                     data_sources::IDataSource const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
     void Init(launchdarkly::data_model::SDKDataSet data_set) override;
-    void Upsert(std::string const& key, FlagDescriptor flag) override;
-    void Upsert(std::string const& key, SegmentDescriptor segment) override;
+    void Upsert(std::string const& key,
+                data_sources::FlagDescriptor flag) override;
+    void Upsert(std::string const& key,
+                data_sources::SegmentDescriptor segment) override;
     ~DataStoreUpdater() override = default;
 
     DataStoreUpdater(DataStoreUpdater const& item) = delete;
@@ -102,7 +105,7 @@ class DataStoreUpdater
     void NotifyChanges(DependencySet changes);
 
     IDataSourceUpdateSink& sink_;
-    IDataStore const& store_;
+    data_sources::IDataSource const& source_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;
 

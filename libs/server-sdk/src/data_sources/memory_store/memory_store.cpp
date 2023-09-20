@@ -2,7 +2,7 @@
 
 #include "memory_store.hpp"
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_sources {
 
 std::shared_ptr<FlagDescriptor> MemoryStore::GetFlag(
     std::string const& key) const {
@@ -61,15 +61,15 @@ void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
 }
 
 void MemoryStore::Upsert(std::string const& key,
-                         data_store::FlagDescriptor flag) {
+                         data_sources::FlagDescriptor flag) {
     std::lock_guard lock{data_mutex_};
     flags_[key] = std::make_shared<FlagDescriptor>(std::move(flag));
 }
 
 void MemoryStore::Upsert(std::string const& key,
-                         data_store::SegmentDescriptor segment) {
+                         data_sources::SegmentDescriptor segment) {
     std::lock_guard lock{data_mutex_};
     segments_[key] = std::make_shared<SegmentDescriptor>(std::move(segment));
 }
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_sources

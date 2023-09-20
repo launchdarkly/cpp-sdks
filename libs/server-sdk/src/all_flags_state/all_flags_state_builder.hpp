@@ -2,7 +2,6 @@
 
 #include <launchdarkly/server_side/client.hpp>
 
-#include "../data_store/data_store.hpp"
 #include "../evaluation/evaluator.hpp"
 
 namespace launchdarkly::server_side {

@@ -23,15 +23,11 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL";
 
 static network::HttpRequest MakeRequest(
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
-        data_source_config,
+    config::shared::built::PollingConfig<config::shared::ServerSDK> const&
+        polling_config,
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::HttpProperties const& http_properties) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
-
-    auto const& polling_config = std::get<
-        config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-        data_source_config.method);
 
     url = network::AppendUrl(url, polling_config.polling_get_path);
 
@@ -47,7 +43,7 @@ static network::HttpRequest MakeRequest(
 
 PollingDataSource::PollingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
+    config::shared::built::PollingConfig<config::shared::ServerSDK> const&
         data_source_config,
     config::shared::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& ioc,
@@ -60,27 +56,24 @@ PollingDataSource::PollingDataSource(
       update_sink_(handler),
       requester_(ioc),
       timer_(ioc),
-      polling_interval_(
-          std::get<
-              config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-              data_source_config.method)
-              .poll_interval),
+      polling_interval_(data_source_config.poll_interval),
       request_(MakeRequest(data_source_config, endpoints, http_properties)) {
-    auto const& polling_config = std::get<
-        config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-        data_source_config.method);
-    if (polling_interval_ < polling_config.min_polling_interval) {
+    if (polling_interval_ < data_source_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
             << std::chrono::duration_cast<std::chrono::seconds>(
-                   polling_config.min_polling_interval)
+                   data_source_config.min_polling_interval)
                    .count()
             << " seconds";
 
-        polling_interval_ = polling_config.min_polling_interval;
+        polling_interval_ = data_source_config.min_polling_interval;
     }
 }
 
+void PollingDataSource::Init(std::optional<data_model::SDKDataSet> initial_data,
+                             IDataDestination& destination) {
+    // TODO: implement
+}
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 

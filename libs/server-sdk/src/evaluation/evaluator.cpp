@@ -19,8 +19,8 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target);
 
-Evaluator::Evaluator(Logger& logger, data_store::IDataStore const& store)
-    : logger_(logger), store_(store), stack_() {}
+Evaluator::Evaluator(Logger& logger, data_sources::IDataSource const& source)
+    : logger_(logger), source_(source), stack_() {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
@@ -46,15 +46,15 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         }
 
         for (Flag::Prerequisite const& p : flag.prerequisites) {
-            std::shared_ptr<data_store::FlagDescriptor> maybe_flag =
-                store_.GetFlag(p.key);
+            std::shared_ptr<data_sources::FlagDescriptor> maybe_flag =
+                source_.GetFlag(p.key);
 
             if (!maybe_flag) {
                 return OffValue(flag,
                                 EvaluationReason::PrerequisiteFailed(p.key));
             }
 
-            data_store::FlagDescriptor const& descriptor = *maybe_flag;
+            data_sources::FlagDescriptor const& descriptor = *maybe_flag;
 
             if (!descriptor.item) {
                 // This flag existed at some point, but has since been deleted.
@@ -106,7 +106,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         auto const& rule = flag.rules[rule_index];
 
         tl::expected<bool, Error> rule_match =
-            Match(rule, context, store_, stack_);
+            Match(rule, context, source_, stack_);
 
         if (!rule_match) {
             LogError(flag.key, rule_match.error());

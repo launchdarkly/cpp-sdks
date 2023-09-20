@@ -93,8 +93,7 @@ class DataSourceEventHandler {
 
     struct Patch {
         std::string key;
-        std::variant<data_store::FlagDescriptor, data_store::SegmentDescriptor>
-            data;
+        std::variant<FlagDescriptor, SegmentDescriptor> data;
     };
 
     struct Delete {

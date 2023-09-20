@@ -6,6 +6,7 @@ using namespace std::chrono_literals;
 #include <boost/asio/any_io_executor.hpp>
 
 #include "data_source_event_handler.hpp"
+#include "data_source_interface.hpp"
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
@@ -15,26 +16,27 @@ using namespace std::chrono_literals;
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/sse/client.hpp>
 
 namespace launchdarkly::server_side::data_sources {
 
 class StreamingDataSource final
-    : public ::launchdarkly::data_sources::IDataSource,
+    : public ISynchronizer,
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
         config::shared::built::ServiceEndpoints const& endpoints,
-        config::shared::built::DataSourceConfig<
-            config::shared::ServerSDK> const& data_source_config,
+        config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
+            data_source_config,
         config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
+    void Init(std::optional<data_model::SDKDataSet> initial_data,
+              IDataDestination& destination) override;
     void Start() override;
     void ShutdownAsync(std::function<void()> completion) override;
 

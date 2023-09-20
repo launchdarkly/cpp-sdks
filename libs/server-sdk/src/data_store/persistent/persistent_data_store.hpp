@@ -1,8 +1,7 @@
 #pragma once
 
+#include "../../data_sources/data_source_interface.hpp"
 #include "../../data_sources/data_source_update_sink.hpp"
-#include "../data_store.hpp"
-#include "../memory_store.hpp"
 #include "expiration_tracker.hpp"
 
 #include <launchdarkly/detail/unreachable.hpp>
@@ -42,7 +41,7 @@ struct Kinds {
     static SegmentKind const Segment;
 };
 
-class PersistentStore : public IDataStore,
+class PersistentStore : public data_sources::IDataSource,
                         public data_sources::IDataSourceUpdateSink {
    public:
     PersistentStore(

@@ -9,8 +9,8 @@
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
+#include "data_sources/pull_mode/pull_mode_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
-#include "data_store/memory_store.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
@@ -34,33 +34,53 @@ using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 using launchdarkly::server_side::data_sources::DataSourceStatus;
 
-static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
-MakeDataSource(HttpProperties const& http_properties,
-               Config const& config,
-               boost::asio::any_io_executor const& executor,
-               data_sources::IDataSourceUpdateSink& flag_updater,
-               data_sources::DataSourceStatusManager& status_manager,
-               Logger& logger) {
-    if (config.Offline()) {
-        return std::make_shared<data_sources::NullDataSource>(executor,
-                                                              status_manager);
-    }
+// static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
+// MakeDataSource(HttpProperties const& http_properties,
+//                Config const& config,
+//                boost::asio::any_io_executor const& executor,
+//                data_sources::IDataSourceUpdateSink& flag_updater,
+//                data_sources::DataSourceStatusManager& status_manager,
+//                Logger& logger) {
+//     if (config.Offline()) {
+//         return std::make_shared<data_sources::NullDataSource>(executor,
+//                                                               status_manager);
+//     }
+//
+//     auto builder = HttpPropertiesBuilder(http_properties);
+//
+//     auto data_source_properties = builder.Build();
+//
+//     if (config.DataSourceConfig().method.index() == 0) {
+//         // TODO: use initial reconnect delay.
+//         return std::make_shared<
+//             launchdarkly::server_side::data_sources::StreamingDataSource>(
+//             config.ServiceEndpoints(), config.DataSourceConfig(),
+//             data_source_properties, executor, flag_updater, status_manager,
+//             logger);
+//     }
+//     return std::make_shared<
+//         launchdarkly::server_side::data_sources::PollingDataSource>(
+//         config.ServiceEndpoints(), config.DataSourceConfig(),
+//         data_source_properties, executor, flag_updater, status_manager,
+//         logger);
+// }
 
+static std::unique_ptr<data_sources::IDataSource> MakeDataSource(
+    HttpProperties const& http_properties,
+    Config const& config,
+    boost::asio::any_io_executor const& executor,
+    data_sources::DataSourceStatusManager& status_manager,
+    Logger& logger) {
     auto builder = HttpPropertiesBuilder(http_properties);
 
     auto data_source_properties = builder.Build();
 
-    if (config.DataSourceConfig().method.index() == 0) {
-        return std::make_shared<
-            launchdarkly::server_side::data_sources::StreamingDataSource>(
-            config.ServiceEndpoints(), config.DataSourceConfig(),
-            data_source_properties, executor, flag_updater, status_manager,
-            logger);
-    }
-    return std::make_shared<
-        launchdarkly::server_side::data_sources::PollingDataSource>(
+    // TODO: Check if config is a persistent Store (so, if 'method' is
+    // Persistent). If so, return a data_sources::PushModeSource instead.
+
+    return std::make_unique<data_sources::PullModeSource>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, flag_updater, status_manager, logger);
+        data_source_properties, executor, status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {
@@ -95,7 +115,7 @@ std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
  * Returns true if the flag pointer is valid and the underlying item is present.
  */
 bool IsFlagPresent(
-    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc);
+    std::shared_ptr<data_sources::FlagDescriptor> const& flag_desc);
 
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
@@ -108,20 +128,17 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
-      memory_store_(),
       status_manager_(),
-      data_store_updater_(memory_store_, memory_store_),
       data_source_(MakeDataSource(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
-                                  data_store_updater_,
                                   status_manager_,
                                   logger_)),
       event_processor_(MakeEventProcessor(config,
                                           ioc_.get_executor(),
                                           http_properties_,
                                           logger_)),
-      evaluator_(logger_, memory_store_),
+      evaluator_(logger_, *data_source_),
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
@@ -159,7 +176,9 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             return false; /* keep the change listener */
         });
 
-    data_source_->Start();
+    if (auto synchronizer = data_source_->GetSynchronizer().lock()) {
+        synchronizer->Start();
+    }
 
     return fut;
 }
@@ -177,24 +196,31 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (!Initialized()) {
-        if (memory_store_.Initialized()) {
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "AllFlagsState() called before client has finished "
-                   "initializing; using last known values from data store";
-        } else {
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "AllFlagsState() called before client has finished "
-                   "initializing. Data store not available. Returning empty "
-                   "state";
-            return {};
-        }
+        //        if (memory_store_.Initialized()) {
+        //            LD_LOG(logger_, LogLevel::kWarn)
+        //                << "AllFlagsState() called before client has finished
+        //                "
+        //                   "initializing; using last known values from data
+        //                   store";
+        //        } else {
+        //            LD_LOG(logger_, LogLevel::kWarn)
+        //                << "AllFlagsState() called before client has finished
+        //                "
+        //                   "initializing. Data store not available. Returning
+        //                   empty " "state";
+        //            return {};
+        //        }
+
+        // TODO: Fix to use the single data source status, which takes into
+        // account whether there is any data ore not.
+        return {};
     }
 
     AllFlagsStateBuilder builder{options};
 
     EventScope no_events;
 
-    for (auto const& [k, v] : memory_store_.AllFlags()) {
+    for (auto const& [k, v] : data_source_->AllFlags()) {
         if (!v || !v->item) {
             continue;
         }
@@ -295,7 +321,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
                               std::nullopt);
     }
 
-    auto flag_rule = memory_store_.GetFlag(key);
+    auto flag_rule = data_source_->GetFlag(key);
 
     bool flag_present = IsFlagPresent(flag_rule);
 
@@ -315,9 +341,10 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
     Context const& context) {
-    if (!memory_store_.Initialized()) {
-        return EvaluationReason::ErrorKind::kClientNotReady;
-    }
+    //    if (!memory_store_.Initialized()) {
+    //        return EvaluationReason::ErrorKind::kClientNotReady;
+    //    }
+    // TODO: Check if initialized
     if (!context.Valid()) {
         return EvaluationReason::ErrorKind::kUserNotSpecified;
     }
@@ -364,7 +391,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
 }
 
 bool IsFlagPresent(
-    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc) {
+    std::shared_ptr<data_sources::FlagDescriptor> const& flag_desc) {
     return flag_desc && flag_desc->item;
 }
 

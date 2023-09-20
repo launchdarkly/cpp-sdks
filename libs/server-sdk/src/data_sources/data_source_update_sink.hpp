@@ -5,7 +5,7 @@
 #include <launchdarkly/data_model/sdk_data_set.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
-#include "../data_store/descriptors.hpp"
+#include "descriptors.hpp"
 
 namespace launchdarkly::server_side::data_sources {
 /**
@@ -14,10 +14,8 @@ namespace launchdarkly::server_side::data_sources {
 class IDataSourceUpdateSink {
    public:
     virtual void Init(launchdarkly::data_model::SDKDataSet data_set) = 0;
-    virtual void Upsert(std::string const& key,
-                        data_store::FlagDescriptor flag) = 0;
-    virtual void Upsert(std::string const& key,
-                        data_store::SegmentDescriptor segment) = 0;
+    virtual void Upsert(std::string const& key, FlagDescriptor flag) = 0;
+    virtual void Upsert(std::string const& key, SegmentDescriptor segment) = 0;
 
     IDataSourceUpdateSink(IDataSourceUpdateSink const& item) = delete;
     IDataSourceUpdateSink(IDataSourceUpdateSink&& item) = delete;
