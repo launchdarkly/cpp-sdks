@@ -57,7 +57,7 @@ jobs:
       - name: Upgrade OpenSSL
         shell: bash
         run: |
-          choco upgrade openssl --no-progress
+          choco list openssl
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
