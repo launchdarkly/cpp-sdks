@@ -24,7 +24,7 @@ enum class State {
     PermanentlyFailed = 4,
 };
 
-std::ostream& operator<<(std::ostream& out, State const& s);
+std::ostream& operator<<(std::ostream& out, State const& state);
 
 enum class Action {
     /* No action necessary. */
@@ -39,7 +39,7 @@ enum class Action {
     NotifyPermanentFailure = 4,
 };
 
-std::ostream& operator<<(std::ostream& out, Action const& s);
+std::ostream& operator<<(std::ostream& out, Action const& state);
 
 /**
  * Computes the next (state, action) pair from an existing state and an HTTP
@@ -105,7 +105,7 @@ class RequestWorker {
     /**
      * Returns true if the worker is available for delivery.
      */
-    bool Available() const;
+    [[nodiscard]] bool Available() const;
 
     /**
      * Passes an EventBatch to the worker for delivery. The delivery may be
@@ -136,10 +136,10 @@ class RequestWorker {
             << batch_->Target() << " with payload: "
             << batch_->Request().Body().value_or("(no body)");
 
-        requester_.Request(
-            batch_->Request(), [this, handler](network::HttpResult result) {
-                OnDeliveryAttempt(std::move(result), std::move(handler));
-            });
+        requester_.Request(batch_->Request(),
+                           [this, handler](network::HttpResult const& result) {
+                               OnDeliveryAttempt(result, std::move(handler));
+                           });
         return result.get();
     }
 
@@ -170,7 +170,8 @@ class RequestWorker {
 
     Logger& logger_;
 
-    void OnDeliveryAttempt(network::HttpResult request, ResultCallback cb);
+    void OnDeliveryAttempt(network::HttpResult const& request,
+                           ResultCallback cb);
 };
 
 }  // namespace launchdarkly::events
