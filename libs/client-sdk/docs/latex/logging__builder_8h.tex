@@ -1,0 +1,407 @@
+\hypertarget{logging__builder_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/config/logging\+\_\+builder.h File Reference}
+\label{logging__builder_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/config/logging\_builder.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/config/logging\_builder.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/status.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+Include dependency graph for logging\+\_\+builder.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{logging__builder_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{logging__builder_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDLogBackend}{LDLog\+Backend}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{logging__builder_8h_ad286cbdd933ae88005c826a27d8f1109}\label{logging__builder_8h_ad286cbdd933ae88005c826a27d8f1109}} 
+typedef struct \+\_\+\+LDLogging\+Basic\+Builder $\ast$ {\bfseries LDLogging\+Basic\+Builder}
+\item 
+\mbox{\Hypertarget{logging__builder_8h_ae0e4f72b7b8d0bf856bc56afae35de71}\label{logging__builder_8h_ae0e4f72b7b8d0bf856bc56afae35de71}} 
+typedef struct \+\_\+\+LDLogging\+Custom\+Builder $\ast$ {\bfseries LDLogging\+Custom\+Builder}
+\item 
+\mbox{\Hypertarget{logging__builder_8h_a7adb8bddf07c21daafdf4a76f1ac9077}\label{logging__builder_8h_a7adb8bddf07c21daafdf4a76f1ac9077}} 
+typedef bool($\ast$ {\bfseries Enabled\+Fn}) (enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} level, void $\ast$user\+\_\+data)
+\item 
+\mbox{\Hypertarget{logging__builder_8h_aaa5786f7f5abd37f3e18646bb839974f}\label{logging__builder_8h_aaa5786f7f5abd37f3e18646bb839974f}} 
+typedef void($\ast$ {\bfseries Write\+Fn}) (enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} level, char const $\ast$msg, void $\ast$user\+\_\+data)
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} \{ {\bfseries LD\+\_\+\+LOG\+\_\+\+DEBUG} = 0
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+INFO} = 1
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+WARN} = 2
+, {\bfseries LD\+\_\+\+LOG\+\_\+\+ERROR} = 3
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{logging__builder_8h_afeb64a36198a8f5a3fe5a11882528e13}{LD\+\_\+\+EXPORT}} (void) LDLog\+Backend\+\_\+\+Init(struct \mbox{\hyperlink{structLDLogBackend}{LDLog\+Backend}} $\ast$backend)
+\item 
+\mbox{\hyperlink{logging__builder_8h_a233abbc6dfbae4b51881e80eb0ddd421}{LD\+\_\+\+EXPORT}} (LDLogging\+Basic\+Builder) LDLogging\+Basic\+Builder\+\_\+\+New()
+\item 
+\mbox{\hyperlink{logging__builder_8h_a26b3debce158ab6b21d7292b66d214aa}{LDLogging\+Basic\+Builder\+\_\+\+Level}} (LDLogging\+Basic\+Builder b, enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}} level)
+\item 
+\mbox{\hyperlink{logging__builder_8h_a1ff196017fe8279f4d399455b93693fe}{LDLogging\+Basic\+Builder\+\_\+\+Tag}} (LDLogging\+Basic\+Builder b, char const $\ast$tag)
+\item 
+\mbox{\hyperlink{logging__builder_8h_aab8e31efb2bae08b46db1d0b0277f7f0}{LD\+\_\+\+EXPORT}} (LDLogging\+Custom\+Builder) LDLogging\+Custom\+Builder\+\_\+\+New()
+\item 
+\mbox{\hyperlink{logging__builder_8h_adf21308a3bd3494564f42102bd6a81ee}{LDLogging\+Custom\+Builder\+\_\+\+Backend}} (LDLogging\+Custom\+Builder b, struct \mbox{\hyperlink{structLDLogBackend}{LDLog\+Backend}} backend)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}\label{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}} 
+\index{logging\_builder.h@{logging\_builder.h}!LDLogLevel@{LDLogLevel}}
+\index{LDLogLevel@{LDLogLevel}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDLogLevel}{LDLogLevel}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}}}
+
+Defines the log levels used with the SDK\textquotesingle{}s default logger, or a user-\/provided custom logger. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{logging__builder_8h_a233abbc6dfbae4b51881e80eb0ddd421}\label{logging__builder_8h_a233abbc6dfbae4b51881e80eb0ddd421}} 
+\index{logging\_builder.h@{logging\_builder.h}!LD\_EXPORT@{LD\_EXPORT}}
+\index{LD\_EXPORT@{LD\_EXPORT}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LD\_EXPORT()}{LD\_EXPORT()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily LD\+\_\+\+EXPORT (\begin{DoxyParamCaption}\item[{LDLogging\+Basic\+Builder}]{ }\end{DoxyParamCaption})}
+
+Creates a new builder for Launch\+Darkly\textquotesingle{}s default logger.
+
+If not passed into the config builder, must be manually freed with LDLogging\+Basic\+Builder\+\_\+\+Free. \begin{DoxyReturn}{Returns}
+New builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{logging__builder_8h_aab8e31efb2bae08b46db1d0b0277f7f0}\label{logging__builder_8h_aab8e31efb2bae08b46db1d0b0277f7f0}} 
+\index{logging\_builder.h@{logging\_builder.h}!LD\_EXPORT@{LD\_EXPORT}}
+\index{LD\_EXPORT@{LD\_EXPORT}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LD\_EXPORT()}{LD\_EXPORT()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily LD\+\_\+\+EXPORT (\begin{DoxyParamCaption}\item[{LDLogging\+Custom\+Builder}]{ }\end{DoxyParamCaption})}
+
+Creates a new builder for a custom, user-\/provided logger.
+
+If not passed into the config builder, must be manually freed with LDLogging\+Custom\+Builder\+\_\+\+Free. \begin{DoxyReturn}{Returns}
+New builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{logging__builder_8h_afeb64a36198a8f5a3fe5a11882528e13}\label{logging__builder_8h_afeb64a36198a8f5a3fe5a11882528e13}} 
+\index{logging\_builder.h@{logging\_builder.h}!LD\_EXPORT@{LD\_EXPORT}}
+\index{LD\_EXPORT@{LD\_EXPORT}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LD\_EXPORT()}{LD\_EXPORT()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily LD\+\_\+\+EXPORT (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Initializes a custom log backend. Must be called before passing a custom backend into configuration. 
+\begin{DoxyParams}{Parameters}
+{\em backend} & Backend to initialize.\\
+\hline
+\end{DoxyParams}
+Frees a basic logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Tracks that the current context performed an event for the given event name. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Initializes a custom persistence implementation. Must be called before passing a custom implementation into configuration. 
+\begin{DoxyParams}{Parameters}
+{\em backend} & Implementation to initialize.\\
+\hline
+\end{DoxyParams}
+Frees a Streaming method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a Polling method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom persistence builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Add a value to an array builder.
+
+After calling this method the provider LDValue is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call LDValue\+\_\+\+Free.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to add the value to. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees a basic logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Move the array-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Destroy an array iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy.\\
+\hline
+\end{DoxyParams}
+Move the object-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Destroy an object iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy.\\
+\hline
+\end{DoxyParams}
+Tracks that the current context performed an event for the given event name. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Free an array builder. This should only be done for a builder which has not been built. Calling LDArray\+Builder\+\_\+\+Build on an array builder transfers consumes the array builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The builder to free.\\
+\hline
+\end{DoxyParams}
+Add a value to an array builder.
+
+After calling this method the provider LDValue is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call LDValue\+\_\+\+Free.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to add the value to. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Initializes a custom persistence implementation. Must be called before passing a custom implementation into configuration. 
+\begin{DoxyParams}{Parameters}
+{\em backend} & Implementation to initialize.\\
+\hline
+\end{DoxyParams}
+Frees a Streaming method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a Polling method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom persistence builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Add a value to an array builder.
+
+After calling this method the provider LDValue is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call LDValue\+\_\+\+Free.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to add the value to. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees a basic logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom logging builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Move the array-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Destroy an array iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy.\\
+\hline
+\end{DoxyParams}
+Move the object-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Destroy an object iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy.\\
+\hline
+\end{DoxyParams}
+Tracks that the current context performed an event for the given event name. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Free an array builder. This should only be done for a builder which has not been built. Calling LDArray\+Builder\+\_\+\+Build on an array builder transfers consumes the array builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The builder to free.\\
+\hline
+\end{DoxyParams}
+Add a value to an array builder.
+
+After calling this method the provider LDValue is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call LDValue\+\_\+\+Free.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to add the value to. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{logging__builder_8h_a26b3debce158ab6b21d7292b66d214aa}\label{logging__builder_8h_a26b3debce158ab6b21d7292b66d214aa}} 
+\index{logging\_builder.h@{logging\_builder.h}!LDLoggingBasicBuilder\_Level@{LDLoggingBasicBuilder\_Level}}
+\index{LDLoggingBasicBuilder\_Level@{LDLoggingBasicBuilder\_Level}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDLoggingBasicBuilder\_Level()}{LDLoggingBasicBuilder\_Level()}}
+{\footnotesize\ttfamily LDLogging\+Basic\+Builder\+\_\+\+Level (\begin{DoxyParamCaption}\item[{LDLogging\+Basic\+Builder}]{b,  }\item[{enum \mbox{\hyperlink{logging__builder_8h_a350a93aa37f635cf7e778121189bb49c}{LDLog\+Level}}}]{level }\end{DoxyParamCaption})}
+
+Sets the enabled log level. The default level is LD\+\_\+\+LOG\+\_\+\+INFO. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Client config builder. Must not be NULL. \\
+\hline
+{\em level} & Level to set. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{logging__builder_8h_a1ff196017fe8279f4d399455b93693fe}\label{logging__builder_8h_a1ff196017fe8279f4d399455b93693fe}} 
+\index{logging\_builder.h@{logging\_builder.h}!LDLoggingBasicBuilder\_Tag@{LDLoggingBasicBuilder\_Tag}}
+\index{LDLoggingBasicBuilder\_Tag@{LDLoggingBasicBuilder\_Tag}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDLoggingBasicBuilder\_Tag()}{LDLoggingBasicBuilder\_Tag()}}
+{\footnotesize\ttfamily LDLogging\+Basic\+Builder\+\_\+\+Tag (\begin{DoxyParamCaption}\item[{LDLogging\+Basic\+Builder}]{b,  }\item[{char const $\ast$}]{tag }\end{DoxyParamCaption})}
+
+Set a tag for this logger. This tag will be included at the start of log entries in square brackets.
+
+If the name was \char`\"{}\+Launch\+Darkly\char`\"{}, then log entries will be prefixed with \char`\"{}\mbox{[}\+Launch\+Darkly\mbox{]}\char`\"{}. The default tag is \char`\"{}\+Launch\+Darkly\char`\"{}. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Client config builder. Must not be NULL. \\
+\hline
+{\em tag} & Tag to set. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{logging__builder_8h_adf21308a3bd3494564f42102bd6a81ee}\label{logging__builder_8h_adf21308a3bd3494564f42102bd6a81ee}} 
+\index{logging\_builder.h@{logging\_builder.h}!LDLoggingCustomBuilder\_Backend@{LDLoggingCustomBuilder\_Backend}}
+\index{LDLoggingCustomBuilder\_Backend@{LDLoggingCustomBuilder\_Backend}!logging\_builder.h@{logging\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDLoggingCustomBuilder\_Backend()}{LDLoggingCustomBuilder\_Backend()}}
+{\footnotesize\ttfamily LDLogging\+Custom\+Builder\+\_\+\+Backend (\begin{DoxyParamCaption}\item[{LDLogging\+Custom\+Builder}]{b,  }\item[{struct \mbox{\hyperlink{structLDLogBackend}{LDLog\+Backend}}}]{backend }\end{DoxyParamCaption})}
+
+Sets a custom log backend. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Custom logging builder. Must not be NULL. \\
+\hline
+{\em backend} & The backend to use for logging. Ensure the backend was initialized with LDLog\+Backend\+\_\+\+Init. \\
+\hline
+\end{DoxyParams}
