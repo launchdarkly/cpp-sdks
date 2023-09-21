@@ -46,6 +46,13 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
 
+## [0.1.10](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.1.9...launchdarkly-cpp-internal-v0.1.10) (2023-09-21)
+
+
+### Bug Fixes
+
+* catch exception if en_US.utf8-locale missing when parsing datetime headers ([#251](https://github.com/launchdarkly/cpp-sdks/issues/251)) ([eb2a8f0](https://github.com/launchdarkly/cpp-sdks/commit/eb2a8f093996361541e11659165cbecc94c15346))
+
 ## [0.1.5](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.1.4...launchdarkly-cpp-internal-v0.1.5) (2023-06-30)
 
 
