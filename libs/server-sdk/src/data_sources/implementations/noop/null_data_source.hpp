@@ -1,7 +1,8 @@
 #pragma once
 
-#include "data_source_interface.hpp"
-#include "data_source_status_manager.hpp"
+#include "../../data_source_status_manager.hpp"
+#include "../../interfaces/data_destination.hpp"
+#include "../../interfaces/data_synchronizer.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
 

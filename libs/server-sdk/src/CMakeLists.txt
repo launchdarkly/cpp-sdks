@@ -27,6 +27,8 @@ target_sources(${LIBNAME}
         data_sources/dependency_tracker.cpp
         data_sources/descriptors.hpp
         data_sources/memory_store/memory_store.cpp
+        data_sources/adapters/json_destination.cpp
+        data_sources/adapters/json_source.cpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status.cpp

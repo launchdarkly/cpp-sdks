@@ -13,6 +13,13 @@ It accepts memory models, serializes them, and forwards to any `ISerializedDataD
 IDataDestination -> (serialization step) -> ISerializedDataDestination
 ```
 
+To handle pulling data out of Redis, use the  `JSONSource`. It pulls from any `ISerializedDataSource`, deserializes it,
+and passes it back up by implementing `IDataSource`.
+
+```
+IDataSource <- (deserialization step) <- ISerializedDataSource
+```
+
 On the other hand, to build a new Bootstrapper that pulls JSON from a web service, you might pull
 the `JSONSource` off the shelf. It accepts JSON models, deserializes them, and forwards to any `IDataDestination`.
 

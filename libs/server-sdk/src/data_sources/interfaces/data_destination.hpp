@@ -5,7 +5,7 @@
 #include <launchdarkly/data_model/sdk_data_set.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
-#include "descriptors.hpp"
+#include "../descriptors.hpp"
 
 namespace launchdarkly::server_side::data_sources {
 
@@ -14,7 +14,7 @@ class IDataDestination {
     virtual void Init(data_model::SDKDataSet data_set) = 0;
     virtual void Upsert(std::string const& key, FlagDescriptor flag) = 0;
     virtual void Upsert(std::string const& key, SegmentDescriptor segment) = 0;
-    virtual std::string Identity() const = 0;
+    virtual std::string const& Identity() const = 0;
 
     IDataDestination(IDataDestination const& item) = delete;
     IDataDestination(IDataDestination&& item) = delete;

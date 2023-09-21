@@ -16,6 +16,9 @@ class ISynchronizer {
                       IDataDestination& destination) = 0;
     virtual void Start() = 0;
     virtual void ShutdownAsync(std::function<void()>) = 0;
+
+    virtual std::string const& Identity() const = 0;
+
     virtual ~ISynchronizer() = default;
     ISynchronizer(ISynchronizer const& item) = delete;
     ISynchronizer(ISynchronizer&& item) = delete;

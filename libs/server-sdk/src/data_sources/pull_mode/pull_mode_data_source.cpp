@@ -1,7 +1,7 @@
 #include "pull_mode_data_source.hpp"
 
-#include "../polling_data_source.hpp"
-#include "../streaming_data_source.hpp"
+#include "../adapters/json_destination.hpp"
+#include "../adapters/json_source.hpp"
 
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
@@ -21,9 +21,9 @@ PullModeSource::PullModeSource(
     Logger const& logger)
     : store_(), synchronizer_(), bootstrapper_() {}
 
-std::string PullModeSource::Identity() const {
+std::string const& PullModeSource::Identity() const {
     // TODO: Obtain more specific info
-    return "generic pull-mode source";
+    static std::string id = "generic pull-mode source";
 }
 
 ISynchronizer* PullModeSource::GetSynchronizer() {
@@ -148,91 +148,6 @@ void PullModeSource::RefreshFlag(std::string const& key) const {
         tracker_.Add(DataKind::kSegment, key, time_());
     }
     // TODO: If there is an actual error, then do we not reset the tracking?
-}
-
-// TODO: Move this to the JSONSerializationAdapter
-persistence::SerializedItemDescriptor PersistentStore::Serialize(
-    FlagDescriptor flag) {
-    // TODO: Implement
-    return persistence::SerializedItemDescriptor();
-}
-
-persistence::SerializedItemDescriptor PersistentStore::Serialize(
-    SegmentDescriptor segment) {
-    // TODO: Implement
-    return persistence::SerializedItemDescriptor();
-}
-
-template <typename TData>
-static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
-    persistence::SerializedItemDescriptor item) {
-    if (item.deleted) {
-        return data_model::ItemDescriptor<TData>(item.version);
-    }
-
-    boost::json::error_code error_code;
-    if (!item.serializedItem.has_value()) {
-        return std::nullopt;
-    }
-    auto parsed = boost::json::parse(item.serializedItem.value(), error_code);
-
-    if (error_code) {
-        return std::nullopt;
-    }
-
-    auto res =
-        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
-            parsed);
-
-    if (res.has_value() && res->has_value()) {
-        return data_model::ItemDescriptor(res->value());
-    }
-
-    return std::nullopt;
-}
-
-std::optional<FlagDescriptor> PersistentStore::DeserializeFlag(
-    persistence::SerializedItemDescriptor flag) {
-    return Deserialize<data_model::Flag>(flag);
-}
-
-std::optional<SegmentDescriptor> PersistentStore::DeserializeSegment(
-    persistence::SerializedItemDescriptor segment) {
-    return Deserialize<data_model::Segment>(segment);
-}
-
-template <typename TData>
-static uint64_t GetVersion(std::string data) {
-    boost::json::error_code error_code;
-    auto parsed = boost::json::parse(data, error_code);
-
-    if (error_code) {
-        return 0;
-    }
-    auto res =
-        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
-            parsed);
-
-    if (res.has_value() && res->has_value()) {
-        return res->value().version;
-    }
-    return 0;
-}
-
-std::string const& PersistentStore::SegmentKind::Namespace() const {
-    return namespace_;
-}
-
-uint64_t PersistentStore::SegmentKind::Version(std::string const& data) const {
-    return GetVersion<data_model::Segment>(data);
-}
-
-std::string const& PersistentStore::FlagKind::Namespace() const {
-    return namespace_;
-}
-
-uint64_t PersistentStore::FlagKind::Version(std::string const& data) const {
-    return GetVersion<data_model::Flag>(data);
 }
 
 }  // namespace launchdarkly::server_side::data_sources

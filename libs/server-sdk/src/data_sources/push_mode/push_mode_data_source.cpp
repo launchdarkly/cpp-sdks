@@ -37,17 +37,18 @@ PushModeSource::PushModeSource(
         data_source_config.method);
 }
 
-std::string PushModeSource::Identity() const {
+std::string const& PushModeSource::Identity() const {
     // TODO: Obtain more specific info
-    return "generic push-mode source";
+    static std::string id = "generic push-mode source";
+    return id;
 }
 
-std::weak_ptr<ISynchronizer> PushModeSource::GetSynchronizer() const {
-    return synchronizer_;
+ISynchronizer* PushModeSource::GetSynchronizer() {
+    return synchronizer_.get();
 }
 
-std::weak_ptr<IBootstrapper> PushModeSource::GetBootstrapper() const {
-    return bootstrapper_;
+IBootstrapper* PushModeSource::GetBootstrapper() {
+    return bootstrapper_.get();
 }
 
 std::shared_ptr<FlagDescriptor> PushModeSource::GetFlag(

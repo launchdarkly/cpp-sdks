@@ -16,7 +16,7 @@ class IDataDestination;
 
 class IDataSource {
    public:
-    [[nodiscard]] virtual std::string Identity() const;
+    [[nodiscard]] virtual std::string const& Identity() const;
 
     [[nodiscard]] virtual ISynchronizer* GetSynchronizer();
     [[nodiscard]] virtual IBootstrapper* GetBootstrapper();

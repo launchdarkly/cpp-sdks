@@ -18,6 +18,7 @@ class IBootstrapper {
     virtual bool IsAuthoritative() const = 0;
     virtual tl::expected<data_model::SDKDataSet, Error> FetchAll(
         std::chrono::milliseconds timeout_hint) = 0;
+    virtual std::string const& Identity() const = 0;
     virtual ~IBootstrapper() = default;
     IBootstrapper(IBootstrapper const& item) = delete;
     IBootstrapper(IBootstrapper&& item) = delete;

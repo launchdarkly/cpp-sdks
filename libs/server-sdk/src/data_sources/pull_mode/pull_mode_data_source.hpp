@@ -5,9 +5,10 @@
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
-#include "../data_destination_interface.hpp"
+#include "../interfaces/data_source.hpp"
+#include "../interfaces/data_synchronizer.hpp"
+
 #include "../data_source_event_handler.hpp"
-#include "../data_source_interface.hpp"
 #include "../data_source_status_manager.hpp"
 
 #include "../memory_store/memory_store.hpp"
@@ -31,7 +32,7 @@ class PullModeSource : public IDataSource, public ISynchronizer {
     PullModeSource& operator=(PullModeSource const&) = delete;
     PullModeSource& operator=(PullModeSource&&) = delete;
 
-    std::string Identity() const override;
+    std::string const& Identity() const override;
 
     ISynchronizer* GetSynchronizer() override;
     IBootstrapper* GetBootstrapper() override;

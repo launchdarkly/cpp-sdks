@@ -4,10 +4,10 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "data_source_event_handler.hpp"
-#include "data_source_interface.hpp"
-#include "data_source_status_manager.hpp"
-#include "data_source_update_sink.hpp"
+#include "../../data_source_event_handler.hpp"
+#include "../../data_source_status_manager.hpp"
+#include "../../interfaces/data_destination.hpp"
+#include "../../interfaces/data_synchronizer.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -27,7 +27,6 @@ class PollingDataSource
             data_source_config,
         config::shared::built::HttpProperties const& http_properties,
         boost::asio::any_io_executor const& ioc,
-        IDataSourceUpdateSink& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
