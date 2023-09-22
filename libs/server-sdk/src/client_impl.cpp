@@ -7,10 +7,8 @@
 #include "client_impl.hpp"
 
 #include "all_flags_state/all_flags_state_builder.hpp"
-#include "data_sources/null_data_source.hpp"
-#include "data_sources/polling_data_source.hpp"
+#include "data_retrieval/systems/background_sync/background_sync_system.hpp"
 #include "data_sources/push_mode/push_mode_data_source.hpp"
-#include "data_sources/streaming_data_source.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
@@ -32,7 +30,6 @@ auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 using config::shared::ServerSDK;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
-using launchdarkly::server_side::data_retrieval::DataSourceStatus;
 
 // static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
 // MakeDataSource(HttpProperties const& http_properties,
@@ -65,11 +62,11 @@ using launchdarkly::server_side::data_retrieval::DataSourceStatus;
 //         logger);
 // }
 
-static std::unique_ptr<data_sources::IDataSource> MakeDataSource(
+static std::unique_ptr<data_retrieval::IDataSystem> MakeDataSystem(
     HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,
-    data_sources::DataSourceStatusManager& status_manager,
+    data_retrieval::DataSourceStatusManager& status_manager,
     Logger& logger) {
     auto builder = HttpPropertiesBuilder(http_properties);
 
@@ -78,7 +75,7 @@ static std::unique_ptr<data_sources::IDataSource> MakeDataSource(
     // TODO: Check if config is a persistent Store (so, if 'method' is
     // Persistent). If so, return a data_sources::PullModeSource instead.
 
-    return std::make_unique<data_sources::PushModeSource>(
+    return std::make_unique<data_retrieval::BackgroundSync>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
         data_source_properties, executor, status_manager, logger);
 }
@@ -110,12 +107,13 @@ std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
     }
     return nullptr;
 }
-
-/**
- * Returns true if the flag pointer is valid and the underlying item is present.
- */
-bool IsFlagPresent(
-    std::shared_ptr<data_sources::FlagDescriptor> const& flag_desc);
+R
+    /**
+     * Returns true if the flag pointer is valid and the underlying item is
+     * present.
+     */
+    bool
+    IsFlagPresent(std::shared_ptr<data_model::FlagDescriptor> const& flag_desc);
 
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
@@ -176,9 +174,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             return false; /* keep the change listener */
         });
 
-    if (auto synchronizer = data_source_->GetSynchronizer().lock()) {
-        synchronizer->Start();
-    }
+    data_system_->Initialize();
 
     return fut;
 }
@@ -391,7 +387,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
 }
 
 bool IsFlagPresent(
-    std::shared_ptr<data_sources::FlagDescriptor> const& flag_desc) {
+    std::shared_ptr<data_model::FlagDescriptor> const& flag_desc) {
     return flag_desc && flag_desc->item;
 }
 

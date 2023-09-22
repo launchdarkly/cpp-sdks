@@ -12,7 +12,7 @@ namespace launchdarkly::server_side::data_retrieval {
 
 using namespace config::shared::built;
 
-PullModeSource::PullModeSource(
+LazyLoad::LazyLoad(
     ServiceEndpoints const& endpoints,
     DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
     HttpProperties http_properties,
@@ -21,37 +21,37 @@ PullModeSource::PullModeSource(
     Logger const& logger)
     : store_(), synchronizer_(), bootstrapper_() {}
 
-std::string const& PullModeSource::Identity() const {
+std::string const& LazyLoad::Identity() const {
     // TODO: Obtain more specific info
     static std::string id = "generic pull-mode source";
 }
 
-ISynchronizer* PullModeSource::GetSynchronizer() {
+ISynchronizer* LazyLoad::GetSynchronizer() {
     return reinterpret_cast<ISynchronizer*>(this);
 }
 
-IBootstrapper* PullModeSource::GetBootstrapper() {
+IBootstrapper* LazyLoad::GetBootstrapper() {
     // Bootstrapping is not supported in Pull Mode sources yet.
     // It would be simple: perform a get all.
     return nullptr;
 }
 
-void PullModeSource::Init(std::optional<data_model::SDKDataSet> initial_data,
-                          IDataDestination& destination) {
+void LazyLoad::Init(std::optional<data_model::SDKDataSet> initial_data,
+                    IDataDestination& destination) {
     // TODO: implement
     // This would happen if we bootstrapped from some source, and now that
     // data is being passed here for management.
     // The data would need to be sorted before passing furthur.
 }
-void PullModeSource::Start() {
+void LazyLoad::Start() {
     // No-op, because we all data is pulled on demand.
 }
-void PullModeSource::ShutdownAsync(std::function<void()>) {
+void LazyLoad::ShutdownAsync(std::function<void()>) {
     // Similar to Start, also a no-op since there's nothing to shutdown
     // (perhaps explicitly close database client?)
 }
 
-std::shared_ptr<FlagDescriptor> PullModeSource::GetFlag(
+std::shared_ptr<FlagDescriptor> LazyLoad::GetFlag(
     std::string const& key) const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::shared_ptr<FlagDescriptor>>(
@@ -59,7 +59,7 @@ std::shared_ptr<FlagDescriptor> PullModeSource::GetFlag(
         [this, &key]() { return memory_store_.GetFlag(key); });
 }
 
-std::shared_ptr<SegmentDescriptor> PullModeSource::GetSegment(
+std::shared_ptr<SegmentDescriptor> LazyLoad::GetSegment(
     std::string const& key) const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::shared_ptr<SegmentDescriptor>>(
@@ -68,7 +68,7 @@ std::shared_ptr<SegmentDescriptor> PullModeSource::GetSegment(
 }
 
 std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>
-PullModeSource::AllFlags() const {
+LazyLoad::AllFlags() const {
     auto state = tracker_.State(Keys::kAllFlags, time_());
     return Get<
         std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>>(
@@ -77,7 +77,7 @@ PullModeSource::AllFlags() const {
 }
 
 std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
-PullModeSource::AllSegments() const {
+LazyLoad::AllSegments() const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
     return Get<
         std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>>(
@@ -103,24 +103,24 @@ bool PersistentStore::Initialized() const {
     return initialized_.value_or(false);
 }
 
-void PullModeSource::RefreshAllFlags() const {
+void LazyLoad::RefreshAllFlags() const {
     auto res = core_->All(Kinds::Flag);
     // TODO: Deserialize and put in store.
     tracker_.Add(Keys::kAllSegments, time_());
 }
 
-void PullModeSource::RefreshAllSegments() const {
+void LazyLoad::RefreshAllSegments() const {
     auto res = core_->All(Kinds::Segment);
     // TODO: Deserialize and put in store.
     tracker_.Add(Keys::kAllFlags, time_());
 }
 
-void PullModeSource::RefreshInitState() const {
+void LazyLoad::RefreshInitState() const {
     initialized_ = core_->Initialized();
     tracker_.Add(Keys::kInitialized, time_());
 }
 
-void PullModeSource::RefreshSegment(std::string const& key) const {
+void LazyLoad::RefreshSegment(std::string const& key) const {
     auto res = core_->Get(Kinds::Segment, key);
     if (res.has_value()) {
         if (res->has_value()) {
@@ -135,7 +135,7 @@ void PullModeSource::RefreshSegment(std::string const& key) const {
     // TODO: If there is an actual error, then do we not reset the tracking?
 }
 
-void PullModeSource::RefreshFlag(std::string const& key) const {
+void LazyLoad::RefreshFlag(std::string const& key) const {
     auto res = core_->Get(Kinds::Segment, key);
     if (res.has_value()) {
         if (res->has_value()) {

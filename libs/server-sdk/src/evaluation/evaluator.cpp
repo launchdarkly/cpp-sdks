@@ -46,7 +46,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         }
 
         for (Flag::Prerequisite const& p : flag.prerequisites) {
-            std::shared_ptr<data_sources::FlagDescriptor> maybe_flag =
+            std::shared_ptr<data_model::FlagDescriptor> maybe_flag =
                 source_.GetFlag(p.key);
 
             if (!maybe_flag) {
@@ -54,7 +54,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
                                 EvaluationReason::PrerequisiteFailed(p.key));
             }
 
-            data_sources::FlagDescriptor const& descriptor = *maybe_flag;
+            data_model::FlagDescriptor const& descriptor = *maybe_flag;
 
             if (!descriptor.item) {
                 // This flag existed at some point, but has since been deleted.

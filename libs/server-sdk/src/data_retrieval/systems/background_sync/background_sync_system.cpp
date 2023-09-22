@@ -7,7 +7,7 @@ namespace launchdarkly::server_side::data_retrieval {
 
 using namespace config::shared::built;
 
-PushModeSource::PushModeSource(
+BackgroundSync::BackgroundSync(
     ServiceEndpoints const& endpoints,
     DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
     HttpProperties http_properties,
@@ -37,37 +37,29 @@ PushModeSource::PushModeSource(
         data_source_config.method);
 }
 
-std::string const& PushModeSource::Identity() const {
+std::string const& BackgroundSync::Identity() const {
     // TODO: Obtain more specific info
     static std::string id = "generic push-mode source";
     return id;
 }
 
-ISynchronizer* PushModeSource::GetSynchronizer() {
-    return synchronizer_.get();
-}
-
-IBootstrapper* PushModeSource::GetBootstrapper() {
-    return bootstrapper_.get();
-}
-
-std::shared_ptr<FlagDescriptor> PushModeSource::GetFlag(
+std::shared_ptr<data_model::FlagDescriptor> BackgroundSync::GetFlag(
     std::string const& key) const {
     return store_.GetFlag(key);
 }
 
-std::shared_ptr<SegmentDescriptor> PushModeSource::GetSegment(
+std::shared_ptr<data_model::SegmentDescriptor> BackgroundSync::GetSegment(
     std::string const& key) const {
     return store_.GetSegment(key);
 }
 
-std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>
-PushModeSource::AllFlags() const {
+std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
+BackgroundSync::AllFlags() const {
     return store_.AllFlags();
 }
 
-std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
-PushModeSource::AllSegments() const {
+std::unordered_map<std::string, std::shared_ptr<data_model::SegmentDescriptor>>
+BackgroundSync::AllSegments() const {
     return store_.AllSegments();
 }
 

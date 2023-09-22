@@ -214,13 +214,13 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             switch (res->kind) {
                 case data_store::DataKind::kFlag: {
                     handler_.Upsert(res->key,
-                                    data_sources::FlagDescriptor(res->version));
+                                    data_model::FlagDescriptor(res->version));
                     return DataSourceEventHandler::MessageStatus::
                         kMessageHandled;
                 }
                 case data_store::DataKind::kSegment: {
-                    handler_.Upsert(res->key, data_sources::SegmentDescriptor(
-                                                  res->version));
+                    handler_.Upsert(
+                        res->key, data_model::SegmentDescriptor(res->version));
                     return DataSourceEventHandler::MessageStatus::
                         kMessageHandled;
                 }

@@ -8,17 +8,13 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::server_side::data_sources {
+namespace launchdarkly::server_side::data_retrieval {
 
 class IDataSystem {
    public:
     [[nodiscard]] virtual std::string const& Identity() const;
 
-    [[nodiscard]] virtual ISynchronizer* GetSynchronizer();
-    [[nodiscard]] virtual IBootstrapper* GetBootstrapper();
-
-    // TODO: Have a GetDataStore() interface? That way we don't need to forward
-    // methods.
+    virtual void Initialize();
 
     [[nodiscard]] virtual std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
@@ -62,4 +58,4 @@ class IDataSystem {
     IDataSystem() = default;
 };
 
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_retrieval

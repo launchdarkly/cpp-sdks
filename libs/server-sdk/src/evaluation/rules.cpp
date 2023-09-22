@@ -82,7 +82,7 @@ tl::expected<bool, Error> MatchSegment(Clause const& clause,
 
         std::string const& segment_key = value.AsString();
 
-        std::shared_ptr<data_sources::SegmentDescriptor> segment_ptr =
+        std::shared_ptr<data_model::SegmentDescriptor> segment_ptr =
             store.GetSegment(segment_key);
 
         if (!segment_ptr || !segment_ptr->item) {

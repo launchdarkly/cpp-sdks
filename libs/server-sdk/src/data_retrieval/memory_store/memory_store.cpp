@@ -61,13 +61,13 @@ void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
 }
 
 void MemoryStore::Upsert(std::string const& key,
-                         data_sources::FlagDescriptor flag) {
+                         data_model::FlagDescriptor flag) {
     std::lock_guard lock{data_mutex_};
     flags_[key] = std::make_shared<FlagDescriptor>(std::move(flag));
 }
 
 void MemoryStore::Upsert(std::string const& key,
-                         data_sources::SegmentDescriptor segment) {
+                         data_model::SegmentDescriptor segment) {
     std::lock_guard lock{data_mutex_};
     segments_[key] = std::make_shared<SegmentDescriptor>(std::move(segment));
 }

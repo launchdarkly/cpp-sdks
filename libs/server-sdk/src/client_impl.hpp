@@ -3,21 +3,16 @@
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/error.hpp>
 #include <launchdarkly/events/event_processor_interface.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "data_sources/data_destination_interface.hpp"
-#include "data_sources/data_source_status_manager.hpp"
-
-#include "data_sources/data_source_interface.hpp"
-#include "data_store/data_store_updater.hpp"
+#include "data_retrieval/interfaces/data_system.hpp"
+#include "data_retrieval/status_notifications/data_source_status_manager.hpp"
 
 #include "evaluation/evaluator.hpp"
-
 #include "events/event_scope.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
@@ -159,7 +154,7 @@ class ClientImpl : public IClient {
                        std::optional<double> metric_value);
 
     std::future<bool> StartAsyncInternal(
-        std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
+        std::function<bool(data_retrieval::DataSourceStatus::DataSourceState)>
             predicate);
 
     void LogVariationCall(std::string const& key, bool flag_present) const;
@@ -173,9 +168,9 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_sources::DataSourceStatusManager status_manager_;
+    data_retrieval::DataSourceStatusManager status_manager_;
 
-    std::unique_ptr<data_sources::IDataSource> data_source_;
+    std::unique_ptr<data_retrieval::IDataSystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 

@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::server_side::data_sources {
+namespace launchdarkly::server_side::data_retrieval {
 
 class IBootstrapper {
    public:
@@ -29,4 +29,4 @@ class IBootstrapper {
     IBootstrapper() = default;
 };
 
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_retrieval

@@ -45,12 +45,12 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
 }
 
 void DataStoreUpdater::Upsert(std::string const& key,
-                              data_sources::FlagDescriptor flag) {
+                              data_model::FlagDescriptor flag) {
     UpsertCommon(DataKind::kFlag, key, source_.GetFlag(key), std::move(flag));
 }
 
 void DataStoreUpdater::Upsert(std::string const& key,
-                              data_sources::SegmentDescriptor segment) {
+                              data_model::SegmentDescriptor segment) {
     UpsertCommon(DataKind::kSegment, key, source_.GetSegment(key),
                  std::move(segment));
 }
