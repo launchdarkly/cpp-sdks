@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace launchdarkly::server_side::data_system::pull {
+namespace launchdarkly::server_side::data_retrieval::pull {
 class SegmentKind : public persistence::IPersistentKind {
    public:
     std::string const& Namespace() const override;
@@ -31,4 +31,4 @@ struct Kinds {
     static FlagKind const Flag;
     static SegmentKind const Segment;
 };
-}  // namespace launchdarkly::server_side::data_system::pull
+}  // namespace launchdarkly::server_side::data_retrieval::pull

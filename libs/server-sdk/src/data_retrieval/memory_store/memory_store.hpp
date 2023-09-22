@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include "../data_destination_interface.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class MemoryStore : public data_sources::IDataDestination {
    public:
@@ -42,4 +42,4 @@ class MemoryStore : public data_sources::IDataDestination {
     mutable std::mutex data_mutex_;
 };
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

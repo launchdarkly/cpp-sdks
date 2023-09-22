@@ -2,7 +2,7 @@
 
 #include <boost/asio/post.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 void NullDataSource::Start() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
@@ -19,4 +19,4 @@ NullDataSource::NullDataSource(boost::asio::any_io_executor exec,
                                DataSourceStatusManager& status_manager)
     : status_manager_(status_manager), exec_(exec) {}
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

@@ -3,7 +3,7 @@
 #include "../interfaces/data_pull_source.hpp"
 #include "../interfaces/serialzied_data_pull_source.hpp"
 
-namespace launchdarkly::server_side::data_system::adapters {
+namespace launchdarkly::server_side::data_retrieval::adapters {
 
 class JsonSource : public IPullSource {
    public:
@@ -19,4 +19,4 @@ class JsonSource : public IPullSource {
     ISerializedDataSource& source_;
 };
 
-}  // namespace launchdarkly::server_side::data_system::adapters
+}  // namespace launchdarkly::server_side::data_retrieval::adapters

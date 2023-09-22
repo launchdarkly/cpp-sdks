@@ -15,7 +15,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class PullModeSource : public IDataSource, public ISynchronizer {
    public:
@@ -127,4 +127,4 @@ class PullModeSource : public IDataSource, public ISynchronizer {
     std::shared_ptr<ISynchronizer> synchronizer_;
     std::shared_ptr<IBootstrapper> bootstrapper_;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

@@ -12,7 +12,7 @@
 #include <set>
 #include <string>
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_retrieval {
 
 /**
  * Class used to maintain a set of dependencies. Each dependency may be either
@@ -152,4 +152,4 @@ class DependencyTracker {
         std::vector<data_model::Clause> const& clauses);
 };
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_retrieval

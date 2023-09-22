@@ -3,7 +3,7 @@
 #include <optional>
 #include <string>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 /**
  * A versioned item which can be stored in a persistent store.
@@ -96,4 +96,4 @@ uint64_t PersistentStore::FlagKind::Version(std::string const& data) const {
     return GetVersion<data_model::Flag>(data);
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

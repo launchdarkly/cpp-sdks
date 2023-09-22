@@ -13,7 +13,7 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class PollingDataSource
     : public IDataPushSource,
@@ -54,4 +54,4 @@ class PollingDataSource
     void StartPollingTimer();
 };
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

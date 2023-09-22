@@ -7,7 +7,7 @@
 #include <optional>
 #include <string>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 /**
  * Interface for a data source that provides feature flags and related data in a
@@ -74,4 +74,4 @@ class ISerializedDataPullSource {
    protected:
     ISerializedDataPullSource() = default;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

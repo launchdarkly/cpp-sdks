@@ -3,7 +3,7 @@
 #include <launchdarkly/signals/boost_signal_connection.hpp>
 #include <utility>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
     launchdarkly::server_side::IChangeNotifier::ChangeHandler handler) {
@@ -73,4 +73,4 @@ DataStoreUpdater::DataStoreUpdater(IDataDestination& sink,
                                    data_sources::IDataSource const& source)
     : sink_(sink), source_(source) {}
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

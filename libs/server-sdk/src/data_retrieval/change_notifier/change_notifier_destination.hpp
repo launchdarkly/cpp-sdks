@@ -1,16 +1,17 @@
 #pragma once
 
-#include "../data_sources/data_destination_interface.hpp"
-#include "../data_sources/data_source_interface.hpp"
-#include "dependency_tracker.hpp"
+#include "../dependency_tracker/dependency_tracker.hpp"
+#include "../interfaces/data_dest/data_destination.hpp"
+#include "../interfaces/data_source/data_pull_source.hpp"
 
+#include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/server_side/change_notifier.hpp>
 
 #include <boost/signals2/signal.hpp>
 
 #include <memory>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class DataStoreUpdater : public IDataDestination, public IChangeNotifier {
    public:
@@ -24,16 +25,15 @@ class DataStoreUpdater : public IDataDestination, public IChangeNotifier {
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDataDestination& sink,
-                     data_sources::IDataSource const& source);
+    DataStoreUpdater(IDataDestination& sink, IDataPullSource const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
     void Init(launchdarkly::data_model::SDKDataSet data_set) override;
     void Upsert(std::string const& key,
-                data_sources::FlagDescriptor flag) override;
+                data_model::FlagDescriptor flag) override;
     void Upsert(std::string const& key,
-                data_sources::SegmentDescriptor segment) override;
+                data_model::SegmentDescriptor segment) override;
     ~DataStoreUpdater() override = default;
 
     DataStoreUpdater(DataStoreUpdater const& item) = delete;
@@ -119,4 +119,4 @@ class DataStoreUpdater : public IDataDestination, public IChangeNotifier {
 
     DependencyTracker dependency_tracker_;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

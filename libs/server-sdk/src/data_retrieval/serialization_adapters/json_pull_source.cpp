@@ -1,6 +1,6 @@
 #include "json_pull_source.hpp"
 
-namespace launchdarkly::server_side::data_system::adapters {
+namespace launchdarkly::server_side::data_retrieval::adapters {
 
 template <typename TData>
 static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
@@ -53,4 +53,4 @@ std::string JsonSource::Identity() const {
     return source_.Identity();
 }
 
-}  // namespace launchdarkly::server_side::data_system::adapters
+}  // namespace launchdarkly::server_side::data_retrieval::adapters

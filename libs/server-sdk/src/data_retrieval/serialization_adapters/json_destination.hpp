@@ -3,7 +3,7 @@
 #include "../interfaces/data_destination.hpp"
 #include "../interfaces/serialized_data_destination.hpp"
 
-namespace launchdarkly::server_side::data_system::adapters {
+namespace launchdarkly::server_side::data_retrieval::adapters {
 
 class JsonDestination : public IDataDestination {
    public:
@@ -18,4 +18,4 @@ class JsonDestination : public IDataDestination {
     ISerializedDataDestination& dest_;
 };
 
-}  // namespace launchdarkly::server_side::data_system::adapters
+}  // namespace launchdarkly::server_side::data_retrieval::adapters

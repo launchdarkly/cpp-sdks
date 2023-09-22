@@ -3,7 +3,7 @@
 #include "../polling_data_source.hpp"
 #include "../streaming_data_source.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 using namespace config::shared::built;
 
@@ -71,4 +71,4 @@ PushModeSource::AllSegments() const {
     return store_.AllSegments();
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

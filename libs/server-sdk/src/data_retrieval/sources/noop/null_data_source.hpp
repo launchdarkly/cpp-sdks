@@ -6,7 +6,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class NullDataSource : public ISynchronizer {
    public:
@@ -23,4 +23,4 @@ class NullDataSource : public ISynchronizer {
     boost::asio::any_io_executor exec_;
 };
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

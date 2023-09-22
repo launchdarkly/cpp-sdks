@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class IDataPullSource {
    public:
@@ -55,4 +55,4 @@ class IDataPullSource {
     IPullSource() = default;
 };
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

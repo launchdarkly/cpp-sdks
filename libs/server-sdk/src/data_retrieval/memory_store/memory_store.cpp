@@ -2,7 +2,7 @@
 
 #include "memory_store.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 std::shared_ptr<FlagDescriptor> MemoryStore::GetFlag(
     std::string const& key) const {
@@ -72,4 +72,4 @@ void MemoryStore::Upsert(std::string const& key,
     segments_[key] = std::make_shared<SegmentDescriptor>(std::move(segment));
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

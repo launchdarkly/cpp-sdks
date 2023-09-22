@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/sse/client.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class StreamingDataSource final
     : public IDataPushSource,
@@ -52,4 +52,4 @@ class StreamingDataSource final
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

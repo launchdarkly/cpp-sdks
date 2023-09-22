@@ -15,7 +15,7 @@
 
 #include "tl/expected.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 static char const* const kErrorParsingPut = "Could not parse PUT message";
 static char const* const kErrorPutInvalid =
@@ -238,4 +238,4 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

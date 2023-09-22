@@ -5,7 +5,7 @@
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/data_model/sdk_data_set.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 class ISerializedDataDestination {
    public:
@@ -65,4 +65,4 @@ class ISerializedDataDestination {
    protected:
     ISerializedDataDestination() = default;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

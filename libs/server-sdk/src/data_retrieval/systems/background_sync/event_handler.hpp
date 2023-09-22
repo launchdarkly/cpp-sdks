@@ -14,7 +14,7 @@
 #include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 // The FlagsPath and SegmentsPath are made to turn a string literal into a type
 // for use in a template.
@@ -120,4 +120,4 @@ class DataSourceEventHandler {
     Logger const& logger_;
     DataSourceStatusManager& status_manager_;
 };
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

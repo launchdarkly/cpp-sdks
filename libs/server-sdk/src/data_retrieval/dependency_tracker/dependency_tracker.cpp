@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_retrieval {
 
 DependencySet::DependencySet()
     : data_{
@@ -194,4 +194,4 @@ void DependencyTracker::Clear() {
     dependencies_from_.Clear();
 }
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_retrieval

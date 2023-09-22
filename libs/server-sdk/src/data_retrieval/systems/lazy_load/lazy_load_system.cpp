@@ -8,7 +8,7 @@
 
 #include "data_version_inspectors.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 using namespace config::shared::built;
 
@@ -150,4 +150,4 @@ void PullModeSource::RefreshFlag(std::string const& key) const {
     // TODO: If there is an actual error, then do we not reset the tracking?
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

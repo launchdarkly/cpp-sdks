@@ -13,7 +13,7 @@
 #include "data_source_update_sink.hpp"
 #include "polling_data_source.hpp"
 
-namespace launchdarkly::server_side::data_system {
+namespace launchdarkly::server_side::data_retrieval {
 
 static char const* const kErrorParsingPut = "Could not parse polling payload";
 static char const* const kErrorPutInvalid =
@@ -235,4 +235,4 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
     }
 }
 
-}  // namespace launchdarkly::server_side::data_system
+}  // namespace launchdarkly::server_side::data_retrieval

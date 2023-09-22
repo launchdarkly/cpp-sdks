@@ -10,7 +10,7 @@
 
 #include "data_kind.hpp"
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_retrieval {
 /**
  * Class which can be used to tag a collection with the DataKind that collection
  * is for. This is primarily to decrease the complexity of iterating collections
@@ -34,4 +34,4 @@ class TaggedData {
     Storage storage_;
 };
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_retrieval
