@@ -32,7 +32,7 @@ auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 using config::shared::ServerSDK;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
-using launchdarkly::server_side::data_sources::DataSourceStatus;
+using launchdarkly::server_side::data_system::DataSourceStatus;
 
 // static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
 // MakeDataSource(HttpProperties const& http_properties,
@@ -53,13 +53,13 @@ using launchdarkly::server_side::data_sources::DataSourceStatus;
 //     if (config.DataSourceConfig().method.index() == 0) {
 //         // TODO: use initial reconnect delay.
 //         return std::make_shared<
-//             launchdarkly::server_side::data_sources::StreamingDataSource>(
+//             launchdarkly::server_side::data_system::StreamingDataSource>(
 //             config.ServiceEndpoints(), config.DataSourceConfig(),
 //             data_source_properties, executor, flag_updater, status_manager,
 //             logger);
 //     }
 //     return std::make_shared<
-//         launchdarkly::server_side::data_sources::PollingDataSource>(
+//         launchdarkly::server_side::data_system::PollingDataSource>(
 //         config.ServiceEndpoints(), config.DataSourceConfig(),
 //         data_source_properties, executor, flag_updater, status_manager,
 //         logger);

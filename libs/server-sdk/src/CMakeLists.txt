@@ -22,22 +22,20 @@ target_sources(${LIBNAME}
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
-        data_sources/data_store_updater.cpp
-        data_sources/dependency_tracker.hpp
-        data_sources/dependency_tracker.cpp
-        data_sources/descriptors.hpp
-        data_sources/memory_store/memory_store.cpp
-        data_sources/adapters/json_destination.cpp
-        data_sources/adapters/json_source.cpp
-        data_sources/data_source_event_handler.cpp
-        data_sources/data_source_event_handler.hpp
-        data_sources/data_source_status.cpp
-        data_sources/implementations/polling/polling_data_source.cpp
-        data_sources/implementations/streaming/streaming_data_source.cpp
-        data_sources/implementations/noop/null_data_source.cpp
-        data_sources/data_source_status_manager.hpp
-        data_sources/pull_mode/pull_mode_data_source.cpp
-        data_sources/push_mode/push_mode_data_source.cpp
+        data_retrieval/change_notifier/change_notifier_destination.cpp
+        data_retrieval/dependency_tracker/dependency_tracker.cpp
+        data_retrieval/memory_store/memory_store.cpp
+        data_retrieval/serialization_adapters/json_destination.cpp
+        data_retrieval/serialization_adapters/json_pull_source.cpp
+        data_retrieval/sources/noop/null_data_source.cpp
+        data_retrieval/sources/streaming/streaming_data_source.cpp
+        data_retrieval/sources/polling/polling_data_source.cpp
+        data_retrieval/status_notifications/data_source_status.cpp
+        data_retrieval/systems/background_sync/background_sync_system.cpp
+        data_retrieval/systems/background_sync/event_handler.cpp
+        data_retrieval/systems/lazy_load/data_version_inspectors.cpp
+        data_retrieval/systems/lazy_load/lazy_load_system.cpp
+        data_retrieval/systems/lazy_load/expiration/expiration_tracker.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

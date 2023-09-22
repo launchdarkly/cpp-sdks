@@ -13,7 +13,7 @@
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/data_sources/data_source_status_base.hpp>
 
-namespace launchdarkly::server_side::data_sources {
+namespace launchdarkly::server_side::data_system {
 
 /**
  * Enumeration of possible data source states.
@@ -114,4 +114,4 @@ std::ostream& operator<<(std::ostream& out,
 
 std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status);
 
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_system

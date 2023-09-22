@@ -28,7 +28,7 @@ struct Detail;
 
 #define TO_DATASOURCESTATUS(ptr) \
     (reinterpret_cast<           \
-        launchdarkly::server_side::data_sources::DataSourceStatus*>(ptr))
+        launchdarkly::server_side::data_system::DataSourceStatus*>(ptr))
 #define FROM_DATASOURCESTATUS(ptr) \
     (reinterpret_cast<LDServerDataSourceStatus>(ptr))
 

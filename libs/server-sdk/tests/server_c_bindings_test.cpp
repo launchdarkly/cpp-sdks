@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-using launchdarkly::server_side::data_sources::DataSourceStatus;
+using launchdarkly::server_side::data_system::DataSourceStatus;
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
