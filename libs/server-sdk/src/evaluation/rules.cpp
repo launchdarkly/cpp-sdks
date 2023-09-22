@@ -15,7 +15,7 @@ bool MaybeNegate(Clause const& clause, bool value) {
 
 tl::expected<bool, Error> Match(Flag::Rule const& rule,
                                 launchdarkly::Context const& context,
-                                data_sources::IDataSource const& store,
+                                data_retrieval::IDataStore const& store,
                                 detail::EvaluationStack& stack) {
     for (Clause const& clause : rule.clauses) {
         tl::expected<bool, Error> result = Match(clause, context, store, stack);
@@ -31,7 +31,7 @@ tl::expected<bool, Error> Match(Flag::Rule const& rule,
 
 tl::expected<bool, Error> Match(Segment::Rule const& rule,
                                 Context const& context,
-                                data_sources::IDataSource const& store,
+                                data_retrieval::IDataStore const& store,
                                 detail::EvaluationStack& stack,
                                 std::string const& key,
                                 std::string const& salt) {
@@ -61,7 +61,7 @@ tl::expected<bool, Error> Match(Segment::Rule const& rule,
 
 tl::expected<bool, Error> Match(Clause const& clause,
                                 launchdarkly::Context const& context,
-                                data_sources::IDataSource const& store,
+                                data_retrieval::IDataStore const& store,
                                 detail::EvaluationStack& stack) {
     if (clause.op == Clause::Op::kSegmentMatch) {
         return MatchSegment(clause, context, store, stack);
@@ -71,7 +71,7 @@ tl::expected<bool, Error> Match(Clause const& clause,
 
 tl::expected<bool, Error> MatchSegment(Clause const& clause,
                                        launchdarkly::Context const& context,
-                                       data_sources::IDataSource const& store,
+                                       data_retrieval::IDataStore const& store,
                                        detail::EvaluationStack& stack) {
     for (Value const& value : clause.values) {
         // A segment key represented as a Value is a string; non-strings are
@@ -153,7 +153,7 @@ tl::expected<bool, Error> MatchNonSegment(
 
 tl::expected<bool, Error> Contains(Segment const& segment,
                                    Context const& context,
-                                   data_sources::IDataSource const& store,
+                                   data_retrieval::IDataStore const& store,
                                    detail::EvaluationStack& stack) {
     auto guard = stack.NoticeSegment(segment.key);
     if (!guard) {

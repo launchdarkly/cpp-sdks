@@ -1,14 +1,14 @@
 #pragma once
 
+#include "../../interfaces/data_system.hpp"
+#include "../../memory_store/memory_store.hpp"
+#include "../../status_notifications/data_source_status_manager.hpp"
+
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
-
-#include "../../interfaces/data_system.hpp"
-#include "../../memory_store/memory_store.hpp"
-#include "../../status_notifications/data_source_status_manager.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -37,9 +37,10 @@ class BackgroundSync : public IDataSystem {
         std::string const& key) const override;
     std::shared_ptr<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const override;
-    std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>> AllFlags()
-        const override;
-    std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
+    std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
+    AllFlags() const override;
+    std::unordered_map<std::string,
+                       std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
    private:

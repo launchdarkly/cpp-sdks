@@ -1,8 +1,5 @@
 #include "lazy_load_system.hpp"
 
-#include "../adapters/json_destination.hpp"
-#include "../adapters/json_source.hpp"
-
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
@@ -19,68 +16,45 @@ LazyLoad::LazyLoad(
     boost::asio::any_io_executor ioc,
     DataSourceStatusManager& status_manager,
     Logger const& logger)
-    : store_(), synchronizer_(), bootstrapper_() {}
+    : store_() {}
 
 std::string const& LazyLoad::Identity() const {
     // TODO: Obtain more specific info
-    static std::string id = "generic pull-mode source";
+    static std::string id = "generic lazy-loader";
 }
 
-ISynchronizer* LazyLoad::GetSynchronizer() {
-    return reinterpret_cast<ISynchronizer*>(this);
-}
+void LazyLoad::Initialize() {}
 
-IBootstrapper* LazyLoad::GetBootstrapper() {
-    // Bootstrapping is not supported in Pull Mode sources yet.
-    // It would be simple: perform a get all.
-    return nullptr;
-}
-
-void LazyLoad::Init(std::optional<data_model::SDKDataSet> initial_data,
-                    IDataDestination& destination) {
-    // TODO: implement
-    // This would happen if we bootstrapped from some source, and now that
-    // data is being passed here for management.
-    // The data would need to be sorted before passing furthur.
-}
-void LazyLoad::Start() {
-    // No-op, because we all data is pulled on demand.
-}
-void LazyLoad::ShutdownAsync(std::function<void()>) {
-    // Similar to Start, also a no-op since there's nothing to shutdown
-    // (perhaps explicitly close database client?)
-}
-
-std::shared_ptr<FlagDescriptor> LazyLoad::GetFlag(
+std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     std::string const& key) const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
-    return Get<std::shared_ptr<FlagDescriptor>>(
+    return Get<std::shared_ptr<data_model::FlagDescriptor>>(
         state, [this, &key]() { RefreshFlag(key); },
         [this, &key]() { return memory_store_.GetFlag(key); });
 }
 
-std::shared_ptr<SegmentDescriptor> LazyLoad::GetSegment(
+std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
     std::string const& key) const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
-    return Get<std::shared_ptr<SegmentDescriptor>>(
+    return Get<std::shared_ptr<data_model::SegmentDescriptor>>(
         state, [this, &key]() { RefreshSegment(key); },
         [this, &key]() { return memory_store_.GetSegment(key); });
 }
 
-std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>
+std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
 LazyLoad::AllFlags() const {
     auto state = tracker_.State(Keys::kAllFlags, time_());
-    return Get<
-        std::unordered_map<std::string, std::shared_ptr<FlagDescriptor>>>(
+    return Get<std::unordered_map<std::string,
+                                  std::shared_ptr<data_model::FlagDescriptor>>>(
         state, [this]() { RefreshAllFlags(); },
         [this]() { return memory_store_.AllFlags(); });
 }
 
-std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>
+std::unordered_map<std::string, std::shared_ptr<data_model::SegmentDescriptor>>
 LazyLoad::AllSegments() const {
     auto state = tracker_.State(Keys::kAllSegments, time_());
-    return Get<
-        std::unordered_map<std::string, std::shared_ptr<SegmentDescriptor>>>(
+    return Get<std::unordered_map<
+        std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
         state, [this]() { RefreshAllSegments(); },
         [this]() { return memory_store_.AllSegments(); });
 }

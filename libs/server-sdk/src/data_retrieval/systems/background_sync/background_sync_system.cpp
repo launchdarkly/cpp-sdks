@@ -39,7 +39,7 @@ BackgroundSync::BackgroundSync(
 
 std::string const& BackgroundSync::Identity() const {
     // TODO: Obtain more specific info
-    static std::string id = "generic push-mode source";
+    static std::string id = "generic background-sync";
     return id;
 }
 
