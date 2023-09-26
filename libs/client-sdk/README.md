@@ -69,6 +69,37 @@ gcc -I $(pwd)/include -Llib -fPIE -g main.c liblaunchdarkly-cpp-client.so
 The examples here are to help with getting started, but generally speaking the SDK should be incorporated using your
 build system (CMake for instance).
 
+
+### CMake Usage
+
+First, add the SDK to your project:
+```cmake
+add_subdirectory(path-to-sdk-repo)
+```
+Currently `find_package` is not yet supported.
+
+This will expose the `launchdarkly::client` target. Next, link the target to your executable or library:
+```cmake
+target_link_libraries(my-target PRIVATE launchdarkly::client)
+```
+
+Various CMake options are available to customize the SDK build. 
+
+| Option                    | Description                                                                         | Default             |
+|---------------------------|-------------------------------------------------------------------------------------|---------------------|
+| `LD_BUILD_TESTING`        | Whether C++ unit tests are built.                                                   | On                  |
+| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled (only has an effect if `LD_BUILD_TESTING=On`). | On                  |
+| `LD_BUILD_SHARED_LIBS`    | Whether the SDK is built as a static or shared library.                             | Off  (static lib)   |
+| `LD_STATIC_LINK_OPENSSL`  | Whether OpenSSL should be statically or dynamically linked.                         | On    (static link) |
+| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service, used in CI, is built.                            | Off                 |
+| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                       | On                  |
+
+
+Example usage:
+```bash
+cmake -GNinja .. -DLD_BUILD_SHARED_LIBS=On
+```
+
 Learn more
 -----------
 

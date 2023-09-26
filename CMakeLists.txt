@@ -3,6 +3,7 @@
 
 # Required for Apple Silicon support.
 cmake_minimum_required(VERSION 3.19)
+include(CMakeDependentOption)
 
 project(
         LaunchDarklyCPPSDKs
@@ -13,6 +14,31 @@ project(
 
 include(GNUInstallDirs)
 
+option(LD_BUILD_TESTING "Build the C++ unit tests." ON)
+
+# If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
+cmake_dependent_option(LD_TESTING_SANITIZERS
+        "Enable sanitizers for unit tests."
+        ON                      # default to enabling unit tests
+        LD_BUILD_TESTING        # only expose if testing..
+        OFF                     # otherwise, off
+)
+
+option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
+
+# The general strategy is to produce a fat artifact containing all of our dependencies so users
+# only have a single thing to link. We should support this either being a static or shared library.
+# Because OpenSSL is a large, and security relevant dependency, we should have a separate option
+# to link against that statically or dynamically.
+
+option(LD_STATIC_LINK_OPENSSL
+        "Link OpenSSL as a static library or as a shared library"
+        ON  # default to linking OpenSSL statically
+)
+
+option(LD_BUILD_CONTRACT_TESTS "Enable contract test service." OFF)
+option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
+
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -20,15 +46,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(BUILD_TESTING "Enable C++ unit tests." ON)
 
-# If you want to run the unit tests with valgrind, then TESTING_SANITIZERS must of OFF.
-option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
-
-if (BUILD_TESTING)
+if (LD_BUILD_TESTING)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
-    if (TESTING_SANITIZERS)
+    if (LD_TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak")
         elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -53,13 +75,22 @@ if (BUILD_TESTING)
     enable_testing()
 endif ()
 
-set(OPENSSL_USE_STATIC_LIBS ON)
+if (LD_STATIC_LINK_OPENSSL)
+    message(STATUS "LaunchDarkly: searching for static OpenSSL library")
+    set(OPENSSL_USE_STATIC_LIBS ON)
+else ()
+    message(STATUS "LaunchDarkly: searching for shared OpenSSL library")
+    set(OPENSSL_USE_STATIC_LIBS OFF)
+endif ()
+
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
+# Even though the main SDK might be a static or shared lib, boost should always statically
+# linked into the binary.
 set(Boost_USE_STATIC_LIBS ON)
 
-if (BUILD_SHARED_LIBS)
+if (NOT LD_BUILD_STATIC_LIBS)
     # When building a shared library we hide all symbols
     # aside from this we have specifically exported for the C-API.
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -71,25 +102,22 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
-add_subdirectory(libs/client-sdk)
+include(${CMAKE_FILES}/certify.cmake)
+add_subdirectory(vendor/foxy)
 
-set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
-set(BUILD_SHARED_LIBS OFF)
-
-# Always build the common libraries as static libs.
+# Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 
-set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+# Built as static or shared depending on LD_BUILD_STATIC_LIBS variable.
+# This target "links" in common, internal, and sse as object libraries.
+add_subdirectory(libs/client-sdk)
 
-set(BUILD_TESTING OFF)
-include(${CMAKE_FILES}/certify.cmake)
-add_subdirectory(vendor/foxy)
+if (LD_BUILD_CONTRACT_TESTS)
+    add_subdirectory(contract-tests)
+endif ()
 
-set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
-
-set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")
-
-add_subdirectory(contract-tests)
-add_subdirectory(examples)
+if (LD_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif ()

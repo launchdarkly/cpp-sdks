@@ -17,6 +17,6 @@ cd build
 # script ends.
 trap cleanup EXIT
 
-cmake -G Ninja -D BUILD_TESTING="$2" ..
+cmake -G Ninja -D LD_BUILD_TESTING="$2" ..
 
 cmake --build . --target "$1"
