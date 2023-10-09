@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-
 #include <launchdarkly/value.hpp>
 
 #include <cstring>
