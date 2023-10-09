@@ -57,12 +57,12 @@ jobs:
       - name: Upgrade OpenSSL
         shell: bash
         run: |
-          choco upgrade openssl --no-progress
+          choco install openssl --no-progress --install-directory='C:\Program Files\OpenSSL'
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:
-          OPENSSL_ROOT_DIR: 'C:\Program Files\OpenSSL-Win64'
+          OPENSSL_ROOT_DIR: 'C:\Program Files\OpenSSL'
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
           BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:
