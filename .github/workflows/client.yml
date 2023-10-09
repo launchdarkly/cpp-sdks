@@ -57,7 +57,7 @@ jobs:
       - name: Upgrade OpenSSL
         shell: bash
         run: |
-          choco install openssl --no-progress
+          choco upgrade openssl --no-progress
       - name: Determine OpenSSL Installation Directory
         shell: bash
         run: |
