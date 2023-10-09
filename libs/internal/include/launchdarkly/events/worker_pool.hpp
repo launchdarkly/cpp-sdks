@@ -24,8 +24,6 @@ namespace launchdarkly::events {
  */
 class WorkerPool {
    public:
-    using ServerTimeCallback =
-        std::function<void(std::chrono::system_clock::time_point)>;
     /**
      * Constructs a new WorkerPool.
      * @param io The executor used for all workers.

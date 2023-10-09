@@ -28,6 +28,8 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
             return "server responded with an invalid redirection";
         case sse::Error::UnrecoverableClientError:
             return "unrecoverable client-side error";
+        case sse::Error::ReadTimeout:
+            return "read timeout reached";
     }
     launchdarkly::detail::unreachable();
 }
@@ -140,7 +142,7 @@ void StreamingDataSource::Start() {
 
     client_builder.logger([weak_self](auto msg) {
         if (auto self = weak_self.lock()) {
-            LD_LOG(self->logger_, LogLevel::kDebug) << msg;
+            LD_LOG(self->logger_, LogLevel::kDebug) << "sse-client: " << msg;
         }
     });
 
@@ -165,7 +167,7 @@ void StreamingDataSource::Start() {
             kCouldNotParseEndpoint);
         return;
     }
-    client_->run();
+    client_->async_connect();
 }
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {

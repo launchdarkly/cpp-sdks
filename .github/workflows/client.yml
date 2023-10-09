@@ -41,10 +41,9 @@ jobs:
     runs-on: macos-12
     steps:
       - run: |
-          brew link --overwrite openssl@1.1
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)" >> "$GITHUB_ENV"
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
           # For debugging
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@1.1)"
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
         env:
@@ -55,11 +54,15 @@ jobs:
   build-test-windows:
     runs-on: windows-2022
     steps:
+      - name: Upgrade OpenSSL
+        shell: bash
+        run: |
+          choco upgrade openssl --no-progress
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:
-          OPENSSL_ROOT_DIR: 'C:\Program Files\OpenSSL'
+          OPENSSL_ROOT_DIR: 'C:\Program Files\OpenSSL-Win64'
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
           BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:

@@ -2,6 +2,28 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
+
+## [3.0.8](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.7...launchdarkly-cpp-client-v3.0.8) (2023-09-13)
+
+
+### Bug Fixes
+
+* stream connections longer than 5 minutes are dropped  ([#244](https://github.com/launchdarkly/cpp-sdks/issues/244)) ([e12664f](https://github.com/launchdarkly/cpp-sdks/commit/e12664f830c84c17242fe9f032d570796555f3d1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.8 to 0.1.9
+    * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
+    * launchdarkly-cpp-sse-client bumped from 0.1.2 to 0.1.3
+
 ## [3.0.7](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.6...launchdarkly-cpp-client-v3.0.7) (2023-08-31)
 
 
