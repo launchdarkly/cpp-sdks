@@ -61,7 +61,7 @@ jobs:
       - name: Determine OpenSSL Installation Directory
         shell: bash
         run: |
-          if [-d "C:\Program Files\OpenSSL-Win64"]; then
+          if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
             echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
           else
             echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
