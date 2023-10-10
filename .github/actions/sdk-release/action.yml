@@ -103,10 +103,8 @@ runs:
       run: |
         if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
           echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
-          echo "OpenSSL was installed to Program Files\OpenSSL-Win64"
         else
           echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
-          echo "OpenSSL was installed to Program Files\OpenSSL"
         fi
     - name: Build Windows Artifacts
       if: runner.os == 'Windows'
