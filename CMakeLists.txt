@@ -47,7 +47,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-if (LD_BUILD_TESTING)
+if (LD_BUILD_TESTING AND BUILD_TESTING)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (LD_TESTING_SANITIZERS)
@@ -114,7 +114,7 @@ add_subdirectory(libs/server-sent-events)
 # This target "links" in common, internal, and sse as object libraries.
 add_subdirectory(libs/client-sdk)
 
-if (LD_BUILD_CONTRACT_TESTS)
+if (LD_BUILD_CONTRACT_TESTS AND BUILD_TESTING)
     add_subdirectory(contract-tests)
 endif ()
 

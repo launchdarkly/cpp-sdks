@@ -30,6 +30,6 @@ include(FetchContent)
 # Add main SDK sources.
 add_subdirectory(src)
 
-if (LD_BUILD_TESTING)
+if (LD_BUILD_TESTING AND BUILD_TESTING)
     add_subdirectory(tests)
 endif ()
