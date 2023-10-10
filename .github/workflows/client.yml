@@ -58,11 +58,19 @@ jobs:
         shell: bash
         run: |
           choco upgrade openssl --no-progress
+      - name: Determine OpenSSL Installation Directory
+        shell: bash
+        run: |
+          if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
+            echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
+          else
+            echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
+          fi
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:
-          OPENSSL_ROOT_DIR: 'C:\Program Files\OpenSSL-Win64'
+          OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
           BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:
