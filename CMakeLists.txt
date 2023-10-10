@@ -14,14 +14,28 @@ project(
 
 include(GNUInstallDirs)
 
-option(LD_BUILD_TESTING "Build the C++ unit tests." ON)
+option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
+
+cmake_dependent_option(LD_BUILD_TESTING
+        "Build the C++ unit tests."
+        ON                  # default to enabling unit tests
+        BUILD_TESTING       # only exposed if top-level switch is on..
+        OFF                 # otherwise, off
+)
 
 # If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
 cmake_dependent_option(LD_TESTING_SANITIZERS
         "Enable sanitizers for unit tests."
         ON                      # default to enabling sanitizers
-        LD_BUILD_TESTING        # only expose if testing..
+        LD_BUILD_TESTING        # only expose if unit tests enabled..
         OFF                     # otherwise, off
+)
+
+cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
+        "Build contract test service."
+        OFF             # default to disabling contract tests, since they require running a service
+        BUILD_TESTING   # only expose if top-level switch is on..
+        OFF             # otherwise, off
 )
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
@@ -36,7 +50,6 @@ option(LD_STATIC_LINK_OPENSSL
         ON  # default to linking OpenSSL statically
 )
 
-option(LD_BUILD_CONTRACT_TESTS "Enable contract test service." OFF)
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
 # All projects in this repo should share the same version of 3rd party depends.
@@ -47,7 +60,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-if (LD_BUILD_TESTING AND BUILD_TESTING)
+if (LD_BUILD_TESTING)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (LD_TESTING_SANITIZERS)
@@ -114,7 +127,7 @@ add_subdirectory(libs/server-sent-events)
 # This target "links" in common, internal, and sse as object libraries.
 add_subdirectory(libs/client-sdk)
 
-if (LD_BUILD_CONTRACT_TESTS AND BUILD_TESTING)
+if (LD_BUILD_CONTRACT_TESTS)
     add_subdirectory(contract-tests)
 endif ()
 
