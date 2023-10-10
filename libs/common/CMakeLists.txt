@@ -30,6 +30,6 @@ include(${CMAKE_FILES}/expected.cmake)
 # Add main SDK sources.
 add_subdirectory(src)
 
-if (BUILD_TESTING)
+if (LD_BUILD_TESTING)
     add_subdirectory(tests)
 endif ()

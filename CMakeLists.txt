@@ -19,7 +19,7 @@ option(LD_BUILD_TESTING "Build the C++ unit tests." ON)
 # If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
 cmake_dependent_option(LD_TESTING_SANITIZERS
         "Enable sanitizers for unit tests."
-        ON                      # default to enabling unit tests
+        ON                      # default to enabling sanitizers
         LD_BUILD_TESTING        # only expose if testing..
         OFF                     # otherwise, off
 )
