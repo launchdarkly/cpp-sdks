@@ -5,7 +5,7 @@
 # ./scripts/build.sh my-build-target ON
 #
 # $1 the name of the target. For example "launchdarkly-cpp-common".
-# $2 ON/OFF which enables/disables building in a test configuration.
+# $2 ON/OFF which enables/disables building in a test configuration (unit tests + contract tests.)
 
 function cleanup {
   cd ..
@@ -17,6 +17,6 @@ cd build
 # script ends.
 trap cleanup EXIT
 
-cmake -G Ninja -D LD_BUILD_TESTING="$2" ..
+cmake -G Ninja -D LD_BUILD_TESTING="$2" -D LD_BUILD_CONTRACT_TESTS="$2" ..
 
 cmake --build . --target "$1"
