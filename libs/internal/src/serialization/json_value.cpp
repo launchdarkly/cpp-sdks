@@ -1,3 +1,4 @@
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
@@ -48,7 +49,7 @@ Value tag_invoke(boost::json::value_to_tag<launchdarkly::Value> const& unused,
     }
     // The above switch is exhaustive, so this can only happen if a new
     // type is added to boost::json::value.
-    assert(!"All types need to be handled.");
+    launchdarkly::detail::unreachable();
 }
 
 void tag_invoke(boost::json::value_from_tag const&,
