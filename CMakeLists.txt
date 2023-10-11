@@ -16,7 +16,7 @@ include(GNUInstallDirs)
 
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
-cmake_dependent_option(LD_BUILD_TESTING
+cmake_dependent_option(LD_BUILD_UNIT_TESTS
         "Build the C++ unit tests."
         ON                  # default to enabling unit tests
         BUILD_TESTING       # only exposed if top-level switch is on..
@@ -27,7 +27,7 @@ cmake_dependent_option(LD_BUILD_TESTING
 cmake_dependent_option(LD_TESTING_SANITIZERS
         "Enable sanitizers for unit tests."
         ON                      # default to enabling sanitizers
-        LD_BUILD_TESTING        # only expose if unit tests enabled..
+        LD_BUILD_UNIT_TESTS        # only expose if unit tests enabled..
         OFF                     # otherwise, off
 )
 
@@ -60,7 +60,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-if (LD_BUILD_TESTING)
+if (LD_BUILD_UNIT_TESTS)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (LD_TESTING_SANITIZERS)
