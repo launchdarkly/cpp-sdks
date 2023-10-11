@@ -1,6 +1,6 @@
 {
-  "libs/client-sdk": "3.0.9",
+  "libs/client-sdk": "3.0.10",
   "libs/server-sent-events": "0.1.3",
-  "libs/common": "0.3.6",
-  "libs/internal": "0.1.10"
+  "libs/common": "0.3.7",
+  "libs/internal": "0.1.11"
 }
