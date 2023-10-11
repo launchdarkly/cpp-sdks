@@ -17,6 +17,6 @@ cd build
 # script ends.
 trap cleanup EXIT
 
-cmake -G Ninja -D BUILD_TESTING="$2" ..
+cmake -G Ninja -DCMAKE_COMPILE_WARNING_AS_ERROR=TRUE -D BUILD_TESTING="$2" ..
 
 cmake --build . --target "$1"
