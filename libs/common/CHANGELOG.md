@@ -12,6 +12,13 @@
   * dependencies
     * launchdarkly-cpp-sse-client bumped from 0.1.1 to 0.1.2
 
+## [0.3.7](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.6...launchdarkly-cpp-common-v0.3.7) (2023-10-11)
+
+
+### Bug Fixes
+
+* treat warnings as errors in CI ([#253](https://github.com/launchdarkly/cpp-sdks/issues/253)) ([7f4f168](https://github.com/launchdarkly/cpp-sdks/commit/7f4f168f47619d7fa8b8952feade485261c69049))
+
 ## [0.3.6](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.5...launchdarkly-cpp-common-v0.3.6) (2023-09-13)
 
 
