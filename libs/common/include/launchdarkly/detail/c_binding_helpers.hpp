@@ -6,7 +6,7 @@
 
 #include <tl/expected.hpp>
 
-namespace launchdarkly {
+namespace launchdarkly::detail {
 template <typename T, typename = void>
 struct has_result_type : std::false_type {};
 
@@ -105,5 +105,5 @@ bool OptReturnReinterpretCast(std::optional<OptType>& opt,
 
 #define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
 
-}  // namespace launchdarkly
+}  // namespace launchdarkly::detail
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

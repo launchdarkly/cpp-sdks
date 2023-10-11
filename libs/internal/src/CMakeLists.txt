@@ -5,7 +5,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/network/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
-        )
+)
 
 # Automatic library: static or dynamic based on user config.
 add_library(${LIBNAME} OBJECT
@@ -36,6 +36,11 @@ add_library(${LIBNAME} OBJECT
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
+# TODO(SC-209963): Remove once OpenSSL deprecated hash function usage has been updated
+target_compile_options(${LIBNAME} PRIVATE
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wno-deprecated-declarations>
+)
 
 set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")

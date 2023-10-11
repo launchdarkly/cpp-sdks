@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-
 #include <launchdarkly/value.hpp>
 
 #include <cstring>
@@ -7,57 +5,76 @@
 
 namespace launchdarkly {
 
-const std::string Value::empty_string_;
-const Value::Array Value::empty_vector_;
-const Value::Object Value::empty_map_;
-const Value Value::null_value_;
+std::string const Value::empty_string_;
+Value::Array const Value::empty_vector_;
+Value::Object const Value::empty_map_;
+Value const Value::null_value_;
 
-Value::Value() : type_(Value::Type::kNull), storage_{0.0} {}
+Value::Value() : storage_{null_type{}} {}
 
-Value::Value(bool boolean) : type_(Value::Type::kBool), storage_{boolean} {}
+Value::Value(bool boolean) : storage_{boolean} {}
 
-Value::Value(double num) : type_(Value::Type::kNumber), storage_{num} {}
+Value::Value(double num) : storage_{num} {}
 
-Value::Value(int num) : type_(Value::Type::kNumber), storage_{(double)num} {}
+Value::Value(int num) : storage_{(double)num} {}
 
-Value::Value(std::string str)
-    : type_(Value::Type::kString), storage_{std::move(str)} {}
+Value::Value(std::string str) : storage_{std::move(str)} {}
 
-Value::Value(char const* str)
-    : type_(Value::Type::kString), storage_{std::string(str)} {}
+Value::Value(char const* str) : storage_{std::string(str)} {}
 
-Value::Value(std::vector<Value> arr)
-    : type_(Value::Type::kArray), storage_{std::move(arr)} {}
+Value::Value(std::vector<Value> arr) : storage_{std::move(arr)} {}
 
-Value::Value(std::map<std::string, Value> obj)
-    : type_(Value::Type::kObject), storage_{std::move(obj)} {}
+Value::Value(std::map<std::string, Value> obj) : storage_{std::move(obj)} {}
+
+template <class>
+inline constexpr bool always_false_v = false;
 
 enum Value::Type Value::Type() const {
-    return type_;
+    return std::visit(
+        [](auto const& arg) {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, null_type>) {
+                return Type::kNull;
+            } else if constexpr (std::is_same_v<T, bool>) {
+                return Type::kBool;
+            } else if constexpr (std::is_same_v<T, double>) {
+                return Type::kNumber;
+            } else if constexpr (std::is_same_v<T, std::string>) {
+                return Type::kString;
+            } else if constexpr (std::is_same_v<T, Value::Array>) {
+                return Type::kArray;
+            } else if constexpr (std::is_same_v<T, Value::Object>) {
+                return Type::kObject;
+            } else {
+                static_assert(always_false_v<T>,
+                              "all value types must be visited");
+            }
+        },
+        storage_);
 }
 
 bool Value::IsNull() const {
-    return type_ == Type::kNull;
+    return std::holds_alternative<null_type>(storage_);
 }
 
 bool Value::IsBool() const {
-    return type_ == Type::kBool;
+    return std::holds_alternative<bool>(storage_);
 }
 
 bool Value::IsNumber() const {
-    return type_ == Type::kNumber;
+    return std::holds_alternative<double>(storage_);
 }
 
 bool Value::IsString() const {
-    return type_ == Type::kString;
+    return std::holds_alternative<std::string>(storage_);
 }
 
 bool Value::IsArray() const {
-    return type_ == Type::kArray;
+    return std::holds_alternative<Value::Array>(storage_);
 }
 
 bool Value::IsObject() const {
-    return type_ == Type::kObject;
+    return std::holds_alternative<Value::Object>(storage_);
 }
 
 Value const& Value::Null() {
@@ -67,42 +84,42 @@ Value const& Value::Null() {
 }
 
 bool Value::AsBool() const {
-    if (type_ == Type::kBool) {
+    if (IsBool()) {
         return std::get<bool>(storage_);
     }
     return false;
 }
 
 int Value::AsInt() const {
-    if (type_ == Type::kNumber) {
+    if (IsNumber()) {
         return static_cast<int>(std::get<double>(storage_));
     }
     return 0;
 }
 
 double Value::AsDouble() const {
-    if (type_ == Type::kNumber) {
+    if (IsNumber()) {
         return std::get<double>(storage_);
     }
     return 0.0;
 }
 
 std::string const& Value::AsString() const {
-    if (type_ == Type::kString) {
+    if (IsString()) {
         return std::get<std::string>(storage_);
     }
     return empty_string_;
 }
 
 Value::Array const& Value::AsArray() const {
-    if (type_ == Type::kArray) {
+    if (IsArray()) {
         return std::get<Array>(storage_);
     }
     return empty_vector_;
 }
 
 Value::Object const& Value::AsObject() const {
-    if (type_ == Type::kObject) {
+    if (IsObject()) {
         return std::get<Object>(storage_);
     }
     return empty_map_;
@@ -110,19 +127,17 @@ Value::Object const& Value::AsObject() const {
 
 Value::Value(std::optional<std::string> opt_str) : storage_{0.0} {
     if (opt_str.has_value()) {
-        type_ = Type::kString;
         storage_ = opt_str.value();
     } else {
-        type_ = Type::kNull;
+        storage_ = null_type{};
     }
 }
 Value::Value(std::initializer_list<Value> values)
-    : type_(Type::kArray), storage_(std::vector<Value>(values)) {}
+    : storage_(std::vector<Value>(values)) {}
 
-Value::Value(Value::Array arr)
-    : storage_(std::move(arr)), type_(Type::kArray) {}
-Value::Value(Value::Object obj)
-    : storage_(std::move(obj)), type_(Type::kObject) {}
+Value::Value(Value::Array arr) : storage_(std::move(arr)) {}
+
+Value::Value(Value::Object obj) : storage_(std::move(obj)) {}
 
 Value::Array::Iterator::Iterator(std::vector<Value>::const_iterator iterator)
     : iterator_(iterator) {}
