@@ -95,7 +95,7 @@ Various CMake options are available to customize the SDK build.
 | `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                               | Off                | `BUILD_TESTING`                           |
 | `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                          | On                 | N/A                                       |
 | `LD_BUILD_SHARED_LIBS`    | Whether the SDK is built as a static or shared library.                                | Off  (static lib)  | N/A                                       |
-| `LD_STATIC_LINK_OPENSSL`  | Whether OpenSSL should be statically or dynamically linked.                            | On   (static link) | N/A                                       |
+| `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL be dynamically linked.                                                 | Off  (static link) | N/A                                       |
 
 **Note:** _if building the SDK as a shared library, then unit tests won't be able to link correctly since the SDK's C++
 symbols aren't exposed. To run unit tests, build the SDK as a static library._

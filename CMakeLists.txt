@@ -46,9 +46,9 @@ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
 # Because OpenSSL is a large, and security relevant dependency, we should have a separate option
 # to link against that statically or dynamically.
 
-option(LD_STATIC_LINK_OPENSSL
-        "Link OpenSSL as a static library or as a shared library"
-        ON  # default to linking OpenSSL statically
+option(LD_DYNAMIC_LINK_OPENSSL
+        "Dynamically link OpenSSL instead of building with static library"
+        OFF # default to linking OpenSSL statically
 )
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
@@ -95,12 +95,12 @@ if (LD_BUILD_UNIT_TESTS)
     enable_testing()
 endif ()
 
-if (LD_STATIC_LINK_OPENSSL)
-    message(STATUS "LaunchDarkly: searching for static OpenSSL library")
-    set(OPENSSL_USE_STATIC_LIBS ON)
-else ()
+if (LD_DYNAMIC_LINK_OPENSSL)
     message(STATUS "LaunchDarkly: searching for shared OpenSSL library")
     set(OPENSSL_USE_STATIC_LIBS OFF)
+else ()
+    message(STATUS "LaunchDarkly: searching for static OpenSSL library")
+    set(OPENSSL_USE_STATIC_LIBS ON)
 endif ()
 
 find_package(OpenSSL REQUIRED)
