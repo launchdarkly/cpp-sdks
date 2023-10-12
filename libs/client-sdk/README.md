@@ -87,19 +87,23 @@ target_link_libraries(my-target PRIVATE launchdarkly::client)
 
 Various CMake options are available to customize the SDK build.
 
-| Option                    | Description                                                                            | Default            | Requires              |
-|---------------------------|----------------------------------------------------------------------------------------|--------------------|-----------------------|
-| `BUILD_TESTING`           | Coarse-grained switch; turn off to disable all testing and only build the SDK targets. | On                 | N/A                   |
-| `LD_BUILD_UNIT_TESTS`     | Whether C++ unit tests are built.                                                      | On                 | `BUILD_TESTING`       |
-| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled.                                                  | On                 | `LD_BUILD_UNIT_TESTS` |
-| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                               | Off                | `BUILD_TESTING`       |
-| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                          | On                 | N/A                   |
-| `LD_BUILD_SHARED_LIBS`    | Whether the SDK is built as a static or shared library.                                | Off  (static lib)  | N/A                   |
-| `LD_STATIC_LINK_OPENSSL`  | Whether OpenSSL should be statically or dynamically linked.                            | On   (static link) | N/A                   |
+| Option                    | Description                                                                            | Default            | Requires                                  |
+|---------------------------|----------------------------------------------------------------------------------------|--------------------|-------------------------------------------|
+| `BUILD_TESTING`           | Coarse-grained switch; turn off to disable all testing and only build the SDK targets. | On                 | N/A                                       |
+| `LD_BUILD_UNIT_TESTS`     | Whether C++ unit tests are built.                                                      | On                 | `BUILD_TESTING; NOT LD_BUILD_SHARED_LIBS` |
+| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled.                                                  | On                 | `LD_BUILD_UNIT_TESTS`                     |
+| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                               | Off                | `BUILD_TESTING`                           |
+| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                          | On                 | N/A                                       |
+| `LD_BUILD_SHARED_LIBS`    | Whether the SDK is built as a static or shared library.                                | Off  (static lib)  | N/A                                       |
+| `LD_STATIC_LINK_OPENSSL`  | Whether OpenSSL should be statically or dynamically linked.                            | On   (static link) | N/A                                       |
+
+**Note:** _if building the SDK as a shared library, then unit tests won't be able to link correctly since the SDK's C++
+symbols aren't exposed. To run unit tests, build the SDK as a static library._
 
 Example usage:
 
 ```bash
+# Build the SDK as a shared library
 cmake -GNinja .. -DLD_BUILD_SHARED_LIBS=On
 ```
 
