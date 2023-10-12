@@ -16,11 +16,14 @@ include(GNUInstallDirs)
 
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
+option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
+
 cmake_dependent_option(LD_BUILD_UNIT_TESTS
         "Build the C++ unit tests."
-        ON                  # default to enabling unit tests
-        BUILD_TESTING       # only exposed if top-level switch is on..
-        OFF                 # otherwise, off
+        ON                                      # default to enabling unit tests
+        BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS  # only exposed if top-level switch is on, and also only when building
+        # static libs. This is because we have hidden visibility of symbols by default (to only expose our C API.)
+        OFF                                     # otherwise, off
 )
 
 # If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
@@ -38,8 +41,6 @@ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         OFF             # otherwise, off
 )
 
-option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
-
 # The general strategy is to produce a fat artifact containing all of our dependencies so users
 # only have a single thing to link. We should support this either being a static or shared library.
 # Because OpenSSL is a large, and security relevant dependency, we should have a separate option
@@ -52,6 +53,11 @@ option(LD_STATIC_LINK_OPENSSL
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
+
+if (LD_BUILD_SHARED_LIBS AND LD_BUILD_UNIT_TESTS)
+    message(WARNING "LaunchDarkly: unit testing isn't supported while building shared libraries. Switch to static libraries or disable unit tests.")
+endif ()
+
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -61,6 +67,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 if (LD_BUILD_UNIT_TESTS)
+    message(STATUS "LaunchDarkly: building unit tests")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
     if (LD_TESTING_SANITIZERS)
@@ -128,9 +135,11 @@ add_subdirectory(libs/server-sent-events)
 add_subdirectory(libs/client-sdk)
 
 if (LD_BUILD_CONTRACT_TESTS)
+    message(STATUS "LaunchDarkly: building contract tests")
     add_subdirectory(contract-tests)
 endif ()
 
 if (LD_BUILD_EXAMPLES)
+    message(STATUS "LaunchDarkly: building examples")
     add_subdirectory(examples)
 endif ()
