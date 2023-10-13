@@ -12,6 +12,13 @@
   * dependencies
     * launchdarkly-cpp-sse-client bumped from 0.1.1 to 0.1.2
 
+## [0.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.7...launchdarkly-cpp-common-v0.4.0) (2023-10-13)
+
+
+### Features
+
+* clean up LD CMake variables & allow for OpenSSL dynamic link ([#255](https://github.com/launchdarkly/cpp-sdks/issues/255)) ([ed23c9a](https://github.com/launchdarkly/cpp-sdks/commit/ed23c9a347665529a09d18111bb9d3b699381728))
+
 ## [0.3.7](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.6...launchdarkly-cpp-common-v0.3.7) (2023-10-11)
 
 
