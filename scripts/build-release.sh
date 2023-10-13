@@ -17,7 +17,7 @@ cd ..
 # Build a dynamic release.
 mkdir -p build-dynamic && cd build-dynamic
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTING=OFF -D BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
 cmake --install .
