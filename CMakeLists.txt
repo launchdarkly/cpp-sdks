@@ -20,25 +20,25 @@ option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
 
 cmake_dependent_option(LD_BUILD_UNIT_TESTS
         "Build the C++ unit tests."
-        ON                                      # default to enabling unit tests
-        BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS  # only exposed if top-level switch is on, and also only when building
+        ON                                        # default to enabling unit tests
+        "BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS"  # only exposed if top-level switch is on, and also only when building
         # static libs. This is because we have hidden visibility of symbols by default (to only expose our C API.)
-        OFF                                     # otherwise, off
+        OFF                                       # otherwise, off
 )
 
 # If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
 cmake_dependent_option(LD_TESTING_SANITIZERS
         "Enable sanitizers for unit tests."
         ON                      # default to enabling sanitizers
-        LD_BUILD_UNIT_TESTS        # only expose if unit tests enabled..
+        "LD_BUILD_UNIT_TESTS"   # only expose if unit tests enabled..
         OFF                     # otherwise, off
 )
 
 cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         "Build contract test service."
-        OFF             # default to disabling contract tests, since they require running a service
-        BUILD_TESTING   # only expose if top-level switch is on..
-        OFF             # otherwise, off
+        OFF               # default to disabling contract tests, since they require running a service
+        "BUILD_TESTING"   # only expose if top-level switch is on..
+        OFF               # otherwise, off
 )
 
 # The general strategy is to produce a fat artifact containing all of our dependencies so users
@@ -64,7 +64,6 @@ set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 
 if (LD_BUILD_UNIT_TESTS)
     message(STATUS "LaunchDarkly: building unit tests")
