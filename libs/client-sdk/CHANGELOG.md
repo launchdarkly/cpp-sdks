@@ -8,6 +8,22 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
   * dependencies
     * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
 
+## [3.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.10...launchdarkly-cpp-client-v3.1.0) (2023-10-13)
+
+
+### Features
+
+* clean up LD CMake variables & allow for OpenSSL dynamic link ([#255](https://github.com/launchdarkly/cpp-sdks/issues/255)) ([ed23c9a](https://github.com/launchdarkly/cpp-sdks/commit/ed23c9a347665529a09d18111bb9d3b699381728))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.11 to 0.2.0
+    * launchdarkly-cpp-common bumped from 0.3.7 to 0.4.0
+    * launchdarkly-cpp-sse-client bumped from 0.1.3 to 0.2.0
+
 ## [3.0.10](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.9...launchdarkly-cpp-client-v3.0.10) (2023-10-11)
 
 
