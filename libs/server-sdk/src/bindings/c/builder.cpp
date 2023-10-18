@@ -54,7 +54,7 @@ LDServerConfigBuilder_Build(LDServerConfigBuilder b,
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(out_config);
 
-    return launchdarkly::ConsumeBuilder<ConfigBuilder>(b, out_config);
+    return launchdarkly::detail::ConsumeBuilder<ConfigBuilder>(b, out_config);
 }
 
 LD_EXPORT(void)

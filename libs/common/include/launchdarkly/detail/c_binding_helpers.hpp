@@ -7,7 +7,7 @@
 #include <functional>
 #include <optional>
 
-namespace launchdarkly {
+namespace launchdarkly::detail {
 template <typename T, typename = void>
 struct has_result_type : std::false_type {};
 

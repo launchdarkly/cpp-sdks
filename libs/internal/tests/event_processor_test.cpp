@@ -104,8 +104,8 @@ TEST_F(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
 
     using Clock = std::chrono::system_clock;
-    auto date =
-        detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT", locale);
+    auto date = events::detail::ParseDateHeader<Clock>(
+        "Wed, 21 Oct 2015 07:28:00 GMT", locale);
 
     ASSERT_TRUE(date);
 
@@ -116,18 +116,20 @@ TEST_F(EventProcessorTests, ParseValidDateHeader) {
 TEST_F(EventProcessorTests, ParseInvalidDateHeader) {
     using namespace launchdarkly;
 
-    auto not_a_date = events::ParseDateHeader<std::chrono::system_clock>(
-        "this is definitely not a date", locale);
+    auto not_a_date =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "this is definitely not a date", locale);
 
     ASSERT_FALSE(not_a_date);
 
-    auto not_gmt = events::ParseDateHeader<std::chrono::system_clock>(
+    auto not_gmt = events::detail::ParseDateHeader<std::chrono::system_clock>(
         "Wed, 21 Oct 2015 07:28:00 PST", locale);
 
     ASSERT_FALSE(not_gmt);
 
-    auto missing_year = events::ParseDateHeader<std::chrono::system_clock>(
-        "Wed, 21 Oct 07:28:00 GMT", locale);
+    auto missing_year =
+        events::detail::ParseDateHeader<std::chrono::system_clock>(
+            "Wed, 21 Oct 07:28:00 GMT", locale);
 
     ASSERT_FALSE(missing_year);
 }
