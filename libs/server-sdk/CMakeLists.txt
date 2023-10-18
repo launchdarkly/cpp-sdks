@@ -33,6 +33,6 @@ include(${CMAKE_FILES}/rfc3339_timestamp.cmake)
 # Add main SDK sources.
 add_subdirectory(src)
 
-if (BUILD_TESTING)
+if (LD_BUILD_UNIT_TESTS)
     add_subdirectory(tests)
 endif ()
