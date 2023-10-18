@@ -109,7 +109,7 @@ message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 # linked into the binary.
 set(Boost_USE_STATIC_LIBS ON)
 
-if (NOT LD_BUILD_STATIC_LIBS)
+if (LD_BUILD_SHARED_LIBS)
     # When building a shared library we hide all symbols
     # aside from this we have specifically exported for the C-API.
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -129,7 +129,7 @@ add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 
-# Built as static or shared depending on LD_BUILD_STATIC_LIBS variable.
+# Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
 # This target "links" in common, internal, and sse as object libraries.
 add_subdirectory(libs/client-sdk)
 add_subdirectory(libs/server-sdk)
