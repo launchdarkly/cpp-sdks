@@ -106,5 +106,5 @@ bool OptReturnReinterpretCast(std::optional<OptType>& opt,
 
 #define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
 
-}  // namespace launchdarkly
+}  // namespace launchdarkly::detail
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

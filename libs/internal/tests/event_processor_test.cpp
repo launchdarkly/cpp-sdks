@@ -58,9 +58,15 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     ioc_thread.join();
 }
 
+class EventProcessorTests : public ::testing::Test {
+   public:
+    EventProcessorTests() : locale("en_US.utf-8") {}
+    std::locale locale;
+};
+
 // This test is a temporary test that exists only to ensure the event processor
 // compiles; it should be replaced by more robust tests (and contract tests.)
-TEST(EventProcessorTests, ProcessorCompiles) {
+TEST_F(EventProcessorTests, ProcessorCompiles) {
     using namespace launchdarkly;
 
     Logger logger{
@@ -94,11 +100,12 @@ TEST(EventProcessorTests, ProcessorCompiles) {
     ioc_thread.join();
 }
 
-TEST(EventProcessorTests, ParseValidDateHeader) {
+TEST_F(EventProcessorTests, ParseValidDateHeader) {
     using namespace launchdarkly;
 
     using Clock = std::chrono::system_clock;
-    auto date = detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT");
+    auto date =
+        detail::ParseDateHeader<Clock>("Wed, 21 Oct 2015 07:28:00 GMT", locale);
 
     ASSERT_TRUE(date);
 
@@ -106,21 +113,21 @@ TEST(EventProcessorTests, ParseValidDateHeader) {
               std::chrono::microseconds(1445412480000000));
 }
 
-TEST(EventProcessorTests, ParseInvalidDateHeader) {
+TEST_F(EventProcessorTests, ParseInvalidDateHeader) {
     using namespace launchdarkly;
 
-    auto not_a_date = detail::ParseDateHeader<std::chrono::system_clock>(
-        "this is definitely not a date");
+    auto not_a_date = events::ParseDateHeader<std::chrono::system_clock>(
+        "this is definitely not a date", locale);
 
     ASSERT_FALSE(not_a_date);
 
-    auto not_gmt = detail::ParseDateHeader<std::chrono::system_clock>(
-        "Wed, 21 Oct 2015 07:28:00 PST");
+    auto not_gmt = events::ParseDateHeader<std::chrono::system_clock>(
+        "Wed, 21 Oct 2015 07:28:00 PST", locale);
 
     ASSERT_FALSE(not_gmt);
 
-    auto missing_year = detail::ParseDateHeader<std::chrono::system_clock>(
-        "Wed, 21 Oct 07:28:00 GMT");
+    auto missing_year = events::ParseDateHeader<std::chrono::system_clock>(
+        "Wed, 21 Oct 07:28:00 GMT", locale);
 
     ASSERT_FALSE(missing_year);
 }

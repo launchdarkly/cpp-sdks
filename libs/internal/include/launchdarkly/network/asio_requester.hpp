@@ -2,6 +2,8 @@
 
 #include "http_requester.hpp"
 
+#include <launchdarkly/detail/unreachable.hpp>
+
 #include <boost/asio.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
@@ -44,6 +46,10 @@ static bool NeedsRedirect(HttpResult const& res) {
            res.Status() == 308 && res.Headers().count("location") != 0;
 }
 
+/**
+ * Converts the given HttpMethod to a boost beast HTTP verb.
+ * If the verb is unrecognized, returns http::verb::get.
+ */
 static http::verb ConvertMethod(HttpMethod method) {
     switch (method) {
         case HttpMethod::kPost:
@@ -55,7 +61,7 @@ static http::verb ConvertMethod(HttpMethod method) {
         case HttpMethod::kPut:
             return http::verb::put;
     }
-    assert(!"Method not found. Ensure all method cases covered.");
+    launchdarkly::detail::unreachable();
 }
 
 static http::request<http::string_body> MakeBeastRequest(

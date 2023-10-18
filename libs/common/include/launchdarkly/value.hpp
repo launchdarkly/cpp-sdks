@@ -119,7 +119,7 @@ class Value final {
             using iterator_category = std::forward_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            using value_type = std::pair<const std::string, Value>;
+            using value_type = std::pair<std::string const, Value>;
             using pointer = value_type const*;
             using reference = value_type const&;
 
@@ -374,7 +374,7 @@ class Value final {
     static Value const& Null();
 
     friend std::ostream& operator<<(std::ostream& out, Value const& value) {
-        switch (value.type_) {
+        switch (value.Type()) {
             case Type::kNull:
                 out << "null()";
                 break;
@@ -409,16 +409,17 @@ class Value final {
     operator int() const { return AsInt(); }
 
    private:
-    std::variant<bool, double, std::string, Array, Object> storage_;
-    enum Type type_;
+    struct null_type {};
+
+    std::variant<null_type, bool, double, std::string, Array, Object> storage_;
 
     // Empty constants used when accessing the wrong type.
     // These are not inline static const because of this bug:
     // https://developercommunity.visualstudio.com/t/inline-static-destructors-are-called-multiple-time/1157794
-    static const std::string empty_string_;
-    static const Array empty_vector_;
-    static const Object empty_map_;
-    static const Value null_value_;
+    static std::string const empty_string_;
+    static Array const empty_vector_;
+    static Object const empty_map_;
+    static Value const null_value_;
 };
 
 bool operator==(Value const& lhs, Value const& rhs);

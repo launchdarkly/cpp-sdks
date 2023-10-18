@@ -1,6 +1,6 @@
 {
   "name": "launchdarkly-cpp-common",
   "description": "This package.json exists for modeling dependencies for the release process.",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "private": true
 }

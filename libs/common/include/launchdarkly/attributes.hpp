@@ -118,8 +118,8 @@ class Attributes final {
         : key_(std::move(key)),
           name_(std::move(name)),
           anonymous_(anonymous),
-          custom_attributes_(std::move(attributes)),
-          private_attributes_(std::move(private_attributes)) {}
+          private_attributes_(std::move(private_attributes)),
+          custom_attributes_(std::move(attributes)) {}
 
     friend std::ostream& operator<<(std::ostream& out,
                                     Attributes const& attrs) {
@@ -142,9 +142,13 @@ class Attributes final {
     }
 
     Attributes(Attributes const& context) = default;
+
     Attributes(Attributes&& context) = default;
+
     ~Attributes() = default;
+
     Attributes& operator=(Attributes const&) = default;
+
     Attributes& operator=(Attributes&&) = default;
 
    private:

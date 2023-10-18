@@ -2,6 +2,43 @@
 
 All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
+
+## [3.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.10...launchdarkly-cpp-client-v3.1.0) (2023-10-13)
+
+
+### Features
+
+* clean up LD CMake variables & allow for OpenSSL dynamic link ([#255](https://github.com/launchdarkly/cpp-sdks/issues/255)) ([ed23c9a](https://github.com/launchdarkly/cpp-sdks/commit/ed23c9a347665529a09d18111bb9d3b699381728))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.11 to 0.2.0
+    * launchdarkly-cpp-common bumped from 0.3.7 to 0.4.0
+    * launchdarkly-cpp-sse-client bumped from 0.1.3 to 0.2.0
+
+## [3.0.10](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.9...launchdarkly-cpp-client-v3.0.10) (2023-10-11)
+
+
+### Bug Fixes
+
+* treat warnings as errors in CI ([#253](https://github.com/launchdarkly/cpp-sdks/issues/253)) ([7f4f168](https://github.com/launchdarkly/cpp-sdks/commit/7f4f168f47619d7fa8b8952feade485261c69049))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.1.10 to 0.1.11
+    * launchdarkly-cpp-common bumped from 0.3.6 to 0.3.7
+
 ## [3.0.8](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.7...launchdarkly-cpp-client-v3.0.8) (2023-09-13)
 
 

@@ -4,6 +4,7 @@
 #include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/bindings/c/iter.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/value.hpp>
 
 using launchdarkly::Value;
@@ -59,7 +60,7 @@ LD_EXPORT(enum LDValueType) LDValue_Type(LDValue val) {
         case Value::Type::kArray:
             return LDValueType_Array;
     }
-    LD_ASSERT(!"Unsupported value type.");
+    launchdarkly::detail::unreachable();
 }
 
 LD_EXPORT(bool) LDValue_GetBool(LDValue val) {
