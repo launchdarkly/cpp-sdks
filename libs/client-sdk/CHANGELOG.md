@@ -8,6 +8,13 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
   * dependencies
     * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
 
+## [3.1.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.1.0...launchdarkly-cpp-client-v3.1.1) (2023-10-19)
+
+
+### Bug Fixes
+
+* LD_BUILD_SHARED_LIBS build flag usage ([#260](https://github.com/launchdarkly/cpp-sdks/issues/260)) ([8dd473f](https://github.com/launchdarkly/cpp-sdks/commit/8dd473f825d4d05f1bc4f94621f7e4a4fefab929))
+
 ## [3.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.0.10...launchdarkly-cpp-client-v3.1.0) (2023-10-13)
 
 
