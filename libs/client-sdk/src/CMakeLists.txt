@@ -53,7 +53,7 @@ target_sources(${LIBNAME} PRIVATE
 )
 
 
-if (MSVC OR LD_BUILD_STATIC_LIBS)
+if (MSVC OR (NOT LD_BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
             PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
@@ -76,7 +76,7 @@ set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
-if (BUILD_SHARED_LIBS AND MSVC)
+if (LD_BUILD_SHARED_LIBS AND MSVC)
     install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
 endif ()
 # Using PUBLIC_HEADERS would flatten the include.
