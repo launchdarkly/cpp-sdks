@@ -637,7 +637,7 @@ TEST(FlagTests, SerializeAll) {
 }
 
 TEST(SegmentTargetTests, SerializeAll) {
-    data_model::Segment::Target target{"bob", {"bill", "sam"}};
+    data_model::Segment::Target target{ContextKind("bob"), {"bill", "sam"}};
 
     auto json = boost::json::value_from(target);
     auto expected = boost::json::parse(
@@ -683,8 +683,8 @@ TEST(SegmentTests, SerializeBasicAll) {
         87,
         {"bob", "sam"},
         {"sally", "johan"},
-        {{"vegetable", {"potato", "yam"}}},
-        {{"material", {"cardboard", "plastic"}}},
+        {{ContextKind("vegetable"), {"potato", "yam"}}},
+        {{ContextKind("material"), {"cardboard", "plastic"}}},
         {{{{data_model::Clause::Op::kIn,
             {"a", "b"},
             true,
@@ -730,8 +730,9 @@ TEST(SegmentTests, SerializeBasicAll) {
 }
 
 TEST(SegmentTests, SerializeUnbounded) {
-    data_model::Segment segment{"my-segment", 87,      {},   {},        {}, {},
-                                {},           "salty", true, "company", 12};
+    data_model::Segment segment{
+        "my-segment",           87, {}, {}, {}, {}, {}, "salty", true,
+        ContextKind("company"), 12};
 
     auto json = boost::json::value_from(segment);
     auto expected = boost::json::parse(

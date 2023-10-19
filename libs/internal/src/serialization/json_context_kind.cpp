@@ -21,4 +21,13 @@ tl::expected<std::optional<data_model::ContextKind>, JsonError> tag_invoke(
 
     return data_model::ContextKind(str.c_str());
 }
+
+namespace data_model {
+void tag_invoke(boost::json::value_from_tag const& unused,
+                boost::json::value& json_value,
+                data_model::ContextKind const& context_kind) {
+    boost::ignore_unused(unused);
+    json_value.emplace_string() = context_kind.t;
+}
+}  // namespace data_model
 }  // namespace launchdarkly
