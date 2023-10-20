@@ -2,6 +2,7 @@
 
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
+#include <launchdarkly/data_model/context_kind.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/value.hpp>
 
@@ -16,9 +17,8 @@
 namespace launchdarkly::data_model {
 
 struct Segment {
-    using Kind = std::string;
     struct Target {
-        Kind contextKind;
+        ContextKind contextKind;
         std::vector<std::string> values;
     };
 
@@ -43,11 +43,8 @@ struct Segment {
     std::vector<Rule> rules;
     std::optional<std::string> salt;
     bool unbounded;
-    std::optional<Kind> unboundedContextKind;
+    std::optional<ContextKind> unboundedContextKind;
     std::optional<std::uint64_t> generation;
-
-    // TODO(sc209882): in data model, ensure empty Kind string is error
-    // condition.
 
     /**
      * Returns the segment's version. Satisfies ItemDescriptor template

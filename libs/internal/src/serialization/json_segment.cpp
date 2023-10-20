@@ -20,7 +20,10 @@ tl::expected<std::optional<data_model::Segment::Target>, JsonError> tag_invoke(
 
     data_model::Segment::Target target{};
 
-    PARSE_FIELD_DEFAULT(target.contextKind, obj, "contextKind", "user");
+    // The zero value of a ContextKind ("" - empty string) is not valid in the
+    // domain of possible contexts. This field is parsed as REQUIRED to
+    // specify that fact.
+    PARSE_REQUIRED_FIELD(target.contextKind, obj, "contextKind");
 
     PARSE_FIELD(target.values, obj, "values");
 
@@ -125,7 +128,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                 data_model::Segment::Target const& target) {
     auto& obj = json_value.emplace_object();
     obj.emplace("values", boost::json::value_from(target.values));
-    obj.emplace("contextKind", target.contextKind);
+    obj.emplace("contextKind", boost::json::value_from(target.contextKind));
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
