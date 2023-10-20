@@ -34,4 +34,4 @@ class TaggedData {
     Storage storage_;
 };
 
-}
+}  // namespace launchdarkly::server_side::data_store
