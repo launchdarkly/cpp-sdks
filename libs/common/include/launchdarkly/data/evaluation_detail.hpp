@@ -56,35 +56,19 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<std::size_t> VariationIndex() const;
 
     /**
+     * @return True if the evaluation resulted in an error.
+     */
+    [[nodiscard]] bool IsError() const;
+
+    /**
      * @return A reference to the reason for the results.
      */
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;
 
     /**
-     * Check if an evaluation reason exists, and if so, if it is of a particular
-     * kind.
-     * @param kind Kind to check.
-     * @return True if a reason exists and matches the given kind.
-     */
-    [[nodiscard]] bool ReasonKindIs(enum EvaluationReason::Kind kind) const;
-
-    /**
-     * @return True if the evaluation resulted in an error.
-     * TODO(sc209960)
-     */
-    [[nodiscard]] bool IsError() const;
-
-    /**
      * @return A reference to the variation value.
      */
     T const& operator*() const;
-
-    /**
-     * @return True if the evaluation was successful (i.e. IsError returns
-     * false.)
-     * TODO(sc209960)
-     */
-    explicit operator bool() const;
 
    private:
     T value_;
