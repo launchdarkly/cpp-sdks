@@ -36,9 +36,9 @@ cmake_dependent_option(LD_TESTING_SANITIZERS
 
 cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         "Build contract test service."
-        OFF               # default to disabling contract tests, since they require running a service
-        "BUILD_TESTING"   # only expose if top-level switch is on..
-        OFF               # otherwise, off
+        OFF                                         # default to disabling contract tests, since they require running a service
+        "BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS"    # only expose if top-level switch is on and using static libs, since C++ symbols needed would be hidden.
+        OFF                                         # otherwise, off
 )
 
 # The general strategy is to produce a fat artifact containing all of our dependencies so users
@@ -52,11 +52,6 @@ option(LD_DYNAMIC_LINK_OPENSSL
 )
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
-
-
-if (LD_BUILD_SHARED_LIBS AND LD_BUILD_UNIT_TESTS)
-    message(WARNING "LaunchDarkly: unit testing isn't supported while building shared libraries. Switch to static libraries or disable unit tests.")
-endif ()
 
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
