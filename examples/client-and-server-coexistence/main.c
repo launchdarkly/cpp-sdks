@@ -12,6 +12,8 @@
 
 #include <launchdarkly/bindings/c/context_builder.h>
 
+#include <stdio.h>
+
 int main() {
     LDContextBuilder context_builder = LDContextBuilder_New();
     LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
@@ -27,6 +29,7 @@ int main() {
 
     if (LDStatus_Ok(client_config_status)) {
         LDClientSDK client_sdk = LDClientSDK_New(client_config, context);
+        printf("Created client SDK\n");
         LDClientSDK_Free(client_sdk);
     }
 
@@ -39,6 +42,7 @@ int main() {
 
     if (LDStatus_Ok(server_config_status)) {
         LDServerSDK server_sdk = LDServerSDK_New(server_config);
+        printf("Created server SDK\n");
         LDServerSDK_Free(server_sdk);
     }
 
