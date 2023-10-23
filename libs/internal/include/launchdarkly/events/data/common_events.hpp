@@ -33,7 +33,8 @@ struct TrackEventParams {
     std::optional<double> metric_value;
 };
 
-struct ServerTrackEventParams : public TrackEventParams {
+struct ServerTrackEventParams {
+    TrackEventParams base;
     Context context;
 };
 
