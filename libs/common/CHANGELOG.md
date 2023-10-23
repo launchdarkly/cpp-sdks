@@ -12,6 +12,13 @@
   * dependencies
     * launchdarkly-cpp-sse-client bumped from 0.1.1 to 0.1.2
 
+## [0.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.4.0...launchdarkly-cpp-common-v0.5.0) (2023-10-23)
+
+
+### Features
+
+* server-side SDK  ([#160](https://github.com/launchdarkly/cpp-sdks/issues/160)) ([75eece3](https://github.com/launchdarkly/cpp-sdks/commit/75eece3a46870fdb6bf4384c112700558099c4d1))
+
 ## [0.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v0.3.7...launchdarkly-cpp-common-v0.4.0) (2023-10-13)
 
 
