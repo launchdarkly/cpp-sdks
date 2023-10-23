@@ -79,11 +79,13 @@ struct FeatureEventBase {
     explicit FeatureEventBase(FeatureEventParams const& params);
 };
 
-struct FeatureEvent : public FeatureEventBase {
+struct FeatureEvent {
+    FeatureEventBase base;
     ContextKeys context_keys;
 };
 
-struct DebugEvent : public FeatureEventBase {
+struct DebugEvent {
+    FeatureEventBase base;
     EventContext context;
 };
 
