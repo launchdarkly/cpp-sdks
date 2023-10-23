@@ -8,6 +8,13 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
   * dependencies
     * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
 
+## [3.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.2.0...launchdarkly-cpp-client-v3.2.1) (2023-10-23)
+
+
+### Bug Fixes
+
+* allow for installing only the client or server SDK independently ([#269](https://github.com/launchdarkly/cpp-sdks/issues/269)) ([fe08c3c](https://github.com/launchdarkly/cpp-sdks/commit/fe08c3c14600c712ba6480f671fc306eca320044))
+
 ## [3.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.1.1...launchdarkly-cpp-client-v3.2.0) (2023-10-23)
 
 
