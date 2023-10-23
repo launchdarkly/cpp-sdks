@@ -15,38 +15,26 @@ target_sources(${LIBNAME} PRIVATE
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/data_source_event_handler.cpp
-        data_sources/data_source_update_sink.cpp
         data_sources/polling_data_source.cpp
         flag_manager/flag_store.cpp
         flag_manager/flag_updater.cpp
         flag_manager/flag_change_event.cpp
         data_sources/data_source_status.cpp
-        data_sources/data_source_status_manager.cpp
-        event_processor/event_processor.cpp
-        event_processor/null_event_processor.cpp
-        boost_signal_connection.cpp
         client_impl.cpp
         client.cpp
-        boost_signal_connection.hpp
         client_impl.hpp
-        data_sources/data_source.hpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status_manager.hpp
         data_sources/data_source_update_sink.hpp
         data_sources/polling_data_source.hpp
         data_sources/streaming_data_source.hpp
-        event_processor/event_processor.hpp
-        event_processor/null_event_processor.hpp
         flag_manager/flag_store.hpp
         flag_manager/flag_updater.hpp
-        event_processor.hpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp
         bindings/c/config.cpp
         data_sources/null_data_source.cpp
         flag_manager/context_index.cpp
-        serialization/json_all_flags.hpp
-        serialization/json_all_flags.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_persistence.cpp
         bindings/c/sdk.cpp

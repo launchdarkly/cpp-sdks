@@ -5,19 +5,23 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/network/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
-)
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/signals/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
+        )
 
 # Automatic library: static or dynamic based on user config.
 add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         context_filter.cpp
         events/asio_event_processor.cpp
-        events/client_events.cpp
+        events/null_event_processor.cpp
+        events/common_events.cpp
         events/event_batch.cpp
         events/outbox.cpp
         events/request_worker.cpp
         events/summarizer.cpp
         events/worker_pool.cpp
+        events/lru_cache.cpp
         logging/console_backend.cpp
         logging/null_logger.cpp
         logging/logger.cpp
@@ -31,8 +35,18 @@ add_library(${LIBNAME} OBJECT
         serialization/json_value.cpp
         serialization/value_mapping.cpp
         serialization/json_evaluation_result.cpp
+        serialization/json_sdk_data_set.cpp
+        serialization/json_segment.cpp
+        serialization/json_primitives.cpp
+        serialization/json_rule_clause.cpp
+        serialization/json_flag.cpp
+        serialization/json_context_kind.cpp
+        data_model/rule_clause.cpp
+        data_model/flag.cpp
         encoding/base_64.cpp
-        encoding/sha_256.cpp)
+        encoding/sha_256.cpp
+        encoding/sha_1.cpp
+        signals/boost_signal_connection.cpp)
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 

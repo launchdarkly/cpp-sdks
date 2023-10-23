@@ -2,11 +2,11 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 
-namespace launchdarkly::events::client {
+namespace launchdarkly::events {
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 FeatureEvent const& event) {
-    auto base = boost::json::value_from<FeatureEventBase const&>(event);
+    auto base = boost::json::value_from<FeatureEventBase const&>(event.base);
     base.as_object().emplace("kind", "feature");
     base.as_object().emplace("contextKeys",
                              boost::json::value_from(event.context_keys));
@@ -16,7 +16,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
                 DebugEvent const& event) {
-    auto base = boost::json::value_from<FeatureEventBase const&>(event);
+    auto base = boost::json::value_from<FeatureEventBase const&>(event.base);
     base.as_object().emplace("kind", "debug");
     base.as_object().emplace("context", boost::json::value_from(event.context));
     json_value = std::move(base);
@@ -39,6 +39,9 @@ void tag_invoke(boost::json::value_from_tag const& tag,
         obj.emplace("reason", boost::json::value_from(*event.reason));
     }
     obj.emplace("default", boost::json::value_from(event.default_));
+    if (event.prereq_of) {
+        obj.emplace("prereqOf", *event.prereq_of);
+    }
 }
 
 void tag_invoke(boost::json::value_from_tag const& tag,
@@ -49,7 +52,19 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("context", event.context);
 }
-}  // namespace launchdarkly::events::client
+}  // namespace launchdarkly::events
+
+namespace launchdarkly::events::server_side {
+
+void tag_invoke(boost::json::value_from_tag const&,
+                boost::json::value& json_value,
+                IndexEvent const& event) {
+    auto& obj = json_value.emplace_object();
+    obj.emplace("kind", "index");
+    obj.emplace("creationDate", boost::json::value_from(event.creation_date));
+    obj.emplace("context", event.context);
+}
+}  // namespace launchdarkly::events::server_side
 
 namespace launchdarkly::events {
 
@@ -88,7 +103,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
 
 }  // namespace launchdarkly::events
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 void tag_invoke(boost::json::value_from_tag const& tag,
                 boost::json::value& json_value,
@@ -119,8 +134,8 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     auto& obj = json_value.emplace_object();
     obj.emplace("kind", "summary");
     obj.emplace("startDate",
-                boost::json::value_from(Date{summary.start_time()}));
-    obj.emplace("endDate", boost::json::value_from(Date{summary.end_time()}));
+                boost::json::value_from(Date{summary.StartTime()}));
+    obj.emplace("endDate", boost::json::value_from(Date{summary.EndTime()}));
     obj.emplace("features", boost::json::value_from(summary.Features()));
 }
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

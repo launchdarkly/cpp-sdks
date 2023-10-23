@@ -24,9 +24,6 @@ struct Detail;
         launchdarkly::client_side::data_sources::DataSourceStatus*>(ptr))
 #define FROM_DATASOURCESTATUS(ptr) (reinterpret_cast<LDDataSourceStatus>(ptr))
 
-#define TO_DATASOURCESTATUS_ERRORINFO(ptr)                      \
-    (reinterpret_cast<launchdarkly::client_side::data_sources:: \
-                          DataSourceStatus::ErrorInfo*>(ptr))
 #define FROM_DATASOURCESTATUS_ERRORINFO(ptr) \
     (reinterpret_cast<LDDataSourceStatus_ErrorInfo>(ptr))
 
@@ -206,7 +203,6 @@ LDClientSDK_StringVariation(LDClientSDK sdk,
     LD_ASSERT_NOT_NULL(flag_key);
     LD_ASSERT_NOT_NULL(default_value);
 
-    // TODO: custom allocation / free routines
     return strdup(
         TO_SDK(sdk)->StringVariation(flag_key, default_value).c_str());
 }
@@ -377,37 +373,6 @@ LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status) {
         .count();
 }
 
-LD_EXPORT(LDDataSourceStatus_ErrorKind)
-LDDataSourceStatus_ErrorInfo_GetKind(LDDataSourceStatus_ErrorInfo info) {
-    LD_ASSERT_NOT_NULL(info);
-
-    return static_cast<enum LDDataSourceStatus_ErrorKind>(
-        TO_DATASOURCESTATUS_ERRORINFO(info)->Kind());
-}
-
-LD_EXPORT(uint64_t)
-LDDataSourceStatus_ErrorInfo_StatusCode(LDDataSourceStatus_ErrorInfo info) {
-    LD_ASSERT_NOT_NULL(info);
-
-    return TO_DATASOURCESTATUS_ERRORINFO(info)->StatusCode();
-}
-
-LD_EXPORT(char const*)
-LDDataSourceStatus_ErrorInfo_Message(LDDataSourceStatus_ErrorInfo info) {
-    LD_ASSERT_NOT_NULL(info);
-
-    return TO_DATASOURCESTATUS_ERRORINFO(info)->Message().c_str();
-}
-
-LD_EXPORT(time_t)
-LDDataSourceStatus_ErrorInfo_Time(LDDataSourceStatus_ErrorInfo info) {
-    LD_ASSERT_NOT_NULL(info);
-
-    return std::chrono::duration_cast<std::chrono::seconds>(
-               TO_DATASOURCESTATUS_ERRORINFO(info)->Time().time_since_epoch())
-        .count();
-}
-
 LD_EXPORT(void)
 LDDataSourceStatusListener_Init(struct LDDataSourceStatusListener* listener) {
     listener->StatusChanged = nullptr;
@@ -443,11 +408,6 @@ LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk) {
 
 LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
-}
-
-LD_EXPORT(void)
-LDDataSourceStatus_ErrorInfo_Free(LDDataSourceStatus_ErrorInfo info) {
-    delete TO_DATASOURCESTATUS_ERRORINFO(info);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

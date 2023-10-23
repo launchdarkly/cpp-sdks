@@ -282,4 +282,23 @@ bool operator!=(Value::Object const& lhs, Value::Object const& rhs) {
     return !(lhs == rhs);
 }
 
+inline bool BothNumbers(Value const& lhs, Value const& rhs) {
+    return lhs.IsNumber() && rhs.IsNumber();
+}
+
+bool operator<(Value const& lhs, Value const& rhs) {
+    return BothNumbers(lhs, rhs) && lhs.AsDouble() < rhs.AsDouble();
+}
+
+bool operator>(Value const& lhs, Value const& rhs) {
+    return BothNumbers(lhs, rhs) && rhs < lhs;
+}
+
+bool operator<=(Value const& lhs, Value const& rhs) {
+    return BothNumbers(lhs, rhs) && !(lhs > rhs);
+}
+
+bool operator>=(Value const& lhs, Value const& rhs) {
+    return BothNumbers(lhs, rhs) && !(lhs < rhs);
+}
 }  // namespace launchdarkly

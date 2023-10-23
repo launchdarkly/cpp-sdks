@@ -1,6 +1,6 @@
-#include <launchdarkly/events/summarizer.hpp>
+#include <launchdarkly/events/detail/summarizer.hpp>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 Summarizer::Summarizer(std::chrono::system_clock::time_point start)
     : start_time_(start) {}
@@ -14,7 +14,7 @@ Summarizer::Features() const {
     return features_;
 }
 
-void Summarizer::Update(client::FeatureEventParams const& event) {
+void Summarizer::Update(events::FeatureEventParams const& event) {
     auto const& kinds = event.context.Kinds();
 
     auto feature_state_iterator =
@@ -37,11 +37,11 @@ Summarizer& Summarizer::Finish(Time end_time) {
     return *this;
 }
 
-Summarizer::Time Summarizer::start_time() const {
+Summarizer::Time Summarizer::StartTime() const {
     return start_time_;
 }
 
-Summarizer::Time Summarizer::end_time() const {
+Summarizer::Time Summarizer::EndTime() const {
     return end_time_;
 }
 
@@ -69,4 +69,4 @@ std::int32_t Summarizer::VariationSummary::Count() const {
 
 Summarizer::State::State(Value default_value)
     : default_(std::move(default_value)) {}
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

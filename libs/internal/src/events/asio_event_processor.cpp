@@ -11,6 +11,8 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 
+#include <launchdarkly/events/data/server_events.hpp>
+
 namespace http = boost::beast::http;
 namespace launchdarkly::events {
 
@@ -54,6 +56,7 @@ AsioEventProcessor<SDK>::AsioEventProcessor(
       last_known_past_time_(std::nullopt),
       filter_(events_config.AllAttributesPrivate(),
               events_config.PrivateAttributes()),
+      context_key_cache_(events_config.ContextKeysCacheCapacity().value_or(0)),
       logger_(logger) {
     ScheduleFlush();
 }
@@ -87,7 +90,7 @@ void AsioEventProcessor<SDK>::InboxDecrement() {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncSend(InputEvent input_event) {
+void AsioEventProcessor<SDK>::SendAsync(InputEvent input_event) {
     if (!InboxIncrement()) {
         return;
     }
@@ -112,7 +115,7 @@ void AsioEventProcessor<SDK>::HandleSend(InputEvent event) {
 
 template <typename SDK>
 void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
-    workers_.Get([this](RequestWorker* worker) {
+    workers_.Get([this](detail::RequestWorker* worker) {
         if (worker == nullptr) {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "event-processor: no flush workers available; skipping "
@@ -127,10 +130,11 @@ void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
         }
         worker->AsyncDeliver(
             std::move(*batch),
-            [this](std::size_t count, RequestWorker::DeliveryResult result) {
+            [this](std::size_t count,
+                   detail::RequestWorker::DeliveryResult result) {
                 OnEventDeliveryResult(count, result);
             });
-        summarizer_ = Summarizer(Clock::now());
+        summarizer_ = detail::Summarizer(Clock::now());
     });
 
     if (flush_type == FlushTrigger::Automatic) {
@@ -141,7 +145,7 @@ void AsioEventProcessor<SDK>::Flush(FlushTrigger flush_type) {
 template <typename SDK>
 void AsioEventProcessor<SDK>::OnEventDeliveryResult(
     std::size_t event_count,
-    RequestWorker::DeliveryResult result) {
+    detail::RequestWorker::DeliveryResult result) {
     boost::ignore_unused(event_count);
 
     std::visit(
@@ -176,17 +180,17 @@ void AsioEventProcessor<SDK>::ScheduleFlush() {
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncFlush() {
+void AsioEventProcessor<SDK>::FlushAsync() {
     boost::asio::post(io_, [=] { Flush(FlushTrigger::Manual); });
 }
 
 template <typename SDK>
-void AsioEventProcessor<SDK>::AsyncClose() {
+void AsioEventProcessor<SDK>::ShutdownAsync() {
     timer_.cancel();
 }
 
 template <typename SDK>
-std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
+std::optional<detail::EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     auto events = boost::json::value_from(outbox_.Consume()).as_array();
 
     bool has_summary =
@@ -205,7 +209,7 @@ std::optional<EventBatch> AsioEventProcessor<SDK>::CreateBatch() {
     props.Header(kPayloadIdHeader, boost::lexical_cast<std::string>(uuids_()));
     props.Header(to_string(http::field::content_type), "application/json");
 
-    return EventBatch(url_, props.Build(), events);
+    return detail::EventBatch(url_, props.Build(), events);
 }
 
 template <typename SDK>
@@ -213,52 +217,82 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
     InputEvent input_event) {
     std::vector<OutputEvent> out;
     std::visit(
-        overloaded{[&](client::FeatureEventParams&& event) {
-                       summarizer_.Update(event);
+        overloaded{
+            [&](FeatureEventParams&& event) {
+                summarizer_.Update(event);
 
-                       client::FeatureEventBase base{event};
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    if (!context_key_cache_.Notice(
+                            event.context.CanonicalKey())) {
+                        out.emplace_back(server_side::IndexEvent{
+                            event.creation_date,
+                            filter_.filter(event.context)});
+                    }
+                }
 
-                       auto debug_until_date = event.debug_events_until_date;
+                FeatureEventBase base{event};
 
-                       // To be conservative, use as the current time the
-                       // maximum of the actual current time and the server's
-                       // time. This way if the local host is running behind, we
-                       // won't accidentally keep emitting events.
+                auto debug_until_date = event.debug_events_until_date;
 
-                       auto conservative_now = std::max(
-                           std::chrono::system_clock::now(),
-                           last_known_past_time_.value_or(
-                               std::chrono::system_clock::from_time_t(0)));
+                // To be conservative, use as the current time the
+                // maximum of the actual current time and the server's
+                // time. This way if the local host is running behind, we
+                // won't accidentally keep emitting events.
 
-                       bool emit_debug_event =
-                           debug_until_date &&
-                           conservative_now < debug_until_date->t;
+                auto conservative_now =
+                    std::max(std::chrono::system_clock::now(),
+                             last_known_past_time_.value_or(
+                                 std::chrono::system_clock::from_time_t(0)));
 
-                       if (emit_debug_event) {
-                           out.emplace_back(client::DebugEvent{
-                               base, filter_.filter(event.context)});
-                       }
+                bool emit_debug_event =
+                    debug_until_date && conservative_now < debug_until_date->t;
 
-                       if (event.require_full_event) {
-                           out.emplace_back(client::FeatureEvent{
-                               std::move(base), event.context.KindsToKeys()});
-                       }
-                   },
-                   [&](client::IdentifyEventParams&& event) {
-                       // Contexts should already have been checked for
-                       // validity by this point.
-                       assert(event.context.Valid());
-                       out.emplace_back(client::IdentifyEvent{
-                           event.creation_date, filter_.filter(event.context)});
-                   },
-                   [&](TrackEventParams&& event) {
-                       out.emplace_back(std::move(event));
-                   }},
+                if (emit_debug_event) {
+                    out.emplace_back(
+                        DebugEvent{base, filter_.filter(event.context)});
+                }
+
+                if (event.require_full_event) {
+                    out.emplace_back(FeatureEvent{std::move(base),
+                                                  event.context.KindsToKeys()});
+                }
+            },
+            [&](IdentifyEventParams&& event) {
+                // Contexts should already have been checked for
+                // validity by this point.
+                assert(event.context.Valid());
+
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    context_key_cache_.Notice(event.context.CanonicalKey());
+                }
+
+                out.emplace_back(IdentifyEvent{event.creation_date,
+                                               filter_.filter(event.context)});
+            },
+            [&](ClientTrackEventParams&& event) {
+                out.emplace_back(std::move(event));
+            },
+            [&](ServerTrackEventParams&& event) {
+                if constexpr (std::is_same<SDK,
+                                           config::shared::ServerSDK>::value) {
+                    if (!context_key_cache_.Notice(
+                            event.context.CanonicalKey())) {
+                        out.emplace_back(server_side::IndexEvent{
+                            event.base.creation_date,
+                            filter_.filter(event.context)});
+                    }
+                }
+
+                out.emplace_back(std::move(event.base));
+            }},
         std::move(input_event));
 
     return out;
 }
 
 template class AsioEventProcessor<config::shared::ClientSDK>;
+template class AsioEventProcessor<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::events

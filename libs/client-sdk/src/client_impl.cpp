@@ -1,20 +1,18 @@
-
-#include <chrono>
-
-#include <optional>
-#include <utility>
-
 #include "client_impl.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
 
-#include "event_processor/event_processor.hpp"
-#include "event_processor/null_event_processor.hpp"
+#include <launchdarkly/events/asio_event_processor.hpp>
+#include <launchdarkly/events/null_event_processor.hpp>
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
+
+#include <chrono>
+#include <optional>
+#include <utility>
 
 namespace launchdarkly::client_side {
 
@@ -32,14 +30,14 @@ using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 
-static std::shared_ptr<IDataSource> MakeDataSource(
-    HttpProperties const& http_properties,
-    Config const& config,
-    Context const& context,
-    boost::asio::any_io_executor const& executor,
-    IDataSourceUpdateSink& flag_updater,
-    data_sources::DataSourceStatusManager& status_manager,
-    Logger& logger) {
+static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
+MakeDataSource(HttpProperties const& http_properties,
+               Config const& config,
+               Context const& context,
+               boost::asio::any_io_executor const& executor,
+               IDataSourceUpdateSink& flag_updater,
+               data_sources::DataSourceStatusManager& status_manager,
+               Logger& logger) {
     if (config.Offline()) {
         return std::make_shared<data_sources::NullDataSource>(executor,
                                                               status_manager);
@@ -50,7 +48,6 @@ static std::shared_ptr<IDataSource> MakeDataSource(
     auto data_source_properties = builder.Build();
 
     if (config.DataSourceConfig().method.index() == 0) {
-        // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
             config.ServiceEndpoints(), config.DataSourceConfig(),
@@ -112,14 +109,15 @@ ClientImpl::ClientImpl(Config config,
     flag_manager_.LoadCache(context_);
 
     if (config.Events().Enabled() && !config.Offline()) {
-        event_processor_ = std::make_unique<EventProcessor>(
-            ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
-            http_properties_, logger_);
+        event_processor_ =
+            std::make_unique<events::AsioEventProcessor<ClientSDK>>(
+                ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
+                http_properties_, logger_);
     } else {
-        event_processor_ = std::make_unique<NullEventProcessor>();
+        event_processor_ = std::make_unique<events::NullEventProcessor>();
     }
 
-    event_processor_->SendAsync(events::client::IdentifyEventParams{
+    event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), context_});
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
@@ -143,7 +141,7 @@ static bool IsInitialized(DataSourceStatus::DataSourceState state) {
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     UpdateContextSynchronized(context);
     flag_manager_.LoadCache(context);
-    event_processor_->SendAsync(events::client::IdentifyEventParams{
+    event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
     return StartAsyncInternal(IsInitializedSuccessfully);
@@ -192,8 +190,8 @@ bool ClientImpl::Initialized() const {
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
     std::unordered_map<Client::FlagKey, Value> result;
     for (auto& [key, descriptor] : flag_manager_.Store().GetAll()) {
-        if (descriptor->flag) {
-            result.try_emplace(key, descriptor->flag->Detail().Value());
+        if (descriptor->item) {
+            result.try_emplace(key, descriptor->item->Detail().Value());
         }
     }
     return result;
@@ -234,7 +232,7 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   bool detailed) {
     auto desc = flag_manager_.Store().Get(key);
 
-    events::client::FeatureEventParams event = {
+    events::FeatureEventParams event = {
         std::chrono::system_clock::now(),
         key,
         ReadContextSynchronized([](Context const& c) { return c; }),
@@ -247,13 +245,12 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         std::nullopt,
     };
 
-    if (!desc || !desc->flag) {
+    if (!desc || !desc->item) {
         if (!Initialized()) {
             LD_LOG(logger_, LogLevel::kWarn)
                 << "LaunchDarkly client has not yet been initialized. "
                    "Returning default value";
 
-            // TODO: SC-199918
             auto error_reason =
                 EvaluationReason(EvaluationReason::ErrorKind::kClientNotReady);
             if (eval_reasons_available_) {
@@ -282,9 +279,9 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                "Returning cached value";
     }
 
-    assert(desc->flag);
+    assert(desc->item);
 
-    auto const& flag = *(desc->flag);
+    auto const& flag = *(desc->item);
     auto const& detail = flag.Detail();
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
@@ -389,7 +386,7 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 
 ClientImpl::~ClientImpl() {
     ioc_.stop();
-    // TODO: Probably not the best.
+    // TODO(SC-219101)
     run_thread_.join();
 }
 

@@ -127,6 +127,7 @@ add_subdirectory(libs/server-sent-events)
 # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
 # This target "links" in common, internal, and sse as object libraries.
 add_subdirectory(libs/client-sdk)
+add_subdirectory(libs/server-sdk)
 
 if (LD_BUILD_CONTRACT_TESTS)
     message(STATUS "LaunchDarkly: building contract tests")

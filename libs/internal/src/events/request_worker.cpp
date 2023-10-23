@@ -1,7 +1,7 @@
-#include <launchdarkly/events/parse_date_header.hpp>
-#include <launchdarkly/events/request_worker.hpp>
+#include <launchdarkly/events/detail/parse_date_header.hpp>
+#include <launchdarkly/events/detail/request_worker.hpp>
 
-namespace launchdarkly::events {
+namespace launchdarkly::events::detail {
 
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,
@@ -213,4 +213,4 @@ std::ostream& operator<<(std::ostream& out, Action const& s) {
     return out;
 }
 
-}  // namespace launchdarkly::events
+}  // namespace launchdarkly::events::detail

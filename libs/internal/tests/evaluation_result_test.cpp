@@ -15,54 +15,49 @@ using launchdarkly::JsonError;
 using launchdarkly::Value;
 
 TEST(EvaluationResultTests, FromJsonAllFields) {
-    auto evaluation_result =
-        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-            boost::json::parse("{"
-                               "\"version\": 12,"
-                               "\"flagVersion\": 24,"
-                               "\"trackEvents\": true,"
-                               "\"trackReason\": true,"
-                               "\"debugEventsUntilDate\": 1680555761,"
-                               "\"value\": {\"item\": 42},"
-                               "\"variation\": 84,"
-                               "\"reason\": {"
-                               "\"kind\":\"OFF\","
-                               "\"errorKind\":\"MALFORMED_FLAG\","
-                               "\"ruleIndex\":12,"
-                               "\"ruleId\":\"RULE_ID\","
-                               "\"prerequisiteKey\":\"PREREQ_KEY\","
-                               "\"inExperiment\":true,"
-                               "\"bigSegmentStatus\":\"STORE_ERROR\""
-                               "}"
-                               "}"));
+    auto evaluation_result = boost::json::value_to<
+        tl::expected<std::optional<EvaluationResult>, JsonError>>(
+        boost::json::parse("{"
+                           "\"version\": 12,"
+                           "\"flagVersion\": 24,"
+                           "\"trackEvents\": true,"
+                           "\"trackReason\": true,"
+                           "\"debugEventsUntilDate\": 1680555761,"
+                           "\"value\": {\"item\": 42},"
+                           "\"variation\": 84,"
+                           "\"reason\": {"
+                           "\"kind\":\"OFF\","
+                           "\"errorKind\":\"MALFORMED_FLAG\","
+                           "\"ruleIndex\":12,"
+                           "\"ruleId\":\"RULE_ID\","
+                           "\"prerequisiteKey\":\"PREREQ_KEY\","
+                           "\"inExperiment\":true,"
+                           "\"bigSegmentStatus\":\"STORE_ERROR\""
+                           "}"
+                           "}"));
 
     EXPECT_TRUE(evaluation_result.has_value());
-    EXPECT_EQ(12, evaluation_result.value().Version());
-    EXPECT_EQ(24, evaluation_result.value().FlagVersion());
-    EXPECT_TRUE(evaluation_result.value().TrackEvents());
-    EXPECT_TRUE(evaluation_result.value().TrackReason());
+    auto const& val = evaluation_result.value();
+    EXPECT_TRUE(val.has_value());
+
+    EXPECT_EQ(12, val->Version());
+    EXPECT_EQ(24, val->FlagVersion());
+    EXPECT_TRUE(val->TrackEvents());
+    EXPECT_TRUE(val->TrackReason());
     EXPECT_EQ(std::chrono::system_clock::time_point{std::chrono::milliseconds{
                   1680555761}},
-              evaluation_result.value().DebugEventsUntilDate());
-    EXPECT_EQ(
-        42,
-        evaluation_result.value().Detail().Value().AsObject()["item"].AsInt());
-    EXPECT_EQ(84, evaluation_result.value().Detail().VariationIndex());
+              val->DebugEventsUntilDate());
+    EXPECT_EQ(42, val->Detail().Value().AsObject()["item"].AsInt());
+    EXPECT_EQ(84, val->Detail().VariationIndex());
     EXPECT_EQ(EvaluationReason::Kind::kOff,
-              evaluation_result.value().Detail().Reason()->get().Kind());
+              val->Detail().Reason()->get().Kind());
     EXPECT_EQ(EvaluationReason::ErrorKind::kMalformedFlag,
-              evaluation_result.value().Detail().Reason()->get().ErrorKind());
-    EXPECT_EQ(12,
-              evaluation_result.value().Detail().Reason()->get().RuleIndex());
-    EXPECT_EQ("RULE_ID",
-              evaluation_result.value().Detail().Reason()->get().RuleId());
-    EXPECT_EQ(
-        "PREREQ_KEY",
-        evaluation_result.value().Detail().Reason()->get().PrerequisiteKey());
-    EXPECT_EQ("STORE_ERROR",
-        evaluation_result.value().Detail().Reason()->get().BigSegmentStatus());
-    EXPECT_TRUE(
-        evaluation_result.value().Detail().Reason()->get().InExperiment());
+              val->Detail().Reason()->get().ErrorKind());
+    EXPECT_EQ(12, val->Detail().Reason()->get().RuleIndex());
+    EXPECT_EQ("RULE_ID", val->Detail().Reason()->get().RuleId());
+    EXPECT_EQ("PREREQ_KEY", val->Detail().Reason()->get().PrerequisiteKey());
+    EXPECT_EQ("STORE_ERROR", val->Detail().Reason()->get().BigSegmentStatus());
+    EXPECT_TRUE(val->Detail().Reason()->get().InExperiment());
 }
 
 TEST(EvaluationResultTests, ToJsonAllFields) {
@@ -91,29 +86,27 @@ TEST(EvaluationResultTests, ToJsonAllFields) {
 }
 
 TEST(EvaluationResultTests, FromJsonMinimalFields) {
-    auto evaluation_result =
-        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-            boost::json::parse("{"
-                               "\"version\": 12,"
-                               "\"value\": {\"item\": 42}"
-                               "}"));
+    auto evaluation_result = boost::json::value_to<
+        tl::expected<std::optional<EvaluationResult>, JsonError>>(
+        boost::json::parse("{"
+                           "\"version\": 12,"
+                           "\"value\": {\"item\": 42}"
+                           "}"));
 
-    EXPECT_EQ(12, evaluation_result.value().Version());
-    EXPECT_EQ(std::nullopt, evaluation_result.value().FlagVersion());
-    EXPECT_FALSE(evaluation_result.value().TrackEvents());
-    EXPECT_FALSE(evaluation_result.value().TrackReason());
-    EXPECT_EQ(std::nullopt, evaluation_result.value().DebugEventsUntilDate());
-    EXPECT_EQ(
-        42,
-        evaluation_result.value().Detail().Value().AsObject()["item"].AsInt());
-    EXPECT_EQ(std::nullopt,
-              evaluation_result.value().Detail().VariationIndex());
-    EXPECT_EQ(std::nullopt, evaluation_result.value().Detail().Reason());
+    auto const& value = evaluation_result.value();
+    EXPECT_EQ(12, value->Version());
+    EXPECT_EQ(std::nullopt, value->FlagVersion());
+    EXPECT_FALSE(value->TrackEvents());
+    EXPECT_FALSE(value->TrackReason());
+    EXPECT_EQ(std::nullopt, value->DebugEventsUntilDate());
+    EXPECT_EQ(42, value->Detail().Value().AsObject()["item"].AsInt());
+    EXPECT_EQ(std::nullopt, value->Detail().VariationIndex());
+    EXPECT_EQ(std::nullopt, value->Detail().Reason());
 }
 
 TEST(EvaluationResultTests, FromMapOfResults) {
-    auto results = boost::json::value_to<
-        std::map<std::string, tl::expected<EvaluationResult, JsonError>>>(
+    auto results = boost::json::value_to<std::map<
+        std::string, tl::expected<std::optional<EvaluationResult>, JsonError>>>(
         boost::json::parse("{"
                            "\"flagA\":{"
                            "\"version\": 12,"
@@ -124,26 +117,25 @@ TEST(EvaluationResultTests, FromMapOfResults) {
                            "\"value\": false"
                            "}"
                            "}"));
-
-    EXPECT_TRUE(results.at("flagA").value().Detail().Value().AsBool());
-    EXPECT_FALSE(results.at("flagB").value().Detail().Value().AsBool());
+    EXPECT_TRUE(results.at("flagA").value().value().Detail().Value().AsBool());
+    EXPECT_FALSE(results.at("flagB").value().value().Detail().Value().AsBool());
 }
 
 TEST(EvaluationResultTests, NoResultFieldsJson) {
-    auto results =
-        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-            boost::json::parse("{}"));
+    auto results = boost::json::value_to<
+        tl::expected<std::optional<EvaluationResult>, JsonError>>(
+        boost::json::parse("{}"));
 
-    EXPECT_FALSE(results.has_value());
+    EXPECT_FALSE(results);
     EXPECT_EQ(JsonError::kSchemaFailure, results.error());
 }
 
 TEST(EvaluationResultTests, VersionWrongTypeJson) {
-    auto results =
-        boost::json::value_to<tl::expected<EvaluationResult, JsonError>>(
-            boost::json::parse("{\"version\": \"apple\"}"));
+    auto results = boost::json::value_to<
+        tl::expected<std::optional<EvaluationResult>, JsonError>>(
+        boost::json::parse("{\"version\": \"apple\"}"));
 
-    EXPECT_FALSE(results.has_value());
+    EXPECT_FALSE(results);
     EXPECT_EQ(JsonError::kSchemaFailure, results.error());
 }
 

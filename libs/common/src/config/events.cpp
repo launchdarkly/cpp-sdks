@@ -9,7 +9,8 @@ Events::Events(bool enabled,
                bool all_attributes_private,
                AttributeReference::SetType private_attrs,
                std::chrono::milliseconds delivery_retry_delay,
-               std::size_t flush_workers)
+               std::size_t flush_workers,
+               std::optional<std::size_t> context_keys_cache_capacity)
     : enabled_(enabled),
       capacity_(capacity),
       flush_interval_(flush_interval),
@@ -17,7 +18,8 @@ Events::Events(bool enabled,
       all_attributes_private_(all_attributes_private),
       private_attributes_(std::move(private_attrs)),
       delivery_retry_delay_(delivery_retry_delay),
-      flush_workers_(flush_workers) {}
+      flush_workers_(flush_workers),
+      context_keys_cache_capacity_(context_keys_cache_capacity) {}
 
 bool Events::Enabled() const {
     return enabled_;
@@ -51,6 +53,10 @@ std::size_t Events::FlushWorkers() const {
     return flush_workers_;
 }
 
+std::optional<std::size_t> Events::ContextKeysCacheCapacity() const {
+    return context_keys_cache_capacity_;
+}
+
 bool operator==(Events const& lhs, Events const& rhs) {
     return lhs.Path() == rhs.Path() &&
            lhs.FlushInterval() == rhs.FlushInterval() &&
@@ -58,6 +64,7 @@ bool operator==(Events const& lhs, Events const& rhs) {
            lhs.AllAttributesPrivate() == rhs.AllAttributesPrivate() &&
            lhs.PrivateAttributes() == rhs.PrivateAttributes() &&
            lhs.DeliveryRetryDelay() == rhs.DeliveryRetryDelay() &&
-           lhs.FlushWorkers() == rhs.FlushWorkers();
+           lhs.FlushWorkers() == rhs.FlushWorkers() &&
+           lhs.ContextKeysCacheCapacity() == rhs.ContextKeysCacheCapacity();
 }
 }  // namespace launchdarkly::config::shared::built
