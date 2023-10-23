@@ -14,9 +14,11 @@
     "libs/server-sdk": {
       "extra-files": [
         "include/launchdarkly/server_side/client.hpp",
+        "tests/server_c_bindings_test.cpp",
         "tests/client_test.cpp",
         "CMakeLists.txt"
-      ]
+      ],
+      "prerelease": true
     },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
