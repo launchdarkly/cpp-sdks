@@ -127,8 +127,6 @@ void StreamingDataSource::Start() {
         client_builder.header(header.first, header.second);
     }
 
-    // TODO: Handle proxy support. sc-204386
-
     auto weak_self = weak_from_this();
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
