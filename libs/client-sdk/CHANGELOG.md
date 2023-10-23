@@ -8,6 +8,12 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
   * dependencies
     * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-sse-client bumped from 0.2.0 to 0.3.0
+
 ## [3.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.2.0...launchdarkly-cpp-client-v3.2.1) (2023-10-23)
 
 
