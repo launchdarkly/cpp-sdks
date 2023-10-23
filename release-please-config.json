@@ -18,7 +18,8 @@
         "tests/client_test.cpp",
         "CMakeLists.txt"
       ],
-      "prerelease": true
+      "prerelease": true,
+      "bump-minor-pre-major": true
     },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
