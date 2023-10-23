@@ -53,6 +53,11 @@ option(LD_DYNAMIC_LINK_OPENSSL
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
+# If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
+# it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
+# so that we only need to build the client or server for a given release (if only the client or server were affected.)
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
