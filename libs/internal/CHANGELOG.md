@@ -46,6 +46,20 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
 
+## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.2.0...launchdarkly-cpp-internal-v0.3.0) (2023-10-23)
+
+
+### Features
+
+* server-side SDK  ([#160](https://github.com/launchdarkly/cpp-sdks/issues/160)) ([75eece3](https://github.com/launchdarkly/cpp-sdks/commit/75eece3a46870fdb6bf4384c112700558099c4d1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 0.4.0 to 0.5.0
+
 ## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.1.11...launchdarkly-cpp-internal-v0.2.0) (2023-10-13)
 
 
