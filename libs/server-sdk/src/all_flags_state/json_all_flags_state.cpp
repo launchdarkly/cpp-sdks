@@ -4,6 +4,7 @@
 
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
+#include "launchdarkly/serialization/value_mapping.hpp"
 
 namespace launchdarkly::server_side {
 
@@ -15,23 +16,15 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
     if (!state.OmitDetails()) {
         obj.emplace("version", state.Version());
-
-        if (auto const& reason = state.Reason()) {
-            obj.emplace("reason", boost::json::value_from(*reason));
-        }
+        WriteMinimal(obj, "reason", state.Reason());
     }
 
     if (auto const& variation = state.Variation()) {
         obj.emplace("variation", *variation);
     }
 
-    if (state.TrackEvents()) {
-        obj.emplace("trackEvents", true);
-    }
-
-    if (state.TrackReason()) {
-        obj.emplace("trackReason", true);
-    }
+    WriteMinimal(obj, "trackEvents", state.TrackEvents());
+    WriteMinimal(obj, "trackReason", state.TrackReason());
 
     if (auto const& date = state.DebugEventsUntilDate()) {
         if (*date > 0) {

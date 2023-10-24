@@ -33,7 +33,8 @@ struct TrackEventParams {
     std::optional<double> metric_value;
 };
 
-struct ServerTrackEventParams : public TrackEventParams {
+struct ServerTrackEventParams {
+    TrackEventParams base;
     Context context;
 };
 
@@ -78,11 +79,13 @@ struct FeatureEventBase {
     explicit FeatureEventBase(FeatureEventParams const& params);
 };
 
-struct FeatureEvent : public FeatureEventBase {
+struct FeatureEvent {
+    FeatureEventBase base;
     ContextKeys context_keys;
 };
 
-struct DebugEvent : public FeatureEventBase {
+struct DebugEvent {
+    FeatureEventBase base;
     EventContext context;
 };
 

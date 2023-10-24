@@ -4,9 +4,17 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/*.hpp"
 )
 
-# Automatic library: static or dynamic based on user config.
+if (LD_BUILD_SHARED_LIBS)
+    message(STATUS "LaunchDarkly: building server-sdk as shared library")
+    add_library(${LIBNAME} SHARED)
+else ()
+    message(STATUS "LaunchDarkly: building server-sdk as static library")
+    add_library(${LIBNAME} STATIC)
+endif ()
 
-add_library(${LIBNAME}
+
+target_sources(${LIBNAME}
+        PRIVATE
         ${HEADER_LIST}
         boost.cpp
         client.cpp
@@ -50,7 +58,7 @@ add_library(${LIBNAME}
         bindings/c/all_flags_state/all_flags_state.cpp
 )
 
-if (MSVC OR (NOT BUILD_SHARED_LIBS))
+if (MSVC OR (NOT LD_BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
             PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
@@ -72,8 +80,9 @@ add_library(launchdarkly::server ALIAS ${LIBNAME})
 set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-install(TARGETS ${LIBNAME})
-if (BUILD_SHARED_LIBS AND MSVC)
+# Optional in case only the client SDK is being built.
+install(TARGETS ${LIBNAME} OPTIONAL)
+if (LD_BUILD_SHARED_LIBS AND MSVC)
     install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
 endif ()
 # Using PUBLIC_HEADERS would flatten the include.

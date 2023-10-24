@@ -1,8 +1,6 @@
 #include <boost/json.hpp>
 #include <launchdarkly/serialization/json_context_aware_reference.hpp>
-#include <launchdarkly/serialization/json_context_kind.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
@@ -228,7 +226,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                 data_model::Flag::Rollout::Kind const& kind) {
     switch (kind) {
         case Flag::Rollout::Kind::kUnrecognized:
-            // TODO: Should we be preserving the original string.
+            // TODO(SC-222050)
             break;
         case Flag::Rollout::Kind::kExperiment:
             json_value.emplace_string() = "experiment";
@@ -246,7 +244,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
     obj.emplace("variations", boost::json::value_from(rollout.variations));
     if (rollout.kind != Flag::Rollout::Kind::kUnrecognized) {
-        // TODO: Should we be preserving the original string and putting it in.
+        // TODO(SC-222050)
         obj.emplace("kind", boost::json::value_from(rollout.kind));
     }
     WriteMinimal(obj, "seed", rollout.seed);

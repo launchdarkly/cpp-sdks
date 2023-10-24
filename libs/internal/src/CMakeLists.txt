@@ -50,6 +50,11 @@ add_library(${LIBNAME} OBJECT
 
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
+# TODO(SC-209963): Remove once OpenSSL deprecated hash function usage has been updated
+target_compile_options(${LIBNAME} PRIVATE
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wno-deprecated-declarations>
+)
 
 set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")

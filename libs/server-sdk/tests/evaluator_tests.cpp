@@ -62,7 +62,7 @@ TEST_F(EvaluatorTests, BasicChanges) {
 
     auto detail = eval_.Evaluate(flag, alice);
 
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason(), EvaluationReason::Off());
@@ -70,27 +70,27 @@ TEST_F(EvaluatorTests, BasicChanges) {
     // flip off variation
     flag.offVariation = 1;
     detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), 1);
     ASSERT_EQ(*detail, Value(true));
 
     // off variation unspecified
     flag.offVariation = std::nullopt;
     detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), std::nullopt);
     ASSERT_EQ(*detail, Value::Null());
 
     // flip targeting on
     flag.on = true;
     detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), 1);
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason(), EvaluationReason::TargetMatch());
@@ -98,14 +98,14 @@ TEST_F(EvaluatorTests, BasicChanges) {
     // flip default variation
     flag.fallthrough = data_model::Flag::Variation{0};
     detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
 
     // bob's reason should still be TargetMatch even though his value is now the
     // default
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason(), EvaluationReason::TargetMatch());
@@ -121,12 +121,12 @@ TEST_F(EvaluatorTests, EvaluateWithMatchesOpGroups) {
     auto flag = store_->GetFlag("flagWithMatchesOpOnGroups")->item.value();
 
     auto detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason(),
@@ -141,7 +141,7 @@ TEST_F(EvaluatorTests, EvaluateWithMatchesOpKinds) {
     auto flag = store_->GetFlag("flagWithMatchesOpOnKinds")->item.value();
 
     auto detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason(),
@@ -149,13 +149,13 @@ TEST_F(EvaluatorTests, EvaluateWithMatchesOpKinds) {
                   0, "6a7755ac-e47a-40ea-9579-a09dd5f061bd", false));
 
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 
     auto new_bob = ContextBuilder().Kind("org", "bob").Build();
     detail = eval_.Evaluate(flag, new_bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.VariationIndex(), 0);
     ASSERT_EQ(detail.Reason(),
@@ -169,7 +169,7 @@ TEST_F(EvaluatorTestsWithLogs, PrerequisiteCycle) {
     auto flag = store_->GetFlag("cycleFlagA")->item.value();
 
     auto detail = eval_.Evaluate(flag, alice);
-    ASSERT_FALSE(detail);
+    ASSERT_TRUE(detail.IsError());
     ASSERT_EQ(detail.Reason(), EvaluationReason::MalformedFlag());
     ASSERT_TRUE(messages_->Count(1));
     ASSERT_TRUE(messages_->Contains(0, LogLevel::kError, "circular reference"));
@@ -182,13 +182,13 @@ TEST_F(EvaluatorTests, FlagWithSegment) {
     auto flag = store_->GetFlag("flagWithSegmentMatchRule")->item.value();
 
     auto detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason(),
               EvaluationReason::RuleMatch(0, "match-rule", false));
 
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(true));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 }
@@ -201,13 +201,13 @@ TEST_F(EvaluatorTests, FlagWithSegmentContainingRules) {
         store_->GetFlag("flagWithSegmentMatchesUserAlice")->item.value();
 
     auto detail = eval_.Evaluate(flag, alice);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.Reason(),
               EvaluationReason::RuleMatch(0, "match-rule", false));
     ASSERT_EQ(*detail, Value(false));
 
     detail = eval_.Evaluate(flag, bob);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
     ASSERT_EQ(*detail, Value(true));
 }
@@ -220,17 +220,17 @@ TEST_F(EvaluatorTests, FlagWithExperiment) {
     auto flag = store_->GetFlag("flagWithExperiment")->item.value();
 
     auto detail = eval_.Evaluate(flag, user_a);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_TRUE(detail.Reason()->InExperiment());
 
     detail = eval_.Evaluate(flag, user_b);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(true));
     ASSERT_TRUE(detail.Reason()->InExperiment());
 
     detail = eval_.Evaluate(flag, user_c);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_FALSE(detail.Reason()->InExperiment());
 }
@@ -242,7 +242,7 @@ TEST_F(EvaluatorTests, FlagWithExperimentTargetingMissingContext) {
     auto user_a = ContextBuilder().Kind("user", "userKeyA").Build();
 
     auto detail = eval_.Evaluate(flag, user_a);
-    ASSERT_TRUE(detail);
+    ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
 }

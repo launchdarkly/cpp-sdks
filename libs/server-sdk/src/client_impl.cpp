@@ -51,7 +51,6 @@ MakeDataSource(HttpProperties const& http_properties,
     auto data_source_properties = builder.Build();
 
     if (config.DataSourceConfig().method.index() == 0) {
-        // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::server_side::data_sources::StreamingDataSource>(
             config.ServiceEndpoints(), config.DataSourceConfig(),
@@ -129,20 +128,13 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
-// TODO: audit if this is correct for server
-// Was an attempt made to initialize the data source, and did that attempt
-// succeed? The data source being connected, or not being connected due to
-// offline mode, both represent successful terminal states.
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
     return state == DataSourceStatus::DataSourceState::kValid;
 }
 
-// TODO: audit if this is correct for server
-// Was any attempt made to initialize the data source (with a successful or
-// permanent failure outcome?)
 static bool IsInitialized(DataSourceStatus::DataSourceState state) {
     return IsInitializedSuccessfully(state) ||
-           (state == DataSourceStatus::DataSourceState::kOff);
+           (state != DataSourceStatus::DataSourceState::kInitializing);
 }
 
 void ClientImpl::Identify(Context context) {
@@ -453,7 +445,7 @@ data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
 
 ClientImpl::~ClientImpl() {
     ioc_.stop();
-    // TODO: Probably not the best.
+    // TODO(SC-219101)
     run_thread_.join();
 }
 }  // namespace launchdarkly::server_side

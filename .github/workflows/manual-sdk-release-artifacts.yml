@@ -1,5 +1,6 @@
 # Checks out the tag, builds release builds, and attaches them to the release for the tag.
 # If you need to change build scripts, then update the tag to include the modifications.
+# NOTE: This workflow uses sdk-release/action.yml @ the tag specified in the workflow_dispatch input.
 on:
   workflow_dispatch:
     inputs:
@@ -13,6 +14,7 @@ on:
         type: choice
         options:
           - libs/client-sdk:launchdarkly-cpp-client
+          - libs/server-sdk:launchdarkly-cpp-server
 
 name: Publish SDK Artifacts
 
@@ -55,18 +57,18 @@ jobs:
           sdk_path: ${{ needs.split-input.outputs.sdk_path}}
           sdk_cmake_target: ${{ needs.split-input.outputs.sdk_cmake_target}}
   release-sdk-provenance:
-    needs: ['release-sdk']
+    needs: [ 'release-sdk' ]
     strategy:
       matrix:
         # Generates a combined attestation for each platform
         os: [ linux, windows, macos ]
-    permissions: 
+    permissions:
       actions: read
       id-token: write
       contents: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
     with:
       base64-subjects: "${{ needs.release-sdk.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true 
+      upload-assets: true
       upload-tag-name: ${{ inputs.tag }}
       provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}

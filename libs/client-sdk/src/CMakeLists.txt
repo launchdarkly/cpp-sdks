@@ -3,9 +3,15 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly/client_side/*.hpp"
 )
 
-# Automatic library: static or dynamic based on user config.
+if (LD_BUILD_SHARED_LIBS)
+    message(STATUS "LaunchDarkly: building client-sdk as shared library")
+    add_library(${LIBNAME} SHARED)
+else ()
+    message(STATUS "LaunchDarkly: building client-sdk as static library")
+    add_library(${LIBNAME} STATIC)
+endif ()
 
-add_library(${LIBNAME}
+target_sources(${LIBNAME} PRIVATE
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
         data_sources/data_source_event_handler.cpp
@@ -31,14 +37,16 @@ add_library(${LIBNAME}
         flag_manager/context_index.cpp
         flag_manager/flag_manager.cpp
         flag_manager/flag_persistence.cpp
-        bindings/c/sdk.cpp)
+        bindings/c/sdk.cpp
+)
 
-if (MSVC OR (NOT BUILD_SHARED_LIBS))
+
+if (MSVC OR (NOT LD_BUILD_SHARED_LIBS))
     target_link_libraries(${LIBNAME}
             PUBLIC launchdarkly::common
             PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
 else ()
-    # The default static lib builds, for linux, are positition independent.
+    # The default static lib builds, for linux, are position independent.
     # So they do not link into a shared object without issues. So, when
     # building shared objects do not link the static libraries and instead
     # use the "src.hpp" files for required libraries.
@@ -55,8 +63,9 @@ add_library(launchdarkly::client ALIAS ${LIBNAME})
 set_property(TARGET ${LIBNAME} PROPERTY
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
-install(TARGETS ${LIBNAME})
-if (BUILD_SHARED_LIBS AND MSVC)
+# Optional in case only the server SDK is being built.
+install(TARGETS ${LIBNAME} OPTIONAL)
+if (LD_BUILD_SHARED_LIBS AND MSVC)
     install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
 endif ()
 # Using PUBLIC_HEADERS would flatten the include.

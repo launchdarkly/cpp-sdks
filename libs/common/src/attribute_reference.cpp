@@ -235,10 +235,11 @@ AttributeReference::AttributeReference() : AttributeReference("") {}
 std::string AttributeReference::PathToStringReference(
     std::vector<std::string_view> path) {
     // Approximate size to reduce resizes.
-    auto size = std::accumulate(path.begin(), path.end(), 0,
-                                [](auto sum, auto const& component) {
-                                    return sum + component.size() + 1;
-                                });
+    std::size_t size =
+        std::accumulate(path.begin(), path.end(), std::size_t{0},
+                        [](std::size_t sum, auto const& component) {
+                            return sum + component.size() + 1;
+                        });
 
     std::string redaction_name;
     redaction_name.reserve(size);

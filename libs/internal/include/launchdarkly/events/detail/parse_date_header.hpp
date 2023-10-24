@@ -8,14 +8,17 @@
 namespace launchdarkly::events::detail {
 
 template <typename Clock>
+
 static std::optional<typename Clock::time_point> ParseDateHeader(
-    std::string const& datetime) {
+    std::string const& datetime,
+    std::locale const& locale) {
     // The following comments may not be entirely accurate.
     // TODO: There must be a better way.
 
     std::tm gmt_tm = {};
+
     std::istringstream string_stream(datetime);
-    string_stream.imbue(std::locale("en_US.utf-8"));
+    string_stream.imbue(locale);
     string_stream >> std::get_time(&gmt_tm, "%a, %d %b %Y %H:%M:%S GMT");
     if (string_stream.fail()) {
         return std::nullopt;

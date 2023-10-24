@@ -5,7 +5,6 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <array>
 #include <string>
 
 #include <launchdarkly/connection.hpp>
@@ -123,7 +122,6 @@ class ExpirationTracker {
             std::array<TaggedData<TtlMap>,
                        static_cast<std::underlying_type_t<DataKind>>(
                            DataKind::kKindCount)>;
-
         void Set(DataKind kind, std::string const& key, TimePoint expiration);
         void Remove(DataKind kind, std::string const& key);
         std::optional<TimePoint> Get(DataKind kind,

@@ -18,7 +18,7 @@ namespace launchdarkly::server_side::data_sources {
 /**
  * Enumeration of possible data source states.
  */
-enum class ServerDataSourceState {
+enum class DataSourceState {
     /**
      * The initial state of the data source when the SDK is being
      * initialized.
@@ -65,7 +65,7 @@ enum class ServerDataSourceState {
 };
 
 using DataSourceStatus =
-    common::data_sources::DataSourceStatusBase<ServerDataSourceState>;
+    common::data_sources::DataSourceStatusBase<DataSourceState>;
 
 /**
  * Interface for accessing and listening to the data source status.

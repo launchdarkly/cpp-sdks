@@ -1,3 +1,11 @@
+#include "streaming_data_source.hpp"
+
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/detail/unreachable.hpp>
+#include <launchdarkly/encoding/base_64.hpp>
+#include <launchdarkly/network/http_requester.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
+
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
@@ -5,13 +13,6 @@
 #include <boost/url.hpp>
 
 #include <utility>
-
-#include "streaming_data_source.hpp"
-
-#include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/encoding/base_64.hpp>
-#include <launchdarkly/network/http_requester.hpp>
-#include <launchdarkly/serialization/json_context.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -30,6 +31,7 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
         case sse::Error::ReadTimeout:
             return "read timeout reached";
     }
+    launchdarkly::detail::unreachable();
 }
 
 StreamingDataSource::StreamingDataSource(
@@ -124,8 +126,6 @@ void StreamingDataSource::Start() {
     for (auto const& header : http_config_.BaseHeaders()) {
         client_builder.header(header.first, header.second);
     }
-
-    // TODO: Handle proxy support. sc-204386
 
     auto weak_self = weak_from_this();
 

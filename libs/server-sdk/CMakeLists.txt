@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(
         LaunchDarklyCPPServer
-        VERSION 0.1
+        VERSION 0.1.0 # {x-release-please-version}
         DESCRIPTION "LaunchDarkly C++ Server SDK"
         LANGUAGES CXX C
 )
@@ -24,7 +24,7 @@ endif ()
 #set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_FILES})
 
-# Needed to fetch external dependencies. 
+# Needed to fetch external dependencies.
 include(FetchContent)
 
 # Needed to parse RFC3339 dates in flag rules.
@@ -33,6 +33,6 @@ include(${CMAKE_FILES}/rfc3339_timestamp.cmake)
 # Add main SDK sources.
 add_subdirectory(src)
 
-if (BUILD_TESTING)
+if (LD_BUILD_UNIT_TESTS)
     add_subdirectory(tests)
 endif ()

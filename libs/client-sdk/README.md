@@ -71,6 +71,22 @@ gcc -I $(pwd)/include -Llib -fPIE -g main.c liblaunchdarkly-cpp-client.so
 The examples here are to help with getting started, but generally speaking the SDK should be incorporated using your
 build system (CMake for instance).
 
+### CMake Usage
+
+First, add the SDK to your project:
+
+```cmake
+add_subdirectory(path-to-sdk-repo)
+```
+
+Currently `find_package` is not yet supported.
+
+This will expose the `launchdarkly::client` target. Next, link the target to your executable or library:
+
+```cmake
+target_link_libraries(my-target PRIVATE launchdarkly::client)
+```
+
 Learn more
 -----------
 

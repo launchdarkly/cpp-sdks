@@ -42,6 +42,40 @@ GoogleTest is used for testing.
 
 For information on integrating an SDK package please refer to the SDK specific README.
 
+## CMake Usage
+
+Various CMake options are available to customize the client/server SDK builds.
+
+| Option                    | Description                                                                            | Default            | Requires                                  |
+|---------------------------|----------------------------------------------------------------------------------------|--------------------|-------------------------------------------|
+| `BUILD_TESTING`           | Coarse-grained switch; turn off to disable all testing and only build the SDK targets. | On                 | N/A                                       |
+| `LD_BUILD_UNIT_TESTS`     | Whether C++ unit tests are built.                                                      | On                 | `BUILD_TESTING; NOT LD_BUILD_SHARED_LIBS` |
+| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled.                                                  | On                 | `LD_BUILD_UNIT_TESTS`                     |
+| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                               | Off                | `BUILD_TESTING`                           |
+| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                          | On                 | N/A                                       |
+| `LD_BUILD_SHARED_LIBS`    | Whether the SDKs are built as static or shared libraries.                              | Off  (static lib)  | N/A                                       |
+| `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL be dynamically linked.                                                 | Off  (static link) | N/A                                       |
+
+**Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
+symbols aren't exposed. To run unit tests, build a static library._
+
+Basic usage example:
+
+```bash
+mkdir -p build && cd build
+cmake -G"Unix Makefiles" ..
+```
+
+Slightly more advanced example - build shared libraries, and don't build any of the testing components:
+
+```bash
+mkdir -p build  && cd build
+cmake -G"Unix Makefiles" -DLD_BUILD_SHARED_LIBS=On -DBUILD_TESTING=Off ..
+```
+
+The example uses `make`, but you might instead use [Ninja](https://ninja-build.org/),
+MSVC, [etc.](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+
 ## LaunchDarkly overview
 
 [LaunchDarkly](https://www.launchdarkly.com) is a feature management platform that serves trillions of feature flags
@@ -76,7 +110,8 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
     - Grant access to certain features based on user attributes, like payment plan (eg: users on the ‘gold’ plan get
       access to more features than users in the ‘silver’ plan). Disable parts of your application to facilitate
       maintenance, without taking everything offline.
-- LaunchDarkly provides feature flag SDKs for a wide variety of languages and technologies. Read [our documentation](https://docs.launchdarkly.com/sdk) for a complete list.
+- LaunchDarkly provides feature flag SDKs for a wide variety of languages and technologies.
+  Read [our documentation](https://docs.launchdarkly.com/sdk) for a complete list.
 - Explore LaunchDarkly
     - [launchdarkly.com](https://www.launchdarkly.com/ 'LaunchDarkly Main Website') for more information
     - [docs.launchdarkly.com](https://docs.launchdarkly.com/ 'LaunchDarkly Documentation') for our documentation and SDK

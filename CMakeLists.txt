@@ -3,6 +3,7 @@
 
 # Required for Apple Silicon support.
 cmake_minimum_required(VERSION 3.19)
+include(CMakeDependentOption)
 
 project(
         LaunchDarklyCPPSDKs
@@ -13,6 +14,50 @@ project(
 
 include(GNUInstallDirs)
 
+option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
+
+option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
+
+cmake_dependent_option(LD_BUILD_UNIT_TESTS
+        "Build the C++ unit tests."
+        ON                                        # default to enabling unit tests
+        "BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS"  # only exposed if top-level switch is on, and also only when building
+        # static libs. This is because we have hidden visibility of symbols by default (to only expose our C API.)
+        OFF                                       # otherwise, off
+)
+
+# If you want to run the unit tests with valgrind, then LD_TESTING_SANITIZERS must of OFF.
+cmake_dependent_option(LD_TESTING_SANITIZERS
+        "Enable sanitizers for unit tests."
+        ON                      # default to enabling sanitizers
+        "LD_BUILD_UNIT_TESTS"   # only expose if unit tests enabled..
+        OFF                     # otherwise, off
+)
+
+cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
+        "Build contract test service."
+        OFF                                         # default to disabling contract tests, since they require running a service
+        "BUILD_TESTING;NOT LD_BUILD_SHARED_LIBS"    # only expose if top-level switch is on and using static libs, since C++ symbols needed would be hidden.
+        OFF                                         # otherwise, off
+)
+
+# The general strategy is to produce a fat artifact containing all of our dependencies so users
+# only have a single thing to link. We should support this either being a static or shared library.
+# Because OpenSSL is a large, and security relevant dependency, we should have a separate option
+# to link against that statically or dynamically.
+
+option(LD_DYNAMIC_LINK_OPENSSL
+        "Dynamically link OpenSSL instead of building with static library"
+        OFF # default to linking OpenSSL statically
+)
+
+option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
+
+# If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
+# it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
+# so that we only need to build the client or server for a given release (if only the client or server were affected.)
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
+
 # All projects in this repo should share the same version of 3rd party depends.
 # It's the only way to remain sane.
 set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -20,15 +65,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(BUILD_TESTING "Enable C++ unit tests." ON)
-
-# If you want to run the unit tests with valgrind, then TESTING_SANITIZERS must of OFF.
-option(TESTING_SANITIZERS "Enable sanitizers for unit tests." ON)
-
-if (BUILD_TESTING)
+if (LD_BUILD_UNIT_TESTS)
+    message(STATUS "LaunchDarkly: building unit tests")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
     add_compile_definitions(LAUNCHDARKLY_USE_ASSERT)
-    if (TESTING_SANITIZERS)
+    if (LD_TESTING_SANITIZERS)
         if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined -fsanitize=leak")
         elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
@@ -53,14 +94,22 @@ if (BUILD_TESTING)
     enable_testing()
 endif ()
 
-set(OPENSSL_USE_STATIC_LIBS ON)
-set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
+if (LD_DYNAMIC_LINK_OPENSSL)
+    message(STATUS "LaunchDarkly: searching for shared OpenSSL library")
+    set(OPENSSL_USE_STATIC_LIBS OFF)
+else ()
+    message(STATUS "LaunchDarkly: searching for static OpenSSL library")
+    set(OPENSSL_USE_STATIC_LIBS ON)
+endif ()
+
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
+# Even though the main SDK might be a static or shared lib, boost should always statically
+# linked into the binary.
 set(Boost_USE_STATIC_LIBS ON)
 
-if (BUILD_SHARED_LIBS)
+if (LD_BUILD_SHARED_LIBS)
     # When building a shared library we hide all symbols
     # aside from this we have specifically exported for the C-API.
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -72,26 +121,25 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
-add_subdirectory(libs/client-sdk)
-add_subdirectory(libs/server-sdk)
+include(${CMAKE_FILES}/certify.cmake)
+add_subdirectory(vendor/foxy)
 
-set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
-set(BUILD_SHARED_LIBS OFF)
-
-# Always build the common libraries as static libs.
+# Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 
-set(ORIGINAL_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+# Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
+# This target "links" in common, internal, and sse as object libraries.
+add_subdirectory(libs/client-sdk)
+add_subdirectory(libs/server-sdk)
 
-set(BUILD_TESTING OFF)
-include(${CMAKE_FILES}/certify.cmake)
-add_subdirectory(vendor/foxy)
+if (LD_BUILD_CONTRACT_TESTS)
+    message(STATUS "LaunchDarkly: building contract tests")
+    add_subdirectory(contract-tests)
+endif ()
 
-set(BUILD_TESTING "${ORIGINAL_BUILD_TESTING}")
-
-set(BUILD_SHARED_LIBS "${ORIGINAL_BUILD_SHARED_LIBS}")
-
-add_subdirectory(contract-tests)
-add_subdirectory(examples)
+if (LD_BUILD_EXAMPLES)
+    message(STATUS "LaunchDarkly: building examples")
+    add_subdirectory(examples)
+endif ()

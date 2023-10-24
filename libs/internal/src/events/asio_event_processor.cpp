@@ -280,15 +280,12 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                     if (!context_key_cache_.Notice(
                             event.context.CanonicalKey())) {
                         out.emplace_back(server_side::IndexEvent{
-                            event.creation_date,
+                            event.base.creation_date,
                             filter_.filter(event.context)});
                     }
                 }
 
-                // Object slicing on purpose; the context will be stripped out
-                // of the ServerTrackEventParams when converted to a
-                // TrackEventParams.
-                out.emplace_back(std::move(event));
+                out.emplace_back(std::move(event.base));
             }},
         std::move(input_event));
 

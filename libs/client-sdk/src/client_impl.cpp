@@ -48,7 +48,6 @@ MakeDataSource(HttpProperties const& http_properties,
     auto data_source_properties = builder.Build();
 
     if (config.DataSourceConfig().method.index() == 0) {
-        // TODO: use initial reconnect delay.
         return std::make_shared<
             launchdarkly::client_side::data_sources::StreamingDataSource>(
             config.ServiceEndpoints(), config.DataSourceConfig(),
@@ -387,7 +386,7 @@ void ClientImpl::UpdateContextSynchronized(Context context) {
 
 ClientImpl::~ClientImpl() {
     ioc_.stop();
-    // TODO: Probably not the best.
+    // TODO(SC-219101)
     run_thread_.join();
 }
 

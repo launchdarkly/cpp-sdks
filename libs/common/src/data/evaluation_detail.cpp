@@ -36,11 +36,6 @@ std::optional<EvaluationReason> const& EvaluationDetail<T>::Reason() const {
 }
 
 template <typename T>
-bool EvaluationDetail<T>::ReasonKindIs(enum EvaluationReason::Kind kind) const {
-    return reason_.has_value() && reason_->Kind() == kind;
-}
-
-template <typename T>
 std::optional<std::size_t> EvaluationDetail<T>::VariationIndex() const {
     return variation_index_;
 }
@@ -52,11 +47,6 @@ T const& EvaluationDetail<T>::operator*() const {
 template <typename T>
 [[nodiscard]] bool EvaluationDetail<T>::IsError() const {
     return reason_.has_value() && reason_->ErrorKind().has_value();
-}
-
-template <typename T>
-EvaluationDetail<T>::operator bool() const {
-    return !IsError();
 }
 
 template class EvaluationDetail<bool>;

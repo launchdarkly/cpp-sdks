@@ -162,7 +162,7 @@ void WriteMinimal(boost::json::object& obj,
                   std::string const& key,  // No copy when not used.
                   std::optional<T> val) {
     if (val.has_value()) {
-        obj.emplace(key, val.value());
+        obj.emplace(key, boost::json::value_from(val.value()));
     }
 }
 

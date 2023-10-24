@@ -8,6 +8,7 @@ on:
         type: choice
         options:
           - libs/client-sdk
+          - libs/server-sdk
 name: Publish Documentation
 jobs:
   build-publish:

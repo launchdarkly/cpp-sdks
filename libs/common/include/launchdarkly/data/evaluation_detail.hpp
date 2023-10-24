@@ -56,6 +56,11 @@ class EvaluationDetail {
     [[nodiscard]] std::optional<std::size_t> VariationIndex() const;
 
     /**
+     * @return True if the evaluation resulted in an error.
+     */
+    [[nodiscard]] bool IsError() const;
+
+    /**
      * @return A reference to the reason for the results.
      */
     [[nodiscard]] std::optional<EvaluationReason> const& Reason() const;

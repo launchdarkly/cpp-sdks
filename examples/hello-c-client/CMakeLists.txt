@@ -12,4 +12,4 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_executable(hello-c-client main.c)
-target_link_libraries(hello-c-client PRIVATE launchdarkly::client launchdarkly::sse launchdarkly::common Threads::Threads)
+target_link_libraries(hello-c-client PRIVATE launchdarkly::client Threads::Threads)
