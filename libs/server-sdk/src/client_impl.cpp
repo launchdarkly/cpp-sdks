@@ -50,13 +50,13 @@ using launchdarkly::config::shared::built::HttpProperties;
 //     if (config.DataSourceConfig().method.index() == 0) {
 //         // TODO: use initial reconnect delay.
 //         return std::make_shared<
-//             launchdarkly::server_side::data_retrieval::StreamingDataSource>(
+//             launchdarkly::server_side::data::StreamingDataSource>(
 //             config.ServiceEndpoints(), config.DataSourceConfig(),
 //             data_source_properties, executor, flag_updater, status_manager,
 //             logger);
 //     }
 //     return std::make_shared<
-//         launchdarkly::server_side::data_retrieval::PollingDataSource>(
+//         launchdarkly::server_side::data::PollingDataSource>(
 //         config.ServiceEndpoints(), config.DataSourceConfig(),
 //         data_source_properties, executor, flag_updater, status_manager,
 //         logger);

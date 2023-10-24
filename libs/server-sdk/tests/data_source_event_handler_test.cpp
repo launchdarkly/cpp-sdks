@@ -6,7 +6,7 @@
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
-using namespace launchdarkly::server_side::data_retrieval;
+using namespace launchdarkly::server_side::data;
 using namespace launchdarkly::server_side::data_store;
 
 TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
