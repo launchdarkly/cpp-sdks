@@ -5,6 +5,7 @@
 #include "../memory_store.hpp"
 #include "expiration_tracker.hpp"
 
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/persistence/persistent_store_core.hpp>
 
 #include <memory>
@@ -22,7 +23,7 @@ class SegmentKind : public persistence::IPersistentKind {
     ~SegmentKind() override = default;
 
    private:
-    static const inline std::string namespace_ = "segments";
+    static inline std::string const namespace_ = "segments";
 };
 
 class FlagKind : public persistence::IPersistentKind {
@@ -33,12 +34,12 @@ class FlagKind : public persistence::IPersistentKind {
     ~FlagKind() override = default;
 
    private:
-    static const inline std::string namespace_ = "features";
+    static inline std::string const namespace_ = "features";
 };
 
 struct Kinds {
-    static const FlagKind Flag;
-    static const SegmentKind Segment;
+    static FlagKind const Flag;
+    static SegmentKind const Segment;
 };
 
 class PersistentStore : public IDataStore,
@@ -105,6 +106,8 @@ class PersistentStore : public IDataStore,
                 [[fallthrough]];
             case ExpirationTracker::TrackState::kFresh:
                 return get();
+            default:
+                launchdarkly::detail::unreachable();
         }
     }
 
@@ -122,7 +125,7 @@ class PersistentStore : public IDataStore,
         ~SegmentKind() override = default;
 
        private:
-        static const inline std::string namespace_ = "segments";
+        static inline std::string const namespace_ = "segments";
     };
 
     class FlagKind : public persistence::IPersistentKind {
@@ -133,18 +136,18 @@ class PersistentStore : public IDataStore,
         ~FlagKind() override = default;
 
        private:
-        static const inline std::string namespace_ = "features";
+        static inline std::string const namespace_ = "features";
     };
 
     struct Kinds {
-        static const FlagKind Flag;
-        static const SegmentKind Segment;
+        static FlagKind const Flag;
+        static SegmentKind const Segment;
     };
 
     struct Keys {
-        static const inline std::string kAllFlags = "allFlags";
-        static const inline std::string kAllSegments = "allSegments";
-        static const inline std::string kInitialized = "initialized";
+        static inline std::string const kAllFlags = "allFlags";
+        static inline std::string const kAllSegments = "allSegments";
+        static inline std::string const kInitialized = "initialized";
     };
 };
 
