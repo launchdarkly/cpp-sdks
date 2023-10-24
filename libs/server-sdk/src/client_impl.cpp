@@ -1,9 +1,3 @@
-
-#include <chrono>
-
-#include <optional>
-#include <utility>
-
 #include "client_impl.hpp"
 
 #include "all_flags_state/all_flags_state_builder.hpp"
@@ -15,6 +9,10 @@
 #include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
+
+#include <chrono>
+#include <optional>
+#include <utility>
 
 namespace launchdarkly::server_side {
 
@@ -62,7 +60,7 @@ using launchdarkly::config::shared::built::HttpProperties;
 //         logger);
 // }
 
-static std::unique_ptr<data_retrieval::IDataSystem> MakeDataSystem(
+static std::unique_ptr<data_retrieval::ISystem> MakeDataSystem(
     HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,

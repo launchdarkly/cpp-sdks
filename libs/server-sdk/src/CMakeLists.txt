@@ -22,19 +22,19 @@ target_sources(${LIBNAME}
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
-        data/change_notifier/change_notifier_destination.cpp
-        data/dependency_tracker/dependency_tracker.cpp
-        data/memory_store/memory_store.cpp
-        data/serialization_adapters/json_destination.cpp
-        data/serialization_adapters/json_pull_source.cpp
-        data/sources/noop/null_data_source.cpp
-        data/sources/streaming/streaming_data_source.cpp
-        data/sources/polling/polling_data_source.cpp
-        data/status_notifications/data_source_status.cpp
-        data/systems/background_sync/background_sync_system.cpp
-        data/systems/background_sync/event_handler.cpp
-        data/systems/lazy_load/lazy_load_system.cpp
-        data/systems/lazy_load/expiration/expiration_tracker.cpp
+        data_components/change_notifier/change_notifier_destination.cpp
+        data_components/dependency_tracker/dependency_tracker.cpp
+        data_components/memory_store/memory_store.cpp
+        data_components/serialization_adapters/json_destination.cpp
+        data_components/serialization_adapters/json_pull_source.cpp
+        data_components/sources/noop/null_data_source.cpp
+        data_components/sources/streaming/streaming_data_source.cpp
+        data_components/sources/polling/polling_data_source.cpp
+        data_components/status_notifications/data_source_status.cpp
+        data_systems/background_sync/background_sync_system.cpp
+        data_systems/background_sync/event_handler.cpp
+        data_systems/lazy_load/lazy_load_system.cpp
+        data_systems/lazy_load/expiration/expiration_tracker.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

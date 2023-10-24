@@ -1,5 +1,10 @@
 #pragma once
 
+#include "data_components/status_notifications/data_source_status_manager.hpp"
+#include "data_interfaces/system/isystem.hpp"
+#include "evaluation/evaluator.hpp"
+#include "events/event_scope.hpp"
+
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
@@ -8,12 +13,6 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
-
-#include "data_retrieval/interfaces/data_system.hpp"
-#include "data_retrieval/status_notifications/data_source_status_manager.hpp"
-
-#include "evaluation/evaluator.hpp"
-#include "events/event_scope.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -102,7 +101,7 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
-    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
+    data_interfaces::IDataSourceStatusProvider& DataSourceStatus() override;
 
     ~ClientImpl();
 
@@ -170,7 +169,7 @@ class ClientImpl : public IClient {
 
     data_retrieval::DataSourceStatusManager status_manager_;
 
-    std::unique_ptr<data_retrieval::IDataSystem> data_system_;
+    std::unique_ptr<data_interfaces::ISystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 
