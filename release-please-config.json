@@ -19,7 +19,8 @@
         "CMakeLists.txt"
       ],
       "prerelease": true,
-      "bump-minor-pre-major": true
+      "bump-minor-pre-major": true,
+      "release-as": "0.1.0"
     },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
