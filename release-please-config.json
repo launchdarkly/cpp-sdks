@@ -21,7 +21,7 @@
       "prerelease": true,
       "bump-minor-pre-major": true,
       "release-as": "0.1.0",
-      "commit-search-depth": 10
+      "bootstrap-sha": "82d72df338a2a89d6f55e3ebe21b4c987a9cc2c0"
     },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
