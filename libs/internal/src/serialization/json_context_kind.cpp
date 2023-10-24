@@ -31,4 +31,3 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 }
 }  // namespace data_model
 }  // namespace launchdarkly
->>>>>>> main
