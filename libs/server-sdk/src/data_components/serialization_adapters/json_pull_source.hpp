@@ -4,6 +4,8 @@
 #include "../../data_interfaces/source/ipull_source.hpp"
 #include "../../data_interfaces/source/iserialized_pull_source.hpp"
 
+#include "../kinds/kinds.hpp"
+
 namespace launchdarkly::server_side::data_components {
 
 class JsonSource : public data_interfaces::IPullSource {
@@ -24,8 +26,9 @@ class JsonSource : public data_interfaces::IPullSource {
     AllSegments() const override;
     [[nodiscard]] virtual std::string const& Identity() const override;
 
-   public:
    private:
+    FlagKind const flag_kind_;
+    FlagKind const segment_kind_;
     data_interfaces::ISerializedDataPullSource& source_;
 };
 

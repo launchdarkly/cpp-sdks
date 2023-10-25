@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../data_interfaces/destination/idestination.hpp"
-#include "../../data_interfaces/source/ipull_source.hpp"
+#include "../../data_interfaces/store/istore.hpp"
 #include "../dependency_tracker/dependency_tracker.hpp"
 
 #include <launchdarkly/data_model/descriptors.hpp>
@@ -26,7 +26,7 @@ class DataStoreUpdater : public data_interfaces::IDestination,
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDestination& sink, IPullSource const& source);
+    DataStoreUpdater(IDestination& sink, data_interfaces::IStore const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
@@ -104,7 +104,7 @@ class DataStoreUpdater : public data_interfaces::IDestination,
     void NotifyChanges(DependencySet changes);
 
     IDestination& sink_;
-    data_sources::IDataSource const& source_;
+    data_interfaces::IStore const& source_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;
 

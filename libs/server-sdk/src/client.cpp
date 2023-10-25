@@ -124,7 +124,7 @@ EvaluationDetail<Value> Client::JsonVariationDetail(Context const& ctx,
     return client->JsonVariationDetail(ctx, key, std::move(default_value));
 }
 
-data_sources::IDataSourceStatusProvider& Client::DataSourceStatus() {
+IDataSourceStatusProvider& Client::DataSourceStatus() {
     return client->DataSourceStatus();
 }
 

@@ -39,7 +39,7 @@ bool MemoryStore::Initialized() const {
     return initialized_;
 }
 
-std::string const& MemoryStore::Description() const {
+std::string const& MemoryStore::Identity() const {
     return description_;
 }
 

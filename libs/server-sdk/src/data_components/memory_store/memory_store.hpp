@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../data_interfaces/destination/idestination.hpp"
+#include "../../data_interfaces/store/istore.hpp"
 
 #include <memory>
 #include <mutex>
@@ -9,26 +10,33 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class MemoryStore : public data_interfaces::IDestination {
+class MemoryStore : public data_interfaces::IStore,
+                    public data_interfaces::IDestination {
    public:
-    std::shared_ptr<data_model::FlagDescriptor> GetFlag(
-        std::string const& key) const;
+    [[nodiscard]] std::shared_ptr<data_model::FlagDescriptor> GetFlag(
+        std::string const& key) const override;
 
-    std::shared_ptr<data_model::SegmentDescriptor> GetSegment(
-        std::string const& key) const;
+    [[nodiscard]] std::shared_ptr<data_model::SegmentDescriptor> GetSegment(
+        std::string const& key) const override;
 
-    std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
-    AllFlags() const;
-    std::unordered_map<std::string,
-                       std::shared_ptr<data_model::SegmentDescriptor>>
-    AllSegments() const;
+    [[nodiscard]] std::
+        unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
+        AllFlags() const override;
 
-    bool Initialized() const;
-    std::string const& Description() const;
+    [[nodiscard]] std::unordered_map<
+        std::string,
+        std::shared_ptr<data_model::SegmentDescriptor>>
+    AllSegments() const override;
+
+    [[nodiscard]] bool Initialized() const override;
+
+    [[nodiscard]] std::string const& Identity() const override;
 
     void Init(launchdarkly::data_model::SDKDataSet dataSet) override;
+
     void Upsert(std::string const& key,
                 data_model::FlagDescriptor flag) override;
+    
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
 

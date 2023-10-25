@@ -1,5 +1,4 @@
 #include "polling_data_source.hpp"
-#include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
@@ -13,7 +12,7 @@
 
 #include <boost/json.hpp>
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side::data_systems {
 
 static char const* const kErrorParsingPut = "Could not parse polling payload";
 static char const* const kErrorPutInvalid =
@@ -47,8 +46,8 @@ PollingDataSource::PollingDataSource(
         data_source_config,
     config::shared::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& ioc,
-    IDataSourceUpdateSink& handler,
-    DataSourceStatusManager& status_manager,
+    data_interfaces::IDestination& handler,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
@@ -71,7 +70,7 @@ PollingDataSource::PollingDataSource(
 }
 
 void PollingDataSource::Init(std::optional<data_model::SDKDataSet> initial_data,
-                             IDestination& destination) {
+                             data_interfaces::IDestination& destination) {
     // TODO: implement
 }
 void PollingDataSource::DoPoll() {
@@ -235,4 +234,4 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
     }
 }
 
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side::data_systems

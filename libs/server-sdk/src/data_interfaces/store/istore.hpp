@@ -1,3 +1,5 @@
+#pragma once
+
 #include <launchdarkly/data_model/descriptors.hpp>
 
 #include <memory>

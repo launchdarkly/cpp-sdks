@@ -3,8 +3,6 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
-#include "data_version_inspectors.hpp"
-
 namespace launchdarkly::server_side::data_systems {
 
 using namespace config::shared::built;
@@ -14,13 +12,14 @@ LazyLoad::LazyLoad(
     DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
     HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
-    DataSourceStatusManager& status_manager,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : store_() {}
 
 std::string const& LazyLoad::Identity() const {
     // TODO: Obtain more specific info
     static std::string id = "generic lazy-loader";
+    return id;
 }
 
 void LazyLoad::Initialize() {}
@@ -59,17 +58,19 @@ LazyLoad::AllSegments() const {
         [this]() { return memory_store_.AllSegments(); });
 }
 
-PersistentStore::FlagKind const PersistentStore::Kinds::Flag = FlagKind();
-PersistentStore::SegmentKind const PersistentStore::Kinds::Segment =
-    SegmentKind();
+data_components::FlagKind const LazyLoad::Kinds::Flag =
+    data_components::FlagKind();
 
-bool PersistentStore::Initialized() const {
+data_components::SegmentKind const LazyLoad::Kinds::Segment =
+    data_components::SegmentKind();
+
+bool LazyLoad::Initialized() const {
     auto state = tracker_.State(Keys::kInitialized, time_());
     if (initialized_.has_value()) {
         if (initialized_.value()) {
             return true;
         }
-        if (ExpirationTracker::TrackState::kFresh == state) {
+        if (data_components::ExpirationTracker::TrackState::kFresh == state) {
             return initialized_.value();
         }
     }
@@ -104,7 +105,7 @@ void LazyLoad::RefreshSegment(std::string const& key) const {
             }
             // TODO: Log that we got bogus data?
         }
-        tracker_.Add(DataKind::kSegment, key, time_());
+        tracker_.Add(data_components::DataKind::kSegment, key, time_());
     }
     // TODO: If there is an actual error, then do we not reset the tracking?
 }
@@ -119,7 +120,7 @@ void LazyLoad::RefreshFlag(std::string const& key) const {
             }
             // TODO: Log that we got bogus data?
         }
-        tracker_.Add(DataKind::kSegment, key, time_());
+        tracker_.Add(data_components::DataKind::kSegment, key, time_());
     }
     // TODO: If there is an actual error, then do we not reset the tracking?
 }

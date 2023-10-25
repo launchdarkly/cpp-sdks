@@ -31,7 +31,7 @@ class BackgroundSync : public data_interfaces::ISystem {
                        config::shared::ServerSDK> const& data_source_config,
                    config::shared::built::HttpProperties http_properties,
                    boost::asio::any_io_executor ioc,
-                   DataSourceStatusManager& status_manager,
+                   data_components::DataSourceStatusManager& status_manager,
                    Logger const& logger);
 
     BackgroundSync(BackgroundSync const& item) = delete;
@@ -54,6 +54,6 @@ class BackgroundSync : public data_interfaces::ISystem {
     AllSegments() const override;
 
    private:
-    MemoryStore store_;
+    data_components::MemoryStore store_;
 };
 }  // namespace launchdarkly::server_side::data_systems

@@ -1,8 +1,8 @@
 #pragma once
-#include "../../../data_interfaces/destination/idestination.hpp"
-#include "../../../data_interfaces/source/ipush_source.hpp"
 
-#include "../../status_notifications/data_source_status_manager.hpp"
+#include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../../../data_interfaces/destination/idestination.hpp"
+#include "../../../../data_interfaces/source/ipush_source.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -14,7 +14,7 @@
 
 #include <chrono>
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side::data_systems {
 
 class PollingDataSource
     : public data_interfaces::IPushSource,
@@ -26,7 +26,7 @@ class PollingDataSource
             data_source_config,
         config::shared::built::HttpProperties const& http_properties,
         boost::asio::any_io_executor const& ioc,
-        DataSourceStatusManager& status_manager,
+        data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data,
@@ -40,7 +40,7 @@ class PollingDataSource
     void DoPoll();
     void HandlePollResult(network::HttpResult const& res);
 
-    DataSourceStatusManager& status_manager_;
+    data_components::DataSourceStatusManager& status_manager_;
     std::string polling_endpoint_;
 
     network::AsioRequester requester_;
@@ -57,4 +57,4 @@ class PollingDataSource
     void StartPollingTimer();
 };
 
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side::data_systems

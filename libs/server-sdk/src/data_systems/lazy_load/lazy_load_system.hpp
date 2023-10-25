@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../data_components/expiration_tracker/expiration_tracker.hpp"
+#include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
@@ -9,6 +11,7 @@
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -30,7 +33,7 @@ class LazyLoad : public data_interfaces::ISystem {
                  config::shared::ServerSDK> const& data_source_config,
              config::shared::built::HttpProperties http_properties,
              boost::asio::any_io_executor ioc,
-             DataSourceStatusManager& status_manager,
+             data_components::DataSourceStatusManager& status_manager,
              Logger const& logger);
 
     LazyLoad(LazyLoad const& item) = delete;
@@ -50,6 +53,8 @@ class LazyLoad : public data_interfaces::ISystem {
                        std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
+    bool Initialized() const;
+
     void Initialize() override;
 
    private:
@@ -59,63 +64,41 @@ class LazyLoad : public data_interfaces::ISystem {
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
-    static persistence::SerializedItemDescriptor Serialize(
+    static integrations::SerializedItemDescriptor Serialize(
         data_model::FlagDescriptor flag);
-    static persistence::SerializedItemDescriptor Serialize(
+    static integrations::SerializedItemDescriptor Serialize(
         data_model::SegmentDescriptor segment);
 
     static std::optional<data_model::FlagDescriptor> DeserializeFlag(
-        persistence::SerializedItemDescriptor flag);
+        integrations::SerializedItemDescriptor flag);
 
     static std::optional<data_model::SegmentDescriptor> DeserializeSegment(
-        persistence::SerializedItemDescriptor segment);
+        integrations::SerializedItemDescriptor segment);
 
     template <typename TResult>
-    static TResult Get(ExpirationTracker::TrackState state,
+    static TResult Get(data_components::ExpirationTracker::TrackState state,
                        std::function<void(void)> refresh,
                        std::function<TResult(void)> get) {
         switch (state) {
-            case ExpirationTracker::TrackState::kStale:
+            case data_components::ExpirationTracker::TrackState::kStale:
                 [[fallthrough]];
-            case ExpirationTracker::TrackState::kNotTracked:
+            case data_components::ExpirationTracker::TrackState::kNotTracked:
                 refresh();
                 [[fallthrough]];
-            case ExpirationTracker::TrackState::kFresh:
+            case data_components::ExpirationTracker::TrackState::kFresh:
                 return get();
         }
     }
 
-    mutable MemoryStore memory_store_;
+    mutable data_components::MemoryStore memory_store_;
     std::shared_ptr<persistence::IPersistentStoreCore> core_;
-    mutable ExpirationTracker tracker_;
+    mutable data_components::ExpirationTracker tracker_;
     std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
     mutable std::optional<bool> initialized_;
 
-    class SegmentKind : public persistence::IPersistentKind {
-       public:
-        std::string const& Namespace() const override;
-        uint64_t Version(std::string const& data) const override;
-
-        ~SegmentKind() override = default;
-
-       private:
-        static inline std::string const namespace_ = "segments";
-    };
-
-    class FlagKind : public persistence::IPersistentKind {
-       public:
-        std::string const& Namespace() const override;
-        uint64_t Version(std::string const& data) const override;
-
-        ~FlagKind() override = default;
-
-       private:
-        static inline std::string const namespace_ = "features";
-    };
-
     struct Kinds {
-        static FlagKind const Flag;
-        static SegmentKind const Segment;
+        static data_components::FlagKind const Flag;
+        static data_components::SegmentKind const Segment;
     };
 
     struct Keys {
@@ -123,7 +106,5 @@ class LazyLoad : public data_interfaces::ISystem {
         static inline std::string const kAllSegments = "allSegments";
         static inline std::string const kInitialized = "initialized";
     };
-
-    MemoryStore store_;
 };
 }  // namespace launchdarkly::server_side::data_systems

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../../../data_interfaces/destination/idestination.hpp"
-#include "../../../data_interfaces/source/ipush_source.hpp"
+#include "event_handler.hpp"
 
-#include "../../status_notifications/data_source_status_manager.hpp"
+#include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../../../data_interfaces/destination/idestination.hpp"
+#include "../../../../data_interfaces/source/ipush_source.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -20,7 +21,7 @@
 
 using namespace std::chrono_literals;
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side::data_systems {
 
 class StreamingDataSource final
     : public data_interfaces::IPushSource,
@@ -33,7 +34,7 @@ class StreamingDataSource final
         config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         data_interfaces::IDestination& handler,
-        DataSourceStatusManager& status_manager,
+        data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data,
@@ -45,8 +46,8 @@ class StreamingDataSource final
 
    private:
     boost::asio::any_io_executor exec_;
-    DataSourceStatusManager& status_manager_;
-    data_interfaces::IDestination& data_source_handler_;
+    data_components::DataSourceStatusManager& status_manager_;
+    DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
 
     config::shared::built::StreamingConfig<config::shared::ServerSDK>
@@ -57,4 +58,4 @@ class StreamingDataSource final
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;
 };
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side::data_systems

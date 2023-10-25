@@ -1,6 +1,6 @@
 #include "expiration_tracker.hpp"
 
-namespace launchdarkly::server_side::data_store::persistent {
+namespace launchdarkly::server_side::data_components {
 
 void ExpirationTracker::Add(std::string const& key,
                             ExpirationTracker::TimePoint expiration) {
@@ -22,19 +22,18 @@ ExpirationTracker::TrackState ExpirationTracker::State(
     return ExpirationTracker::TrackState::kNotTracked;
 }
 
-void ExpirationTracker::Add(data_store::DataKind kind,
+void ExpirationTracker::Add(DataKind kind,
                             std::string const& key,
                             ExpirationTracker::TimePoint expiration) {
     scoped_.Set(kind, key, expiration);
 }
 
-void ExpirationTracker::Remove(data_store::DataKind kind,
-                               std::string const& key) {
+void ExpirationTracker::Remove(DataKind kind, std::string const& key) {
     scoped_.Remove(kind, key);
 }
 
 ExpirationTracker::TrackState ExpirationTracker::State(
-    data_store::DataKind kind,
+    DataKind kind,
     std::string const& key,
     ExpirationTracker::TimePoint current_time) const {
     auto expiration = scoped_.Get(kind, key);
@@ -149,4 +148,4 @@ std::ostream& operator<<(std::ostream& out,
     }
     return out;
 }
-}  // namespace launchdarkly::server_side::data_store::persistent
+}  // namespace launchdarkly::server_side::data_components

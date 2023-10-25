@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side::data_systems {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
@@ -34,21 +34,20 @@ StreamingDataSource::StreamingDataSource(
         data_source_config,
     config::shared::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
-    IDataSourceUpdateSink& handler,
-    DataSourceStatusManager& status_manager,
+    data_interfaces::IDestination& handler,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : exec_(std::move(ioc)),
       logger_(logger),
       status_manager_(status_manager),
-      data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+      data_source_handler_(handler, logger, status_manager_),
       http_config_(std::move(http_properties)),
       streaming_config_(data_source_config),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Init(
     std::optional<data_model::SDKDataSet> initial_data,
-    IDestination& destination) {
+    data_interfaces::IDestination& destination) {
     // TODO: implement
 }
 
@@ -153,4 +152,4 @@ void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(exec_, completion);
     }
 }
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side::data_systems

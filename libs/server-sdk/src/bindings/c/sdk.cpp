@@ -355,10 +355,8 @@ LDServerDataSourceStatus_GetLastError(LDServerDataSourceStatus status) {
     if (!error) {
         return nullptr;
     }
-    return FROM_DATASOURCESTATUS_ERRORINFO(
-        new data_sources::DataSourceStatus::ErrorInfo(
-            error->Kind(), error->StatusCode(), error->Message(),
-            error->Time()));
+    return FROM_DATASOURCESTATUS_ERRORINFO(new DataSourceStatus::ErrorInfo(
+        error->Kind(), error->StatusCode(), error->Message(), error->Time()));
 }
 
 LD_EXPORT(time_t)
@@ -386,7 +384,7 @@ LDServerSDK_DataSourceStatus_OnStatusChange(
     if (listener.StatusChanged) {
         auto connection =
             TO_SDK(sdk)->DataSourceStatus().OnDataSourceStatusChange(
-                [listener](data_sources::DataSourceStatus status) {
+                [listener](DataSourceStatus status) {
                     listener.StatusChanged(FROM_DATASOURCESTATUS(&status),
                                            listener.UserData);
                 });
@@ -401,8 +399,8 @@ LD_EXPORT(LDServerDataSourceStatus)
 LDServerSDK_DataSourceStatus_Status(LDServerSDK sdk) {
     LD_ASSERT_NOT_NULL(sdk);
 
-    return FROM_DATASOURCESTATUS(new data_sources::DataSourceStatus(
-        TO_SDK(sdk)->DataSourceStatus().Status()));
+    return FROM_DATASOURCESTATUS(
+        new DataSourceStatus(TO_SDK(sdk)->DataSourceStatus().Status()));
 }
 
 LD_EXPORT(void) LDServerDataSourceStatus_Free(LDServerDataSourceStatus status) {

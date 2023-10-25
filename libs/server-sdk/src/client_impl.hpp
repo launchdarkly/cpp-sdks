@@ -101,7 +101,7 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
-    data_interfaces::IDataSourceStatusProvider& DataSourceStatus() override;
+    IDataSourceStatusProvider& DataSourceStatus() override;
 
     ~ClientImpl();
 
@@ -153,8 +153,7 @@ class ClientImpl : public IClient {
                        std::optional<double> metric_value);
 
     std::future<bool> StartAsyncInternal(
-        std::function<bool(data_retrieval::DataSourceStatus::DataSourceState)>
-            predicate);
+        std::function<bool(DataSourceStatus::DataSourceState)> predicate);
 
     void LogVariationCall(std::string const& key, bool flag_present) const;
 
@@ -167,7 +166,7 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_retrieval::DataSourceStatusManager status_manager_;
+    data_components::DataSourceStatusManager status_manager_;
 
     std::unique_ptr<data_interfaces::ISystem> data_system_;
 

@@ -15,7 +15,7 @@
 
 #include "tl/expected.hpp"
 
-namespace launchdarkly::server_side::data {
+namespace launchdarkly::server_side::data_systems {
 
 static char const* const kErrorParsingPut = "Could not parse PUT message";
 static char const* const kErrorPutInvalid =
@@ -126,9 +126,9 @@ static tl::expected<DataSourceEventHandler::Delete, JsonError> tag_invoke(
 }
 
 DataSourceEventHandler::DataSourceEventHandler(
-    IDestination& handler,
+    data_interfaces::IDestination& handler,
     Logger const& logger,
-    DataSourceStatusManager& status_manager)
+    data_components::DataSourceStatusManager& status_manager)
     : handler_(handler), logger_(logger), status_manager_(status_manager) {}
 
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
@@ -212,13 +212,13 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
 
         if (res.has_value()) {
             switch (res->kind) {
-                case data_store::DataKind::kFlag: {
+                case data_components::DataKind::kFlag: {
                     handler_.Upsert(res->key,
                                     data_model::FlagDescriptor(res->version));
                     return DataSourceEventHandler::MessageStatus::
                         kMessageHandled;
                 }
-                case data_store::DataKind::kSegment: {
+                case data_components::DataKind::kSegment: {
                     handler_.Upsert(
                         res->key, data_model::SegmentDescriptor(res->version));
                     return DataSourceEventHandler::MessageStatus::
@@ -238,4 +238,4 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
 }
 
-}  // namespace launchdarkly::server_side::data
+}  // namespace launchdarkly::server_side::data_systems

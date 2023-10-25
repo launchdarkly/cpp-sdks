@@ -70,7 +70,7 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
 }
 
 DataStoreUpdater::DataStoreUpdater(IDestination& sink,
-                                   data_sources::IDataSource const& source)
+                                   data_interfaces::IStore const& source)
     : sink_(sink), source_(source) {}
 
 }  // namespace launchdarkly::server_side::data_components

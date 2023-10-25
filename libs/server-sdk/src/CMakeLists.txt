@@ -27,13 +27,13 @@ target_sources(${LIBNAME}
         data_components/memory_store/memory_store.cpp
         data_components/serialization_adapters/json_destination.cpp
         data_components/serialization_adapters/json_pull_source.cpp
-        data_components/sources/noop/null_data_source.cpp
-        data_components/sources/streaming/streaming_data_source.cpp
-        data_components/sources/polling/polling_data_source.cpp
+        data_components/expiration_tracker/expiration_tracker.cpp
+        data_systems/background_sync/sources/noop/null_data_source.cpp
+        data_systems/background_sync/sources/streaming/streaming_data_source.cpp
+        data_systems/background_sync/sources/polling/polling_data_source.cpp
         data_systems/background_sync/background_sync_system.cpp
-        data_systems/background_sync/event_handler.cpp
+        data_systems/background_sync/sources/streaming/event_handler.cpp
         data_systems/lazy_load/lazy_load_system.cpp
-        data_systems/lazy_load/expiration/expiration_tracker.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

@@ -1,8 +1,9 @@
 #include "client_impl.hpp"
 
 #include "all_flags_state/all_flags_state_builder.hpp"
-#include "data_retrieval/systems/background_sync/background_sync_system.hpp"
-#include "data_sources/push_mode/push_mode_data_source.hpp"
+#include "data_systems/background_sync/background_sync_system.hpp"
+
+#include "data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
@@ -60,11 +61,11 @@ using launchdarkly::config::shared::built::HttpProperties;
 //         logger);
 // }
 
-static std::unique_ptr<data_retrieval::ISystem> MakeDataSystem(
+static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
     HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,
-    data_retrieval::DataSourceStatusManager& status_manager,
+    data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
     auto builder = HttpPropertiesBuilder(http_properties);
 
@@ -73,7 +74,7 @@ static std::unique_ptr<data_retrieval::ISystem> MakeDataSystem(
     // TODO: Check if config is a persistent Store (so, if 'method' is
     // Persistent). If so, return a data_sources::PullModeSource instead.
 
-    return std::make_unique<data_retrieval::BackgroundSync>(
+    return std::make_unique<data_systems::BackgroundSync>(
         config.ServiceEndpoints(), config.DataSourceConfig(),
         data_source_properties, executor, status_manager, logger);
 }
@@ -105,13 +106,13 @@ std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
     }
     return nullptr;
 }
-R
-    /**
-     * Returns true if the flag pointer is valid and the underlying item is
-     * present.
-     */
-    bool
-    IsFlagPresent(std::shared_ptr<data_model::FlagDescriptor> const& flag_desc);
+
+/**
+ * Returns true if the flag pointer is valid and the underlying item is
+ * present.
+ */
+bool IsFlagPresent(
+    std::shared_ptr<data_model::FlagDescriptor> const& flag_desc);
 
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
@@ -214,7 +215,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     EventScope no_events;
 
-    for (auto const& [k, v] : data_source_->AllFlags()) {
+    for (auto const& [k, v] : data_system_->Store().AllFlags()) {
         if (!v || !v->item) {
             continue;
         }
@@ -315,7 +316,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
                               std::nullopt);
     }
 
-    auto flag_rule = data_source_->GetFlag(key);
+    auto flag_rule = data_system_->Store().GetFlag(key);
 
     bool flag_present = IsFlagPresent(flag_rule);
 
@@ -456,7 +457,7 @@ Value ClientImpl::JsonVariation(Context const& ctx,
     return *VariationInternal(ctx, key, default_value, events_default_);
 }
 
-data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
+IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
 }
 

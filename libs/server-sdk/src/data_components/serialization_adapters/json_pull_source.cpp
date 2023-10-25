@@ -1,10 +1,11 @@
 #include "json_pull_source.hpp"
+
 #include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
 JsonSource::JsonSource(data_interfaces::ISerializedDataPullSource& json_source)
-    : source_(json_source) {}
+    : flag_kind_(), segment_kind_(), source_(json_source) {}
 
 template <typename TData>
 static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
@@ -37,26 +38,26 @@ static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
 data_model::FlagDescriptor JsonSource::GetFlag(std::string const& key) const {
     // TODO: deserialize then return
     data_interfaces::ISerializedDataPullSource::GetResult result =
-        source_.Get(kind, key);
+        source_.Get(flag_kind_, key);
 }
 data_model::SegmentDescriptor JsonSource::GetSegment(
     std::string const& key) const {
     // TODO: deserialize then return
     data_interfaces::ISerializedDataPullSource::GetResult result =
-        source_.Get(kind, key);
+        source_.Get(segment_kind_, key);
 }
 std::unordered_map<std::string, data_model::FlagDescriptor>
 JsonSource::AllFlags() const {
     // TODO: deserialize then return
-    data_interfaces::ISerializedDataPullSource::GetResult result =
-        source_.All(kind);
+    data_interfaces::ISerializedDataPullSource::AllResult result =
+        source_.All(flag_kind_);
 }
 std::unordered_map<std::string, data_model::SegmentDescriptor>
 JsonSource::AllSegments() const {
     // TODO: deserialize then return
 
-    data_interfaces::ISerializedDataPullSource::GetResult result =
-        source_.All(kind);
+    data_interfaces::ISerializedDataPullSource::AllResult result =
+        source_.All(segment_kind_);
 }
 
 std::string const& JsonSource::Identity() const {

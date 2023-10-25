@@ -9,7 +9,7 @@ BackgroundSync::BackgroundSync(
     DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
     HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
-    DataSourceStatusManager& status_manager,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : store_(), synchronizer_(), bootstrapper_() {
     std::visit(
