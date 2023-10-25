@@ -1,7 +1,7 @@
 LaunchDarkly Server-Side SDK for C/C++
 ===================================
 
-### ⚠ This repository contains alpha software and should not be considered ready for production use while this message is visible.
+### ⚠️ This repository contains alpha software and should not be considered ready for production use while this message is visible.
 
 ### Breaking changes may occur.
 
