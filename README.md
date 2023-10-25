@@ -5,14 +5,16 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
 ## Packages
 
-| Readme                                       | issues                                      | tests                                                   | docs                                                                                                                                                                           | latest release                                                                                 |
-|----------------------------------------------|---------------------------------------------|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/) | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-client%22) | 
+| Readme                                       | issues                                      | tests                                                   | docs                                                                                                                        | latest release                                                                                         |
+|----------------------------------------------|---------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-client-docs] | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-client%22)         | 
+| [libs/server-sdk](libs/server-sdk/README.md) | [C++ Server SDK][package-cpp-server-issues] | [![Actions Status][cpp-server-ci-badge]][cpp-server-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-server-docs] | [On Github (Alpha)](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-server%22) |
 
-| Shared packages                                              | issues                                                 | tests                                                         |
-|--------------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------------|
-| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]                 | [![Actions Status][shared-common-ci-badge]][shared-common-ci] |
-| [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server-Sent-Events][package-shared-sse-issues] | [![Actions Status][shared-sse-ci-badge]][shared-sse-ci]       |
+| Shared packages                                              | issues                                                 | tests                                                             |
+|--------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------|
+| [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]                 | [![Actions Status][shared-common-ci-badge]][shared-common-ci]     |
+| [libs/internal](libs/internal/README.md)                     | [Internal][package-shared-internal-issues]             | [![Actions Status][shared-internal-ci-badge]][shared-internal-ci] |
+| [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server-Sent-Events][package-shared-sse-issues] | [![Actions Status][shared-sse-ci-badge]][shared-sse-ci]           |
 
 ## Organization
 
@@ -129,6 +131,15 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
 
 [package-shared-common-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Fcommon%22+
 
+[//]: # 'libs/internal'
+
+[shared-internal-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/internal.yml/badge.svg
+
+[shared-internal-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/internal.yml
+
+[package-shared-internal-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+shared%2Finternal%22+
+
+
 [//]: # 'libs/server-sent-events'
 
 [shared-sse-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/sse.yml/badge.svg
@@ -144,4 +155,16 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
 
 [cpp-client-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/client.yml
 
+[cpp-client-docs]: https://launchdarkly.github.io/cpp-sdks/libs/client-sdk/docs/html/
+
 [package-cpp-client-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+sdk%2Fclient%22+
+
+[//]: # 'libs/server-sdk'
+
+[cpp-server-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml/badge.svg
+
+[cpp-server-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml
+
+[cpp-server-docs]: https://launchdarkly.github.io/cpp-sdks/libs/server-sdk/docs/html/
+
+[package-cpp-server-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+sdk%2Fserver%22+
