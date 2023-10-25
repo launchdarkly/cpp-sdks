@@ -6,11 +6,12 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "../data_sources/data_source_interface.hpp"
-#include "../events/event_scope.hpp"
 #include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
+
+#include "../data_interfaces/store/istore.hpp"
+#include "../events/event_scope.hpp"
 
 #include <tl/expected.hpp>
 
@@ -18,7 +19,7 @@ namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
-    Evaluator(Logger& logger, data_sources::IDataSource const& source);
+    Evaluator(Logger& logger, data_interfaces::IStore const& source);
 
     /**
      * Evaluates a flag for a given context.
@@ -64,7 +65,7 @@ class Evaluator {
     void LogError(std::string const& key, Error const& error) const;
 
     Logger& logger_;
-    data_sources::IDataSource const& source_;
+    data_interfaces::IStore const& source_;
     detail::EvaluationStack stack_;
 };
 }  // namespace launchdarkly::server_side::evaluation

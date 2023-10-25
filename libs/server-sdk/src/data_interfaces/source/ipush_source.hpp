@@ -19,7 +19,7 @@ class IPushSource {
     virtual void Start() = 0;
     virtual void ShutdownAsync(std::function<void()>) = 0;
 
-    virtual std::string const& Identity() const = 0;
+    [[nodiscard]] virtual std::string const& Identity() const = 0;
 
     virtual ~IPushSource() = default;
     IPushSource(IPushSource const& item) = delete;

@@ -20,17 +20,14 @@ namespace launchdarkly::server_side::data_components {
 template <typename Storage>
 class TaggedData {
    public:
-    explicit TaggedData(launchdarkly::server_side::data_store::DataKind kind)
-        : kind_(kind) {}
-    [[nodiscard]] launchdarkly::server_side::data_store::DataKind Kind() const {
-        return kind_;
-    }
+    explicit TaggedData(DataKind kind) : kind_(kind) {}
+    [[nodiscard]] DataKind Kind() const { return kind_; }
     [[nodiscard]] Storage const& Data() const { return storage_; }
 
     [[nodiscard]] Storage& Data() { return storage_; }
 
    private:
-    launchdarkly::server_side::data_store::DataKind kind_;
+    DataKind kind_;
     Storage storage_;
 };
 

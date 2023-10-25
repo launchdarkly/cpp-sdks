@@ -19,4 +19,7 @@ struct Persistence<ClientSDK> {
     std::size_t max_contexts_;
 };
 
+template <>
+struct Persistence<ServerSDK> {};
+
 }  // namespace launchdarkly::config::shared::built

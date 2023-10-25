@@ -3,6 +3,9 @@
 
 namespace launchdarkly::server_side::data_components {
 
+JsonSource::JsonSource(data_interfaces::ISerializedDataPullSource& json_source)
+    : source_(json_source) {}
+
 template <typename TData>
 static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
     integrations::SerializedItemDescriptor item) {
@@ -31,12 +34,13 @@ static std::optional<data_model::ItemDescriptor<TData>> Deserialize(
     return std::nullopt;
 }
 
-data_model::FlagDescriptor JsonSource::GetFlag(std::string& key) const {
+data_model::FlagDescriptor JsonSource::GetFlag(std::string const& key) const {
     // TODO: deserialize then return
     data_interfaces::ISerializedDataPullSource::GetResult result =
         source_.Get(kind, key);
 }
-data_model::SegmentDescriptor JsonSource::GetSegment(std::string& key) const {
+data_model::SegmentDescriptor JsonSource::GetSegment(
+    std::string const& key) const {
     // TODO: deserialize then return
     data_interfaces::ISerializedDataPullSource::GetResult result =
         source_.Get(kind, key);
@@ -55,7 +59,7 @@ JsonSource::AllSegments() const {
         source_.All(kind);
 }
 
-std::string JsonSource::Identity() const {
+std::string const& JsonSource::Identity() const {
     return source_.Identity();
 }
 

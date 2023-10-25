@@ -2,6 +2,8 @@
 #include "../../../data_interfaces/destination/idestination.hpp"
 #include "../../../data_interfaces/source/ipush_source.hpp"
 
+#include "../../status_notifications/data_source_status_manager.hpp"
+
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
@@ -28,9 +30,11 @@ class PollingDataSource
         Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data,
-              IDestination& destination) override;
+              data_interfaces::IDestination& destination) override;
     void Start() override;
     void ShutdownAsync(std::function<void()> completion) override;
+
+    [[nodiscard]] std::string const& Identity() const override;
 
    private:
     void DoPoll();
@@ -48,7 +52,7 @@ class PollingDataSource
 
     boost::asio::steady_timer timer_;
     std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
-    IDataSourceUpdateSink& update_sink_;
+    data_interfaces::IDestination& update_sink_;
 
     void StartPollingTimer();
 };

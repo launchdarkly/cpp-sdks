@@ -3,6 +3,8 @@
 #include "../../../data_interfaces/destination/idestination.hpp"
 #include "../../../data_interfaces/source/ipush_source.hpp"
 
+#include "../../status_notifications/data_source_status_manager.hpp"
+
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
@@ -30,19 +32,21 @@ class StreamingDataSource final
             data_source_config,
         config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
-        IDataSourceUpdateSink& handler,
+        data_interfaces::IDestination& handler,
         DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data,
-              IDestination& destination) override;
+              data_interfaces::IDestination& destination) override;
     void Start() override;
     void ShutdownAsync(std::function<void()> completion) override;
+
+    [[nodiscard]] std::string const& Identity() const override;
 
    private:
     boost::asio::any_io_executor exec_;
     DataSourceStatusManager& status_manager_;
-    DataSourceEventHandler data_source_handler_;
+    data_interfaces::IDestination& data_source_handler_;
     std::string streaming_endpoint_;
 
     config::shared::built::StreamingConfig<config::shared::ServerSDK>

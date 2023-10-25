@@ -2,7 +2,7 @@
 
 #include <iomanip>
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side {
 
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::DataSourceState const& state) {
@@ -37,4 +37,4 @@ std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
     return out;
 }
 
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side

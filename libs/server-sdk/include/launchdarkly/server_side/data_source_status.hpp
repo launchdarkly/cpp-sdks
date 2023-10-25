@@ -13,7 +13,7 @@
 #include <launchdarkly/connection.hpp>
 #include <launchdarkly/data_sources/data_source_status_base.hpp>
 
-namespace launchdarkly::server_side::data {
+namespace launchdarkly::server_side {
 
 /**
  * Enumeration of possible data source states.
@@ -85,7 +85,7 @@ class IDataSourceStatusProvider {
      * @return A IConnection which can be used to stop listening to the status.
      */
     virtual std::unique_ptr<IConnection> OnDataSourceStatusChange(
-        std::function<void(data_sources::DataSourceStatus status)> handler) = 0;
+        std::function<void(DataSourceStatus status)> handler) = 0;
 
     /**
      * Listen to changes to the data source status, with ability for listener
@@ -96,7 +96,7 @@ class IDataSourceStatusProvider {
      * @return A IConnection which can be used to stop listening to the status.
      */
     virtual std::unique_ptr<IConnection> OnDataSourceStatusChangeEx(
-        std::function<bool(data_sources::DataSourceStatus status)> handler) = 0;
+        std::function<bool(DataSourceStatus status)> handler) = 0;
 
     virtual ~IDataSourceStatusProvider() = default;
     IDataSourceStatusProvider(IDataSourceStatusProvider const& item) = delete;
@@ -114,4 +114,4 @@ std::ostream& operator<<(std::ostream& out,
 
 std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status);
 
-}  // namespace launchdarkly::server_side::data
+}  // namespace launchdarkly::server_side

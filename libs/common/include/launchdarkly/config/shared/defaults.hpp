@@ -115,8 +115,7 @@ struct Defaults<ServerSDK> {
     }
 
     static auto PersistenceConfig() -> shared::built::Persistence<ServerSDK> {
-        return {nullptr, std::chrono::seconds{30}, false,
-                std::chrono::seconds{10}};
+        return {};
     }
 };
 

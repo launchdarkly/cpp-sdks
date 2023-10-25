@@ -7,11 +7,15 @@ class JsonDestination : public data_interfaces::IDestination {
    public:
     JsonDestination(data_interfaces::ISerializedDestination& destination);
 
-    void Init(data_model::SDKDataSet data_set) override;
-    void Upsert(std::string& key, data_model::FlagDescriptor flag) override;
-    void Upsert(std::string& key,
+    virtual void Init(data_model::SDKDataSet data_set) override;
+
+    void Upsert(std::string const& key,
+                data_model::FlagDescriptor flag) override;
+
+    void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
-    std::string Identity() const override;
+
+    [[nodiscard]] std::string const& Identity() const override;
 
    private:
     data_interfaces::ISerializedDestination& dest_;

@@ -20,7 +20,7 @@ void JsonDestination::Upsert(std::string const& key,
     // TODO: serialize and forward to dest_.Upsert
 }
 
-std::string JsonDestination::Identity() const {
+std::string const& JsonDestination::Identity() const {
     return dest_.Identity();
 }
 }  // namespace launchdarkly::server_side::data_components

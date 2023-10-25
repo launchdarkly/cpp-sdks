@@ -7,6 +7,7 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 class IStore {
+   public:
     [[nodiscard]] virtual std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
@@ -38,5 +39,14 @@ class IStore {
         std::string,
         std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const = 0;
+
+    virtual ~IStore() = default;
+    IStore(IStore const& item) = delete;
+    IStore(IStore&& item) = delete;
+    IStore& operator=(IStore const&) = delete;
+    IStore& operator=(IStore&&) = delete;
+
+   protected:
+    IStore() = default;
 };
 }  // namespace launchdarkly::server_side::data_interfaces

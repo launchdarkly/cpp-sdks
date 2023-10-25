@@ -19,7 +19,7 @@ std::optional<std::size_t> TargetMatchVariation(
     launchdarkly::Context const& context,
     Flag::Target const& target);
 
-Evaluator::Evaluator(Logger& logger, data_sources::IDataSource const& source)
+Evaluator::Evaluator(Logger& logger, data_interfaces::IStore const& source)
     : logger_(logger), source_(source), stack_() {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(

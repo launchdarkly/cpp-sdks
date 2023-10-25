@@ -8,11 +8,14 @@ namespace launchdarkly::server_side::data_interfaces {
 class IDestination {
    public:
     virtual void Init(data_model::SDKDataSet data_set) = 0;
+    
     virtual void Upsert(std::string const& key,
                         data_model::FlagDescriptor flag) = 0;
+
     virtual void Upsert(std::string const& key,
                         data_model::SegmentDescriptor segment) = 0;
-    virtual std::string const& Identity() const = 0;
+
+    [[nodiscard]] virtual std::string const& Identity() const = 0;
 
     IDestination(IDestination const& item) = delete;
     IDestination(IDestination&& item) = delete;

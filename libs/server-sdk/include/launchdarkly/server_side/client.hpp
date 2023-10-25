@@ -252,7 +252,7 @@ class IClient {
      * source status.
      * @return A data source status provider.
      */
-    virtual data_sources::IDataSourceStatusProvider& DataSourceStatus() = 0;
+    virtual IDataSourceStatusProvider& DataSourceStatus() = 0;
 
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
@@ -338,7 +338,7 @@ class Client : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
-    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
+    IDataSourceStatusProvider& DataSourceStatus() override;
 
     /**
      * Returns the version of the SDK.

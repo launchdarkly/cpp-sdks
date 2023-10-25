@@ -30,7 +30,6 @@ target_sources(${LIBNAME}
         data_components/sources/noop/null_data_source.cpp
         data_components/sources/streaming/streaming_data_source.cpp
         data_components/sources/polling/polling_data_source.cpp
-        data_components/status_notifications/data_source_status.cpp
         data_systems/background_sync/background_sync_system.cpp
         data_systems/background_sync/event_handler.cpp
         data_systems/lazy_load/lazy_load_system.cpp

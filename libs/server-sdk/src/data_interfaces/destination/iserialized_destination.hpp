@@ -54,7 +54,7 @@ class ISerializedDestination {
         std::string const& key,
         integrations::SerializedItemDescriptor item) = 0;
 
-    virtual std::string Identity() const = 0;
+    virtual std::string const& Identity() const = 0;
 
     ISerializedDestination(ISerializedDestination const& item) = delete;
     ISerializedDestination(ISerializedDestination&& item) = delete;
