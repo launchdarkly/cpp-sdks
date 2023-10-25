@@ -13,7 +13,7 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 | Shared packages                                              | issues                                                 | tests                                                             |
 |--------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------|
 | [libs/common](libs/common/README.md)                         | [Common][package-shared-common-issues]                 | [![Actions Status][shared-common-ci-badge]][shared-common-ci]     |
-| [libs/internal](libs/internal/README.md)                     | N/A                                                    | [![Actions Status][shared-internal-ci-badge]][shared-internal-ci] |
+| [libs/internal](libs/internal/README.md)                     | [Internal][package-shared-internal-issues]             | [![Actions Status][shared-internal-ci-badge]][shared-internal-ci] |
 | [libs/server-sent-events](libs/server-sent-events/README.md) | [Common Server-Sent-Events][package-shared-sse-issues] | [![Actions Status][shared-sse-ci-badge]][shared-sse-ci]           |
 
 ## Organization
