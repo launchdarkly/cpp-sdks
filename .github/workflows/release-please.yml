@@ -10,6 +10,8 @@ jobs:
     outputs:
       package-client-released: ${{ steps.release.outputs['libs/client-sdk--release_created'] }}
       package-client-tag: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
+      package-server-released: ${{ steps.release.outputs['libs/server-sdk--release_created'] }}
+      package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
@@ -42,19 +44,61 @@ jobs:
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
 
+  release-server:
+    strategy:
+      matrix:
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ ubuntu-latest, windows-2022, macos-12 ]
+    runs-on: ${{ matrix.os }}
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-released }}
+    outputs:
+      hashes-linux: ${{ steps.release-server.outputs.hashes-linux }}
+      hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
+      hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: release-server
+        name: Full release of libs/server-sdk
+        uses: ./.github/actions/sdk-release
+        with:
+          # The tag of the release to upload artifacts to.
+          tag_name: ${{ needs.release-please.outputs.package-server-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk'
+          sdk_cmake_target: 'launchdarkly-cpp-server'
+
+
   release-client-provenance:
-    needs: ['release-please', 'release-client']
+    needs: [ 'release-please', 'release-client' ]
     strategy:
       matrix:
         # Generates a combined attestation for each platform
         os: [ linux, windows, macos ]
-    permissions: 
+    permissions:
       actions: read
       id-token: write
       contents: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
     with:
       base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true 
+      upload-assets: true
       upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
+      provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
+
+  release-server-provenance:
+    needs: [ 'release-please', 'release-server' ]
+    strategy:
+      matrix:
+        # Generates a combined attestation for each platform
+        os: [ linux, windows, macos ]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
+    with:
+      base64-subjects: "${{ needs.release-server.outputs[format('hashes-{0}', matrix.os)] }}"
+      upload-assets: true
+      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
       provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
