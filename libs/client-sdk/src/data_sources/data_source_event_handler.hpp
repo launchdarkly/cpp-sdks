@@ -8,7 +8,6 @@
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::client_side::data_sources {

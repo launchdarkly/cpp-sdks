@@ -1,7 +1,24 @@
 #pragma once
 
+#include "data_sources/data_source.hpp"
+#include "data_sources/data_source_status_manager.hpp"
+#include "flag_manager/flag_manager.hpp"
+
+#include <launchdarkly/client_side/client.hpp>
+#include <launchdarkly/client_side/data_source_status.hpp>
+#include <launchdarkly/client_side/flag_notifier.hpp>
+#include <launchdarkly/config/client.hpp>
+#include <launchdarkly/context.hpp>
+#include <launchdarkly/data/evaluation_detail.hpp>
+#include <launchdarkly/error.hpp>
+#include <launchdarkly/events/event_processor_interface.hpp>
+#include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/value.hpp>
+
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
+
+#include <tl/expected.hpp>
 
 #include <condition_variable>
 #include <cstdint>
@@ -10,24 +27,6 @@
 #include <shared_mutex>
 #include <thread>
 #include <tuple>
-
-#include <tl/expected.hpp>
-
-#include <launchdarkly/client_side/client.hpp>
-#include <launchdarkly/client_side/data_source_status.hpp>
-#include <launchdarkly/client_side/flag_notifier.hpp>
-#include <launchdarkly/config/client.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/data/evaluation_detail.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
-#include <launchdarkly/error.hpp>
-#include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/value.hpp>
-
-#include <launchdarkly/events/event_processor_interface.hpp>
-
-#include "data_sources/data_source_status_manager.hpp"
-#include "flag_manager/flag_manager.hpp"
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {
@@ -130,10 +129,10 @@ class ClientImpl : public IClient {
     mutable std::shared_mutex context_mutex_;
 
     flag_manager::FlagManager flag_manager_;
-    std::function<std::shared_ptr<::launchdarkly::data_sources::IDataSource>()>
+    std::function<std::shared_ptr<data_sources::IDataSource>()>
         data_source_factory_;
 
-    std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
+    std::shared_ptr<data_sources::IDataSource> data_source_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 

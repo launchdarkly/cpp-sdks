@@ -1,10 +1,8 @@
 #pragma once
 
-#include <chrono>
-using namespace std::chrono_literals;
-
 #include <boost/asio/any_io_executor.hpp>
 
+#include "data_source.hpp"
 #include "data_source_event_handler.hpp"
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
@@ -15,14 +13,15 @@ using namespace std::chrono_literals;
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/sse/client.hpp>
+
+#include <chrono>
 
 namespace launchdarkly::client_side::data_sources {
 
 class StreamingDataSource final
-    : public ::launchdarkly::data_sources::IDataSource,
+    : public IDataSource,
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
