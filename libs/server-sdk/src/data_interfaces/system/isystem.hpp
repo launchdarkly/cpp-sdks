@@ -17,9 +17,6 @@ class ISystem : public IStore {
     [[nodiscard]] virtual std::string const& Identity() const = 0;
     virtual void Initialize() = 0;
 
-    [[nodiscard]] virtual IStore& Store() = 0;
-    [[nodiscard]] virtual IStore const& Store() const = 0;
-
     virtual ~ISystem() = default;
     ISystem(ISystem const& item) = delete;
     ISystem(ISystem&& item) = delete;

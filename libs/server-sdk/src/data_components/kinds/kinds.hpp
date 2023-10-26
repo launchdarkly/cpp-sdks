@@ -5,7 +5,7 @@ namespace launchdarkly::server_side::data_components {
 class SegmentKind : public integrations::IPersistentKind {
    public:
     std::string const& Namespace() const override;
-    uint64_t Version(std::string const& data) const override;
+    std::uint64_t Version(std::string const& data) const override;
 
     ~SegmentKind() override = default;
 
@@ -16,7 +16,7 @@ class SegmentKind : public integrations::IPersistentKind {
 class FlagKind : public integrations::IPersistentKind {
    public:
     std::string const& Namespace() const override;
-    uint64_t Version(std::string const& data) const override;
+    std::uint64_t Version(std::string const& data) const override;
 
     ~FlagKind() override = default;
 

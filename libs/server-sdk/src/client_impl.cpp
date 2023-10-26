@@ -126,7 +126,7 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
       status_manager_(),
-      data_source_(MakeDataSource(http_properties_,
+      data_system_(MakeDataSystem(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
                                   status_manager_,
@@ -135,7 +135,7 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                                           ioc_.get_executor(),
                                           http_properties_,
                                           logger_)),
-      evaluator_(logger_, *data_source_),
+      evaluator_(logger_, *data_system_),
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
@@ -163,7 +163,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
     auto fut = pr->get_future();
 
     status_manager_.OnDataSourceStatusChangeEx(
-        [result_predicate, pr](data_sources::DataSourceStatus status) {
+        [result_predicate, pr](auto status) {
             auto state = status.State();
             if (IsInitialized(state)) {
                 pr->set_value(result_predicate(status.State()));
@@ -215,7 +215,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     EventScope no_events;
 
-    for (auto const& [k, v] : data_system_->Store().AllFlags()) {
+    for (auto const& [k, v] : data_system_->AllFlags()) {
         if (!v || !v->item) {
             continue;
         }
@@ -316,7 +316,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
                               std::nullopt);
     }
 
-    auto flag_rule = data_system_->Store().GetFlag(key);
+    auto flag_rule = data_system_->GetFlag(key);
 
     bool flag_present = IsFlagPresent(flag_rule);
 

@@ -14,7 +14,7 @@ LazyLoad::LazyLoad(
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
-    : store_() {}
+    : cache_() {}
 
 std::string const& LazyLoad::Identity() const {
     // TODO: Obtain more specific info
@@ -29,7 +29,7 @@ std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     auto state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::shared_ptr<data_model::FlagDescriptor>>(
         state, [this, &key]() { RefreshFlag(key); },
-        [this, &key]() { return memory_store_.GetFlag(key); });
+        [this, &key]() { return cache_.GetFlag(key); });
 }
 
 std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
@@ -37,7 +37,7 @@ std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
     auto state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::shared_ptr<data_model::SegmentDescriptor>>(
         state, [this, &key]() { RefreshSegment(key); },
-        [this, &key]() { return memory_store_.GetSegment(key); });
+        [this, &key]() { return cache_.GetSegment(key); });
 }
 
 std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
@@ -46,7 +46,7 @@ LazyLoad::AllFlags() const {
     return Get<std::unordered_map<std::string,
                                   std::shared_ptr<data_model::FlagDescriptor>>>(
         state, [this]() { RefreshAllFlags(); },
-        [this]() { return memory_store_.AllFlags(); });
+        [this]() { return cache_.AllFlags(); });
 }
 
 std::unordered_map<std::string, std::shared_ptr<data_model::SegmentDescriptor>>
@@ -55,7 +55,7 @@ LazyLoad::AllSegments() const {
     return Get<std::unordered_map<
         std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
         state, [this]() { RefreshAllSegments(); },
-        [this]() { return memory_store_.AllSegments(); });
+        [this]() { return cache_.AllSegments(); });
 }
 
 data_components::FlagKind const LazyLoad::Kinds::Flag =
@@ -79,29 +79,29 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    auto res = core_->All(Kinds::Flag);
+    auto res = source_->All(Kinds::Flag);
     // TODO: Deserialize and put in store.
     tracker_.Add(Keys::kAllSegments, time_());
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    auto res = core_->All(Kinds::Segment);
+    auto res = source_->All(Kinds::Segment);
     // TODO: Deserialize and put in store.
     tracker_.Add(Keys::kAllFlags, time_());
 }
 
 void LazyLoad::RefreshInitState() const {
-    initialized_ = core_->Initialized();
+    initialized_ = source_->Initialized();
     tracker_.Add(Keys::kInitialized, time_());
 }
 
 void LazyLoad::RefreshSegment(std::string const& key) const {
-    auto res = core_->Get(Kinds::Segment, key);
+    auto res = source_->Get(Kinds::Segment, key);
     if (res.has_value()) {
         if (res->has_value()) {
             auto segment = DeserializeSegment(res->value());
             if (segment.has_value()) {
-                memory_store_.Upsert(key, segment.value());
+                cache_.Upsert(key, segment.value());
             }
             // TODO: Log that we got bogus data?
         }
@@ -111,12 +111,12 @@ void LazyLoad::RefreshSegment(std::string const& key) const {
 }
 
 void LazyLoad::RefreshFlag(std::string const& key) const {
-    auto res = core_->Get(Kinds::Segment, key);
+    auto res = source_->Get(Kinds::Segment, key);
     if (res.has_value()) {
         if (res->has_value()) {
             auto flag = DeserializeFlag(res->value());
             if (flag.has_value()) {
-                memory_store_.Upsert(key, flag.value());
+                cache_.Upsert(key, flag.value());
             }
             // TODO: Log that we got bogus data?
         }

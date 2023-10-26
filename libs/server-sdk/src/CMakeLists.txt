@@ -28,6 +28,7 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_destination.cpp
         data_components/serialization_adapters/json_pull_source.cpp
         data_components/expiration_tracker/expiration_tracker.cpp
+        data_components/kinds/kinds.cpp
         data_systems/background_sync/sources/noop/null_data_source.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp

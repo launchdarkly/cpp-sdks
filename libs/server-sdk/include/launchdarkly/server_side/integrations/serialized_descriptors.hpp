@@ -59,41 +59,4 @@ class IPersistentKind {
    protected:
     IPersistentKind() = default;
 };
-
-// TODO Find out where to put these
-
-template <typename TData>
-static uint64_t GetVersion(std::string data) {
-    boost::json::error_code error_code;
-    auto parsed = boost::json::parse(data, error_code);
-
-    if (error_code) {
-        return 0;
-    }
-    auto res =
-        boost::json::value_to<tl::expected<std::optional<TData>, JsonError>>(
-            parsed);
-
-    if (res.has_value() && res->has_value()) {
-        return res->value().version;
-    }
-    return 0;
-}
-
-std::string const& PersistentStore::SegmentKind::Namespace() const {
-    return namespace_;
-}
-
-uint64_t PersistentStore::SegmentKind::Version(std::string const& data) const {
-    return GetVersion<data_model::Segment>(data);
-}
-
-std::string const& PersistentStore::FlagKind::Namespace() const {
-    return namespace_;
-}
-
-uint64_t PersistentStore::FlagKind::Version(std::string const& data) const {
-    return GetVersion<data_model::Flag>(data);
-}
-
 }  // namespace launchdarkly::server_side::integrations

@@ -26,6 +26,7 @@ class PollingDataSource
             data_source_config,
         config::shared::built::HttpProperties const& http_properties,
         boost::asio::any_io_executor const& ioc,
+        data_interfaces::IDestination& handler,
         data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 

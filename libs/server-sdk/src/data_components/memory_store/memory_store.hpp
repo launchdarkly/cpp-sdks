@@ -28,7 +28,7 @@ class MemoryStore : public data_interfaces::IStore,
         std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
-    [[nodiscard]] bool Initialized() const override;
+    [[nodiscard]] bool Initialized() const;
 
     [[nodiscard]] std::string const& Identity() const override;
 
@@ -36,7 +36,7 @@ class MemoryStore : public data_interfaces::IStore,
 
     void Upsert(std::string const& key,
                 data_model::FlagDescriptor flag) override;
-    
+
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
 

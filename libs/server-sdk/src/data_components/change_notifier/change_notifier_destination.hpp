@@ -13,8 +13,8 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class DataStoreUpdater : public data_interfaces::IDestination,
-                         public IChangeNotifier {
+class ChangeNotifierDestination : public data_interfaces::IDestination,
+                                  public IChangeNotifier {
    public:
     template <typename Storage>
     using Collection = data_model::SDKDataSet::Collection<std::string, Storage>;
@@ -26,7 +26,8 @@ class DataStoreUpdater : public data_interfaces::IDestination,
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDestination& sink, data_interfaces::IStore const& source);
+    ChangeNotifierDestination(IDestination& sink,
+                              data_interfaces::IStore const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
@@ -35,12 +36,16 @@ class DataStoreUpdater : public data_interfaces::IDestination,
                 data_model::FlagDescriptor flag) override;
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
-    ~DataStoreUpdater() override = default;
 
-    DataStoreUpdater(DataStoreUpdater const& item) = delete;
-    DataStoreUpdater(DataStoreUpdater&& item) = delete;
-    DataStoreUpdater& operator=(DataStoreUpdater const&) = delete;
-    DataStoreUpdater& operator=(DataStoreUpdater&&) = delete;
+    [[nodiscard]] std::string const& Identity() const override;
+
+    ~ChangeNotifierDestination() override = default;
+
+    ChangeNotifierDestination(ChangeNotifierDestination const& item) = delete;
+    ChangeNotifierDestination(ChangeNotifierDestination&& item) = delete;
+    ChangeNotifierDestination& operator=(ChangeNotifierDestination const&) =
+        delete;
+    ChangeNotifierDestination& operator=(ChangeNotifierDestination&&) = delete;
 
    private:
     bool HasListeners() const;

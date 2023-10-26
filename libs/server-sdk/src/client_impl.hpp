@@ -168,6 +168,9 @@ class ClientImpl : public IClient {
 
     data_components::DataSourceStatusManager status_manager_;
 
+    // This is the main polymorphic component that constitutes the
+    // guts of how data is retrieved (polling, streaming, persistent stores,
+    // etc.)
     std::unique_ptr<data_interfaces::ISystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;

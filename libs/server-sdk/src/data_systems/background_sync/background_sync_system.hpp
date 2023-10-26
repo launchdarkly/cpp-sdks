@@ -1,7 +1,9 @@
 #pragma once
 
+#include "../../data_components/change_notifier/change_notifier_destination.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../data_interfaces/source/ipush_source.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
@@ -39,10 +41,6 @@ class BackgroundSync : public data_interfaces::ISystem {
     BackgroundSync& operator=(BackgroundSync const&) = delete;
     BackgroundSync& operator=(BackgroundSync&&) = delete;
 
-    std::string const& Identity() const override;
-
-    void Initialize() override;
-
     std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
     std::shared_ptr<data_model::SegmentDescriptor> GetSegment(
@@ -53,7 +51,15 @@ class BackgroundSync : public data_interfaces::ISystem {
                        std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
+    std::string const& Identity() const override;
+
+    void Initialize() override;
+
    private:
     data_components::MemoryStore store_;
+    data_components::ChangeNotifierDestination change_notifier_;
+    // Needs to be shared to that the source can keep itself alive through
+    // async operations.
+    std::shared_ptr<data_interfaces::IPushSource> synchronizer_;
 };
 }  // namespace launchdarkly::server_side::data_systems

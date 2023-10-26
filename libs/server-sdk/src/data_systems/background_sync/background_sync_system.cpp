@@ -1,5 +1,8 @@
 #include "background_sync_system.hpp"
 
+#include "sources/polling/polling_data_source.hpp"
+#include "sources/streaming/streaming_data_source.hpp"
+
 namespace launchdarkly::server_side::data_systems {
 
 using namespace config::shared::built;
@@ -11,24 +14,22 @@ BackgroundSync::BackgroundSync(
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
-    : store_(), synchronizer_(), bootstrapper_() {
+    : store_(), change_notifier_(store_, store_), synchronizer_() {
     std::visit(
         [&](auto&& method_config) {
             using T = std::decay_t<decltype(method_config)>;
             if constexpr (std::is_same_v<
                               T, StreamingConfig<config::shared::ServerSDK>>) {
-                synchronizer_ =
-                    std::make_shared<data_sources::StreamingDataSource>(
-                        endpoints, method_config, http_properties, ioc, store_,
-                        status_manager, logger);
+                synchronizer_ = std::make_shared<StreamingDataSource>(
+                    endpoints, method_config, http_properties, ioc, store_,
+                    status_manager, logger);
 
             } else if constexpr (std::is_same_v<
                                      T, PollingConfig<
                                             config::shared::ServerSDK>>) {
-                synchronizer_ =
-                    std::make_shared<data_sources::PollingDataSource>(
-                        endpoints, method_config, http_properties, ioc, store_,
-                        status_manager, logger);
+                synchronizer_ = std::make_shared<PollingDataSource>(
+                    endpoints, method_config, http_properties, ioc, store_,
+                    status_manager, logger);
             }
         },
         data_source_config.method);

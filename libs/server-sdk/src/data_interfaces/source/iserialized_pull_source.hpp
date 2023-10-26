@@ -72,6 +72,8 @@ class ISerializedDataPullSource {
 
     virtual std::string const& Identity() const = 0;
 
+    virtual bool Initialized() const = 0;
+
    protected:
     ISerializedDataPullSource() = default;
 };

@@ -4,6 +4,7 @@
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../data_interfaces/source/iserialized_pull_source.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
@@ -90,8 +91,8 @@ class LazyLoad : public data_interfaces::ISystem {
         }
     }
 
-    mutable data_components::MemoryStore memory_store_;
-    std::shared_ptr<persistence::IPersistentStoreCore> core_;
+    mutable data_components::MemoryStore cache_;
+    std::shared_ptr<data_interfaces::ISerializedDataPullSource> source_;
     mutable data_components::ExpirationTracker tracker_;
     std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
     mutable std::optional<bool> initialized_;

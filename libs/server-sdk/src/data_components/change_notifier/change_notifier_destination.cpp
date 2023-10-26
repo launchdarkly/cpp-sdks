@@ -5,7 +5,7 @@
 
 namespace launchdarkly::server_side::data_components {
 
-std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
+std::unique_ptr<IConnection> ChangeNotifierDestination::OnFlagChange(
     launchdarkly::server_side::IChangeNotifier::ChangeHandler handler) {
     std::lock_guard lock{signal_mutex_};
 
@@ -13,7 +13,8 @@ std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
         signals_.connect(handler));
 }
 
-void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
+void ChangeNotifierDestination::Init(
+    launchdarkly::data_model::SDKDataSet data_set) {
     // Optional outside the HasListeners() scope, this allows for the changes
     // to be calculated before the update and then the notification to be
     // sent after the update completes.
@@ -44,23 +45,23 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
 }
 
-void DataStoreUpdater::Upsert(std::string const& key,
-                              data_model::FlagDescriptor flag) {
+void ChangeNotifierDestination::Upsert(std::string const& key,
+                                       data_model::FlagDescriptor flag) {
     UpsertCommon(DataKind::kFlag, key, source_.GetFlag(key), std::move(flag));
 }
 
-void DataStoreUpdater::Upsert(std::string const& key,
-                              data_model::SegmentDescriptor segment) {
+void ChangeNotifierDestination::Upsert(std::string const& key,
+                                       data_model::SegmentDescriptor segment) {
     UpsertCommon(DataKind::kSegment, key, source_.GetSegment(key),
                  std::move(segment));
 }
 
-bool DataStoreUpdater::HasListeners() const {
+bool ChangeNotifierDestination::HasListeners() const {
     std::lock_guard lock{signal_mutex_};
     return !signals_.empty();
 }
 
-void DataStoreUpdater::NotifyChanges(DependencySet changes) {
+void ChangeNotifierDestination::NotifyChanges(DependencySet changes) {
     std::lock_guard lock{signal_mutex_};
     auto flag_changes = changes.SetForKind(DataKind::kFlag);
     // Only emit an event if there are changes.
@@ -69,8 +70,9 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
     }
 }
 
-DataStoreUpdater::DataStoreUpdater(IDestination& sink,
-                                   data_interfaces::IStore const& source)
+ChangeNotifierDestination::ChangeNotifierDestination(
+    IDestination& sink,
+    data_interfaces::IStore const& source)
     : sink_(sink), source_(source) {}
 
 }  // namespace launchdarkly::server_side::data_components
