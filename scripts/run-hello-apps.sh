@@ -8,7 +8,7 @@
 # $1 is the linkage, either 'static' or 'dynamic'.
 # Subsequent arguments are cmake target names.
 
-if [ -z "$1" ]
+if [ "$1" != "static" ] && [ "$1" != "dynamic" ]
 then
   echo "Linkage must be specified ('static' or 'dynamic')"
   exit 1
@@ -25,8 +25,8 @@ function cleanup {
   cd ..
 }
 
-mkdir -p build
-cd build || exit
+mkdir -p build-"$1"
+cd build-"$1" || exit
 
 # After we enter the directory we want to make sure we always exit it when the
 # script ends.

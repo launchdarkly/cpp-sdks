@@ -15,7 +15,6 @@ jobs:
   smoketest:
     strategy:
       matrix:
-        linkage: [ "dynamic", "static" ]
         os: [ "ubuntu-22.04", "macos-12", "windows-2022" ]
     runs-on: ${{ matrix.os }}
     steps:
@@ -28,9 +27,16 @@ jobs:
       - name: Install OpenSSL
         uses: ./.github/actions/install-openssl
         id: install-openssl
-      - name: Execute Hello Apps
+      - name: Statically Linked Hello Apps
         shell: bash
-        run: ./scripts/run-hello-apps.sh ${{ matrix.linkage }} hello-c-client hello-cpp-client hello-c-server hello-cpp-server
+        run: ./scripts/run-hello-apps.sh static hello-c-client hello-cpp-client hello-c-server hello-cpp-server
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+      - name: Dynamically Linked Hello Apps
+        shell: bash
+        # Only the C bindings work with dynamic linking because C++ symbols are hidden
+        run: ./scripts/run-hello-apps.sh dynamic hello-c-client hello-c-server
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
