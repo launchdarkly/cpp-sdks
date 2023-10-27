@@ -36,9 +36,13 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release  -D BUILD_TESTING=OFF  -D LD_BUILD_SH
 
 cmake --build .
 
-set +e
+function run {
+  set +e
+  for target in "$@"
+  do
+    ./examples/"$target"/"$target"
+  done
+  set -e
+}
 
-for target in "$@"
-do
-  ./examples/"$target"/"$target"
-done
+run "$@"

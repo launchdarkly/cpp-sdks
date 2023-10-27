@@ -8,7 +8,12 @@ inputs:
     description: "Must be 'static' or 'dynamic'"
     required: false
     default: 'static'
-
+  boost_root:
+    description: "Boost installation path"
+    required: true
+  openssl_root:
+    description: "OpenSSL installation path"
+    required: true
 
 runs:
   using: composite
@@ -16,3 +21,6 @@ runs:
     - name: "Execute Hello Apps"
       shell: bash
       run: ./scripts/run-hello-apps.sh ${{ inputs.linkage }} ${{ inputs.cmake_targets }}
+      env:
+        BOOST_ROOT: ${{ inputs.boost_root }}
+        OPENSSL_ROOT_DIR: ${{ inputs.openssl_root }}
