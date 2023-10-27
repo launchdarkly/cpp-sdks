@@ -25,8 +25,12 @@ inputs:
     description: 'Whether to run ./build-release.sh for the CMake target'
     required: false
     default: 'false'
-  hello_app_cmake_target:
-    description: 'The name of the CMake target for the hello app if applicable, i.e. hello-cpp-client'
+  hello_app_cmake_target_1:
+    description: 'The CMake target name of a hello app to execute, e.g. hello-cpp-client'
+    required: false
+    default: ''
+  hello_app_cmake_target_2:
+    description: 'A secondary CMake target name of a hello app to execute, e.g. hello-cpp-client'
     required: false
     default: ''
 
@@ -63,12 +67,19 @@ runs:
       # has better performance and output.
       run: ./build/gtest_${{ inputs.cmake_target }}
 
-    - name: Smoke Test
-      if: inputs.hello_app_cmake_target != ''
+    - name: Smoke Test 1
+      if: inputs.hello_app_cmake_target_1 != ''
       uses: ./.github/actions/hello-world
       with:
-        cmake_target: ${{ inputs.hello_app_cmake_target }}
-        binary_dir: "build/examples/${{ inputs.hello_app_cmake_target }}"
+        cmake_target: ${{ inputs.hello_app_cmake_target_1 }}
+        binary_dir: "build/examples/${{ inputs.hello_app_cmake_target_1 }}"
+
+    - name: Smoke Test 2
+      if: inputs.hello_app_cmake_target_2 != ''
+      uses: ./.github/actions/hello-world
+      with:
+        cmake_target: ${{ inputs.hello_app_cmake_target_2 }}
+        binary_dir: "build/examples/${{ inputs.hello_app_cmake_target_2 }}"
 
     - name: Simulate Release
       if: inputs.simulate_release == 'true'
