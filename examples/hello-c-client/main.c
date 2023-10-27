@@ -18,16 +18,20 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg);
+
 int main() {
-    if (!strlen(MOBILE_KEY)) {
-        printf(
-            "*** Please edit main.c to set MOBILE_KEY to your LaunchDarkly "
-            "mobile key first\n\n");
-        return 1;
-    }
+    char const* mobile_key = get_with_env_fallback(
+        MOBILE_KEY, "LD_MOBILE_KEY",
+        "Please edit main.c to set MOBILE_KEY to your LaunchDarkly mobile key "
+        "first.\n\nAlternatively, set the LD_MOBILE_KEY environment "
+        "variable.\n"
+        "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
     LDClientConfigBuilder config_builder =
-        LDClientConfigBuilder_New(MOBILE_KEY);
+        LDClientConfigBuilder_New(mobile_key);
 
     LDClientConfig config = NULL;
     LDStatus config_status =
@@ -67,12 +71,28 @@ int main() {
 
     // Here we ensure that the SDK shuts down cleanly and has a chance to
     // deliver analytics events to LaunchDarkly before the program exits. If
-    // analytics events are not delivered, the user properties and flag usage
-    // statistics will not appear on your dashboard. In a normal long-running
-    // application, the SDK would continue running and events would be delivered
-    // automatically in the background.
+    // analytics events are not delivered, the context properties and flag
+    // usage statistics will not appear on your dashboard. In a normal
+    // long-running application, the SDK would continue running and events
+    // would be delivered automatically in the background.
 
     LDClientSDK_Free(client);
 
     return 0;
+}
+
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg) {
+    if (strlen(source_val)) {
+        return source_val;
+    }
+
+    char const* from_env = getenv(env_variable);
+    if (from_env && strlen(from_env)) {
+        return from_env;
+    }
+
+    printf("*** %s\n\n", error_msg);
+    exit(1);
 }
