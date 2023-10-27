@@ -65,7 +65,7 @@ runs:
 
     - name: Smoke Test
       if: inputs.hello_app_cmake_target != ''
-      uses: ./github/actions/hello-world
+      uses: ./.github/actions/hello-world
       with:
         cmake_target: ${{ inputs.hello_app_cmake_target }}
         command: "./build/examples/${{ inputs.hello_app_cmake_target }}"
