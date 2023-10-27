@@ -19,5 +19,5 @@ runs:
     - name: 'Run Hello App'
       shell: bash
       run: |
-        "./${{ inputs.binary_dir }}/${{ inputs.cmake_target}}" | tee output.txt
+        ./${{ inputs.binary_dir }}/${{ inputs.cmake_target}} | tee output.txt
         grep "Please edit" output.txt || (echo "binary did not ask for SDK key as expected" && exit 1) 
