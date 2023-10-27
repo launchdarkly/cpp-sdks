@@ -68,7 +68,7 @@ runs:
       uses: ./.github/actions/hello-world
       with:
         cmake_target: ${{ inputs.hello_app_cmake_target }}
-        command: "./build/examples/${{ inputs.hello_app_cmake_target }}"
+        binary_dir: "build/examples/${{ inputs.hello_app_cmake_target }}"
 
     - name: Simulate Release
       if: inputs.simulate_release == 'true'

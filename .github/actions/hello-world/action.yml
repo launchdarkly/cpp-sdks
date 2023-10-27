@@ -4,8 +4,8 @@ inputs:
   cmake_target:
     description: 'The name of the CMake target. i.e. hello-cpp-client'
     required: true
-  command:
-    description: 'Command that executes the hello binary'
+  binary_dir:
+    description: 'Output directory for the hello world binary'
     required: true
 
 
@@ -14,7 +14,8 @@ runs:
   steps:
     - name: "Build Hello App"
       shell: bash
+      # Should generate a binary in 'inputs.binary_dir'
       run: ./scripts/build.sh ${{ inputs.cmake_target }} OFF
     - name: 'Run Hello App'
       shell: bash
-      run: ${{ inputs.command }}
+      run: "./${{ inputs.binary_dir }}/${{ inputs.cmake_target}}"
