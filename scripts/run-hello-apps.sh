@@ -37,6 +37,7 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release  -D BUILD_TESTING=OFF  -D LD_BUILD_SH
 cmake --build .
 
 export LD_MOBILE_KEY="bogus"
+export LD_SDK_KEY="bogus"
 
 for target in "$@"
 do
