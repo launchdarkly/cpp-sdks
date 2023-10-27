@@ -36,13 +36,10 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release  -D BUILD_TESTING=OFF  -D LD_BUILD_SH
 
 cmake --build .
 
-function run {
-  set +e
-  for target in "$@"
-  do
-    ./examples/"$target"/"$target"
-  done
-  set -e
-}
+export LD_MOBILE_KEY="bogus"
 
-run "$@"
+for target in "$@"
+do
+  ./examples/"$target"/"$target" | tee "$target"_output.txt
+  grep "is true for this user" "$target"_output.txt || (echo "$target: expected flag to be true" && exit 1)
+done
