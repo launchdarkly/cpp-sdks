@@ -1,0 +1,26 @@
+name: libs/client-sdk
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md' #Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ main, "feat/**" ]
+    paths-ignore:
+      - '**.md'
+
+
+jobs:
+  smoke_tests:
+    strategy:
+      matrix:
+        linkage: [ "dynamic", "static" ]
+        os: [ "ubuntu-22.04", "macos-12", "windows-2022" ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/hello-app
+        with:
+          cmake_targets: "hello-c-client hello-cpp-client hello-c-server hello-cpp-server"
+          linkage: ${{ matrix.linkage }}
