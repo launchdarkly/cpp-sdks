@@ -18,6 +18,7 @@ runs:
       run: ./scripts/build.sh ${{ inputs.cmake_target }} OFF
     - name: 'Run Hello App'
       shell: bash
-      run: |
-        ./${{ inputs.binary_dir }}/${{ inputs.cmake_target}} | tee output.txt
-        grep "Please edit" output.txt || (echo "binary did not ask for SDK key as expected" && exit 1) 
+      run: ./${{ inputs.binary_dir }}/${{ inputs.cmake_target}} > output.txt && cat output.txt
+    - name: 'Inspect Output'
+      shell: bash
+      run: grep "Please edit" output.txt || (echo "binary did not ask for SDK key as expected" && exit 1)
