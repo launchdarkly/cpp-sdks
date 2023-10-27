@@ -15,10 +15,16 @@ inputs:
     required: false
     default: 'true'
   platform_version:
+    description: 'Boost platform version'
     required: false
     default: "22.04"
   toolset:
+    description: 'Boost toolset'
     required: false
+  simulate_release:
+    description: 'Whether to run ./build-release.sh for the CMake target'
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -50,3 +56,9 @@ runs:
       # This uses the binary, versus "make tests" because the binary
       # has better performance and output.
       run: ./build/gtest_${{ inputs.cmake_target }}
+    - name: Simulate Release
+      if: inputs.simulate_release == 'true'
+      shell: bash
+      run: ./scripts/build-release.sh ${{ inputs.cmake_target }}
+      env:
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
