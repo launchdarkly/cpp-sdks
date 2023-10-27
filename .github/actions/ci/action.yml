@@ -43,6 +43,7 @@ runs:
       run: ./scripts/build.sh ${{ inputs.cmake_target }} ON
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
     - name: Build Tests
       id: build-tests
       if: inputs.run_tests == 'true'
@@ -50,12 +51,21 @@ runs:
       run: ./scripts/build.sh gtest_${{ inputs.cmake_target }} ON
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+
     - name: Run Tests
       if: steps.build-tests.outcome == 'success'
       shell: bash
       # This uses the binary, versus "make tests" because the binary
       # has better performance and output.
       run: ./build/gtest_${{ inputs.cmake_target }}
+
+    - name: Smoke Test
+      if: inputs.hello_app_cmake_target != ''
+      uses: ./github/actions/hello-world
+      with:
+        cmake_target: ${{ inputs.hello_app_cmake_target }}
+        command: "./build/examples/${{ inputs.hello_app_cmake_target }}"
+
     - name: Simulate Release
       if: inputs.simulate_release == 'true'
       shell: bash

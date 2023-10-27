@@ -1,0 +1,20 @@
+name: "Hello World Smoke Test"
+description: 'Runs the "hello app" for an SDK.'
+inputs:
+  cmake_target:
+    description: 'The name of the CMake target. i.e. hello-cpp-client'
+    required: true
+  command:
+    description: 'Command that executes the hello binary'
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - name: "Build Hello App"
+      shell: bash
+      run: ./scripts/build.sh ${{ inputs.cmake_target }} OFF
+    - name: 'Run Hello App'
+      shell: bash
+      run: ${{ inputs.command }}

@@ -36,6 +36,7 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
+          hello_app_cmake_target: hello-c-client
           simulate_release: true
   build-test-client-mac:
     runs-on: macos-12
