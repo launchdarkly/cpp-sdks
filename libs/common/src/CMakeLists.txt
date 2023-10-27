@@ -9,6 +9,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/builders/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/built/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/builders/data_system/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/config/shared/built/data_system/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
@@ -38,6 +40,10 @@ add_library(${LIBNAME} OBJECT
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp
+        config/data_system/bootstrap_builder.cpp
+        config/data_system/background_sync_builder.cpp
+        config/data_system/data_destination_builder.cpp
+        config/data_system/data_system_builder.cpp
         bindings/c/value.cpp
         bindings/c/array_builder.cpp
         bindings/c/object_builder.cpp

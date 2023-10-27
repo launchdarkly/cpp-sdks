@@ -1,6 +1,7 @@
 #pragma once
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
+#include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/persistence.hpp>
@@ -64,6 +65,12 @@ struct Defaults<ClientSDK> {
         return {Defaults<ClientSDK>::StreamingConfig(), false, false};
     }
 
+    static auto DataSystemConfig()
+        -> shared::built::DataSystemConfig<ClientSDK> {
+        // No usage of DataSystem config yet until next major version.
+        return {};
+    }
+
     static auto PollingConfig() -> shared::built::PollingConfig<ClientSDK> {
         return {std::chrono::minutes(5), "/msdk/evalx/contexts",
                 "/msdk/evalx/context", std::chrono::minutes(5)};
@@ -107,6 +114,11 @@ struct Defaults<ServerSDK> {
     static auto DataSourceConfig()
         -> shared::built::DataSourceConfig<ServerSDK> {
         return {Defaults<ServerSDK>::StreamingConfig()};
+    }
+
+    static auto DataSystemConfig()
+        -> shared::built::DataSystemConfig<ServerSDK> {
+        return {shared::built::BackgroundSyncConfig<ServerSDK>{}};
     }
 
     static auto PollingConfig() -> shared::built::PollingConfig<ServerSDK> {

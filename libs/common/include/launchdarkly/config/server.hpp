@@ -18,9 +18,8 @@ using ConfigBuilder = config::shared::builders::ConfigBuilder<SDK>;
 using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
-using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
+using DataSystemBuilder = config::shared::builders::DataSystemBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
-using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;
 
 using Config = config::Config<SDK>;
 

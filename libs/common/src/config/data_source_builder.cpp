@@ -66,11 +66,7 @@ built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
     return {method, with_reasons_, use_report_};
 }
 
-DataSourceBuilder<ServerSDK>::DataSourceBuilder()
-    : method_(Streaming()),
-      enable_bootstrap_(true),
-      enable_sync_(false),
-      order_(0) {}
+DataSourceBuilder<ServerSDK>::DataSourceBuilder() : method_(Streaming()) {}
 
 DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
     StreamingBuilder<ServerSDK> builder) {

@@ -94,11 +94,14 @@ TEST_F(ConfigBuilderTest,
 
 TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
     using namespace launchdarkly::server_side;
+
+    using Sync = ConfigBuilder::DataSystemBuilder::BackgroundSyncBuilder;
+
     ConfigBuilder builder("sdk-123");
 
-    builder.DataSource().Method(
-        ConfigBuilder::DataSourceBuilder::Streaming().InitialReconnectDelay(
-            std::chrono::milliseconds{5000}));
+    builder.DataSystem().BackgroundSync(
+        Sync().Source(Sync::Streaming().InitialReconnectDelay(
+            std::chrono::milliseconds{5000})));
 
     auto cfg = builder.Build();
 

@@ -12,7 +12,8 @@ Config<SDK>::Config(std::string sdk_key,
                     std::optional<std::string> application_tag,
                     shared::built::DataSourceConfig<SDK> data_source_config,
                     shared::built::HttpProperties http_properties,
-                    shared::built::Persistence<SDK> persistence)
+                    shared::built::Persistence<SDK> persistence,
+                    shared::built::DataSystemConfig<SDK> data_system_config)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
       offline_(offline),
@@ -21,7 +22,8 @@ Config<SDK>::Config(std::string sdk_key,
       application_tag_(std::move(application_tag)),
       data_source_config_(std::move(data_source_config)),
       http_properties_(std::move(http_properties)),
-      persistence_(persistence) {}
+      persistence_(std::move(persistence)),
+      data_system_config_(std::move(data_system_config)) {}
 
 template <typename SDK>
 std::string const& Config<SDK>::SdkKey() const {
@@ -47,6 +49,12 @@ template <typename SDK>
 shared::built::DataSourceConfig<SDK> const& Config<SDK>::DataSourceConfig()
     const {
     return data_source_config_;
+}
+
+template <typename SDK>
+shared::built::DataSystemConfig<SDK> const& Config<SDK>::DataSystemConfig()
+    const {
+    return data_system_config_;
 }
 
 template <typename SDK>

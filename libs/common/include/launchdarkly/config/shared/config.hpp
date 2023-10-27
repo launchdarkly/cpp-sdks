@@ -3,6 +3,7 @@
 #include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
 #include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
+#include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/logging.hpp>
@@ -27,7 +28,8 @@ struct Config {
            std::optional<std::string> application_tag,
            shared::built::DataSourceConfig<SDK> data_source_config,
            shared::built::HttpProperties http_properties,
-           shared::built::Persistence<SDK> persistence);
+           shared::built::Persistence<SDK> persistence,
+           shared::built::DataSystemConfig<SDK> data_system_config);
 
     [[nodiscard]] std::string const& SdkKey() const;
 
@@ -38,8 +40,19 @@ struct Config {
 
     [[nodiscard]] std::optional<std::string> const& ApplicationTag() const;
 
-    config::shared::built::DataSourceConfig<SDK> const& DataSourceConfig()
-        const;
+    /**
+     * Client-side SDK only.
+     * @return
+     */
+    [[nodiscard]] config::shared::built::DataSourceConfig<SDK> const&
+    DataSourceConfig() const;
+
+    /**
+     * Server-side SDK only.
+     * @return
+     */
+    [[nodiscard]] config::shared::built::DataSystemConfig<SDK> const&
+    DataSystemConfig() const;
 
     [[nodiscard]] shared::built::HttpProperties const& HttpProperties() const;
 
@@ -59,6 +72,6 @@ struct Config {
     config::shared::built::DataSourceConfig<SDK> data_source_config_;
     config::shared::built::HttpProperties http_properties_;
     shared::built::Persistence<SDK> persistence_;
+    shared::built::DataSystemConfig<SDK> data_system_config_;
 };
-
 }  // namespace launchdarkly::config
