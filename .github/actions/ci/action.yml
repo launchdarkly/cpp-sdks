@@ -25,6 +25,10 @@ inputs:
     description: 'Whether to run ./build-release.sh for the CMake target'
     required: false
     default: 'false'
+  hello_app_cmake_target:
+    description: 'The name of the CMake target for the hello app if applicable, i.e. hello-cpp-client'
+    required: false
+    default: ''
 
 runs:
   using: composite
