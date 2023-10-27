@@ -37,6 +37,8 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
+          hello_app_cmake_target_1: hello-c-server
+          hello_app_cmake_target_2: hello-cpp-server
           simulate_release: true
   build-test-server-mac:
     runs-on: macos-12
