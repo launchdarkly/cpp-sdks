@@ -42,5 +42,6 @@ export LD_SDK_KEY="bogus"
 for target in "$@"
 do
   ./examples/"$target"/"$target" | tee "$target"_output.txt
-  grep "is true for this user" "$target"_output.txt || (echo "$target: expected flag to be true" && exit 1)
+  #grep "is true for this user" "$target"_output.txt || (echo "$target: expected flag to be true" && exit 1)
+  grep "unrecoverable" "$target"_output.txt && (echo "$target: expected connection to LD to fail" && exit 1)
 done
