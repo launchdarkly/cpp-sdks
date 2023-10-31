@@ -1,0 +1,32 @@
+name: Install OpenSSL
+description: 'Install OpenSSL >= 3 if not already present.'
+
+runs:
+  using: composite
+  steps:
+    # The ubuntu runner already has OpenSSL > 3 and CMake can find it.
+    - name: Install for Ubuntu.
+      if: runner.os == 'Linux'
+      shell: bash
+      run: echo "Nothing to do!"
+
+    # The Mac runner already has OpenSSL > 3 via brew, but we need to expose its
+    # install path to CMake.
+    - name: Install for Mac
+      if: runner.os == 'macOS'
+      shell: bash
+      run: echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+
+    # The Windows runner has an older version of OpenSSL and needs to be upgraded.
+    # Additionally it seems to randomly be installed in OpenSSL-Win64 or OpenSSL depending on
+    # the runner Github gives us.
+    - name: Install for Windows
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        choco upgrade openssl --no-progress
+        if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
+          echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
+        else
+          echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
+        fi

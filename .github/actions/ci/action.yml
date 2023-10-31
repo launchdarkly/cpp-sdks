@@ -31,12 +31,15 @@ runs:
       with:
         platform_version: ${{ inputs.platform_version }}
         toolset: ${{ inputs.toolset }}
-
+    - name: Install OpenSSL
+      uses: ./.github/actions/install-openssl
+      id: install-openssl
     - name: Build Library
       shell: bash
       run: ./scripts/build.sh ${{ inputs.cmake_target }} ON
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
     - name: Build Tests
       id: build-tests
       if: inputs.run_tests == 'true'
@@ -44,6 +47,7 @@ runs:
       run: ./scripts/build.sh gtest_${{ inputs.cmake_target }} ON
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
     - name: Run Tests
       if: steps.build-tests.outcome == 'success'
       shell: bash
