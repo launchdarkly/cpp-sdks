@@ -37,6 +37,7 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
+          simulate_release: true
   build-test-server-mac:
     runs-on: macos-12
     steps:
