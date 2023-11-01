@@ -34,13 +34,12 @@ trap cleanup EXIT
 
 cmake -G Ninja -D CMAKE_BUILD_TYPE=Release  -D BUILD_TESTING=OFF  -D LD_BUILD_SHARED_LIBS=$dynamic_linkage ..
 
-cmake --build .
-
 export LD_MOBILE_KEY="bogus"
 export LD_SDK_KEY="bogus"
 
 for target in "$@"
 do
+  cmake --build . --target "$target"
   ./examples/"$target"/"$target" | tee "$target"_output.txt
   #grep "is true for this user" "$target"_output.txt || (echo "$target: expected flag to be true" && exit 1)
   grep "failed to initialize" "$target"_output.txt || (echo "$target: expected connection to LD to fail" && exit 1)
