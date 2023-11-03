@@ -41,6 +41,5 @@ for target in "$@"
 do
   cmake --build . --target "$target"
   ./examples/"$target"/"$target" | tee "$target"_output.txt
-  #grep "is true for this user" "$target"_output.txt || (echo "$target: expected flag to be true" && exit 1)
   grep "failed to initialize" "$target"_output.txt || (echo "$target: expected connection to LD to fail" && exit 1)
 done
