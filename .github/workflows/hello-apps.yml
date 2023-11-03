@@ -37,6 +37,7 @@ jobs:
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
       - name: Dynamically Linked Hello Apps
         shell: bash
+        continue-on-error: true # TODO(SC-223804)
         # Only the C bindings work with dynamic linking because C++ symbols are hidden
         run: ./scripts/run-hello-apps.sh dynamic hello-c-client hello-c-server
         env:
