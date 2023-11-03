@@ -21,6 +21,6 @@ using HttpPropertiesBuilder =
 using DataSystemBuilder = config::shared::builders::DataSystemBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 
-using Config = config::Config<SDK>;
+using Config = config::shared::Config<SDK>;
 
 }  // namespace launchdarkly::server_side

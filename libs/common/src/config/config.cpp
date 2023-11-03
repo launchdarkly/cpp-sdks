@@ -2,18 +2,19 @@
 
 #include <launchdarkly/config/shared/config.hpp>
 
-namespace launchdarkly::config {
-template <typename SDK>
-Config<SDK>::Config(std::string sdk_key,
-                    bool offline,
-                    shared::built::Logging logging,
-                    shared::built::ServiceEndpoints service_endpoints,
-                    shared::built::Events events,
-                    std::optional<std::string> application_tag,
-                    shared::built::DataSourceConfig<SDK> data_source_config,
-                    shared::built::HttpProperties http_properties,
-                    shared::built::Persistence<SDK> persistence,
-                    shared::built::DataSystemConfig<SDK> data_system_config)
+namespace launchdarkly::config::shared {
+
+Config<shared::ClientSDK>::Config(
+    std::string sdk_key,
+    bool offline,
+    shared::built::Logging logging,
+    shared::built::ServiceEndpoints service_endpoints,
+    shared::built::Events events,
+    std::optional<std::string> application_tag,
+    shared::built::DataSourceConfig<SDK> data_source_config,
+    shared::built::HttpProperties http_properties,
+    shared::built::Persistence<SDK> persistence,
+    shared::built::DataSystemConfig<SDK> data_system_config)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
       offline_(offline),
@@ -22,21 +23,31 @@ Config<SDK>::Config(std::string sdk_key,
       application_tag_(std::move(application_tag)),
       data_source_config_(std::move(data_source_config)),
       http_properties_(std::move(http_properties)),
-      persistence_(std::move(persistence)),
-      data_system_config_(std::move(data_system_config)) {}
+      persistence_(std::move(persistence)) {}
 
-template <typename SDK>
-std::string const& Config<SDK>::SdkKey() const {
+std::string const& Config<shared::ClientSDK>::SdkKey() const {
     return sdk_key_;
 }
 
-template <typename SDK>
-shared::built::ServiceEndpoints const& Config<SDK>::ServiceEndpoints() const {
+std::string const& Config<shared::ServerSDK>::SdkKey() const {
+    return sdk_key_;
+}
+
+shared::built::ServiceEndpoints const&
+Config<shared::ClientSDK>::ServiceEndpoints() const {
     return service_endpoints_;
 }
 
-template <typename SDK>
-shared::built::Events const& Config<SDK>::Events() const {
+shared::built::ServiceEndpoints const&
+Config<shared::ServerSDK>::ServiceEndpoints() const {
+    return service_endpoints_;
+}
+
+shared::built::Events const& Config<ClientSDK>::Events() const {
+    return events_;
+}
+
+shared::built::Events const& Config<ServerSDK>::Events() const {
     return events_;
 }
 
@@ -80,4 +91,4 @@ shared::built::Persistence<SDK> const& Config<SDK>::Persistence() const {
 template class Config<config::shared::ClientSDK>;
 template class Config<config::shared::ServerSDK>;
 
-}  // namespace launchdarkly::config
+}  // namespace launchdarkly::config::shared

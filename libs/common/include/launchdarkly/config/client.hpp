@@ -23,6 +23,6 @@ using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;
 
-using Config = config::Config<SDK>;
+using Config = config::shared::Config<SDK>;
 
 }  // namespace launchdarkly::client_side
