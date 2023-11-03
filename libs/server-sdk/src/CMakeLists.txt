@@ -16,7 +16,6 @@ endif ()
 target_sources(${LIBNAME}
         PRIVATE
         ${HEADER_LIST}
-        boost.cpp
         client.cpp
         client_impl.cpp
         config/config.cpp
