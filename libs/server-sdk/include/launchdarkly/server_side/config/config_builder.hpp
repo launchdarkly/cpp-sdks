@@ -1,4 +1,5 @@
 #pragma once
+#include <launchdarkly/config/server_builders.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
 #include "launchdarkly/config/shared/builders/app_info_builder.hpp"
 #include "launchdarkly/config/shared/builders/data_source_builder.hpp"
@@ -7,15 +8,6 @@
 #include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::server_side {
-
-using Defaults = config::shared::Defaults<SDK>;
-using AppInfoBuilder = config::shared::builders::AppInfoBuilder;
-using EndpointsBuilder = config::shared::builders::EndpointsBuilder<SDK>;
-using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
-using HttpPropertiesBuilder =
-    config::shared::builders::HttpPropertiesBuilder<SDK>;
-using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
-using LoggingBuilder = config::shared::builders::LoggingBuilder;
 
 class ConfigBuilder {
    public:
