@@ -91,6 +91,5 @@ ConfigBuilder<SDK>::Build() const {
 }
 
 template class ConfigBuilder<config::shared::ClientSDK>;
-template class ConfigBuilder<config::shared::ServerSDK>;
 
 }  // namespace launchdarkly::config::shared::builders
