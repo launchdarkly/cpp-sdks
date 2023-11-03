@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/server_side/client.hpp>
+#include <launchdarkly/server_side/config/config_builder.hpp>
 #include <map>
 
 using namespace launchdarkly;
@@ -23,7 +24,7 @@ TEST_F(ClientTest, ClientConstructedWithMinimalConfigAndContextT) {
 }
 
 TEST_F(ClientTest, BoolVariationDefaultPassesThrough) {
-    const std::string flag = "extra-cat-food";
+    std::string const flag = "extra-cat-food";
     std::vector<bool> values = {true, false};
     for (auto const& v : values) {
         ASSERT_EQ(client_.BoolVariation(context_, flag, v), v);
@@ -32,7 +33,7 @@ TEST_F(ClientTest, BoolVariationDefaultPassesThrough) {
 }
 
 TEST_F(ClientTest, StringVariationDefaultPassesThrough) {
-    const std::string flag = "treat";
+    std::string const flag = "treat";
     std::vector<std::string> values = {"chicken", "fish", "cat-grass"};
     for (auto const& v : values) {
         ASSERT_EQ(client_.StringVariation(context_, flag, v), v);
@@ -41,7 +42,7 @@ TEST_F(ClientTest, StringVariationDefaultPassesThrough) {
 }
 
 TEST_F(ClientTest, IntVariationDefaultPassesThrough) {
-    const std::string flag = "weight";
+    std::string const flag = "weight";
     std::vector<int> values = {0, 12, 13, 24, 1000};
     for (auto const& v : values) {
         ASSERT_EQ(client_.IntVariation(context_, flag, v), v);
@@ -50,7 +51,7 @@ TEST_F(ClientTest, IntVariationDefaultPassesThrough) {
 }
 
 TEST_F(ClientTest, DoubleVariationDefaultPassesThrough) {
-    const std::string flag = "weight";
+    std::string const flag = "weight";
     std::vector<double> values = {0.0, 12.0, 13.0, 24.0, 1000.0};
     for (auto const& v : values) {
         ASSERT_EQ(client_.DoubleVariation(context_, flag, v), v);
@@ -59,7 +60,7 @@ TEST_F(ClientTest, DoubleVariationDefaultPassesThrough) {
 }
 
 TEST_F(ClientTest, JsonVariationDefaultPassesThrough) {
-    const std::string flag = "assorted-values";
+    std::string const flag = "assorted-values";
     std::vector<Value> values = {
         Value({"running", "jumping"}), Value(3), Value(1.0), Value(true),
         Value(std::map<std::string, Value>{{"weight", 20}})};
