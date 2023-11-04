@@ -13,14 +13,18 @@ runs:
     # The Mac runner already has OpenSSL > 3 via brew, but we need to expose its
     # install path to CMake.
     - name: Install for Mac
+      id: brew-action
       if: runner.os == 'macOS'
       shell: bash
-      run: echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+      run: |
+        echo "OpenSSL Prefix: $(brew --prefix openssl@3)"
+        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
 
     # The Windows runner has an older version of OpenSSL and needs to be upgraded.
-    # Additionally it seems to randomly be installed in OpenSSL-Win64 or OpenSSL depending on
+    # Additionally, it seems to randomly be installed in OpenSSL-Win64 or OpenSSL depending on
     # the runner Github gives us.
     - name: Install for Windows
+      id: choco-action
       if: runner.os == 'Windows'
       shell: bash
       run: |
@@ -30,3 +34,19 @@ runs:
         else
           echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
         fi
+
+    - name: Determine root
+      id: determine-root
+      shell: bash
+      run: |
+        if [ ! -z "$ROOT_CHOCO" ]; then
+          echo "OPENSSL_ROOT_DIR=$ROOT_CHOCO" >> $GITHUB_OUTPUT
+          echo Setting OPENSSL_ROOT_DIR to "$ROOT_CHOCO"
+        elif [ ! -z "$ROOT_BREW" ]; then
+          echo "OPENSSL_ROOT_DIR=$ROOT_BREW" >> $GITHUB_OUTPUT
+          echo Setting OPENSSL_ROOT_DIR to "$ROOT_BREW"
+        fi
+
+      env:
+        ROOT_CHOCO: ${{ steps.choco-action.outputs.OPENSSL_ROOT_DIR }}
+        ROOT_BREW: ${{ steps.brew-action.outputs.OPENSSL_ROOT_DIR }}
