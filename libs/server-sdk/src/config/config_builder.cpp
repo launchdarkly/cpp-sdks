@@ -23,8 +23,8 @@ ConfigBuilder& ConfigBuilder::Offline(bool offline) {
     return *this;
 }
 
-DataSourceBuilder& ConfigBuilder::DataSource() {
-    return data_source_builder_;
+DataSystemBuilder& ConfigBuilder::DataSystem() {
+    return data_system_builder_;
 }
 
 HttpPropertiesBuilder& ConfigBuilder::HttpProperties() {

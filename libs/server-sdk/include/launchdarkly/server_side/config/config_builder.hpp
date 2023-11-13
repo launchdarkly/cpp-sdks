@@ -55,7 +55,7 @@ class ConfigBuilder {
      * @param builder A DataSystemBuilder.
      * @return Reference to a DataSystemBuilder.
      */
-    DataSystemBuilder& DataSource();
+    DataSystemBuilder& DataSystem();
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
