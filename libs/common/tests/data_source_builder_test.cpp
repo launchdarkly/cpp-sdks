@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/config/client.hpp>
-#include <launchdarkly/config/server.hpp>
+#include <launchdarkly/config/server_builders.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/value.hpp>
 

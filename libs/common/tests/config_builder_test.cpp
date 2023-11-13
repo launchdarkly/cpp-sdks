@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/config/client.hpp>
-#include <launchdarkly/config/server.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
 
 class ConfigBuilderTest
@@ -14,14 +13,6 @@ class ConfigBuilderTest
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ClientConfig) {
     using namespace launchdarkly::client_side;
-    ConfigBuilder builder("sdk-123");
-    auto cfg = builder.Build();
-    ASSERT_TRUE(cfg);
-    ASSERT_EQ(cfg->SdkKey(), "sdk-123");
-}
-
-TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
-    using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
@@ -78,40 +69,6 @@ TEST_F(ConfigBuilderTest,
                   .initial_reconnect_delay);
 }
 
-TEST_F(ConfigBuilderTest,
-       DefaultConstruction_ServerConfig_UsesDefaulDataSourceConfig) {
-    using namespace launchdarkly::server_side;
-    ConfigBuilder builder("sdk-123");
-    auto cfg = builder.Build();
-
-    // Should be streaming with a 1 second initial retry;
-    EXPECT_EQ(std::chrono::milliseconds{1000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
-}
-
-TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
-    using namespace launchdarkly::server_side;
-
-    using Sync = ConfigBuilder::DataSystemBuilder::BackgroundSyncBuilder;
-
-    ConfigBuilder builder("sdk-123");
-
-    builder.DataSystem().BackgroundSync(
-        Sync().Source(Sync::Streaming().InitialReconnectDelay(
-            std::chrono::milliseconds{5000})));
-
-    auto cfg = builder.Build();
-
-    EXPECT_EQ(std::chrono::milliseconds{5000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
-}
-
 TEST_F(ConfigBuilderTest, ClientConfig_CanSetDataSource) {
     using namespace launchdarkly::client_side;
     ConfigBuilder builder("sdk-123");
@@ -141,14 +98,6 @@ TEST_F(ConfigBuilderTest,
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
-    ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
-}
-
-TEST_F(ConfigBuilderTest,
-       DefaultConstruction_ServerConfig_UsesDefaultHttpProperties) {
-    using namespace launchdarkly::server_side;
-    ConfigBuilder builder("sdk-123");
-    auto cfg = builder.Build();
     ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
 }
 

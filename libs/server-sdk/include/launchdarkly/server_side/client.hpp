@@ -1,8 +1,8 @@
 #pragma once
 
-#include <launchdarkly/config/server.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
+#include <launchdarkly/server_side/config/config.hpp>
 #include <launchdarkly/value.hpp>
 
 #include <launchdarkly/server_side/all_flags_state.hpp>

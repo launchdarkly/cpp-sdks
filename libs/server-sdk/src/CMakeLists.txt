@@ -19,6 +19,8 @@ target_sources(${LIBNAME}
         boost.cpp
         client.cpp
         client_impl.cpp
+        config/config.cpp
+        config/config_builder.cpp
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp

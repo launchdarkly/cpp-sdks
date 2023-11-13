@@ -10,6 +10,7 @@
 #include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
+#include <launchdarkly/server_side/config/config_builder.hpp>
 
 #include <chrono>
 #include <optional>

@@ -14,13 +14,10 @@ using SDK = config::shared::ServerSDK;
 using Defaults = config::shared::Defaults<SDK>;
 using AppInfoBuilder = config::shared::builders::AppInfoBuilder;
 using EndpointsBuilder = config::shared::builders::EndpointsBuilder<SDK>;
-using ConfigBuilder = config::shared::builders::ConfigBuilder<SDK>;
 using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
 using DataSystemBuilder = config::shared::builders::DataSystemBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
-
-using Config = config::shared::Config<SDK>;
 
 }  // namespace launchdarkly::server_side
