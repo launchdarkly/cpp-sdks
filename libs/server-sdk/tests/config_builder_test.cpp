@@ -53,15 +53,16 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
 
     auto const delay = std::chrono::seconds{5};
 
-    auto const streaming =
-        DataSystemBuilder::BackgroundSyncBuilder::Streaming()
-            .InitialReconnectDelay(delay);
+    auto const streaming_connection =
+        DataSystemBuilder::BackgroundSync::Streaming().InitialReconnectDelay(
+            delay);
 
-    builder.DataSystem().BackgroundSync(
-        DataSystemBuilder::BackgroundSyncBuilder()
-            .Source(streaming));
+    auto const background_sync =
+        DataSystemBuilder::BackgroundSync().Synchronizer(streaming_connection);
 
-    auto cfg = builder.Build();
+    builder.DataSystem().Method(background_sync);
+
+    const auto cfg = builder.Build();
 
     EXPECT_EQ(
         delay,

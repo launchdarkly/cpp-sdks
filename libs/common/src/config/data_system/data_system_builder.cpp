@@ -5,9 +5,9 @@ namespace launchdarkly::config::shared::builders {
 DataSystemBuilder<ServerSDK>::DataSystemBuilder()
     : config_(Defaults<ServerSDK>::DataSystemConfig()) {}
 
-DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::BackgroundSync(
-    BackgroundSyncBuilder builder) {
-    config_.system_ = builder.Build();
+DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Method(
+    BackgroundSync bg_sync) {
+    config_.system_ = bg_sync.Build();
     return *this;
 }
 

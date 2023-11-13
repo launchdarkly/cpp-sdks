@@ -18,11 +18,6 @@ AppInfoBuilder& ConfigBuilder::AppInfo() {
     return app_info_builder_;
 }
 
-ConfigBuilder& ConfigBuilder::Offline(bool offline) {
-    offline_ = offline;
-    return *this;
-}
-
 DataSystemBuilder& ConfigBuilder::DataSystem() {
     return data_system_builder_;
 }

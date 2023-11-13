@@ -29,16 +29,17 @@ struct BackgroundSyncBuilder<ServerSDK> {
 
     BackgroundSyncBuilder();
 
-    BackgroundSyncBuilder& PrimaryBootstrapper(BootstrapBuilder bootstrap);
-    BackgroundSyncBuilder& FallbackBootstrapper(BootstrapBuilder bootstrap);
-    BackgroundSyncBuilder& Source(Streaming source);
-    BackgroundSyncBuilder& Source(Polling source);
+    BootstrapBuilder& Bootstrapper();
+
+    BackgroundSyncBuilder& Synchronizer(Streaming source);
+    BackgroundSyncBuilder& Synchronizer(Polling source);
+
     BackgroundSyncBuilder& Destination(DataDestinationBuilder destination);
 
-    [[nodiscard]] config::shared::built::BackgroundSyncConfig<ServerSDK> Build()
-        const;
+    [[nodiscard]] built::BackgroundSyncConfig<ServerSDK> Build() const;
 
    private:
+    BootstrapBuilder bootstrap_builder_;
     built::BackgroundSyncConfig<ServerSDK> config_;
 
     //    /* Will be the default LaunchDarkly bootstrapper or a custom one

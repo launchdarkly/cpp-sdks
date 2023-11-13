@@ -1,17 +1,13 @@
 #include <launchdarkly/config/shared/builders/data_system/bootstrap_builder.hpp>
 
+#include "launchdarkly/config/shared/defaults.hpp"
+
 namespace launchdarkly::config::shared::builders {
 
-BootstrapBuilder::BootstrapBuilder() : bootstrapper_() {}
+BootstrapBuilder::BootstrapBuilder()
+    : config_(Defaults<ServerSDK>::BootstrapConfig()) {}
 
-BootstrapBuilder& BootstrapBuilder::Default() {
-    bootstrapper_ = DefaultBuilder();
-    return *this;
-}
-
-built::BootstrapConfig BootstrapBuilder::Build() const {
-    return {
-        // TODO
-    };
+std::optional<built::BootstrapConfig> BootstrapBuilder::Build() const {
+    return config_;
 }
 }  // namespace launchdarkly::config::shared::builders

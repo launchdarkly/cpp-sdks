@@ -2,28 +2,21 @@
 
 namespace launchdarkly::config::shared::builders {
 
-BackgroundSyncBuilder<ServerSDK>::BackgroundSyncBuilder() : config_() {}
+BackgroundSyncBuilder<ServerSDK>::BackgroundSyncBuilder()
+    : bootstrap_builder_(), config_() {}
 
-BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<
-    ServerSDK>::PrimaryBootstrapper(BootstrapBuilder bootstrap) {
-    config_.primary_bootstrapper_ = bootstrap.Build();
-    return *this;
+BootstrapBuilder& BackgroundSyncBuilder<ServerSDK>::Bootstrapper() {
+    return bootstrap_builder_;
 }
 
-BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<
-    ServerSDK>::FallbackBootstrapper(BootstrapBuilder bootstrap) {
-    config_.fallback_bootstrapper_ = bootstrap.Build();
-    return *this;
-}
-
-BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<ServerSDK>::Source(
-    Streaming source) {
+BackgroundSyncBuilder<ServerSDK>&
+BackgroundSyncBuilder<ServerSDK>::Synchronizer(Streaming source) {
     config_.source_.method = source.Build();
     return *this;
 }
 
-BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<ServerSDK>::Source(
-    Polling source) {
+BackgroundSyncBuilder<ServerSDK>&
+BackgroundSyncBuilder<ServerSDK>::Synchronizer(Polling source) {
     config_.source_.method = source.Build();
     return *this;
 }
@@ -34,9 +27,12 @@ BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<ServerSDK>::Destination(
     return *this;
 }
 
-[[nodiscard]] config::shared::built::BackgroundSyncConfig<ServerSDK>
+[[nodiscard]] built::BackgroundSyncConfig<ServerSDK>
 BackgroundSyncBuilder<ServerSDK>::Build() const {
-    return config_;
+    auto const bootstrap_cfg = bootstrap_builder_.Build();
+    auto copy = config_;
+    copy.bootstrap_ = bootstrap_cfg;
+    return copy;
 }
 
 }  // namespace launchdarkly::config::shared::builders

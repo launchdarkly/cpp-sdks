@@ -118,13 +118,6 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
 }
 
 LD_EXPORT(void)
-LDServerConfigBuilder_Offline(LDServerConfigBuilder b, bool offline) {
-    LD_ASSERT_NOT_NULL(b);
-
-    TO_BUILDER(b)->Offline(offline);
-}
-
-LD_EXPORT(void)
 LDServerConfigBuilder_Events_Enabled(LDServerConfigBuilder b, bool enabled) {
     LD_ASSERT_NOT_NULL(b);
 

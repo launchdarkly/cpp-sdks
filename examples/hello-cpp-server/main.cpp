@@ -16,6 +16,8 @@
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
 using namespace launchdarkly;
+using namespace launchdarkly::server_side;
+
 int main() {
     if (!strlen(SDK_KEY)) {
         printf(
@@ -24,16 +26,16 @@ int main() {
         return 1;
     }
 
-    auto cfg_builder = server_side::ConfigBuilder(SDK_KEY);
+    auto cfg_builder = ConfigBuilder(SDK_KEY);
 
-    auto const streaming_source =
-        server_side::DataSourceBuilder::Streaming().InitialReconnectDelay(
+    auto const streaming_connection =
+        DataSourceBuilder::Streaming().InitialReconnectDelay(
             std::chrono::seconds(1));
 
-    auto const background_sync  =
-        server_side::BackgroundSyncBuilder().Source(streaming_source);
+    auto system =
+        DataSystemBuilder::BackgroundSync().Synchronizer(streaming_connection);
 
-    cfg_builder.DataSystem().BackgroundSync(background_sync);
+    cfg_builder.DataSystem().Method(system);
 
     auto config = cfg_builder.Build();
     if (!config) {
@@ -41,7 +43,7 @@ int main() {
         return 1;
     }
 
-    auto client = server_side::Client(std::move(*config));
+    auto client = Client(std::move(*config));
 
     auto start_result = client.StartAsync();
     auto status = start_result.wait_for(

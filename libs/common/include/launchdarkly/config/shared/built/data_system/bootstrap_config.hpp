@@ -4,5 +4,7 @@
 
 namespace launchdarkly::config::shared::built {
 
-struct BootstrapConfig {};
+struct BootstrapConfig {
+
+};
 }  // namespace launchdarkly::config::shared::built

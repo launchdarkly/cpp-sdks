@@ -32,18 +32,15 @@ class DataSystemBuilder<ClientSDK> {
 template <>
 class DataSystemBuilder<ServerSDK> {
    public:
-    using BackgroundSyncBuilder = BackgroundSyncBuilder<ServerSDK>;
-    //  using LazyLoadBuilder = LazyLoadBuilder<ServerSDK>;
-
     DataSystemBuilder();
+    using BackgroundSync = BackgroundSyncBuilder<ServerSDK>;
 
-    // DataSystemBuilder& LazyLoad(LazyLoadBuilder lazy_load);
-
-    DataSystemBuilder& BackgroundSync(BackgroundSyncBuilder background_sync);
+    DataSystemBuilder& Method(BackgroundSync bg_sync);
 
     [[nodiscard]] built::DataSystemConfig<ServerSDK> Build() const;
 
    private:
+
     built::DataSystemConfig<ServerSDK> config_;
 };
 

@@ -37,7 +37,9 @@ void StatusListenerFunction(LDServerDataSourceStatus status, void* user_data) {
 // will at least ensure 1.) Compilation, and 2.) Allow sanitizers to run.
 TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
-    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    // TODO: Disable the default datasource for the test, otherwise this will
+    // try to make a net conneciton.
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
@@ -66,7 +68,8 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
 TEST(ClientBindings, GetStatusOfOfflineClient) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
-    LDServerConfigBuilder_Offline(cfg_builder, true);
+    // TODO: Disable the default datasource for the test, otherwise this will
+    // try to make a net conneciton.
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);

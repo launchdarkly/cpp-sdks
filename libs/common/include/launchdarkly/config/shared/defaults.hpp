@@ -117,8 +117,7 @@ struct Defaults<ServerSDK> {
 
     // No bootstrap phase yet in server-sdk; instead full
     // sync is done when polling/streaming source initializes.
-    static auto PrimaryBootstrapConfig()
-        -> std::optional<built::BootstrapConfig> {
+    static auto BootstrapConfig() -> std::optional<built::BootstrapConfig> {
         return std::nullopt;
     }
 
@@ -128,11 +127,9 @@ struct Defaults<ServerSDK> {
         return std::nullopt;
     }
 
-    static auto DataSystemConfig()
-        -> built::DataSystemConfig<ServerSDK> {
+    static auto DataSystemConfig() -> built::DataSystemConfig<ServerSDK> {
         return {shared::built::BackgroundSyncConfig<ServerSDK>{
-            PrimaryBootstrapConfig(),
-            std::nullopt,
+            BootstrapConfig(),
             DataSourceConfig(),
             DataDestinationConfig(),
         }};

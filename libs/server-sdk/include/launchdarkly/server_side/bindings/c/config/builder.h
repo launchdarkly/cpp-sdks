@@ -84,15 +84,6 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
                                       char const* app_version);
 
 /**
- * Enables or disables "Offline" mode. True means
- * Offline mode is enabled.
- * @param b Client config builder. Must not be NULL.
- * @param offline True if offline.
- */
-LD_EXPORT(void)
-LDServerConfigBuilder_Offline(LDServerConfigBuilder b, bool offline);
-
-/**
  * Specify if event-sending should be enabled or not. By default,
  * events are enabled.
  * @param b Client config builder. Must not be NULL.
