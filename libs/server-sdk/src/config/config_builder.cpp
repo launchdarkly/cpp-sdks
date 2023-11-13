@@ -52,7 +52,7 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
 
     std::optional<std::string> app_tag = app_info_builder_.Build();
 
-    auto data_source_config = data_source_builder_.Build();
+    auto data_system_config = data_system_builder_.Build();
 
     auto http_properties = http_properties_builder_.Build();
 
@@ -65,7 +65,7 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
             *endpoints_config,
             *events_config,
             app_tag,
-            std::move(data_source_config),
+            std::move(data_system_config),
             std::move(http_properties)};
 }
 

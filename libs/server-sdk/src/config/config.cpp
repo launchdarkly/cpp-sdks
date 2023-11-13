@@ -8,7 +8,7 @@ Config::Config(std::string sdk_key,
                config::shared::built::ServiceEndpoints service_endpoints,
                config::shared::built::Events events,
                std::optional<std::string> application_tag,
-               config::shared::built::DataSourceConfig<SDK> data_source_config,
+               config::shared::built::DataSystemConfig<SDK> data_system_config,
                config::shared::built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
@@ -16,7 +16,7 @@ Config::Config(std::string sdk_key,
       service_endpoints_(std::move(service_endpoints)),
       events_(std::move(events)),
       application_tag_(std::move(application_tag)),
-      data_source_config_(std::move(data_source_config)),
+      data_system_config_(std::move(data_system_config)),
       http_properties_(std::move(http_properties)) {}
 
 std::string const& Config::SdkKey() const {
@@ -36,9 +36,9 @@ std::optional<std::string> const& Config::ApplicationTag() const {
     return application_tag_;
 }
 
-config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
-Config::DataSourceConfig() const {
-    return data_source_config_;
+config::shared::built::DataSystemConfig<config::shared::ServerSDK> const&
+Config::DataSystemConfig() const {
+    return data_system_config_;
 }
 
 config::shared::built::HttpProperties const& Config::HttpProperties() const {

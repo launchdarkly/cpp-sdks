@@ -27,17 +27,24 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
 }
 
 TEST_F(ConfigBuilderTest,
-       DefaultConstruction_ServerConfig_UsesDefaulDataSourceConfig) {
+       DefaultConstruction_ServerConfig_UsesDefaulDataSystemConfig) {
     using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
+    auto background_sync_config =
+        std::get<launchdarkly::config::shared::built::BackgroundSyncConfig<
+            launchdarkly::config::shared::ServerSDK>>(
+            cfg->DataSystemConfig().system_);
+
+    auto streaming_config =
+        std::get <launchdarkly::config::shared::built::StreamingConfig<
+                       launchdarkly::config::shared::ServerSDK>>(
+                       background_sync_config.source_.method);
+
     // Should be streaming with a 1 second initial retry;
     EXPECT_EQ(std::chrono::milliseconds{1000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
+              streaming_config.initial_reconnect_delay);
 }
 
 TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSystem) {

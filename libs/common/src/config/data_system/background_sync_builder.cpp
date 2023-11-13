@@ -17,8 +17,14 @@ BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<
 }
 
 BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<ServerSDK>::Source(
-    DataSourceBuilder source) {
-    config_.source_ = source.Build();
+    Streaming source) {
+    config_.source_.method = source.Build();
+    return *this;
+}
+
+BackgroundSyncBuilder<ServerSDK>& BackgroundSyncBuilder<ServerSDK>::Source(
+    Polling source) {
+    config_.source_.method = source.Build();
     return *this;
 }
 
