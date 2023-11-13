@@ -1,12 +1,9 @@
 #pragma once
 
-#include <launchdarkly/config/shared/builders/endpoints_builder.hpp>
-#include <launchdarkly/config/shared/builders/events_builder.hpp>
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/logging.hpp>
-#include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 

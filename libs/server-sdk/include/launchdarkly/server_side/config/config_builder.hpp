@@ -1,11 +1,10 @@
 #pragma once
 #include <launchdarkly/config/server_builders.hpp>
+#include <launchdarkly/config/shared/builders/app_info_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_system/data_systems_builder.hpp>
+#include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
+#include <launchdarkly/config/shared/builders/logging_builder.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
-#include "launchdarkly/config/shared/builders/app_info_builder.hpp"
-#include "launchdarkly/config/shared/builders/data_source_builder.hpp"
-#include "launchdarkly/config/shared/builders/http_properties_builder.hpp"
-#include "launchdarkly/config/shared/builders/logging_builder.hpp"
-#include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::server_side {
 
@@ -51,12 +50,12 @@ class ConfigBuilder {
     EventsBuilder& Events();
 
     /**
-     * Sets the configuration of the component that receives feature flag data
-     * from LaunchDarkly.
-     * @param builder A DataSourceConfig builder.
-     * @return Reference to a DataSourceBuilder.
+     * Sets the configuration of the component that receives and stores feature
+     * flag data from LaunchDarkly.
+     * @param builder A DataSystemBuilder.
+     * @return Reference to a DataSystemBuilder.
      */
-    DataSourceBuilder& DataSource();
+    DataSystemBuilder& DataSource();
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -86,7 +85,7 @@ class ConfigBuilder {
     EndpointsBuilder service_endpoints_builder_;
     AppInfoBuilder app_info_builder_;
     EventsBuilder events_builder_;
-    DataSourceBuilder data_source_builder_;
+    DataSystemBuilder data_system_builder_;
     HttpPropertiesBuilder http_properties_builder_;
     LoggingBuilder logging_config_builder_;
 };

@@ -164,29 +164,29 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
     TO_BUILDER(b)->Events().PrivateAttribute(attribute_reference);
 }
 
-LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodStream(
-    LDServerConfigBuilder b,
-    LDServerDataSourceStreamBuilder stream_builder) {
-    LD_ASSERT_NOT_NULL(b);
-    LD_ASSERT_NOT_NULL(stream_builder);
-
-    DataSourceBuilder::Streaming* sb = TO_STREAM_BUILDER(stream_builder);
-    TO_BUILDER(b)->DataSource().Method(*sb);
-    LDServerDataSourceStreamBuilder_Free(stream_builder);
-}
-
-LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodPoll(
-    LDServerConfigBuilder b,
-    LDServerDataSourcePollBuilder poll_builder) {
-    LD_ASSERT_NOT_NULL(b);
-    LD_ASSERT_NOT_NULL(poll_builder);
-
-    DataSourceBuilder::Polling* pb = TO_POLL_BUILDER(poll_builder);
-    TO_BUILDER(b)->DataSource().Method(*pb);
-    LDServerDataSourcePollBuilder_Free(poll_builder);
-}
+// LD_EXPORT(void)
+// LDServerConfigBuilder_DataSource_MethodStream(
+//     LDServerConfigBuilder b,
+//     LDServerDataSourceStreamBuilder stream_builder) {
+//     LD_ASSERT_NOT_NULL(b);
+//     LD_ASSERT_NOT_NULL(stream_builder);
+//
+//     DataSourceBuilder::Streaming* sb = TO_STREAM_BUILDER(stream_builder);
+//     TO_BUILDER(b)->DataSource().Method(*sb);
+//     LDServerDataSourceStreamBuilder_Free(stream_builder);
+// }
+//
+// LD_EXPORT(void)
+// LDServerConfigBuilder_DataSource_MethodPoll(
+//     LDServerConfigBuilder b,
+//     LDServerDataSourcePollBuilder poll_builder) {
+//     LD_ASSERT_NOT_NULL(b);
+//     LD_ASSERT_NOT_NULL(poll_builder);
+//
+//     DataSourceBuilder::Polling* pb = TO_POLL_BUILDER(poll_builder);
+//     TO_BUILDER(b)->DataSource().Method(*pb);
+//     LDServerDataSourcePollBuilder_Free(poll_builder);
+// }
 
 LD_EXPORT(LDServerDataSourceStreamBuilder)
 LDServerDataSourceStreamBuilder_New() {
