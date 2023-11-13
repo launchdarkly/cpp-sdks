@@ -4,6 +4,7 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
+#include <data_systems/background_sync/sources/streaming/streaming_data_source.hpp>
 #include <map>
 
 using namespace launchdarkly;
@@ -39,13 +40,21 @@ TEST_F(ConfigBuilderTest,
                   .initial_reconnect_delay);
 }
 
-TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
+TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSystem) {
     using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
-    builder.DataSource().Method(
-        DataSourceBuilder::Streaming().InitialReconnectDelay(
-            std::chrono::milliseconds{5000}));
+    auto const streaming =
+        DataSystemBuilder::BackgroundSyncBuilder::Streaming()
+            .InitialReconnectDelay(std::chrono::milliseconds{5000});
+
+    auto const mirror =
+        DataSystemBuilder::BackgroundSyncBuilder::DataDestinationBuilder();
+
+    builder.DataSystem().BackgroundSync(
+        DataSystemBuilder::BackgroundSyncBuilder()
+            .Source(streaming)
+            .Destination(mirror));
 
     auto cfg = builder.Build();
 
