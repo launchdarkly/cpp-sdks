@@ -40,7 +40,7 @@ runs:
       shell: bash
       run: |
         brew install boost
-        echo "BOOST_ROOT=$(boost --prefix boost@1.82)" >> $GITHUB_OUTPUT
+        echo "BOOST_ROOT=$(brew --prefix boost)" >> $GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
