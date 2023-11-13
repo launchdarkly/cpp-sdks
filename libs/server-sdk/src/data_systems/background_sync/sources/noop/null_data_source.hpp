@@ -14,8 +14,7 @@ class NullDataSource : public data_interfaces::IPushSource {
         boost::asio::any_io_executor exec,
         data_components::DataSourceStatusManager& status_manager);
 
-    void Init(std::optional<data_model::SDKDataSet> initial_data,
-              data_interfaces::IDestination& destination) override;
+    void Init(std::optional<data_model::SDKDataSet> initial_data) override;
     void Start() override;
     void ShutdownAsync(std::function<void()>) override;
 

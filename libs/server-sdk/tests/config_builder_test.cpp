@@ -38,38 +38,40 @@ TEST_F(ConfigBuilderTest,
             cfg->DataSystemConfig().system_);
 
     auto streaming_config =
-        std::get <launchdarkly::config::shared::built::StreamingConfig<
-                       launchdarkly::config::shared::ServerSDK>>(
-                       background_sync_config.source_.method);
+        std::get<launchdarkly::config::shared::built::StreamingConfig<
+            launchdarkly::config::shared::ServerSDK>>(
+            background_sync_config.source_.method);
 
-    // Should be streaming with a 1 second initial retry;
+    // Should be streaming with a 1 second initial delay.
     EXPECT_EQ(std::chrono::milliseconds{1000},
               streaming_config.initial_reconnect_delay);
 }
 
-TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSystem) {
+TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
     using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
+    auto const delay = std::chrono::seconds{5};
+
     auto const streaming =
         DataSystemBuilder::BackgroundSyncBuilder::Streaming()
-            .InitialReconnectDelay(std::chrono::milliseconds{5000});
-
-    auto const mirror =
-        DataSystemBuilder::BackgroundSyncBuilder::DataDestinationBuilder();
+            .InitialReconnectDelay(delay);
 
     builder.DataSystem().BackgroundSync(
         DataSystemBuilder::BackgroundSyncBuilder()
-            .Source(streaming)
-            .Destination(mirror));
+            .Source(streaming));
 
     auto cfg = builder.Build();
 
-    EXPECT_EQ(std::chrono::milliseconds{5000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
+    EXPECT_EQ(
+        delay,
+        std::get<launchdarkly::config::shared::built::StreamingConfig<
+            launchdarkly::config::shared::ServerSDK>>(
+            std::get<launchdarkly::config::shared::built::BackgroundSyncConfig<
+                launchdarkly::config::shared::ServerSDK>>(
+                cfg->DataSystemConfig().system_)
+                .source_.method)
+            .initial_reconnect_delay);
 }
 
 TEST_F(ConfigBuilderTest,

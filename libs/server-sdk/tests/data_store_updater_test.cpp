@@ -1,19 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "data_store/data_store_updater.hpp"
-#include "data_store/descriptors.hpp"
-#include "data_store/memory_store.hpp"
-
-using launchdarkly::data_model::SDKDataSet;
-using launchdarkly::server_side::data_store::ChangeNotifierDestination;
-using launchdarkly::server_side::data_store::FlagDescriptor;
-using launchdarkly::server_side::data_store::IDataStore;
-using launchdarkly::server_side::data_store::MemoryStore;
-using launchdarkly::server_side::data_store::SegmentDescriptor;
+#include <data_components/change_notifier/change_notifier_destination.hpp>
+#include <data_components/memory_store/memory_store.hpp>
+#include <launchdarkly/data_model/descriptors.hpp>
 
 using launchdarkly::Value;
-using launchdarkly::data_model::Flag;
-using launchdarkly::data_model::Segment;
+
+using namespace launchdarkly::data_model;
+using namespace launchdarkly::server_side::data_components;
 
 TEST(ChangeNotifierDestinationTest, DoesNotInitializeStoreUntilInit) {
     MemoryStore store;

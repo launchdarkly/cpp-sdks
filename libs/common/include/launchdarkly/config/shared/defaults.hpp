@@ -83,13 +83,13 @@ template <>
 struct Defaults<ServerSDK> {
     static bool Offline() { return Defaults<AnySDK>::Offline(); }
 
-    static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
+    static auto ServiceEndpoints() -> built::ServiceEndpoints {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",
                 "https://events.launchdarkly.com"};
     }
 
-    static auto Events() -> shared::built::Events {
+    static auto Events() -> built::Events {
         return {true,
                 10000,
                 std::chrono::seconds(5),
@@ -101,32 +101,49 @@ struct Defaults<ServerSDK> {
                 1000};
     }
 
-    static auto HttpProperties() -> shared::built::HttpProperties {
+    static auto HttpProperties() -> built::HttpProperties {
         return {std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
-    static auto StreamingConfig() -> shared::built::StreamingConfig<ServerSDK> {
+    static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {
         return {std::chrono::seconds{1}, "/all"};
     }
 
-    static auto DataSourceConfig()
-        -> shared::built::DataSourceConfig<ServerSDK> {
-        return {Defaults<ServerSDK>::StreamingConfig()};
+    static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {
+        return {StreamingConfig()};
+    }
+
+    // No bootstrap phase yet in server-sdk; instead full
+    // sync is done when polling/streaming source initializes.
+    static auto PrimaryBootstrapConfig()
+        -> std::optional<built::BootstrapConfig> {
+        return std::nullopt;
+    }
+
+    // Data isn't mirrored anywhere by default.
+    static auto DataDestinationConfig()
+        -> std::optional<built::DataDestinationConfig<ServerSDK>> {
+        return std::nullopt;
     }
 
     static auto DataSystemConfig()
-        -> shared::built::DataSystemConfig<ServerSDK> {
-        return {shared::built::BackgroundSyncConfig<ServerSDK>{}};
+        -> built::DataSystemConfig<ServerSDK> {
+        return {shared::built::BackgroundSyncConfig<ServerSDK>{
+            PrimaryBootstrapConfig(),
+            std::nullopt,
+            DataSourceConfig(),
+            DataDestinationConfig(),
+        }};
     }
 
-    static auto PollingConfig() -> shared::built::PollingConfig<ServerSDK> {
+    static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
         return {std::chrono::seconds{30}, "/sdk/latest-all",
                 std::chrono::seconds{30}};
     }
 
-    static auto PersistenceConfig() -> shared::built::Persistence<ServerSDK> {
+    static auto PersistenceConfig() -> built::Persistence<ServerSDK> {
         return {};
     }
 };

@@ -75,9 +75,12 @@ static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
     // TODO: Check if config is a persistent Store (so, if 'method' is
     // Persistent). If so, return a data_sources::PullModeSource instead.
 
+    auto const bg_sync_config = std::get<config::shared::built::BackgroundSyncConfig<ServerSDK>>(
+        config.DataSystemConfig().system_);
+
     return std::make_unique<data_systems::BackgroundSync>(
-        config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, status_manager, logger);
+        config.ServiceEndpoints(), bg_sync_config, data_source_properties,
+        executor, status_manager, logger);
 }
 
 static Logger MakeLogger(config::shared::built::Logging const& config) {

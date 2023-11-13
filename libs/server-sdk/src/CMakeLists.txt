@@ -37,6 +37,7 @@ target_sources(${LIBNAME}
         data_systems/background_sync/background_sync_system.cpp
         data_systems/background_sync/sources/streaming/event_handler.cpp
         data_systems/lazy_load/lazy_load_system.cpp
+        data_source_status.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

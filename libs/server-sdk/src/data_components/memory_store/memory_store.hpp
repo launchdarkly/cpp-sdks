@@ -10,8 +10,8 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class MemoryStore : public data_interfaces::IStore,
-                    public data_interfaces::IDestination {
+class MemoryStore final : public data_interfaces::IStore,
+                          public data_interfaces::IDestination {
    public:
     [[nodiscard]] std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;

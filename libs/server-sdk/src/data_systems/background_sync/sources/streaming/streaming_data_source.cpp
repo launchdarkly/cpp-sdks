@@ -28,6 +28,11 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
     }
 }
 
+std::string const& StreamingDataSource::Identity() const {
+    static std::string const identity = "streaming data source";
+    return identity;
+}
+
 StreamingDataSource::StreamingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
@@ -46,8 +51,7 @@ StreamingDataSource::StreamingDataSource(
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
 void StreamingDataSource::Init(
-    std::optional<data_model::SDKDataSet> initial_data,
-    data_interfaces::IDestination& destination) {
+    std::optional<data_model::SDKDataSet> initial_data) {
     // TODO: implement
 }
 

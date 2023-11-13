@@ -7,6 +7,7 @@
 #include "../../data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
+#include <launchdarkly/config/shared/built/data_system/background_sync_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
@@ -29,8 +30,8 @@ namespace launchdarkly::server_side::data_systems {
 class BackgroundSync : public data_interfaces::ISystem {
    public:
     BackgroundSync(config::shared::built::ServiceEndpoints const& endpoints,
-                   config::shared::built::DataSourceConfig<
-                       config::shared::ServerSDK> const& data_source_config,
+                   config::shared::built::BackgroundSyncConfig<
+                       config::shared::ServerSDK> const& background_sync_config,
                    config::shared::built::HttpProperties http_properties,
                    boost::asio::any_io_executor ioc,
                    data_components::DataSourceStatusManager& status_manager,

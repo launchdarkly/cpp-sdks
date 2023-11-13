@@ -14,8 +14,7 @@ namespace launchdarkly::server_side::data_interfaces {
 
 class IPushSource {
    public:
-    virtual void Init(std::optional<data_model::SDKDataSet> initial_data,
-                      IDestination& destination) = 0;
+    virtual void Init(std::optional<data_model::SDKDataSet> initial_data) = 0;
     virtual void Start() = 0;
     virtual void ShutdownAsync(std::function<void()>) = 0;
 

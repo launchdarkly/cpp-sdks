@@ -12,8 +12,12 @@ void NullDataSource::ShutdownAsync(std::function<void()> complete) {
     boost::asio::post(exec_, complete);
 }
 
-void NullDataSource::Init(std::optional<data_model::SDKDataSet> initial_data,
-                          data_interfaces::IDestination& destination) {}
+void NullDataSource::Init(std::optional<data_model::SDKDataSet> initial_data) {}
+
+std::string const& NullDataSource::Identity() const {
+    static std::string const identity = "no-op data source";
+    return identity;
+}
 
 NullDataSource::NullDataSource(
     boost::asio::any_io_executor exec,

@@ -40,6 +40,11 @@ static network::HttpRequest MakeRequest(
     return {url.value_or(""), method, builder.Build(), body};
 }
 
+std::string const& PollingDataSource::Identity() const {
+    static std::string const identity = "polling data source";
+    return identity;
+}
+
 PollingDataSource::PollingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
     config::shared::built::PollingConfig<config::shared::ServerSDK> const&
@@ -69,8 +74,8 @@ PollingDataSource::PollingDataSource(
     }
 }
 
-void PollingDataSource::Init(std::optional<data_model::SDKDataSet> initial_data,
-                             data_interfaces::IDestination& destination) {
+void PollingDataSource::Init(
+    std::optional<data_model::SDKDataSet> initial_data) {
     // TODO: implement
 }
 void PollingDataSource::DoPoll() {

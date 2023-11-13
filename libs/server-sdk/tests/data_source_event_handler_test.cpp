@@ -1,17 +1,18 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/logging/null_logger.hpp>
-#include "data_sources/data_source_event_handler.hpp"
-#include "data_store/memory_store.hpp"
+
+#include <data_components/memory_store/memory_store.hpp>
+#include <data_systems/background_sync/sources/streaming/event_handler.hpp>
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
-using namespace launchdarkly::server_side::data;
-using namespace launchdarkly::server_side::data_store;
+using namespace server_side::data_components;
+using namespace server_side::data_systems;
 
 TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
     auto logger = launchdarkly::logging::NullLogger();
-    auto store = std::make_shared<MemoryStore>();
+    auto store = std::make_shared<data_components::MemoryStore>();
     DataSourceStatusManager manager;
     DataSourceEventHandler event_handler(*store, logger, manager);
 

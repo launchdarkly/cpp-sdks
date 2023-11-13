@@ -18,6 +18,7 @@ using EndpointsBuilder = config::shared::builders::EndpointsBuilder<SDK>;
 using EventsBuilder = config::shared::builders::EventsBuilder<SDK>;
 using HttpPropertiesBuilder =
     config::shared::builders::HttpPropertiesBuilder<SDK>;
+using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
 using DataSystemBuilder = config::shared::builders::DataSystemBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 

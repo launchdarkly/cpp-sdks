@@ -30,8 +30,7 @@ class PollingDataSource
         data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
-    void Init(std::optional<data_model::SDKDataSet> initial_data,
-              data_interfaces::IDestination& destination) override;
+    void Init(std::optional<data_model::SDKDataSet> initial_data) override;
     void Start() override;
     void ShutdownAsync(std::function<void()> completion) override;
 

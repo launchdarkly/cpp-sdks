@@ -21,10 +21,10 @@ struct BackgroundSyncConfig<ClientSDK> {};
 
 template <>
 struct BackgroundSyncConfig<ServerSDK> {
-    BootstrapConfig primary_bootstrapper_;
+    std::optional<BootstrapConfig> primary_bootstrapper_;
     std::optional<BootstrapConfig> fallback_bootstrapper_;
     DataSourceConfig<ServerSDK> source_;
-    DataDestinationConfig<ServerSDK> destination_;
+    std::optional<DataDestinationConfig<ServerSDK>> destination_;
 };
 
 }  // namespace launchdarkly::config::shared::built

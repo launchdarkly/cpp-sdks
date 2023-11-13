@@ -9,7 +9,8 @@ using namespace config::shared::built;
 
 BackgroundSync::BackgroundSync(
     ServiceEndpoints const& endpoints,
-    DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
+    BackgroundSyncConfig<config::shared::ServerSDK> const&
+        background_sync_config,
     HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager& status_manager,
@@ -32,7 +33,13 @@ BackgroundSync::BackgroundSync(
                     status_manager, logger);
             }
         },
-        data_source_config.method);
+        background_sync_config.source_.method);
+}
+
+void BackgroundSync::Initialize() {
+    // TODO: if there was any data from bootstrapping, then add it:
+    // synchronizer_->Init(data);
+    synchronizer_->Start();
 }
 
 std::string const& BackgroundSync::Identity() const {

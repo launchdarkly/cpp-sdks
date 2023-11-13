@@ -75,4 +75,10 @@ ChangeNotifierDestination::ChangeNotifierDestination(
     data_interfaces::IStore const& source)
     : sink_(sink), source_(source) {}
 
+std::string const& ChangeNotifierDestination::Identity() const {
+    static std::string const identity =
+        "change notifier for " + sink_.Identity();
+    return identity;
+}
+
 }  // namespace launchdarkly::server_side::data_components
