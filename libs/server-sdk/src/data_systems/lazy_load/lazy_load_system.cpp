@@ -17,8 +17,7 @@ LazyLoad::LazyLoad(
     : cache_() {}
 
 std::string const& LazyLoad::Identity() const {
-    // TODO: Obtain more specific info
-    static std::string id = "generic lazy-loader";
+    static std::string id = "lazy load via " + source_->Identity();
     return id;
 }
 

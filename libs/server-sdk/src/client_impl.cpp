@@ -68,7 +68,6 @@ static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
-
     if (config.DataSystemConfig().disabled) {
         return std::make_unique<data_systems::BackgroundSync>(executor,
                                                               status_manager);
@@ -147,6 +146,8 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "data system: " << data_system_->Identity();
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 

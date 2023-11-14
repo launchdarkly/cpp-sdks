@@ -6,7 +6,7 @@
 #include <iostream>
 
 // Set SDK_KEY to your LaunchDarkly SDK key.
-#define SDK_KEY ""
+#define SDK_KEY "foo"
 
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
@@ -37,9 +37,7 @@ int main() {
 
     cfg_builder.DataSystem().Method(system);
 
-    cfg_builder.
-
-        auto config = cfg_builder.Build();
+    auto config = cfg_builder.Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;

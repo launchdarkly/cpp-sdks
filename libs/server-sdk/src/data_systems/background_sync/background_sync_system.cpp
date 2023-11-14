@@ -51,8 +51,7 @@ void BackgroundSync::Initialize() {
 }
 
 std::string const& BackgroundSync::Identity() const {
-    // TODO: Obtain more specific info
-    static std::string id = "generic background-sync";
+    static std::string id = "background sync via " + synchronizer_->Identity();
     return id;
 }
 
