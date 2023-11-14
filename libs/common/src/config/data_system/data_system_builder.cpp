@@ -1,4 +1,4 @@
-#include <launchdarkly/config/shared/builders/data_system/data_systems_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_system/data_system_builder.hpp>
 
 namespace launchdarkly::config::shared::builders {
 
@@ -8,6 +8,12 @@ DataSystemBuilder<ServerSDK>::DataSystemBuilder()
 DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Method(
     BackgroundSync bg_sync) {
     config_.system_ = bg_sync.Build();
+    return *this;
+}
+
+DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Disabled(
+    bool const disabled) {
+    config_.disabled = disabled;
     return *this;
 }
 

@@ -35,12 +35,13 @@ class DataSystemBuilder<ServerSDK> {
     DataSystemBuilder();
     using BackgroundSync = BackgroundSyncBuilder<ServerSDK>;
 
+    DataSystemBuilder& Disabled(bool disabled);
+
     DataSystemBuilder& Method(BackgroundSync bg_sync);
 
     [[nodiscard]] built::DataSystemConfig<ServerSDK> Build() const;
 
    private:
-
     built::DataSystemConfig<ServerSDK> config_;
 };
 

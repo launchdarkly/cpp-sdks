@@ -5,7 +5,6 @@
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
 #include <data_systems/background_sync/sources/streaming/streaming_data_source.hpp>
-#include <map>
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
@@ -14,8 +13,8 @@ class ConfigBuilderTest
     : public ::testing::
           Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    protected:
-    launchdarkly::Logger logger;
-    ConfigBuilderTest() : logger(launchdarkly::logging::NullLogger()) {}
+    Logger logger;
+    ConfigBuilderTest() : logger(logging::NullLogger()) {}
 };
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
@@ -62,7 +61,7 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
 
     builder.DataSystem().Method(background_sync);
 
-    const auto cfg = builder.Build();
+    auto const cfg = builder.Build();
 
     EXPECT_EQ(
         delay,
@@ -73,6 +72,18 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
                 cfg->DataSystemConfig().system_)
                 .source_.method)
             .initial_reconnect_delay);
+}
+
+TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
+    using namespace launchdarkly::server_side;
+    ConfigBuilder builder("sdk-123");
+
+    auto const cfg1 = builder.Build();
+    EXPECT_FALSE(cfg1->DataSystemConfig().disabled);
+
+    builder.DataSystem().Disabled(true);
+    auto const cfg2 = builder.Build();
+    EXPECT_TRUE(cfg2->DataSystemConfig().disabled);
 }
 
 TEST_F(ConfigBuilderTest,

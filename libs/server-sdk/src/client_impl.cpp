@@ -68,15 +68,19 @@ static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
-    auto builder = HttpPropertiesBuilder(http_properties);
+
+    if (config.DataSystemConfig().disabled) {
+        return std::make_unique<data_systems::BackgroundSync>(executor,
+                                                              status_manager);
+    }
+
+    auto const builder = HttpPropertiesBuilder(http_properties);
 
     auto data_source_properties = builder.Build();
 
-    // TODO: Check if config is a persistent Store (so, if 'method' is
-    // Persistent). If so, return a data_sources::PullModeSource instead.
-
-    auto const bg_sync_config = std::get<config::shared::built::BackgroundSyncConfig<ServerSDK>>(
-        config.DataSystemConfig().system_);
+    auto const bg_sync_config =
+        std::get<config::shared::built::BackgroundSyncConfig<ServerSDK>>(
+            config.DataSystemConfig().system_);
 
     return std::make_unique<data_systems::BackgroundSync>(
         config.ServiceEndpoints(), bg_sync_config, data_source_properties,

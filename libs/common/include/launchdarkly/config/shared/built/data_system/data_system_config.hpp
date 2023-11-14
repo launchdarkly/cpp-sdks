@@ -19,6 +19,7 @@ struct DataSystemConfig<ClientSDK> {};
 
 template <>
 struct DataSystemConfig<ServerSDK> {
+    bool disabled;
     std::variant<
         /*LazyLoadConfig<ServerSDK>, */ BackgroundSyncConfig<ServerSDK>>
         system_;

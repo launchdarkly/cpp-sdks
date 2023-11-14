@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
-#include "../../../../data_interfaces/destination/idestination.hpp"
 #include "../../../../data_interfaces/source/ipush_source.hpp"
 
 #include <boost/asio/any_io_executor.hpp>

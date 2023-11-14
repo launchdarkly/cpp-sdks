@@ -37,6 +37,12 @@ class BackgroundSync : public data_interfaces::ISystem {
                    data_components::DataSourceStatusManager& status_manager,
                    Logger const& logger);
 
+    /**
+     * @brief Constructs a BackgroundSync without a data source.
+     */
+    BackgroundSync(boost::asio::any_io_executor ioc,
+                   data_components::DataSourceStatusManager& status_manager);
+
     BackgroundSync(BackgroundSync const& item) = delete;
     BackgroundSync(BackgroundSync&& item) = delete;
     BackgroundSync& operator=(BackgroundSync const&) = delete;

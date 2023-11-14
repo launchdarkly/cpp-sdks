@@ -1,5 +1,6 @@
 #include "background_sync_system.hpp"
 
+#include "sources/noop/null_data_source.hpp"
 #include "sources/polling/polling_data_source.hpp"
 #include "sources/streaming/streaming_data_source.hpp"
 
@@ -35,6 +36,13 @@ BackgroundSync::BackgroundSync(
         },
         background_sync_config.source_.method);
 }
+
+BackgroundSync::BackgroundSync(
+    boost::asio::any_io_executor ioc,
+    data_components::DataSourceStatusManager& status_manager)
+    : store_(),
+      change_notifier_(store_, store_),
+      synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
 
 void BackgroundSync::Initialize() {
     // TODO: if there was any data from bootstrapping, then add it:

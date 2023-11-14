@@ -37,7 +37,9 @@ int main() {
 
     cfg_builder.DataSystem().Method(system);
 
-    auto config = cfg_builder.Build();
+    cfg_builder.
+
+        auto config = cfg_builder.Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;

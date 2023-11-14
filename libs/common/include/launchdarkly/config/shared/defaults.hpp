@@ -128,11 +128,11 @@ struct Defaults<ServerSDK> {
     }
 
     static auto DataSystemConfig() -> built::DataSystemConfig<ServerSDK> {
-        return {shared::built::BackgroundSyncConfig<ServerSDK>{
-            BootstrapConfig(),
-            DataSourceConfig(),
-            DataDestinationConfig(),
-        }};
+        return {false, shared::built::BackgroundSyncConfig<ServerSDK>{
+                           BootstrapConfig(),
+                           DataSourceConfig(),
+                           DataDestinationConfig(),
+                       }};
     }
 
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
