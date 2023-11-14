@@ -8,25 +8,63 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class JsonSource : public data_interfaces::IPullSource {
+class JsonSource final : public data_interfaces::IPullSource {
    public:
-    JsonSource(data_interfaces::ISerializedDataPullSource& json_source);
+    explicit JsonSource(
+        data_interfaces::ISerializedDataPullSource& json_source);
 
-    [[nodiscard]] virtual data_model::FlagDescriptor GetFlag(
+    [[nodiscard]] ItemResult<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
 
-    [[nodiscard]] virtual data_model::SegmentDescriptor GetSegment(
+    [[nodiscard]] ItemResult<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const override;
 
-    [[nodiscard]] virtual std::unordered_map<std::string,
-                                             data_model::FlagDescriptor>
+    [[nodiscard]] std::unordered_map<std::string, data_model::FlagDescriptor>
     AllFlags() const override;
-    [[nodiscard]] virtual std::unordered_map<std::string,
-                                             data_model::SegmentDescriptor>
+    [[nodiscard]] std::unordered_map<std::string, data_model::SegmentDescriptor>
     AllSegments() const override;
-    [[nodiscard]] virtual std::string const& Identity() const override;
+    [[nodiscard]] std::string const& Identity() const override;
+
+    [[nodiscard]] bool Initialized() const override;
 
    private:
+    template <typename DataModel, typename DataKind>
+    ItemResult<data_model::ItemDescriptor<DataModel>> Deserialize(
+        DataKind const& kind,
+        std::string const& key) const {
+        auto result = source_.Get(kind, key);
+
+        if (!result) {
+            /* the actual fetch failed */
+            return tl::make_unexpected(result.error().message);
+        }
+
+        if (!result->serializedItem) {
+            /* the fetch succeeded, but the item wasn't found */
+            return std::nullopt;
+        }
+
+        auto const boost_json_val = boost::json::parse(*result->serializedItem);
+        auto flag = boost::json::value_to<
+            tl::expected<std::optional<DataModel>, JsonError>>(boost_json_val);
+
+        if (!flag) {
+            /* flag couldn't be deserialized from the JSON string */
+            return tl::make_unexpected(ErrorToString(flag.error()));
+        }
+
+        std::optional<DataModel> maybe_flag = flag->value();
+
+        if (!maybe_flag) {
+            /* JSON was valid, but the value is 'null'
+             * TODO: will this ever happen?
+             */
+            return tl::make_unexpected("data was null");
+        }
+
+        return data_model::ItemDescriptor<DataModel>(std::move(*maybe_flag));
+    }
+
     FlagKind const flag_kind_;
     FlagKind const segment_kind_;
     data_interfaces::ISerializedDataPullSource& source_;

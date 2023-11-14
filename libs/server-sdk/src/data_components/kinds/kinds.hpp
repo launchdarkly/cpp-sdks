@@ -1,8 +1,10 @@
+#pragma once
+
 #include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
-class SegmentKind : public integrations::IPersistentKind {
+class SegmentKind final : public integrations::IPersistentKind {
    public:
     std::string const& Namespace() const override;
     std::uint64_t Version(std::string const& data) const override;
@@ -13,7 +15,7 @@ class SegmentKind : public integrations::IPersistentKind {
     static inline std::string const namespace_ = "segments";
 };
 
-class FlagKind : public integrations::IPersistentKind {
+class FlagKind final : public integrations::IPersistentKind {
    public:
     std::string const& Namespace() const override;
     std::uint64_t Version(std::string const& data) const override;

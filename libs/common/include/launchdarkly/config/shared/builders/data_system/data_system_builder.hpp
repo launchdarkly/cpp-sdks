@@ -1,6 +1,8 @@
 #pragma once
 
 #include <launchdarkly/config/shared/builders/data_system/background_sync_builder.hpp>
+#include <launchdarkly/config/shared/builders/data_system/lazy_load_builder.hpp>
+
 #include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
 
 #include <launchdarkly/config/shared/builders/data_system/bootstrap_builder.hpp>
@@ -34,10 +36,12 @@ class DataSystemBuilder<ServerSDK> {
    public:
     DataSystemBuilder();
     using BackgroundSync = BackgroundSyncBuilder<ServerSDK>;
+    using LazyLoad = LazyLoadBuilder;
 
     DataSystemBuilder& Disabled(bool disabled);
 
     DataSystemBuilder& Method(BackgroundSync bg_sync);
+    DataSystemBuilder& Method(LazyLoad lazy_load);
 
     [[nodiscard]] built::DataSystemConfig<ServerSDK> Build() const;
 

@@ -40,8 +40,7 @@ class ISerializedDataPullSource {
     };
 
     using GetResult =
-        tl::expected<std::optional<integrations::SerializedItemDescriptor>,
-                     Error>;
+        tl::expected<integrations::SerializedItemDescriptor, Error>;
 
     using AllResult = tl::expected<
         std::unordered_map<std::string, integrations::SerializedItemDescriptor>,

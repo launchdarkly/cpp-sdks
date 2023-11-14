@@ -12,7 +12,10 @@ namespace launchdarkly::server_side::data_interfaces {
 
 class IPullSource {
    public:
-    [[nodiscard]] virtual data_model::FlagDescriptor GetFlag(
+    template <typename T>
+    using ItemResult = tl::expected<std::optional<T>, std::string>;
+
+    [[nodiscard]] virtual ItemResult<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
     /**
@@ -22,7 +25,7 @@ class IPullSource {
      * @return Returns a shared_ptr to the SegmentDescriptor, or a nullptr if
      * there is no such segment, or the segment was deleted.
      */
-    [[nodiscard]] virtual data_model::SegmentDescriptor GetSegment(
+    [[nodiscard]] virtual ItemResult<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const = 0;
 
     /**
@@ -44,6 +47,8 @@ class IPullSource {
     AllSegments() const = 0;
 
     [[nodiscard]] virtual std::string const& Identity() const = 0;
+
+    [[nodiscard]] virtual bool Initialized() const = 0;
 
     virtual ~IPullSource() = default;
     IPullSource(IPullSource const& item) = delete;

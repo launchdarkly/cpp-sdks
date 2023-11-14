@@ -3,8 +3,10 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
+#include "../../data_components/serialization_adapters/json_pull_source.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/iserialized_pull_source.hpp"
+
 #include "../../data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
@@ -29,13 +31,7 @@ namespace launchdarkly::server_side::data_systems {
  */
 class LazyLoad : public data_interfaces::ISystem {
    public:
-    LazyLoad(config::shared::built::ServiceEndpoints const& endpoints,
-             config::shared::built::DataSourceConfig<
-                 config::shared::ServerSDK> const& data_source_config,
-             config::shared::built::HttpProperties http_properties,
-             boost::asio::any_io_executor ioc,
-             data_components::DataSourceStatusManager& status_manager,
-             Logger const& logger);
+    LazyLoad();
 
     LazyLoad(LazyLoad const& item) = delete;
     LazyLoad(LazyLoad&& item) = delete;
@@ -70,12 +66,6 @@ class LazyLoad : public data_interfaces::ISystem {
     static integrations::SerializedItemDescriptor Serialize(
         data_model::SegmentDescriptor segment);
 
-    static std::optional<data_model::FlagDescriptor> DeserializeFlag(
-        integrations::SerializedItemDescriptor flag);
-
-    static std::optional<data_model::SegmentDescriptor> DeserializeSegment(
-        integrations::SerializedItemDescriptor segment);
-
     template <typename TResult>
     static TResult Get(data_components::ExpirationTracker::TrackState state,
                        std::function<void(void)> refresh,
@@ -92,7 +82,9 @@ class LazyLoad : public data_interfaces::ISystem {
     }
 
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataPullSource> source_;
+    std::shared_ptr<data_interfaces::ISerializedDataPullSource> raw_source_;
+    data_components::JsonSource source_;
+
     mutable data_components::ExpirationTracker tracker_;
     std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
     mutable std::optional<bool> initialized_;
