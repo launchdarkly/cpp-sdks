@@ -38,7 +38,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
-    auto& datasource = config_builder.DataSource();
+    auto datasystem = DataSystemBuilder::BackgroundSync();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
@@ -48,7 +48,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             auto streaming = DataSourceBuilder::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
-            datasource.Method(std::move(streaming));
+            datasystem.Synchronizer(std::move(streaming));
         }
     }
 
@@ -64,9 +64,11 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
                         std::chrono::milliseconds(
                             *in.polling->pollIntervalMs)));
             }
-            datasource.Method(std::move(method));
+            datasystem.Synchronizer(std::move(method));
         }
     }
+
+    config_builder.DataSystem().Method(std::move(datasystem));
 
     auto& event_config = config_builder.Events();
 

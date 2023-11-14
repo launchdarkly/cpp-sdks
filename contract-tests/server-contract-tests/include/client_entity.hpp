@@ -2,7 +2,10 @@
 
 #include <data_model/data_model.hpp>
 #include <launchdarkly/server_side/client.hpp>
+
 #include <memory>
+
+#include <tl/expected.hpp>
 
 class ClientEntity {
    public:
