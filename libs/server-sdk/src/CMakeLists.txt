@@ -57,7 +57,7 @@ if (LD_BUILD_REDIS_SUPPORT)
     target_sources(${LIBNAME}
             PRIVATE
             data_systems/lazy_load/sources/redis/redis_source.cpp)
-    target_link_libraries(${LIBNAME} PRIVATE redis++::redis++_static)
+    target_link_libraries(${LIBNAME} PRIVATE hiredis::hiredis redis++::redis++_static)
 endif ()
 
 if (MSVC OR (NOT LD_BUILD_SHARED_LIBS))

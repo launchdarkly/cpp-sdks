@@ -4,7 +4,7 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
-#include <data_systems/background_sync/sources/streaming/streaming_data_source.hpp>
+#include "data_systems/background_sync/sources/streaming/streaming_data_source.hpp"
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;

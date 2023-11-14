@@ -17,8 +17,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     auto config_builder = ConfigBuilder(in.credential);
 
-    auto default_endpoints =
-        launchdarkly::server_side::Defaults::ServiceEndpoints();
+    auto default_endpoints = Defaults::ServiceEndpoints();
 
     auto& endpoints =
         config_builder.ServiceEndpoints()
