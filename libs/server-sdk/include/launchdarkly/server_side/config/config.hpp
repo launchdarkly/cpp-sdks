@@ -14,7 +14,6 @@ using SDK = config::shared::ServerSDK;
 struct Config {
    public:
     Config(std::string sdk_key,
-           bool offline,
            config::shared::built::Logging logging,
            config::shared::built::ServiceEndpoints endpoints,
            config::shared::built::Events events,
@@ -36,8 +35,6 @@ struct Config {
 
     [[nodiscard]] config::shared::built::HttpProperties const& HttpProperties()
         const;
-
-    [[nodiscard]] bool Offline() const;
 
     [[nodiscard]] config::shared::built::Logging const& Logging() const;
 

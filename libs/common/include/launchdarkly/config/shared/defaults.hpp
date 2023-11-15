@@ -82,8 +82,6 @@ struct Defaults<ClientSDK> {
 
 template <>
 struct Defaults<ServerSDK> {
-    static bool Offline() { return Defaults<AnySDK>::Offline(); }
-
     static auto ServiceEndpoints() -> built::ServiceEndpoints {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",

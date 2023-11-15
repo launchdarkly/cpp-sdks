@@ -3,7 +3,6 @@
 namespace launchdarkly::server_side {
 
 Config::Config(std::string sdk_key,
-               bool offline,
                config::shared::built::Logging logging,
                config::shared::built::ServiceEndpoints service_endpoints,
                config::shared::built::Events events,
@@ -12,7 +11,6 @@ Config::Config(std::string sdk_key,
                config::shared::built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
-      offline_(offline),
       service_endpoints_(std::move(service_endpoints)),
       events_(std::move(events)),
       application_tag_(std::move(application_tag)),
@@ -43,10 +41,6 @@ Config::DataSystemConfig() const {
 
 config::shared::built::HttpProperties const& Config::HttpProperties() const {
     return http_properties_;
-}
-
-bool Config::Offline() const {
-    return offline_;
 }
 
 config::shared::built::Logging const& Config::Logging() const {

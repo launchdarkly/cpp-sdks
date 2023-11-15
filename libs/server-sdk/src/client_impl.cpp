@@ -97,16 +97,12 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-bool EventsEnabled(Config const& config) {
-    return config.Events().Enabled() && !config.Offline();
-}
-
 std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
     Config const& config,
     boost::asio::any_io_executor const& exec,
     HttpProperties const& http_properties,
     Logger& logger) {
-    if (EventsEnabled(config)) {
+    if (config.Events().Enabled()) {
         return std::make_unique<events::AsioEventProcessor<ServerSDK>>(
             exec, config.ServiceEndpoints(), config.Events(), http_properties,
             logger);

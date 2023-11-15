@@ -5,7 +5,6 @@
 #include <chrono>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace launchdarkly::config::shared::built {
@@ -24,6 +23,12 @@ struct StreamingConfig<ServerSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
     std::string streaming_path;
 };
+
+inline bool operator==(StreamingConfig<ServerSDK> const& lhs,
+                       StreamingConfig<ServerSDK> const& rhs) {
+    return lhs.initial_reconnect_delay == rhs.initial_reconnect_delay &&
+           lhs.streaming_path == rhs.streaming_path;
+}
 
 template <typename SDK>
 struct PollingConfig;
@@ -47,10 +52,22 @@ struct RedisPullConfig {
     using URI = std::string;
 
     struct ConnectionOpts {
+        /**
+         * \brief Redis host. Required; cannot be empty string.
+         */
         std::string host;
-        std::uint16_t port;
-        std::string password;
-        std::uint64_t db;
+        /**
+         * \brief Redis port. Required.
+         */
+        std::optional<std::uint16_t> port;
+        /**
+         * \brief Redis password. Optional.
+         */
+        std::optional<std::string> password;
+        /**
+         * \brief Redis db. Optional.
+         */
+        std::optional<std::uint64_t> db;
     };
 
     std::variant<URI, ConnectionOpts> connection_;

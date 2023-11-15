@@ -23,8 +23,8 @@ enum class Error : std::uint32_t {
     kConfig_SDKKey_Empty = 400,
     /* Client-side errors: 10000-19999 */
     /* Server-side errors: 20000-29999 */
-    kConfig_DataSource_Redis_EmptyURI = 20000,
-    kConfig_DataSource_Redis_EmptyHost = 20001,
+    kConfig_DataSource_Redis_MissingURI = 20000,
+    kConfig_DataSource_Redis_MissingHost = 20001,
     kConfig_DataSource_Redis_MissingPort = 2002,
 
     kMax = std::numeric_limits<std::uint32_t>::max()

@@ -35,7 +35,7 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
     if (sdk_key.empty()) {
         return tl::make_unexpected(Error::kConfig_SDKKey_Empty);
     }
-    auto offline = offline_.value_or(Defaults::Offline());
+
     auto endpoints_config = service_endpoints_builder_.Build();
     if (!endpoints_config) {
         return tl::make_unexpected(endpoints_config.error());
@@ -58,7 +58,6 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
 
     return {tl::in_place,
             sdk_key,
-            offline,
             logging,
             *endpoints_config,
             *events_config,

@@ -95,9 +95,9 @@ tl::expected<built::RedisPullConfig, Error> RedisPullBuilder::Build() const {
         auto const& opts = std::get<ConnOpts>(config_.connection_);
         if (opts.host.empty()) {
             return tl::make_unexpected(
-                Error::kConfig_DataSource_Redis_EmptyHost);
+                Error::kConfig_DataSource_Redis_MissingHost);
         }
-        if (opts.port == 0) {
+        if (!opts.port) {
             return tl::make_unexpected(
                 Error::kConfig_DataSource_Redis_MissingPort);
         }
@@ -105,7 +105,7 @@ tl::expected<built::RedisPullConfig, Error> RedisPullBuilder::Build() const {
         auto const& uri = std::get<ConnURI>(config_.connection_);
         if (uri.empty()) {
             return tl::make_unexpected(
-                Error::kConfig_DataSource_Redis_EmptyURI);
+                Error::kConfig_DataSource_Redis_MissingURI);
         }
     }
     return config_;
