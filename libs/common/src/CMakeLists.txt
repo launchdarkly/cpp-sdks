@@ -45,7 +45,6 @@ add_library(${LIBNAME} OBJECT
         config/data_system/data_destination_builder.cpp
         config/data_system/data_system_builder.cpp
         config/data_system/lazy_load_builder.cpp
-        config/data_source_config.cpp
         bindings/c/value.cpp
         bindings/c/array_builder.cpp
         bindings/c/object_builder.cpp

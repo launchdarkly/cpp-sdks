@@ -8,13 +8,13 @@ DataSystemBuilder<ServerSDK>::DataSystemBuilder()
 
 DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Method(
     BackgroundSync bg_sync) {
-    method_config_ = bg_sync.Build();
+    method_builder_ = std::move(bg_sync);
     return *this;
 }
 
 DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Method(
     LazyLoad lazy_load) {
-    method_config_ = lazy_load.Build();
+    method_builder_ = std::move(lazy_load);
     return *this;
 }
 
@@ -26,19 +26,29 @@ DataSystemBuilder<ServerSDK>& DataSystemBuilder<ServerSDK>::Disabled(
 
 tl::expected<built::DataSystemConfig<ServerSDK>, Error>
 DataSystemBuilder<ServerSDK>::Build() const {
-    // We could also store the builders and do a std::visit here. Instead,
-    // we're building immediately in the Method setters to reduce the visitor
-    // boilerplate.
-
-    if (method_config_) {
-        auto maybe_built = *method_config_;
-        if (!maybe_built) {
-            return tl::make_unexpected(maybe_built.error());
+    if (method_builder_) {
+        auto lazy_or_background_cfg = std::visit(
+            [](auto&& arg)
+                -> tl::expected<
+                    std::variant<built::LazyLoadConfig,
+                                 built::BackgroundSyncConfig<ServerSDK>>,
+                    Error> {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, BackgroundSync>) {
+                    return arg.Build();  // -> built::BackgroundSyncConfig
+                } else if constexpr (std::is_same_v<T, LazyLoad>) {
+                    return arg
+                        .Build();  // -> tl::expected<built::LazyLoadConfig,
+                                   // Error>
+                }
+            },
+            *method_builder_);
+        if (!lazy_or_background_cfg) {
+            return tl::make_unexpected(lazy_or_background_cfg.error());
         }
-        return built::DataSystemConfig<ServerSDK>{config_.disabled,
-                                                  *maybe_built};
+        return built::DataSystemConfig<ServerSDK>{
+            config_.disabled, std::move(*lazy_or_background_cfg)};
     }
-
     return config_;
 }
 

@@ -46,24 +46,12 @@ struct PollingConfig<ServerSDK> {
 struct RedisPullConfig {
     using URI = std::string;
 
-    class ConnectionOpts {
-       public:
-        ConnectionOpts();
-        ConnectionOpts(std::string host,
-                       std::uint16_t port,
-                       std::string password,
-                       std::uint64_t db);
-
-        [[nodiscard]] std::string const& Host() const noexcept;
-        [[nodiscard]] std::uint16_t Port() const noexcept;
-        [[nodiscard]] std::string const& Password() const noexcept;
-        [[nodiscard]] std::uint64_t DB() const noexcept;
-
-       private:
-        std::string host_;
-        std::uint16_t port_;
-        std::string password_;
-        std::uint64_t db_;
+    struct ConnectionOpts {
+        std::string host;
+        std::uint16_t port;
+        std::string password;
+        std::uint64_t db;
+        ConnectionOpts() : host(), port(0), password(), db(0) {}
     };
 
     std::variant<URI, ConnectionOpts> connection_;
