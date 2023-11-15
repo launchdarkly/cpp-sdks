@@ -4,16 +4,10 @@
 #include <launchdarkly/config/shared/builders/data_system/lazy_load_builder.hpp>
 
 #include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
-
-#include <launchdarkly/config/shared/builders/data_system/bootstrap_builder.hpp>
-
 #include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 
-#include <chrono>
-#include <optional>
-#include <type_traits>
-#include <vector>
+#include <launchdarkly/error.hpp>
 
 namespace launchdarkly::config::shared::builders {
 
@@ -43,9 +37,11 @@ class DataSystemBuilder<ServerSDK> {
     DataSystemBuilder& Method(BackgroundSync bg_sync);
     DataSystemBuilder& Method(LazyLoad lazy_load);
 
-    [[nodiscard]] built::DataSystemConfig<ServerSDK> Build() const;
+    [[nodiscard]] tl::expected<built::DataSystemConfig<ServerSDK>, Error>
+    Build() const;
 
    private:
+    std::optional<std::variant<BackgroundSync, LazyLoad>> method_builder_;
     built::DataSystemConfig<ServerSDK> config_;
 };
 

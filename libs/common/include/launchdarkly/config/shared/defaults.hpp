@@ -2,6 +2,7 @@
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
+#include <launchdarkly/config/shared/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/persistence.hpp>
@@ -127,12 +128,22 @@ struct Defaults<ServerSDK> {
         return std::nullopt;
     }
 
+    static auto BackgroundSyncConfig()
+        -> built::BackgroundSyncConfig<ServerSDK> {
+        return {BootstrapConfig(), DataSourceConfig(), DataDestinationConfig()};
+    }
+
+    static auto RedisPullConfig() -> built::RedisPullConfig {
+        return {"tcp://localhost:6379"};
+    }
+
+    static auto LazyLoadConfig() -> built::LazyLoadConfig {
+        return {built::LazyLoadConfig::EvictionPolicy::Disabled,
+                std::chrono::minutes{5}, RedisPullConfig()};
+    }
+
     static auto DataSystemConfig() -> built::DataSystemConfig<ServerSDK> {
-        return {false, shared::built::BackgroundSyncConfig<ServerSDK>{
-                           BootstrapConfig(),
-                           DataSourceConfig(),
-                           DataDestinationConfig(),
-                       }};
+        return {false, BackgroundSyncConfig()};
     }
 
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {

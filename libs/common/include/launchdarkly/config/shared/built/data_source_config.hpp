@@ -43,6 +43,20 @@ struct PollingConfig<ServerSDK> {
     std::chrono::seconds min_polling_interval;
 };
 
+struct RedisPullConfig {
+    using URI = std::string;
+
+    struct ConnectionOpts {
+        std::string host;
+        std::uint16_t port;
+        std::string password;
+        std::uint64_t db;
+        ConnectionOpts() : host(), port(0), password(), db(0) {}
+    };
+
+    std::variant<URI, ConnectionOpts> connection_;
+};
+
 template <typename SDK>
 struct DataSourceConfig;
 
@@ -56,7 +70,10 @@ struct DataSourceConfig<ClientSDK> {
 
 template <>
 struct DataSourceConfig<ServerSDK> {
-    std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
+    std::variant<StreamingConfig<ServerSDK>,
+                 PollingConfig<ServerSDK>,
+                 RedisPullConfig>
+        method;
 };
 
 }  // namespace launchdarkly::config::shared::built

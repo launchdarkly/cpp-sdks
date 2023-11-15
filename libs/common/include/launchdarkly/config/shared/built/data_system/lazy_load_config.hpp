@@ -15,5 +15,7 @@ struct LazyLoadConfig {
     };
 
     EvictionPolicy eviction_policy;
+    std::chrono::milliseconds eviction_ttl;
+    DataSourceConfig<ServerSDK> source;
 };
 }  // namespace launchdarkly::config::shared::built

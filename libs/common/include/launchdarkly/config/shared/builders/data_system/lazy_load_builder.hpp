@@ -3,6 +3,7 @@
 #include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 #include <launchdarkly/config/shared/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/error.hpp>
 
 #include <chrono>
 
@@ -23,7 +24,7 @@ namespace launchdarkly::config::shared::builders {
  * another SDK) is necessary.
  */
 struct LazyLoadBuilder {
-    using Redis = DataSourceBuilder<ServerSDK>::RedisPull;
+    using Redis = RedisPullBuilder;
     using EvictionPolicy = built::LazyLoadConfig::EvictionPolicy;
     /**
      * \brief Constructs a new LazyLoadBuilder.
@@ -54,9 +55,10 @@ struct LazyLoadBuilder {
      */
     LazyLoadBuilder& CacheEviction(EvictionPolicy policy);
 
-    [[nodiscard]] built::LazyLoadConfig Build() const;
+    [[nodiscard]] tl::expected<built::LazyLoadConfig, Error> Build() const;
 
    private:
+    RedisPullBuilder redis_builder_;
     built::LazyLoadConfig config_;
 };
 

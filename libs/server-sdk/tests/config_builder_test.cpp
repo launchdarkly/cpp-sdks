@@ -27,7 +27,6 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
 
 TEST_F(ConfigBuilderTest,
        DefaultConstruction_ServerConfig_UsesDefaulDataSystemConfig) {
-    using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
@@ -47,7 +46,6 @@ TEST_F(ConfigBuilderTest,
 }
 
 TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
-    using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
     auto const delay = std::chrono::seconds{5};
@@ -75,7 +73,6 @@ TEST_F(ConfigBuilderTest, ServerConfig_CanModifyStreamReconnectDelay) {
 }
 
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
-    using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
 
     auto const cfg1 = builder.Build();
@@ -88,8 +85,22 @@ TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
 
 TEST_F(ConfigBuilderTest,
        DefaultConstruction_ServerConfig_UsesDefaultHttpProperties) {
-    using namespace launchdarkly::server_side;
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
+}
+
+TEST_F(ConfigBuilderTest, RedisConfiguration) {
+    ConfigBuilder builder("sdk-123");
+
+    using LazyLoad = DataSystemBuilder::LazyLoad;
+
+    builder.DataSystem().Method(
+        LazyLoad()
+            .Source(LazyLoad::Redis().Connection("tcp://localhost:1234"))
+            .CacheEviction(LazyLoad::EvictionPolicy::Disabled)
+            .CacheTTL(std::chrono::seconds(5)));
+
+    auto cfg = builder.Build();
+    ASSERT_TRUE(cfg);
 }

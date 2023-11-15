@@ -22,8 +22,8 @@ struct BackgroundSyncBuilder<ClientSDK> {};
 
 template <>
 struct BackgroundSyncBuilder<ServerSDK> {
-    using Streaming = DataSourceBuilder<ServerSDK>::Streaming;
-    using Polling = DataSourceBuilder<ServerSDK>::Polling;
+    using Streaming = StreamingBuilder<ServerSDK>;
+    using Polling = PollingBuilder<ServerSDK>;
 
     using DataDestinationBuilder = DataDestinationBuilder<ServerSDK>;
 

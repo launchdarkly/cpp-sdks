@@ -12,13 +12,13 @@ using namespace launchdarkly::server_side;
 #define FROM_BUILDER(ptr) (reinterpret_cast<LDServerConfigBuilder>(ptr))
 
 #define TO_STREAM_BUILDER(ptr) \
-    (reinterpret_cast<DataSourceBuilder::Streaming*>(ptr))
+    (reinterpret_cast<DataSystemBuilder::BackgroundSync::Streaming*>(ptr))
 
 #define FROM_STREAM_BUILDER(ptr) \
     (reinterpret_cast<LDServerDataSourceStreamBuilder>(ptr))
 
 #define TO_POLL_BUILDER(ptr) \
-    (reinterpret_cast<DataSourceBuilder::Polling*>(ptr))
+    (reinterpret_cast<DataSystemBuilder::BackgroundSync::Polling*>(ptr))
 
 #define FROM_POLL_BUILDER(ptr) \
     (reinterpret_cast<LDServerDataSourcePollBuilder>(ptr))
@@ -183,7 +183,8 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
 
 LD_EXPORT(LDServerDataSourceStreamBuilder)
 LDServerDataSourceStreamBuilder_New() {
-    return FROM_STREAM_BUILDER(new DataSourceBuilder::Streaming());
+    return FROM_STREAM_BUILDER(
+        new DataSystemBuilder::BackgroundSync::Streaming());
 }
 
 LD_EXPORT(void)
@@ -202,7 +203,7 @@ LDServerDataSourceStreamBuilder_Free(LDServerDataSourceStreamBuilder b) {
 }
 
 LD_EXPORT(LDServerDataSourcePollBuilder) LDServerDataSourcePollBuilder_New() {
-    return FROM_POLL_BUILDER(new DataSourceBuilder::Polling());
+    return FROM_POLL_BUILDER(new DataSystemBuilder::BackgroundSync::Polling());
 }
 
 LD_EXPORT(void)
