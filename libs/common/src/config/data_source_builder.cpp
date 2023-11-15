@@ -93,11 +93,11 @@ RedisPullBuilder& RedisPullBuilder::Connection(ConnURI uri) {
 tl::expected<built::RedisPullConfig, Error> RedisPullBuilder::Build() const {
     if (std::holds_alternative<ConnOpts>(config_.connection_)) {
         auto const& opts = std::get<ConnOpts>(config_.connection_);
-        if (opts.host.empty()) {
+        if (opts.Host().empty()) {
             return tl::make_unexpected(
                 Error::kConfig_DataSource_RedisPull_EmptyHost);
         }
-        if (opts.port == 0) {
+        if (opts.Port() == 0) {
             return tl::make_unexpected(
                 Error::kConfig_DataSource_RedisPull_MissingPort);
         }

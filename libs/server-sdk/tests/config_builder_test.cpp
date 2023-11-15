@@ -90,7 +90,7 @@ TEST_F(ConfigBuilderTest,
     ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
 }
 
-TEST_F(ConfigBuilderTest, RedisConfiguration) {
+TEST_F(ConfigBuilderTest, ValidRedisConfiguration) {
     ConfigBuilder builder("sdk-123");
 
     using LazyLoad = DataSystemBuilder::LazyLoad;
@@ -103,4 +103,19 @@ TEST_F(ConfigBuilderTest, RedisConfiguration) {
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
+}
+
+TEST_F(ConfigBuilderTest, InvalidRedisConfiguration) {
+    ConfigBuilder builder("sdk-123");
+
+    using LazyLoad = DataSystemBuilder::LazyLoad;
+
+    builder.DataSystem().Method(
+        LazyLoad().Source(LazyLoad::Redis().Connection("")));
+
+    auto cfg = builder.Build();
+    ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_RedisPull_EmptyURI);
+
+    builder.DataSystem().Method(LazyLoad().Source(LazyLoad::Redis().Connection(
+        LazyLoad::Redis::ConnOpts("tcp://localhost", 1233, "password", 2))));
 }

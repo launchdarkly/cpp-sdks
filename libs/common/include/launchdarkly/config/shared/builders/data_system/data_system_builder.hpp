@@ -41,6 +41,11 @@ class DataSystemBuilder<ServerSDK> {
     Build() const;
 
    private:
+    std::optional<
+        tl::expected<std::variant<built::LazyLoadConfig,
+                                  built::BackgroundSyncConfig<ServerSDK>>,
+                     Error>>
+        method_config_;
     std::optional<std::variant<BackgroundSync, LazyLoad>> method_builder_;
     built::DataSystemConfig<ServerSDK> config_;
 };
