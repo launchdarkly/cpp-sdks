@@ -51,7 +51,6 @@ struct RedisPullConfig {
         std::uint16_t port;
         std::string password;
         std::uint64_t db;
-        ConnectionOpts() : host(), port(0), password(), db(0) {}
     };
 
     std::variant<URI, ConnectionOpts> connection_;
