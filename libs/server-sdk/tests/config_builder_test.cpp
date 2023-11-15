@@ -114,8 +114,14 @@ TEST_F(ConfigBuilderTest, InvalidRedisConfiguration) {
         LazyLoad().Source(LazyLoad::Redis().Connection("")));
 
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_RedisPull_EmptyURI);
+    ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_Redis_EmptyURI);
 
     builder.DataSystem().Method(LazyLoad().Source(LazyLoad::Redis().Connection(
-        LazyLoad::Redis::ConnOpts("tcp://localhost", 1233, "password", 2))));
+        LazyLoad::Redis::ConnOpts("", 1233, "password", 2))));
+
+    cfg = builder.Build();
+    ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_Redis_EmptyHost);
+
+    builder.DataSystem().Method(LazyLoad().Source(LazyLoad::Redis().Connection(
+       LazyLoad::Redis::ConnOpts("tcp://localhost", 0, "password", 2))));
 }

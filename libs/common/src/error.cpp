@@ -30,11 +30,11 @@ char const* ErrorToString(Error err) {
             return "events: capacity must be non-zero";
         case Error::kConfig_SDKKey_Empty:
             return "sdk key: cannot be empty";
-        case Error::kConfig_DataSource_RedisPull_EmptyHost:
+        case Error::kConfig_DataSource_Redis_EmptyHost:
             return "data system: Redis host cannot be empty";
-        case Error::kConfig_DataSource_RedisPull_EmptyURI:
+        case Error::kConfig_DataSource_Redis_EmptyURI:
             return "data system: Redis URI cannot be empty";
-        case Error::kConfig_DataSource_RedisPull_MissingPort:
+        case Error::kConfig_DataSource_Redis_MissingPort:
             return "data system: Redis port must be specified";
         case Error::kMax:
             break;
