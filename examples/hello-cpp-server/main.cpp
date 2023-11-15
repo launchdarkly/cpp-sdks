@@ -28,14 +28,13 @@ int main() {
 
     auto cfg_builder = ConfigBuilder(SDK_KEY);
 
-    auto const streaming_connection =
-        DataSourceBuilder::Streaming().InitialReconnectDelay(
-            std::chrono::seconds(1));
+    using BackgroundSync = DataSystemBuilder::BackgroundSync;
 
-    auto system =
-        DataSystemBuilder::BackgroundSync().Synchronizer(streaming_connection);
+    auto data_system = BackgroundSync().Synchronizer(
+        BackgroundSync::Streaming().InitialReconnectDelay(
+            std::chrono::seconds(1)));
 
-    cfg_builder.DataSystem().Method(system);
+    cfg_builder.DataSystem().Method(data_system);
 
     auto config = cfg_builder.Build();
     if (!config) {

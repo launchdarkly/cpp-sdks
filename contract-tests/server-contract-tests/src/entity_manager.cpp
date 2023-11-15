@@ -37,14 +37,15 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
-    auto datasystem = DataSystemBuilder::BackgroundSync();
+    using BackgroundSync = DataSystemBuilder::BackgroundSync;
+    auto datasystem = BackgroundSync();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
         if (in.streaming->initialRetryDelayMs) {
-            auto streaming = DataSourceBuilder::Streaming();
+            auto streaming = BackgroundSync::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
             datasystem.Synchronizer(std::move(streaming));
@@ -56,7 +57,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.PollingBaseUrl(*in.polling->baseUri);
         }
         if (!in.streaming) {
-            auto method = DataSourceBuilder::Polling();
+            auto method = BackgroundSync::Polling();
             if (in.polling->pollIntervalMs) {
                 method.PollInterval(
                     std::chrono::duration_cast<std::chrono::seconds>(

@@ -1,17 +1,17 @@
 #include "kinds.hpp"
-#include "launchdarkly/serialization/json_errors.hpp"
 
-#include <launchdarkly/data_model/flag.hpp>
-#include <launchdarkly/data_model/segment.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_segment.hpp>
 
-#include <boost/json/parse.hpp>
+#include <boost/json.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
 template <typename TData>
-static uint64_t GetVersion(std::string data) {
+static uint64_t GetVersion(std::string const& data) {
     boost::json::error_code error_code;
-    auto parsed = boost::json::parse(data, error_code);
+    auto const parsed = boost::json::parse(data, error_code);
 
     if (error_code) {
         return 0;
