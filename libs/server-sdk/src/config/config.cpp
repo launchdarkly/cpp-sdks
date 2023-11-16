@@ -2,13 +2,16 @@
 
 namespace launchdarkly::server_side {
 
+using namespace launchdarkly::config::shared;
+
 Config::Config(std::string sdk_key,
-               config::shared::built::Logging logging,
-               config::shared::built::ServiceEndpoints service_endpoints,
-               config::shared::built::Events events,
+               built::Logging logging,
+               built::ServiceEndpoints service_endpoints,
+               built::Events events,
                std::optional<std::string> application_tag,
-               config::shared::built::DataSystemConfig<SDK> data_system_config,
-               config::shared::built::HttpProperties http_properties)
+               launchdarkly::server_side::config::built::DataSystemConfig
+                   data_system_config,
+               built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
       service_endpoints_(std::move(service_endpoints)),
@@ -21,12 +24,11 @@ std::string const& Config::SdkKey() const {
     return sdk_key_;
 }
 
-config::shared::built::ServiceEndpoints const& Config::ServiceEndpoints()
-    const {
+built::ServiceEndpoints const& Config::ServiceEndpoints() const {
     return service_endpoints_;
 }
 
-config::shared::built::Events const& Config::Events() const {
+built::Events const& Config::Events() const {
     return events_;
 }
 
@@ -34,16 +36,16 @@ std::optional<std::string> const& Config::ApplicationTag() const {
     return application_tag_;
 }
 
-config::shared::built::DataSystemConfig<config::shared::ServerSDK> const&
+launchdarkly::server_side::config::built::DataSystemConfig const&
 Config::DataSystemConfig() const {
     return data_system_config_;
 }
 
-config::shared::built::HttpProperties const& Config::HttpProperties() const {
+built::HttpProperties const& Config::HttpProperties() const {
     return http_properties_;
 }
 
-config::shared::built::Logging const& Config::Logging() const {
+built::Logging const& Config::Logging() const {
     return logging_;
 }
 

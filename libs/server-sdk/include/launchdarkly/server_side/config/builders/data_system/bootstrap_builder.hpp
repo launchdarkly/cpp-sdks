@@ -1,10 +1,10 @@
 #pragma once
 
-#include <launchdarkly/config/shared/built/data_system/bootstrap_config.hpp>
+#include <launchdarkly/server_side/config/built/data_system/bootstrap_config.hpp>
 
 #include <optional>
 
-namespace launchdarkly::config::shared::builders {
+namespace launchdarkly::server_side::config::builders {
 
 class BootstrapBuilder {
    public:
@@ -15,4 +15,4 @@ class BootstrapBuilder {
    private:
     std::optional<built::BootstrapConfig> config_;
 };
-}  // namespace launchdarkly::config::shared::builders
+}  // namespace launchdarkly::server_side::config::builders

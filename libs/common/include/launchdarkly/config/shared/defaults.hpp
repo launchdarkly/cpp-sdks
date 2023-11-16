@@ -1,8 +1,6 @@
 #pragma once
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/data_system/data_system_config.hpp>
-#include <launchdarkly/config/shared/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/persistence.hpp>
@@ -66,12 +64,6 @@ struct Defaults<ClientSDK> {
         return {Defaults<ClientSDK>::StreamingConfig(), false, false};
     }
 
-    static auto DataSystemConfig()
-        -> shared::built::DataSystemConfig<ClientSDK> {
-        // No usage of DataSystem config yet until next major version.
-        return {};
-    }
-
     static auto PollingConfig() -> shared::built::PollingConfig<ClientSDK> {
         return {std::chrono::minutes(5), "/msdk/evalx/contexts",
                 "/msdk/evalx/context", std::chrono::minutes(5)};
@@ -114,43 +106,9 @@ struct Defaults<ServerSDK> {
         return {StreamingConfig()};
     }
 
-    // No bootstrap phase yet in server-sdk; instead full
-    // sync is done when polling/streaming source initializes.
-    static auto BootstrapConfig() -> std::optional<built::BootstrapConfig> {
-        return std::nullopt;
-    }
-
-    // Data isn't mirrored anywhere by default.
-    static auto DataDestinationConfig()
-        -> std::optional<built::DataDestinationConfig<ServerSDK>> {
-        return std::nullopt;
-    }
-
-    static auto BackgroundSyncConfig()
-        -> built::BackgroundSyncConfig<ServerSDK> {
-        return {BootstrapConfig(), DataSourceConfig(), DataDestinationConfig()};
-    }
-
-    static auto RedisPullConfig() -> built::RedisPullConfig {
-        return {"tcp://localhost:6379"};
-    }
-
-    static auto LazyLoadConfig() -> built::LazyLoadConfig {
-        return {built::LazyLoadConfig::EvictionPolicy::Disabled,
-                std::chrono::minutes{5}, RedisPullConfig()};
-    }
-
-    static auto DataSystemConfig() -> built::DataSystemConfig<ServerSDK> {
-        return {false, BackgroundSyncConfig()};
-    }
-
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
         return {std::chrono::seconds{30}, "/sdk/latest-all",
                 std::chrono::seconds{30}};
-    }
-
-    static auto PersistenceConfig() -> built::Persistence<ServerSDK> {
-        return {};
     }
 };
 

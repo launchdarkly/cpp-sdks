@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 #include "data_components/kinds/kinds.hpp"
-#include "data_systems/lazy_load/sources/redis/redis_source.hpp"
 
 using namespace launchdarkly::server_side::data_systems;
 using namespace launchdarkly::server_side::data_components;

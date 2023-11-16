@@ -6,6 +6,11 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 
 file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 
+if (LD_BUILD_REDIS_SUPPORT)
+    file(GLOB redis_tests "${PROJECT_SOURCE_DIR}/tests/redis/*.cpp")
+    list(APPEND tests ${redis_tests})
+endif ()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Get things in the same directory on windows.
@@ -15,6 +20,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}../")
 add_executable(gtest_${LIBNAME}
         ${tests}
 )
-target_link_libraries(gtest_${LIBNAME} launchdarkly::server launchdarkly::internal launchdarkly::sse timestamp redis++::redis++_static GTest::gtest_main)
+
+target_link_libraries(gtest_${LIBNAME} launchdarkly::server launchdarkly::internal launchdarkly::sse timestamp GTest::gtest_main)
+
+if (LD_BUILD_REDIS_SUPPORT)
+    target_link_libraries(gtest_${LIBNAME} redis++::redis++_static)
+endif ()
 
 gtest_discover_tests(gtest_${LIBNAME})

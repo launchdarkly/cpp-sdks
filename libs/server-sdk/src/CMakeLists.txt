@@ -37,6 +37,11 @@ target_sources(${LIBNAME}
         data_systems/background_sync/background_sync_system.cpp
         data_systems/background_sync/sources/streaming/event_handler.cpp
         data_systems/lazy_load/lazy_load_system.cpp
+        config/builders/data_system/background_sync_builder.cpp
+        config/builders/data_system/bootstrap_builder.cpp
+        config/builders/data_system/data_destination_builder.cpp
+        config/builders/data_system/data_system_builder.cpp
+        config/builders/data_system/lazy_load_builder.cpp
         data_source_status.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
@@ -56,7 +61,7 @@ target_sources(${LIBNAME}
 if (LD_BUILD_REDIS_SUPPORT)
     target_sources(${LIBNAME}
             PRIVATE
-            data_systems/lazy_load/sources/redis/redis_source.cpp)
+            integrations/redis/redis_source.cpp)
     target_link_libraries(${LIBNAME} PRIVATE hiredis::hiredis redis++::redis++_static)
 endif ()
 

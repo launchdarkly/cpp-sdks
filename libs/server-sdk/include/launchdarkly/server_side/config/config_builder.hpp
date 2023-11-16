@@ -1,12 +1,15 @@
 #pragma once
-#include <launchdarkly/config/server_builders.hpp>
 #include <launchdarkly/config/shared/builders/app_info_builder.hpp>
-#include <launchdarkly/config/shared/builders/data_system/data_system_builder.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/builders/logging_builder.hpp>
+#include <launchdarkly/server_side/config/builders/server_builders.hpp>
+
+#include <launchdarkly/server_side/config/builders/data_system/data_system_builder.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
 
 namespace launchdarkly::server_side {
+
+using DataSystemBuilder = config::builders::DataSystemBuilder;
 
 class ConfigBuilder {
    public:

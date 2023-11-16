@@ -25,7 +25,7 @@ struct MethodVisitor<ServerSDK> {
     using SDK = ServerSDK;
     using Result = tl::expected<std::variant<built::StreamingConfig<SDK>,
                                              built::PollingConfig<SDK>,
-                                             built::RedisPullConfig>,
+                                             built::RedisConfig>,
                                 Error>;
 
     Result operator()(StreamingBuilder<SDK> const& streaming) const {
@@ -36,11 +36,11 @@ struct MethodVisitor<ServerSDK> {
         return polling.Build();
     }
 
-    Result operator()(RedisPullBuilder const& redis_pull) const {
+    Result operator()(RedisBuilder const& redis_pull) const {
         return redis_pull.Build().map([](auto&& config) {
             return std::variant<built::StreamingConfig<SDK>,
-                                built::PollingConfig<SDK>,
-                                built::RedisPullConfig>{std::move(config)};
+                                built::PollingConfig<SDK>, built::RedisConfig>{
+                std::move(config)};
         });
     }
 };
@@ -74,40 +74,6 @@ PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
 
 template <typename SDK>
 built::PollingConfig<SDK> PollingBuilder<SDK>::Build() const {
-    return config_;
-}
-
-RedisPullBuilder::RedisPullBuilder()
-    : config_(Defaults<ServerSDK>::RedisPullConfig()) {}
-
-RedisPullBuilder& RedisPullBuilder::Connection(ConnOpts opts) {
-    config_.connection_ = opts;
-    return *this;
-}
-
-RedisPullBuilder& RedisPullBuilder::Connection(ConnURI uri) {
-    config_.connection_ = uri;
-    return *this;
-}
-
-tl::expected<built::RedisPullConfig, Error> RedisPullBuilder::Build() const {
-    if (std::holds_alternative<ConnOpts>(config_.connection_)) {
-        auto const& opts = std::get<ConnOpts>(config_.connection_);
-        if (opts.host.empty()) {
-            return tl::make_unexpected(
-                Error::kConfig_DataSource_Redis_MissingHost);
-        }
-        if (!opts.port) {
-            return tl::make_unexpected(
-                Error::kConfig_DataSource_Redis_MissingPort);
-        }
-    } else {
-        auto const& uri = std::get<ConnURI>(config_.connection_);
-        if (uri.empty()) {
-            return tl::make_unexpected(
-                Error::kConfig_DataSource_Redis_MissingURI);
-        }
-    }
     return config_;
 }
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include <openssl/macros.h>
-
-#include "../../../../data_interfaces/source/iserialized_pull_source.hpp"
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
 
 #include <sw/redis++/redis++.h>
 

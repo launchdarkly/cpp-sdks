@@ -15,6 +15,10 @@ class IPullSource {
     template <typename T>
     using ItemResult = tl::expected<std::optional<T>, std::string>;
 
+    template <typename T>
+    using AllResult =
+        tl::expected<std::unordered_map<std::string, T>, std::string>;
+
     [[nodiscard]] virtual ItemResult<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
@@ -33,18 +37,16 @@ class IPullSource {
      *
      * @return Returns an unordered map of FlagDescriptors.
      */
-    [[nodiscard]] virtual std::unordered_map<std::string,
-                                             data_model::FlagDescriptor>
-    AllFlags() const = 0;
+    [[nodiscard]] virtual AllResult<data_model::FlagDescriptor> AllFlags()
+        const = 0;
 
     /**
      * Get all of the segments.
      *
      * @return Returns an unordered map of SegmentDescriptors.
      */
-    [[nodiscard]] virtual std::unordered_map<std::string,
-                                             data_model::SegmentDescriptor>
-    AllSegments() const = 0;
+    [[nodiscard]] virtual AllResult<data_model::SegmentDescriptor> AllSegments()
+        const = 0;
 
     [[nodiscard]] virtual std::string const& Identity() const = 0;
 

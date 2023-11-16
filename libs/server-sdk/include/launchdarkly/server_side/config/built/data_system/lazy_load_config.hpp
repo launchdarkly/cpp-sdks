@@ -1,8 +1,11 @@
 #pragma once
 
-#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
 
-namespace launchdarkly::config::shared::built {
+#include <chrono>
+#include <memory>
+
+namespace launchdarkly::server_side::config::built {
 
 struct LazyLoadConfig {
     /**
@@ -16,6 +19,7 @@ struct LazyLoadConfig {
 
     EvictionPolicy eviction_policy;
     std::chrono::milliseconds eviction_ttl;
-    DataSourceConfig<ServerSDK> source;
+    std::shared_ptr<server_side::data_interfaces::ISerializedDataPullSource>
+        source;
 };
-}  // namespace launchdarkly::config::shared::built
+}  // namespace launchdarkly::server_side::config::built

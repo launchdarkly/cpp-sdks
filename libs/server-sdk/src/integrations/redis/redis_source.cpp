@@ -1,4 +1,4 @@
-#include "redis_source.hpp"
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -19,7 +19,7 @@ data_interfaces::ISerializedDataPullSource::GetResult RedisDataSource::Get(
         return integrations::SerializedItemDescriptor{0, false,
                                                       maybe_item.value()};
     }
-    return tl::make_unexpected(Error{"not found"});
+    sw::redis::SentinelOptions return tl::make_unexpected(Error{"not found"});
 }
 
 data_interfaces::ISerializedDataPullSource::AllResult RedisDataSource::All(

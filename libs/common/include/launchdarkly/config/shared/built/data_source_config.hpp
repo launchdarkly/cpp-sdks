@@ -48,10 +48,10 @@ struct PollingConfig<ServerSDK> {
     std::chrono::seconds min_polling_interval;
 };
 
-struct RedisPullConfig {
+struct RedisConfig {
     using URI = std::string;
 
-    struct ConnectionOpts {
+    struct Standard {
         /**
          * \brief Redis host. Required; cannot be empty string.
          */
@@ -70,7 +70,7 @@ struct RedisPullConfig {
         std::optional<std::uint64_t> db;
     };
 
-    std::variant<URI, ConnectionOpts> connection_;
+    std::variant<URI, Standard> connection_;
 };
 
 template <typename SDK>
@@ -88,7 +88,7 @@ template <>
 struct DataSourceConfig<ServerSDK> {
     std::variant<StreamingConfig<ServerSDK>,
                  PollingConfig<ServerSDK>,
-                 RedisPullConfig>
+                 RedisConfig>
         method;
 };
 

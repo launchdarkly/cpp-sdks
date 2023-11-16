@@ -1,13 +1,14 @@
 #pragma once
 
-#include <launchdarkly/config/shared/builders/data_source_builder.hpp>
-#include <launchdarkly/config/shared/built/data_system/lazy_load_config.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
+#include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
+
 #include <launchdarkly/error.hpp>
 
 #include <chrono>
+#include <memory>
 
-namespace launchdarkly::config::shared::builders {
+namespace launchdarkly::server_side::config::builders {
 
 /**
  * \brief LazyLoadBuilder allows for specifying the configuration of
@@ -24,7 +25,8 @@ namespace launchdarkly::config::shared::builders {
  * another SDK) is necessary.
  */
 struct LazyLoadBuilder {
-    using Redis = RedisPullBuilder;
+    using SourcePtr =
+        std::shared_ptr<data_interfaces::ISerializedDataPullSource>;
     using EvictionPolicy = built::LazyLoadConfig::EvictionPolicy;
     /**
      * \brief Constructs a new LazyLoadBuilder.
@@ -32,12 +34,11 @@ struct LazyLoadBuilder {
     LazyLoadBuilder();
 
     /**
-     * \brief Specify the source of the data. Currently, only Redis is
-     * supported.
-     * \param source The Redis configuration.
+     * \brief Specify the source of the data.
+     * \param source Component implementing ISerializedDataPullSource.
      * \return Reference to this.
      */
-    LazyLoadBuilder& Source(Redis source);
+    LazyLoadBuilder& Source(SourcePtr source);
 
     /**
      * \brief
@@ -58,8 +59,7 @@ struct LazyLoadBuilder {
     [[nodiscard]] tl::expected<built::LazyLoadConfig, Error> Build() const;
 
    private:
-    RedisPullBuilder redis_builder_;
     built::LazyLoadConfig config_;
 };
 
-}  // namespace launchdarkly::config::shared::builders
+}  // namespace launchdarkly::server_side::config::builders

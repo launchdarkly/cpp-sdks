@@ -40,11 +40,6 @@ add_library(${LIBNAME} OBJECT
         config/http_properties.cpp
         config/data_source_builder.cpp
         config/http_properties_builder.cpp
-        config/data_system/bootstrap_builder.cpp
-        config/data_system/background_sync_builder.cpp
-        config/data_system/data_destination_builder.cpp
-        config/data_system/data_system_builder.cpp
-        config/data_system/lazy_load_builder.cpp
         bindings/c/value.cpp
         bindings/c/array_builder.cpp
         bindings/c/object_builder.cpp

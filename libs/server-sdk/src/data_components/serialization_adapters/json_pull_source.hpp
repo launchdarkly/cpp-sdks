@@ -1,10 +1,9 @@
-#include "../../data_interfaces/destination/idestination.hpp"
-#include "../../data_interfaces/destination/iserialized_destination.hpp"
+#pragma once
 
 #include "../../data_interfaces/source/ipull_source.hpp"
-#include "../../data_interfaces/source/iserialized_pull_source.hpp"
-
 #include "../kinds/kinds.hpp"
+
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
@@ -19,10 +18,12 @@ class JsonSource final : public data_interfaces::IPullSource {
     [[nodiscard]] ItemResult<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const override;
 
-    [[nodiscard]] std::unordered_map<std::string, data_model::FlagDescriptor>
-    AllFlags() const override;
-    [[nodiscard]] std::unordered_map<std::string, data_model::SegmentDescriptor>
-    AllSegments() const override;
+    [[nodiscard]] AllResult<data_model::FlagDescriptor> AllFlags()
+        const override;
+
+    [[nodiscard]] AllResult<data_model::SegmentDescriptor> AllSegments()
+        const override;
+
     [[nodiscard]] std::string const& Identity() const override;
 
     [[nodiscard]] bool Initialized() const override;
