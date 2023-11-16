@@ -1,20 +1,20 @@
 #pragma once
 
-#include "../data_sources/data_source_update_sink.hpp"
-#include "data_store.hpp"
-#include "dependency_tracker.hpp"
+#include "../../data_interfaces/destination/idestination.hpp"
+#include "../../data_interfaces/store/istore.hpp"
+#include "../dependency_tracker/dependency_tracker.hpp"
 
+#include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/server_side/change_notifier.hpp>
 
 #include <boost/signals2/signal.hpp>
 
 #include <memory>
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_components {
 
-class DataStoreUpdater
-    : public launchdarkly::server_side::data_sources::IDataSourceUpdateSink,
-      public launchdarkly::server_side::IChangeNotifier {
+class ChangeNotifier : public data_interfaces::IDestination,
+                       public IChangeNotifier {
    public:
     template <typename Storage>
     using Collection = data_model::SDKDataSet::Collection<std::string, Storage>;
@@ -26,19 +26,24 @@ class DataStoreUpdater
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    DataStoreUpdater(IDataSourceUpdateSink& sink, IDataStore const& store);
+    ChangeNotifier(IDestination& sink, data_interfaces::IStore const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
     void Init(launchdarkly::data_model::SDKDataSet data_set) override;
-    void Upsert(std::string const& key, FlagDescriptor flag) override;
-    void Upsert(std::string const& key, SegmentDescriptor segment) override;
-    ~DataStoreUpdater() override = default;
+    void Upsert(std::string const& key,
+                data_model::FlagDescriptor flag) override;
+    void Upsert(std::string const& key,
+                data_model::SegmentDescriptor segment) override;
 
-    DataStoreUpdater(DataStoreUpdater const& item) = delete;
-    DataStoreUpdater(DataStoreUpdater&& item) = delete;
-    DataStoreUpdater& operator=(DataStoreUpdater const&) = delete;
-    DataStoreUpdater& operator=(DataStoreUpdater&&) = delete;
+    [[nodiscard]] std::string const& Identity() const override;
+
+    ~ChangeNotifier() override = default;
+
+    ChangeNotifier(ChangeNotifier const& item) = delete;
+    ChangeNotifier(ChangeNotifier&& item) = delete;
+    ChangeNotifier& operator=(ChangeNotifier const&) = delete;
+    ChangeNotifier& operator=(ChangeNotifier&&) = delete;
 
    private:
     bool HasListeners() const;
@@ -101,8 +106,8 @@ class DataStoreUpdater
 
     void NotifyChanges(DependencySet changes);
 
-    IDataSourceUpdateSink& sink_;
-    IDataStore const& store_;
+    IDestination& sink_;
+    data_interfaces::IStore const& source_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;
 
@@ -118,4 +123,4 @@ class DataStoreUpdater
 
     DependencyTracker dependency_tracker_;
 };
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_components

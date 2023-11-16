@@ -1,11 +1,11 @@
-#include "data_store_updater.hpp"
+#include "change_notifier.hpp"
 
 #include <launchdarkly/signals/boost_signal_connection.hpp>
 #include <utility>
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_components {
 
-std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
+std::unique_ptr<IConnection> ChangeNotifier::OnFlagChange(
     launchdarkly::server_side::IChangeNotifier::ChangeHandler handler) {
     std::lock_guard lock{signal_mutex_};
 
@@ -13,7 +13,7 @@ std::unique_ptr<IConnection> DataStoreUpdater::OnFlagChange(
         signals_.connect(handler));
 }
 
-void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
+void ChangeNotifier::Init(launchdarkly::data_model::SDKDataSet data_set) {
     // Optional outside the HasListeners() scope, this allows for the changes
     // to be calculated before the update and then the notification to be
     // sent after the update completes.
@@ -21,9 +21,9 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     if (HasListeners()) {
         DependencySet updated_items;
 
-        CalculateChanges(DataKind::kFlag, store_.AllFlags(), data_set.flags,
+        CalculateChanges(DataKind::kFlag, source_.AllFlags(), data_set.flags,
                          updated_items);
-        CalculateChanges(DataKind::kSegment, store_.AllSegments(),
+        CalculateChanges(DataKind::kSegment, source_.AllSegments(),
                          data_set.segments, updated_items);
         change_notifications = updated_items;
     }
@@ -44,23 +44,23 @@ void DataStoreUpdater::Init(launchdarkly::data_model::SDKDataSet data_set) {
     }
 }
 
-void DataStoreUpdater::Upsert(std::string const& key,
-                              data_store::FlagDescriptor flag) {
-    UpsertCommon(DataKind::kFlag, key, store_.GetFlag(key), std::move(flag));
+void ChangeNotifier::Upsert(std::string const& key,
+                            data_model::FlagDescriptor flag) {
+    UpsertCommon(DataKind::kFlag, key, source_.GetFlag(key), std::move(flag));
 }
 
-void DataStoreUpdater::Upsert(std::string const& key,
-                              data_store::SegmentDescriptor segment) {
-    UpsertCommon(DataKind::kSegment, key, store_.GetSegment(key),
+void ChangeNotifier::Upsert(std::string const& key,
+                            data_model::SegmentDescriptor segment) {
+    UpsertCommon(DataKind::kSegment, key, source_.GetSegment(key),
                  std::move(segment));
 }
 
-bool DataStoreUpdater::HasListeners() const {
+bool ChangeNotifier::HasListeners() const {
     std::lock_guard lock{signal_mutex_};
     return !signals_.empty();
 }
 
-void DataStoreUpdater::NotifyChanges(DependencySet changes) {
+void ChangeNotifier::NotifyChanges(DependencySet changes) {
     std::lock_guard lock{signal_mutex_};
     auto flag_changes = changes.SetForKind(DataKind::kFlag);
     // Only emit an event if there are changes.
@@ -69,8 +69,14 @@ void DataStoreUpdater::NotifyChanges(DependencySet changes) {
     }
 }
 
-DataStoreUpdater::DataStoreUpdater(IDataSourceUpdateSink& sink,
-                                   IDataStore const& store)
-    : sink_(sink), store_(store) {}
+ChangeNotifier::ChangeNotifier(IDestination& sink,
+                               data_interfaces::IStore const& source)
+    : sink_(sink), source_(source) {}
 
-}  // namespace launchdarkly::server_side::data_store
+std::string const& ChangeNotifier::Identity() const {
+    static std::string const identity =
+        "change notifier for " + sink_.Identity();
+    return identity;
+}
+
+}  // namespace launchdarkly::server_side::data_components
