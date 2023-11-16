@@ -27,8 +27,6 @@ target_sources(${LIBNAME}
         data_sources/data_source_update_sink.hpp
         data_store/data_store.hpp
         data_store/memory_store.cpp
-        data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp
         data_store/descriptors.hpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_event_handler.hpp
@@ -41,6 +39,8 @@ target_sources(${LIBNAME}
         data_sources/null_data_source.cpp
         data_components/change_notifier/change_notifier.hpp
         data_components/change_notifier/change_notifier.cpp
+        data_components/dependency_tracker/dependency_tracker.hpp
+        data_components/dependency_tracker/dependency_tracker.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
