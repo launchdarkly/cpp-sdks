@@ -1,9 +1,11 @@
 #pragma once
 
-#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
+#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
+#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
-#include <launchdarkly/data_model/descriptors.hpp>
-#include <launchdarkly/data_model/sdk_data_set.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace launchdarkly::server_side::data_interfaces {
 
@@ -39,22 +41,48 @@ class ISerializedDestination {
         kNotUpdated
     };
 
-    using ItemKey = std::string;
-    using KeyItemPair =
-        std::pair<ItemKey, integrations::SerializedItemDescriptor>;
-    using OrderedNamepace = std::vector<KeyItemPair>;
-    using KindCollectionPair =
-        std::pair<integrations::IPersistentKind const&, OrderedNamepace>;
-    using OrderedData = std::vector<KindCollectionPair>;
+    using Key = std::string;
 
-    virtual InitResult Init(OrderedData sdk_data_set) = 0;
+    template <typename T>
+    using Keyed = std::pair<Key, T>;
 
-    virtual UpsertResult Upsert(
+    using OrderedNamepace =
+        std::vector<Keyed<integrations::SerializedItemDescriptor>>;
+
+    using ItemCollection =
+        std::pair<integrations::ISerializedItemKind const&, OrderedNamepace>;
+
+    /**
+     * \brief Initializes the destination with data.
+     * \param sdk_data_set A series of collections, where each collection is
+     * named by an ISerializedItemKind and contains a list of key/value pairs
+     * representing the key of the item and the serialized form of the item.
+     * \return InitResult::kSuccess if all
+     * data items were stored, or InitResult::kError if any error occoured.
+     */
+    [[nodiscard]] virtual InitResult Init(
+        std::vector<ItemCollection> sdk_data_set) = 0;
+
+    /**
+     * \brief Upserts a single item (update if exist, insert if not.)
+     * \param kind The item kind.
+     * \param key The item key.
+     * \param item Serialized form of the item. The item should be deleted if
+     * the SerializedItem's 'deleted' bool is true. \return
+     * UpsertResult::kSuccess if the operation was successful.
+     * UpsertResult::kError if an error occured. Otherwise,
+     * UpsertResult::kNotUpdated if the existing item version was greater than
+     * the version passed in.
+     */
+    [[nodiscard]] virtual UpsertResult Upsert(
         std::string const& kind,
         std::string const& key,
         integrations::SerializedItemDescriptor item) = 0;
 
-    virtual std::string const& Identity() const = 0;
+    /**
+     * \return Identity of the destination. Used in logs.
+     */
+    [[nodiscard]] virtual std::string const& Identity() const = 0;
 
     ISerializedDestination(ISerializedDestination const& item) = delete;
     ISerializedDestination(ISerializedDestination&& item) = delete;

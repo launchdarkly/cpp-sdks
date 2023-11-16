@@ -43,6 +43,7 @@ target_sources(${LIBNAME}
         config/builders/data_system/data_system_builder.cpp
         config/builders/data_system/lazy_load_builder.cpp
         data_source_status.cpp
+        data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp

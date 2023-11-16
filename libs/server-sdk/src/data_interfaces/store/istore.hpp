@@ -8,34 +8,39 @@
 
 namespace launchdarkly::server_side::data_interfaces {
 
+/**
+ * \brief IStore provides shared ownership of flag and segment domain
+ * objects.
+ */
 class IStore {
    public:
+    /**
+     * \brief Get the flag named by key. Returns nullptr if no such flag exists.
+     * \param key Key of the flag.
+     * \return Shared pointer to the flag.
+     */
     [[nodiscard]] virtual std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
     /**
-     * Get a segment from the store.
-     *
-     * @param key The key for the segment.
-     * @return Returns a shared_ptr to the SegmentDescriptor, or a nullptr if
-     * there is no such segment, or the segment was deleted.
+     * \brief Get the segment named by key. Returns nullptr if no such flag
+     * exists. \param key Key of the segment. \return Shared pointer to the
+     * segment.
      */
     [[nodiscard]] virtual std::shared_ptr<data_model::SegmentDescriptor>
     GetSegment(std::string const& key) const = 0;
 
     /**
-     * Get all of the flags.
-     *
-     * @return Returns an unordered map of FlagDescriptors.
+     * \brief Get a map of all flags.
+     * \return Map of shared pointers to flags.
      */
     [[nodiscard]] virtual std::
         unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
         AllFlags() const = 0;
 
     /**
-     * Get all of the segments.
-     *
-     * @return Returns an unordered map of SegmentDescriptors.
+     * \brief Get a map of all segments.
+     * \return Map of shared pointers to segments.
      */
     [[nodiscard]] virtual std::unordered_map<
         std::string,

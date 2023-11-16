@@ -1,56 +1,71 @@
 #pragma once
 
 #include <launchdarkly/data_model/descriptors.hpp>
-#include <launchdarkly/data_model/sdk_data_set.hpp>
 
-#include <functional>
-#include <memory>
+#include <tl/expected.hpp>
+
+#include <optional>
 #include <string>
 #include <unordered_map>
 
 namespace launchdarkly::server_side::data_interfaces {
 
+/**
+ * \brief IPullSource obtains data on-demand. Calls to obtain data may fail, so
+ * the getter methods use tl::expected in order to propagate error codes.
+ *
+ * The IPullSource does not perform caching, so parent components must be
+ * careful to avoid repeatedly fetching data (i.e. use a cache.)
+ *
+ */
 class IPullSource {
    public:
-    template <typename T>
-    using ItemResult = tl::expected<std::optional<T>, std::string>;
+    using Error = std::string;
 
     template <typename T>
-    using AllResult =
-        tl::expected<std::unordered_map<std::string, T>, std::string>;
+    using Single = tl::expected<std::optional<T>, Error>;
 
-    [[nodiscard]] virtual ItemResult<data_model::FlagDescriptor> GetFlag(
+    template <typename T>
+    using Collection = tl::expected<std::unordered_map<std::string, T>, Error>;
+
+    /**
+     * \brief Attempts to get a flag named by key.
+     * \param key Key of the flag.
+     * \return On success, an optional FlagDescriptor (std::nullopt means the
+     * flag doesn't exist.) On failure, an error string.
+     */
+    [[nodiscard]] virtual Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const = 0;
 
     /**
-     * Get a segment from the store.
-     *
-     * @param key The key for the segment.
-     * @return Returns a shared_ptr to the SegmentDescriptor, or a nullptr if
-     * there is no such segment, or the segment was deleted.
+     * \brief Attempts to get a segment named by key.
+     * \param key Key of the segment.
+     * \return On success, an optional SegmentDescriptor (std::nullopt means the
+     * segment doesn't exist.) On failure, an error string.
      */
-    [[nodiscard]] virtual ItemResult<data_model::SegmentDescriptor> GetSegment(
+    [[nodiscard]] virtual Single<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const = 0;
 
     /**
-     * Get all of the flags.
-     *
-     * @return Returns an unordered map of FlagDescriptors.
+     * \brief Attempts to get a collection of all flags.
+     * \return On success, a collection of FlagDescriptors. On failure, an error
+     * string.
      */
-    [[nodiscard]] virtual AllResult<data_model::FlagDescriptor> AllFlags()
+    [[nodiscard]] virtual Collection<data_model::FlagDescriptor> AllFlags()
         const = 0;
 
     /**
-     * Get all of the segments.
-     *
-     * @return Returns an unordered map of SegmentDescriptors.
+     * \brief Attempts to get a collection of all segments.
+     * \return On success, a collection of SegmentDescriptors. On failure, an
+     * error string.
      */
-    [[nodiscard]] virtual AllResult<data_model::SegmentDescriptor> AllSegments()
-        const = 0;
+    [[nodiscard]] virtual Collection<data_model::SegmentDescriptor>
+    AllSegments() const = 0;
 
+    /**
+     * \return Identity of the source. Used in logs.
+     */
     [[nodiscard]] virtual std::string const& Identity() const = 0;
-
-    [[nodiscard]] virtual bool Initialized() const = 0;
 
     virtual ~IPullSource() = default;
     IPullSource(IPullSource const& item) = delete;
