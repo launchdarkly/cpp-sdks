@@ -25,9 +25,6 @@ target_sources(${LIBNAME}
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
         data_sources/data_source_update_sink.hpp
-        data_store/data_store.hpp
-        data_store/memory_store.cpp
-        data_store/descriptors.hpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status.cpp
@@ -43,6 +40,8 @@ target_sources(${LIBNAME}
         data_components/dependency_tracker/dependency_tracker.cpp
         data_components/expiration_tracker/expiration_tracker.hpp
         data_components/expiration_tracker/expiration_tracker.cpp
+        data_components/memory_store/memory_store.hpp
+        data_components/memory_store/memory_store.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp

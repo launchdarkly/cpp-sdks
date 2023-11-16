@@ -4,14 +4,14 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include <launchdarkly/data_model/descriptors.hpp>
+
 #include "../data_components/dependency_tracker/data_kind.hpp"
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::server_side::data_sources {
@@ -94,7 +94,7 @@ class DataSourceEventHandler {
 
     struct Patch {
         std::string key;
-        std::variant<data_store::FlagDescriptor, data_store::SegmentDescriptor>
+        std::variant<data_model::FlagDescriptor, data_model::SegmentDescriptor>
             data;
     };
 

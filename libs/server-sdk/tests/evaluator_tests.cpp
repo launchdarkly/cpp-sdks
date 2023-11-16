@@ -25,7 +25,7 @@ class EvaluatorTests : public ::testing::Test {
     Logger logger_;
 
    protected:
-    std::unique_ptr<data_store::IDataStore const> store_;
+    std::unique_ptr<data_interfaces::IStore const> store_;
     evaluation::Evaluator eval_;
 };
 
@@ -48,7 +48,7 @@ class EvaluatorTestsWithLogs : public ::testing::Test {
     Logger logger_;
 
    protected:
-    std::unique_ptr<data_store::IDataStore const> store_;
+    std::unique_ptr<data_interfaces::IStore const> store_;
     evaluation::Evaluator eval_;
 };
 

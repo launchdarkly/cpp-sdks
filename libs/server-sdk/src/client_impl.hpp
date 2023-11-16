@@ -14,7 +14,7 @@
 #include "data_sources/data_source_update_sink.hpp"
 
 #include "data_components/change_notifier/change_notifier.hpp"
-#include "data_store/memory_store.hpp"
+#include "data_components/memory_store/memory_store.hpp"
 
 #include "evaluation/evaluator.hpp"
 
@@ -173,7 +173,7 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_store::MemoryStore memory_store_;
+    data_components::MemoryStore memory_store_;
 
     data_sources::DataSourceStatusManager status_manager_;
     data_components::ChangeNotifier data_store_updater_;

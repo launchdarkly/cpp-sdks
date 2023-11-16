@@ -1,17 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "data_store/descriptors.hpp"
-#include "data_store/memory_store.hpp"
-
-using launchdarkly::data_model::SDKDataSet;
-using launchdarkly::server_side::data_store::FlagDescriptor;
-using launchdarkly::server_side::data_store::IDataStore;
-using launchdarkly::server_side::data_store::MemoryStore;
-using launchdarkly::server_side::data_store::SegmentDescriptor;
+#include <data_components/memory_store/memory_store.hpp>
 
 using launchdarkly::Value;
-using launchdarkly::data_model::Flag;
-using launchdarkly::data_model::Segment;
+
+using namespace launchdarkly::data_model;
+using namespace launchdarkly::server_side::data_components;
 
 TEST(MemoryStoreTest, StartsUninitialized) {
     MemoryStore store;
@@ -26,7 +20,7 @@ TEST(MemoryStoreTest, IsInitializedAfterInit) {
 
 TEST(MemoryStoreTest, HasDescription) {
     MemoryStore store;
-    EXPECT_EQ(std::string("memory"), store.Description());
+    EXPECT_EQ(std::string("memory"), store.Identity());
 }
 
 TEST(MemoryStoreTest, CanGetFlag) {
