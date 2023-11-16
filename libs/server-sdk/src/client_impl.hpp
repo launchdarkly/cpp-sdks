@@ -10,11 +10,11 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "data_sources/data_source_status_manager.hpp"
 #include "data_sources/data_source_update_sink.hpp"
 
 #include "data_components/change_notifier/change_notifier.hpp"
 #include "data_components/memory_store/memory_store.hpp"
+#include "data_components/status_notifications/data_source_status_manager.hpp"
 
 #include "evaluation/evaluator.hpp"
 

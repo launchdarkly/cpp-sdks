@@ -7,7 +7,7 @@
 #include <launchdarkly/data_model/descriptors.hpp>
 
 #include "../data_components/dependency_tracker/data_kind.hpp"
-#include "data_source_status_manager.hpp"
+#include "../data_components/status_notifications/data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
@@ -104,9 +104,10 @@ class DataSourceEventHandler {
         uint64_t version;
     };
 
-    DataSourceEventHandler(IDataSourceUpdateSink& handler,
-                           Logger const& logger,
-                           DataSourceStatusManager& status_manager);
+    DataSourceEventHandler(
+        IDataSourceUpdateSink& handler,
+        Logger const& logger,
+        data_components::DataSourceStatusManager& status_manager);
 
     /**
      * Handles an event from the LaunchDarkly service.
@@ -120,6 +121,6 @@ class DataSourceEventHandler {
    private:
     IDataSourceUpdateSink& handler_;
     Logger const& logger_;
-    DataSourceStatusManager& status_manager_;
+    data_components::DataSourceStatusManager& status_manager_;
 };
 }  // namespace launchdarkly::server_side::data_sources
