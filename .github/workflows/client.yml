@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - '**.md' #Do not need to run CI for markdown changes.
   pull_request:
-    branches: [ main, server-side ]
+    branches: [ main, "feat/**" ]
     paths-ignore:
       - '**.md'
 
@@ -36,40 +36,22 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
+          simulate_release: true
   build-test-client-mac:
     runs-on: macos-12
     steps:
-      - run: |
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
-          # For debugging
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
-        env:
-          OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
         with:
           cmake_target: launchdarkly-cpp-client
           platform_version: 12
   build-test-client-windows:
     runs-on: windows-2022
     steps:
-      - name: Upgrade OpenSSL
-        shell: bash
-        run: |
-          choco upgrade openssl --no-progress
-      - name: Determine OpenSSL Installation Directory
-        shell: bash
-        run: |
-          if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
-            echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
-          else
-            echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
-          fi
       - uses: actions/checkout@v3
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:
-          OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
           BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:

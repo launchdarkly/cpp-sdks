@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main", server-side  ]
+    branches: [ "main", "feat/**" ]
 
 jobs:
   cpp-linter:

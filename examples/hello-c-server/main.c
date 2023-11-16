@@ -18,15 +18,20 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
-int main() {
-    if (!strlen(SDK_KEY)) {
-        printf(
-            "*** Please edit main.c to set SDK_KEY to your LaunchDarkly "
-            "SDK key first\n\n");
-        return 1;
-    }
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg);
 
-    LDServerConfigBuilder config_builder = LDServerConfigBuilder_New(SDK_KEY);
+int main() {
+    char const* sdk_key = get_with_env_fallback(
+        SDK_KEY, "LD_SDK_KEY",
+        "Please edit main.c to set SDK_KEY to your LaunchDarkly server-side "
+        "SDK key "
+        "first.\n\nAlternatively, set the LD_SDK_KEY environment "
+        "variable.\n"
+        "The value of SDK_KEY in main.c takes priority over LD_SDK_KEY.");
+
+    LDServerConfigBuilder config_builder = LDServerConfigBuilder_New(sdk_key);
 
     LDServerConfig config = NULL;
     LDStatus config_status =
@@ -75,4 +80,20 @@ int main() {
     LDServerSDK_Free(client);
 
     return 0;
+}
+
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg) {
+    if (strlen(source_val)) {
+        return source_val;
+    }
+
+    char const* from_env = getenv(env_variable);
+    if (from_env && strlen(from_env)) {
+        return from_env;
+    }
+
+    printf("*** %s\n\n", error_msg);
+    exit(1);
 }

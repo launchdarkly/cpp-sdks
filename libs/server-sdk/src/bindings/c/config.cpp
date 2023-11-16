@@ -2,7 +2,7 @@
 // NOLINTBEGIN OCInconsistentNamingInspection
 
 #include <launchdarkly/server_side/bindings/c/config/config.h>
-#include <launchdarkly/config/server.hpp>
+#include <launchdarkly/server_side/config/config.hpp>
 
 #define TO_CONFIG(ptr) (reinterpret_cast<Config*>(ptr))
 
