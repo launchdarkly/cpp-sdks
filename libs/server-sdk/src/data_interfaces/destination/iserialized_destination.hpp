@@ -60,7 +60,8 @@ class ISerializedDestination {
      * \return InitResult::kSuccess if all
      * data items were stored, or InitResult::kError if any error occoured.
      */
-    virtual InitResult Init(std::vector<ItemCollection> sdk_data_set) = 0;
+    [[nodiscard]] virtual InitResult Init(
+        std::vector<ItemCollection> sdk_data_set) = 0;
 
     /**
      * \brief Upserts a single item (update if exist, insert if not.)
@@ -73,7 +74,7 @@ class ISerializedDestination {
      * UpsertResult::kNotUpdated if the existing item version was greater than
      * the version passed in.
      */
-    virtual UpsertResult Upsert(
+    [[nodiscard]] virtual UpsertResult Upsert(
         std::string const& kind,
         std::string const& key,
         integrations::SerializedItemDescriptor item) = 0;
@@ -81,7 +82,7 @@ class ISerializedDestination {
     /**
      * \return Identity of the destination. Used in logs.
      */
-    virtual std::string const& Identity() const = 0;
+    [[nodiscard]] virtual std::string const& Identity() const = 0;
 
     ISerializedDestination(ISerializedDestination const& item) = delete;
     ISerializedDestination(ISerializedDestination&& item) = delete;

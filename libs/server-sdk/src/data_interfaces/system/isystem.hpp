@@ -21,7 +21,7 @@ class ISystem : public IStore {
      */
     virtual void Initialize() = 0;
 
-    virtual ~ISystem() = default;
+    virtual ~ISystem() override = default;
     ISystem(ISystem const& item) = delete;
     ISystem(ISystem&& item) = delete;
     ISystem& operator=(ISystem const&) = delete;
