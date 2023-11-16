@@ -6,7 +6,7 @@
 #include <iostream>
 
 // Set SDK_KEY to your LaunchDarkly SDK key.
-#define SDK_KEY "foo"
+#define SDK_KEY ""
 
 // Set FEATURE_FLAG_KEY to the feature flag key you want to evaluate.
 #define FEATURE_FLAG_KEY "my-boolean-flag"
@@ -15,28 +15,22 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg);
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
 int main() {
-    if (!strlen(SDK_KEY)) {
-        printf(
-            "*** Please edit main.cpp to set SDK_KEY to your LaunchDarkly "
-            "SDK key first\n\n");
-        return 1;
-    }
+    char const* sdk_key = get_with_env_fallback(
+        SDK_KEY, "LD_SDK_KEY",
+        "Please edit main.c to set SDK_KEY to your LaunchDarkly server-side "
+        "SDK key "
+        "first.\n\nAlternatively, set the LD_SDK_KEY environment "
+        "variable.\n"
+        "The value of SDK_KEY in main.c takes priority over LD_SDK_KEY.");
 
-    auto cfg_builder = ConfigBuilder(SDK_KEY);
-
-    using BackgroundSync = DataSystemBuilder::BackgroundSync;
-
-    auto data_system = BackgroundSync().Synchronizer(
-        BackgroundSync::Streaming().InitialReconnectDelay(
-            std::chrono::seconds(1)));
-
-    cfg_builder.DataSystem().Method(data_system);
-
-    auto config = cfg_builder.Build();
+    auto config = ConfigBuilder(sdk_key).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
@@ -69,4 +63,20 @@ int main() {
               << (flag_value ? "true" : "false") << " for this user\n\n";
 
     return 0;
+}
+
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg) {
+    if (strlen(source_val)) {
+        return source_val;
+    }
+
+    char const* from_env = std::getenv(env_variable);
+    if (from_env && strlen(from_env)) {
+        return from_env;
+    }
+
+    std::cout << "*** " << error_msg << std::endl;
+    std::exit(1);
 }

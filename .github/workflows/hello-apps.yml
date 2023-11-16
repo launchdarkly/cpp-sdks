@@ -1,0 +1,45 @@
+name: hello-apps
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md' #Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ main, "feat/**" ]
+    paths-ignore:
+      - '**.md'
+
+
+jobs:
+  smoketest:
+    strategy:
+      matrix:
+        os: [ "ubuntu-22.04", "macos-12", "windows-2022" ]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Install Ninja
+        uses: ./.github/actions/install-ninja
+      - name: Install boost
+        uses: ./.github/actions/install-boost
+        id: install-boost
+      - name: Install OpenSSL
+        uses: ./.github/actions/install-openssl
+        id: install-openssl
+      - name: Statically Linked Hello Apps
+        shell: bash
+        run: ./scripts/run-hello-apps.sh static hello-c-client hello-cpp-client hello-c-server hello-cpp-server
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+      - name: Dynamically Linked Hello Apps
+        shell: bash
+        continue-on-error: true # TODO(SC-223804)
+        # Only the C bindings work with dynamic linking because C++ symbols are hidden
+        run: ./scripts/run-hello-apps.sh dynamic hello-c-client hello-c-server
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
