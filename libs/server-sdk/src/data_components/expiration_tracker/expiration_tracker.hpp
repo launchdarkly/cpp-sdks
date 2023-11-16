@@ -1,5 +1,10 @@
 #pragma once
 
+#include "../dependency_tracker/data_kind.hpp"
+#include "../dependency_tracker/tagged_data.hpp"
+
+#include <launchdarkly/connection.hpp>
+
 #include <array>
 #include <chrono>
 #include <functional>
@@ -7,12 +12,7 @@
 #include <optional>
 #include <string>
 
-#include <launchdarkly/connection.hpp>
-
-#include "../../data_store/data_kind.hpp"
-#include "../tagged_data.hpp"
-
-namespace launchdarkly::server_side::data_store::persistent {
+namespace launchdarkly::server_side::data_components {
 
 class ExpirationTracker {
    public:
@@ -68,7 +68,7 @@ class ExpirationTracker {
      * @param key The key to track.
      * @param expiration The time that the key expires.
      */
-    void Add(data_store::DataKind kind,
+    void Add(data_components::DataKind kind,
              std::string const& key,
              TimePoint expiration);
 
@@ -78,7 +78,7 @@ class ExpirationTracker {
      * @param kind The scope (kind) of the key.
      * @param key The key to stop tracking.
      */
-    void Remove(data_store::DataKind kind, std::string const& key);
+    void Remove(data_components::DataKind kind, std::string const& key);
 
     /**
      * Check the state of a scoped key.
@@ -87,7 +87,7 @@ class ExpirationTracker {
      * @param key The key to check.
      * @return The state of the key.
      */
-    TrackState State(data_store::DataKind kind,
+    TrackState State(data_components::DataKind kind,
                      std::string const& key,
                      TimePoint current_time) const;
 
@@ -142,4 +142,4 @@ class ExpirationTracker {
 std::ostream& operator<<(std::ostream& out,
                          ExpirationTracker::TrackState const& state);
 
-}  // namespace launchdarkly::server_side::data_store::persistent
+}  // namespace launchdarkly::server_side::data_components

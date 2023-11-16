@@ -41,6 +41,8 @@ target_sources(${LIBNAME}
         data_components/change_notifier/change_notifier.cpp
         data_components/dependency_tracker/dependency_tracker.hpp
         data_components/dependency_tracker/dependency_tracker.cpp
+        data_components/expiration_tracker/expiration_tracker.hpp
+        data_components/expiration_tracker/expiration_tracker.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
@@ -50,8 +52,6 @@ target_sources(${LIBNAME}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
-        data_store/persistent/expiration_tracker.hpp
-        data_store/persistent/expiration_tracker.cpp
         events/event_factory.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp

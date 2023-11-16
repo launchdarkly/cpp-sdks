@@ -13,8 +13,8 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class ChangeNotifier : public data_interfaces::IDestination,
-                       public IChangeNotifier {
+class ChangeNotifier final : public data_interfaces::IDestination,
+                             public IChangeNotifier {
    public:
     template <typename Storage>
     using Collection = data_model::SDKDataSet::Collection<std::string, Storage>;
@@ -30,7 +30,7 @@ class ChangeNotifier : public data_interfaces::IDestination,
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
-    void Init(launchdarkly::data_model::SDKDataSet data_set) override;
+    void Init(data_model::SDKDataSet data_set) override;
     void Upsert(std::string const& key,
                 data_model::FlagDescriptor flag) override;
     void Upsert(std::string const& key,
@@ -49,11 +49,10 @@ class ChangeNotifier : public data_interfaces::IDestination,
     bool HasListeners() const;
 
     template <typename FlagOrSegment>
-    void UpsertCommon(
-        DataKind kind,
-        std::string key,
-        SharedItem<FlagOrSegment> existing,
-        launchdarkly::data_model::ItemDescriptor<FlagOrSegment> updated) {
+    void UpsertCommon(DataKind kind,
+                      std::string key,
+                      SharedItem<FlagOrSegment> existing,
+                      data_model::ItemDescriptor<FlagOrSegment> updated) {
         if (existing && (updated.version <= existing->version)) {
             // Out of order update, ignore it.
             return;

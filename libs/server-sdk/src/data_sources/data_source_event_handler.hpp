@@ -4,7 +4,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "../data_store/data_kind.hpp"
+#include "../data_components/dependency_tracker/data_kind.hpp"
 #include "data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
@@ -29,10 +29,10 @@ struct SegmentsPath {
     static constexpr std::string_view path = "/segments/";
 };
 
-template <data_store::DataKind kind, typename TPath>
+template <data_components::DataKind kind, typename TPath>
 class StreamingDataKind {
    public:
-    static data_store::DataKind Kind() { return kind; }
+    static data_components::DataKind Kind() { return kind; }
     static bool IsKind(std::string const& patch_path) {
         return patch_path.rfind(TPath::path) == 0;
     }
@@ -42,16 +42,17 @@ class StreamingDataKind {
 };
 
 struct StreamingDataKinds {
-    using Flag = StreamingDataKind<data_store::DataKind::kFlag, FlagsPath>;
+    using Flag = StreamingDataKind<data_components::DataKind::kFlag, FlagsPath>;
     using Segment =
-        StreamingDataKind<data_store::DataKind::kSegment, SegmentsPath>;
+        StreamingDataKind<data_components::DataKind::kSegment, SegmentsPath>;
 
-    static std::optional<data_store::DataKind> Kind(std::string const& path) {
+    static std::optional<data_components::DataKind> Kind(
+        std::string const& path) {
         if (Flag::IsKind(path)) {
-            return data_store::DataKind::kFlag;
+            return data_components::DataKind::kFlag;
         }
         if (Segment::IsKind(path)) {
-            return data_store::DataKind::kSegment;
+            return data_components::DataKind::kSegment;
         }
         return std::nullopt;
     }
@@ -99,7 +100,7 @@ class DataSourceEventHandler {
 
     struct Delete {
         std::string key;
-        data_store::DataKind kind;
+        data_components::DataKind kind;
         uint64_t version;
     };
 
