@@ -14,16 +14,20 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg);
+
 using namespace launchdarkly;
 int main() {
-    if (!strlen(MOBILE_KEY)) {
-        printf(
-            "*** Please edit main.cpp to set MOBILE_KEY to your LaunchDarkly "
-            "mobile key first\n\n");
-        return 1;
-    }
+    char const* mobile_key = get_with_env_fallback(
+        MOBILE_KEY, "LD_MOBILE_KEY",
+        "Please edit main.c to set MOBILE_KEY to your LaunchDarkly mobile key "
+        "first.\n\nAlternatively, set the LD_MOBILE_KEY environment "
+        "variable.\n"
+        "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-    auto config = client_side::ConfigBuilder(MOBILE_KEY).Build();
+    auto config = client_side::ConfigBuilder(mobile_key).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
@@ -56,4 +60,20 @@ int main() {
               << (flag_value ? "true" : "false") << " for this user\n\n";
 
     return 0;
+}
+
+char const* get_with_env_fallback(char const* source_val,
+                                  char const* env_variable,
+                                  char const* error_msg) {
+    if (strlen(source_val)) {
+        return source_val;
+    }
+
+    char const* from_env = std::getenv(env_variable);
+    if (from_env && strlen(from_env)) {
+        return from_env;
+    }
+
+    std::cout << "*** " << error_msg << std::endl;
+    std::exit(1);
 }
