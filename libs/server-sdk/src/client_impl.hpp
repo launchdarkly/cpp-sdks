@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data_components/status_notifications/data_source_status_manager.hpp"
-#include "data_interfaces/system/isystem.hpp"
+#include "data_interfaces/system/idata_system.hpp"
 #include "evaluation/evaluator.hpp"
 #include "events/event_scope.hpp"
 
@@ -171,7 +171,7 @@ class ClientImpl : public IClient {
     // This is the main polymorphic component that constitutes the
     // guts of how data is retrieved (polling, streaming, persistent stores,
     // etc.)
-    std::unique_ptr<data_interfaces::ISystem> data_system_;
+    std::unique_ptr<data_interfaces::IDataSystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 

@@ -5,7 +5,7 @@
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/serialization_adapters/json_pull_source.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
-#include "../../data_interfaces/system/isystem.hpp"
+#include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -27,7 +27,7 @@ namespace launchdarkly::server_side::data_systems {
  * LazyLoad is able to remain efficient because it caches responses from the
  * store. Over time, data becomes stale causing the system to refresh data.
  */
-class LazyLoad : public data_interfaces::ISystem {
+class LazyLoad : public data_interfaces::IDataSystem {
    public:
     LazyLoad();
 
