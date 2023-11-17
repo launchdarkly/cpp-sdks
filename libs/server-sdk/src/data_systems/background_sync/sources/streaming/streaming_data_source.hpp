@@ -28,12 +28,10 @@ class StreamingDataSource final
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
-        ::launchdarkly::config::shared::built::ServiceEndpoints const&
-            endpoints,
-        ::launchdarkly::config::shared::built::StreamingConfig<
-            ::launchdarkly::config::shared::ServerSDK> const&
+        config::shared::built::ServiceEndpoints const& endpoints,
+        config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
             data_source_config,
-        launchdarkly::config::shared::built::HttpProperties http_properties,
+        config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         data_interfaces::IDestination& handler,
         data_components::DataSourceStatusManager& status_manager,
@@ -51,13 +49,12 @@ class StreamingDataSource final
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
 
-    ::launchdarkly::config::shared::built::StreamingConfig<
-        ::launchdarkly::config::shared::ServerSDK>
+    config::shared::built::StreamingConfig<config::shared::ServerSDK>
         streaming_config_;
 
-    ::launchdarkly::config::shared::built::HttpProperties http_config_;
+    config::shared::built::HttpProperties http_config_;
 
     Logger const& logger_;
-    std::shared_ptr<launchdarkly::sse::Client> client_;
+    std::shared_ptr<sse::Client> client_;
 };
 }  // namespace launchdarkly::server_side::data_systems
