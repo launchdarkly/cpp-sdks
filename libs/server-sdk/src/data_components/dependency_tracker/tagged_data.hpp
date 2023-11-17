@@ -1,13 +1,5 @@
 #pragma once
 
-#include <set>
-#include <string>
-
-#include <launchdarkly/data_model/flag.hpp>
-#include <launchdarkly/data_model/item_descriptor.hpp>
-#include <launchdarkly/data_model/rule_clause.hpp>
-#include <launchdarkly/data_model/segment.hpp>
-
 #include "data_kind.hpp"
 
 namespace launchdarkly::server_side::data_components {
@@ -20,7 +12,7 @@ namespace launchdarkly::server_side::data_components {
 template <typename Storage>
 class TaggedData {
    public:
-    explicit TaggedData(DataKind kind) : kind_(kind) {}
+    explicit TaggedData(DataKind const kind) : kind_(kind) {}
     [[nodiscard]] DataKind Kind() const { return kind_; }
     [[nodiscard]] Storage const& Data() const { return storage_; }
 

@@ -14,7 +14,7 @@ class DataSourceStatusManager
     : public internal::data_sources::DataSourceStatusManagerBase<
           DataSourceStatus,
           IDataSourceStatusProvider> {
-   public:
+public:
     DataSourceStatusManager() = default;
 
     ~DataSourceStatusManager() override = default;

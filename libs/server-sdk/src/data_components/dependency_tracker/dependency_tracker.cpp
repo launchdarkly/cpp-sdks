@@ -11,15 +11,16 @@ DependencySet::DependencySet()
           TaggedData<std::set<std::string>>(DataKind::kSegment),
       } {}
 
-void DependencySet::Set(DataKind kind, std::string key) {
+void DependencySet::Set(DataKind const kind, std::string key) {
     Data(kind).emplace(std::move(key));
 }
 
-void DependencySet::Remove(DataKind kind, std::string const& key) {
+void DependencySet::Remove(DataKind const kind, std::string const& key) {
     Data(kind).erase(key);
 }
 
-bool DependencySet::Contains(DataKind kind, std::string const& key) const {
+bool DependencySet::Contains(DataKind const kind,
+                             std::string const& key) const {
     return Data(kind).count(key) != 0;
 }
 

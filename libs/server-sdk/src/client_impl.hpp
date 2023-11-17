@@ -101,7 +101,7 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
-    IDataSourceStatusProvider& DataSourceStatus() override;
+    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
 
     ~ClientImpl();
 

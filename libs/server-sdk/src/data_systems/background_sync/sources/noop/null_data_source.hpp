@@ -14,7 +14,7 @@ class NullDataSource : public data_interfaces::IPushSource {
         data_components::DataSourceStatusManager& status_manager);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data) override;
-    void Start() override;
+    void StartAsync() override;
     void ShutdownAsync(std::function<void()>) override;
 
     [[nodiscard]] std::string const& Identity() const override;

@@ -1,20 +1,19 @@
-#include "change_notifier_destination.hpp"
+#include "change_notifier.hpp"
 
 #include <launchdarkly/signals/boost_signal_connection.hpp>
-#include <utility>
+#include <mutex>
 
 namespace launchdarkly::server_side::data_components {
 
-std::unique_ptr<IConnection> ChangeNotifierDestination::OnFlagChange(
-    launchdarkly::server_side::IChangeNotifier::ChangeHandler handler) {
+std::unique_ptr<IConnection> ChangeNotifier::OnFlagChange(
+    ChangeHandler handler) {
     std::lock_guard lock{signal_mutex_};
 
     return std::make_unique<launchdarkly::internal::signals::SignalConnection>(
         signals_.connect(handler));
 }
 
-void ChangeNotifierDestination::Init(
-    launchdarkly::data_model::SDKDataSet data_set) {
+void ChangeNotifier::Init(data_model::SDKDataSet data_set) {
     // Optional outside the HasListeners() scope, this allows for the changes
     // to be calculated before the update and then the notification to be
     // sent after the update completes.
@@ -45,23 +44,23 @@ void ChangeNotifierDestination::Init(
     }
 }
 
-void ChangeNotifierDestination::Upsert(std::string const& key,
-                                       data_model::FlagDescriptor flag) {
+void ChangeNotifier::Upsert(std::string const& key,
+                            data_model::FlagDescriptor flag) {
     UpsertCommon(DataKind::kFlag, key, source_.GetFlag(key), std::move(flag));
 }
 
-void ChangeNotifierDestination::Upsert(std::string const& key,
-                                       data_model::SegmentDescriptor segment) {
+void ChangeNotifier::Upsert(std::string const& key,
+                            data_model::SegmentDescriptor segment) {
     UpsertCommon(DataKind::kSegment, key, source_.GetSegment(key),
                  std::move(segment));
 }
 
-bool ChangeNotifierDestination::HasListeners() const {
+bool ChangeNotifier::HasListeners() const {
     std::lock_guard lock{signal_mutex_};
     return !signals_.empty();
 }
 
-void ChangeNotifierDestination::NotifyChanges(DependencySet changes) {
+void ChangeNotifier::NotifyChanges(DependencySet changes) {
     std::lock_guard lock{signal_mutex_};
     auto flag_changes = changes.SetForKind(DataKind::kFlag);
     // Only emit an event if there are changes.
@@ -70,12 +69,11 @@ void ChangeNotifierDestination::NotifyChanges(DependencySet changes) {
     }
 }
 
-ChangeNotifierDestination::ChangeNotifierDestination(
-    IDestination& sink,
-    data_interfaces::IStore const& source)
+ChangeNotifier::ChangeNotifier(IDestination& sink,
+                               data_interfaces::IStore const& source)
     : sink_(sink), source_(source) {}
 
-std::string const& ChangeNotifierDestination::Identity() const {
+std::string const& ChangeNotifier::Identity() const {
     static std::string const identity =
         "change notifier for " + sink_.Identity();
     return identity;

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <data_components/change_notifier/change_notifier_destination.hpp>
+#include <data_components/change_notifier/change_notifier.hpp>
 #include <data_components/memory_store/memory_store.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 
@@ -9,22 +9,22 @@ using launchdarkly::Value;
 using namespace launchdarkly::data_model;
 using namespace launchdarkly::server_side::data_components;
 
-TEST(ChangeNotifierDestinationTest, DoesNotInitializeStoreUntilInit) {
+TEST(ChangeNotifierTest, DoesNotInitializeStoreUntilInit) {
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
     EXPECT_FALSE(store.Initialized());
 }
 
-TEST(ChangeNotifierDestinationTest, InitializesStore) {
+TEST(ChangeNotifierTest, InitializesStore) {
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
     updater.Init(SDKDataSet());
     EXPECT_TRUE(store.Initialized());
 }
 
-TEST(ChangeNotifierDestinationTest, InitPropagatesData) {
+TEST(ChangeNotifierTest, InitPropagatesData) {
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
     Flag flag;
     flag.version = 1;
     flag.key = "flagA";
@@ -59,9 +59,9 @@ TEST(ChangeNotifierDestinationTest, InitPropagatesData) {
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, SecondInitProducesChanges) {
+TEST(ChangeNotifierTest, SecondInitProducesChanges) {
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
     Flag flag_a_v1;
     flag_a_v1.version = 1;
     flag_a_v1.key = "flagA";
@@ -138,9 +138,9 @@ TEST(ChangeNotifierDestinationTest, SecondInitProducesChanges) {
     EXPECT_TRUE(got_event);
 }
 
-TEST(ChangeNotifierDestinationTest, CanUpsertNewFlag) {
+TEST(ChangeNotifierTest, CanUpsertNewFlag) {
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     Flag flag_a;
     flag_a.version = 1;
@@ -160,13 +160,13 @@ TEST(ChangeNotifierDestinationTest, CanUpsertNewFlag) {
     EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, CanUpsertExitingFlag) {
+TEST(ChangeNotifierTest, CanUpsertExitingFlag) {
     Flag flag_a;
     flag_a.version = 1;
     flag_a.key = "flagA";
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{
@@ -188,14 +188,14 @@ TEST(ChangeNotifierDestinationTest, CanUpsertExitingFlag) {
     EXPECT_EQ(fetched_flag->version, fetched_flag->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, OldVersionIsDiscardedOnUpsertFlag) {
+TEST(ChangeNotifierTest, OldVersionIsDiscardedOnUpsertFlag) {
     Flag flag_a;
     flag_a.version = 2;
     flag_a.key = "flagA";
     flag_a.variations = std::vector<Value>{"potato", "ham"};
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{
@@ -222,13 +222,13 @@ TEST(ChangeNotifierDestinationTest, OldVersionIsDiscardedOnUpsertFlag) {
     EXPECT_EQ(std::string("ham"), fetched_flag->item->variations[1].AsString());
 }
 
-TEST(ChangeNotifierDestinationTest, CanUpsertNewSegment) {
+TEST(ChangeNotifierTest, CanUpsertNewSegment) {
     Segment segment_a;
     segment_a.version = 1;
     segment_a.key = "segmentA";
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>(),
@@ -244,13 +244,13 @@ TEST(ChangeNotifierDestinationTest, CanUpsertNewSegment) {
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, CanUpsertExitingSegment) {
+TEST(ChangeNotifierTest, CanUpsertExitingSegment) {
     Segment segment_a;
     segment_a.version = 1;
     segment_a.key = "segmentA";
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>(),
@@ -272,13 +272,13 @@ TEST(ChangeNotifierDestinationTest, CanUpsertExitingSegment) {
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, OldVersionIsDiscardedOnUpsertSegment) {
+TEST(ChangeNotifierTest, OldVersionIsDiscardedOnUpsertSegment) {
     Segment segment_a;
     segment_a.version = 2;
     segment_a.key = "segmentA";
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>(),
@@ -300,7 +300,7 @@ TEST(ChangeNotifierDestinationTest, OldVersionIsDiscardedOnUpsertSegment) {
     EXPECT_EQ(fetched_segment->version, fetched_segment->item->version);
 }
 
-TEST(ChangeNotifierDestinationTest, ProducesChangeEventsOnUpsert) {
+TEST(ChangeNotifierTest, ProducesChangeEventsOnUpsert) {
     Flag flag_a;
     Flag flag_b;
 
@@ -313,7 +313,7 @@ TEST(ChangeNotifierDestinationTest, ProducesChangeEventsOnUpsert) {
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{
@@ -343,7 +343,7 @@ TEST(ChangeNotifierDestinationTest, ProducesChangeEventsOnUpsert) {
     EXPECT_EQ(true, got_event);
 }
 
-TEST(ChangeNotifierDestinationTest, ProducesNoEventIfNoFlagChanged) {
+TEST(ChangeNotifierTest, ProducesNoEventIfNoFlagChanged) {
     Flag flag_a;
     Flag flag_b;
 
@@ -356,7 +356,7 @@ TEST(ChangeNotifierDestinationTest, ProducesNoEventIfNoFlagChanged) {
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     Segment segment_a;
     segment_a.version = 1;
@@ -386,7 +386,7 @@ TEST(ChangeNotifierDestinationTest, ProducesNoEventIfNoFlagChanged) {
     EXPECT_EQ(false, got_event);
 }
 
-TEST(ChangeNotifierDestinationTest, NoEventOnDiscardedUpsert) {
+TEST(ChangeNotifierTest, NoEventOnDiscardedUpsert) {
     Flag flag_a;
     Flag flag_b;
 
@@ -399,7 +399,7 @@ TEST(ChangeNotifierDestinationTest, NoEventOnDiscardedUpsert) {
     flag_b.prerequisites.push_back(Flag::Prerequisite{"flagA", 0});
 
     MemoryStore store;
-    ChangeNotifierDestination updater(store, store);
+    ChangeNotifier updater(store, store);
 
     updater.Init(SDKDataSet{
         std::unordered_map<std::string, FlagDescriptor>{

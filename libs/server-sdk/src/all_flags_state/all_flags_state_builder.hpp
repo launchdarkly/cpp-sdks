@@ -2,7 +2,10 @@
 
 #include <launchdarkly/server_side/client.hpp>
 
-#include "../evaluation/evaluator.hpp"
+#include <launchdarkly/value.hpp>
+
+#include <string>
+#include <unordered_map>
 
 namespace launchdarkly::server_side {
 
@@ -15,7 +18,7 @@ class AllFlagsStateBuilder {
      * Constructs a builder capable of generating a AllFlagsState structure.
      * @param options Options affecting the behavior of the builder.
      */
-    AllFlagsStateBuilder(AllFlagsState::Options options);
+    explicit AllFlagsStateBuilder(AllFlagsState::Options options);
 
     /**
      * Adds a flag, including its evaluation result and additional state.
@@ -35,7 +38,7 @@ class AllFlagsStateBuilder {
     [[nodiscard]] AllFlagsState Build();
 
    private:
-    enum AllFlagsState::Options options_;
+    AllFlagsState::Options options_;
     std::unordered_map<std::string, AllFlagsState::State> flags_state_;
     std::unordered_map<std::string, Value> evaluations_;
 };

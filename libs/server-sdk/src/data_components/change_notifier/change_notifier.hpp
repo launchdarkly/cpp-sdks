@@ -13,8 +13,8 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class ChangeNotifierDestination : public data_interfaces::IDestination,
-                                  public IChangeNotifier {
+class ChangeNotifier final : public data_interfaces::IDestination,
+                             public IChangeNotifier {
    public:
     template <typename Storage>
     using Collection = data_model::SDKDataSet::Collection<std::string, Storage>;
@@ -26,12 +26,11 @@ class ChangeNotifierDestination : public data_interfaces::IDestination,
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    ChangeNotifierDestination(IDestination& sink,
-                              data_interfaces::IStore const& source);
+    ChangeNotifier(IDestination& sink, data_interfaces::IStore const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
-    void Init(launchdarkly::data_model::SDKDataSet data_set) override;
+    void Init(data_model::SDKDataSet data_set) override;
     void Upsert(std::string const& key,
                 data_model::FlagDescriptor flag) override;
     void Upsert(std::string const& key,
@@ -39,23 +38,21 @@ class ChangeNotifierDestination : public data_interfaces::IDestination,
 
     [[nodiscard]] std::string const& Identity() const override;
 
-    ~ChangeNotifierDestination() override = default;
+    ~ChangeNotifier() override = default;
 
-    ChangeNotifierDestination(ChangeNotifierDestination const& item) = delete;
-    ChangeNotifierDestination(ChangeNotifierDestination&& item) = delete;
-    ChangeNotifierDestination& operator=(ChangeNotifierDestination const&) =
-        delete;
-    ChangeNotifierDestination& operator=(ChangeNotifierDestination&&) = delete;
+    ChangeNotifier(ChangeNotifier const& item) = delete;
+    ChangeNotifier(ChangeNotifier&& item) = delete;
+    ChangeNotifier& operator=(ChangeNotifier const&) = delete;
+    ChangeNotifier& operator=(ChangeNotifier&&) = delete;
 
    private:
     bool HasListeners() const;
 
     template <typename FlagOrSegment>
-    void UpsertCommon(
-        DataKind kind,
-        std::string key,
-        SharedItem<FlagOrSegment> existing,
-        launchdarkly::data_model::ItemDescriptor<FlagOrSegment> updated) {
+    void UpsertCommon(DataKind kind,
+                      std::string key,
+                      SharedItem<FlagOrSegment> existing,
+                      data_model::ItemDescriptor<FlagOrSegment> updated) {
         if (existing && (updated.version <= existing->version)) {
             // Out of order update, ignore it.
             return;

@@ -12,25 +12,23 @@ class JsonSource final : public data_interfaces::IPullSource {
     explicit JsonSource(
         data_interfaces::ISerializedDataPullSource& json_source);
 
-    [[nodiscard]] ItemResult<data_model::FlagDescriptor> GetFlag(
+    [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
 
-    [[nodiscard]] ItemResult<data_model::SegmentDescriptor> GetSegment(
+    [[nodiscard]] Single<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const override;
 
-    [[nodiscard]] AllResult<data_model::FlagDescriptor> AllFlags()
+    [[nodiscard]] Collection<data_model::FlagDescriptor> AllFlags()
         const override;
 
-    [[nodiscard]] AllResult<data_model::SegmentDescriptor> AllSegments()
+    [[nodiscard]] Collection<data_model::SegmentDescriptor> AllSegments()
         const override;
 
     [[nodiscard]] std::string const& Identity() const override;
 
-    [[nodiscard]] bool Initialized() const override;
-
    private:
     template <typename DataModel, typename DataKind>
-    ItemResult<data_model::ItemDescriptor<DataModel>> Deserialize(
+    Single<data_model::ItemDescriptor<DataModel>> Deserialize(
         DataKind const& kind,
         std::string const& key) const {
         auto result = source_.Get(kind, key);

@@ -1,5 +1,7 @@
 #include "expiration_tracker.hpp"
 
+#include <ostream>
+
 namespace launchdarkly::server_side::data_components {
 
 void ExpirationTracker::Add(std::string const& key,

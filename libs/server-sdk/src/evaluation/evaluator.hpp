@@ -32,7 +32,7 @@ class Evaluator {
      */
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
-        launchdarkly::Context const& context,
+        Context const& context,
         EventScope const& event_scope);
 
     /**
@@ -42,15 +42,14 @@ class Evaluator {
      * @param flag The flag to evaluate.
      * @param context The context to evaluate the flag against.
      */
-    [[nodiscard]] EvaluationDetail<Value> Evaluate(
-        data_model::Flag const& flag,
-        launchdarkly::Context const& context);
+    [[nodiscard]] EvaluationDetail<Value> Evaluate(data_model::Flag const& flag,
+                                                   Context const& context);
 
    private:
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         std::optional<std::string> parent_key,
         data_model::Flag const& flag,
-        launchdarkly::Context const& context,
+        Context const& context,
         EventScope const& event_scope);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
