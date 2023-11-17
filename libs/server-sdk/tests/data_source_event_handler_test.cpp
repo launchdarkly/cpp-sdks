@@ -5,6 +5,7 @@
 
 #include <launchdarkly/logging/null_logger.hpp>
 
+#include <memory>
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
