@@ -9,16 +9,9 @@ namespace launchdarkly::server_side::data_systems {
 
 using namespace config::shared::built;
 
-/*
-*DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
-HttpProperties http_properties,
-boost::asio::any_io_executor ioc,
-data_components::DataSourceStatusManager& status_manager,
-*/
 LazyLoad::LazyLoad()
     : cache_(),
-      raw_source_(
-          std::make_shared<RedisDataSource>("tcp://localhost:6379", "test")),
+      raw_source_(),  // TODO: take LazyLoadConfig argument and construct source
       source_(*raw_source_.get()),
       tracker_(),
       time_([]() { return std::chrono::steady_clock::now(); }),
