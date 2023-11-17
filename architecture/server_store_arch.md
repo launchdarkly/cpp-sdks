@@ -8,11 +8,11 @@ classDiagram
     Client --* IChangeNotifier
     
     IDataStore <|-- MemoryStore
-    IDataSourceUpdateSink <|-- MemoryStore
+    IDataDestination <|-- MemoryStore
 
     IDataStore <|-- PersistentStore
-    IDataSourceUpdateSink <|-- PersistentStore
-    IDataSourceUpdateSink <|-- DataStoreUpdater
+    IDataDestination <|-- PersistentStore
+    IDataDestination <|-- DataStoreUpdater
     
     IChangeNotifier <|-- DataStoreUpdater
     
@@ -55,7 +55,7 @@ classDiagram
     }
 
 
-    class IDataSourceUpdateSink{
+    class IDataDestination{
         <<interface>>
         +void Init(SDKDataSet allData)
         +void Upsert(std::string key, ItemDescriptor~Flag~ data)

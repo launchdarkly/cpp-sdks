@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
+#include <launchdarkly/server_side/config/config_builder.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
-
-#include <launchdarkly/bindings/c/context_builder.h>
 
 #include <boost/json/parse.hpp>
 
 #include <chrono>
 
-using launchdarkly::server_side::data_sources::DataSourceStatus;
+using namespace launchdarkly::server_side;
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -37,7 +37,9 @@ void StatusListenerFunction(LDServerDataSourceStatus status, void* user_data) {
 // will at least ensure 1.) Compilation, and 2.) Allow sanitizers to run.
 TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
-    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    // TODO: Disable the default datasource for the test, otherwise this will
+    // try to make a net conneciton.
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
@@ -66,7 +68,8 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
 TEST(ClientBindings, GetStatusOfOfflineClient) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
-    LDServerConfigBuilder_Offline(cfg_builder, true);
+    // TODO: Disable the default datasource for the test, otherwise this will
+    // try to make a net conneciton.
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);

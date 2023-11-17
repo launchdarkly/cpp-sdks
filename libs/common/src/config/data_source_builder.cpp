@@ -3,6 +3,49 @@
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
+struct MethodVisitor {};
+
+template <>
+struct MethodVisitor<ClientSDK> {
+    using SDK = ClientSDK;
+    using Result =
+        std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>;
+
+    Result operator()(StreamingBuilder<SDK> const& streaming) const {
+        return streaming.Build();
+    }
+
+    Result operator()(PollingBuilder<SDK> const& polling) const {
+        return polling.Build();
+    }
+};
+
+template <>
+struct MethodVisitor<ServerSDK> {
+    using SDK = ServerSDK;
+    using Result = tl::expected<std::variant<built::StreamingConfig<SDK>,
+                                             built::PollingConfig<SDK>,
+                                             built::RedisConfig>,
+                                Error>;
+
+    Result operator()(StreamingBuilder<SDK> const& streaming) const {
+        return streaming.Build();
+    }
+
+    Result operator()(PollingBuilder<SDK> const& polling) const {
+        return polling.Build();
+    }
+
+    Result operator()(RedisBuilder const& redis_pull) const {
+        return redis_pull.Build().map([](auto&& config) {
+            return std::variant<built::StreamingConfig<SDK>,
+                                built::PollingConfig<SDK>, built::RedisConfig>{
+                std::move(config)};
+        });
+    }
+};
+
+template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
     : config_(Defaults<SDK>::StreamingConfig()) {}
 
@@ -51,45 +94,25 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::UseReport(
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     StreamingBuilder<ClientSDK> builder) {
-    method_ = builder;
+    method_ = std::move(builder);
     return *this;
 }
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     PollingBuilder<ClientSDK> builder) {
-    method_ = builder;
+    method_ = std::move(builder);
     return *this;
 }
 
 built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
-    auto method = std::visit(MethodVisitor<ClientSDK>(), method_);
-    return {method, with_reasons_, use_report_};
+    return {std::visit(MethodVisitor<ClientSDK>(), method_), with_reasons_,
+            use_report_};
 }
 
-DataSourceBuilder<ServerSDK>::DataSourceBuilder()
-    : with_reasons_(false), use_report_(false), method_(Streaming()) {}
+template class PollingBuilder<ClientSDK>;
+template class PollingBuilder<ServerSDK>;
 
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
-    StreamingBuilder<ServerSDK> builder) {
-    method_ = builder;
-    return *this;
-}
-
-DataSourceBuilder<ServerSDK>& DataSourceBuilder<ServerSDK>::Method(
-    PollingBuilder<ServerSDK> builder) {
-    method_ = builder;
-    return *this;
-}
-
-built::DataSourceConfig<ServerSDK> DataSourceBuilder<ServerSDK>::Build() const {
-    auto method = std::visit(MethodVisitor<ServerSDK>(), method_);
-    return {method};
-}
-
-template class PollingBuilder<config::shared::ClientSDK>;
-template class PollingBuilder<config::shared::ServerSDK>;
-
-template class StreamingBuilder<config::shared::ClientSDK>;
-template class StreamingBuilder<config::shared::ServerSDK>;
+template class StreamingBuilder<ClientSDK>;
+template class StreamingBuilder<ServerSDK>;
 
 }  // namespace launchdarkly::config::shared::builders

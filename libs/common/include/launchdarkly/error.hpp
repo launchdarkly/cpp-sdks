@@ -23,6 +23,7 @@ enum class Error : std::uint32_t {
     kConfig_SDKKey_Empty = 400,
     /* Client-side errors: 10000-19999 */
     /* Server-side errors: 20000-29999 */
+    kConfig_DataSystem_LazyLoad_MissingSource = 20000,
 
     kMax = std::numeric_limits<std::uint32_t>::max()
 };

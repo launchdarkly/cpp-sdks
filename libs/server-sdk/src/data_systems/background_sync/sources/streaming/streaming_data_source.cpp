@@ -1,3 +1,7 @@
+#include "streaming_data_source.hpp"
+
+#include <launchdarkly/network/http_requester.hpp>
+
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
@@ -5,11 +9,7 @@
 
 #include <utility>
 
-#include "streaming_data_source.hpp"
-
-#include <launchdarkly/network/http_requester.hpp>
-
-namespace launchdarkly::server_side::data_sources {
+namespace launchdarkly::server_side::data_systems {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
@@ -28,27 +28,34 @@ static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
     }
 }
 
+std::string const& StreamingDataSource::Identity() const {
+    static std::string const identity = "streaming data source";
+    return identity;
+}
+
 StreamingDataSource::StreamingDataSource(
     config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
+    config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
         data_source_config,
     config::shared::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
-    IDataSourceUpdateSink& handler,
-    DataSourceStatusManager& status_manager,
+    data_interfaces::IDestination& handler,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : exec_(std::move(ioc)),
       logger_(logger),
       status_manager_(status_manager),
-      data_source_handler_(
-          DataSourceEventHandler(handler, logger, status_manager_)),
+      data_source_handler_(handler, logger, status_manager_),
       http_config_(std::move(http_properties)),
-      streaming_config_(
-          std::get<config::shared::built::StreamingConfig<
-              config::shared::ServerSDK>>(data_source_config.method)),
+      streaming_config_(data_source_config),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
-void StreamingDataSource::Start() {
+void StreamingDataSource::Init(
+    std::optional<data_model::SDKDataSet> initial_data) {
+    // TODO: implement
+}
+
+void StreamingDataSource::StartAsync() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
@@ -149,4 +156,4 @@ void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(exec_, completion);
     }
 }
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_systems

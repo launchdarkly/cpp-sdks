@@ -19,6 +19,8 @@ char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
                                   char const* error_msg);
 using namespace launchdarkly;
+using namespace launchdarkly::server_side;
+
 int main() {
     char const* sdk_key = get_with_env_fallback(
         SDK_KEY, "LD_SDK_KEY",
@@ -28,13 +30,13 @@ int main() {
         "variable.\n"
         "The value of SDK_KEY in main.c takes priority over LD_SDK_KEY.");
 
-    auto config = server_side::ConfigBuilder(sdk_key).Build();
+    auto config = ConfigBuilder(sdk_key).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
     }
 
-    auto client = server_side::Client(std::move(*config));
+    auto client = Client(std::move(*config));
 
     auto start_result = client.StartAsync();
     auto status = start_result.wait_for(

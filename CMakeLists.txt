@@ -53,6 +53,8 @@ option(LD_DYNAMIC_LINK_OPENSSL
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
+option(LD_BUILD_REDIS_SUPPORT "Build redis support." ON)
+
 # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
 # it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
 # so that we only need to build the client or server for a given release (if only the client or server were affected.)
@@ -128,6 +130,11 @@ add_subdirectory(vendor/foxy)
 add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
+
+if (LD_BUILD_REDIS_SUPPORT)
+    message(STATUS "LaunchDarkly: building redis support")
+    include(${CMAKE_FILES}/redis-plus-plus.cmake)
+endif ()
 
 # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
 # This target "links" in common, internal, and sse as object libraries.

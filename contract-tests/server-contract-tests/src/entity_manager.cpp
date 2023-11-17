@@ -17,8 +17,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     auto config_builder = ConfigBuilder(in.credential);
 
-    auto default_endpoints =
-        launchdarkly::server_side::Defaults::ServiceEndpoints();
+    auto default_endpoints = Defaults::ServiceEndpoints();
 
     auto& endpoints =
         config_builder.ServiceEndpoints()
@@ -38,17 +37,18 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
-    auto& datasource = config_builder.DataSource();
+    using BackgroundSync = DataSystemBuilder::BackgroundSync;
+    auto datasystem = BackgroundSync();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
         if (in.streaming->initialRetryDelayMs) {
-            auto streaming = DataSourceBuilder::Streaming();
+            auto streaming = BackgroundSync::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
-            datasource.Method(std::move(streaming));
+            datasystem.Synchronizer(std::move(streaming));
         }
     }
 
@@ -57,16 +57,18 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.PollingBaseUrl(*in.polling->baseUri);
         }
         if (!in.streaming) {
-            auto method = DataSourceBuilder::Polling();
+            auto method = BackgroundSync::Polling();
             if (in.polling->pollIntervalMs) {
                 method.PollInterval(
                     std::chrono::duration_cast<std::chrono::seconds>(
                         std::chrono::milliseconds(
                             *in.polling->pollIntervalMs)));
             }
-            datasource.Method(std::move(method));
+            datasystem.Synchronizer(std::move(method));
         }
     }
+
+    config_builder.DataSystem().Method(std::move(datasystem));
 
     auto& event_config = config_builder.Events();
 

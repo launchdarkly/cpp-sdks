@@ -3,8 +3,8 @@
 #include "data_kind.hpp"
 #include "tagged_data.hpp"
 
+#include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/data_model/flag.hpp>
-#include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
@@ -93,16 +93,14 @@ class DependencyMap {
  */
 class DependencyTracker {
    public:
-    using FlagDescriptor = data_model::ItemDescriptor<data_model::Flag>;
-    using SegmentDescriptor = data_model::ItemDescriptor<data_model::Segment>;
-
     /**
      * Update the dependency tracker with a new or updated flag.
      *
      * @param key The key for the flag.
      * @param flag A descriptor for the flag.
      */
-    void UpdateDependencies(std::string const& key, FlagDescriptor const& flag);
+    void UpdateDependencies(std::string const& key,
+                            data_model::FlagDescriptor const& flag);
 
     /**
      * Update the dependency tracker with a new or updated segment.
@@ -111,7 +109,7 @@ class DependencyTracker {
      * @param flag A descriptor for the segment.
      */
     void UpdateDependencies(std::string const& key,
-                            SegmentDescriptor const& segment);
+                            data_model::SegmentDescriptor const& segment);
 
     /**
      * Given the current dependencies, determine what flags or segments may be
