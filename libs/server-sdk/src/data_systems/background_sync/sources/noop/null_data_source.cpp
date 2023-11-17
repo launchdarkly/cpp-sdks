@@ -4,7 +4,7 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-void NullDataSource::Start() {
+void NullDataSource::StartAsync() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
 }
 

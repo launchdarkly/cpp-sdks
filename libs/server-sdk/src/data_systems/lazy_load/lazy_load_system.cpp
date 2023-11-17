@@ -3,7 +3,7 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
-#include "sources/redis/redis_source.hpp"
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -86,21 +86,30 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    for (auto const [flag_key, flag_descriptor] : source_.AllFlags()) {
-        cache_.Upsert(flag_key, std::move(flag_descriptor));
+    auto maybe_flags = source_.AllFlags();
+    // TODO: log failure?
+    if (maybe_flags) {
+        for (auto const [flag_key, flag_descriptor] : *maybe_flags) {
+            cache_.Upsert(flag_key, std::move(flag_descriptor));
+        }
+        tracker_.Add(Keys::kAllFlags, time_());
     }
-    tracker_.Add(Keys::kAllFlags, time_());
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    for (auto const [seg_key, seg_descriptor] : source_.AllSegments()) {
-        cache_.Upsert(seg_key, std::move(seg_descriptor));
+    auto maybe_segments = source_.AllSegments();
+    // TODO: log failure?
+    if (maybe_segments) {
+        for (auto const [seg_key, seg_descriptor] : *maybe_segments) {
+            cache_.Upsert(seg_key, std::move(seg_descriptor));
+        }
+        tracker_.Add(Keys::kAllSegments, time_());
     }
-    tracker_.Add(Keys::kAllSegments, time_());
 }
 
 void LazyLoad::RefreshInitState() const {
-    initialized_ = source_.Initialized();
+    // TODO: what does this matter?
+    // initialized_ = source_.Initialized();
     tracker_.Add(Keys::kInitialized, time_());
 }
 

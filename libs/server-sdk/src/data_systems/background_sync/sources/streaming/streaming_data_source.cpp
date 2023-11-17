@@ -55,7 +55,7 @@ void StreamingDataSource::Init(
     // TODO: implement
 }
 
-void StreamingDataSource::Start() {
+void StreamingDataSource::StartAsync() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,

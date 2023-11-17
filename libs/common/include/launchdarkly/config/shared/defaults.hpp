@@ -102,10 +102,6 @@ struct Defaults<ServerSDK> {
         return {std::chrono::seconds{1}, "/all"};
     }
 
-    static auto DataSourceConfig() -> built::DataSourceConfig<ServerSDK> {
-        return {StreamingConfig()};
-    }
-
     static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
         return {std::chrono::seconds{30}, "/sdk/latest-all",
                 std::chrono::seconds{30}};

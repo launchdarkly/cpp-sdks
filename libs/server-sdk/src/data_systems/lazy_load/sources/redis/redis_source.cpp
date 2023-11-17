@@ -19,7 +19,7 @@ data_interfaces::ISerializedDataPullSource::GetResult RedisDataSource::Get(
         return integrations::SerializedItemDescriptor{0, false,
                                                       maybe_item.value()};
     }
-    sw::redis::SentinelOptions return tl::make_unexpected(Error{"not found"});
+    return tl::make_unexpected(Error{"not found"});
 }
 
 data_interfaces::ISerializedDataPullSource::AllResult RedisDataSource::All(

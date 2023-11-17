@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 

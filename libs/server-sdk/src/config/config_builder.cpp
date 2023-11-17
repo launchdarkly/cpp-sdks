@@ -1,32 +1,31 @@
 #include <launchdarkly/server_side/config/config_builder.hpp>
-#include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::server_side {
 
 ConfigBuilder::ConfigBuilder(std::string sdk_key)
     : sdk_key_(std::move(sdk_key)) {}
 
-EndpointsBuilder& ConfigBuilder::ServiceEndpoints() {
+config::builders::EndpointsBuilder& ConfigBuilder::ServiceEndpoints() {
     return service_endpoints_builder_;
 }
 
-EventsBuilder& ConfigBuilder::Events() {
+config::builders::EventsBuilder& ConfigBuilder::Events() {
     return events_builder_;
 }
 
-AppInfoBuilder& ConfigBuilder::AppInfo() {
+config::builders::AppInfoBuilder& ConfigBuilder::AppInfo() {
     return app_info_builder_;
 }
 
-DataSystemBuilder& ConfigBuilder::DataSystem() {
+config::builders::DataSystemBuilder& ConfigBuilder::DataSystem() {
     return data_system_builder_;
 }
 
-HttpPropertiesBuilder& ConfigBuilder::HttpProperties() {
+config::builders::HttpPropertiesBuilder& ConfigBuilder::HttpProperties() {
     return http_properties_builder_;
 }
 
-LoggingBuilder& ConfigBuilder::Logging() {
+config::builders::LoggingBuilder& ConfigBuilder::Logging() {
     return logging_config_builder_;
 }
 

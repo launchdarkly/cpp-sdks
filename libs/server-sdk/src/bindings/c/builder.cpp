@@ -7,6 +7,7 @@
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
 using namespace launchdarkly::server_side;
+using namespace launchdarkly::server_side::config::builders;
 
 #define TO_BUILDER(ptr) (reinterpret_cast<ConfigBuilder*>(ptr))
 #define FROM_BUILDER(ptr) (reinterpret_cast<LDServerConfigBuilder>(ptr))

@@ -4,9 +4,8 @@
 #include "../../../../data_interfaces/destination/idestination.hpp"
 #include "../../../../data_interfaces/source/ipush_source.hpp"
 
-#include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
+#include <launchdarkly/server_side/config/built/all_built.hpp>
+
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 
@@ -20,18 +19,17 @@ class PollingDataSource
     : public data_interfaces::IPushSource,
       public std::enable_shared_from_this<PollingDataSource> {
    public:
-    PollingDataSource(
-        config::shared::built::ServiceEndpoints const& endpoints,
-        config::shared::built::PollingConfig<config::shared::ServerSDK> const&
-            data_source_config,
-        config::shared::built::HttpProperties const& http_properties,
-        boost::asio::any_io_executor const& ioc,
-        data_interfaces::IDestination& handler,
-        data_components::DataSourceStatusManager& status_manager,
-        Logger const& logger);
+    PollingDataSource(config::built::ServiceEndpoints const& endpoints,
+                      config::built::BackgroundSyncConfig::PollingConfig const&
+                          data_source_config,
+                      config::built::HttpProperties const& http_properties,
+                      boost::asio::any_io_executor const& ioc,
+                      data_interfaces::IDestination& handler,
+                      data_components::DataSourceStatusManager& status_manager,
+                      Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data) override;
-    void Start() override;
+    void StartAsync() override;
     void ShutdownAsync(std::function<void()> completion) override;
 
     [[nodiscard]] std::string const& Identity() const override;

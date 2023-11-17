@@ -1,17 +1,14 @@
 #pragma once
 
-#include "../../data_components/change_notifier/change_notifier_destination.hpp"
+#include "../../data_components/change_notifier/change_notifier.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/ipush_source.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
 
-#include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/data_system/background_sync_config.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -27,15 +24,15 @@ namespace launchdarkly::server_side::data_systems {
  * too large to fit in memory, or a direct connection to LaunchDarkly isn't
  * desired, necessitating use of the alternate LazyLoad system.
  */
-class BackgroundSync : public data_interfaces::ISystem {
+class BackgroundSync final : public data_interfaces::ISystem {
    public:
-    BackgroundSync(config::shared::built::ServiceEndpoints const& endpoints,
-                   config::shared::built::BackgroundSyncConfig<
-                       config::shared::ServerSDK> const& background_sync_config,
-                   config::shared::built::HttpProperties http_properties,
-                   boost::asio::any_io_executor ioc,
-                   data_components::DataSourceStatusManager& status_manager,
-                   Logger const& logger);
+    BackgroundSync(
+        config::built::ServiceEndpoints const& endpoints,
+        config::built::BackgroundSyncConfig const& background_sync_config,
+        config::built::HttpProperties http_properties,
+        boost::asio::any_io_executor ioc,
+        data_components::DataSourceStatusManager& status_manager,
+        Logger const& logger);
 
     /**
      * @brief Constructs a BackgroundSync without a data source.
@@ -64,7 +61,7 @@ class BackgroundSync : public data_interfaces::ISystem {
 
    private:
     data_components::MemoryStore store_;
-    data_components::ChangeNotifierDestination change_notifier_;
+    data_components::ChangeNotifier change_notifier_;
     // Needs to be shared to that the source can keep itself alive through
     // async operations.
     std::shared_ptr<data_interfaces::IPushSource> synchronizer_;

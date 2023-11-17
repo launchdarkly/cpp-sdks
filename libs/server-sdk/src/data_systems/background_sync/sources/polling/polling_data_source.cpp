@@ -1,14 +1,14 @@
 #include "polling_data_source.hpp"
 
-#include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
+
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
-#include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
+
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
 #include <boost/json.hpp>
 
@@ -22,10 +22,9 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL";
 
 static network::HttpRequest MakeRequest(
-    config::shared::built::PollingConfig<config::shared::ServerSDK> const&
-        polling_config,
-    config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::HttpProperties const& http_properties) {
+    config::built::BackgroundSyncConfig::PollingConfig const& polling_config,
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::HttpProperties const& http_properties) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
 
     url = network::AppendUrl(url, polling_config.polling_get_path);
@@ -33,8 +32,7 @@ static network::HttpRequest MakeRequest(
     network::HttpRequest::BodyType body;
     network::HttpMethod method = network::HttpMethod::kGet;
 
-    config::shared::builders::HttpPropertiesBuilder<config::shared::ServerSDK>
-        builder(http_properties);
+    config::builders::HttpPropertiesBuilder const builder(http_properties);
 
     // If no URL is set, then we will fail the request.
     return {url.value_or(""), method, builder.Build(), body};
@@ -46,10 +44,10 @@ std::string const& PollingDataSource::Identity() const {
 }
 
 PollingDataSource::PollingDataSource(
-    config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::PollingConfig<config::shared::ServerSDK> const&
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
-    config::shared::built::HttpProperties const& http_properties,
+    config::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& ioc,
     data_interfaces::IDestination& handler,
     data_components::DataSourceStatusManager& status_manager,
@@ -106,9 +104,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     }
 
     if (has_etag) {
-        config::shared::builders::HttpPropertiesBuilder<
-            config::shared::ServerSDK>
-            builder(request_.Properties());
+        config::builders::HttpPropertiesBuilder builder(request_.Properties());
         builder.Header("If-None-Match", header_etag->second);
         request_ = network::HttpRequest(request_, builder.Build());
 
@@ -215,7 +211,7 @@ void PollingDataSource::StartPollingTimer() {
     });
 }
 
-void PollingDataSource::Start() {
+void PollingDataSource::StartAsync() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;

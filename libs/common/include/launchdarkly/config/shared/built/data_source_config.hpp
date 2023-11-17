@@ -85,11 +85,5 @@ struct DataSourceConfig<ClientSDK> {
 };
 
 template <>
-struct DataSourceConfig<ServerSDK> {
-    std::variant<StreamingConfig<ServerSDK>,
-                 PollingConfig<ServerSDK>,
-                 RedisConfig>
-        method;
-};
-
+struct DataSourceConfig<ServerSDK> {};
 }  // namespace launchdarkly::config::shared::built

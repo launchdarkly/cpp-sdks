@@ -6,14 +6,18 @@
 #include <launchdarkly/server_side/config/built/data_system/data_destination_config.hpp>
 
 #include <optional>
+#include <variant>
 
 namespace launchdarkly::server_side::config::built {
 
+
 struct BackgroundSyncConfig {
+    using StreamingConfig = launchdarkly::config::shared::built::StreamingConfig<launchdarkly::config::shared::ServerSDK>;
+    using PollingConfig = launchdarkly::config::shared::built::PollingConfig<launchdarkly::config::shared::ServerSDK>;
+
+
     std::optional<BootstrapConfig> bootstrap_;
-    launchdarkly::config::shared::built::DataSourceConfig<
-        launchdarkly::config::shared::ServerSDK>
-        source_;
+    std::variant<StreamingConfig, PollingConfig> synchronizer_;
     std::optional<DataDestinationConfig> destination_;
 };
 

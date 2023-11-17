@@ -10,13 +10,17 @@
 #include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
-#include <launchdarkly/server_side/config/config_builder.hpp>
+
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
+#include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <chrono>
 #include <optional>
 #include <utility>
 
 namespace launchdarkly::server_side {
+
+using EventProcessor = events::AsioEventProcessor<config::builders::SDK>;
 
 // The ASIO implementation assumes that the io_context will be run from a
 // single thread, and applies several optimisations based on this
@@ -26,10 +30,6 @@ auto const kAsioConcurrencyHint = 1;
 // Client's destructor attempts to gracefully shut down the datasource
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
-
-using config::shared::ServerSDK;
-using launchdarkly::config::shared::built::DataSourceConfig;
-using launchdarkly::config::shared::built::HttpProperties;
 
 // static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
 // MakeDataSource(HttpProperties const& http_properties,
@@ -63,7 +63,7 @@ using launchdarkly::config::shared::built::HttpProperties;
 // }
 
 static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
-    HttpProperties const& http_properties,
+    config::built::HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
@@ -73,20 +73,20 @@ static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
                                                               status_manager);
     }
 
-    auto const builder = HttpPropertiesBuilder(http_properties);
+    auto const builder =
+        config::builders::HttpPropertiesBuilder(http_properties);
 
     auto data_source_properties = builder.Build();
 
-    auto const bg_sync_config =
-        std::get<config::shared::built::BackgroundSyncConfig<ServerSDK>>(
-            config.DataSystemConfig().system_);
+    auto const bg_sync_config = std::get<config::built::BackgroundSyncConfig>(
+        config.DataSystemConfig().system_);
 
     return std::make_unique<data_systems::BackgroundSync>(
         config.ServiceEndpoints(), bg_sync_config, data_source_properties,
         executor, status_manager, logger);
 }
 
-static Logger MakeLogger(config::shared::built::Logging const& config) {
+static Logger MakeLogger(config::built::Logging const& config) {
     if (config.disable_logging) {
         return {std::make_shared<logging::NullLoggerBackend>()};
     }
@@ -97,15 +97,15 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
+std::unique_ptr<EventProcessor> MakeEventProcessor(
     Config const& config,
     boost::asio::any_io_executor const& exec,
-    HttpProperties const& http_properties,
+    config::built::HttpProperties const& http_properties,
     Logger& logger) {
     if (config.Events().Enabled()) {
-        return std::make_unique<events::AsioEventProcessor<ServerSDK>>(
-            exec, config.ServiceEndpoints(), config.Events(), http_properties,
-            logger);
+        return std::make_unique<EventProcessor>(exec, config.ServiceEndpoints(),
+                                                config.Events(),
+                                                http_properties, logger);
     }
     return nullptr;
 }
@@ -120,7 +120,7 @@ bool IsFlagPresent(
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
       http_properties_(
-          HttpPropertiesBuilder(config.HttpProperties())
+          config::builders::HttpPropertiesBuilder(config.HttpProperties())
               .Header("user-agent", "CPPClient/" + version)
               .Header("authorization", config.SdkKey())
               .Header("x-launchdarkly-tags", config.ApplicationTag())

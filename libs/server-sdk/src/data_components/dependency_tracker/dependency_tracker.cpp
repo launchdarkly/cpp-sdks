@@ -98,7 +98,7 @@ DependencyMap::end() const {
 
 void DependencyTracker::UpdateDependencies(
     std::string const& key,
-    DependencyTracker::FlagDescriptor const& flag) {
+    data_model::FlagDescriptor const& flag) {
     DependencySet dependencies;
     if (flag.item) {
         for (auto const& prereq : flag.item->prerequisites) {
@@ -114,7 +114,7 @@ void DependencyTracker::UpdateDependencies(
 
 void DependencyTracker::UpdateDependencies(
     std::string const& key,
-    DependencyTracker::SegmentDescriptor const& segment) {
+    data_model::SegmentDescriptor const& segment) {
     DependencySet dependencies;
     if (segment.item) {
         for (auto const& rule : segment.item->rules) {

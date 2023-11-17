@@ -28,17 +28,19 @@ class StreamingDataSource final
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
-        config::shared::built::ServiceEndpoints const& endpoints,
-        config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
+        ::launchdarkly::config::shared::built::ServiceEndpoints const&
+            endpoints,
+        ::launchdarkly::config::shared::built::StreamingConfig<
+            ::launchdarkly::config::shared::ServerSDK> const&
             data_source_config,
-        config::shared::built::HttpProperties http_properties,
+        launchdarkly::config::shared::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         data_interfaces::IDestination& handler,
         data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
     void Init(std::optional<data_model::SDKDataSet> initial_data) override;
-    void Start() override;
+    void StartAsync() override;
     void ShutdownAsync(std::function<void()> completion) override;
 
     [[nodiscard]] std::string const& Identity() const override;
@@ -49,10 +51,11 @@ class StreamingDataSource final
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
 
-    config::shared::built::StreamingConfig<config::shared::ServerSDK>
+    ::launchdarkly::config::shared::built::StreamingConfig<
+        ::launchdarkly::config::shared::ServerSDK>
         streaming_config_;
 
-    config::shared::built::HttpProperties http_config_;
+    ::launchdarkly::config::shared::built::HttpProperties http_config_;
 
     Logger const& logger_;
     std::shared_ptr<launchdarkly::sse::Client> client_;

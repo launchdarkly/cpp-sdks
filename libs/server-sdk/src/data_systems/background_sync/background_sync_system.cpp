@@ -6,13 +6,10 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-using namespace config::shared::built;
-
 BackgroundSync::BackgroundSync(
-    ServiceEndpoints const& endpoints,
-    BackgroundSyncConfig<config::shared::ServerSDK> const&
-        background_sync_config,
-    HttpProperties http_properties,
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig const& background_sync_config,
+    config::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
@@ -20,21 +17,22 @@ BackgroundSync::BackgroundSync(
     std::visit(
         [&](auto&& method_config) {
             using T = std::decay_t<decltype(method_config)>;
-            if constexpr (std::is_same_v<
-                              T, StreamingConfig<config::shared::ServerSDK>>) {
+            if constexpr (std::is_same_v<T,
+                                         config::built::BackgroundSyncConfig::
+                                             StreamingConfig>) {
                 synchronizer_ = std::make_shared<StreamingDataSource>(
-                    endpoints, method_config, http_properties, ioc, store_,
-                    status_manager, logger);
+                    endpoints, method_config, http_properties, ioc,
+                    change_notifier_, status_manager, logger);
 
             } else if constexpr (std::is_same_v<
-                                     T, PollingConfig<
-                                            config::shared::ServerSDK>>) {
+                                     T, config::built::BackgroundSyncConfig::
+                                            PollingConfig>) {
                 synchronizer_ = std::make_shared<PollingDataSource>(
-                    endpoints, method_config, http_properties, ioc, store_,
-                    status_manager, logger);
+                    endpoints, method_config, http_properties, ioc,
+                    change_notifier_, status_manager, logger);
             }
         },
-        background_sync_config.source_.method);
+        background_sync_config.synchronizer_);
 }
 
 BackgroundSync::BackgroundSync(
@@ -47,7 +45,7 @@ BackgroundSync::BackgroundSync(
 void BackgroundSync::Initialize() {
     // TODO: if there was any data from bootstrapping, then add it:
     // synchronizer_->Init(data);
-    synchronizer_->Start();
+    synchronizer_->StartAsync();
 }
 
 std::string const& BackgroundSync::Identity() const {
