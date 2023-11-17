@@ -1,20 +1,18 @@
 #pragma once
 
-#include <cstdint>
+#include "../../../../data_components/dependency_tracker/data_kind.hpp"
+#include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../../../data_interfaces/destination/idestination.hpp"
+
+#include <launchdarkly/data/evaluation_result.hpp>
+#include <launchdarkly/data_model/descriptors.hpp>
+#include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <launchdarkly/data_model/descriptors.hpp>
+#include <cstdint>
 
-#include "../data_components/dependency_tracker/data_kind.hpp"
-#include "../data_components/status_notifications/data_source_status_manager.hpp"
-#include "data_source_update_sink.hpp"
-
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/logging/logger.hpp>
-
-namespace launchdarkly::server_side::data_sources {
+namespace launchdarkly::server_side::data_systems {
 
 // The FlagsPath and SegmentsPath are made to turn a string literal into a type
 // for use in a template.
@@ -105,7 +103,7 @@ class DataSourceEventHandler {
     };
 
     DataSourceEventHandler(
-        IDataSourceUpdateSink& handler,
+        data_interfaces::IDestination& handler,
         Logger const& logger,
         data_components::DataSourceStatusManager& status_manager);
 
@@ -119,8 +117,8 @@ class DataSourceEventHandler {
                                 std::string const& data);
 
    private:
-    IDataSourceUpdateSink& handler_;
+    data_interfaces::IDestination& handler_;
     Logger const& logger_;
     data_components::DataSourceStatusManager& status_manager_;
 };
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_systems

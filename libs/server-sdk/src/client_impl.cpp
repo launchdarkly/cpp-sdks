@@ -1,24 +1,26 @@
-
-#include <chrono>
-
-#include <optional>
-#include <utility>
+#include "client_impl.hpp"
 
 #include "all_flags_state/all_flags_state_builder.hpp"
-#include "client_impl.hpp"
-#include "data_components/memory_store/memory_store.hpp"
-#include "data_sources/null_data_source.hpp"
-#include "data_sources/polling_data_source.hpp"
-#include "data_sources/streaming_data_source.hpp"
+#include "data_systems/background_sync/background_sync_system.hpp"
+
+#include "data_interfaces/system/isystem.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
-#include <launchdarkly/server_side/config/config_builder.hpp>
+
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
+#include <launchdarkly/server_side/config/built/all_built.hpp>
+
+#include <chrono>
+#include <optional>
+#include <utility>
 
 namespace launchdarkly::server_side {
+
+using EventProcessor = events::AsioEventProcessor<config::builders::SDK>;
 
 // The ASIO implementation assumes that the io_context will be run from a
 // single thread, and applies several optimisations based on this
@@ -29,41 +31,62 @@ auto const kAsioConcurrencyHint = 1;
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
-using config::shared::ServerSDK;
-using launchdarkly::config::shared::built::DataSourceConfig;
-using launchdarkly::config::shared::built::HttpProperties;
-using launchdarkly::server_side::data_sources::DataSourceStatus;
+// static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
+// MakeDataSource(HttpProperties const& http_properties,
+//                Config const& config,
+//                boost::asio::any_io_executor const& executor,
+//                data_sources::IDataSourceUpdateSink& flag_updater,
+//                data_sources::DataSourceStatusManager& status_manager,
+//                Logger& logger) {
+//     if (config.Offline()) {
+//         return std::make_shared<data_sources::NullDataSource>(executor,
+//                                                               status_manager);
+//     }
+//
+//     auto builder = HttpPropertiesBuilder(http_properties);
+//
+//     auto data_source_properties = builder.Build();
+//
+//     if (config.DataSourceConfig().method.index() == 0) {
+//         // TODO: use initial reconnect delay.
+//         return std::make_shared<
+//             launchdarkly::server_side::data::StreamingDataSource>(
+//             config.ServiceEndpoints(), config.DataSourceConfig(),
+//             data_source_properties, executor, flag_updater, status_manager,
+//             logger);
+//     }
+//     return std::make_shared<
+//         launchdarkly::server_side::data::PollingDataSource>(
+//         config.ServiceEndpoints(), config.DataSourceConfig(),
+//         data_source_properties, executor, flag_updater, status_manager,
+//         logger);
+// }
 
-static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
-MakeDataSource(HttpProperties const& http_properties,
-               Config const& config,
-               boost::asio::any_io_executor const& executor,
-               data_sources::IDataSourceUpdateSink& flag_updater,
-               data_sources::DataSourceStatusManager& status_manager,
-               Logger& logger) {
-    if (config.Offline()) {
-        return std::make_shared<data_sources::NullDataSource>(executor,
+static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
+    config::built::HttpProperties const& http_properties,
+    Config const& config,
+    boost::asio::any_io_executor const& executor,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    if (config.DataSystemConfig().disabled) {
+        return std::make_unique<data_systems::BackgroundSync>(executor,
                                                               status_manager);
     }
 
-    auto builder = HttpPropertiesBuilder(http_properties);
+    auto const builder =
+        config::builders::HttpPropertiesBuilder(http_properties);
 
     auto data_source_properties = builder.Build();
 
-    if (config.DataSourceConfig().method.index() == 0) {
-        return std::make_shared<
-            launchdarkly::server_side::data_sources::StreamingDataSource>(
-            config.ServiceEndpoints(), config.DataSourceConfig(),
-            data_source_properties, executor, flag_updater, status_manager,
-            logger);
-    }
-    return std::make_shared<
-        launchdarkly::server_side::data_sources::PollingDataSource>(
-        config.ServiceEndpoints(), config.DataSourceConfig(),
-        data_source_properties, executor, flag_updater, status_manager, logger);
+    auto const bg_sync_config = std::get<config::built::BackgroundSyncConfig>(
+        config.DataSystemConfig().system_);
+
+    return std::make_unique<data_systems::BackgroundSync>(
+        config.ServiceEndpoints(), bg_sync_config, data_source_properties,
+        executor, status_manager, logger);
 }
 
-static Logger MakeLogger(config::shared::built::Logging const& config) {
+static Logger MakeLogger(config::built::Logging const& config) {
     if (config.disable_logging) {
         return {std::make_shared<logging::NullLoggerBackend>()};
     }
@@ -74,33 +97,30 @@ static Logger MakeLogger(config::shared::built::Logging const& config) {
         std::make_shared<logging::ConsoleBackend>(config.level, config.tag)};
 }
 
-bool EventsEnabled(Config const& config) {
-    return config.Events().Enabled() && !config.Offline();
-}
-
-std::unique_ptr<events::AsioEventProcessor<ServerSDK>> MakeEventProcessor(
+std::unique_ptr<EventProcessor> MakeEventProcessor(
     Config const& config,
     boost::asio::any_io_executor const& exec,
-    HttpProperties const& http_properties,
+    config::built::HttpProperties const& http_properties,
     Logger& logger) {
-    if (EventsEnabled(config)) {
-        return std::make_unique<events::AsioEventProcessor<ServerSDK>>(
-            exec, config.ServiceEndpoints(), config.Events(), http_properties,
-            logger);
+    if (config.Events().Enabled()) {
+        return std::make_unique<EventProcessor>(exec, config.ServiceEndpoints(),
+                                                config.Events(),
+                                                http_properties, logger);
     }
     return nullptr;
 }
 
 /**
- * Returns true if the flag pointer is valid and the underlying item is present.
+ * Returns true if the flag pointer is valid and the underlying item is
+ * present.
  */
 bool IsFlagPresent(
-    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc);
+    std::shared_ptr<data_model::FlagDescriptor> const& flag_desc);
 
 ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
       http_properties_(
-          HttpPropertiesBuilder(config.HttpProperties())
+          config::builders::HttpPropertiesBuilder(config.HttpProperties())
               .Header("user-agent", "CPPClient/" + version)
               .Header("authorization", config.SdkKey())
               .Header("x-launchdarkly-tags", config.ApplicationTag())
@@ -108,23 +128,22 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
-      memory_store_(),
       status_manager_(),
-      data_store_updater_(memory_store_, memory_store_),
-      data_source_(MakeDataSource(http_properties_,
+      data_system_(MakeDataSystem(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
-                                  data_store_updater_,
                                   status_manager_,
                                   logger_)),
       event_processor_(MakeEventProcessor(config,
                                           ioc_.get_executor(),
                                           http_properties_,
                                           logger_)),
-      evaluator_(logger_, memory_store_),
+      evaluator_(logger_, *data_system_),
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
+    LD_LOG(logger_, LogLevel::kDebug)
+        << "data system: " << data_system_->Identity();
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
@@ -149,7 +168,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
     auto fut = pr->get_future();
 
     status_manager_.OnDataSourceStatusChangeEx(
-        [result_predicate, pr](data_sources::DataSourceStatus status) {
+        [result_predicate, pr](auto status) {
             auto state = status.State();
             if (IsInitialized(state)) {
                 pr->set_value(result_predicate(status.State()));
@@ -159,7 +178,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             return false; /* keep the change listener */
         });
 
-    data_source_->Start();
+    data_system_->Initialize();
 
     return fut;
 }
@@ -177,24 +196,31 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (!Initialized()) {
-        if (memory_store_.Initialized()) {
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "AllFlagsState() called before client has finished "
-                   "initializing; using last known values from data store";
-        } else {
-            LD_LOG(logger_, LogLevel::kWarn)
-                << "AllFlagsState() called before client has finished "
-                   "initializing. Data store not available. Returning empty "
-                   "state";
-            return {};
-        }
+        //        if (memory_store_.Initialized()) {
+        //            LD_LOG(logger_, LogLevel::kWarn)
+        //                << "AllFlagsState() called before client has finished
+        //                "
+        //                   "initializing; using last known values from data
+        //                   store";
+        //        } else {
+        //            LD_LOG(logger_, LogLevel::kWarn)
+        //                << "AllFlagsState() called before client has finished
+        //                "
+        //                   "initializing. Data store not available. Returning
+        //                   empty " "state";
+        //            return {};
+        //        }
+
+        // TODO: Fix to use the single data source status, which takes into
+        // account whether there is any data ore not.
+        return {};
     }
 
     AllFlagsStateBuilder builder{options};
 
     EventScope no_events;
 
-    for (auto const& [k, v] : memory_store_.AllFlags()) {
+    for (auto const& [k, v] : data_system_->AllFlags()) {
         if (!v || !v->item) {
             continue;
         }
@@ -295,7 +321,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
                               std::nullopt);
     }
 
-    auto flag_rule = memory_store_.GetFlag(key);
+    auto flag_rule = data_system_->GetFlag(key);
 
     bool flag_present = IsFlagPresent(flag_rule);
 
@@ -315,9 +341,10 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
     Context const& context) {
-    if (!memory_store_.Initialized()) {
-        return EvaluationReason::ErrorKind::kClientNotReady;
-    }
+    //    if (!memory_store_.Initialized()) {
+    //        return EvaluationReason::ErrorKind::kClientNotReady;
+    //    }
+    // TODO: Check if initialized
     if (!context.Valid()) {
         return EvaluationReason::ErrorKind::kUserNotSpecified;
     }
@@ -364,7 +391,7 @@ EvaluationDetail<Value> ClientImpl::PostEvaluation(
 }
 
 bool IsFlagPresent(
-    std::shared_ptr<data_store::FlagDescriptor> const& flag_desc) {
+    std::shared_ptr<data_model::FlagDescriptor> const& flag_desc) {
     return flag_desc && flag_desc->item;
 }
 
@@ -435,7 +462,7 @@ Value ClientImpl::JsonVariation(Context const& ctx,
     return *VariationInternal(ctx, key, default_value, events_default_);
 }
 
-data_sources::IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
+IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
 }
 

@@ -1,19 +1,18 @@
-#include <boost/json.hpp>
+#include "polling_data_source.hpp"
 
-#include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
+
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
-#include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
-#include "data_source_update_sink.hpp"
-#include "polling_data_source.hpp"
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
-namespace launchdarkly::server_side::data_sources {
+#include <boost/json.hpp>
+
+namespace launchdarkly::server_side::data_systems {
 
 static char const* const kErrorParsingPut = "Could not parse polling payload";
 static char const* const kErrorPutInvalid =
@@ -23,36 +22,35 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL";
 
 static network::HttpRequest MakeRequest(
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
-        data_source_config,
-    config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::HttpProperties const& http_properties) {
+    config::built::BackgroundSyncConfig::PollingConfig const& polling_config,
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::HttpProperties const& http_properties) {
     auto url = std::make_optional(endpoints.PollingBaseUrl());
-
-    auto const& polling_config = std::get<
-        config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-        data_source_config.method);
 
     url = network::AppendUrl(url, polling_config.polling_get_path);
 
     network::HttpRequest::BodyType body;
     network::HttpMethod method = network::HttpMethod::kGet;
 
-    config::shared::builders::HttpPropertiesBuilder<config::shared::ServerSDK>
-        builder(http_properties);
+    config::builders::HttpPropertiesBuilder const builder(http_properties);
 
     // If no URL is set, then we will fail the request.
     return {url.value_or(""), method, builder.Build(), body};
 }
 
+std::string const& PollingDataSource::Identity() const {
+    static std::string const identity = "polling data source";
+    return identity;
+}
+
 PollingDataSource::PollingDataSource(
-    config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::DataSourceConfig<config::shared::ServerSDK> const&
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
-    config::shared::built::HttpProperties const& http_properties,
+    config::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& ioc,
-    IDataSourceUpdateSink& handler,
-    DataSourceStatusManager& status_manager,
+    data_interfaces::IDestination& handler,
+    data_components::DataSourceStatusManager& status_manager,
     Logger const& logger)
     : ioc_(ioc),
       logger_(logger),
@@ -60,27 +58,24 @@ PollingDataSource::PollingDataSource(
       update_sink_(handler),
       requester_(ioc),
       timer_(ioc),
-      polling_interval_(
-          std::get<
-              config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-              data_source_config.method)
-              .poll_interval),
+      polling_interval_(data_source_config.poll_interval),
       request_(MakeRequest(data_source_config, endpoints, http_properties)) {
-    auto const& polling_config = std::get<
-        config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-        data_source_config.method);
-    if (polling_interval_ < polling_config.min_polling_interval) {
+    if (polling_interval_ < data_source_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
             << std::chrono::duration_cast<std::chrono::seconds>(
-                   polling_config.min_polling_interval)
+                   data_source_config.min_polling_interval)
                    .count()
             << " seconds";
 
-        polling_interval_ = polling_config.min_polling_interval;
+        polling_interval_ = data_source_config.min_polling_interval;
     }
 }
 
+void PollingDataSource::Init(
+    std::optional<data_model::SDKDataSet> initial_data) {
+    // TODO: implement
+}
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
@@ -109,9 +104,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     }
 
     if (has_etag) {
-        config::shared::builders::HttpPropertiesBuilder<
-            config::shared::ServerSDK>
-            builder(request_.Properties());
+        config::builders::HttpPropertiesBuilder builder(request_.Properties());
         builder.Header("If-None-Match", header_etag->second);
         request_ = network::HttpRequest(request_, builder.Build());
 
@@ -218,7 +211,7 @@ void PollingDataSource::StartPollingTimer() {
     });
 }
 
-void PollingDataSource::Start() {
+void PollingDataSource::StartAsync() {
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
@@ -242,4 +235,4 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
     }
 }
 
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side::data_systems

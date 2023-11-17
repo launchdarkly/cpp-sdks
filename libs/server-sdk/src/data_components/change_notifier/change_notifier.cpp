@@ -1,19 +1,19 @@
 #include "change_notifier.hpp"
 
 #include <launchdarkly/signals/boost_signal_connection.hpp>
-#include <utility>
+#include <mutex>
 
 namespace launchdarkly::server_side::data_components {
 
 std::unique_ptr<IConnection> ChangeNotifier::OnFlagChange(
-    launchdarkly::server_side::IChangeNotifier::ChangeHandler handler) {
+    ChangeHandler handler) {
     std::lock_guard lock{signal_mutex_};
 
     return std::make_unique<launchdarkly::internal::signals::SignalConnection>(
         signals_.connect(handler));
 }
 
-void ChangeNotifier::Init(launchdarkly::data_model::SDKDataSet data_set) {
+void ChangeNotifier::Init(data_model::SDKDataSet data_set) {
     // Optional outside the HasListeners() scope, this allows for the changes
     // to be calculated before the update and then the notification to be
     // sent after the update completes.

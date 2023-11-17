@@ -1,24 +1,18 @@
 #pragma once
 
+#include "data_components/status_notifications/data_source_status_manager.hpp"
+#include "data_interfaces/system/isystem.hpp"
+#include "evaluation/evaluator.hpp"
+#include "events/event_scope.hpp"
+
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/error.hpp>
 #include <launchdarkly/events/event_processor_interface.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
-
-#include "data_sources/data_source_update_sink.hpp"
-
-#include "data_components/change_notifier/change_notifier.hpp"
-#include "data_components/memory_store/memory_store.hpp"
-#include "data_components/status_notifications/data_source_status_manager.hpp"
-
-#include "evaluation/evaluator.hpp"
-
-#include "events/event_scope.hpp"
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
@@ -107,7 +101,7 @@ class ClientImpl : public IClient {
                                                 FlagKey const& key,
                                                 Value default_value) override;
 
-    data_sources::IDataSourceStatusProvider& DataSourceStatus() override;
+    IDataSourceStatusProvider& DataSourceStatus() override;
 
     ~ClientImpl();
 
@@ -159,8 +153,7 @@ class ClientImpl : public IClient {
                        std::optional<double> metric_value);
 
     std::future<bool> StartAsyncInternal(
-        std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
-            predicate);
+        std::function<bool(DataSourceStatus::DataSourceState)> predicate);
 
     void LogVariationCall(std::string const& key, bool flag_present) const;
 
@@ -173,12 +166,12 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_components::MemoryStore memory_store_;
+    data_components::DataSourceStatusManager status_manager_;
 
-    data_sources::DataSourceStatusManager status_manager_;
-    data_components::ChangeNotifier data_store_updater_;
-
-    std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
+    // This is the main polymorphic component that constitutes the
+    // guts of how data is retrieved (polling, streaming, persistent stores,
+    // etc.)
+    std::unique_ptr<data_interfaces::ISystem> data_system_;
 
     std::unique_ptr<events::IEventProcessor> event_processor_;
 

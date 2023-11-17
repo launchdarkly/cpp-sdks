@@ -59,6 +59,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_StreamingDefaultsAreUsed) {
 TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
+<<<<<<< HEAD
     ASSERT_EQ(cfg->HttpProperties(),
               ::launchdarkly::config::shared::Defaults<
                   launchdarkly::config::shared::ServerSDK>::Defaults::
@@ -92,4 +93,91 @@ TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
     builder.DataSystem().Disabled(true);
     auto const cfg2 = builder.Build();
     EXPECT_TRUE(cfg2->DataSystemConfig().disabled);
+||||||| 233622f2
+    ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
+=======
+    ASSERT_EQ(cfg->HttpProperties(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  HttpProperties());
+>>>>>>> cw/sc-224112/redis-client
 }
+
+TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
+    ConfigBuilder builder("sdk-123");
+    auto cfg = builder.Build();
+    ASSERT_EQ(cfg->ServiceEndpoints(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  ServiceEndpoints());
+}
+
+TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
+    ConfigBuilder builder("sdk-123");
+    auto cfg = builder.Build();
+    ASSERT_EQ(cfg->Events(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::Events());
+}
+
+TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
+    ConfigBuilder builder("sdk-123");
+
+    // First establish that the data system is enabled.
+    auto const cfg1 = builder.Build();
+    EXPECT_FALSE(cfg1->DataSystemConfig().disabled);
+
+    builder.DataSystem().Disabled(true);
+    auto const cfg2 = builder.Build();
+    EXPECT_TRUE(cfg2->DataSystemConfig().disabled);
+}
+
+TEST_F(ConfigBuilderTest, CanConstructValidRedisConfig) {
+    ConfigBuilder builder("sdk-123");
+
+    using LazyLoad = builders::DataSystemBuilder::LazyLoad;
+
+    auto redis = std::make_shared<data_systems::RedisDataSource>(
+        "tcp://foo.bar:1234", "test");
+
+    builder.DataSystem().Method(
+        LazyLoad()
+            .Source(redis)
+            .CacheEviction(LazyLoad::EvictionPolicy::Disabled)
+            .CacheTTL(std::chrono::seconds(5)));
+
+    auto cfg = builder.Build();
+    ASSERT_TRUE(cfg);
+}
+
+// TEST_F(ConfigBuilderTest, InvalidRedisConfigurationDetected) {
+//     ConfigBuilder builder("sdk-123");
+//
+//     using LazyLoad = DataSystemBuilder::LazyLoad;
+//
+//     auto redis = std::make_shared<data_systems::RedisDataSource>(
+//        "tcp://foo.bar:1234", "test");
+//
+//     // An empty URI string should be rejected before it is passed deeper
+//     // into the redis client.
+//     builder.DataSystem().Method(
+//         LazyLoad().Source(redis);
+//
+//     auto cfg = builder.Build();
+//     ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_Redis_MissingURI);
+//
+//     // If using ConnOpts instead of a URI string, the host should be rejected
+//     // for same reason as above.
+//     builder.DataSystem().Method(LazyLoad().Source(LazyLoad::Redis().Connection(
+//         LazyLoad::Redis::ConnOpts{"", 1233, "password", 2})));
+//
+//     cfg = builder.Build();
+//     ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_Redis_MissingHost);
+//
+//     // If the port isn't set, it'll be default-constructed as std::nullopt.
+//     builder.DataSystem().Method(LazyLoad().Source(LazyLoad::Redis().Connection(
+//         LazyLoad::Redis::ConnOpts{"tcp://localhost"})));
+//
+//     cfg = builder.Build();
+//     ASSERT_EQ(cfg.error(), Error::kConfig_DataSource_Redis_MissingPort);
+// }
