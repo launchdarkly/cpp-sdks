@@ -1,19 +1,18 @@
 #pragma once
 
-#include <array>
-#include <set>
-#include <string>
-#include <array>
+#include "data_kind.hpp"
+#include "tagged_data.hpp"
 
 #include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/rule_clause.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
-#include "data_kind.hpp"
-#include "tagged_data.hpp"
+#include <array>
+#include <set>
+#include <string>
 
-namespace launchdarkly::server_side::data_store {
+namespace launchdarkly::server_side::data_components {
 
 /**
  * Class used to maintain a set of dependencies. Each dependency may be either
@@ -153,4 +152,4 @@ class DependencyTracker {
         std::vector<data_model::Clause> const& clauses);
 };
 
-}  // namespace launchdarkly::server_side::data_store
+}  // namespace launchdarkly::server_side::data_components

@@ -10,11 +10,11 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "data_sources/data_source_status_manager.hpp"
 #include "data_sources/data_source_update_sink.hpp"
 
-#include "data_store/data_store_updater.hpp"
-#include "data_store/memory_store.hpp"
+#include "data_components/change_notifier/change_notifier.hpp"
+#include "data_components/memory_store/memory_store.hpp"
+#include "data_components/status_notifications/data_source_status_manager.hpp"
 
 #include "evaluation/evaluator.hpp"
 
@@ -173,10 +173,10 @@ class ClientImpl : public IClient {
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
         work_;
 
-    data_store::MemoryStore memory_store_;
+    data_components::MemoryStore memory_store_;
 
     data_sources::DataSourceStatusManager status_manager_;
-    data_store::DataStoreUpdater data_store_updater_;
+    data_components::ChangeNotifier data_store_updater_;
 
     std::shared_ptr<::launchdarkly::data_sources::IDataSource> data_source_;
 

@@ -25,13 +25,6 @@ target_sources(${LIBNAME}
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
         data_sources/data_source_update_sink.hpp
-        data_store/data_store.hpp
-        data_store/data_store_updater.hpp
-        data_store/data_store_updater.cpp
-        data_store/memory_store.cpp
-        data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp
-        data_store/descriptors.hpp
         data_sources/data_source_event_handler.cpp
         data_sources/data_source_event_handler.hpp
         data_sources/data_source_status.cpp
@@ -41,6 +34,14 @@ target_sources(${LIBNAME}
         data_sources/streaming_data_source.hpp
         data_sources/streaming_data_source.cpp
         data_sources/null_data_source.cpp
+        data_components/change_notifier/change_notifier.hpp
+        data_components/change_notifier/change_notifier.cpp
+        data_components/dependency_tracker/dependency_tracker.hpp
+        data_components/dependency_tracker/dependency_tracker.cpp
+        data_components/expiration_tracker/expiration_tracker.hpp
+        data_components/expiration_tracker/expiration_tracker.cpp
+        data_components/memory_store/memory_store.hpp
+        data_components/memory_store/memory_store.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
@@ -50,8 +51,6 @@ target_sources(${LIBNAME}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
-        data_store/persistent/expiration_tracker.hpp
-        data_store/persistent/expiration_tracker.cpp
         events/event_factory.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp

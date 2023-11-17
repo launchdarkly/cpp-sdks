@@ -6,10 +6,10 @@
 
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "client_impl.hpp"
+#include "data_components/memory_store/memory_store.hpp"
 #include "data_sources/null_data_source.hpp"
 #include "data_sources/polling_data_source.hpp"
 #include "data_sources/streaming_data_source.hpp"
-#include "data_store/memory_store.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>

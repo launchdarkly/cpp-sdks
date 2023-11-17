@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/logging/null_logger.hpp>
+#include "data_components/memory_store/memory_store.hpp"
 #include "data_sources/data_source_event_handler.hpp"
-#include "data_store/memory_store.hpp"
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::data_sources;
-using namespace launchdarkly::server_side::data_store;
+using namespace launchdarkly::server_side::data_components;
 
 TEST(DataSourceEventHandlerTests, HandlesEmptyPutMessage) {
     auto logger = launchdarkly::logging::NullLogger();

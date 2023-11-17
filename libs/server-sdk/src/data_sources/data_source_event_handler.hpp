@@ -4,14 +4,14 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include "../data_store/data_kind.hpp"
-#include "data_source_status_manager.hpp"
+#include <launchdarkly/data_model/descriptors.hpp>
+
+#include "../data_components/dependency_tracker/data_kind.hpp"
+#include "../data_components/status_notifications/data_source_status_manager.hpp"
 #include "data_source_update_sink.hpp"
 
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_result.hpp>
-#include <launchdarkly/data_sources/data_source.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::server_side::data_sources {
@@ -29,10 +29,10 @@ struct SegmentsPath {
     static constexpr std::string_view path = "/segments/";
 };
 
-template <data_store::DataKind kind, typename TPath>
+template <data_components::DataKind kind, typename TPath>
 class StreamingDataKind {
    public:
-    static data_store::DataKind Kind() { return kind; }
+    static data_components::DataKind Kind() { return kind; }
     static bool IsKind(std::string const& patch_path) {
         return patch_path.rfind(TPath::path) == 0;
     }
@@ -42,16 +42,17 @@ class StreamingDataKind {
 };
 
 struct StreamingDataKinds {
-    using Flag = StreamingDataKind<data_store::DataKind::kFlag, FlagsPath>;
+    using Flag = StreamingDataKind<data_components::DataKind::kFlag, FlagsPath>;
     using Segment =
-        StreamingDataKind<data_store::DataKind::kSegment, SegmentsPath>;
+        StreamingDataKind<data_components::DataKind::kSegment, SegmentsPath>;
 
-    static std::optional<data_store::DataKind> Kind(std::string const& path) {
+    static std::optional<data_components::DataKind> Kind(
+        std::string const& path) {
         if (Flag::IsKind(path)) {
-            return data_store::DataKind::kFlag;
+            return data_components::DataKind::kFlag;
         }
         if (Segment::IsKind(path)) {
-            return data_store::DataKind::kSegment;
+            return data_components::DataKind::kSegment;
         }
         return std::nullopt;
     }
@@ -93,19 +94,20 @@ class DataSourceEventHandler {
 
     struct Patch {
         std::string key;
-        std::variant<data_store::FlagDescriptor, data_store::SegmentDescriptor>
+        std::variant<data_model::FlagDescriptor, data_model::SegmentDescriptor>
             data;
     };
 
     struct Delete {
         std::string key;
-        data_store::DataKind kind;
+        data_components::DataKind kind;
         uint64_t version;
     };
 
-    DataSourceEventHandler(IDataSourceUpdateSink& handler,
-                           Logger const& logger,
-                           DataSourceStatusManager& status_manager);
+    DataSourceEventHandler(
+        IDataSourceUpdateSink& handler,
+        Logger const& logger,
+        data_components::DataSourceStatusManager& status_manager);
 
     /**
      * Handles an event from the LaunchDarkly service.
@@ -119,6 +121,6 @@ class DataSourceEventHandler {
    private:
     IDataSourceUpdateSink& handler_;
     Logger const& logger_;
-    DataSourceStatusManager& status_manager_;
+    data_components::DataSourceStatusManager& status_manager_;
 };
 }  // namespace launchdarkly::server_side::data_sources

@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "data_store/persistent/expiration_tracker.hpp"
+#include <data_components/expiration_tracker/expiration_tracker.hpp>
 
-using launchdarkly::server_side::data_store::DataKind;
-using launchdarkly::server_side::data_store::persistent::ExpirationTracker;
+using namespace launchdarkly::server_side::data_components;
 
 ExpirationTracker::TimePoint Second(uint64_t second) {
     return std::chrono::steady_clock::time_point{std::chrono::seconds{second}};

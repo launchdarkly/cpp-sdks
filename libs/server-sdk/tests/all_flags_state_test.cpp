@@ -4,6 +4,8 @@
 
 #include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 
+#include <boost/json.hpp>
+
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
@@ -109,7 +111,7 @@ TEST(AllFlagsTest, IncludeReasons) {
 TEST(AllFlagsTest, FlagValues) {
     AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
-    const std::size_t kNumFlags = 10;
+    std::size_t const kNumFlags = 10;
 
     for (std::size_t i = 0; i < kNumFlags; i++) {
         builder.AddFlag("myFlag" + std::to_string(i), "value",
@@ -131,7 +133,7 @@ TEST(AllFlagsTest, FlagValues) {
 TEST(AllFlagsTest, FlagState) {
     AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
-    const std::size_t kNumFlags = 10;
+    std::size_t const kNumFlags = 10;
 
     AllFlagsState::State state{42, 1, std::nullopt, false, false, std::nullopt};
     for (std::size_t i = 0; i < kNumFlags; i++) {
