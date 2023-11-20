@@ -1,8 +1,8 @@
-#include <iomanip>
-
 #include <launchdarkly/server_side/data_source_status.hpp>
 
-namespace launchdarkly::server_side::data_sources {
+#include <iomanip>
+
+namespace launchdarkly::server_side {
 
 std::ostream& operator<<(std::ostream& out,
                          DataSourceStatus::DataSourceState const& state) {
@@ -37,4 +37,4 @@ std::ostream& operator<<(std::ostream& out, DataSourceStatus const& status) {
     return out;
 }
 
-}  // namespace launchdarkly::server_side::data_sources
+}  // namespace launchdarkly::server_side
