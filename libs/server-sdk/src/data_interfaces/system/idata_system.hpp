@@ -5,13 +5,13 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
- * \brief ISystem obtains data used for flag evaluations and makes it available
+ * @brief IDataSystem obtains data used for flag evaluations and makes it available
  * to other components.
  */
-class ISystem : public IStore {
+class IDataSystem : public IStore {
    public:
     /**
-     * \return Identity of the system. Used in logs.
+     * @return Identity of the system. Used in logs.
      */
     [[nodiscard]] virtual std::string const& Identity() const = 0;
 
@@ -27,14 +27,14 @@ class ISystem : public IStore {
      */
     virtual void Shutdown() = 0;
 
-    virtual ~ISystem() override = default;
-    ISystem(ISystem const& item) = delete;
-    ISystem(ISystem&& item) = delete;
-    ISystem& operator=(ISystem const&) = delete;
-    ISystem& operator=(ISystem&&) = delete;
+    virtual ~IDataSystem() override = default;
+    IDataSystem(IDataSystem const& item) = delete;
+    IDataSystem(IDataSystem&& item) = delete;
+    IDataSystem& operator=(IDataSystem const&) = delete;
+    IDataSystem& operator=(IDataSystem&&) = delete;
 
    protected:
-    ISystem() = default;
+    IDataSystem() = default;
 };
 
 }  // namespace launchdarkly::server_side::data_interfaces

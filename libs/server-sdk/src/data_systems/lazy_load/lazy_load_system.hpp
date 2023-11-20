@@ -4,7 +4,7 @@
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/serialization_adapters/json_pull_source.hpp"
-#include "../../data_interfaces/system/isystem.hpp"
+#include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
 
@@ -23,7 +23,7 @@ namespace launchdarkly::server_side::data_systems {
  * LazyLoad is able to remain efficient because it caches responses from the
  * store. Over time, data becomes stale causing the system to refresh data.
  */
-class LazyLoad final : public data_interfaces::ISystem {
+class LazyLoad final : public data_interfaces::IDataSystem {
    public:
     using TimeFn =
         std::function<std::chrono::time_point<std::chrono::steady_clock>()>;

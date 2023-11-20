@@ -4,7 +4,7 @@
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/ipush_source.hpp"
-#include "../../data_interfaces/system/isystem.hpp"
+#include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
@@ -24,7 +24,7 @@ namespace launchdarkly::server_side::data_systems {
  * too large to fit in memory, or a direct connection to LaunchDarkly isn't
  * desired, necessitating use of the alternate LazyLoad system.
  */
-class BackgroundSync final : public data_interfaces::ISystem {
+class BackgroundSync final : public data_interfaces::IDataSystem {
    public:
     BackgroundSync(
         config::built::ServiceEndpoints const& endpoints,

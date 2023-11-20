@@ -3,7 +3,7 @@
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_systems/background_sync/background_sync_system.hpp"
 
-#include "data_interfaces/system/isystem.hpp"
+#include "data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
@@ -31,38 +31,7 @@ auto const kAsioConcurrencyHint = 1;
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
-// static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
-// MakeDataSource(HttpProperties const& http_properties,
-//                Config const& config,
-//                boost::asio::any_io_executor const& executor,
-//                data_sources::IDataSourceUpdateSink& flag_updater,
-//                data_sources::DataSourceStatusManager& status_manager,
-//                Logger& logger) {
-//     if (config.Offline()) {
-//         return std::make_shared<data_sources::NullDataSource>(executor,
-//                                                               status_manager);
-//     }
-//
-//     auto builder = HttpPropertiesBuilder(http_properties);
-//
-//     auto data_source_properties = builder.Build();
-//
-//     if (config.DataSourceConfig().method.index() == 0) {
-//         // TODO: use initial reconnect delay.
-//         return std::make_shared<
-//             launchdarkly::server_side::data::StreamingDataSource>(
-//             config.ServiceEndpoints(), config.DataSourceConfig(),
-//             data_source_properties, executor, flag_updater, status_manager,
-//             logger);
-//     }
-//     return std::make_shared<
-//         launchdarkly::server_side::data::PollingDataSource>(
-//         config.ServiceEndpoints(), config.DataSourceConfig(),
-//         data_source_properties, executor, flag_updater, status_manager,
-//         logger);
-// }
-
-static std::unique_ptr<data_interfaces::ISystem> MakeDataSystem(
+static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
     Config const& config,
     boost::asio::any_io_executor const& executor,
