@@ -7,8 +7,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-using namespace config::shared::built;
-
 /*
 *DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
 HttpProperties http_properties,

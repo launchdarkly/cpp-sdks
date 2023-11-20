@@ -4,17 +4,11 @@
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/serialization_adapters/json_pull_source.hpp"
-#include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
 
-#include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
-
-#include <boost/asio/any_io_executor.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 
