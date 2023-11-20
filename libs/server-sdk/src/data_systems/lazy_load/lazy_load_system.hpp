@@ -25,7 +25,11 @@ namespace launchdarkly::server_side::data_systems {
  */
 class LazyLoad final : public data_interfaces::ISystem {
    public:
+    using TimeFn =
+        std::function<std::chrono::time_point<std::chrono::steady_clock>()>;
+
     explicit LazyLoad(config::built::LazyLoadConfig cfg);
+    LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time);
 
     LazyLoad(LazyLoad const& item) = delete;
     LazyLoad(LazyLoad&& item) = delete;
@@ -80,7 +84,7 @@ class LazyLoad final : public data_interfaces::ISystem {
     data_components::JsonSource source_;
 
     mutable data_components::ExpirationTracker tracker_;
-    std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
+    TimeFn time_;
     mutable std::optional<bool> initialized_;
 
     struct Kinds {
