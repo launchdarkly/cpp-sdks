@@ -3,63 +3,93 @@
 #include <launchdarkly/logging/null_logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
-#include <map>
+#include "data_systems/background_sync/sources/streaming/streaming_data_source.hpp"
 
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
+using namespace launchdarkly::server_side::config;
 
 class ConfigBuilderTest
     : public ::testing::
           Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    protected:
-    launchdarkly::Logger logger;
-    ConfigBuilderTest() : logger(launchdarkly::logging::NullLogger()) {}
+    Logger logger;
+    ConfigBuilderTest() : logger(logging::NullLogger()) {}
 };
 
-TEST_F(ConfigBuilderTest, DefaultConstruction_ServerConfig) {
-    using namespace launchdarkly::server_side;
+TEST_F(ConfigBuilderTest, DefaultConstruction_Succeeds) {
+    // It's important that the SDK's configuration can be constructed with
+    // nothing more than an SDK key.
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);
     ASSERT_EQ(cfg->SdkKey(), "sdk-123");
 }
 
-TEST_F(ConfigBuilderTest,
-       DefaultConstruction_ServerConfig_UsesDefaulDataSourceConfig) {
-    using namespace launchdarkly::server_side;
+TEST_F(ConfigBuilderTest, DefaultConstruction_StreamingDefaultsAreUsed) {
+    // Sanity check that the default server-side config uses
+    // the streaming data source.
+
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
 
-    // Should be streaming with a 1 second initial retry;
-    EXPECT_EQ(std::chrono::milliseconds{1000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
+    ASSERT_TRUE(std::holds_alternative<built::BackgroundSyncConfig>(
+        cfg->DataSystemConfig().system_));
+
+    auto const bg_sync_config =
+        std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(std::holds_alternative<
+                ::launchdarkly::config::shared::built::StreamingConfig<
+                    launchdarkly::config::shared::ServerSDK>>(
+        bg_sync_config.synchronizer_));
+
+    auto const streaming_config =
+        std::get<::launchdarkly::config::shared::built::StreamingConfig<
+            launchdarkly::config::shared::ServerSDK>>(
+            bg_sync_config.synchronizer_);
+
+    EXPECT_EQ(streaming_config,
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::StreamingConfig());
 }
 
-TEST_F(ConfigBuilderTest, ServerConfig_CanSetDataSource) {
-    using namespace launchdarkly::server_side;
+TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
-
-    builder.DataSource().Method(
-        DataSourceBuilder::Streaming().InitialReconnectDelay(
-            std::chrono::milliseconds{5000}));
-
     auto cfg = builder.Build();
-
-    EXPECT_EQ(std::chrono::milliseconds{5000},
-              std::get<launchdarkly::config::shared::built::StreamingConfig<
-                  launchdarkly::config::shared::ServerSDK>>(
-                  cfg->DataSourceConfig().method)
-                  .initial_reconnect_delay);
+    ASSERT_EQ(cfg->HttpProperties(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  HttpProperties());
 }
 
-TEST_F(ConfigBuilderTest,
-       DefaultConstruction_ServerConfig_UsesDefaultHttpProperties) {
-    using namespace launchdarkly::server_side;
+TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
-    ASSERT_EQ(cfg->HttpProperties(), Defaults::HttpProperties());
+    ASSERT_EQ(cfg->ServiceEndpoints(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  ServiceEndpoints());
+}
+
+TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
+    ConfigBuilder builder("sdk-123");
+    auto cfg = builder.Build();
+    ASSERT_EQ(cfg->Events(),
+              ::launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::Defaults::Events());
+}
+
+TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
+    ConfigBuilder builder("sdk-123");
+
+    // First establish that the data system is enabled.
+    auto const cfg1 = builder.Build();
+    EXPECT_FALSE(cfg1->DataSystemConfig().disabled);
+
+    builder.DataSystem().Disabled(true);
+    auto const cfg2 = builder.Build();
+    EXPECT_TRUE(cfg2->DataSystemConfig().disabled);
 }
