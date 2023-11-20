@@ -19,6 +19,11 @@ struct Defaults {
         return std::nullopt;
     }
 
+    static auto DataSourceConfig()
+        -> built::BackgroundSyncConfig::StreamingConfig {
+        return {std::chrono::seconds(1), "/all"};
+    }
+
     static auto BackgroundSyncConfig() -> built::BackgroundSyncConfig {
         return {BootstrapConfig(), DataSourceConfig(), DataDestinationConfig()};
     }

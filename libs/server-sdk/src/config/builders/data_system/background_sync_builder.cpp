@@ -10,12 +10,12 @@ BootstrapBuilder& BackgroundSyncBuilder::Bootstrapper() {
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Streaming source) {
-    config_.source_.method = source.Build();
+    config_.synchronizer_ = source.Build();
     return *this;
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Polling source) {
-    config_.source_.method = source.Build();
+    config_.synchronizer_ = source.Build();
     return *this;
 }
 
