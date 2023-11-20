@@ -4,8 +4,7 @@
 
 namespace launchdarkly::server_side::data_components {
 
-void ExpirationTracker::Add(std::string const& key,
-                            ExpirationTracker::TimePoint expiration) {
+void ExpirationTracker::Add(std::string const& key, TimePoint expiration) {
     unscoped_.insert({key, expiration});
 }
 
@@ -15,7 +14,7 @@ void ExpirationTracker::Remove(std::string const& key) {
 
 ExpirationTracker::TrackState ExpirationTracker::State(
     std::string const& key,
-    ExpirationTracker::TimePoint current_time) const {
+    TimePoint current_time) const {
     auto item = unscoped_.find(key);
     if (item != unscoped_.end()) {
         return State(item->second, current_time);
@@ -26,7 +25,7 @@ ExpirationTracker::TrackState ExpirationTracker::State(
 
 void ExpirationTracker::Add(DataKind kind,
                             std::string const& key,
-                            ExpirationTracker::TimePoint expiration) {
+                            TimePoint expiration) {
     scoped_.Set(kind, key, expiration);
 }
 
@@ -37,7 +36,7 @@ void ExpirationTracker::Remove(DataKind kind, std::string const& key) {
 ExpirationTracker::TrackState ExpirationTracker::State(
     DataKind kind,
     std::string const& key,
-    ExpirationTracker::TimePoint current_time) const {
+    TimePoint current_time) const {
     auto expiration = scoped_.Get(kind, key);
     if (expiration.has_value()) {
         return State(expiration.value(), current_time);
@@ -50,7 +49,7 @@ void ExpirationTracker::Clear() {
     unscoped_.clear();
 }
 std::vector<std::pair<std::optional<DataKind>, std::string>>
-ExpirationTracker::Prune(ExpirationTracker::TimePoint current_time) {
+ExpirationTracker::Prune(TimePoint current_time) {
     std::vector<std::pair<std::optional<DataKind>, std::string>> pruned;
 
     // Determine everything to be pruned.
@@ -79,19 +78,17 @@ ExpirationTracker::Prune(ExpirationTracker::TimePoint current_time) {
     }
     return pruned;
 }
-ExpirationTracker::TrackState ExpirationTracker::State(
-    ExpirationTracker::TimePoint expiration,
-    ExpirationTracker::TimePoint current_time) {
+ExpirationTracker::TrackState ExpirationTracker::State(TimePoint expiration,
+                                                       TimePoint current_time) {
     if (expiration > current_time) {
-        return ExpirationTracker::TrackState::kFresh;
+        return TrackState::kFresh;
     }
-    return ExpirationTracker::TrackState::kStale;
+    return TrackState::kStale;
 }
 
-void ExpirationTracker::ScopedTtls::Set(
-    DataKind kind,
-    std::string const& key,
-    ExpirationTracker::TimePoint expiration) {
+void ExpirationTracker::ScopedTtls::Set(DataKind kind,
+                                        std::string const& key,
+                                        TimePoint expiration) {
     data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().insert(
         {key, expiration});
 }
@@ -108,7 +105,7 @@ void ExpirationTracker::ScopedTtls::Clear() {
     }
 }
 
-std::optional<ExpirationTracker::TimePoint> ExpirationTracker::ScopedTtls::Get(
+std::optional<TimePoint> ExpirationTracker::ScopedTtls::Get(
     DataKind kind,
     std::string const& key) const {
     auto const& scope =
