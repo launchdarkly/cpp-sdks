@@ -142,7 +142,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPut);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
         auto res =
             boost::json::value_to<tl::expected<std::optional<Put>, JsonError>>(
@@ -153,14 +153,14 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorPutInvalid);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
 
         // Check the inner optional.
         if (res->has_value()) {
             handler_.Init(std::move((*res)->data));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+            return MessageStatus::kMessageHandled;
         }
         return DataSourceEventHandler::MessageStatus::kMessageHandled;
     }
@@ -232,10 +232,10 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorDeleteInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        return MessageStatus::kInvalidMessage;
     }
 
-    return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
+    return MessageStatus::kUnhandledVerb;
 }
 
 }  // namespace launchdarkly::server_side::data_systems

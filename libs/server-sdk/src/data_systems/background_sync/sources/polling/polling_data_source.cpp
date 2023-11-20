@@ -13,7 +13,6 @@
 #include <boost/json.hpp>
 
 namespace launchdarkly::server_side::data_systems {
-
 static char const* const kErrorParsingPut = "Could not parse polling payload";
 static char const* const kErrorPutInvalid =
     "Polling payload contained invalid data";
@@ -44,22 +43,20 @@ std::string const& PollingDataSource::Identity() const {
 }
 
 PollingDataSource::PollingDataSource(
+    boost::asio::any_io_executor const& ioc,
+    Logger const& logger,
+    data_components::DataSourceStatusManager& status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
-    config::built::HttpProperties const& http_properties,
-    boost::asio::any_io_executor const& ioc,
-    data_interfaces::IDestination& handler,
-    data_components::DataSourceStatusManager& status_manager,
-    Logger const& logger)
-    : ioc_(ioc),
-      logger_(logger),
+    config::built::HttpProperties const& http_properties)
+    : logger_(logger),
       status_manager_(status_manager),
-      update_sink_(handler),
       requester_(ioc),
-      timer_(ioc),
       polling_interval_(data_source_config.poll_interval),
-      request_(MakeRequest(data_source_config, endpoints, http_properties)) {
+      request_(MakeRequest(data_source_config, endpoints, http_properties)),
+      timer_(ioc),
+      sink_(nullptr) {
     if (polling_interval_ < data_source_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
@@ -72,10 +69,6 @@ PollingDataSource::PollingDataSource(
     }
 }
 
-void PollingDataSource::Init(
-    std::optional<data_model::SDKDataSet> initial_data) {
-    // TODO: implement
-}
 void PollingDataSource::DoPoll() {
     last_poll_start_ = std::chrono::system_clock::now();
 
@@ -136,7 +129,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
                 tl::expected<data_model::SDKDataSet, JsonError>>(parsed);
 
             if (poll_result.has_value()) {
-                update_sink_.Init(std::move(*poll_result));
+                sink_->Init(std::move(*poll_result));
                 status_manager_.SetState(
                     DataSourceStatus::DataSourceState::kValid);
                 return;
@@ -211,7 +204,13 @@ void PollingDataSource::StartPollingTimer() {
     });
 }
 
-void PollingDataSource::StartAsync() {
+void PollingDataSource::StartAsync(
+    data_interfaces::IDestination* dest,
+    data_model::SDKDataSet const* bootstrap_data) {
+    boost::ignore_unused(bootstrap_data);
+
+    sink_ = dest;
+
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;

@@ -16,10 +16,16 @@ class ISystem : public IStore {
     [[nodiscard]] virtual std::string const& Identity() const = 0;
 
     /**
-     * \brief Initializes the system. This method will be called before any of
+     * @brief Initializes the system. This method will be called before any of
      * the IStore methods are called.
      */
     virtual void Initialize() = 0;
+
+    /**
+     * @brief Shuts down the system. This method will be called at some point
+     * after Initialize, after which no methods from IStore will be called.
+     */
+    virtual void Shutdown() = 0;
 
     virtual ~ISystem() override = default;
     ISystem(ISystem const& item) = delete;

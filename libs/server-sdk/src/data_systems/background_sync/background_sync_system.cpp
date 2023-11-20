@@ -21,15 +21,15 @@ BackgroundSync::BackgroundSync(
                                          config::built::BackgroundSyncConfig::
                                              StreamingConfig>) {
                 synchronizer_ = std::make_shared<StreamingDataSource>(
-                    endpoints, method_config, http_properties, ioc,
-                    change_notifier_, status_manager, logger);
+                    ioc, logger, status_manager, endpoints, method_config,
+                    http_properties);
 
             } else if constexpr (std::is_same_v<
                                      T, config::built::BackgroundSyncConfig::
                                             PollingConfig>) {
                 synchronizer_ = std::make_shared<PollingDataSource>(
-                    endpoints, method_config, http_properties, ioc,
-                    change_notifier_, status_manager, logger);
+                    ioc, logger, status_manager, endpoints, method_config,
+                    http_properties);
             }
         },
         background_sync_config.synchronizer_);
@@ -43,9 +43,14 @@ BackgroundSync::BackgroundSync(
       synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
 
 void BackgroundSync::Initialize() {
-    // TODO: if there was any data from bootstrapping, then add it:
-    // synchronizer_->Init(data);
-    synchronizer_->StartAsync();
+    synchronizer_->StartAsync(&change_notifier_, nullptr);
+}
+
+void BackgroundSync::Shutdown() {
+    auto promise = std::make_shared<std::promise<void>>();
+    auto const did_shutdown = promise->get_future();
+    synchronizer_->ShutdownAsync([promise]() { promise->set_value(); });
+    did_shutdown.wait();
 }
 
 std::string const& BackgroundSync::Identity() const {

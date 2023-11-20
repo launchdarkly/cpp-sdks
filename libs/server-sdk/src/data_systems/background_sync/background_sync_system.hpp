@@ -59,6 +59,8 @@ class BackgroundSync final : public data_interfaces::ISystem {
 
     void Initialize() override;
 
+    void Shutdown() override;
+
    private:
     data_components::MemoryStore store_;
     data_components::ChangeNotifier change_notifier_;

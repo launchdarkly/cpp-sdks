@@ -6,6 +6,8 @@
 #include <optional>
 #include <string>
 
+#include "../destination/idestination.hpp"
+
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
@@ -15,18 +17,25 @@ namespace launchdarkly::server_side::data_interfaces {
 class IPushSource {
    public:
     /**
-     * \brief Initialize the source, optionally with an initial data set. Init
-     * will be called before Start.
-     * \param initial_data Initial set of SDK data.
+     * @brief Starts synchronizing data into the given IDestination.
+     *
+     *
+     * The second parameter, boostrap_data, may be nullptr meaning no bootstrap
+     * data is present in the SDK and a full synchronization must be initiated.
+     *
+     * If bootstrap_data is not nullptr, then it contains data obtained by the
+     * SDK out-of-band from the source's mechanism. The pointer is valid only
+     * for this call.
+     *
+     * The data may be used to optimize the synchronization process, e.g. by
+     * obtaining a diff rather than a full dataset.
+     * @param destination The destination to synchronize data into. Pointer is
+     * invalid after the ShutdownAsync completion handler is called.
+     * @param bootstrap_data Optional bootstrap data.
+     * Pointer is valid only for this call.
      */
-    virtual void Init(std::optional<data_model::SDKDataSet> initial_data) = 0;
-
-    /**
-     * \brief Starts the synchronization mechanism. Start will be called only
-     * once after Init; the source is responsible for maintaining a persistent
-     * connection. Start should not block.
-     */
-    virtual void StartAsync() = 0;
+    virtual void StartAsync(IDestination* destination,
+                            data_model::SDKDataSet const* bootstrap_data) = 0;
 
     /**
      * \brief Stops the synchronization mechanism. Stop will be called only once

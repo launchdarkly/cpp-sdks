@@ -32,6 +32,8 @@ std::string const& LazyLoad::Identity() const {
 
 void LazyLoad::Initialize() {}
 
+void LazyLoad::Shutdown() {}
+
 std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     std::string const& key) const {
     auto const state =
