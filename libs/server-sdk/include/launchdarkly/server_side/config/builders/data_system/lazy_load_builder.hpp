@@ -46,7 +46,7 @@ struct LazyLoadBuilder {
      * before being refreshed from the database. The chosen \ref EvictionPolicy
      * affects usage of this TTL. \return Reference to this.
      */
-    LazyLoadBuilder& CacheTTL(std::chrono::milliseconds ttl);
+    LazyLoadBuilder& CacheRefresh(std::chrono::milliseconds ttl);
 
     /**
      * \brief Specify the eviction policy when a data item's TTL expires.

@@ -6,6 +6,8 @@
 #include "../../data_components/serialization_adapters/json_pull_source.hpp"
 #include "../../data_interfaces/system/isystem.hpp"
 
+#include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
+
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
@@ -21,9 +23,9 @@ namespace launchdarkly::server_side::data_systems {
  * LazyLoad is able to remain efficient because it caches responses from the
  * store. Over time, data becomes stale causing the system to refresh data.
  */
-class LazyLoad : public data_interfaces::ISystem {
+class LazyLoad final : public data_interfaces::ISystem {
    public:
-    LazyLoad();
+    explicit LazyLoad(config::built::LazyLoadConfig cfg);
 
     LazyLoad(LazyLoad const& item) = delete;
     LazyLoad(LazyLoad&& item) = delete;

@@ -20,7 +20,7 @@ ExpirationTracker::TrackState ExpirationTracker::State(
         return State(item->second, current_time);
     }
 
-    return ExpirationTracker::TrackState::kNotTracked;
+    return TrackState::kNotTracked;
 }
 
 void ExpirationTracker::Add(DataKind kind,
@@ -41,7 +41,7 @@ ExpirationTracker::TrackState ExpirationTracker::State(
     if (expiration.has_value()) {
         return State(expiration.value(), current_time);
     }
-    return ExpirationTracker::TrackState::kNotTracked;
+    return TrackState::kNotTracked;
 }
 
 void ExpirationTracker::Clear() {
@@ -54,15 +54,13 @@ ExpirationTracker::Prune(TimePoint current_time) {
 
     // Determine everything to be pruned.
     for (auto const& item : unscoped_) {
-        if (State(item.second, current_time) ==
-            ExpirationTracker::TrackState::kStale) {
+        if (State(item.second, current_time) == TrackState::kStale) {
             pruned.emplace_back(std::nullopt, item.first);
         }
     }
     for (auto const& scope : scoped_) {
         for (auto const& item : scope.Data()) {
-            if (State(item.second, current_time) ==
-                ExpirationTracker::TrackState::kStale) {
+            if (State(item.second, current_time) == TrackState::kStale) {
                 pruned.emplace_back(scope.Kind(), item.first);
             }
         }

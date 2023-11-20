@@ -106,7 +106,7 @@ TEST_F(ConfigBuilderTest, CanConstructValidRedisConfig) {
         LazyLoad()
             .Source(redis)
             .CacheEviction(LazyLoad::EvictionPolicy::Disabled)
-            .CacheTTL(std::chrono::seconds(5)));
+            .CacheRefresh(std::chrono::seconds(5)));
 
     auto cfg = builder.Build();
     ASSERT_TRUE(cfg);

@@ -18,7 +18,7 @@ struct LazyLoadConfig {
     };
 
     EvictionPolicy eviction_policy;
-    std::chrono::milliseconds eviction_ttl;
+    std::chrono::milliseconds refresh_ttl;
     std::shared_ptr<server_side::data_interfaces::ISerializedDataPullSource>
         source;
 };
