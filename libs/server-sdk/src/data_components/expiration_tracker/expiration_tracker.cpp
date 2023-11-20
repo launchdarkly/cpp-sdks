@@ -105,7 +105,7 @@ void ExpirationTracker::ScopedTtls::Clear() {
     }
 }
 
-std::optional<TimePoint> ExpirationTracker::ScopedTtls::Get(
+std::optional<ExpirationTracker::TimePoint> ExpirationTracker::ScopedTtls::Get(
     DataKind kind,
     std::string const& key) const {
     auto const& scope =
