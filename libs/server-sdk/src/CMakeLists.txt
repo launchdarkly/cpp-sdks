@@ -21,6 +21,11 @@ target_sources(${LIBNAME}
         client_impl.cpp
         config/config.cpp
         config/config_builder.cpp
+        config/builders/data_system/background_sync_builder.cpp
+        config/builders/data_system/bootstrap_builder.cpp
+        config/builders/data_system/data_system_builder.cpp
+        config/builders/data_system/lazy_load_builder.cpp
+        config/builders/data_system/data_destination_builder.cpp
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp

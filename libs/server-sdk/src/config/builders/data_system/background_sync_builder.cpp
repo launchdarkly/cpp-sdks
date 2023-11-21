@@ -1,21 +1,23 @@
 #include <launchdarkly/server_side/config/builders/data_system/background_sync_builder.hpp>
 
+#include "defaults.hpp"
+
 namespace launchdarkly::server_side::config::builders {
 
 BackgroundSyncBuilder::BackgroundSyncBuilder()
-    : bootstrap_builder_(), config_() {}
+    : bootstrap_builder_(), config_(Defaults::BackgroundSyncConfig()) {}
 
 BootstrapBuilder& BackgroundSyncBuilder::Bootstrapper() {
     return bootstrap_builder_;
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Streaming source) {
-    config_.source_.method = source.Build();
+    config_.synchronizer_ = source.Build();
     return *this;
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Polling source) {
-    config_.source_.method = source.Build();
+    config_.synchronizer_ = source.Build();
     return *this;
 }
 
