@@ -17,7 +17,16 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     auto config_builder = ConfigBuilder(in.credential);
 
-    auto default_endpoints = Defaults::ServiceEndpoints();
+    // The contract test service sets endpoints in a way that is disallowed
+    // for users. Specifically, it may set just 1 of the 3 endpoints, whereas
+    // we require all 3 to be set.
+    //
+    // To avoid that error being detected, we must configure the Endpoints
+    // builder with the 3 default URLs, which we can fetch by just calling Build
+    // on a new builder. That way when the contract tests set just 1 URL,
+    // the others have already been "set" so no error occurs.
+    auto const default_endpoints =
+        *config::builders::EndpointsBuilder().Build();
 
     auto& endpoints =
         config_builder.ServiceEndpoints()
@@ -36,16 +45,14 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.EventsBaseUrl(*in.serviceEndpoints->events);
         }
     }
-
-    using BackgroundSync = DataSystemBuilder::BackgroundSync;
-    auto datasystem = BackgroundSync();
+    auto datasystem = config::builders::DataSystemBuilder::BackgroundSync();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
         if (in.streaming->initialRetryDelayMs) {
-            auto streaming = BackgroundSync::Streaming();
+            auto streaming = decltype(datasystem)::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
             datasystem.Synchronizer(std::move(streaming));
@@ -57,7 +64,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.PollingBaseUrl(*in.polling->baseUri);
         }
         if (!in.streaming) {
-            auto method = BackgroundSync::Polling();
+            auto method = decltype(datasystem)::Polling();
             if (in.polling->pollIntervalMs) {
                 method.PollInterval(
                     std::chrono::duration_cast<std::chrono::seconds>(

@@ -1,38 +1,36 @@
 #include <gtest/gtest.h>
 
-#include <launchdarkly/config/client.hpp>
 #include <launchdarkly/error.hpp>
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
-class ServiceEndpointTest : public testing::Test {};
+using namespace launchdarkly::server_side::config::builders;
+using Error = launchdarkly::Error;
 
-using namespace launchdarkly;
-using launchdarkly::Error;
-
-TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
-    client_side::EndpointsBuilder builder;
+TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
+    EndpointsBuilder builder;
     auto eps = builder.Build();
     ASSERT_TRUE(eps);
-    ASSERT_EQ(eps->PollingBaseUrl(), "https://clientsdk.launchdarkly.com");
-    ASSERT_EQ(eps->StreamingBaseUrl(), "https://clientstream.launchdarkly.com");
-    ASSERT_EQ(eps->EventsBaseUrl(), "https://mobile.launchdarkly.com");
+    ASSERT_EQ(eps->PollingBaseUrl(), "https://sdk.launchdarkly.com");
+    ASSERT_EQ(eps->StreamingBaseUrl(), "https://stream.launchdarkly.com");
+    ASSERT_EQ(eps->EventsBaseUrl(), "https://events.launchdarkly.com");
 }
 
 TEST(ServiceEndpointTest, ModifySingleURLCausesError) {
-    auto result = client_side::EndpointsBuilder().PollingBaseUrl("foo").Build();
+    auto result = EndpointsBuilder().PollingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = client_side::EndpointsBuilder().StreamingBaseUrl("foo").Build();
+    result = EndpointsBuilder().StreamingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 
-    result = client_side::EndpointsBuilder().EventsBaseUrl("foo").Build();
+    result = EndpointsBuilder().EventsBaseUrl("foo").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
-    auto eps = client_side::EndpointsBuilder().RelayProxyBaseURL("foo").Build();
+    auto eps = EndpointsBuilder().RelayProxyBaseURL("foo").Build();
     ASSERT_TRUE(eps);
     ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     ASSERT_EQ(eps->PollingBaseUrl(), "foo");
@@ -41,34 +39,30 @@ TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
 
 TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
     {
-        auto eps =
-            client_side::EndpointsBuilder().RelayProxyBaseURL("foo/").Build();
+        auto eps = EndpointsBuilder().RelayProxyBaseURL("foo/").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps = client_side::EndpointsBuilder()
-                       .RelayProxyBaseURL("foo////////")
-                       .Build();
+        auto eps = EndpointsBuilder().RelayProxyBaseURL("foo////////").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "foo");
     }
 
     {
-        auto eps =
-            client_side::EndpointsBuilder().RelayProxyBaseURL("/").Build();
+        auto eps = EndpointsBuilder().RelayProxyBaseURL("/").Build();
         ASSERT_TRUE(eps);
         ASSERT_EQ(eps->StreamingBaseUrl(), "");
     }
 }
 
 TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
-    auto result = client_side::EndpointsBuilder().RelayProxyBaseURL("").Build();
+    auto result = EndpointsBuilder().RelayProxyBaseURL("").Build();
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = client_side::EndpointsBuilder()
+    result = EndpointsBuilder()
                  .StreamingBaseUrl("")
                  .EventsBaseUrl("foo")
                  .PollingBaseUrl("bar")
@@ -76,7 +70,7 @@ TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = client_side::EndpointsBuilder()
+    result = EndpointsBuilder()
                  .StreamingBaseUrl("foo")
                  .EventsBaseUrl("")
                  .PollingBaseUrl("bar")
@@ -84,7 +78,7 @@ TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
 
-    result = client_side::EndpointsBuilder()
+    result = EndpointsBuilder()
                  .StreamingBaseUrl("foo")
                  .EventsBaseUrl("bar")
                  .PollingBaseUrl("")
