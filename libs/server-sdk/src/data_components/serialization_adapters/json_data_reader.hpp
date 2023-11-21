@@ -30,7 +30,7 @@ class JsonDataReader final : public data_interfaces::IDataReader {
     Single<data_model::ItemDescriptor<DataModel>> Deserialize(
         DataKind const& kind,
         std::string const& key) const {
-        auto result = source_.Get(kind, key);
+        auto result = reader_.Get(kind, key);
 
         if (!result) {
             /* the actual fetch failed */
