@@ -440,6 +440,7 @@ IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
 // }
 
 ClientImpl::~ClientImpl() {
+    data_system_->Shutdown();
     ioc_.stop();
     // TODO(SC-219101)
     run_thread_.join();

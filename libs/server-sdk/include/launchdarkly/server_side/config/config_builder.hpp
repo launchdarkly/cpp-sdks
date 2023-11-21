@@ -77,7 +77,7 @@ class ConfigBuilder {
 
    private:
     std::string sdk_key_;
-    std::optional<bool> offline_;
+    bool offline_;
 
     config::builders::EndpointsBuilder service_endpoints_builder_;
     config::builders::AppInfoBuilder app_info_builder_;

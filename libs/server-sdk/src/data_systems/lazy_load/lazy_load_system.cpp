@@ -7,12 +7,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-/*
-*DataSourceConfig<config::shared::ServerSDK> const& data_source_config,
-HttpProperties http_properties,
-boost::asio::any_io_executor ioc,
-data_components::DataSourceStatusManager& status_manager,
-*/
 LazyLoad::LazyLoad(config::built::LazyLoadConfig cfg)
     : LazyLoad(std::move(cfg),
                []() { return std::chrono::steady_clock::now(); }) {}
