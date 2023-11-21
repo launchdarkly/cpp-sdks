@@ -10,7 +10,7 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
- * Interface for a data source that provides feature flags and related data in a
+ * Interface for a data reader that provides feature flags and related data in a
  * serialized form.
  *
  * This interface should be used for database integrations, or any other data
@@ -26,14 +26,14 @@ namespace launchdarkly::server_side::data_interfaces {
  *
  * Implementations must be thread-safe.
  */
-class ISerializedDataPullSource {
+class ISerializedDataReader {
    public:
-    virtual ~ISerializedDataPullSource() = default;
-    ISerializedDataPullSource(ISerializedDataPullSource const& item) = delete;
-    ISerializedDataPullSource(ISerializedDataPullSource&& item) = delete;
-    ISerializedDataPullSource& operator=(ISerializedDataPullSource const&) =
+    virtual ~ISerializedDataReader() = default;
+    ISerializedDataReader(ISerializedDataReader const& item) = delete;
+    ISerializedDataReader(ISerializedDataReader&& item) = delete;
+    ISerializedDataReader& operator=(ISerializedDataReader const&) =
         delete;
-    ISerializedDataPullSource& operator=(ISerializedDataPullSource&&) = delete;
+    ISerializedDataReader& operator=(ISerializedDataReader&&) = delete;
 
     struct Error {
         std::string message;
@@ -74,6 +74,6 @@ class ISerializedDataPullSource {
     virtual bool Initialized() const = 0;
 
    protected:
-    ISerializedDataPullSource() = default;
+    ISerializedDataReader() = default;
 };
 }  // namespace launchdarkly::server_side::data_interfaces

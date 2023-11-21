@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
-#include "../../../../data_interfaces/source/ipush_source.hpp"
+#include "../../../../data_interfaces/source/idata_synchronizer.hpp"
 
 #include <boost/asio/any_io_executor.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 
-class NullDataSource : public data_interfaces::IPushSource {
+class NullDataSource : public data_interfaces::IDataSynchronizer {
    public:
     explicit NullDataSource(
         boost::asio::any_io_executor exec,

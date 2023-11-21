@@ -26,7 +26,7 @@ namespace launchdarkly::server_side::config::builders {
  */
 struct LazyLoadBuilder {
     using SourcePtr =
-        std::shared_ptr<data_interfaces::ISerializedDataPullSource>;
+        std::shared_ptr<data_interfaces::ISerializedDataReader>;
     using EvictionPolicy = built::LazyLoadConfig::EvictionPolicy;
     /**
      * \brief Constructs a new LazyLoadBuilder.
@@ -35,7 +35,7 @@ struct LazyLoadBuilder {
 
     /**
      * \brief Specify the source of the data.
-     * \param source Component implementing ISerializedDataPullSource.
+     * \param source Component implementing ISerializedDataReader.
      * \return Reference to this.
      */
     LazyLoadBuilder& Source(SourcePtr source);

@@ -1,16 +1,15 @@
 #pragma once
 
-#include "../../data_interfaces/source/ipull_source.hpp"
+#include "../../data_interfaces/source/idata_reader.hpp"
 #include "../kinds/kinds.hpp"
 
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
-class JsonSource final : public data_interfaces::IPullSource {
+class JsonDataReader final : public data_interfaces::IDataReader {
    public:
-    explicit JsonSource(
-        data_interfaces::ISerializedDataPullSource& json_source);
+    explicit JsonDataReader(data_interfaces::ISerializedDataReader& reader);
 
     [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
@@ -66,7 +65,7 @@ class JsonSource final : public data_interfaces::IPullSource {
 
     FlagKind const flag_kind_;
     FlagKind const segment_kind_;
-    data_interfaces::ISerializedDataPullSource& source_;
+    data_interfaces::ISerializedDataReader& reader_;
 };
 
 }  // namespace launchdarkly::server_side::data_components
