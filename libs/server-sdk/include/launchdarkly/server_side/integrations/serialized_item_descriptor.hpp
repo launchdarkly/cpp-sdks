@@ -24,6 +24,17 @@ struct SerializedItemDescriptor {
      * std::nullopt for deleted items.
      */
     std::optional<std::string> serializedItem;
+
+    static SerializedItemDescriptor Present(std::uint64_t version,
+                                            std::string data) {
+        return SerializedItemDescriptor{version, false, std::move(data)};
+    }
+
+    static SerializedItemDescriptor Absent(std::uint64_t const version,
+                                           std::string tombstone_rep) {
+        return SerializedItemDescriptor{version, true,
+                                        std::move(tombstone_rep)};
+    }
 };
 
 }  // namespace launchdarkly::server_side::integrations

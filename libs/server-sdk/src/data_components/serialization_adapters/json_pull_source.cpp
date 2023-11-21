@@ -3,7 +3,7 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
-#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
+#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
 
 #include <boost/json.hpp>
 

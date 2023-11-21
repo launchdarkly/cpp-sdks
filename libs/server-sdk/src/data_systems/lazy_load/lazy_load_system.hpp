@@ -10,7 +10,6 @@
 
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 

@@ -13,19 +13,19 @@ class LazyLoadTest : public ::testing::Test {};
 class FakeDataSource : public launchdarkly::server_side::data_interfaces::
                            ISerializedDataPullSource {
    public:
-    using GetFn = std::function<GetResult(integrations::IPersistentKind const&,
+    using GetFn = std::function<GetResult(integrations::ISerializedItemKind const&,
                                           std::string const& key)>;
 
     using AllFn =
-        std::function<AllResult(integrations::IPersistentKind const&)>;
+        std::function<AllResult(integrations::ISerializedItemKind const&)>;
 
     FakeDataSource(std::string name, GetFn items, AllFn all)
         : name(std::move(name)),
-          item_getter([](integrations::IPersistentKind const& kind,
+          item_getter([](integrations::ISerializedItemKind const& kind,
                          std::string const& key) {
               return tl::make_unexpected(Error{key + "not found"});
           }),
-          all_getter([](integrations::IPersistentKind const& kind) {
+          all_getter([](integrations::ISerializedItemKind const& kind) {
               return tl::make_unexpected(Error{kind.Namespace() + "not found"});
           }),
           items_requested() {
@@ -42,12 +42,12 @@ class FakeDataSource : public launchdarkly::server_side::data_interfaces::
 
     FakeDataSource() : FakeDataSource("fake source") {}
 
-    GetResult Get(integrations::IPersistentKind const& kind,
+    GetResult Get(integrations::ISerializedItemKind const& kind,
                   std::string const& itemKey) const override {
         items_requested[kind.Namespace()].push_back(itemKey);
         return item_getter(kind, itemKey);
     }
-    AllResult All(integrations::IPersistentKind const& kind) const override {
+    AllResult All(integrations::ISerializedItemKind const& kind) const override {
         all_requested.push_back(kind.Namespace());
         return all_getter(kind);
     }
