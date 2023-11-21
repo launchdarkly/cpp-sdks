@@ -1,6 +1,7 @@
 #pragma once
 
-#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
+#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
+#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
 #include <tl/expected.hpp>
 
@@ -31,8 +32,7 @@ class ISerializedDataReader {
     virtual ~ISerializedDataReader() = default;
     ISerializedDataReader(ISerializedDataReader const& item) = delete;
     ISerializedDataReader(ISerializedDataReader&& item) = delete;
-    ISerializedDataReader& operator=(ISerializedDataReader const&) =
-        delete;
+    ISerializedDataReader& operator=(ISerializedDataReader const&) = delete;
     ISerializedDataReader& operator=(ISerializedDataReader&&) = delete;
 
     struct Error {
@@ -55,7 +55,7 @@ class ISerializedDataReader {
      * if the item did not exist, or an error. For a deleted item the serialized
      * item descriptor may contain a std::nullopt for the serializedItem.
      */
-    virtual GetResult Get(integrations::IPersistentKind const& kind,
+    virtual GetResult Get(integrations::ISerializedItemKind const& kind,
                           std::string const& itemKey) const = 0;
 
     /**
@@ -67,7 +67,8 @@ class ISerializedDataReader {
      * @return Either all of the items of the type, or an error. If there are
      * no items of the specified type, then return an empty collection.
      */
-    virtual AllResult All(integrations::IPersistentKind const& kind) const = 0;
+    virtual AllResult All(
+        integrations::ISerializedItemKind const& kind) const = 0;
 
     virtual std::string const& Identity() const = 0;
 
