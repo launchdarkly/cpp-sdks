@@ -4,6 +4,7 @@
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
+#include "config/builders/data_system/defaults.hpp"
 #include "data_systems/background_sync/sources/streaming/streaming_data_source.hpp"
 
 using namespace launchdarkly;
@@ -40,19 +41,15 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_StreamingDefaultsAreUsed) {
     auto const bg_sync_config =
         std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
 
-    ASSERT_TRUE(std::holds_alternative<
-                ::launchdarkly::config::shared::built::StreamingConfig<
-                    launchdarkly::config::shared::ServerSDK>>(
-        bg_sync_config.synchronizer_));
+    ASSERT_TRUE(
+        std::holds_alternative<built::BackgroundSyncConfig::StreamingConfig>(
+            bg_sync_config.synchronizer_));
 
     auto const streaming_config =
-        std::get<::launchdarkly::config::shared::built::StreamingConfig<
-            launchdarkly::config::shared::ServerSDK>>(
+        std::get<built::BackgroundSyncConfig::StreamingConfig>(
             bg_sync_config.synchronizer_);
 
-    EXPECT_EQ(streaming_config,
-              ::launchdarkly::config::shared::Defaults<
-                  launchdarkly::config::shared::ServerSDK>::StreamingConfig());
+    EXPECT_EQ(streaming_config, Defaults::SynchronizerConfig());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
