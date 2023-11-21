@@ -6,12 +6,8 @@
 #include "../../../../data_interfaces/destination/idestination.hpp"
 #include "../../../../data_interfaces/source/idata_synchronizer.hpp"
 
-#include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
-#include <launchdarkly/context.hpp>
-#include <launchdarkly/data/evaluation_result.hpp>
+#include <launchdarkly/server_side/config/built/all_built.hpp>
+
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/sse/client.hpp>
 
@@ -28,10 +24,10 @@ class StreamingDataSource final
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(
-        config::shared::built::ServiceEndpoints const& endpoints,
-        config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
+        config::built::ServiceEndpoints const& endpoints,
+        config::built::BackgroundSyncConfig::StreamingConfig const&
             data_source_config,
-        config::shared::built::HttpProperties http_properties,
+        config::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         data_interfaces::IDestination& handler,
         data_components::DataSourceStatusManager& status_manager,
@@ -49,10 +45,9 @@ class StreamingDataSource final
     DataSourceEventHandler data_source_handler_;
     std::string streaming_endpoint_;
 
-    config::shared::built::StreamingConfig<config::shared::ServerSDK>
-        streaming_config_;
+    config::built::BackgroundSyncConfig::StreamingConfig streaming_config_;
 
-    config::shared::built::HttpProperties http_config_;
+    config::built::HttpProperties http_config_;
 
     Logger const& logger_;
     std::shared_ptr<sse::Client> client_;
