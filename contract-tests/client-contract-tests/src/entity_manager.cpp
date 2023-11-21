@@ -1,9 +1,10 @@
 #include "entity_manager.hpp"
-#include <boost/json/parse.hpp>
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+
+#include <boost/json.hpp>
 
 using launchdarkly::LogLevel;
 using namespace launchdarkly::client_side;
