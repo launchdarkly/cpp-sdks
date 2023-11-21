@@ -9,14 +9,16 @@ using namespace config::shared::built;
 
 LazyLoad::LazyLoad()
     : cache_(),
-      raw_source_(),  // TODO: take LazyLoadConfig argument and construct source
-      source_(*raw_source_.get()),
+      serialized_reader_(),  // TODO: take LazyLoadConfig argument and construct
+                             // source
+      reader_(std::make_unique<data_components::JsonDeserializer>(
+          *serialized_reader_.get())),
       tracker_(),
       time_([]() { return std::chrono::steady_clock::now(); }),
       initialized_() {}
 
 std::string const& LazyLoad::Identity() const {
-    static std::string id = "lazy load via " + source_.Identity();
+    static std::string id = "lazy load via " + reader_->Identity();
     return id;
 }
 
@@ -77,7 +79,7 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    auto maybe_flags = source_.AllFlags();
+    auto maybe_flags = reader_->AllFlags();
     // TODO: log failure?
     if (maybe_flags) {
         for (auto const [flag_key, flag_descriptor] : *maybe_flags) {
@@ -88,7 +90,7 @@ void LazyLoad::RefreshAllFlags() const {
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    auto maybe_segments = source_.AllSegments();
+    auto maybe_segments = reader_->AllSegments();
     // TODO: log failure?
     if (maybe_segments) {
         for (auto const [seg_key, seg_descriptor] : *maybe_segments) {
@@ -105,7 +107,7 @@ void LazyLoad::RefreshInitState() const {
 }
 
 void LazyLoad::RefreshSegment(std::string const& key) const {
-    if (auto segment_result = source_.GetSegment(key)) {
+    if (auto segment_result = reader_->GetSegment(key)) {
         if (auto optional_segment = *segment_result) {
             cache_.Upsert(key, std::move(*optional_segment));
         }
@@ -115,7 +117,7 @@ void LazyLoad::RefreshSegment(std::string const& key) const {
 }
 
 void LazyLoad::RefreshFlag(std::string const& key) const {
-    if (auto flag_result = source_.GetFlag(key)) {
+    if (auto flag_result = reader_->GetFlag(key)) {
         if (auto optional_flag = *flag_result) {
             cache_.Upsert(key, std::move(*optional_flag));
         }

@@ -7,9 +7,9 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class JsonDataReader final : public data_interfaces::IDataReader {
+class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
-    explicit JsonDataReader(data_interfaces::ISerializedDataReader& reader);
+    explicit JsonDeserializer(data_interfaces::ISerializedDataReader& reader);
 
     [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;

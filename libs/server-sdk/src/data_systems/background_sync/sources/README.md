@@ -1,22 +1,15 @@
 ## Data Source Implementations
 
-This directory contains implementations of `IDataSource`.
+This directory contains data sources for use in the Background Sync system.
 
-There are two primary schemes supported by the server-side SDK.
+These sources implement `IDataSynchronizer`, which provides an interface that allows for passing in
+an `IDestination` to which data updates should be sent.
 
-One is to receive push-updates from a web-service (via Server-Sent Events). The other is to pull
-data from a database as needed.
+There are two primary sources supported by the server-side SDK.
 
-### Push Data Source
+One is the [streaming](./streaming) source: it receives updates from a web-service (via Server-Sent Events).
 
-The Push data source is able to operate in "streaming" or "polling" mode. In either mode, flag
-updates are delivered in the background from the perspective of the application.
+The other is [polling](./polling): it periodically hits an endpoint to retrieve a full payload of flag data.
 
-### Pull Data Source
-
-The Pull data source fetches flag data on-demand from a database. Because this is likely slow,
-it operates a read-through cache wherein each stored item has a TTL indicating when it should be
-re-fetched.
-
-When an item expires, it does not evict it from memory - often stale data is better
-than no data. Eviction is disabled at this time, but may be added in a later version.
+By default, the SDK uses the streaming source. Users can optionally configure the polling source if streaming
+isn't feasible or desired. 
