@@ -62,12 +62,12 @@ class ConfigBuilder {
     config::builders::LoggingBuilder& Logging();
 
     /**
-     * @brief Equivalent to setting Events().Disable() and
+     * @brief If true, equivalent to setting Events().Disable() and
      * DataSystem().Disable(). The effect is that all evaluations will return
      * application-provided default values, and no network calls will be made.
      * @return Reference to this.
      */
-    ConfigBuilder& Offline();
+    ConfigBuilder& Offline(bool offline);
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.

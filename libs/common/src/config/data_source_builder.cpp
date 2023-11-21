@@ -20,31 +20,6 @@ struct MethodVisitor<ClientSDK> {
     }
 };
 
-template <>
-struct MethodVisitor<ServerSDK> {
-    using SDK = ServerSDK;
-    using Result = tl::expected<std::variant<built::StreamingConfig<SDK>,
-                                             built::PollingConfig<SDK>,
-                                             built::RedisConfig>,
-                                Error>;
-
-    Result operator()(StreamingBuilder<SDK> const& streaming) const {
-        return streaming.Build();
-    }
-
-    Result operator()(PollingBuilder<SDK> const& polling) const {
-        return polling.Build();
-    }
-
-    Result operator()(RedisBuilder const& redis_pull) const {
-        return redis_pull.Build().map([](auto&& config) {
-            return std::variant<built::StreamingConfig<SDK>,
-                                built::PollingConfig<SDK>, built::RedisConfig>{
-                std::move(config)};
-        });
-    }
-};
-
 template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
     : config_(Defaults<SDK>::StreamingConfig()) {}

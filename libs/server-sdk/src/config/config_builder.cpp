@@ -29,8 +29,8 @@ config::builders::LoggingBuilder& ConfigBuilder::Logging() {
     return logging_config_builder_;
 }
 
-ConfigBuilder& ConfigBuilder::Offline() {
-    offline_ = true;
+ConfigBuilder& ConfigBuilder::Offline(bool const offline) {
+    offline_ = offline;
     return *this;
 }
 
