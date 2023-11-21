@@ -76,7 +76,7 @@ classDiagram
 
 ```
 
-In contrast to Background Sync, Lazy Load actively implements `IStore` by fetching data items from a
+In contrast to Background Sync, Lazy Load actively implements `IStore` by fetching data items from
 an `ISerializedDataReader`
 via `IDataReader` and placing them in a Memory Store cache.
 
