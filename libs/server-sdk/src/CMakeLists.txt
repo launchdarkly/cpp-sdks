@@ -19,6 +19,7 @@ target_sources(${LIBNAME}
         boost.cpp
         client.cpp
         client_impl.cpp
+        data_source_status.cpp
         config/config.cpp
         config/config_builder.cpp
         config/builders/data_system/background_sync_builder.cpp
