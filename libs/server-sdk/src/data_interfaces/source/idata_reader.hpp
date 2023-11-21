@@ -11,14 +11,14 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
- * \brief IPullSource obtains data on-demand. Calls to obtain data may fail, so
+ * \brief IDataReader obtains data on-demand. Calls to obtain data may fail, so
  * the getter methods use tl::expected in order to propagate error codes.
  *
- * The IPullSource does not perform caching, so parent components must be
+ * The IDataReader does not perform caching, so parent components must be
  * careful to avoid repeatedly fetching data (i.e. use a cache.)
  *
  */
-class IPullSource {
+class IDataReader {
    public:
     using Error = std::string;
 
@@ -67,14 +67,14 @@ class IPullSource {
      */
     [[nodiscard]] virtual std::string const& Identity() const = 0;
 
-    virtual ~IPullSource() = default;
-    IPullSource(IPullSource const& item) = delete;
-    IPullSource(IPullSource&& item) = delete;
-    IPullSource& operator=(IPullSource const&) = delete;
-    IPullSource& operator=(IPullSource&&) = delete;
+    virtual ~IDataReader() = default;
+    IDataReader(IDataReader const& item) = delete;
+    IDataReader(IDataReader&& item) = delete;
+    IDataReader& operator=(IDataReader const&) = delete;
+    IDataReader& operator=(IDataReader&&) = delete;
 
    protected:
-    IPullSource() = default;
+    IDataReader() = default;
 };
 
 }  // namespace launchdarkly::server_side::data_interfaces

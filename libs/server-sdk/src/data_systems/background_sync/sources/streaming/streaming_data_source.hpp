@@ -4,7 +4,7 @@
 
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../../../data_interfaces/destination/idestination.hpp"
-#include "../../../../data_interfaces/source/ipush_source.hpp"
+#include "../../../../data_interfaces/source/idata_synchronizer.hpp"
 
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 namespace launchdarkly::server_side::data_systems {
 
 class StreamingDataSource final
-    : public data_interfaces::IPushSource,
+    : public data_interfaces::IDataSynchronizer,
       public std::enable_shared_from_this<StreamingDataSource> {
    public:
     StreamingDataSource(

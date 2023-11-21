@@ -3,7 +3,7 @@
 #include "../../data_components/change_notifier/change_notifier.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
-#include "../../data_interfaces/source/ipush_source.hpp"
+#include "../../data_interfaces/source/idata_synchronizer.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/data_model/descriptors.hpp>
@@ -64,6 +64,6 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
     data_components::ChangeNotifier change_notifier_;
     // Needs to be shared to that the source can keep itself alive through
     // async operations.
-    std::shared_ptr<data_interfaces::IPushSource> synchronizer_;
+    std::shared_ptr<data_interfaces::IDataSynchronizer> synchronizer_;
 };
 }  // namespace launchdarkly::server_side::data_systems

@@ -80,8 +80,8 @@ class LazyLoad : public data_interfaces::IDataSystem {
     }
 
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataPullSource> raw_source_;
-    data_components::JsonSource source_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> raw_source_;
+    data_components::JsonDataReader source_;
 
     mutable data_components::ExpirationTracker tracker_;
     std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
