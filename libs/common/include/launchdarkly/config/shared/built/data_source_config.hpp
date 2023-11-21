@@ -5,7 +5,6 @@
 #include <chrono>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace launchdarkly::config::shared::built {
@@ -61,8 +60,5 @@ struct DataSourceConfig<ClientSDK> {
 };
 
 template <>
-struct DataSourceConfig<ServerSDK> {
-    std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
-};
-
+struct DataSourceConfig<ServerSDK> {};
 }  // namespace launchdarkly::config::shared::built
