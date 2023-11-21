@@ -1,21 +1,13 @@
 #include "lazy_load_system.hpp"
 
-#include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_segment.hpp>
+#include "../../data_components/serialization_adapters/json_deserializer.hpp"
 
 namespace launchdarkly::server_side::data_systems {
 
-using namespace config::shared::built;
-
 LazyLoad::LazyLoad()
-    : cache_(),
-      serialized_reader_(),  // TODO: take LazyLoadConfig argument and construct
-                             // source
-      reader_(std::make_unique<data_components::JsonDeserializer>(
-          *serialized_reader_.get())),
-      tracker_(),
-      time_([]() { return std::chrono::steady_clock::now(); }),
-      initialized_() {}
+    : reader_(std::make_unique<data_components::JsonDeserializer>(
+          *serialized_reader_)),
+      time_([]() { return std::chrono::steady_clock::now(); }) {}
 
 std::string const& LazyLoad::Identity() const {
     static std::string id = "lazy load via " + reader_->Identity();
@@ -82,8 +74,8 @@ void LazyLoad::RefreshAllFlags() const {
     auto maybe_flags = reader_->AllFlags();
     // TODO: log failure?
     if (maybe_flags) {
-        for (auto const [flag_key, flag_descriptor] : *maybe_flags) {
-            cache_.Upsert(flag_key, std::move(flag_descriptor));
+        for (auto flag : *maybe_flags) {
+            cache_.Upsert(flag.first, std::move(flag.second));
         }
         tracker_.Add(Keys::kAllFlags, time_());
     }
@@ -93,8 +85,8 @@ void LazyLoad::RefreshAllSegments() const {
     auto maybe_segments = reader_->AllSegments();
     // TODO: log failure?
     if (maybe_segments) {
-        for (auto const [seg_key, seg_descriptor] : *maybe_segments) {
-            cache_.Upsert(seg_key, std::move(seg_descriptor));
+        for (auto seg : *maybe_segments) {
+            cache_.Upsert(seg.first, std::move(seg.second));
         }
         tracker_.Add(Keys::kAllSegments, time_());
     }

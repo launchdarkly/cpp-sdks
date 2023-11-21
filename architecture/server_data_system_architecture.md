@@ -1,5 +1,7 @@
 # Server Data System Architecture
 
+**Client's usage of the Data System**
+
 ```mermaid
 classDiagram
     direction TB

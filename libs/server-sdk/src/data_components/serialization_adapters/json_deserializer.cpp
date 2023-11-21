@@ -9,7 +9,8 @@
 
 namespace launchdarkly::server_side::data_components {
 
-JsonDeserializer::JsonDeserializer(data_interfaces::ISerializedDataReader& reader)
+JsonDeserializer::JsonDeserializer(
+    data_interfaces::ISerializedDataReader& reader)
     : flag_kind_(), segment_kind_(), reader_(reader) {}
 
 data_interfaces::IDataReader::Single<data_model::FlagDescriptor>
