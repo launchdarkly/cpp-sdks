@@ -25,6 +25,12 @@ struct StreamingConfig<ServerSDK> {
     std::string streaming_path;
 };
 
+inline bool operator==(StreamingConfig<ServerSDK> const& lhs,
+                       StreamingConfig<ServerSDK> const& rhs) {
+    return lhs.initial_reconnect_delay == rhs.initial_reconnect_delay &&
+           lhs.streaming_path == rhs.streaming_path;
+}
+
 template <typename SDK>
 struct PollingConfig;
 
