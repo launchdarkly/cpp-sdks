@@ -3,17 +3,14 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
-#include "../../data_components/serialization_adapters/json_data_reader.hpp"
-#include "../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../data_components/serialization_adapters/json_deserializer.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
-#include <launchdarkly/config/shared/built/data_source_config.hpp>
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <launchdarkly/config/shared/built/service_endpoints.hpp>
+#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
+
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -28,14 +25,9 @@ namespace launchdarkly::server_side::data_systems {
  * LazyLoad is able to remain efficient because it caches responses from the
  * store. Over time, data becomes stale causing the system to refresh data.
  */
-class LazyLoad : public data_interfaces::IDataSystem {
+class LazyLoad final : public data_interfaces::IDataSystem {
    public:
     LazyLoad();
-
-    LazyLoad(LazyLoad const& item) = delete;
-    LazyLoad(LazyLoad&& item) = delete;
-    LazyLoad& operator=(LazyLoad const&) = delete;
-    LazyLoad& operator=(LazyLoad&&) = delete;
 
     std::string const& Identity() const override;
 
@@ -67,8 +59,8 @@ class LazyLoad : public data_interfaces::IDataSystem {
 
     template <typename TResult>
     static TResult Get(data_components::ExpirationTracker::TrackState state,
-                       std::function<void(void)> refresh,
-                       std::function<TResult(void)> get) {
+                       std::function<void(void)> const& refresh,
+                       std::function<TResult(void)> const& get) {
         switch (state) {
             case data_components::ExpirationTracker::TrackState::kStale:
                 [[fallthrough]];
@@ -82,8 +74,8 @@ class LazyLoad : public data_interfaces::IDataSystem {
     }
 
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataReader> raw_source_;
-    data_components::JsonDataReader source_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> serialized_reader_;
+    std::unique_ptr<data_interfaces::IDataReader> reader_;
 
     mutable data_components::ExpirationTracker tracker_;
     std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;

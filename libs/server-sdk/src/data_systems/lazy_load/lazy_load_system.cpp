@@ -1,22 +1,16 @@
 #include "lazy_load_system.hpp"
 
-#include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_segment.hpp>
+#include "../../data_components/serialization_adapters/json_deserializer.hpp"
 
 namespace launchdarkly::server_side::data_systems {
 
-using namespace config::shared::built;
-
 LazyLoad::LazyLoad()
-    : cache_(),
-      raw_source_(),  // TODO: take LazyLoadConfig argument and construct source
-      source_(*raw_source_.get()),
-      tracker_(),
-      time_([]() { return std::chrono::steady_clock::now(); }),
-      initialized_() {}
+    : reader_(std::make_unique<data_components::JsonDeserializer>(
+          *serialized_reader_)),
+      time_([]() { return std::chrono::steady_clock::now(); }) {}
 
 std::string const& LazyLoad::Identity() const {
-    static std::string id = "lazy load via " + source_.Identity();
+    static std::string id = "lazy load via " + reader_->Identity();
     return id;
 }
 
@@ -77,22 +71,22 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    auto maybe_flags = source_.AllFlags();
+    auto maybe_flags = reader_->AllFlags();
     // TODO: log failure?
     if (maybe_flags) {
-        for (auto const [flag_key, flag_descriptor] : *maybe_flags) {
-            cache_.Upsert(flag_key, std::move(flag_descriptor));
+        for (auto flag : *maybe_flags) {
+            cache_.Upsert(flag.first, std::move(flag.second));
         }
         tracker_.Add(Keys::kAllFlags, time_());
     }
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    auto maybe_segments = source_.AllSegments();
+    auto maybe_segments = reader_->AllSegments();
     // TODO: log failure?
     if (maybe_segments) {
-        for (auto const [seg_key, seg_descriptor] : *maybe_segments) {
-            cache_.Upsert(seg_key, std::move(seg_descriptor));
+        for (auto seg : *maybe_segments) {
+            cache_.Upsert(seg.first, std::move(seg.second));
         }
         tracker_.Add(Keys::kAllSegments, time_());
     }
@@ -105,7 +99,7 @@ void LazyLoad::RefreshInitState() const {
 }
 
 void LazyLoad::RefreshSegment(std::string const& key) const {
-    if (auto segment_result = source_.GetSegment(key)) {
+    if (auto segment_result = reader_->GetSegment(key)) {
         if (auto optional_segment = *segment_result) {
             cache_.Upsert(key, std::move(*optional_segment));
         }
@@ -115,7 +109,7 @@ void LazyLoad::RefreshSegment(std::string const& key) const {
 }
 
 void LazyLoad::RefreshFlag(std::string const& key) const {
-    if (auto flag_result = source_.GetFlag(key)) {
+    if (auto flag_result = reader_->GetFlag(key)) {
         if (auto optional_flag = *flag_result) {
             cache_.Upsert(key, std::move(*optional_flag));
         }
