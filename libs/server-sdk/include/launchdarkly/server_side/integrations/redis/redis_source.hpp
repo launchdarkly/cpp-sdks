@@ -1,13 +1,12 @@
 #pragma once
 
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
 #include <sw/redis++/redis++.h>
 
 namespace launchdarkly::server_side::data_systems {
 
-class RedisDataSource final
-    : public data_interfaces::ISerializedDataPullSource {
+class RedisDataSource final : public data_interfaces::ISerializedDataReader {
    public:
     RedisDataSource(std::string uri, std::string prefix);
     [[nodiscard]] GetResult Get(integrations::ISerializedItemKind const& kind,
@@ -20,7 +19,8 @@ class RedisDataSource final
    private:
     std::string const prefix_;
     std::string const inited_key_;
-    std::string key_for_kind(integrations::ISerializedItemKind const& kind) const;
+    std::string key_for_kind(
+        integrations::ISerializedItemKind const& kind) const;
     mutable sw::redis::Redis redis_;
 };
 

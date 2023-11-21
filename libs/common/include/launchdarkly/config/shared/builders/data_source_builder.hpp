@@ -78,43 +78,6 @@ class PollingBuilder {
     built::PollingConfig<SDK> config_;
 };
 
-/**
- * \brief Represents a Redis data source capable of pulling data on-demand.
- */
-class RedisBuilder {
-   public:
-    /**
-     * \brief Inividual connection options, including host, port, password, and
-     * db.
-     */
-    using ConnOpts = built::RedisConfig::Standard;
-    /**
-     * \brief Connection string.
-     */
-    using ConnURI = built::RedisConfig::URI;
-
-    RedisBuilder();
-
-    /**
-     * \brief Connect to Redis using explicit connection options.
-     * \param opts The options.
-     * \return Reference to this.
-     */
-    RedisBuilder& Connection(ConnOpts opts);
-
-    /**
-     * \brief Connect to Redis using a URI.
-     * \param uri The URI.
-     * \return Reference to this.
-     */
-    RedisBuilder& Connection(ConnURI uri);
-
-    [[nodiscard]] tl::expected<built::RedisConfig, Error> Build() const;
-
-   private:
-    built::RedisConfig config_;
-};
-
 template <>
 class DataSourceBuilder<ClientSDK> {
    public:

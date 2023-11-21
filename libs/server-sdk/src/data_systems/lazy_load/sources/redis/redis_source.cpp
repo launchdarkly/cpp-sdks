@@ -12,7 +12,7 @@ RedisDataSource::RedisDataSource(std::string uri, std::string prefix)
       inited_key_(prefix_ + ":$inited"),
       redis_(std::move(uri)) {}
 
-data_interfaces::ISerializedDataPullSource::GetResult RedisDataSource::Get(
+data_interfaces::ISerializedDataReader::GetResult RedisDataSource::Get(
     integrations::ISerializedItemKind const& kind,
     std::string const& itemKey) const {
     if (auto maybe_item = redis_.hget(key_for_kind(kind), itemKey)) {
@@ -22,7 +22,7 @@ data_interfaces::ISerializedDataPullSource::GetResult RedisDataSource::Get(
     return tl::make_unexpected(Error{"not found"});
 }
 
-data_interfaces::ISerializedDataPullSource::AllResult RedisDataSource::All(
+data_interfaces::ISerializedDataReader::AllResult RedisDataSource::All(
     integrations::ISerializedItemKind const& kind) const {
     std::unordered_map<std::string, std::string> raw_items;
     AllResult::value_type items;

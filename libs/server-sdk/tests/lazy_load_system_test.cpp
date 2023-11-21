@@ -10,11 +10,11 @@ using namespace launchdarkly::server_side::config;
 
 class LazyLoadTest : public ::testing::Test {};
 
-class FakeDataSource : public launchdarkly::server_side::data_interfaces::
-                           ISerializedDataPullSource {
+class FakeDataSource final : public data_interfaces::ISerializedDataReader {
    public:
-    using GetFn = std::function<GetResult(integrations::ISerializedItemKind const&,
-                                          std::string const& key)>;
+    using GetFn =
+        std::function<GetResult(integrations::ISerializedItemKind const&,
+                                std::string const& key)>;
 
     using AllFn =
         std::function<AllResult(integrations::ISerializedItemKind const&)>;
@@ -47,7 +47,8 @@ class FakeDataSource : public launchdarkly::server_side::data_interfaces::
         items_requested[kind.Namespace()].push_back(itemKey);
         return item_getter(kind, itemKey);
     }
-    AllResult All(integrations::ISerializedItemKind const& kind) const override {
+    AllResult All(
+        integrations::ISerializedItemKind const& kind) const override {
         all_requested.push_back(kind.Namespace());
         return all_getter(kind);
     }
