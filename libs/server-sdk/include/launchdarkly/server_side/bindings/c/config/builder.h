@@ -83,8 +83,14 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
                                       char const* app_version);
 
 /**
- * Enables or disables "Offline" mode. True means
- * Offline mode is enabled.
+ * If true, equivalent to setting LDServerConfigBuilder_Events_Enabled(false)
+ * and LDServerConfigBuilder_DataSystem_Enabled(false).
+ *
+ * The effect is that all evaluations will return
+ * application-provided default values, and no network calls will be made.
+ *
+ * This overrides specific configuration of events and/or data system, if
+ * present.
  * @param b Config builder. Must not be NULL.
  * @param offline True if offline.
  */
@@ -193,6 +199,18 @@ LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
     LDServerPollingSyncBuilder poll_builder);
+
+/**
+ * Specify if the SDK's data system should be enabled or not.
+ *
+ * By default, the SDK uses the Background Sync data system with a Streaming
+ * connection.
+ *
+ * @param b Config builder. Must not be NULL.
+ * @param enabled True to enable the data system, false to disable it.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b, bool enabled);
 
 /**
  * Creates a new DataSource builder for the Streaming method.

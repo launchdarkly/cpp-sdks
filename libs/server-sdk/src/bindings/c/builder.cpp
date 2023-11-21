@@ -181,7 +181,7 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
 }
 
 LD_EXPORT(void)
-LDServerConfigBuilder_DataSystem_BackgroudSync_Polling(
+LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
     LDServerPollingSyncBuilder poll_builder) {
     LD_ASSERT_NOT_NULL(b);
@@ -191,6 +191,13 @@ LDServerConfigBuilder_DataSystem_BackgroudSync_Polling(
     TO_BUILDER(b)->DataSystem().Method(
         BackgroundSyncBuilder().Synchronizer(*pb));
     LDServerPollingSyncBuilder_Free(poll_builder);
+}
+
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b,
+                                         bool const enabled) {
+    LD_ASSERT_NOT_NULL(b);
+    TO_BUILDER(b)->DataSystem().Enabled(enabled);
 }
 
 LD_EXPORT(LDServerStreamingSyncBuilder)

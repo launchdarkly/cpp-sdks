@@ -65,6 +65,10 @@ class ConfigBuilder {
      * @brief If true, equivalent to setting Events().Disable() and
      * DataSystem().Disable(). The effect is that all evaluations will return
      * application-provided default values, and no network calls will be made.
+     *
+     * This overrides specific configuration of events and/or data system, if
+     * present.
+     *
      * @return Reference to this.
      */
     ConfigBuilder& Offline(bool offline);
