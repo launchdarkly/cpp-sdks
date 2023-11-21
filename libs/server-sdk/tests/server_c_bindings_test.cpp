@@ -10,8 +10,6 @@
 
 #include <chrono>
 
-using launchdarkly::server_side::data_sources::DataSourceStatus;
-
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
 
@@ -97,6 +95,8 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 }
 
 TEST(ClientBindings, ComplexDataSourceStatus) {
+    using namespace launchdarkly::server_side;
+
     DataSourceStatus status(
         DataSourceStatus::DataSourceState::kValid,
         std::chrono::time_point<std::chrono::system_clock>{

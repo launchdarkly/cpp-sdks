@@ -3,7 +3,6 @@
 #include <launchdarkly/logging/null_logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
-#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
 #include "data_systems/background_sync/sources/streaming/streaming_data_source.hpp"
 
