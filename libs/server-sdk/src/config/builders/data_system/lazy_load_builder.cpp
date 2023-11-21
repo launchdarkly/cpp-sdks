@@ -6,7 +6,7 @@ namespace launchdarkly::server_side::config::builders {
 
 LazyLoadBuilder::LazyLoadBuilder() : config_(Defaults::LazyLoadConfig()) {}
 
-LazyLoadBuilder& LazyLoadBuilder::CacheTTL(
+LazyLoadBuilder& LazyLoadBuilder::CacheRefresh(
     std::chrono::milliseconds const ttl) {
     config_.eviction_ttl = ttl;
     return *this;

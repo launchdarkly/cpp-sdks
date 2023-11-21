@@ -3,8 +3,6 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
-#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
-
 namespace launchdarkly::server_side::data_systems {
 
 using namespace config::shared::built;

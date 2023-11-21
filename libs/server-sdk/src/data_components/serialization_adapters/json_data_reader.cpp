@@ -25,11 +25,13 @@ JsonDataReader::GetSegment(std::string const& key) const {
 data_interfaces::IDataReader::Collection<data_model::FlagDescriptor>
 JsonDataReader::AllFlags() const {
     // TODO: deserialize then return
+    return tl::make_unexpected("Not implemented");
 }
 
 data_interfaces::IDataReader::Collection<data_model::SegmentDescriptor>
 JsonDataReader::AllSegments() const {
     // TODO: deserialize then return
+    return tl::make_unexpected("Not implemented");
 }
 
 std::string const& JsonDataReader::Identity() const {

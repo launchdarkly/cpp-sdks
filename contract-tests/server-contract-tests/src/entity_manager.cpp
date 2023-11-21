@@ -1,9 +1,10 @@
 #include "entity_manager.hpp"
-#include <boost/json/parse.hpp>
 
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
+
+#include <boost/json.hpp>
 
 using launchdarkly::LogLevel;
 using namespace launchdarkly::server_side;
@@ -17,8 +18,16 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     auto config_builder = ConfigBuilder(in.credential);
 
-    auto default_endpoints =
-        launchdarkly::server_side::Defaults::ServiceEndpoints();
+    // The contract test service sets endpoints in a way that is disallowed
+    // for users. Specifically, it may set just 1 of the 3 endpoints, whereas
+    // we require all 3 to be set.
+    //
+    // To avoid that error being detected, we must configure the Endpoints
+    // builder with the 3 default URLs, which we can fetch by just calling Build
+    // on a new builder. That way when the contract tests set just 1 URL,
+    // the others have already been "set" so no error occurs.
+    auto const default_endpoints =
+        *config::builders::EndpointsBuilder().Build();
 
     auto& endpoints =
         config_builder.ServiceEndpoints()
@@ -37,18 +46,17 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.EventsBaseUrl(*in.serviceEndpoints->events);
         }
     }
-
-    auto& datasource = config_builder.DataSource();
+    auto datasystem = config::builders::DataSystemBuilder::BackgroundSync();
 
     if (in.streaming) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
         if (in.streaming->initialRetryDelayMs) {
-            auto streaming = DataSourceBuilder::Streaming();
+            auto streaming = decltype(datasystem)::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
-            datasource.Method(std::move(streaming));
+            datasystem.Synchronizer(std::move(streaming));
         }
     }
 
@@ -57,16 +65,18 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             endpoints.PollingBaseUrl(*in.polling->baseUri);
         }
         if (!in.streaming) {
-            auto method = DataSourceBuilder::Polling();
+            auto method = decltype(datasystem)::Polling();
             if (in.polling->pollIntervalMs) {
                 method.PollInterval(
                     std::chrono::duration_cast<std::chrono::seconds>(
                         std::chrono::milliseconds(
                             *in.polling->pollIntervalMs)));
             }
-            datasource.Method(std::move(method));
+            datasystem.Synchronizer(std::move(method));
         }
     }
+
+    config_builder.DataSystem().Method(std::move(datasystem));
 
     auto& event_config = config_builder.Events();
 

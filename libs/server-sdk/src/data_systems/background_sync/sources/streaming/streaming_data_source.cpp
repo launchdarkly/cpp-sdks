@@ -34,10 +34,10 @@ std::string const& StreamingDataSource::Identity() const {
 }
 
 StreamingDataSource::StreamingDataSource(
-    config::shared::built::ServiceEndpoints const& endpoints,
-    config::shared::built::StreamingConfig<config::shared::ServerSDK> const&
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig::StreamingConfig const&
         data_source_config,
-    config::shared::built::HttpProperties http_properties,
+    config::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
     data_interfaces::IDestination& handler,
     data_components::DataSourceStatusManager& status_manager,

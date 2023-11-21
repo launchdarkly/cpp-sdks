@@ -3,7 +3,7 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
-#include "../../data_components/serialization_adapters/json_pull_source.hpp"
+#include "../../data_components/serialization_adapters/json_data_reader.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
@@ -11,8 +11,9 @@
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/server_side/integrations/serialized_descriptors.hpp>
+#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
@@ -77,6 +78,7 @@ class LazyLoad : public data_interfaces::IDataSystem {
             case data_components::ExpirationTracker::TrackState::kFresh:
                 return get();
         }
+        detail::unreachable();
     }
 
     mutable data_components::MemoryStore cache_;

@@ -30,6 +30,8 @@ char const* ErrorToString(Error err) {
             return "events: capacity must be non-zero";
         case Error::kConfig_SDKKey_Empty:
             return "sdk key: cannot be empty";
+        case Error::kConfig_DataSystem_LazyLoad_MissingSource:
+            return "data system: lazy load config requires a source";
         case Error::kMax:
             break;
     }
