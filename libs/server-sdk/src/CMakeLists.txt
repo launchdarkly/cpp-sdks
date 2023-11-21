@@ -38,8 +38,8 @@ target_sources(${LIBNAME}
         data_components/expiration_tracker/expiration_tracker.cpp
         data_components/memory_store/memory_store.hpp
         data_components/memory_store/memory_store.cpp
-        data_components/serialization_adapters/json_data_reader.hpp
-        data_components/serialization_adapters/json_data_reader.cpp
+        data_components/serialization_adapters/json_deserializer.hpp
+        data_components/serialization_adapters/json_deserializer.cpp
         data_components/serialization_adapters/json_destination.hpp
         data_components/serialization_adapters/json_destination.cpp
         data_components/kinds/kinds.hpp

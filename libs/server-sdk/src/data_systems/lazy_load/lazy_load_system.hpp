@@ -3,7 +3,6 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
-#include "../../data_components/serialization_adapters/json_data_reader.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
@@ -31,11 +30,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     explicit LazyLoad(config::built::LazyLoadConfig cfg);
     LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time);
-
-    LazyLoad(LazyLoad const& item) = delete;
-    LazyLoad(LazyLoad&& item) = delete;
-    LazyLoad& operator=(LazyLoad const&) = delete;
-    LazyLoad& operator=(LazyLoad&&) = delete;
 
     std::string const& Identity() const override;
 
@@ -69,8 +63,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     template <typename TResult>
     static TResult Get(data_components::ExpirationTracker::TrackState state,
-                       std::function<void(void)> refresh,
-                       std::function<TResult(void)> get) {
+                       std::function<void(void)> const& refresh,
+                       std::function<TResult(void)> const& get) {
         switch (state) {
             case data_components::ExpirationTracker::TrackState::kStale:
                 [[fallthrough]];
@@ -84,8 +78,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     }
 
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataReader> raw_source_;
-    data_components::JsonDataReader source_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> serialized_reader_;
+    std::unique_ptr<data_interfaces::IDataReader> reader_;
 
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;
