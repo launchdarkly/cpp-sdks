@@ -11,6 +11,7 @@
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/data_model/descriptors.hpp>
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
@@ -77,6 +78,7 @@ class LazyLoad : public data_interfaces::IDataSystem {
             case data_components::ExpirationTracker::TrackState::kFresh:
                 return get();
         }
+        detail::unreachable();
     }
 
     mutable data_components::MemoryStore cache_;
