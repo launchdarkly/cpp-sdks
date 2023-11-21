@@ -1,7 +1,7 @@
 #pragma once
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
 #include <launchdarkly/error.hpp>
 
@@ -25,8 +25,7 @@ namespace launchdarkly::server_side::config::builders {
  * another SDK) is necessary.
  */
 struct LazyLoadBuilder {
-    using SourcePtr =
-        std::shared_ptr<data_interfaces::ISerializedDataPullSource>;
+    using SourcePtr = std::shared_ptr<data_interfaces::ISerializedDataReader>;
     using EvictionPolicy = built::LazyLoadConfig::EvictionPolicy;
     /**
      * \brief Constructs a new LazyLoadBuilder.

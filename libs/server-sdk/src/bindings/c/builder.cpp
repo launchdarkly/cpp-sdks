@@ -6,8 +6,6 @@
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
-#include "../../data_systems/lazy_load/lazy_load_system.hpp"
-
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config::builders;
 

@@ -3,12 +3,14 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
-#include "../../data_components/serialization_adapters/json_pull_source.hpp"
+#include "../../data_components/serialization_adapters/json_data_reader.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
+#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
 #include <launchdarkly/data_model/descriptors.hpp>
+#include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 namespace launchdarkly::server_side::data_systems {
@@ -78,11 +80,12 @@ class LazyLoad final : public data_interfaces::IDataSystem {
             case data_components::ExpirationTracker::TrackState::kFresh:
                 return get();
         }
+        detail::unreachable();
     }
 
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataPullSource> raw_source_;
-    data_components::JsonSource source_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> raw_source_;
+    data_components::JsonDataReader source_;
 
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;

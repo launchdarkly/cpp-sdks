@@ -2,7 +2,7 @@
 
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../../../data_interfaces/destination/idestination.hpp"
-#include "../../../../data_interfaces/source/ipush_source.hpp"
+#include "../../../../data_interfaces/source/idata_synchronizer.hpp"
 
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
@@ -16,7 +16,7 @@
 namespace launchdarkly::server_side::data_systems {
 
 class PollingDataSource
-    : public data_interfaces::IPushSource,
+    : public data_interfaces::IDataSynchronizer,
       public std::enable_shared_from_this<PollingDataSource> {
    public:
     PollingDataSource(boost::asio::any_io_executor const& ioc,

@@ -27,7 +27,8 @@ struct Detail;
 #define FROM_DETAIL(ptr) (reinterpret_cast<LDEvalDetail>(ptr))
 
 #define TO_DATASOURCESTATUS(ptr) \
-    (reinterpret_cast<launchdarkly::server_side::DataSourceStatus*>(ptr))
+    (reinterpret_cast<DataSourceStatus*>(ptr))
+
 #define FROM_DATASOURCESTATUS(ptr) \
     (reinterpret_cast<LDServerDataSourceStatus>(ptr))
 

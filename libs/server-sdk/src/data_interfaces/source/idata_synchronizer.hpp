@@ -11,10 +11,10 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
- * \brief IPushSource obtains data via a push synchronization mechanism,
- * updating a local cache whenever changes are made upstream.
+ * \brief IDataSynchronizer obtains data via a background synchronization
+ * mechanism, updating a local cache whenever changes are made upstream.
  */
-class IPushSource {
+class IDataSynchronizer {
    public:
     /**
      * @brief Starts synchronizing data into the given IDestination.
@@ -50,14 +50,14 @@ class IPushSource {
      */
     [[nodiscard]] virtual std::string const& Identity() const = 0;
 
-    virtual ~IPushSource() = default;
-    IPushSource(IPushSource const& item) = delete;
-    IPushSource(IPushSource&& item) = delete;
-    IPushSource& operator=(IPushSource const&) = delete;
-    IPushSource& operator=(IPushSource&&) = delete;
+    virtual ~IDataSynchronizer() = default;
+    IDataSynchronizer(IDataSynchronizer const& item) = delete;
+    IDataSynchronizer(IDataSynchronizer&& item) = delete;
+    IDataSynchronizer& operator=(IDataSynchronizer const&) = delete;
+    IDataSynchronizer& operator=(IDataSynchronizer&&) = delete;
 
    protected:
-    IPushSource() = default;
+    IDataSynchronizer() = default;
 };
 
 }  // namespace launchdarkly::server_side::data_interfaces

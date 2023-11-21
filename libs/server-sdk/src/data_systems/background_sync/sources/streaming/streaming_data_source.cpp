@@ -14,7 +14,7 @@ namespace launchdarkly::server_side::data_systems {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 
-static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
+static char const* DataSourceErrorToString(sse::Error const error) {
     switch (error) {
         case sse::Error::NoContent:
             return "server responded 204 (No Content), will not attempt to "

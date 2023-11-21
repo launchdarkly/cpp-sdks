@@ -1,6 +1,6 @@
 #pragma once
 
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_pull_source.hpp>
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
 #include <chrono>
 #include <memory>
@@ -19,7 +19,6 @@ struct LazyLoadConfig {
 
     EvictionPolicy eviction_policy;
     std::chrono::milliseconds refresh_ttl;
-    std::shared_ptr<server_side::data_interfaces::ISerializedDataPullSource>
-        source;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> source;
 };
 }  // namespace launchdarkly::server_side::config::built

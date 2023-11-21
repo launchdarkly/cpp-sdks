@@ -3,7 +3,6 @@
 #include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
-#include <launchdarkly/server_side/config/config_builder.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <boost/json/parse.hpp>
@@ -97,6 +96,8 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
 }
 
 TEST(ClientBindings, ComplexDataSourceStatus) {
+    using namespace launchdarkly::server_side;
+
     DataSourceStatus status(
         DataSourceStatus::DataSourceState::kValid,
         std::chrono::time_point<std::chrono::system_clock>{

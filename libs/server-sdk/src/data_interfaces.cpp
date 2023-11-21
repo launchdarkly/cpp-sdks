@@ -1,7 +1,7 @@
 #include "data_interfaces/destination/idestination.hpp"
 #include "data_interfaces/destination/iserialized_destination.hpp"
-#include "data_interfaces/source/ipull_source.hpp"
-#include "data_interfaces/source/ipush_source.hpp"
+#include "data_interfaces/source/idata_reader.hpp"
+#include "data_interfaces/source/idata_synchronizer.hpp"
 #include "data_interfaces/store/istore.hpp"
 #include "data_interfaces/system/idata_system.hpp"
 
