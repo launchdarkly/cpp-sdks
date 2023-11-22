@@ -68,9 +68,7 @@ class ExpirationTracker {
      * @param key The key to track.
      * @param expiration The time that the key expires.
      */
-    void Add(data_components::DataKind kind,
-             std::string const& key,
-             TimePoint expiration);
+    void Add(DataKind kind, std::string const& key, TimePoint expiration);
 
     /**
      * Remove a scoped key from the tracker.
@@ -78,7 +76,7 @@ class ExpirationTracker {
      * @param kind The scope (kind) of the key.
      * @param key The key to stop tracking.
      */
-    void Remove(data_components::DataKind kind, std::string const& key);
+    void Remove(DataKind kind, std::string const& key);
 
     /**
      * Check the state of a scoped key.
@@ -87,7 +85,7 @@ class ExpirationTracker {
      * @param key The key to check.
      * @return The state of the key.
      */
-    TrackState State(data_components::DataKind kind,
+    TrackState State(DataKind kind,
                      std::string const& key,
                      TimePoint current_time) const;
 
@@ -110,9 +108,7 @@ class ExpirationTracker {
 
     TtlMap unscoped_;
 
-    static ExpirationTracker::TrackState State(
-        ExpirationTracker::TimePoint expiration,
-        ExpirationTracker::TimePoint current_time);
+    static TrackState State(TimePoint expiration, TimePoint current_time);
 
     class ScopedTtls {
        public:
