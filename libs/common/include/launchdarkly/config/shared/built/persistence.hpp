@@ -1,6 +1,8 @@
 #pragma once
 
+#include <chrono>
 #include <cstddef>
+#include <memory>
 
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/persistence/persistence.hpp>

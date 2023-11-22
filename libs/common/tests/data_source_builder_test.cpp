@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <launchdarkly/config/client.hpp>
-#include <launchdarkly/config/server_builders.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/value.hpp>
 
@@ -44,35 +43,5 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
         std::get<
             config::shared::built::PollingConfig<config::shared::ClientSDK>>(
             client_config.method)
-            .poll_interval);
-}
-
-TEST(DataSourceBuilderTests, CanCreateStreamingServerConfig) {
-    auto server_config =
-        server_side::DataSourceBuilder()
-            .Method(server_side::DataSourceBuilder::Streaming()
-                        .InitialReconnectDelay(std::chrono::milliseconds{1500}))
-            .Build();
-
-    EXPECT_EQ(
-        std::chrono::milliseconds{1500},
-        std::get<
-            config::shared::built::StreamingConfig<config::shared::ServerSDK>>(
-            server_config.method)
-            .initial_reconnect_delay);
-}
-
-TEST(DataSourceBuilderTests, CanCreatePollingServerConfig) {
-    auto server_config =
-        server_side::DataSourceBuilder()
-            .Method(server_side::DataSourceBuilder::Polling().PollInterval(
-                std::chrono::seconds{30000}))
-            .Build();
-
-    EXPECT_EQ(
-        std::chrono::seconds{30000},
-        std::get<
-            config::shared::built::PollingConfig<config::shared::ServerSDK>>(
-            server_config.method)
             .poll_interval);
 }
