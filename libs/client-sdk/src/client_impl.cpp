@@ -6,6 +6,7 @@
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/events/null_event_processor.hpp>
 
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/null_logger.hpp>
@@ -30,14 +31,14 @@ using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::config::shared::built::DataSourceConfig;
 using launchdarkly::config::shared::built::HttpProperties;
 
-static std::shared_ptr<::launchdarkly::data_sources::IDataSource>
-MakeDataSource(HttpProperties const& http_properties,
-               Config const& config,
-               Context const& context,
-               boost::asio::any_io_executor const& executor,
-               IDataSourceUpdateSink& flag_updater,
-               data_sources::DataSourceStatusManager& status_manager,
-               Logger& logger) {
+static std::shared_ptr<data_sources::IDataSource> MakeDataSource(
+    HttpProperties const& http_properties,
+    Config const& config,
+    Context const& context,
+    boost::asio::any_io_executor const& executor,
+    IDataSourceUpdateSink& flag_updater,
+    data_sources::DataSourceStatusManager& status_manager,
+    Logger& logger) {
     if (config.Offline()) {
         return std::make_shared<data_sources::NullDataSource>(executor,
                                                               status_manager);
@@ -80,24 +81,24 @@ static std::shared_ptr<IPersistence> MakePersistence(Config const& config) {
     return persistence.implementation;
 }
 
-ClientImpl::ClientImpl(Config config,
+ClientImpl::ClientImpl(Config in_cfg,
                        Context context,
                        std::string const& version)
-    : config_(config),
+    : config_(std::move(in_cfg)), /* caution: do not use in_cfg (moved from!) */
       http_properties_(
-          HttpPropertiesBuilder(config.HttpProperties())
+          HttpPropertiesBuilder(config_.HttpProperties())
               .Header("user-agent", "CPPClient/" + version)
-              .Header("authorization", config.SdkKey())
-              .Header("x-launchdarkly-tags", config.ApplicationTag())
+              .Header("authorization", config_.SdkKey())
+              .Header("x-launchdarkly-tags", config_.ApplicationTag())
               .Build()),
-      logger_(MakeLogger(config.Logging())),
+      logger_(MakeLogger(config_.Logging())),
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
       context_(std::move(context)),
-      flag_manager_(config.SdkKey(),
+      flag_manager_(config_.SdkKey(),
                     logger_,
-                    config.Persistence().max_contexts_,
-                    MakePersistence(config)),
+                    config_.Persistence().max_contexts_,
+                    MakePersistence(config_)),
       data_source_factory_([this]() {
           return MakeDataSource(http_properties_, config_, context_,
                                 ioc_.get_executor(), flag_manager_.Updater(),
@@ -105,14 +106,14 @@ ClientImpl::ClientImpl(Config config,
       }),
       data_source_(nullptr),
       event_processor_(nullptr),
-      eval_reasons_available_(config.DataSourceConfig().with_reasons) {
+      eval_reasons_available_(config_.DataSourceConfig().with_reasons) {
     flag_manager_.LoadCache(context_);
 
-    if (config.Events().Enabled() && !config.Offline()) {
+    if (config_.Events().Enabled() && !config_.Offline()) {
         event_processor_ =
             std::make_unique<events::AsioEventProcessor<ClientSDK>>(
-                ioc_.get_executor(), config.ServiceEndpoints(), config.Events(),
-                http_properties_, logger_);
+                ioc_.get_executor(), config_.ServiceEndpoints(),
+                config_.Events(), http_properties_, logger_);
     } else {
         event_processor_ = std::make_unique<events::NullEventProcessor>();
     }
@@ -160,14 +161,14 @@ void ClientImpl::RestartDataSource() {
 
 std::future<bool> ClientImpl::StartAsyncInternal(
     std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
-    auto pr = std::make_shared<std::promise<bool>>();
-    auto fut = pr->get_future();
+    auto init_promise = std::make_shared<std::promise<bool>>();
+    auto init_future = init_promise->get_future();
 
     status_manager_.OnDataSourceStatusChangeEx(
-        [result_predicate, pr](data_sources::DataSourceStatus status) {
-            auto state = status.State();
-            if (IsInitialized(state)) {
-                pr->set_value(result_predicate(status.State()));
+        [result = std::move(result_predicate),
+         init_promise](data_sources::DataSourceStatus const& status) {
+            if (auto const state = status.State(); IsInitialized(state)) {
+                init_promise->set_value(result(status.State()));
                 return true; /* delete this change listener since the desired
                                 state was reached */
             }
@@ -176,7 +177,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
 
     RestartDataSource();
 
-    return fut;
+    return init_future;
 }
 
 std::future<bool> ClientImpl::StartAsync() {
@@ -272,14 +273,15 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         event_processor_->SendAsync(std::move(event));
         return EvaluationDetail<T>(default_value, std::nullopt,
                                    std::move(error_reason));
+    }
 
-    } else if (!Initialized()) {
+    if (!Initialized()) {
         LD_LOG(logger_, LogLevel::kInfo)
             << "LaunchDarkly client has not yet been initialized. "
                "Returning cached value";
     }
 
-    assert(desc->item);
+    LD_ASSERT(desc->item);
 
     auto const& flag = *(desc->item);
     auto const& detail = flag.Detail();
