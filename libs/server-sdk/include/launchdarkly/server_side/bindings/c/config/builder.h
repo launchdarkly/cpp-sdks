@@ -18,8 +18,8 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
-typedef struct _LDServerStreamingSyncBuilder* LDServerStreamingSyncBuilder;
-typedef struct _LDServerPollingSyncBuilder* LDServerPollingSyncBuilder;
+typedef struct _LDServerDataSourceStreamBuilder* LDServerDataSourceStreamBuilder;
+typedef struct _LDServerDataSourcePollBuilder* LDServerDataSourcePollBuilder;
 
 /**
  * Constructs a client-side config builder.
@@ -180,7 +180,7 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
     LDServerConfigBuilder b,
-    LDServerStreamingSyncBuilder stream_builder);
+    LDServerDataSourceStreamBuilder stream_builder);
 
 /**
  * Configures the Background Sync data system with a Polling synchronizer.
@@ -198,7 +198,7 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
-    LDServerPollingSyncBuilder poll_builder);
+    LDServerDataSourcePollBuilder poll_builder);
 
 /**
  * Specify if the SDK's data system should be enabled or not.
@@ -216,12 +216,12 @@ LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b, bool enabled);
  * Creates a new DataSource builder for the Streaming method.
  *
  * If not passed into the config
- * builder, must be manually freed with LDServerStreamingSyncBuilder_Free.
+ * builder, must be manually freed with LDServerDataSourceStreamBuilder_Free.
  *
  * @return New builder for Streaming method.
  */
-LD_EXPORT(LDServerStreamingSyncBuilder)
-LDServerStreamingSyncBuilder_New();
+LD_EXPORT(LDServerDataSourceStreamBuilder)
+LDServerDataSourceStreamBuilder_New();
 
 /**
  * Sets the initial reconnect delay for the streaming connection.
@@ -235,8 +235,8 @@ LDServerStreamingSyncBuilder_New();
  * @param milliseconds Initial delay for a reconnection attempt.
  */
 LD_EXPORT(void)
-LDServerStreamingSyncBuilder_InitialReconnectDelayMs(
-    LDServerStreamingSyncBuilder b,
+LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
+    LDServerDataSourceStreamBuilder b,
     unsigned int milliseconds);
 
 /**
@@ -246,19 +246,19 @@ LDServerStreamingSyncBuilder_InitialReconnectDelayMs(
  * @param b Builder to free.
  */
 LD_EXPORT(void)
-LDServerStreamingSyncBuilder_Free(LDServerStreamingSyncBuilder b);
+LDServerDataSourceStreamBuilder_Free(LDServerDataSourceStreamBuilder b);
 
 /**
  * Creates a new DataSource builder for the Polling method.
  *
  * If not passed into the config
- * builder, must be manually freed with LDServerPollingSyncBuilder_Free.
+ * builder, must be manually freed with LDServerDataSourcePollBuilder_Free.
  *
  * @return New builder for Polling method.
  */
 
-LD_EXPORT(LDServerPollingSyncBuilder)
-LDServerPollingSyncBuilder_New();
+LD_EXPORT(LDServerDataSourcePollBuilder)
+LDServerDataSourcePollBuilder_New();
 
 /**
  * Sets the interval at which the SDK will poll for feature flag updates.
@@ -266,8 +266,8 @@ LDServerPollingSyncBuilder_New();
  * @param milliseconds Polling interval.
  */
 LD_EXPORT(void)
-LDServerPollingSyncBuilder_IntervalS(LDServerPollingSyncBuilder b,
-                                     unsigned int seconds);
+LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
+                                        unsigned int seconds);
 
 /**
  * Frees a Polling method builder. Do not call if the builder was consumed by
@@ -276,7 +276,7 @@ LDServerPollingSyncBuilder_IntervalS(LDServerPollingSyncBuilder b,
  * @param b Builder to free.
  */
 LD_EXPORT(void)
-LDServerPollingSyncBuilder_Free(LDServerPollingSyncBuilder b);
+LDServerDataSourcePollBuilder_Free(LDServerDataSourcePollBuilder b);
 
 /**
  * This should be used for wrapper SDKs to set the wrapper name.

@@ -16,13 +16,13 @@ using namespace launchdarkly::server_side::config::builders;
     (reinterpret_cast<DataSystemBuilder::BackgroundSync::Streaming*>(ptr))
 
 #define FROM_STREAM_BUILDER(ptr) \
-    (reinterpret_cast<LDServerStreamingSyncBuilder>(ptr))
+    (reinterpret_cast<LDServerDataSourceStreamBuilder>(ptr))
 
 #define TO_POLL_BUILDER(ptr) \
     (reinterpret_cast<DataSystemBuilder::BackgroundSync::Polling*>(ptr))
 
 #define FROM_POLL_BUILDER(ptr) \
-    (reinterpret_cast<LDServerPollingSyncBuilder>(ptr))
+    (reinterpret_cast<LDServerDataSourcePollBuilder>(ptr))
 
 #define TO_BASIC_LOGGING_BUILDER(ptr) \
     (reinterpret_cast<LoggingBuilder::BasicLogging*>(ptr))
@@ -168,27 +168,27 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
     LDServerConfigBuilder b,
-    LDServerStreamingSyncBuilder stream_builder) {
+    LDServerDataSourceStreamBuilder stream_builder) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(stream_builder);
 
     BackgroundSyncBuilder::Streaming* sb = TO_STREAM_BUILDER(stream_builder);
     TO_BUILDER(b)->DataSystem().Method(
         BackgroundSyncBuilder().Synchronizer(*sb));
-    LDServerStreamingSyncBuilder_Free(stream_builder);
+    LDServerDataSourceStreamBuilder_Free(stream_builder);
 }
 
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
-    LDServerPollingSyncBuilder poll_builder) {
+    LDServerDataSourcePollBuilder poll_builder) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(poll_builder);
 
     BackgroundSyncBuilder::Polling* pb = TO_POLL_BUILDER(poll_builder);
     TO_BUILDER(b)->DataSystem().Method(
         BackgroundSyncBuilder().Synchronizer(*pb));
-    LDServerPollingSyncBuilder_Free(poll_builder);
+    LDServerDataSourcePollBuilder_Free(poll_builder);
 }
 
 LD_EXPORT(void)
@@ -198,15 +198,15 @@ LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b,
     TO_BUILDER(b)->DataSystem().Enabled(enabled);
 }
 
-LD_EXPORT(LDServerStreamingSyncBuilder)
-LDServerStreamingSyncBuilder_New() {
+LD_EXPORT(LDServerDataSourceStreamBuilder)
+LDServerDataSourceStreamBuilder_New() {
     return FROM_STREAM_BUILDER(
         new DataSystemBuilder::BackgroundSync::Streaming());
 }
 
 LD_EXPORT(void)
-LDServerStreamingSyncBuilder_InitialReconnectDelayMs(
-    LDServerStreamingSyncBuilder b,
+LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
+    LDServerDataSourceStreamBuilder b,
     unsigned int milliseconds) {
     LD_ASSERT_NOT_NULL(b);
 
@@ -215,16 +215,16 @@ LDServerStreamingSyncBuilder_InitialReconnectDelayMs(
 }
 
 LD_EXPORT(void)
-LDServerStreamingSyncBuilder_Free(LDServerStreamingSyncBuilder b) {
+LDServerDataSourceStreamBuilder_Free(LDServerDataSourceStreamBuilder b) {
     delete TO_STREAM_BUILDER(b);
 }
 
-LD_EXPORT(LDServerPollingSyncBuilder) LDServerPollingSyncBuilder_New() {
+LD_EXPORT(LDServerDataSourcePollBuilder) LDServerDataSourcePollBuilder_New() {
     return FROM_POLL_BUILDER(new DataSystemBuilder::BackgroundSync::Polling());
 }
 
 LD_EXPORT(void)
-LDServerPollingSyncBuilder_IntervalS(LDServerPollingSyncBuilder b,
+LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
                                      unsigned int seconds) {
     LD_ASSERT_NOT_NULL(b);
 
@@ -232,7 +232,7 @@ LDServerPollingSyncBuilder_IntervalS(LDServerPollingSyncBuilder b,
 }
 
 LD_EXPORT(void)
-LDServerPollingSyncBuilder_Free(LDServerPollingSyncBuilder b) {
+LDServerDataSourcePollBuilder_Free(LDServerDataSourcePollBuilder b) {
     delete TO_POLL_BUILDER(b);
 }
 
