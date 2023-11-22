@@ -14,7 +14,7 @@ namespace launchdarkly::server_side::data_systems {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 
-static char const* DataSourceErrorToString(launchdarkly::sse::Error error) {
+static char const* DataSourceErrorToString(sse::Error const error) {
     switch (error) {
         case sse::Error::NoContent:
             return "server responded 204 (No Content), will not attempt to "
@@ -34,28 +34,26 @@ std::string const& StreamingDataSource::Identity() const {
 }
 
 StreamingDataSource::StreamingDataSource(
-    config::built::ServiceEndpoints const& endpoints,
-    config::built::BackgroundSyncConfig::StreamingConfig const&
-        data_source_config,
-    config::built::HttpProperties http_properties,
-    boost::asio::any_io_executor ioc,
-    data_interfaces::IDestination& handler,
+    boost::asio::any_io_executor io,
+    Logger const& logger,
     data_components::DataSourceStatusManager& status_manager,
-    Logger const& logger)
-    : exec_(std::move(ioc)),
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
+    config::built::HttpProperties const& http_properties)
+    : io_(std::move(io)),
       logger_(logger),
       status_manager_(status_manager),
-      data_source_handler_(handler, logger, status_manager_),
-      http_config_(std::move(http_properties)),
-      streaming_config_(data_source_config),
+      http_config_(http_properties),
+      streaming_config_(streaming),
       streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
 
-void StreamingDataSource::Init(
-    std::optional<data_model::SDKDataSet> initial_data) {
-    // TODO: implement
-}
+void StreamingDataSource::StartAsync(
+    data_interfaces::IDestination* dest,
+    data_model::SDKDataSet const* bootstrap_data) {
+    boost::movelib::ignore(bootstrap_data);
 
-void StreamingDataSource::StartAsync() {
+    event_handler_.emplace(*dest, logger_, status_manager_);
+
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
@@ -85,7 +83,7 @@ void StreamingDataSource::StartAsync() {
 
     boost::urls::url url = uri_components.value();
 
-    auto client_builder = launchdarkly::sse::Builder(exec_, url.buffer());
+    auto client_builder = launchdarkly::sse::Builder(io_, url.buffer());
 
     client_builder.method(boost::beast::http::verb::get);
 
@@ -101,16 +99,15 @@ void StreamingDataSource::StartAsync() {
     client_builder.initial_reconnect_delay(
         streaming_config_.initial_reconnect_delay);
 
-    for (auto const& header : http_config_.BaseHeaders()) {
-        client_builder.header(header.first, header.second);
+    for (auto const& [key, value] : http_config_.BaseHeaders()) {
+        client_builder.header(key, value);
     }
 
     auto weak_self = weak_from_this();
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
-            self->data_source_handler_.HandleMessage(event.type(),
-                                                     event.data());
+            self->event_handler_->HandleMessage(event.type(), event.data());
             // TODO: Use the result of handle message to restart the
             // event source if we got bad data. sc-204387
         }
@@ -153,7 +150,7 @@ void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
         return client_->async_shutdown(std::move(completion));
     }
     if (completion) {
-        boost::asio::post(exec_, completion);
+        boost::asio::post(io_, completion);
     }
 }
 }  // namespace launchdarkly::server_side::data_systems

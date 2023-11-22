@@ -19,17 +19,17 @@ class PollingDataSource
     : public data_interfaces::IDataSynchronizer,
       public std::enable_shared_from_this<PollingDataSource> {
    public:
-    PollingDataSource(config::built::ServiceEndpoints const& endpoints,
+    PollingDataSource(boost::asio::any_io_executor const& ioc,
+                      Logger const& logger,
+                      data_components::DataSourceStatusManager& status_manager,
+                      config::built::ServiceEndpoints const& endpoints,
                       config::built::BackgroundSyncConfig::PollingConfig const&
                           data_source_config,
-                      config::built::HttpProperties const& http_properties,
-                      boost::asio::any_io_executor const& ioc,
-                      data_interfaces::IDestination& handler,
-                      data_components::DataSourceStatusManager& status_manager,
-                      Logger const& logger);
+                      config::built::HttpProperties const& http_properties);
 
-    void Init(std::optional<data_model::SDKDataSet> initial_data) override;
-    void StartAsync() override;
+    void StartAsync(data_interfaces::IDestination* dest,
+                    data_model::SDKDataSet const* bootstrap_data) override;
+
     void ShutdownAsync(std::function<void()> completion) override;
 
     [[nodiscard]] std::string const& Identity() const override;
@@ -38,19 +38,35 @@ class PollingDataSource
     void DoPoll();
     void HandlePollResult(network::HttpResult const& res);
 
-    data_components::DataSourceStatusManager& status_manager_;
-    std::string polling_endpoint_;
-
-    network::AsioRequester requester_;
     Logger const& logger_;
-    boost::asio::any_io_executor ioc_;
+
+    // Status manager is used to report the status of the data source. It must
+    // outlive the source. This source performs asynchronous
+    // operations, so a completion handler might invoke the status manager after
+    // the it has been destroyed.
+    data_components::DataSourceStatusManager& status_manager_;
+
+    // Responsible for performing HTTP requests using boost::asio.
+    network::AsioRequester requester_;
+
+    // How long to wait beteween individual polling requests.
     std::chrono::seconds polling_interval_;
+
+    // Cached request arguments used in the polling request.
     network::HttpRequest request_;
+
+    // Etag can be sent in HTTP request to save bandwidth if the server knows
+    // the response is unchanged.
     std::optional<std::string> etag_;
 
+    // Used with polling_interval to schedule polling requests.
     boost::asio::steady_timer timer_;
+
+    // The last time the polling HTTP request is initiated.
     std::chrono::time_point<std::chrono::system_clock> last_poll_start_;
-    data_interfaces::IDestination& update_sink_;
+
+    // Destination for all data obtained via polling.
+    data_interfaces::IDestination* sink_;
 
     void StartPollingTimer();
 };
