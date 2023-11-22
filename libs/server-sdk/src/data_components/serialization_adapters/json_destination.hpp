@@ -14,8 +14,19 @@ namespace launchdarkly::server_side::data_components {
  * It's purpose is to encapsulate the details of serialization in a reusable
  * adapter.
  *
+ * JsonDestination does not initialize ISerializedDestination with a
+ * flag-dependency-order data layout, which is required for some stores (e.g.
+ * DynamoDB).
+ *
+ * Since DynamoDB is not supported at the moment this is acceptable. When the
+ * capability is needed, a new class should be derived from JsonDestination
+ * overriding Init to provide the correct data layout.
+ *
+ * Alternatively, JsonDestination can be made to order the data so that it works
+ * for any store.
+ *
  */
-class JsonDestination final : public data_interfaces::IDestination {
+class JsonDestination : public data_interfaces::IDestination {
    public:
     /**
      * @brief Construct the JsonDestination with the given destination.

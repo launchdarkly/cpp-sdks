@@ -58,24 +58,21 @@ JsonDestination::JsonDestination(ISerializedDestination& destination)
     : dest_(destination) {}
 
 void JsonDestination::Init(data_model::SDKDataSet data_set) {
-    // TODO: implement
-
     std::vector<ISerializedDestination::ItemCollection> items;
 
     ISerializedDestination::OrderedNamepace flags;
     for (auto const& [key, descriptor] : data_set.flags) {
         flags.emplace_back(key, Serialize(key, descriptor));
     }
-    std::sort(flags.begin(), flags.end());
     items.emplace_back(Kinds::Flag, std::move(flags));
 
     ISerializedDestination::OrderedNamepace segments;
     for (auto const& [key, descriptor] : data_set.segments) {
         segments.emplace_back(key, Serialize(key, descriptor));
     }
-    std::sort(segments.begin(), segments.end());
     items.emplace_back(Kinds::Segment, std::move(segments));
 
+    // TODO: how to handle errors?
     dest_.Init(std::move(items));
 }
 
