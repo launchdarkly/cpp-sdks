@@ -29,7 +29,7 @@ LD_EXPORT(LDServerConfigBuilder) LDServerConfigBuilder_New(char const* sdk_key);
 
 /**
  * Sets a custom URL for the polling service.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
@@ -37,7 +37,7 @@ LDServerConfigBuilder_ServiceEndpoints_PollingBaseURL(LDServerConfigBuilder b,
                                                       char const* url);
 /**
  * Sets a custom URL for the streaming service.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
@@ -45,7 +45,7 @@ LDServerConfigBuilder_ServiceEndpoints_StreamingBaseURL(LDServerConfigBuilder b,
                                                         char const* url);
 /**
  * Sets a custom URL for the events service.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
@@ -54,7 +54,7 @@ LDServerConfigBuilder_ServiceEndpoints_EventsBaseURL(LDServerConfigBuilder b,
 /**
  * Sets a custom URL for a Relay Proxy instance. The streaming,
  * polling, and events URLs are set automatically.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
@@ -64,7 +64,7 @@ LDServerConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
 
 /**
  * Sets an identifier for the application.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param app_id Non-empty string. Must be <= 64 chars. Must be alphanumeric,
  * '-', '.', or '_'. Must not be NULL.
  */
@@ -74,7 +74,7 @@ LDServerConfigBuilder_AppInfo_Identifier(LDServerConfigBuilder b,
 
 /**
  * Sets a version for the application.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param app_version Non-empty string. Must be <= 64 chars. Must be
  * alphanumeric,
  * '-', '.', or '_'. Must not be NULL.
@@ -86,7 +86,7 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
 /**
  * Enables or disables "Offline" mode. True means
  * Offline mode is enabled.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param offline True if offline.
  */
 LD_EXPORT(void)
@@ -95,7 +95,7 @@ LDServerConfigBuilder_Offline(LDServerConfigBuilder b, bool offline);
 /**
  * Specify if event-sending should be enabled or not. By default,
  * events are enabled.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param enabled True to enable event-sending.
  */
 LD_EXPORT(void)
@@ -105,7 +105,7 @@ LDServerConfigBuilder_Events_Enabled(LDServerConfigBuilder b, bool enabled);
  * Sets the capacity of the event processor. When more events are generated
  * within the processor's flush interval than this value, events will be
  * dropped.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param capacity Event queue capacity.
  */
 LD_EXPORT(void)
@@ -115,7 +115,7 @@ LDServerConfigBuilder_Events_Capacity(LDServerConfigBuilder b, size_t capacity);
  * Sets the flush interval of the event processor. The processor queues
  * outgoing events based on the capacity parameter; these events are then
  * delivered based on the flush interval.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param milliseconds Interval between automatic flushes.
  */
 LD_EXPORT(void)
@@ -141,7 +141,7 @@ LDServerConfigBuilder_Events_FlushIntervalMs(LDServerConfigBuilder b,
  * necessary to call either of these methods, as the default behavior is to
  * treat all attributes as non-private unless otherwise specified.
  *
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param all_attributes_private True for behavior of (1), false for default
  * behavior of (2) or (3).
  */
@@ -152,7 +152,7 @@ LDServerConfigBuilder_Events_AllAttributesPrivate(LDServerConfigBuilder b,
 /**
  * Specifies a single private attribute. May be called multiple times
  * with additional private attributes.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param attribute_reference Attribute to mark private.
  */
 LD_EXPORT(void)
@@ -166,7 +166,7 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
  * builder indicates the data source will use streaming. Setting a polling
  * builder will indicate the use of polling.
  *
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param stream_builder The streaming builder. The builder is consumed; do not
  * free it.
  */
@@ -182,7 +182,7 @@ LDServerConfigBuilder_DataSource_MethodStream(
  * builder indicates the data source will use streaming. Setting a polling
  * builder will indicate the use of polling.
  *
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param poll_builder The polling builder. The builder is consumed; do not free
  * it.
  */
@@ -261,7 +261,7 @@ LDServerDataSourcePollBuilder_Free(LDServerDataSourcePollBuilder b);
  * This should be used for wrapper SDKs to set the wrapper name.
  *
  * Wrapper information will be included in request headers.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param wrapper_name Name of the wrapper.
  */
 LD_EXPORT(void)
@@ -272,7 +272,7 @@ LDServerConfigBuilder_HttpProperties_WrapperName(LDServerConfigBuilder b,
  * This should be used for wrapper SDKs to set the wrapper version.
  *
  * Wrapper information will be included in request headers.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param wrapper_version Version of the wrapper.
  */
 LD_EXPORT(void)
@@ -284,7 +284,7 @@ LDServerConfigBuilder_HttpProperties_WrapperVersion(
  * Set a custom header value. May be called more than once with additional
  * headers.
  *
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  * @param key Name of the header. Must not be NULL.
  * @param value Value of the header. Must not be NULL.
  */
@@ -295,14 +295,14 @@ LDServerConfigBuilder_HttpProperties_Header(LDServerConfigBuilder b,
 
 /**
  * Disables the default SDK logging.
- * @param b Client config builder. Must not be NULL.
+ * @param b Server config builder. Must not be NULL.
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_Logging_Disable(LDServerConfigBuilder b);
 
 /**
  * Configures the SDK with basic logging.
- * @param b  Client config builder. Must not be NULL.
+ * @param b  Server config builder. Must not be NULL.
  * @param basic_builder The basic logging builder. Must not be NULL.
  */
 LD_EXPORT(void)
@@ -311,7 +311,7 @@ LDServerConfigBuilder_Logging_Basic(LDServerConfigBuilder b,
 
 /**
  * Configures the SDK with custom logging.
- * @param b  Client config builder. Must not be NULL.
+ * @param b  Server config builder. Must not be NULL.
  * @param custom_builder The custom logging builder. Must not be NULL.
  */
 LD_EXPORT(void)
