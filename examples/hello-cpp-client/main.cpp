@@ -19,6 +19,8 @@ char const* get_with_env_fallback(char const* source_val,
                                   char const* error_msg);
 
 using namespace launchdarkly;
+using namespace launchdarkly::client_side;
+
 int main() {
     char const* mobile_key = get_with_env_fallback(
         MOBILE_KEY, "LD_MOBILE_KEY",
@@ -27,7 +29,7 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-    auto config = client_side::ConfigBuilder(mobile_key).Build();
+    auto config = ConfigBuilder(mobile_key).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
@@ -36,12 +38,13 @@ int main() {
     auto context =
         ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
 
-    auto client = client_side::Client(std::move(*config), std::move(context));
+    auto client = Client(std::move(*config), std::move(context));
 
     auto start_result = client.StartAsync();
-    auto status = start_result.wait_for(
-        std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
-    if (status == std::future_status::ready) {
+
+    if (auto const status = start_result.wait_for(
+            std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
+        status == std::future_status::ready) {
         if (start_result.get()) {
             std::cout << "*** SDK successfully initialized!\n\n";
         } else {
@@ -54,7 +57,7 @@ int main() {
         return 1;
     }
 
-    bool flag_value = client.BoolVariation(FEATURE_FLAG_KEY, false);
+    bool const flag_value = client.BoolVariation(FEATURE_FLAG_KEY, false);
 
     std::cout << "*** Feature flag '" << FEATURE_FLAG_KEY << "' is "
               << (flag_value ? "true" : "false") << " for this user\n\n";
@@ -69,8 +72,8 @@ char const* get_with_env_fallback(char const* source_val,
         return source_val;
     }
 
-    char const* from_env = std::getenv(env_variable);
-    if (from_env && strlen(from_env)) {
+    if (char const* from_env = std::getenv(env_variable);
+        from_env && strlen(from_env)) {
         return from_env;
     }
 

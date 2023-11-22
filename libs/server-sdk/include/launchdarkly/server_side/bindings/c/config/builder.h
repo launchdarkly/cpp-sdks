@@ -167,11 +167,12 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
 /**
  * Configures the Background Sync data system with a Streaming synchronizer.
  *
- * This is the default data system for the SDK.
+ * This is the default data system configuration for the SDK.
  *
  * In this mode, the SDK maintains a persistent, streaming data connection
- * with LaunchDarkly. Flag data is received automatically in the background,
- * meaning there are no network costs associated with evaluating flags.
+ * with LaunchDarkly. The application is able to evaluate using the most
+ * recent flag configurations, since any changes are streamed from LaunchDarkly
+ * in the background.
  *
  * @param b Server config builder. Must not be NULL.
  * @param stream_builder The streaming builder. The builder is consumed; do not
@@ -203,8 +204,8 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
 /**
  * Specify if the SDK's data system should be enabled or not.
  *
- * By default, the SDK uses the Background Sync data system with a Streaming
- * connection.
+ * If disabled, the SDK won't be able to obtain flag configuration
+ * and will instead serve application-provided default values.
  *
  * @param b Server config builder. Must not be NULL.
  * @param enabled True to enable the data system, false to disable it.

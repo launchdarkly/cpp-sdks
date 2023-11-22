@@ -18,15 +18,12 @@
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/io_context.hpp>
 
-#include <tl/expected.hpp>
-
 #include <condition_variable>
 #include <cstdint>
 #include <memory>
 #include <optional>
 #include <shared_mutex>
 #include <thread>
-#include <tuple>
 
 namespace launchdarkly::client_side {
 class ClientImpl : public IClient {

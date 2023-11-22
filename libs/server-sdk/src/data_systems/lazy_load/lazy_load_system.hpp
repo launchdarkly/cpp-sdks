@@ -3,8 +3,10 @@
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
 #include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
+#include "../../data_interfaces/source/idata_reader.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
+#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 

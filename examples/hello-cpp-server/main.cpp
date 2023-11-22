@@ -39,9 +39,10 @@ int main() {
     auto client = Client(std::move(*config));
 
     auto start_result = client.StartAsync();
-    auto status = start_result.wait_for(
-        std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
-    if (status == std::future_status::ready) {
+
+    if (auto const status = start_result.wait_for(
+            std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
+        status == std::future_status::ready) {
         if (start_result.get()) {
             std::cout << "*** SDK successfully initialized!\n\n";
         } else {
@@ -54,10 +55,11 @@ int main() {
         return 1;
     }
 
-    auto context =
+    auto const context =
         ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
 
-    bool flag_value = client.BoolVariation(context, FEATURE_FLAG_KEY, false);
+    bool const flag_value =
+        client.BoolVariation(context, FEATURE_FLAG_KEY, false);
 
     std::cout << "*** Feature flag '" << FEATURE_FLAG_KEY << "' is "
               << (flag_value ? "true" : "false") << " for this user\n\n";
@@ -72,8 +74,8 @@ char const* get_with_env_fallback(char const* source_val,
         return source_val;
     }
 
-    char const* from_env = std::getenv(env_variable);
-    if (from_env && strlen(from_env)) {
+    if (char const* from_env = std::getenv(env_variable);
+        from_env && strlen(from_env)) {
         return from_env;
     }
 

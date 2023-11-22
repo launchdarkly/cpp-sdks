@@ -162,7 +162,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
             return MessageStatus::kMessageHandled;
         }
-        return DataSourceEventHandler::MessageStatus::kMessageHandled;
+        return MessageStatus::kMessageHandled;
     }
     if (type == "patch") {
         boost::json::error_code error_code;
@@ -172,7 +172,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPatch);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
 
         auto res = boost::json::value_to<
@@ -182,7 +182,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorPatchInvalid);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
 
         // This references the optional inside the expected.
@@ -191,10 +191,10 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             auto const& key = patch.key;
             std::visit([this, &key](auto&& arg) { handler_.Upsert(key, arg); },
                        patch.data);
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+            return MessageStatus::kMessageHandled;
         }
         // We didn't recognize the type of the patch. So we ignore it.
-        return DataSourceEventHandler::MessageStatus::kMessageHandled;
+        return MessageStatus::kMessageHandled;
     }
     if (type == "delete") {
         boost::json::error_code error_code;
@@ -204,7 +204,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingDelete);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
 
         auto res =
@@ -215,14 +215,12 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
                 case data_components::DataKind::kFlag: {
                     handler_.Upsert(res->key,
                                     data_model::FlagDescriptor(res->version));
-                    return DataSourceEventHandler::MessageStatus::
-                        kMessageHandled;
+                    return MessageStatus::kMessageHandled;
                 }
                 case data_components::DataKind::kSegment: {
                     handler_.Upsert(
                         res->key, data_model::SegmentDescriptor(res->version));
-                    return DataSourceEventHandler::MessageStatus::
-                        kMessageHandled;
+                    return MessageStatus::kMessageHandled;
                 }
                 default: {
                 } break;
