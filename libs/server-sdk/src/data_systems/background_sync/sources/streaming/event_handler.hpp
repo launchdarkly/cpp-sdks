@@ -68,7 +68,7 @@ struct StreamingDataKinds {
 
 /**
  * This class handles LaunchDarkly events, parses them, and then uses
- * a IDataSourceUpdateSink to process the parsed events.
+ * a IDestination to process the parsed events.
  *
  * This is only used for streaming. For server polling the shape of the poll
  * response is different than the put, so there is limited utility in
