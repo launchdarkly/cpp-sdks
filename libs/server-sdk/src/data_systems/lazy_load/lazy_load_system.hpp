@@ -44,6 +44,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     void Initialize() override;
 
+    void Shutdown() override;
+
    private:
     void RefreshAllFlags() const;
     void RefreshAllSegments() const;
