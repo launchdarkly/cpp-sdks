@@ -50,7 +50,7 @@ StreamingDataSource::StreamingDataSource(
 void StreamingDataSource::StartAsync(
     data_interfaces::IDestination* dest,
     data_model::SDKDataSet const* bootstrap_data) {
-    boost::movelib::ignore(bootstrap_data);
+    boost::ignore_unused(bootstrap_data);
 
     event_handler_.emplace(*dest, logger_, status_manager_);
 
