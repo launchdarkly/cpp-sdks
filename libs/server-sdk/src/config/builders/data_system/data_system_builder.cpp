@@ -16,9 +16,13 @@ DataSystemBuilder& DataSystemBuilder::Method(LazyLoad lazy_load) {
     return *this;
 }
 
-DataSystemBuilder& DataSystemBuilder::Disabled(bool const disabled) {
-    config_.disabled = disabled;
+DataSystemBuilder& DataSystemBuilder::Enabled(bool const enabled) {
+    config_.disabled = !enabled;
     return *this;
+}
+
+DataSystemBuilder& DataSystemBuilder::Disable() {
+    return Enabled(false);
 }
 
 tl::expected<built::DataSystemConfig, Error> DataSystemBuilder::Build() const {

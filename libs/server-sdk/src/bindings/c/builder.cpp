@@ -119,10 +119,10 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
 }
 
 LD_EXPORT(void)
-LDServerConfigBuilder_Offline(LDServerConfigBuilder b, bool offline) {
+LDServerConfigBuilder_Offline(LDServerConfigBuilder b, bool const offline) {
     LD_ASSERT_NOT_NULL(b);
 
-    // TO_BUILDER(b)->Offline(offline);
+    TO_BUILDER(b)->Offline(offline);
 }
 
 LD_EXPORT(void)
@@ -166,7 +166,7 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
 }
 
 LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodStream(
+LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
     LDServerConfigBuilder b,
     LDServerDataSourceStreamBuilder stream_builder) {
     LD_ASSERT_NOT_NULL(b);
@@ -179,7 +179,7 @@ LDServerConfigBuilder_DataSource_MethodStream(
 }
 
 LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodPoll(
+LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
     LDServerDataSourcePollBuilder poll_builder) {
     LD_ASSERT_NOT_NULL(b);
@@ -191,9 +191,17 @@ LDServerConfigBuilder_DataSource_MethodPoll(
     LDServerDataSourcePollBuilder_Free(poll_builder);
 }
 
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b,
+                                         bool const enabled) {
+    LD_ASSERT_NOT_NULL(b);
+    TO_BUILDER(b)->DataSystem().Enabled(enabled);
+}
+
 LD_EXPORT(LDServerDataSourceStreamBuilder)
 LDServerDataSourceStreamBuilder_New() {
-    return FROM_STREAM_BUILDER(new BackgroundSyncBuilder::Streaming());
+    return FROM_STREAM_BUILDER(
+        new DataSystemBuilder::BackgroundSync::Streaming());
 }
 
 LD_EXPORT(void)
@@ -212,12 +220,12 @@ LDServerDataSourceStreamBuilder_Free(LDServerDataSourceStreamBuilder b) {
 }
 
 LD_EXPORT(LDServerDataSourcePollBuilder) LDServerDataSourcePollBuilder_New() {
-    return FROM_POLL_BUILDER(new BackgroundSyncBuilder::Polling());
+    return FROM_POLL_BUILDER(new DataSystemBuilder::BackgroundSync::Polling());
 }
 
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
-                                        unsigned int seconds) {
+                                     unsigned int seconds) {
     LD_ASSERT_NOT_NULL(b);
 
     TO_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});

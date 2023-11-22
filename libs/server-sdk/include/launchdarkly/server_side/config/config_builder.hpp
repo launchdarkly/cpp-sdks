@@ -62,6 +62,18 @@ class ConfigBuilder {
     config::builders::LoggingBuilder& Logging();
 
     /**
+     * @brief If true, equivalent to setting Events().Disable() and
+     * DataSystem().Disable(). The effect is that all evaluations will return
+     * application-provided default values, and no network calls will be made.
+     *
+     * This overrides specific configuration of events and/or data system, if
+     * present.
+     *
+     * @return Reference to this.
+     */
+    ConfigBuilder& Offline(bool offline);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -69,7 +81,7 @@ class ConfigBuilder {
 
    private:
     std::string sdk_key_;
-    std::optional<bool> offline_;
+    bool offline_;
 
     config::builders::EndpointsBuilder service_endpoints_builder_;
     config::builders::AppInfoBuilder app_info_builder_;
