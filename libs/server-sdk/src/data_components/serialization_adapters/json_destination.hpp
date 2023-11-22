@@ -1,11 +1,15 @@
+#pragma once
+
+#include "../../data_components/kinds/kinds.hpp"
 #include "../../data_interfaces/destination/idestination.hpp"
 #include "../../data_interfaces/destination/iserialized_destination.hpp"
 
 namespace launchdarkly::server_side::data_components {
 
-class JsonDestination : public data_interfaces::IDestination {
+class JsonDestination final : public data_interfaces::IDestination {
    public:
-    JsonDestination(data_interfaces::ISerializedDestination& destination);
+    explicit JsonDestination(
+        data_interfaces::ISerializedDestination& destination);
 
     virtual void Init(data_model::SDKDataSet data_set) override;
 
@@ -19,6 +23,10 @@ class JsonDestination : public data_interfaces::IDestination {
 
    private:
     data_interfaces::ISerializedDestination& dest_;
+    struct Kinds {
+        static FlagKind const Flag;
+        static SegmentKind const Segment;
+    };
 };
 
 }  // namespace launchdarkly::server_side::data_components
