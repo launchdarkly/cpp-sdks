@@ -20,12 +20,13 @@ struct Defaults {
     }
 
     static auto SynchronizerConfig()
-       -> built::BackgroundSyncConfig::StreamingConfig {
+        -> built::BackgroundSyncConfig::StreamingConfig {
         return {std::chrono::seconds(1), "/all"};
     }
 
     static auto BackgroundSyncConfig() -> built::BackgroundSyncConfig {
-        return {BootstrapConfig(), SynchronizerConfig(), DataDestinationConfig()};
+        return {BootstrapConfig(), SynchronizerConfig(),
+                DataDestinationConfig()};
     }
 
     static auto LazyLoadConfig() -> built::LazyLoadConfig {

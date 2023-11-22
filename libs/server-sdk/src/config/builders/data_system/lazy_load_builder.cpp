@@ -8,7 +8,7 @@ LazyLoadBuilder::LazyLoadBuilder() : config_(Defaults::LazyLoadConfig()) {}
 
 LazyLoadBuilder& LazyLoadBuilder::CacheRefresh(
     std::chrono::milliseconds const ttl) {
-    config_.eviction_ttl = ttl;
+    config_.refresh_ttl = ttl;
     return *this;
 }
 

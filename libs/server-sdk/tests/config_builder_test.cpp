@@ -81,11 +81,16 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {
     ConfigBuilder builder("sdk-123");
 
-    // First establish that the data system is enabled.
+    // First establish that the data system is enabled,
+    // to detect if defaults are misconfigured.
     auto const cfg1 = builder.Build();
     EXPECT_FALSE(cfg1->DataSystemConfig().disabled);
 
-    builder.DataSystem().Disabled(true);
+    builder.DataSystem().Disable();
     auto const cfg2 = builder.Build();
     EXPECT_TRUE(cfg2->DataSystemConfig().disabled);
+
+    builder.DataSystem().Enabled(true);
+    auto const cfg3 = builder.Build();
+    EXPECT_FALSE(cfg3->DataSystemConfig().disabled);
 }

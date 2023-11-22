@@ -9,8 +9,7 @@ Config::Config(std::string sdk_key,
                built::ServiceEndpoints service_endpoints,
                built::Events events,
                std::optional<std::string> application_tag,
-               launchdarkly::server_side::config::built::DataSystemConfig
-                   data_system_config,
+               config::built::DataSystemConfig data_system_config,
                built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
       logging_(std::move(logging)),
@@ -36,8 +35,7 @@ std::optional<std::string> const& Config::ApplicationTag() const {
     return application_tag_;
 }
 
-launchdarkly::server_side::config::built::DataSystemConfig const&
-Config::DataSystemConfig() const {
+config::built::DataSystemConfig const& Config::DataSystemConfig() const {
     return data_system_config_;
 }
 

@@ -84,8 +84,14 @@ LDServerConfigBuilder_AppInfo_Version(LDServerConfigBuilder b,
                                       char const* app_version);
 
 /**
- * Enables or disables "Offline" mode. True means
- * Offline mode is enabled.
+ * If true, equivalent to setting LDServerConfigBuilder_Events_Enabled(false)
+ * and LDServerConfigBuilder_DataSystem_Enabled(false).
+ *
+ * The effect is that all evaluations will return
+ * application-provided default values, and no network calls will be made.
+ *
+ * This overrides specific configuration of events and/or data system, if
+ * present.
  * @param b Server config builder. Must not be NULL.
  * @param offline True if offline.
  */
@@ -160,36 +166,53 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
                                               char const* attribute_reference);
 
 /**
- * Set the streaming configuration for the builder.
+ * Configures the Background Sync data system with a Streaming synchronizer.
  *
- * A data source may either be streaming or polling. Setting a streaming
- * builder indicates the data source will use streaming. Setting a polling
- * builder will indicate the use of polling.
+ * This is the default data system configuration for the SDK.
+ *
+ * In this mode, the SDK maintains a persistent, streaming data connection
+ * with LaunchDarkly. The application is able to evaluate using the most
+ * recent flag configurations, since any changes are streamed from LaunchDarkly
+ * in the background.
  *
  * @param b Server config builder. Must not be NULL.
  * @param stream_builder The streaming builder. The builder is consumed; do not
  * free it.
  */
 LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodStream(
+LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
     LDServerConfigBuilder b,
     LDServerDataSourceStreamBuilder stream_builder);
 
 /**
- * Set the polling configuration for the builder.
+ * Configures the Background Sync data system with a Polling synchronizer.
  *
- * A data source may either be streaming or polling. Setting a stream
- * builder indicates the data source will use streaming. Setting a polling
- * builder will indicate the use of polling.
+ * This synchronizer may be chosen to override the default Streaming mode.
+ *
+ * In this mode, the SDK makes periodic network requests to LaunchDarkly.
+ * Between requests, flag data may be stale to some degree. This mode may be
+ * advantageous if a streaming connection cannot be maintained.
  *
  * @param b Server config builder. Must not be NULL.
  * @param poll_builder The polling builder. The builder is consumed; do not free
  * it.
  */
 LD_EXPORT(void)
-LDServerConfigBuilder_DataSource_MethodPoll(
+LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
     LDServerDataSourcePollBuilder poll_builder);
+
+/**
+ * Specify if the SDK's data system should be enabled or not.
+ *
+ * If disabled, the SDK won't be able to obtain flag configuration
+ * and will instead serve application-provided default values.
+ *
+ * @param b Server config builder. Must not be NULL.
+ * @param enabled True to enable the data system, false to disable it.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b, bool enabled);
 
 /**
  * Creates a new DataSource builder for the Streaming method.

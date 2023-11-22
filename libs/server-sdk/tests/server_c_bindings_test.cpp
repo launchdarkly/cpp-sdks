@@ -1,14 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/bindings/c/context_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
-#include <launchdarkly/bindings/c/context_builder.h>
-
 #include <boost/json/parse.hpp>
 
 #include <chrono>
+
+using namespace launchdarkly::server_side;
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -43,7 +44,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    struct LDServerDataSourceStatusListener listener {};
+    LDServerDataSourceStatusListener listener{};
     LDServerDataSourceStatusListener_Init(&listener);
 
     listener.UserData = const_cast<char*>("Potato");
