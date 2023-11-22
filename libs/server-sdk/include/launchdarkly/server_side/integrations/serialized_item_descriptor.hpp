@@ -24,6 +24,37 @@ struct SerializedItemDescriptor {
      * std::nullopt for deleted items.
      */
     std::optional<std::string> serializedItem;
+
+    /**
+     * @brief Constructs a SerializedItemDescriptor from a version and a
+     * serialized item.
+     * @param version Version of item.
+     * @param data Serialized item.
+     * @return SerializedItemDescriptor.
+     */
+    static SerializedItemDescriptor Present(std::uint64_t version,
+                                            std::string data) {
+        return SerializedItemDescriptor{version, false, std::move(data)};
+    }
+
+    /**
+     * @brief Constructs a SerializedItemDescriptor from a version and a
+     * tombstone.
+     *
+     * This is used when an item is deleted: the tombstone can be stored in
+     * place of the item, and the version checked in the future. Without the
+     * tombstone, out-of-order data updates could "resurrect" a deleted item.
+     *
+     * @param version Version of the item.
+     * @param tombstone_rep Serialized tombstone representation of the item.
+     * @return SerializedItemDescriptor.
+     */
+    static SerializedItemDescriptor Absent(std::uint64_t const version,
+                                           std::string tombstone_rep) {
+        return SerializedItemDescriptor{version, true,
+                                        std::move(tombstone_rep)};
+    }
+}
 };
 
 }  // namespace launchdarkly::server_side::integrations
