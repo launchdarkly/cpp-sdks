@@ -54,7 +54,7 @@ void StreamingDataSource::StartAsync(
 
     event_handler_.emplace(*dest, logger_, status_manager_);
 
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kReconciling);
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
                                           streaming_config_.streaming_path);
@@ -63,8 +63,8 @@ void StreamingDataSource::StartAsync(
     if (!updated_url) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kOff,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            DataSourceStatus::DataSourceState::kOffline,
+            DataSourceStatus::ErrorInfo::ErrorKind::kConfigError,
             kCouldNotParseEndpoint);
         return;
     }
@@ -75,8 +75,8 @@ void StreamingDataSource::StartAsync(
     if (!uri_components) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kOff,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            DataSourceStatus::DataSourceState::kOffline,
+            DataSourceStatus::ErrorInfo::ErrorKind::kConfigError,
             kCouldNotParseEndpoint);
         return;
     }
@@ -124,7 +124,7 @@ void StreamingDataSource::StartAsync(
             auto error_string = DataSourceErrorToString(error);
             LD_LOG(self->logger_, LogLevel::kError) << error_string;
             self->status_manager_.SetState(
-                DataSourceStatus::DataSourceState::kOff,
+                DataSourceStatus::DataSourceState::kOffline,
                 DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse,
                 error_string);
         }
@@ -135,8 +135,8 @@ void StreamingDataSource::StartAsync(
     if (!client_) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kOff,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            DataSourceStatus::DataSourceState::kOffline,
+            DataSourceStatus::ErrorInfo::ErrorKind::kConfigError,
             kCouldNotParseEndpoint);
         return;
     }
@@ -145,8 +145,7 @@ void StreamingDataSource::StartAsync(
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
     if (client_) {
-        status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kInitializing);
+        status_manager_.SetState(DataSourceStatus::DataSourceState::kOffline);
         return client_->async_shutdown(std::move(completion));
     }
     if (completion) {

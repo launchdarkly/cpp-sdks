@@ -131,9 +131,10 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
             if (poll_result.has_value()) {
                 sink_->Init(std::move(*poll_result));
                 status_manager_.SetState(
-                    DataSourceStatus::DataSourceState::kValid);
+                    DataSourceStatus::DataSourceState::kTracking);
                 return;
             }
+
             LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
@@ -211,12 +212,13 @@ void PollingDataSource::StartAsync(
 
     sink_ = dest;
 
-    status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
+    status_manager_.SetState(DataSourceStatus::DataSourceState::kReconciling);
+
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError) << kCouldNotParseEndpoint;
         status_manager_.SetState(
-            DataSourceStatus::DataSourceState::kOff,
-            DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+            DataSourceStatus::DataSourceState::kOffline,
+            DataSourceStatus::ErrorInfo::ErrorKind::kConfigError,
             kCouldNotParseEndpoint);
 
         // No need to attempt to poll if the URL is not valid.

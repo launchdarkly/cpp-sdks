@@ -159,7 +159,7 @@ class DataSourceStatusManagerBase : public TInterface {
         data_source_status_signal_;
     mutable std::recursive_mutex status_mutex_;
 
-    bool UpdateState(
+    tabool UpdateState(
         typename TDataSourceStatus::DataSourceState const& requested_state) {
         std::lock_guard lock(status_mutex_);
 

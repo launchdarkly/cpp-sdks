@@ -17,47 +17,63 @@ namespace launchdarkly::server_side {
 enum class DataSourceState {
     /**
      * The initial state of the data source when the SDK is being
-     * initialized.
+     * initialized (when not offline, otherwise it will be kOffline.)
+     *
+     * During this time, the SDK serves default values for all flags.
      *
      * If it encounters an error that requires it to retry initialization,
      * the state will remain at kInitializing until it either succeeds and
-     * becomes kValid, or permanently fails and becomes kShutdown.
+     * becomes kInitialized, or permanently fails and becomes kOffline.
      */
     kInitializing = 0,
 
     /**
-     * Indicates that the data source is currently operational and has not
-     * had any problems since the last time it received data. Alternatively if
-     * the client was configured for offline mode, the state will be kValid.
+     * Indicates that the SDK has received initial data, and flag evaluations
+     * will be based on that data.
      *
-     * In streaming mode, this means that there is currently an open stream
-     * connection and that at least one initial message has been received on
-     * the stream. In polling mode, it means that the last poll request
-     * succeeded.
+     * In this state, flag data may not be consistent with LaunchDarkly - for example,
+     * if the initial data came from a local database.
      */
-    kValid = 1,
+    kInitialized = 1,
+
+    /**
+     * Indicates that the SDK is reconciling the latest remote flag data
+     * with the existing initial data. During this time, flag evaluations
+     * will continue to be based on the initial data.
+     */
+    kReconciling = 2,
+
+    /**
+     * Indicates that the SDK has finished reconciliation and flag data is
+     * now synchronized with LaunchDarkly. During this time, flag evaluations
+     * are based on the latest flag data available.
+     *
+     * If an error occurs, the state will become kInterrupted.
+     *
+     */
+    kTracking = 3,
 
     /**
      * Indicates that the data source encountered an error that it will
      * attempt to recover from.
      *
-     * In streaming mode, this means that the stream connection failed, or
-     * had to be dropped due to some other error, and will be retried after
-     * a backoff delay. In polling mode, it means that the last poll request
-     * failed, and a new poll request will be made after the configured
-     * polling interval.
+     * During this time, flag evaluations will continue to be based on the
+     * latest data before the interruption.
+     *
+     * If the error is resolved, the state will become kTracking.
      */
-    kInterrupted = 2,
+    kInterrupted = 4,
 
     /**
      * Indicates that the data source has been permanently shut down.
      *
      * This could be because it encountered an unrecoverable error (for
      * instance, the LaunchDarkly service rejected the SDK key; an invalid
-     * SDK key will never become valid), or because the SDK client was
-     * explicitly closed.
+     * SDK key will never become valid), because the SDK client was
+     * explicitly closed, or because the SDK's Data System was disabled (either
+     * by explicit Data System configuration, or by the top-level Offline config.)
      */
-    kOff = 3,
+    kOffline = 3,
 };
 
 using DataSourceStatus =

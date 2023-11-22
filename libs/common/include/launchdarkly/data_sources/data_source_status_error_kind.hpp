@@ -35,7 +35,12 @@ enum class DataSourceStatusErrorKind {
      * update into the data store, the data store failed (so the SDK may
      * not have the latest data).
      */
-    kStoreError = 4
+    kStoreError = 4,
+
+    /**
+     * The data source is misconfigured.
+     */
+    kConfigError = 5,
 };
 
 std::ostream& operator<<(std::ostream& out,
