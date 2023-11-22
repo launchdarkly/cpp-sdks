@@ -18,7 +18,8 @@ extern "C" {  // only need to export C interface if
 #endif
 
 typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
-typedef struct _LDServerDataSourceStreamBuilder* LDServerDataSourceStreamBuilder;
+typedef struct _LDServerDataSourceStreamBuilder*
+    LDServerDataSourceStreamBuilder;
 typedef struct _LDServerDataSourcePollBuilder* LDServerDataSourcePollBuilder;
 
 /**
