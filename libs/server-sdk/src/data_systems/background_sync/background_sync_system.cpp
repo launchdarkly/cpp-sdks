@@ -47,6 +47,13 @@ void BackgroundSync::Initialize() {
                               nullptr /* no bootstrap data supported yet */);
 }
 
+void BackgroundSync::Shutdown() {
+    auto promise = std::make_shared<std::promise<void>>();
+    auto const did_shutdown = promise->get_future();
+    synchronizer_->ShutdownAsync([promise]() { promise->set_value(); });
+    did_shutdown.wait();
+}
+
 std::string const& BackgroundSync::Identity() const {
     static std::string id = "background sync via " + synchronizer_->Identity();
     return id;
