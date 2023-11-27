@@ -743,12 +743,7 @@ TEST(SegmentTests, SerializeUnbounded) {
         R"({
             "key": "my-segment",
             "version": 87,
-            "included": [],
-            "excluded": [],
-            "includedContexts": [],
-            "excludedContexts": [],
             "salt": "salty",
-            "rules":[],
             "unbounded": true,
             "unboundedContextKind": "company",
             "generation": 12
