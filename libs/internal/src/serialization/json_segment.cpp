@@ -114,13 +114,11 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     WriteMinimal(obj, "unboundedContextKind", segment.unboundedContextKind);
     WriteMinimal(obj, "unbounded", segment.unbounded);
 
-    obj.emplace("rules", boost::json::value_from(segment.rules));
-    obj.emplace("excluded", boost::json::value_from(segment.excluded));
-    obj.emplace("excludedContexts",
-                boost::json::value_from(segment.excludedContexts));
-    obj.emplace("included", boost::json::value_from(segment.included));
-    obj.emplace("includedContexts",
-                boost::json::value_from(segment.includedContexts));
+    WriteMinimal(obj, "rules", segment.rules);
+    WriteMinimal(obj, "excluded", segment.excluded);
+    WriteMinimal(obj, "excludedContexts", segment.excludedContexts);
+    WriteMinimal(obj, "included", segment.included);
+    WriteMinimal(obj, "includedContexts", segment.includedContexts);
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
