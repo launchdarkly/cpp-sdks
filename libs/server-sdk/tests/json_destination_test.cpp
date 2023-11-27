@@ -166,7 +166,7 @@ TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
     dest.Upsert("segment", data_model::SegmentDescriptor(2));
 }
 
-TEST_F(JsonDestinationTest, UpserFlagCreatesSerializedItem) {
+TEST_F(JsonDestinationTest, UpsertFlagCreatesSerializedItem) {
     EXPECT_CALL(mock_dest,
                 Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
                        SerializedItemDescriptor::Present(
@@ -177,7 +177,7 @@ TEST_F(JsonDestinationTest, UpserFlagCreatesSerializedItem) {
                 data_model::FlagDescriptor(data_model::Flag{"flag", 2, true}));
 }
 
-TEST_F(JsonDestinationTest, UpserSegmentCreatesSerializedItem) {
+TEST_F(JsonDestinationTest, UpsertSegmentCreatesSerializedItem) {
     EXPECT_CALL(mock_dest,
                 Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
                        SerializedItemDescriptor::Present(
