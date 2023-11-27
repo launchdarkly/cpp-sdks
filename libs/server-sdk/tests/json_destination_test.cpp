@@ -31,7 +31,8 @@ class MockSerializedDestination : public ISerializedDestination {
 };
 
 TEST(JsonDestination, WrapsUnderlyingDestinationIdentity) {
-    auto logger = logging::NullLogger();
+    Logger const logger = logging::NullLogger();
+
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination const destination{logger, mock_dest};
 
@@ -67,7 +68,8 @@ TEST(JsonDestination, InitErrorGeneratesLogMessage) {
 // transformation consists of two parts; first, serializing items to JSON, and
 // second, ordering those items by comparing keys with '<'.
 TEST(JsonDestination, InitProperlyTransformsSDKDataSet) {
-    auto logger = logging::NullLogger();
+    Logger const logger = logging::NullLogger();
+
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination destination{logger, mock_dest};
 
@@ -190,8 +192,7 @@ TEST(JsonDestination, UpsertStaleSegmentGeneratesDebugMessage) {
 }
 
 TEST(JsonDestination, UpsertDeletedFlagCreatesTombstone) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
+    Logger const logger = logging::NullLogger();
 
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination destination{logger, mock_dest};
@@ -207,8 +208,7 @@ TEST(JsonDestination, UpsertDeletedFlagCreatesTombstone) {
 }
 
 TEST(JsonDestination, UpsertDeletedSegmentCreatesTombstone) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
+    Logger const logger = logging::NullLogger();
 
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination destination{logger, mock_dest};
@@ -221,4 +221,39 @@ TEST(JsonDestination, UpsertDeletedSegmentCreatesTombstone) {
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
     destination.Upsert("segment", data_model::SegmentDescriptor(2));
+}
+
+TEST(JsonDestination, UpserFlagCreatesSerializedItem) {
+    Logger const logger = logging::NullLogger();
+
+    NiceMock<MockSerializedDestination> mock_dest;
+    JsonDestination destination{logger, mock_dest};
+
+    EXPECT_CALL(mock_dest,
+                Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
+                       SerializedItemDescriptor::Present(
+                           2, "{\"on\":true,\"key\":\"flag\",\"version\":2}")))
+        .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
+
+    destination.Upsert(
+        "flag", data_model::FlagDescriptor(data_model::Flag{"flag", 2, true}));
+}
+
+TEST(JsonDestination, UpserSegmentCreatesSerializedItem) {
+    Logger const logger = logging::NullLogger();
+
+    NiceMock<MockSerializedDestination> mock_dest;
+    JsonDestination destination{logger, mock_dest};
+
+    EXPECT_CALL(mock_dest,
+                Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
+                       SerializedItemDescriptor::Present(
+                           2,
+                           "{\"key\":\"segment\",\"version\":2,\"excluded\":"
+                           "[\"bar\"],\"included\":[\"foo\"]}")))
+        .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
+
+    destination.Upsert(
+        "segment", data_model::SegmentDescriptor(
+                       data_model::Segment{"segment", 2, {"foo"}, {"bar"}}));
 }

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <ostream>
 #include <string>
 
 namespace launchdarkly::server_side::integrations {
@@ -60,6 +61,11 @@ inline bool operator==(SerializedItemDescriptor const& lhs,
                        SerializedItemDescriptor const& rhs) {
     return lhs.version == rhs.version && lhs.deleted == rhs.deleted &&
            lhs.serializedItem == rhs.serializedItem;
+}
+
+inline void PrintTo(SerializedItemDescriptor const& item, std::ostream* os) {
+    *os << "{version=" << item.version << ", deleted=" << item.deleted
+        << ", item=" << item.serializedItem.value_or("nullopt") << "}";
 }
 
 }  // namespace launchdarkly::server_side::integrations
