@@ -352,15 +352,24 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     WriteMinimal(obj, "variations", flag.variations);
     WriteMinimal(obj, "rules", flag.rules);
     WriteMinimal(obj, "prerequisites", flag.prerequisites);
-    if (auto fallthrough = boost::json::value_from(flag.fallthrough);
-        !fallthrough.as_object().empty()) {
-        obj.emplace("fallthrough", fallthrough);
-    }
-    if (flag.clientSideAvailability.usingEnvironmentId ||
-        flag.clientSideAvailability.usingMobileKey) {
-        obj.emplace("clientSideAvailability",
-                    boost::json::value_from(flag.clientSideAvailability));
-    }
+    WriteMinimal(obj, "fallthrough", flag.fallthrough, [&]() {
+        return std::visit(
+            [&](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T,
+                                             std::optional<Flag::Variation>>) {
+                    return arg.has_value();
+                } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
+                    return true;
+                }
+            },
+            flag.fallthrough);
+    });
+    WriteMinimal(obj, "clientSideAvailability", flag.clientSideAvailability,
+                 [&]() {
+                     return flag.clientSideAvailability.usingEnvironmentId ||
+                            flag.clientSideAvailability.usingMobileKey;
+                 });
     WriteMinimal(obj, "contextTargets", flag.contextTargets);
 
     std::vector<UserTarget> user_targets;

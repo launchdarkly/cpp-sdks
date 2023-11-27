@@ -175,6 +175,16 @@ void WriteMinimal(boost::json::object& obj,
     }
 }
 
+template <typename T>
+void WriteMinimal(boost::json::object& obj,
+                  std::string const& key,
+                  T const& val,
+                  std::function<bool()> const& predicate) {
+    if (predicate()) {
+        obj.emplace(key, boost::json::value_from(val));
+    }
+}
+
 void WriteMinimal(boost::json::object& obj,
                   std::string const& key,  // No copy when not used.
                   bool val);
