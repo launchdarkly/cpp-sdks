@@ -43,7 +43,7 @@ class PollingDataSource
     // Status manager is used to report the status of the data source. It must
     // outlive the source. This source performs asynchronous
     // operations, so a completion handler might invoke the status manager after
-    // the it has been destroyed.
+    // it has been destroyed.
     data_components::DataSourceStatusManager& status_manager_;
 
     // Responsible for performing HTTP requests using boost::asio.
