@@ -15,6 +15,7 @@ using namespace launchdarkly::server_side::integrations;
 using ::testing::Eq;
 using ::testing::NiceMock;
 using ::testing::Pair;
+using ::testing::Ref;
 using ::testing::Return;
 
 class MockSerializedDestination : public ISerializedDestination {
@@ -67,7 +68,7 @@ TEST(JsonDestination, InitErrorGeneratesLogMessage) {
 // second, ordering those items by comparing keys with '<'.
 TEST(JsonDestination, InitProperlyTransformsSDKDataSet) {
     auto logger = logging::NullLogger();
-    MockSerializedDestination mock_dest;
+    NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination destination{logger, mock_dest};
 
     EXPECT_CALL(
@@ -186,4 +187,38 @@ TEST(JsonDestination, UpsertStaleSegmentGeneratesDebugMessage) {
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kDebug, "segment foo not updated"));
+}
+
+TEST(JsonDestination, UpsertDeletedFlagCreatesTombstone) {
+    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
+    Logger logger(spy_logger);
+
+    NiceMock<MockSerializedDestination> mock_dest;
+    JsonDestination destination{logger, mock_dest};
+
+    EXPECT_CALL(
+        mock_dest,
+        Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
+               SerializedItemDescriptor::Absent(
+                   2, "{\"key\":\"flag\",\"version\":2,\"deleted\":true}")))
+        .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
+
+    destination.Upsert("flag", data_model::FlagDescriptor(2));
+}
+
+TEST(JsonDestination, UpsertDeletedSegmentCreatesTombstone) {
+    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
+    Logger logger(spy_logger);
+
+    NiceMock<MockSerializedDestination> mock_dest;
+    JsonDestination destination{logger, mock_dest};
+
+    EXPECT_CALL(
+        mock_dest,
+        Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
+               SerializedItemDescriptor::Absent(
+                   2, "{\"key\":\"segment\",\"version\":2,\"deleted\":true}")))
+        .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
+
+    destination.Upsert("segment", data_model::SegmentDescriptor(2));
 }

@@ -25,9 +25,9 @@ template <typename T>
 boost::json::value Tombstone(std::string const& key,
                              data_model::ItemDescriptor<T> const& desc) {
     boost::json::object tombstone;
-    tombstone.emplace("deleted", true);
     tombstone.emplace("key", key);
     tombstone.emplace("version", desc.version);
+    tombstone.emplace("deleted", true);
     return tombstone;
 }
 
@@ -64,6 +64,8 @@ std::string const& JsonDestination::Identity() const {
 }
 
 void JsonDestination::Init(data_model::SDKDataSet data_set) {
+    // TODO(sc-225327): Topographical sort of flag dependencies
+
     std::vector<ISerializedDestination::ItemCollection> items;
 
     ISerializedDestination::OrderedNamepace flags;

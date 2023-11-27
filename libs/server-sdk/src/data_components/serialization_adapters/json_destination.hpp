@@ -16,21 +16,17 @@ namespace launchdarkly::server_side::data_components {
  * It's purpose is to encapsulate the details of serialization in a reusable
  * adapter.
  *
- * JsonDestination does not initialize ISerializedDestination with a
- * deterministic flag-dependency-order data layout, which is required for some
- * stores (e.g. DynamoDB). Instead, it sorts items within a collection using
- * '<', to have enough determinism for testing purposes.
+ * JsonDestination does not currently initialize ISerializedDestination with a
+ * deterministic flag-dependency-order data order, which is required for some
+ * stores without atomic transactions (e.g. DynamoDB).
  *
- * Since DynamoDB is not supported at the moment this sorting is acceptable.
- * When the support for a store requiring a specific ordering is needed, a new
- * class should be derived from JsonDestination overriding Init to provide the
- * correct data layout.
+ * Instead, it sorts items within a collection using '<' on item keys, giving
+ * enough determinism for testing purposes.
  *
- * Alternatively, JsonDestination can be made to order the data so that it works
- * for any store.
+ * TODO(sc-225327): Implement topographic sort as prerequisite for DynamoDB.
  *
  */
-class JsonDestination : public data_interfaces::IDestination {
+class JsonDestination final : public data_interfaces::IDestination {
    public:
     /**
      * @brief Construct the JsonDestination with the given destination.
