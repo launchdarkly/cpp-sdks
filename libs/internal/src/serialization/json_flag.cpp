@@ -349,19 +349,35 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     WriteMinimal(obj, "offVariation", flag.offVariation);
     obj.emplace("key", flag.key);
     obj.emplace("version", flag.version);
-    obj.emplace("variations", boost::json::value_from(flag.variations));
-    obj.emplace("rules", boost::json::value_from(flag.rules));
-    obj.emplace("prerequisites", boost::json::value_from(flag.prerequisites));
-    obj.emplace("fallthrough", boost::json::value_from(flag.fallthrough));
-    obj.emplace("clientSideAvailability",
-                boost::json::value_from(flag.clientSideAvailability));
-    obj.emplace("contextTargets", boost::json::value_from(flag.contextTargets));
+    WriteMinimal(obj, "variations", flag.variations);
+    WriteMinimal(obj, "rules", flag.rules);
+    WriteMinimal(obj, "prerequisites", flag.prerequisites);
+    WriteMinimal(obj, "fallthrough", flag.fallthrough, [&]() {
+        return std::visit(
+            [&](auto&& arg) {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T,
+                                             std::optional<Flag::Variation>>) {
+                    return arg.has_value();
+                } else if constexpr (std::is_same_v<T, Flag::Rollout>) {
+                    return true;
+                }
+            },
+            flag.fallthrough);
+    });
+    WriteMinimal(obj, "clientSideAvailability", flag.clientSideAvailability,
+                 [&]() {
+                     return flag.clientSideAvailability.usingEnvironmentId ||
+                            flag.clientSideAvailability.usingMobileKey;
+                 });
+    WriteMinimal(obj, "contextTargets", flag.contextTargets);
 
     std::vector<UserTarget> user_targets;
     for (auto const& target : flag.targets) {
         user_targets.emplace_back(target);
     }
-    obj.emplace("targets", boost::json::value_from(user_targets));
+
+    WriteMinimal(obj, "targets", user_targets);
 }
 
 }  // namespace data_model
