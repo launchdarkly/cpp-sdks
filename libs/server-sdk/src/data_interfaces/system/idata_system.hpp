@@ -9,7 +9,7 @@ namespace launchdarkly::server_side::data_interfaces {
  * to other components.
  */
 class IDataSystem : public IStore {
-   public:
+public:
     /**
      * @return Identity of the system. Used in logs.
      */
@@ -33,7 +33,7 @@ class IDataSystem : public IStore {
     IDataSystem& operator=(IDataSystem const&) = delete;
     IDataSystem& operator=(IDataSystem&&) = delete;
 
-   protected:
+protected:
     IDataSystem() = default;
 };
 

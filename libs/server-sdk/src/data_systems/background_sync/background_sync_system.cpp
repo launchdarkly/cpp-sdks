@@ -43,7 +43,8 @@ BackgroundSync::BackgroundSync(
       synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
 
 void BackgroundSync::Initialize() {
-    synchronizer_->StartAsync(&change_notifier_, nullptr);
+    synchronizer_->StartAsync(&change_notifier_,
+                              nullptr /* no bootstrap data supported yet */);
 }
 
 void BackgroundSync::Shutdown() {
