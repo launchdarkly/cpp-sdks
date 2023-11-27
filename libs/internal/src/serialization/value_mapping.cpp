@@ -75,5 +75,4 @@ void WriteMinimal(boost::json::object& obj, std::string const& key, bool val) {
         obj.emplace(key, val);
     }
 }
-
 }  // namespace launchdarkly
