@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace launchdarkly::server_side::data_interfaces {
 
