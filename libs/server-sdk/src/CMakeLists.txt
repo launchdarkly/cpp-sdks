@@ -42,6 +42,8 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_deserializer.cpp
         data_components/serialization_adapters/json_destination.hpp
         data_components/serialization_adapters/json_destination.cpp
+        data_components/kinds/kinds.hpp
+        data_components/kinds/kinds.cpp
         data_systems/background_sync/sources/noop/null_data_source.hpp
         data_systems/background_sync/sources/noop/null_data_source.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
