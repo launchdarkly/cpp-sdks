@@ -30,34 +30,32 @@ class MockSerializedDestination : public ISerializedDestination {
     MOCK_METHOD(std::string const&, Identity, (), (const, override));
 };
 
-TEST(JsonDestination, WrapsUnderlyingDestinationIdentity) {
-    Logger const logger = logging::NullLogger();
-
+class JsonDestinationTest : public ::testing::Test {
+   public:
+    std::shared_ptr<logging::SpyLoggerBackend> spy_logger;
+    Logger const logger;
     NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination const destination{logger, mock_dest};
+    JsonDestination dest;
+    JsonDestinationTest()
+        : spy_logger(std::make_shared<logging::SpyLoggerBackend>()),
+          logger(spy_logger),
+          dest(logger, mock_dest) {
+        ON_CALL(mock_dest, Identity()).WillByDefault([]() {
+            static const std::string name = "FooCorp Database";
+            return name;
+        });
+    }
+};
 
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([]() {
-        return "FooCorp Database";
-    });
-
-    ASSERT_EQ(destination.Identity(), "FooCorp Database (JSON)");
+TEST_F(JsonDestinationTest, WrapsUnderlyingDestinationIdentity) {
+    ASSERT_EQ(dest.Identity(), "FooCorp Database (JSON)");
 }
 
-TEST(JsonDestination, InitErrorGeneratesLogMessage) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([] {
-        return "FooCorp Database";
-    });
-
+TEST_F(JsonDestinationTest, InitErrorGeneratesLogMessage) {
     EXPECT_CALL(mock_dest, Init)
         .WillOnce(Return(ISerializedDestination::InitResult::kError));
 
-    destination.Init(data_model::SDKDataSet{});
+    dest.Init(data_model::SDKDataSet{});
 
     ASSERT_TRUE(spy_logger->Contains(0, LogLevel::kError, "failed"));
 }
@@ -67,12 +65,7 @@ TEST(JsonDestination, InitErrorGeneratesLogMessage) {
 // transformation from SDKDataSet into that argument is done correctly. The
 // transformation consists of two parts; first, serializing items to JSON, and
 // second, ordering those items by comparing keys with '<'.
-TEST(JsonDestination, InitProperlyTransformsSDKDataSet) {
-    Logger const logger = logging::NullLogger();
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
+TEST_F(JsonDestinationTest, InitProperlyTransformsSDKDataSet) {
     EXPECT_CALL(
         mock_dest,
         Init(Eq(std::vector<ISerializedDestination::ItemCollection>{
@@ -96,9 +89,9 @@ TEST(JsonDestination, InitProperlyTransformsSDKDataSet) {
                        2, "{\"key\":\"segment_beta\",\"version\":2}")}}}}})))
         .WillOnce(Return(ISerializedDestination::InitResult::kSuccess));
 
-    // Note: flag/segments are out of alphabetical order here to help verify
-    // they are sorted.
-    destination.Init(data_model::SDKDataSet{
+    // Note: flag/segments are deliberately not in alphabetical order here, so
+    // that the implementation must sort them to pass the test.
+    dest.Init(data_model::SDKDataSet{
         std::unordered_map<std::string, data_model::FlagDescriptor>{
             {"flag_beta",
              data_model::FlagDescriptor(data_model::Flag{"flag_beta", 2})},
@@ -111,92 +104,47 @@ TEST(JsonDestination, InitProperlyTransformsSDKDataSet) {
                                   data_model::Segment{"segment_alpha", 1})}}});
 }
 
-TEST(JsonDestination, UpsertFlagErrorGeneratesErrorMessage) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([] {
-        return "FooCorp Database";
-    });
-
+TEST_F(JsonDestinationTest, UpsertFlagErrorGeneratesErrorMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kError));
 
-    destination.Upsert("foo", data_model::FlagDescriptor(1));
+    dest.Upsert("foo", data_model::FlagDescriptor(1));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kError, "failed to update flag foo"));
 }
 
-TEST(JsonDestination, UpsertSegmentErrorGeneratesErrorMessage) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([] {
-        return "FooCorp Database";
-    });
-
+TEST_F(JsonDestinationTest, UpsertSegmentErrorGeneratesErrorMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kError));
 
-    destination.Upsert("foo", data_model::SegmentDescriptor(1));
+    dest.Upsert("foo", data_model::SegmentDescriptor(1));
 
     ASSERT_TRUE(spy_logger->Contains(0, LogLevel::kError,
                                      "failed to update segment foo"));
 }
 
-TEST(JsonDestination, UpsertStaleFlagGeneratesDebugMessage) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([] {
-        return "FooCorp Database";
-    });
-
+TEST_F(JsonDestinationTest, UpsertStaleFlagGeneratesDebugMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kNotUpdated));
 
-    destination.Upsert("foo", data_model::FlagDescriptor(1));
+    dest.Upsert("foo", data_model::FlagDescriptor(1));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kDebug, "flag foo not updated"));
 }
 
-TEST(JsonDestination, UpsertStaleSegmentGeneratesDebugMessage) {
-    auto spy_logger = std::make_shared<logging::SpyLoggerBackend>();
-    Logger logger(spy_logger);
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
-    EXPECT_CALL(mock_dest, Identity()).WillOnce([] {
-        return "FooCorp Database";
-    });
-
+TEST_F(JsonDestinationTest, UpsertStaleSegmentGeneratesDebugMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kNotUpdated));
 
-    destination.Upsert("foo", data_model::SegmentDescriptor(1));
+    dest.Upsert("foo", data_model::SegmentDescriptor(1));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kDebug, "segment foo not updated"));
 }
 
-TEST(JsonDestination, UpsertDeletedFlagCreatesTombstone) {
-    Logger const logger = logging::NullLogger();
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
+TEST_F(JsonDestinationTest, UpsertDeletedFlagCreatesTombstone) {
     EXPECT_CALL(
         mock_dest,
         Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
@@ -204,15 +152,10 @@ TEST(JsonDestination, UpsertDeletedFlagCreatesTombstone) {
                    2, "{\"key\":\"flag\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    destination.Upsert("flag", data_model::FlagDescriptor(2));
+    dest.Upsert("flag", data_model::FlagDescriptor(2));
 }
 
-TEST(JsonDestination, UpsertDeletedSegmentCreatesTombstone) {
-    Logger const logger = logging::NullLogger();
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
+TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
     EXPECT_CALL(
         mock_dest,
         Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
@@ -220,31 +163,21 @@ TEST(JsonDestination, UpsertDeletedSegmentCreatesTombstone) {
                    2, "{\"key\":\"segment\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    destination.Upsert("segment", data_model::SegmentDescriptor(2));
+    dest.Upsert("segment", data_model::SegmentDescriptor(2));
 }
 
-TEST(JsonDestination, UpserFlagCreatesSerializedItem) {
-    Logger const logger = logging::NullLogger();
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
+TEST_F(JsonDestinationTest, UpserFlagCreatesSerializedItem) {
     EXPECT_CALL(mock_dest,
                 Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
                        SerializedItemDescriptor::Present(
                            2, "{\"on\":true,\"key\":\"flag\",\"version\":2}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    destination.Upsert(
-        "flag", data_model::FlagDescriptor(data_model::Flag{"flag", 2, true}));
+    dest.Upsert("flag",
+                data_model::FlagDescriptor(data_model::Flag{"flag", 2, true}));
 }
 
-TEST(JsonDestination, UpserSegmentCreatesSerializedItem) {
-    Logger const logger = logging::NullLogger();
-
-    NiceMock<MockSerializedDestination> mock_dest;
-    JsonDestination destination{logger, mock_dest};
-
+TEST_F(JsonDestinationTest, UpserSegmentCreatesSerializedItem) {
     EXPECT_CALL(mock_dest,
                 Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
                        SerializedItemDescriptor::Present(
@@ -253,7 +186,6 @@ TEST(JsonDestination, UpserSegmentCreatesSerializedItem) {
                            "[\"bar\"],\"included\":[\"foo\"]}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    destination.Upsert(
-        "segment", data_model::SegmentDescriptor(
-                       data_model::Segment{"segment", 2, {"foo"}, {"bar"}}));
+    dest.Upsert("segment", data_model::SegmentDescriptor(data_model::Segment{
+                               "segment", 2, {"foo"}, {"bar"}}));
 }

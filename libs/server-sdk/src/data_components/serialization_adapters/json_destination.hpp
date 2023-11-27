@@ -13,15 +13,15 @@ namespace launchdarkly::server_side::data_components {
  * models into serialized data suitable for storage in an
  * ISerializedDestination.
  *
- * It's purpose is to encapsulate the details of serialization in a reusable
- * adapter.
+ * By encapsulating the serialization logic here, different adapters can be
+ * swapped in if our serialization format ever changes.
  *
  * JsonDestination does not currently initialize ISerializedDestination with a
- * deterministic flag-dependency-order data order, which is required for some
+ * flag-dependency-order payload, which is required to minimize bugs in
  * stores without atomic transactions (e.g. DynamoDB).
  *
- * Instead, it sorts items within a collection using '<' on item keys, giving
- * enough determinism for testing purposes.
+ * Instead, it sorts items within a collection using 'operator<' on their keys,
+ * giving which is enough determinism for testing purposes.
  *
  * TODO(sc-225327): Implement topographic sort as prerequisite for DynamoDB.
  *
@@ -29,9 +29,9 @@ namespace launchdarkly::server_side::data_components {
 class JsonDestination final : public data_interfaces::IDestination {
    public:
     /**
-     * @brief Construct the JsonDestination with the given destination.
-     * Calls to Upsert will trigger serialization and storage in the
-     * destination.
+     * @brief Construct the JsonDestination with the given
+     * ISerializedDestination. Calls to Upsert will trigger serialization and
+     * store to the destination.
      * @param logger Used for logging storage errors.
      * @param destination Where data should be forwarded.
      */
@@ -74,6 +74,9 @@ class JsonDestination final : public data_interfaces::IDestination {
      */
     [[nodiscard]] std::string const& Identity() const override;
 
+    /**
+     * @brief These are public so they can be referenced in tests.
+     */
     struct Kinds {
         static FlagKind const Flag;
         static SegmentKind const Segment;
