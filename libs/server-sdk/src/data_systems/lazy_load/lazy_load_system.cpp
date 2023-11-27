@@ -4,10 +4,14 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-LazyLoad::LazyLoad()
-    : reader_(std::make_unique<data_components::JsonDeserializer>(
-          *serialized_reader_)),
-      time_([]() { return std::chrono::steady_clock::now(); }) {}
+LazyLoad::LazyLoad(config::built::LazyLoadConfig cfg)
+    : LazyLoad(std::move(cfg),
+               []() { return std::chrono::steady_clock::now(); }) {}
+
+LazyLoad::LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time)
+    : serialized_reader_(std::move(cfg.source)),
+      reader_(std::make_unique<data_components::JsonDeserializer>(*serialized_reader_)),
+      time_(std::move(time)) {}
 
 std::string const& LazyLoad::Identity() const {
     static std::string id = "lazy load via " + reader_->Identity();
@@ -20,7 +24,8 @@ void LazyLoad::Shutdown() {}
 
 std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     std::string const& key) const {
-    auto const state = tracker_.State(Keys::kAllSegments, time_());
+    auto const state =
+        tracker_.State(data_components::DataKind::kFlag, key, time_());
     return Get<std::shared_ptr<data_model::FlagDescriptor>>(
         state, [this, &key]() { RefreshFlag(key); },
         [this, &key]() { return cache_.GetFlag(key); });
@@ -28,7 +33,8 @@ std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
 
 std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
     std::string const& key) const {
-    auto const state = tracker_.State(Keys::kAllSegments, time_());
+    auto const state =
+        tracker_.State(data_components::DataKind::kSegment, key, time_());
     return Get<std::shared_ptr<data_model::SegmentDescriptor>>(
         state, [this, &key]() { RefreshSegment(key); },
         [this, &key]() { return cache_.GetSegment(key); });

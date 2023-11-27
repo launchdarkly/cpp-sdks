@@ -6,6 +6,7 @@
 #include "../../data_interfaces/source/idata_reader.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
+#include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 #include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
@@ -26,7 +27,11 @@ namespace launchdarkly::server_side::data_systems {
  */
 class LazyLoad final : public data_interfaces::IDataSystem {
    public:
-    LazyLoad();
+    using TimeFn =
+        std::function<std::chrono::time_point<std::chrono::steady_clock>()>;
+
+    explicit LazyLoad(config::built::LazyLoadConfig cfg);
+    LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time);
 
     std::string const& Identity() const override;
 
@@ -79,7 +84,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     std::unique_ptr<data_interfaces::IDataReader> reader_;
 
     mutable data_components::ExpirationTracker tracker_;
-    std::function<std::chrono::time_point<std::chrono::steady_clock>()> time_;
+    TimeFn time_;
     mutable std::optional<bool> initialized_;
 
     struct Kinds {
