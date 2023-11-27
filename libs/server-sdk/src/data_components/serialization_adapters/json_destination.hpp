@@ -4,6 +4,8 @@
 #include "../../data_interfaces/destination/idestination.hpp"
 #include "../../data_interfaces/destination/iserialized_destination.hpp"
 
+#include <launchdarkly/logging/logger.hpp>
+
 namespace launchdarkly::server_side::data_components {
 
 /**
@@ -15,12 +17,14 @@ namespace launchdarkly::server_side::data_components {
  * adapter.
  *
  * JsonDestination does not initialize ISerializedDestination with a
- * flag-dependency-order data layout, which is required for some stores (e.g.
- * DynamoDB).
+ * deterministic flag-dependency-order data layout, which is required for some
+ * stores (e.g. DynamoDB). Instead, it sorts items within a collection using
+ * '<', to have enough determinism for testing purposes.
  *
- * Since DynamoDB is not supported at the moment this is acceptable. When the
- * capability is needed, a new class should be derived from JsonDestination
- * overriding Init to provide the correct data layout.
+ * Since DynamoDB is not supported at the moment this sorting is acceptable.
+ * When the support for a store requiring a specific ordering is needed, a new
+ * class should be derived from JsonDestination overriding Init to provide the
+ * correct data layout.
  *
  * Alternatively, JsonDestination can be made to order the data so that it works
  * for any store.
@@ -32,9 +36,11 @@ class JsonDestination : public data_interfaces::IDestination {
      * @brief Construct the JsonDestination with the given destination.
      * Calls to Upsert will trigger serialization and storage in the
      * destination.
+     * @param logger Used for logging storage errors.
      * @param destination Where data should be forwarded.
      */
     explicit JsonDestination(
+        Logger const& logger,
         data_interfaces::ISerializedDestination& destination);
 
     /**
@@ -72,12 +78,20 @@ class JsonDestination : public data_interfaces::IDestination {
      */
     [[nodiscard]] std::string const& Identity() const override;
 
-   private:
-    data_interfaces::ISerializedDestination& dest_;
     struct Kinds {
         static FlagKind const Flag;
         static SegmentKind const Segment;
     };
+
+   private:
+    void LogUpsertResult(
+        std::string const& key,
+        std::string const& data_type,
+        data_interfaces::ISerializedDestination::UpsertResult const& result)
+        const;
+
+    Logger const& logger_;
+    data_interfaces::ISerializedDestination& dest_;
 };
 
 }  // namespace launchdarkly::server_side::data_components
