@@ -600,9 +600,13 @@ TEST(FlagTests, SerializeAll) {
           },
           24,
           ContextKind("bob")}},  // contextTargets
-        {},                      // rules
-        84,                      // offVariation
-        true,                    // clientSide
+        {data_model::Flag::Rule{{data_model::Clause{data_model::Clause::Op::kIn,
+                                                    {"bob"},
+                                                    false,
+                                                    ContextKind{"user"},
+                                                    "name"}}}},  // rules
+        84,                                                      // offVariation
+        true,                                                    // clientSide
         data_model::Flag::ClientSideAvailability{true, true},
         "4242",  // salt
         true,    // trackEvents
@@ -623,7 +627,7 @@ TEST(FlagTests, SerializeAll) {
             "key":"the-key",
             "version":21,
             "variations":["a","b"],
-            "rules":[],
+            "rules":[{"clauses":[{"op":"in","values":["bob"],"contextKind":"user","attribute":"name"}]}],
             "prerequisites":[{"key":"prereqA","variation":2},
                 {"key":"prereqB","variation":3}],
             "fallthrough":{"variation":42},
@@ -739,12 +743,7 @@ TEST(SegmentTests, SerializeUnbounded) {
         R"({
             "key": "my-segment",
             "version": 87,
-            "included": [],
-            "excluded": [],
-            "includedContexts": [],
-            "excludedContexts": [],
             "salt": "salty",
-            "rules":[],
             "unbounded": true,
             "unboundedContextKind": "company",
             "generation": 12
