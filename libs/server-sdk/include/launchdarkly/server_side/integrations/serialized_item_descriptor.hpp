@@ -54,7 +54,12 @@ struct SerializedItemDescriptor {
         return SerializedItemDescriptor{version, true,
                                         std::move(tombstone_rep)};
     }
-}
 };
+
+inline bool operator==(SerializedItemDescriptor const& lhs,
+                       SerializedItemDescriptor const& rhs) {
+    return lhs.version == rhs.version && lhs.deleted == rhs.deleted &&
+           lhs.serializedItem == rhs.serializedItem;
+}
 
 }  // namespace launchdarkly::server_side::integrations
