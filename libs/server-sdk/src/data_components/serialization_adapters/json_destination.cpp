@@ -59,7 +59,7 @@ JsonDestination::JsonDestination(Logger const& logger,
     : logger_(logger), dest_(destination) {}
 
 std::string const& JsonDestination::Identity() const {
-    static std::string const identity = dest_.Identity() + " (JSON)";
+    static std::string const identity = "(JSON)";
     return identity;
 }
 
