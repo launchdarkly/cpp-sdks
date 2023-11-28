@@ -28,6 +28,11 @@ class MockSerializedDestination : public ISerializedDestination {
                  SerializedItemDescriptor),
                 (override));
     MOCK_METHOD(std::string const&, Identity, (), (const, override));
+    MockSerializedDestination() {
+        ON_CALL(*this, Identity).WillByDefault([]() {
+            return "FooCorp Database";
+        });
+    }
 };
 
 class JsonDestinationTest : public ::testing::Test {
@@ -36,14 +41,10 @@ class JsonDestinationTest : public ::testing::Test {
     Logger const logger;
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination dest;
-    std::string name;
     JsonDestinationTest()
         : spy_logger(std::make_shared<logging::SpyLoggerBackend>()),
           logger(spy_logger),
-          dest(logger, mock_dest),
-          name("FooCorp Database") {
-        ON_CALL(mock_dest, Identity()).WillByDefault([&]() { return name; });
-    }
+          dest(logger, mock_dest) {}
 };
 
 TEST_F(JsonDestinationTest, WrapsUnderlyingDestinationIdentity) {
