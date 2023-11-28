@@ -15,22 +15,22 @@ JsonDeserializer::JsonDeserializer(
 
 data_interfaces::IDataReader::Single<data_model::FlagDescriptor>
 JsonDeserializer::GetFlag(std::string const& key) const {
-    return Deserialize<data_model::Flag>(flag_kind_, key);
+    return DeserializeSingle<data_model::Flag>(flag_kind_, key);
 }
 
 data_interfaces::IDataReader::Single<data_model::SegmentDescriptor>
 JsonDeserializer::GetSegment(std::string const& key) const {
-    return Deserialize<data_model::Segment>(segment_kind_, key);
+    return DeserializeSingle<data_model::Segment>(segment_kind_, key);
 }
 
 data_interfaces::IDataReader::Collection<data_model::FlagDescriptor>
 JsonDeserializer::AllFlags() const {
-    return DeserializeAll<data_model::Flag>(flag_kind_);
+    return DeserializeCollection<data_model::Flag>(flag_kind_);
 }
 
 data_interfaces::IDataReader::Collection<data_model::SegmentDescriptor>
 JsonDeserializer::AllSegments() const {
-    return DeserializeAll<data_model::Segment>(segment_kind_);
+    return DeserializeCollection<data_model::Segment>(segment_kind_);
 }
 
 std::string const& JsonDeserializer::Identity() const {

@@ -55,7 +55,8 @@ TEST_F(LazyLoadTest, IdentityWrapsReaderIdentity) {
 
     data_systems::LazyLoad const lazy_load(logger, config);
 
-    ASSERT_EQ(lazy_load.Identity(), "lazy load via " + mock_reader_name);
+    ASSERT_EQ(lazy_load.Identity(),
+              "lazy load via " + mock_reader_name + " (JSON)");
 }
 
 TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagIsCached) {
