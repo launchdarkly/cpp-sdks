@@ -36,14 +36,13 @@ class JsonDestinationTest : public ::testing::Test {
     Logger const logger;
     NiceMock<MockSerializedDestination> mock_dest;
     JsonDestination dest;
+    std::string name;
     JsonDestinationTest()
         : spy_logger(std::make_shared<logging::SpyLoggerBackend>()),
           logger(spy_logger),
-          dest(logger, mock_dest) {
-        ON_CALL(mock_dest, Identity()).WillByDefault([]() {
-            static const std::string name = "FooCorp Database";
-            return name;
-        });
+          dest(logger, mock_dest),
+          name("FooCorp Database") {
+        ON_CALL(mock_dest, Identity()).WillByDefault([&]() { return name; });
     }
 };
 
