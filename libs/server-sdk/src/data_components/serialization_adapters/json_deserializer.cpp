@@ -25,18 +25,17 @@ JsonDeserializer::GetSegment(std::string const& key) const {
 
 data_interfaces::IDataReader::Collection<data_model::FlagDescriptor>
 JsonDeserializer::AllFlags() const {
-    // TODO: deserialize then return
-    return tl::make_unexpected("Not implemented");
+    return DeserializeAll<data_model::Flag>(flag_kind_);
 }
 
 data_interfaces::IDataReader::Collection<data_model::SegmentDescriptor>
 JsonDeserializer::AllSegments() const {
-    // TODO: deserialize then return
-    return tl::make_unexpected("Not implemented");
+    return DeserializeAll<data_model::Segment>(segment_kind_);
 }
 
 std::string const& JsonDeserializer::Identity() const {
-    return reader_->Identity();
+    static std::string const name = reader_->Identity() + " (JSON)";
+    return name;
 }
 
 bool JsonDeserializer::Initialized() const {

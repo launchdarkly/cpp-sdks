@@ -48,24 +48,68 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
         }
 
         auto const boost_json_val = boost::json::parse(*result->serializedItem);
-        auto flag = boost::json::value_to<
+        auto item = boost::json::value_to<
             tl::expected<std::optional<DataModel>, JsonError>>(boost_json_val);
 
-        if (!flag) {
-            /* flag couldn't be deserialized from the JSON string */
-            return tl::make_unexpected(ErrorToString(flag.error()));
+        if (!item) {
+            /* item couldn't be deserialized from the JSON string */
+            return tl::make_unexpected(ErrorToString(item.error()));
         }
 
-        std::optional<DataModel> maybe_flag = flag->value();
+        std::optional<DataModel> maybe_item = item->value();
 
-        if (!maybe_flag) {
+        if (!maybe_item) {
             /* JSON was valid, but the value is 'null'
              * TODO: will this ever happen?
              */
             return tl::make_unexpected("data was null");
         }
 
-        return data_model::ItemDescriptor<DataModel>(std::move(*maybe_flag));
+        return data_model::ItemDescriptor<DataModel>(std::move(*maybe_item));
+    }
+
+    template <typename DataModel, typename DataKind>
+    Collection<data_model::ItemDescriptor<DataModel>> DeserializeAll(
+        DataKind const& kind) const {
+        auto result = reader_->All(kind);
+
+        if (!result) {
+            /* the actual fetch failed */
+            return tl::make_unexpected(result.error().message);
+        }
+
+        std::unordered_map<std::string, data_model::ItemDescriptor<DataModel>>
+            items;
+
+        for (auto const& [key, descriptor] : *result) {
+            if (!descriptor.serializedItem) {
+                // Item deleted
+                continue;
+            }
+
+            auto const boost_json_val =
+                boost::json::parse(*descriptor.serializedItem);
+            auto item = boost::json::value_to<
+                tl::expected<std::optional<DataModel>, JsonError>>(
+                boost_json_val);
+
+            if (!item) {
+                // TODO: log parse error
+                continue;
+            }
+
+            std::optional<DataModel> maybe_item = item->value();
+
+            if (!maybe_item) {
+                /* JSON was valid, but the value is 'null', so skip it. TODO:
+                 * log it?*/
+                continue;
+            }
+
+            items.emplace(key, data_model::ItemDescriptor<DataModel>(
+                                   std::move(*maybe_item)));
+        }
+        return items;
     }
 
     FlagKind const flag_kind_;

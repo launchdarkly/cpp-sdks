@@ -6,6 +6,7 @@
 #include <set>
 #include <unordered_map>
 
+#include "data_components/serialization_adapters/json_deserializer.hpp"
 #include "spy_logger.hpp"
 
 using namespace launchdarkly;
@@ -205,31 +206,42 @@ TEST_F(LazyLoadTest, RefreshesSegmentIfStale) {
     }
 }
 
-TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlagExpiration) {
-    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
-
-    constexpr auto refresh_ttl = std::chrono::seconds(10);
-
+TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlag) {
     built::LazyLoadConfig const config{
-        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
-        mock_reader};
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
 
-    // We want to demonstrate that the individual TTL of a flag will be
+    // We want to demonstrate that an individual flag will be
     // refreshed not just when we grab that single flag, but also if
-    // we call AllFlags. So we'll have a situation where a single
-    // flag is fetched, and then is about to expire. We'll then call AllFlags
-    // and step the time forward, and ensure the flag is updated in memory - without
-    // actually calling GetFlag on the reader.
+    // we call AllFlags.
 
     {
         InSequence s;
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
             .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
-        EXPECT_CALL(*mock_reader, All(testing::_))
-            .WillOnce(testing::Return(std::unordered_map<std::string, integrations::SerializedItemDescriptor>{
-                {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
+        EXPECT_CALL(*mock_reader, All(testing::_))  // first call for flags
+            .WillOnce(testing::Return(
+                std::unordered_map<std::string,
+                                   integrations::SerializedItemDescriptor>{
+                    {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
+        EXPECT_CALL(*mock_reader, All(testing::_))  // second call for segments
+            .WillOnce(testing::Return(
+                std::unordered_map<std::string,
+                                   integrations::SerializedItemDescriptor>{}));
     }
 
+    data_systems::LazyLoad const lazy_load(logger, config);
 
+    auto const flag1 = lazy_load.GetFlag("foo");
+    ASSERT_TRUE(flag1);
+    ASSERT_EQ(flag1->version, 1);
+
+    auto const all_flags = lazy_load.AllFlags();
+    ASSERT_EQ(all_flags.size(), 1);
+    ASSERT_EQ(all_flags.at("foo")->version, 2);
+
+    auto const flag2 = lazy_load.GetFlag("foo");
+    ASSERT_TRUE(flag2);
+    ASSERT_EQ(flag2->version, 2);
 }

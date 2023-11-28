@@ -4,6 +4,12 @@
 
 namespace launchdarkly::server_side::data_systems {
 
+data_components::FlagKind const LazyLoad::Kinds::Flag =
+    data_components::FlagKind();
+
+data_components::SegmentKind const LazyLoad::Kinds::Segment =
+    data_components::SegmentKind();
+
 LazyLoad::LazyLoad(Logger const& logger, config::built::LazyLoadConfig cfg)
     : LazyLoad(logger, std::move(cfg), []() {
           return std::chrono::steady_clock::now();
@@ -44,29 +50,45 @@ std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
         [this, &key]() { return cache_.GetSegment(key); });
 }
 
+// In the normal course of SDK operation, flags and segments are loaded
+// on-demand, are resident in memory for a TTL, and then are refreshed.
+// This results in a working set that is eventually consistent. Load on the
+// underlying source is spread out relative to the pattern of flag evaluations
+// performed by an application.
+//
+// However, AllFlags is a special case. Here the SDK is asking for all flags
+// in order to perform a mass-evaluation for a single context. This could
+// theoretically generate thousands of individual refresh calls for both flags
+// and segments, which could overwhelm the source.
+//
+// To optimize this, two calls are made to grab all flags and all segments.
+// As long as the TTL is longer than the actual time it takes to evaluate all of
+// the flags, no additional calls will need to be made to the source.
+//
+// To guard against overloading the source when all flags are being constantly
+// evaluated, the "all flags" operation itself is assigned a TTL (the same as a
+// flag/segment.)
 std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
 LazyLoad::AllFlags() const {
     auto const state = tracker_.State(Keys::kAllFlags, time_());
     return Get<std::unordered_map<std::string,
                                   std::shared_ptr<data_model::FlagDescriptor>>>(
-        state, [this]() { RefreshAllFlags(); },
-        [this]() { return cache_.AllFlags(); });
+        state,
+        [this]() {
+            RefreshAllFlags();
+            RefreshAllSegments();
+        },
+        [this]() {
+            return cache_
+                .AllFlags();  // segments will be accessed as-needed by the
+            // evaluation algorithm
+        });
 }
 
 std::unordered_map<std::string, std::shared_ptr<data_model::SegmentDescriptor>>
 LazyLoad::AllSegments() const {
-    auto const state = tracker_.State(Keys::kAllSegments, time_());
-    return Get<std::unordered_map<
-        std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
-        state, [this]() { RefreshAllSegments(); },
-        [this]() { return cache_.AllSegments(); });
+    return cache_.AllSegments();
 }
-
-data_components::FlagKind const LazyLoad::Kinds::Flag =
-    data_components::FlagKind();
-
-data_components::SegmentKind const LazyLoad::Kinds::Segment =
-    data_components::SegmentKind();
 
 bool LazyLoad::Initialized() const {
     auto const state = tracker_.State(Keys::kInitialized, time_());
@@ -87,6 +109,8 @@ bool LazyLoad::Initialized() const {
 
 void LazyLoad::RefreshAllFlags() const {
     auto const updated_expiry = ExpiryTime();
+    tracker_.Add(Keys::kAllFlags, updated_expiry);
+
     if (auto all_flags = reader_->AllFlags()) {
         for (auto flag : *all_flags) {
             cache_.Upsert(flag.first, std::move(flag.second));
@@ -98,7 +122,6 @@ void LazyLoad::RefreshAllFlags() const {
             << "failed to refresh all flags via " << reader_->Identity() << ": "
             << all_flags.error();
     }
-    tracker_.Add(Keys::kAllFlags, updated_expiry);
 }
 
 void LazyLoad::RefreshAllSegments() const {
@@ -114,7 +137,6 @@ void LazyLoad::RefreshAllSegments() const {
             << "failed to refresh all segments via " << reader_->Identity()
             << ": " << all_segments.error();
     }
-    tracker_.Add(Keys::kAllSegments, updated_expiry);
 }
 
 void LazyLoad::RefreshInitState() const {
@@ -133,6 +155,7 @@ void LazyLoad::RefreshSegment(std::string const& key) const {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "segment " << key << " requested but not found via "
                 << reader_->Identity();
+            cache_.RemoveSegment(key);
         }
     } else {
         LD_LOG(logger_, LogLevel::kError)
@@ -152,6 +175,7 @@ void LazyLoad::RefreshFlag(std::string const& key) const {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "flag " << key << " requested but not found via "
                 << reader_->Identity();
+            cache_.RemoveFlag(key);
         }
     } else {
         LD_LOG(logger_, LogLevel::kError)

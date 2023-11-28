@@ -39,10 +39,13 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     std::shared_ptr<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
+
     std::shared_ptr<data_model::SegmentDescriptor> GetSegment(
         std::string const& key) const override;
+
     std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
     AllFlags() const override;
+
     std::unordered_map<std::string,
                        std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
@@ -52,6 +55,12 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     void Initialize() override;
 
     void Shutdown() override;
+
+    // Public for usage in tests.
+    struct Kinds {
+        static data_components::FlagKind const Flag;
+        static data_components::SegmentKind const Segment;
+    };
 
    private:
     void RefreshAllFlags() const;
@@ -94,14 +103,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     ClockType::duration fresh_duration_;
 
-    struct Kinds {
-        static data_components::FlagKind const Flag;
-        static data_components::SegmentKind const Segment;
-    };
-
     struct Keys {
         static inline std::string const kAllFlags = "allFlags";
-        static inline std::string const kAllSegments = "allSegments";
         static inline std::string const kInitialized = "initialized";
     };
 };

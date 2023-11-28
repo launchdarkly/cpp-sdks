@@ -43,7 +43,7 @@ std::string const& MemoryStore::Identity() const {
     return description_;
 }
 
-void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
+void MemoryStore::Init(data_model::SDKDataSet dataSet) {
     std::lock_guard lock{data_mutex_};
     initialized_ = true;
     flags_.clear();
