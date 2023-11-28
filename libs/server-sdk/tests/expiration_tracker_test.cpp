@@ -119,3 +119,17 @@ TEST(ExpirationTrackerTest, CanPrune) {
     EXPECT_EQ(ExpirationTracker::TrackState::kFresh,
               tracker.State(DataKind::kSegment, "freshSegment", Second(80)));
 }
+
+TEST(ExpirationTrackerTest, CanUpdateExistingExpiry) {
+    ExpirationTracker tracker;
+
+    for (std::size_t seconds = 1; seconds < 10; seconds++) {
+        auto const now = Second(seconds - 1);
+        auto const expiry = Second(seconds);
+
+        tracker.Add("Potato", expiry);
+        EXPECT_EQ(ExpirationTracker::TrackState::kFresh,
+                  tracker.State("Potato", now));
+        ASSERT_TRUE(tracker.Prune(now).empty());
+    }
+}
