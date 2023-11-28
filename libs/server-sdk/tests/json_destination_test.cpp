@@ -29,9 +29,11 @@ class MockSerializedDestination : public ISerializedDestination {
                 (override));
     MOCK_METHOD(std::string const&, Identity, (), (const, override));
     MockSerializedDestination() {
-        ON_CALL(*this, Identity)
-            .WillByDefault(testing::ReturnRef("FooCorp Database"));
+        ON_CALL(*this, Identity).WillByDefault(testing::ReturnRef(name));
     }
+
+   private:
+    std::string const name = "FooCorp Database";
 };
 
 class JsonDestinationTest : public ::testing::Test {
