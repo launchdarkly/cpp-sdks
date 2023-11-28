@@ -73,20 +73,17 @@ LazyLoad::AllFlags() const {
     auto const state = tracker_.State(Keys::kAllFlags, time_());
     return Get<std::unordered_map<std::string,
                                   std::shared_ptr<data_model::FlagDescriptor>>>(
-        state,
-        [this]() {
-            RefreshAllFlags();
-            RefreshAllSegments();
-        },
-        [this]() {
-            return cache_
-                .AllFlags();  // segments will be accessed as-needed by the
-            // evaluation algorithm
-        });
+        state, [this]() { RefreshAllFlags(); },
+        [this]() { return cache_.AllFlags(); });
 }
 
 std::unordered_map<std::string, std::shared_ptr<data_model::SegmentDescriptor>>
 LazyLoad::AllSegments() const {
+    auto const state = tracker_.State(Keys::kAllSegments, time_());
+    return Get<std::unordered_map<
+        std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
+        state, [this]() { RefreshAllSegments(); },
+        [this]() { return cache_.AllSegments(); });
     return cache_.AllSegments();
 }
 
@@ -126,6 +123,8 @@ void LazyLoad::RefreshAllFlags() const {
 
 void LazyLoad::RefreshAllSegments() const {
     auto const updated_expiry = ExpiryTime();
+    tracker_.Add(Keys::kAllSegments, updated_expiry);
+
     if (auto all_segments = reader_->AllSegments()) {
         for (auto segment : *all_segments) {
             cache_.Upsert(segment.first, std::move(segment.second));

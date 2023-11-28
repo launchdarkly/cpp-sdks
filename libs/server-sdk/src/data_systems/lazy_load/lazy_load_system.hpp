@@ -69,11 +69,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
-    static integrations::SerializedItemDescriptor Serialize(
-        data_model::FlagDescriptor flag);
-    static integrations::SerializedItemDescriptor Serialize(
-        data_model::SegmentDescriptor segment);
-
     template <typename TResult>
     static TResult Get(data_components::ExpirationTracker::TrackState state,
                        std::function<void(void)> const& refresh,
@@ -105,6 +100,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     struct Keys {
         static inline std::string const kAllFlags = "allFlags";
+        static inline std::string const kAllSegments = "allFlags";
         static inline std::string const kInitialized = "initialized";
     };
 };
