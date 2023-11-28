@@ -6,6 +6,8 @@
 
 #include <launchdarkly/logging/logger.hpp>
 
+#include <string>
+
 namespace launchdarkly::server_side::data_components {
 
 /**
@@ -35,9 +37,8 @@ class JsonDestination final : public data_interfaces::IDestination {
      * @param logger Used for logging storage errors.
      * @param destination Where data should be forwarded.
      */
-    explicit JsonDestination(
-        Logger const& logger,
-        data_interfaces::ISerializedDestination& destination);
+    JsonDestination(Logger const& logger,
+                    data_interfaces::ISerializedDestination& destination);
 
     /**
      * @brief Initialize the destination with an SDK data set.
