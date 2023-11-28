@@ -71,8 +71,18 @@ class ISerializedDataReader {
     virtual AllResult All(
         integrations::ISerializedItemKind const& kind) const = 0;
 
+    /**
+     * @return Identity of the reader. Used in logs.
+     */
     virtual std::string const& Identity() const = 0;
 
+    /**
+     * @return True if the reader has data that can be queried. The reader
+     * should derive this state externally; that is, it should be an attribute
+     * of the underlying source of data (not in memory.) A possible
+     * implementation would be to store a special data key that is only set
+     * after initial SDK data is stored.
+     */
     virtual bool Initialized() const = 0;
 
    protected:

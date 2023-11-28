@@ -5,11 +5,14 @@
 
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
+#include <memory>
+
 namespace launchdarkly::server_side::data_components {
 
 class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
-    explicit JsonDeserializer(data_interfaces::ISerializedDataReader& reader);
+    explicit JsonDeserializer(
+        std::shared_ptr<data_interfaces::ISerializedDataReader> reader);
 
     [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
@@ -25,12 +28,14 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
     [[nodiscard]] std::string const& Identity() const override;
 
+    [[nodiscard]] bool Initialized() const override;
+
    private:
     template <typename DataModel, typename DataKind>
     Single<data_model::ItemDescriptor<DataModel>> Deserialize(
         DataKind const& kind,
         std::string const& key) const {
-        auto result = reader_.Get(kind, key);
+        auto result = reader_->Get(kind, key);
 
         if (!result) {
             /* the actual fetch failed */
@@ -65,7 +70,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
     FlagKind const flag_kind_;
     FlagKind const segment_kind_;
-    data_interfaces::ISerializedDataReader& reader_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> reader_;
 };
 
 }  // namespace launchdarkly::server_side::data_components
