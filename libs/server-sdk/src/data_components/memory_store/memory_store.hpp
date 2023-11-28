@@ -40,6 +40,10 @@ class MemoryStore final : public data_interfaces::IStore,
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
 
+    bool RemoveFlag(std::string const& key);
+
+    bool RemoveSegment(std::string const& key);
+
     MemoryStore() = default;
     ~MemoryStore() override = default;
 
