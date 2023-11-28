@@ -90,12 +90,12 @@ void LazyLoad::RefreshAllFlags() const {
     if (auto all_flags = reader_->AllFlags()) {
         for (auto flag : *all_flags) {
             cache_.Upsert(flag.first, std::move(flag.second));
-            tracker_.Add(data_components::DataKind::kSegment, flag.first,
+            tracker_.Add(data_components::DataKind::kFlag, flag.first,
                          updated_expiry);
         }
     } else {
         LD_LOG(logger_, LogLevel::kError)
-            << "failed to refresh all flags via " << reader_->Identity()
+            << "failed to refresh all flags via " << reader_->Identity() << ": "
             << all_flags.error();
     }
     tracker_.Add(Keys::kAllFlags, updated_expiry);
@@ -112,7 +112,7 @@ void LazyLoad::RefreshAllSegments() const {
     } else {
         LD_LOG(logger_, LogLevel::kError)
             << "failed to refresh all segments via " << reader_->Identity()
-            << all_segments.error();
+            << ": " << all_segments.error();
     }
     tracker_.Add(Keys::kAllSegments, updated_expiry);
 }
@@ -123,41 +123,41 @@ void LazyLoad::RefreshInitState() const {
 }
 
 void LazyLoad::RefreshSegment(std::string const& key) const {
+    // Rate limit in all cases to protect the underlying store.
+    tracker_.Add(data_components::DataKind::kSegment, key, ExpiryTime());
+
     if (auto segment_result = reader_->GetSegment(key)) {
         if (auto optional_segment = *segment_result) {
             cache_.Upsert(key, std::move(*optional_segment));
         } else {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "segment " << key << " requested but not found via "
-                << reader_->Identity()
-                << ", this is probably a temporary issue";
+                << reader_->Identity();
         }
     } else {
         LD_LOG(logger_, LogLevel::kError)
             << "failed to refresh segment " << key << " via "
             << reader_->Identity() << ": " << segment_result.error();
     }
-    // TODO: If there is an actual error, then do we not reset the tracking?
-    tracker_.Add(data_components::DataKind::kSegment, key, ExpiryTime());
 }
 
 void LazyLoad::RefreshFlag(std::string const& key) const {
+    // Rate limit in all cases to protect the underlying store.
+    tracker_.Add(data_components::DataKind::kFlag, key, ExpiryTime());
+
     if (auto flag_result = reader_->GetFlag(key)) {
         if (auto optional_flag = *flag_result) {
             cache_.Upsert(key, std::move(*optional_flag));
         } else {
             LD_LOG(logger_, LogLevel::kDebug)
                 << "flag " << key << " requested but not found via "
-                << reader_->Identity()
-                << ", this is probably a temporary issue";
+                << reader_->Identity();
         }
     } else {
         LD_LOG(logger_, LogLevel::kError)
             << "failed to refresh flag " << key << " via "
             << reader_->Identity() << ": " << flag_result.error();
     }
-    // TODO: If there is an actual error, then do we not reset the tracking?
-    tracker_.Add(data_components::DataKind::kFlag, key, ExpiryTime());
 }
 
 std::chrono::time_point<std::chrono::steady_clock> LazyLoad::ExpiryTime()
