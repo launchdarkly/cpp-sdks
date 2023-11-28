@@ -91,6 +91,7 @@ class JsonDestination final : public data_interfaces::IDestination {
 
     Logger const& logger_;
     data_interfaces::ISerializedDestination& dest_;
+    std::string const ident_;
 };
 
 }  // namespace launchdarkly::server_side::data_components

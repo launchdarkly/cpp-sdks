@@ -56,11 +56,12 @@ SerializedItemDescriptor Serialize(std::string const& key,
 
 JsonDestination::JsonDestination(Logger const& logger,
                                  ISerializedDestination& destination)
-    : logger_(logger), dest_(destination) {}
+    : logger_(logger),
+      dest_(destination),
+      ident_(dest_.Identity() + " (JSON)") {}
 
 std::string const& JsonDestination::Identity() const {
-    static std::string const identity = "(JSON)";
-    return identity;
+    return ident_;
 }
 
 void JsonDestination::Init(data_model::SDKDataSet data_set) {
