@@ -29,9 +29,8 @@ class MockSerializedDestination : public ISerializedDestination {
                 (override));
     MOCK_METHOD(std::string const&, Identity, (), (const, override));
     MockSerializedDestination() {
-        ON_CALL(*this, Identity).WillByDefault([]() {
-            return "FooCorp Database";
-        });
+        ON_CALL(*this, Identity)
+            .WillByDefault(testing::ReturnRef("FooCorp Database"));
     }
 };
 
