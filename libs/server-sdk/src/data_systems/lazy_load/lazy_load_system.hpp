@@ -27,11 +27,13 @@ namespace launchdarkly::server_side::data_systems {
  */
 class LazyLoad final : public data_interfaces::IDataSystem {
    public:
-    using TimeFn =
-        std::function<std::chrono::time_point<std::chrono::steady_clock>()>;
+    using ClockType = std::chrono::steady_clock;
+    using TimeFn = std::function<std::chrono::time_point<ClockType>()>;
 
-    explicit LazyLoad(config::built::LazyLoadConfig cfg);
-    LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time);
+    explicit LazyLoad(Logger const& logger, config::built::LazyLoadConfig cfg);
+    LazyLoad(Logger const& logger,
+             config::built::LazyLoadConfig cfg,
+             TimeFn time);
 
     std::string const& Identity() const override;
 
@@ -79,13 +81,18 @@ class LazyLoad final : public data_interfaces::IDataSystem {
         detail::unreachable();
     }
 
+    ClockType::time_point ExpiryTime() const;
+
+    Logger const& logger_;
+
     mutable data_components::MemoryStore cache_;
-    std::shared_ptr<data_interfaces::ISerializedDataReader> serialized_reader_;
     std::unique_ptr<data_interfaces::IDataReader> reader_;
 
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;
     mutable std::optional<bool> initialized_;
+
+    ClockType::duration fresh_duration_;
 
     struct Kinds {
         static data_components::FlagKind const Flag;

@@ -6,9 +6,13 @@
 #include <set>
 #include <unordered_map>
 
+#include "spy_logger.hpp"
+
+using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config;
 
+using ::testing::InSequence;
 using ::testing::NiceMock;
 
 class MockDataReader : public data_interfaces::ISerializedDataReader {
@@ -30,110 +34,202 @@ class LazyLoadTest : public ::testing::Test {
    public:
     std::string mock_reader_name;
     std::shared_ptr<NiceMock<MockDataReader>> mock_reader;
+    std::shared_ptr<logging::SpyLoggerBackend> spy_logger_backend;
+    Logger const logger;
     LazyLoadTest()
         : mock_reader_name("fake reader"),
-          mock_reader(std::make_shared<NiceMock<MockDataReader>>()) {
+          mock_reader(std::make_shared<NiceMock<MockDataReader>>()),
+          spy_logger_backend(std::make_shared<logging::SpyLoggerBackend>()),
+          logger(spy_logger_backend) {
         ON_CALL(*mock_reader, Identity()).WillByDefault([&]() {
             return mock_reader_name;
         });
     }
 };
 
-TEST_F(LazyLoadTest, ItentityWrapsReaderIdentity) {
+TEST_F(LazyLoadTest, IdentityWrapsReaderIdentity) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::milliseconds(100), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(config);
+    data_systems::LazyLoad const lazy_load(logger, config);
 
     ASSERT_EQ(lazy_load.Identity(), "lazy load via " + mock_reader_name);
 }
 
-TEST_F(LazyLoadTest, SourceIsNotAccessedIfFetchFails) {
+TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagIsCached) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(config);
+    data_systems::LazyLoad const lazy_load(logger, config);
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
         .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
             1, false, "{\"key\":\"foo\",\"version\":1}"}));
 
-    // Although we ask for 'foo' 10 times, the underlying source should only
-    // receive one call because the refresh is 10 seconds. Only after 10 seconds
-    // elapse would the source be queried again.
-    for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_FALSE(lazy_load.GetFlag("foo"));
+    for (std::size_t i = 0; i < 20; i++) {
+        ASSERT_TRUE(lazy_load.GetFlag("foo"));
     }
 }
 
-// TEST_F(LazyLoadTest, FetchingAllSegmentsRefreshesIndividualSegments) {
-//     auto source = std::make_shared<FakeDataSource>();
-//
-//     auto refresh = std::chrono::seconds(10);
-//
-//     built::LazyLoadConfig const config{
-//         built::LazyLoadConfig::EvictionPolicy::Disabled, refresh, source};
-//
-//     data_systems::LazyLoad const lazy_load(config);
-//
-//     ASSERT_FALSE(lazy_load.AllSegments().empty());
-//     ASSERT_TRUE(lazy_load.GetSegment("foo"));
-//
-//     // Since all segments were requested, then..
-//     ASSERT_EQ(source->all_requested, std::vector<std::string>{"segments"});
-//     // There should be no individual request for a segment.
-//     ASSERT_TRUE(source->items_requested["segments"].empty());
-// }
-//
-// TEST_F(LazyLoadTest, FetchingAllFlagsRefreshesIndividualFlags) {
-//     auto source = std::make_shared<FakeDataSource>();
-//
-//     auto refresh = std::chrono::seconds(10);
-//
-//     built::LazyLoadConfig const config{
-//         built::LazyLoadConfig::EvictionPolicy::Disabled, refresh, source};
-//
-//     data_systems::LazyLoad const lazy_load(config);
-//
-//     ASSERT_FALSE(lazy_load.AllFlags().empty());
-//     ASSERT_TRUE(lazy_load.GetFlag("foo"));
-//
-//     // Since all flags were requested, then..
-//     ASSERT_EQ(source->all_requested, std::vector<std::string>{"features"});
-//     // There should be no individual request for a segment.
-//     ASSERT_TRUE(source->items_requested["features"].empty());
-// }
-//
-// TEST_F(LazyLoadTest, ItemIsRefreshedAfterDelay) {
-//     auto source = std::make_shared<FakeDataSource>();
-//
-//     auto refresh = std::chrono::seconds(10);
-//
-//     built::LazyLoadConfig const config{
-//         built::LazyLoadConfig::EvictionPolicy::Disabled, refresh, source};
-//
-//     std::chrono::time_point<std::chrono::steady_clock> now(
-//         std::chrono::seconds(0));
-//
-//     data_systems::LazyLoad const lazy_load(config, [&]() { return now; });
-//
-//     // Simulate time moving forward for 9 seconds. Each time, the flag should
-//     be
-//     // served from the cache rather than quering the store.
-//     for (std::size_t i = 0; i < 9; i++) {
-//         now = std::chrono::time_point<std::chrono::steady_clock>(
-//             std::chrono::seconds(i));
-//         ASSERT_TRUE(lazy_load.GetFlag("foo"));
-//         ASSERT_EQ(source->items_requested["features"],
-//                   std::vector<std::string>{"foo"});
-//     }
-//
-//     // Advance past the refresh time. Now the flag should be queried again.
-//     now = std::chrono::time_point<std::chrono::steady_clock>(refresh);
-//
-//     ASSERT_TRUE(lazy_load.GetFlag("foo"));
-//     auto expected = std::vector<std::string>{"foo", "foo"};
-//     ASSERT_EQ(source->items_requested["features"], expected);
-// }
+TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentIsCached) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+        .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            1, false, "{\"key\":\"foo\",\"version\":1}"}));
+
+    for (std::size_t i = 0; i < 20; i++) {
+        ASSERT_TRUE(lazy_load.GetSegment("foo"));
+    }
+}
+
+TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagCannotBeFetched) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+        .WillOnce(testing::Return(tl::make_unexpected(
+            data_interfaces::ISerializedDataReader::Error{"oops"})));
+
+    for (std::size_t i = 0; i < 20; i++) {
+        ASSERT_FALSE(lazy_load.GetFlag("foo"));
+    };
+
+    ASSERT_TRUE(spy_logger_backend->Count(1));
+    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+}
+
+TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+        .WillOnce(testing::Return(tl::make_unexpected(
+            data_interfaces::ISerializedDataReader::Error{"oops"})));
+
+    for (std::size_t i = 0; i < 20; i++) {
+        ASSERT_FALSE(lazy_load.GetSegment("foo"));
+    };
+
+    ASSERT_TRUE(spy_logger_backend->Count(1));
+    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+}
+
+TEST_F(LazyLoadTest, RefreshesFlagIfStale) {
+    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
+
+    constexpr auto refresh_ttl = std::chrono::seconds(10);
+
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
+        mock_reader};
+
+    TimePoint now{std::chrono::seconds(0)};
+
+    data_systems::LazyLoad const lazy_load(logger, config,
+                                           [&]() { return now; });
+
+    {
+        InSequence s;
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                1, false, "{\"key\":\"foo\",\"version\":1}"}));
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                2, false, "{\"key\":\"foo\",\"version\":2}"}));
+    }
+
+    for (std::size_t i = 0; i < 10; i++) {
+        auto flag = lazy_load.GetFlag("foo");
+        ASSERT_TRUE(flag);
+        ASSERT_EQ(flag->version, 1);
+    }
+
+    now = TimePoint{refresh_ttl + std::chrono::seconds(1)};
+
+    for (std::size_t i = 0; i < 10; i++) {
+        auto flag = lazy_load.GetFlag("foo");
+        ASSERT_TRUE(flag);
+        ASSERT_EQ(flag->version, 2);
+    }
+}
+
+TEST_F(LazyLoadTest, RefreshesSegmentIfStale) {
+    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
+
+    constexpr auto refresh_ttl = std::chrono::seconds(10);
+
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
+        mock_reader};
+
+    TimePoint now{std::chrono::seconds(0)};
+
+    data_systems::LazyLoad const lazy_load(logger, config,
+                                           [&]() { return now; });
+
+    {
+        InSequence s;
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                1, false, "{\"key\":\"foo\",\"version\":1}"}));
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                2, false, "{\"key\":\"foo\",\"version\":2}"}));
+    }
+
+    for (std::size_t i = 0; i < 10; i++) {
+        auto segment = lazy_load.GetSegment("foo");
+        ASSERT_TRUE(segment);
+        ASSERT_EQ(segment->version, 1);
+    }
+
+    now = TimePoint{refresh_ttl + std::chrono::seconds(1)};
+
+    for (std::size_t i = 0; i < 10; i++) {
+        auto segment = lazy_load.GetSegment("foo");
+        ASSERT_TRUE(segment);
+        ASSERT_EQ(segment->version, 2);
+    }
+}
+
+TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlagExpiration) {
+    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
+
+    constexpr auto refresh_ttl = std::chrono::seconds(10);
+
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
+        mock_reader};
+
+    // We want to demonstrate that the individual TTL of a flag will be
+    // refreshed not just when we grab that single flag, but also if
+    // we call AllFlags. So we'll have a situation where a single
+    // flag is fetched, and then is about to expire. We'll then call AllFlags
+    // and step the time forward, and ensure the flag is updated in memory - without
+    // actually calling GetFlag on the reader.
+
+    {
+        InSequence s;
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                1, false, "{\"key\":\"foo\",\"version\":1}"}));
+        EXPECT_CALL(*mock_reader, All(testing::_))
+            .WillOnce(testing::Return(std::unordered_map<std::string, integrations::SerializedItemDescriptor>{
+                {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
+    }
+
+
+}

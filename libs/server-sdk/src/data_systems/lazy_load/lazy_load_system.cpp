@@ -4,14 +4,18 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-LazyLoad::LazyLoad(config::built::LazyLoadConfig cfg)
-    : LazyLoad(std::move(cfg),
-               []() { return std::chrono::steady_clock::now(); }) {}
+LazyLoad::LazyLoad(Logger const& logger, config::built::LazyLoadConfig cfg)
+    : LazyLoad(logger, std::move(cfg), []() {
+          return std::chrono::steady_clock::now();
+      }) {}
 
-LazyLoad::LazyLoad(config::built::LazyLoadConfig cfg, TimeFn time)
-    : serialized_reader_(std::move(cfg.source)),
-      reader_(std::make_unique<data_components::JsonDeserializer>(*serialized_reader_)),
-      time_(std::move(time)) {}
+LazyLoad::LazyLoad(Logger const& logger,
+                   config::built::LazyLoadConfig cfg,
+                   TimeFn time)
+    : logger_(logger),
+      reader_(std::make_unique<data_components::JsonDeserializer>(cfg.source)),
+      time_(std::move(time)),
+      fresh_duration_(cfg.refresh_ttl) {}
 
 std::string const& LazyLoad::Identity() const {
     static std::string id = "lazy load via " + reader_->Identity();
@@ -67,11 +71,14 @@ data_components::SegmentKind const LazyLoad::Kinds::Segment =
 bool LazyLoad::Initialized() const {
     auto const state = tracker_.State(Keys::kInitialized, time_());
     if (initialized_.has_value()) {
+        /* Once initialized, we can always return true. */
         if (initialized_.value()) {
             return true;
         }
+        /* If not yet initialized, then we can return false only if the state is
+         * fresh - otherwise we should make an attempt to refresh. */
         if (data_components::ExpirationTracker::TrackState::kFresh == state) {
-            return initialized_.value();
+            return false;
         }
     }
     RefreshInitState();
@@ -79,51 +86,85 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    auto maybe_flags = reader_->AllFlags();
-    // TODO: log failure?
-    if (maybe_flags) {
-        for (auto flag : *maybe_flags) {
+    auto const updated_expiry = ExpiryTime();
+    if (auto all_flags = reader_->AllFlags()) {
+        for (auto flag : *all_flags) {
             cache_.Upsert(flag.first, std::move(flag.second));
+            tracker_.Add(data_components::DataKind::kSegment, flag.first,
+                         updated_expiry);
         }
-        tracker_.Add(Keys::kAllFlags, time_());
+    } else {
+        LD_LOG(logger_, LogLevel::kError)
+            << "failed to refresh all flags via " << reader_->Identity()
+            << all_flags.error();
     }
+    tracker_.Add(Keys::kAllFlags, updated_expiry);
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    auto maybe_segments = reader_->AllSegments();
-    // TODO: log failure?
-    if (maybe_segments) {
-        for (auto seg : *maybe_segments) {
-            cache_.Upsert(seg.first, std::move(seg.second));
+    auto const updated_expiry = ExpiryTime();
+    if (auto all_segments = reader_->AllSegments()) {
+        for (auto segment : *all_segments) {
+            cache_.Upsert(segment.first, std::move(segment.second));
+            tracker_.Add(data_components::DataKind::kSegment, segment.first,
+                         updated_expiry);
         }
-        tracker_.Add(Keys::kAllSegments, time_());
+    } else {
+        LD_LOG(logger_, LogLevel::kError)
+            << "failed to refresh all segments via " << reader_->Identity()
+            << all_segments.error();
     }
+    tracker_.Add(Keys::kAllSegments, updated_expiry);
 }
 
 void LazyLoad::RefreshInitState() const {
-    // TODO: what does this matter?
-    // initialized_ = source_.Initialized();
-    tracker_.Add(Keys::kInitialized, time_());
+    initialized_ = reader_->Initialized();
+    tracker_.Add(Keys::kInitialized, ExpiryTime());
 }
 
 void LazyLoad::RefreshSegment(std::string const& key) const {
     if (auto segment_result = reader_->GetSegment(key)) {
         if (auto optional_segment = *segment_result) {
             cache_.Upsert(key, std::move(*optional_segment));
+        } else {
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "segment " << key << " requested but not found via "
+                << reader_->Identity()
+                << ", this is probably a temporary issue";
         }
-        tracker_.Add(data_components::DataKind::kSegment, key, time_());
+    } else {
+        LD_LOG(logger_, LogLevel::kError)
+            << "failed to refresh segment " << key << " via "
+            << reader_->Identity() << ": " << segment_result.error();
     }
     // TODO: If there is an actual error, then do we not reset the tracking?
+    tracker_.Add(data_components::DataKind::kSegment, key, ExpiryTime());
 }
 
 void LazyLoad::RefreshFlag(std::string const& key) const {
     if (auto flag_result = reader_->GetFlag(key)) {
         if (auto optional_flag = *flag_result) {
             cache_.Upsert(key, std::move(*optional_flag));
+        } else {
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "flag " << key << " requested but not found via "
+                << reader_->Identity()
+                << ", this is probably a temporary issue";
         }
-        tracker_.Add(data_components::DataKind::kFlag, key, time_());
+    } else {
+        LD_LOG(logger_, LogLevel::kError)
+            << "failed to refresh flag " << key << " via "
+            << reader_->Identity() << ": " << flag_result.error();
     }
     // TODO: If there is an actual error, then do we not reset the tracking?
+    tracker_.Add(data_components::DataKind::kFlag, key, ExpiryTime());
+}
+
+std::chrono::time_point<std::chrono::steady_clock> LazyLoad::ExpiryTime()
+    const {
+    return time_() +
+           std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+               fresh_duration_);
 }
 
 }  // namespace launchdarkly::server_side::data_systems
