@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.1.0...launchdarkly-cpp-server-v0.2.0) (2023-11-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* move server side config into lib/server ([#283](https://github.com/launchdarkly/cpp-sdks/issues/283))
+
+### Code Refactoring
+
+* move server side config into lib/server ([#283](https://github.com/launchdarkly/cpp-sdks/issues/283)) ([c58de8f](https://github.com/launchdarkly/cpp-sdks/commit/c58de8f3914bf83fa8662cccf5b284de3179852d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.3.0 to 0.4.0
+    * launchdarkly-cpp-common bumped from 0.5.0 to 1.0.0
+
 ## 0.1.0 (2023-10-25)
 
 
