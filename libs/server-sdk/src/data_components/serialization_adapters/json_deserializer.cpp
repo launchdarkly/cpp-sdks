@@ -10,33 +10,40 @@
 namespace launchdarkly::server_side::data_components {
 
 JsonDeserializer::JsonDeserializer(
-    data_interfaces::ISerializedDataReader& reader)
-    : flag_kind_(), segment_kind_(), reader_(reader) {}
+    Logger const& logger,
+    std::shared_ptr<data_interfaces::ISerializedDataReader> reader)
+    : logger_(logger),
+      flag_kind_(),
+      segment_kind_(),
+      source_(std::move(reader)),
+      identity_(source_->Identity() + " (JSON)") {}
 
 data_interfaces::IDataReader::Single<data_model::FlagDescriptor>
 JsonDeserializer::GetFlag(std::string const& key) const {
-    return Deserialize<data_model::Flag>(flag_kind_, key);
+    return DeserializeSingle<data_model::Flag>(flag_kind_, key);
 }
 
 data_interfaces::IDataReader::Single<data_model::SegmentDescriptor>
 JsonDeserializer::GetSegment(std::string const& key) const {
-    return Deserialize<data_model::Segment>(segment_kind_, key);
+    return DeserializeSingle<data_model::Segment>(segment_kind_, key);
 }
 
 data_interfaces::IDataReader::Collection<data_model::FlagDescriptor>
 JsonDeserializer::AllFlags() const {
-    // TODO: deserialize then return
-    return tl::make_unexpected("Not implemented");
+    return DeserializeCollection<data_model::Flag>(flag_kind_);
 }
 
 data_interfaces::IDataReader::Collection<data_model::SegmentDescriptor>
 JsonDeserializer::AllSegments() const {
-    // TODO: deserialize then return
-    return tl::make_unexpected("Not implemented");
+    return DeserializeCollection<data_model::Segment>(segment_kind_);
 }
 
 std::string const& JsonDeserializer::Identity() const {
-    return reader_.Identity();
+    return identity_;
+}
+
+bool JsonDeserializer::Initialized() const {
+    return source_->Initialized();
 }
 
 }  // namespace launchdarkly::server_side::data_components

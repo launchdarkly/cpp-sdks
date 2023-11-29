@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <ostream>
 #include <string>
 
 namespace launchdarkly::server_side::integrations {
@@ -49,6 +50,10 @@ class ISerializedItemKind {
 inline bool operator==(ISerializedItemKind const& lhs,
                        ISerializedItemKind const& rhs) {
     return lhs.Namespace() == rhs.Namespace();
+}
+
+inline void PrintTo(ISerializedItemKind const& kind, std::ostream* os) {
+    *os << kind.Namespace();
 }
 
 }  // namespace launchdarkly::server_side::integrations

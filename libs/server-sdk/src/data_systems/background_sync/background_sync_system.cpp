@@ -35,23 +35,13 @@ BackgroundSync::BackgroundSync(
         background_sync_config.synchronizer_);
 }
 
-BackgroundSync::BackgroundSync(
-    boost::asio::any_io_executor ioc,
-    data_components::DataSourceStatusManager& status_manager)
-    : store_(),
-      change_notifier_(store_, store_),
-      synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
-
 void BackgroundSync::Initialize() {
     synchronizer_->StartAsync(&change_notifier_,
                               nullptr /* no bootstrap data supported yet */);
 }
 
-void BackgroundSync::Shutdown() {
-    auto promise = std::make_shared<std::promise<void>>();
-    auto const did_shutdown = promise->get_future();
-    synchronizer_->ShutdownAsync([promise]() { promise->set_value(); });
-    did_shutdown.wait();
+bool BackgroundSync::Initialized() const {
+    return store_.Initialized();
 }
 
 std::string const& BackgroundSync::Identity() const {

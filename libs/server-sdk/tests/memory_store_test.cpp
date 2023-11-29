@@ -278,3 +278,44 @@ TEST(MemoryStoreTest, OriginalFlagValidAfterUpsertOfFlag) {
     EXPECT_EQ(std::string("potato"),
               fetched_flag_after->item->variations[0].AsString());
 }
+
+TEST(MemoryStoreTest, CanDeleteExistingSegment) {
+    MemoryStore store;
+
+    Segment segment_a;
+    segment_a.version = 1;
+    segment_a.key = "segmentA";
+
+    store.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{},
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment_a)}},
+    });
+
+    ASSERT_TRUE(store.GetSegment("segmentA"));
+    ASSERT_TRUE(store.RemoveSegment("segmentA"));
+
+    ASSERT_FALSE(store.GetSegment("segmentA"));
+    ASSERT_FALSE(store.RemoveSegment("segmentA"));
+}
+
+TEST(MemoryStoreTest, CanDeleteExistingFlag) {
+    MemoryStore store;
+
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
+    flag_a.variations = std::vector<Value>{"potato", "ham"};
+
+    store.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    ASSERT_TRUE(store.GetFlag("flagA"));
+    ASSERT_TRUE(store.RemoveFlag("flagA"));
+
+    ASSERT_FALSE(store.GetFlag("flagA"));
+    ASSERT_FALSE(store.RemoveFlag("flagA"));
+}

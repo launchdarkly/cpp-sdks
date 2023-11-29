@@ -5,7 +5,7 @@
 namespace launchdarkly::server_side::data_components {
 
 void ExpirationTracker::Add(std::string const& key, TimePoint expiration) {
-    unscoped_.insert({key, expiration});
+    unscoped_.insert_or_assign(key, expiration);
 }
 
 void ExpirationTracker::Remove(std::string const& key) {
@@ -87,8 +87,9 @@ ExpirationTracker::TrackState ExpirationTracker::State(TimePoint expiration,
 void ExpirationTracker::ScopedTtls::Set(DataKind kind,
                                         std::string const& key,
                                         TimePoint expiration) {
-    data_[static_cast<std::underlying_type_t<DataKind>>(kind)].Data().insert(
-        {key, expiration});
+    data_[static_cast<std::underlying_type_t<DataKind>>(kind)]
+        .Data()
+        .insert_or_assign(key, expiration);
 }
 
 void ExpirationTracker::ScopedTtls::Remove(DataKind kind,
