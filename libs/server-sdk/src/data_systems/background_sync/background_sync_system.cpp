@@ -35,13 +35,6 @@ BackgroundSync::BackgroundSync(
         background_sync_config.synchronizer_);
 }
 
-BackgroundSync::BackgroundSync(
-    boost::asio::any_io_executor ioc,
-    data_components::DataSourceStatusManager& status_manager)
-    : store_(),
-      change_notifier_(store_, store_),
-      synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
-
 void BackgroundSync::Initialize() {
     synchronizer_->StartAsync(&change_notifier_,
                               nullptr /* no bootstrap data supported yet */);
