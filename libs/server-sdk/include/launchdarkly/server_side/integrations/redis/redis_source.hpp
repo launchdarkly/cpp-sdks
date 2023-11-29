@@ -2,7 +2,9 @@
 
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
-#include <sw/redis++/redis++.h>
+namespace sw::redis {
+class Redis;
+}
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -16,12 +18,14 @@ class RedisDataSource final : public data_interfaces::ISerializedDataReader {
     [[nodiscard]] std::string const& Identity() const override;
     [[nodiscard]] bool Initialized() const override;
 
+    ~RedisDataSource();
+
    private:
     std::string const prefix_;
     std::string const inited_key_;
     std::string key_for_kind(
         integrations::ISerializedItemKind const& kind) const;
-    mutable sw::redis::Redis redis_;
+    std::unique_ptr<sw::redis::Redis> redis_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
