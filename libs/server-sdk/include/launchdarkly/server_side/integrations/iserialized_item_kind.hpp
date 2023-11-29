@@ -41,4 +41,14 @@ class ISerializedItemKind {
    protected:
     ISerializedItemKind() = default;
 };
+
+/**
+ * @brief Used in test assertions; two ISerializedItemKinds are regarded as
+ * the same if they have the same namespace.
+ */
+inline bool operator==(ISerializedItemKind const& lhs,
+                       ISerializedItemKind const& rhs) {
+    return lhs.Namespace() == rhs.Namespace();
+}
+
 }  // namespace launchdarkly::server_side::integrations
