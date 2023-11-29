@@ -55,6 +55,8 @@ target_sources(${LIBNAME}
         data_systems/background_sync/background_sync_system.cpp
         data_systems/lazy_load/lazy_load_system.hpp
         data_systems/lazy_load/lazy_load_system.cpp
+        data_systems/offline.hpp
+        data_systems/offline.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp

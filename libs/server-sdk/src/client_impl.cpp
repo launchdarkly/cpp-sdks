@@ -2,6 +2,8 @@
 
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_systems/background_sync/background_sync_system.hpp"
+#include "data_systems/lazy_load/lazy_load_system.hpp"
+#include "data_systems/offline.hpp"
 
 #include "data_interfaces/system/idata_system.hpp"
 
@@ -38,8 +40,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.DataSystemConfig().disabled) {
-        return std::make_unique<data_systems::BackgroundSync>(executor,
-                                                              status_manager);
+        return std::make_unique<data_systems::OfflineSystem>();
     }
 
     auto const builder =
@@ -47,12 +48,21 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
 
     auto data_source_properties = builder.Build();
 
-    auto const bg_sync_config = std::get<config::built::BackgroundSyncConfig>(
+    return std::visit(
+        [&](auto&& arg) -> std::unique_ptr<data_interfaces::IDataSystem> {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T,
+                                         config::built::BackgroundSyncConfig>) {
+                return std::make_unique<data_systems::BackgroundSync>(
+                    config.ServiceEndpoints(), arg, data_source_properties,
+                    executor, status_manager, logger);
+            } else if constexpr (std::is_same_v<
+                                     T, config::built::LazyLoadConfig>) {
+                return std::make_unique<data_systems::LazyLoad>(logger, arg,
+                                                                status_manager);
+            }
+        },
         config.DataSystemConfig().system_);
-
-    return std::make_unique<data_systems::BackgroundSync>(
-        config.ServiceEndpoints(), bg_sync_config, data_source_properties,
-        executor, status_manager, logger);
 }
 
 static Logger MakeLogger(config::built::Logging const& config) {
