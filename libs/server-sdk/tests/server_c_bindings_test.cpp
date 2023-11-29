@@ -52,9 +52,11 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
     LDListenerConnection connection =
         LDServerSDK_DataSourceStatus_OnStatusChange(sdk, listener);
 
-    bool success = false;
+    bool success = true;
     LDServerSDK_Start(sdk, 3000, &success);
-    EXPECT_TRUE(success);
+
+    // Since we're offline, the SDK won't become initialized.
+    EXPECT_FALSE(success);
 
     LDListenerConnection_Disconnect(connection);
 
