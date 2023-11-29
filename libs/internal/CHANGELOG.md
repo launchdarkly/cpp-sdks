@@ -46,6 +46,20 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
 
+## [0.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.3.0...launchdarkly-cpp-internal-v0.4.0) (2023-11-29)
+
+
+### Features
+
+* omit empty items from data model JSON serialization ([#309](https://github.com/launchdarkly/cpp-sdks/issues/309)) ([9141732](https://github.com/launchdarkly/cpp-sdks/commit/9141732e7ec1c42481e52f61da3d726740f17595))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 0.5.0 to 1.0.0
+
 ## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.2.0...launchdarkly-cpp-internal-v0.3.0) (2023-10-23)
 
 
