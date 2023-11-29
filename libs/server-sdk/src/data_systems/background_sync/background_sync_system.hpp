@@ -34,7 +34,6 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
         data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
-
     BackgroundSync(BackgroundSync const& item) = delete;
     BackgroundSync(BackgroundSync&& item) = delete;
     BackgroundSync& operator=(BackgroundSync const&) = delete;
