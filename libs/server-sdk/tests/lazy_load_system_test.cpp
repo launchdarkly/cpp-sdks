@@ -15,6 +15,7 @@ using namespace launchdarkly::server_side::config;
 
 using ::testing::InSequence;
 using ::testing::NiceMock;
+using ::testing::Return;
 
 class MockDataReader : public data_interfaces::ISerializedDataReader {
    public:
@@ -243,4 +244,96 @@ TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlag) {
     auto const flag2 = lazy_load.GetFlag("foo");
     ASSERT_TRUE(flag2);
     ASSERT_EQ(flag2->version, 2);
+}
+
+TEST_F(LazyLoadTest, AllSegmentsRefreshesIndividualSegment) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    // We want to demonstrate that an individual segment will be
+    // refreshed not just when we grab that single segment, but also if
+    // we call AllSegments.
+
+    {
+        InSequence s;
+        EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
+            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+                1, false, "{\"key\":\"foo\",\"version\":1}"}));
+        EXPECT_CALL(*mock_reader, All(testing::_))
+            .WillOnce(testing::Return(
+                std::unordered_map<std::string,
+                                   integrations::SerializedItemDescriptor>{
+                    {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
+    }
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    auto const segment1 = lazy_load.GetSegment("foo");
+    ASSERT_TRUE(segment1);
+    ASSERT_EQ(segment1->version, 1);
+
+    auto const all_segments = lazy_load.AllSegments();
+    ASSERT_EQ(all_segments.size(), 1);
+    ASSERT_EQ(all_segments.at("foo")->version, 2);
+
+    auto const segment2 = lazy_load.GetSegment("foo");
+    ASSERT_TRUE(segment2);
+    ASSERT_EQ(segment2->version, 2);
+}
+
+TEST_F(LazyLoadTest, InitializeNotQueriedRepeatedly) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    for (std::size_t i = 0; i < 10; i++) {
+        ASSERT_FALSE(lazy_load.Initialized());
+    }
+}
+
+TEST_F(LazyLoadTest, InitializeCalledOnceThenNeverAgainAfterReturningTrue) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
+
+    data_systems::LazyLoad const lazy_load(logger, config);
+
+    for (std::size_t i = 0; i < 10; i++) {
+        ASSERT_TRUE(lazy_load.Initialized());
+    }
+}
+
+TEST_F(LazyLoadTest, InitializeCalledAgainAfterTTL) {
+    using TimePoint = data_systems::LazyLoad::ClockType::time_point;
+    constexpr auto refresh_ttl = std::chrono::seconds(10);
+
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled, refresh_ttl,
+        mock_reader};
+
+    {
+        InSequence s;
+        EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
+        EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
+    }
+
+    TimePoint now{std::chrono::seconds(0)};
+    data_systems::LazyLoad const lazy_load(logger, config,
+                                           [&]() { return now; });
+
+    for (std::size_t i = 0; i < 10; i++) {
+        ASSERT_FALSE(lazy_load.Initialized());
+        now += std::chrono::seconds(1);
+    }
+
+    for (std::size_t i = 0; i < 10; i++) {
+        ASSERT_TRUE(lazy_load.Initialized());
+    }
 }
