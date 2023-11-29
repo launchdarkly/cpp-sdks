@@ -43,7 +43,7 @@ std::string const& MemoryStore::Identity() const {
     return description_;
 }
 
-void MemoryStore::Init(launchdarkly::data_model::SDKDataSet dataSet) {
+void MemoryStore::Init(data_model::SDKDataSet dataSet) {
     std::lock_guard lock{data_mutex_};
     initialized_ = true;
     flags_.clear();
@@ -70,6 +70,16 @@ void MemoryStore::Upsert(std::string const& key,
     std::lock_guard lock{data_mutex_};
     segments_[key] =
         std::make_shared<data_model::SegmentDescriptor>(std::move(segment));
+}
+
+bool MemoryStore::RemoveFlag(std::string const& key) {
+    std::lock_guard lock{data_mutex_};
+    return flags_.erase(key) == 1;
+}
+
+bool MemoryStore::RemoveSegment(std::string const& key) {
+    std::lock_guard lock{data_mutex_};
+    return segments_.erase(key) == 1;
 }
 
 }  // namespace launchdarkly::server_side::data_components
