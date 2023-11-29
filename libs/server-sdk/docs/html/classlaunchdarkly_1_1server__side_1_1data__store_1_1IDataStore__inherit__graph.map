@@ -1,5 +1,0 @@
-<map id="launchdarkly::server_side::data_store::IDataStore" name="launchdarkly::server_side::data_store::IDataStore">
-<area shape="rect" id="node1" title=" " alt="" coords="5,43,216,84"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__store_1_1MemoryStore.html" title=" " alt="" coords="264,5,493,47"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__store_1_1persistent_1_1PersistentStore.html" title=" " alt="" coords="275,71,482,127"/>
-</map>
