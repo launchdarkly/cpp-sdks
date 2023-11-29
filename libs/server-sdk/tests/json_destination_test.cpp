@@ -28,6 +28,12 @@ class MockSerializedDestination : public ISerializedDestination {
                  SerializedItemDescriptor),
                 (override));
     MOCK_METHOD(std::string const&, Identity, (), (const, override));
+    MockSerializedDestination() {
+        ON_CALL(*this, Identity).WillByDefault(testing::ReturnRef(name));
+    }
+
+   private:
+    std::string const name = "FooCorp Database";
 };
 
 class JsonDestinationTest : public ::testing::Test {
@@ -39,12 +45,7 @@ class JsonDestinationTest : public ::testing::Test {
     JsonDestinationTest()
         : spy_logger(std::make_shared<logging::SpyLoggerBackend>()),
           logger(spy_logger),
-          dest(logger, mock_dest) {
-        ON_CALL(mock_dest, Identity()).WillByDefault([]() {
-            static const std::string name = "FooCorp Database";
-            return name;
-        });
-    }
+          dest(logger, mock_dest) {}
 };
 
 TEST_F(JsonDestinationTest, WrapsUnderlyingDestinationIdentity) {
@@ -89,8 +90,8 @@ TEST_F(JsonDestinationTest, InitProperlyTransformsSDKDataSet) {
                        2, "{\"key\":\"segment_beta\",\"version\":2}")}}}}})))
         .WillOnce(Return(ISerializedDestination::InitResult::kSuccess));
 
-    // Note: flag/segments are deliberately not in alphabetical order here, so
-    // that the implementation must sort them to pass the test.
+    // Note: flag/segments are deliberately not in alphabetical order here,
+    // so that the implementation must sort them to pass the test.
     dest.Init(data_model::SDKDataSet{
         std::unordered_map<std::string, data_model::FlagDescriptor>{
             {"flag_beta",

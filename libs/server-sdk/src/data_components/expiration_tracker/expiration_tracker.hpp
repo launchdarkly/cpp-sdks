@@ -3,14 +3,13 @@
 #include "../dependency_tracker/data_kind.hpp"
 #include "../dependency_tracker/tagged_data.hpp"
 
-#include <launchdarkly/connection.hpp>
-
 #include <array>
 #include <chrono>
-#include <functional>
-#include <memory>
 #include <optional>
+#include <ostream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace launchdarkly::server_side::data_components {
 
