@@ -58,9 +58,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
-
-    void Shutdown() override;
-
     // Public for usage in tests.
     struct Kinds {
         static data_components::FlagKind const Flag;

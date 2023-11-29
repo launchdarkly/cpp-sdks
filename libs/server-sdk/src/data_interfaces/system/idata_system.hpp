@@ -21,12 +21,6 @@ class IDataSystem : public IStore {
      */
     virtual void Initialize() = 0;
 
-    /**
-     * @brief Shuts down the system. This method will be called at some point
-     * after Initialize, after which no methods from IStore will be called.
-     */
-    virtual void Shutdown() = 0;
-
     virtual ~IDataSystem() override = default;
     IDataSystem(IDataSystem const& item) = delete;
     IDataSystem(IDataSystem&& item) = delete;
