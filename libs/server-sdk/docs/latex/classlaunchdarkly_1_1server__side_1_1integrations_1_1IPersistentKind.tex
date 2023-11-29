@@ -1,0 +1,60 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::IPersistent\+Kind Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}\index{launchdarkly::server\_side::integrations::IPersistentKind@{launchdarkly::server\_side::integrations::IPersistentKind}}
+
+
+{\ttfamily \#include $<$persistent\+\_\+store\+\_\+core.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a440c7024a1bee4e2595378013d1c9c25}{Namespace}} ()
+\item 
+virtual uint64\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ae41e7477aaad31876b7110d057f23d2e}{Version}} (std\+::string const \&data)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a1fe24f88900d9786b0fc500dd38b2c96}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a1fe24f88900d9786b0fc500dd38b2c96}} 
+{\bfseries IPersistent\+Kind} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ab4638b230e5df579f609b583c4da7a3f}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ab4638b230e5df579f609b583c4da7a3f}} 
+{\bfseries IPersistent\+Kind} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a74ce4adcad36c9a04bca1b8936e9cd96}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a74ce4adcad36c9a04bca1b8936e9cd96}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ab7f8c7272806756c7a97182e7d6ed29f}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ab7f8c7272806756c7a97182e7d6ed29f}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind}{IPersistent\+Kind}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents a namespace of persistent data. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a440c7024a1bee4e2595378013d1c9c25}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_a440c7024a1bee4e2595378013d1c9c25}} 
+\index{launchdarkly::server\_side::integrations::IPersistentKind@{launchdarkly::server\_side::integrations::IPersistentKind}!Namespace@{Namespace}}
+\index{Namespace@{Namespace}!launchdarkly::server\_side::integrations::IPersistentKind@{launchdarkly::server\_side::integrations::IPersistentKind}}
+\doxysubsubsection{\texorpdfstring{Namespace()}{Namespace()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::integrations\+::\+IPersistent\+Kind\+::\+Namespace (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+The namespace for the data. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ae41e7477aaad31876b7110d057f23d2e}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1IPersistentKind_ae41e7477aaad31876b7110d057f23d2e}} 
+\index{launchdarkly::server\_side::integrations::IPersistentKind@{launchdarkly::server\_side::integrations::IPersistentKind}!Version@{Version}}
+\index{Version@{Version}!launchdarkly::server\_side::integrations::IPersistentKind@{launchdarkly::server\_side::integrations::IPersistentKind}}
+\doxysubsubsection{\texorpdfstring{Version()}{Version()}}
+{\footnotesize\ttfamily virtual uint64\+\_\+t launchdarkly\+::server\+\_\+side\+::integrations\+::\+IPersistent\+Kind\+::\+Version (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Deserialize data and return the version of the data.
+
+This is for cases where the persistent store cannot avoid deserializing data to determine its version. For instance a Redis store where the only columns are the prefixed key and the serialized data.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to deserialize. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The version of the data. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/persistent\+\_\+store\+\_\+core.\+hpp\end{DoxyCompactItemize}

@@ -1,0 +1,91 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+store\+::Dependency\+Tracker Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker}\index{launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}}
+
+
+{\ttfamily \#include $<$dependency\+\_\+tracker.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a9d2bc5f9c433a6899aba03f0942e46d7}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a9d2bc5f9c433a6899aba03f0942e46d7}} 
+using {\bfseries Flag\+Descriptor} = data\+\_\+model\+::\+Item\+Descriptor$<$ data\+\_\+model\+::\+Flag $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a22060d7a80e668667d5b36ebeeef7dff}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a22060d7a80e668667d5b36ebeeef7dff}} 
+using {\bfseries Segment\+Descriptor} = data\+\_\+model\+::\+Item\+Descriptor$<$ data\+\_\+model\+::\+Segment $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a5f030f637f79f3151d62ce42c625d9bc}{Update\+Dependencies}} (std\+::string const \&key, Flag\+Descriptor const \&flag)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a51e6798a1f467a42c02128f8ce4028f4}{Update\+Dependencies}} (std\+::string const \&key, Segment\+Descriptor const \&segment)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_aa7187f33d85eb4f1e31e77dd3989ef55}{Calculate\+Changes}} (Data\+Kind kind, std\+::string const \&key, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencySet}{Dependency\+Set}} \&dependency\+\_\+set)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_acafb91b622a4f133233fcbed559e4a63}{Clear}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This class implements a mechanism of tracking dependencies of flags and segments. Both the forward dependencies (flag A depends on flag B) but also the reverse (flag B is depended on by flagA). 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_aa7187f33d85eb4f1e31e77dd3989ef55}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_aa7187f33d85eb4f1e31e77dd3989ef55}} 
+\index{launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}!CalculateChanges@{CalculateChanges}}
+\index{CalculateChanges@{CalculateChanges}!launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}}
+\doxysubsubsection{\texorpdfstring{CalculateChanges()}{CalculateChanges()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+store\+::\+Dependency\+Tracker\+::\+Calculate\+Changes (\begin{DoxyParamCaption}\item[{Data\+Kind}]{kind,  }\item[{std\+::string const \&}]{key,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencySet}{Dependency\+Set}} \&}]{dependency\+\_\+set }\end{DoxyParamCaption})}
+
+Given the current dependencies, determine what flags or segments may be impacted by a change to the given flag/segment.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind of data. \\
+\hline
+{\em key} & The key for the data. \\
+\hline
+{\em dependency\+\_\+set} & A dependency set, which dependencies are accumulated in. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_acafb91b622a4f133233fcbed559e4a63}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_acafb91b622a4f133233fcbed559e4a63}} 
+\index{launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}!Clear@{Clear}}
+\index{Clear@{Clear}!launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+store\+::\+Dependency\+Tracker\+::\+Clear (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Clear all existing dependencies. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a5f030f637f79f3151d62ce42c625d9bc}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a5f030f637f79f3151d62ce42c625d9bc}} 
+\index{launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}!UpdateDependencies@{UpdateDependencies}}
+\index{UpdateDependencies@{UpdateDependencies}!launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}}
+\doxysubsubsection{\texorpdfstring{UpdateDependencies()}{UpdateDependencies()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+store\+::\+Dependency\+Tracker\+::\+Update\+Dependencies (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{Dependency\+Tracker\+::\+Flag\+Descriptor const \&}]{flag }\end{DoxyParamCaption})}
+
+Update the dependency tracker with a new or updated flag.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key for the flag. \\
+\hline
+{\em flag} & A descriptor for the flag. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a51e6798a1f467a42c02128f8ce4028f4}\label{classlaunchdarkly_1_1server__side_1_1data__store_1_1DependencyTracker_a51e6798a1f467a42c02128f8ce4028f4}} 
+\index{launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}!UpdateDependencies@{UpdateDependencies}}
+\index{UpdateDependencies@{UpdateDependencies}!launchdarkly::server\_side::data\_store::DependencyTracker@{launchdarkly::server\_side::data\_store::DependencyTracker}}
+\doxysubsubsection{\texorpdfstring{UpdateDependencies()}{UpdateDependencies()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+store\+::\+Dependency\+Tracker\+::\+Update\+Dependencies (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{Dependency\+Tracker\+::\+Segment\+Descriptor const \&}]{segment }\end{DoxyParamCaption})}
+
+Update the dependency tracker with a new or updated segment.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key for the segment. \\
+\hline
+{\em flag} & A descriptor for the segment. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+store/dependency\+\_\+tracker.\+hpp\item 
+src/data\+\_\+store/dependency\+\_\+tracker.\+cpp\end{DoxyCompactItemize}
