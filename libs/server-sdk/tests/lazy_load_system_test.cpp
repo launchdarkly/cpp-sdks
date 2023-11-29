@@ -29,23 +29,25 @@ class MockDataReader : public data_interfaces::ISerializedDataReader {
                 (override, const));
     MOCK_METHOD(std::string const&, Identity, (), (override, const));
     MOCK_METHOD(bool, Initialized, (), (override, const));
+    explicit MockDataReader(std::string name) : name_(std::move(name)) {
+        ON_CALL(*this, Identity).WillByDefault(testing::ReturnRef(name_));
+    }
+
+   private:
+    std::string const name_;
 };
 
 class LazyLoadTest : public ::testing::Test {
    public:
-    std::string mock_reader_name;
+    std::string mock_reader_name = "fake reader";
     std::shared_ptr<NiceMock<MockDataReader>> mock_reader;
     std::shared_ptr<logging::SpyLoggerBackend> spy_logger_backend;
     Logger const logger;
     LazyLoadTest()
-        : mock_reader_name("fake reader"),
-          mock_reader(std::make_shared<NiceMock<MockDataReader>>()),
+        : mock_reader(
+              std::make_shared<NiceMock<MockDataReader>>(mock_reader_name)),
           spy_logger_backend(std::make_shared<logging::SpyLoggerBackend>()),
-          logger(spy_logger_backend) {
-        ON_CALL(*mock_reader, Identity()).WillByDefault([&]() {
-            return mock_reader_name;
-        });
-    }
+          logger(spy_logger_backend) {}
 };
 
 TEST_F(LazyLoadTest, IdentityWrapsReaderIdentity) {

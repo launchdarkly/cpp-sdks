@@ -63,8 +63,9 @@ LazyLoad::LazyLoad(Logger const& logger,
                    config::built::LazyLoadConfig cfg,
                    TimeFn time)
     : logger_(logger),
-      reader_(std::make_unique<data_components::JsonDeserializer>(logger,
-                                                                  cfg.source)),
+      reader_(std::make_unique<data_components::JsonDeserializer>(
+          logger,
+          std::move(cfg.source))),
       time_(std::move(time)),
       fresh_duration_(cfg.refresh_ttl) {}
 
