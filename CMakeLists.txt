@@ -18,6 +18,14 @@ option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
 
+cmake_dependent_option(LD_DYNAMIC_LINK_BOOST
+        "Dynamically link boost instead of building with its static libraries"
+        ON  # Default to dynamically linking boost, because we can't provide static libs on all platforms that
+        # are position-independent.
+        "LD_BUILD_SHARED_LIBS" # only relevant if building SDK as shared lib
+        OFF # If not building shared libs, then static link boost instead.
+)
+
 cmake_dependent_option(LD_BUILD_UNIT_TESTS
         "Build the C++ unit tests."
         ON                                        # default to enabling unit tests
@@ -47,7 +55,7 @@ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
 # to link against that statically or dynamically.
 
 option(LD_DYNAMIC_LINK_OPENSSL
-        "Dynamically link OpenSSL instead of building with static library"
+        "Dynamically link OpenSSL instead of building with its static library"
         OFF # default to linking OpenSSL statically
 )
 
@@ -107,9 +115,14 @@ endif ()
 find_package(OpenSSL REQUIRED)
 message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
 
-# Even though the main SDK might be a static or shared lib, boost should always statically
-# linked into the binary.
-set(Boost_USE_STATIC_LIBS ON)
+
+if (LD_DYNAMIC_LINK_BOOST)
+    message(STATUS "LaunchDarkly: searching for shared Boost libraries")
+    set(Boost_USE_STATIC_LIBS OFF)
+else ()
+    message(STATUS "LaunchDarkly: searching for static Boost libraries")
+    set(Boost_USE_STATIC_LIBS ON)
+endif ()
 
 if (LD_BUILD_SHARED_LIBS)
     # When building a shared library we hide all symbols
