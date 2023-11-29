@@ -33,6 +33,6 @@ std::string const& OfflineSystem::Identity() const {
     return ident;
 }
 
-void Initialize() {}
+void OfflineSystem::Initialize() {}
 
 }  // namespace launchdarkly::server_side::data_systems
