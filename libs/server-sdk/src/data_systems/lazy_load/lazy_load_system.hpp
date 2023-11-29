@@ -178,7 +178,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     struct Keys {
         static inline std::string const kAllFlags = "allFlags";
-        static inline std::string const kAllSegments = "allFlags";
+        static inline std::string const kAllSegments = "allSegments";
         static inline std::string const kInitialized = "initialized";
     };
 };
