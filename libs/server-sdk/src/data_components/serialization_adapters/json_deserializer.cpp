@@ -10,8 +10,13 @@
 namespace launchdarkly::server_side::data_components {
 
 JsonDeserializer::JsonDeserializer(
+    Logger const& logger,
     std::shared_ptr<data_interfaces::ISerializedDataReader> reader)
-    : flag_kind_(), segment_kind_(), reader_(std::move(reader)) {}
+    : logger_(logger),
+      flag_kind_(),
+      segment_kind_(),
+      source_(std::move(reader)),
+      identity_(source_->Identity() + " (JSON)") {}
 
 data_interfaces::IDataReader::Single<data_model::FlagDescriptor>
 JsonDeserializer::GetFlag(std::string const& key) const {
@@ -34,12 +39,11 @@ JsonDeserializer::AllSegments() const {
 }
 
 std::string const& JsonDeserializer::Identity() const {
-    static std::string const name = reader_->Identity() + " (JSON)";
-    return name;
+    return identity_;
 }
 
 bool JsonDeserializer::Initialized() const {
-    return reader_->Initialized();
+    return source_->Initialized();
 }
 
 }  // namespace launchdarkly::server_side::data_components

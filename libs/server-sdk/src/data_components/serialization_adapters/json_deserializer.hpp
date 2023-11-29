@@ -3,6 +3,7 @@
 #include "../../data_interfaces/source/idata_reader.hpp"
 #include "../kinds/kinds.hpp"
 
+#include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
 #include <memory>
@@ -12,6 +13,7 @@ namespace launchdarkly::server_side::data_components {
 class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
     explicit JsonDeserializer(
+        Logger const& logger,
         std::shared_ptr<data_interfaces::ISerializedDataReader> reader);
 
     [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
@@ -39,17 +41,13 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
             tl::expected<std::optional<DataModel>, JsonError>>(boost_json_val);
 
         if (!item) {
-            /* item couldn't be deserialized from the JSON string */
             return tl::make_unexpected(ErrorToString(item.error()));
         }
 
         std::optional<DataModel> maybe_item = item->value();
 
         if (!maybe_item) {
-            /* JSON was valid, but the value is 'null'
-             * TODO: log an error? Can this happen?
-             */
-            return tl::make_unexpected("data was null");
+            return tl::make_unexpected("JSON value is null");
         }
 
         return data_model::ItemDescriptor<DataModel>(std::move(*maybe_item));
@@ -59,15 +57,15 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
     Single<data_model::ItemDescriptor<DataModel>> DeserializeSingle(
         DataKind const& kind,
         std::string const& key) const {
-        auto result = reader_->Get(kind, key);
+        auto result = source_->Get(kind, key);
 
         if (!result) {
-            /* the actual fetch failed */
+            /* error in fetching the item */
             return tl::make_unexpected(result.error().message);
         }
 
         if (!result->serializedItem) {
-            /* the fetch succeeded, but the item wasn't found */
+            /* no error, but item not found by the source */
             return std::nullopt;
         }
 
@@ -77,10 +75,10 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
     template <typename DataModel, typename DataKind>
     Collection<data_model::ItemDescriptor<DataModel>> DeserializeCollection(
         DataKind const& kind) const {
-        auto result = reader_->All(kind);
+        auto result = source_->All(kind);
 
         if (!result) {
-            /* the actual fetch failed */
+            /* error in fetching the items */
             return tl::make_unexpected(result.error().message);
         }
 
@@ -89,14 +87,22 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
         for (auto const& [key, descriptor] : *result) {
             if (!descriptor.serializedItem) {
-                // Item deleted
+                /* item is deleted, add a tombstone to the result so that the
+                 * caller can make a decision on what to do. */
+                items.emplace(key, data_model::ItemDescriptor<DataModel>(
+                                       descriptor.version));
                 continue;
             }
 
             auto maybe_item = DeserializeItem<DataModel, DataKind>(
                 *descriptor.serializedItem);
+
             if (!maybe_item) {
-                // TODO: Log the error?
+                /* single item failing to deserialize doesn't cause the
+                 * whole operation to fail; other items may be valid. */
+                LD_LOG(logger_, LogLevel::kError)
+                    << "failed to deserialize " << key << " while fetching all "
+                    << kind.Namespace() << ": " << maybe_item.error();
                 continue;
             }
 
@@ -105,9 +111,11 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
         return items;
     }
 
+    Logger const& logger_;
     FlagKind const flag_kind_;
     FlagKind const segment_kind_;
-    std::shared_ptr<data_interfaces::ISerializedDataReader> reader_;
+    std::shared_ptr<data_interfaces::ISerializedDataReader> source_;
+    std::string const identity_;
 };
 
 }  // namespace launchdarkly::server_side::data_components
