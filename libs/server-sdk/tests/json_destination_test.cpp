@@ -45,7 +45,6 @@ class JsonDestinationTest : public ::testing::Test {
     JsonDestinationTest()
         : spy_logger(std::make_shared<logging::SpyLoggerBackend>()),
           logger(spy_logger),
-          mock_dest(),
           dest(logger, mock_dest) {}
 };
 
@@ -92,20 +91,18 @@ TEST_F(JsonDestinationTest, InitProperlyTransformsSDKDataSet) {
         .WillOnce(Return(ISerializedDestination::InitResult::kSuccess));
 
     // Note: flag/segments are deliberately not in alphabetical order here,
-    so
-        // that the implementation must sort them to pass the test.
-        dest.Init(data_model::SDKDataSet{
-            std::unordered_map<std::string, data_model::FlagDescriptor>{
-                {"flag_beta",
-                 data_model::FlagDescriptor(data_model::Flag{"flag_beta", 2})},
-                {"flag_alpha", data_model::FlagDescriptor(
-                                   data_model::Flag{"flag_alpha", 1})}},
-            std::unordered_map<std::string, data_model::SegmentDescriptor>{
-                {"segment_beta", data_model::SegmentDescriptor(
-                                     data_model::Segment{"segment_beta", 2})},
-                {"segment_alpha",
-                 data_model::SegmentDescriptor(
-                     data_model::Segment{"segment_alpha", 1})}}});
+    // so that the implementation must sort them to pass the test.
+    dest.Init(data_model::SDKDataSet{
+        std::unordered_map<std::string, data_model::FlagDescriptor>{
+            {"flag_beta",
+             data_model::FlagDescriptor(data_model::Flag{"flag_beta", 2})},
+            {"flag_alpha",
+             data_model::FlagDescriptor(data_model::Flag{"flag_alpha", 1})}},
+        std::unordered_map<std::string, data_model::SegmentDescriptor>{
+            {"segment_beta", data_model::SegmentDescriptor(
+                                 data_model::Segment{"segment_beta", 2})},
+            {"segment_alpha", data_model::SegmentDescriptor(
+                                  data_model::Segment{"segment_alpha", 1})}}});
 }
 
 TEST_F(JsonDestinationTest, UpsertFlagErrorGeneratesErrorMessage) {
@@ -115,8 +112,7 @@ TEST_F(JsonDestinationTest, UpsertFlagErrorGeneratesErrorMessage) {
     dest.Upsert("foo", data_model::FlagDescriptor(1));
 
     ASSERT_TRUE(
-        spy_logger->Contains(0, LogLevel::kError, "failed to update flag
-        foo"));
+        spy_logger->Contains(0, LogLevel::kError, "failed to update flag foo"));
 }
 
 TEST_F(JsonDestinationTest, UpsertSegmentErrorGeneratesErrorMessage) {
@@ -146,8 +142,7 @@ TEST_F(JsonDestinationTest, UpsertStaleSegmentGeneratesDebugMessage) {
     dest.Upsert("foo", data_model::SegmentDescriptor(1));
 
     ASSERT_TRUE(
-        spy_logger->Contains(0, LogLevel::kDebug, "segment foo not
-        updated"));
+        spy_logger->Contains(0, LogLevel::kDebug, "segment foo not updated"));
 }
 
 TEST_F(JsonDestinationTest, UpsertDeletedFlagCreatesTombstone) {
