@@ -8,7 +8,6 @@
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
 
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/detail/unreachable.hpp>

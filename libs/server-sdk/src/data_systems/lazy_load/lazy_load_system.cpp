@@ -1,3 +1,44 @@
+// The Lazy Load system is responsible for loading flags and segments from
+// an underlying source when requested by the SDK's evaluation algorithm.
+//
+// This is fundamentally different than Background Sync, where all items
+// are loaded into memory at initialization, and then updated asynchronously
+// when changes arrive from LaunchDarkly.
+
+// In this system, items are updated through a cache refresh process which
+// depends on a TTL.
+//
+// This TTL is configured by the user, and represents a tradeoff between
+// freshness (and consistency), and load/traffic to the underyling source.
+//
+// In the normal course of SDK operation, individual flags and segments loaded
+// over time depending on the patterns of SDK usage present in an application.
+// This generally spreads out the load on the source over time.
+//
+// A different usage pattern is caused by the SDK's "AllFlags" API, which
+// evaluates all flags for a given context. Because this usage is potentially
+// extremely costly (if there are thousands of flags or segments to be loaded),
+// the Lazy Load system optimizes by performing a special "GetAll" operation
+// on the underlying source. This operation fetches the entire set of a data kind
+// (either flags or segments) in one trip, and then stores them in the cache.
+//
+// It's important that the "GetAll" operation also be bound by a TTL, so that
+// repeated calls to "AllFlags" don't cause repeated calls to the source. The TTL
+// for this operation is identical to the indivudal-item TTL configurable by
+// the user.
+//
+// An implication of the current implementation is that if Lazy Load is being
+// used to handle a "sparse" environment - that is, the environment is too big
+// to load into memory, and so loading on demand is desirable - calling "AllFlags"
+// will destroy that property because items are not actively evicted from
+// the cache. On the other hand, that property could be used to prime the SDK's
+// memory cache, preventing the need to individually load flags or segments.
+//
+// The current design does not perform active eviction when an item is stale because
+// it is generally better to serve stale data than none at all. If the source
+// is unavailable, the SDK will be able to indefinitely serve the last known
+// values. Active eviction can be added in the future as a configurable option.
+
 #include "lazy_load_system.hpp"
 
 #include "../../data_components/serialization_adapters/json_deserializer.hpp"
@@ -50,24 +91,6 @@ std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
         [this, &key]() { return cache_.GetSegment(key); });
 }
 
-// In the normal course of SDK operation, flags and segments are loaded
-// on-demand, are resident in memory for a TTL, and then are refreshed.
-// This results in a working set that is eventually consistent. Load on the
-// underlying source is spread out relative to the pattern of flag evaluations
-// performed by an application.
-//
-// However, AllFlags is a special case. Here the SDK is asking for all flags
-// in order to perform a mass-evaluation for a single context. This could
-// theoretically generate thousands of individual refresh calls for both flags
-// and segments, which could overwhelm the source.
-//
-// To optimize this, two calls are made to grab all flags and all segments.
-// As long as the TTL is longer than the actual time it takes to evaluate all of
-// the flags, no additional calls will need to be made to the source.
-//
-// To guard against overloading the source when all flags are being constantly
-// evaluated, the "all flags" operation itself is assigned a TTL (the same as a
-// flag/segment.)
 std::unordered_map<std::string, std::shared_ptr<data_model::FlagDescriptor>>
 LazyLoad::AllFlags() const {
     auto const state = tracker_.State(Keys::kAllFlags, time_());
