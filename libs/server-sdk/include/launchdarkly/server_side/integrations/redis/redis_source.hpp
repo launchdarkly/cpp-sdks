@@ -2,6 +2,10 @@
 
 #include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
 
+#include <tl/expected.hpp>
+
+#include <string>
+
 namespace sw::redis {
 class Redis;
 }
@@ -10,7 +14,9 @@ namespace launchdarkly::server_side::data_systems {
 
 class RedisDataSource final : public data_interfaces::ISerializedDataReader {
    public:
-    RedisDataSource(std::string uri, std::string prefix);
+
+    static tl::expected<std::shared_ptr<RedisDataSource>, std::string> Create(std::string uri, std::string prefix);
+
     [[nodiscard]] GetResult Get(integrations::ISerializedItemKind const& kind,
                                 std::string const& itemKey) const override;
     [[nodiscard]] AllResult All(
@@ -21,6 +27,8 @@ class RedisDataSource final : public data_interfaces::ISerializedDataReader {
     ~RedisDataSource();
 
    private:
+    RedisDataSource(std::unique_ptr<sw::redis::Redis> redis, std::string prefix);
+
     std::string const prefix_;
     std::string const inited_key_;
     std::string key_for_kind(

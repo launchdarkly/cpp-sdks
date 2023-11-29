@@ -36,11 +36,17 @@ int main() {
 
     using LazyLoad = server_side::config::builders::LazyLoadBuilder;
 
-    auto const redis = std::make_shared<data_systems::RedisDataSource>(
-        "redis://localhost:6379", "launchdarkly");
+    auto redis = data_systems::RedisDataSource::Create("redis://localhost:6379",
+                                                       "launchdarkly");
+
+    if (!redis) {
+        std::cout << "error: redis config is invalid: " << redis.error()
+                  << '\n';
+        return 1;
+    }
 
     config_builder.DataSystem().Method(
-        LazyLoad().Source(redis).CacheRefresh(std::chrono::seconds(30)));
+        LazyLoad().Source(*redis).CacheRefresh(std::chrono::seconds(30)));
 
     auto config = config_builder.Build();
     if (!config) {
