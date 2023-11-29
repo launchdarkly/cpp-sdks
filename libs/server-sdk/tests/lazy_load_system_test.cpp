@@ -221,15 +221,11 @@ TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlag) {
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
             .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
-        EXPECT_CALL(*mock_reader, All(testing::_))  // first call for flags
+        EXPECT_CALL(*mock_reader, All(testing::_))
             .WillOnce(testing::Return(
                 std::unordered_map<std::string,
                                    integrations::SerializedItemDescriptor>{
                     {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
-        EXPECT_CALL(*mock_reader, All(testing::_))  // second call for segments
-            .WillOnce(testing::Return(
-                std::unordered_map<std::string,
-                                   integrations::SerializedItemDescriptor>{}));
     }
 
     data_systems::LazyLoad const lazy_load(logger, config);

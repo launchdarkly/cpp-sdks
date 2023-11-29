@@ -19,25 +19,28 @@
 // evaluates all flags for a given context. Because this usage is potentially
 // extremely costly (if there are thousands of flags or segments to be loaded),
 // the Lazy Load system optimizes by performing a special "GetAll" operation
-// on the underlying source. This operation fetches the entire set of a data kind
-// (either flags or segments) in one trip, and then stores them in the cache.
+// on the underlying source. This operation fetches the entire set of a data
+// kind (either flags or segments) in one trip, and then stores them in the
+// cache.
 //
 // It's important that the "GetAll" operation also be bound by a TTL, so that
-// repeated calls to "AllFlags" don't cause repeated calls to the source. The TTL
-// for this operation is identical to the indivudal-item TTL configurable by
+// repeated calls to "AllFlags" don't cause repeated calls to the source. The
+// TTL for this operation is identical to the indivudal-item TTL configurable by
 // the user.
 //
 // An implication of the current implementation is that if Lazy Load is being
 // used to handle a "sparse" environment - that is, the environment is too big
-// to load into memory, and so loading on demand is desirable - calling "AllFlags"
-// will destroy that property because items are not actively evicted from
-// the cache. On the other hand, that property could be used to prime the SDK's
-// memory cache, preventing the need to individually load flags or segments.
+// to load into memory, and so loading on demand is desirable - calling
+// "AllFlags" will destroy that property because items are not actively evicted
+// from the cache. On the other hand, that property could be used to prime the
+// SDK's memory cache, preventing the need to individually load flags or
+// segments.
 //
-// The current design does not perform active eviction when an item is stale because
-// it is generally better to serve stale data than none at all. If the source
-// is unavailable, the SDK will be able to indefinitely serve the last known
-// values. Active eviction can be added in the future as a configurable option.
+// The current design does not perform active eviction when an item is stale
+// because it is generally better to serve stale data than none at all. If the
+// source is unavailable, the SDK will be able to indefinitely serve the last
+// known values. Active eviction can be added in the future as a configurable
+// option.
 
 #include "lazy_load_system.hpp"
 
@@ -60,7 +63,8 @@ LazyLoad::LazyLoad(Logger const& logger,
                    config::built::LazyLoadConfig cfg,
                    TimeFn time)
     : logger_(logger),
-      reader_(std::make_unique<data_components::JsonDeserializer>(cfg.source)),
+      reader_(std::make_unique<data_components::JsonDeserializer>(logger,
+                                                                  cfg.source)),
       time_(std::move(time)),
       fresh_duration_(cfg.refresh_ttl) {}
 
