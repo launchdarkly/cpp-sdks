@@ -48,15 +48,16 @@ For information on integrating an SDK package please refer to the SDK specific R
 
 Various CMake options are available to customize the client/server SDK builds.
 
-| Option                    | Description                                                                            | Default            | Requires                                  |
-|---------------------------|----------------------------------------------------------------------------------------|--------------------|-------------------------------------------|
-| `BUILD_TESTING`           | Coarse-grained switch; turn off to disable all testing and only build the SDK targets. | On                 | N/A                                       |
-| `LD_BUILD_UNIT_TESTS`     | Whether C++ unit tests are built.                                                      | On                 | `BUILD_TESTING; NOT LD_BUILD_SHARED_LIBS` |
-| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled.                                                  | On                 | `LD_BUILD_UNIT_TESTS`                     |
-| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                               | Off                | `BUILD_TESTING`                           |
-| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                          | On                 | N/A                                       |
-| `LD_BUILD_SHARED_LIBS`    | Whether the SDKs are built as static or shared libraries.                              | Off  (static lib)  | N/A                                       |
-| `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL be dynamically linked.                                                 | Off  (static link) | N/A                                       |
+| Option                    | Description                                                                                                                                       | Default                                                | Requires                                  |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------|
+| `BUILD_TESTING`           | Coarse-grained switch; turn off to disable all testing and only build the SDK targets.                                                            | On                                                     | N/A                                       |
+| `LD_BUILD_UNIT_TESTS`     | Whether C++ unit tests are built.                                                                                                                 | On                                                     | `BUILD_TESTING; NOT LD_BUILD_SHARED_LIBS` |
+| `LD_TESTING_SANITIZERS`   | Whether sanitizers should be enabled.                                                                                                             | On                                                     | `LD_BUILD_UNIT_TESTS`                     |
+| `LD_BUILD_CONTRACT_TESTS` | Whether the contract test service (used in CI) is built.                                                                                          | Off                                                    | `BUILD_TESTING`                           |
+| `LD_BUILD_EXAMPLES`       | Whether example apps (hello world) are built.                                                                                                     | On                                                     | N/A                                       |
+| `LD_BUILD_SHARED_LIBS`    | Whether the SDKs are built as static or shared libraries.                                                                                         | Off  (static lib)                                      | N/A                                       |
+| `LD_DYNAMIC_LINK_BOOST`   | If building SDK as shared lib, whether to dynamically link Boost or not. Ensure that the shared boost libraries are present on the target system. | On (link boost dynamically when producing shared libs) | `LD_BUILD_SHARED_LIBS`                    |
+| `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL is dynamically linked or not.                                                                                                     | Off  (static link)                                     | N/A                                       |
 
 **Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
 symbols aren't exposed. To run unit tests, build a static library._

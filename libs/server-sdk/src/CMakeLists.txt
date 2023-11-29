@@ -16,7 +16,6 @@ endif ()
 target_sources(${LIBNAME}
         PRIVATE
         ${HEADER_LIST}
-        boost.cpp
         client.cpp
         client_impl.cpp
         data_source_status.cpp
@@ -72,22 +71,11 @@ target_sources(${LIBNAME}
         bindings/c/all_flags_state/all_flags_state.cpp
 )
 
-if (MSVC OR (NOT LD_BUILD_SHARED_LIBS))
-    target_link_libraries(${LIBNAME}
-            PUBLIC launchdarkly::common
-            PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
-else ()
-    # The default static lib builds, for linux, are position independent.
-    # So they do not link into a shared object without issues. So, when
-    # building shared objects do not link the static libraries and instead
-    # use the "src.hpp" files for required libraries.
-    # macOS shares the same path for simplicity.
-    target_link_libraries(${LIBNAME}
-            PUBLIC launchdarkly::common
-            PRIVATE Boost::headers launchdarkly::sse launchdarkly::internal foxy timestamp)
 
-    target_sources(${LIBNAME} PRIVATE boost.cpp)
-endif ()
+target_link_libraries(${LIBNAME}
+        PUBLIC launchdarkly::common
+        PRIVATE Boost::disable_autolinking Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
+
 
 add_library(launchdarkly::server ALIAS ${LIBNAME})
 
