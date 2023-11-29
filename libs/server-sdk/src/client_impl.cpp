@@ -40,7 +40,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.DataSystemConfig().disabled) {
-        return std::make_unique<data_systems::OfflineSystem>();
+        return std::make_unique<data_systems::OfflineSystem>(status_manager);
     }
 
     auto const builder =
