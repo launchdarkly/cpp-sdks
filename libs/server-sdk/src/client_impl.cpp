@@ -288,11 +288,10 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 }
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
-    Context const& context) {
-    //    if (!memory_store_.Initialized()) {
-    //        return EvaluationReason::ErrorKind::kClientNotReady;
-    //    }
-    // TODO: Check if initialized
+    Context const& context) const {
+    if (!Initialized()) {
+        return EvaluationReason::ErrorKind::kClientNotReady;
+    }
     if (!context.Valid()) {
         return EvaluationReason::ErrorKind::kUserNotSpecified;
     }
@@ -413,10 +412,6 @@ Value ClientImpl::JsonVariation(Context const& ctx,
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
 }
-
-// flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
-//     return flag_manager_.Notifier();
-// }
 
 ClientImpl::~ClientImpl() {
     ioc_.stop();
