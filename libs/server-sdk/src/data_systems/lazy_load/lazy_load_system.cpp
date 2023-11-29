@@ -84,7 +84,6 @@ LazyLoad::AllSegments() const {
         std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
         state, [this]() { RefreshAllSegments(); },
         [this]() { return cache_.AllSegments(); });
-    return cache_.AllSegments();
 }
 
 bool LazyLoad::Initialized() const {
@@ -105,37 +104,13 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    auto const updated_expiry = ExpiryTime();
-    tracker_.Add(Keys::kAllFlags, updated_expiry);
-
-    if (auto all_flags = reader_->AllFlags()) {
-        for (auto flag : *all_flags) {
-            cache_.Upsert(flag.first, std::move(flag.second));
-            tracker_.Add(data_components::DataKind::kFlag, flag.first,
-                         updated_expiry);
-        }
-    } else {
-        LD_LOG(logger_, LogLevel::kError)
-            << "failed to refresh all flags via " << reader_->Identity() << ": "
-            << all_flags.error();
-    }
+    RefreshAll(Keys::kAllFlags, data_components::DataKind::kFlag,
+               [this]() { return reader_->AllFlags(); });
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    auto const updated_expiry = ExpiryTime();
-    tracker_.Add(Keys::kAllSegments, updated_expiry);
-
-    if (auto all_segments = reader_->AllSegments()) {
-        for (auto segment : *all_segments) {
-            cache_.Upsert(segment.first, std::move(segment.second));
-            tracker_.Add(data_components::DataKind::kSegment, segment.first,
-                         updated_expiry);
-        }
-    } else {
-        LD_LOG(logger_, LogLevel::kError)
-            << "failed to refresh all segments via " << reader_->Identity()
-            << ": " << all_segments.error();
-    }
+    RefreshAll(Keys::kAllSegments, data_components::DataKind::kSegment,
+               [this]() { return reader_->AllSegments(); });
 }
 
 void LazyLoad::RefreshInitState() const {
@@ -143,44 +118,18 @@ void LazyLoad::RefreshInitState() const {
     tracker_.Add(Keys::kInitialized, ExpiryTime());
 }
 
-void LazyLoad::RefreshSegment(std::string const& key) const {
-    // Rate limit in all cases to protect the underlying store.
-    tracker_.Add(data_components::DataKind::kSegment, key, ExpiryTime());
-
-    if (auto segment_result = reader_->GetSegment(key)) {
-        if (auto optional_segment = *segment_result) {
-            cache_.Upsert(key, std::move(*optional_segment));
-        } else {
-            LD_LOG(logger_, LogLevel::kDebug)
-                << "segment " << key << " requested but not found via "
-                << reader_->Identity();
-            cache_.RemoveSegment(key);
-        }
-    } else {
-        LD_LOG(logger_, LogLevel::kError)
-            << "failed to refresh segment " << key << " via "
-            << reader_->Identity() << ": " << segment_result.error();
-    }
+void LazyLoad::RefreshSegment(std::string const& segment_key) const {
+    RefreshItem(
+        data_components::DataKind::kSegment, segment_key,
+        [this](std::string const& key) { return reader_->GetSegment(key); },
+        [this](std::string const& key) { return cache_.RemoveSegment(key); });
 }
 
-void LazyLoad::RefreshFlag(std::string const& key) const {
-    // Rate limit in all cases to protect the underlying store.
-    tracker_.Add(data_components::DataKind::kFlag, key, ExpiryTime());
-
-    if (auto flag_result = reader_->GetFlag(key)) {
-        if (auto optional_flag = *flag_result) {
-            cache_.Upsert(key, std::move(*optional_flag));
-        } else {
-            LD_LOG(logger_, LogLevel::kDebug)
-                << "flag " << key << " requested but not found via "
-                << reader_->Identity();
-            cache_.RemoveFlag(key);
-        }
-    } else {
-        LD_LOG(logger_, LogLevel::kError)
-            << "failed to refresh flag " << key << " via "
-            << reader_->Identity() << ": " << flag_result.error();
-    }
+void LazyLoad::RefreshFlag(std::string const& flag_key) const {
+    RefreshItem(
+        data_components::DataKind::kFlag, flag_key,
+        [this](std::string const& key) { return reader_->GetFlag(key); },
+        [this](std::string const& key) { return cache_.RemoveFlag(key); });
 }
 
 std::chrono::time_point<std::chrono::steady_clock> LazyLoad::ExpiryTime()

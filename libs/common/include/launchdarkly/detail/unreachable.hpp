@@ -1,3 +1,5 @@
+#pragma once
+
 namespace launchdarkly::detail {
 
 // This may be replaced with a standard routine when C++23 is available.

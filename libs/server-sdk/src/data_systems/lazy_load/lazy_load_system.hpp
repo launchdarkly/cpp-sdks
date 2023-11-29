@@ -85,6 +85,66 @@ class LazyLoad final : public data_interfaces::IDataSystem {
         detail::unreachable();
     }
 
+    template <typename Getter, typename Evictor>
+    void RefreshItem(data_components::DataKind const kind,
+                     std::string const& key,
+                     Getter&& getter,
+                     Evictor&& evictor) const {
+        // Refreshing this item is always rate limited, even
+        // if the refresh has an error.
+        tracker_.Add(kind, key, ExpiryTime());
+
+        if (auto expected_item = getter(key)) {
+            if (auto optional_item = *expected_item) {
+                cache_.Upsert(key, std::move(*optional_item));
+            } else {
+                // If the item is actually *missing* - not just a deleted
+                // tombstone representation - it implies that the source
+                // was re-initialized. In this case, the correct thing to do
+                // is evict it from the memory cache
+                LD_LOG(logger_, LogLevel::kDebug)
+                    << kind << key << " requested but not found via "
+                    << reader_->Identity();
+                if (evictor(key)) {
+                    LD_LOG(logger_, LogLevel::kDebug)
+                        << "removed " << kind << " " << key << " from cache";
+                }
+            }
+        } else {
+            // If there's a persistent error, it will be logged at the refresh
+            // interval.
+            LD_LOG(logger_, LogLevel::kError)
+                << "failed to refresh " << kind << " " << key << " via "
+                << reader_->Identity() << ": " << expected_item.error();
+        }
+    }
+
+    template <typename Getter>
+    void RefreshAll(std::string const& all_item_key,
+                    data_components::DataKind const item_kind,
+                    Getter&& getter) const {
+        // Storing an expiry time so that the 'all' key and the individual
+        // item keys will expire at the same time.
+        auto const updated_expiry = ExpiryTime();
+
+        // Refreshing 'all' for this item is always rate limited, even if
+        // the refresh has an error.
+        tracker_.Add(all_item_key, updated_expiry);
+
+        if (auto all_items = getter()) {
+            for (auto item : *all_items) {
+                cache_.Upsert(item.first, std::move(item.second));
+                tracker_.Add(item_kind, item.first, updated_expiry);
+            }
+        } else {
+            // If there's a persistent error, it will be logged at the
+            // refresh interval.
+            LD_LOG(logger_, LogLevel::kError)
+                << "failed to refresh all " << item_kind << "s via "
+                << reader_->Identity() << ": " << all_items.error();
+        }
+    }
+
     ClockType::time_point ExpiryTime() const;
 
     Logger const& logger_;
