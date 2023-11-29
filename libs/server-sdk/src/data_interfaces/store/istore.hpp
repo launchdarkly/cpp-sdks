@@ -47,6 +47,11 @@ class IStore {
         std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const = 0;
 
+    /**
+     * @return True if the store has ever contained data.
+     */
+    [[nodiscard]] virtual bool Initialized() const = 0;
+
     virtual ~IStore() = default;
     IStore(IStore const& item) = delete;
     IStore(IStore&& item) = delete;

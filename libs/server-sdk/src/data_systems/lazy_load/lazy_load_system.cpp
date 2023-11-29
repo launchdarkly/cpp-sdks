@@ -54,18 +54,22 @@ data_components::FlagKind const LazyLoad::Kinds::Flag =
 data_components::SegmentKind const LazyLoad::Kinds::Segment =
     data_components::SegmentKind();
 
-LazyLoad::LazyLoad(Logger const& logger, config::built::LazyLoadConfig cfg)
-    : LazyLoad(logger, std::move(cfg), []() {
+LazyLoad::LazyLoad(Logger const& logger,
+                   config::built::LazyLoadConfig cfg,
+                   data_components::DataSourceStatusManager& status_manager)
+    : LazyLoad(logger, std::move(cfg), status_manager, []() {
           return std::chrono::steady_clock::now();
       }) {}
 
 LazyLoad::LazyLoad(Logger const& logger,
                    config::built::LazyLoadConfig cfg,
+                   data_components::DataSourceStatusManager& status_manager,
                    TimeFn time)
     : logger_(logger),
       reader_(std::make_unique<data_components::JsonDeserializer>(
           logger,
           std::move(cfg.source))),
+      status_manager_(status_manager),
       time_(std::move(time)),
       fresh_duration_(cfg.refresh_ttl) {}
 
@@ -74,7 +78,12 @@ std::string const& LazyLoad::Identity() const {
     return id;
 }
 
-void LazyLoad::Initialize() {}
+void LazyLoad::Initialize() {
+    status_manager_.SetState(DataSourceState::kInitializing);
+    if (Initialized()) {
+        status_manager_.SetState(DataSourceState::kValid);
+    }
+}
 
 void LazyLoad::Shutdown() {}
 
@@ -115,6 +124,11 @@ LazyLoad::AllSegments() const {
 }
 
 bool LazyLoad::Initialized() const {
+    /* Since the memory store isn't provisioned with an initial SDKDataSet
+     * like in the Background Sync system, we can't forward this call to
+     * MemoryStore::Initialized(). Instead, we need to check the state of the
+     * underlying source. */
+
     auto const state = tracker_.State(Keys::kInitialized, time_());
     if (initialized_.has_value()) {
         /* Once initialized, we can always return true. */

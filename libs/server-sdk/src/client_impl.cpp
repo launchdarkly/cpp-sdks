@@ -116,48 +116,32 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
-static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
-    return state == DataSourceStatus::DataSourceState::kValid;
-}
-
-static bool IsInitialized(DataSourceStatus::DataSourceState state) {
-    return IsInitializedSuccessfully(state) ||
-           (state != DataSourceStatus::DataSourceState::kInitializing);
-}
-
 void ClientImpl::Identify(Context context) {
     events_default_.Send([&](EventFactory const& factory) {
         return factory.Identify(std::move(context));
     });
 }
 
-std::future<bool> ClientImpl::StartAsyncInternal(
-    std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
+std::future<bool> ClientImpl::StartAsync() {
     auto pr = std::make_shared<std::promise<bool>>();
     auto fut = pr->get_future();
 
-    status_manager_.OnDataSourceStatusChangeEx(
-        [result_predicate, pr](auto status) {
-            auto state = status.State();
-            if (IsInitialized(state)) {
-                pr->set_value(result_predicate(status.State()));
-                return true; /* delete this change listener since the
-                                desired state was reached */
-            }
-            return false; /* keep the change listener */
-        });
+    status_manager_.OnDataSourceStatusChangeEx([this, pr](auto _) {
+        if (data_system_->Initialized()) {
+            pr->set_value(true);
+            return true; /* delete this change listener since the
+                            desired state was reached */
+        }
+        return false; /* keep the change listener */
+    });
 
     data_system_->Initialize();
 
     return fut;
 }
 
-std::future<bool> ClientImpl::StartAsync() {
-    return StartAsyncInternal(IsInitializedSuccessfully);
-}
-
 bool ClientImpl::Initialized() const {
-    return IsInitializedSuccessfully(status_manager_.Status().State());
+    return data_system_->Initialized();
 }
 
 AllFlagsState ClientImpl::AllFlagsState(Context const& context,
@@ -165,23 +149,10 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (!Initialized()) {
-        //        if (memory_store_.Initialized()) {
-        //            LD_LOG(logger_, LogLevel::kWarn)
-        //                << "AllFlagsState() called before client has finished
-        //                "
-        //                   "initializing; using last known values from data
-        //                   store";
-        //        } else {
-        //            LD_LOG(logger_, LogLevel::kWarn)
-        //                << "AllFlagsState() called before client has finished
-        //                "
-        //                   "initializing. Data store not available. Returning
-        //                   empty " "state";
-        //            return {};
-        //        }
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "AllFlagsState() called before client has finished "
+               "initializing. Data store not available. Returning empty state";
 
-        // TODO: Fix to use the single data source status, which takes into
-        // account whether there is any data ore not.
         return {};
     }
 
@@ -189,7 +160,15 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     EventScope no_events;
 
-    for (auto const& [k, v] : data_system_->AllFlags()) {
+    auto all_flags = data_system_->AllFlags();
+
+    // Because evaluating the flags may access many segments, tell the data
+    // system to fetch them all at once up-front. This may be a no-op
+    // depending on the data system (e.g. if the segments are all already in
+    // memory.)
+    auto _ = data_system_->AllSegments();
+
+    for (auto const& [k, v] : all_flags) {
         if (!v || !v->item) {
             continue;
         }
@@ -440,7 +419,7 @@ IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
 // }
 
 ClientImpl::~ClientImpl() {
-    data_system_->Shutdown(); // This is a blocking call.
+    data_system_->Shutdown();  // This is a blocking call.
     ioc_.stop();
     // TODO(SC-219101)
     run_thread_.join();

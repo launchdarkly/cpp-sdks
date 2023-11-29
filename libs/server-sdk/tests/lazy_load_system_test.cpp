@@ -31,7 +31,7 @@ class MockDataReader : public data_interfaces::ISerializedDataReader {
     MOCK_METHOD(std::string const&, Identity, (), (override, const));
     MOCK_METHOD(bool, Initialized, (), (override, const));
     explicit MockDataReader(std::string name) : name_(std::move(name)) {
-        ON_CALL(*this, Identity).WillByDefault(testing::ReturnRef(name_));
+        ON_CALL(*this, Identity).WillByDefault(::testing::ReturnRef(name_));
     }
 
    private:
@@ -44,6 +44,7 @@ class LazyLoadTest : public ::testing::Test {
     std::shared_ptr<NiceMock<MockDataReader>> mock_reader;
     std::shared_ptr<logging::SpyLoggerBackend> spy_logger_backend;
     Logger const logger;
+    data_components::DataSourceStatusManager status_manager;
     LazyLoadTest()
         : mock_reader(
               std::make_shared<NiceMock<MockDataReader>>(mock_reader_name)),
@@ -56,7 +57,7 @@ TEST_F(LazyLoadTest, IdentityWrapsReaderIdentity) {
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::milliseconds(100), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     ASSERT_EQ(lazy_load.Identity(),
               "lazy load via " + mock_reader_name + " (JSON)");
@@ -67,10 +68,10 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagIsCached) {
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-        .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+        .WillOnce(Return(integrations::SerializedItemDescriptor{
             1, false, "{\"key\":\"foo\",\"version\":1}"}));
 
     for (std::size_t i = 0; i < 20; i++) {
@@ -83,10 +84,10 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentIsCached) {
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-        .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+        .WillOnce(Return(integrations::SerializedItemDescriptor{
             1, false, "{\"key\":\"foo\",\"version\":1}"}));
 
     for (std::size_t i = 0; i < 20; i++) {
@@ -99,10 +100,10 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagCannotBeFetched) {
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-        .WillOnce(testing::Return(tl::make_unexpected(
+        .WillOnce(Return(tl::make_unexpected(
             data_interfaces::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
@@ -118,10 +119,10 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-        .WillOnce(testing::Return(tl::make_unexpected(
+        .WillOnce(Return(tl::make_unexpected(
             data_interfaces::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
@@ -143,16 +144,16 @@ TEST_F(LazyLoadTest, RefreshesFlagIfStale) {
 
     TimePoint now{std::chrono::seconds(0)};
 
-    data_systems::LazyLoad const lazy_load(logger, config,
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager,
                                            [&]() { return now; });
 
     {
         InSequence s;
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 2, false, "{\"key\":\"foo\",\"version\":2}"}));
     }
 
@@ -182,16 +183,16 @@ TEST_F(LazyLoadTest, RefreshesSegmentIfStale) {
 
     TimePoint now{std::chrono::seconds(0)};
 
-    data_systems::LazyLoad const lazy_load(logger, config,
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager,
                                            [&]() { return now; });
 
     {
         InSequence s;
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 2, false, "{\"key\":\"foo\",\"version\":2}"}));
     }
 
@@ -222,16 +223,16 @@ TEST_F(LazyLoadTest, AllFlagsRefreshesIndividualFlag) {
     {
         InSequence s;
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
         EXPECT_CALL(*mock_reader, All(testing::_))
-            .WillOnce(testing::Return(
+            .WillOnce(Return(
                 std::unordered_map<std::string,
                                    integrations::SerializedItemDescriptor>{
                     {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
     }
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     auto const flag1 = lazy_load.GetFlag("foo");
     ASSERT_TRUE(flag1);
@@ -258,16 +259,16 @@ TEST_F(LazyLoadTest, AllSegmentsRefreshesIndividualSegment) {
     {
         InSequence s;
         EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
-            .WillOnce(testing::Return(integrations::SerializedItemDescriptor{
+            .WillOnce(Return(integrations::SerializedItemDescriptor{
                 1, false, "{\"key\":\"foo\",\"version\":1}"}));
         EXPECT_CALL(*mock_reader, All(testing::_))
-            .WillOnce(testing::Return(
+            .WillOnce(Return(
                 std::unordered_map<std::string,
                                    integrations::SerializedItemDescriptor>{
                     {"foo", {2, false, "{\"key\":\"foo\",\"version\":2}"}}}));
     }
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     auto const segment1 = lazy_load.GetSegment("foo");
     ASSERT_TRUE(segment1);
@@ -289,7 +290,7 @@ TEST_F(LazyLoadTest, InitializeNotQueriedRepeatedly) {
 
     EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     for (std::size_t i = 0; i < 10; i++) {
         ASSERT_FALSE(lazy_load.Initialized());
@@ -303,7 +304,7 @@ TEST_F(LazyLoadTest, InitializeCalledOnceThenNeverAgainAfterReturningTrue) {
 
     EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
 
-    data_systems::LazyLoad const lazy_load(logger, config);
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
     for (std::size_t i = 0; i < 10; i++) {
         ASSERT_TRUE(lazy_load.Initialized());
@@ -325,7 +326,7 @@ TEST_F(LazyLoadTest, InitializeCalledAgainAfterTTL) {
     }
 
     TimePoint now{std::chrono::seconds(0)};
-    data_systems::LazyLoad const lazy_load(logger, config,
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager,
                                            [&]() { return now; });
 
     for (std::size_t i = 0; i < 10; i++) {

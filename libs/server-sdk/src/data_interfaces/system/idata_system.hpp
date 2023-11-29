@@ -5,11 +5,11 @@
 namespace launchdarkly::server_side::data_interfaces {
 
 /**
- * @brief IDataSystem obtains data used for flag evaluations and makes it available
- * to other components.
+ * @brief IDataSystem obtains data used for flag evaluations and makes it
+ * available to other components.
  */
 class IDataSystem : public IStore {
-public:
+   public:
     /**
      * @return Identity of the system. Used in logs.
      */
@@ -33,7 +33,7 @@ public:
     IDataSystem& operator=(IDataSystem const&) = delete;
     IDataSystem& operator=(IDataSystem&&) = delete;
 
-protected:
+   protected:
     IDataSystem() = default;
 };
 

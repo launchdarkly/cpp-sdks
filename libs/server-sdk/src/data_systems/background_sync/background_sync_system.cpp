@@ -47,6 +47,10 @@ void BackgroundSync::Initialize() {
                               nullptr /* no bootstrap data supported yet */);
 }
 
+bool BackgroundSync::Initialized() const {
+    return store_.Initialized();
+}
+
 void BackgroundSync::Shutdown() {
     auto promise = std::make_shared<std::promise<void>>();
     auto const did_shutdown = promise->get_future();

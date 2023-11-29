@@ -28,11 +28,11 @@ class MemoryStore final : public data_interfaces::IStore,
         std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
-    [[nodiscard]] bool Initialized() const;
+    [[nodiscard]] bool Initialized() const override;
 
     [[nodiscard]] std::string const& Identity() const override;
 
-    void Init(launchdarkly::data_model::SDKDataSet dataSet) override;
+    void Init(data_model::SDKDataSet dataSet) override;
 
     void Upsert(std::string const& key,
                 data_model::FlagDescriptor flag) override;

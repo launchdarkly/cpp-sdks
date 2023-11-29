@@ -59,6 +59,8 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
 
     void Initialize() override;
 
+    bool Initialized() const override;
+
     void Shutdown() override;
 
    private:
