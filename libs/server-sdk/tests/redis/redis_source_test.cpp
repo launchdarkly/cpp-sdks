@@ -3,10 +3,12 @@
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 #include "data_components/kinds/kinds.hpp"
 
-#include <redis++.h>
+#include <launchdarkly/serialization/json_flag.hpp>
+#include <launchdarkly/serialization/json_segment.hpp>
 
 #include <boost/json.hpp>
-#include <launchdarkly/serialization/json_flag.hpp>
+
+#include <redis++.h>
 
 using namespace launchdarkly::server_side::data_systems;
 using namespace launchdarkly::server_side::data_components;
@@ -29,6 +31,15 @@ class PrefixedClient {
         try {
             client_.hset(prefix_ + ":features", flag.key,
                          serialize(boost::json::value_from(flag)));
+        } catch (sw::redis::Error const& e) {
+            FAIL() << e.what();
+        }
+    }
+
+    void PutSegment(Segment const& segment) const {
+        try {
+            client_.hset(prefix_ + ":segments", segment.key,
+                         serialize(boost::json::value_from(segment)));
         } catch (sw::redis::Error const& e) {
             FAIL() << e.what();
         }
@@ -78,6 +89,11 @@ class RedisTests : public ::testing::Test {
         client.PutFlag(flag);
     }
 
+    void PutSegment(Segment const& segment) {
+        auto const client = PrefixedClient(client_, prefix_);
+        client.PutSegment(segment);
+    }
+
     void Clear() {
         auto const client = PrefixedClient(client_, prefix_);
         client.Clear();
@@ -119,11 +135,35 @@ TEST_F(RedisTests, ChecksInitialized) {
 TEST_F(RedisTests, GetFlag) {
     PutFlag(Flag{"foo", 1, true});
 
-    auto result = source->Get(FlagKind{}, "foo");
+    auto const result = source->Get(FlagKind{}, "foo");
     ASSERT_TRUE(result);
 
-    ASSERT_EQ(result->version, 1);
     ASSERT_FALSE(result->deleted);
+    ASSERT_TRUE(result->serializedItem);
+}
+
+TEST_F(RedisTests, GetFlagDoesNotFindSegment) {
+    PutSegment(Segment{"foo", 1});
+
+    auto const result = source->Get(FlagKind{}, "foo");
+    ASSERT_FALSE(result);
+}
+
+TEST_F(RedisTests, GetSegment) {
+    PutSegment(Segment{"foo", 1});
+
+    auto const result = source->Get(SegmentKind{}, "foo");
+    ASSERT_TRUE(result);
+
+    ASSERT_FALSE(result->deleted);
+    ASSERT_TRUE(result->serializedItem);
+}
+
+TEST_F(RedisTests, GetSegmentDoesNotFindFlag) {
+    PutFlag(Flag{"foo", 1, true});
+
+    auto const result = source->Get(SegmentKind{}, "foo");
+    ASSERT_FALSE(result);
 }
 
 TEST_F(RedisTests, ChecksInitializedPrefixIndependence) {
