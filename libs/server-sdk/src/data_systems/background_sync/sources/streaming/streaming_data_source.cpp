@@ -5,6 +5,7 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/url.hpp>
 
 #include <utility>
@@ -50,7 +51,7 @@ StreamingDataSource::StreamingDataSource(
 void StreamingDataSource::StartAsync(
     data_interfaces::IDestination* dest,
     data_model::SDKDataSet const* bootstrap_data) {
-    boost::movelib::ignore(bootstrap_data);
+    boost::ignore_unused(bootstrap_data);
 
     event_handler_.emplace(*dest, logger_, status_manager_);
 
