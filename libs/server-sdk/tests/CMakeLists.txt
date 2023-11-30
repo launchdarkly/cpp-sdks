@@ -21,10 +21,10 @@ add_executable(gtest_${LIBNAME}
         ${tests}
 )
 
-target_link_libraries(gtest_${LIBNAME} launchdarkly::server launchdarkly::internal launchdarkly::sse timestamp GTest::gtest_main GTest::gmock)
+target_link_libraries(gtest_${LIBNAME} PRIVATE launchdarkly::server launchdarkly::internal launchdarkly::sse timestamp GTest::gtest_main GTest::gmock)
 
 if (LD_BUILD_REDIS_SUPPORT)
-    target_link_libraries(gtest_${LIBNAME} redis++::redis++_static)
+    target_link_libraries(gtest_${LIBNAME} PRIVATE redis++::redis++_static)
 endif ()
 
 gtest_discover_tests(gtest_${LIBNAME})
