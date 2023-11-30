@@ -6,11 +6,6 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 
 file(GLOB tests "${PROJECT_SOURCE_DIR}/tests/*.cpp")
 
-if (LD_BUILD_REDIS_SUPPORT)
-    file(GLOB redis_tests "${PROJECT_SOURCE_DIR}/tests/redis/*.cpp")
-    list(APPEND tests ${redis_tests})
-endif ()
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Get things in the same directory on windows.
@@ -30,10 +25,6 @@ set(LIBS
         GTest::gtest_main
         GTest::gmock
 )
-
-if (LD_BUILD_REDIS_SUPPORT)
-    list(APPEND LIBS redis++::redis++_static)
-endif ()
 
 target_link_libraries(gtest_${LIBNAME} PRIVATE ${LIBS})
 
