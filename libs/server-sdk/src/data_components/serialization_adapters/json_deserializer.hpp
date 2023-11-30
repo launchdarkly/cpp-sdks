@@ -113,7 +113,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
     Logger const& logger_;
     FlagKind const flag_kind_;
-    FlagKind const segment_kind_;
+    SegmentKind const segment_kind_;
     std::shared_ptr<data_interfaces::ISerializedDataReader> source_;
     std::string const identity_;
 };
