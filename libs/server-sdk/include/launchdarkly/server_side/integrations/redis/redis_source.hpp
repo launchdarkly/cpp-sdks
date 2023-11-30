@@ -5,6 +5,7 @@
 #include <tl/expected.hpp>
 
 #include <string>
+#include <memory>
 
 namespace sw::redis {
 class Redis;
