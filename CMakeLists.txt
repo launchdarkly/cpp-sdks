@@ -103,6 +103,9 @@ if (LD_BUILD_UNIT_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
+    set_target_properties(gtest PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+
+
 endif ()
 
 if (LD_DYNAMIC_LINK_OPENSSL)

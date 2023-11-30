@@ -15,5 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}../")
 add_executable(gtest_${LIBNAME}
         ${tests})
 target_link_libraries(gtest_${LIBNAME} launchdarkly::client launchdarkly::internal GTest::gtest_main)
+# There's an uninitialized variable warning in gtest that hasn't been resolved.
+set_target_properties(gtest_${LIBNAME} PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
 
 gtest_discover_tests(gtest_${LIBNAME})
