@@ -15,6 +15,8 @@ FetchContent_MakeAvailable(hiredis)
 
 include_directories(${CMAKE_BINARY_DIR}/_deps)
 
+set(REDIS_PLUS_PLUS_BUILD_TEST OFF)
+
 FetchContent_Declare(redis-plus-plus
         GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
         GIT_TAG 8b9ce389099608cf9bae617d79d257d2cc05e12f
