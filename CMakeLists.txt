@@ -144,11 +144,6 @@ add_subdirectory(libs/common)
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 
-if (LD_BUILD_REDIS_SUPPORT)
-    message(STATUS "LaunchDarkly: building redis support")
-    include(${CMAKE_FILES}/redis-plus-plus.cmake)
-endif ()
-
 # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
 # This target "links" in common, internal, and sse as object libraries.
 add_subdirectory(libs/client-sdk)
