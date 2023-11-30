@@ -1,6 +1,6 @@
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
-#include <sw/redis++/redis++.h>
+#include <redis++.h>
 
 namespace launchdarkly::server_side::data_systems {
 
