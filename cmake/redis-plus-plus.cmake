@@ -18,7 +18,6 @@ include_directories(${CMAKE_BINARY_DIR}/_deps)
 set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
 set(REDIS_PLUS_PLUS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(REDIS_PLUS_PLUS_BUILD_STATIC ON CACHE BOOL "" FORCE)
-set(REDIS_PLUS_PLUS_BUILD_STATIC_WITH_PIC OFF CACHE BOOL "" FORCE)
 
 # 1.3.7 is the last release that works with FetchContent, due to a problem with CheckSymbolExists
 # when it tries to do feature detection on hiredis.
