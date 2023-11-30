@@ -43,8 +43,6 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_destination.cpp
         data_components/kinds/kinds.hpp
         data_components/kinds/kinds.cpp
-        data_systems/background_sync/sources/noop/null_data_source.hpp
-        data_systems/background_sync/sources/noop/null_data_source.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
@@ -55,6 +53,8 @@ target_sources(${LIBNAME}
         data_systems/background_sync/background_sync_system.cpp
         data_systems/lazy_load/lazy_load_system.hpp
         data_systems/lazy_load/lazy_load_system.cpp
+        data_systems/offline.hpp
+        data_systems/offline.cpp
         data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp

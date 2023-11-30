@@ -34,12 +34,6 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
         data_components::DataSourceStatusManager& status_manager,
         Logger const& logger);
 
-    /**
-     * @brief Constructs a BackgroundSync without a data source.
-     */
-    BackgroundSync(boost::asio::any_io_executor ioc,
-                   data_components::DataSourceStatusManager& status_manager);
-
     BackgroundSync(BackgroundSync const& item) = delete;
     BackgroundSync(BackgroundSync&& item) = delete;
     BackgroundSync& operator=(BackgroundSync const&) = delete;
@@ -59,7 +53,7 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
 
     void Initialize() override;
 
-    void Shutdown() override;
+    bool Initialized() const override;
 
    private:
     data_components::MemoryStore store_;

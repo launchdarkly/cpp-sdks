@@ -28,7 +28,7 @@ class MemoryStore final : public data_interfaces::IStore,
         std::shared_ptr<data_model::SegmentDescriptor>>
     AllSegments() const override;
 
-    [[nodiscard]] bool Initialized() const;
+    [[nodiscard]] bool Initialized() const override;
 
     [[nodiscard]] std::string const& Identity() const override;
 

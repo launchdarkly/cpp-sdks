@@ -56,8 +56,9 @@ class ISerializedDataReader {
      * if the item did not exist, or an error. For a deleted item the serialized
      * item descriptor may contain a std::nullopt for the serializedItem.
      */
-    virtual GetResult Get(integrations::ISerializedItemKind const& kind,
-                          std::string const& itemKey) const = 0;
+    [[nodiscard]] virtual GetResult Get(
+        integrations::ISerializedItemKind const& kind,
+        std::string const& itemKey) const = 0;
 
     /**
      * Retrieves all items from the specified collection.
@@ -68,12 +69,22 @@ class ISerializedDataReader {
      * @return Either all of the items of the type, or an error. If there are
      * no items of the specified type, then return an empty collection.
      */
-    virtual AllResult All(
+    [[nodiscard]] virtual AllResult All(
         integrations::ISerializedItemKind const& kind) const = 0;
 
-    virtual std::string const& Identity() const = 0;
+    /**
+     * @return Identity of the reader. Used in logs.
+     */
+    [[nodiscard]] virtual std::string const& Identity() const = 0;
 
-    virtual bool Initialized() const = 0;
+    /**
+     * @return True if the reader has data that can be queried. The reader
+     * should derive this state externally; that is, it should be an attribute
+     * of the underlying source of data (not in memory.) A possible
+     * implementation would be to store a special data key that is only set
+     * after initial SDK data is stored.
+     */
+    [[nodiscard]] virtual bool Initialized() const = 0;
 
    protected:
     ISerializedDataReader() = default;

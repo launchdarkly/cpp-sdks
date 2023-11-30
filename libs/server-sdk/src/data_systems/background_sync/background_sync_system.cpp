@@ -1,6 +1,5 @@
 #include "background_sync_system.hpp"
 
-#include "sources/noop/null_data_source.hpp"
 #include "sources/polling/polling_data_source.hpp"
 #include "sources/streaming/streaming_data_source.hpp"
 
@@ -23,7 +22,6 @@ BackgroundSync::BackgroundSync(
                 synchronizer_ = std::make_shared<StreamingDataSource>(
                     ioc, logger, status_manager, endpoints, method_config,
                     http_properties);
-
             } else if constexpr (std::is_same_v<
                                      T, config::built::BackgroundSyncConfig::
                                             PollingConfig>) {
@@ -35,23 +33,13 @@ BackgroundSync::BackgroundSync(
         background_sync_config.synchronizer_);
 }
 
-BackgroundSync::BackgroundSync(
-    boost::asio::any_io_executor ioc,
-    data_components::DataSourceStatusManager& status_manager)
-    : store_(),
-      change_notifier_(store_, store_),
-      synchronizer_(std::make_shared<NullDataSource>(ioc, status_manager)) {}
-
 void BackgroundSync::Initialize() {
     synchronizer_->StartAsync(&change_notifier_,
                               nullptr /* no bootstrap data supported yet */);
 }
 
-void BackgroundSync::Shutdown() {
-    auto promise = std::make_shared<std::promise<void>>();
-    auto const did_shutdown = promise->get_future();
-    synchronizer_->ShutdownAsync([promise]() { promise->set_value(); });
-    did_shutdown.wait();
+bool BackgroundSync::Initialized() const {
+    return store_.Initialized();
 }
 
 std::string const& BackgroundSync::Identity() const {

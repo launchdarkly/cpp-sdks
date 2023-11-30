@@ -2,6 +2,8 @@
 
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_systems/background_sync/background_sync_system.hpp"
+#include "data_systems/lazy_load/lazy_load_system.hpp"
+#include "data_systems/offline.hpp"
 
 #include "data_interfaces/system/idata_system.hpp"
 
@@ -38,8 +40,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     data_components::DataSourceStatusManager& status_manager,
     Logger& logger) {
     if (config.DataSystemConfig().disabled) {
-        return std::make_unique<data_systems::BackgroundSync>(executor,
-                                                              status_manager);
+        return std::make_unique<data_systems::OfflineSystem>(status_manager);
     }
 
     auto const builder =
@@ -47,12 +48,21 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
 
     auto data_source_properties = builder.Build();
 
-    auto const bg_sync_config = std::get<config::built::BackgroundSyncConfig>(
+    return std::visit(
+        [&](auto&& arg) -> std::unique_ptr<data_interfaces::IDataSystem> {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T,
+                                         config::built::BackgroundSyncConfig>) {
+                return std::make_unique<data_systems::BackgroundSync>(
+                    config.ServiceEndpoints(), arg, data_source_properties,
+                    executor, status_manager, logger);
+            } else if constexpr (std::is_same_v<
+                                     T, config::built::LazyLoadConfig>) {
+                return std::make_unique<data_systems::LazyLoad>(logger, arg,
+                                                                status_manager);
+            }
+        },
         config.DataSystemConfig().system_);
-
-    return std::make_unique<data_systems::BackgroundSync>(
-        config.ServiceEndpoints(), bg_sync_config, data_source_properties,
-        executor, status_manager, logger);
 }
 
 static Logger MakeLogger(config::built::Logging const& config) {
@@ -116,48 +126,32 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
-static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
-    return state == DataSourceStatus::DataSourceState::kValid;
-}
-
-static bool IsInitialized(DataSourceStatus::DataSourceState state) {
-    return IsInitializedSuccessfully(state) ||
-           (state != DataSourceStatus::DataSourceState::kInitializing);
-}
-
 void ClientImpl::Identify(Context context) {
     events_default_.Send([&](EventFactory const& factory) {
         return factory.Identify(std::move(context));
     });
 }
 
-std::future<bool> ClientImpl::StartAsyncInternal(
-    std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
+std::future<bool> ClientImpl::StartAsync() {
     auto pr = std::make_shared<std::promise<bool>>();
     auto fut = pr->get_future();
 
-    status_manager_.OnDataSourceStatusChangeEx(
-        [result_predicate, pr](auto status) {
-            auto state = status.State();
-            if (IsInitialized(state)) {
-                pr->set_value(result_predicate(status.State()));
-                return true; /* delete this change listener since the
-                                desired state was reached */
-            }
-            return false; /* keep the change listener */
-        });
+    status_manager_.OnDataSourceStatusChangeEx([this, pr](auto _) {
+        if (data_system_->Initialized()) {
+            pr->set_value(true);
+            return true; /* delete this change listener since the
+                            desired state was reached */
+        }
+        return false; /* keep the change listener */
+    });
 
     data_system_->Initialize();
 
     return fut;
 }
 
-std::future<bool> ClientImpl::StartAsync() {
-    return StartAsyncInternal(IsInitializedSuccessfully);
-}
-
 bool ClientImpl::Initialized() const {
-    return IsInitializedSuccessfully(status_manager_.Status().State());
+    return data_system_->Initialized();
 }
 
 AllFlagsState ClientImpl::AllFlagsState(Context const& context,
@@ -165,23 +159,10 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (!Initialized()) {
-        //        if (memory_store_.Initialized()) {
-        //            LD_LOG(logger_, LogLevel::kWarn)
-        //                << "AllFlagsState() called before client has finished
-        //                "
-        //                   "initializing; using last known values from data
-        //                   store";
-        //        } else {
-        //            LD_LOG(logger_, LogLevel::kWarn)
-        //                << "AllFlagsState() called before client has finished
-        //                "
-        //                   "initializing. Data store not available. Returning
-        //                   empty " "state";
-        //            return {};
-        //        }
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "AllFlagsState() called before client has finished "
+               "initializing. Data store not available. Returning empty state";
 
-        // TODO: Fix to use the single data source status, which takes into
-        // account whether there is any data ore not.
         return {};
     }
 
@@ -189,7 +170,15 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     EventScope no_events;
 
-    for (auto const& [k, v] : data_system_->AllFlags()) {
+    auto all_flags = data_system_->AllFlags();
+
+    // Because evaluating the flags may access many segments, tell the data
+    // system to fetch them all at once up-front. This may be a no-op
+    // depending on the data system (e.g. if the segments are all already in
+    // memory.)
+    auto _ = data_system_->AllSegments();
+
+    for (auto const& [k, v] : all_flags) {
         if (!v || !v->item) {
             continue;
         }
@@ -309,11 +298,10 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 }
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
-    Context const& context) {
-    //    if (!memory_store_.Initialized()) {
-    //        return EvaluationReason::ErrorKind::kClientNotReady;
-    //    }
-    // TODO: Check if initialized
+    Context const& context) const {
+    if (!Initialized()) {
+        return EvaluationReason::ErrorKind::kClientNotReady;
+    }
     if (!context.Valid()) {
         return EvaluationReason::ErrorKind::kUserNotSpecified;
     }
@@ -435,12 +423,7 @@ IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
 }
 
-// flag_manager::IFlagNotifier& ClientImpl::FlagNotifier() {
-//     return flag_manager_.Notifier();
-// }
-
 ClientImpl::~ClientImpl() {
-    data_system_->Shutdown(); // This is a blocking call.
     ioc_.stop();
     // TODO(SC-219101)
     run_thread_.join();

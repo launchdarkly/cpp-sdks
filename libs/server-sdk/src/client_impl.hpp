@@ -145,7 +145,7 @@ class ClientImpl : public IClient {
         std::optional<data_model::Flag> const& flag);
 
     [[nodiscard]] std::optional<enum EvaluationReason::ErrorKind>
-    PreEvaluationChecks(Context const& context);
+    PreEvaluationChecks(Context const& context) const;
 
     void TrackInternal(Context const& ctx,
                        std::string event_name,
