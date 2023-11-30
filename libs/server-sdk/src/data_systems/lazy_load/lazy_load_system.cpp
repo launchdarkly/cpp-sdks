@@ -90,7 +90,7 @@ std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     auto const state =
         tracker_.State(data_components::DataKind::kFlag, key, time_());
     return Get<std::shared_ptr<data_model::FlagDescriptor>>(
-        state, [this, &key]() { RefreshFlag(key); },
+        key, state, [this, &key]() { RefreshFlag(key); },
         [this, &key]() { return cache_.GetFlag(key); });
 }
 
@@ -99,7 +99,7 @@ std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
     auto const state =
         tracker_.State(data_components::DataKind::kSegment, key, time_());
     return Get<std::shared_ptr<data_model::SegmentDescriptor>>(
-        state, [this, &key]() { RefreshSegment(key); },
+        key, state, [this, &key]() { RefreshSegment(key); },
         [this, &key]() { return cache_.GetSegment(key); });
 }
 
@@ -108,7 +108,7 @@ LazyLoad::AllFlags() const {
     auto const state = tracker_.State(Keys::kAllFlags, time_());
     return Get<std::unordered_map<std::string,
                                   std::shared_ptr<data_model::FlagDescriptor>>>(
-        state, [this]() { RefreshAllFlags(); },
+        Keys::kAllFlags, state, [this]() { RefreshAllFlags(); },
         [this]() { return cache_.AllFlags(); });
 }
 
@@ -117,7 +117,7 @@ LazyLoad::AllSegments() const {
     auto const state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::unordered_map<
         std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
-        state, [this]() { RefreshAllSegments(); },
+        Keys::kAllSegments, state, [this]() { RefreshAllSegments(); },
         [this]() { return cache_.AllSegments(); });
 }
 
