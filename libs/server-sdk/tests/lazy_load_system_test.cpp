@@ -110,8 +110,8 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagCannotBeFetched) {
         ASSERT_FALSE(lazy_load.GetFlag("foo"));
     };
 
-    ASSERT_TRUE(spy_logger_backend->Count(1));
-    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+    ASSERT_TRUE(spy_logger_backend->Count(21));  // 20 debug logs + 1 error log
+    ASSERT_TRUE(spy_logger_backend->Contains(1, LogLevel::kError, "oops"));
 }
 
 TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
@@ -129,8 +129,8 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
         ASSERT_FALSE(lazy_load.GetSegment("foo"));
     };
 
-    ASSERT_TRUE(spy_logger_backend->Count(1));
-    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+    ASSERT_TRUE(spy_logger_backend->Count(21));
+    ASSERT_TRUE(spy_logger_backend->Contains(1, LogLevel::kError, "oops"));
 }
 
 TEST_F(LazyLoadTest, RefreshesFlagIfStale) {
