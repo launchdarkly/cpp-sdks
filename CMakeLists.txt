@@ -95,7 +95,8 @@ if (LD_BUILD_UNIT_TESTS)
     endif ()
     FetchContent_Declare(
             googletest
-            URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG 76bb2afb8b522d24496ad1c757a49784fbfa2e42
     )
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
