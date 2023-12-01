@@ -12,8 +12,6 @@ jobs:
       package-client-tag: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
       package-server-released: ${{ steps.release.outputs['libs/server-sdk--release_created'] }}
       package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
-      package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source-release_created'] }}
-      package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source-tag_name'] }}
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
@@ -69,31 +67,6 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
-
-  release-server-redis:
-    strategy:
-      matrix:
-        # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-latest, windows-2022, macos-12 ]
-    runs-on: ${{ matrix.os }}
-    needs: [ 'release-please' ]
-    if: ${{ needs.release-please.outputs.package-server-released }}
-    outputs:
-      hashes-linux: ${{ steps.release-server.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
-    steps:
-      - uses: actions/checkout@v3
-      - id: release-server-redis
-        name: Full release of libs/server-sdk-redis-source
-        uses: ./.github/actions/sdk-release
-        with:
-          # The tag of the release to upload artifacts to.
-          tag_name: ${{ needs.release-please.outputs.package-server-redis-tag }}
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          sdk_path: 'libs/server-sdk-redis-source'
-          sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
-
 
   release-client-provenance:
     needs: [ 'release-please', 'release-client' ]
