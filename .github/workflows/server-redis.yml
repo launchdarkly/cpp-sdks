@@ -1,4 +1,4 @@
-name: libs/server-sdk
+name: libs/server-sdk-redis-source
 
 on:
   push:
@@ -11,34 +11,16 @@ on:
       - '**.md'
 
 jobs:
-  contract-tests:
-    runs-on: ubuntu-22.04
-    env:
-      # Port the test service (implemented in this repo) should bind to.
-      TEST_SERVICE_PORT: 8123
-      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/ci
-        with:
-          cmake_target: server-tests
-          run_tests: false
-      - name: 'Launch test service as background task'
-        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: ./.github/actions/contract-tests
-        with:
-          # Inform the test harness of test service's port.
-          test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip-from ./contract-tests/server-contract-tests/test-suppressions.txt'
-  build-test-server:
+  build-test-redis:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/ci
         with:
-          cmake_target: launchdarkly-cpp-server
-          simulate_release: true
-  build-test-server-mac:
+          cmake_target: launchdarkly-cpp-server-redis-source
+          # TODO: Fix installation of redis++/hiredis headers to enable releases.
+          simulate_release: false
+  build-test-redis-mac:
     runs-on: macos-12
     steps:
       - run: |
@@ -50,9 +32,9 @@ jobs:
         env:
           OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
         with:
-          cmake_target: launchdarkly-cpp-server
+          cmake_target: launchdarkly-cpp-server-redis-source
           platform_version: 12
-  build-test-server-windows:
+  build-test-redis-windows:
     runs-on: windows-2022
     steps:
       - name: Upgrade OpenSSL
@@ -75,6 +57,6 @@ jobs:
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
           BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         with:
-          cmake_target: launchdarkly-cpp-server
+          cmake_target: launchdarkly-cpp-server-redis-source
           platform_version: 2022
           toolset: msvc

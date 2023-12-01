@@ -17,6 +17,19 @@ cd build
 # script ends.
 trap cleanup EXIT
 
-cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE -D BUILD_TESTING="$2" -D LD_BUILD_UNIT_TESTS="$2" -D LD_BUILD_CONTRACT_TESTS="$2" ..
+# Special case: unlike the other targets, enabling redis support will pull in redis++ and hiredis dependencies at
+# configuration time. To ensure this only happens when asked, disable the support by default.
+build_redis="OFF"
+if [ "$1" == "launchdarkly-cpp-server-redis-source" ] || [ "$1" == "gtest_launchdarkly-cpp-server-redis-source" ]; then
+  build_redis="ON"
+fi
+
+
+
+cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
+               -D BUILD_TESTING="$2" \
+               -D LD_BUILD_UNIT_TESTS="$2" \
+               -D LD_BUILD_CONTRACT_TESTS="$2" \
+               -D LD_BUILD_REDIS_SUPPORT="$build_redis" ..
 
 cmake --build . --target "$1"
