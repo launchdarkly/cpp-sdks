@@ -2,6 +2,8 @@
 
 #include "data_sources/data_source_status_manager.hpp"
 
+#include <thread>
+
 using launchdarkly::client_side::data_sources::DataSourceStatus;
 using launchdarkly::client_side::data_sources::DataSourceStatusManager;
 using launchdarkly::client_side::data_sources::IDataSourceStatusProvider;
@@ -145,6 +147,8 @@ TEST(DataSourceStatusManagerTests, TimeIsUpdatedOnStateChange) {
     status_manager.SetState(DataSourceStatus::DataSourceState::kValid);
 
     auto initial = status_manager.Status().StateSince();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     status_manager.SetState(DataSourceStatus::DataSourceState::kInterrupted);
 
     EXPECT_NE(initial.time_since_epoch().count(),
