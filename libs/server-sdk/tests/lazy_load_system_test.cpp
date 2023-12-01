@@ -17,7 +17,7 @@ using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 
-class MockDataReader : public data_interfaces::ISerializedDataReader {
+class MockDataReader : public integrations::ISerializedDataReader {
    public:
     MOCK_METHOD(GetResult,
                 Get,
@@ -104,7 +104,7 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagCannotBeFetched) {
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
         .WillOnce(Return(tl::make_unexpected(
-            data_interfaces::ISerializedDataReader::Error{"oops"})));
+            integrations::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
         ASSERT_FALSE(lazy_load.GetFlag("foo"));
@@ -123,7 +123,7 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
         .WillOnce(Return(tl::make_unexpected(
-            data_interfaces::ISerializedDataReader::Error{"oops"})));
+            integrations::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
         ASSERT_FALSE(lazy_load.GetSegment("foo"));

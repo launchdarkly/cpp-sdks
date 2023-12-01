@@ -3,7 +3,7 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/serialized_item_descriptor.hpp>
 
 #include <boost/json.hpp>
 
@@ -11,7 +11,7 @@ namespace launchdarkly::server_side::data_components {
 
 JsonDeserializer::JsonDeserializer(
     Logger const& logger,
-    std::shared_ptr<data_interfaces::ISerializedDataReader> reader)
+    std::shared_ptr<integrations::ISerializedDataReader> reader)
     : logger_(logger),
       flag_kind_(),
       segment_kind_(),

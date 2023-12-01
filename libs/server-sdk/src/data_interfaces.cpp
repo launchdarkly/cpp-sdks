@@ -5,5 +5,5 @@
 #include "data_interfaces/store/istore.hpp"
 #include "data_interfaces/system/idata_system.hpp"
 
-#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/iserialized_item_kind.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/serialized_item_descriptor.hpp>

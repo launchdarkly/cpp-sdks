@@ -29,6 +29,7 @@ target_sources(${LIBNAME}
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
+        integrations/data_reader/kinds.cpp
         data_components/change_notifier/change_notifier.hpp
         data_components/change_notifier/change_notifier.cpp
         data_components/dependency_tracker/dependency_tracker.hpp
@@ -41,8 +42,6 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_deserializer.cpp
         data_components/serialization_adapters/json_destination.hpp
         data_components/serialization_adapters/json_destination.cpp
-        data_components/kinds/kinds.hpp
-        data_components/kinds/kinds.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp

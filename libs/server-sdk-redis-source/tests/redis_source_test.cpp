@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/server_side/integrations/data_reader/kinds.hpp>
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
-#include "data_components/kinds/kinds.hpp"
 
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
@@ -10,8 +10,7 @@
 
 #include <redis++.h>
 
-using namespace launchdarkly::server_side::data_systems;
-using namespace launchdarkly::server_side::data_components;
+using namespace launchdarkly::server_side::integrations;
 using namespace launchdarkly::data_model;
 
 class PrefixedClient {

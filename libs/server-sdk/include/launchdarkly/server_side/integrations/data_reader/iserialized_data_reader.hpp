@@ -1,7 +1,7 @@
 #pragma once
 
-#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/iserialized_item_kind.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/serialized_item_descriptor.hpp>
 
 #include <tl/expected.hpp>
 
@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::server_side::data_interfaces {
+namespace launchdarkly::server_side::integrations {
 
 /**
  * Interface for a data reader that provides feature flags and related data in a
@@ -89,4 +89,4 @@ class ISerializedDataReader {
    protected:
     ISerializedDataReader() = default;
 };
-}  // namespace launchdarkly::server_side::data_interfaces
+}  // namespace launchdarkly::server_side::integrations

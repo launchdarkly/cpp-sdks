@@ -1,14 +1,14 @@
 #pragma once
 
+#include "../../../include/launchdarkly/server_side/integrations/data_reader/kinds.hpp"
 #include "../../data_components/expiration_tracker/expiration_tracker.hpp"
-#include "../../data_components/kinds/kinds.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/idata_reader.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
 
 #include <launchdarkly/server_side/config/built/data_system/lazy_load_config.hpp>
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/iserialized_data_reader.hpp>
 
 #include <launchdarkly/data_model/descriptors.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
@@ -60,8 +60,8 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     // Public for usage in tests.
     struct Kinds {
-        static data_components::FlagKind const Flag;
-        static data_components::SegmentKind const Segment;
+        static integrations::FlagKind const Flag;
+        static integrations::SegmentKind const Segment;
     };
 
    private:

@@ -14,7 +14,7 @@ FetchContent_Declare(hiredis
 
 FetchContent_MakeAvailable(hiredis)
 
-include_directories(${CMAKE_BINARY_DIR}/_deps)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/_deps)
 
 set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
 

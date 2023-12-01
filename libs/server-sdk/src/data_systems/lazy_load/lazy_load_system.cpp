@@ -48,11 +48,10 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-data_components::FlagKind const LazyLoad::Kinds::Flag =
-    data_components::FlagKind();
+integrations::FlagKind const LazyLoad::Kinds::Flag = integrations::FlagKind();
 
-data_components::SegmentKind const LazyLoad::Kinds::Segment =
-    data_components::SegmentKind();
+integrations::SegmentKind const LazyLoad::Kinds::Segment =
+    integrations::SegmentKind();
 
 LazyLoad::LazyLoad(Logger const& logger,
                    config::built::LazyLoadConfig cfg,

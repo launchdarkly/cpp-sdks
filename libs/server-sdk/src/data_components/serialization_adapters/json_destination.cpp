@@ -8,8 +8,11 @@ namespace launchdarkly::server_side::data_components {
 using data_interfaces::ISerializedDestination;
 using integrations::SerializedItemDescriptor;
 
-FlagKind const JsonDestination::Kinds::Flag = FlagKind();
-SegmentKind const JsonDestination::Kinds::Segment = SegmentKind();
+integrations::FlagKind const JsonDestination::Kinds::Flag =
+    integrations::FlagKind();
+
+integrations::SegmentKind const JsonDestination::Kinds::Segment =
+    integrations::SegmentKind();
 
 /**
  * @brief Creates a boost::json::value representing a tombstone for a given

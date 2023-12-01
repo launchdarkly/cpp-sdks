@@ -1,10 +1,10 @@
 #pragma once
 
+#include "../../../include/launchdarkly/server_side/integrations/data_reader/kinds.hpp"
 #include "../../data_interfaces/source/idata_reader.hpp"
-#include "../kinds/kinds.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/server_side/data_interfaces/sources/iserialized_data_reader.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/iserialized_data_reader.hpp>
 
 #include <memory>
 
@@ -14,7 +14,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
     explicit JsonDeserializer(
         Logger const& logger,
-        std::shared_ptr<data_interfaces::ISerializedDataReader> reader);
+        std::shared_ptr<integrations::ISerializedDataReader> reader);
 
     [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
         std::string const& key) const override;
@@ -112,9 +112,9 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
     }
 
     Logger const& logger_;
-    FlagKind const flag_kind_;
-    SegmentKind const segment_kind_;
-    std::shared_ptr<data_interfaces::ISerializedDataReader> source_;
+    integrations::FlagKind const flag_kind_;
+    integrations::SegmentKind const segment_kind_;
+    std::shared_ptr<integrations::ISerializedDataReader> source_;
     std::string const identity_;
 };
 

@@ -2,7 +2,7 @@
 
 #include <redis++.h>
 
-namespace launchdarkly::server_side::data_systems {
+namespace launchdarkly::server_side::integrations {
 
 tl::expected<std::shared_ptr<RedisDataSource>, std::string>
 RedisDataSource::Create(std::string uri, std::string prefix) {
@@ -28,7 +28,7 @@ RedisDataSource::RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
 
 RedisDataSource::~RedisDataSource() = default;
 
-data_interfaces::ISerializedDataReader::GetResult RedisDataSource::Get(
+integrations::ISerializedDataReader::GetResult RedisDataSource::Get(
     integrations::ISerializedItemKind const& kind,
     std::string const& itemKey) const {
     try {
@@ -42,7 +42,7 @@ data_interfaces::ISerializedDataReader::GetResult RedisDataSource::Get(
     }
 }
 
-data_interfaces::ISerializedDataReader::AllResult RedisDataSource::All(
+integrations::ISerializedDataReader::AllResult RedisDataSource::All(
     integrations::ISerializedItemKind const& kind) const {
     std::unordered_map<std::string, std::string> raw_items;
     AllResult::value_type items;
