@@ -143,13 +143,15 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    RefreshAll(Keys::kAllFlags, data_components::DataKind::kFlag,
-               [this]() { return reader_->AllFlags(); });
+    RefreshAll<data_model::Flag>(Keys::kAllFlags,
+                                 data_components::DataKind::kFlag,
+                                 [this]() { return reader_->AllFlags(); });
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    RefreshAll(Keys::kAllSegments, data_components::DataKind::kSegment,
-               [this]() { return reader_->AllSegments(); });
+    RefreshAll<data_model::Segment>(
+        Keys::kAllSegments, data_components::DataKind::kSegment,
+        [this]() { return reader_->AllSegments(); });
 }
 
 void LazyLoad::RefreshInitState() const {
@@ -158,14 +160,14 @@ void LazyLoad::RefreshInitState() const {
 }
 
 void LazyLoad::RefreshSegment(std::string const& segment_key) const {
-    RefreshItem(
+    RefreshItem<data_model::Segment>(
         data_components::DataKind::kSegment, segment_key,
         [this](std::string const& key) { return reader_->GetSegment(key); },
         [this](std::string const& key) { return cache_.RemoveSegment(key); });
 }
 
 void LazyLoad::RefreshFlag(std::string const& flag_key) const {
-    RefreshItem(
+    RefreshItem<data_model::Flag>(
         data_components::DataKind::kFlag, flag_key,
         [this](std::string const& key) { return reader_->GetFlag(key); },
         [this](std::string const& key) { return cache_.RemoveFlag(key); });

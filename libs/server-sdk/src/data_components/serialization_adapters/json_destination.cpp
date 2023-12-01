@@ -52,7 +52,7 @@ SerializedItemDescriptor Serialize(std::string const& key,
                ? SerializedItemDescriptor::Present(
                      desc.version, boost::json::serialize(
                                        boost::json::value_from(*desc.item)))
-               : SerializedItemDescriptor::Absent(
+               : SerializedItemDescriptor::Tombstone(
                      desc.version,
                      boost::json::serialize(Tombstone(key, desc)));
 }

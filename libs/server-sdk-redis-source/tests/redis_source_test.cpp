@@ -20,7 +20,7 @@ class PrefixedClient {
 
     void Init() const {
         try {
-            client_.set(prefix_ + ":$inited", "true");
+            client_.set(Prefixed("$inited"), "true");
         } catch (sw::redis::Error const& e) {
             FAIL() << e.what();
         }
@@ -28,8 +28,25 @@ class PrefixedClient {
 
     void PutFlag(Flag const& flag) const {
         try {
-            client_.hset(prefix_ + ":features", flag.key,
+            client_.hset(Prefixed("features"), flag.key,
                          serialize(boost::json::value_from(flag)));
+        } catch (sw::redis::Error const& e) {
+            FAIL() << e.what();
+        }
+    }
+
+    void PutDeletedFlag(std::string const& key, std::string const& ts) const {
+        try {
+            client_.hset(Prefixed("features"), key, ts);
+        } catch (sw::redis::Error const& e) {
+            FAIL() << e.what();
+        }
+    }
+
+    void PutDeletedSegment(std::string const& key,
+                           std::string const& ts) const {
+        try {
+            client_.hset(Prefixed("segments"), key, ts);
         } catch (sw::redis::Error const& e) {
             FAIL() << e.what();
         }
@@ -37,7 +54,7 @@ class PrefixedClient {
 
     void PutSegment(Segment const& segment) const {
         try {
-            client_.hset(prefix_ + ":segments", segment.key,
+            client_.hset(Prefixed("segments"), segment.key,
                          serialize(boost::json::value_from(segment)));
         } catch (sw::redis::Error const& e) {
             FAIL() << e.what();
@@ -47,7 +64,7 @@ class PrefixedClient {
     void Clear() const {
         try {
             std::vector<std::pair<std::string, std::string>> output;
-            client_.keys(prefix_ + ":*", std::back_inserter(output));
+            client_.keys(Prefixed("*"), std::back_inserter(output));
             for (auto const& [key, _] : output) {
                 client_.del(key);
             }
@@ -57,6 +74,10 @@ class PrefixedClient {
     }
 
    private:
+    std::string Prefixed(std::string const& name) const {
+        return prefix_ + ":" + name;
+    }
+
     sw::redis::Redis& client_;
     std::string const& prefix_;
 };
@@ -86,6 +107,16 @@ class RedisTests : public ::testing::Test {
     void PutFlag(Flag const& flag) {
         auto const client = PrefixedClient(client_, prefix_);
         client.PutFlag(flag);
+    }
+
+    void PutDeletedFlag(std::string const& key, std::string const& ts) {
+        auto const client = PrefixedClient(client_, prefix_);
+        client.PutDeletedFlag(key, ts);
+    }
+
+    void PutDeletedSegment(std::string const& key, std::string const& ts) {
+        auto const client = PrefixedClient(client_, prefix_);
+        client.PutDeletedSegment(key, ts);
     }
 
     void PutSegment(Segment const& segment) {
@@ -132,37 +163,86 @@ TEST_F(RedisTests, ChecksInitialized) {
 }
 
 TEST_F(RedisTests, GetFlag) {
-    PutFlag(Flag{"foo", 1, true});
+    Flag const flag{"foo", 1, true};
+    PutFlag(flag);
 
     auto const result = source->Get(FlagKind{}, "foo");
     ASSERT_TRUE(result);
 
-    ASSERT_FALSE(result->deleted);
-    ASSERT_TRUE(result->serializedItem);
+    if (auto const f = *result) {
+        ASSERT_EQ(f->serializedItem, serialize(boost::json::value_from(flag)));
+    } else {
+        FAIL() << "expected flag to be found";
+    }
+}
+
+TEST_F(RedisTests, GetSegment) {
+    Segment const segment{"foo", 1};
+    PutSegment(segment);
+
+    auto const result = source->Get(SegmentKind{}, "foo");
+    ASSERT_TRUE(result);
+
+    if (auto const f = *result) {
+        ASSERT_EQ(f->serializedItem,
+                  serialize(boost::json::value_from(segment)));
+    } else {
+        FAIL() << "expected segment to be found";
+    }
+}
+
+TEST_F(RedisTests, GetMissingFlag) {
+    auto const result = source->Get(FlagKind{}, "foo");
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(*result);
+}
+
+TEST_F(RedisTests, GetMissingSegment) {
+    auto const result = source->Get(SegmentKind{}, "foo");
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(*result);
+}
+
+TEST_F(RedisTests, GetDeletedFlag) {
+    PutDeletedFlag("foo", "foo_tombstone");
+
+    auto const result = source->Get(FlagKind{}, "foo");
+    ASSERT_TRUE(result);
+
+    if (auto const f = *result) {
+        ASSERT_EQ(f->serializedItem, "foo_tombstone");
+    } else {
+        FAIL() << "expected tombstone to be present";
+    }
+}
+
+TEST_F(RedisTests, GetDeletedSegment) {
+    PutDeletedSegment("foo", "foo_tombstone");
+
+    auto const result = source->Get(SegmentKind{}, "foo");
+    ASSERT_TRUE(result);
+
+    if (auto const f = *result) {
+        ASSERT_EQ(f->serializedItem, "foo_tombstone");
+    } else {
+        FAIL() << "expected tombstone to be present";
+    }
 }
 
 TEST_F(RedisTests, GetFlagDoesNotFindSegment) {
     PutSegment(Segment{"foo", 1});
 
     auto const result = source->Get(FlagKind{}, "foo");
-    ASSERT_FALSE(result);
-}
-
-TEST_F(RedisTests, GetSegment) {
-    PutSegment(Segment{"foo", 1});
-
-    auto const result = source->Get(SegmentKind{}, "foo");
     ASSERT_TRUE(result);
-
-    ASSERT_FALSE(result->deleted);
-    ASSERT_TRUE(result->serializedItem);
+    ASSERT_FALSE(*result);
 }
 
 TEST_F(RedisTests, GetSegmentDoesNotFindFlag) {
     PutFlag(Flag{"foo", 1, true});
 
     auto const result = source->Get(SegmentKind{}, "foo");
-    ASSERT_FALSE(result);
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(*result);
 }
 
 TEST_F(RedisTests, ChecksInitializedPrefixIndependence) {

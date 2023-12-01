@@ -33,9 +33,10 @@ ISerializedDataReader::GetResult RedisDataSource::Get(
     std::string const& itemKey) const {
     try {
         if (auto maybe_item = redis_->hget(key_for_kind(kind), itemKey)) {
-            return SerializedItemDescriptor{0, false, maybe_item.value()};
+            return SerializedItemDescriptor::Present(
+                0, std::move(maybe_item.value()));
         }
-        return tl::make_unexpected(Error{"not found"});
+        return std::nullopt;
     } catch (sw::redis::Error const& e) {
         return tl::make_unexpected(Error{e.what()});
     }
@@ -50,7 +51,7 @@ ISerializedDataReader::AllResult RedisDataSource::All(
         redis_->hgetall(key_for_kind(kind),
                         std::inserter(raw_items, raw_items.begin()));
         for (auto const& [key, val] : raw_items) {
-            items.emplace(key, SerializedItemDescriptor{0, false, val});
+            items.emplace(key, SerializedItemDescriptor::Present(0, val));
         }
         return items;
 
