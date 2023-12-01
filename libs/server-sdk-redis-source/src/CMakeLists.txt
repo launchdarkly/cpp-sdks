@@ -10,7 +10,6 @@ else ()
     add_library(${LIBNAME} STATIC)
 endif ()
 
-
 target_sources(${LIBNAME}
         PRIVATE
         ${HEADER_LIST}
@@ -20,7 +19,9 @@ target_sources(${LIBNAME}
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::server
-        PRIVATE redis++)
+        PRIVATE
+        redis++::redis++_static
+)
 
 
 add_library(launchdarkly::server_redis_source ALIAS ${LIBNAME})

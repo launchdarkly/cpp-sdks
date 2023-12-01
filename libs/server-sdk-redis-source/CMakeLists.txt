@@ -24,6 +24,8 @@ endif ()
 # Needed to fetch external dependencies.
 include(FetchContent)
 
+set(REDIS_PLUS_PLUS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+
 include(${CMAKE_FILES}/redis-plus-plus.cmake)
 
 add_subdirectory(src)

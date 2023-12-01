@@ -24,7 +24,7 @@ set(LIBS
         launchdarkly::internal
         # Needed because the source doesn't (need to) expose redis++ as a public dependency, but we need to construct
         # a redis client in the tests.
-        redis++
+        redis++::redis++_static
         GTest::gtest_main
         GTest::gmock
 )
