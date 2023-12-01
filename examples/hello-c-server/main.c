@@ -53,7 +53,7 @@ int main() {
             return 1;
         }
     } else {
-        printf("SDK initialization didn't complete in %dms\n",
+        printf("*** SDK initialization didn't complete in %dms\n",
                INIT_TIMEOUT_MILLISECONDS);
         return 1;
     }
