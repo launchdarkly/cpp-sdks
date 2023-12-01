@@ -16,7 +16,7 @@ RedisDataSource::Create(std::string uri, std::string prefix) {
 }
 
 std::string RedisDataSource::key_for_kind(
-    integrations::ISerializedItemKind const& kind) const {
+    ISerializedItemKind const& kind) const {
     return prefix_ + ":" + kind.Namespace();
 }
 
@@ -28,13 +28,12 @@ RedisDataSource::RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
 
 RedisDataSource::~RedisDataSource() = default;
 
-integrations::ISerializedDataReader::GetResult RedisDataSource::Get(
-    integrations::ISerializedItemKind const& kind,
+ISerializedDataReader::GetResult RedisDataSource::Get(
+    ISerializedItemKind const& kind,
     std::string const& itemKey) const {
     try {
         if (auto maybe_item = redis_->hget(key_for_kind(kind), itemKey)) {
-            return integrations::SerializedItemDescriptor{0, false,
-                                                          maybe_item.value()};
+            return SerializedItemDescriptor{0, false, maybe_item.value()};
         }
         return tl::make_unexpected(Error{"not found"});
     } catch (sw::redis::Error const& e) {
@@ -42,8 +41,8 @@ integrations::ISerializedDataReader::GetResult RedisDataSource::Get(
     }
 }
 
-integrations::ISerializedDataReader::AllResult RedisDataSource::All(
-    integrations::ISerializedItemKind const& kind) const {
+ISerializedDataReader::AllResult RedisDataSource::All(
+    ISerializedItemKind const& kind) const {
     std::unordered_map<std::string, std::string> raw_items;
     AllResult::value_type items;
 
@@ -51,8 +50,7 @@ integrations::ISerializedDataReader::AllResult RedisDataSource::All(
         redis_->hgetall(key_for_kind(kind),
                         std::inserter(raw_items, raw_items.begin()));
         for (auto const& [key, val] : raw_items) {
-            items.emplace(
-                key, integrations::SerializedItemDescriptor{0, false, val});
+            items.emplace(key, SerializedItemDescriptor{0, false, val});
         }
         return items;
 
@@ -74,4 +72,4 @@ bool RedisDataSource::Initialized() const {
     }
 }
 
-}  // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::server_side::integrations
