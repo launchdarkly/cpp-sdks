@@ -61,7 +61,7 @@ option(LD_DYNAMIC_LINK_OPENSSL
 
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
-option(LD_BUILD_REDIS_SUPPORT "Build redis support." ON)
+option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
 
 # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
 # it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
