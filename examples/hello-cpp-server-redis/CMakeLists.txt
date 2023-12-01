@@ -12,4 +12,4 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_executable(hello-cpp-server-redis-source main.cpp)
-target_link_libraries(hello-cpp-server-redis-source PRIVATE launchdarkly::server Threads::Threads)
+target_link_libraries(hello-cpp-server-redis-source PRIVATE launchdarkly::server_redis_source Threads::Threads)

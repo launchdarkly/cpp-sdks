@@ -36,7 +36,7 @@ int main() {
 
     using LazyLoad = server_side::config::builders::LazyLoadBuilder;
 
-    auto redis = data_systems::RedisDataSource::Create("redis://localhost:6379",
+    auto redis = integrations::RedisDataSource::Create("redis://localhost:6379",
                                                        "launchdarkly");
 
     if (!redis) {
