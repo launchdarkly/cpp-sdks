@@ -129,10 +129,19 @@ class RedisTests : public ::testing::Test {
         client.Clear();
     }
 
-    void WithPrefix(std::string const& prefix,
-                    std::function<void(PrefixedClient const&)> const& f) {
+    void WithPrefixedClient(
+        std::string const& prefix,
+        std::function<void(PrefixedClient const&)> const& f) {
         auto const client = PrefixedClient(client_, prefix);
         f(client);
+    }
+
+    void WithPrefixedSource(
+        std::string const& prefix,
+        std::function<void(RedisDataSource const&)> const& f) const {
+        auto maybe_source = RedisDataSource::Create(uri_, prefix);
+        ASSERT_TRUE(maybe_source);
+        f((*maybe_source->get()));
     }
 
    protected:
@@ -245,19 +254,170 @@ TEST_F(RedisTests, GetSegmentDoesNotFindFlag) {
     ASSERT_FALSE(*result);
 }
 
-TEST_F(RedisTests, ChecksInitializedPrefixIndependence) {
-    WithPrefix("not_our_prefix", [&](auto const& client) {
+TEST_F(RedisTests, GetAllSegmentsWhenEmpty) {
+    auto const result = source->All(SegmentKind{});
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->empty());
+}
+
+TEST_F(RedisTests, GetAllFlagsWhenEmpty) {
+    auto const result = source->All(FlagKind{});
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->empty());
+}
+
+TEST_F(RedisTests, GetAllFlags) {
+    Flag const flag1{"foo", 1, true};
+    Flag const flag2{"bar", 2, false};
+
+    PutFlag(flag1);
+    PutFlag(flag2);
+    PutDeletedFlag("baz", "baz_tombstone");
+
+    auto const result = source->All(FlagKind{});
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->size(), 3);
+
+    auto const& flags = *result;
+    auto const flag1_it = flags.find("foo");
+    ASSERT_NE(flag1_it, flags.end());
+    ASSERT_EQ(flag1_it->second.serializedItem,
+              serialize(boost::json::value_from(flag1)));
+
+    auto const flag2_it = flags.find("bar");
+    ASSERT_NE(flag2_it, flags.end());
+    ASSERT_EQ(flag2_it->second.serializedItem,
+              serialize(boost::json::value_from(flag2)));
+
+    auto const flag3_it = flags.find("baz");
+    ASSERT_NE(flag3_it, flags.end());
+    ASSERT_EQ(flag3_it->second.serializedItem, "baz_tombstone");
+}
+
+TEST_F(RedisTests, InitializedPrefixIndependence) {
+    WithPrefixedClient("not_our_prefix", [&](auto const& client) {
         client.Init();
         ASSERT_FALSE(source->Initialized());
     });
 
-    WithPrefix("TestPrefix", [&](auto const& client) {
+    WithPrefixedClient("TestPrefix", [&](auto const& client) {
         client.Init();
         ASSERT_FALSE(source->Initialized());
     });
 
-    WithPrefix("stillnotprefix", [&](auto const& client) {
+    WithPrefixedClient("stillnotprefix", [&](auto const& client) {
         client.Init();
         ASSERT_FALSE(source->Initialized());
     });
+}
+
+TEST_F(RedisTests, SegmentPrefixIndependence) {
+    auto MakeSegment = [](std::uint64_t const version) {
+        return Segment{"foo", version};
+    };
+
+    auto PrefixName = [](std::uint64_t const version) {
+        return "prefix" + std::to_string(version);
+    };
+
+    auto ValidateSegment = [&](ISerializedDataReader::GetResult const& result,
+                               std::size_t i) {
+        ASSERT_TRUE(result);
+        if (auto const f = *result) {
+            ASSERT_EQ(f->serializedItem,
+                      serialize(boost::json::value_from(MakeSegment(i))));
+        } else {
+            FAIL() << "expected segment to be found under " << PrefixName(i);
+        }
+    };
+
+    constexpr std::size_t kPrefixCount = 10;
+
+    // Setup the same segment key (with different versions) under kPrefixCount
+    // prefixes. This will allow us to verify that the prefixed clients only
+    // "see" the single segment and not the ones living under different
+    // prefixes.
+
+    for (std::size_t i = 0; i < kPrefixCount; i++) {
+        WithPrefixedClient(PrefixName(i), [&](auto const& client) {
+            client.PutSegment(MakeSegment(i));
+        });
+    }
+
+    for (std::size_t i = 0; i < kPrefixCount; i++) {
+        WithPrefixedSource(PrefixName(i), [&](auto const& source) {
+            // Checks that the string that was stored for segment #i is the
+            // same one that was retrieved.
+            ValidateSegment(source.Get(SegmentKind{}, "foo"), i);
+
+            // Sanity check that the other segments are not visible.
+            auto all = source.All(SegmentKind{});
+            ASSERT_TRUE(all);
+            ASSERT_EQ(all->size(), 1);
+        });
+    }
+}
+
+TEST_F(RedisTests, FlagPrefixIndependence) {
+    auto MakeFlag = [](std::uint64_t const version) {
+        return Flag{"foo", version, true};
+    };
+
+    auto PrefixName = [](std::uint64_t const version) {
+        return "prefix" + std::to_string(version);
+    };
+
+    auto ValidateFlag = [&](ISerializedDataReader::GetResult const& result,
+                            std::size_t i) {
+        ASSERT_TRUE(result);
+        if (auto const f = *result) {
+            ASSERT_EQ(f->serializedItem,
+                      serialize(boost::json::value_from(MakeFlag(i))));
+        } else {
+            FAIL() << "expected flag to be found under " << PrefixName(i);
+        }
+    };
+
+    constexpr std::size_t kPrefixCount = 10;
+
+    // Setup the same flag key (with different versions) under kPrefixCount
+    // prefixes. This will allow us to verify that the prefixed clients only
+    // "see" the single flag and not the ones living under different prefixes.
+
+    for (std::size_t i = 0; i < kPrefixCount; i++) {
+        WithPrefixedClient(PrefixName(i), [&](auto const& client) {
+            client.PutFlag(MakeFlag(i));
+        });
+    }
+
+    for (std::size_t i = 0; i < kPrefixCount; i++) {
+        WithPrefixedSource(PrefixName(i), [&](auto const& source) {
+            // Checks that the string that was stored for flag #i is the
+            // same one that was retrieved.
+            ValidateFlag(source.Get(FlagKind{}, "foo"), i);
+
+            // Sanity check that the other flags are not visible.
+            auto all = source.All(FlagKind{});
+            ASSERT_TRUE(all);
+            ASSERT_EQ(all->size(), 1);
+        });
+    }
+}
+
+TEST_F(RedisTests, FlagAndSegmentCanCoexistWithSameKey) {
+    Flag const flag_in{"foo", 1, true};
+    Segment const segment_in{"foo", 1};
+
+    PutFlag(flag_in);
+    PutSegment(segment_in);
+
+    auto flag = source->Get(FlagKind{}, "foo");
+    ASSERT_TRUE(flag);
+    ASSERT_EQ((*flag)->serializedItem,
+              serialize(boost::json::value_from(flag_in)));
+
+    auto segment = source->Get(SegmentKind{}, "foo");
+    ASSERT_TRUE(segment);
+    ASSERT_EQ((*segment)->serializedItem,
+              serialize(boost::json::value_from(segment_in)));
 }
