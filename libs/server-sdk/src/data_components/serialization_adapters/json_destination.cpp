@@ -3,6 +3,8 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
+#include <boost/json.hpp>
+
 namespace launchdarkly::server_side::data_components {
 
 using data_interfaces::ISerializedDestination;
