@@ -1,0 +1,153 @@
+\hypertarget{evaluation__detail_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data/evaluation\+\_\+detail.h File Reference}
+\label{evaluation__detail_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data/evaluation\_detail.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data/evaluation\_detail.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+Include dependency graph for evaluation\+\_\+detail.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=279pt]{evaluation__detail_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{evaluation__detail_8h_aebefb6b7c76015a81f2eb36f1cd9cf52}\label{evaluation__detail_8h_aebefb6b7c76015a81f2eb36f1cd9cf52}} 
+typedef struct \+\_\+\+LDEval\+Detail $\ast$ {\bfseries LDEval\+Detail}
+\item 
+\mbox{\Hypertarget{evaluation__detail_8h_ac736de3b2a9814bce71f11578be52f07}\label{evaluation__detail_8h_ac736de3b2a9814bce71f11578be52f07}} 
+typedef struct \+\_\+\+LDEval\+Reason $\ast$ {\bfseries LDEval\+Reason}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{evaluation__detail_8h_ab66878fe2c616e809ceac6b999572c50}\label{evaluation__detail_8h_ab66878fe2c616e809ceac6b999572c50}} 
+enum {\bfseries LDEval\+Reason\+\_\+\+Kind} \{ \newline
+{\bfseries LD\+\_\+\+EVALREASON\+\_\+\+OFF} = 0
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+FALLTHROUGH} = 1
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+TARGET\+\_\+\+MATCH} = 2
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+RULE\+\_\+\+MATCH} = 3
+, \newline
+{\bfseries LD\+\_\+\+EVALREASON\+\_\+\+PREREQUISITE\+\_\+\+FAILED} = 4
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR} = 5
+ \}
+\item 
+\mbox{\Hypertarget{evaluation__detail_8h_a6d341c0965517c38aad88208eddac728}\label{evaluation__detail_8h_a6d341c0965517c38aad88208eddac728}} 
+enum {\bfseries LDEval\+Reason\+\_\+\+Error\+Kind} \{ \newline
+{\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+CLIENT\+\_\+\+NOT\+\_\+\+READY} = 0
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+USER\+\_\+\+NOT\+\_\+\+SPECIFIED} = 1
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+FLAG\+\_\+\+NOT\+\_\+\+FOUND} = 2
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+WRONG\+\_\+\+TYPE} = 3
+, \newline
+{\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+MALFORMED\+\_\+\+FLAG} = 4
+, {\bfseries LD\+\_\+\+EVALREASON\+\_\+\+ERROR\+\_\+\+EXCEPTION} = 5
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a35e3d721f0147eab281a2ceb55da04e9}{LDEval\+Detail\+\_\+\+Free}} (LDEval\+Detail detail)
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a8221649dc0a59119848cce1e2125a8a9}{LDEval\+Detail\+\_\+\+Variation\+Index}} (LDEval\+Detail detail, size\+\_\+t $\ast$out\+\_\+variation\+\_\+index)
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a4c60dbc095dc1ff1bf0318523420f232}{LDEval\+Detail\+\_\+\+Reason}} (LDEval\+Detail detail, LDEval\+Reason $\ast$out\+\_\+reason)
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a60dd23f5d0533c05cf0ffe4496854ea6}{LDEval\+Reason\+\_\+\+Kind}} (LDEval\+Reason reason)
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a544e005c40837aa4f40eaca180525a1a}{LDEval\+Reason\+\_\+\+Error\+Kind}} (LDEval\+Reason reason, enum LDEval\+Reason\+\_\+\+Error\+Kind $\ast$out\+\_\+error\+\_\+kind)
+\item 
+\mbox{\hyperlink{evaluation__detail_8h_a5c0300297bcb20f73d50161fa1bab189}{LDEval\+Reason\+\_\+\+In\+Experiment}} (LDEval\+Reason reason)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{evaluation__detail_8h_a35e3d721f0147eab281a2ceb55da04e9}\label{evaluation__detail_8h_a35e3d721f0147eab281a2ceb55da04e9}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalDetail\_Free@{LDEvalDetail\_Free}}
+\index{LDEvalDetail\_Free@{LDEvalDetail\_Free}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalDetail\_Free()}{LDEvalDetail\_Free()}}
+{\footnotesize\ttfamily LDEval\+Detail\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDEval\+Detail}]{detail }\end{DoxyParamCaption})}
+
+Frees the detail structure optionally returned by $\ast$\+Variation\+Detail functions. 
+\begin{DoxyParams}{Parameters}
+{\em detail} & Evaluation detail to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{evaluation__detail_8h_a4c60dbc095dc1ff1bf0318523420f232}\label{evaluation__detail_8h_a4c60dbc095dc1ff1bf0318523420f232}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalDetail\_Reason@{LDEvalDetail\_Reason}}
+\index{LDEvalDetail\_Reason@{LDEvalDetail\_Reason}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalDetail\_Reason()}{LDEvalDetail\_Reason()}}
+{\footnotesize\ttfamily LDEval\+Detail\+\_\+\+Reason (\begin{DoxyParamCaption}\item[{LDEval\+Detail}]{detail,  }\item[{LDEval\+Reason $\ast$}]{out\+\_\+reason }\end{DoxyParamCaption})}
+
+Returns the reason of the evaluation result, if any. 
+\begin{DoxyParams}{Parameters}
+{\em detail} & Evaluation detail.\+Must not be NULL. \\
+\hline
+{\em out\+\_\+reason} & Pointer where reason should be stored, if any. The reason\textquotesingle{}s lifetime is valid only for that of the containing Eval\+Detail. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if a reason was present, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__detail_8h_a8221649dc0a59119848cce1e2125a8a9}\label{evaluation__detail_8h_a8221649dc0a59119848cce1e2125a8a9}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalDetail\_VariationIndex@{LDEvalDetail\_VariationIndex}}
+\index{LDEvalDetail\_VariationIndex@{LDEvalDetail\_VariationIndex}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalDetail\_VariationIndex()}{LDEvalDetail\_VariationIndex()}}
+{\footnotesize\ttfamily LDEval\+Detail\+\_\+\+Variation\+Index (\begin{DoxyParamCaption}\item[{LDEval\+Detail}]{detail,  }\item[{size\+\_\+t $\ast$}]{out\+\_\+variation\+\_\+index }\end{DoxyParamCaption})}
+
+Returns variation index of the evaluation result, if any. 
+\begin{DoxyParams}{Parameters}
+{\em detail} & Evaluation detail. Must not be NULL. \\
+\hline
+{\em out\+\_\+variation\+\_\+index} & Pointer where index should be stored, if any. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if an index was present, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__detail_8h_a544e005c40837aa4f40eaca180525a1a}\label{evaluation__detail_8h_a544e005c40837aa4f40eaca180525a1a}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalReason\_ErrorKind@{LDEvalReason\_ErrorKind}}
+\index{LDEvalReason\_ErrorKind@{LDEvalReason\_ErrorKind}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalReason\_ErrorKind()}{LDEvalReason\_ErrorKind()}}
+{\footnotesize\ttfamily LDEval\+Reason\+\_\+\+Error\+Kind (\begin{DoxyParamCaption}\item[{LDEval\+Reason}]{reason,  }\item[{enum LDEval\+Reason\+\_\+\+Error\+Kind $\ast$}]{out\+\_\+error\+\_\+kind }\end{DoxyParamCaption})}
+
+Returns the evaluation reason\textquotesingle{}s error kind, if the evaluation reason\textquotesingle{}s kind was LD\+\_\+\+EVALREASON\+\_\+\+ERROR. 
+\begin{DoxyParams}{Parameters}
+{\em reason} & Evaluation reason. Must not be NULL. \\
+\hline
+{\em out\+\_\+error\+\_\+kind} & Pointer where error kind should be stored, if any. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if an error kind was present, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__detail_8h_a5c0300297bcb20f73d50161fa1bab189}\label{evaluation__detail_8h_a5c0300297bcb20f73d50161fa1bab189}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalReason\_InExperiment@{LDEvalReason\_InExperiment}}
+\index{LDEvalReason\_InExperiment@{LDEvalReason\_InExperiment}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalReason\_InExperiment()}{LDEvalReason\_InExperiment()}}
+{\footnotesize\ttfamily LDEval\+Reason\+\_\+\+In\+Experiment (\begin{DoxyParamCaption}\item[{LDEval\+Reason}]{reason }\end{DoxyParamCaption})}
+
+Whether the evaluation was part of an experiment.
+
+
+\begin{DoxyParams}{Parameters}
+{\em reason} & Evaluation reason. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the evaluation resulted in an experiment rollout and served one of the variations in the experiment. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{evaluation__detail_8h_a60dd23f5d0533c05cf0ffe4496854ea6}\label{evaluation__detail_8h_a60dd23f5d0533c05cf0ffe4496854ea6}} 
+\index{evaluation\_detail.h@{evaluation\_detail.h}!LDEvalReason\_Kind@{LDEvalReason\_Kind}}
+\index{LDEvalReason\_Kind@{LDEvalReason\_Kind}!evaluation\_detail.h@{evaluation\_detail.h}}
+\doxysubsubsection{\texorpdfstring{LDEvalReason\_Kind()}{LDEvalReason\_Kind()}}
+{\footnotesize\ttfamily LDEval\+Reason\+\_\+\+Kind (\begin{DoxyParamCaption}\item[{LDEval\+Reason}]{reason }\end{DoxyParamCaption})}
+
+Returns the evaluation reason\textquotesingle{}s kind. 
+\begin{DoxyParams}{Parameters}
+{\em reason} & Evaluation reason. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Kind of reason. 
+\end{DoxyReturn}
