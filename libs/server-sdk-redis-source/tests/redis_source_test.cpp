@@ -404,3 +404,53 @@ TEST_F(RedisTests, FlagAndSegmentCanCoexistWithSameKey) {
     ASSERT_EQ((*segment)->serializedItem,
               serialize(boost::json::value_from(segment_in)));
 }
+
+TEST(RedisErrorTests, InvalidURIs) {
+    std::vector<std::string> const uris = {"nope, not a redis URI",
+                                           "http://foo",
+                                           "foo.com"
+                                           ""};
+
+    for (auto const& uri : uris) {
+        auto const source = RedisDataSource::Create(uri, "prefix");
+        ASSERT_FALSE(source);
+    }
+}
+
+TEST(RedisErrorTests, ValidURIs) {
+    std::vector<std::string> const uris = {
+        "tcp://127.0.0.1:6666",
+        "tcp://127.0.0.1",
+        "tcp://pass@127.0.0.1",
+        "tcp://127.0.0.1:6379/2",
+        "tcp://127.0.0.1:6379/2?keep_alive=true",
+        "tcp://127.0.0.1?socket_timeout=50ms&connect_timeout=1s",
+        "unix://path/to/socket"};
+    for (auto const& uri : uris) {
+        auto const source = RedisDataSource::Create(uri, "prefix");
+        ASSERT_TRUE(source);
+    }
+}
+
+TEST(RedisErrorTests, GetReturnsErrorAndNoExceptionThrown) {
+    auto const maybe_source = RedisDataSource::Create(
+        "tcp://foobar:1000" /* no redis service here */, "prefix");
+    ASSERT_TRUE(maybe_source);
+
+    auto const source = *maybe_source;
+
+    auto const get_initialized = source->Initialized();
+    ASSERT_FALSE(get_initialized);
+
+    auto const get_flag = source->Get(FlagKind{}, "foo");
+    ASSERT_FALSE(get_flag);
+
+    auto const get_segment = source->Get(SegmentKind{}, "foo");
+    ASSERT_FALSE(get_segment);
+
+    auto const get_all_flag = source->All(FlagKind{});
+    ASSERT_FALSE(get_all_flag);
+
+    auto const get_all_segment = source->All(SegmentKind{});
+    ASSERT_FALSE(get_all_segment);
+}
