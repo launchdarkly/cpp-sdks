@@ -180,4 +180,17 @@ std::chrono::time_point<std::chrono::steady_clock> LazyLoad::ExpiryTime()
                fresh_duration_);
 }
 
+std::string LazyLoad::CacheTraceMsg(
+    data_components::ExpirationTracker::TrackState const state) {
+    switch (state) {
+        case data_components::ExpirationTracker::TrackState::kStale:
+            return "cache hit (stale)";
+        case data_components::ExpirationTracker::TrackState::kNotTracked:
+            return "cache miss";
+        case data_components::ExpirationTracker::TrackState::kFresh:
+            return "cache hit";
+    }
+    detail::unreachable();
+}
+
 }  // namespace launchdarkly::server_side::data_systems

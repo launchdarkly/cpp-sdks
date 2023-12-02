@@ -71,26 +71,25 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
+    static std::string CacheTraceMsg(
+        data_components::ExpirationTracker::TrackState state);
+
     template <typename TResult>
     TResult Get(std::string const& key,
                 data_components::ExpirationTracker::TrackState const state,
 
                 std::function<void(void)> const& refresh,
                 std::function<TResult(void)> const& get) const {
+        LD_LOG(logger_, LogLevel::kDebug)
+            << Identity() << ": get " << key << " - " << CacheTraceMsg(state);
+
         switch (state) {
             case data_components::ExpirationTracker::TrackState::kStale:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " is stale; refreshing";
-                refresh();
-                return get();
+                [[fallthrough]];
             case data_components::ExpirationTracker::TrackState::kNotTracked:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " not cached; refreshing";
                 refresh();
-                return get();
+                [[fallthrough]];
             case data_components::ExpirationTracker::TrackState::kFresh:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " served from cache";
                 return get();
         }
         detail::unreachable();
