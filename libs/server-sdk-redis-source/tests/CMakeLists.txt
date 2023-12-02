@@ -31,7 +31,4 @@ set(LIBS
 
 target_link_libraries(gtest_${LIBNAME} PRIVATE ${LIBS})
 
-# There's an uninitialized variable warning in gtest that hasn't been resolved.
-set_target_properties(gtest_${LIBNAME} PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
-
 gtest_discover_tests(gtest_${LIBNAME})
