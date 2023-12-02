@@ -18,6 +18,10 @@ add_executable(gtest_${LIBNAME}
         ${tests}
 )
 
+# Suppress gtest warning about uninitialized variable.
+set_target_properties(gtest_${LIBNAME} PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
+
+
 set(LIBS
         launchdarkly::server_redis_source
         # Needed so we can access the flag/segment data models so we can serialize them for putting in redis.
