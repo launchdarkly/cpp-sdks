@@ -19,8 +19,7 @@ add_executable(gtest_${LIBNAME}
 )
 
 # Suppress gtest warning about uninitialized variable.
-set_target_properties(gtest_${LIBNAME} PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
-
+set_target_properties(gtest PROPERTIES COMPILE_WARNING_AS_ERROR OFF)
 
 set(LIBS
         launchdarkly::server_redis_source
