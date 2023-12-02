@@ -61,18 +61,6 @@ class PrefixedClient {
         }
     }
 
-    void Clear() const {
-        try {
-            std::vector<std::pair<std::string, std::string>> output;
-            client_.keys(Prefixed("*"), std::back_inserter(output));
-            for (auto const& [key, _] : output) {
-                client_.del(key);
-            }
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
    private:
     std::string Prefixed(std::string const& name) const {
         return prefix_ + ":" + name;
@@ -122,11 +110,6 @@ class RedisTests : public ::testing::Test {
     void PutSegment(Segment const& segment) {
         auto const client = PrefixedClient(client_, prefix_);
         client.PutSegment(segment);
-    }
-
-    void Clear() {
-        auto const client = PrefixedClient(client_, prefix_);
-        client.Clear();
     }
 
     void WithPrefixedClient(
