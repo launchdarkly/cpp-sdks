@@ -59,6 +59,7 @@ Various CMake options are available to customize the client/server SDK builds.
 | `LD_BUILD_SHARED_LIBS`    | Whether the SDKs are built as static or shared libraries.                                                                                         | Off  (static lib)                                      | N/A                                       |
 | `LD_DYNAMIC_LINK_BOOST`   | If building SDK as shared lib, whether to dynamically link Boost or not. Ensure that the shared boost libraries are present on the target system. | On (link boost dynamically when producing shared libs) | `LD_BUILD_SHARED_LIBS`                    |
 | `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL is dynamically linked or not.                                                                                                     | Off  (static link)                                     | N/A                                       |
+| `LD_BUILD_REDIS_SUPPORT`  | Whether the server-side Redis Source is built or not.                                                                                             | Off                                                    | N/A                                       |
 
 **Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
 symbols aren't exposed. To run unit tests, build a static library._
