@@ -2,7 +2,7 @@
 name: 'C++ Server SDK / Redis Source Bug Report'
 about: Create a report to help us improve
 title: ''
-labels: 'package: sdk/server-redis, bug'
+labels: 'package: integration/redis, bug'
 assignees: ''
 
 ---

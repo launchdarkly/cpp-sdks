@@ -5,10 +5,11 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 
 ## Packages
 
-| Readme                                       | issues                                      | tests                                                   | docs                                                                                                                        | latest release                                                                                         |
-|----------------------------------------------|---------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| [libs/client-sdk](libs/client-sdk/README.md) | [C++ Client SDK][package-cpp-client-issues] | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-client-docs] | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-client%22)         | 
-| [libs/server-sdk](libs/server-sdk/README.md) | [C++ Server SDK][package-cpp-server-issues] | [![Actions Status][cpp-server-ci-badge]][cpp-server-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-server-docs] | [On Github (Alpha)](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-server%22) |
+| Readme                                                                 | issues                                                           | tests                                                               | docs                                                                                                                              | latest release                                                                                       |
+|------------------------------------------------------------------------|------------------------------------------------------------------|---------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [libs/client-sdk](libs/client-sdk/README.md)                           | [C++ Client SDK][package-cpp-client-issues]                      | [![Actions Status][cpp-client-ci-badge]][cpp-client-ci]             | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-client-docs]       | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-client%22)       | 
+| [libs/server-sdk](libs/server-sdk/README.md)                           | [C++ Server SDK][package-cpp-server-issues]                      | [![Actions Status][cpp-server-ci-badge]][cpp-server-ci]             | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-server-docs]       | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-server%22)       |
+| [libs/server-sdk-redis-source](libs/server-sdk-redis-source/README.md) | [C++ Server SDK - Redis Source][package-cpp-server-redis-issues] | [![Actions Status][cpp-server-redis-ci-badge]][cpp-server-redis-ci] | [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)][cpp-server-redis-docs] | [On Github](https://github.com/launchdarkly/cpp-sdks/releases?q=%22launchdarkly-cpp-server-redis%22) |
 
 | Shared packages                                              | issues                                                 | tests                                                             |
 |--------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------|
@@ -58,6 +59,7 @@ Various CMake options are available to customize the client/server SDK builds.
 | `LD_BUILD_SHARED_LIBS`    | Whether the SDKs are built as static or shared libraries.                                                                                         | Off  (static lib)                                      | N/A                                       |
 | `LD_DYNAMIC_LINK_BOOST`   | If building SDK as shared lib, whether to dynamically link Boost or not. Ensure that the shared boost libraries are present on the target system. | On (link boost dynamically when producing shared libs) | `LD_BUILD_SHARED_LIBS`                    |
 | `LD_DYNAMIC_LINK_OPENSSL` | Whether OpenSSL is dynamically linked or not.                                                                                                     | Off  (static link)                                     | N/A                                       |
+| `LD_BUILD_REDIS_SUPPORT`  | Whether the server-side Redis Source is built or not.                                                                                             | Off                                                    | N/A                                       |
 
 **Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
 symbols aren't exposed. To run unit tests, build a static library._
@@ -169,3 +171,13 @@ our [contributing guidelines](CONTRIBUTING.md) for instructions on how to contri
 [cpp-server-docs]: https://launchdarkly.github.io/cpp-sdks/libs/server-sdk/docs/html/
 
 [package-cpp-server-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aissue+is%3Aopen+label%3A%22package%3A+sdk%2Fserver%22+
+
+[//]: # 'libs/server-sdk-redis-source'
+
+[cpp-server-redis-ci-badge]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/server-redis.yml/badge.svg
+
+[cpp-server-redis-ci]: https://github.com/launchdarkly/cpp-sdks/actions/workflows/server-redis.yml
+
+[cpp-server-redis-docs]: https://launchdarkly.github.io/cpp-sdks/libs/server-sdk-redis-source/docs/html/
+
+[package-cpp-server-redis-issues]: https://github.com/launchdarkly/cpp-sdks/issues?q=is%3Aopen+is%3Aissue+label%3A%22package%3A+integration%2Fredis%22

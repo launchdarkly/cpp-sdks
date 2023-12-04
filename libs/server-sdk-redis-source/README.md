@@ -1,11 +1,7 @@
 LaunchDarkly Server-Side SDK - Redis Source for C/C++
 ===================================
 
-### ⚠️ This repository contains alpha software and should not be considered ready for production use while this message is visible.
-
-### Breaking changes may occur.
-
-[![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server-redis.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server.yml)
+[![Actions Status](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server-redis.yml/badge.svg)](https://github.com/launchdarkly/cpp-sdks/actions/workflows/server-redis.yml)
 [![Documentation](https://img.shields.io/static/v1?label=GitHub+Pages&message=API+reference&color=00add8)](https://launchdarkly.github.io/cpp-sdks/libs/server-sdk-redis-source/docs/html/)
 
 The LaunchDarkly Server-Side SDK Redis Source for C/C++ is designed for use with the Server-Side SDK.
