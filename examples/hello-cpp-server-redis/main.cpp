@@ -17,6 +17,13 @@
 // the client to become initialized.
 #define INIT_TIMEOUT_MILLISECONDS 3000
 
+// Set REDIS_URI to your own Redis instance's URI.
+#define REDIS_URI "redis://localhost:6379"
+
+// Set REDIS_PREFIX to the prefix containing the launchdarkly
+// environment data in Redis.
+#define REDIS_PREFIX "launchdarkly"
+
 char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
                                   char const* error_msg);
@@ -36,8 +43,7 @@ int main() {
 
     using LazyLoad = server_side::config::builders::LazyLoadBuilder;
 
-    auto redis = integrations::RedisDataSource::Create("redis://localhost:6379",
-                                                       "launchdarkly");
+    auto redis = integrations::RedisDataSource::Create(REDIS_URI, REDIS_PREFIX);
 
     if (!redis) {
         std::cout << "error: redis config is invalid: " << redis.error()
