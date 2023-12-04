@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.2.0...launchdarkly-cpp-server-v0.2.1) (2023-12-04)
+
+
+### Bug Fixes
+
+* remove Boost::disable_autolinking from client and server linking ([#316](https://github.com/launchdarkly/cpp-sdks/issues/316)) ([e84c6a0](https://github.com/launchdarkly/cpp-sdks/commit/e84c6a071553b128436e6dd1bb664f0fd752e4d1))
+
 ## [0.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.1.0...launchdarkly-cpp-server-v0.2.0) (2023-11-29)
 
 

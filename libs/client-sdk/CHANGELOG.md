@@ -15,6 +15,13 @@ All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be docume
     * launchdarkly-cpp-internal bumped from 0.3.0 to 0.4.0
     * launchdarkly-cpp-common bumped from 0.5.0 to 1.0.0
 
+## [3.2.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.2.2...launchdarkly-cpp-client-v3.2.3) (2023-12-04)
+
+
+### Bug Fixes
+
+* remove Boost::disable_autolinking from client and server linking ([#316](https://github.com/launchdarkly/cpp-sdks/issues/316)) ([e84c6a0](https://github.com/launchdarkly/cpp-sdks/commit/e84c6a071553b128436e6dd1bb664f0fd752e4d1))
+
 ## [3.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.2.0...launchdarkly-cpp-client-v3.2.1) (2023-10-23)
 
 
