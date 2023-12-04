@@ -1,0 +1,48 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::IData\+Source\+Update\+Sink Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}\index{launchdarkly::server\_side::data\_sources::IDataSourceUpdateSink@{launchdarkly::server\_side::data\_sources::IDataSourceUpdateSink}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+update\+\_\+sink.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::IData\+Source\+Update\+Sink\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_af3e19d7d6b2ce748b1894e82283d5a17}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_af3e19d7d6b2ce748b1894e82283d5a17}} 
+virtual void {\bfseries Init} (launchdarkly\+::data\+\_\+model\+::\+SDKData\+Set data\+\_\+set)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a3cdcb736b9abc998fd79755ae1b70048}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a3cdcb736b9abc998fd79755ae1b70048}} 
+virtual void {\bfseries Upsert} (std\+::string const \&key, data\+\_\+store\+::\+Flag\+Descriptor flag)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a9d5785c9a8fede3db349dc5403368ad3}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a9d5785c9a8fede3db349dc5403368ad3}} 
+virtual void {\bfseries Upsert} (std\+::string const \&key, data\+\_\+store\+::\+Segment\+Descriptor segment)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_aa65845dc8bb3d6b3dbdb231ff11e55f9}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_aa65845dc8bb3d6b3dbdb231ff11e55f9}} 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_adb9df8772a78e5883fd1883fdcdc9e2c}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_adb9df8772a78e5883fd1883fdcdc9e2c}} 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_aac8e201f7bb2289611a761d7cd91407a}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_aac8e201f7bb2289611a761d7cd91407a}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a4316278a96cd7f10403e2662cd79c393}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink_a4316278a96cd7f10403e2662cd79c393}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for handling updates from Launch\+Darkly. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/data\+\_\+source\+\_\+update\+\_\+sink.\+hpp\end{DoxyCompactItemize}

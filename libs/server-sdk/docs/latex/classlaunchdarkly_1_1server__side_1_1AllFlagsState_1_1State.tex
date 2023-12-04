@@ -1,0 +1,107 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{}\doxysection{launchdarkly\+::server\+\_\+side\+::All\+Flags\+State\+::State Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+
+
+{\ttfamily \#include $<$all\+\_\+flags\+\_\+state.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_abbbbcbbb0116f7be250a4daab6cd378b}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_abbbbcbbb0116f7be250a4daab6cd378b}} 
+{\bfseries State} (std\+::uint64\+\_\+t version, std\+::optional$<$ std\+::int64\+\_\+t $>$ variation, std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} $>$ reason, bool track\+\_\+events, bool track\+\_\+reason, std\+::optional$<$ std\+::uint64\+\_\+t $>$ debug\+\_\+events\+\_\+until\+\_\+date)
+\item 
+std\+::uint64\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a3850239b2039bbddb46ad2465506e61d}{Version}} () const
+\item 
+std\+::optional$<$ std\+::int64\+\_\+t $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1837f872bd8e540732660c94b8d4b4a4}{Variation}} () const
+\item 
+std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} $>$ const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a40aa53a1bdbfb84b5ccb900b25b2c30f}{Reason}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ac7f93495cc0a8672aa403e155f33d442}{Track\+Events}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ad63b578713aa90d0f9932054d256fea6}{Track\+Reason}} () const
+\item 
+std\+::optional$<$ std\+::uint64\+\_\+t $>$ const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1cad89b4f25d62f5ee1746e9f5ce1310}{Debug\+Events\+Until\+Date}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a92a753d9c3f36399bf35dfbd231e248d}{Omit\+Details}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a4588a05ab8669fac6b83a4e38b2f1c97}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a4588a05ab8669fac6b83a4e38b2f1c97}} 
+class {\bfseries All\+Flags\+State\+Builder}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{State}} contains information pertaining to a single feature flag. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1cad89b4f25d62f5ee1746e9f5ce1310}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1cad89b4f25d62f5ee1746e9f5ce1310}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!DebugEventsUntilDate@{DebugEventsUntilDate}}
+\index{DebugEventsUntilDate@{DebugEventsUntilDate}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{DebugEventsUntilDate()}{DebugEventsUntilDate()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::uint64\+\_\+t $>$ const  \& launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Debug\+Events\+Until\+Date (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The date on which debug mode expires for this flag, if enabled. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a92a753d9c3f36399bf35dfbd231e248d}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a92a753d9c3f36399bf35dfbd231e248d}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!OmitDetails@{OmitDetails}}
+\index{OmitDetails@{OmitDetails}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{OmitDetails()}{OmitDetails()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Omit\+Details (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+True if the options passed to \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState}{All\+Flags\+State}}, combined with the obtained flag state, indicate that some metadata can be left out of the JSON serialization. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a40aa53a1bdbfb84b5ccb900b25b2c30f}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a40aa53a1bdbfb84b5ccb900b25b2c30f}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!Reason@{Reason}}
+\index{Reason@{Reason}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{Reason()}{Reason()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} $>$ const  \& launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Reason (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The reason that the flag evaluation produced the specified variation. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ac7f93495cc0a8672aa403e155f33d442}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ac7f93495cc0a8672aa403e155f33d442}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!TrackEvents@{TrackEvents}}
+\index{TrackEvents@{TrackEvents}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{TrackEvents()}{TrackEvents()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Track\+Events (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+True if a full feature event must be sent when evaluating this flag. This will be true if tracking was explicitly enabled for this flag for data export, or if the evaluation involved an experiment, or both. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ad63b578713aa90d0f9932054d256fea6}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ad63b578713aa90d0f9932054d256fea6}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!TrackReason@{TrackReason}}
+\index{TrackReason@{TrackReason}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{TrackReason()}{TrackReason()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Track\+Reason (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+True if the evaluation reason should always be included in any full feature event created for this flag, regardless of whether a Variation\+Detail method was called. This will be true if the evaluation involved an experiment. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1837f872bd8e540732660c94b8d4b4a4}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1837f872bd8e540732660c94b8d4b4a4}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!Variation@{Variation}}
+\index{Variation@{Variation}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{Variation()}{Variation()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::int64\+\_\+t $>$ launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Variation (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The variation index that was selected for the specified evaluation context. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a3850239b2039bbddb46ad2465506e61d}\label{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a3850239b2039bbddb46ad2465506e61d}} 
+\index{launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}!Version@{Version}}
+\index{Version@{Version}!launchdarkly::server\_side::AllFlagsState::State@{launchdarkly::server\_side::AllFlagsState::State}}
+\doxysubsubsection{\texorpdfstring{Version()}{Version()}}
+{\footnotesize\ttfamily std\+::uint64\+\_\+t launchdarkly\+::server\+\_\+side\+::\+All\+Flags\+State\+::\+State\+::\+Version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The flag\textquotesingle{}s version number when it was evaluated. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/all\+\_\+flags\+\_\+state.\+hpp\item 
+src/all\+\_\+flags\+\_\+state/all\+\_\+flags\+\_\+state.\+cpp\end{DoxyCompactItemize}

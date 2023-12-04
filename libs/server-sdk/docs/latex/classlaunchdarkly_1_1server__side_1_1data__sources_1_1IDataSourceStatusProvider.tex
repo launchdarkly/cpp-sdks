@@ -1,0 +1,76 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::IData\+Source\+Status\+Provider Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}\index{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+status.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a550a0be55405c8671d4d388c7c267708}{Status}} () const =0
+\item 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_ac1d7496d7aefaaba33fb21c933718cf1}{On\+Data\+Source\+Status\+Change}} (std\+::function$<$ void(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{data\+\_\+sources\+::\+Data\+Source\+Status}} status)$>$ handler)=0
+\item 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a1c1e692f1e9ed3deb802a77c08905c7e}{On\+Data\+Source\+Status\+Change\+Ex}} (std\+::function$<$ bool(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{data\+\_\+sources\+::\+Data\+Source\+Status}} status)$>$ handler)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a71bbbb8ada28b3bfd4da291386f0df2c}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a71bbbb8ada28b3bfd4da291386f0df2c}} 
+{\bfseries IData\+Source\+Status\+Provider} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a035bf729c55f98efbf512d6fdf3a11f9}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a035bf729c55f98efbf512d6fdf3a11f9}} 
+{\bfseries IData\+Source\+Status\+Provider} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_ac303df698254794fa36dfac1d77062cb}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_ac303df698254794fa36dfac1d77062cb}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a35c3ebed85a4bf1d3720627535193123}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a35c3ebed85a4bf1d3720627535193123}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider}{IData\+Source\+Status\+Provider}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for accessing and listening to the data source status. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_ac1d7496d7aefaaba33fb21c933718cf1}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_ac1d7496d7aefaaba33fb21c933718cf1}} 
+\index{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}!OnDataSourceStatusChange@{OnDataSourceStatusChange}}
+\index{OnDataSourceStatusChange@{OnDataSourceStatusChange}!launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}}
+\doxysubsubsection{\texorpdfstring{OnDataSourceStatusChange()}{OnDataSourceStatusChange()}}
+{\footnotesize\ttfamily virtual std\+::unique\+\_\+ptr$<$\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source\+Status\+Provider\+::\+On\+Data\+Source\+Status\+Change (\begin{DoxyParamCaption}\item[{std\+::function$<$ void(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{data\+\_\+sources\+::\+Data\+Source\+Status}} status)$>$}]{handler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Listen to changes to the data source status.
+
+
+\begin{DoxyParams}{Parameters}
+{\em handler} & Function which will be called with the new status. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} which can be used to stop listening to the status. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a1c1e692f1e9ed3deb802a77c08905c7e}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a1c1e692f1e9ed3deb802a77c08905c7e}} 
+\index{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}!OnDataSourceStatusChangeEx@{OnDataSourceStatusChangeEx}}
+\index{OnDataSourceStatusChangeEx@{OnDataSourceStatusChangeEx}!launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}}
+\doxysubsubsection{\texorpdfstring{OnDataSourceStatusChangeEx()}{OnDataSourceStatusChangeEx()}}
+{\footnotesize\ttfamily virtual std\+::unique\+\_\+ptr$<$\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source\+Status\+Provider\+::\+On\+Data\+Source\+Status\+Change\+Ex (\begin{DoxyParamCaption}\item[{std\+::function$<$ bool(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{data\+\_\+sources\+::\+Data\+Source\+Status}} status)$>$}]{handler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Listen to changes to the data source status, with ability for listener to unregister itself.
+
+
+\begin{DoxyParams}{Parameters}
+{\em handler} & Function which will be called with the new status. Return true to unregister. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} which can be used to stop listening to the status. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a550a0be55405c8671d4d388c7c267708}\label{classlaunchdarkly_1_1server__side_1_1data__sources_1_1IDataSourceStatusProvider_a550a0be55405c8671d4d388c7c267708}} 
+\index{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}!Status@{Status}}
+\index{Status@{Status}!launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider@{launchdarkly::server\_side::data\_sources::IDataSourceStatusProvider}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status}} launchdarkly\+::server\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source\+Status\+Provider\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+The current status of the data source. Suitable for broadcast to data source status listeners. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/data\+\_\+source\+\_\+status.\+hpp\end{DoxyCompactItemize}
