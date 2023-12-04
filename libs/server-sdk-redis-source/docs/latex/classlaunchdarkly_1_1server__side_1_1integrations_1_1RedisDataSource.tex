@@ -1,0 +1,49 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}\index{launchdarkly::server\_side::integrations::RedisDataSource@{launchdarkly::server\_side::integrations::RedisDataSource}}
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=205pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Redis\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=205pt]{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a5f009b71cb3146dc198967490346a678}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a5f009b71cb3146dc198967490346a678}} 
+Get\+Result {\bfseries Get} (ISerialized\+Item\+Kind const \&kind, std\+::string const \&item\+Key) const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_abcb7298f22889e6f82c940c71781f5e1}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_abcb7298f22889e6f82c940c71781f5e1}} 
+All\+Result {\bfseries All} (integrations\+::\+ISerialized\+Item\+Kind const \&kind) const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ace0a78e14fe96f2643e4e3835f8ec32e}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ace0a78e14fe96f2643e4e3835f8ec32e}} 
+std\+::string const  \& {\bfseries Identity} () const override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ad4a8ab94fb397db55bb1174d1fcc2d13}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_ad4a8ab94fb397db55bb1174d1fcc2d13}} 
+bool {\bfseries Initialized} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a0e73165679c8eb7480d97d555dd71b2a}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource_a0e73165679c8eb7480d97d555dd71b2a}} 
+static tl\+::expected$<$ std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1RedisDataSource}{Redis\+Data\+Source}} $>$, std\+::string $>$ {\bfseries Create} (std\+::string uri, std\+::string prefix)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/redis/redis\+\_\+source.\+hpp\item 
+src/redis\+\_\+source.\+cpp\end{DoxyCompactItemize}
