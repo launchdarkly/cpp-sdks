@@ -1,5 +1,11 @@
 # Changelog
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 0.3.0 to 3.0.0
+
 ## 0.1.0 (2023-12-04)
 
 

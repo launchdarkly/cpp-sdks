@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.3.0...launchdarkly-cpp-server-v3.0.0) (2023-12-04)
+
+
+### Features
+
+* server sdk 3.0 ([#324](https://github.com/launchdarkly/cpp-sdks/issues/324)) ([fb407d8](https://github.com/launchdarkly/cpp-sdks/commit/fb407d8ad2b681a95799f63896d1c03964026b01))
+
 ## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.2.1...launchdarkly-cpp-server-v0.3.0) (2023-12-04)
 
 
