@@ -1,9 +1,9 @@
 {
   "name": "launchdarkly-cpp-internal",
   "description": "This package.json exists for modeling dependencies for the release process.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "dependencies": {
-    "launchdarkly-cpp-common": "1.0.0"
+    "launchdarkly-cpp-common": "1.1.0"
   }
 }
