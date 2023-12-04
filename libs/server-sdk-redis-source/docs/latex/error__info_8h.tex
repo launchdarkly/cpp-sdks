@@ -1,0 +1,84 @@
+\hypertarget{error__info_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data\+\_\+source/error\+\_\+info.h File Reference}
+\label{error__info_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data\_source/error\_info.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/data\_source/error\_info.h}}
+
+
+Launch\+Darkly Server-\/side C Bindings for Data Source Error Info.  
+
+
+{\ttfamily \#include $<$launchdarkly/bindings/c/data\+\_\+source/error\+\_\+kind.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+Include dependency graph for error\+\_\+info.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{error__info_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{error__info_8h_a7ffc5559f536530fbcefe6b54f23b014}\label{error__info_8h_a7ffc5559f536530fbcefe6b54f23b014}} 
+typedef struct \+\_\+\+LDData\+Source\+Status\+\_\+\+Error\+Info $\ast$ {\bfseries LDData\+Source\+Status\+\_\+\+Error\+Info}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{error__info_8h_a2300c17636a9eb099f47619d9ceedc93}{LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Get\+Kind}} (LDData\+Source\+Status\+\_\+\+Error\+Info info)
+\item 
+\mbox{\hyperlink{error__info_8h_a275297250c4871be8a01a2a5f95ec728}{LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Status\+Code}} (LDData\+Source\+Status\+\_\+\+Error\+Info info)
+\item 
+\mbox{\hyperlink{error__info_8h_abc5a83690793247c54903259e9484e71}{LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Message}} (LDData\+Source\+Status\+\_\+\+Error\+Info info)
+\item 
+\mbox{\hyperlink{error__info_8h_a440a1faa6deb56bbf6f0cddc51f74774}{LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Time}} (LDData\+Source\+Status\+\_\+\+Error\+Info info)
+\item 
+\mbox{\hyperlink{error__info_8h_aae2f56cc701ec9cdd68ee4d2ff12611e}{LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Free}} (LDData\+Source\+Status\+\_\+\+Error\+Info info)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side C Bindings for Data Source Error Info. 
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{error__info_8h_aae2f56cc701ec9cdd68ee4d2ff12611e}\label{error__info_8h_aae2f56cc701ec9cdd68ee4d2ff12611e}} 
+\index{error\_info.h@{error\_info.h}!LDDataSourceStatus\_ErrorInfo\_Free@{LDDataSourceStatus\_ErrorInfo\_Free}}
+\index{LDDataSourceStatus\_ErrorInfo\_Free@{LDDataSourceStatus\_ErrorInfo\_Free}!error\_info.h@{error\_info.h}}
+\doxysubsubsection{\texorpdfstring{LDDataSourceStatus\_ErrorInfo\_Free()}{LDDataSourceStatus\_ErrorInfo\_Free()}}
+{\footnotesize\ttfamily LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDData\+Source\+Status\+\_\+\+Error\+Info}]{info }\end{DoxyParamCaption})}
+
+Frees the data source status error information. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The error information to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{error__info_8h_a2300c17636a9eb099f47619d9ceedc93}\label{error__info_8h_a2300c17636a9eb099f47619d9ceedc93}} 
+\index{error\_info.h@{error\_info.h}!LDDataSourceStatus\_ErrorInfo\_GetKind@{LDDataSourceStatus\_ErrorInfo\_GetKind}}
+\index{LDDataSourceStatus\_ErrorInfo\_GetKind@{LDDataSourceStatus\_ErrorInfo\_GetKind}!error\_info.h@{error\_info.h}}
+\doxysubsubsection{\texorpdfstring{LDDataSourceStatus\_ErrorInfo\_GetKind()}{LDDataSourceStatus\_ErrorInfo\_GetKind()}}
+{\footnotesize\ttfamily LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Get\+Kind (\begin{DoxyParamCaption}\item[{LDData\+Source\+Status\+\_\+\+Error\+Info}]{info }\end{DoxyParamCaption})}
+
+Get an enumerated value representing the general category of the error. \mbox{\Hypertarget{error__info_8h_abc5a83690793247c54903259e9484e71}\label{error__info_8h_abc5a83690793247c54903259e9484e71}} 
+\index{error\_info.h@{error\_info.h}!LDDataSourceStatus\_ErrorInfo\_Message@{LDDataSourceStatus\_ErrorInfo\_Message}}
+\index{LDDataSourceStatus\_ErrorInfo\_Message@{LDDataSourceStatus\_ErrorInfo\_Message}!error\_info.h@{error\_info.h}}
+\doxysubsubsection{\texorpdfstring{LDDataSourceStatus\_ErrorInfo\_Message()}{LDDataSourceStatus\_ErrorInfo\_Message()}}
+{\footnotesize\ttfamily LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Message (\begin{DoxyParamCaption}\item[{LDData\+Source\+Status\+\_\+\+Error\+Info}]{info }\end{DoxyParamCaption})}
+
+Any additional human-\/readable information relevant to the error.
+
+The format is subject to change and should not be relied on programmatically. \mbox{\Hypertarget{error__info_8h_a275297250c4871be8a01a2a5f95ec728}\label{error__info_8h_a275297250c4871be8a01a2a5f95ec728}} 
+\index{error\_info.h@{error\_info.h}!LDDataSourceStatus\_ErrorInfo\_StatusCode@{LDDataSourceStatus\_ErrorInfo\_StatusCode}}
+\index{LDDataSourceStatus\_ErrorInfo\_StatusCode@{LDDataSourceStatus\_ErrorInfo\_StatusCode}!error\_info.h@{error\_info.h}}
+\doxysubsubsection{\texorpdfstring{LDDataSourceStatus\_ErrorInfo\_StatusCode()}{LDDataSourceStatus\_ErrorInfo\_StatusCode()}}
+{\footnotesize\ttfamily LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Status\+Code (\begin{DoxyParamCaption}\item[{LDData\+Source\+Status\+\_\+\+Error\+Info}]{info }\end{DoxyParamCaption})}
+
+The HTTP status code if the error was LD\+\_\+\+DATASOURCESTATUS\+\_\+\+ERRORKIND\+\_\+\+ERROR\+\_\+\+RESPONSE. \mbox{\Hypertarget{error__info_8h_a440a1faa6deb56bbf6f0cddc51f74774}\label{error__info_8h_a440a1faa6deb56bbf6f0cddc51f74774}} 
+\index{error\_info.h@{error\_info.h}!LDDataSourceStatus\_ErrorInfo\_Time@{LDDataSourceStatus\_ErrorInfo\_Time}}
+\index{LDDataSourceStatus\_ErrorInfo\_Time@{LDDataSourceStatus\_ErrorInfo\_Time}!error\_info.h@{error\_info.h}}
+\doxysubsubsection{\texorpdfstring{LDDataSourceStatus\_ErrorInfo\_Time()}{LDDataSourceStatus\_ErrorInfo\_Time()}}
+{\footnotesize\ttfamily LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Time (\begin{DoxyParamCaption}\item[{LDData\+Source\+Status\+\_\+\+Error\+Info}]{info }\end{DoxyParamCaption})}
+
+The date/time that the error occurred, in seconds since epoch. 
