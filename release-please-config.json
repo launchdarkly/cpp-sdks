@@ -18,8 +18,7 @@
         "tests/client_test.cpp",
         "CMakeLists.txt"
       ],
-      "prerelease": true,
-      "bump-minor-pre-major": true
+      "release-as": "3.0.0"
     },
     "libs/server-sdk-redis-source": {
       "extra-files": [
