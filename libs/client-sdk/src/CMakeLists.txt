@@ -43,7 +43,7 @@ target_sources(${LIBNAME} PRIVATE
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE Boost::disable_autolinking Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
+        PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
 
 
 add_library(launchdarkly::client ALIAS ${LIBNAME})
