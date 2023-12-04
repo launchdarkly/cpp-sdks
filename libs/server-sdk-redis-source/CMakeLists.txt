@@ -5,13 +5,13 @@
 cmake_minimum_required(VERSION 3.19)
 
 project(
-        LaunchDarklyCPPServer
-        VERSION 0.2.0 # {x-release-please-version}
-        DESCRIPTION "LaunchDarkly C++ Server SDK"
+        LaunchDarklyCPPServerRedisSource
+        VERSION 0.1.0 # {x-release-please-version}
+        DESCRIPTION "LaunchDarkly C++ Server SDK Redis Source"
         LANGUAGES CXX C
 )
 
-set(LIBNAME "launchdarkly-cpp-server")
+set(LIBNAME "launchdarkly-cpp-server-redis-source")
 
 # If this project is the main CMake project (as opposed to being included via add_subdirectory)
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -21,16 +21,13 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif ()
 
-#set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_FILES})
-
 # Needed to fetch external dependencies.
 include(FetchContent)
 
-# Needed to parse RFC3339 dates in flag rules.
-include(${CMAKE_FILES}/rfc3339_timestamp.cmake)
+set(REDIS_PLUS_PLUS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 
-# Add main SDK sources.
+include(${CMAKE_FILES}/redis-plus-plus.cmake)
+
 add_subdirectory(src)
 
 if (LD_BUILD_UNIT_TESTS)

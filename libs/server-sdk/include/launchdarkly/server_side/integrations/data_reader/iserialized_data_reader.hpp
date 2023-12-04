@@ -1,7 +1,7 @@
 #pragma once
 
-#include <launchdarkly/server_side/integrations/iserialized_item_kind.hpp>
-#include <launchdarkly/server_side/integrations/serialized_item_descriptor.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/iserialized_item_kind.hpp>
+#include <launchdarkly/server_side/integrations/data_reader/serialized_item_descriptor.hpp>
 
 #include <tl/expected.hpp>
 
@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace launchdarkly::server_side::data_interfaces {
+namespace launchdarkly::server_side::integrations {
 
 /**
  * Interface for a data reader that provides feature flags and related data in a
@@ -41,11 +41,11 @@ class ISerializedDataReader {
     };
 
     using GetResult =
-        tl::expected<integrations::SerializedItemDescriptor, Error>;
+        tl::expected<std::optional<SerializedItemDescriptor>, Error>;
 
-    using AllResult = tl::expected<
-        std::unordered_map<std::string, integrations::SerializedItemDescriptor>,
-        Error>;
+    using AllResult =
+        tl::expected<std::unordered_map<std::string, SerializedItemDescriptor>,
+                     Error>;
 
     /**
      * Retrieves an item from the specified collection, if available.
@@ -56,9 +56,8 @@ class ISerializedDataReader {
      * if the item did not exist, or an error. For a deleted item the serialized
      * item descriptor may contain a std::nullopt for the serializedItem.
      */
-    [[nodiscard]] virtual GetResult Get(
-        integrations::ISerializedItemKind const& kind,
-        std::string const& itemKey) const = 0;
+    [[nodiscard]] virtual GetResult Get(ISerializedItemKind const& kind,
+                                        std::string const& itemKey) const = 0;
 
     /**
      * Retrieves all items from the specified collection.
@@ -70,7 +69,7 @@ class ISerializedDataReader {
      * no items of the specified type, then return an empty collection.
      */
     [[nodiscard]] virtual AllResult All(
-        integrations::ISerializedItemKind const& kind) const = 0;
+        ISerializedItemKind const& kind) const = 0;
 
     /**
      * @return Identity of the reader. Used in logs.
@@ -89,4 +88,4 @@ class ISerializedDataReader {
    protected:
     ISerializedDataReader() = default;
 };
-}  // namespace launchdarkly::server_side::data_interfaces
+}  // namespace launchdarkly::server_side::integrations

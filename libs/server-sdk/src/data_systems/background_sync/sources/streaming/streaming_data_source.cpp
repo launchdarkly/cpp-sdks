@@ -5,6 +5,7 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/url.hpp>
 
 #include <utility>

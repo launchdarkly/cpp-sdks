@@ -20,11 +20,7 @@ struct SerializedItemDescriptor {
      */
     bool deleted;
 
-    /**
-     * When reading from a persistent store the serializedItem may be
-     * std::nullopt for deleted items.
-     */
-    std::optional<std::string> serializedItem;
+    std::string serializedItem;
 
     /**
      * @brief Constructs a SerializedItemDescriptor from a version and a
@@ -33,7 +29,7 @@ struct SerializedItemDescriptor {
      * @param data Serialized item.
      * @return SerializedItemDescriptor.
      */
-    static SerializedItemDescriptor Present(std::uint64_t version,
+    static SerializedItemDescriptor Present(std::uint64_t const version,
                                             std::string data) {
         return SerializedItemDescriptor{version, false, std::move(data)};
     }
@@ -50,8 +46,8 @@ struct SerializedItemDescriptor {
      * @param tombstone_rep Serialized tombstone representation of the item.
      * @return SerializedItemDescriptor.
      */
-    static SerializedItemDescriptor Absent(std::uint64_t const version,
-                                           std::string tombstone_rep) {
+    static SerializedItemDescriptor Tombstone(std::uint64_t const version,
+                                              std::string tombstone_rep) {
         return SerializedItemDescriptor{version, true,
                                         std::move(tombstone_rep)};
     }
@@ -65,7 +61,7 @@ inline bool operator==(SerializedItemDescriptor const& lhs,
 
 inline void PrintTo(SerializedItemDescriptor const& item, std::ostream* os) {
     *os << "{version=" << item.version << ", deleted=" << item.deleted
-        << ", item=" << item.serializedItem.value_or("nullopt") << "}";
+        << ", item=" << item.serializedItem << "}";
 }
 
 }  // namespace launchdarkly::server_side::integrations

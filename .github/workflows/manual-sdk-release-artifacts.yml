@@ -15,6 +15,7 @@ on:
         options:
           - libs/client-sdk:launchdarkly-cpp-client
           - libs/server-sdk:launchdarkly-cpp-server
+          - libs/server-sdk-redis-source:launchdarkly-cpp-server-redis-source
 
 name: Publish SDK Artifacts
 

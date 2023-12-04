@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../data_components/kinds/kinds.hpp"
+#include "../../../include/launchdarkly/server_side/integrations/data_reader/kinds.hpp"
 #include "../../data_interfaces/destination/idestination.hpp"
 #include "../../data_interfaces/destination/iserialized_destination.hpp"
 
@@ -79,8 +79,8 @@ class JsonDestination final : public data_interfaces::IDestination {
      * @brief These are public so they can be referenced in tests.
      */
     struct Kinds {
-        static FlagKind const Flag;
-        static SegmentKind const Segment;
+        static integrations::FlagKind const Flag;
+        static integrations::SegmentKind const Segment;
     };
 
    private:

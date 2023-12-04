@@ -1,4 +1,4 @@
-#include "kinds.hpp"
+#include <launchdarkly/server_side/integrations/data_reader/kinds.hpp>
 
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
@@ -6,7 +6,7 @@
 
 #include <boost/json.hpp>
 
-namespace launchdarkly::server_side::data_components {
+namespace launchdarkly::server_side::integrations {
 
 template <typename TData>
 static uint64_t GetVersion(std::string const& data) {
@@ -42,4 +42,4 @@ std::uint64_t FlagKind::Version(std::string const& data) const {
     return GetVersion<data_model::Flag>(data);
 }
 
-}  // namespace launchdarkly::server_side::data_components
+}  // namespace launchdarkly::server_side::integrations

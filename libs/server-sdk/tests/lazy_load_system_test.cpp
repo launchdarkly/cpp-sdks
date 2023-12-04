@@ -17,7 +17,7 @@ using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 
-class MockDataReader : public data_interfaces::ISerializedDataReader {
+class MockDataReader : public integrations::ISerializedDataReader {
    public:
     MOCK_METHOD(GetResult,
                 Get,
@@ -104,14 +104,14 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfFlagCannotBeFetched) {
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
         .WillOnce(Return(tl::make_unexpected(
-            data_interfaces::ISerializedDataReader::Error{"oops"})));
+            integrations::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
         ASSERT_FALSE(lazy_load.GetFlag("foo"));
     };
 
-    ASSERT_TRUE(spy_logger_backend->Count(1));
-    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+    ASSERT_TRUE(spy_logger_backend->Count(21));  // 20 debug logs + 1 error log
+    ASSERT_TRUE(spy_logger_backend->Contains(1, LogLevel::kError, "oops"));
 }
 
 TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
@@ -123,14 +123,14 @@ TEST_F(LazyLoadTest, ReaderIsNotQueriedRepeatedlyIfSegmentCannotBeFetched) {
 
     EXPECT_CALL(*mock_reader, Get(testing::_, "foo"))
         .WillOnce(Return(tl::make_unexpected(
-            data_interfaces::ISerializedDataReader::Error{"oops"})));
+            integrations::ISerializedDataReader::Error{"oops"})));
 
     for (std::size_t i = 0; i < 20; i++) {
         ASSERT_FALSE(lazy_load.GetSegment("foo"));
     };
 
-    ASSERT_TRUE(spy_logger_backend->Count(1));
-    ASSERT_TRUE(spy_logger_backend->Contains(0, LogLevel::kError, "oops"));
+    ASSERT_TRUE(spy_logger_backend->Count(21));
+    ASSERT_TRUE(spy_logger_backend->Contains(1, LogLevel::kError, "oops"));
 }
 
 TEST_F(LazyLoadTest, RefreshesFlagIfStale) {

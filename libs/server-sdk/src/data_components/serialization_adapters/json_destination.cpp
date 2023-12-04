@@ -3,13 +3,18 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
+#include <boost/json.hpp>
+
 namespace launchdarkly::server_side::data_components {
 
 using data_interfaces::ISerializedDestination;
 using integrations::SerializedItemDescriptor;
 
-FlagKind const JsonDestination::Kinds::Flag = FlagKind();
-SegmentKind const JsonDestination::Kinds::Segment = SegmentKind();
+integrations::FlagKind const JsonDestination::Kinds::Flag =
+    integrations::FlagKind();
+
+integrations::SegmentKind const JsonDestination::Kinds::Segment =
+    integrations::SegmentKind();
 
 /**
  * @brief Creates a boost::json::value representing a tombstone for a given
@@ -49,7 +54,7 @@ SerializedItemDescriptor Serialize(std::string const& key,
                ? SerializedItemDescriptor::Present(
                      desc.version, boost::json::serialize(
                                        boost::json::value_from(*desc.item)))
-               : SerializedItemDescriptor::Absent(
+               : SerializedItemDescriptor::Tombstone(
                      desc.version,
                      boost::json::serialize(Tombstone(key, desc)));
 }

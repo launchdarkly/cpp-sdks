@@ -20,13 +20,33 @@ namespace launchdarkly::server_side::data_interfaces {
  */
 class IDataReader {
    public:
+    BOOST_STRONG_TYPEDEF(std::uint64_t, Tombstone);
+
+    template <typename Item>
+    using StorageItem = std::variant<Item, Tombstone>;
+
+    template <typename T>
+    static data_model::ItemDescriptor<T> StorageItemIntoDescriptor(
+        StorageItem<T> item) {
+        if (std::holds_alternative<Tombstone>(item)) {
+            return data_model::ItemDescriptor<T>(std::get<Tombstone>(item));
+        }
+        return data_model::ItemDescriptor<T>(std::move(std::get<T>(item)));
+    }
+
     using Error = std::string;
 
     template <typename T>
-    using Single = tl::expected<std::optional<T>, Error>;
+    using Single = std::optional<StorageItem<T>>;
 
     template <typename T>
-    using Collection = tl::expected<std::unordered_map<std::string, T>, Error>;
+    using SingleResult = tl::expected<Single<T>, Error>;
+
+    template <typename T>
+    using Collection = std::unordered_map<std::string, StorageItem<T>>;
+
+    template <typename T>
+    using CollectionResult = tl::expected<Collection<T>, Error>;
 
     /**
      * @brief Attempts to get a flag named by key.
@@ -34,7 +54,7 @@ class IDataReader {
      * @return On success, an optional FlagDescriptor (std::nullopt means the
      * flag doesn't exist.) On failure, an error string.
      */
-    [[nodiscard]] virtual Single<data_model::FlagDescriptor> GetFlag(
+    [[nodiscard]] virtual SingleResult<data_model::Flag> GetFlag(
         std::string const& key) const = 0;
 
     /**
@@ -43,7 +63,7 @@ class IDataReader {
      * @return On success, an optional SegmentDescriptor (std::nullopt means the
      * segment doesn't exist.) On failure, an error string.
      */
-    [[nodiscard]] virtual Single<data_model::SegmentDescriptor> GetSegment(
+    [[nodiscard]] virtual SingleResult<data_model::Segment> GetSegment(
         std::string const& key) const = 0;
 
     /**
@@ -51,7 +71,7 @@ class IDataReader {
      * @return On success, a collection of FlagDescriptors. On failure, an error
      * string.
      */
-    [[nodiscard]] virtual Collection<data_model::FlagDescriptor> AllFlags()
+    [[nodiscard]] virtual CollectionResult<data_model::Flag> AllFlags()
         const = 0;
 
     /**
@@ -59,8 +79,8 @@ class IDataReader {
      * @return On success, a collection of SegmentDescriptors. On failure, an
      * error string.
      */
-    [[nodiscard]] virtual Collection<data_model::SegmentDescriptor>
-    AllSegments() const = 0;
+    [[nodiscard]] virtual CollectionResult<data_model::Segment> AllSegments()
+        const = 0;
 
     /**
      * @return Identity of the reader. Used in logs.

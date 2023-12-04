@@ -48,11 +48,10 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-data_components::FlagKind const LazyLoad::Kinds::Flag =
-    data_components::FlagKind();
+integrations::FlagKind const LazyLoad::Kinds::Flag = integrations::FlagKind();
 
-data_components::SegmentKind const LazyLoad::Kinds::Segment =
-    data_components::SegmentKind();
+integrations::SegmentKind const LazyLoad::Kinds::Segment =
+    integrations::SegmentKind();
 
 LazyLoad::LazyLoad(Logger const& logger,
                    config::built::LazyLoadConfig cfg,
@@ -90,7 +89,7 @@ std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
     auto const state =
         tracker_.State(data_components::DataKind::kFlag, key, time_());
     return Get<std::shared_ptr<data_model::FlagDescriptor>>(
-        state, [this, &key]() { RefreshFlag(key); },
+        key, state, [this, &key]() { RefreshFlag(key); },
         [this, &key]() { return cache_.GetFlag(key); });
 }
 
@@ -99,7 +98,7 @@ std::shared_ptr<data_model::SegmentDescriptor> LazyLoad::GetSegment(
     auto const state =
         tracker_.State(data_components::DataKind::kSegment, key, time_());
     return Get<std::shared_ptr<data_model::SegmentDescriptor>>(
-        state, [this, &key]() { RefreshSegment(key); },
+        key, state, [this, &key]() { RefreshSegment(key); },
         [this, &key]() { return cache_.GetSegment(key); });
 }
 
@@ -108,7 +107,7 @@ LazyLoad::AllFlags() const {
     auto const state = tracker_.State(Keys::kAllFlags, time_());
     return Get<std::unordered_map<std::string,
                                   std::shared_ptr<data_model::FlagDescriptor>>>(
-        state, [this]() { RefreshAllFlags(); },
+        Keys::kAllFlags, state, [this]() { RefreshAllFlags(); },
         [this]() { return cache_.AllFlags(); });
 }
 
@@ -117,7 +116,7 @@ LazyLoad::AllSegments() const {
     auto const state = tracker_.State(Keys::kAllSegments, time_());
     return Get<std::unordered_map<
         std::string, std::shared_ptr<data_model::SegmentDescriptor>>>(
-        state, [this]() { RefreshAllSegments(); },
+        Keys::kAllSegments, state, [this]() { RefreshAllSegments(); },
         [this]() { return cache_.AllSegments(); });
 }
 
@@ -144,13 +143,15 @@ bool LazyLoad::Initialized() const {
 }
 
 void LazyLoad::RefreshAllFlags() const {
-    RefreshAll(Keys::kAllFlags, data_components::DataKind::kFlag,
-               [this]() { return reader_->AllFlags(); });
+    RefreshAll<data_model::Flag>(Keys::kAllFlags,
+                                 data_components::DataKind::kFlag,
+                                 [this]() { return reader_->AllFlags(); });
 }
 
 void LazyLoad::RefreshAllSegments() const {
-    RefreshAll(Keys::kAllSegments, data_components::DataKind::kSegment,
-               [this]() { return reader_->AllSegments(); });
+    RefreshAll<data_model::Segment>(
+        Keys::kAllSegments, data_components::DataKind::kSegment,
+        [this]() { return reader_->AllSegments(); });
 }
 
 void LazyLoad::RefreshInitState() const {
@@ -159,14 +160,14 @@ void LazyLoad::RefreshInitState() const {
 }
 
 void LazyLoad::RefreshSegment(std::string const& segment_key) const {
-    RefreshItem(
+    RefreshItem<data_model::Segment>(
         data_components::DataKind::kSegment, segment_key,
         [this](std::string const& key) { return reader_->GetSegment(key); },
         [this](std::string const& key) { return cache_.RemoveSegment(key); });
 }
 
 void LazyLoad::RefreshFlag(std::string const& flag_key) const {
-    RefreshItem(
+    RefreshItem<data_model::Flag>(
         data_components::DataKind::kFlag, flag_key,
         [this](std::string const& key) { return reader_->GetFlag(key); },
         [this](std::string const& key) { return cache_.RemoveFlag(key); });
@@ -177,6 +178,19 @@ std::chrono::time_point<std::chrono::steady_clock> LazyLoad::ExpiryTime()
     return time_() +
            std::chrono::duration_cast<std::chrono::steady_clock::duration>(
                fresh_duration_);
+}
+
+std::string LazyLoad::CacheTraceMsg(
+    data_components::ExpirationTracker::TrackState const state) {
+    switch (state) {
+        case data_components::ExpirationTracker::TrackState::kStale:
+            return "cache hit (stale)";
+        case data_components::ExpirationTracker::TrackState::kNotTracked:
+            return "cache miss";
+        case data_components::ExpirationTracker::TrackState::kFresh:
+            return "cache hit";
+    }
+    detail::unreachable();
 }
 
 }  // namespace launchdarkly::server_side::data_systems
