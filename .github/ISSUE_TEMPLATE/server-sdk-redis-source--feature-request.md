@@ -2,7 +2,7 @@
 name: 'C++ Server SDK / Redis Source Feature Request'
 about: Create a report to help us improve
 title: ''
-labels: 'package: sdk/server-redis, feature'
+labels: 'package: integration/redis, feature'
 assignees: ''
 
 ---
