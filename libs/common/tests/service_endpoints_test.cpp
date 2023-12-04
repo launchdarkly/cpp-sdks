@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <launchdarkly/config/client.hpp>
-#include <launchdarkly/config/server_builders.hpp>
 #include <launchdarkly/error.hpp>
 
 class ServiceEndpointTest : public testing::Test {};
@@ -16,15 +15,6 @@ TEST(ServiceEndpointTest, DefaultClientBuilderURLs) {
     ASSERT_EQ(eps->PollingBaseUrl(), "https://clientsdk.launchdarkly.com");
     ASSERT_EQ(eps->StreamingBaseUrl(), "https://clientstream.launchdarkly.com");
     ASSERT_EQ(eps->EventsBaseUrl(), "https://mobile.launchdarkly.com");
-}
-
-TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
-    server_side::EndpointsBuilder builder;
-    auto eps = builder.Build();
-    ASSERT_TRUE(eps);
-    ASSERT_EQ(eps->PollingBaseUrl(), "https://sdk.launchdarkly.com");
-    ASSERT_EQ(eps->StreamingBaseUrl(), "https://stream.launchdarkly.com");
-    ASSERT_EQ(eps->EventsBaseUrl(), "https://events.launchdarkly.com");
 }
 
 TEST(ServiceEndpointTest, ModifySingleURLCausesError) {

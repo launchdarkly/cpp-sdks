@@ -41,5 +41,5 @@ for target in "$@"
 do
   cmake --build . --target "$target"
   ./examples/"$target"/"$target" | tee "$target"_output.txt
-  grep "failed to initialize" "$target"_output.txt || (echo "$target: expected connection to LD to fail" && exit 1)
+  grep -F "*** SDK" "$target"_output.txt || (echo "$target: expected connection to LD to fail" && exit 1)
 done

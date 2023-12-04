@@ -1,17 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "data_store/descriptors.hpp"
-#include "data_store/memory_store.hpp"
-
-using launchdarkly::data_model::SDKDataSet;
-using launchdarkly::server_side::data_store::FlagDescriptor;
-using launchdarkly::server_side::data_store::IDataStore;
-using launchdarkly::server_side::data_store::MemoryStore;
-using launchdarkly::server_side::data_store::SegmentDescriptor;
+#include <data_components/memory_store/memory_store.hpp>
 
 using launchdarkly::Value;
-using launchdarkly::data_model::Flag;
-using launchdarkly::data_model::Segment;
+
+using namespace launchdarkly::data_model;
+using namespace launchdarkly::server_side::data_components;
 
 TEST(MemoryStoreTest, StartsUninitialized) {
     MemoryStore store;
@@ -26,7 +20,7 @@ TEST(MemoryStoreTest, IsInitializedAfterInit) {
 
 TEST(MemoryStoreTest, HasDescription) {
     MemoryStore store;
-    EXPECT_EQ(std::string("memory"), store.Description());
+    EXPECT_EQ(std::string("memory"), store.Identity());
 }
 
 TEST(MemoryStoreTest, CanGetFlag) {
@@ -283,4 +277,45 @@ TEST(MemoryStoreTest, OriginalFlagValidAfterUpsertOfFlag) {
     EXPECT_EQ(1, fetched_flag_after->item->variations.size());
     EXPECT_EQ(std::string("potato"),
               fetched_flag_after->item->variations[0].AsString());
+}
+
+TEST(MemoryStoreTest, CanDeleteExistingSegment) {
+    MemoryStore store;
+
+    Segment segment_a;
+    segment_a.version = 1;
+    segment_a.key = "segmentA";
+
+    store.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{},
+        std::unordered_map<std::string, SegmentDescriptor>{
+            {"segmentA", SegmentDescriptor(segment_a)}},
+    });
+
+    ASSERT_TRUE(store.GetSegment("segmentA"));
+    ASSERT_TRUE(store.RemoveSegment("segmentA"));
+
+    ASSERT_FALSE(store.GetSegment("segmentA"));
+    ASSERT_FALSE(store.RemoveSegment("segmentA"));
+}
+
+TEST(MemoryStoreTest, CanDeleteExistingFlag) {
+    MemoryStore store;
+
+    Flag flag_a;
+    flag_a.version = 1;
+    flag_a.key = "flagA";
+    flag_a.variations = std::vector<Value>{"potato", "ham"};
+
+    store.Init(SDKDataSet{
+        std::unordered_map<std::string, FlagDescriptor>{
+            {"flagA", FlagDescriptor(flag_a)}},
+        std::unordered_map<std::string, SegmentDescriptor>(),
+    });
+
+    ASSERT_TRUE(store.GetFlag("flagA"));
+    ASSERT_TRUE(store.RemoveFlag("flagA"));
+
+    ASSERT_FALSE(store.GetFlag("flagA"));
+    ASSERT_FALSE(store.RemoveFlag("flagA"));
 }

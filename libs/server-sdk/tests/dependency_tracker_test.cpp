@@ -1,22 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "data_store/dependency_tracker.hpp"
-#include "data_store/descriptors.hpp"
-
-using launchdarkly::server_side::data_store::DataKind;
-using launchdarkly::server_side::data_store::DependencyMap;
-using launchdarkly::server_side::data_store::DependencySet;
-using launchdarkly::server_side::data_store::DependencyTracker;
-using launchdarkly::server_side::data_store::FlagDescriptor;
-using launchdarkly::server_side::data_store::SegmentDescriptor;
+#include <data_components/dependency_tracker/dependency_tracker.hpp>
+#include <launchdarkly/data_model/descriptors.hpp>
 
 using launchdarkly::AttributeReference;
 using launchdarkly::Value;
-using launchdarkly::data_model::Clause;
-using launchdarkly::data_model::ContextKind;
-using launchdarkly::data_model::Flag;
-using launchdarkly::data_model::ItemDescriptor;
-using launchdarkly::data_model::Segment;
+
+using namespace launchdarkly::server_side::data_components;
+using namespace launchdarkly::data_model;
 
 TEST(ScopedSetTest, CanAddItem) {
     DependencySet set;

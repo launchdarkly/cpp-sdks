@@ -1,11 +1,7 @@
 #pragma once
-#include <launchdarkly/config/server_builders.hpp>
+
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
-#include "launchdarkly/config/shared/builders/app_info_builder.hpp"
-#include "launchdarkly/config/shared/builders/data_source_builder.hpp"
-#include "launchdarkly/config/shared/builders/http_properties_builder.hpp"
-#include "launchdarkly/config/shared/builders/logging_builder.hpp"
-#include "launchdarkly/config/shared/defaults.hpp"
 
 namespace launchdarkly::server_side {
 
@@ -24,7 +20,7 @@ class ConfigBuilder {
      * @param builder An EndpointsBuilder.
      * @return Reference to an EndpointsBuilder.
      */
-    EndpointsBuilder& ServiceEndpoints();
+    config::builders::EndpointsBuilder& ServiceEndpoints();
 
     /**
      * To include metadata about the application that is utilizing the SDK,
@@ -32,15 +28,7 @@ class ConfigBuilder {
      * @param builder An AppInfoBuilder.
      * @return Reference to an AppInfoBuilder.
      */
-    AppInfoBuilder& AppInfo();
-
-    /**
-     * Enables or disables "Offline" mode. True means
-     * Offline mode is enabled.
-     * @param offline True if the SDK should operate in Offline mode.
-     * @return Reference to this builder.
-     */
-    ConfigBuilder& Offline(bool offline);
+    config::builders::AppInfoBuilder& AppInfo();
 
     /**
      * To tune settings related to event generation and delivery, pass an
@@ -48,15 +36,15 @@ class ConfigBuilder {
      * @param builder An EventsBuilder.
      * @return Reference to an EventsBuilder.
      */
-    EventsBuilder& Events();
+    config::builders::EventsBuilder& Events();
 
     /**
-     * Sets the configuration of the component that receives feature flag data
-     * from LaunchDarkly.
-     * @param builder A DataSourceConfig builder.
-     * @return Reference to a DataSourceBuilder.
+     * Sets the configuration of the component that receives and stores feature
+     * flag data from LaunchDarkly.
+     * @param builder A DataSystemBuilder.
+     * @return Reference to a DataSystemBuilder.
      */
-    DataSourceBuilder& DataSource();
+    config::builders::DataSystemBuilder& DataSystem();
 
     /**
      * Sets the SDK's networking configuration, using an HttpPropertiesBuilder.
@@ -64,14 +52,26 @@ class ConfigBuilder {
      * @param builder A HttpPropertiesBuilder builder.
      * @return Reference to an HttpPropertiesBuilder.
      */
-    HttpPropertiesBuilder& HttpProperties();
+    config::builders::HttpPropertiesBuilder& HttpProperties();
 
     /**
      * Sets the logging configuration for the SDK.
      * @param builder A Logging builder.
      * @return Reference to a LoggingBuilder.
      */
-    LoggingBuilder& Logging();
+    config::builders::LoggingBuilder& Logging();
+
+    /**
+     * @brief If true, equivalent to setting Events().Disable() and
+     * DataSystem().Disable(). The effect is that all evaluations will return
+     * application-provided default values, and no network calls will be made.
+     *
+     * This overrides specific configuration of events and/or data system, if
+     * present.
+     *
+     * @return Reference to this.
+     */
+    ConfigBuilder& Offline(bool offline);
 
     /**
      * Builds a Configuration, suitable for passing into an instance of Client.
@@ -81,13 +81,13 @@ class ConfigBuilder {
 
    private:
     std::string sdk_key_;
-    std::optional<bool> offline_;
+    bool offline_;
 
-    EndpointsBuilder service_endpoints_builder_;
-    AppInfoBuilder app_info_builder_;
-    EventsBuilder events_builder_;
-    DataSourceBuilder data_source_builder_;
-    HttpPropertiesBuilder http_properties_builder_;
-    LoggingBuilder logging_config_builder_;
+    config::builders::EndpointsBuilder service_endpoints_builder_;
+    config::builders::AppInfoBuilder app_info_builder_;
+    config::builders::EventsBuilder events_builder_;
+    config::builders::DataSystemBuilder data_system_builder_;
+    config::builders::HttpPropertiesBuilder http_properties_builder_;
+    config::builders::LoggingBuilder logging_config_builder_;
 };
 }  // namespace launchdarkly::server_side

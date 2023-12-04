@@ -24,7 +24,7 @@ endif ()
 #set(CMAKE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_FILES})
 
-# Needed to fetch external dependencies. 
+# Needed to fetch external dependencies.
 include(FetchContent)
 
 # Needed to parse RFC3339 dates in flag rules.

@@ -1,5 +1,7 @@
 #include "all_flags_state_builder.hpp"
 
+#include <launchdarkly/data_model/flag.hpp>
+
 namespace launchdarkly::server_side {
 
 bool IsDebuggingEnabled(std::optional<std::uint64_t> debug_events_until);

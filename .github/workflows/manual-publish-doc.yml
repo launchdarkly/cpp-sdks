@@ -9,6 +9,7 @@ on:
         options:
           - libs/client-sdk
           - libs/server-sdk
+          - libs/server-sdk-redis-source
 name: Publish Documentation
 jobs:
   build-publish:

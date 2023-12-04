@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "data_store/persistent/expiration_tracker.hpp"
+#include <data_components/expiration_tracker/expiration_tracker.hpp>
 
-using launchdarkly::server_side::data_store::DataKind;
-using launchdarkly::server_side::data_store::persistent::ExpirationTracker;
+using namespace launchdarkly::server_side::data_components;
 
 ExpirationTracker::TimePoint Second(uint64_t second) {
     return std::chrono::steady_clock::time_point{std::chrono::seconds{second}};
@@ -119,4 +118,18 @@ TEST(ExpirationTrackerTest, CanPrune) {
 
     EXPECT_EQ(ExpirationTracker::TrackState::kFresh,
               tracker.State(DataKind::kSegment, "freshSegment", Second(80)));
+}
+
+TEST(ExpirationTrackerTest, CanUpdateExistingExpiry) {
+    ExpirationTracker tracker;
+
+    for (std::size_t seconds = 1; seconds < 10; seconds++) {
+        auto const now = Second(seconds - 1);
+        auto const expiry = Second(seconds);
+
+        tracker.Add("Potato", expiry);
+        EXPECT_EQ(ExpirationTracker::TrackState::kFresh,
+                  tracker.State("Potato", now));
+        ASSERT_TRUE(tracker.Prune(now).empty());
+    }
 }

@@ -18,28 +18,43 @@ target_sources(${LIBNAME}
         ${HEADER_LIST}
         client.cpp
         client_impl.cpp
+        data_source_status.cpp
         config/config.cpp
         config/config_builder.cpp
+        config/builders/data_system/background_sync_builder.cpp
+        config/builders/data_system/bootstrap_builder.cpp
+        config/builders/data_system/data_system_builder.cpp
+        config/builders/data_system/lazy_load_builder.cpp
+        config/builders/data_system/data_destination_builder.cpp
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
-        data_sources/data_source_update_sink.hpp
-        data_store/data_store.hpp
-        data_store/data_store_updater.hpp
-        data_store/data_store_updater.cpp
-        data_store/memory_store.cpp
-        data_store/dependency_tracker.hpp
-        data_store/dependency_tracker.cpp
-        data_store/descriptors.hpp
-        data_sources/data_source_event_handler.cpp
-        data_sources/data_source_event_handler.hpp
-        data_sources/data_source_status.cpp
-        data_sources/polling_data_source.hpp
-        data_sources/polling_data_source.cpp
-        data_sources/data_source_status_manager.hpp
-        data_sources/streaming_data_source.hpp
-        data_sources/streaming_data_source.cpp
-        data_sources/null_data_source.cpp
+        integrations/data_reader/kinds.cpp
+        data_components/change_notifier/change_notifier.hpp
+        data_components/change_notifier/change_notifier.cpp
+        data_components/dependency_tracker/dependency_tracker.hpp
+        data_components/dependency_tracker/dependency_tracker.cpp
+        data_components/expiration_tracker/expiration_tracker.hpp
+        data_components/expiration_tracker/expiration_tracker.cpp
+        data_components/memory_store/memory_store.hpp
+        data_components/memory_store/memory_store.cpp
+        data_components/serialization_adapters/json_deserializer.hpp
+        data_components/serialization_adapters/json_deserializer.cpp
+        data_components/serialization_adapters/json_destination.hpp
+        data_components/serialization_adapters/json_destination.cpp
+        data_systems/background_sync/sources/polling/polling_data_source.hpp
+        data_systems/background_sync/sources/polling/polling_data_source.cpp
+        data_systems/background_sync/sources/streaming/streaming_data_source.hpp
+        data_systems/background_sync/sources/streaming/streaming_data_source.cpp
+        data_systems/background_sync/sources/streaming/event_handler.hpp
+        data_systems/background_sync/sources/streaming/event_handler.cpp
+        data_systems/background_sync/background_sync_system.hpp
+        data_systems/background_sync/background_sync_system.cpp
+        data_systems/lazy_load/lazy_load_system.hpp
+        data_systems/lazy_load/lazy_load_system.cpp
+        data_systems/offline.hpp
+        data_systems/offline.cpp
+        data_interfaces.cpp
         evaluation/evaluator.cpp
         evaluation/rules.cpp
         evaluation/bucketing.cpp
@@ -48,10 +63,6 @@ target_sources(${LIBNAME}
         evaluation/detail/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
-        data_store/persistent/persistent_data_store.hpp
-        data_store/persistent/expiration_tracker.hpp
-        data_store/persistent/persistent_data_store.cpp
-        data_store/persistent/expiration_tracker.cpp
         events/event_factory.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp

@@ -6,11 +6,12 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "../data_store/data_store.hpp"
-#include "../events/event_scope.hpp"
 #include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
+
+#include "../data_interfaces/store/istore.hpp"
+#include "../events/event_scope.hpp"
 
 #include <tl/expected.hpp>
 
@@ -18,7 +19,7 @@ namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
-    Evaluator(Logger& logger, data_store::IDataStore const& store);
+    Evaluator(Logger& logger, data_interfaces::IStore const& source);
 
     /**
      * Evaluates a flag for a given context.
@@ -31,7 +32,7 @@ class Evaluator {
      */
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
-        launchdarkly::Context const& context,
+        Context const& context,
         EventScope const& event_scope);
 
     /**
@@ -41,15 +42,14 @@ class Evaluator {
      * @param flag The flag to evaluate.
      * @param context The context to evaluate the flag against.
      */
-    [[nodiscard]] EvaluationDetail<Value> Evaluate(
-        data_model::Flag const& flag,
-        launchdarkly::Context const& context);
+    [[nodiscard]] EvaluationDetail<Value> Evaluate(data_model::Flag const& flag,
+                                                   Context const& context);
 
    private:
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         std::optional<std::string> parent_key,
         data_model::Flag const& flag,
-        launchdarkly::Context const& context,
+        Context const& context,
         EventScope const& event_scope);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
@@ -64,7 +64,7 @@ class Evaluator {
     void LogError(std::string const& key, Error const& error) const;
 
     Logger& logger_;
-    data_store::IDataStore const& store_;
+    data_interfaces::IStore const& source_;
     detail::EvaluationStack stack_;
 };
 }  // namespace launchdarkly::server_side::evaluation

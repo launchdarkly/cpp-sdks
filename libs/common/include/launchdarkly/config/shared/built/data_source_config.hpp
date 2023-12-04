@@ -5,7 +5,6 @@
 #include <chrono>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace launchdarkly::config::shared::built {
@@ -24,6 +23,12 @@ struct StreamingConfig<ServerSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
     std::string streaming_path;
 };
+
+inline bool operator==(StreamingConfig<ServerSDK> const& lhs,
+                       StreamingConfig<ServerSDK> const& rhs) {
+    return lhs.initial_reconnect_delay == rhs.initial_reconnect_delay &&
+           lhs.streaming_path == rhs.streaming_path;
+}
 
 template <typename SDK>
 struct PollingConfig;
@@ -55,8 +60,5 @@ struct DataSourceConfig<ClientSDK> {
 };
 
 template <>
-struct DataSourceConfig<ServerSDK> {
-    std::variant<StreamingConfig<ServerSDK>, PollingConfig<ServerSDK>> method;
-};
-
+struct DataSourceConfig<ServerSDK> {};
 }  // namespace launchdarkly::config::shared::built

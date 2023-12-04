@@ -3,6 +3,7 @@
 #include <launchdarkly/config/shared/built/data_source_config.hpp>
 #include <launchdarkly/config/shared/built/events.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/built/persistence.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 #include <launchdarkly/logging/log_level.hpp>
@@ -73,15 +74,13 @@ struct Defaults<ClientSDK> {
 
 template <>
 struct Defaults<ServerSDK> {
-    static bool Offline() { return Defaults<AnySDK>::Offline(); }
-
-    static auto ServiceEndpoints() -> shared::built::ServiceEndpoints {
+    static auto ServiceEndpoints() -> built::ServiceEndpoints {
         return {"https://sdk.launchdarkly.com",
                 "https://stream.launchdarkly.com",
                 "https://events.launchdarkly.com"};
     }
 
-    static auto Events() -> shared::built::Events {
+    static auto Events() -> built::Events {
         return {true,
                 10000,
                 std::chrono::seconds(5),
@@ -93,22 +92,17 @@ struct Defaults<ServerSDK> {
                 1000};
     }
 
-    static auto HttpProperties() -> shared::built::HttpProperties {
+    static auto HttpProperties() -> built::HttpProperties {
         return {std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::chrono::seconds{10}, std::chrono::seconds{10},
                 std::map<std::string, std::string>()};
     }
 
-    static auto StreamingConfig() -> shared::built::StreamingConfig<ServerSDK> {
+    static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {
         return {std::chrono::seconds{1}, "/all"};
     }
 
-    static auto DataSourceConfig()
-        -> shared::built::DataSourceConfig<ServerSDK> {
-        return {Defaults<ServerSDK>::StreamingConfig()};
-    }
-
-    static auto PollingConfig() -> shared::built::PollingConfig<ServerSDK> {
+    static auto PollingConfig() -> built::PollingConfig<ServerSDK> {
         return {std::chrono::seconds{30}, "/sdk/latest-all",
                 std::chrono::seconds{30}};
     }

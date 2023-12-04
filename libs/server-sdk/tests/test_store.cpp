@@ -1,38 +1,38 @@
 #include "test_store.hpp"
 
-#include "data_store/memory_store.hpp"
-
+#include <data_components/memory_store/memory_store.hpp>
+#include <data_interfaces/store/istore.hpp>
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
 namespace launchdarkly::server_side::test_store {
 
-std::unique_ptr<data_store::IDataStore> Empty() {
-    auto store = std::make_unique<data_store::MemoryStore>();
+std::unique_ptr<data_interfaces::IStore> Empty() {
+    auto store = std::make_unique<data_components::MemoryStore>();
     store->Init({});
     return store;
 }
 
-data_store::FlagDescriptor Flag(char const* json) {
+data_model::FlagDescriptor Flag(char const* json) {
     auto val = boost::json::value_to<
         tl::expected<std::optional<data_model::Flag>, JsonError>>(
         boost::json::parse(json));
     assert(val.has_value());
     assert(val.value().has_value());
-    return data_store::FlagDescriptor{val.value().value()};
+    return data_model::FlagDescriptor{val.value().value()};
 }
 
-data_store::SegmentDescriptor Segment(char const* json) {
+data_model::SegmentDescriptor Segment(char const* json) {
     auto val = boost::json::value_to<
         tl::expected<std::optional<data_model::Segment>, JsonError>>(
         boost::json::parse(json));
     assert(val.has_value());
     assert(val.value().has_value());
-    return data_store::SegmentDescriptor{val.value().value()};
+    return data_model::SegmentDescriptor{val.value().value()};
 }
 
-std::unique_ptr<data_store::IDataStore> TestData() {
-    auto store = std::make_unique<data_store::MemoryStore>();
+std::unique_ptr<data_interfaces::IStore> TestData() {
+    auto store = std::make_unique<data_components::MemoryStore>();
     store->Init({});
 
     store->Upsert("segmentWithNoRules", Segment(R"({

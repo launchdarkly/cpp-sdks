@@ -81,12 +81,4 @@ class PersistenceBuilder<ClientSDK> {
     std::size_t max_contexts_;
 };
 
-template <>
-class PersistenceBuilder<ServerSDK> {
-   public:
-    [[nodiscard]] built::Persistence<ServerSDK> Build() const {
-        return built::Persistence<ServerSDK>();
-    }
-};
-
 }  // namespace launchdarkly::config::shared::builders
