@@ -71,36 +71,37 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     void RefreshFlag(std::string const& key) const;
     void RefreshSegment(std::string const& key) const;
 
+    static std::string CacheTraceMsg(
+        data_components::ExpirationTracker::TrackState state);
+
     template <typename TResult>
     TResult Get(std::string const& key,
                 data_components::ExpirationTracker::TrackState const state,
 
                 std::function<void(void)> const& refresh,
                 std::function<TResult(void)> const& get) const {
+        LD_LOG(logger_, LogLevel::kDebug)
+            << Identity() << ": get " << key << " - " << CacheTraceMsg(state);
+
         switch (state) {
             case data_components::ExpirationTracker::TrackState::kStale:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " is stale; refreshing";
-                refresh();
-                return get();
+                [[fallthrough]];
             case data_components::ExpirationTracker::TrackState::kNotTracked:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " not cached; refreshing";
                 refresh();
-                return get();
+                [[fallthrough]];
             case data_components::ExpirationTracker::TrackState::kFresh:
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": " << key << " served from cache";
                 return get();
         }
         detail::unreachable();
     }
 
-    template <typename Getter, typename Evictor>
-    void RefreshItem(data_components::DataKind const kind,
-                     std::string const& key,
-                     Getter&& getter,
-                     Evictor&& evictor) const {
+    template <typename Item, typename Evictor>
+    void RefreshItem(
+        data_components::DataKind const kind,
+        std::string const& key,
+        std::function<data_interfaces::IDataReader::SingleResult<Item>(
+            std::string const&)> const& getter,
+        Evictor&& evictor) const {
         // Refreshing this item is always rate limited, even
         // if the refresh has an error.
         tracker_.Add(kind, key, ExpiryTime());
@@ -109,7 +110,15 @@ class LazyLoad final : public data_interfaces::IDataSystem {
             status_manager_.SetState(DataSourceState::kValid);
 
             if (auto optional_item = *expected_item) {
-                cache_.Upsert(key, std::move(*optional_item));
+                // This transformation is necessary because the memory store
+                // works with ItemDescriptors, whereas the reader operates using
+                // IDataReader::StorageItems. This doesn't necessarily need to
+                // be the case.
+                cache_.Upsert(
+                    key,
+                    data_interfaces::IDataReader::StorageItemIntoDescriptor(
+                        std::move(*optional_item)));
+
             } else {
                 // If the item is actually *missing* - not just a deleted
                 // tombstone representation - it implies that the source
@@ -137,10 +146,13 @@ class LazyLoad final : public data_interfaces::IDataSystem {
         }
     }
 
-    template <typename Getter>
-    void RefreshAll(std::string const& all_item_key,
-                    data_components::DataKind const item_kind,
-                    Getter&& getter) const {
+    template <typename Item>
+    void RefreshAll(
+        std::string const& all_item_key,
+        data_components::DataKind const item_kind,
+        std::function<
+            data_interfaces::IDataReader::CollectionResult<Item>()> const&
+            getter) const {
         // Storing an expiry time so that the 'all' key and the individual
         // item keys will expire at the same time.
         auto const updated_expiry = ExpiryTime();
@@ -153,8 +165,15 @@ class LazyLoad final : public data_interfaces::IDataSystem {
             status_manager_.SetState(DataSourceState::kValid);
 
             for (auto item : *all_items) {
-                cache_.Upsert(item.first, std::move(item.second));
-                tracker_.Add(item_kind, item.first, updated_expiry);
+                // This transformation is necessary because the memory store
+                // works with ItemDescriptors, whereas the reader operates using
+                // IDataReader::StorageItems. This doesn't necessarily need to
+                // be the case.
+                cache_.Upsert(
+                    item.first,
+                    data_interfaces::IDataReader::StorageItemIntoDescriptor(
+                        std::move(item.second)));
+                tracker_.Add(item.first, updated_expiry);
             }
         } else {
             status_manager_.SetState(

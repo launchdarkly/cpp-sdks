@@ -20,7 +20,7 @@ cd ..
 # Build a dynamic debug release.
 mkdir -p build-dynamic-debug && cd build-dynamic-debug
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D LD_DYNAMIC_LINK_BOOST=OFF -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
 cmake --install .

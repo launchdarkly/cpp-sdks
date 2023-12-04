@@ -10,22 +10,78 @@
 
 namespace launchdarkly::server_side::data_components {
 
+template <typename Item>
+tl::expected<data_interfaces::IDataReader::StorageItem<Item>,
+             data_interfaces::IDataReader::Error>
+IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
+    if (descriptor.deleted) {
+        return data_interfaces::IDataReader::StorageItem<Item>(
+            data_interfaces::IDataReader::Tombstone(descriptor.version));
+    }
+
+    auto const json_val = boost::json::parse(descriptor.serializedItem);
+
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Item>, JsonError>>(
+            json_val);
+
+    if (!result) {
+        /* maybe it's a tombstone - check */
+        /* TODO(225976): replace with boost::json deserializer */
+        if (json_val.is_object()) {
+            auto const& obj = json_val.as_object();
+            if (auto deleted_it = obj.find("deleted");
+                deleted_it != obj.end()) {
+                auto const& deleted = deleted_it->value();
+
+                if (deleted.is_bool() && deleted.as_bool()) {
+                    if (auto version_it = obj.find("version");
+                        version_it != obj.end()) {
+                        auto const& version = version_it->value();
+                        if (version.is_number()) {
+                            return data_interfaces::IDataReader::Tombstone(
+                                version.as_uint64());
+                        }
+                        return tl::make_unexpected(
+                            data_interfaces::IDataReader::Error{
+                                "tombstone field 'version' is invalid"});
+                    }
+                    return tl::make_unexpected(
+                        "tombstone field 'version' is missing");
+                }
+                return tl::make_unexpected(
+                    "tombstone field 'deleted' is invalid ");
+            }
+        }
+
+        return tl::make_unexpected(
+            "serialized item isn't a valid data item or tombstone");
+    }
+
+    auto item = *result;
+
+    if (!item) {
+        return tl::make_unexpected("serialized item is null JSON value");
+    }
+
+    return *item;
+}
+
 class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
     explicit JsonDeserializer(
         Logger const& logger,
         std::shared_ptr<integrations::ISerializedDataReader> reader);
 
-    [[nodiscard]] Single<data_model::FlagDescriptor> GetFlag(
+    [[nodiscard]] SingleResult<data_model::Flag> GetFlag(
         std::string const& key) const override;
 
-    [[nodiscard]] Single<data_model::SegmentDescriptor> GetSegment(
+    [[nodiscard]] SingleResult<data_model::Segment> GetSegment(
         std::string const& key) const override;
 
-    [[nodiscard]] Collection<data_model::FlagDescriptor> AllFlags()
-        const override;
+    [[nodiscard]] CollectionResult<data_model::Flag> AllFlags() const override;
 
-    [[nodiscard]] Collection<data_model::SegmentDescriptor> AllSegments()
+    [[nodiscard]] CollectionResult<data_model::Segment> AllSegments()
         const override;
 
     [[nodiscard]] std::string const& Identity() const override;
@@ -34,29 +90,8 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
 
    private:
     template <typename DataModel, typename DataKind>
-    tl::expected<data_model::ItemDescriptor<DataModel>, std::string>
-    DeserializeItem(std::string const& serialized_item) const {
-        auto const boost_json_val = boost::json::parse(serialized_item);
-        auto item = boost::json::value_to<
-            tl::expected<std::optional<DataModel>, JsonError>>(boost_json_val);
-
-        if (!item) {
-            return tl::make_unexpected(ErrorToString(item.error()));
-        }
-
-        std::optional<DataModel> maybe_item = item->value();
-
-        if (!maybe_item) {
-            return tl::make_unexpected("JSON value is null");
-        }
-
-        return data_model::ItemDescriptor<DataModel>(std::move(*maybe_item));
-    }
-
-    template <typename DataModel, typename DataKind>
-    Single<data_model::ItemDescriptor<DataModel>> DeserializeSingle(
-        DataKind const& kind,
-        std::string const& key) const {
+    SingleResult<DataModel> DeserializeSingle(DataKind const& kind,
+                                              std::string const& key) const {
         auto result = source_->Get(kind, key);
 
         if (!result) {
@@ -64,16 +99,17 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
             return tl::make_unexpected(result.error().message);
         }
 
-        if (!result->serializedItem) {
-            /* no error, but item not found by the source */
+        auto serialized_item = *result;
+
+        if (!serialized_item) {
             return std::nullopt;
         }
 
-        return DeserializeItem<DataModel, DataKind>(*result->serializedItem);
+        return IntoStorageItem<DataModel>(*serialized_item);
     }
 
     template <typename DataModel, typename DataKind>
-    Collection<data_model::ItemDescriptor<DataModel>> DeserializeCollection(
+    CollectionResult<DataModel> DeserializeCollection(
         DataKind const& kind) const {
         auto result = source_->All(kind);
 
@@ -82,31 +118,19 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
             return tl::make_unexpected(result.error().message);
         }
 
-        std::unordered_map<std::string, data_model::ItemDescriptor<DataModel>>
-            items;
+        Collection<DataModel> items;
 
         for (auto const& [key, descriptor] : *result) {
-            if (!descriptor.serializedItem) {
-                /* item is deleted, add a tombstone to the result so that the
-                 * caller can make a decision on what to do. */
-                items.emplace(key, data_model::ItemDescriptor<DataModel>(
-                                       descriptor.version));
-                continue;
-            }
+            auto item = IntoStorageItem<DataModel>(descriptor);
 
-            auto maybe_item = DeserializeItem<DataModel, DataKind>(
-                *descriptor.serializedItem);
-
-            if (!maybe_item) {
-                /* single item failing to deserialize doesn't cause the
-                 * whole operation to fail; other items may be valid. */
+            if (!item) {
                 LD_LOG(logger_, LogLevel::kError)
                     << "failed to deserialize " << key << " while fetching all "
-                    << kind.Namespace() << ": " << maybe_item.error();
+                    << kind.Namespace() << ": " << item.error();
                 continue;
             }
 
-            items.emplace(key, *maybe_item);
+            items.emplace(key, *item);
         }
         return items;
     }

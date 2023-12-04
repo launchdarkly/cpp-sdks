@@ -149,7 +149,7 @@ TEST_F(JsonDestinationTest, UpsertDeletedFlagCreatesTombstone) {
     EXPECT_CALL(
         mock_dest,
         Upsert(Ref(JsonDestination::Kinds::Flag), "flag",
-               SerializedItemDescriptor::Absent(
+               SerializedItemDescriptor::Tombstone(
                    2, "{\"key\":\"flag\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
@@ -160,7 +160,7 @@ TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
     EXPECT_CALL(
         mock_dest,
         Upsert(Ref(JsonDestination::Kinds::Segment), "segment",
-               SerializedItemDescriptor::Absent(
+               SerializedItemDescriptor::Tombstone(
                    2, "{\"key\":\"segment\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 

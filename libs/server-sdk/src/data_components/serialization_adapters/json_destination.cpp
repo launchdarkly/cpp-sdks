@@ -3,6 +3,8 @@
 #include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
+#include <boost/json.hpp>
+
 namespace launchdarkly::server_side::data_components {
 
 using data_interfaces::ISerializedDestination;
@@ -52,7 +54,7 @@ SerializedItemDescriptor Serialize(std::string const& key,
                ? SerializedItemDescriptor::Present(
                      desc.version, boost::json::serialize(
                                        boost::json::value_from(*desc.item)))
-               : SerializedItemDescriptor::Absent(
+               : SerializedItemDescriptor::Tombstone(
                      desc.version,
                      boost::json::serialize(Tombstone(key, desc)));
 }

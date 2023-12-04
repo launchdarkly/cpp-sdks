@@ -23,8 +23,7 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
-          # TODO: Fix installation of redis++/hiredis headers to enable releases.
-          simulate_release: false
+          simulate_release: true
   build-redis-mac:
     runs-on: macos-12
     steps:
