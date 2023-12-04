@@ -1,0 +1,5 @@
+<map id="launchdarkly::server_side::data_components::MemoryStore" name="launchdarkly::server_side::data_components::MemoryStore">
+<area shape="rect" id="node1" title=" " alt="" coords="219,45,399,101"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore.html" title="IStore provides shared ownership of flag and segment domain objects." alt="" coords="5,5,171,61"/>
+<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination.html" title="IDestination represents a sink for data received by the SDK. A destination may be a database,..." alt="" coords="5,85,171,141"/>
+</map>

@@ -1,0 +1,101 @@
+\hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{}\doxysection{launchdarkly\+::server\+\_\+side\+::config\+::builders\+::Lazy\+Load\+Builder Struct Reference}
+\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}\index{launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}}
+
+
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} allows for specifying the configuration of the Lazy Load data system, which is appropriate when a Launch\+Darkly environment should be stored external to the SDK (such as in Redis.)  
+
+
+
+
+{\ttfamily \#include $<$lazy\+\_\+load\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a3932f8d5e08bcddcf17e7f01014dcc13}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a3932f8d5e08bcddcf17e7f01014dcc13}} 
+using {\bfseries Source\+Ptr} = std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{integrations\+::\+ISerialized\+Data\+Reader}} $>$
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a50013794b072cd0c47361f90ebdb184d}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a50013794b072cd0c47361f90ebdb184d}} 
+using {\bfseries Eviction\+Policy} = \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{built\+::\+Lazy\+Load\+Config\+::\+Eviction\+Policy}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a34bf8745cd55b999e7d6a5ac4185290a}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a34bf8745cd55b999e7d6a5ac4185290a}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a34bf8745cd55b999e7d6a5ac4185290a}{Lazy\+Load\+Builder}} ()
+\begin{DoxyCompactList}\small\item\em Constructs a new \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}}. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a14ad8758b87a2d33a5d087374e4fbcd2}{Source}} (Source\+Ptr source)
+\begin{DoxyCompactList}\small\item\em Specify the source of the data. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a10bb232346b38953898fe9d12c1f416e}{Cache\+Refresh}} (std\+::chrono\+::milliseconds ttl)
+\item 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a6e2efeccf2263c431e7bd10c3e0fc59a}{Cache\+Eviction}} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{Eviction\+Policy}} policy)
+\begin{DoxyCompactList}\small\item\em Specify the eviction policy when a data item\textquotesingle{}s TTL expires. At this time, only Eviction\+Policy\+::\+Disabled is supported (the default), which leaves stale items in the cache until they can be refreshed. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a0b06a8df0ce6764a61369a9e328e7e87}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a0b06a8df0ce6764a61369a9e328e7e87}} 
+tl\+::expected$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{built\+::\+Lazy\+Load\+Config}}, Error $>$ {\bfseries Build} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} allows for specifying the configuration of the Lazy Load data system, which is appropriate when a Launch\+Darkly environment should be stored external to the SDK (such as in Redis.) 
+
+In the Lazy Load system, flag and segment data is fetched on-\/demand from the database and stored in an in-\/memory cache for a specific duration. This allows the SDK to maintain a working set of data that may be a specific subset of the entire environment.
+
+The database is read-\/only from the perspective of the SDK. To populate the database with flag and segment data, an external process (e.\+g. Relay Proxy or another SDK) is necessary. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a6e2efeccf2263c431e7bd10c3e0fc59a}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a6e2efeccf2263c431e7bd10c3e0fc59a}} 
+\index{launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}!CacheEviction@{CacheEviction}}
+\index{CacheEviction@{CacheEviction}!launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}}
+\doxysubsubsection{\texorpdfstring{CacheEviction()}{CacheEviction()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& launchdarkly\+::server\+\_\+side\+::config\+::builders\+::\+Lazy\+Load\+Builder\+::\+Cache\+Eviction (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{Eviction\+Policy}}}]{policy }\end{DoxyParamCaption})}
+
+
+
+Specify the eviction policy when a data item\textquotesingle{}s TTL expires. At this time, only Eviction\+Policy\+::\+Disabled is supported (the default), which leaves stale items in the cache until they can be refreshed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em policy} & The Eviction\+Policy. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a10bb232346b38953898fe9d12c1f416e}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a10bb232346b38953898fe9d12c1f416e}} 
+\index{launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}!CacheRefresh@{CacheRefresh}}
+\index{CacheRefresh@{CacheRefresh}!launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}}
+\doxysubsubsection{\texorpdfstring{CacheRefresh()}{CacheRefresh()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& launchdarkly\+::server\+\_\+side\+::config\+::builders\+::\+Lazy\+Load\+Builder\+::\+Cache\+Refresh (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{ttl }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em ttl} & Specify the duration data items should be live in-\/memory before being refreshed from the database. The chosen Eviction\+Policy affects usage of this TTL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a14ad8758b87a2d33a5d087374e4fbcd2}\label{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a14ad8758b87a2d33a5d087374e4fbcd2}} 
+\index{launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}!Source@{Source}}
+\index{Source@{Source}!launchdarkly::server\_side::config::builders::LazyLoadBuilder@{launchdarkly::server\_side::config::builders::LazyLoadBuilder}}
+\doxysubsubsection{\texorpdfstring{Source()}{Source()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{Lazy\+Load\+Builder}} \& launchdarkly\+::server\+\_\+side\+::config\+::builders\+::\+Lazy\+Load\+Builder\+::\+Source (\begin{DoxyParamCaption}\item[{Source\+Ptr}]{source }\end{DoxyParamCaption})}
+
+
+
+Specify the source of the data. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em source} & Component implementing ISerialized\+Data\+Pull\+Source. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this. 
+\end{DoxyReturn}
+
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/config/builders/data\+\_\+system/lazy\+\_\+load\+\_\+builder.\+hpp\item 
+src/config/builders/data\+\_\+system/lazy\+\_\+load\+\_\+builder.\+cpp\end{DoxyCompactItemize}
