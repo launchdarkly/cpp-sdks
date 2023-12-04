@@ -21,6 +21,14 @@
       "prerelease": true,
       "bump-minor-pre-major": true
     },
+    "libs/server-sdk-redis-source": {
+      "extra-files": [
+        "CMakeLists.txt"
+      ],
+      "prerelease": true,
+      "release-as": "0.1.0",
+      "bump-minor-pre-major": true
+    },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
     },
