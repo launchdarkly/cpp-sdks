@@ -26,7 +26,7 @@ using namespace launchdarkly::server_side;
 int main() {
     char const* sdk_key = get_with_env_fallback(
         SDK_KEY, "LD_SDK_KEY",
-        "Please edit main.c to set SDK_KEY to your LaunchDarkly server-side "
+        "Please edit main.cpp to set SDK_KEY to your LaunchDarkly server-side "
         "SDK key "
         "first.\n\nAlternatively, set the LD_SDK_KEY environment "
         "variable.\n"
