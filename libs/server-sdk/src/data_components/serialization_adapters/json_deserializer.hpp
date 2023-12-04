@@ -26,8 +26,8 @@ IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
             json_val);
 
     if (!result) {
-        /* maybe it's a tombstone */
-
+        /* maybe it's a tombstone - check */
+        /* TODO(225976): replace with boost::json deserializer */
         if (json_val.is_object()) {
             auto const& obj = json_val.as_object();
             if (auto deleted_it = obj.find("deleted");
