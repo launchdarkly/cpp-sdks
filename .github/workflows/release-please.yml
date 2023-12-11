@@ -77,11 +77,11 @@ jobs:
         os: [ ubuntu-latest, windows-2022, macos-12 ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
-    if: ${{ needs.release-please.outputs.package-server-released }}
+    if: ${{ needs.release-please.outputs.package-server-redis-released }}
     outputs:
-      hashes-linux: ${{ steps.release-server.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
+      hashes-linux: ${{ steps.release-server-redis.outputs.hashes-linux }}
+      hashes-windows: ${{ steps.release-server-redis.outputs.hashes-windows }}
+      hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
     steps:
       - uses: actions/checkout@v3
       - id: release-server-redis

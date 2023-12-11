@@ -63,7 +63,8 @@ class RedisDataSource final : public ISerializedDataReader {
     RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
                     std::string prefix);
 
-    std::string key_for_kind(ISerializedItemKind const& kind) const;
+    [[nodiscard]] std::string key_for_kind(
+        ISerializedItemKind const& kind) const;
 
     std::string const prefix_;
     std::string const inited_key_;
