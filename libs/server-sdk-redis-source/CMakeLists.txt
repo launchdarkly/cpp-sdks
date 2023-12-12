@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(
         LaunchDarklyCPPServerRedisSource
-        VERSION 0.1.0 # {x-release-please-version}
+        VERSION 1.0.0 # {x-release-please-version}
         DESCRIPTION "LaunchDarkly C++ Server SDK Redis Source"
         LANGUAGES CXX C
 )
