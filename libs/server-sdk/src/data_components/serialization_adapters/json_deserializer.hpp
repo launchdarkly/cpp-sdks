@@ -20,10 +20,11 @@ tl::expected<std::optional<data_model::Tombstone>, JsonError> tag_invoke(
 namespace launchdarkly::server_side::data_components {
 
 template <typename Item>
-tl::expected<data_model::StorageItem<Item>, data_interfaces::IDataReader::Error>
+tl::expected<data_model::ItemDescriptor<Item>,
+             data_interfaces::IDataReader::Error>
 IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
     if (descriptor.deleted) {
-        return data_model::Tombstone(descriptor.version);
+        return data_model::ItemDescriptor<Item>(descriptor.version);
     }
 
     auto const json_val = boost::json::parse(descriptor.serializedItem);
@@ -35,7 +36,7 @@ IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
         if (!item) {
             return tl::make_unexpected("item invalid: value is null");
         }
-        return *item;
+        return data_model::ItemDescriptor<Item>(std::move(*item));
     }
 
     auto tombstone = boost::json::value_to<
@@ -48,7 +49,7 @@ IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
     if (!tombstone_result) {
         return tl::make_unexpected("tombstone invalid: value is null");
     }
-    return *tombstone_result;
+    return data_model::ItemDescriptor<Item>(*tombstone_result);
 }
 
 class JsonDeserializer final : public data_interfaces::IDataReader {

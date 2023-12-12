@@ -110,14 +110,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
             status_manager_.SetState(DataSourceState::kValid);
 
             if (auto optional_item = *expected_item) {
-                // This transformation is necessary because the memory store
-                // works with ItemDescriptors, whereas the reader operates using
-                // IDataReader::StorageItems. This doesn't necessarily need to
-                // be the case.
-                cache_.Upsert(key,
-                              data_model::ItemDescriptor<Item>::FromStorage(
-                                  std::move(*optional_item)));
-
+                cache_.Upsert(key, std::move(*optional_item));
             } else {
                 // If the item is actually *missing* - not just a deleted
                 // tombstone representation - it implies that the source
@@ -164,13 +157,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
             status_manager_.SetState(DataSourceState::kValid);
 
             for (auto item : *all_items) {
-                // This transformation is necessary because the memory store
-                // works with ItemDescriptors, whereas the reader operates using
-                // IDataReader::StorageItems. This doesn't necessarily need to
-                // be the case.
-                cache_.Upsert(item.first,
-                              data_model::ItemDescriptor<Item>::FromStorage(
-                                  std::move(item.second)));
+                cache_.Upsert(item.first, std::move(item.second));
                 tracker_.Add(item.first, updated_expiry);
             }
         } else {

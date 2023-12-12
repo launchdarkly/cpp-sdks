@@ -23,14 +23,14 @@ class IDataReader {
     using Error = std::string;
 
     template <typename T>
-    using Single = std::optional<data_model::StorageItem<T>>;
+    using Single = std::optional<data_model::ItemDescriptor<T>>;
 
     template <typename T>
     using SingleResult = tl::expected<Single<T>, Error>;
 
     template <typename T>
     using Collection =
-        std::unordered_map<std::string, data_model::StorageItem<T>>;
+        std::unordered_map<std::string, data_model::ItemDescriptor<T>>;
 
     template <typename T>
     using CollectionResult = tl::expected<Collection<T>, Error>;
