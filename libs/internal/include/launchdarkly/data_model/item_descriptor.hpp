@@ -1,11 +1,15 @@
 #pragma once
 
-#include <launchdarkly/data_model/storage_item.hpp>
+#include <boost/serialization/strong_typedef.hpp>
 
 #include <optional>
 #include <ostream>
 
 namespace launchdarkly::data_model {
+
+/** Represents the version number of a deleted item. */
+BOOST_STRONG_TYPEDEF(std::uint64_t, Tombstone);
+
 /**
  * An item descriptor is an abstraction that allows for Flag data to be
  * handled using the same type in both a put or a patch.
@@ -27,14 +31,6 @@ struct ItemDescriptor {
     explicit ItemDescriptor(Tombstone tombstone);
 
     explicit ItemDescriptor(T item);
-
-    template <typename Item>
-    static ItemDescriptor<Item> FromStorage(StorageItem<Item> item) {
-        if (std::holds_alternative<Tombstone>(item)) {
-            return ItemDescriptor<Item>(std::get<Tombstone>(item));
-        }
-        return ItemDescriptor<Item>(std::move(std::get<Item>(item)));
-    }
 
     ItemDescriptor(ItemDescriptor const&) = default;
     ItemDescriptor(ItemDescriptor&&) = default;
