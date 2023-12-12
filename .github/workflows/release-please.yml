@@ -127,3 +127,20 @@ jobs:
       upload-assets: true
       upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
       provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
+
+  release-server-redis-provenance:
+    needs: [ 'release-please', 'release-server-redis' ]
+    strategy:
+      matrix:
+        # Generates a combined attestation for each platform
+        os: [ linux, windows, macos ]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
+    with:
+      base64-subjects: "${{ needs.release-server-redis.outputs[format('hashes-{0}', matrix.os)] }}"
+      upload-assets: true
+      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
+      provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
