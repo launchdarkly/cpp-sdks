@@ -26,8 +26,6 @@ struct ItemDescriptor {
      */
     std::optional<T> item;
 
-    explicit ItemDescriptor(uint64_t version);
-
     explicit ItemDescriptor(Tombstone tombstone);
 
     explicit ItemDescriptor(T item);
@@ -56,9 +54,6 @@ std::ostream& operator<<(std::ostream& out,
     }
     return out;
 }
-
-template <typename T>
-ItemDescriptor<T>::ItemDescriptor(uint64_t const version) : version(version) {}
 
 template <typename T>
 ItemDescriptor<T>::ItemDescriptor(Tombstone tombstone)

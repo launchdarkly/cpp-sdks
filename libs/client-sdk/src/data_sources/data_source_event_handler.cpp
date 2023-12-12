@@ -92,7 +92,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPut);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
         auto res = boost::json::value_to<tl::expected<
             std::optional<std::unordered_map<std::string, ItemDescriptor>>,
@@ -105,13 +105,13 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
 
             handler_.Init(context_, std::move(map));
             status_manager_.SetState(DataSourceStatus::DataSourceState::kValid);
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+            return MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPutInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorPutInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        return MessageStatus::kInvalidMessage;
     }
     if (type == "patch") {
         boost::json::error_code error_code;
@@ -121,21 +121,20 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingPatch);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<DataSourceEventHandler::PatchData, JsonError>>(parsed);
+        auto res =
+            boost::json::value_to<tl::expected<PatchData, JsonError>>(parsed);
         if (res.has_value()) {
-            handler_.Upsert(
-                context_, res.value().key,
-                launchdarkly::client_side::ItemDescriptor(res.value().flag));
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+            handler_.Upsert(context_, res.value().key,
+                            ItemDescriptor(res.value().flag));
+            return MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorPatchInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorPatchInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        return MessageStatus::kInvalidMessage;
     }
     if (type == "delete") {
         boost::json::error_code error_code;
@@ -145,22 +144,22 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             status_manager_.SetError(
                 DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
                 kErrorParsingDelete);
-            return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+            return MessageStatus::kInvalidMessage;
         }
-        auto res = boost::json::value_to<
-            tl::expected<DataSourceEventHandler::DeleteData, JsonError>>(
+        auto res = boost::json::value_to<tl::expected<DeleteData, JsonError>>(
             boost::json::parse(data));
         if (res.has_value()) {
-            handler_.Upsert(context_, res.value().key,
-                            ItemDescriptor(res.value().version));
-            return DataSourceEventHandler::MessageStatus::kMessageHandled;
+            handler_.Upsert(
+                context_, res.value().key,
+                ItemDescriptor(data_model::Tombstone(res.value().version)));
+            return MessageStatus::kMessageHandled;
         }
         LD_LOG(logger_, LogLevel::kError) << kErrorDeleteInvalid;
         status_manager_.SetError(
             DataSourceStatus::ErrorInfo::ErrorKind::kInvalidData,
             kErrorDeleteInvalid);
-        return DataSourceEventHandler::MessageStatus::kInvalidMessage;
+        return MessageStatus::kInvalidMessage;
     }
-    return DataSourceEventHandler::MessageStatus::kUnhandledVerb;
+    return MessageStatus::kUnhandledVerb;
 }
 }  // namespace launchdarkly::client_side::data_sources

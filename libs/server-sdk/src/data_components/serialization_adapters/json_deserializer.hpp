@@ -46,7 +46,8 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
                         data_interfaces::IDataReader::Error>
     IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
         if (descriptor.deleted) {
-            return data_model::ItemDescriptor<Item>(descriptor.version);
+            return data_model::ItemDescriptor<Item>(
+                data_model::Tombstone(descriptor.version));
         }
 
         auto const json_val = boost::json::parse(descriptor.serializedItem);
