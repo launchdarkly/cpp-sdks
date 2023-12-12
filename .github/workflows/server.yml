@@ -46,6 +46,7 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-server
           platform_version: 12
+          simulate_release: true
   build-test-server-windows:
     runs-on: windows-2022
     steps:
@@ -56,3 +57,4 @@ jobs:
           cmake_target: launchdarkly-cpp-server
           platform_version: 2022
           toolset: msvc
+          simulate_windows_release: true

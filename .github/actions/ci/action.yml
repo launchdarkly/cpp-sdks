@@ -25,6 +25,10 @@ inputs:
     description: 'Whether to run ./build-release.sh for the CMake target'
     required: false
     default: 'false'
+  simulate_windows_release:
+    description: 'Whether to run ./build-release-windows.sh for the CMake target'
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -60,9 +64,19 @@ runs:
       # This uses the binary, versus "make tests" because the binary
       # has better performance and output.
       run: ./build/gtest_${{ inputs.cmake_target }}
-    - name: Simulate Release
+
+    - name: Simulate Release (Linux/MacOS)
       if: inputs.simulate_release == 'true'
       shell: bash
       run: ./scripts/build-release.sh ${{ inputs.cmake_target }}
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+
+    - name: Simulate Release (Windows)
+      if: inputs.simulate_windows_release == 'true'
+      shell: bash
+      run: ./scripts/build-release-windows.sh ${{ inputs.cmake_target }}
+      env:
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
