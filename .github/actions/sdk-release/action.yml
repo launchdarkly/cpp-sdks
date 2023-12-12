@@ -37,7 +37,9 @@ runs:
     - name: Install boost
       uses: ./.github/actions/install-boost
       id: install-boost
-
+    - name: Install OpenSSL
+      uses: ./.github/actions/install-openssl
+      id: install-openssl
     - name: Build Linux Artifacts
       if: runner.os == 'Linux'
       shell: bash
@@ -49,6 +51,7 @@ runs:
       env:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
 
     - name: Archive Release Linux - GCC/x64/Static
       if: runner.os == 'Linux'
@@ -92,28 +95,12 @@ runs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Upgrade OpenSSL
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        choco upgrade openssl --no-progress
-    - name: Determine OpenSSL Installation Directory
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
-          echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> "$GITHUB_ENV"
-        else
-          echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL" >> "$GITHUB_ENV"
-        fi
     - name: Build Windows Artifacts
       if: runner.os == 'Windows'
       shell: bash
       env:
-        OPENSSL_ROOT_DIR: ${{ env.OPENSSL_ROOT_DIR }}
-        BOOST_LIBRARY_DIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
-        BOOST_LIBRARYDIR: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
       run: ./scripts/build-windows.sh ${{ inputs.sdk_cmake_target }}
 
     - name: Archive Release Windows - MSVC/x64/Static
@@ -168,14 +155,11 @@ runs:
       id: brew-action
       if: runner.os == 'macOS'
       shell: bash
-      run: |
-        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
-        export OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
-        
-        ./scripts/build-release.sh ${{ inputs.sdk_cmake_target }}
+      run: ./scripts/build-release.sh ${{ inputs.sdk_cmake_target }}
       env:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
 
     - name: Archive Release Mac - AppleClang/x64/Static
       if: runner.os == 'macOS'
