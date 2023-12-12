@@ -1,15 +1,9 @@
 #pragma once
 
 #include <launchdarkly/data_model/storage_item.hpp>
-#include <launchdarkly/serialization/json_errors.hpp>
 
-#include <boost/json.hpp>
-#include <tl/expected.hpp>
-
-#include <memory>
 #include <optional>
 #include <ostream>
-#include <unordered_map>
 
 namespace launchdarkly::data_model {
 /**
@@ -68,10 +62,11 @@ std::ostream& operator<<(std::ostream& out,
 }
 
 template <typename T>
-ItemDescriptor<T>::ItemDescriptor(uint64_t version) : version(version) {}
+ItemDescriptor<T>::ItemDescriptor(uint64_t const version) : version(version) {}
 
 template <typename T>
-ItemDescriptor<T>::ItemDescriptor(Tombstone tombstone) : version(tombstone) {}
+ItemDescriptor<T>::ItemDescriptor(Tombstone tombstone)
+    : version(std::move(tombstone)) {}
 
 template <typename T>
 ItemDescriptor<T>::ItemDescriptor(T item)
