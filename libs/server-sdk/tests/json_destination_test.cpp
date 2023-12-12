@@ -164,7 +164,8 @@ TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
                    2, "{\"key\":\"segment\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    dest.Upsert("segment", data_model::SegmentDescriptor(data_model::Tombstone(2)));
+    dest.Upsert("segment",
+                data_model::SegmentDescriptor(data_model::Tombstone(2)));
 }
 
 TEST_F(JsonDestinationTest, UpsertFlagCreatesSerializedItem) {

@@ -44,7 +44,8 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
     template <typename Item>
     static tl::expected<data_model::ItemDescriptor<Item>,
                         data_interfaces::IDataReader::Error>
-    IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
+    DeserializeJsonDescriptor(
+        integrations::SerializedItemDescriptor const& descriptor) {
         if (descriptor.deleted) {
             return data_model::ItemDescriptor<Item>(
                 data_model::Tombstone(descriptor.version));
@@ -90,7 +91,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
             return std::nullopt;
         }
 
-        return IntoStorageItem<DataModel>(*serialized_item);
+        return DeserializeJsonDescriptor<DataModel>(*serialized_item);
     }
 
     template <typename DataModel, typename DataKind>
@@ -106,7 +107,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
         Collection<DataModel> items;
 
         for (auto const& [key, descriptor] : *result) {
-            auto item = IntoStorageItem<DataModel>(descriptor);
+            auto item = DeserializeJsonDescriptor<DataModel>(descriptor);
 
             if (!item) {
                 LD_LOG(logger_, LogLevel::kError)
