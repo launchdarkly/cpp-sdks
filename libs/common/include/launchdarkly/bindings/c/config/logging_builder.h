@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <launchdarkly/bindings/c/logging/log_level.h>
+
 #include <launchdarkly/bindings/c/export.h>
 #include <launchdarkly/bindings/c/status.h>
 
@@ -16,17 +18,6 @@ extern "C" {  // only need to export C interface if
 
 typedef struct _LDLoggingBasicBuilder* LDLoggingBasicBuilder;
 typedef struct _LDLoggingCustomBuilder* LDLoggingCustomBuilder;
-
-/**
- * Defines the log levels used with the SDK's default logger, or a user-provided
- * custom logger.
- */
-enum LDLogLevel {
-    LD_LOG_DEBUG = 0,
-    LD_LOG_INFO = 1,
-    LD_LOG_WARN = 2,
-    LD_LOG_ERROR = 3,
-};
 
 typedef bool (*EnabledFn)(enum LDLogLevel level, void* user_data);
 typedef void (*WriteFn)(enum LDLogLevel level,
