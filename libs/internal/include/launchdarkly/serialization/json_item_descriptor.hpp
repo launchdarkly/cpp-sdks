@@ -8,6 +8,8 @@
 #include <boost/json.hpp>
 #include <tl/expected.hpp>
 
+#include <memory>
+
 namespace launchdarkly {
 
 template <typename T>
