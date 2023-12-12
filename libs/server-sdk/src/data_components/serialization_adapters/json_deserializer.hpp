@@ -4,11 +4,37 @@
 #include "../../data_interfaces/source/idata_reader.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/serialization/value_mapping.hpp>
 #include <launchdarkly/server_side/integrations/data_reader/iserialized_data_reader.hpp>
 
 #include <memory>
 
 namespace launchdarkly::server_side::data_components {
+
+tl::expected<std::optional<data_interfaces::IDataReader::Tombstone>, JsonError>
+tag_invoke(
+    boost::json::value_to_tag<
+        tl::expected<std::optional<data_interfaces::IDataReader::Tombstone>,
+                     JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
+    REQUIRE_OBJECT(json_value);
+
+    auto const& obj = json_value.as_object();
+
+    bool deleted = false;
+    PARSE_REQUIRED_FIELD(deleted, obj, "deleted");
+
+    if (!deleted) {
+        return tl::make_unexpected(JsonError::kTombstoneInvalidDeletedField);
+    }
+
+    std::uint64_t version = 0;
+    PARSE_REQUIRED_FIELD(version, obj, "version");
+
+    return data_interfaces::IDataReader::Tombstone(version);
+}
 
 template <typename Item>
 tl::expected<data_interfaces::IDataReader::StorageItem<Item>,
@@ -26,36 +52,17 @@ IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
             json_val);
 
     if (!result) {
-        /* maybe it's a tombstone - check */
-        /* TODO(225976): replace with boost::json deserializer */
-        if (json_val.is_object()) {
-            auto const& obj = json_val.as_object();
-            if (auto deleted_it = obj.find("deleted");
-                deleted_it != obj.end()) {
-                auto const& deleted = deleted_it->value();
-
-                if (deleted.is_bool() && deleted.as_bool()) {
-                    if (auto version_it = obj.find("version");
-                        version_it != obj.end()) {
-                        auto const& version = version_it->value();
-                        if (version.is_number()) {
-                            return data_interfaces::IDataReader::Tombstone(
-                                version.as_uint64());
-                        }
-                        return tl::make_unexpected(
-                            data_interfaces::IDataReader::Error{
-                                "tombstone field 'version' is invalid"});
-                    }
-                    return tl::make_unexpected(
-                        "tombstone field 'version' is missing");
-                }
-                return tl::make_unexpected(
-                    "tombstone field 'deleted' is invalid ");
-            }
+        auto tombstone = boost::json::value_from<std::optional<
+            tl::expected<data_interfaces::IDataReader::Tombstone>, JsonError>>(
+            json_val);
+        if (!tombstone) {
+            return tl::make_unexpected(result.error());
         }
-
-        return tl::make_unexpected(
-            "serialized item isn't a valid data item or tombstone");
+        auto tombstone_result = *tombstone;
+        if (!tombstone_result {
+            return tl::make_unexpected("")
+        }
+        return *tombstone;
     }
 
     auto item = *result;

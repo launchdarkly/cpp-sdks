@@ -15,6 +15,8 @@ enum class JsonError {
     kContextInvalidSecondaryField = 108,
     kContextInvalidAttributeReference = 109,
     kContextInvalidPrivateAttributesField = 110,
+
+    kTombstoneInvalidDeletedField = 200,
 };
 
 std::ostream& operator<<(std::ostream& os, JsonError const& err);
