@@ -12,6 +12,11 @@ project(
         LANGUAGES CXX C
 )
 
+if (POLICY CMP0074)
+    # Allow BOOST_ROOT to be set by CI without warnings.
+    cmake_policy(SET CMP0074 NEW)
+endif ()
+
 include(GNUInstallDirs)
 
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)

@@ -26,7 +26,7 @@ inputs:
     required: false
     default: 'false'
   simulate_windows_release:
-    description: 'Whether to run ./build-windows.sh for the CMake target'
+    description: 'Whether to run ./build-release-windows.sh for the CMake target'
     required: false
     default: 'false'
 
@@ -76,7 +76,7 @@ runs:
     - name: Simulate Release (Windows)
       if: inputs.simulate_windows_release == 'true'
       shell: bash
-      run: ./scripts/build-windows.sh ${{ inputs.cmake_target }}
+      run: ./scripts/build-release-windows.sh ${{ inputs.cmake_target }}
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
