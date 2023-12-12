@@ -31,6 +31,7 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D LD_BUILD_REDIS_SUPPORT="$build_redis" \
                -D BUILD_TESTING=OFF \
                -D LD_BUILD_SHARED_LIBS=ON \
+               -D LD_DYNAMIC_LINK_BOOST=OFF \
                -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
@@ -57,6 +58,7 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug \
                -D BUILD_TESTING=OFF \
                -D LD_BUILD_REDIS_SUPPORT="$build_redis" \
                -D LD_BUILD_SHARED_LIBS=ON \
+               -D LD_DYNAMIC_LINK_BOOST=OFF \
                -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
