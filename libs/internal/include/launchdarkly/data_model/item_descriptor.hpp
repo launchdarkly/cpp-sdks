@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/data_model/storage_item.hpp>
 #include <launchdarkly/serialization/json_errors.hpp>
 
 #include <boost/json.hpp>
@@ -30,6 +31,14 @@ struct ItemDescriptor {
     explicit ItemDescriptor(uint64_t version);
 
     explicit ItemDescriptor(T item);
+
+    template <typename Item>
+    static ItemDescriptor<Item> FromStorage(StorageItem<Item> item) {
+        if (std::holds_alternative<Tombstone>(item)) {
+            return ItemDescriptor<Item>(std::get<Tombstone>(item));
+        }
+        return ItemDescriptor<Item>(std::move(std::get<Item>(item)));
+    }
 
     ItemDescriptor(ItemDescriptor const&) = default;
     ItemDescriptor(ItemDescriptor&&) = default;

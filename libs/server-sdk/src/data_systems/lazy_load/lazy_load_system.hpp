@@ -114,10 +114,9 @@ class LazyLoad final : public data_interfaces::IDataSystem {
                 // works with ItemDescriptors, whereas the reader operates using
                 // IDataReader::StorageItems. This doesn't necessarily need to
                 // be the case.
-                cache_.Upsert(
-                    key,
-                    data_interfaces::IDataReader::StorageItemIntoDescriptor(
-                        std::move(*optional_item)));
+                cache_.Upsert(key,
+                              data_model::ItemDescriptor<Item>::FromStorage(
+                                  std::move(*optional_item)));
 
             } else {
                 // If the item is actually *missing* - not just a deleted
@@ -169,10 +168,9 @@ class LazyLoad final : public data_interfaces::IDataSystem {
                 // works with ItemDescriptors, whereas the reader operates using
                 // IDataReader::StorageItems. This doesn't necessarily need to
                 // be the case.
-                cache_.Upsert(
-                    item.first,
-                    data_interfaces::IDataReader::StorageItemIntoDescriptor(
-                        std::move(item.second)));
+                cache_.Upsert(item.first,
+                              data_model::ItemDescriptor<Item>::FromStorage(
+                                  std::move(item.second)));
                 tracker_.Add(item.first, updated_expiry);
             }
         } else {

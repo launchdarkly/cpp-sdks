@@ -7,6 +7,31 @@
 
 #include <boost/json.hpp>
 
+namespace launchdarkly {
+tl::expected<std::optional<data_model::Tombstone>, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<std::optional<data_model::Tombstone>,
+                                           JsonError>> const& unused,
+    boost::json::value const& json_value) {
+    boost::ignore_unused(unused);
+
+    REQUIRE_OBJECT(json_value);
+
+    auto const& obj = json_value.as_object();
+
+    bool deleted = false;
+    PARSE_REQUIRED_FIELD(deleted, obj, "deleted");
+
+    if (!deleted) {
+        return tl::make_unexpected(JsonError::kTombstoneInvalidDeletedField);
+    }
+
+    std::uint64_t version = 0;
+    PARSE_REQUIRED_FIELD(version, obj, "version");
+
+    return data_model::Tombstone(version);
+}
+}  // namespace launchdarkly
+
 namespace launchdarkly::server_side::data_components {
 
 JsonDeserializer::JsonDeserializer(

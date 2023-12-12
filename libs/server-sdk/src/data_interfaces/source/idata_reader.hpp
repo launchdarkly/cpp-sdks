@@ -20,30 +20,17 @@ namespace launchdarkly::server_side::data_interfaces {
  */
 class IDataReader {
    public:
-    BOOST_STRONG_TYPEDEF(std::uint64_t, Tombstone);
-
-    template <typename Item>
-    using StorageItem = std::variant<Item, Tombstone>;
-
-    template <typename T>
-    static data_model::ItemDescriptor<T> StorageItemIntoDescriptor(
-        StorageItem<T> item) {
-        if (std::holds_alternative<Tombstone>(item)) {
-            return data_model::ItemDescriptor<T>(std::get<Tombstone>(item));
-        }
-        return data_model::ItemDescriptor<T>(std::move(std::get<T>(item)));
-    }
-
     using Error = std::string;
 
     template <typename T>
-    using Single = std::optional<StorageItem<T>>;
+    using Single = std::optional<data_model::StorageItem<T>>;
 
     template <typename T>
     using SingleResult = tl::expected<Single<T>, Error>;
 
     template <typename T>
-    using Collection = std::unordered_map<std::string, StorageItem<T>>;
+    using Collection =
+        std::unordered_map<std::string, data_model::StorageItem<T>>;
 
     template <typename T>
     using CollectionResult = tl::expected<Collection<T>, Error>;

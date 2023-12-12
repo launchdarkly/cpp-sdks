@@ -9,69 +9,46 @@
 
 #include <memory>
 
+namespace launchdarkly {
+
+tl::expected<std::optional<data_model::Tombstone>, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<std::optional<data_model::Tombstone>,
+                                           JsonError>> const& unused,
+    boost::json::value const& json_value);
+}  // namespace launchdarkly
+
 namespace launchdarkly::server_side::data_components {
 
-tl::expected<std::optional<data_interfaces::IDataReader::Tombstone>, JsonError>
-tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<std::optional<data_interfaces::IDataReader::Tombstone>,
-                     JsonError>> const& unused,
-    boost::json::value const& json_value) {
-    boost::ignore_unused(unused);
-
-    REQUIRE_OBJECT(json_value);
-
-    auto const& obj = json_value.as_object();
-
-    bool deleted = false;
-    PARSE_REQUIRED_FIELD(deleted, obj, "deleted");
-
-    if (!deleted) {
-        return tl::make_unexpected(JsonError::kTombstoneInvalidDeletedField);
-    }
-
-    std::uint64_t version = 0;
-    PARSE_REQUIRED_FIELD(version, obj, "version");
-
-    return data_interfaces::IDataReader::Tombstone(version);
-}
-
 template <typename Item>
-tl::expected<data_interfaces::IDataReader::StorageItem<Item>,
-             data_interfaces::IDataReader::Error>
+tl::expected<data_model::StorageItem<Item>, data_interfaces::IDataReader::Error>
 IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
     if (descriptor.deleted) {
-        return data_interfaces::IDataReader::StorageItem<Item>(
-            data_interfaces::IDataReader::Tombstone(descriptor.version));
+        return data_model::Tombstone(descriptor.version);
     }
 
     auto const json_val = boost::json::parse(descriptor.serializedItem);
 
-    auto result =
-        boost::json::value_to<tl::expected<std::optional<Item>, JsonError>>(
-            json_val);
-
-    if (!result) {
-        auto tombstone = boost::json::value_from<std::optional<
-            tl::expected<data_interfaces::IDataReader::Tombstone>, JsonError>>(
-            json_val);
-        if (!tombstone) {
-            return tl::make_unexpected(result.error());
+    if (auto item_result =
+            boost::json::value_to<tl::expected<std::optional<Item>, JsonError>>(
+                json_val)) {
+        auto item = *item_result;
+        if (!item) {
+            return tl::make_unexpected("item invalid: value is null");
         }
-        auto tombstone_result = *tombstone;
-        if (!tombstone_result {
-            return tl::make_unexpected("")
-        }
-        return *tombstone;
+        return *item;
     }
 
-    auto item = *result;
-
-    if (!item) {
-        return tl::make_unexpected("serialized item is null JSON value");
+    auto tombstone = boost::json::value_to<
+        tl::expected<std::optional<data_model::Tombstone>, JsonError>>(
+        json_val);
+    if (!tombstone) {
+        return tl::make_unexpected(ErrorToString(tombstone.error()));
     }
-
-    return *item;
+    auto tombstone_result = *tombstone;
+    if (!tombstone_result) {
+        return tl::make_unexpected("tombstone invalid: value is null");
+    }
+    return *tombstone_result;
 }
 
 class JsonDeserializer final : public data_interfaces::IDataReader {

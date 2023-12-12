@@ -16,6 +16,8 @@ enum class JsonError {
     kContextInvalidAttributeReference = 109,
     kContextInvalidPrivateAttributesField = 110,
 
+    // The tombstone representation has a 'deleted' field, but it's false
+    // instead of true as required.
     kTombstoneInvalidDeletedField = 200,
 };
 
