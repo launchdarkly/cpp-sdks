@@ -75,6 +75,9 @@ target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 
+if (LD_DYNAMIC_LINK_BOOST)
+    target_link_libraries(${LIBNAME} PRIVATE Boost::dynamic_linking)
+endif ()
 
 add_library(launchdarkly::server ALIAS ${LIBNAME})
 
