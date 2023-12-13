@@ -184,4 +184,5 @@ TEST(ClientBindings, DoubleVariationPassesThroughDefault) {
     }
 
     LDServerSDK_Free(sdk);
+    LDContext_Free(context);
 }
