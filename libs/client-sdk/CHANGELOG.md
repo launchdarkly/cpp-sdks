@@ -1,19 +1,6 @@
 # Changelog
 
-All notable changes to the LaunchDarkly Client-Side SDK for C/C++ will be documented in this file. This project adheres to [Semantic Versioning](https://semver.org).
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-internal bumped from 0.1.9 to 0.1.10
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-internal bumped from 0.3.0 to 0.4.0
-    * launchdarkly-cpp-common bumped from 0.5.0 to 1.0.0
+## [3.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.3.0...launchdarkly-cpp-client-v3.3.1) (2023-12-13)
 
 ### Dependencies
 
