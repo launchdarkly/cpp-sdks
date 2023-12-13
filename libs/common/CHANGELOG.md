@@ -1,16 +1,5 @@
 # Changelog
 
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-sse-client bumped from 0.1.0 to 0.1.1
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-sse-client bumped from 0.1.1 to 0.1.2
 
 ## [1.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.1.0...launchdarkly-cpp-common-v1.2.0) (2023-12-13)
 

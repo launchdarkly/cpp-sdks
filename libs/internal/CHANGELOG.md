@@ -1,50 +1,6 @@
 # Changelog
 
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.1.0 to 0.2.0
-
-### Dependencies
-
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.2.0 to 0.3.0
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.3.0 to 0.3.1
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.3.2 to 0.3.3
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.3.3 to 0.3.4
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.3.4 to 0.3.5
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * dependencies
-    * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
+## [0.5.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.5.0...launchdarkly-cpp-internal-v0.5.1) (2023-12-13)
 
 ### Dependencies
 
