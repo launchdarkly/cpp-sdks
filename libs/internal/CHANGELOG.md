@@ -46,6 +46,12 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 0.3.5 to 0.3.6
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 1.1.0 to 1.2.0
+
 ## [0.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.4.0...launchdarkly-cpp-internal-v0.5.0) (2023-12-04)
 
 
