@@ -1,0 +1,15 @@
+digraph "include/launchdarkly/client_side" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_9eefd166cfb38881a53e6ced23ae3519 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="launchdarkly" fontname="Helvetica", fontsize="10", URL="dir_9eefd166cfb38881a53e6ced23ae3519.html"]
+  subgraph clusterdir_22fb0d6462546642bc6c49f025f80bdc {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_22fb0d6462546642bc6c49f025f80bdc.html"];
+    dir_22fb0d6462546642bc6c49f025f80bdc [shape=plaintext label="client_side"];
+  dir_1e26f8de3bfcd9fa7bce35252b1f57fd [shape=box label="bindings" fillcolor="white" style="filled" color="red" URL="dir_1e26f8de3bfcd9fa7bce35252b1f57fd.html"];
+  }
+  }
+  dir_bdd9a5d540de89e9fe90efdfc6973a4f [shape=box label="common" fillcolor="white" style="filled" color="red" URL="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html"];
+  dir_1e26f8de3bfcd9fa7bce35252b1f57fd->dir_bdd9a5d540de89e9fe90efdfc6973a4f [headlabel="12", labeldistance=1.5 headhref="dir_000004_000007.html"];
+}
