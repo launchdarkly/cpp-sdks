@@ -5,18 +5,15 @@ inputs:
   workspace_path:
     description: 'The workspace to publish docs for'
     required: true
+  token:
+    description: 'Token to use for publishing.'
+    required: true
 runs:
   using: composite
   steps:
-    # We put the github pages in another directory.
-    - uses: actions/checkout@v3
+    - uses: launchdarkly/gh-actions/actions/publish-pages@publish-pages-v1.0.1
+      name: 'Publish to Github pages'
       with:
-        path: gh-pages
-        ref: gh-pages
-    - name: Publish Docs
-      shell: bash
-      run: |
-        echo "Publishing docs for: $WORKSPACE"
-        ./scripts/publish-doc.sh $WORKSPACE
-      env:
-        WORKSPACE: ${{ inputs.workspace_path }}
+        docs_path: ${{ inputs.workspace_path }}/docs
+        output_path: ${{ inputs.workspace_path }}/docs
+        github_token: ${{ inputs.token }}

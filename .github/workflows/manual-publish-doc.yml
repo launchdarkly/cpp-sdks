@@ -34,3 +34,4 @@ jobs:
         uses: ./.github/actions/publish-docs
         with:
           workspace_path: ${{ inputs.workspace_path }}
+          token: ${{secrets.GITHUB_TOKEN}}
