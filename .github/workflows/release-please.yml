@@ -12,8 +12,8 @@ jobs:
       package-client-tag: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
       package-server-released: ${{ steps.release.outputs['libs/server-sdk--release_created'] }}
       package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
-      package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source-release_created'] }}
-      package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source-tag_name'] }}
+      package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
+      package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
