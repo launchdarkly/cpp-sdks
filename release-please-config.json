@@ -17,14 +17,12 @@
         "tests/server_c_bindings_test.cpp",
         "tests/client_test.cpp",
         "CMakeLists.txt"
-      ],
-      "release-as": "3.0.0"
+      ]
     },
     "libs/server-sdk-redis-source": {
       "extra-files": [
         "CMakeLists.txt"
-      ],
-      "release-as": "1.0.0"
+      ]
     },
     "libs/server-sent-events": {
       "initial-version": "0.1.0"
