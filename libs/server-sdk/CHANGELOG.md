@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.0.0...launchdarkly-cpp-server-v3.0.1) (2023-12-13)
+
+
+### Bug Fixes
+
+* double variation was returning ints ([#335](https://github.com/launchdarkly/cpp-sdks/issues/335)) ([ef0559d](https://github.com/launchdarkly/cpp-sdks/commit/ef0559d0bfe4a662cfe558a73afed66a9db9d3b5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.5.0 to 0.5.1
+    * launchdarkly-cpp-common bumped from 1.1.0 to 1.2.0
+
 ## [3.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v0.3.0...launchdarkly-cpp-server-v3.0.0) (2023-12-04)
 
 

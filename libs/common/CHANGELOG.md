@@ -12,6 +12,13 @@
   * dependencies
     * launchdarkly-cpp-sse-client bumped from 0.1.1 to 0.1.2
 
+## [1.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.1.0...launchdarkly-cpp-common-v1.2.0) (2023-12-13)
+
+
+### Features
+
+* add C bindings for getting log levels ([#334](https://github.com/launchdarkly/cpp-sdks/issues/334)) ([2b7f7d6](https://github.com/launchdarkly/cpp-sdks/commit/2b7f7d64dd2f401e984d14b444c34ad394cf7485))
+
 ## [1.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.0.0...launchdarkly-cpp-common-v1.1.0) (2023-12-04)
 
 
