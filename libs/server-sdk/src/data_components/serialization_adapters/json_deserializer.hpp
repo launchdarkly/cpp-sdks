@@ -4,68 +4,20 @@
 #include "../../data_interfaces/source/idata_reader.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
+#include <launchdarkly/serialization/value_mapping.hpp>
 #include <launchdarkly/server_side/integrations/data_reader/iserialized_data_reader.hpp>
 
 #include <memory>
 
+namespace launchdarkly {
+
+tl::expected<std::optional<data_model::Tombstone>, JsonError> tag_invoke(
+    boost::json::value_to_tag<tl::expected<std::optional<data_model::Tombstone>,
+                                           JsonError>> const& unused,
+    boost::json::value const& json_value);
+}  // namespace launchdarkly
+
 namespace launchdarkly::server_side::data_components {
-
-template <typename Item>
-tl::expected<data_interfaces::IDataReader::StorageItem<Item>,
-             data_interfaces::IDataReader::Error>
-IntoStorageItem(integrations::SerializedItemDescriptor const& descriptor) {
-    if (descriptor.deleted) {
-        return data_interfaces::IDataReader::StorageItem<Item>(
-            data_interfaces::IDataReader::Tombstone(descriptor.version));
-    }
-
-    auto const json_val = boost::json::parse(descriptor.serializedItem);
-
-    auto result =
-        boost::json::value_to<tl::expected<std::optional<Item>, JsonError>>(
-            json_val);
-
-    if (!result) {
-        /* maybe it's a tombstone - check */
-        /* TODO(225976): replace with boost::json deserializer */
-        if (json_val.is_object()) {
-            auto const& obj = json_val.as_object();
-            if (auto deleted_it = obj.find("deleted");
-                deleted_it != obj.end()) {
-                auto const& deleted = deleted_it->value();
-
-                if (deleted.is_bool() && deleted.as_bool()) {
-                    if (auto version_it = obj.find("version");
-                        version_it != obj.end()) {
-                        auto const& version = version_it->value();
-                        if (version.is_number()) {
-                            return data_interfaces::IDataReader::Tombstone(
-                                version.as_uint64());
-                        }
-                        return tl::make_unexpected(
-                            data_interfaces::IDataReader::Error{
-                                "tombstone field 'version' is invalid"});
-                    }
-                    return tl::make_unexpected(
-                        "tombstone field 'version' is missing");
-                }
-                return tl::make_unexpected(
-                    "tombstone field 'deleted' is invalid ");
-            }
-        }
-
-        return tl::make_unexpected(
-            "serialized item isn't a valid data item or tombstone");
-    }
-
-    auto item = *result;
-
-    if (!item) {
-        return tl::make_unexpected("serialized item is null JSON value");
-    }
-
-    return *item;
-}
 
 class JsonDeserializer final : public data_interfaces::IDataReader {
    public:
@@ -89,6 +41,40 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
     [[nodiscard]] bool Initialized() const override;
 
    private:
+    template <typename Item>
+    static tl::expected<data_model::ItemDescriptor<Item>,
+                        data_interfaces::IDataReader::Error>
+    DeserializeJsonDescriptor(
+        integrations::SerializedItemDescriptor const& descriptor) {
+        if (descriptor.deleted) {
+            return data_model::ItemDescriptor<Item>(
+                data_model::Tombstone(descriptor.version));
+        }
+
+        auto const json_val = boost::json::parse(descriptor.serializedItem);
+
+        if (auto item_result = boost::json::value_to<
+                tl::expected<std::optional<Item>, JsonError>>(json_val)) {
+            auto item = *item_result;
+            if (!item) {
+                return tl::make_unexpected("item invalid: value is null");
+            }
+            return data_model::ItemDescriptor<Item>(std::move(*item));
+        }
+
+        auto tombstone = boost::json::value_to<
+            tl::expected<std::optional<data_model::Tombstone>, JsonError>>(
+            json_val);
+        if (!tombstone) {
+            return tl::make_unexpected(ErrorToString(tombstone.error()));
+        }
+        auto tombstone_result = *tombstone;
+        if (!tombstone_result) {
+            return tl::make_unexpected("tombstone invalid: value is null");
+        }
+        return data_model::ItemDescriptor<Item>(*tombstone_result);
+    }
+
     template <typename DataModel, typename DataKind>
     SingleResult<DataModel> DeserializeSingle(DataKind const& kind,
                                               std::string const& key) const {
@@ -105,7 +91,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
             return std::nullopt;
         }
 
-        return IntoStorageItem<DataModel>(*serialized_item);
+        return DeserializeJsonDescriptor<DataModel>(*serialized_item);
     }
 
     template <typename DataModel, typename DataKind>
@@ -121,7 +107,7 @@ class JsonDeserializer final : public data_interfaces::IDataReader {
         Collection<DataModel> items;
 
         for (auto const& [key, descriptor] : *result) {
-            auto item = IntoStorageItem<DataModel>(descriptor);
+            auto item = DeserializeJsonDescriptor<DataModel>(descriptor);
 
             if (!item) {
                 LD_LOG(logger_, LogLevel::kError)

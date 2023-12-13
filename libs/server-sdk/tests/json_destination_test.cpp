@@ -109,7 +109,7 @@ TEST_F(JsonDestinationTest, UpsertFlagErrorGeneratesErrorMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kError));
 
-    dest.Upsert("foo", data_model::FlagDescriptor(1));
+    dest.Upsert("foo", data_model::FlagDescriptor(data_model::Tombstone(1)));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kError, "failed to update flag foo"));
@@ -119,7 +119,7 @@ TEST_F(JsonDestinationTest, UpsertSegmentErrorGeneratesErrorMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kError));
 
-    dest.Upsert("foo", data_model::SegmentDescriptor(1));
+    dest.Upsert("foo", data_model::SegmentDescriptor(data_model::Tombstone(1)));
 
     ASSERT_TRUE(spy_logger->Contains(0, LogLevel::kError,
                                      "failed to update segment foo"));
@@ -129,7 +129,7 @@ TEST_F(JsonDestinationTest, UpsertStaleFlagGeneratesDebugMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kNotUpdated));
 
-    dest.Upsert("foo", data_model::FlagDescriptor(1));
+    dest.Upsert("foo", data_model::FlagDescriptor(data_model::Tombstone(1)));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kDebug, "flag foo not updated"));
@@ -139,7 +139,7 @@ TEST_F(JsonDestinationTest, UpsertStaleSegmentGeneratesDebugMessage) {
     EXPECT_CALL(mock_dest, Upsert)
         .WillOnce(Return(ISerializedDestination::UpsertResult::kNotUpdated));
 
-    dest.Upsert("foo", data_model::SegmentDescriptor(1));
+    dest.Upsert("foo", data_model::SegmentDescriptor(data_model::Tombstone(1)));
 
     ASSERT_TRUE(
         spy_logger->Contains(0, LogLevel::kDebug, "segment foo not updated"));
@@ -153,7 +153,7 @@ TEST_F(JsonDestinationTest, UpsertDeletedFlagCreatesTombstone) {
                    2, "{\"key\":\"flag\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    dest.Upsert("flag", data_model::FlagDescriptor(2));
+    dest.Upsert("flag", data_model::FlagDescriptor(data_model::Tombstone(2)));
 }
 
 TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
@@ -164,7 +164,8 @@ TEST_F(JsonDestinationTest, UpsertDeletedSegmentCreatesTombstone) {
                    2, "{\"key\":\"segment\",\"version\":2,\"deleted\":true}")))
         .WillOnce(Return(ISerializedDestination::UpsertResult::kSuccess));
 
-    dest.Upsert("segment", data_model::SegmentDescriptor(2));
+    dest.Upsert("segment",
+                data_model::SegmentDescriptor(data_model::Tombstone(2)));
 }
 
 TEST_F(JsonDestinationTest, UpsertFlagCreatesSerializedItem) {

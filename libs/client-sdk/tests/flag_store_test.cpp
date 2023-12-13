@@ -11,6 +11,7 @@ using launchdarkly::EvaluationResult;
 using launchdarkly::Value;
 using launchdarkly::client_side::ItemDescriptor;
 using launchdarkly::client_side::flag_manager::FlagStore;
+using Tombstone = launchdarkly::data_model::Tombstone;
 
 TEST(FlagstoreTests, HandlesEmptyInit) {
     FlagStore store;
@@ -108,7 +109,7 @@ TEST(FlagstoreTests, HandleDelete) {
                        EvaluationDetailInternal{Value("test"), std::nullopt,
                                                 std::nullopt}}}}}});
 
-    store.Upsert("flagA", ItemDescriptor{2});
+    store.Upsert("flagA", ItemDescriptor{Tombstone{2}});
 
     EXPECT_FALSE(store.GetAll().empty());
     EXPECT_FALSE(store.Get("flagA")->item.has_value());

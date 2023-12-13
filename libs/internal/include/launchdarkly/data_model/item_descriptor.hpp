@@ -1,16 +1,16 @@
 #pragma once
 
-#include <launchdarkly/serialization/json_errors.hpp>
+#include <boost/serialization/strong_typedef.hpp>
 
-#include <boost/json.hpp>
-#include <tl/expected.hpp>
-
-#include <memory>
+#include <cstdint>
 #include <optional>
 #include <ostream>
-#include <unordered_map>
 
 namespace launchdarkly::data_model {
+
+/** Represents the version number of a deleted item. */
+BOOST_STRONG_TYPEDEF(std::uint64_t, Tombstone);
+
 /**
  * An item descriptor is an abstraction that allows for Flag data to be
  * handled using the same type in both a put or a patch.
@@ -27,7 +27,7 @@ struct ItemDescriptor {
      */
     std::optional<T> item;
 
-    explicit ItemDescriptor(uint64_t version);
+    explicit ItemDescriptor(Tombstone tombstone);
 
     explicit ItemDescriptor(T item);
 
@@ -57,7 +57,8 @@ std::ostream& operator<<(std::ostream& out,
 }
 
 template <typename T>
-ItemDescriptor<T>::ItemDescriptor(uint64_t version) : version(version) {}
+ItemDescriptor<T>::ItemDescriptor(Tombstone tombstone)
+    : version(std::move(tombstone)) {}
 
 template <typename T>
 ItemDescriptor<T>::ItemDescriptor(T item)

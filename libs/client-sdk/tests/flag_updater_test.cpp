@@ -17,15 +17,14 @@ using launchdarkly::client_side::flag_manager::FlagStore;
 using launchdarkly::client_side::flag_manager::FlagUpdater;
 using launchdarkly::client_side::flag_manager::FlagValueChangeEvent;
 using launchdarkly::client_side::flag_manager::IFlagNotifier;
+using Tombstone = launchdarkly::data_model::Tombstone;
 
 TEST(FlagUpdaterDataTests, HandlesEmptyInit) {
     FlagStore manager;
     FlagUpdater updater(manager);
 
-    updater.Init(
-        ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{});
+    updater.Init(ContextBuilder().Kind("user", "user-key").Build(),
+                 std::unordered_map<std::string, ItemDescriptor>{});
 
     EXPECT_TRUE(manager.GetAll().empty());
 }
@@ -36,8 +35,7 @@ TEST(FlagUpdaterDataTests, HandlesInitWithData) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -53,8 +51,7 @@ TEST(FlagUpdaterDataTests, HandlesSecondInit) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -62,8 +59,7 @@ TEST(FlagUpdaterDataTests, HandlesSecondInit) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagB", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -80,8 +76,7 @@ TEST(FlagUpdaterDataTests, HandlePatchNewFlag) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -104,8 +99,7 @@ TEST(FlagUpdaterDataTests, HandlePatchUpdateFlag) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -127,8 +121,7 @@ TEST(FlagUpdaterDataTests, HandlePatchOutOfOrder) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -150,15 +143,14 @@ TEST(FlagUpdaterDataTests, HandleDelete) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{2});
+                   ItemDescriptor{Tombstone{2}});
 
     EXPECT_FALSE(manager.GetAll().empty());
     EXPECT_FALSE(manager.Get("flagA")->item.has_value());
@@ -170,15 +162,14 @@ TEST(FlagUpdaterDataTests, HandleDeleteOutOfOrder) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{0});
+                   ItemDescriptor{Tombstone{0}});
 
     EXPECT_FALSE(manager.GetAll().empty());
     EXPECT_EQ("test", manager.Get("flagA")->item.value().Detail().Value());
@@ -198,8 +189,7 @@ TEST(FlagUpdaterEventTests, InitialInitProducesNoEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -228,8 +218,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -237,8 +226,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA",
               ItemDescriptor{EvaluationResult{
                   1, std::nullopt, false, false, std::nullopt,
@@ -268,8 +256,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithNewFlagProducesEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -277,8 +264,7 @@ TEST(FlagUpdaterEventTests, SecondInitWithNewFlagProducesEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagB",
               ItemDescriptor{EvaluationResult{
                   1, std::nullopt, false, false, std::nullopt,
@@ -308,8 +294,7 @@ TEST(FlagUpdaterDataTests, PatchWithUpdateProducesEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -343,8 +328,7 @@ TEST(FlagUpdaterEventTests, PatchWithNewFlagProducesEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -374,8 +358,7 @@ TEST(FlagUpdaterEventTests, OutOfOrderPatchProducesNoEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -404,8 +387,7 @@ TEST(FlagUpdaterEventTests, EqualVersionProducesNoEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -439,15 +421,14 @@ TEST(FlagUpdaterEventTests, DeleteProducesAnEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{2});
+                   ItemDescriptor{Tombstone{2}});
 
     EXPECT_TRUE(got_event);
 }
@@ -471,8 +452,7 @@ TEST(FlagUpdaterEventTests, FlagMissingFromSecondInitTreatedAsDelete) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -485,8 +465,7 @@ TEST(FlagUpdaterEventTests, FlagMissingFromSecondInitTreatedAsDelete) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -516,8 +495,7 @@ TEST(FlagUpdaterEventTests, InitWithoutEvaluationResultTreatedAsDelete) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -530,13 +508,12 @@ TEST(FlagUpdaterEventTests, InitWithoutEvaluationResultTreatedAsDelete) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}},
-             {"flagB", ItemDescriptor{2}}}});
+             {"flagB", ItemDescriptor{Tombstone{2}}}}});
 
     EXPECT_TRUE(got_event);
 }
@@ -560,8 +537,7 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -574,8 +550,7 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -586,8 +561,7 @@ TEST(FlagUpdaterEventTests, DeletedFlagStillDeletedInit) {
     // Do another init where it is still deleted.
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -615,20 +589,19 @@ TEST(FlagUpdaterEventTests, SecondDeleteNoEventPatch) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{2});
+                   ItemDescriptor{Tombstone{2}});
 
     got_event.store(false);
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{3});
+                   ItemDescriptor{Tombstone{3}});
 
     EXPECT_FALSE(got_event);
 }
@@ -652,8 +625,7 @@ TEST(FlagUpdaterDataTests, CanDisconnectEventAndStopGettingEvents) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            0, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
@@ -701,15 +673,14 @@ TEST(FlagUpdaterEventTests, UndeletedFlagProducesEvent) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{Value("test"), std::nullopt,
                                                     std::nullopt}}}}}});
 
     updater.Upsert(ContextBuilder().Kind("user", "user-key").Build(), "flagA",
-                   ItemDescriptor{2});
+                   ItemDescriptor{Tombstone{2}});
 
     got_event.store(false);
 
@@ -752,8 +723,7 @@ TEST(FlagUpdaterEventTests, CanListenToMultipleFlags) {
 
     updater.Init(
         ContextBuilder().Kind("user", "user-key").Build(),
-        std::unordered_map<std::string,
-                           launchdarkly::client_side::ItemDescriptor>{
+        std::unordered_map<std::string, ItemDescriptor>{
             {{"flagA", ItemDescriptor{EvaluationResult{
                            1, std::nullopt, false, false, std::nullopt,
                            EvaluationDetailInternal{

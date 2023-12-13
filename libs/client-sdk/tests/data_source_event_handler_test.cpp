@@ -158,8 +158,8 @@ TEST(StreamingDataHandlerTests, HandlesDeleteMessage) {
 
     EXPECT_EQ(DataSourceEventHandler::MessageStatus::kMessageHandled, res);
     EXPECT_EQ(1, test_handler.count_);
-    auto expected_put =
-        std::pair<std::string, ItemDescriptor>{"flagA", ItemDescriptor(1)};
+    auto expected_put = std::pair<std::string, ItemDescriptor>{
+        "flagA", ItemDescriptor(data_model::Tombstone(1))};
     EXPECT_EQ(expected_put, test_handler.upsert_data_[0]);
 }
 

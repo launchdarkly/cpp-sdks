@@ -214,12 +214,14 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
             switch (res->kind) {
                 case data_components::DataKind::kFlag: {
                     handler_.Upsert(res->key,
-                                    data_model::FlagDescriptor(res->version));
+                                    data_model::FlagDescriptor(
+                                        data_model::Tombstone(res->version)));
                     return MessageStatus::kMessageHandled;
                 }
                 case data_components::DataKind::kSegment: {
-                    handler_.Upsert(
-                        res->key, data_model::SegmentDescriptor(res->version));
+                    handler_.Upsert(res->key,
+                                    data_model::SegmentDescriptor(
+                                        data_model::Tombstone(res->version)));
                     return MessageStatus::kMessageHandled;
                 }
                 default: {
