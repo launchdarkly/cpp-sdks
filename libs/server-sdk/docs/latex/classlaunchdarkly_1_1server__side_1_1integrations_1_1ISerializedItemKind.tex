@@ -1,0 +1,79 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::ISerialized\+Item\+Kind Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}\index{launchdarkly::server\_side::integrations::ISerializedItemKind@{launchdarkly::server\_side::integrations::ISerializedItemKind}}
+
+
+Represents the kind of a serialized item. The purpose of this interface is to allow for determining a serialized item\textquotesingle{}s version without leaking the details of the serialization format to the calling code.  
+
+
+
+
+{\ttfamily \#include $<$iserialized\+\_\+item\+\_\+kind.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::ISerialized\+Item\+Kind\+:
+% FIG 0
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a73c0cd6d490c648d81fa6cf99775ca6b}{Namespace}} () const =0
+\item 
+virtual std\+::uint64\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_adc4a77ceecf2f835a30467095327ef8c}{Version}} (std\+::string const \&data) const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a2b2a8a7cf5c55952a83a5835ba5c75ca}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a2b2a8a7cf5c55952a83a5835ba5c75ca}} 
+{\bfseries ISerialized\+Item\+Kind} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_ad877749f9d12e2aee40089b0cbcc4fbb}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_ad877749f9d12e2aee40089b0cbcc4fbb}} 
+{\bfseries ISerialized\+Item\+Kind} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a7fc47805bfcebaa3f265e289d6cddf45}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a7fc47805bfcebaa3f265e289d6cddf45}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a2833f9beeb3b271479caa33e018eb43d}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a2833f9beeb3b271479caa33e018eb43d}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents the kind of a serialized item. The purpose of this interface is to allow for determining a serialized item\textquotesingle{}s version without leaking the details of the serialization format to the calling code. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a73c0cd6d490c648d81fa6cf99775ca6b}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a73c0cd6d490c648d81fa6cf99775ca6b}} 
+\index{launchdarkly::server\_side::integrations::ISerializedItemKind@{launchdarkly::server\_side::integrations::ISerializedItemKind}!Namespace@{Namespace}}
+\index{Namespace@{Namespace}!launchdarkly::server\_side::integrations::ISerializedItemKind@{launchdarkly::server\_side::integrations::ISerializedItemKind}}
+\doxysubsubsection{\texorpdfstring{Namespace()}{Namespace()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Item\+Kind\+::\+Namespace (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+The namespace for the data. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_a8b30f70a206fce293d95bb4c5cd45010}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+Flag\+Kind}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1SegmentKind_ad6aa262f44ef563b9a719ca7e41053b7}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+Segment\+Kind}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_adc4a77ceecf2f835a30467095327ef8c}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_adc4a77ceecf2f835a30467095327ef8c}} 
+\index{launchdarkly::server\_side::integrations::ISerializedItemKind@{launchdarkly::server\_side::integrations::ISerializedItemKind}!Version@{Version}}
+\index{Version@{Version}!launchdarkly::server\_side::integrations::ISerializedItemKind@{launchdarkly::server\_side::integrations::ISerializedItemKind}}
+\doxysubsubsection{\texorpdfstring{Version()}{Version()}}
+{\footnotesize\ttfamily virtual std\+::uint64\+\_\+t launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Item\+Kind\+::\+Version (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{data }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Deserialize data and return the version of the data.
+
+This is for cases where the persistent store cannot avoid deserializing data to determine its version. For instance a Redis store where the only columns are the prefixed key and the serialized data.
+
+If the data cannot be deserialized, then 0 will be returned.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to deserialize. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The version of the data. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_ab41318592b9b2f77f924be72471d1de6}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+Flag\+Kind}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1SegmentKind_ade5374ae30cf0da65991c03fc6403361}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+Segment\+Kind}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/data\+\_\+reader/iserialized\+\_\+item\+\_\+kind.\+hpp\end{DoxyCompactItemize}
