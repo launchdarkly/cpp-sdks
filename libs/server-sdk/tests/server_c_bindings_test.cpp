@@ -159,3 +159,28 @@ TEST(ClientBindings, AllFlagsState) {
     LDContext_Free(context);
     LDServerSDK_Free(sdk);
 }
+
+TEST(ClientBindings, DoubleVariationPassesThroughDefault) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    LDContextBuilder ctx_builder = LDContextBuilder_New();
+    LDContextBuilder_AddKind(ctx_builder, "user", "shadow");
+    LDContext context = LDContextBuilder_Build(ctx_builder);
+
+    std::string const flag = "weight";
+    std::vector<double> values = {0.0, 0.5, 1.234, 12.0, 13.0, 24.0, 1000.0};
+    for (auto const& v : values) {
+        ASSERT_EQ(LDServerSDK_DoubleVariation(sdk, context, "weight", v), v);
+        ASSERT_EQ(LDServerSDK_DoubleVariationDetail(sdk, context, "weight", v,
+                                                    LD_DISCARD_DETAIL),
+                  v);
+    }
+
+    LDServerSDK_Free(sdk);
+}

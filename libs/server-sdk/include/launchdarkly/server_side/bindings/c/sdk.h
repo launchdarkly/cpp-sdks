@@ -303,7 +303,7 @@ LDServerSDK_IntVariationDetail(LDServerSDK sdk,
  * @return The variation for the given context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
  */
-LD_EXPORT(int)
+LD_EXPORT(double)
 LDServerSDK_DoubleVariation(LDServerSDK sdk,
                             LDContext context,
                             char const* flag_key,
@@ -322,7 +322,7 @@ LDServerSDK_DoubleVariation(LDServerSDK sdk,
  * @return The variation for the given context, or default_value if the
  * flag is disabled in the LaunchDarkly control panel.
  */
-LD_EXPORT(int)
+LD_EXPORT(double)
 LDServerSDK_DoubleVariationDetail(LDServerSDK sdk,
                                   LDContext context,
                                   char const* flag_key,

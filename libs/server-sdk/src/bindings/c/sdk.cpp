@@ -26,8 +26,7 @@ struct Detail;
 
 #define FROM_DETAIL(ptr) (reinterpret_cast<LDEvalDetail>(ptr))
 
-#define TO_DATASOURCESTATUS(ptr) \
-    (reinterpret_cast<DataSourceStatus*>(ptr))
+#define TO_DATASOURCESTATUS(ptr) (reinterpret_cast<DataSourceStatus*>(ptr))
 
 #define FROM_DATASOURCESTATUS(ptr) \
     (reinterpret_cast<LDServerDataSourceStatus>(ptr))
@@ -260,7 +259,7 @@ LDServerSDK_IntVariationDetail(LDServerSDK sdk,
     });
 }
 
-LD_EXPORT(int)
+LD_EXPORT(double)
 LDServerSDK_DoubleVariation(LDServerSDK sdk,
                             LDContext context,
                             char const* flag_key,
@@ -273,7 +272,7 @@ LDServerSDK_DoubleVariation(LDServerSDK sdk,
                                         default_value);
 }
 
-LD_EXPORT(int)
+LD_EXPORT(double)
 LDServerSDK_DoubleVariationDetail(LDServerSDK sdk,
                                   LDContext context,
                                   char const* flag_key,

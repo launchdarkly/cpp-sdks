@@ -52,7 +52,7 @@ TEST_F(ClientTest, IntVariationDefaultPassesThrough) {
 
 TEST_F(ClientTest, DoubleVariationDefaultPassesThrough) {
     std::string const flag = "weight";
-    std::vector<double> values = {0.0, 12.0, 13.0, 24.0, 1000.0};
+    std::vector<double> values = {0.0, 0.5, 1.234, 12.0, 13.0, 24.0, 1000.0};
     for (auto const& v : values) {
         ASSERT_EQ(client_.DoubleVariation(context_, flag, v), v);
         ASSERT_EQ(*client_.DoubleVariationDetail(context_, flag, v), v);
