@@ -14,6 +14,6 @@ runs:
     - uses: launchdarkly/gh-actions/actions/publish-pages@publish-pages-v1.0.1
       name: 'Publish to Github pages'
       with:
-        docs_path: ${{ inputs.workspace_path }}
-        output_path: ${{ inputs.workspace_path }}
+        docs_path: ${{ inputs.workspace_path }}/docs
+        output_path: ${{ inputs.workspace_path }}/docs
         github_token: ${{ inputs.token }}
