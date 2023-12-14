@@ -7,27 +7,27 @@
 
 using namespace launchdarkly;
 
-#define TO_ERROR(ptr) (reinterpret_cast<Error*>(ptr))
+#define TO_STATUS(ptr) (reinterpret_cast<Error*>(ptr))
 
-LD_EXPORT(char const*) LDStatus_Error(LDStatus res) {
-    if (Error* e = TO_ERROR(res)) {
+LD_EXPORT(char const*) LDStatus_Error(LDStatus const status) {
+    if (Error const* e = TO_STATUS(status)) {
         return ErrorToString(*e);
     }
     return nullptr;
 }
 
-LD_EXPORT(bool) LDStatus_Ok(LDStatus res) {
-    if (TO_ERROR(res) == nullptr) {
+LD_EXPORT(bool) LDStatus_Ok(LDStatus const status) {
+    if (TO_STATUS(status) == nullptr) {
         return true;
     }
     return false;
 }
 
-LD_EXPORT(void) LDStatus_Free(LDStatus error) {
-    delete TO_ERROR(error);
+LD_EXPORT(void) LDStatus_Free(LDStatus const error) {
+    delete TO_STATUS(error);
 }
 
-LD_EXPORT(LDStatus) LDStatus_Success(void) {
+LD_EXPORT(LDStatus) LDStatus_Success() {
     return nullptr;
 }
 

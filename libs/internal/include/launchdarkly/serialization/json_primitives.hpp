@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 namespace launchdarkly {
-
 template <typename T>
 tl::expected<std::optional<std::vector<T>>, JsonError> tag_invoke(
     boost::json::value_to_tag<
@@ -68,7 +67,7 @@ template <typename K, typename V>
 tl::expected<std::optional<std::unordered_map<K, V>>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<std::unordered_map<K, V>>, JsonError>> const&
-        unused,
+    unused,
     boost::json::value const& json_value) {
     boost::ignore_unused(unused);
 
@@ -117,5 +116,4 @@ tl::expected<T, JsonError> tag_invoke(
     }
     return maybe_val.value().value_or(T());
 }
-
-}  // namespace launchdarkly
+} // namespace launchdarkly

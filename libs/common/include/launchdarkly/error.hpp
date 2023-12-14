@@ -3,10 +3,11 @@
 #include <cstdint>
 #include <limits>
 #include <ostream>
+#include <variant>
+#include <string>
 
 namespace launchdarkly {
-
-enum class Error : std::uint32_t {
+enum class ErrorCode : std::uint32_t {
     KReserved1 = 0,
     KReserved2 = 1,
     /* Common lib errors: 2-9999 */
@@ -27,7 +28,11 @@ enum class Error : std::uint32_t {
     kMax = std::numeric_limits<std::uint32_t>::max()
 };
 
-char const* ErrorToString(Error err);
-std::ostream& operator<<(std::ostream& os, Error const& err);
+using Error = std::variant<ErrorCode, std::string>;
 
-}  // namespace launchdarkly
+bool operator==(Error const& lhs, ErrorCode const& rhs);
+
+
+char const* ErrorToString(Error const& err);
+std::ostream& operator<<(std::ostream& os, Error const& err);
+} // namespace launchdarkly

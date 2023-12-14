@@ -55,7 +55,7 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::PrivateAttribute(
 template <typename SDK>
 tl::expected<built::Events, Error> EventsBuilder<SDK>::Build() const {
     if (config_.Capacity() == 0) {
-        return tl::unexpected(Error::kConfig_Events_ZeroCapacity);
+        return tl::unexpected(ErrorCode::kConfig_Events_ZeroCapacity);
     }
     return config_;
 }

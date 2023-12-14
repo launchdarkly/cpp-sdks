@@ -9,21 +9,25 @@
 
 namespace launchdarkly::detail {
 template <typename T, typename = void>
-struct has_result_type : std::false_type {};
+struct has_result_type : std::false_type {
+};
 
 template <typename T>
-struct has_result_type<T, std::void_t<typename T::Result>> : std::true_type {};
+struct has_result_type<T, std::void_t<typename T::Result>> : std::true_type {
+};
 
 template <typename T, typename ReturnType, typename = void>
-struct has_build_method : std::false_type {};
+struct has_build_method : std::false_type {
+};
 
 template <typename T, typename ReturnType>
 struct has_build_method<T,
                         ReturnType,
                         std::void_t<decltype(std::declval<T>().Build())>>
     : std::integral_constant<
-          bool,
-          std::is_same_v<decltype(std::declval<T>().Build()), ReturnType>> {};
+        bool,
+        std::is_same_v<decltype(std::declval<T>().Build()), ReturnType>> {
+};
 
 // NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 
@@ -39,7 +43,7 @@ template <typename Builder, typename OpaqueBuilder, typename OpaqueResult>
 LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
                         OpaqueResult* out_result) {
     using ReturnType =
-        tl::expected<typename Builder::Result, launchdarkly::Error>;
+        tl::expected<typename Builder::Result, Error>;
 
     static_assert(has_result_type<Builder>::value,
                   "Builder must have an associated type named Result");
@@ -51,14 +55,14 @@ LDStatus ConsumeBuilder(OpaqueBuilder opaque_builder,
 
     auto builder = reinterpret_cast<Builder*>(opaque_builder);
 
-    tl::expected<typename Builder::Result, launchdarkly::Error> res =
+    tl::expected<typename Builder::Result, Error> res =
         builder->Build();
 
     delete builder;
 
     if (!res) {
         *out_result = nullptr;
-        return reinterpret_cast<LDStatus>(new launchdarkly::Error(res.error()));
+        return reinterpret_cast<LDStatus>(new Error(res.error()));
     }
 
     *out_result = reinterpret_cast<OpaqueResult>(
@@ -105,6 +109,5 @@ bool OptReturnReinterpretCast(std::optional<OptType>& opt,
 #endif
 
 #define LD_ASSERT_NOT_NULL(param) LD_ASSERT(param != nullptr)
-
-}  // namespace launchdarkly::detail
+} // namespace launchdarkly::detail
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

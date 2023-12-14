@@ -4,7 +4,9 @@
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
 using namespace launchdarkly::server_side::config::builders;
-using Error = launchdarkly::Error;
+
+using launchdarkly::Error;
+using launchdarkly::ErrorCode;
 
 TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
     EndpointsBuilder builder;
@@ -18,15 +20,15 @@ TEST(ServiceEndpointTest, DefaultServerBuilderURLs) {
 TEST(ServiceEndpointTest, ModifySingleURLCausesError) {
     auto result = EndpointsBuilder().PollingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_AllURLsMustBeSet);
 
     result = EndpointsBuilder().StreamingBaseUrl("foo").Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_AllURLsMustBeSet);
 
     result = EndpointsBuilder().EventsBaseUrl("foo").Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_AllURLsMustBeSet);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 TEST(ServiceEndpointsTest, RelaySetsAllURLS) {
@@ -60,29 +62,29 @@ TEST(ServiceEndpointsTest, TrimsTrailingSlashes) {
 TEST(ServiceEndpointsTest, EmptyURLsAreInvalid) {
     auto result = EndpointsBuilder().RelayProxyBaseURL("").Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_EmptyURL);
 
     result = EndpointsBuilder()
-                 .StreamingBaseUrl("")
-                 .EventsBaseUrl("foo")
-                 .PollingBaseUrl("bar")
-                 .Build();
+             .StreamingBaseUrl("")
+             .EventsBaseUrl("foo")
+             .PollingBaseUrl("bar")
+             .Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_EmptyURL);
 
     result = EndpointsBuilder()
-                 .StreamingBaseUrl("foo")
-                 .EventsBaseUrl("")
-                 .PollingBaseUrl("bar")
-                 .Build();
+             .StreamingBaseUrl("foo")
+             .EventsBaseUrl("")
+             .PollingBaseUrl("bar")
+             .Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_EmptyURL);
 
     result = EndpointsBuilder()
-                 .StreamingBaseUrl("foo")
-                 .EventsBaseUrl("bar")
-                 .PollingBaseUrl("")
-                 .Build();
+             .StreamingBaseUrl("foo")
+             .EventsBaseUrl("bar")
+             .PollingBaseUrl("")
+             .Build();
     ASSERT_FALSE(result);
-    ASSERT_EQ(result.error(), Error::kConfig_Endpoints_EmptyURL);
+    ASSERT_EQ(result.error(), ErrorCode::kConfig_Endpoints_EmptyURL);
 }

@@ -4,18 +4,19 @@
 #include <utility>
 
 namespace launchdarkly::config::shared::builders {
-
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::PollingBaseUrl(std::string url) {
     polling_base_url_ = std::move(url);
     return *this;
 }
+
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::StreamingBaseUrl(
     std::string url) {
     streaming_base_url_ = std::move(url);
     return *this;
 }
+
 template <typename SDK>
 EndpointsBuilder<SDK>& EndpointsBuilder<SDK>::EventsBaseUrl(std::string url) {
     events_base_url_ = std::move(url);
@@ -44,11 +45,11 @@ bool empty_string(std::optional<std::string> const& opt_string) {
 
 template <typename SDK>
 tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build()
-    const {
+const {
     // Empty URLs are not allowed.
     if (empty_string(polling_base_url_) || empty_string(streaming_base_url_) ||
         empty_string(events_base_url_)) {
-        return tl::unexpected(Error::kConfig_Endpoints_EmptyURL);
+        return tl::unexpected(ErrorCode::kConfig_Endpoints_EmptyURL);
     }
 
     // If no URLs were set, return the default endpoints for this SDK.
@@ -69,7 +70,7 @@ tl::expected<built::ServiceEndpoints, Error> EndpointsBuilder<SDK>::Build()
     }
 
     // Otherwise if a subset of URLs were set, this is an error.
-    return tl::unexpected(Error::kConfig_Endpoints_AllURLsMustBeSet);
+    return tl::unexpected(ErrorCode::kConfig_Endpoints_AllURLsMustBeSet);
 }
 
 template <typename SDK>
@@ -88,5 +89,4 @@ template bool operator==(EndpointsBuilder<config::shared::ClientSDK> const&,
 
 template bool operator==(EndpointsBuilder<config::shared::ServerSDK> const&,
                          EndpointsBuilder<config::shared::ServerSDK> const&);
-
-}  // namespace launchdarkly::config::shared::builders
+} // namespace launchdarkly::config::shared::builders

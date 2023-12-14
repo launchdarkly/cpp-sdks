@@ -37,7 +37,7 @@ ConfigBuilder& ConfigBuilder::Offline(bool const offline) {
 tl::expected<Config, Error> ConfigBuilder::Build() const {
     auto sdk_key = sdk_key_;
     if (sdk_key.empty()) {
-        return tl::make_unexpected(Error::kConfig_SDKKey_Empty);
+        return tl::make_unexpected(ErrorCode::kConfig_SDKKey_Empty);
     }
 
     auto endpoints_config = service_endpoints_builder_.Build();

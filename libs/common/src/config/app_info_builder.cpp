@@ -6,12 +6,12 @@
 #include <cctype>
 
 namespace launchdarkly::config::shared::builders {
-
 // Defines the maximum character length for an Application Tag value.
 constexpr std::size_t kMaxTagValueLength = 64;
 
 AppInfoBuilder::Tag::Tag(std::string key, std::string value)
-    : key(std::move(key)), value(std::move(value)) {}
+    : key(std::move(key)), value(std::move(value)) {
+}
 
 tl::expected<std::string, Error> AppInfoBuilder::Tag::Build() const {
     if (auto err = IsValidTag(key, value)) {
@@ -33,16 +33,16 @@ bool ValidChar(char c) {
 std::optional<Error> IsValidTag(std::string const& key,
                                 std::string const& value) {
     if (value.empty() || key.empty()) {
-        return Error::kConfig_ApplicationInfo_EmptyKeyOrValue;
+        return ErrorCode::kConfig_ApplicationInfo_EmptyKeyOrValue;
     }
     if (value.length() > kMaxTagValueLength) {
-        return Error::kConfig_ApplicationInfo_ValueTooLong;
+        return ErrorCode::kConfig_ApplicationInfo_ValueTooLong;
     }
     if (!std::all_of(key.begin(), key.end(), ValidChar)) {
-        return Error::kConfig_ApplicationInfo_InvalidKeyCharacters;
+        return ErrorCode::kConfig_ApplicationInfo_InvalidKeyCharacters;
     }
     if (!std::all_of(value.begin(), value.end(), ValidChar)) {
-        return Error::kConfig_ApplicationInfo_InvalidValueCharacters;
+        return ErrorCode::kConfig_ApplicationInfo_InvalidValueCharacters;
     }
     return std::nullopt;
 }
@@ -51,6 +51,7 @@ AppInfoBuilder& AppInfoBuilder::AddTag(std::string key, std::string value) {
     tags_.emplace_back(std::move(key), std::move(value));
     return *this;
 }
+
 AppInfoBuilder& AppInfoBuilder::Identifier(std::string app_id) {
     return AddTag("application-id", std::move(app_id));
 }
@@ -96,5 +97,4 @@ std::optional<std::string> AppInfoBuilder::Build() const {
     // Concatenate with space as the delimiter.
     return boost::algorithm::join(validated, " ");
 }
-
-}  // namespace launchdarkly::config::shared::builders
+} // namespace launchdarkly::config::shared::builders

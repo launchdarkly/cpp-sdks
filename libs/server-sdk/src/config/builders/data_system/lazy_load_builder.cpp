@@ -25,7 +25,7 @@ LazyLoadBuilder& LazyLoadBuilder::Source(SourcePtr source) {
 tl::expected<built::LazyLoadConfig, Error> LazyLoadBuilder::Build() const {
     if (!config_.source) {
         return tl::make_unexpected(
-            Error::kConfig_DataSystem_LazyLoad_MissingSource);
+            ErrorCode::kConfig_DataSystem_LazyLoad_MissingSource);
     }
     return config_;
 }
