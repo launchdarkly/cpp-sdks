@@ -2,31 +2,51 @@
 
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
-#include <launchdarkly/error.hpp>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
+#include <launchdarkly/error.hpp>
+
+#include <redis++.h>
 
 using namespace launchdarkly::server_side::integrations;
 
-LD_EXPORT(LDStatus) LDServerSDK_RedisSource_Create(
-    const char* uri,
-    const char* prefix,
-    LDServerSDK_RedisSource* out_source,
-    char** out_exception_msg) {
+LD_EXPORT(bool)
+LDServerLazyLoadRedisSource_New(char const* uri,
+                                char const* prefix,
+                                LDServerLazyLoadResult* out_result) {
     LD_ASSERT_NOT_NULL(uri);
     LD_ASSERT_NOT_NULL(prefix);
-    LD_ASSERT_NOT_NULL(out_source);
+    LD_ASSERT_NOT_NULL(out_result);
+
+    // Explicitely zero out the exception_msg buffer in case the exception is
+    // shorter than the buffer.
+    memset(out_result->error_message, 0,
+           sizeof(LDServerLazyLoadResult::error_message));
+
+    // Ensure the source pointer isn't garbage.
+    out_result->source = nullptr;
 
     auto maybe_source = RedisDataSource::Create(uri, prefix);
     if (!maybe_source) {
-        if (out_exception_msg) {
-            *out_exception_msg = strdup(maybe_source.error().c_str());
-        }
-        return reinterpret_cast<LDStatus>(new launchdarkly::Error(
-            launchdarkly::Error::k));
+        // Avoid heap allocating another string to pass back to the caller;
+        // instead, we copy into the buffer and ensure a terminator is present.
+        // This does mean the message may be truncated.
+
+        std::size_t const len = maybe_source.error().copy(
+            out_result->error_message, sizeof(out_result->error_message) - 1);
+        out_result->error_message[len] = '\0';
+
+        return false;
     }
 
-    *out_source = reinterpret_cast<LDServerSDK_RedisSource>(new std::shared_ptr(
-        maybe_source.value()));
+    // The pointer is no longer managed and must either be freed by the caller,
+    // or passed into the SDK which will take ownership.
+    out_result->source =
+        reinterpret_cast<LDServerLazyLoadRedisSource>(maybe_source->release());
 
-    return LDStatus_Success();
+    return true;
+}
+
+LD_EXPORT(void)
+LDServerLazyLoadRedisSource_Free(LDServerLazyLoadRedisSource source) {
+    delete reinterpret_cast<RedisDataSource*>(source);
 }
