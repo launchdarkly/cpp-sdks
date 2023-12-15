@@ -3,11 +3,10 @@
 #include <redis++.h>
 
 namespace launchdarkly::server_side::integrations {
-
-tl::expected<std::shared_ptr<RedisDataSource>, std::string>
+tl::expected<std::unique_ptr<RedisDataSource>, std::string>
 RedisDataSource::Create(std::string uri, std::string prefix) {
     try {
-        return std::shared_ptr<RedisDataSource>(new RedisDataSource(
+        return std::unique_ptr<RedisDataSource>(new RedisDataSource(
             std::make_unique<sw::redis::Redis>(std::move(uri)),
             std::move(prefix)));
     } catch (sw::redis::Error const& e) {
@@ -25,8 +24,6 @@ RedisDataSource::RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
     : prefix_(std::move(prefix)),
       inited_key_(prefix_ + ":$inited"),
       redis_(std::move(redis)) {}
-
-RedisDataSource::~RedisDataSource() = default;
 
 ISerializedDataReader::GetResult RedisDataSource::Get(
     ISerializedItemKind const& kind,
@@ -54,7 +51,6 @@ ISerializedDataReader::AllResult RedisDataSource::All(
             items.emplace(key, SerializedItemDescriptor::Present(0, val));
         }
         return items;
-
     } catch (sw::redis::Error const& e) {
         return tl::make_unexpected(Error{e.what()});
     }
@@ -72,5 +68,4 @@ bool RedisDataSource::Initialized() const {
         return false;
     }
 }
-
 }  // namespace launchdarkly::server_side::integrations
