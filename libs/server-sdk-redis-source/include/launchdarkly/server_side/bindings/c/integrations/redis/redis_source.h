@@ -14,15 +14,22 @@ extern "C" {
 
 typedef struct _LDServerLazyLoadRedisSource* LDServerLazyLoadRedisSource;
 
+/* Defines the size of the error message buffer in LDServerLazyLoadResult.
+ */
 #ifndef LDSERVER_LAZYLOAD_REDISSOURCE_ERROR_MESSAGE_SIZE
 #define LDSERVER_LAZYLOAD_REDISSOURCE_ERROR_MESSAGE_SIZE 256
 #endif
 
 /**
- * @brief Contains the result of calling LDDServerLazyLoadRedisSource_New.
- * On successful creation (returns true), source will contain a pointer.
+ * @brief Stores the result of calling LDDServerLazyLoadRedisSource_New.
+ *
+ * On successful creation, source will contain a pointer which may be passed
+ * into the LaunchDarkly SDK's configuration.
+ *
  * On failure, error_message contains a NULL-terminated string describing the
- * error. The message may be truncated if it was originally longer than the
+ * error.
+ *
+ * The message may be truncated if it was originally longer than error_message's
  * buffer size.
  */
 struct LDServerLazyLoadResult {
@@ -32,18 +39,25 @@ struct LDServerLazyLoadResult {
 
 /**
  * @brief Creates a new Redis data source suitable for usage in the SDK's
- * Lazy Load data system. At runtime, the SDK will query Redis for flag/segment
+ * Lazy Load data system.
+ *
+ * In this system, the SDK will query Redis for flag/segment
  * data as required, with an in-memory cache to reduce the number of queries.
+ *
  * Data is never written back to Redis.
+ *
  * @param uri Redis URI string. Must not be NULL or empty string.
+ *
  * @param prefix Prefix to use when reading SDK data from Redis. This allows
  * multiple SDK environments to coexist in the same database, or for the SDK's
  * data to coexist with other unrelated data. Must not be NULL.
+ *
  * @param out_result Pointer to struct where the source pointer or an error
  * message should be stored.
- * @return True if the source was created successfully. In this case,
- * out_result->source will contain the source. The caller must either free the
- * pointer with LDServerLazyLoadRedisSource_Free, or pass it into the SDK's
+ *
+ * @return True if the source was created successfully; out_result->source
+ * will contain the pointer. The caller must either free the
+ * pointer with LDServerLazyLoadRedisSource_Free, OR pass it into the SDK's
  * configuration methods which will take ownership (in which case do not call
  * LDServerLazyLoadRedisSource_Free.)
  */
@@ -52,6 +66,10 @@ LDServerLazyLoadRedisSource_New(char const* uri,
                                 char const* prefix,
                                 LDServerLazyLoadResult* out_result);
 
+/**
+ * @brief Frees a Redis data source pointer. Only necessary to call if not
+ * passing ownership to SDK configuration.
+ */
 LD_EXPORT(void)
 LDServerLazyLoadRedisSource_Free(LDServerLazyLoadRedisSource source);
 
