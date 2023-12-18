@@ -108,6 +108,20 @@ class EventsBuilder {
     EventsBuilder& PrivateAttribute(AttributeReference attribute);
 
     /**
+     * @brief Specifies the number of unique context keys that can be remembered
+     * by the index event generation logic before needing to evict keys from
+     * memory in LRU order.
+     *
+     * After reaching capacity, it's possible
+     * that a previously-indexed context may cause generation of a redundant
+     * index event.
+     *
+     * @param capacity Maximum unique context keys to remember.
+     * @return  Reference to this builder.
+     */
+    EventsBuilder& ContextKeysCapacity(std::size_t capacity);
+
+    /**
      * Builds Events configuration, if the configuration is valid.
      * @return Events config, or error.
      */
