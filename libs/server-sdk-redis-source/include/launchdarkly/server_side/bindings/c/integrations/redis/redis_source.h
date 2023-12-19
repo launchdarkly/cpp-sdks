@@ -32,7 +32,7 @@ typedef struct _LDServerLazyLoadRedisSource* LDServerLazyLoadRedisSource;
  * The message may be truncated if it was originally longer than error_message's
  * buffer size.
  */
-struct LDServerLazyLoadResult {
+struct LDServerLazyLoadRedisResult {
     LDServerLazyLoadRedisSource source;
     char error_message[LDSERVER_LAZYLOAD_REDISSOURCE_ERROR_MESSAGE_SIZE];
 };
@@ -64,7 +64,7 @@ struct LDServerLazyLoadResult {
 LD_EXPORT(bool)
 LDServerLazyLoadRedisSource_New(char const* uri,
                                 char const* prefix,
-                                LDServerLazyLoadResult* out_result);
+                                struct LDServerLazyLoadRedisResult* out_result);
 
 /**
  * @brief Frees a Redis data source pointer. Only necessary to call if not
