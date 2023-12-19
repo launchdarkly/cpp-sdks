@@ -12,7 +12,7 @@ using namespace launchdarkly::server_side::integrations;
 LD_EXPORT(bool)
 LDServerLazyLoadRedisSource_New(char const* uri,
                                 char const* prefix,
-                                LDServerLazyLoadResult* out_result) {
+                                LDServerLazyLoadRedisResult* out_result) {
     LD_ASSERT_NOT_NULL(uri);
     LD_ASSERT_NOT_NULL(prefix);
     LD_ASSERT_NOT_NULL(out_result);
@@ -20,7 +20,7 @@ LDServerLazyLoadRedisSource_New(char const* uri,
     // Explicitely zero out the exception_msg buffer in case the exception is
     // shorter than the buffer.
     memset(out_result->error_message, 0,
-           sizeof(LDServerLazyLoadResult::error_message));
+           sizeof(LDServerLazyLoadRedisResult::error_message));
 
     // Ensure the source pointer isn't garbage.
     out_result->source = nullptr;
