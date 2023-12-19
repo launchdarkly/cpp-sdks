@@ -1,0 +1,34 @@
+\hypertarget{structLDServerLazyLoadResult}{}\doxysection{LDServer\+Lazy\+Load\+Result Struct Reference}
+\label{structLDServerLazyLoadResult}\index{LDServerLazyLoadResult@{LDServerLazyLoadResult}}
+
+
+Stores the result of calling LDDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New.  
+
+
+
+
+{\ttfamily \#include $<$redis\+\_\+source.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structLDServerLazyLoadResult_aa12f6f7d0d1ea1d2677f7bf1891984db}\label{structLDServerLazyLoadResult_aa12f6f7d0d1ea1d2677f7bf1891984db}} 
+LDServer\+Lazy\+Load\+Redis\+Source {\bfseries source}
+\item 
+\mbox{\Hypertarget{structLDServerLazyLoadResult_a44538cb4a334e3ffacba4a33329504b0}\label{structLDServerLazyLoadResult_a44538cb4a334e3ffacba4a33329504b0}} 
+char {\bfseries error\+\_\+message} \mbox{[}LDSERVER\+\_\+\+LAZYLOAD\+\_\+\+REDISSOURCE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Stores the result of calling LDDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New. 
+
+On successful creation, source will contain a pointer which may be passed into the Launch\+Darkly SDK\textquotesingle{}s configuration.
+
+On failure, error\+\_\+message contains a NULL-\/terminated string describing the error.
+
+The message may be truncated if it was originally longer than error\+\_\+message\textquotesingle{}s buffer size. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/bindings/c/integrations/redis/\mbox{\hyperlink{redis__source_8h}{redis\+\_\+source.\+h}}\end{DoxyCompactItemize}
