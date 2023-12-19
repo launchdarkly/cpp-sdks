@@ -18,7 +18,7 @@ LazyLoadBuilder& LazyLoadBuilder::CacheEviction(EvictionPolicy const policy) {
 }
 
 LazyLoadBuilder& LazyLoadBuilder::Source(SourcePtr source) {
-    config_.source = source;
+    config_.source = std::move(source);
     return *this;
 }
 

@@ -14,6 +14,8 @@ RedisDataSource::Create(std::string uri, std::string prefix) {
     }
 }
 
+RedisDataSource::~RedisDataSource() = default;
+
 std::string RedisDataSource::key_for_kind(
     ISerializedItemKind const& kind) const {
     return prefix_ + ":" + kind.Namespace();

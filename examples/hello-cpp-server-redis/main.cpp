@@ -52,7 +52,9 @@ int main() {
     }
 
     config_builder.DataSystem().Method(
-        LazyLoad().Source(*redis).CacheRefresh(std::chrono::seconds(30)));
+        LazyLoad()
+            .Source(std::move(*redis))
+            .CacheRefresh(std::chrono::seconds(30)));
 
     auto config = config_builder.Build();
     if (!config) {
