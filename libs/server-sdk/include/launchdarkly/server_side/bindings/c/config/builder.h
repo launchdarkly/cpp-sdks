@@ -281,7 +281,7 @@ LDServerDataSourcePollBuilder_New();
 /**
  * Sets the interval at which the SDK will poll for feature flag updates.
  * @param b Polling method builder. Must not be NULL.
- * @param milliseconds Polling interval.
+ * @param seconds Polling interval in seconds.
  */
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
