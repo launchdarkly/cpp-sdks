@@ -9,6 +9,7 @@
 #include <boost/json/parse.hpp>
 
 #include <chrono>
+#include <launchdarkly/server_side/config/config.hpp>
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -185,4 +186,30 @@ TEST(ClientBindings, DoubleVariationPassesThroughDefault) {
 
     LDServerSDK_Free(sdk);
     LDContext_Free(context);
+}
+
+TEST(ClientBindings, CanSetEventConfigurationSuccessfully) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerConfigBuilder_Events_Enabled(cfg_builder, false);
+    LDServerConfigBuilder_Events_Capacity(cfg_builder, 100);
+    LDServerConfigBuilder_Events_ContextKeysCapacity(cfg_builder, 100);
+    LDServerConfigBuilder_Events_PrivateAttribute(cfg_builder, "email");
+    LDServerConfigBuilder_Events_AllAttributesPrivate(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    launchdarkly::server_side::Config const* c =
+        reinterpret_cast<launchdarkly::server_side::Config*>(config);
+
+    ASSERT_EQ(c->Events().Capacity(), 100);
+    ASSERT_EQ(c->Events().ContextKeysCacheCapacity(), 100);
+    ASSERT_EQ(c->Events().PrivateAttributes(),
+              launchdarkly::AttributeReference::SetType{"email"});
+    ASSERT_TRUE(c->Events().AllAttributesPrivate());
+    ASSERT_FALSE(c->Events().Enabled());
+
+    LDServerConfig_Free(config);
 }

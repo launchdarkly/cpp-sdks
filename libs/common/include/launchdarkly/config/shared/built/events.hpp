@@ -93,8 +93,8 @@ class Events final {
     [[nodiscard]] std::size_t FlushWorkers() const;
 
     /**
-     * Max number of unique context keys to hold in LRU cache used for context
-     * deduplication when generating index events.
+     * Number of unique contexts to remember when deduplicating index
+     * events.
      * @return Max, or std::nullopt if not applicable.
      */
     [[nodiscard]] std::optional<std::size_t> ContextKeysCacheCapacity() const;

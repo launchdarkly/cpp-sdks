@@ -141,6 +141,14 @@ LDServerConfigBuilder_Events_Capacity(LDServerConfigBuilder b,
 }
 
 LD_EXPORT(void)
+LDServerConfigBuilder_Events_ContextKeysCapacity(LDServerConfigBuilder b,
+                                                 size_t context_keys_capacity) {
+    LD_ASSERT_NOT_NULL(b);
+
+    TO_BUILDER(b)->Events().ContextKeysCapacity(context_keys_capacity);
+}
+
+LD_EXPORT(void)
 LDServerConfigBuilder_Events_FlushIntervalMs(LDServerConfigBuilder b,
                                              unsigned int milliseconds) {
     LD_ASSERT_NOT_NULL(b);
@@ -225,7 +233,7 @@ LD_EXPORT(LDServerDataSourcePollBuilder) LDServerDataSourcePollBuilder_New() {
 
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
-                                     unsigned int seconds) {
+                                        unsigned int seconds) {
     LD_ASSERT_NOT_NULL(b);
 
     TO_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});

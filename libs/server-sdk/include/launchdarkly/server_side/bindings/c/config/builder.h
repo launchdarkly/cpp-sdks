@@ -108,6 +108,22 @@ LD_EXPORT(void)
 LDServerConfigBuilder_Events_Enabled(LDServerConfigBuilder b, bool enabled);
 
 /**
+ * Specifies the number of unique context keys that can be remembered
+ * by the index event generation logic before needing to evict keys from
+ * memory in LRU order.
+ *
+ * After reaching capacity, it's possible
+ * that a previously-indexed context may cause generation of a redundant
+ * index event.
+ * @param b Server config builder. Must not be NULL.
+ * @param context_keys_capacity Maximum unique context keys to remember. The default
+ * is 1000.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_Events_ContextKeysCapacity(LDServerConfigBuilder b,
+                                                 size_t context_keys_capacity);
+
+/**
  * Sets the capacity of the event processor. When more events are generated
  * within the processor's flush interval than this value, events will be
  * dropped.

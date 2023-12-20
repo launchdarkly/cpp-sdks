@@ -26,6 +26,13 @@ EventsBuilder<SDK>& EventsBuilder<SDK>::Capacity(std::size_t capacity) {
 }
 
 template <typename SDK>
+EventsBuilder<SDK>& EventsBuilder<SDK>::ContextKeysCapacity(
+    std::size_t capacity) {
+    config_.context_keys_cache_capacity_ = capacity;
+    return *this;
+}
+
+template <typename SDK>
 EventsBuilder<SDK>& EventsBuilder<SDK>::FlushInterval(
     std::chrono::milliseconds interval) {
     config_.flush_interval_ = interval;
