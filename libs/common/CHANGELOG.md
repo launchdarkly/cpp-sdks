@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.2.0...launchdarkly-cpp-common-v1.3.0) (2023-12-21)
+
+
+### Features
+
+* add C binding for context keys cache capacity configuration ([#346](https://github.com/launchdarkly/cpp-sdks/issues/346)) ([8793fc4](https://github.com/launchdarkly/cpp-sdks/commit/8793fc446d24fb1fe4999daa2557e5ded2bbecbf))
+
 ## [1.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.1.0...launchdarkly-cpp-common-v1.2.0) (2023-12-13)
 
 
