@@ -6,7 +6,9 @@
 #include <boost/json/serialize.hpp>
 #include <boost/json/value_from.hpp>
 
-#include <string.h>
+#include <cstring>
+
+// NOLINTBEGIN cppcoreguidelines-pro-type-reinterpret-cast
 
 #define TO_ALLFLAGS(ptr) (reinterpret_cast<AllFlagsState*>(ptr))
 #define FROM_ALLFLAGS(ptr) (reinterpret_cast<LDAllFlagsState>(ptr))
@@ -68,3 +70,5 @@ LDAllFlagsState_Map(LDAllFlagsState state) {
 
     return FROM_VALUE(new Value(std::move(map)));
 }
+
+// NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

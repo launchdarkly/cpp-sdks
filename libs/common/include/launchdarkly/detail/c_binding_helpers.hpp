@@ -1,3 +1,5 @@
+#pragma once
+
 #include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/error.hpp>
 
