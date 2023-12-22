@@ -12,6 +12,7 @@ TEST(ContextCBindingTests, CanBuildBasicContext) {
               LDValue_GetString(LDContext_Get(context, "user", "key")));
 
     EXPECT_TRUE(LDContext_Valid(context));
+    EXPECT_STREQ(LDContext_CanonicalKey(context), "user-key");
 
     LDContext_Free(context);
 }
@@ -88,6 +89,8 @@ TEST(ContextCBindingTests, CanMakeMultiKindContext) {
 
     LDContext context = LDContextBuilder_Build(builder);
 
+    EXPECT_STREQ(LDContext_CanonicalKey(context), "org:org-key:user:user-key");
+
     EXPECT_EQ(std::string("user-key"),
               LDValue_GetString(LDContext_Get(context, "user", "key")));
 
@@ -114,6 +117,7 @@ TEST(ContextCBindingTests, CanCreateInvalidContext) {
     LDContext context = LDContextBuilder_Build(builder);
 
     EXPECT_FALSE(LDContext_Valid(context));
+    EXPECT_STREQ(LDContext_CanonicalKey(context), "");
 
     EXPECT_EQ(std::string("#)(#$@*(#^@&*: \"Kind contained invalid characters. "
                           "A kind may contain ASCII letters or numbers, as "
