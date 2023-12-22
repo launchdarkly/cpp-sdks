@@ -18,6 +18,14 @@ typedef struct _LDContext_PrivateAttributesIter*
     LDContext_PrivateAttributesIter;
 
 /**
+ * Get the canonical key for the context.
+ * @param context The context. Must not be NULL.
+ * @return Canonical key. Only valid for the lifetime of this context.
+ */
+LD_EXPORT(char const*)
+LDContext_CanonicalKey(LDContext context);
+
+/**
  * Check if the context is valid.
  *
  * @param context The context to check. Must not be NULL.

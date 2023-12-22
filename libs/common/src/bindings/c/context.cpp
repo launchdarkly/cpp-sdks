@@ -26,6 +26,13 @@ LD_EXPORT(bool) LDContext_Valid(LDContext context) {
     return AS_CONTEXT(context)->Valid();
 }
 
+LD_EXPORT(char const*)
+LDContext_CanonicalKey(LDContext context) {
+    LD_ASSERT_NOT_NULL(context);
+
+    return AS_CONTEXT(context)->CanonicalKey().c_str();
+}
+
 LD_EXPORT(LDValue)
 LDContext_Get(LDContext context, char const* kind, char const* ref) {
     LD_ASSERT_NOT_NULL(context);
