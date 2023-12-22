@@ -2,8 +2,8 @@
 
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
-#include <launchdarkly/server_side/data_source_status.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
+#include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <launchdarkly/bindings/c/context_builder.h>
 
@@ -157,6 +157,17 @@ TEST(ClientBindings, AllFlagsState) {
 
     LDValue nonexistent_flag = LDAllFlagsState_Value(state, "nonexistent_flag");
     ASSERT_EQ(LDValue_Type(nonexistent_flag), LDValueType_Null);
+
+    LDValue value_map = LDAllFlagsState_Map(state);
+    ASSERT_EQ(LDValue_Type(value_map), LDValueType_Object);
+
+    LDValue_ObjectIter value_iter = LDValue_ObjectIter_New(value_map);
+    ASSERT_TRUE(value_iter);
+
+    ASSERT_TRUE(LDValue_ObjectIter_End(value_iter));
+    LDValue_ObjectIter_Free(value_iter);
+
+    LDValue_Free(value_map);
 
     LDAllFlagsState_Free(state);
     LDContext_Free(context);

@@ -72,6 +72,22 @@ LD_EXPORT(LDValue)
 LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key);
 
 /**
+ * Returns an object-type LDValue where the keys are flag keys
+ * and the values are the flag values for the context used to generate this
+ * LDAllFlagsState.
+ *
+ * The LDValue is owned by the caller and must be freed. This
+ * may cause a large heap allocation. If you're interested in bootstrapping
+ * a client-side SDK, this is not the right method. See @ref LDAllFlagsState_SerializeJSON.
+ *
+ * @param state An LDAllFlagsState. Must not be NULL.
+ * @return An object-type LDValue of flag-key/flag-value pairs. The caller MUST
+ * free this value using LDValue_Free.
+ */
+LD_EXPORT(LDValue)
+LDAllFlagsState_Map(LDAllFlagsState state);
+
+/**
  * Defines options that may be used with LDServerSDK_AllFlagsState. To
  * obtain default behavior, pass LD_ALLFLAGSSTATE_DEFAULT.
  *

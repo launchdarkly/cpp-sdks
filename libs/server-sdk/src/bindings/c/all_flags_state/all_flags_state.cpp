@@ -54,3 +54,17 @@ LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key) {
 
     return FROM_VALUE(const_cast<Value*>(&val_ref));
 }
+
+LD_EXPORT(LDValue)
+LDAllFlagsState_Map(LDAllFlagsState state) {
+    LD_ASSERT_NOT_NULL(state);
+
+    auto const& values = TO_ALLFLAGS(state)->Values();
+
+    std::map<std::string, Value> map;
+    for (auto const& pair : values) {
+        map.emplace(pair.first, pair.second);
+    }
+
+    return FROM_VALUE(new Value(std::move(map)));
+}
