@@ -11,7 +11,7 @@
 namespace launchdarkly::server_side::config::builders {
 
 /**
- * \brief LazyLoadBuilder allows for specifying the configuration of
+ * @brief LazyLoadBuilder allows for specifying the configuration of
  * the Lazy Load data system, which is appropriate when a LaunchDarkly
  * environment should be stored external to the SDK (such as in Redis.)
  *
@@ -28,30 +28,33 @@ struct LazyLoadBuilder {
     using SourcePtr = std::shared_ptr<integrations::ISerializedDataReader>;
     using EvictionPolicy = built::LazyLoadConfig::EvictionPolicy;
     /**
-     * \brief Constructs a new LazyLoadBuilder.
+     * @brief Constructs a new LazyLoadBuilder.
      */
     LazyLoadBuilder();
 
     /**
-     * \brief Specify the source of the data.
-     * \param source Component implementing ISerializedDataPullSource.
-     * \return Reference to this.
+     * @brief Specify the source of the data.
+     * @param source Component implementing ISerializedDataReader. Ownership is
+     * shared.
+     * @return Reference to this.
      */
     LazyLoadBuilder& Source(SourcePtr source);
 
     /**
-     * \brief
-     * \param ttl Specify the duration data items should be live in-memory
-     * before being refreshed from the database. The chosen \ref EvictionPolicy
-     * affects usage of this TTL. \return Reference to this.
+     * @brief Specify the duration data items should live in-memory
+     * before requiring a refresh via the database. The chosen @ref
+     * EvictionPolicy affects usage of this TTL.
+     * @param ttl The time-to-live for an item.
+     * @return Reference to this.
      */
     LazyLoadBuilder& CacheRefresh(std::chrono::milliseconds ttl);
 
     /**
-     * \brief Specify the eviction policy when a data item's TTL expires.
+     * @brief Specify the eviction policy when a data item's TTL expires.
      * At this time, only EvictionPolicy::Disabled is supported (the default),
-     * which leaves stale items in the cache until they can be refreshed. \param
-     * policy The EvictionPolicy. \return Reference to this.
+     * which leaves stale items in the cache until they can be refreshed.
+     * @param policy The EvictionPolicy.
+     * @return Reference to this.
      */
     LazyLoadBuilder& CacheEviction(EvictionPolicy policy);
 

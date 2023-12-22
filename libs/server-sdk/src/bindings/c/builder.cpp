@@ -24,6 +24,12 @@ using namespace launchdarkly::server_side::config::builders;
 #define FROM_POLL_BUILDER(ptr) \
     (reinterpret_cast<LDServerDataSourcePollBuilder>(ptr))
 
+#define TO_LAZYLOAD_BUILDER(ptr) \
+    (reinterpret_cast<DataSystemBuilder::LazyLoad*>(ptr))
+
+#define FROM_LAZYLOAD_BUILDER(ptr) \
+    (reinterpret_cast<LDServerLazyLoadBuilder>(ptr))
+
 #define TO_BASIC_LOGGING_BUILDER(ptr) \
     (reinterpret_cast<LoggingBuilder::BasicLogging*>(ptr))
 
@@ -200,6 +206,19 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
 }
 
 LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_LazyLoad(
+    LDServerConfigBuilder b,
+    LDServerLazyLoadBuilder lazy_load_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(lazy_load_builder);
+
+    DataSystemBuilder::LazyLoad const* llb =
+        TO_LAZYLOAD_BUILDER(lazy_load_builder);
+    TO_BUILDER(b)->DataSystem().Method(*llb);
+    LDServerLazyLoadBuilder_Free(lazy_load_builder);
+}
+
+LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_Enabled(LDServerConfigBuilder b,
                                          bool const enabled) {
     LD_ASSERT_NOT_NULL(b);
@@ -242,6 +261,45 @@ LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_Free(LDServerDataSourcePollBuilder b) {
     delete TO_POLL_BUILDER(b);
+}
+
+LD_EXPORT(LDServerLazyLoadBuilder)
+LDServerLazyLoadBuilder_New() {
+    return FROM_LAZYLOAD_BUILDER(new DataSystemBuilder::LazyLoad());
+}
+
+LD_EXPORT(void)
+LDServerLazyLoadBuilder_Free(LDServerLazyLoadBuilder b) {
+    delete TO_LAZYLOAD_BUILDER(b);
+}
+
+LD_EXPORT(void)
+LDServerLazyLoadBuilder_SourcePtr(LDServerLazyLoadBuilder b,
+                                  LDServerLazyLoadSourcePtr source) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(source);
+
+    auto const raw_owned_ptr =
+        reinterpret_cast<integrations::ISerializedDataReader*>(source);
+    auto owned_ptr =
+        std::unique_ptr<integrations::ISerializedDataReader>(raw_owned_ptr);
+    TO_LAZYLOAD_BUILDER(b)->Source(std::move(owned_ptr));
+}
+
+LD_EXPORT(void)
+LDServerLazyLoadBuilder_CacheRefreshMs(LDServerLazyLoadBuilder b,
+                                       unsigned int const milliseconds) {
+    LD_ASSERT_NOT_NULL(b);
+    TO_LAZYLOAD_BUILDER(b)->CacheRefresh(
+        std::chrono::milliseconds{milliseconds});
+}
+
+LD_EXPORT(void)
+LDServerLazyLoadBuilder_CachePolicy(LDServerLazyLoadBuilder b,
+                                    LDLazyLoadCacheEvictionPolicy policy) {
+    LD_ASSERT_NOT_NULL(b);
+    TO_LAZYLOAD_BUILDER(b)->CacheEviction(
+        static_cast<DataSystemBuilder::LazyLoad::EvictionPolicy>(policy));
 }
 
 LD_EXPORT(void)

@@ -10,6 +10,9 @@ namespace launchdarkly::server_side::config::built {
 struct LazyLoadConfig {
     /**
      * \brief Specifies the action taken when a data item's TTL expires.
+     *
+     * The values must not be changed to ensure backwards compatibility
+     * with the C API.
      */
     enum class EvictionPolicy {
         /* No action taken; eviction is disabled. Stale items will be used

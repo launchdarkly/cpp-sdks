@@ -3,13 +3,15 @@
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/data_source_status.hpp>
+#include <launchdarkly/server_side/config/config.hpp>
 
 #include <launchdarkly/bindings/c/context_builder.h>
+
+#include <launchdarkly/error.hpp>
 
 #include <boost/json/parse.hpp>
 
 #include <chrono>
-#include <launchdarkly/server_side/config/config.hpp>
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -212,4 +214,28 @@ TEST(ClientBindings, CanSetEventConfigurationSuccessfully) {
     ASSERT_FALSE(c->Events().Enabled());
 
     LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, LazyLoadDataSource) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerLazyLoadBuilder lazy_builder = LDServerLazyLoadBuilder_New();
+
+    /* Omitting setting the source, which should cause a config error. */
+    LDServerLazyLoadBuilder_CachePolicy(
+        lazy_builder, LD_LAZYLOAD_CACHE_EVICTION_POLICY_DISABLED);
+    LDServerLazyLoadBuilder_CacheRefreshMs(lazy_builder, 1000);
+
+    LDServerConfigBuilder_DataSystem_LazyLoad(cfg_builder, lazy_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+
+    ASSERT_FALSE(LDStatus_Ok(status));
+    ASSERT_STREQ(
+        LDStatus_Error(status),
+        launchdarkly::ErrorToString(
+            launchdarkly::Error::kConfig_DataSystem_LazyLoad_MissingSource));
+
+    LDStatus_Free(status);
 }

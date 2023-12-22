@@ -56,6 +56,8 @@ class RedisDataSource final : public ISerializedDataReader {
     [[nodiscard]] std::string const& Identity() const override;
     [[nodiscard]] bool Initialized() const override;
 
+    ~RedisDataSource() override;  // = default
+
    private:
     RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
                     std::string prefix);

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <launchdarkly/server_side/bindings/c/config/config.h>
+#include <launchdarkly/server_side/bindings/c/config/lazy_load_builder/lazy_load_builder.h>
 
 #include <launchdarkly/bindings/c/config/logging_builder.h>
 #include <launchdarkly/bindings/c/export.h>
@@ -217,6 +218,22 @@ LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerConfigBuilder b,
     LDServerDataSourcePollBuilder poll_builder);
+
+/**
+ * Configures the Lazy Load data system. This method is mutually exclusive with
+ * the BackgroundSync_Polling and BackgroundSync_Streaming builders.
+ *
+ * In this mode the SDK will query a data source on-demand as required, with an
+ * in-memory cache to reduce the number of queries.
+ *
+ * @param b Server config builder. Must not be NULL.
+ * @param lazy_load_builder The lazy load builder. The builder is consumed; do
+ * not free it. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_LazyLoad(
+    LDServerConfigBuilder b,
+    LDServerLazyLoadBuilder lazy_load_builder);
 
 /**
  * Specify if the SDK's data system should be enabled or not.
