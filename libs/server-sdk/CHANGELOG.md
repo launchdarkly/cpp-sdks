@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.1.0...launchdarkly-cpp-server-v3.2.0) (2023-12-22)
+
+
+### Features
+
+* redis data source C bindings ([#345](https://github.com/launchdarkly/cpp-sdks/issues/345)) ([03b7de1](https://github.com/launchdarkly/cpp-sdks/commit/03b7de195febdcd4739d670448f5aefcbc2e9a2d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.5.2 to 0.5.3
+    * launchdarkly-cpp-common bumped from 1.3.0 to 1.4.0
+
 ## [3.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.0.1...launchdarkly-cpp-server-v3.1.0) (2023-12-21)
 
 

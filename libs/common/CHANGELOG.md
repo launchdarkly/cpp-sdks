@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.3.0...launchdarkly-cpp-common-v1.4.0) (2023-12-22)
+
+
+### Features
+
+* add C binding for Context::CanonicalKey() ([#349](https://github.com/launchdarkly/cpp-sdks/issues/349)) ([319a3ee](https://github.com/launchdarkly/cpp-sdks/commit/319a3ee8e37bfa50364d09c1eb4d89f8489e30f6))
+
 ## [1.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.2.0...launchdarkly-cpp-common-v1.3.0) (2023-12-21)
 
 
