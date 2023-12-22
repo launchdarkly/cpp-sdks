@@ -405,6 +405,13 @@ TEST_F(RedisTests, FlagAndSegmentCanCoexistWithSameKey) {
               serialize(boost::json::value_from(segment_in)));
 }
 
+TEST_F(RedisTests, CanConvertRedisDataSourceToDataReader) {
+    auto maybe_source = RedisDataSource::Create("tcp://foobar:1000", "prefix");
+    ASSERT_TRUE(maybe_source);
+
+    std::shared_ptr<ISerializedDataReader> reader = std::move(*maybe_source);
+}
+
 TEST(RedisErrorTests, InvalidURIs) {
     std::vector<std::string> const uris = {"nope, not a redis URI",
                                            "http://foo",
@@ -433,11 +440,11 @@ TEST(RedisErrorTests, ValidURIs) {
 }
 
 TEST(RedisErrorTests, GetReturnsErrorAndNoExceptionThrown) {
-    auto const maybe_source = RedisDataSource::Create(
+    auto maybe_source = RedisDataSource::Create(
         "tcp://foobar:1000" /* no redis service here */, "prefix");
     ASSERT_TRUE(maybe_source);
 
-    auto const source = *maybe_source;
+    auto const source = std::move(*maybe_source);
 
     auto const get_initialized = source->Initialized();
     ASSERT_FALSE(get_initialized);

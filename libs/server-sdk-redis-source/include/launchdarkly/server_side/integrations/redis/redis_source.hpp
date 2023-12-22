@@ -16,7 +16,6 @@ class Redis;
 }
 
 namespace launchdarkly::server_side::integrations {
-
 /**
  * @brief RedisDataSource represents a data source for the Server-Side SDK
  * backed by Redis. It is meant to be used in place of the standard
@@ -47,7 +46,7 @@ class RedisDataSource final : public ISerializedDataReader {
      *
      * @return A RedisDataSource, or an error if construction failed.
      */
-    static tl::expected<std::shared_ptr<RedisDataSource>, std::string> Create(
+    static tl::expected<std::unique_ptr<RedisDataSource>, std::string> Create(
         std::string uri,
         std::string prefix);
 
@@ -56,8 +55,6 @@ class RedisDataSource final : public ISerializedDataReader {
     [[nodiscard]] AllResult All(ISerializedItemKind const& kind) const override;
     [[nodiscard]] std::string const& Identity() const override;
     [[nodiscard]] bool Initialized() const override;
-
-    ~RedisDataSource();
 
    private:
     RedisDataSource(std::unique_ptr<sw::redis::Redis> redis,
@@ -70,5 +67,4 @@ class RedisDataSource final : public ISerializedDataReader {
     std::string const inited_key_;
     std::unique_ptr<sw::redis::Redis> redis_;
 };
-
 }  // namespace launchdarkly::server_side::integrations
