@@ -78,7 +78,8 @@ LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key);
  *
  * The LDValue is owned by the caller and must be freed. This
  * may cause a large heap allocation. If you're interested in bootstrapping
- * a client-side SDK, this is not the right method. See @ref LDAllFlagsState_SerializeJSON.
+ * a client-side SDK, this is not the right method. See @ref
+ * LDAllFlagsState_SerializeJSON.
  *
  * @param state An LDAllFlagsState. Must not be NULL.
  * @return An object-type LDValue of flag-key/flag-value pairs. The caller MUST
