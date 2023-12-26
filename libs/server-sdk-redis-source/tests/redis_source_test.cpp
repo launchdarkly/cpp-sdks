@@ -3,72 +3,21 @@
 #include <launchdarkly/server_side/integrations/data_reader/kinds.hpp>
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
-#include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_segment.hpp>
+#include <launchdarkly/context_builder.hpp>
+#include <launchdarkly/server_side/client.hpp>
+#include <launchdarkly/server_side/config/config_builder.hpp>
 
-#include <boost/json.hpp>
+#include "prefixed_redis_client.hpp"
 
 #include <redis++.h>
 
+#include <boost/json.hpp>
+
+#include <unordered_map>
+
 using namespace launchdarkly::server_side::integrations;
 using namespace launchdarkly::data_model;
-
-class PrefixedClient {
-   public:
-    PrefixedClient(sw::redis::Redis& client, std::string const& prefix)
-        : client_(client), prefix_(prefix) {}
-
-    void Init() const {
-        try {
-            client_.set(Prefixed("$inited"), "true");
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
-    void PutFlag(Flag const& flag) const {
-        try {
-            client_.hset(Prefixed("features"), flag.key,
-                         serialize(boost::json::value_from(flag)));
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
-    void PutDeletedFlag(std::string const& key, std::string const& ts) const {
-        try {
-            client_.hset(Prefixed("features"), key, ts);
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
-    void PutDeletedSegment(std::string const& key,
-                           std::string const& ts) const {
-        try {
-            client_.hset(Prefixed("segments"), key, ts);
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
-    void PutSegment(Segment const& segment) const {
-        try {
-            client_.hset(Prefixed("segments"), segment.key,
-                         serialize(boost::json::value_from(segment)));
-        } catch (sw::redis::Error const& e) {
-            FAIL() << e.what();
-        }
-    }
-
-   private:
-    std::string Prefixed(std::string const& name) const {
-        return prefix_ + ":" + name;
-    }
-
-    sw::redis::Redis& client_;
-    std::string const& prefix_;
-};
+using namespace launchdarkly::server_side;
 
 class RedisTests : public ::testing::Test {
    public:
@@ -410,6 +359,39 @@ TEST_F(RedisTests, CanConvertRedisDataSourceToDataReader) {
     ASSERT_TRUE(maybe_source);
 
     std::shared_ptr<ISerializedDataReader> reader = std::move(*maybe_source);
+}
+
+TEST_F(RedisTests, CanUseAsSDKLazyLoadDataSource) {
+    Flag flag_a{"foo", 1, false, std::nullopt, {true, false}};
+    flag_a.offVariation = 0;  // variation: true
+    Flag flag_b{"bar", 1, false, std::nullopt, {true, false}};
+    flag_b.offVariation = 1;  // variation: false
+
+    PutFlag(flag_a);
+    PutFlag(flag_b);
+    Init();
+
+    auto cfg_builder = ConfigBuilder("sdk-123");
+    cfg_builder.DataSystem().Method(
+        config::builders::LazyLoadBuilder().Source(source));
+    cfg_builder.Events()
+        .Disable();  // Don't want outbound calls to LD in the test
+    auto config = cfg_builder.Build();
+
+    ASSERT_TRUE(config);
+
+    auto client = Client(std::move(*config));
+    client.StartAsync();
+
+    auto const context =
+        launchdarkly::ContextBuilder().Kind("cat", "shadow").Build();
+
+    auto const all_flags = client.AllFlagsState(context);
+    auto const expected = std::unordered_map<std::string, launchdarkly::Value>{
+        {"foo", true}, {"bar", false}};
+
+    ASSERT_TRUE(all_flags.Valid());
+    ASSERT_EQ(all_flags.Values(), expected);
 }
 
 TEST(RedisErrorTests, InvalidURIs) {

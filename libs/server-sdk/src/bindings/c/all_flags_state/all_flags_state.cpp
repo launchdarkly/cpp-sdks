@@ -63,12 +63,12 @@ LDAllFlagsState_Map(LDAllFlagsState state) {
 
     auto const& values = TO_ALLFLAGS(state)->Values();
 
-    std::map<std::string, Value> map;
-    for (auto const& pair : values) {
-        map.emplace(pair.first, pair.second);
-    }
+    std::map<std::string, Value> all_flags_ordered{values.begin(),
+                                                   values.end()};
 
-    return FROM_VALUE(new Value(std::move(map)));
+    Value* val = new Value(Value::Object{std::move(all_flags_ordered)});
+
+    return FROM_VALUE(val);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

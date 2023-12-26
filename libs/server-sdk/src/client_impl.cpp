@@ -161,7 +161,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     if (!Initialized()) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "AllFlagsState() called before client has finished "
-               "initializing. Data store not available. Returning empty state";
+               "initializing. Data source not available. Returning empty state";
 
         return {};
     }
