@@ -36,7 +36,8 @@ LDListenerConnection_Disconnect(LDListenerConnection connection);
  *
  * @param connection The LDListenerConnection to free.
  */
-LD_EXPORT(void) LDListenerConnection_Free(LDListenerConnection connection);
+LD_EXPORT(void)
+LDListenerConnection_Free(LDListenerConnection connection);
 
 #ifdef __cplusplus
 }

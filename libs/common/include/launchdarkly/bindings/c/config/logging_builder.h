@@ -54,7 +54,8 @@ struct LDLogBackend {
  * backend into configuration.
  * @param backend Backend to initialize.
  */
-LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
+LD_EXPORT(void)
+LDLogBackend_Init(struct LDLogBackend* backend);
 
 /**
  * Creates a new builder for LaunchDarkly's default logger.
@@ -63,14 +64,16 @@ LD_EXPORT(void) LDLogBackend_Init(struct LDLogBackend* backend);
  * builder, must be manually freed with LDLoggingBasicBuilder_Free.
  * @return New builder.
  */
-LD_EXPORT(LDLoggingBasicBuilder) LDLoggingBasicBuilder_New();
+LD_EXPORT(LDLoggingBasicBuilder)
+LDLoggingBasicBuilder_New();
 
 /**
  * Frees a basic logging builder. Do not call if the builder was consumed by
  * the config builder.
  * @param b Builder to free.
  */
-LD_EXPORT(void) LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b);
+LD_EXPORT(void)
+LDLoggingBasicBuilder_Free(LDLoggingBasicBuilder b);
 
 /**
  * Sets the enabled log level. The default level is LD_LOG_INFO.
@@ -99,14 +102,16 @@ LDLoggingBasicBuilder_Tag(LDLoggingBasicBuilder b, char const* tag);
  * builder, must be manually freed with LDLoggingCustomBuilder_Free.
  * @return New builder.
  */
-LD_EXPORT(LDLoggingCustomBuilder) LDLoggingCustomBuilder_New();
+LD_EXPORT(LDLoggingCustomBuilder)
+LDLoggingCustomBuilder_New();
 
 /**
  * Frees a custom logging builder. Do not call if the builder was consumed by
  * the config builder.
  * @param b Builder to free.
  */
-LD_EXPORT(void) LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b);
+LD_EXPORT(void)
+LDLoggingCustomBuilder_Free(LDLoggingCustomBuilder b);
 
 /**
  * Sets a custom log backend.

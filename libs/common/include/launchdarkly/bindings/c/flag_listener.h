@@ -47,15 +47,16 @@ struct LDFlagListener {
 
 /**
  * Initializes a flag listener. Must be called before passing the listener
- * to LDClientSDK_FlagNotifier_OnFlagChange.
+ * to @ref LDClientSDK_FlagNotifier_OnFlagChange.
  *
  * Create the struct, initialize the struct, set the FlagChanged handler
  * and optionally UserData, and then pass the struct to
- * LDClientSDK_FlagNotifier_OnFlagChange.
+ * @ref LDClientSDK_FlagNotifier_OnFlagChange.
  *
  * @param listener Listener to initialize.
  */
-LD_EXPORT(void) LDFlagListener_Init(struct LDFlagListener* listener);
+LD_EXPORT(void)
+LDFlagListener_Init(struct LDFlagListener* listener);
 
 #ifdef __cplusplus
 }

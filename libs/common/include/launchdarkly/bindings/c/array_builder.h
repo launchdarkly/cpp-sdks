@@ -18,40 +18,44 @@ typedef struct _LDArrayBuilder* LDArrayBuilder;
  * @return The new array builder.
  *
  */
-LD_EXPORT(LDArrayBuilder) LDArrayBuilder_New();
+LD_EXPORT(LDArrayBuilder)
+LDArrayBuilder_New();
 
 /**
  * Free an array builder. This should only be done for a builder which
- * has not been built. Calling LDArrayBuilder_Build on an array builder
- * transfers consumes the array builder.
+ * has not been built. Calling @ref LDArrayBuilder_Build on an array builder
+ * consumes the array builder.
  *
  * @param array_builder The builder to free.
  */
-LD_EXPORT(void) LDArrayBuilder_Free(LDArrayBuilder array_builder);
+LD_EXPORT(void)
+LDArrayBuilder_Free(LDArrayBuilder array_builder);
 
 /**
  * Add a value to an array builder.
  *
- * After calling this method the provider LDValue is consumed. It should not
- * be accessed, and the caller doesn't need to call LDValue_Free.
+ * After calling this method the provider @ref LDValue is consumed. It should
+ * not be accessed, and the caller doesn't need to call @ref LDValue_Free.
  *
  * @param array_builder The array builder to add the value to.  Must not be
  * NULL.
  * @param val The value to add. Must not be NULL.
  */
-LD_EXPORT(void) LDArrayBuilder_Add(LDArrayBuilder array_builder, LDValue val);
+LD_EXPORT(void)
+LDArrayBuilder_Add(LDArrayBuilder array_builder, LDValue val);
 
 /**
- * Construct an LDValue from an array builder.
+ * Construct an @ref LDValue from an array builder.
  *
  * After calling this method the array builder is consumed. It should not be
- * used and the caller does not need to call LDArrayBuilder_Free.
+ * used and the caller does not need to call @ref LDArrayBuilder_Free.
  *
  * @param array_builder The array builder to build an LDValue from. Must not be
  * NULL.
  * @return The built LDValue. Must not be NULL.
  */
-LD_EXPORT(LDValue) LDArrayBuilder_Build(LDArrayBuilder array_builder);
+LD_EXPORT(LDValue)
+LDArrayBuilder_Build(LDArrayBuilder array_builder);
 
 #ifdef __cplusplus
 }
