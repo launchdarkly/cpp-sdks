@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.4.0...launchdarkly-cpp-common-v1.5.0) (2023-12-26)
+
+
+### Features
+
+* add LDAllFlagsState_Map C binding ([#350](https://github.com/launchdarkly/cpp-sdks/issues/350)) ([2aca898](https://github.com/launchdarkly/cpp-sdks/commit/2aca898074b16cbb34498c289869b7687413df51))
+
 ## [1.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.3.0...launchdarkly-cpp-common-v1.4.0) (2023-12-22)
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.0.0...launchdarkly-cpp-server-redis-source-v2.1.0) (2023-12-26)
+
+
+### Features
+
+* add LDAllFlagsState_Map C binding ([#350](https://github.com/launchdarkly/cpp-sdks/issues/350)) ([2aca898](https://github.com/launchdarkly/cpp-sdks/commit/2aca898074b16cbb34498c289869b7687413df51))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.2.0 to 3.3.0
+
 ## [2.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v1.0.2...launchdarkly-cpp-server-redis-source-v2.0.0) (2023-12-22)
 
 
