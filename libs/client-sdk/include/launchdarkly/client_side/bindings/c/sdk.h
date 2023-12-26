@@ -401,7 +401,7 @@ LDClientSDK_JsonVariationDetail(LDClientSDK sdk,
  * @code
  * LDValue all_flags = LDClientSDK_AllFlags(sdk);
  * LDValue_ObjectIter it;
- * for (it = LDValue_CreateObjectIter(all_flags);
+ * for (it = LDValue_ObjectIter_New(all_flags);
  * !LDValue_ObjectIter_End(it); LDValue_ObjectIter_Next(it)) { char
  * const* flag_key = LDValue_ObjectIter_Key(it); LDValue flag_val_ref =
  * LDValue_ObjectIter_Value(it);
