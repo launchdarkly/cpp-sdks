@@ -4,7 +4,6 @@
 #pragma once
 
 #include <launchdarkly/bindings/c/export.h>
-#include <launchdarkly/bindings/c/status.h>
 #include <launchdarkly/bindings/c/value.h>
 
 #ifdef __cplusplus
@@ -15,14 +14,16 @@ extern "C" {  // only need to export C interface if
 typedef struct _LDAllFlagsState* LDAllFlagsState;
 
 /**
- * Frees an AllFlagsState.
- * @param state The AllFlagState to free.
+ * Frees an @ref LDAllFlagsState.
+ * @param state The state to free.
+ * @return void
  */
-LD_EXPORT(void) LDAllFlagsState_Free(LDAllFlagsState state);
+LD_EXPORT(void)
+LDAllFlagsState_Free(LDAllFlagsState state);
 
 /**
  * True if the LDAllFlagsState is valid.  False if there was
- * an error, such as the data store being unavailable.
+ * an error, such as the data source being unavailable.
  *
  * An invalid LDAllFlagsState can still be serialized successfully to a JSON
  * string.
@@ -30,7 +31,8 @@ LD_EXPORT(void) LDAllFlagsState_Free(LDAllFlagsState state);
  * @param state The LDAllFlagState to check for validity. Must not be NULL.
  * @return True if the state is valid, false otherwise.
  */
-LD_EXPORT(bool) LDAllFlagsState_Valid(LDAllFlagsState state);
+LD_EXPORT(bool)
+LDAllFlagsState_Valid(LDAllFlagsState state);
 
 /**
  * Serializes the LDAllFlagsState to a JSON string.
@@ -39,7 +41,7 @@ LD_EXPORT(bool) LDAllFlagsState_Valid(LDAllFlagsState state);
  *
  * @param state The LDAllFlagState to serialize. Must not be NULL.
  * @return A JSON string representing the LDAllFlagsState. The caller must free
- * the string using LDMemory_FreeString.
+ * the string using @ref LDMemory_FreeString.
  */
 LD_EXPORT(char*)
 LDAllFlagsState_SerializeJSON(LDAllFlagsState state);
@@ -49,18 +51,18 @@ LDAllFlagsState_SerializeJSON(LDAllFlagsState state);
  * LDAllFlagsState.
  *
  * In order to avoid copying when a large value is accessed,
- * the returned LDValue is a reference and NOT DIRECTLY OWNED by the caller. Its
- * lifetime is managed by the parent LDAllFlagsState object.
+ * the returned @ref LDValue is a reference and NOT DIRECTLY OWNED by the
+ * caller. Its lifetime is managed by the parent LDAllFlagsState object.
  *
- * WARNING!
+ * *WARNING!*
  * Do not free the returned LDValue.
  * Do not in any way access the returned LDValue after the LDAllFlagsState has
  * been freed.
  *
- * If the flag has no value, returns an LDValue of type LDValueType_Null.
+ * If the flag has no value, returns an LDValue of type @ref LDValueType_Null.
  *
  * To obtain a caller-owned copy of the LDValue not subject to these
- * restrictions, call LDValue_NewValue on the result.
+ * restrictions, call @ref LDValue_NewValue on the result.
  *
  * @param state An LDAllFlagsState. Must not be NULL.
  * @param flag_key Key of the flag. Must not be NULL.
@@ -72,25 +74,25 @@ LD_EXPORT(LDValue)
 LDAllFlagsState_Value(LDAllFlagsState state, char const* flag_key);
 
 /**
- * Returns an object-type LDValue where the keys are flag keys
- * and the values are the flag values for the context used to generate this
- * LDAllFlagsState.
+ * Returns an object-type @ref LDValue where the keys are flag keys
+ * and the values are the flag values for the @ref LDContext used to generate
+ * this state.
  *
  * The LDValue is owned by the caller and must be freed. This
  * may cause a large heap allocation. If you're interested in bootstrapping
- * a client-side SDK, this is not the right method. See @ref
+ * a client-side SDK, this is not the right method: see @ref
  * LDAllFlagsState_SerializeJSON.
  *
  * @param state An LDAllFlagsState. Must not be NULL.
  * @return An object-type LDValue of flag-key/flag-value pairs. The caller MUST
- * free this value using LDValue_Free.
+ * free this value using @ref LDValue_Free.
  */
 LD_EXPORT(LDValue)
 LDAllFlagsState_Map(LDAllFlagsState state);
 
 /**
- * Defines options that may be used with LDServerSDK_AllFlagsState. To
- * obtain default behavior, pass LD_ALLFLAGSSTATE_DEFAULT.
+ * Defines options that may be used with @ref LDServerSDK_AllFlagsState. To
+ * obtain default behavior, pass `LD_ALLFLAGSSTATE_DEFAULT`.
  *
  * It is possible to combine multiple options by ORing them together.
  *
