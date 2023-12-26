@@ -90,7 +90,8 @@ TEST(RedisBindings, CanUseInSDKLazyLoadDataSource) {
     ASSERT_EQ(LDValue_Type(all), LDValueType_Object);
 
     std::unordered_map<std::string, launchdarkly::Value> values;
-    for (LDValue_ObjectIter iter = LDValue_ObjectIter_New(all);
+    LDValue_ObjectIter iter;
+    for (iter = LDValue_ObjectIter_New(all);
          !LDValue_ObjectIter_End(iter); LDValue_ObjectIter_Next(iter)) {
         char const* key = LDValue_ObjectIter_Key(iter);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -98,6 +99,8 @@ TEST(RedisBindings, CanUseInSDKLazyLoadDataSource) {
             LDValue_ObjectIter_Value(iter));
         values.emplace(key, *value_ref);
     }
+
+    LDValue_ObjectIter_Free(iter);
 
     std::unordered_map<std::string, launchdarkly::Value> expected = {
         {"foo", true}, {"bar", false}};
