@@ -93,7 +93,8 @@ TEST(RedisBindings, CanUseInSDKLazyLoadDataSource) {
     for (LDValue_ObjectIter iter = LDValue_ObjectIter_New(all);
          !LDValue_ObjectIter_End(iter); LDValue_ObjectIter_Next(iter)) {
         char const* key = LDValue_ObjectIter_Key(iter);
-        auto value_ref = reinterpret_cast<launchdarkly::Value const*>(
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        auto value_ref = reinterpret_cast<launchdarkly::Value const* const>(
             LDValue_ObjectIter_Value(iter));
         values.emplace(key, *value_ref);
     }
