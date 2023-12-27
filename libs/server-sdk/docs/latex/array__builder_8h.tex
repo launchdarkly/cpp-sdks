@@ -1,0 +1,83 @@
+\hypertarget{array__builder_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/array\+\_\+builder.h File Reference}
+\label{array__builder_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/array\_builder.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/array\_builder.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/value.\+h$>$}\newline
+Include dependency graph for array\+\_\+builder.\+h\+:
+% FIG 0
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{array__builder_8h_a7cdf5dbdffee5f0ac2955b2f8a9fbae1}\label{array__builder_8h_a7cdf5dbdffee5f0ac2955b2f8a9fbae1}} 
+typedef struct \+\_\+\+LDArray\+Builder $\ast$ {\bfseries LDArray\+Builder}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{array__builder_8h_aae0264773c468639ac9848809d81bbdb}{LDArray\+Builder\+\_\+\+New}} ()
+\item 
+\mbox{\hyperlink{array__builder_8h_aee730e25ceceb00cbaca5f9d6dcaf0aa}{LDArray\+Builder\+\_\+\+Free}} (LDArray\+Builder array\+\_\+builder)
+\item 
+\mbox{\hyperlink{array__builder_8h_a19900216e0eebf8ab99db146120c139d}{LDArray\+Builder\+\_\+\+Add}} (LDArray\+Builder array\+\_\+builder, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{array__builder_8h_ab6d68a859a517ad889f46a76dd54ff64}{LDArray\+Builder\+\_\+\+Build}} (LDArray\+Builder array\+\_\+builder)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{array__builder_8h_a19900216e0eebf8ab99db146120c139d}\label{array__builder_8h_a19900216e0eebf8ab99db146120c139d}} 
+\index{array\_builder.h@{array\_builder.h}!LDArrayBuilder\_Add@{LDArrayBuilder\_Add}}
+\index{LDArrayBuilder\_Add@{LDArrayBuilder\_Add}!array\_builder.h@{array\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDArrayBuilder\_Add()}{LDArrayBuilder\_Add()}}
+{\footnotesize\ttfamily LDArray\+Builder\+\_\+\+Add (\begin{DoxyParamCaption}\item[{LDArray\+Builder}]{array\+\_\+builder,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Add a value to an array builder.
+
+After calling this method the provider \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to add the value to. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{array__builder_8h_ab6d68a859a517ad889f46a76dd54ff64}\label{array__builder_8h_ab6d68a859a517ad889f46a76dd54ff64}} 
+\index{array\_builder.h@{array\_builder.h}!LDArrayBuilder\_Build@{LDArrayBuilder\_Build}}
+\index{LDArrayBuilder\_Build@{LDArrayBuilder\_Build}!array\_builder.h@{array\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDArrayBuilder\_Build()}{LDArrayBuilder\_Build()}}
+{\footnotesize\ttfamily LDArray\+Builder\+\_\+\+Build (\begin{DoxyParamCaption}\item[{LDArray\+Builder}]{array\+\_\+builder }\end{DoxyParamCaption})}
+
+Construct an \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} from an array builder.
+
+After calling this method the array builder is consumed. It should not be used and the caller does not need to call \mbox{\hyperlink{array__builder_8h_aee730e25ceceb00cbaca5f9d6dcaf0aa}{LDArray\+Builder\+\_\+\+Free}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The array builder to build an LDValue from. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The built LDValue. Must not be NULL. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{array__builder_8h_aee730e25ceceb00cbaca5f9d6dcaf0aa}\label{array__builder_8h_aee730e25ceceb00cbaca5f9d6dcaf0aa}} 
+\index{array\_builder.h@{array\_builder.h}!LDArrayBuilder\_Free@{LDArrayBuilder\_Free}}
+\index{LDArrayBuilder\_Free@{LDArrayBuilder\_Free}!array\_builder.h@{array\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDArrayBuilder\_Free()}{LDArrayBuilder\_Free()}}
+{\footnotesize\ttfamily LDArray\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDArray\+Builder}]{array\+\_\+builder }\end{DoxyParamCaption})}
+
+Free an array builder. This should only be done for a builder which has not been built. Calling \mbox{\hyperlink{array__builder_8h_ab6d68a859a517ad889f46a76dd54ff64}{LDArray\+Builder\+\_\+\+Build}} on an array builder consumes the array builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em array\+\_\+builder} & The builder to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{array__builder_8h_aae0264773c468639ac9848809d81bbdb}\label{array__builder_8h_aae0264773c468639ac9848809d81bbdb}} 
+\index{array\_builder.h@{array\_builder.h}!LDArrayBuilder\_New@{LDArrayBuilder\_New}}
+\index{LDArrayBuilder\_New@{LDArrayBuilder\_New}!array\_builder.h@{array\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDArrayBuilder\_New()}{LDArrayBuilder\_New()}}
+{\footnotesize\ttfamily LDArray\+Builder\+\_\+\+New (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Construct a new array builder. \begin{DoxyReturn}{Returns}
+The new array builder. 
+\end{DoxyReturn}

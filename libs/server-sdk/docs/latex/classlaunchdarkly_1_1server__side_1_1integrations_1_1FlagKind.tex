@@ -1,0 +1,60 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::Flag\+Kind Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind}\index{launchdarkly::server\_side::integrations::FlagKind@{launchdarkly::server\_side::integrations::FlagKind}}
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Flag\+Kind\+:
+% FIG 0
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::integrations\+::Flag\+Kind\+:
+% FIG 1
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_a8b30f70a206fce293d95bb4c5cd45010}{Namespace}} () const override
+\item 
+std\+::uint64\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_ab41318592b9b2f77f924be72471d1de6}{Version}} (std\+::string const \&data) const override
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_a8b30f70a206fce293d95bb4c5cd45010}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_a8b30f70a206fce293d95bb4c5cd45010}} 
+\index{launchdarkly::server\_side::integrations::FlagKind@{launchdarkly::server\_side::integrations::FlagKind}!Namespace@{Namespace}}
+\index{Namespace@{Namespace}!launchdarkly::server\_side::integrations::FlagKind@{launchdarkly::server\_side::integrations::FlagKind}}
+\doxysubsubsection{\texorpdfstring{Namespace()}{Namespace()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::integrations\+::\+Flag\+Kind\+::\+Namespace (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+The namespace for the data. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_a73c0cd6d490c648d81fa6cf99775ca6b}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Item\+Kind}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_ab41318592b9b2f77f924be72471d1de6}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind_ab41318592b9b2f77f924be72471d1de6}} 
+\index{launchdarkly::server\_side::integrations::FlagKind@{launchdarkly::server\_side::integrations::FlagKind}!Version@{Version}}
+\index{Version@{Version}!launchdarkly::server\_side::integrations::FlagKind@{launchdarkly::server\_side::integrations::FlagKind}}
+\doxysubsubsection{\texorpdfstring{Version()}{Version()}}
+{\footnotesize\ttfamily std\+::uint64\+\_\+t launchdarkly\+::server\+\_\+side\+::integrations\+::\+Flag\+Kind\+::\+Version (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{data }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Deserialize data and return the version of the data.
+
+This is for cases where the persistent store cannot avoid deserializing data to determine its version. For instance a Redis store where the only columns are the prefixed key and the serialized data.
+
+If the data cannot be deserialized, then 0 will be returned.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & The data to deserialize. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The version of the data. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_adc4a77ceecf2f835a30467095327ef8c}{launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Item\+Kind}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/data\+\_\+reader/kinds.\+hpp\item 
+src/integrations/data\+\_\+reader/kinds.\+cpp\end{DoxyCompactItemize}

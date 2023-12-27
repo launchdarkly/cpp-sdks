@@ -1,0 +1,85 @@
+\hypertarget{object__builder_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/object\+\_\+builder.h File Reference}
+\label{object__builder_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/object\_builder.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/object\_builder.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/value.\+h$>$}\newline
+Include dependency graph for object\+\_\+builder.\+h\+:
+% FIG 0
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{object__builder_8h_a5fbbf9aa62ae9d6aeefb4b5a15b82850}\label{object__builder_8h_a5fbbf9aa62ae9d6aeefb4b5a15b82850}} 
+typedef struct \+\_\+\+LDObject\+Builder $\ast$ {\bfseries LDObject\+Builder}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{object__builder_8h_ae521b70c852125ecd77ed9cc49369794}{LDObject\+Builder\+\_\+\+New}} ()
+\item 
+\mbox{\hyperlink{object__builder_8h_a995f71b38e21d5465cb775ebaff144d0}{LDObject\+Builder\+\_\+\+Free}} (LDObject\+Builder builder)
+\item 
+\mbox{\hyperlink{object__builder_8h_a3bdc0d63e7a06f79e39a56f6d944a43c}{LDObject\+Builder\+\_\+\+Add}} (LDObject\+Builder builder, char const $\ast$key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{object__builder_8h_a71fdf9cba651df917d98ef4987169791}{LDObject\+Builder\+\_\+\+Build}} (LDObject\+Builder builder)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{object__builder_8h_a3bdc0d63e7a06f79e39a56f6d944a43c}\label{object__builder_8h_a3bdc0d63e7a06f79e39a56f6d944a43c}} 
+\index{object\_builder.h@{object\_builder.h}!LDObjectBuilder\_Add@{LDObjectBuilder\_Add}}
+\index{LDObjectBuilder\_Add@{LDObjectBuilder\_Add}!object\_builder.h@{object\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDObjectBuilder\_Add()}{LDObjectBuilder\_Add()}}
+{\footnotesize\ttfamily LDObject\+Builder\+\_\+\+Add (\begin{DoxyParamCaption}\item[{LDObject\+Builder}]{builder,  }\item[{char const $\ast$}]{key,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Add a key-\/value pair to the object builder.
+
+After calling this method the provider \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} is consumed. It should not be accessed, and the caller doesn\textquotesingle{}t need to call \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free}}. The key will be copied.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & The object builder to add the value to. \\
+\hline
+{\em key} & The key for the value being added. Must not be NULL. \\
+\hline
+{\em val} & The value to add. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{object__builder_8h_a71fdf9cba651df917d98ef4987169791}\label{object__builder_8h_a71fdf9cba651df917d98ef4987169791}} 
+\index{object\_builder.h@{object\_builder.h}!LDObjectBuilder\_Build@{LDObjectBuilder\_Build}}
+\index{LDObjectBuilder\_Build@{LDObjectBuilder\_Build}!object\_builder.h@{object\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDObjectBuilder\_Build()}{LDObjectBuilder\_Build()}}
+{\footnotesize\ttfamily LDObject\+Builder\+\_\+\+Build (\begin{DoxyParamCaption}\item[{LDObject\+Builder}]{builder }\end{DoxyParamCaption})}
+
+Construct an \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} from an object builder.
+
+After calling this method the object builder is consumed. It should not be used and the caller does not need to call \mbox{\hyperlink{object__builder_8h_a995f71b38e21d5465cb775ebaff144d0}{LDObject\+Builder\+\_\+\+Free}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & The object builder to build an LDValue from. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The built LDValue. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{object__builder_8h_a995f71b38e21d5465cb775ebaff144d0}\label{object__builder_8h_a995f71b38e21d5465cb775ebaff144d0}} 
+\index{object\_builder.h@{object\_builder.h}!LDObjectBuilder\_Free@{LDObjectBuilder\_Free}}
+\index{LDObjectBuilder\_Free@{LDObjectBuilder\_Free}!object\_builder.h@{object\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDObjectBuilder\_Free()}{LDObjectBuilder\_Free()}}
+{\footnotesize\ttfamily LDObject\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDObject\+Builder}]{builder }\end{DoxyParamCaption})}
+
+Free an object builder. This should only be done for a builder which has not been built. Calling \mbox{\hyperlink{object__builder_8h_a71fdf9cba651df917d98ef4987169791}{LDObject\+Builder\+\_\+\+Build}} on an object builder consumes the object builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em builder} & The builder to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{object__builder_8h_ae521b70c852125ecd77ed9cc49369794}\label{object__builder_8h_ae521b70c852125ecd77ed9cc49369794}} 
+\index{object\_builder.h@{object\_builder.h}!LDObjectBuilder\_New@{LDObjectBuilder\_New}}
+\index{LDObjectBuilder\_New@{LDObjectBuilder\_New}!object\_builder.h@{object\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDObjectBuilder\_New()}{LDObjectBuilder\_New()}}
+{\footnotesize\ttfamily LDObject\+Builder\+\_\+\+New (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Construct a new object builder. \begin{DoxyReturn}{Returns}
+The new object builder. 
+\end{DoxyReturn}
