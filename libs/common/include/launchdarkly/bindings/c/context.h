@@ -31,14 +31,16 @@ LDContext_CanonicalKey(LDContext context);
  * @param context The context to check. Must not be NULL.
  * @return True if the context is valid.
  */
-LD_EXPORT(bool) LDContext_Valid(LDContext context);
+LD_EXPORT(bool)
+LDContext_Valid(LDContext context);
 
 /**
  * Free the context.
  *
  * @param context The context to free.
  */
-LD_EXPORT(void) LDContext_Free(LDContext context);
+LD_EXPORT(void)
+LDContext_Free(LDContext context);
 
 /**
  * Get an attribute value by kind and attribute reference. If the kind is
@@ -68,7 +70,8 @@ LDContext_Get(LDContext context, char const* kind, char const* ref);
  * @param context The context to check for validity. Must not be NULL.
  * @return A string explaining why the context is not valid.
  */
-LD_EXPORT(char const*) LDContext_Errors(LDContext context);
+LD_EXPORT(char const*)
+LDContext_Errors(LDContext context);
 
 /**
  * Create an iterator which iterates over the private attributes for the

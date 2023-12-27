@@ -20,28 +20,31 @@ typedef struct _LDContextBuilder* LDContextBuilder;
  * Create a new context builder.
  * @return A new context builder instance.
  */
-LD_EXPORT(LDContextBuilder) LDContextBuilder_New();
+LD_EXPORT(LDContextBuilder)
+LDContextBuilder_New();
 
 /**
  * Free a context builder.
  *
  * This method only needs to be used when not building
- * the context. If you use LDContextBuilder_Build, then the builder will
- * be consumed, and you do not need to call LDContextBuilder_Free.
+ * the context. If you use @ref LDContextBuilder_Build, then the builder will
+ * be consumed, and you do not need to call @ref LDContextBuilder_Free.
  * @param builder The builder to free.
  */
-LD_EXPORT(void) LDContextBuilder_Free(LDContextBuilder builder);
+LD_EXPORT(void)
+LDContextBuilder_Free(LDContextBuilder builder);
 
 /**
  * Construct a context from a context builder.
  *
- * When building a context using LDContextBuilder_Build the builder will be
- * consumed and you do not need to call LDContextBuilder_Free.
+ * When building a context using @ref LDContextBuilder_Build the builder will be
+ * consumed and you do not need to call @ref LDContextBuilder_Free.
  *
  * @param builder The builder to build a context from. Must not be NULL.
  * @return The built context.
  */
-LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder);
+LD_EXPORT(LDContext)
+LDContextBuilder_Build(LDContextBuilder builder);
 
 /**
  * Add a kind instance to the context builder. The kind will have the specified
@@ -52,7 +55,7 @@ LD_EXPORT(LDContext) LDContextBuilder_Build(LDContextBuilder builder);
  *
  * You must first add the kind to the context builder before setting attributes.
  *
- * If you call LDContextBuilder_AddKind a second time, with an already specified
+ * If you call this a second time, with an already specified
  * kind, but a different key, then the key for that kind will be updated.
  *
  * @param builder The builder to add the kind to. Must not be NULL.
@@ -67,11 +70,11 @@ LDContextBuilder_AddKind(LDContextBuilder builder,
 /**
  * Add or update a top-level attribute in the specified kind.
  *
- * Adding a LDValue to the builder will consume that value.
+ * Adding a @ref LDValue to the builder will consume that value.
  * You should not access the value after adding it to the builder, and you
- * do not need to call LDValue_Free on the value.
+ * do not need to call @ref LDValue_Free on the value.
  *
- * @param builder. The builder. Must not be NULL.
+ * @param builder The builder. Must not be NULL.
  * @param kind The kind to add the attribute to. Must not be NULL.
  * @param attr_name The name of the attribute to add. Must not be NULL.
  * @param val The value of the attribute to add. Must not be NULL.
@@ -84,18 +87,20 @@ LDContextBuilder_Attributes_Set(LDContextBuilder builder,
 
 /**
  * Add or update a private attribute. Once an attribute has been set as private
- * using LDContextBuilder_Attributes_SetPrivate it will remain private.
- * A subsequent call to LDContextBuilder_Attributes_Set, for the same attribute,
- * will not remove the private status.
+ * using this method it will remain private.
  *
- * This method cannot be used to set the key, kind, name, or anonymous
+ * A subsequent call to @ref LDContextBuilder_Attributes_Set, for the same
+ * attribute, will not remove the private status.
+ *
+ * This method cannot be used to set the `key`, `kind`, `name`, or `anonymous`
  * property of a context.
  *
- * Adding a LDValue to the builder will consume that value.
+ * Adding a @ref LDValue to the builder will consume that value.
+ *
  * You should not access the value after adding it to the builder, and you
- * do not need to call LDValue_Free on the value. This method is just a
+ * do not need to call @ref LDValue_Free on the value. This method is just a
  * convenience which also adds the attribute to the private attributes list,
- * as if using LDContextBuilder_Attributes_AddPrivateAttribute.
+ * as if using @ref LDContextBuilder_Attributes_AddPrivateAttribute.
  *
  * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the private attribute for. Must not be NULL.
@@ -111,7 +116,7 @@ LDContextBuilder_Attributes_SetPrivate(LDContextBuilder builder,
 /**
  * Set the name attribute for the specified kind.
  *
- * You can search for contexts on the Contexts page by name.
+ * You can search for contexts on the LaunchDarkly Contexts page by name.
  *
  * This method will make a copy of the name string, and the caller remains
  * responsible for the original name string.
@@ -164,8 +169,12 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * This action only affects analytics events that involve this particular
  * context. To mark some (or all) context attributes as private for all
  * contexts, use the overall configuration for the SDK. See
- * LDClientConfigBuilder_Events_AllAttributesPrivate and
- * LDClientConfigBuilder_Events_PrivateAttribute.
+ * - @ref LDServerConfigBuilder_Events_AllAttributesPrivate
+ * - @ref LDClientConfigBuilder_Events_AllAttributesPrivate
+ *
+ * and
+ * - @ref LDServerConfigBuilder_Events_PrivateAttribute
+ * - @ref LDClientConfigBuilder_Events_PrivateAttribute
  *
  * The attributes "kind" and "key", and the "_meta" attributes cannot be
  * made private.
