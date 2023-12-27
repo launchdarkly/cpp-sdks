@@ -1,0 +1,11 @@
+digraph "/home/runner/work/cpp-sdks/cpp-sdks/libs/common/src/bindings/c/data" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_0aa2c7a11627ae3b29503c4d1e362b1b {
+    graph [ bgcolor="#ddddee", pencolor="black", label="c" fontname="Helvetica", fontsize="10", URL="dir_0aa2c7a11627ae3b29503c4d1e362b1b.html"]
+  dir_d0a81b0b0fa97d64b2042fa7168e962d [shape=box, label="data", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_d0a81b0b0fa97d64b2042fa7168e962d.html"];
+  }
+  dir_11fbc4217d50ab21044e5ad6614aede5 [shape=box label="include" fillcolor="white" style="filled" color="red" URL="dir_11fbc4217d50ab21044e5ad6614aede5.html"];
+  dir_d0a81b0b0fa97d64b2042fa7168e962d->dir_11fbc4217d50ab21044e5ad6614aede5 [headlabel="1", labeldistance=1.5 headhref="dir_000035_000008.html"];
+}

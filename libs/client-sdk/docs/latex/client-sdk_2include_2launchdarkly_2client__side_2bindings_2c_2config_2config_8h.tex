@@ -1,0 +1,103 @@
+\hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h}{}\doxysection{include/launchdarkly/client\+\_\+side/bindings/c/config/config.h File Reference}
+\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h}\index{include/launchdarkly/client\_side/bindings/c/config/config.h@{include/launchdarkly/client\_side/bindings/c/config/config.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/status.\+h$>$}\newline
+Include dependency graph for config.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acae071392ca38bd1019ee085dbd000d1}\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acae071392ca38bd1019ee085dbd000d1}} 
+typedef struct \+\_\+\+LDClient\+Config $\ast$ {\bfseries LDClient\+Config}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acc4131ea1b6022b4b694fd1d0a34f010}{LD\+\_\+\+EXPORT}} (void) LDClient\+Config\+\_\+\+Free(LDClient\+Config config)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acc4131ea1b6022b4b694fd1d0a34f010}\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acc4131ea1b6022b4b694fd1d0a34f010}} 
+\index{config.h@{config.h}!LD\_EXPORT@{LD\_EXPORT}}
+\index{LD\_EXPORT@{LD\_EXPORT}!config.h@{config.h}}
+\doxysubsubsection{\texorpdfstring{LD\_EXPORT()}{LD\_EXPORT()}}
+{\footnotesize\ttfamily LD\+\_\+\+EXPORT (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Free an unused configuration. Configurations used to construct an LDClient\+SDK must not be be freed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & Config to free.\\
+\hline
+\end{DoxyParams}
+Tracks that the current context performed an event for the given event name. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Initializes a custom persistence implementation. Must be called before passing a custom implementation into configuration. 
+\begin{DoxyParams}{Parameters}
+{\em backend} & Implementation to initialize.\\
+\hline
+\end{DoxyParams}
+Frees a Streaming method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a Polling method builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees a custom persistence builder. Do not call if the builder was consumed by the config builder. 
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free.\\
+\hline
+\end{DoxyParams}
+Tracks that the current context performed an event for the given event name. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK.\\
+\hline
+\end{DoxyParams}
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free. \\
+\hline
+\end{DoxyParams}

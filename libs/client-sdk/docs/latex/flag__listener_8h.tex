@@ -1,0 +1,42 @@
+\hypertarget{flag__listener_8h}{}\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/flag\+\_\+listener.h File Reference}
+\label{flag__listener_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/flag\_listener.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/flag\_listener.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/value.\+h$>$}\newline
+Include dependency graph for flag\+\_\+listener.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDFlagListener}{LDFlag\+Listener}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{flag__listener_8h_a132d6d52c8e85763e63cacba03d71b53}\label{flag__listener_8h_a132d6d52c8e85763e63cacba03d71b53}} 
+typedef void($\ast$ {\bfseries Flag\+Changed\+Callback\+Fn}) (char const $\ast$flag\+\_\+key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} new\+\_\+value, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} old\+\_\+value, bool deleted, void $\ast$user\+\_\+data)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{flag__listener_8h_a67655f440055ffab4e383d118b6d1e08}{LDFlag\+Listener\+\_\+\+Init}} (struct \mbox{\hyperlink{structLDFlagListener}{LDFlag\+Listener}} $\ast$listener)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{flag__listener_8h_a67655f440055ffab4e383d118b6d1e08}\label{flag__listener_8h_a67655f440055ffab4e383d118b6d1e08}} 
+\index{flag\_listener.h@{flag\_listener.h}!LDFlagListener\_Init@{LDFlagListener\_Init}}
+\index{LDFlagListener\_Init@{LDFlagListener\_Init}!flag\_listener.h@{flag\_listener.h}}
+\doxysubsubsection{\texorpdfstring{LDFlagListener\_Init()}{LDFlagListener\_Init()}}
+{\footnotesize\ttfamily LDFlag\+Listener\+\_\+\+Init (\begin{DoxyParamCaption}\item[{struct \mbox{\hyperlink{structLDFlagListener}{LDFlag\+Listener}} $\ast$}]{listener }\end{DoxyParamCaption})}
+
+Initializes a flag listener. Must be called before passing the listener to \mbox{\hyperlink{sdk_8h_ab8ed7b538b95028ec7f6db233218ca1e}{LDClient\+SDK\+\_\+\+Flag\+Notifier\+\_\+\+On\+Flag\+Change}}.
+
+Create the struct, initialize the struct, set the Flag\+Changed handler and optionally User\+Data, and then pass the struct to \mbox{\hyperlink{sdk_8h_ab8ed7b538b95028ec7f6db233218ca1e}{LDClient\+SDK\+\_\+\+Flag\+Notifier\+\_\+\+On\+Flag\+Change}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em listener} & Listener to initialize. \\
+\hline
+\end{DoxyParams}
