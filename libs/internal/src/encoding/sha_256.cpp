@@ -9,7 +9,7 @@ std::array<unsigned char, SHA256_DIGEST_LENGTH> Sha256String(
     std::array<unsigned char, SHA256_DIGEST_LENGTH> hash{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    SHA256(reinterpret_cast<unsigned char const*>(input.c_str()), input.size(),
+    SHA256(reinterpret_cast<unsigned char const*>(input.data()), input.size(),
            hash.data());
 
     return hash;

@@ -9,7 +9,7 @@ std::array<unsigned char, SHA_DIGEST_LENGTH> Sha1String(
     std::array<unsigned char, SHA_DIGEST_LENGTH> hash{};
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    SHA1(reinterpret_cast<unsigned char const*>(input.c_str()), input.size(),
+    SHA1(reinterpret_cast<unsigned char const*>(input.data()), input.size(),
          hash.data());
 
     return hash;
