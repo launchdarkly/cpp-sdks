@@ -27,6 +27,6 @@ Verifying artifact linux-gcc-x64-dynamic.zip: PASSED
 PASSED: Verified SLSA provenance
 ```
 
-Alternatively, to verify the provenance manually, he SLSA framework specifies [recommendations for verifying build artifacts](https://slsa.dev/spec/v1.0/verifying-artifacts) in their documentation.
+Alternatively, to verify the provenance manually, the SLSA framework specifies [recommendations for verifying build artifacts](https://slsa.dev/spec/v1.0/verifying-artifacts) in their documentation.
 
 **Note:** These instructions do not apply when building our SDKs from source. 
