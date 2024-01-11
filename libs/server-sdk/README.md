@@ -102,33 +102,10 @@ for consistency across SDKs, as well as test networking behavior in a long-runni
 method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all
 behave correctly.
 
-Validating SDK packages with the SLSA framework
--------
+Verifying SDK packages with the SLSA framework (Supply-chain Levels for Software Artifacts)
+------------
 
-LaunchDarkly uses the [SLSA framework](https://slsa.dev/spec/v1.0/about) to help developers make their supply chain more secure by ensuring the authenticity of our published SDK packages. As part of [SLSA requirements for level 3 compliance](https://slsa.dev/spec/v1.0/requirements), LaunchDarkly publishes provenance about our SDK package builds using [Github's generic SLSA3 provenance generator](https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#generation-of-slsa3-provenance-for-arbitrary-projects) for distribution alongside our packages. 
-
-The SLSA framework specifies some [recommendations for verifying build artifacts](https://slsa.dev/spec/v1.0/verifying-artifacts) in their documentation. For our C/C++ SDKs, we recommend the following steps:
-- From the Github releases page for the release version, download the provenance file for the OS you're developing on (`OSNAME-multiple-provenance.intoto.jsonl`)
-- Check the provenance payload (`payload` in `OSNAME-multiple-provenance.intoto.jsonl`) to verify the authenticity of the build:
-  - The payload is wrapped in a DSEE envelope in encoded in base64. To make the provenance human readable, base64 decode the `payload` parameter, e.g.: 
-    ```cat OSNAME-multiple-provenance.intoto.jsonl | jq -r '.payload' | base64 -d | jq```
-  - Validate that the subject digests in `payload.subject` match the sha256 checksums of the SDK packages for the OS you're developing in
-  - Validate that the provenance builder in `payload.predicate.builder` corresponds to Github's generic SLSA3 provenance generator, which ensures SLSA level 3 compliance
-  - Check the source commit referenced in `payload.predicate.invocation.configSource` and `payload.predicate.invocation.environment` for:
-    - Source repository is a LaunchDarkly-owned repository
-    - Commit author is a LaunchDarkly entity
-    - (Optional) Code changes in the commit are trustworthy 
-  - Check the build workflow file referenced in `payload.predicate.invocation.configSource.entryPoint` for:
-    - Build is triggered by a LaunchDarkly-owned repository
-    - Build is executed by a LaunchDarkly-owned Github Actions workflow
-    - Build steps are trustworthy 
-- Check the provenance signature (`signatures[0].cert` in `OSNAME-multiple-provenance.intoto.jsonl`) to verify the authenticity of the build provenance:
-  - Certificate issuer is Sigstore 
-  - x509 extension field `1.3.6.1.4.1.57264.1.1` (OIDC Issuer) is `https://token.actions.githubusercontent.com`
-  - x509 extension field `1.3.6.1.4.1.57264.1.5` (GitHub Workflow Repository) is a LaunchDarkly-owned repository
-  - x509 extension field `1.3.6.1.4.1.57264.1.3` (GitHub Workflow SHA) matches the SHA of the source commit in the provenance payload
-  
-The recommendations above may be adjusted to fit your organization's needs and supply chain security policies. For additional questions, please contact [security@launchdarkly.com](mailto:security@launchdarkly.com).
+LaunchDarkly uses the [SLSA framework](https://slsa.dev/spec/v1.0/about) to help developers make their supply chain more secure by ensuring the authenticity and build integrity of our published SDK packages. To learn more, see the [provenance guide](PROVENANCE.md). 
 
 Contributing
 ------------
