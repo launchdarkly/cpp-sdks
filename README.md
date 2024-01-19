@@ -92,8 +92,7 @@ using LaunchDarkly today!
 ## Testing
 
 We run integration tests for all our SDKs using a centralized test harness. This approach gives us the ability to test
-for consistency across SDKs, as well as test networking behavior in a long-running application. These tests cover each
-method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all
+for consistency across SDKs. These tests cover each method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all
 behave correctly.
 
 ## Contributing
