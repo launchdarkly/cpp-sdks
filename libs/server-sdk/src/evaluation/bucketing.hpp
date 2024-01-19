@@ -13,6 +13,7 @@
 #include <ostream>
 #include <string>
 #include <variant>
+#include <cstdint>
 
 namespace launchdarkly::server_side::evaluation {
 
