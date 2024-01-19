@@ -11,6 +11,9 @@ namespace launchdarkly::events {
 
 TEST(EventSerialization, FeatureEvent) {
     auto creation_date = std::chrono::system_clock::from_time_t({});
+    AttributeReference::SetType attrs;
+    ContextFilter filter(false, attrs);
+    auto context = ContextBuilder().Kind("foo", "bar").Build();
     auto event = events::FeatureEvent{
         events::FeatureEventBase(events::FeatureEventParams{
             creation_date,
@@ -25,12 +28,12 @@ TEST(EventSerialization, FeatureEvent) {
             std::nullopt,
 
         }),
-        std::map<std::string, std::string>{{"foo", "bar"}}};
+        filter.filter(context)};
 
     auto event_json = boost::json::value_from(event);
 
     auto result = boost::json::parse(
-        R"({"creationDate":0,"key":"key","version":1,"variation":2,"value":4.2E1,"default":3E0,"kind":"feature","contextKeys":{"foo":"bar"}})");
+        R"({"creationDate":0,"key":"key","version":1,"variation":2,"value":4.2E1,"default":3E0,"kind":"feature","context":{"key":"bar","kind":"foo"}})");
 
     ASSERT_EQ(result, event_json);
 }

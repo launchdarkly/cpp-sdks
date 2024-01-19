@@ -81,7 +81,7 @@ struct FeatureEventBase {
 
 struct FeatureEvent {
     FeatureEventBase base;
-    ContextKeys context_keys;
+    EventContext context;
 };
 
 struct DebugEvent {
