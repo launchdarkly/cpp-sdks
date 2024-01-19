@@ -3,10 +3,10 @@
 #include <launchdarkly/data/evaluation_reason.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include <cstdint>
 
 namespace launchdarkly::server_side {
 
@@ -154,8 +154,8 @@ class AllFlagsState {
 
    private:
     bool const valid_;
-    const std::unordered_map<std::string, class State> flags_state_;
-    const std::unordered_map<std::string, Value> evaluations_;
+    std::unordered_map<std::string, class State> const flags_state_;
+    std::unordered_map<std::string, Value> const evaluations_;
 };
 
 void operator|=(AllFlagsState::Options& lhs, AllFlagsState::Options rhs);

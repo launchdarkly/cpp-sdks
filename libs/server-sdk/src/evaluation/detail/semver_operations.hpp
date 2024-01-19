@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <variant>
 #include <vector>
-#include <cstdint>
 
 namespace launchdarkly::server_side::evaluation::detail {
 

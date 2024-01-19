@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <ostream>
-#include <cstdint>
 
 namespace launchdarkly::server_side::evaluation {
 
