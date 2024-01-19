@@ -82,8 +82,8 @@ bool operator>(SemVer const& lhs, SemVer const& rhs);
  * containing a build string, it will not be present as this information
  * is discarded when parsing.
  */
-std::ostream& operator<<(std::ostream& out, SemVer const& sv);
+std::ostream& operator<<(std::ostream& out, SemVer const& semver);
 
-std::ostream& operator<<(std::ostream& out, SemVer::Token const& sv);
+std::ostream& operator<<(std::ostream& out, SemVer::Token const& semver_token);
 
 }  // namespace launchdarkly::server_side::evaluation::detail
