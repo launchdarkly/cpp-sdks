@@ -8,6 +8,7 @@
 
 #include <tl/expected.hpp>
 
+#include <cstdint>
 #include <limits>
 #include <optional>
 #include <ostream>
@@ -108,16 +109,16 @@ class BucketResult {
  * variation index for the context. For a plain variation, this is simply the
  * variation index. For a rollout, this utilizes the Bucket function.
  *
- * @param vr Variation or rollout.
+ * @param variation_or_rollout Variation or rollout.
  * @param flag_key Key of flag.
  * @param context Context to bucket.
  * @param salt Salt to use when bucketing.
  * @return A BucketResult on success, or an error if bucketing failed.
  */
 tl::expected<BucketResult, Error> Variation(
-    data_model::Flag::VariationOrRollout const& vr,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout,
     std::string const& flag_key,
-    launchdarkly::Context const& context,
+    Context const& context,
     std::optional<std::string> const& salt);
 
 }  // namespace launchdarkly::server_side::evaluation
