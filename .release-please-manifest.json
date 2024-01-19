@@ -3,6 +3,6 @@
   "libs/server-sent-events": "0.3.0",
   "libs/common": "1.5.0",
   "libs/internal": "0.5.4",
-  "libs/server-sdk": "3.3.0",
-  "libs/server-sdk-redis-source": "2.1.0"
+  "libs/server-sdk": "3.3.1",
+  "libs/server-sdk-redis-source": "2.1.1"
 }
