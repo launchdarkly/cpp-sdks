@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.0...launchdarkly-cpp-server-v3.3.1) (2024-01-19)
+
+
+### Bug Fixes
+
+* add missing &lt;cstdint&gt; in various headers ([#360](https://github.com/launchdarkly/cpp-sdks/issues/360)) ([2d9351c](https://github.com/launchdarkly/cpp-sdks/commit/2d9351c6f584881b7164258785270e5926f4db4c))
+
 ## [3.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.2.0...launchdarkly-cpp-server-v3.3.0) (2023-12-26)
 
 
