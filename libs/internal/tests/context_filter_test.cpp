@@ -173,3 +173,56 @@ TEST(ContextFilterTests, AllAttributesPrivateMultiContext) {
 
     EXPECT_EQ(expected, filtered);
 }
+
+TEST(ContextFilterTests, AnonymousRedactionForSingleContext) {
+    auto global_private_attributes = AttributeReference::SetType{};
+    ContextFilter filter(false, global_private_attributes);
+
+    auto filtered =
+        filter.FilterWithAnonymousRedaction(ContextBuilder()
+                                                .Kind("user", "user-key")
+                                                .Name("Bob")
+                                                .Anonymous(true)
+                                                .Set("isCat", false)
+                                                .Build());
+
+    auto expected = parse(
+        "{\"key\":\"user-key\","
+        "\"kind\":\"user\","
+        "\"anonymous\":true,"
+        "\"_meta\":{"
+        "\"redactedAttributes\":[\"/name\", \"/isCat\"]}}");
+
+    EXPECT_EQ(expected, filtered);
+}
+
+TEST(ContextFilterTests, AnonymousRedactionForMultiContext) {
+    auto global_private_attributes = AttributeReference::SetType{};
+    ContextFilter filter(false, global_private_attributes);
+
+    auto filtered = filter.FilterWithAnonymousRedaction(
+        ContextBuilder()
+            .Kind("user", "user-key")
+            .Name("Bob")
+            .Anonymous(true)
+            .Set("email", "email.email@email")
+            .Set("array", {false, true, "bacon"})
+            .Set("object", Object{{"test", true}, {"second", false}})
+            .SetPrivate("isCat", false)
+            .AddPrivateAttribute("/object/test")
+            .Kind("org", "org-key")
+            .Set("isCat", true)
+            .Set("email", "cat@cat.cat")
+            .Build());
+
+    auto expected = parse(
+        "{\"kind\":\"multi\""
+        ",\"org\":"
+        "{\"key\":\"org-key\",\"isCat\":true,\"email\":\"cat@cat.cat\"},"
+        "\"user\":"
+        "{\"key\":\"user-key\",\"anonymous\":true,\"_meta\":{"
+        "\"redactedAttributes\":[\"/name\",\"/object\",\"/isCat\",\"/"
+        "email\",\"/array\"]}}}");
+
+    EXPECT_EQ(expected, filtered);
+}

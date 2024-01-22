@@ -34,6 +34,17 @@ class ContextFilter {
      */
     JsonValue Filter(Context const& context);
 
+    /**
+     * Filter the given context and produce a JSON value. If a provided context
+     * is anonymous, all attributes are redacted.
+     *
+     * Only call this method for valid contexts.
+     *
+     * @param context The context to redact.
+     * @return JSON suitable for an analytics event.
+     */
+    JsonValue FilterWithAnonymousRedaction(Context const& context);
+
    private:
     /**
      * The filtering and JSON conversion algorithm is stack based
@@ -47,6 +58,16 @@ class ContextFilter {
         std::vector<std::string_view> path;
         JsonValue& parent;
     };
+
+    /**
+     * Internal delegate function for Filter_and FilterWithAnonymousRedaction.
+     *
+     * @param context The context to redact.
+     * @param redactAnonymous Whether to redact all attributes from anonymous
+     * contexts.
+     * @return JSON suitable for an analytics event.
+     */
+    JsonValue Filter(Context const& context, bool redactAnonymous);
 
     /**
      * Put an item into its parent. Either as a pair in a map,
@@ -63,11 +84,13 @@ class ContextFilter {
      * @param path The path to check.
      * @param attributes Attributes which may contain additional private
      * attributes.
+     * @param redactAll Force all attributes to be redacted.
      * @return True if the item was redacted.
      */
     bool Redact(std::vector<std::string>& redactions,
                 std::vector<std::string_view> path,
-                Attributes const& attributes);
+                Attributes const& attributes,
+                bool redactAll);
 
     /**
      * Append a container to the parent.
@@ -85,9 +108,10 @@ class ContextFilter {
 
     JsonValue FilterSingleContext(std::string_view kind,
                                   bool include_kind,
-                                  Attributes const& attributes);
+                                  Attributes const& attributes,
+                                  bool redactAnonymous);
 
-    JsonValue FilterMultiContext(Context const& context);
+    JsonValue FilterMultiContext(Context const& context, bool redactAnonymous);
 
     bool all_attributes_private_;
     AttributeReference::SetType const global_private_attributes_;
