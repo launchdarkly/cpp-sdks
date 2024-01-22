@@ -254,8 +254,8 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                 }
 
                 if (event.require_full_event) {
-                    out.emplace_back(FeatureEvent{std::move(base),
-                                                  filter_.filter(event.context)});
+                    out.emplace_back(FeatureEvent{
+                        std::move(base), filter_.filter(event.context)});
                 }
             },
             [&](IdentifyEventParams&& event) {
