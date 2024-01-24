@@ -227,7 +227,7 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                             event.context.CanonicalKey())) {
                         out.emplace_back(server_side::IndexEvent{
                             event.creation_date,
-                            filter_.filter(event.context)});
+                            filter_.Filter(event.context)});
                     }
                 }
 
@@ -250,7 +250,7 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
 
                 if (emit_debug_event) {
                     out.emplace_back(
-                        DebugEvent{base, filter_.filter(event.context)});
+                        DebugEvent{base, filter_.Filter(event.context)});
                 }
 
                 if (event.require_full_event) {
@@ -269,7 +269,7 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                 }
 
                 out.emplace_back(IdentifyEvent{event.creation_date,
-                                               filter_.filter(event.context)});
+                                               filter_.Filter(event.context)});
             },
             [&](ClientTrackEventParams&& event) {
                 out.emplace_back(std::move(event));
@@ -281,7 +281,7 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                             event.context.CanonicalKey())) {
                         out.emplace_back(server_side::IndexEvent{
                             event.base.creation_date,
-                            filter_.filter(event.context)});
+                            filter_.Filter(event.context)});
                     }
                 }
 

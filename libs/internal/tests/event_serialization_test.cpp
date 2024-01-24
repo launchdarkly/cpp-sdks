@@ -55,7 +55,7 @@ TEST(EventSerialization, DebugEvent) {
                 std::nullopt,
 
             })),
-        filter.filter(context)};
+        filter.Filter(context)};
 
     auto event_json = boost::json::value_from(event);
 
@@ -71,7 +71,7 @@ TEST(EventSerialization, IdentifyEvent) {
     ContextFilter filter(false, attrs);
     auto event = events::IdentifyEvent{
         creation_date,
-        filter.filter(ContextBuilder().Kind("foo", "bar").Build())};
+        filter.Filter(ContextBuilder().Kind("foo", "bar").Build())};
 
     auto event_json = boost::json::value_from(event);
 
@@ -86,7 +86,7 @@ TEST(EventSerialization, IndexEvent) {
     ContextFilter filter(false, attrs);
     auto event = events::server_side::IndexEvent{
         creation_date,
-        filter.filter(ContextBuilder().Kind("foo", "bar").Build())};
+        filter.Filter(ContextBuilder().Kind("foo", "bar").Build())};
 
     auto event_json = boost::json::value_from(event);
 

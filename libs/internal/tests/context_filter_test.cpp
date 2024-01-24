@@ -17,7 +17,7 @@ TEST(ContextFilterTests, CanRedactName) {
     auto global_private_attributes = AttributeReference::SetType{"name"};
     ContextFilter filter(false, global_private_attributes);
 
-    auto filtered = filter.filter(ContextBuilder()
+    auto filtered = filter.Filter(ContextBuilder()
                                       .Kind("user", "user-key")
                                       .Name("Bob")
                                       .Set("isCat", false)
@@ -38,7 +38,7 @@ TEST(ContextFilterTests, CannotRedactKeyKindMeta) {
         AttributeReference::SetType{"key", "kind", "_meta", "name"};
     ContextFilter filter(false, global_private_attributes);
 
-    auto filtered = filter.filter(ContextBuilder()
+    auto filtered = filter.Filter(ContextBuilder()
                                       .Kind("user", "user-key")
                                       .Name("Bob")
                                       .Set("isCat", false)
@@ -58,7 +58,7 @@ TEST(ContextFilterTests, BasicContext) {
     auto global_private_attributes = AttributeReference::SetType{"email"};
     ContextFilter filter(false, global_private_attributes);
 
-    auto filtered = filter.filter(
+    auto filtered = filter.Filter(
         ContextBuilder()
             .Kind("user", "user-key")
             .Set("email", "email.email@email")
@@ -91,7 +91,7 @@ TEST(ContextFilterTests, MultiContext) {
     auto global_private_attributes = AttributeReference::SetType{"email"};
     ContextFilter filter(false, global_private_attributes);
 
-    auto filtered = filter.filter(
+    auto filtered = filter.Filter(
         ContextBuilder()
             .Kind("user", "user-key")
             .Set("email", "email.email@email")
@@ -127,7 +127,7 @@ TEST(ContextFilterTests, AllAttributesPrivateSingleContext) {
     auto global_private_attributes = AttributeReference::SetType{};
     ContextFilter filter(true, global_private_attributes);
 
-    auto filtered = filter.filter(ContextBuilder()
+    auto filtered = filter.Filter(ContextBuilder()
                                       .Kind("user", "user-key")
                                       .Name("Bob")
                                       .Set("isCat", false)
@@ -146,7 +146,7 @@ TEST(ContextFilterTests, AllAttributesPrivateMultiContext) {
     auto global_private_attributes = AttributeReference::SetType{};
     ContextFilter filter(true, global_private_attributes);
 
-    auto filtered = filter.filter(
+    auto filtered = filter.Filter(
         ContextBuilder()
             .Kind("user", "user-key")
             .Name("Bob")
