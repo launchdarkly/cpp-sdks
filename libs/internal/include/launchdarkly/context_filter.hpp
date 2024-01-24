@@ -84,8 +84,8 @@ class ContextFilter {
     static void AppendSimpleType(StackItem& item);
 
     JsonValue FilterSingleContext(std::string_view kind,
-                                    bool include_kind,
-                                    Attributes const& attributes);
+                                  bool include_kind,
+                                  Attributes const& attributes);
 
     JsonValue FilterMultiContext(Context const& context);
 

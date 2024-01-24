@@ -17,7 +17,7 @@ ContextFilter::JsonValue ContextFilter::Filter(Context const& context) {
     if (context.Kinds().size() == 1) {
         auto kind = context.Kinds()[0];
         return FilterSingleContext(kind, INCLUDE_KIND,
-                                     context.Attributes(kind.data()));
+                                   context.Attributes(kind.data()));
     }
     return FilterMultiContext(context);
 }
@@ -177,7 +177,7 @@ ContextFilter::JsonValue ContextFilter::FilterMultiContext(
     for (auto const& kind : context.Kinds()) {
         filtered.as_object().emplace(
             kind, FilterSingleContext(kind, EXCLUDE_KIND,
-                                        context.Attributes(kind.data())));
+                                      context.Attributes(kind.data())));
     }
 
     return filtered;
