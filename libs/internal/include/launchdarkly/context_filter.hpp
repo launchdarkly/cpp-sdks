@@ -54,7 +54,7 @@ class ContextFilter {
      * @param item The stack item denoting placement information.
      * @param addition The item to add.
      */
-    static void emplace(StackItem& item, JsonValue&& addition);
+    static void Emplace(StackItem& item, JsonValue&& addition);
 
     /**
      * If the path needs to be redacted, then redact it and add it to the

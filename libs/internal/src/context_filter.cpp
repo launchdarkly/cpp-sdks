@@ -22,7 +22,7 @@ ContextFilter::JsonValue ContextFilter::Filter(Context const& context) {
     return FilterMultiContext(context);
 }
 
-void ContextFilter::emplace(ContextFilter::StackItem& item,
+void ContextFilter::Emplace(ContextFilter::StackItem& item,
                             ContextFilter::JsonValue&& addition) {
     if (item.parent.is_object()) {
         item.parent.as_object().emplace(item.path.back(), std::move(addition));
@@ -140,16 +140,16 @@ ContextFilter::JsonValue ContextFilter::FilterSingleContext(
 void ContextFilter::AppendSimpleType(ContextFilter::StackItem& item) {
     switch (item.value.Type()) {
         case Value::Type::kNull:
-            emplace(item, JsonValue());
+            Emplace(item, JsonValue());
             break;
         case Value::Type::kBool:
-            emplace(item, item.value.AsBool());
+            Emplace(item, item.value.AsBool());
             break;
         case Value::Type::kNumber:
-            emplace(item, item.value.AsDouble());
+            Emplace(item, item.value.AsDouble());
             break;
         case Value::Type::kString:
-            emplace(item, item.value.AsString().c_str());
+            Emplace(item, item.value.AsString().c_str());
             break;
         case Value::Type::kObject:
         case Value::Type::kArray:
