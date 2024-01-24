@@ -15,9 +15,9 @@ ContextFilter::JsonValue ContextFilter::Filter(Context const& context) {
     // Context should be validated before calling this method.
     assert(context.Valid());
     if (context.Kinds().size() == 1) {
-        auto kind = context.Kinds()[0];
+        std::string const& kind = context.Kinds()[0];
         return FilterSingleContext(kind, INCLUDE_KIND,
-                                   context.Attributes(kind.data()));
+                                   context.Attributes(kind));
     }
     return FilterMultiContext(context);
 }
@@ -174,10 +174,10 @@ ContextFilter::JsonValue ContextFilter::FilterMultiContext(
     JsonValue filtered = JsonObject();
     filtered.as_object().emplace("kind", "multi");
 
-    for (auto const& kind : context.Kinds()) {
+    for (std::string const& kind : context.Kinds()) {
         filtered.as_object().emplace(
-            kind, FilterSingleContext(kind, EXCLUDE_KIND,
-                                      context.Attributes(kind.data())));
+            kind,
+            FilterSingleContext(kind, EXCLUDE_KIND, context.Attributes(kind)));
     }
 
     return filtered;
