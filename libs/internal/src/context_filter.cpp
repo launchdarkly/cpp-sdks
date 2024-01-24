@@ -11,18 +11,18 @@ ContextFilter::ContextFilter(
     : all_attributes_private_(all_attributes_private),
       global_private_attributes_(std::move(global_private_attributes)) {}
 
-ContextFilter::JsonValue ContextFilter::filter(Context const& context) {
+ContextFilter::JsonValue ContextFilter::Filter(Context const& context) {
     // Context should be validated before calling this method.
     assert(context.Valid());
     if (context.Kinds().size() == 1) {
-        auto kind = context.Kinds()[0];
-        return filter_single_context(kind, INCLUDE_KIND,
-                                     context.Attributes(kind.data()));
+        std::string const& kind = context.Kinds()[0];
+        return FilterSingleContext(kind, INCLUDE_KIND,
+                                   context.Attributes(kind));
     }
-    return filter_multi_context(context);
+    return FilterMultiContext(context);
 }
 
-void ContextFilter::emplace(ContextFilter::StackItem& item,
+void ContextFilter::Emplace(ContextFilter::StackItem& item,
                             ContextFilter::JsonValue&& addition) {
     if (item.parent.is_object()) {
         item.parent.as_object().emplace(item.path.back(), std::move(addition));
@@ -31,7 +31,7 @@ void ContextFilter::emplace(ContextFilter::StackItem& item,
     }
 }
 
-bool ContextFilter::redact(std::vector<std::string>& redactions,
+bool ContextFilter::Redact(std::vector<std::string>& redactions,
                            std::vector<std::string_view> path,
                            Attributes const& attributes) {
     if (all_attributes_private_) {
@@ -58,7 +58,7 @@ bool ContextFilter::redact(std::vector<std::string>& redactions,
     return false;
 }
 
-ContextFilter::JsonValue ContextFilter::filter_single_context(
+ContextFilter::JsonValue ContextFilter::FilterSingleContext(
     std::string_view kind,
     bool include_kind,
     Attributes const& attributes) {
@@ -75,7 +75,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
     }
 
     if (!attributes.Name().empty() &&
-        !redact(redactions, std::vector<std::string_view>{"name"},
+        !Redact(redactions, std::vector<std::string_view>{"name"},
                 attributes)) {
         filtered.as_object().insert_or_assign("name", attributes.Name());
     }
@@ -90,12 +90,12 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
         stack.pop_back();
 
         // Check if the attribute needs to be redacted.
-        if (!item.path.empty() && redact(redactions, item.path, attributes)) {
+        if (!item.path.empty() && Redact(redactions, item.path, attributes)) {
             continue;
         }
 
         if (item.value.IsObject()) {
-            JsonValue* nested = append_container(item, JsonObject());
+            JsonValue* nested = AppendContainer(item, JsonObject());
 
             for (auto const& pair : item.value.AsObject()) {
                 auto new_path = std::vector<std::string_view>(item.path);
@@ -103,7 +103,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 stack.push_back(StackItem{pair.second, new_path, *nested});
             }
         } else if (item.value.IsArray()) {
-            JsonValue* nested = append_container(item, JsonArray());
+            JsonValue* nested = AppendContainer(item, JsonArray());
 
             // Array contents are added in reverse, this is a recursive
             // algorithm so they will get reversed again when the stack
@@ -120,7 +120,7 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
                 rev_from++;
             }
         } else {
-            append_simple_type(item);
+            AppendSimpleType(item);
         }
     }
 
@@ -137,19 +137,19 @@ ContextFilter::JsonValue ContextFilter::filter_single_context(
     return filtered;
 }
 
-void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
+void ContextFilter::AppendSimpleType(ContextFilter::StackItem& item) {
     switch (item.value.Type()) {
         case Value::Type::kNull:
-            emplace(item, JsonValue());
+            Emplace(item, JsonValue());
             break;
         case Value::Type::kBool:
-            emplace(item, item.value.AsBool());
+            Emplace(item, item.value.AsBool());
             break;
         case Value::Type::kNumber:
-            emplace(item, item.value.AsDouble());
+            Emplace(item, item.value.AsDouble());
             break;
         case Value::Type::kString:
-            emplace(item, item.value.AsString().c_str());
+            Emplace(item, item.value.AsString().c_str());
             break;
         case Value::Type::kObject:
         case Value::Type::kArray:
@@ -158,7 +158,7 @@ void ContextFilter::append_simple_type(ContextFilter::StackItem& item) {
     }
 }
 
-ContextFilter::JsonValue* ContextFilter::append_container(
+ContextFilter::JsonValue* ContextFilter::AppendContainer(
     ContextFilter::StackItem& item,
     JsonValue&& value) {
     if (item.parent.is_object()) {
@@ -169,15 +169,15 @@ ContextFilter::JsonValue* ContextFilter::append_container(
     return &item.parent.as_array().back();
 }
 
-ContextFilter::JsonValue ContextFilter::filter_multi_context(
+ContextFilter::JsonValue ContextFilter::FilterMultiContext(
     Context const& context) {
     JsonValue filtered = JsonObject();
     filtered.as_object().emplace("kind", "multi");
 
-    for (auto const& kind : context.Kinds()) {
+    for (std::string const& kind : context.Kinds()) {
         filtered.as_object().emplace(
-            kind, filter_single_context(kind, EXCLUDE_KIND,
-                                        context.Attributes(kind.data())));
+            kind,
+            FilterSingleContext(kind, EXCLUDE_KIND, context.Attributes(kind)));
     }
 
     return filtered;

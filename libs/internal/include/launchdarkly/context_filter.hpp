@@ -32,7 +32,7 @@ class ContextFilter {
      * @param context The context to redact.
      * @return JSON suitable for an analytics event.
      */
-    JsonValue filter(Context const& context);
+    JsonValue Filter(Context const& context);
 
    private:
     /**
@@ -54,7 +54,7 @@ class ContextFilter {
      * @param item The stack item denoting placement information.
      * @param addition The item to add.
      */
-    static void emplace(StackItem& item, JsonValue&& addition);
+    static void Emplace(StackItem& item, JsonValue&& addition);
 
     /**
      * If the path needs to be redacted, then redact it and add it to the
@@ -65,7 +65,7 @@ class ContextFilter {
      * attributes.
      * @return True if the item was redacted.
      */
-    bool redact(std::vector<std::string>& redactions,
+    bool Redact(std::vector<std::string>& redactions,
                 std::vector<std::string_view> path,
                 Attributes const& attributes);
 
@@ -75,19 +75,19 @@ class ContextFilter {
      * @param value The container to append.
      * @return The appended container.
      */
-    static JsonValue* append_container(StackItem& item, JsonValue&& value);
+    static JsonValue* AppendContainer(StackItem& item, JsonValue&& value);
 
     /**
      * Put a simple value into the parent specified by its stack item.
      * @param item The stack item with value information and the parent.
      */
-    static void append_simple_type(StackItem& item);
+    static void AppendSimpleType(StackItem& item);
 
-    JsonValue filter_single_context(std::string_view kind,
-                                    bool include_kind,
-                                    Attributes const& attributes);
+    JsonValue FilterSingleContext(std::string_view kind,
+                                  bool include_kind,
+                                  Attributes const& attributes);
 
-    JsonValue filter_multi_context(Context const& context);
+    JsonValue FilterMultiContext(Context const& context);
 
     bool all_attributes_private_;
     AttributeReference::SetType const global_private_attributes_;
