@@ -40,6 +40,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("context-type");
         srv.add_capability("service-endpoints");
         srv.add_capability("tags");
+        srv.add_capability("client-independence");
+
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
