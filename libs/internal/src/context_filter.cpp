@@ -25,7 +25,7 @@ ContextFilter::JsonValue ContextFilter::Filter(Context const& context,
     // Context should be validated before calling this method.
     assert(context.Valid());
     if (context.Kinds().size() == 1) {
-        auto kind = context.Kinds()[0];
+        std::string const& kind = context.Kinds()[0];
         return FilterSingleContext(kind, INCLUDE_KIND,
                                    context.Attributes(kind.data()),
                                    redactAnonymous);

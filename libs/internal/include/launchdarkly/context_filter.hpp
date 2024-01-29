@@ -60,7 +60,7 @@ class ContextFilter {
     };
 
     /**
-     * Internal delegate function for Filter_and FilterWithAnonymousRedaction.
+     * Internal delegate function for Filter and FilterWithAnonymousRedaction.
      *
      * @param context The context to redact.
      * @param redactAnonymous Whether to redact all attributes from anonymous
