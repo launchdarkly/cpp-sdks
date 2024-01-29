@@ -12,14 +12,24 @@ ContextFilter::ContextFilter(
       global_private_attributes_(std::move(global_private_attributes)) {}
 
 ContextFilter::JsonValue ContextFilter::Filter(Context const& context) {
+    return Filter(context, false);
+}
+
+ContextFilter::JsonValue ContextFilter::FilterWithAnonymousRedaction(
+    Context const& context) {
+    return Filter(context, true);
+}
+
+ContextFilter::JsonValue ContextFilter::Filter(Context const& context,
+                                               bool redactAnonymous) {
     // Context should be validated before calling this method.
     assert(context.Valid());
     if (context.Kinds().size() == 1) {
         std::string const& kind = context.Kinds()[0];
-        return FilterSingleContext(kind, INCLUDE_KIND,
-                                   context.Attributes(kind));
+        return FilterSingleContext(kind, INCLUDE_KIND, context.Attributes(kind),
+                                   redactAnonymous);
     }
-    return FilterMultiContext(context);
+    return FilterMultiContext(context, redactAnonymous);
 }
 
 void ContextFilter::Emplace(ContextFilter::StackItem& item,
@@ -33,8 +43,9 @@ void ContextFilter::Emplace(ContextFilter::StackItem& item,
 
 bool ContextFilter::Redact(std::vector<std::string>& redactions,
                            std::vector<std::string_view> path,
-                           Attributes const& attributes) {
-    if (all_attributes_private_) {
+                           Attributes const& attributes,
+                           bool redactAll) {
+    if (redactAll) {
         redactions.push_back(AttributeReference::PathToStringReference(path));
         return true;
     }
@@ -61,7 +72,8 @@ bool ContextFilter::Redact(std::vector<std::string>& redactions,
 ContextFilter::JsonValue ContextFilter::FilterSingleContext(
     std::string_view kind,
     bool include_kind,
-    Attributes const& attributes) {
+    Attributes const& attributes,
+    bool redactAnonymous) {
     std::vector<StackItem> stack;
     JsonValue filtered = JsonObject();
     std::vector<std::string> redactions;
@@ -74,9 +86,11 @@ ContextFilter::JsonValue ContextFilter::FilterSingleContext(
         filtered.as_object().emplace("anonymous", attributes.Anonymous());
     }
 
+    bool redactAll =
+        all_attributes_private_ || (redactAnonymous && attributes.Anonymous());
     if (!attributes.Name().empty() &&
-        !Redact(redactions, std::vector<std::string_view>{"name"},
-                attributes)) {
+        !Redact(redactions, std::vector<std::string_view>{"name"}, attributes,
+                redactAll)) {
         filtered.as_object().insert_or_assign("name", attributes.Name());
     }
 
@@ -90,7 +104,8 @@ ContextFilter::JsonValue ContextFilter::FilterSingleContext(
         stack.pop_back();
 
         // Check if the attribute needs to be redacted.
-        if (!item.path.empty() && Redact(redactions, item.path, attributes)) {
+        if (!item.path.empty() &&
+            Redact(redactions, item.path, attributes, redactAll)) {
             continue;
         }
 
@@ -170,14 +185,16 @@ ContextFilter::JsonValue* ContextFilter::AppendContainer(
 }
 
 ContextFilter::JsonValue ContextFilter::FilterMultiContext(
-    Context const& context) {
+    Context const& context,
+    bool redactAnonymous) {
     JsonValue filtered = JsonObject();
     filtered.as_object().emplace("kind", "multi");
 
     for (std::string const& kind : context.Kinds()) {
         filtered.as_object().emplace(
             kind,
-            FilterSingleContext(kind, EXCLUDE_KIND, context.Attributes(kind)));
+            FilterSingleContext(kind, EXCLUDE_KIND, context.Attributes(kind),
+                                redactAnonymous));
     }
 
     return filtered;

@@ -28,7 +28,7 @@ TEST(EventSerialization, FeatureEvent) {
             std::nullopt,
 
         }),
-        filter.filter(context)};
+        filter.Filter(context)};
 
     auto event_json = boost::json::value_from(event);
 
