@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("tags");
         srv.add_capability("client-independence");
         srv.add_capability("inline-context");
+        srv.add_capability("anonymous-redaction");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
