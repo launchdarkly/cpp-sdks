@@ -15,6 +15,7 @@ on:
 
 jobs:
   contract-tests:
+
     runs-on: ubuntu-22.04
     env:
       # Port the test service (implemented in this repo) should bind to.
@@ -28,7 +29,7 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: ./.github/actions/contract-tests
+      - uses: launchdarkly/gh-actions/actions/contract-tests@d3e77c9484fb97c1294ac1b9a47dfc62ae244f6b
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
