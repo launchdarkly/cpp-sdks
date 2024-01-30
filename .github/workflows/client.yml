@@ -33,6 +33,7 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: foo
   build-test:
     runs-on: ubuntu-22.04
     steps:
