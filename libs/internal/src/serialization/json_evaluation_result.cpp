@@ -56,15 +56,21 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     // when deserializing FlagMeta. Primarily `variation` not
     // `variationIndex`.
 
-    auto* value_iter = json_obj.find("value");
-    if (value_iter == json_obj.end()) {
-        return tl::unexpected(JsonError::kSchemaFailure);
-    }
-
-    auto maybe_value = boost::json::value_to<tl::expected<Value, JsonError>>(
-        value_iter->value());
-    if (!maybe_value) {
-        return tl::unexpected(maybe_value.error());
+    // We're looking for the evaluated value. If it's not there, we should treat
+    // it as null and *not* a schema error. This is because the server-side SDK
+    // that produced the EvaluationResult may have omitted the 'null' value.
+    // Otherwise, if it is there, it must deserialize to a valid Value (which
+    // might itself be null.)
+    Value value = Value::Null();
+    if (auto* value_iter = json_obj.find("value");
+        value_iter != json_obj.end()) {
+        auto maybe_value =
+            boost::json::value_to<tl::expected<Value, JsonError>>(
+                value_iter->value());
+        if (!maybe_value) {
+            return tl::unexpected(maybe_value.error());
+        }
+        value = *maybe_value;
     }
 
     auto* variation_iter = json_obj.find("variation");
@@ -85,7 +91,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
                 track_events,
                 track_reason,
                 debug_events_until_date,
-                EvaluationDetailInternal(*maybe_value, variation,
+                EvaluationDetailInternal(std::move(value), variation,
                                          std::make_optional(reason.value()))};
         }
         // We could not parse the reason.
@@ -99,7 +105,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         track_events,
         track_reason,
         debug_events_until_date,
-        EvaluationDetailInternal(*maybe_value, variation, std::nullopt)};
+        EvaluationDetailInternal(std::move(value), variation, std::nullopt)};
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
