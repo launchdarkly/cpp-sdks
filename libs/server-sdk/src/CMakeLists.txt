@@ -78,9 +78,6 @@ target_link_libraries(${LIBNAME}
 
 add_library(launchdarkly::server ALIAS ${LIBNAME})
 
-set_property(TARGET ${LIBNAME} PROPERTY
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
 # Optional in case only the client SDK is being built.
 install(TARGETS ${LIBNAME} OPTIONAL)
 if (LD_BUILD_SHARED_LIBS AND MSVC)

@@ -7,7 +7,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/events/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/signals/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
-        )
+)
 
 # Automatic library: static or dynamic based on user config.
 add_library(${LIBNAME} OBJECT
@@ -55,9 +55,6 @@ target_compile_options(${LIBNAME} PRIVATE
         $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
         -Wno-deprecated-declarations>
 )
-
-set_property(TARGET ${LIBNAME} PROPERTY
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 install(TARGETS ${LIBNAME})
 
