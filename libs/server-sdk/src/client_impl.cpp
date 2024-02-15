@@ -100,7 +100,7 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
     : config_(config),
       http_properties_(
           config::builders::HttpPropertiesBuilder(config.HttpProperties())
-              .Header("user-agent", "CPPClient/" + version)
+              .Header("user-agent", "CPPServer/" + version)
               .Header("authorization", config.SdkKey())
               .Header("x-launchdarkly-tags", config.ApplicationTag())
               .Build()),
