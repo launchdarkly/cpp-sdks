@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.1...launchdarkly-cpp-server-v3.3.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* server sdk should have CPPServer user agent ([#371](https://github.com/launchdarkly/cpp-sdks/issues/371)) ([b403105](https://github.com/launchdarkly/cpp-sdks/commit/b403105f919e42dfb9664cce805b459bd740a4b3))
+
 ## [3.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.0...launchdarkly-cpp-server-v3.3.1) (2024-01-19)
 
 
