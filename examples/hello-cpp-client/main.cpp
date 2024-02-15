@@ -1,8 +1,12 @@
+#include <launchdarkly/bindings/c/logging/log_level.h>
+
 #include <launchdarkly/client_side/client.hpp>
 #include <launchdarkly/context_builder.hpp>
 
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 
 // Set MOBILE_KEY to your LaunchDarkly mobile key.
 #define MOBILE_KEY ""
@@ -21,6 +25,46 @@ char const* get_with_env_fallback(char const* source_val,
 using namespace launchdarkly;
 using namespace launchdarkly::client_side;
 
+/**
+ * \brief Example persistence implementation. This implementation stores each
+ * key as a file on disk in different directories based on their namespace.
+ *
+ * This is an example and is not resilient and therefore not intended for
+ * production.
+ */
+class ExamplePersistence: public IPersistence {
+   public:
+    void Set(std::string storage_namespace,
+             std::string key,
+             std::string data) noexcept override {
+        std::filesystem::create_directories("data/" + storage_namespace);
+        std::ofstream file;
+        file.open("data/" + storage_namespace + "/" + key);
+        file << data;
+        file.close();
+    }
+
+    void Remove(std::string storage_namespace,
+                std::string key) noexcept override {
+        std::filesystem::remove("data/" + storage_namespace + "/" + key);
+    }
+
+    std::optional<std::string> Read(std::string storage_namespace,
+                                    std::string key) noexcept override {
+        std::ifstream file;
+
+        file.open("data/" + storage_namespace + "/" + key);
+        if (file.is_open())
+        {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            file.close();
+            return buffer.str();
+        }
+        return std::nullopt;
+    }
+};
+
 int main() {
     char const* mobile_key = get_with_env_fallback(
         MOBILE_KEY, "LD_MOBILE_KEY",
@@ -29,7 +73,9 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-    auto config = ConfigBuilder(mobile_key).Build();
+    auto config_builder = ConfigBuilder(mobile_key);
+    config_builder.Persistence().Custom(std::make_shared<ExamplePersistence>());
+    auto config = config_builder.Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;
