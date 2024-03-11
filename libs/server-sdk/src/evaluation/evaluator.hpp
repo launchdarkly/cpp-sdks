@@ -6,33 +6,37 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "bucketing.hpp"
 #include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
 
 #include "../data_interfaces/store/istore.hpp"
 #include "../events/event_scope.hpp"
 
-#include <tl/expected.hpp>
-
 namespace launchdarkly::server_side::evaluation {
 
 class Evaluator {
    public:
+    /**
+     * Constructs a new Evaluator. Since the Evaluator may be used by multiple
+     * threads in parallel, the given logger and IStore must be thread safe.
+     * @param logger A logger for recording errors or warnings.
+     * @param source The flag/segment source.
+     */
     Evaluator(Logger& logger, data_interfaces::IStore const& source);
 
     /**
      * Evaluates a flag for a given context.
-     * Warning: not thread safe.
      *
      * @param flag The flag to evaluate.
      * @param context The context to evaluate the flag against.
+     * @param stack The evaluation stack used for detecting circular references.
      * @param event_scope The event scope used for recording prerequisite
      * events.
      */
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
         Context const& context,
+        detail::EvaluationStack& stack,
         EventScope const& event_scope);
 
     /**
@@ -50,6 +54,7 @@ class Evaluator {
         std::optional<std::string> parent_key,
         data_model::Flag const& flag,
         Context const& context,
+        detail::EvaluationStack& stack,
         EventScope const& event_scope);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
@@ -65,6 +70,5 @@ class Evaluator {
 
     Logger& logger_;
     data_interfaces::IStore const& source_;
-    detail::EvaluationStack stack_;
 };
 }  // namespace launchdarkly::server_side::evaluation
