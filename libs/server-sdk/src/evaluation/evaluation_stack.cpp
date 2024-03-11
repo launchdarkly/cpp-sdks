@@ -1,6 +1,6 @@
 #include "evaluation_stack.hpp"
 
-namespace launchdarkly::server_side::evaluation::detail {
+namespace launchdarkly::server_side::evaluation {
 
 Guard::Guard(std::unordered_set<std::string>& set, std::string key)
     : set_(set), key_(std::move(key)) {
@@ -27,4 +27,4 @@ std::optional<Guard> EvaluationStack::NoticeSegment(std::string segment_key) {
     return std::make_optional<Guard>(segments_seen_, std::move(segment_key));
 }
 
-}  // namespace launchdarkly::server_side::evaluation::detail
+}  // namespace launchdarkly::server_side::evaluation

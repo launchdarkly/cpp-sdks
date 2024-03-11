@@ -60,7 +60,7 @@ target_sources(${LIBNAME}
         evaluation/bucketing.cpp
         evaluation/operators.cpp
         evaluation/evaluation_error.cpp
-        evaluation/detail/evaluation_stack.cpp
+        evaluation/evaluation_stack.cpp
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
         events/event_factory.cpp

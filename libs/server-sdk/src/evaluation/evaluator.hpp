@@ -6,8 +6,8 @@
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/value.hpp>
 
-#include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
+#include "evaluation_stack.hpp"
 
 #include "../data_interfaces/store/istore.hpp"
 #include "../events/event_scope.hpp"
@@ -36,7 +36,7 @@ class Evaluator {
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
         Context const& context,
-        detail::EvaluationStack& stack,
+        EvaluationStack& stack,
         EventScope const& event_scope);
 
     /**
@@ -54,7 +54,7 @@ class Evaluator {
         std::optional<std::string> parent_key,
         data_model::Flag const& flag,
         Context const& context,
-        detail::EvaluationStack& stack,
+        EvaluationStack& stack,
         EventScope const& event_scope);
 
     [[nodiscard]] EvaluationDetail<Value> FlagVariation(
