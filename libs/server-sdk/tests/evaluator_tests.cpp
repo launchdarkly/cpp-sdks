@@ -8,6 +8,9 @@
 
 #include <gtest/gtest.h>
 
+#include <random>
+#include <thread>
+
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 
@@ -245,4 +248,31 @@ TEST_F(EvaluatorTests, FlagWithExperimentTargetingMissingContext) {
     ASSERT_FALSE(detail.IsError());
     ASSERT_EQ(*detail, Value(false));
     ASSERT_EQ(detail.Reason(), EvaluationReason::Fallthrough(false));
+}
+
+TEST_F(EvaluatorTests, ThreadSafeEvaluation) {
+    auto flag = store_->GetFlag("flagWithTarget")->item.value();
+
+    constexpr std::size_t kNumThreads = 20;
+    constexpr std::size_t kNumIterations = 1000;
+
+    std::vector<std::thread> threads;
+
+    for (std::size_t i = 0; i < kNumThreads; i++) {
+        threads.emplace_back([this, &flag] {
+            std::mt19937 generator(
+                std::chrono::system_clock::now().time_since_epoch().count());
+            std::uniform_int_distribution distribution(1, 3);
+            for (std::size_t j = 0; j < kNumIterations; j++) {
+                auto user_a = ContextBuilder().Kind("user", "userKeyA").Build();
+                auto _ = eval_.Evaluate(flag, user_a);
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(distribution(generator)));
+            }
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
 }
