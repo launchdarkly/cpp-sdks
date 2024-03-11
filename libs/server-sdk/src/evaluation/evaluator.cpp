@@ -26,14 +26,14 @@ Evaluator::Evaluator(Logger& logger, data_interfaces::IStore const& source)
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
     launchdarkly::Context const& context) {
-    detail::EvaluationStack stack;
+    EvaluationStack stack;
     return Evaluate(flag, context, stack, EventScope{});
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context,
-    detail::EvaluationStack& stack,
+    EvaluationStack& stack,
     EventScope const& event_scope) {
     return Evaluate(std::nullopt, flag, context, stack, event_scope);
 }
@@ -42,7 +42,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     std::optional<std::string> parent_key,
     Flag const& flag,
     launchdarkly::Context const& context,
-    detail::EvaluationStack& stack,
+    EvaluationStack& stack,
     EventScope const& event_scope) {
     if (auto guard = stack.NoticePrerequisite(flag.key)) {
         if (!flag.on) {

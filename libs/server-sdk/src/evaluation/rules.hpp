@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../data_interfaces/store/istore.hpp"
-#include "detail/evaluation_stack.hpp"
 #include "evaluation_error.hpp"
+#include "evaluation_stack.hpp"
 
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data_model/flag.hpp>
@@ -18,18 +18,18 @@ namespace launchdarkly::server_side::evaluation {
     data_model::Flag::Rule const&,
     Context const&,
     data_interfaces::IStore const& store,
-    detail::EvaluationStack& stack);
+    EvaluationStack& stack);
 
 [[nodiscard]] tl::expected<bool, Error> Match(data_model::Clause const&,
                                               Context const&,
                                               data_interfaces::IStore const&,
-                                              detail::EvaluationStack&);
+                                              EvaluationStack&);
 
 [[nodiscard]] tl::expected<bool, Error> Match(
     data_model::Segment::Rule const& rule,
     Context const& context,
     data_interfaces::IStore const& store,
-    detail::EvaluationStack& stack,
+    EvaluationStack& stack,
     std::string const& key,
     std::string const& salt);
 
@@ -37,7 +37,7 @@ namespace launchdarkly::server_side::evaluation {
     data_model::Clause const&,
     Context const&,
     data_interfaces::IStore const&,
-    detail::EvaluationStack& stack);
+    EvaluationStack& stack);
 
 [[nodiscard]] tl::expected<bool, Error> MatchNonSegment(
     data_model::Clause const&,
@@ -47,7 +47,7 @@ namespace launchdarkly::server_side::evaluation {
     data_model::Segment const&,
     Context const&,
     data_interfaces::IStore const& store,
-    detail::EvaluationStack& stack);
+    EvaluationStack& stack);
 
 [[nodiscard]] bool MaybeNegate(data_model::Clause const& clause, bool value);
 

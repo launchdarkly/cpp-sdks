@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "evaluation/detail/evaluation_stack.hpp"
+#include "evaluation/evaluation_stack.hpp"
 
-using namespace launchdarkly::server_side::evaluation::detail;
+using namespace launchdarkly::server_side::evaluation;
 
 TEST(EvalStackTests, SegmentIsNoticed) {
     EvaluationStack stack;

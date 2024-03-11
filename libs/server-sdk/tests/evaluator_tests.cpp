@@ -254,12 +254,12 @@ TEST_F(EvaluatorTests, ThreadSafeEvaluation) {
     auto flag = store_->GetFlag("flagWithTarget")->item.value();
 
     constexpr std::size_t kNumThreads = 20;
-    constexpr std::size_t kNumIterations = 1000;
 
     std::vector<std::thread> threads;
 
     for (std::size_t i = 0; i < kNumThreads; i++) {
-        threads.emplace_back([this, &flag] {
+        constexpr std::size_t kNumIterations = 1000;
+        threads.emplace_back([this, &flag, kNumIterations] {
             std::mt19937 generator(
                 std::chrono::system_clock::now().time_since_epoch().count());
             std::uniform_int_distribution distribution(1, 3);
