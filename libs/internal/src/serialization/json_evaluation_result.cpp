@@ -8,7 +8,6 @@
 #include <boost/json.hpp>
 
 namespace launchdarkly {
-
 tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<EvaluationResult>, JsonError>> const& unused,
@@ -56,6 +55,7 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
     // when deserializing FlagMeta. Primarily `variation` not
     // `variationIndex`.
 
+    // todo(cwaldren): SC-203949 + SC-236165
     // We're looking for the evaluated value. If it's not there, we should treat
     // it as null and *not* a schema error. This is because the server-side SDK
     // that produced the EvaluationResult may have omitted the 'null' value.
@@ -133,7 +133,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
             "debugEventsUntilDate",
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 evaluation_result.DebugEventsUntilDate()->time_since_epoch())
-                .count());
+            .count());
     }
 
     auto& detail = evaluation_result.Detail();
@@ -149,5 +149,4 @@ void tag_invoke(boost::json::value_from_tag const& unused,
         obj.emplace("reason", reason_json);
     }
 }
-
-}  // namespace launchdarkly
+} // namespace launchdarkly
