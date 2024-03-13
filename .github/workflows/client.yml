@@ -22,7 +22,7 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/client-contract-tests/client-tests
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: client-tests
@@ -37,7 +37,7 @@ jobs:
   build-test:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -45,7 +45,7 @@ jobs:
   build-test-client-mac:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-client
@@ -54,7 +54,7 @@ jobs:
   build-test-client-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:

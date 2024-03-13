@@ -35,7 +35,7 @@ jobs:
       hashes-windows: ${{ steps.release-client.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-client
         name: Full release of libs/client-sdk
         uses: ./.github/actions/sdk-release
@@ -59,7 +59,7 @@ jobs:
       hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-server
         name: Full release of libs/server-sdk
         uses: ./.github/actions/sdk-release
@@ -83,7 +83,7 @@ jobs:
       hashes-windows: ${{ steps.release-server-redis.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source
         uses: ./.github/actions/sdk-release
