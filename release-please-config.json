@@ -24,14 +24,8 @@
         "CMakeLists.txt"
       ]
     },
-    "libs/server-sent-events": {
-      "initial-version": "0.1.0"
-    },
-    "libs/common": {
-      "initial-version": "0.1.0"
-    },
-    "libs/internal": {
-      "initial-version": "0.1.0"
-    }
+    "libs/server-sent-events": {},
+    "libs/common": {},
+    "libs/internal": {}
   }
 }
