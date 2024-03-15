@@ -22,7 +22,7 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -30,7 +30,7 @@ jobs:
   build-redis-mac:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -40,7 +40,7 @@ jobs:
   build-test-redis-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: ./.github/actions/ci
         env:
