@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "sdks": {
+    "cpp-client-sdk": {
+      "name": "C++ Client SDK",
+      "type": "client-side",
+      "path": "libs/client-sdk",
+      "languages": [
+        "C++",
+        "C"
+      ],
+      "releases": {
+        "tag-prefix": "launchdarkly-cpp-client-"
+      }
+    },
+    "cpp-server-sdk": {
+      "name": "C++ Server SDK",
+      "type": "server-side",
+      "path": "libs/server-sdk",
+      "languages": [
+        "C++",
+        "C"
+      ],
+      "releases": {
+        "tag-prefix": "launchdarkly-cpp-server-"
+      }
+    }
+  }
+}
