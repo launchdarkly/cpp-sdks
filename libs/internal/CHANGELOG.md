@@ -6,6 +6,19 @@
   * dependencies
     * launchdarkly-cpp-common bumped from 1.4.0 to 1.5.0
 
+## [0.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.5.4...launchdarkly-cpp-internal-v0.6.0) (2024-03-18)
+
+
+### Features
+
+* always inline contexts for feature events ([#362](https://github.com/launchdarkly/cpp-sdks/issues/362)) ([bc77e89](https://github.com/launchdarkly/cpp-sdks/commit/bc77e89d1bf5b2294e2b384363b32734fd1f75db))
+* redact anonymous attributes within feature events ([#363](https://github.com/launchdarkly/cpp-sdks/issues/363)) ([85fe237](https://github.com/launchdarkly/cpp-sdks/commit/85fe2376a0a5f6ee620e3af7a7d57ab19b1933f8))
+
+
+### Bug Fixes
+
+* handle omitted evaluation result value when deserializing client-side JSON payload ([#368](https://github.com/launchdarkly/cpp-sdks/issues/368)) ([334ea51](https://github.com/launchdarkly/cpp-sdks/commit/334ea51ce18e6945ae49edfbdfff7807964c28fd))
+
 ## [0.5.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.5.2...launchdarkly-cpp-internal-v0.5.3) (2023-12-22)
 
 
