@@ -1,0 +1,218 @@
+\hypertarget{classlaunchdarkly_1_1AttributeReference}{}\doxysection{launchdarkly\+::Attribute\+Reference Class Reference}
+\label{classlaunchdarkly_1_1AttributeReference}\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+
+
+{\ttfamily \#include $<$attribute\+\_\+reference.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a09c4ed82ec1fd2667a2c633db07cc6bc}\label{classlaunchdarkly_1_1AttributeReference_a09c4ed82ec1fd2667a2c633db07cc6bc}} 
+using {\bfseries Set\+Type} = std\+::set$<$ \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}{Component}} (std\+::size\+\_\+t depth) const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}{Depth}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a095436d3b368215420b34e6e637cdf13}{Is\+Kind}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a7190f97fd76042d6f04963204971167c}{Valid}} () const
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a5023e1850c4283d4b1eaf8d654482b05}{Redaction\+Name}} () const
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a054c52dd381c2e167dd03fce65ff115e}{Attribute\+Reference}} (std\+::string ref\+\_\+str)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a39cebf34905f88ac473df734cdf6899f}{Attribute\+Reference}} (char const $\ast$ref\+\_\+str)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_ade13ab0386330addf1100f7a2be971b4}{Attribute\+Reference}} ()
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_aa671b9750e47627ce4a41013a58a9137}\label{classlaunchdarkly_1_1AttributeReference_aa671b9750e47627ce4a41013a58a9137}} 
+bool {\bfseries operator==} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} const \&other) const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a9cc17022b60cbf1f8d9cb9b70c095432}\label{classlaunchdarkly_1_1AttributeReference_a9cc17022b60cbf1f8d9cb9b70c095432}} 
+bool {\bfseries operator==} (std\+::vector$<$ std\+::string\+\_\+view $>$ const \&path) const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a794f2af796bbbb2123987f9b3cf1affb}\label{classlaunchdarkly_1_1AttributeReference_a794f2af796bbbb2123987f9b3cf1affb}} 
+bool {\bfseries operator!=} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} const \&other) const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_afb569687b02c4c0e78cf43bc572c5e1d}\label{classlaunchdarkly_1_1AttributeReference_afb569687b02c4c0e78cf43bc572c5e1d}} 
+bool {\bfseries operator!=} (std\+::vector$<$ std\+::string\+\_\+view $>$ const \&path) const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a51d6f28026a2bf442d0ed399c66b45cd}\label{classlaunchdarkly_1_1AttributeReference_a51d6f28026a2bf442d0ed399c66b45cd}} 
+bool {\bfseries operator$<$} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} const \&rhs) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a1b4b03e9226b619150b305892b5ffb2b}{From\+Reference\+Str}} (std\+::string ref\+\_\+str)
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a6bff3184294966cde006bad334d4ab67}{From\+Literal\+Str}} (std\+::string lit\+\_\+str)
+\item 
+static std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_ae14b8043e7b9b6d8981b79baa0223162}{Path\+To\+String\+Reference}} (std\+::vector$<$ std\+::string\+\_\+view $>$ path)
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a3e7ef241f81d0c70145d5a6957eb7221}\label{classlaunchdarkly_1_1AttributeReference_a3e7ef241f81d0c70145d5a6957eb7221}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&os, \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} const \&ref)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents an attribute name or path expression identifying a value within a \mbox{\hyperlink{classlaunchdarkly_1_1Context}{launchdarkly\+::\+Context}}. This can be used to retrieve a value with \mbox{\hyperlink{classlaunchdarkly_1_1Context_a2819bdd269c4b7fb77bface74cd95330}{launchdarkly\+::\+Context\+::\+Get}}, or to identify an attribute or nested value that should be considered private with \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_a73390b7de501a79d8dfe16cc93489389}{launchdarkly\+::\+Attributes\+Builder$<$\+Builder\+Return, Build\+Type$>$\+::\+Set\+Private}} or \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder_aec0f025607ec3aaa63006644e9f1b6cc}{launchdarkly\+::\+Attributes\+Builder$<$\+Builder\+Return,\+Build\+Type$>$\+::\+Add\+Private\+Attribute}} (the SDK configuration can also have a list of private attribute references).
+
+This is represented as a separate type, rather than just a string, so that validation and parsing can be done ahead of time if an attribute reference will be used repeatedly later (such as in flag evaluations).
+
+If the string starts with \textquotesingle{}/\textquotesingle{}, then this is treated as a slash-\/delimited path reference where the first component is the name of an attribute, and subsequent components are the names of nested JSON object properties. In this syntax, the escape sequences \char`\"{}$\sim$0\char`\"{} and \char`\"{}$\sim$1\char`\"{} represent \textquotesingle{}$\sim$\textquotesingle{} and \textquotesingle{}/\textquotesingle{} respectively within a path component.
+
+If the string does not start with \textquotesingle{}/\textquotesingle{}, then it is treated as the literal name of an attribute. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a054c52dd381c2e167dd03fce65ff115e}\label{classlaunchdarkly_1_1AttributeReference_a054c52dd381c2e167dd03fce65ff115e}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!AttributeReference@{AttributeReference}}
+\index{AttributeReference@{AttributeReference}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{AttributeReference()}{AttributeReference()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily launchdarkly\+::\+Attribute\+Reference\+::\+Attribute\+Reference (\begin{DoxyParamCaption}\item[{std\+::string}]{ref\+\_\+str }\end{DoxyParamCaption})}
+
+Construct an attribute reference from a string. 
+\begin{DoxyParams}{Parameters}
+{\em ref\+\_\+str} & The string to make an attribute reference from. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a39cebf34905f88ac473df734cdf6899f}\label{classlaunchdarkly_1_1AttributeReference_a39cebf34905f88ac473df734cdf6899f}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!AttributeReference@{AttributeReference}}
+\index{AttributeReference@{AttributeReference}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{AttributeReference()}{AttributeReference()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily launchdarkly\+::\+Attribute\+Reference\+::\+Attribute\+Reference (\begin{DoxyParamCaption}\item[{char const $\ast$}]{ref\+\_\+str }\end{DoxyParamCaption})}
+
+Construct an attribute reference from a constant string. 
+\begin{DoxyParams}{Parameters}
+{\em ref\+\_\+str} & The string to make an attribute reference from. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_ade13ab0386330addf1100f7a2be971b4}\label{classlaunchdarkly_1_1AttributeReference_ade13ab0386330addf1100f7a2be971b4}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!AttributeReference@{AttributeReference}}
+\index{AttributeReference@{AttributeReference}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{AttributeReference()}{AttributeReference()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily launchdarkly\+::\+Attribute\+Reference\+::\+Attribute\+Reference (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Default constructs an invalid attribute reference. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}\label{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!Component@{Component}}
+\index{Component@{Component}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{Component()}{Component()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::\+Attribute\+Reference\+::\+Component (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{depth }\end{DoxyParamCaption}) const}
+
+Get the component of the attribute reference at the specified depth.
+
+For example, Component(1) on the reference {\ttfamily /a/b/c} would return {\ttfamily b}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em depth} & The depth to get a component for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The component at the specified depth or an empty string if the depth is out of bounds. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}\label{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!Depth@{Depth}}
+\index{Depth@{Depth}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{Depth()}{Depth()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::\+Attribute\+Reference\+::\+Depth (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the total depth of the reference.
+
+For example, \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}{Depth()}} on the reference {\ttfamily /a/b/c} would return 3. \begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a6bff3184294966cde006bad334d4ab67}\label{classlaunchdarkly_1_1AttributeReference_a6bff3184294966cde006bad334d4ab67}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!FromLiteralStr@{FromLiteralStr}}
+\index{FromLiteralStr@{FromLiteralStr}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{FromLiteralStr()}{FromLiteralStr()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} launchdarkly\+::\+Attribute\+Reference\+::\+From\+Literal\+Str (\begin{DoxyParamCaption}\item[{std\+::string}]{lit\+\_\+str }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Create a string from an attribute that is known to be a literal.
+
+This allows escaping literals that contained special characters.
+
+
+\begin{DoxyParams}{Parameters}
+{\em lit\+\_\+str} & The literal attribute name. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A new \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} based on the literal name. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a1b4b03e9226b619150b305892b5ffb2b}\label{classlaunchdarkly_1_1AttributeReference_a1b4b03e9226b619150b305892b5ffb2b}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!FromReferenceStr@{FromReferenceStr}}
+\index{FromReferenceStr@{FromReferenceStr}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{FromReferenceStr()}{FromReferenceStr()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} launchdarkly\+::\+Attribute\+Reference\+::\+From\+Reference\+Str (\begin{DoxyParamCaption}\item[{std\+::string}]{ref\+\_\+str }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Create an attribute from a string that is known to be an attribute reference string. 
+\begin{DoxyParams}{Parameters}
+{\em ref\+\_\+str} & The reference string. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A new \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} based on the reference string. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a095436d3b368215420b34e6e637cdf13}\label{classlaunchdarkly_1_1AttributeReference_a095436d3b368215420b34e6e637cdf13}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!IsKind@{IsKind}}
+\index{IsKind@{IsKind}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{IsKind()}{IsKind()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Attribute\+Reference\+::\+Is\+Kind (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Check if the reference is a \char`\"{}kind\char`\"{} reference. Either {\ttfamily /kind} or {\ttfamily kind}.
+
+\begin{DoxyReturn}{Returns}
+True if it is a kind reference. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_ae14b8043e7b9b6d8981b79baa0223162}\label{classlaunchdarkly_1_1AttributeReference_ae14b8043e7b9b6d8981b79baa0223162}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!PathToStringReference@{PathToStringReference}}
+\index{PathToStringReference@{PathToStringReference}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{PathToStringReference()}{PathToStringReference()}}
+{\footnotesize\ttfamily std\+::string launchdarkly\+::\+Attribute\+Reference\+::\+Path\+To\+String\+Reference (\begin{DoxyParamCaption}\item[{std\+::vector$<$ std\+::string\+\_\+view $>$}]{path }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+For a path, a series of names to address an attribute, create a name suitable for including in event meta data.
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & The path to get a name for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The path as a reference string. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a5023e1850c4283d4b1eaf8d654482b05}\label{classlaunchdarkly_1_1AttributeReference_a5023e1850c4283d4b1eaf8d654482b05}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!RedactionName@{RedactionName}}
+\index{RedactionName@{RedactionName}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{RedactionName()}{RedactionName()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::\+Attribute\+Reference\+::\+Redaction\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The redaction name will always be an attribute reference compatible string. So, for instance, a literal that contained {\ttfamily /attr} would be converted to {\ttfamily /$\sim$1attr}. \begin{DoxyReturn}{Returns}
+String to use in redacted attributes. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1AttributeReference_a7190f97fd76042d6f04963204971167c}\label{classlaunchdarkly_1_1AttributeReference_a7190f97fd76042d6f04963204971167c}} 
+\index{launchdarkly::AttributeReference@{launchdarkly::AttributeReference}!Valid@{Valid}}
+\index{Valid@{Valid}!launchdarkly::AttributeReference@{launchdarkly::AttributeReference}}
+\doxysubsubsection{\texorpdfstring{Valid()}{Valid()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Attribute\+Reference\+::\+Valid (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Check if the reference is valid.
+
+\begin{DoxyReturn}{Returns}
+True if the reference is valid. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/attribute\+\_\+reference.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/attribute\+\_\+reference.\+cpp\end{DoxyCompactItemize}
