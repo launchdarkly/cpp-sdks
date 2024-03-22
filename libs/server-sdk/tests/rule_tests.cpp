@@ -36,7 +36,7 @@ int const AllOperatorsTest::DATE_MS_NEGATIVE = -10000;
 const std::string AllOperatorsTest::INVALID_DATE = "hey what's this?";
 
 TEST_P(AllOperatorsTest, Matches) {
-    using namespace launchdarkly::server_side::evaluation::detail;
+    using namespace launchdarkly::server_side::evaluation;
     using namespace launchdarkly;
 
     auto const& param = GetParam();

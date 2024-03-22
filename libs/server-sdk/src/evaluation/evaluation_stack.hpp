@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_set>
 
-namespace launchdarkly::server_side::evaluation::detail {
+namespace launchdarkly::server_side::evaluation {
 
 /**
  * Guard is an object used to track that a segment or flag key has been noticed.
@@ -57,4 +57,4 @@ class EvaluationStack {
     std::unordered_set<std::string> segments_seen_;
 };
 
-}  // namespace launchdarkly::server_side::evaluation::detail
+}  // namespace launchdarkly::server_side::evaluation
