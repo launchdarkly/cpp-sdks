@@ -49,7 +49,7 @@ auto const kDefaultMaxBackoffDelay = std::chrono::seconds(30);
 // we or the server are misbehaving here. In any case, there is no need to wait
 // 5 minutes, we should give a couple seconds to receive a valid response or
 // else stop waiting.
-auto const kShutdownTimeout = std::chrono::seconds(5);
+auto const kShutdownTimeout = std::chrono::seconds(10);
 
 static boost::optional<net::ssl::context&> ToOptRef(
     std::optional<net::ssl::context>& maybe_val) {
@@ -292,8 +292,10 @@ class FoxyClient : public Client,
                 // if we're shutting down, so shutting_down_ is needed to
                 // disambiguate.
                 if (shutting_down_) {
-                    // End the chain of async operations.
-                    return;
+                    session_->opts.timeout = kShutdownTimeout;
+
+                    return session_->async_shutdown(beast::bind_front_handler(
+                        &FoxyClient::on_shutdown, shared_from_this(), []() {}));
                 }
                 errors_(Error::ReadTimeout);
                 return async_backoff(
@@ -337,6 +339,7 @@ class FoxyClient : public Client,
     }
 
     void async_shutdown(std::function<void()> completion) override {
+        std::cout << "shutdown requested, posting..\n";
         // Get on the session's executor, otherwise the code in the completion
         // handler could race.
         boost::asio::post(session_->get_executor(),
@@ -346,15 +349,14 @@ class FoxyClient : public Client,
     }
 
     void do_shutdown(std::function<void()> completion) {
+        std::cout << "shutdown request executing..\n";
         shutting_down_ = true;
         backoff_timer_.cancel();
-        session_->opts.timeout = kShutdownTimeout;
         if (session_->stream.is_ssl()) {
             session_->stream.ssl().next_layer().cancel();
+        } else {
+            session_->stream.plain().cancel();
         }
-        session_->async_shutdown(beast::bind_front_handler(
-            &FoxyClient::on_shutdown, shared_from_this(),
-            std::move(completion)));
     }
 
     void on_shutdown(std::function<void()> completion,

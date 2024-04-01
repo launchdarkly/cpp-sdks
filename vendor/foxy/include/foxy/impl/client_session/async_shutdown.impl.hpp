@@ -1,8 +1,9 @@
 //
-// Copyright (c) 2018-2019 Christian Mazakas (christian dot mazakas at gmail dot com)
+// Copyright (c) 2018-2019 Christian Mazakas (christian dot mazakas at gmail dot
+// com)
 //
-// Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt
-// or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 // Official repository: https://github.com/LeonineKing1199/foxy
 //
@@ -11,39 +12,50 @@
 #define FOXY_IMPL_CLIENT_SESSION_ASYNC_SHUTDOWN_IMPL_HPP_
 
 #include <foxy/client_session.hpp>
-
-namespace launchdarkly::foxy
-{
+#include <iostream>
+namespace launchdarkly::foxy {
 template <class DynamicBuffer>
 template <class ShutdownHandler>
-auto
-basic_client_session<DynamicBuffer>::async_shutdown(ShutdownHandler&& handler) & ->
-  typename boost::asio::async_result<std::decay_t<ShutdownHandler>,
-                                     void(boost::system::error_code)>::return_type
-{
-  return ::launchdarkly::foxy::detail::async_timer<void(boost::system::error_code)>(
-    [self = this, coro = boost::asio::coroutine()](auto& cb, boost::system::error_code ec = {},
-                                                   std::size_t bytes_transferrred = 0) mutable {
-      auto& s = *self;
+auto basic_client_session<DynamicBuffer>::async_shutdown(
+    ShutdownHandler&& handler) & ->
+    typename boost::asio::async_result<
+        std::decay_t<ShutdownHandler>,
+        void(boost::system::error_code)>::return_type {
+    return ::launchdarkly::foxy::detail::async_timer<void(
+        boost::system::error_code)>(
+        [self = this, coro = boost::asio::coroutine()](
+            auto& cb, boost::system::error_code ec = {},
+            std::size_t bytes_transferrred = 0) mutable {
+            auto& s = *self;
 
-      BOOST_ASIO_CORO_REENTER(coro)
-      {
-        if (s.stream.is_ssl()) {
-          BOOST_ASIO_CORO_YIELD s.stream.ssl().async_shutdown(std::move(cb));
-          if (ec == boost::asio::ssl::error::stream_truncated) { ec = {}; }
-          if (ec) { goto upcall; }
-        }
+            BOOST_ASIO_CORO_REENTER(coro) {
+                if (s.stream.is_ssl()) {
+                    std::cout << "-> ssl().async_shutdown()\n";
+                    BOOST_ASIO_CORO_YIELD s.stream.ssl().async_shutdown(
+                        std::move(cb));
+                    std::cout << "<- ssl().async_shutdown: " << ec.message()
+                              << '\n';
+                    if (ec == boost::asio::ssl::error::stream_truncated) {
+                        ec = {};
+                    }
+                    if (ec) {
+                        goto upcall;
+                    }
+                }
 
-        s.stream.plain().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-        s.stream.plain().close(ec);
+                std::cout << "plain socket shutdown\n";
+                s.stream.plain().shutdown(
+                    boost::asio::ip::tcp::socket::shutdown_both, ec);
+                s.stream.plain().close(ec);
 
-      upcall:
-        return cb.complete(ec);
-      }
-    },
-    *this, std::forward<ShutdownHandler>(handler));
+            upcall:
+                std::cout << "invoke completion handler\n";
+                return cb.complete(ec);
+            }
+        },
+        *this, std::forward<ShutdownHandler>(handler));
 }
 
-} // namespace launchdarkly::foxy
+}  // namespace launchdarkly::foxy
 
-#endif // FOXY_IMPL_CLIENT_SESSION_ASYNC_SHUTDOWN_IMPL_HPP_
+#endif  // FOXY_IMPL_CLIENT_SESSION_ASYNC_SHUTDOWN_IMPL_HPP_
