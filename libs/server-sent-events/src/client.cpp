@@ -44,6 +44,13 @@ auto const kDefaultInitialReconnectDelay = std::chrono::seconds(1);
 // Maximum duration between backoff attempts.
 auto const kDefaultMaxBackoffDelay = std::chrono::seconds(30);
 
+// When we shut down the SSL stream using async_shutdown operation, it
+// appears that the completion handler isn't invoked for about 5 minutes. Either
+// we or the server are misbehaving here. In any case, there is no need to wait
+// 5 minutes, we should give a couple seconds to receive a valid response or
+// else stop waiting.
+auto const kShutdownTimeout = std::chrono::seconds(5);
+
 static boost::optional<net::ssl::context&> ToOptRef(
     std::optional<net::ssl::context>& maybe_val) {
     if (maybe_val) {
@@ -341,15 +348,17 @@ class FoxyClient : public Client,
     void do_shutdown(std::function<void()> completion) {
         shutting_down_ = true;
         backoff_timer_.cancel();
+        session_->opts.timeout = kShutdownTimeout;
+        if (session_->stream.is_ssl()) {
+            session_->stream.ssl().next_layer().cancel();
+        }
         session_->async_shutdown(beast::bind_front_handler(
-            &FoxyClient::on_shutdown, std::move(completion)));
+            &FoxyClient::on_shutdown, shared_from_this(),
+            std::move(completion)));
     }
 
-    static void on_shutdown(std::function<void()> completion,
-                            boost::system::error_code ec) {
-        // Because do_shutdown doesn't use shared_from_this() when initiating
-        // the async_shutdown op, the client may already be destroyed - hence
-        // this static method.
+    void on_shutdown(std::function<void()> completion,
+                     boost::system::error_code ec) {
         boost::ignore_unused(ec);
         if (completion) {
             completion();
