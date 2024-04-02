@@ -292,10 +292,7 @@ class FoxyClient : public Client,
                 // if we're shutting down, so shutting_down_ is needed to
                 // disambiguate.
                 if (shutting_down_) {
-                    session_->opts.timeout = kShutdownTimeout;
-
-                    return session_->async_shutdown(beast::bind_front_handler(
-                        &FoxyClient::on_shutdown, shared_from_this(), []() {}));
+                    return;
                 }
                 errors_(Error::ReadTimeout);
                 return async_backoff(
@@ -348,6 +345,7 @@ class FoxyClient : public Client,
                                                     std::move(completion)));
     }
 
+    void on_shutdown_write() { std::cout << "shutdown write completed\n"; }
     void do_shutdown(std::function<void()> completion) {
         std::cout << "shutdown request executing..\n";
         shutting_down_ = true;
@@ -357,6 +355,15 @@ class FoxyClient : public Client,
         } else {
             session_->stream.plain().cancel();
         }
+        session_->opts.timeout = kShutdownTimeout;
+        session_->async_shutdown(beast::bind_front_handler(
+            &FoxyClient::on_shutdown, shared_from_this(),
+            std::move(completion)));
+        // Run async_write with a single null byte:
+        session_->stream.async_write_some(
+            net::buffer("\0", 1),
+            beast::bind_front_handler(&FoxyClient::on_shutdown_write,
+                                      shared_from_this()));
     }
 
     void on_shutdown(std::function<void()> completion,
