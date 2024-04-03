@@ -44,13 +44,6 @@ auto const kDefaultInitialReconnectDelay = std::chrono::seconds(1);
 // Maximum duration between backoff attempts.
 auto const kDefaultMaxBackoffDelay = std::chrono::seconds(30);
 
-// When we shut down the SSL stream using async_shutdown operation, it
-// appears that the completion handler isn't invoked for about 5 minutes. Either
-// we or the server are misbehaving here. In any case, there is no need to wait
-// 5 minutes, we should give a couple seconds to receive a valid response or
-// else stop waiting.
-auto const kShutdownTimeout = std::chrono::seconds(10);
-
 static boost::optional<net::ssl::context&> ToOptRef(
     std::optional<net::ssl::context>& maybe_val) {
     if (maybe_val) {
@@ -65,6 +58,7 @@ class FoxyClient : public Client,
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
     using response = http::response<body>;
+    int count;
 
    public:
     FoxyClient(boost::asio::any_io_executor executor,
@@ -97,7 +91,8 @@ class FoxyClient : public Client,
               kDefaultMaxBackoffDelay),
           backoff_timer_(std::move(executor)),
           last_read_(std::nullopt),
-          shutting_down_(false) {
+          shutting_down_(false),
+          count(get_counter()) {
         create_session();
         create_parser();
     }
@@ -292,6 +287,10 @@ class FoxyClient : public Client,
                 // if we're shutting down, so shutting_down_ is needed to
                 // disambiguate.
                 if (shutting_down_) {
+                    boost::system::error_code ec = {};
+                    session_->stream.plain().shutdown(
+                        boost::asio::ip::tcp::socket::shutdown_both, ec);
+                    session_->stream.plain().close(ec);
                     return;
                 }
                 errors_(Error::ReadTimeout);
@@ -336,7 +335,6 @@ class FoxyClient : public Client,
     }
 
     void async_shutdown(std::function<void()> completion) override {
-        std::cout << "shutdown requested, posting..\n";
         // Get on the session's executor, otherwise the code in the completion
         // handler could race.
         boost::asio::post(session_->get_executor(),
@@ -345,9 +343,7 @@ class FoxyClient : public Client,
                                                     std::move(completion)));
     }
 
-    void on_shutdown_write() { std::cout << "shutdown write completed\n"; }
     void do_shutdown(std::function<void()> completion) {
-        std::cout << "shutdown request executing..\n";
         shutting_down_ = true;
         backoff_timer_.cancel();
         if (session_->stream.is_ssl()) {
@@ -355,15 +351,6 @@ class FoxyClient : public Client,
         } else {
             session_->stream.plain().cancel();
         }
-        session_->opts.timeout = kShutdownTimeout;
-        session_->async_shutdown(beast::bind_front_handler(
-            &FoxyClient::on_shutdown, shared_from_this(),
-            std::move(completion)));
-        // Run async_write with a single null byte:
-        session_->stream.async_write_some(
-            net::buffer("\0", 1),
-            beast::bind_front_handler(&FoxyClient::on_shutdown_write,
-                                      shared_from_this()));
     }
 
     void on_shutdown(std::function<void()> completion,
