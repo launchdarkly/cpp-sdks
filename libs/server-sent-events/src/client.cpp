@@ -280,14 +280,10 @@ class FoxyClient : public Client,
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec) {
+            if (shutting_down_) {
+                return;
+            }
             if (ec == boost::asio::error::operation_aborted) {
-                // operation_aborted can occur if the read timeout is reached or
-                // if we're shutting down, so shutting_down_ is needed to
-                // disambiguate.
-                if (shutting_down_) {
-                    // End the chain of async operations.
-                    return;
-                }
                 errors_(Error::ReadTimeout);
                 return async_backoff(
                     "aborting read of response body (timeout)");
@@ -339,18 +335,37 @@ class FoxyClient : public Client,
     }
 
     void do_shutdown(std::function<void()> completion) {
+        // Signal to the body reader operation that if it completes,
+        // it should return instead of starting another async read.
         shutting_down_ = true;
+        // If any backoff is taking place, cancel that as well.
         backoff_timer_.cancel();
-        session_->async_shutdown(beast::bind_front_handler(
-            &FoxyClient::on_shutdown, std::move(completion)));
-    }
 
-    static void on_shutdown(std::function<void()> completion,
-                            boost::system::error_code ec) {
-        // Because do_shutdown doesn't use shared_from_this() when initiating
-        // the async_shutdown op, the client may already be destroyed - hence
-        // this static method.
-        boost::ignore_unused(ec);
+        // Cancels the outstanding read.
+        if (session_->stream.is_ssl()) {
+            session_->stream.ssl().next_layer().cancel();
+        } else {
+            session_->stream.plain().cancel();
+        }
+
+        // Ideally we would call session_->async_shutdown() here to gracefully
+        // terminate the SSL session. For unknown reasons, this call appears to
+        // hang indefinitely and never complete until the SDK client is
+        // destroyed.
+        //
+        // A workaround is to set a timeout on the operation, say 1 second. This
+        // gives the opportunity to shutdown gracefully and then if that fails,
+        // we could close the socket directly. But that also doesn't seem to
+        // work: even with the timeout, the operation still doesn't complete.
+        //
+        // So the most robust solution appears to be closing the socket
+        // directly. This is not ideal because it doesn't send a close_notify to
+        // the server.
+        boost::system::error_code ec;
+        session_->stream.plain().shutdown(
+            boost::asio::ip::tcp::socket::shutdown_both, ec);
+        session_->stream.plain().close(ec);
+
         if (completion) {
             completion();
         }
