@@ -62,19 +62,6 @@ int main() {
     std::cout << "*** Feature flag '" << FEATURE_FLAG_KEY << "' is "
               << (flag_value ? "true" : "false") << " for this user\n\n";
 
-    for (int i = 0; i < 5; i++) {
-        auto user_key = "example-user-key-" + std::to_string(i);
-        auto context2 =
-            ContextBuilder().Kind("user", user_key).Name("Bob").Build();
-
-        std::cout << "identifying " << user_key << std::endl;
-        auto fut = client.IdentifyAsync(context2);
-        fut.wait();
-        std::cout << "identified " << user_key << "!" << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-    }
-
     return 0;
 }
 
