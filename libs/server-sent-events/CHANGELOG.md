@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.3.0...launchdarkly-cpp-sse-client-v0.3.1) (2024-04-03)
+
+
+### Bug Fixes
+
+* do not block identify on SSE client shutdown completion ([#384](https://github.com/launchdarkly/cpp-sdks/issues/384)) ([ca270cd](https://github.com/launchdarkly/cpp-sdks/commit/ca270cd873e97c4b609ecd4656c52ee74d4cbebe))
+
 ## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.2.0...launchdarkly-cpp-sse-client-v0.3.0) (2023-12-04)
 
 
