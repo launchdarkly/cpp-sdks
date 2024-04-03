@@ -1,5 +1,0 @@
-<map id="launchdarkly::server_side::data_systems::LazyLoad" name="launchdarkly::server_side::data_systems::LazyLoad">
-<area shape="rect" id="node1" title=" " alt="" coords="7,213,169,269"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem.html" title="IDataSystem obtains data used for flag evaluations and makes it available to other components." alt="" coords="5,109,171,165"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore.html" title="IStore provides shared ownership of flag and segment domain objects." alt="" coords="5,5,171,61"/>
-</map>
