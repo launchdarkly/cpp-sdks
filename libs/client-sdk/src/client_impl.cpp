@@ -149,18 +149,14 @@ std::future<bool> ClientImpl::IdentifyAsync(Context context) {
 }
 
 void ClientImpl::RestartDataSource() {
-    if (data_source_) {
-        auto then = std::chrono::steady_clock::now();
-        data_source_->ShutdownAsync([then]() {
-            std::cout << "Shutdown in "
-                      << std::chrono::duration_cast<std::chrono::milliseconds>(
-                             std::chrono::steady_clock::now() - then)
-                             .count()
-                      << "ms" << std::endl;
-        });
+    auto start_op = [this]() {
+        data_source_ = data_source_factory_();
+        data_source_->Start();
+    };
+    if (!data_source_) {
+        return start_op();
     }
-    data_source_ = data_source_factory_();
-    data_source_->Start();
+    data_source_->ShutdownAsync(start_op);
 }
 
 std::future<bool> ClientImpl::StartAsyncInternal(
@@ -174,7 +170,7 @@ std::future<bool> ClientImpl::StartAsyncInternal(
             if (auto const state = status.State(); IsInitialized(state)) {
                 init_promise->set_value(result(status.State()));
                 return true; /* delete this change listener since the desired
-                        state was reached */
+                                state was reached */
             }
             return false; /* keep the change listener */
         });

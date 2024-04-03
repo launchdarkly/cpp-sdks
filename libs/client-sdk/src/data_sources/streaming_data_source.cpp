@@ -12,7 +12,6 @@
 #include <boost/json.hpp>
 #include <boost/url.hpp>
 
-#include <iostream>
 #include <utility>
 
 namespace launchdarkly::client_side::data_sources {

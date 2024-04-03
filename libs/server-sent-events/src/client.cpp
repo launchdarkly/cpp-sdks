@@ -58,7 +58,6 @@ class FoxyClient : public Client,
     using cb = std::function<void(launchdarkly::sse::Event)>;
     using body = launchdarkly::sse::detail::EventBody<cb>;
     using response = http::response<body>;
-    int count;
 
    public:
     FoxyClient(boost::asio::any_io_executor executor,
@@ -91,8 +90,7 @@ class FoxyClient : public Client,
               kDefaultMaxBackoffDelay),
           backoff_timer_(std::move(executor)),
           last_read_(std::nullopt),
-          shutting_down_(false),
-          count(get_counter()) {
+          shutting_down_(false) {
         create_session();
         create_parser();
     }
@@ -282,17 +280,10 @@ class FoxyClient : public Client,
     void on_read_body(boost::system::error_code ec, std::size_t amount) {
         boost::ignore_unused(amount);
         if (ec) {
+            if (shutting_down_) {
+                return;
+            }
             if (ec == boost::asio::error::operation_aborted) {
-                // operation_aborted can occur if the read timeout is reached or
-                // if we're shutting down, so shutting_down_ is needed to
-                // disambiguate.
-                if (shutting_down_) {
-                    boost::system::error_code ec = {};
-                    session_->stream.plain().shutdown(
-                        boost::asio::ip::tcp::socket::shutdown_both, ec);
-                    session_->stream.plain().close(ec);
-                    return;
-                }
                 errors_(Error::ReadTimeout);
                 return async_backoff(
                     "aborting read of response body (timeout)");
@@ -344,18 +335,17 @@ class FoxyClient : public Client,
     }
 
     void do_shutdown(std::function<void()> completion) {
+        // Signal to the body reader operation that if it completes,
+        // it should return instead of starting another async read.
         shutting_down_ = true;
+        // If any backoff is taking place, cancel that as well.
         backoff_timer_.cancel();
-        if (session_->stream.is_ssl()) {
-            session_->stream.ssl().next_layer().cancel();
-        } else {
-            session_->stream.plain().cancel();
-        }
-    }
+        
+        boost::system::error_code ec = {};
+        session_->stream.plain().shutdown(
+            boost::asio::ip::tcp::socket::shutdown_both, ec);
+        session_->stream.plain().close(ec);
 
-    void on_shutdown(std::function<void()> completion,
-                     boost::system::error_code ec) {
-        boost::ignore_unused(ec);
         if (completion) {
             completion();
         }
