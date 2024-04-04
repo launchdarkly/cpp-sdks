@@ -11,6 +11,45 @@
 namespace launchdarkly::config::shared::builders {
 
 /**
+ * Class used for building TLS options used within HttpProperties.
+ * @tparam SDK THe SDK type to build options for. This affects the default
+ * values of the built options.
+ */
+template <typename SDK>
+class TlsBuilder {
+   public:
+    /**
+     * Construct a new TlsBuilder. The builder will use the default
+     * properties based on the SDK type. Setting a property will override
+     * the default value.
+     */
+    TlsBuilder();
+
+    /**
+     * Create a TLS builder from an initial set of options.
+     * This can be useful when extending a set of options for a request.
+     *
+     * @param tls The TLS options to start with.
+     */
+    TlsBuilder(built::TlsOptions const& tls);
+
+    /**
+     * Whether the remote peer's certificates should be verified.
+     * @param verify_peer True to verify peer, false otherwise.
+     * @return A reference to this builder.
+     */
+    TlsBuilder& VerifyPeer(bool verify_peer);
+
+    /**
+     * Builds the TLS options.
+     * @return The built options.
+     */
+    [[nodiscard]] built::TlsOptions Build() const;
+
+   private:
+    bool verify_peer_;
+};
+/**
  * Class used for building a set of HttpProperties.
  * @tparam SDK The SDK type to build properties for. This affects the default
  * values of the built properties.
@@ -117,6 +156,13 @@ class HttpPropertiesBuilder {
                                   std::optional<std::string> value);
 
     /**
+     * Sets the builder for TLS properties.
+     * @param builder The TLS property builder.
+     * @return A reference to this builder.
+     */
+    HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
+
+    /**
      * Build a set of HttpProperties.
      * @return The built properties.
      */
@@ -130,6 +176,7 @@ class HttpPropertiesBuilder {
     std::string wrapper_name_;
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
+    TlsBuilder<SDK> tls_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

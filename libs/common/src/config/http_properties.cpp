@@ -4,9 +4,11 @@
 
 namespace launchdarkly::config::shared::built {
 
-HttpProperties::TLS::TLS(bool verify_peer) : verify_peer_(verify_peer) {}
+TlsOptions::TlsOptions(bool verify_peer) : verify_peer_(verify_peer) {}
 
-bool HttpProperties::TLS::VerifyPeer() const {
+TlsOptions::TlsOptions() : TlsOptions(true) {}
+
+bool TlsOptions::VerifyPeer() const {
     return verify_peer_;
 }
 
@@ -15,7 +17,7 @@ HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
                                std::chrono::milliseconds write_timeout,
                                std::chrono::milliseconds response_timeout,
                                std::map<std::string, std::string> base_headers,
-                               class HttpProperties::TLS tls)
+                               TlsOptions tls)
     : connect_timeout_(connect_timeout),
       read_timeout_(read_timeout),
       write_timeout_(write_timeout),
@@ -43,7 +45,7 @@ std::map<std::string, std::string> const& HttpProperties::BaseHeaders() const {
     return base_headers_;
 }
 
-class HttpProperties::TLS HttpProperties::TLS() const& {
+TlsOptions const& HttpProperties::Tls() const {
     return tls_;
 }
 
@@ -51,11 +53,10 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
     return lhs.ReadTimeout() == rhs.ReadTimeout() &&
            lhs.WriteTimeout() == rhs.WriteTimeout() &&
            lhs.ConnectTimeout() == rhs.ConnectTimeout() &&
-           lhs.BaseHeaders() == rhs.BaseHeaders() && lhs.TLS() == rhs.TLS();
+           lhs.BaseHeaders() == rhs.BaseHeaders() && lhs.Tls() == rhs.Tls();
 }
 
-bool operator==(class HttpProperties::TLS const& lhs,
-                class HttpProperties::TLS const& rhs) {
+bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
     return lhs.VerifyPeer() == rhs.VerifyPeer();
 }
 

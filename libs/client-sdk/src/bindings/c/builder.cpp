@@ -41,6 +41,11 @@ using namespace launchdarkly::client_side;
 #define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
     (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
 
+#define TO_TLS_BUILDER(ptr) (reinterpret_cast<TlsBuilder*>(ptr))
+
+#define FROM_TLS_BUILDER(ptr) \
+    (reinterpret_cast<LDClientHttpPropertiesTlsBuilder>(ptr))
+
 class PersistenceImplementationWrapper : public IPersistence {
    public:
     explicit PersistenceImplementationWrapper(LDPersistence impl)
@@ -304,6 +309,34 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     LD_ASSERT_NOT_NULL(value);
 
     TO_BUILDER(b)->HttpProperties().Header(key, value);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Tls(
+    LDClientConfigBuilder b,
+    LDClientHttpPropertiesTlsBuilder tls_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(tls_builder);
+
+    TO_BUILDER(b)->HttpProperties().Tls(*TO_TLS_BUILDER(tls_builder));
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_VerifyPeer(LDClientHttpPropertiesTlsBuilder b,
+                                            bool verify_peer) {
+    LD_ASSERT_NOT_NULL(b);
+
+    TO_TLS_BUILDER(b)->VerifyPeer(verify_peer);
+}
+
+LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
+LDClientHttpPropertiesTlsBuilder_New(void) {
+    return FROM_TLS_BUILDER(new TlsBuilder());
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_Free(LDClientHttpPropertiesTlsBuilder b) {
+    delete TO_TLS_BUILDER(b);
 }
 
 LD_EXPORT(void)
