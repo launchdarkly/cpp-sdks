@@ -132,6 +132,14 @@ class Builder {
     Builder& errors(ErrorCallback callback);
 
     /**
+     * If connecting to a TLS endpoint, whether to verify the remote
+     * peer's certificates.
+     * @param verify_peer True to verify the peer, false otherwise.
+     * @return Reference to this builder.
+     */
+    Builder& verify_peer(bool verify_peer);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -147,6 +155,7 @@ class Builder {
     std::optional<std::chrono::milliseconds> write_timeout_;
     std::optional<std::chrono::milliseconds> connect_timeout_;
     std::optional<std::chrono::milliseconds> initial_reconnect_delay_;
+    bool verify_peer_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
     ErrorCallback error_cb_;

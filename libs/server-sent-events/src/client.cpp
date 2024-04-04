@@ -561,6 +561,11 @@ Builder& Builder::errors(ErrorCallback callback) {
     return *this;
 }
 
+Builder& Builder::verify_peer(bool verify_peer) {
+    verify_peer_ = verify_peer;
+    return *this;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
@@ -607,6 +612,10 @@ std::shared_ptr<Client> Builder::build() {
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
+        if (!verify_peer_) {
+            ssl->set_verify_mode(ssl::context::verify_none);
+            logging_cb_("SSL peer verification is disabled");
+        }
     }
 
     return std::make_shared<FoxyClient>(
