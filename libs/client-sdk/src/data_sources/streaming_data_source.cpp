@@ -127,6 +127,8 @@ void StreamingDataSource::Start() {
         client_builder.header(header.first, header.second);
     }
 
+    client_builder.verify_peer(http_config_.Tls().VerifyPeer());
+
     auto weak_self = weak_from_this();
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
