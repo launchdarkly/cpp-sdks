@@ -36,7 +36,6 @@ class Evaluator {
     [[nodiscard]] EvaluationDetail<Value> Evaluate(
         data_model::Flag const& flag,
         Context const& context,
-        EvaluationStack& stack,
         EventScope const& event_scope);
 
     /**

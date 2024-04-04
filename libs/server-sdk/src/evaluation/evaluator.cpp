@@ -26,15 +26,14 @@ Evaluator::Evaluator(Logger& logger, data_interfaces::IStore const& source)
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
     launchdarkly::Context const& context) {
-    EvaluationStack stack;
-    return Evaluate(flag, context, stack, EventScope{});
+    return Evaluate(flag, context, EventScope{});
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context,
-    EvaluationStack& stack,
     EventScope const& event_scope) {
+    EvaluationStack stack;
     return Evaluate(std::nullopt, flag, context, stack, event_scope);
 }
 

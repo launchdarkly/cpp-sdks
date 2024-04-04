@@ -170,7 +170,6 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     AllFlagsStateBuilder builder{options};
 
     EventScope no_events;
-    evaluation::EvaluationStack stack;
 
     auto all_flags = data_system_->AllFlags();
 
@@ -193,7 +192,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
         }
 
         EvaluationDetail<Value> detail =
-            evaluator_.Evaluate(flag, context, stack, no_events);
+            evaluator_.Evaluate(flag, context, no_events);
 
         bool in_experiment = flag.IsExperimentationEnabled(detail.Reason());
         builder.AddFlag(k, detail.Value(),
@@ -293,9 +292,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
                               event_scope, std::nullopt);
     }
 
-    evaluation::EvaluationStack stack;
     EvaluationDetail<Value> result =
-        evaluator_.Evaluate(*flag_rule->item, context, stack, event_scope);
+        evaluator_.Evaluate(*flag_rule->item, context, event_scope);
     return PostEvaluation(key, context, default_value, result, event_scope,
                           flag_rule.get()->item);
 }
