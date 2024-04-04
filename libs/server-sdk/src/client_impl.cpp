@@ -4,6 +4,7 @@
 #include "data_systems/background_sync/background_sync_system.hpp"
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
+#include "evaluation/evaluation_stack.hpp"
 
 #include "data_interfaces/system/idata_system.hpp"
 

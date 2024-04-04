@@ -1,4 +1,5 @@
 #include "evaluator.hpp"
+#include "bucketing.hpp"
 #include "rules.hpp"
 
 #include <boost/core/ignore_unused.hpp>
@@ -20,7 +21,7 @@ std::optional<std::size_t> TargetMatchVariation(
     Flag::Target const& target);
 
 Evaluator::Evaluator(Logger& logger, data_interfaces::IStore const& source)
-    : logger_(logger), source_(source), stack_() {}
+    : logger_(logger), source_(source) {}
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     data_model::Flag const& flag,
@@ -32,15 +33,17 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     Flag const& flag,
     launchdarkly::Context const& context,
     EventScope const& event_scope) {
-    return Evaluate(std::nullopt, flag, context, event_scope);
+    EvaluationStack stack;
+    return Evaluate(std::nullopt, flag, context, stack, event_scope);
 }
 
 EvaluationDetail<Value> Evaluator::Evaluate(
     std::optional<std::string> parent_key,
     Flag const& flag,
     launchdarkly::Context const& context,
+    EvaluationStack& stack,
     EventScope const& event_scope) {
-    if (auto guard = stack_.NoticePrerequisite(flag.key)) {
+    if (auto guard = stack.NoticePrerequisite(flag.key)) {
         if (!flag.on) {
             return OffValue(flag, EvaluationReason::Off());
         }
@@ -63,8 +66,8 @@ EvaluationDetail<Value> Evaluator::Evaluate(
             }
 
             // Recursive call; cycles are detected by the guard.
-            EvaluationDetail<Value> detailed_evaluation =
-                Evaluate(flag.key, *descriptor.item, context, event_scope);
+            EvaluationDetail<Value> detailed_evaluation = Evaluate(
+                flag.key, *descriptor.item, context, stack, event_scope);
 
             if (detailed_evaluation.IsError()) {
                 return detailed_evaluation;
@@ -106,7 +109,7 @@ EvaluationDetail<Value> Evaluator::Evaluate(
         auto const& rule = flag.rules[rule_index];
 
         tl::expected<bool, Error> rule_match =
-            Match(rule, context, source_, stack_);
+            Match(rule, context, source_, stack);
 
         if (!rule_match) {
             LogError(flag.key, rule_match.error());
