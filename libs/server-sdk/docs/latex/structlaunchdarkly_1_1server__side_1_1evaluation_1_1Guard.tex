@@ -1,0 +1,33 @@
+\hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{}\doxysection{launchdarkly\+::server\+\_\+side\+::evaluation\+::Guard Struct Reference}
+\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}\index{launchdarkly::server\_side::evaluation::Guard@{launchdarkly::server\_side::evaluation::Guard}}
+
+
+{\ttfamily \#include $<$evaluation\+\_\+stack.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_ab48fd7ba6eba5570e728ed0ae9c1565c}\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_ab48fd7ba6eba5570e728ed0ae9c1565c}} 
+{\bfseries Guard} (std\+::unordered\+\_\+set$<$ std\+::string $>$ \&set, std\+::string key)
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a9cedeb47f42e58f3eeec849536c921dc}\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a9cedeb47f42e58f3eeec849536c921dc}} 
+{\bfseries Guard} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} const \&)=delete
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a89fe83b43083da19721a2bbd5502389d}\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a89fe83b43083da19721a2bbd5502389d}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} \& {\bfseries operator=} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} const \&)=delete
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_aab86747331e41981cece461bd930f8a3}\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_aab86747331e41981cece461bd930f8a3}} 
+{\bfseries Guard} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a5df1d3568e25478c119cc2051c7cb185}\label{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard_a5df1d3568e25478c119cc2051c7cb185}} 
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} \& {\bfseries operator=} (\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} is an object used to track that a segment or flag key has been noticed. Upon destruction, the key is forgotten. 
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/evaluation/evaluation\+\_\+stack.\+hpp\item 
+src/evaluation/evaluation\+\_\+stack.\+cpp\end{DoxyCompactItemize}

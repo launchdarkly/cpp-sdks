@@ -1,0 +1,114 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{}\doxysection{launchdarkly\+::server\+\_\+side\+::integrations\+::ISerialized\+Data\+Reader Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}\index{launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}}
+
+
+{\ttfamily \#include $<$iserialized\+\_\+data\+\_\+reader.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_1_1Error}{Error}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a691db6d68d7fd6f4f639c3a2cb512410}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a691db6d68d7fd6f4f639c3a2cb512410}} 
+using {\bfseries Get\+Result} = tl\+::expected$<$ std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{Serialized\+Item\+Descriptor}} $>$, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_1_1Error}{Error}} $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a09c8b9127084a8521d807d6ba6aca4ed}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a09c8b9127084a8521d807d6ba6aca4ed}} 
+using {\bfseries All\+Result} = tl\+::expected$<$ std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{Serialized\+Item\+Descriptor}} $>$, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_1_1Error}{Error}} $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a3c25648ed21d6012dbcce65d4af8a238}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a3c25648ed21d6012dbcce65d4af8a238}} 
+{\bfseries ISerialized\+Data\+Reader} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a6bddfc2743bec970042260cd2bd29d63}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a6bddfc2743bec970042260cd2bd29d63}} 
+{\bfseries ISerialized\+Data\+Reader} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_ac18276a2d1b8aba8b0c8763ade793e8a}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_ac18276a2d1b8aba8b0c8763ade793e8a}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a95b5197f2793a958179d2b98ff51ef1f}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a95b5197f2793a958179d2b98ff51ef1f}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader}{ISerialized\+Data\+Reader}} \&\&)=delete
+\item 
+virtual Get\+Result \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a8dd46cbad8885ece33f8a534d8b7ddda}{Get}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&kind, std\+::string const \&item\+Key) const =0
+\item 
+virtual All\+Result \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a7ca8f6ab9492dbe5c3fc17adc944a2f7}{All}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&kind) const =0
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_aa24e9f36e7fee8e911bc18708b4078da}{Identity}} () const =0
+\item 
+virtual bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a33086d9d0e70773db50b08ab33039866}{Initialized}} () const =0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for a data reader that provides feature flags and related data in a serialized form.
+
+This interface should be used for database integrations, or any other data source implementation that retrieves data from some external service.
+
+The SDK will take care of converting between its own internal data model and a serialized string form; the source interacts only with the serialized form.
+
+The SDK will also provide its own caching layer in front of this source; this source should not provide caching, but simply do every query or update that the SDK tells it to do.
+
+Implementations must be thread-\/safe. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a7ca8f6ab9492dbe5c3fc17adc944a2f7}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a7ca8f6ab9492dbe5c3fc17adc944a2f7}} 
+\index{launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}!All@{All}}
+\index{All@{All}!launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}}
+\doxysubsubsection{\texorpdfstring{All()}{All()}}
+{\footnotesize\ttfamily virtual All\+Result launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Data\+Reader\+::\+All (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&}]{kind }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Retrieves all items from the specified collection.
+
+If the store contains placeholders for deleted items, it should include them in the results, not filter them out. 
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind of data to get. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Either all of the items of the type, or an error. If there are no items of the specified type, then return an empty collection. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a8dd46cbad8885ece33f8a534d8b7ddda}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a8dd46cbad8885ece33f8a534d8b7ddda}} 
+\index{launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}!Get@{Get}}
+\index{Get@{Get}!launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily virtual Get\+Result launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Data\+Reader\+::\+Get (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{ISerialized\+Item\+Kind}} const \&}]{kind,  }\item[{std\+::string const \&}]{item\+Key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Retrieves an item from the specified collection, if available.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The kind of the item. \\
+\hline
+{\em item\+Key} & The key for the item. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A serialized item descriptor if the item existed, a std\+::nullopt if the item did not exist, or an error. For a deleted item the serialized item descriptor may contain a std\+::nullopt for the serialized\+Item. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_aa24e9f36e7fee8e911bc18708b4078da}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_aa24e9f36e7fee8e911bc18708b4078da}} 
+\index{launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Data\+Reader\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the reader. Used in logs. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a33086d9d0e70773db50b08ab33039866}\label{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedDataReader_a33086d9d0e70773db50b08ab33039866}} 
+\index{launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}!Initialized@{Initialized}}
+\index{Initialized@{Initialized}!launchdarkly::server\_side::integrations::ISerializedDataReader@{launchdarkly::server\_side::integrations::ISerializedDataReader}}
+\doxysubsubsection{\texorpdfstring{Initialized()}{Initialized()}}
+{\footnotesize\ttfamily virtual bool launchdarkly\+::server\+\_\+side\+::integrations\+::\+ISerialized\+Data\+Reader\+::\+Initialized (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+True if the reader has data that can be queried. The reader should derive this state externally; that is, it should be an attribute of the underlying source of data (not in memory.) A possible implementation would be to store a special data key that is only set after initial SDK data is stored. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/integrations/data\+\_\+reader/iserialized\+\_\+data\+\_\+reader.\+hpp\end{DoxyCompactItemize}
