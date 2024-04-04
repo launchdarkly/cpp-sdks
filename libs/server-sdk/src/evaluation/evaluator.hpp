@@ -40,7 +40,7 @@ class Evaluator {
 
     /**
      * Evaluates a flag for a given context. Does not record prerequisite
-     * events. Warning: not thread safe.
+     * events.
      *
      * @param flag The flag to evaluate.
      * @param context The context to evaluate the flag against.
