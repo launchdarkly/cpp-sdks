@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.5](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.4...launchdarkly-cpp-server-v3.3.5) (2024-04-04)
+
+
+### Bug Fixes
+
+* Evaluate should not share EvaluationStack between calls ([#374](https://github.com/launchdarkly/cpp-sdks/issues/374)) ([7fd64ef](https://github.com/launchdarkly/cpp-sdks/commit/7fd64efa028f87306c73fe2fd09ee18683ec24f2))
+
 ## [3.3.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.3...launchdarkly-cpp-server-v3.3.4) (2024-04-03)
 
 
