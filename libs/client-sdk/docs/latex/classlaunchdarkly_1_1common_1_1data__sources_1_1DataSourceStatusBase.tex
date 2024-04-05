@@ -1,0 +1,80 @@
+\hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{}\doxysection{launchdarkly\+::common\+::data\+\_\+sources\+::Data\+Source\+Status\+Base$<$ TData\+Source\+State $>$ Class Template Reference}
+\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}\index{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_aae5732bcfda9d5beb09ea522b781029e}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_aae5732bcfda9d5beb09ea522b781029e}} 
+using {\bfseries Error\+Kind} = Data\+Source\+Status\+Error\+Kind
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a12d2cf196b4b0c0d6c80726d68fc1eef}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a12d2cf196b4b0c0d6c80726d68fc1eef}} 
+using {\bfseries Error\+Info} = \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{Data\+Source\+Status\+Error\+Info}}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ae55cb92bd71bdc55be107efd33af5c91}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ae55cb92bd71bdc55be107efd33af5c91}} 
+using {\bfseries Date\+Time} = std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a1ec6465f2448cd2362a91bf13752737e}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a1ec6465f2448cd2362a91bf13752737e}} 
+using {\bfseries Data\+Source\+State} = TData\+Source\+State
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+Data\+Source\+State \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ac5e456ede107289f30b0f28a5d59d9a2}{State}} () const
+\item 
+Date\+Time \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a57ae6f1c31c831be28e900e82e2aa950}{State\+Since}} () const
+\item 
+std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{Error\+Info}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_acbf14328b16a311e9d9c6703b7a1b153}{Last\+Error}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a10cd8f36f1a862cfe9982f3ccf3f9e76}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a10cd8f36f1a862cfe9982f3ccf3f9e76}} 
+{\bfseries Data\+Source\+Status\+Base} (Data\+Source\+State state, Date\+Time state\+\_\+since, std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{Error\+Info}} $>$ last\+\_\+error)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ace0190cef6af4833cb44e9108c485cb0}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ace0190cef6af4833cb44e9108c485cb0}} 
+{\bfseries Data\+Source\+Status\+Base} (\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} const \&item)=default
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a5da6c0279eac48b84f476766835afeba}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a5da6c0279eac48b84f476766835afeba}} 
+{\bfseries Data\+Source\+Status\+Base} (\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} \&\&item) noexcept=default
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a225aaeba5edb32237439ac30493cd50f}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a225aaeba5edb32237439ac30493cd50f}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a78471ffe17b0d00880bb9b965af20c7e}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a78471ffe17b0d00880bb9b965af20c7e}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{Data\+Source\+Status\+Base}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_acbf14328b16a311e9d9c6703b7a1b153}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_acbf14328b16a311e9d9c6703b7a1b153}} 
+\index{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}!LastError@{LastError}}
+\index{LastError@{LastError}!launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}}
+\doxysubsubsection{\texorpdfstring{LastError()}{LastError()}}
+{\footnotesize\ttfamily template$<$typename TData\+Source\+State $>$ \\
+std\+::optional$<$\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusErrorInfo}{Error\+Info}}$>$ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{launchdarkly\+::common\+::data\+\_\+sources\+::\+Data\+Source\+Status\+Base}}$<$ TData\+Source\+State $>$\+::Last\+Error (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+Information about the last error that the data source encountered, if any.
+
+This property should be updated whenever the data source encounters a problem, even if it does not cause the state to change. For instance, if a stream connection fails and the state changes to Data\+Source\+State\+::k\+Interrupted, and then subsequent attempts to restart the connection also fail, the state will remain Data\+Source\+State\+::k\+Interrupted but the error information will be updated each time-- and the last error will still be reported in this property even if the state later becomes Data\+Source\+State\+::k\+Valid. \mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ac5e456ede107289f30b0f28a5d59d9a2}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_ac5e456ede107289f30b0f28a5d59d9a2}} 
+\index{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}!State@{State}}
+\index{State@{State}!launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}}
+\doxysubsubsection{\texorpdfstring{State()}{State()}}
+{\footnotesize\ttfamily template$<$typename TData\+Source\+State $>$ \\
+Data\+Source\+State \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{launchdarkly\+::common\+::data\+\_\+sources\+::\+Data\+Source\+Status\+Base}}$<$ TData\+Source\+State $>$\+::State (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+An enumerated value representing the overall current state of the data source. \mbox{\Hypertarget{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a57ae6f1c31c831be28e900e82e2aa950}\label{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase_a57ae6f1c31c831be28e900e82e2aa950}} 
+\index{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}!StateSince@{StateSince}}
+\index{StateSince@{StateSince}!launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$@{launchdarkly::common::data\_sources::DataSourceStatusBase$<$ TDataSourceState $>$}}
+\doxysubsubsection{\texorpdfstring{StateSince()}{StateSince()}}
+{\footnotesize\ttfamily template$<$typename TData\+Source\+State $>$ \\
+Date\+Time \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{launchdarkly\+::common\+::data\+\_\+sources\+::\+Data\+Source\+Status\+Base}}$<$ TData\+Source\+State $>$\+::State\+Since (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+The date/time that the value of State most recently changed.
+
+The meaning of this depends on the current state\+:
+\begin{DoxyItemize}
+\item For Data\+Source\+State\+::k\+Initializing, it is the time that the SDK started initializing.
+\item For Data\+Source\+State\+::k\+Valid, it is the time that the data source most recently entered a valid state, after previously having been Data\+Source\+State\+::k\+Initializing or an invalid state such as Data\+Source\+State\+::k\+Interrupted.
+\item For Data\+Source\+State\+::k\+Interrupted, it is the time that the data source most recently entered an error state, after previously having been Data\+Source\+State\+::k\+Valid.
+\item For Data\+Source\+State\+::k\+Shutdown (client-\/side) or Data\+Source\+State\+::k\+Off (server-\/side), it is the time that the data source encountered an unrecoverable error or that the SDK was explicitly shut down. 
+\end{DoxyItemize}
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data\+\_\+sources/data\+\_\+source\+\_\+status\+\_\+base.\+hpp\end{DoxyCompactItemize}
