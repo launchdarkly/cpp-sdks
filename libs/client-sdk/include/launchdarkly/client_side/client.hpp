@@ -324,7 +324,7 @@ class Client : public IClient {
 
    private:
     inline static char const* const kVersion =
-        "3.4.2";  // {x-release-please-version}
+        "3.4.3";  // {x-release-please-version}
     std::unique_ptr<IClient> client;
 };
 

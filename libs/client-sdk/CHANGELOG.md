@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.4.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.4.2...launchdarkly-cpp-client-v3.4.3) (2024-04-05)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.6.0 to 0.6.1
+    * launchdarkly-cpp-sse-client bumped from 0.3.1 to 0.3.2
+
 ## [3.4.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.4.1...launchdarkly-cpp-client-v3.4.2) (2024-04-03)
 
 

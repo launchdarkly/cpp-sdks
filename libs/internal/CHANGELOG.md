@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.6.0...launchdarkly-cpp-internal-v0.6.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* handle service endpoints with custom ports correctly ([#389](https://github.com/launchdarkly/cpp-sdks/issues/389)) ([f0114e3](https://github.com/launchdarkly/cpp-sdks/commit/f0114e304756fcd606537ffd609f398606cb728f))
+
 ## [0.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.5.4...launchdarkly-cpp-internal-v0.6.0) (2024-03-18)
 
 
