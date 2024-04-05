@@ -590,8 +590,8 @@ std::shared_ptr<Client> Builder::build() {
     request.target(uri_components->encoded_target());
 
     if (uri_components->has_scheme()) {
-        if (!(uri_components->scheme() == "http" ||
-              uri_components->scheme() == "https")) {
+        if (!(uri_components->scheme_id() == boost::urls::scheme::http ||
+              uri_components->scheme_id() == boost::urls::scheme::https)) {
             return nullptr;
         }
     }
@@ -604,7 +604,7 @@ std::shared_ptr<Client> Builder::build() {
                                                      : uri_components->scheme();
 
     std::optional<ssl::context> ssl;
-    if (uri_components->scheme() == "https") {
+    if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
     }
