@@ -503,7 +503,8 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       initial_reconnect_delay_{std::nullopt},
       logging_cb_([](auto msg) {}),
       receiver_([](launchdarkly::sse::Event const&) {}),
-      error_cb_([](auto err) {}) {
+      error_cb_([](auto err) {}),
+      verify_peer_(true) {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -614,7 +615,7 @@ std::shared_ptr<Client> Builder::build() {
         ssl->set_default_verify_paths();
         if (!verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);
-            logging_cb_("SSL peer verification is disabled");
+            logging_cb_("SSL peer verification disabled");
         }
     }
 

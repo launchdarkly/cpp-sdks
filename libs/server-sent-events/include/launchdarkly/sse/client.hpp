@@ -155,10 +155,10 @@ class Builder {
     std::optional<std::chrono::milliseconds> write_timeout_;
     std::optional<std::chrono::milliseconds> connect_timeout_;
     std::optional<std::chrono::milliseconds> initial_reconnect_delay_;
-    bool verify_peer_;
     LogCallback logging_cb_;
     EventReceiver receiver_;
     ErrorCallback error_cb_;
+    bool verify_peer_;
 };
 
 /**
