@@ -29,11 +29,14 @@ class WorkerPool {
      * @param pool_size How many workers to make available.
      * @param delivery_retry_delay How long a worker should wait after a failed
      * delivery before trying again.
+     * @param verify_mode True if the SSL peer should be verified, false
+     * otherwise.
      * @param logger Logger.
      */
     WorkerPool(boost::asio::any_io_executor io,
                std::size_t pool_size,
                std::chrono::milliseconds delivery_retry_delay,
+               bool verify_peer,
                Logger& logger);
 
     /**

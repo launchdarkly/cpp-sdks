@@ -94,12 +94,14 @@ class RequestWorker {
      * @param retry_after How long to wait after a recoverable failure before
      * trying to deliver events again.
      * @param id Unique identifier for the flush worker (used for logging).
+     * @param mode SSL peer verification mode.
      * @param logger Logger.
      */
     RequestWorker(boost::asio::any_io_executor io,
                   std::chrono::milliseconds retry_after,
                   std::size_t id,
                   std::optional<std::locale> date_header_locale,
+                  ssl::verify_mode verify_mode,
                   Logger& logger);
 
     /**

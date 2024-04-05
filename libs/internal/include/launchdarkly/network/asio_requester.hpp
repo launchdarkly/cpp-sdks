@@ -255,11 +255,12 @@ class AsioRequester {
      * must be accounted for.
      */
    public:
-    AsioRequester(net::any_io_executor ctx)
+    AsioRequester(net::any_io_executor ctx, boost::asio::ssl::verify_mode mode)
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
         ssl_ctx_->set_default_verify_paths();
+        ssl_ctx_->set_verify_mode(mode);
     }
 
     template <typename CompletionToken>
