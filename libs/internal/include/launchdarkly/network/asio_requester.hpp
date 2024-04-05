@@ -323,7 +323,7 @@ class AsioRequester {
                 request->Port().value_or(request->Https() ? "https" : "http");
 
             std::shared_ptr<ssl::context> ssl;
-            if (service == "https") {
+            if (request->Https()) {
                 ssl = this->ssl_ctx_;
             }
 

@@ -589,11 +589,22 @@ std::shared_ptr<Client> Builder::build() {
     request.set(http::field::host, host);
     request.target(uri_components->encoded_target());
 
+    if (uri_components->has_scheme()) {
+        if (!(uri_components->scheme_id() == boost::urls::scheme::http ||
+              uri_components->scheme_id() == boost::urls::scheme::https)) {
+            return nullptr;
+        }
+    }
+
+    // The resolver accepts either a port number or a service name. If the
+    // URL specifies a port, use that - otherwise, pass in the scheme as the
+    // service name (which will be either http or https due to the check
+    // above.)
     std::string service = uri_components->has_port() ? uri_components->port()
                                                      : uri_components->scheme();
 
     std::optional<ssl::context> ssl;
-    if (service == "https") {
+    if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
     }
