@@ -422,7 +422,7 @@ LD_EXPORT(void)
 LDClientHttpPropertiesTlsBuilder_Free(LDClientHttpPropertiesTlsBuilder b);
 
 /**
- * Enables peer certificate verification. Enabled by default.
+ * Configures TLS peer certificate verification. Enabled by default.
  *
  * Disabling peer verification is not recommended unless a specific
  * use-case calls for it.
