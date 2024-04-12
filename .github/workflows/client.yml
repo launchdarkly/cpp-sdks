@@ -51,6 +51,15 @@ jobs:
           cmake_target: launchdarkly-cpp-client
           platform_version: 12
           simulate_release: true
+  build-test-client-m1:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: launchdarkly-cpp-client
+          platform_version: 14
+          simulate_release: true
   build-test-client-windows:
     runs-on: windows-2022
     steps:
