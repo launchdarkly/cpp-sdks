@@ -127,7 +127,9 @@ void StreamingDataSource::Start() {
         client_builder.header(header.first, header.second);
     }
 
-    client_builder.verify_peer(http_config_.Tls().VerifyPeer());
+    client_builder.verify_peer(
+        http_config_.Tls().VerifyMode() ==
+        config::shared::built::TlsOptions::VerifyMode::kVerifyPeer);
 
     auto weak_self = weak_from_this();
 

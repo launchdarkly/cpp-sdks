@@ -52,7 +52,7 @@ PollingDataSource::PollingDataSource(
     config::built::HttpProperties const& http_properties)
     : logger_(logger),
       status_manager_(status_manager),
-      requester_(ioc),
+      requester_(ioc, http_properties.Tls().VerifyMode()),
       polling_interval_(data_source_config.poll_interval),
       request_(MakeRequest(data_source_config, endpoints, http_properties)),
       timer_(ioc),

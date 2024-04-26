@@ -74,9 +74,7 @@ PollingDataSource::PollingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(context, handler, logger, status_manager_)),
-      requester_(ioc,
-                 http_properties.Tls().VerifyPeer() ? ssl::verify_peer
-                                                    : ssl::verify_none),
+      requester_(ioc, http_properties.Tls().VerifyMode()),
       timer_(ioc),
       polling_interval_(
           std::get<
@@ -90,7 +88,8 @@ PollingDataSource::PollingDataSource(
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ClientSDK>>(
         data_source_config.method);
-    if (!http_properties.Tls().VerifyPeer()) {
+    if (http_properties.Tls().VerifyMode() ==
+        config::shared::built::TlsOptions::VerifyMode::kVerifyNone) {
         LD_LOG(logger_, LogLevel::kDebug) << "SSL peer verification disabled";
     }
     if (polling_interval_ < polling_config.min_polling_interval) {
