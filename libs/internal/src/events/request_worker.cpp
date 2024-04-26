@@ -3,12 +3,13 @@
 
 namespace launchdarkly::events::detail {
 
-RequestWorker::RequestWorker(boost::asio::any_io_executor io,
-                             std::chrono::milliseconds retry_after,
-                             std::size_t id,
-                             std::optional<std::locale> date_header_locale,
-                             ssl::verify_mode verify_mode,
-                             Logger& logger)
+RequestWorker::RequestWorker(
+    boost::asio::any_io_executor io,
+    std::chrono::milliseconds retry_after,
+    std::size_t id,
+    std::optional<std::locale> date_header_locale,
+    enum config::shared::built::TlsOptions::VerifyMode verify_mode,
+    Logger& logger)
     : timer_(std::move(io)),
       retry_delay_(retry_after),
       state_(State::Idle),

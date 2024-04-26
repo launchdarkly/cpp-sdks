@@ -5,6 +5,8 @@
 
 namespace launchdarkly::events::detail {
 
+using namespace launchdarkly::config::shared::built;
+
 std::optional<std::locale> GetLocale(std::string const& locale,
                                      std::string const& tag,
                                      Logger& logger) {
@@ -22,7 +24,17 @@ std::optional<std::locale> GetLocale(std::string const& locale,
 WorkerPool::WorkerPool(boost::asio::any_io_executor io,
                        std::size_t pool_size,
                        std::chrono::milliseconds delivery_retry_delay,
-                       bool verify_peer,
+                       Logger& logger)
+    : WorkerPool(std::move(io),
+                 pool_size,
+                 delivery_retry_delay,
+                 TlsOptions::VerifyMode::kVerifyPeer,
+                 logger) {}
+
+WorkerPool::WorkerPool(boost::asio::any_io_executor io,
+                       std::size_t pool_size,
+                       std::chrono::milliseconds delivery_retry_delay,
+                       enum TlsOptions::VerifyMode verify_mode,
                        Logger& logger)
     : io_(io), workers_() {
     // The en_US.utf-8 locale is used whenever a date is parsed from the HTTP
@@ -33,9 +45,6 @@ WorkerPool::WorkerPool(boost::asio::any_io_executor io,
     // if the host's time is way out of sync.
     std::optional<std::locale> date_header_locale =
         GetLocale("en_US.utf-8", "event-processor", logger);
-
-    ssl::verify_mode verify_mode =
-        (verify_peer ? ssl::verify_peer : ssl::verify_none);
 
     for (std::size_t i = 0; i < pool_size; i++) {
         workers_.emplace_back(std::make_unique<RequestWorker>(

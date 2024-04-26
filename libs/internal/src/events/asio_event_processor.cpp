@@ -47,7 +47,7 @@ AsioEventProcessor<SDK>::AsioEventProcessor(
       workers_(io_,
                events_config.FlushWorkers(),
                events_config.DeliveryRetryDelay(),
-               http_properties.Tls().VerifyPeer(),
+               http_properties.Tls().VerifyMode(),
                logger),
       inbox_capacity_(events_config.Capacity()),
       inbox_size_(0),

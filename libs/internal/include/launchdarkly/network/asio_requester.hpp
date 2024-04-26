@@ -2,6 +2,7 @@
 
 #include "http_requester.hpp"
 
+#include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 
 #include <boost/asio.hpp>
@@ -28,6 +29,8 @@ namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network {
+
+using VerifyMode = enum config::shared::built::TlsOptions::VerifyMode;
 
 static unsigned char const kRedirectLimit = 20;
 
@@ -255,12 +258,14 @@ class AsioRequester {
      * must be accounted for.
      */
    public:
-    AsioRequester(net::any_io_executor ctx, boost::asio::ssl::verify_mode mode)
+    AsioRequester(net::any_io_executor ctx, VerifyMode verify_mode)
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
         ssl_ctx_->set_default_verify_paths();
-        ssl_ctx_->set_verify_mode(mode);
+        ssl_ctx_->set_verify_mode(verify_mode == VerifyMode::kVerifyPeer
+                                      ? ssl::verify_peer
+                                      : ssl::verify_none);
     }
 
     template <typename CompletionToken>

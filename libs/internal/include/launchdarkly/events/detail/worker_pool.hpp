@@ -1,5 +1,6 @@
 #pragma once
 
+#include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/events/detail/request_worker.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
@@ -23,20 +24,24 @@ namespace launchdarkly::events::detail {
  */
 class WorkerPool {
    public:
+    WorkerPool(boost::asio::any_io_executor io,
+               std::size_t pool_size,
+               std::chrono::milliseconds delivery_retry_delay,
+               Logger& logger);
+
     /**
      * Constructs a new WorkerPool.
      * @param io The executor used for all workers.
      * @param pool_size How many workers to make available.
      * @param delivery_retry_delay How long a worker should wait after a failed
      * delivery before trying again.
-     * @param verify_mode True if the SSL peer should be verified, false
-     * otherwise.
+     * @param verify_mode The TLS verification mode.
      * @param logger Logger.
      */
     WorkerPool(boost::asio::any_io_executor io,
                std::size_t pool_size,
                std::chrono::milliseconds delivery_retry_delay,
-               bool verify_peer,
+               enum config::shared::built::TlsOptions::VerifyMode verify_mode,
                Logger& logger);
 
     /**
