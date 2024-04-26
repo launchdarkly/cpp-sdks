@@ -9,12 +9,13 @@ namespace launchdarkly::config::shared::built {
 
 class TlsOptions final {
    public:
-    TlsOptions(bool verify_peer);
+    enum class VerifyMode { kVerifyPeer, kVerifyNone };
+    TlsOptions(VerifyMode verify_mode);
     TlsOptions();
-    [[nodiscard]] bool VerifyPeer() const;
+    [[nodiscard]] VerifyMode VerifyMode() const;
 
    private:
-    bool verify_peer_;
+    enum VerifyMode verify_mode_;
 };
 
 class HttpProperties final {

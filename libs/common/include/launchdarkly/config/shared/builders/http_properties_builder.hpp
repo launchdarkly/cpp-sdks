@@ -47,7 +47,7 @@ class TlsBuilder {
     [[nodiscard]] built::TlsOptions Build() const;
 
    private:
-    bool verify_peer_;
+    enum built::TlsOptions::VerifyMode verify_mode_;
 };
 /**
  * Class used for building a set of HttpProperties.

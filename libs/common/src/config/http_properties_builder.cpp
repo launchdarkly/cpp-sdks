@@ -11,18 +11,19 @@ TlsBuilder<SDK>::TlsBuilder() : TlsBuilder(shared::Defaults<SDK>::TLS()) {}
 
 template <typename SDK>
 TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
-    verify_peer_ = tls.VerifyPeer();
+    verify_mode_ = tls.VerifyMode();
 }
 
 template <typename SDK>
 TlsBuilder<SDK>& TlsBuilder<SDK>::VerifyPeer(bool verify_peer) {
-    verify_peer_ = verify_peer;
+    verify_mode_ = verify_peer ? built::TlsOptions::VerifyMode::kVerifyPeer
+                               : built::TlsOptions::VerifyMode::kVerifyNone;
     return *this;
 }
 
 template <typename SDK>
 built::TlsOptions TlsBuilder<SDK>::Build() const {
-    return {verify_peer_};
+    return {verify_mode_};
 }
 
 template <typename SDK>

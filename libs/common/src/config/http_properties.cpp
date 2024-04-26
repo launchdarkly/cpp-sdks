@@ -4,12 +4,13 @@
 
 namespace launchdarkly::config::shared::built {
 
-TlsOptions::TlsOptions(bool verify_peer) : verify_peer_(verify_peer) {}
+TlsOptions::TlsOptions(enum TlsOptions::VerifyMode verify_mode)
+    : verify_mode_(verify_mode) {}
 
-TlsOptions::TlsOptions() : TlsOptions(true) {}
+TlsOptions::TlsOptions() : TlsOptions(TlsOptions::VerifyMode::kVerifyPeer) {}
 
-bool TlsOptions::VerifyPeer() const {
-    return verify_peer_;
+enum TlsOptions::VerifyMode TlsOptions::VerifyMode() const {
+    return verify_mode_;
 }
 
 HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
@@ -57,7 +58,7 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
 }
 
 bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
-    return lhs.VerifyPeer() == rhs.VerifyPeer();
+    return lhs.VerifyMode() == rhs.VerifyMode();
 }
 
 }  // namespace launchdarkly::config::shared::built
