@@ -319,6 +319,8 @@ LDClientConfigBuilder_HttpProperties_Tls(
     LD_ASSERT_NOT_NULL(tls_builder);
 
     TO_BUILDER(b)->HttpProperties().Tls(*TO_TLS_BUILDER(tls_builder));
+
+    LDClientHttpPropertiesTlsBuilder_Free(tls_builder);
 }
 
 LD_EXPORT(void)
