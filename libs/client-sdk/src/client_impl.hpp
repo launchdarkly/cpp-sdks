@@ -88,6 +88,11 @@ class ClientImpl : public IClient {
 
     std::future<bool> StartAsync() override;
 
+    void Initialize() override;
+
+    bool WaitForInitialization(std::chrono::milliseconds timeout =
+                                   kDefaultInitializationTimeout) override;
+
    private:
     template <typename T>
     [[nodiscard]] EvaluationDetail<T> VariationInternal(FlagKey const& key,

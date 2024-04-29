@@ -17,6 +17,12 @@
 namespace launchdarkly::client_side {
 
 /**
+ * The default amount of time Client::WaitForInitialization will wait up to
+ * before returning control to the caller.
+ */
+constexpr static std::chrono::seconds kDefaultInitializationTimeout{5};
+
+/**
  *  Interface for the standard SDK client methods and properties.
  */
 class IClient {
@@ -26,7 +32,10 @@ class IClient {
      */
     using FlagKey = std::string;
 
-    /** Connects the client to LaunchDarkly's flag delivery endpoints.
+    /**
+     * @deprecated See Initialize instead.
+     *
+     * Connects the client to LaunchDarkly's flag delivery endpoints.
      *
      * If StartAsync isn't called, the client is able to post events but is
      * unable to obtain flag data.
@@ -35,6 +44,52 @@ class IClient {
      * outlined on @ref Initialized.
      */
     virtual std::future<bool> StartAsync() = 0;
+
+    /** Initializes the client with fresh flag data from LaunchDarkly.
+     *
+     * If Initialize is not called, the client will use application-provided
+     * default values or cached flag values if a persistent store is in use.
+     *
+     * To block until the connection is established, call WaitForInitialization
+     * after calling Initialize.
+     *
+     * The client may still post events to LaunchDarkly even if Initialize isn't
+     * called.
+     *
+     * It is not safe to call Initialize more than once. If the client
+     * encounters an unrecoverable error, destroy it and create a new client.
+     *
+     */
+    virtual void Initialize() = 0;
+
+    /**
+     * Blocks the calling thread until the earliest of:
+     * (1) The client has obtained fresh flag data
+     * (2) The client has encountered an unrecoverable error
+     * (3) The timeout has elapsed
+     * occurs.
+     *
+     * If the client is in offline mode or has already received fresh flag data,
+     * then WaitForInitialization returns immediately.
+     *
+     * The default timeout is 5 seconds, meaning that if you call this method
+     * with no parameter, it will block the calling thread for up to 5 seconds.
+     *
+     * It is always safe to call WaitForInitialization more than once serially,
+     * but it is not safe to call it concurrently.
+     * @code
+     * client.Initialize(); // asynchronous
+     * client.WaitForInitialization(); // blocks for up to 5 seconds
+     *
+     * @param timeout How long to wait for fresh flag data before returning.
+     * Defaults to 5 seconds.
+     * @return True if the client has fresh flag data (case 1). False if the
+     * client encountered a terminal error or the timeout elapsed (cases 2 and
+     * 3). To obtain more granular information about failure, setup a
+     * DataSourceStatus listener.
+     */
+    virtual bool WaitForInitialization(
+        std::chrono::milliseconds timeout = kDefaultInitializationTimeout) = 0;
 
     /**
      * Returns a boolean value indicating LaunchDarkly connection and flag state
@@ -46,7 +101,7 @@ class IClient {
      * offline mode so there's no need to connect to LaunchDarkly. If the client
      * timed out trying to connect to LD, then Initialized returns false (even
      * if we do have cached flags). If the client connected and got a 401 error,
-     * Initialized is will return false. This serves the purpose of letting the
+     * Initialized will return false. This serves the purpose of letting the
      * app know that there was a problem of some kind.
      *
      * @return True if the client is initialized.
@@ -104,8 +159,11 @@ class IClient {
     virtual void FlushAsync() = 0;
 
     /**
-     * Changes the current evaluation context, requests flags for that context
-     * from LaunchDarkly if online, and generates an analytics event to
+     * @deprecated Use IdentifyAsync(Context, std::chrono::milliseconds)
+     * instead.
+     *
+     * Changes the current evaluation context, requests flags for that
+     * context from LaunchDarkly if online, and generates an analytics event to
      * tell LaunchDarkly about the context.
      *
      * Only one IdentifyAsync can be in progress at once; calling it
@@ -267,6 +325,11 @@ class Client : public IClient {
 
     std::future<bool> StartAsync() override;
 
+    void Initialize() override;
+
+    bool WaitForInitialization(std::chrono::milliseconds timeout =
+                                   kDefaultInitializationTimeout) override;
+
     [[nodiscard]] bool Initialized() const override;
 
     using FlagKey = std::string;
@@ -283,7 +346,7 @@ class Client : public IClient {
     void FlushAsync() override;
 
     std::future<bool> IdentifyAsync(Context context) override;
-
+    
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 
     EvaluationDetail<bool> BoolVariationDetail(FlagKey const& key,

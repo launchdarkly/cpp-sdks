@@ -16,6 +16,14 @@ std::future<bool> Client::StartAsync() {
     return client->StartAsync();
 }
 
+void Client::Initialize() {
+    client->Initialize();
+}
+
+bool Client::WaitForInitialization(std::chrono::milliseconds timeout) {
+    return client->WaitForInitialization(timeout);
+}
+
 using FlagKey = std::string;
 [[nodiscard]] std::unordered_map<FlagKey, Value> Client::AllFlags() const {
     return client->AllFlags();

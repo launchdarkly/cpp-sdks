@@ -184,6 +184,36 @@ std::future<bool> ClientImpl::StartAsync() {
     return StartAsyncInternal(IsInitializedSuccessfully);
 }
 
+void ClientImpl::Initialize() {
+    RestartDataSource();
+}
+
+bool ClientImpl::WaitForInitialization(std::chrono::milliseconds timeout) {
+    auto init_promise = std::make_shared<std::promise<bool>>();
+    auto init_future = init_promise->get_future();
+
+    auto listener = status_manager_.OnDataSourceStatusChangeEx(
+        [init_promise](data_sources::DataSourceStatus const& status) {
+            if (auto const state = status.State(); IsInitialized(state)) {
+                init_promise->set_value(IsInitializedSuccessfully(state));
+                return true; /* delete this change listener since the desired
+                                state was reached */
+            }
+            return false; /* keep the change listener */
+        });
+
+    if (IsInitializedSuccessfully(status_manager_.Status().State())) {
+        listener->Disconnect();
+        return true;
+    }
+
+    auto future_status = init_future.wait_for(timeout);
+    if (future_status == std::future_status::ready) {
+        return init_future.get();
+    }
+    return false;
+}
+
 bool ClientImpl::Initialized() const {
     return IsInitializedSuccessfully(status_manager_.Status().State());
 }
