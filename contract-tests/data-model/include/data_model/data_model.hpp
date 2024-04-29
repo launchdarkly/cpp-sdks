@@ -29,6 +29,14 @@ struct adl_serializer<std::optional<T>> {
 };
 }  // namespace nlohmann
 
+struct ConfigTLSParams {
+    bool verifyPeer;
+    std::optional<std::string> certificateAuthorityPath;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTLSParams,
+                                                verifyPeer,
+                                                certificateAuthorityPath);
+
 struct ConfigStreamingParams {
     std::optional<std::string> baseUri;
     std::optional<uint32_t> initialRetryDelayMs;
@@ -98,6 +106,7 @@ struct ConfigParams {
     std::optional<ConfigServiceEndpointsParams> serviceEndpoints;
     std::optional<ConfigClientSideParams> clientSide;
     std::optional<ConfigTags> tags;
+    std::optional<ConfigTLSParams> tls;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 credential,
@@ -108,7 +117,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 events,
                                                 serviceEndpoints,
                                                 clientSide,
-                                                tags);
+                                                tags,
+                                                tls);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;

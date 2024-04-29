@@ -129,6 +129,15 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
+    if (in.tls) {
+        auto builder = TlsBuilder();
+        builder.VerifyPeer(in.tls->verifyPeer);
+        if (in.tls->certificateAuthorityPath) {
+            /* TODO: pass in the CA path */
+        }
+        config_builder.HttpProperties().Tls(std::move(builder));
+    }
+
     auto config = config_builder.Build();
     if (!config) {
         LD_LOG(logger_, LogLevel::kWarn)
