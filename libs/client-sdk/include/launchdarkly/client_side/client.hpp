@@ -63,11 +63,11 @@ class IClient {
     virtual void Initialize() = 0;
 
     /**
-     * Blocks the calling thread until the earliest of:
+     * This is a convenience function that blocks the calling thread until the
+     * earliest of the following occurs:
      * (1) The client has obtained fresh flag data
      * (2) The client has encountered an unrecoverable error
      * (3) The timeout has elapsed
-     * occurs.
      *
      * If the client is in offline mode or has already received fresh flag data,
      * then WaitForInitialization returns immediately.
@@ -75,17 +75,29 @@ class IClient {
      * The default timeout is 5 seconds, meaning that if you call this method
      * with no parameter, it will block the calling thread for up to 5 seconds.
      *
-     * It is always safe to call WaitForInitialization more than once serially,
-     * but it is not safe to call it concurrently.
+     * This method is not safe for concurrent use.
+     *
+     * Although it is possible to call WaitForInitialization more than once
+     * serially, for example in a loop, it is likely a better idea to
+     * register a DataSourceStatus listener to monitor the connection status
+     * directly.
+     *
      * @code
-     * client.Initialize(); // asynchronous
-     * client.WaitForInitialization(); // blocks for up to 5 seconds
+     * client.Initialize(); // client begins connecting in background
+     * bool initialized = client.WaitForInitialization(); // blocks for up to 5s
+     * if (initialized) {
+     *    // client has fresh flag data
+     * } else {
+     *    // client encountered an unrecoverable error, is still connecting,
+     *    // or hit the 5 second timeout.
+     * }
+     * @endcode
      *
      * @param timeout How long to wait for fresh flag data before returning.
      * Defaults to 5 seconds.
      * @return True if the client has fresh flag data (case 1). False if the
-     * client encountered a terminal error or the timeout elapsed (cases 2 and
-     * 3). To obtain more granular information about failure, setup a
+     * client encountered a unrecoverable error or the timeout elapsed (cases 2
+     * and 3). To obtain more granular information about failure, setup a
      * DataSourceStatus listener.
      */
     virtual bool WaitForInitialization(
@@ -159,11 +171,8 @@ class IClient {
     virtual void FlushAsync() = 0;
 
     /**
-     * @deprecated Use IdentifyAsync(Context, std::chrono::milliseconds)
-     * instead.
-     *
-     * Changes the current evaluation context, requests flags for that
-     * context from LaunchDarkly if online, and generates an analytics event to
+     * Changes the current evaluation context, requests flags for that context
+     * from LaunchDarkly if online, and generates an analytics event to
      * tell LaunchDarkly about the context.
      *
      * Only one IdentifyAsync can be in progress at once; calling it
@@ -346,7 +355,7 @@ class Client : public IClient {
     void FlushAsync() override;
 
     std::future<bool> IdentifyAsync(Context context) override;
-    
+
     bool BoolVariation(FlagKey const& key, bool default_value) override;
 
     EvaluationDetail<bool> BoolVariationDetail(FlagKey const& key,

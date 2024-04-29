@@ -38,22 +38,15 @@ int main() {
     auto context =
         ContextBuilder().Kind("user", "example-user-key").Name("Sandy").Build();
 
-    auto client = Client(std::move(*config), std::move(context));
+    Client client{std::move(*config), std::move(context)};
 
-    auto start_result = client.StartAsync();
+    client.Initialize();
 
-    if (auto const status = start_result.wait_for(
-            std::chrono::milliseconds(INIT_TIMEOUT_MILLISECONDS));
-        status == std::future_status::ready) {
-        if (start_result.get()) {
-            std::cout << "*** SDK successfully initialized!\n\n";
-        } else {
-            std::cout << "*** SDK failed to initialize\n";
-            return 1;
-        }
+    if (client.WaitForInitialization(
+            std::chrono::milliseconds{INIT_TIMEOUT_MILLISECONDS})) {
+        std::cout << "*** SDK successfully initialized!\n\n";
     } else {
-        std::cout << "*** SDK initialization didn't complete in "
-                  << INIT_TIMEOUT_MILLISECONDS << "ms\n";
+        std::cout << "*** SDK failed to initialize\n";
         return 1;
     }
 
