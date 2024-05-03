@@ -22,7 +22,7 @@ runs:
       uses: MarkusJx/install-boost@v2.4.4
       id: boost-action
       with:
-        boost_version: 1.82.0
+        boost_version: 1.84.0
         toolset: ${{ inputs.toolset }}
         platform_version: ${{ inputs.platform_version }}
 
