@@ -19,10 +19,10 @@ runs:
   steps:
     - name: Install boost using action
       if: runner.os == 'Linux'
-      uses: MarkusJx/install-boost@v2.4.4
+      uses: MarkusJx/install-boost@v2.4.5
       id: boost-action
       with:
-        boost_version: 1.84.0
+        boost_version: 1.85.0
         toolset: ${{ inputs.toolset }}
         platform_version: ${{ inputs.platform_version }}
 
