@@ -81,7 +81,7 @@ TEST(ClientConfigBindings, AllConfigs) {
 
     LDClientHttpPropertiesTlsBuilder tls_builder =
         LDClientHttpPropertiesTlsBuilder_New();
-    LDClientHttpPropertiesTlsBuilder_VerifyPeer(tls_builder, false);
+    LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(tls_builder, false);
     LDClientConfigBuilder_HttpProperties_Tls(builder, tls_builder);
 
     LDClientHttpPropertiesTlsBuilder tls_builder2 =
