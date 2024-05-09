@@ -43,7 +43,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("client-independence");
         srv.add_capability("inline-context");
         srv.add_capability("anonymous-redaction");
-        srv.add_capability("tls");
+        srv.add_capability("tls:verify-peer");
+        srv.add_capability("tls:skip-verify-peer");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

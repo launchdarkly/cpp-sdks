@@ -30,11 +30,11 @@ struct adl_serializer<std::optional<T>> {
 }  // namespace nlohmann
 
 struct ConfigTLSParams {
-    bool verifyPeer;
+    bool skipVerifyPeer;
     std::optional<std::string> certificateAuthorityPath;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTLSParams,
-                                                verifyPeer,
+                                                skipVerifyPeer,
                                                 certificateAuthorityPath);
 
 struct ConfigStreamingParams {

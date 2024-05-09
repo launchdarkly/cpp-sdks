@@ -131,7 +131,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     if (in.tls) {
         auto builder = TlsBuilder();
-        builder.VerifyPeer(in.tls->verifyPeer);
+        builder.VerifyPeer(!in.tls->skipVerifyPeer);
         if (in.tls->certificateAuthorityPath) {
             /* TODO: pass in the CA path */
         }
