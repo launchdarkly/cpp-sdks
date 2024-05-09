@@ -422,17 +422,19 @@ LD_EXPORT(void)
 LDClientHttpPropertiesTlsBuilder_Free(LDClientHttpPropertiesTlsBuilder b);
 
 /**
- * Configures TLS peer certificate verification. Enabled by default.
+ * Configures TLS peer certificate verification. Peer verification
+ * is enabled by default.
  *
  * Disabling peer verification is not recommended unless a specific
  * use-case calls for it.
  *
  * @param b Client config builder. Must not be NULL.
- * @param verify_peer True to verify peer, false otherwise.
+ * @param skip_verify_peer False to skip verification.
  */
 LD_EXPORT(void)
-LDClientHttpPropertiesTlsBuilder_VerifyPeer(LDClientHttpPropertiesTlsBuilder b,
-                                            bool verify_peer);
+LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(
+    LDClientHttpPropertiesTlsBuilder b,
+    bool skip_verify_peer);
 
 /**
  * Disables the default SDK logging.

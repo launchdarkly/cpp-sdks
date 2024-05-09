@@ -324,11 +324,12 @@ LDClientConfigBuilder_HttpProperties_Tls(
 }
 
 LD_EXPORT(void)
-LDClientHttpPropertiesTlsBuilder_VerifyPeer(LDClientHttpPropertiesTlsBuilder b,
-                                            bool verify_peer) {
+LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(
+    LDClientHttpPropertiesTlsBuilder b,
+    bool skip_verify_peer) {
     LD_ASSERT_NOT_NULL(b);
 
-    TO_TLS_BUILDER(b)->VerifyPeer(verify_peer);
+    TO_TLS_BUILDER(b)->SkipVerifyPeer(skip_verify_peer);
 }
 
 LD_EXPORT(LDClientHttpPropertiesTlsBuilder)

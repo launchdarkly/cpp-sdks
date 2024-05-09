@@ -34,11 +34,11 @@ class TlsBuilder {
     TlsBuilder(built::TlsOptions const& tls);
 
     /**
-     * Whether the remote peer's certificates should be verified.
-     * @param verify_peer True to verify peer, false otherwise.
+     * Whether to skip verifying the remote peer's certificates.
+     * @param verify_peer True to skip verification, false to verify.
      * @return A reference to this builder.
      */
-    TlsBuilder& VerifyPeer(bool verify_peer);
+    TlsBuilder& SkipVerifyPeer(bool skip_verify_peer);
 
     /**
      * Builds the TLS options.

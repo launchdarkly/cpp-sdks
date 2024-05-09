@@ -15,9 +15,10 @@ TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
 }
 
 template <typename SDK>
-TlsBuilder<SDK>& TlsBuilder<SDK>::VerifyPeer(bool verify_peer) {
-    verify_mode_ = verify_peer ? built::TlsOptions::VerifyMode::kVerifyPeer
-                               : built::TlsOptions::VerifyMode::kVerifyNone;
+TlsBuilder<SDK>& TlsBuilder<SDK>::SkipVerifyPeer(bool skip_verify_peer) {
+    verify_mode_ = skip_verify_peer
+                       ? built::TlsOptions::VerifyMode::kVerifyNone
+                       : built::TlsOptions::VerifyMode::kVerifyPeer;
     return *this;
 }
 
