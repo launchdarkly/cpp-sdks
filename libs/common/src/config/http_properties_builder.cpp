@@ -11,7 +11,7 @@ TlsBuilder<SDK>::TlsBuilder() : TlsBuilder(shared::Defaults<SDK>::TLS()) {}
 
 template <typename SDK>
 TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
-    verify_mode_ = tls.VerifyMode();
+    verify_mode_ = tls.PeerVerifyMode();
 }
 
 template <typename SDK>

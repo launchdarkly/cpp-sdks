@@ -12,10 +12,10 @@ class TlsOptions final {
     enum class VerifyMode { kVerifyPeer, kVerifyNone };
     TlsOptions(VerifyMode verify_mode);
     TlsOptions();
-    [[nodiscard]] VerifyMode VerifyMode() const;
+    [[nodiscard]] VerifyMode PeerVerifyMode() const;
 
    private:
-    enum VerifyMode verify_mode_;
+    VerifyMode verify_mode_;
 };
 
 class HttpProperties final {

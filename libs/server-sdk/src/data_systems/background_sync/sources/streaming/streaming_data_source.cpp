@@ -104,7 +104,7 @@ void StreamingDataSource::StartAsync(
         client_builder.header(key, value);
     }
 
-    if (http_config_.Tls().VerifyMode() ==
+    if (http_config_.Tls().PeerVerifyMode() ==
         launchdarkly::config::shared::built::TlsOptions::VerifyMode::
             kVerifyNone) {
         client_builder.skip_verify_peer(true);

@@ -9,7 +9,7 @@ TlsOptions::TlsOptions(enum TlsOptions::VerifyMode verify_mode)
 
 TlsOptions::TlsOptions() : TlsOptions(TlsOptions::VerifyMode::kVerifyPeer) {}
 
-enum TlsOptions::VerifyMode TlsOptions::VerifyMode() const {
+TlsOptions::VerifyMode TlsOptions::PeerVerifyMode() const {
     return verify_mode_;
 }
 
@@ -58,7 +58,7 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
 }
 
 bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
-    return lhs.VerifyMode() == rhs.VerifyMode();
+    return lhs.PeerVerifyMode() == rhs.PeerVerifyMode();
 }
 
 }  // namespace launchdarkly::config::shared::built
