@@ -132,9 +132,10 @@ class Builder {
     Builder& errors(ErrorCallback callback);
 
     /**
-     * If connecting to a TLS endpoint, whether to verify the remote
-     * peer's certificates.
-     * @param verify_peer True to verify the peer, false otherwise.
+     * If connecting to an endpoint with TLS, whether to skip verifying the
+     * remote peer's certificates. Verification is enabled by default.
+     *
+     * @param skip_verify_peer True to skip verification, false to verify.
      * @return Reference to this builder.
      */
     Builder& skip_verify_peer(bool skip_verify_peer);

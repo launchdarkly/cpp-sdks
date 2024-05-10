@@ -389,7 +389,7 @@ LDServerHttpPropertiesTlsBuilder_Free(LDServerHttpPropertiesTlsBuilder b);
  * use-case calls for it.
  *
  * @param b Server config builder. Must not be NULL.
- * @param skip_verify_peer False to skip verification.
+ * @param skip_verify_peer True to skip verification.
  */
 LD_EXPORT(void)
 LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(

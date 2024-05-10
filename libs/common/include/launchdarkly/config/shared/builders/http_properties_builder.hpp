@@ -35,7 +35,7 @@ class TlsBuilder {
 
     /**
      * Whether to skip verifying the remote peer's certificates.
-     * @param verify_peer True to skip verification, false to verify.
+     * @param skip_verify_peer True to skip verification, false to verify.
      * @return A reference to this builder.
      */
     TlsBuilder& SkipVerifyPeer(bool skip_verify_peer);
