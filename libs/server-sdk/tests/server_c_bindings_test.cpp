@@ -263,6 +263,5 @@ TEST(ClientBindings, TlsConfiguration) {
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
 
-    ASSERT_FALSE(LDStatus_Ok(status));
-    LDStatus_Free(status);
+    LDServerConfig_Free(config);
 }

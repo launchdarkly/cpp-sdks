@@ -30,7 +30,7 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network {
 
-using VerifyMode = enum config::shared::built::TlsOptions::VerifyMode;
+using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
 
 static unsigned char const kRedirectLimit = 20;
 
