@@ -90,7 +90,7 @@ PollingDataSource::PollingDataSource(
         data_source_config.method);
     if (http_properties.Tls().VerifyMode() ==
         config::shared::built::TlsOptions::VerifyMode::kVerifyNone) {
-        LD_LOG(logger_, LogLevel::kDebug) << "SSL peer verification disabled";
+        LD_LOG(logger_, LogLevel::kDebug) << "TLS peer verification disabled";
     }
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)

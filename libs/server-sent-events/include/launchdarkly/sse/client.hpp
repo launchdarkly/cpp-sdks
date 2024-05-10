@@ -137,7 +137,7 @@ class Builder {
      * @param verify_peer True to verify the peer, false otherwise.
      * @return Reference to this builder.
      */
-    Builder& verify_peer(bool verify_peer);
+    Builder& skip_verify_peer(bool skip_verify_peer);
 
     /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
@@ -158,7 +158,7 @@ class Builder {
     LogCallback logging_cb_;
     EventReceiver receiver_;
     ErrorCallback error_cb_;
-    bool verify_peer_;
+    bool skip_verify_peer_;
 };
 
 /**
