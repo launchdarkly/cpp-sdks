@@ -34,7 +34,6 @@ jobs:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: 'cw/sc-239174/tls'
   build-test:
     runs-on: ubuntu-22.04
     steps:
