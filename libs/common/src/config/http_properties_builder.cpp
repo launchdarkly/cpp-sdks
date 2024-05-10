@@ -124,6 +124,8 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
 }
 
 template class TlsBuilder<config::shared::ClientSDK>;
+template class TlsBuilder<config::shared::ServerSDK>;
+
 template class HttpPropertiesBuilder<config::shared::ClientSDK>;
 template class HttpPropertiesBuilder<config::shared::ServerSDK>;
 }  // namespace launchdarkly::config::shared::builders

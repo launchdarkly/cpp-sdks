@@ -48,6 +48,11 @@ using namespace launchdarkly::server_side::config::builders;
 #define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
     (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
 
+#define TO_TLS_BUILDER(ptr) (reinterpret_cast<TlsBuilder*>(ptr))
+
+#define FROM_TLS_BUILDER(ptr) \
+    (reinterpret_cast<LDServerHttpPropertiesTlsBuilder>(ptr))
+
 LD_EXPORT(LDServerConfigBuilder)
 LDServerConfigBuilder_New(char const* sdk_key) {
     LD_ASSERT_NOT_NULL(sdk_key);
@@ -330,6 +335,37 @@ LDServerConfigBuilder_HttpProperties_Header(LDServerConfigBuilder b,
     LD_ASSERT_NOT_NULL(value);
 
     TO_BUILDER(b)->HttpProperties().Header(key, value);
+}
+
+LD_EXPORT(void)
+LDServerConfigBuilder_HttpProperties_Tls(
+    LDServerConfigBuilder b,
+    LDServerHttpPropertiesTlsBuilder tls_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(tls_builder);
+
+    TO_BUILDER(b)->HttpProperties().Tls(*TO_TLS_BUILDER(tls_builder));
+
+    LDServerHttpPropertiesTlsBuilder_Free(tls_builder);
+}
+
+LD_EXPORT(void)
+LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(
+    LDServerHttpPropertiesTlsBuilder b,
+    bool skip_verify_peer) {
+    LD_ASSERT_NOT_NULL(b);
+
+    TO_TLS_BUILDER(b)->SkipVerifyPeer(skip_verify_peer);
+}
+
+LD_EXPORT(LDServerHttpPropertiesTlsBuilder)
+LDServerHttpPropertiesTlsBuilder_New(void) {
+    return FROM_TLS_BUILDER(new TlsBuilder());
+}
+
+LD_EXPORT(void)
+LDServerHttpPropertiesTlsBuilder_Free(LDServerHttpPropertiesTlsBuilder b) {
+    delete TO_TLS_BUILDER(b);
 }
 
 LD_EXPORT(void)
