@@ -27,11 +27,20 @@ class IClient {
 
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
-     * If StartAsync isn't called, the client is able to post events but is
-     * unable to obtain flag data.
+     * StartAsync must be called to obtain fresh flag data.
      *
      * The returned future will resolve to true or false based on the logic
      * outlined on @ref Initialized.
+     *
+     * Blocking indefinitely on the future (e.g. by calling .get() or
+     * .wait()) is highly discouraged. Instead, use a method that takes a
+     * timeout like .wait_for() or .wait_until(), or do not wait.
+     *
+     * Otherwise, the application may hang indefinitely if the client cannot
+     * connect to LaunchDarkly.
+     *
+     * While the client is connecting asynchronously, it is safe to call
+     * variation methods, which will return application-defined default values.
      */
     virtual std::future<bool> StartAsync() = 0;
 
@@ -42,10 +51,13 @@ class IClient {
      * When you first start the client, once StartAsync has completed,
      * Initialized should return true if and only if either 1. it connected to
      * LaunchDarkly and successfully retrieved flags, or 2. it started in
-     * offline mode so there's no need to connect to LaunchDarkly. If the client
-     * timed out trying to connect to LD, then Initialized returns false (even
-     * if we do have cached flags). If the client connected and got a 401 error,
-     * Initialized is will return false. This serves the purpose of letting the
+     * offline mode so there's no need to connect to LaunchDarkly.
+     *
+     * If the client timed out trying to connect to LD, then Initialized returns
+     * false (even if we do have cached flags). If the client connected and
+     * got a 401 error, Initialized will return false.
+     *
+     * This serves the purpose of letting the
      * app know that there was a problem of some kind.
      *
      * @return True if the client is initialized.
