@@ -23,5 +23,6 @@ using AppInfoBuilder = launchdarkly::config::shared::builders::AppInfoBuilder;
 using EventsBuilder =
     launchdarkly::config::shared::builders::EventsBuilder<SDK>;
 using LoggingBuilder = launchdarkly::config::shared::builders::LoggingBuilder;
+using TlsBuilder = launchdarkly::config::shared::builders::TlsBuilder<SDK>;
 
 }  // namespace launchdarkly::server_side::config::builders

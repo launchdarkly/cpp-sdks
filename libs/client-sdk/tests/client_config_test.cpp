@@ -65,13 +65,28 @@ TEST(ClientConfigBindings, AllConfigs) {
     LDDataSourceStreamBuilder_InitialReconnectDelayMs(stream_builder, 500);
     LDClientConfigBuilder_DataSource_MethodStream(builder, stream_builder);
 
+    LDDataSourceStreamBuilder stream_builder2 = LDDataSourceStreamBuilder_New();
+    LDDataSourceStreamBuilder_Free(stream_builder2);
+
     LDDataSourcePollBuilder poll_builder = LDDataSourcePollBuilder_New();
     LDDataSourcePollBuilder_IntervalS(poll_builder, 10);
     LDClientConfigBuilder_DataSource_MethodPoll(builder, poll_builder);
 
+    LDDataSourcePollBuilder poll_builder2 = LDDataSourcePollBuilder_New();
+    LDDataSourcePollBuilder_Free(poll_builder2);
+
     LDClientConfigBuilder_HttpProperties_Header(builder, "foo", "bar");
     LDClientConfigBuilder_HttpProperties_WrapperName(builder, "wrapper");
     LDClientConfigBuilder_HttpProperties_WrapperVersion(builder, "v1.2.3");
+
+    LDClientHttpPropertiesTlsBuilder tls_builder =
+        LDClientHttpPropertiesTlsBuilder_New();
+    LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(tls_builder, false);
+    LDClientConfigBuilder_HttpProperties_Tls(builder, tls_builder);
+
+    LDClientHttpPropertiesTlsBuilder tls_builder2 =
+        LDClientHttpPropertiesTlsBuilder_New();
+    LDClientHttpPropertiesTlsBuilder_Free(tls_builder2);
 
     LDClientConfigBuilder_Logging_Disable(builder);
 

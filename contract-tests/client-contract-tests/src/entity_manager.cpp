@@ -129,6 +129,14 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         }
     }
 
+    if (in.tls) {
+        auto builder = TlsBuilder();
+        if (in.tls->skipVerifyPeer) {
+            builder.SkipVerifyPeer(*in.tls->skipVerifyPeer);
+        }
+        config_builder.HttpProperties().Tls(std::move(builder));
+    }
+
     auto config = config_builder.Build();
     if (!config) {
         LD_LOG(logger_, LogLevel::kWarn)

@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     launchdarkly::Logger logger{
         std::make_unique<ConsoleBackend>("client-contract-tests")};
 
-    const std::string default_port = "8123";
+    std::string const default_port = "8123";
     std::string port = default_port;
     if (argc == 2) {
         port =
@@ -43,6 +43,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("client-independence");
         srv.add_capability("inline-context");
         srv.add_capability("anonymous-redaction");
+        srv.add_capability("tls:verify-peer");
+        srv.add_capability("tls:skip-verify-peer");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

@@ -503,7 +503,8 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       initial_reconnect_delay_{std::nullopt},
       logging_cb_([](auto msg) {}),
       receiver_([](launchdarkly::sse::Event const&) {}),
-      error_cb_([](auto err) {}) {
+      error_cb_([](auto err) {}),
+      skip_verify_peer_(false) {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -561,6 +562,11 @@ Builder& Builder::errors(ErrorCallback callback) {
     return *this;
 }
 
+Builder& Builder::skip_verify_peer(bool skip_verify_peer) {
+    skip_verify_peer_ = skip_verify_peer;
+    return *this;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
@@ -607,6 +613,10 @@ std::shared_ptr<Client> Builder::build() {
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
         ssl->set_default_verify_paths();
+        if (skip_verify_peer_) {
+            ssl->set_verify_mode(ssl::context::verify_none);
+            logging_cb_("TLS peer verification disabled");
+        }
     }
 
     return std::make_shared<FoxyClient>(

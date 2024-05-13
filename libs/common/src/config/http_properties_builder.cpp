@@ -7,6 +7,27 @@
 namespace launchdarkly::config::shared::builders {
 
 template <typename SDK>
+TlsBuilder<SDK>::TlsBuilder() : TlsBuilder(shared::Defaults<SDK>::TLS()) {}
+
+template <typename SDK>
+TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
+    verify_mode_ = tls.PeerVerifyMode();
+}
+
+template <typename SDK>
+TlsBuilder<SDK>& TlsBuilder<SDK>::SkipVerifyPeer(bool skip_verify_peer) {
+    verify_mode_ = skip_verify_peer
+                       ? built::TlsOptions::VerifyMode::kVerifyNone
+                       : built::TlsOptions::VerifyMode::kVerifyPeer;
+    return *this;
+}
+
+template <typename SDK>
+built::TlsOptions TlsBuilder<SDK>::Build() const {
+    return {verify_mode_};
+}
+
+template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder()
     : HttpPropertiesBuilder(shared::Defaults<SDK>::HttpProperties()) {}
 
@@ -18,6 +39,7 @@ HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
     write_timeout_ = properties.WriteTimeout();
     response_timeout_ = properties.ResponseTimeout();
     base_headers_ = properties.BaseHeaders();
+    tls_ = properties.Tls();
 }
 
 template <typename SDK>
@@ -82,17 +104,27 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
 }
 
 template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Tls(
+    TlsBuilder<SDK> builder) {
+    tls_ = std::move(builder);
+    return *this;
+}
+
+template <typename SDK>
 built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
     if (!wrapper_name_.empty()) {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
-        return {connect_timeout_, read_timeout_, write_timeout_,
-                response_timeout_, headers_with_wrapper};
+        return {connect_timeout_,  read_timeout_,        write_timeout_,
+                response_timeout_, headers_with_wrapper, tls_.Build()};
     }
-    return {connect_timeout_, read_timeout_, write_timeout_, response_timeout_,
-            base_headers_};
+    return {connect_timeout_,  read_timeout_, write_timeout_,
+            response_timeout_, base_headers_, tls_.Build()};
 }
+
+template class TlsBuilder<config::shared::ClientSDK>;
+template class TlsBuilder<config::shared::ServerSDK>;
 
 template class HttpPropertiesBuilder<config::shared::ClientSDK>;
 template class HttpPropertiesBuilder<config::shared::ServerSDK>;

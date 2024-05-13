@@ -9,6 +9,8 @@
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
+#include <launchdarkly/config/shared/built/http_properties.hpp>
+
 #include <launchdarkly/events/detail/event_batch.hpp>
 
 namespace launchdarkly::events::detail {
@@ -94,13 +96,16 @@ class RequestWorker {
      * @param retry_after How long to wait after a recoverable failure before
      * trying to deliver events again.
      * @param id Unique identifier for the flush worker (used for logging).
+     * @param mode TLS peer verification mode.
      * @param logger Logger.
      */
-    RequestWorker(boost::asio::any_io_executor io,
-                  std::chrono::milliseconds retry_after,
-                  std::size_t id,
-                  std::optional<std::locale> date_header_locale,
-                  Logger& logger);
+    RequestWorker(
+        boost::asio::any_io_executor io,
+        std::chrono::milliseconds retry_after,
+        std::size_t id,
+        std::optional<std::locale> date_header_locale,
+        enum config::shared::built::TlsOptions::VerifyMode verify_mode,
+        Logger& logger);
 
     /**
      * Returns true if the worker is available for delivery.

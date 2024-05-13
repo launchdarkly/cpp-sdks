@@ -22,6 +22,8 @@ typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
 typedef struct _LDServerDataSourceStreamBuilder*
     LDServerDataSourceStreamBuilder;
 typedef struct _LDServerDataSourcePollBuilder* LDServerDataSourcePollBuilder;
+typedef struct _LDServerHttpPropertiesTlsBuilder*
+    LDServerHttpPropertiesTlsBuilder;
 
 /**
  * Constructs a client-side config builder.
@@ -117,8 +119,8 @@ LDServerConfigBuilder_Events_Enabled(LDServerConfigBuilder b, bool enabled);
  * that a previously-indexed context may cause generation of a redundant
  * index event.
  * @param b Server config builder. Must not be NULL.
- * @param context_keys_capacity Maximum unique context keys to remember. The default
- * is 1000.
+ * @param context_keys_capacity Maximum unique context keys to remember. The
+ * default is 1000.
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_Events_ContextKeysCapacity(LDServerConfigBuilder b,
@@ -348,6 +350,51 @@ LD_EXPORT(void)
 LDServerConfigBuilder_HttpProperties_Header(LDServerConfigBuilder b,
                                             char const* key,
                                             char const* value);
+
+/**
+ * Sets the TLS options builder. The builder is consumed; do not free it.
+ * @param b Server config builder. Must not be NULL.
+ * @param tls_builder The TLS options builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_HttpProperties_Tls(
+    LDServerConfigBuilder b,
+    LDServerHttpPropertiesTlsBuilder tls_builder);
+
+/**
+ * Creates a new TLS options builder for the HttpProperties builder.
+ *
+ * If not passed into the HttpProperties
+ * builder, must be manually freed with LDServerHttpPropertiesTlsBuilder_Free.
+ *
+ * @return New builder for TLS options.
+ */
+LD_EXPORT(LDServerHttpPropertiesTlsBuilder)
+LDServerHttpPropertiesTlsBuilder_New(void);
+
+/**
+ * Frees a TLS options builder. Do not call if the builder was consumed by
+ * the HttpProperties builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void)
+LDServerHttpPropertiesTlsBuilder_Free(LDServerHttpPropertiesTlsBuilder b);
+
+/**
+ * Configures TLS peer certificate verification. Peer verification
+ * is enabled by default.
+ *
+ * Disabling peer verification is not recommended unless a specific
+ * use-case calls for it.
+ *
+ * @param b Server config builder. Must not be NULL.
+ * @param skip_verify_peer True to skip verification.
+ */
+LD_EXPORT(void)
+LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(
+    LDServerHttpPropertiesTlsBuilder b,
+    bool skip_verify_peer);
 
 /**
  * Disables the default SDK logging.

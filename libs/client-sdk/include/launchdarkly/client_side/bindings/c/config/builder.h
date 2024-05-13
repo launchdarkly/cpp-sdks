@@ -21,6 +21,8 @@ typedef struct _LDClientConfigBuilder* LDClientConfigBuilder;
 typedef struct _LDDataSourceStreamBuilder* LDDataSourceStreamBuilder;
 typedef struct _LDDataSourcePollBuilder* LDDataSourcePollBuilder;
 typedef struct _LDPersistenceCustomBuilder* LDPersistenceCustomBuilder;
+typedef struct _LDClientHttpPropertiesTlsBuilder*
+    LDClientHttpPropertiesTlsBuilder;
 
 typedef void (*SetFn)(char const* storage_namespace,
                       char const* key,
@@ -333,7 +335,6 @@ LD_EXPORT(void) LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b);
  *
  * @return New builder for Polling method.
  */
-
 LD_EXPORT(LDDataSourcePollBuilder)
 LDDataSourcePollBuilder_New();
 
@@ -389,6 +390,51 @@ LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* key,
                                             char const* value);
+
+/**
+ * Sets the TLS options builder. The builder is consumed; do not free it.
+ * @param b Client config builder. Must not be NULL.
+ * @param tls_builder The TLS options builder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Tls(
+    LDClientConfigBuilder b,
+    LDClientHttpPropertiesTlsBuilder tls_builder);
+
+/**
+ * Creates a new TLS options builder for the HttpProperties builder.
+ *
+ * If not passed into the HttpProperties
+ * builder, must be manually freed with LDClientHttpPropertiesTlsBuilder_Free.
+ *
+ * @return New builder for TLS options.
+ */
+LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
+LDClientHttpPropertiesTlsBuilder_New(void);
+
+/**
+ * Frees a TLS options builder. Do not call if the builder was consumed by
+ * the HttpProperties builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_Free(LDClientHttpPropertiesTlsBuilder b);
+
+/**
+ * Configures TLS peer certificate verification. Peer verification
+ * is enabled by default.
+ *
+ * Disabling peer verification is not recommended unless a specific
+ * use-case calls for it.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param skip_verify_peer True to skip verification.
+ */
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(
+    LDClientHttpPropertiesTlsBuilder b,
+    bool skip_verify_peer);
 
 /**
  * Disables the default SDK logging.

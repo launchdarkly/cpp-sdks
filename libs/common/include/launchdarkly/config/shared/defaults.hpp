@@ -49,10 +49,15 @@ struct Defaults<ClientSDK> {
                 std::nullopt};
     }
 
+    static auto TLS() -> shared::built::TlsOptions { return {}; }
+
     static auto HttpProperties() -> shared::built::HttpProperties {
-        return {std::chrono::seconds{10}, std::chrono::seconds{10},
-                std::chrono::seconds{10}, std::chrono::seconds{10},
-                std::map<std::string, std::string>()};
+        return {std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::map<std::string, std::string>(),
+                TLS()};
     }
 
     static auto StreamingConfig() -> shared::built::StreamingConfig<ClientSDK> {
@@ -92,10 +97,15 @@ struct Defaults<ServerSDK> {
                 1000};
     }
 
+    static auto TLS() -> shared::built::TlsOptions { return {}; }
+
     static auto HttpProperties() -> built::HttpProperties {
-        return {std::chrono::seconds{10}, std::chrono::seconds{10},
-                std::chrono::seconds{10}, std::chrono::seconds{10},
-                std::map<std::string, std::string>()};
+        return {std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::chrono::seconds{10},
+                std::map<std::string, std::string>(),
+                TLS()};
     }
 
     static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {

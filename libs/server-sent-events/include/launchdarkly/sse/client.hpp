@@ -132,6 +132,15 @@ class Builder {
     Builder& errors(ErrorCallback callback);
 
     /**
+     * If connecting to an endpoint with TLS, whether to skip verifying the
+     * remote peer's certificates. Verification is enabled by default.
+     *
+     * @param skip_verify_peer True to skip verification, false to verify.
+     * @return Reference to this builder.
+     */
+    Builder& skip_verify_peer(bool skip_verify_peer);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -150,6 +159,7 @@ class Builder {
     LogCallback logging_cb_;
     EventReceiver receiver_;
     ErrorCallback error_cb_;
+    bool skip_verify_peer_;
 };
 
 /**

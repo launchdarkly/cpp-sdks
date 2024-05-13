@@ -250,3 +250,18 @@ TEST(ClientBindings, LazyLoadDataSource) {
 
     LDStatus_Free(status);
 }
+
+TEST(ClientBindings, TlsConfiguration) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerHttpPropertiesTlsBuilder tls =
+        LDServerHttpPropertiesTlsBuilder_New();
+    LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(tls, true);
+
+    LDServerConfigBuilder_HttpProperties_Tls(cfg_builder, tls);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+
+    LDServerConfig_Free(config);
+}

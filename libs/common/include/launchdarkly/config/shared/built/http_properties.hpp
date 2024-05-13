@@ -7,13 +7,25 @@
 
 namespace launchdarkly::config::shared::built {
 
+class TlsOptions final {
+   public:
+    enum class VerifyMode { kVerifyPeer, kVerifyNone };
+    TlsOptions(VerifyMode verify_mode);
+    TlsOptions();
+    [[nodiscard]] VerifyMode PeerVerifyMode() const;
+
+   private:
+    VerifyMode verify_mode_;
+};
+
 class HttpProperties final {
    public:
     HttpProperties(std::chrono::milliseconds connect_timeout,
                    std::chrono::milliseconds read_timeout,
                    std::chrono::milliseconds write_timeout,
                    std::chrono::milliseconds response_timeout,
-                   std::map<std::string, std::string> base_headers);
+                   std::map<std::string, std::string> base_headers,
+                   TlsOptions tls);
 
     [[nodiscard]] std::chrono::milliseconds ConnectTimeout() const;
     [[nodiscard]] std::chrono::milliseconds ReadTimeout() const;
@@ -22,16 +34,20 @@ class HttpProperties final {
     [[nodiscard]] std::chrono::milliseconds ResponseTimeout() const;
     [[nodiscard]] std::map<std::string, std::string> const& BaseHeaders() const;
 
+    [[nodiscard]] TlsOptions const& Tls() const;
+
    private:
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds read_timeout_;
     std::chrono::milliseconds write_timeout_;
     std::chrono::milliseconds response_timeout_;
     std::map<std::string, std::string> base_headers_;
+    TlsOptions tls_;
 
     // TODO: Proxy.
 };
 
 bool operator==(HttpProperties const& lhs, HttpProperties const& rhs);
+bool operator==(TlsOptions const& lhs, TlsOptions const& rhs);
 
 }  // namespace launchdarkly::config::shared::built
