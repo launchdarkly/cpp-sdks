@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.4.3...launchdarkly-cpp-client-v3.5.0) (2024-05-13)
+
+
+### Features
+
+* add ability to skip TLS peer verification ([#399](https://github.com/launchdarkly/cpp-sdks/issues/399)) ([0422d35](https://github.com/launchdarkly/cpp-sdks/commit/0422d355a9af0af5225e8d60cb853f9d5cf0c35f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.6.1 to 0.7.0
+    * launchdarkly-cpp-common bumped from 1.5.0 to 1.6.0
+    * launchdarkly-cpp-sse-client bumped from 0.3.2 to 0.4.0
+
 ## [3.4.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.4.2...launchdarkly-cpp-client-v3.4.3) (2024-04-05)
 
 
