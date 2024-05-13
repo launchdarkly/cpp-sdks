@@ -12,7 +12,7 @@ namespace launchdarkly::config::shared::builders {
 
 /**
  * Class used for building TLS options used within HttpProperties.
- * @tparam SDK THe SDK type to build options for. This affects the default
+ * @tparam SDK The SDK type to build options for. This affects the default
  * values of the built options.
  */
 template <typename SDK>
