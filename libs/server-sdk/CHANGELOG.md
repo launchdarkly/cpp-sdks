@@ -1,5 +1,37 @@
 # Changelog
 
+## [4.0.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.4.0...launchdarkly-cpp-server-v4.0.0) (2024-05-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* move server side config into lib/server ([#283](https://github.com/launchdarkly/cpp-sdks/issues/283))
+
+### Features
+
+* add ability to skip TLS peer verification ([#399](https://github.com/launchdarkly/cpp-sdks/issues/399)) ([0422d35](https://github.com/launchdarkly/cpp-sdks/commit/0422d355a9af0af5225e8d60cb853f9d5cf0c35f))
+* add C binding for context keys cache capacity configuration ([#346](https://github.com/launchdarkly/cpp-sdks/issues/346)) ([8793fc4](https://github.com/launchdarkly/cpp-sdks/commit/8793fc446d24fb1fe4999daa2557e5ded2bbecbf))
+* add LDAllFlagsState_Map C binding ([#350](https://github.com/launchdarkly/cpp-sdks/issues/350)) ([2aca898](https://github.com/launchdarkly/cpp-sdks/commit/2aca898074b16cbb34498c289869b7687413df51))
+* redis data source C bindings ([#345](https://github.com/launchdarkly/cpp-sdks/issues/345)) ([03b7de1](https://github.com/launchdarkly/cpp-sdks/commit/03b7de195febdcd4739d670448f5aefcbc2e9a2d))
+* server sdk 3.0 ([#324](https://github.com/launchdarkly/cpp-sdks/issues/324)) ([fb407d8](https://github.com/launchdarkly/cpp-sdks/commit/fb407d8ad2b681a95799f63896d1c03964026b01))
+* server-side data system ([#304](https://github.com/launchdarkly/cpp-sdks/issues/304)) ([9a3737d](https://github.com/launchdarkly/cpp-sdks/commit/9a3737d09b1e1e57e5c7e6d30fb0c92f606d284c))
+* server-side SDK  ([#160](https://github.com/launchdarkly/cpp-sdks/issues/160)) ([75eece3](https://github.com/launchdarkly/cpp-sdks/commit/75eece3a46870fdb6bf4384c112700558099c4d1))
+
+
+### Bug Fixes
+
+* add missing &lt;cstdint&gt; in various headers ([#360](https://github.com/launchdarkly/cpp-sdks/issues/360)) ([2d9351c](https://github.com/launchdarkly/cpp-sdks/commit/2d9351c6f584881b7164258785270e5926f4db4c))
+* allow for installing only the client or server SDK independently ([#269](https://github.com/launchdarkly/cpp-sdks/issues/269)) ([fe08c3c](https://github.com/launchdarkly/cpp-sdks/commit/fe08c3c14600c712ba6480f671fc306eca320044))
+* double variation was returning ints ([#335](https://github.com/launchdarkly/cpp-sdks/issues/335)) ([ef0559d](https://github.com/launchdarkly/cpp-sdks/commit/ef0559d0bfe4a662cfe558a73afed66a9db9d3b5))
+* Evaluate should not share EvaluationStack between calls ([#374](https://github.com/launchdarkly/cpp-sdks/issues/374)) ([7fd64ef](https://github.com/launchdarkly/cpp-sdks/commit/7fd64efa028f87306c73fe2fd09ee18683ec24f2))
+* remove Boost::disable_autolinking from client and server linking ([#316](https://github.com/launchdarkly/cpp-sdks/issues/316)) ([e84c6a0](https://github.com/launchdarkly/cpp-sdks/commit/e84c6a071553b128436e6dd1bb664f0fd752e4d1))
+* server sdk should have CPPServer user agent ([#371](https://github.com/launchdarkly/cpp-sdks/issues/371)) ([b403105](https://github.com/launchdarkly/cpp-sdks/commit/b403105f919e42dfb9664cce805b459bd740a4b3))
+
+
+### Code Refactoring
+
+* move server side config into lib/server ([#283](https://github.com/launchdarkly/cpp-sdks/issues/283)) ([c58de8f](https://github.com/launchdarkly/cpp-sdks/commit/c58de8f3914bf83fa8662cccf5b284de3179852d))
+
 ## [3.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.3.6...launchdarkly-cpp-server-v3.4.0) (2024-05-13)
 
 
