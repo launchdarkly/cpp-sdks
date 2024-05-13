@@ -1,0 +1,57 @@
+\hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{}\doxysection{launchdarkly\+::config\+::shared\+::builders\+::Streaming\+Builder$<$ SDK $>$ Class Template Reference}
+\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}\index{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$}}
+
+
+{\ttfamily \#include $<$data\+\_\+source\+\_\+builder.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a27063b54f854b0e8eea8c137ac07be77}{Initial\+Reconnect\+Delay}} (std\+::chrono\+::milliseconds initial\+\_\+reconnect\+\_\+delay)
+\item 
+\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{built\+::\+Streaming\+Config}}$<$ SDK $>$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a577874d4440b3408f3c7c29501ae98c3}{Build}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename SDK$>$\newline
+class launchdarkly\+::config\+::shared\+::builders\+::\+Streaming\+Builder$<$ SDK $>$}
+
+Builds a configuration for a streaming data source. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a577874d4440b3408f3c7c29501ae98c3}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a577874d4440b3408f3c7c29501ae98c3}} 
+\index{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$}!Build@{Build}}
+\index{Build@{Build}!launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Build()}{Build()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{built\+::\+Streaming\+Config}}$<$ SDK $>$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Streaming\+Builder}}$<$ SDK $>$\+::Build}
+
+Build the streaming config. Used internal to the SDK. \begin{DoxyReturn}{Returns}
+The built config. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a27063b54f854b0e8eea8c137ac07be77}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a27063b54f854b0e8eea8c137ac07be77}} 
+\index{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$}!InitialReconnectDelay@{InitialReconnectDelay}}
+\index{InitialReconnectDelay@{InitialReconnectDelay}!launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::StreamingBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{InitialReconnectDelay()}{InitialReconnectDelay()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Streaming\+Builder}}$<$ SDK $>$\+::Initial\+Reconnect\+Delay (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{initial\+\_\+reconnect\+\_\+delay }\end{DoxyParamCaption})}
+
+Sets the initial reconnect delay for the streaming connection.
+
+The streaming service uses a backoff algorithm (with jitter) every time the connection needs to be reestablished.\+The delay for the first reconnection will start near this value, and then increase exponentially for any subsequent connection failures.
+
+
+\begin{DoxyParams}{Parameters}
+{\em initial\+\_\+reconnect\+\_\+delay} & The initial delay for a reconnection attempt. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/data\+\_\+source\+\_\+builder.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/config/data\+\_\+source\+\_\+builder.\+cpp\end{DoxyCompactItemize}
