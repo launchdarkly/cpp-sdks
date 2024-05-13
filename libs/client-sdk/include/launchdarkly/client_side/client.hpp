@@ -57,7 +57,7 @@ class IClient {
      * If the client timed out trying to connect to LD, then Initialized returns
      * false (even if we do have cached flags).
      *
-     * If the client connected and got a 401 error, Initialized is will return
+     * If the client connected and got a 401 error, Initialized will return
      * false.
      *
      * This serves the purpose of letting the app know that there was a problem
