@@ -24,16 +24,6 @@ std::optional<std::locale> GetLocale(std::string const& locale,
 WorkerPool::WorkerPool(boost::asio::any_io_executor io,
                        std::size_t pool_size,
                        std::chrono::milliseconds delivery_retry_delay,
-                       Logger& logger)
-    : WorkerPool(std::move(io),
-                 pool_size,
-                 delivery_retry_delay,
-                 TlsOptions::VerifyMode::kVerifyPeer,
-                 logger) {}
-
-WorkerPool::WorkerPool(boost::asio::any_io_executor io,
-                       std::size_t pool_size,
-                       std::chrono::milliseconds delivery_retry_delay,
                        enum TlsOptions::VerifyMode verify_mode,
                        Logger& logger)
     : io_(io), workers_() {

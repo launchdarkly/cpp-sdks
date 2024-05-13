@@ -31,7 +31,8 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     auto work = boost::asio::make_work_guard(ioc);
     std::thread ioc_thread([&]() { ioc.run(); });
 
-    WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1), logger);
+    WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1),
+                    VerifyMode::kVerifyPeer, logger);
 
     RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_TRUE(worker);
@@ -49,7 +50,8 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     auto work = boost::asio::make_work_guard(ioc);
     std::thread ioc_thread([&]() { ioc.run(); });
 
-    WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1), logger);
+    WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1),
+                    VerifyMode::kVerifyPeer, logger);
 
     RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_FALSE(worker);

@@ -24,11 +24,6 @@ namespace launchdarkly::events::detail {
  */
 class WorkerPool {
    public:
-    WorkerPool(boost::asio::any_io_executor io,
-               std::size_t pool_size,
-               std::chrono::milliseconds delivery_retry_delay,
-               Logger& logger);
-
     /**
      * Constructs a new WorkerPool.
      * @param io The executor used for all workers.
