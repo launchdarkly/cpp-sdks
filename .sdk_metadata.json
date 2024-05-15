@@ -11,6 +11,38 @@
       ],
       "releases": {
         "tag-prefix": "launchdarkly-cpp-client-"
+      },
+      "features": {
+        "appConfig": {
+          "introduced": "3.0"
+        },
+        "bigSegments": {
+          "introduced": "All"
+        },
+        "contexts": {
+          "introduced": "3.0"
+        },
+        "experimentation": {
+          "introduced": "2.4.8"
+        },
+        "variationDetail": {
+          "introduced": "1.0"
+        },
+        "allFlags": {
+          "introduced": "1.0"
+        },
+        "privateAttrs": {
+          "introduced": "1.0"
+        },
+        "relayProxyProxy": {
+          "introduced": "1.0"
+        },
+        "flagChanges": {
+          "introduced": "1.0"
+        },
+        "testDataSource": {
+          "introduced": "1.0"
+        }
       }
     },
     "cpp-server-sdk": {
@@ -23,6 +55,47 @@
       ],
       "releases": {
         "tag-prefix": "launchdarkly-cpp-server-"
+      },
+      "features": {
+        "appConfig": {
+          "introduced": "3.0"
+        },
+        "bigSegments": {
+          "introduced": "All"
+        },
+        "contexts": {
+          "introduced": "3.0"
+        },
+        "experimentation": {
+          "introduced": "2.4.8"
+        },
+        "variationDetail": {
+          "introduced": "1.0"
+        },
+        "allFlags": {
+          "introduced": "1.0"
+        },
+        "offlineMode": {
+          "introduced": "1.0"
+        },
+        "privateAttrs": {
+          "introduced": "1.0"
+        },
+        "fileDataSource": {
+          "introduced": "2.6"
+        },
+        "relayProxyProxy": {
+          "introduced": "1.0"
+        },
+        "flagChanges": {
+          "introduced": "1.0"
+        },
+        "testDataSource": {
+          "introduced": "2.6"
+        },
+        "webProxy": {
+          "introduced": "1.0"
+        }
       }
     }
   }
