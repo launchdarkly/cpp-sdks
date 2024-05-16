@@ -10,7 +10,7 @@ namespace launchdarkly::server_side::integrations {
 
 template <typename TData>
 static uint64_t GetVersion(std::string const& data) {
-    boost::json::error_code error_code;
+    boost::system::error_code error_code;
     auto const parsed = boost::json::parse(data, error_code);
 
     if (error_code) {

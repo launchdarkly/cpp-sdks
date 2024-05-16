@@ -65,7 +65,7 @@ void FlagPersistence::LoadCached(Context const& context) {
         return;
     }
 
-    boost::json::error_code error_code;
+    boost::system::error_code error_code;
     auto parsed = boost::json::parse(*data, error_code);
     if (error_code) {
         LD_LOG(logger_, LogLevel::kError)
@@ -119,7 +119,7 @@ ContextIndex FlagPersistence::GetIndex() {
             persistence_->Read(environment_namespace_, index_key_);
 
         if (index_data) {
-            boost::json::error_code error_code;
+            boost::system::error_code error_code;
             auto parsed = boost::json::parse(*index_data, error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError)

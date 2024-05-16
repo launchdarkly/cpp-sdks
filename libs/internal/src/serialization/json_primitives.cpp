@@ -26,7 +26,7 @@ tl::expected<std::optional<std::uint64_t>, JsonError> tag_invoke(
     if (!json_value.is_number()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    boost::json::error_code ec;
+    boost::system::error_code ec;
     auto val = json_value.to_number<uint64_t>(ec);
     if (ec) {
         return tl::unexpected(JsonError::kSchemaFailure);
@@ -45,7 +45,7 @@ tl::expected<std::optional<std::int64_t>, JsonError> tag_invoke(
     if (!json_value.is_number()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
-    boost::json::error_code ec;
+    boost::system::error_code ec;
     auto val = json_value.to_number<int64_t>(ec);
     if (ec) {
         return tl::unexpected(JsonError::kSchemaFailure);

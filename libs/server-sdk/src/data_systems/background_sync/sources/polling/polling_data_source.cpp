@@ -121,7 +121,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
     } else if (res.Status() == 200) {
         auto const& body = res.Body();
         if (body.has_value()) {
-            boost::json::error_code error_code;
+            boost::system::error_code error_code;
             auto parsed = boost::json::parse(body.value(), error_code);
             if (error_code) {
                 LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;

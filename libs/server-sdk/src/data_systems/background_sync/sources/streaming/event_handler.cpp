@@ -135,7 +135,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
     std::string const& data) {
     if (type == "put") {
-        boost::json::error_code error_code;
+        boost::system::error_code error_code;
         auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
@@ -165,7 +165,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         return MessageStatus::kMessageHandled;
     }
     if (type == "patch") {
-        boost::json::error_code error_code;
+        boost::system::error_code error_code;
         auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingPut;
@@ -197,7 +197,7 @@ DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
         return MessageStatus::kMessageHandled;
     }
     if (type == "delete") {
-        boost::json::error_code error_code;
+        boost::system::error_code error_code;
         auto parsed = boost::json::parse(data, error_code);
         if (error_code) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingDelete;
