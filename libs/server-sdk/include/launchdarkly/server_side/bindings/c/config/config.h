@@ -17,7 +17,8 @@ typedef struct _LDCServerConfig* LDServerConfig;
  * not need to be freed.
  * @param config Config to free.
  */
-LD_EXPORT(void) LDServerConfig_Free(LDServerConfig config);
+LD_EXPORT(void)
+LDServerConfig_Free(LDServerConfig config);
 
 #ifdef __cplusplus
 }

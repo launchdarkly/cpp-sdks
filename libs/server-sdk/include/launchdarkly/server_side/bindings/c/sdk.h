@@ -117,7 +117,8 @@ LDServerSDK_Start(LDServerSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @return True if initialized.
  */
-LD_EXPORT(bool) LDServerSDK_Initialized(LDServerSDK sdk);
+LD_EXPORT(bool)
+LDServerSDK_Initialized(LDServerSDK sdk);
 
 /**
  * Tracks that the given context performed an event with the given event name.
@@ -397,7 +398,8 @@ LDServerSDK_AllFlagsState(LDServerSDK sdk,
  * Frees the SDK's resources, shutting down any connections. May block.
  * @param sdk SDK.
  */
-LD_EXPORT(void) LDServerSDK_Free(LDServerSDK sdk);
+LD_EXPORT(void)
+LDServerSDK_Free(LDServerSDK sdk);
 
 typedef struct _LDServerDataSourceStatus* LDServerDataSourceStatus;
 
@@ -572,7 +574,8 @@ LDServerSDK_DataSourceStatus_Status(LDServerSDK sdk);
  * Frees the data source status.
  * @param status The data source status to free.
  */
-LD_EXPORT(void) LDServerDataSourceStatus_Free(LDServerDataSourceStatus status);
+LD_EXPORT(void)
+LDServerDataSourceStatus_Free(LDServerDataSourceStatus status);
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,8 @@ typedef struct _LDServerHttpPropertiesTlsBuilder*
 /**
  * Constructs a client-side config builder.
  */
-LD_EXPORT(LDServerConfigBuilder) LDServerConfigBuilder_New(char const* sdk_key);
+LD_EXPORT(LDServerConfigBuilder)
+LDServerConfigBuilder_New(char const* sdk_key);
 
 /**
  * Sets a custom URL for the polling service.

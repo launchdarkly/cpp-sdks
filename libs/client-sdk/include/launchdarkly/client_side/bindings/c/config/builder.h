@@ -92,12 +92,14 @@ struct LDPersistence {
  * passing a custom implementation into configuration.
  * @param backend Implementation to initialize.
  */
-LD_EXPORT(void) LDPersistence_Init(struct LDPersistence* implementation);
+LD_EXPORT(void)
+LDPersistence_Init(struct LDPersistence* implementation);
 
 /**
  * Constructs a client-side config builder.
  */
-LD_EXPORT(LDClientConfigBuilder) LDClientConfigBuilder_New(char const* sdk_key);
+LD_EXPORT(LDClientConfigBuilder)
+LDClientConfigBuilder_New(char const* sdk_key);
 
 /**
  * Sets a custom URL for the polling service.
@@ -325,7 +327,8 @@ LDDataSourceStreamBuilder_InitialReconnectDelayMs(LDDataSourceStreamBuilder b,
  *
  * @param b Builder to free.
  */
-LD_EXPORT(void) LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b);
+LD_EXPORT(void)
+LDDataSourceStreamBuilder_Free(LDDataSourceStreamBuilder b);
 
 /**
  * Creates a new DataSource builder for the Polling method.
@@ -353,7 +356,8 @@ LDDataSourcePollBuilder_IntervalS(LDDataSourcePollBuilder b,
  *
  * @param b Builder to free.
  */
-LD_EXPORT(void) LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b);
+LD_EXPORT(void)
+LDDataSourcePollBuilder_Free(LDDataSourcePollBuilder b);
 
 /**
  * This should be used for wrapper SDKs to set the wrapper name.
@@ -468,14 +472,16 @@ LDClientConfigBuilder_Logging_Custom(LDClientConfigBuilder b,
  * LDPersistenceCustomBuilder_Free.
  * @return New builder.
  */
-LD_EXPORT(LDPersistenceCustomBuilder) LDPersistenceCustomBuilder_New();
+LD_EXPORT(LDPersistenceCustomBuilder)
+LDPersistenceCustomBuilder_New();
 
 /**
  * Frees a custom persistence builder. Do not call if the builder was consumed
  * by the config builder.
  * @param b Builder to free.
  */
-LD_EXPORT(void) LDPersistenceCustomBuilder_Free(LDPersistenceCustomBuilder b);
+LD_EXPORT(void)
+LDPersistenceCustomBuilder_Free(LDPersistenceCustomBuilder b);
 
 /**
  * Sets a custom persistence implementation.

@@ -19,7 +19,8 @@ typedef struct _LDClientConfig* LDClientConfig;
  *
  * @param config Config to free.
  */
-LD_EXPORT(void) LDClientConfig_Free(LDClientConfig config);
+LD_EXPORT(void)
+LDClientConfig_Free(LDClientConfig config);
 
 #ifdef __cplusplus
 }
