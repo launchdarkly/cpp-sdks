@@ -99,7 +99,7 @@ TEST(ContextIndexTests, CanSerializeAndDeserialize) {
 
     auto str = boost::json::serialize(boost::json::value_from(context_index));
 
-    boost::json::error_code error_code;
+    boost::system::error_code error_code;
     auto parsed = boost::json::parse(str, error_code);
     auto deserialized = boost::json::value_to<ContextIndex>(parsed);
 
