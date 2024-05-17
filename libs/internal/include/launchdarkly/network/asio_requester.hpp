@@ -3,6 +3,7 @@
 #include "http_requester.hpp"
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 
 #include <boost/asio.hpp>
@@ -30,7 +31,7 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network {
 
-using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
+using TlsOptions = config::shared::built::TlsOptions;
 
 static unsigned char const kRedirectLimit = 20;
 
@@ -258,12 +259,23 @@ class AsioRequester {
      * must be accounted for.
      */
    public:
-    AsioRequester(net::any_io_executor ctx, VerifyMode verify_mode)
+    AsioRequester(net::any_io_executor ctx, TlsOptions const& tls_options)
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
-        ssl_ctx_->set_default_verify_paths();
-        ssl_ctx_->set_verify_mode(verify_mode == VerifyMode::kVerifyPeer
+        std::optional<std::string> const& bundle = tls_options.CABundlePath();
+        if (bundle) {
+            // The builder should enforce that the bundle path (if set) is not
+            // empty.
+            LD_ASSERT(!bundle->empty());
+            ssl_ctx_->add_verify_path(bundle->c_str());
+        } else {
+            ssl_ctx_->set_default_verify_paths();
+        }
+
+        using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
+        ssl_ctx_->set_verify_mode(tls_options.PeerVerifyMode() ==
+                                          VerifyMode::kVerifyPeer
                                       ? ssl::verify_peer
                                       : ssl::verify_none);
     }

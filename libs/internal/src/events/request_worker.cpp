@@ -3,17 +3,16 @@
 
 namespace launchdarkly::events::detail {
 
-RequestWorker::RequestWorker(
-    boost::asio::any_io_executor io,
-    std::chrono::milliseconds retry_after,
-    std::size_t id,
-    std::optional<std::locale> date_header_locale,
-    enum config::shared::built::TlsOptions::VerifyMode verify_mode,
-    Logger& logger)
+RequestWorker::RequestWorker(boost::asio::any_io_executor io,
+                             std::chrono::milliseconds retry_after,
+                             std::size_t id,
+                             std::optional<std::locale> date_header_locale,
+                             config::shared::built::TlsOptions tls_options,
+                             Logger& logger)
     : timer_(std::move(io)),
       retry_delay_(retry_after),
       state_(State::Idle),
-      requester_(timer_.get_executor(), verify_mode),
+      requester_(timer_.get_executor(), tls_options),
       batch_(std::nullopt),
       tag_("flush-worker[" + std::to_string(id) + "]: "),
       date_header_locale_(std::move(date_header_locale)),

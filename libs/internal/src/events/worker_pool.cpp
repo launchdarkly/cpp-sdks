@@ -24,7 +24,7 @@ std::optional<std::locale> GetLocale(std::string const& locale,
 WorkerPool::WorkerPool(boost::asio::any_io_executor io,
                        std::size_t pool_size,
                        std::chrono::milliseconds delivery_retry_delay,
-                       TlsOptions tls_options,
+                       TlsOptions const& tls_options,
                        Logger& logger)
     : io_(io), workers_() {
     // The en_US.utf-8 locale is used whenever a date is parsed from the HTTP
@@ -38,8 +38,8 @@ WorkerPool::WorkerPool(boost::asio::any_io_executor io,
 
     for (std::size_t i = 0; i < pool_size; i++) {
         workers_.emplace_back(std::make_unique<RequestWorker>(
-            io_, delivery_retry_delay, i, date_header_locale,
-            tls_options.PeerVerifyMode(), logger));
+            io_, delivery_retry_delay, i, date_header_locale, tls_options,
+            logger));
     }
 }
 

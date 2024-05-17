@@ -37,7 +37,7 @@ class WorkerPool {
     WorkerPool(boost::asio::any_io_executor io,
                std::size_t pool_size,
                std::chrono::milliseconds delivery_retry_delay,
-               config::shared::built::TlsOptions tls_options,
+               config::shared::built::TlsOptions const& tls_options,
                Logger& logger);
 
     /**

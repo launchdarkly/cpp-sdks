@@ -99,13 +99,12 @@ class RequestWorker {
      * @param mode TLS peer verification mode.
      * @param logger Logger.
      */
-    RequestWorker(
-        boost::asio::any_io_executor io,
-        std::chrono::milliseconds retry_after,
-        std::size_t id,
-        std::optional<std::locale> date_header_locale,
-        enum config::shared::built::TlsOptions::VerifyMode verify_mode,
-        Logger& logger);
+    RequestWorker(boost::asio::any_io_executor io,
+                  std::chrono::milliseconds retry_after,
+                  std::size_t id,
+                  std::optional<std::locale> date_header_locale,
+                  config::shared::built::TlsOptions tls_options,
+                  Logger& logger);
 
     /**
      * Returns true if the worker is available for delivery.

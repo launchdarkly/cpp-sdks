@@ -74,7 +74,7 @@ PollingDataSource::PollingDataSource(
       status_manager_(status_manager),
       data_source_handler_(
           DataSourceEventHandler(context, handler, logger, status_manager_)),
-      requester_(ioc, http_properties.Tls().PeerVerifyMode()),
+      requester_(ioc, http_properties.Tls()),
       timer_(ioc),
       polling_interval_(
           std::get<
