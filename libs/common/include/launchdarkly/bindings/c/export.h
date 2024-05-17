@@ -1,3 +1,7 @@
+/**
+ * @file export.h
+ * @brief Export macros for C bindings
+ */
 #pragma once
 
 #ifdef DOXYGEN_SHOULD_SKIP_THIS

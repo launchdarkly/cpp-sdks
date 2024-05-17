@@ -120,14 +120,16 @@ LDClientSDK_Start(LDClientSDK sdk,
  * @param sdk SDK. Must not be NULL.
  * @return True if initialized.
  */
-LD_EXPORT(bool) LDClientSDK_Initialized(LDClientSDK sdk);
+LD_EXPORT(bool)
+LDClientSDK_Initialized(LDClientSDK sdk);
 
 /**
  * Tracks that the current context performed an event for the given event name.
  * @param sdk SDK. Must not be NULL.
  * @param event_name Name of the event. Must not be NULL.
  */
-LD_EXPORT(void) LDClientSDK_TrackEvent(LDClientSDK sdk, char const* event_name);
+LD_EXPORT(void)
+LDClientSDK_TrackEvent(LDClientSDK sdk, char const* event_name);
 
 /**
  * Tracks that the current context performed an event for the given event
@@ -421,7 +423,8 @@ LDClientSDK_AllFlags(LDClientSDK sdk);
  * Frees the SDK's resources, shutting down any connections. May block.
  * @param sdk SDK.
  */
-LD_EXPORT(void) LDClientSDK_Free(LDClientSDK sdk);
+LD_EXPORT(void)
+LDClientSDK_Free(LDClientSDK sdk);
 
 /**
  * Listen for changes for the specific flag.
@@ -545,7 +548,8 @@ LDDataSourceStatus_GetLastError(LDDataSourceStatus status);
  * encountered an unrecoverable error or that the SDK was explicitly shut
  * down.
  */
-LD_EXPORT(time_t) LDDataSourceStatus_StateSince(LDDataSourceStatus status);
+LD_EXPORT(time_t)
+LDDataSourceStatus_StateSince(LDDataSourceStatus status);
 
 typedef void (*DataSourceStatusCallbackFn)(LDDataSourceStatus status,
                                            void* user_data);
@@ -619,7 +623,8 @@ LDClientSDK_DataSourceStatus_Status(LDClientSDK sdk);
  * Frees the data source status.
  * @param status The data source status to free.
  */
-LD_EXPORT(void) LDDataSourceStatus_Free(LDDataSourceStatus status);
+LD_EXPORT(void)
+LDDataSourceStatus_Free(LDDataSourceStatus status);
 
 #ifdef __cplusplus
 }
