@@ -134,6 +134,9 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         if (in.tls->skipVerifyPeer) {
             builder.SkipVerifyPeer(*in.tls->skipVerifyPeer);
         }
+        if (in.tls->customCAPath) {
+            builder.CABundlePath(*in.tls->customCAPath);
+        }
         config_builder.HttpProperties().Tls(std::move(builder));
     }
 
