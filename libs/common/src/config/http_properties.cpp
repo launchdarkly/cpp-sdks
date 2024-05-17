@@ -4,13 +4,22 @@
 
 namespace launchdarkly::config::shared::built {
 
-TlsOptions::TlsOptions(enum TlsOptions::VerifyMode verify_mode)
-    : verify_mode_(verify_mode) {}
+TlsOptions::TlsOptions(TlsOptions::VerifyMode verify_mode,
+                       std::optional<std::string> ca_bundle_path)
+    : verify_mode_(verify_mode), ca_bundle_path_(std::move(ca_bundle_path)) {}
 
-TlsOptions::TlsOptions() : TlsOptions(TlsOptions::VerifyMode::kVerifyPeer) {}
+TlsOptions::TlsOptions(TlsOptions::VerifyMode verify_mode)
+    : TlsOptions(verify_mode, std::nullopt) {}
+
+TlsOptions::TlsOptions()
+    : TlsOptions(TlsOptions::VerifyMode::kVerifyPeer, std::nullopt) {}
 
 TlsOptions::VerifyMode TlsOptions::PeerVerifyMode() const {
     return verify_mode_;
+}
+
+std::optional<std::string> const& TlsOptions::CABundlePath() const {
+    return ca_bundle_path_;
 }
 
 HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
@@ -58,7 +67,8 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
 }
 
 bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
-    return lhs.PeerVerifyMode() == rhs.PeerVerifyMode();
+    return lhs.PeerVerifyMode() == rhs.PeerVerifyMode() &&
+           lhs.CABundlePath() == rhs.CABundlePath();
 }
 
 }  // namespace launchdarkly::config::shared::built

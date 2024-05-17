@@ -12,6 +12,7 @@ TlsBuilder<SDK>::TlsBuilder() : TlsBuilder(shared::Defaults<SDK>::TLS()) {}
 template <typename SDK>
 TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
     verify_mode_ = tls.PeerVerifyMode();
+    ca_bundle_path_ = tls.CABundlePath();
 }
 
 template <typename SDK>
@@ -23,8 +24,14 @@ TlsBuilder<SDK>& TlsBuilder<SDK>::SkipVerifyPeer(bool skip_verify_peer) {
 }
 
 template <typename SDK>
+TlsBuilder<SDK>& TlsBuilder<SDK>::CABundlePath(std::string ca_bundle_path) {
+    ca_bundle_path_ = std::move(ca_bundle_path);
+    return *this;
+}
+
+template <typename SDK>
 built::TlsOptions TlsBuilder<SDK>::Build() const {
-    return {verify_mode_};
+    return {verify_mode_, ca_bundle_path_};
 }
 
 template <typename SDK>
