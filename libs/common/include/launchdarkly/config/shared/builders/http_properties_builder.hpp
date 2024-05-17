@@ -46,6 +46,10 @@ class TlsBuilder {
      *
      * By default, this is the system's root CA bundle.
      *
+     * If the empty string is passed, this function will clear any existing
+     * CA bundle path previously set, and the system's root CA bundle will be
+     * used.
+     *
      * @param ca_bundle_path File path.
      * @return A reference to this builder.
      */

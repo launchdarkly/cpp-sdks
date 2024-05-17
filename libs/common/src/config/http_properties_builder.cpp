@@ -25,7 +25,11 @@ TlsBuilder<SDK>& TlsBuilder<SDK>::SkipVerifyPeer(bool skip_verify_peer) {
 
 template <typename SDK>
 TlsBuilder<SDK>& TlsBuilder<SDK>::CABundlePath(std::string ca_bundle_path) {
-    ca_bundle_path_ = std::move(ca_bundle_path);
+    if (ca_bundle_path.empty()) {
+        ca_bundle_path_ = std::nullopt;
+    } else {
+        ca_bundle_path_ = std::move(ca_bundle_path);
+    }
     return *this;
 }
 
