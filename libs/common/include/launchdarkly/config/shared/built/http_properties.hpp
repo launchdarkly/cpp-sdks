@@ -11,7 +11,7 @@ namespace launchdarkly::config::shared::built {
 class TlsOptions final {
    public:
     enum class VerifyMode { kVerifyPeer, kVerifyNone };
-    TlsOptions(VerifyMode verify_mode);
+    explicit TlsOptions(VerifyMode verify_mode);
     TlsOptions(VerifyMode verify_mode,
                std::optional<std::string> ca_bundle_path);
     TlsOptions();
