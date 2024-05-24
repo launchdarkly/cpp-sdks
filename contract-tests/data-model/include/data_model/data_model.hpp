@@ -31,12 +31,12 @@ struct adl_serializer<std::optional<T>> {
 
 struct ConfigTLSParams {
     std::optional<bool> skipVerifyPeer;
-    std::optional<std::string> customCAPath;
+    std::optional<std::string> customCAFile;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTLSParams,
                                                 skipVerifyPeer,
-                                                customCAPath);
+                                                customCAFile);
 
 struct ConfigStreamingParams {
     std::optional<std::string> baseUri;

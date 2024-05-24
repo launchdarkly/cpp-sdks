@@ -268,7 +268,7 @@ class AsioRequester {
             // The builder should enforce that the bundle path (if set) is not
             // empty.
             LD_ASSERT(!bundle->empty());
-            ssl_ctx_->add_verify_path(bundle->c_str());
+            ssl_ctx_->load_verify_file(bundle->c_str());
         } else {
             ssl_ctx_->set_default_verify_paths();
         }

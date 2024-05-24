@@ -504,7 +504,8 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       logging_cb_([](auto msg) {}),
       receiver_([](launchdarkly::sse::Event const&) {}),
       error_cb_([](auto err) {}),
-      skip_verify_peer_(false) {
+      skip_verify_peer_(false),
+      ca_bundle_path_() {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -567,6 +568,11 @@ Builder& Builder::skip_verify_peer(bool skip_verify_peer) {
     return *this;
 }
 
+Builder& Builder::ca_bundle_path(std::string path) {
+    ca_bundle_path_ = std::move(path);
+    return *this;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
@@ -612,7 +618,11 @@ std::shared_ptr<Client> Builder::build() {
     std::optional<ssl::context> ssl;
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
-        ssl->set_default_verify_paths();
+        if (ca_bundle_path_.empty()) {
+            ssl->set_default_verify_paths();
+        } else {
+            ssl->add_verify_path(ca_bundle_path_);
+        }
         if (skip_verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);
             logging_cb_("TLS peer verification disabled");

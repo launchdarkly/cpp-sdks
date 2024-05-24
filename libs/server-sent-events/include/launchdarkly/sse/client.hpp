@@ -141,6 +141,17 @@ class Builder {
     Builder& skip_verify_peer(bool skip_verify_peer);
 
     /**
+     * Specify the path to a CA bundle file for verifying the peer's
+     * certificate.
+     *
+     * By default, the system's CA bundle is used. Passing an empty string will
+     * unset any previously set path, and
+     * @param path
+     * @return
+     */
+    Builder& ca_bundle_path(std::string path);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -160,6 +171,7 @@ class Builder {
     EventReceiver receiver_;
     ErrorCallback error_cb_;
     bool skip_verify_peer_;
+    std::string ca_bundle_path_;
 };
 
 /**
