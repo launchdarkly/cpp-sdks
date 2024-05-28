@@ -110,6 +110,10 @@ void StreamingDataSource::StartAsync(
         client_builder.skip_verify_peer(true);
     }
 
+    if (auto bundle = http_config_.Tls().CABundlePath()) {
+        client_builder.ca_bundle_path(*bundle);
+    }
+
     auto weak_self = weak_from_this();
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {

@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("anonymous-redaction");
         srv.add_capability("tls:verify-peer");
         srv.add_capability("tls:skip-verify-peer");
+        srv.add_capability("tls:custom-ca");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
