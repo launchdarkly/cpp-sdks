@@ -621,7 +621,7 @@ std::shared_ptr<Client> Builder::build() {
         if (ca_bundle_path_.empty()) {
             ssl->set_default_verify_paths();
         } else {
-            ssl->add_verify_path(ca_bundle_path_);
+            ssl->load_verify_file(ca_bundle_path_);
         }
         if (skip_verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);
