@@ -263,21 +263,22 @@ class AsioRequester {
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
+        ssl_ctx_->set_verify_mode(ssl::verify_peer);
+        ssl_ctx_->set_default_verify_paths();
+
         std::optional<std::string> const& custom_ca_file =
             tls_options.CustomCAFile();
+
         if (custom_ca_file) {
             // The builder should enforce that the path (if set) is not empty.
             LD_ASSERT(!custom_ca_file->empty());
             ssl_ctx_->load_verify_file(custom_ca_file->c_str());
-        } else {
-            ssl_ctx_->set_default_verify_paths();
         }
 
         using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
-        ssl_ctx_->set_verify_mode(tls_options.PeerVerifyMode() ==
-                                          VerifyMode::kVerifyPeer
-                                      ? ssl::verify_peer
-                                      : ssl::verify_none);
+        if (tls_options.PeerVerifyMode() == VerifyMode::kVerifyNone) {
+            ssl_ctx_->set_verify_mode(ssl::verify_none);
+        }
     }
 
     template <typename CompletionToken>

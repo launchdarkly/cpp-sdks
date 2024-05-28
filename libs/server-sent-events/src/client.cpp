@@ -622,12 +622,18 @@ std::shared_ptr<Client> Builder::build() {
     std::optional<ssl::context> ssl;
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
-        if (!custom_ca_file_) {
-            ssl->set_default_verify_paths();
-        } else {
+
+        ssl->set_default_verify_paths();
+        ssl->set_verify_mode(ssl::context::verify_peer);
+
+        if (custom_ca_file_) {
             assert(!custom_ca_file_->empty());
             ssl->load_verify_file(*custom_ca_file_);
+            logging_cb_(
+                "TLS peer verification configured with custom CA file: " +
+                *custom_ca_file_);
         }
+
         if (skip_verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);
             logging_cb_("TLS peer verification disabled");
