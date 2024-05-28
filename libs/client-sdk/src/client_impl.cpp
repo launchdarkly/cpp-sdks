@@ -109,6 +109,16 @@ ClientImpl::ClientImpl(Config in_cfg,
       eval_reasons_available_(config_.DataSourceConfig().with_reasons) {
     flag_manager_.LoadCache(context_);
 
+    if (auto custom_ca = http_properties_.Tls().CustomCAFile()) {
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "TLS peer verification configured with custom CA file: "
+            << *custom_ca;
+    }
+    if (http_properties_.Tls().PeerVerifyMode() ==
+        config::shared::built::TlsOptions::VerifyMode::kVerifyNone) {
+        LD_LOG(logger_, LogLevel::kInfo) << "TLS peer verification disabled";
+    }
+
     if (config_.Events().Enabled() && !config_.Offline()) {
         event_processor_ =
             std::make_unique<events::AsioEventProcessor<ClientSDK>>(

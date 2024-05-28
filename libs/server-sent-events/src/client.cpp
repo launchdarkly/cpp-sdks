@@ -629,14 +629,10 @@ std::shared_ptr<Client> Builder::build() {
         if (custom_ca_file_) {
             assert(!custom_ca_file_->empty());
             ssl->load_verify_file(*custom_ca_file_);
-            logging_cb_(
-                "TLS peer verification configured with custom CA file: " +
-                *custom_ca_file_);
         }
 
         if (skip_verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);
-            logging_cb_("TLS peer verification disabled");
         }
     }
 

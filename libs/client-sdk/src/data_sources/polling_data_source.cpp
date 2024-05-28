@@ -88,15 +88,6 @@ PollingDataSource::PollingDataSource(
     auto const& polling_config = std::get<
         config::shared::built::PollingConfig<config::shared::ClientSDK>>(
         data_source_config.method);
-    if (http_properties.Tls().CustomCAFile()) {
-        LD_LOG(logger_, LogLevel::kDebug)
-            << "TLS peer verification configured with custom CA file: "
-            << *http_properties.Tls().CustomCAFile();
-    }
-    if (http_properties.Tls().PeerVerifyMode() ==
-        config::shared::built::TlsOptions::VerifyMode::kVerifyNone) {
-        LD_LOG(logger_, LogLevel::kDebug) << "TLS peer verification disabled";
-    }
     if (polling_interval_ < polling_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
