@@ -505,7 +505,7 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       receiver_([](launchdarkly::sse::Event const&) {}),
       error_cb_([](auto err) {}),
       skip_verify_peer_(false),
-      ca_bundle_path_() {
+      custom_ca_file_(std::nullopt) {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -568,8 +568,12 @@ Builder& Builder::skip_verify_peer(bool skip_verify_peer) {
     return *this;
 }
 
-Builder& Builder::ca_bundle_path(std::string path) {
-    ca_bundle_path_ = std::move(path);
+Builder& Builder::custom_ca_file(std::string path) {
+    if (path.empty()) {
+        custom_ca_file_ = std::nullopt;
+        return *this;
+    }
+    custom_ca_file_ = std::move(path);
     return *this;
 }
 
@@ -618,10 +622,11 @@ std::shared_ptr<Client> Builder::build() {
     std::optional<ssl::context> ssl;
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
-        if (ca_bundle_path_.empty()) {
+        if (!custom_ca_file_) {
             ssl->set_default_verify_paths();
         } else {
-            ssl->load_verify_file(ca_bundle_path_);
+            assert(!custom_ca_file_->empty());
+            ssl->load_verify_file(*custom_ca_file_);
         }
         if (skip_verify_peer_) {
             ssl->set_verify_mode(ssl::context::verify_none);

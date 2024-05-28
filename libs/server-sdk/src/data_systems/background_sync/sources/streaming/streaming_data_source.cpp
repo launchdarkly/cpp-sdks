@@ -110,8 +110,8 @@ void StreamingDataSource::StartAsync(
         client_builder.skip_verify_peer(true);
     }
 
-    if (auto bundle = http_config_.Tls().CABundlePath()) {
-        client_builder.ca_bundle_path(*bundle);
+    if (auto ca_file = http_config_.Tls().CustomCAFile()) {
+        client_builder.custom_ca_file(*ca_file);
     }
 
     auto weak_self = weak_from_this();

@@ -263,12 +263,12 @@ class AsioRequester {
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
-        std::optional<std::string> const& bundle = tls_options.CABundlePath();
-        if (bundle) {
-            // The builder should enforce that the bundle path (if set) is not
-            // empty.
-            LD_ASSERT(!bundle->empty());
-            ssl_ctx_->load_verify_file(bundle->c_str());
+        std::optional<std::string> const& custom_ca_file =
+            tls_options.CustomCAFile();
+        if (custom_ca_file) {
+            // The builder should enforce that the path (if set) is not empty.
+            LD_ASSERT(!custom_ca_file->empty());
+            ssl_ctx_->load_verify_file(custom_ca_file->c_str());
         } else {
             ssl_ctx_->set_default_verify_paths();
         }

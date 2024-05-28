@@ -16,7 +16,7 @@ class TlsOptions final {
                std::optional<std::string> ca_bundle_path);
     TlsOptions();
     [[nodiscard]] VerifyMode PeerVerifyMode() const;
-    [[nodiscard]] std::optional<std::string> const& CABundlePath() const;
+    [[nodiscard]] std::optional<std::string> const& CustomCAFile() const;
 
    private:
     VerifyMode verify_mode_;

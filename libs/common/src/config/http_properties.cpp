@@ -18,7 +18,7 @@ TlsOptions::VerifyMode TlsOptions::PeerVerifyMode() const {
     return verify_mode_;
 }
 
-std::optional<std::string> const& TlsOptions::CABundlePath() const {
+std::optional<std::string> const& TlsOptions::CustomCAFile() const {
     return ca_bundle_path_;
 }
 
@@ -68,7 +68,7 @@ bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
 
 bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
     return lhs.PeerVerifyMode() == rhs.PeerVerifyMode() &&
-           lhs.CABundlePath() == rhs.CABundlePath();
+           lhs.CustomCAFile() == rhs.CustomCAFile();
 }
 
 }  // namespace launchdarkly::config::shared::built

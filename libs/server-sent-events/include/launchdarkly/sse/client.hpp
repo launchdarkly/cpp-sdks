@@ -11,6 +11,7 @@
 #include <functional>
 #include <future>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace launchdarkly::sse {
@@ -145,11 +146,12 @@ class Builder {
      * certificate.
      *
      * By default, the system's CA bundle is used. Passing an empty string will
-     * unset any previously set path, and
-     * @param path
-     * @return
+     * unset any previously set path and revert to the system's CA bundle.
+     *
+     * @param path The filepath.
+     * @return Reference to this builder.
      */
-    Builder& ca_bundle_path(std::string path);
+    Builder& custom_ca_file(std::string path);
 
     /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
@@ -171,7 +173,7 @@ class Builder {
     EventReceiver receiver_;
     ErrorCallback error_cb_;
     bool skip_verify_peer_;
-    std::string ca_bundle_path_;
+    std::optional<std::string> custom_ca_file_;
 };
 
 /**

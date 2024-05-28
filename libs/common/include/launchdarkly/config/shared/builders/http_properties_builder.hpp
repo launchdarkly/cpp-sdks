@@ -41,19 +41,19 @@ class TlsBuilder {
     TlsBuilder& SkipVerifyPeer(bool skip_verify_peer);
 
     /**
-     * Path to a file containing one or more certificates to verify
-     * the peer with.
+     * Path to a file containing one or more CAs to verify
+     * the peer with. The certificate(s) must be PEM-encoded.
      *
-     * By default, this is the system's root CA bundle.
+     * By default, the SDK uses the system's root CA bundle.
      *
      * If the empty string is passed, this function will clear any existing
      * CA bundle path previously set, and the system's root CA bundle will be
      * used.
      *
-     * @param ca_bundle_path File path.
+     * @param custom_ca_file File path.
      * @return A reference to this builder.
      */
-    TlsBuilder& CABundlePath(std::string ca_bundle_path);
+    TlsBuilder& CustomCAFile(std::string custom_ca_file);
 
     /**
      * Builds the TLS options.
@@ -63,7 +63,7 @@ class TlsBuilder {
 
    private:
     enum built::TlsOptions::VerifyMode verify_mode_;
-    std::optional<std::string> ca_bundle_path_;
+    std::optional<std::string> custom_ca_file_;
 };
 /**
  * Class used for building a set of HttpProperties.

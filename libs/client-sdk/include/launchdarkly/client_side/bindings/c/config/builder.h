@@ -441,6 +441,19 @@ LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(
     bool skip_verify_peer);
 
 /**
+ * Configures TLS peer certificate verification to use a custom
+ * CA file. The parameter is a filepath pointing to a bundle of
+ * one or more x509 certificates comprising the root of trust for the SDK's
+ * outbound connections.
+ * @param b Client config builder. Must not be NULL.
+ * @param custom_ca_file Filepath of the custom CA bundle. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_CustomCAFile(
+    LDClientHttpPropertiesTlsBuilder b,
+    char const* custom_ca_file);
+
+/**
  * Disables the default SDK logging.
  * @param b Client config builder. Must not be NULL.
  */
