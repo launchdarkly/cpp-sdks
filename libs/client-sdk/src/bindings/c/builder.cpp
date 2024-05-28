@@ -339,7 +339,7 @@ LDClientHttpPropertiesTlsBuilder_CustomCAFile(
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(custom_ca_file);
 
-    TO_TLS_BUILDER(b)->CABundlePath(custom_ca_file);
+    TO_TLS_BUILDER(b)->CustomCAFile(custom_ca_file);
 }
 
 LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
