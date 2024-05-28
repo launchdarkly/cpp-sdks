@@ -36,8 +36,12 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 1. C++17 and above
 1. CMake 3.19 or higher
 1. Ninja (if using the included build scripts)
-1. Boost version 1.81 or higher
+1. Boost version 1.81 or higher (**excluding** Boost 1.83, see note below)
 1. OpenSSL
+
+> [!NOTE]   
+> Boost 1.83 is not supported due to an incompatibility in Boost.JSON. This issue appears to be resolved
+> in versions prior and subsequent to 1.83.
 
 Additional dependencies are fetched via CMake. For details see the `cmake` folder.
 
@@ -92,8 +96,8 @@ using LaunchDarkly today!
 ## Testing
 
 We run integration tests for all our SDKs using a centralized test harness. This approach gives us the ability to test
-for consistency across SDKs. These tests cover each method in the SDK, and verify that event sending, flag evaluation, stream reconnection, and other aspects of the SDK all
-behave correctly.
+for consistency across SDKs. These tests cover each method in the SDK, and verify that event sending, flag evaluation,
+stream reconnection, and other aspects of the SDK all behave correctly.
 
 ## Contributing
 
