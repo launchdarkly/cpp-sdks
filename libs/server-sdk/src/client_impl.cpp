@@ -8,6 +8,7 @@
 
 #include "data_interfaces/system/idata_system.hpp"
 
+#include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/encoding/sha_256.hpp>
 #include <launchdarkly/events/asio_event_processor.hpp>
 #include <launchdarkly/events/data/common_events.hpp>
@@ -124,6 +125,17 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                            EventFactory::WithReasons()) {
     LD_LOG(logger_, LogLevel::kDebug)
         << "data system: " << data_system_->Identity();
+    if (auto custom_ca = http_properties_.Tls().CustomCAFile()) {
+        LD_LOG(logger_, LogLevel::kInfo)
+            << "TLS peer verification configured with custom CA file: "
+            << *custom_ca;
+    }
+    if (http_properties_.Tls().PeerVerifyMode() ==
+        launchdarkly::config::shared::built::TlsOptions::VerifyMode::
+            kVerifyNone) {
+        LD_LOG(logger_, LogLevel::kInfo) << "TLS peer verification disabled";
+    }
+
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 

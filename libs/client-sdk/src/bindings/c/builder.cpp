@@ -332,6 +332,16 @@ LDClientHttpPropertiesTlsBuilder_SkipVerifyPeer(
     TO_TLS_BUILDER(b)->SkipVerifyPeer(skip_verify_peer);
 }
 
+LD_EXPORT(void)
+LDClientHttpPropertiesTlsBuilder_CustomCAFile(
+    LDClientHttpPropertiesTlsBuilder b,
+    char const* custom_ca_file) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(custom_ca_file);
+
+    TO_TLS_BUILDER(b)->CustomCAFile(custom_ca_file);
+}
+
 LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
 LDClientHttpPropertiesTlsBuilder_New(void) {
     return FROM_TLS_BUILDER(new TlsBuilder());

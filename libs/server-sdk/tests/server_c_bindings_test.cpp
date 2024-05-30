@@ -251,7 +251,7 @@ TEST(ClientBindings, LazyLoadDataSource) {
     LDStatus_Free(status);
 }
 
-TEST(ClientBindings, TlsConfiguration) {
+TEST(ClientBindings, TlsConfigurationSkipVerifyPeer) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
 
     LDServerHttpPropertiesTlsBuilder tls =
@@ -262,6 +262,42 @@ TEST(ClientBindings, TlsConfiguration) {
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, TlsConfigurationCustomCAFile) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerHttpPropertiesTlsBuilder tls =
+        LDServerHttpPropertiesTlsBuilder_New();
+    LDServerHttpPropertiesTlsBuilder_CustomCAFile(tls, "/path/to/file.pem");
+
+    LDServerConfigBuilder_HttpProperties_Tls(cfg_builder, tls);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, TlsConfigurationSystemCAFile) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerHttpPropertiesTlsBuilder tls =
+        LDServerHttpPropertiesTlsBuilder_New();
+
+    // Set, then unset the file. This should not cause a configuration error.
+    LDServerHttpPropertiesTlsBuilder_CustomCAFile(tls, "/path/to/file.pem");
+    LDServerHttpPropertiesTlsBuilder_CustomCAFile(tls, "");
+
+    LDServerConfigBuilder_HttpProperties_Tls(cfg_builder, tls);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerConfig_Free(config);
 }

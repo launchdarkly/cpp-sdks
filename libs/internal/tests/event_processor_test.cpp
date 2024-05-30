@@ -13,6 +13,7 @@
 using namespace launchdarkly::events;
 using namespace launchdarkly::events::detail;
 using namespace launchdarkly::network;
+using namespace launchdarkly::config::shared;
 
 static std::chrono::system_clock::time_point TimeZero() {
     return std::chrono::system_clock::time_point{};
@@ -32,7 +33,7 @@ TEST(WorkerPool, PoolReturnsAvailableWorker) {
     std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 1, std::chrono::seconds(1),
-                    VerifyMode::kVerifyPeer, logger);
+                    built::TlsOptions{}, logger);
 
     RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_TRUE(worker);
@@ -51,7 +52,7 @@ TEST(WorkerPool, PoolReturnsNullptrWhenNoWorkerAvaialable) {
     std::thread ioc_thread([&]() { ioc.run(); });
 
     WorkerPool pool(ioc.get_executor(), 0, std::chrono::seconds(1),
-                    VerifyMode::kVerifyPeer, logger);
+                    built::TlsOptions{}, logger);
 
     RequestWorker* worker = pool.Get(boost::asio::use_future).get();
     ASSERT_FALSE(worker);

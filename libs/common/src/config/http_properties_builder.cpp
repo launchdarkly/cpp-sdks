@@ -12,6 +12,7 @@ TlsBuilder<SDK>::TlsBuilder() : TlsBuilder(shared::Defaults<SDK>::TLS()) {}
 template <typename SDK>
 TlsBuilder<SDK>::TlsBuilder(built::TlsOptions const& tls) {
     verify_mode_ = tls.PeerVerifyMode();
+    custom_ca_file_ = tls.CustomCAFile();
 }
 
 template <typename SDK>
@@ -23,8 +24,18 @@ TlsBuilder<SDK>& TlsBuilder<SDK>::SkipVerifyPeer(bool skip_verify_peer) {
 }
 
 template <typename SDK>
+TlsBuilder<SDK>& TlsBuilder<SDK>::CustomCAFile(std::string custom_ca_file) {
+    if (custom_ca_file.empty()) {
+        custom_ca_file_ = std::nullopt;
+    } else {
+        custom_ca_file_ = std::move(custom_ca_file);
+    }
+    return *this;
+}
+
+template <typename SDK>
 built::TlsOptions TlsBuilder<SDK>::Build() const {
-    return {verify_mode_};
+    return {verify_mode_, custom_ca_file_};
 }
 
 template <typename SDK>

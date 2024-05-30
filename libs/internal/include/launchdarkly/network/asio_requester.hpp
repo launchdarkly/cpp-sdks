@@ -3,6 +3,7 @@
 #include "http_requester.hpp"
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
 
 #include <boost/asio.hpp>
@@ -30,7 +31,7 @@ using tcp = boost::asio::ip::tcp;
 
 namespace launchdarkly::network {
 
-using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
+using TlsOptions = config::shared::built::TlsOptions;
 
 static unsigned char const kRedirectLimit = 20;
 
@@ -258,14 +259,26 @@ class AsioRequester {
      * must be accounted for.
      */
    public:
-    AsioRequester(net::any_io_executor ctx, VerifyMode verify_mode)
+    AsioRequester(net::any_io_executor ctx, TlsOptions const& tls_options)
         : ctx_(std::move(ctx)),
           ssl_ctx_(std::make_shared<net::ssl::context>(
               launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client))) {
+        ssl_ctx_->set_verify_mode(ssl::verify_peer);
         ssl_ctx_->set_default_verify_paths();
-        ssl_ctx_->set_verify_mode(verify_mode == VerifyMode::kVerifyPeer
-                                      ? ssl::verify_peer
-                                      : ssl::verify_none);
+
+        std::optional<std::string> const& custom_ca_file =
+            tls_options.CustomCAFile();
+
+        if (custom_ca_file) {
+            // The builder should enforce that the path (if set) is not empty.
+            LD_ASSERT(!custom_ca_file->empty());
+            ssl_ctx_->load_verify_file(custom_ca_file->c_str());
+        }
+
+        using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
+        if (tls_options.PeerVerifyMode() == VerifyMode::kVerifyNone) {
+            ssl_ctx_->set_verify_mode(ssl::verify_none);
+        }
     }
 
     template <typename CompletionToken>

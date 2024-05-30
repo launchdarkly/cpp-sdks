@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -10,12 +11,16 @@ namespace launchdarkly::config::shared::built {
 class TlsOptions final {
    public:
     enum class VerifyMode { kVerifyPeer, kVerifyNone };
-    TlsOptions(VerifyMode verify_mode);
+    explicit TlsOptions(VerifyMode verify_mode);
+    TlsOptions(VerifyMode verify_mode,
+               std::optional<std::string> ca_bundle_path);
     TlsOptions();
     [[nodiscard]] VerifyMode PeerVerifyMode() const;
+    [[nodiscard]] std::optional<std::string> const& CustomCAFile() const;
 
    private:
     VerifyMode verify_mode_;
+    std::optional<std::string> ca_bundle_path_;
 };
 
 class HttpProperties final {
