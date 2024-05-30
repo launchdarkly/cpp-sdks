@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.6.0...launchdarkly-cpp-common-v1.7.0) (2024-05-30)
+
+
+### Features
+
+* specify a custom CA file for TLS peer verification ([#409](https://github.com/launchdarkly/cpp-sdks/issues/409)) ([857dd28](https://github.com/launchdarkly/cpp-sdks/commit/857dd2824f725ee837737130321121595d95d67c))
+
 ## [1.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.5.0...launchdarkly-cpp-common-v1.6.0) (2024-05-13)
 
 

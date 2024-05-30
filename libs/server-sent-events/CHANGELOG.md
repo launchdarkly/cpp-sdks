@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.4.0...launchdarkly-cpp-sse-client-v0.5.0) (2024-05-30)
+
+
+### Features
+
+* specify a custom CA file for TLS peer verification ([#409](https://github.com/launchdarkly/cpp-sdks/issues/409)) ([857dd28](https://github.com/launchdarkly/cpp-sdks/commit/857dd2824f725ee837737130321121595d95d67c))
+
 ## [0.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.3.2...launchdarkly-cpp-sse-client-v0.4.0) (2024-05-13)
 
 
