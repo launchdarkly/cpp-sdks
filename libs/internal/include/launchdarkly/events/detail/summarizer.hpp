@@ -89,6 +89,8 @@ class Summarizer {
         bool operator<(VariationKey const& k) const {
             if (variation < k.variation) {
                 return true;
+            } else if (variation > k.variation) {
+                return false;
             }
             return version < k.version;
         }
