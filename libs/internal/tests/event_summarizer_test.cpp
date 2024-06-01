@@ -35,6 +35,52 @@ TEST(SummarizerTests, ExplicitStartTimeIsCorrect) {
     ASSERT_EQ(summarizer.StartTime(), start);
 }
 
+TEST(SummarizerTests, VariationKeyOrdering) {
+    Summarizer::VariationKey a(0, 1);
+    Summarizer::VariationKey b(1, 0);
+
+    ASSERT_FALSE(a < b);
+    ASSERT_TRUE(a > b);
+
+    ASSERT_FALSE(b > a);
+    ASSERT_TRUE(b < a);
+
+    ASSERT_TRUE(a != b);
+    ASSERT_FALSE(a == b);
+}
+
+TEST(SummarizerTests, VariationKeyEquality) {
+    Summarizer::VariationKey different(2, 2);
+
+    std::vector<Summarizer::VariationKey> keys = {
+        Summarizer::VariationKey(0, 1),
+        Summarizer::VariationKey(1, 0),
+        Summarizer::VariationKey(0, 0),
+        Summarizer::VariationKey(1, 1),
+        Summarizer::VariationKey(12412, 123),
+        Summarizer::VariationKey(324, 5323332)};
+
+    for (auto const& key : keys) {
+        Summarizer::VariationKey a = key;
+        Summarizer::VariationKey b = key;
+
+        ASSERT_EQ(a, b);
+        ASSERT_EQ(b, a);
+
+        ASSERT_FALSE(a != b);
+        ASSERT_FALSE(b != a);
+
+        ASSERT_FALSE(a < b);
+        ASSERT_FALSE(b < a);
+
+        ASSERT_FALSE(a > b);
+        ASSERT_FALSE(b > a);
+
+        ASSERT_NE(key, different);
+        ASSERT_FALSE(key == different);
+    }
+}
+
 struct EvaluationParams {
     std::string feature_key;
     Version feature_version;

@@ -86,6 +86,8 @@ class Summarizer {
             return k.variation == variation && k.version == version;
         }
 
+        bool operator!=(VariationKey const& k) const { return !(*this == k); }
+
         bool operator<(VariationKey const& k) const {
             if (variation < k.variation) {
                 return true;
@@ -94,6 +96,8 @@ class Summarizer {
             }
             return version < k.version;
         }
+
+        bool operator>(VariationKey const& k) const { return k < *this; }
     };
 
     struct State {
