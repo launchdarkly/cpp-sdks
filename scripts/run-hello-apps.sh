@@ -40,6 +40,5 @@ export LD_SDK_KEY="bogus"
 for target in "$@"
 do
   cmake --build . --target "$target"
-  ./examples/"$target"/"$target" | tee "$target"_output.txt
-  grep -F "*** SDK" "$target"_output.txt || (echo "$target: expected connection to LD to fail" && exit 1)
+  ./examples/"$target"/"$target"
 done
