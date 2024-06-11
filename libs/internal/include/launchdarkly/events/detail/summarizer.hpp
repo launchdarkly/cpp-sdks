@@ -83,15 +83,22 @@ class Summarizer {
                      std::optional<VariationIndex> variation);
 
         bool operator==(VariationKey const& k) const {
-            return k.variation == variation && k.version == version;
+            return !(*this < k) && !(k < *this);
         }
+
+        bool operator!=(VariationKey const& k) const { return !(*this == k); }
 
         bool operator<(VariationKey const& k) const {
             if (variation < k.variation) {
                 return true;
             }
+            if (variation > k.variation) {
+                return false;
+            }
             return version < k.version;
         }
+
+        bool operator>(VariationKey const& k) const { return k < *this; }
     };
 
     struct State {
