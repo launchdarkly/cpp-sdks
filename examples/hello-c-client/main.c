@@ -30,24 +30,34 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
+    printf("using mobile key: %s\n", mobile_key);
     LDClientConfigBuilder config_builder =
         LDClientConfigBuilder_New(mobile_key);
 
+    printf("created config builder\n");
     LDClientConfig config = NULL;
+
     LDStatus config_status =
         LDClientConfigBuilder_Build(config_builder, &config);
+
+    printf("built config\n");
+
     if (!LDStatus_Ok(config_status)) {
         printf("error: config is invalid: %s", LDStatus_Error(config_status));
         return 1;
     }
+
+    printf("creating context builder\n");
 
     LDContextBuilder context_builder = LDContextBuilder_New();
     LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
     LDContextBuilder_Attributes_SetName(context_builder, "user", "Sandy");
     LDContext context = LDContextBuilder_Build(context_builder);
 
+    printf("created context, now creating SDK\n");
     LDClientSDK client = LDClientSDK_New(config, context);
 
+    printf("created SDK\n");
     bool initialized_successfully = false;
     if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
                           &initialized_successfully)) {
@@ -63,6 +73,7 @@ int main() {
         return 1;
     }
 
+    printf("evaluating flag: %s\n", FEATURE_FLAG_KEY);
     bool flag_value =
         LDClientSDK_BoolVariation(client, FEATURE_FLAG_KEY, false);
 
@@ -75,7 +86,7 @@ int main() {
     // statistics will not appear on your dashboard. In a normal long-running
     // application, the SDK would continue running and events would be delivered
     // automatically in the background.
-
+    
     LDClientSDK_Free(client);
 
     return 0;
