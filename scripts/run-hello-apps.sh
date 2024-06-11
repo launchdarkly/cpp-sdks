@@ -32,7 +32,7 @@ cd build-"$1" || exit
 # script ends.
 trap cleanup EXIT
 
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release  -D BUILD_TESTING=OFF  -D LD_BUILD_SHARED_LIBS=$dynamic_linkage ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Debug  -D BUILD_TESTING=OFF  -D LD_BUILD_SHARED_LIBS=$dynamic_linkage ..
 
 export LD_MOBILE_KEY="bogus"
 export LD_SDK_KEY="bogus"
