@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.8.0...launchdarkly-cpp-internal-v0.8.1) (2024-06-11)
+
+
+### Bug Fixes
+
+* Summarizer::VariationKey operator&lt; was unsound ([#412](https://github.com/launchdarkly/cpp-sdks/issues/412)) ([57f45b2](https://github.com/launchdarkly/cpp-sdks/commit/57f45b2fd4c73a9b3ed6a0e32a3c5235359f71d7))
+
 ## [0.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.7.0...launchdarkly-cpp-internal-v0.8.0) (2024-05-30)
 
 
