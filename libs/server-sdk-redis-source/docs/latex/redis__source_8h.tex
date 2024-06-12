@@ -1,0 +1,75 @@
+\hypertarget{redis__source_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/integrations/redis/redis\+\_\+source.h File Reference}
+\label{redis__source_8h}\index{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_source.h@{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_source.h}}
+
+
+Launch\+Darkly Server-\/side Redis Source C Binding.  
+
+
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+Include dependency graph for redis\+\_\+source.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{redis__source_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}}
+\begin{DoxyCompactList}\small\item\em Stores the result of calling LDDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{redis__source_8h_a78472dbe65d384b7c4e639faf07134f8}\label{redis__source_8h_a78472dbe65d384b7c4e639faf07134f8}} 
+\#define {\bfseries LDSERVER\+\_\+\+LAZYLOAD\+\_\+\+REDISSOURCE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE}~256
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}\label{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}} 
+typedef struct \+\_\+\+LDServer\+Lazy\+Load\+Redis\+Source $\ast$ {\bfseries LDServer\+Lazy\+Load\+Redis\+Source}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{redis__source_8h_a292916a02304a2599b187b6c16c0de62}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New}} (char const $\ast$uri, char const $\ast$prefix, struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}} $\ast$out\+\_\+result)
+\begin{DoxyCompactList}\small\item\em Creates a new Redis data source suitable for usage in the SDK\textquotesingle{}s Lazy Load data system. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}\label{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}} 
+\mbox{\hyperlink{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free}} (LDServer\+Lazy\+Load\+Redis\+Source source)
+\begin{DoxyCompactList}\small\item\em Frees a Redis data source pointer. Only necessary to call if not passing ownership to SDK configuration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side Redis Source C Binding. 
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{redis__source_8h_a292916a02304a2599b187b6c16c0de62}\label{redis__source_8h_a292916a02304a2599b187b6c16c0de62}} 
+\index{redis\_source.h@{redis\_source.h}!LDServerLazyLoadRedisSource\_New@{LDServerLazyLoadRedisSource\_New}}
+\index{LDServerLazyLoadRedisSource\_New@{LDServerLazyLoadRedisSource\_New}!redis\_source.h@{redis\_source.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadRedisSource\_New()}{LDServerLazyLoadRedisSource\_New()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New (\begin{DoxyParamCaption}\item[{char const $\ast$}]{uri,  }\item[{char const $\ast$}]{prefix,  }\item[{struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}} $\ast$}]{out\+\_\+result }\end{DoxyParamCaption})}
+
+
+
+Creates a new Redis data source suitable for usage in the SDK\textquotesingle{}s Lazy Load data system. 
+
+In this system, the SDK will query Redis for flag/segment data as required, with an in-\/memory cache to reduce the number of queries.
+
+Data is never written back to Redis.
+
+
+\begin{DoxyParams}{Parameters}
+{\em uri} & Redis URI string. Must not be NULL or empty string.\\
+\hline
+{\em prefix} & Prefix to use when reading SDK data from Redis. This allows multiple SDK environments to coexist in the same database, or for the SDK\textquotesingle{}s data to coexist with other unrelated data. Must not be NULL.\\
+\hline
+{\em out\+\_\+result} & Pointer to struct where the source pointer or an error message should be stored.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the source was created successfully; out\+\_\+result-\/$>$source will contain the pointer. The caller must either free the pointer with LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free, OR pass it into the SDK\textquotesingle{}s configuration methods which will take ownership (in which case do not call LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free.) 
+\end{DoxyReturn}
