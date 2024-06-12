@@ -1,6 +1,0 @@
-<map id="launchdarkly::server_side::data_interfaces::IDestination" name="launchdarkly::server_side::data_interfaces::IDestination">
-<area shape="rect" id="node1" title="IDestination represents a sink for data received by the SDK. A destination may be a database,..." alt="" coords="5,85,171,141"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier.html" title=" " alt="" coords="219,5,399,61"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination.html" title="JsonDestination is responsible for converting flag and segment models into serialized data suitable f..." alt="" coords="219,85,399,141"/>
-<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore.html" title=" " alt="" coords="219,165,399,221"/>
-</map>
