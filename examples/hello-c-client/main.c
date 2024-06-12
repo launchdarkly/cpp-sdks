@@ -22,14 +22,6 @@ char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
                                   char const* error);
 
-#if LD_DEBUG_LOGGING
-#define print(...) printf(__VA_ARGS__)
-#else
-#define print(...) \
-    do {           \
-    } while (0)
-#endif
-
 int main() {
     char const* mobile_key = get_with_env_fallback(
         MOBILE_KEY, "LD_MOBILE_KEY",
@@ -38,38 +30,26 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-#if LD_DEBUG_LOGGING
-    printf("Debug logging enabled\n");
-#endif
-
-    print("using mobile key: %s\n", mobile_key);
     LDClientConfigBuilder config_builder =
         LDClientConfigBuilder_New(mobile_key);
 
-    print("created config builder\n");
     LDClientConfig config = NULL;
 
     LDStatus config_status =
         LDClientConfigBuilder_Build(config_builder, &config);
-
-    print("built config\n");
 
     if (!LDStatus_Ok(config_status)) {
         printf("error: config is invalid: %s", LDStatus_Error(config_status));
         return 1;
     }
 
-    print("creating context builder\n");
-
     LDContextBuilder context_builder = LDContextBuilder_New();
     LDContextBuilder_AddKind(context_builder, "user", "example-user-key");
     LDContextBuilder_Attributes_SetName(context_builder, "user", "Sandy");
     LDContext context = LDContextBuilder_Build(context_builder);
 
-    print("created context, now creating SDK\n");
     LDClientSDK client = LDClientSDK_New(config, context);
 
-    print("created SDK\n");
     bool initialized_successfully = false;
     if (LDClientSDK_Start(client, INIT_TIMEOUT_MILLISECONDS,
                           &initialized_successfully)) {
@@ -85,7 +65,6 @@ int main() {
         return 1;
     }
 
-    print("evaluating flag: %s\n", FEATURE_FLAG_KEY);
     bool flag_value =
         LDClientSDK_BoolVariation(client, FEATURE_FLAG_KEY, false);
 
