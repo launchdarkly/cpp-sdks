@@ -20,12 +20,15 @@
 
 char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
-                                  char const* error_msg);
+                                  char const* error);
 
-#define print(...)                    \
-    if (strcmp(logging, "ON") == 0) { \
-        printf(__VA_ARGS__);          \
-    }
+#if LD_DEBUG_LOGGING
+#define print(...) printf(__VA_ARGS__)
+#else
+#define print(...) \
+    do {           \
+    } while (0)
+#endif
 
 int main() {
     char const* mobile_key = get_with_env_fallback(
@@ -35,10 +38,9 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-    char const* logging = get_with_env_fallback(
-        "", "LD_DEBUG_LOGGING", "set LD_DEBUG_LOGGING to ON or OFF");
-
-    printf("Logging is: %s\n", logging);
+#if LD_DEBUG_LOGGING
+    printf("Debug logging enabled\n");
+#endif
 
     print("using mobile key: %s\n", mobile_key);
     LDClientConfigBuilder config_builder =

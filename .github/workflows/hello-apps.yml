@@ -15,7 +15,7 @@ jobs:
   smoketest:
     strategy:
       matrix:
-        logging: [ "OFF", "ON" ]
+        logging: [ "0", "1" ]
       fail-fast: false
     runs-on: "windows-2022"
     steps:
@@ -35,4 +35,4 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
-          LD_DEBUG_LOGGING: ${{ matrix.logging }}
+          CFLAGS: "-D_LD_DEBUG_LOGGING=${{ matrix.logging }}"
