@@ -15,9 +15,9 @@ jobs:
   smoketest:
     strategy:
       matrix:
-        os: [ "windows-2022" ]
+        logging: [ "OFF", "ON" ]
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: "windows-2022"
     steps:
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
@@ -35,3 +35,4 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+          LD_DEBUG_LOGGING: ${{ matrix.logging }}
