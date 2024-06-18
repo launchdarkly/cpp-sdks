@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -23,6 +24,8 @@ enum LDLogLevel {
     LD_LOG_INFO = 1,
     LD_LOG_WARN = 2,
     LD_LOG_ERROR = 3,
+    LD_UNUSED_MAXVALUE = INT32_MAX /* Used to ensure the underlying type is
+                                    * at least 32 bits. */
 };
 
 /**
@@ -40,7 +43,8 @@ LDLogLevel_Name(enum LDLogLevel level, char const* level_if_unknown);
  * @param level Name of level.
  * @param level_if_unknown Default level to return if the level wasn't
  * recognized.
- * @return LDLogLevel matching the name, or level_if_unknown if not recognized.
+ * @return LDLogLevel matching the name, or level_if_unknown if not
+ * recognized.
  */
 LD_EXPORT(enum LDLogLevel)
 LDLogLevel_Enum(char const* level, enum LDLogLevel level_if_unknown);

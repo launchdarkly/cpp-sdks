@@ -11,13 +11,12 @@ char const* GetLogLevelName(LogLevel level, char const* default_) {
             return "debug";
         case LogLevel::kInfo:
             return "info";
-        case LogLevel::kWarn: {
+        case LogLevel::kWarn:
             return "warn";
-            case LogLevel::kError:
-                return "error";
-            default:
-                return default_;
-        }
+        case LogLevel::kError:
+            return "error";
+        default:
+            return default_;
     }
 }
 
