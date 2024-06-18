@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
+
 #include <launchdarkly/logging/console_backend.hpp>
 #include <launchdarkly/logging/logger.hpp>
+
 #include "ostream_tester.hpp"
+
+#include <algorithm>
 
 using launchdarkly::Logger;
 using launchdarkly::LogLevel;
