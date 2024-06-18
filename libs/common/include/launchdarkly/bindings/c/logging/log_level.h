@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {  // only need to export C interface if
@@ -23,8 +24,8 @@ enum LDLogLevel {
     LD_LOG_INFO = 1,
     LD_LOG_WARN = 2,
     LD_LOG_ERROR = 3,
-    LD_LOG_MAXVAL = 0x7FFFFFFF /* This is not a valid log level, it is used to
-                                * ensure the enum is at least 32 bits. */
+    LD_UNUSED_MAXVALUE = INT32_MAX /* Used to ensure the underlying type is
+                                    * at least 32 bits. */
 };
 
 /**

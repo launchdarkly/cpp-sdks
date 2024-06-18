@@ -9,7 +9,7 @@ namespace launchdarkly {
  * severity. The values must not be changed to ensure backwards compatibility
  * with the C API.
  */
-enum class LogLevel : std::uint32_t {
+enum class LogLevel : std::int32_t {
     kDebug = 0,
     kInfo = 1,
     kWarn = 2,

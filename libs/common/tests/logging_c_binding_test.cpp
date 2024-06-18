@@ -7,11 +7,11 @@ TEST(LogLevelTests, LogLevelToString) {
     ASSERT_STREQ("info", LDLogLevel_Name(LD_LOG_INFO, "unknown"));
     ASSERT_STREQ("warn", LDLogLevel_Name(LD_LOG_WARN, "unknown"));
     ASSERT_STREQ("error", LDLogLevel_Name(LD_LOG_ERROR, "unknown"));
-    ASSERT_STREQ("unknown", LDLogLevel_Name(LD_LOG_MAXVAL, "unknown"));
+    ASSERT_STREQ("unknown", LDLogLevel_Name(LD_UNUSED_MAXVALUE, "unknown"));
 }
 
 TEST(LogLevelTests, LogLevelToEnum) {
-    constexpr auto unknown = LD_LOG_MAXVAL;
+    LDLogLevel unknown = LD_UNUSED_MAXVALUE;
     ASSERT_EQ(LD_LOG_DEBUG, LDLogLevel_Enum("debug", unknown));
     ASSERT_EQ(LD_LOG_INFO, LDLogLevel_Enum("info", unknown));
     ASSERT_EQ(LD_LOG_WARN, LDLogLevel_Enum("warn", unknown));
