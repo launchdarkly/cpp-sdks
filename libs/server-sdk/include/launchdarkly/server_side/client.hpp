@@ -280,11 +280,6 @@ class Client : public IClient {
    public:
     Client(Config config);
 
-    Client(Client&&) = delete;
-    Client(Client const&) = delete;
-    Client& operator=(Client) = delete;
-    Client& operator=(Client&& other) = delete;
-
     std::future<bool> StartAsync() override;
 
     [[nodiscard]] bool Initialized() const override;
