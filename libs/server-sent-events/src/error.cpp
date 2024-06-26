@@ -6,25 +6,27 @@ namespace launchdarkly::sse {
 namespace errors {
 
 std::ostream& operator<<(std::ostream& out, NoContent const&) {
-    out << "no content, will not attempt to reconnect (HTTP 204)";
+    out << "received HTTP error 204 (no content) - giving up "
+           "permanently";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out,
                          InvalidRedirectLocation const& invalid) {
-    out << "server responded with an invalid redirect (" << invalid.location
-        << ")";
+    out << "received invalid redirect from server, cannot follow ("
+        << invalid.location << ") - giving up permanently";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, NotRedirectable const&) {
-    out << "cannot follow server redirect";
+    out << "received malformed redirect from server, cannot follow - giving up "
+           "permanently";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, ReadTimeout const& err) {
     out << "timed out reading response body (exceeded " << err.timeout->count()
-        << "ms)";
+        << "ms) - will retry";
     return out;
 }
 
