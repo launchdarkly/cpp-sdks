@@ -30,14 +30,14 @@ std::ostream& operator<<(std::ostream& out, ReadTimeout const& err) {
 
 std::ostream& operator<<(std::ostream& out,
                          UnrecoverableClientError const& err) {
+    std::string explanation;
     if (err.status == boost::beast::http::status::unauthorized ||
         err.status == boost::beast::http::status::forbidden) {
-        out << "invalid auth key (HTTP " << static_cast<int>(err.status) << ")";
-
-    } else {
-        out << "unrecoverable client-side error (HTTP "
-            << static_cast<int>(err.status) << ")";
+        explanation = " (invalid auth key)";
     }
+    out << "received HTTP error " << static_cast<int>(err.status) << explanation
+        << " for streaming connection - giving up "
+           "permanently";
     return out;
 }
 }  // namespace errors
