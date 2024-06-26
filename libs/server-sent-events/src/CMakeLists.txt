@@ -10,6 +10,7 @@ add_library(${LIBNAME} OBJECT
         client.cpp
         parser.cpp
         event.cpp
+        error.cpp
         backoff.cpp)
 
 target_link_libraries(${LIBNAME}

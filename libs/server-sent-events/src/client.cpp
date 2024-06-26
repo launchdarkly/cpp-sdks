@@ -222,7 +222,7 @@ class FoxyClient : public Client,
 
         if (status_class == beast::http::status_class::successful) {
             if (response.result() == beast::http::status::no_content) {
-                errors_(Error::NoContent);
+                errors_(errors::NoContent{});
                 return;
             }
             if (!correct_content_type(response)) {
@@ -247,14 +247,14 @@ class FoxyClient : public Client,
                 auto new_url = redirect_url("base", location_header);
 
                 if (!new_url) {
-                    errors_(Error::InvalidRedirectLocation);
+                    errors_(errors::InvalidRedirectLocation{location_header});
                     return;
                 }
 
                 req_.set(http::field::host, new_url->host());
                 req_.target(new_url->encoded_target());
             } else {
-                errors_(Error::InvalidRedirectLocation);
+                errors_(errors::NotRedirectable{});
                 return;
             }
         }
@@ -264,7 +264,7 @@ class FoxyClient : public Client,
                 return async_backoff(backoff_reason(response.result()));
             }
 
-            errors_(Error::UnrecoverableClientError);
+            errors_(errors::UnrecoverableClientError{response.result()});
             return;
         }
 
@@ -284,7 +284,7 @@ class FoxyClient : public Client,
                 return;
             }
             if (ec == boost::asio::error::operation_aborted) {
-                errors_(Error::ReadTimeout);
+                errors_(errors::ReadTimeout{read_timeout_});
                 return async_backoff(
                     "aborting read of response body (timeout)");
             }
