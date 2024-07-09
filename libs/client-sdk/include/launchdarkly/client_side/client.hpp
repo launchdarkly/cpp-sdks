@@ -18,6 +18,10 @@ namespace launchdarkly::client_side {
 
 /**
  *  Interface for the standard SDK client methods and properties.
+ *
+ * After an SDK instance is created it should be started with the StartAsync
+ * method. Subsequently if a change of context is required the IdentifyAsync
+ * method should be used.
  */
 class IClient {
    public:
@@ -28,7 +32,7 @@ class IClient {
 
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
-     * StartAsync must be called once on the SDK to start receiving flag data.
+     * StartAsync must be called once for the SDK to start receiving flag data.
      * It does not need to be called more than one time. StartAsync only
      * needs to be called one time for the lifetime of the SDK client.
      * To change the context associated with evaluations please call the

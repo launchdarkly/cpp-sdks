@@ -27,7 +27,7 @@ class IClient {
 
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
-     * StartAsync must be called once on the SDK to start receiving flag data.
+     * StartAsync must be called once for the SDK to start receiving flag data.
      * It does not need to be called more than one time.
      *
      * The returned future will resolve to true or false based on the logic
