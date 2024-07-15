@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.5.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.1...launchdarkly-cpp-server-v3.5.2) (2024-07-15)
+
+
+### Bug Fixes
+
+* more helpful error messages for streaming connection failures ([#419](https://github.com/launchdarkly/cpp-sdks/issues/419)) ([6bd21ba](https://github.com/launchdarkly/cpp-sdks/commit/6bd21ba1eafb5f19275935e1f62f7304d4dc69f5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-sse-client bumped from 0.5.0 to 0.5.1
+
 ## [3.5.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.0...launchdarkly-cpp-server-v3.5.1) (2024-06-11)
 
 
