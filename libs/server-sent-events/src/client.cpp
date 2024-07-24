@@ -341,12 +341,17 @@ class FoxyClient : public Client,
         // If any backoff is taking place, cancel that as well.
         backoff_timer_.cancel();
 
-        // Cancels the outstanding read.
-        if (session_->stream.is_ssl()) {
-            session_->stream.ssl().next_layer().cancel();
-        } else {
-            session_->stream.plain().cancel();
+        try {
+            // Cancels the outstanding read.
+            if (session_->stream.is_ssl()) {
+                session_->stream.ssl().next_layer().cancel();
+            } else {
+                session_->stream.plain().cancel();
+            }
+        } catch (boost::system::system_error const& err) {
+            logger_('exception closing stream: ' + err.what());
         }
+
 
         // Ideally we would call session_->async_shutdown() here to gracefully
         // terminate the SSL session. For unknown reasons, this call appears to
