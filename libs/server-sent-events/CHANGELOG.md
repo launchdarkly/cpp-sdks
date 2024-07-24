@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.0...launchdarkly-cpp-sse-client-v0.5.1) (2024-07-15)
+
+
+### Bug Fixes
+
+* more helpful error messages for streaming connection failures ([#419](https://github.com/launchdarkly/cpp-sdks/issues/419)) ([6bd21ba](https://github.com/launchdarkly/cpp-sdks/commit/6bd21ba1eafb5f19275935e1f62f7304d4dc69f5))
+
 ## [0.5.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.4.0...launchdarkly-cpp-sse-client-v0.5.0) (2024-05-30)
 
 

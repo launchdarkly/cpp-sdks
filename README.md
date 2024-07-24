@@ -68,6 +68,9 @@ Various CMake options are available to customize the client/server SDK builds.
 **Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
 symbols aren't exposed. To run unit tests, build a static library._
 
+> [!WARNING]   
+> When building shared libraries C++ symbols are not exported, only the C API will be exported. This is because C++ does not have a stable ABI.
+
 Basic usage example:
 
 ```bash

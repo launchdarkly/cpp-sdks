@@ -1,9 +1,11 @@
 #include "event_outbox.hpp"
 #include "definitions.hpp"
 
+#include <boost/beast/core/bind_handler.hpp>
 #include <boost/url/parse.hpp>
-#include <iostream>
 #include <nlohmann/json.hpp>
+
+#include <iostream>
 
 // Check the outbox at this interval. Normally a flush is triggered for
 // every event; this is just a failsafe in case a flush is happening
@@ -78,22 +80,8 @@ EventOutbox::RequestType EventOutbox::build_request(
                     json = EventMessage{"event", Event{std::move(arg)}};
                 }
             } else if constexpr (std::is_same_v<T, launchdarkly::sse::Error>) {
-                using launchdarkly::sse::Error;
-                auto msg = ErrorMessage{"error"};
-                switch (arg) {
-                    case Error::NoContent:
-                        msg.comment = "no content";
-                        break;
-                    case Error::InvalidRedirectLocation:
-                        msg.comment = "invalid redirect location";
-                        break;
-                    case Error::UnrecoverableClientError:
-                        msg.comment = "unrecoverable client error";
-                    case Error::ReadTimeout:
-                        msg.comment = "read timeout";
-                    default:
-                        msg.comment = "unspecified error";
-                }
+                auto msg = ErrorMessage{"error",
+                                        launchdarkly::sse::ErrorToString(arg)};
                 json = msg;
             }
         },
