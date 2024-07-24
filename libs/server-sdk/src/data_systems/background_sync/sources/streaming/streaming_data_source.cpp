@@ -15,20 +15,6 @@ namespace launchdarkly::server_side::data_systems {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 
-static char const* DataSourceErrorToString(sse::Error const error) {
-    switch (error) {
-        case sse::Error::NoContent:
-            return "server responded 204 (No Content), will not attempt to "
-                   "reconnect";
-        case sse::Error::InvalidRedirectLocation:
-            return "server responded with an invalid redirection";
-        case sse::Error::UnrecoverableClientError:
-            return "unrecoverable client-side error";
-        default:
-            return "unrecognized error";
-    }
-}
-
 std::string const& StreamingDataSource::Identity() const {
     static std::string const identity = "streaming data source";
     return identity;
@@ -132,12 +118,12 @@ void StreamingDataSource::StartAsync(
 
     client_builder.errors([weak_self](auto error) {
         if (auto self = weak_self.lock()) {
-            auto error_string = DataSourceErrorToString(error);
+            std::string error_string = launchdarkly::sse::ErrorToString(error);
             LD_LOG(self->logger_, LogLevel::kError) << error_string;
             self->status_manager_.SetState(
                 DataSourceStatus::DataSourceState::kOff,
                 DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse,
-                error_string);
+                std::move(error_string));
         }
     });
 

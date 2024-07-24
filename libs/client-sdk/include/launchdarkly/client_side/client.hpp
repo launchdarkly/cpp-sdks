@@ -18,6 +18,10 @@ namespace launchdarkly::client_side {
 
 /**
  *  Interface for the standard SDK client methods and properties.
+ *
+ * After an SDK instance is created it should be started with the StartAsync
+ * method. Subsequently if a change of context is required the IdentifyAsync
+ * method should be used.
  */
 class IClient {
    public:
@@ -28,7 +32,11 @@ class IClient {
 
     /** Connects the client to LaunchDarkly's flag delivery endpoints.
      *
-     * StartAsync must be called to obtain fresh flag data.
+     * StartAsync must be called once for the SDK to start receiving flag data.
+     * StartAsync only needs to be called one time for the lifetime of the SDK
+     * client.
+     * To change the context associated with evaluations please call the
+     * IdentifyAsync method.
      *
      * The returned future will resolve to true or false based on the logic
      * outlined on @ref Initialized.
@@ -42,6 +50,10 @@ class IClient {
      *
      * While the client is connecting asynchronously, it is safe to call
      * variation methods, which will return application-defined default values.
+     *
+     * The client will always continue to attempt to connect asynchronously
+     * after being started unless it encounters an unrecoverable error. The
+     * returned promise timing out does not affect this behavior.
      */
     virtual std::future<bool> StartAsync() = 0;
 
@@ -333,7 +345,7 @@ class Client : public IClient {
 
    private:
     inline static char const* const kVersion =
-        "3.6.1";  // {x-release-please-version}
+        "3.6.2";  // {x-release-please-version}
     std::unique_ptr<IClient> client;
 };
 
