@@ -349,6 +349,9 @@ class FoxyClient : public Client,
                 session_->stream.plain().cancel();
             }
         } catch (boost::system::system_error const& err) {
+            // The stream is likely already closed. Potentially the network
+            // interface that was associated with the stream is no longer
+            // available.
             logger_("exception closing stream: " + std::string(err.what()));
         }
 
