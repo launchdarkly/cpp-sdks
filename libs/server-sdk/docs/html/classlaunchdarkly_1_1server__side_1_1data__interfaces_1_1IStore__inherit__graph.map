@@ -1,0 +1,8 @@
+<map id="launchdarkly::server_side::data_interfaces::IStore" name="launchdarkly::server_side::data_interfaces::IStore">
+<area shape="rect" id="node1" title="IStore provides shared ownership of flag and segment domain objects." alt="" coords="5,45,171,101"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore.html" title=" " alt="" coords="219,5,399,61"/>
+<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem.html" title="IDataSystem obtains data used for flag evaluations and makes it available to other components." alt="" coords="226,85,391,141"/>
+<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1BackgroundSync.html" title=" " alt="" coords="447,5,609,61"/>
+<area shape="rect" id="node5" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad.html" title=" " alt="" coords="447,85,609,141"/>
+<area shape="rect" id="node6" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem.html" title=" " alt="" coords="447,165,609,221"/>
+</map>
