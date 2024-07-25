@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.1...launchdarkly-cpp-sse-client-v0.5.2) (2024-07-25)
+
+
+### Bug Fixes
+
+* Handle exception closing stream for unavailable adapter on windows. ([#427](https://github.com/launchdarkly/cpp-sdks/issues/427)) ([ae0013c](https://github.com/launchdarkly/cpp-sdks/commit/ae0013cc0fa1d186e3d8cc9c624dc9496ca67472))
+
 ## [0.5.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.0...launchdarkly-cpp-sse-client-v0.5.1) (2024-07-15)
 
 
