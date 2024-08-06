@@ -27,6 +27,13 @@ option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
 
+cmake_dependent_option(LD_BUILD_EXPORT_ALL_SYMBOLS
+        "Export all symbols when building shared libs. This is disabled by default because C++ ABI stability is not guaranteed. Use only if you have a specific requirement and understand the risks."
+        OFF
+        "LD_BUILD_SHARED_LIBS" # only relevant if building SDK as shared lib
+        OFF                    # otherwise, off.
+)
+
 cmake_dependent_option(LD_DYNAMIC_LINK_BOOST
         "Dynamically link boost instead of building with its static libraries"
         ON  # Default to dynamically linking boost, because we can't provide static libs on all platforms that
@@ -122,11 +129,14 @@ else ()
 endif ()
 
 if (LD_BUILD_SHARED_LIBS)
-    # When building a shared library we hide all symbols
-    # aside from this we have specifically exported for the C-API.
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-endif ()
+    if (LD_BUILD_EXPORT_ALL_SYMBOLS)
+       message(STATUS "LaunchDarkly: exposing all symbols in shared libraries")
+    else ()
+       message(STATUS "LaunchDarkly: hiding all symbols in shared libraries except for C API")
+       set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+       set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+    endif()
+endif()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
