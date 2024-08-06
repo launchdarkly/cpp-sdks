@@ -27,9 +27,11 @@ option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
 
-option(LD_BUILD_EXPORT_SYMBOLS
-        "Export all the symbols."
-        OFF  # default to hide visibility of symbols aside from C-API.
+cmake_dependent_option(LD_BUILD_EXPORT_ALL_SYMBOLS
+        "Export all symbols when building shared libs. This is disabled by default because C++ ABI stability is not guaranteed. Use only if you have a specific requirement and understand the risks."
+        OFF
+        "LD_BUILD_SHARED_LIBS" # only relevant if building SDK as shared lib
+        OFF                    # otherwise, off.
 )
 
 cmake_dependent_option(LD_DYNAMIC_LINK_BOOST
