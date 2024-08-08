@@ -12,6 +12,47 @@ extern "C" {
 // used by C++ source code
 #endif
 
+/**
+ * @brief LDServerLazyLoadRedisSource represents a data source for the
+ * Server-Side SDK backed by Redis. It is meant to be used in place of the
+ * standard LaunchDarkly Streaming or Polling data sources.
+ *
+ * Call @ref LDServerLazyLoadRedisSource_New to obtain a new instance. This
+ * instance can be passed into the SDK's DataSystem configuration via the
+ * LazyLoad builder.
+ *
+ * Example:
+ * @code
+ *  // Stack allocate the result struct, which will hold the result pointer or
+ *  // an error message.
+ *  struct LDServerLazyLoadRedisResult result;
+ *
+ *  // Create the Redis source, passing in arguments for the URI, prefix, and
+ *  // pointer to the result.
+ *  if (!LDServerLazyLoadRedisSource_New("tcp://localhost:6379", "testprefix",
+ * &result)) {
+ *      // On failure, you may print the error message (result.error_message),
+ *      // then exit or return.
+ *  }
+ *
+ *  // Create a builder for the Lazy Load data system.
+ *  LDServerLazyLoadBuilder lazy_builder = LDServerLazyLoadBuilder_New();
+ *
+ *  // Pass the Redis source pointer into it.
+ *  LDServerLazyLoadBuilder_SourcePtr(lazy_builder, result.source);
+ *
+ *  // Create a standard server-side SDK configuration builder.
+ *  LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+ *
+ *  // Tell the SDK config builder to use the Lazy Load system that was just
+ *  // configured.
+ *  LDServerConfigBuilder_DataSystem_LazyLoad(cfg_builder, lazy_builder);
+ * @endcode
+ *
+ * This implementation is backed by <a
+ * href="https://github.com/sewenew/redis-plus-plus">Redis++</a>, a C++ wrapper
+ * for the <a href="https://github.com/redis/hiredis">hiredis</a> library.
+ */
 typedef struct _LDServerLazyLoadRedisSource* LDServerLazyLoadRedisSource;
 
 /* Defines the size of the error message buffer in LDServerLazyLoadResult.
@@ -21,7 +62,7 @@ typedef struct _LDServerLazyLoadRedisSource* LDServerLazyLoadRedisSource;
 #endif
 
 /**
- * @brief Stores the result of calling LDDServerLazyLoadRedisSource_New.
+ * @brief Stores the result of calling @ref LDDServerLazyLoadRedisSource_New.
  *
  * On successful creation, source will contain a pointer which may be passed
  * into the LaunchDarkly SDK's configuration.
@@ -57,9 +98,9 @@ struct LDServerLazyLoadRedisResult {
  *
  * @return True if the source was created successfully; out_result->source
  * will contain the pointer. The caller must either free the
- * pointer with LDServerLazyLoadRedisSource_Free, OR pass it into the SDK's
+ * pointer with @ref LDServerLazyLoadRedisSource_Free, OR pass it into the SDK's
  * configuration methods which will take ownership (in which case do not call
- * LDServerLazyLoadRedisSource_Free.)
+ * @ref LDServerLazyLoadRedisSource_Free.)
  */
 LD_EXPORT(bool)
 LDServerLazyLoadRedisSource_New(char const* uri,
