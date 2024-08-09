@@ -22,7 +22,9 @@ using namespace launchdarkly::server_side;
 class RedisTests : public ::testing::Test {
    public:
     explicit RedisTests()
-        : uri_("tcp://localhost:6379"), prefix_("testprefix"), client_(uri_) {}
+        : uri_("redis://localhost:6379"),
+          prefix_("testprefix"),
+          client_(uri_) {}
 
     void SetUp() override {
         try {

@@ -29,7 +29,7 @@ extern "C" {
  *
  *  // Create the Redis source, passing in arguments for the URI, prefix, and
  *  // pointer to the result.
- *  if (!LDServerLazyLoadRedisSource_New("tcp://localhost:6379", "testprefix",
+ *  if (!LDServerLazyLoadRedisSource_New("redis://localhost:6379", "testprefix",
  * &result)) {
  *      // On failure, you may print the error message (result.error_message),
  *      // then exit or return.
