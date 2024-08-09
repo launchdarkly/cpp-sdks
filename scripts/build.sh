@@ -26,10 +26,19 @@ fi
 
 
 
+# Special case: when building for macOS, we need to specify the architectures to build for.
+osx_archs="x86_64"
+
+if [[ "$(uname -m)" == "arm64" ]]; then
+    osx_archs="arm64;x86_64"
+fi
+
+
 cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
                -D BUILD_TESTING="$2" \
                -D LD_BUILD_UNIT_TESTS="$2" \
                -D LD_BUILD_CONTRACT_TESTS="$2" \
+               -D CMAKE_OSX_ARCHITECTURES="$osx_archs" \
                -D LD_BUILD_REDIS_SUPPORT="$build_redis" ..
 
 cmake --build . --target "$1"
