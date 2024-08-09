@@ -1,0 +1,113 @@
+\hypertarget{redis__source_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/integrations/redis/redis\+\_\+source.h File Reference}
+\label{redis__source_8h}\index{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_source.h@{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_source.h}}
+
+
+Launch\+Darkly Server-\/side Redis Source C Binding.  
+
+
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+Include dependency graph for redis\+\_\+source.\+h\+:
+% FIG 0
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}}
+\begin{DoxyCompactList}\small\item\em Stores the result of calling LDDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{redis__source_8h_a78472dbe65d384b7c4e639faf07134f8}\label{redis__source_8h_a78472dbe65d384b7c4e639faf07134f8}} 
+\#define {\bfseries LDSERVER\+\_\+\+LAZYLOAD\+\_\+\+REDISSOURCE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE}~256
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \+\_\+\+LDServer\+Lazy\+Load\+Redis\+Source $\ast$ \mbox{\hyperlink{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}{LDServer\+Lazy\+Load\+Redis\+Source}}
+\begin{DoxyCompactList}\small\item\em LDServer\+Lazy\+Load\+Redis\+Source represents a data source for the Server-\/\+Side SDK backed by Redis. It is meant to be used in place of the standard Launch\+Darkly Streaming or Polling data sources. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{redis__source_8h_a292916a02304a2599b187b6c16c0de62}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New}} (char const $\ast$uri, char const $\ast$prefix, struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}} $\ast$out\+\_\+result)
+\begin{DoxyCompactList}\small\item\em Creates a new Redis data source suitable for usage in the SDK\textquotesingle{}s Lazy Load data system. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}\label{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}} 
+\mbox{\hyperlink{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free}} (\mbox{\hyperlink{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}{LDServer\+Lazy\+Load\+Redis\+Source}} source)
+\begin{DoxyCompactList}\small\item\em Frees a Redis data source pointer. Only necessary to call if not passing ownership to SDK configuration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side Redis Source C Binding. 
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}\label{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}} 
+\index{redis\_source.h@{redis\_source.h}!LDServerLazyLoadRedisSource@{LDServerLazyLoadRedisSource}}
+\index{LDServerLazyLoadRedisSource@{LDServerLazyLoadRedisSource}!redis\_source.h@{redis\_source.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadRedisSource}{LDServerLazyLoadRedisSource}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDServer\+Lazy\+Load\+Redis\+Source$\ast$ \mbox{\hyperlink{redis__source_8h_aa3b6f62663182c7c87355deb4e20f730}{LDServer\+Lazy\+Load\+Redis\+Source}}}
+
+
+
+LDServer\+Lazy\+Load\+Redis\+Source represents a data source for the Server-\/\+Side SDK backed by Redis. It is meant to be used in place of the standard Launch\+Darkly Streaming or Polling data sources. 
+
+Call \mbox{\hyperlink{redis__source_8h_a292916a02304a2599b187b6c16c0de62}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New}} to obtain a new instance. This instance can be passed into the SDK\textquotesingle{}s Data\+System configuration via the Lazy\+Load builder.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ \textcolor{comment}{// Stack allocate the result struct, which will hold the result pointer or}}
+\DoxyCodeLine{ \textcolor{comment}{// an error message.}}
+\DoxyCodeLine{ \textcolor{keyword}{struct }\mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServerLazyLoadRedisResult}} result;}
+\DoxyCodeLine{}
+\DoxyCodeLine{ \textcolor{comment}{// Create the Redis source, passing in arguments for the URI, prefix, and}}
+\DoxyCodeLine{ \textcolor{comment}{// pointer to the result.}}
+\DoxyCodeLine{ \textcolor{keywordflow}{if} (!\mbox{\hyperlink{redis__source_8h_a292916a02304a2599b187b6c16c0de62}{LDServerLazyLoadRedisSource\_New}}(\textcolor{stringliteral}{"{}redis://localhost:6379"{}}, \textcolor{stringliteral}{"{}testprefix"{}},}
+\DoxyCodeLine{\&result)) \{}
+\DoxyCodeLine{     \textcolor{comment}{// On failure, you may print the error message (result.error\_message),}}
+\DoxyCodeLine{     \textcolor{comment}{// then exit or return.}}
+\DoxyCodeLine{ \}}
+\DoxyCodeLine{}
+\DoxyCodeLine{ \textcolor{comment}{// Create a builder for the Lazy Load data system.}}
+\DoxyCodeLine{ LDServerLazyLoadBuilder lazy\_builder = LDServerLazyLoadBuilder\_New();}
+\DoxyCodeLine{}
+\DoxyCodeLine{ \textcolor{comment}{// Pass the Redis source pointer into it.}}
+\DoxyCodeLine{ LDServerLazyLoadBuilder\_SourcePtr(lazy\_builder, result.source);}
+\DoxyCodeLine{}
+\DoxyCodeLine{ \textcolor{comment}{// Create a standard server-\/side SDK configuration builder.}}
+\DoxyCodeLine{ LDServerConfigBuilder cfg\_builder = LDServerConfigBuilder\_New(\textcolor{stringliteral}{"{}sdk-\/123"{}});}
+\DoxyCodeLine{}
+\DoxyCodeLine{ \textcolor{comment}{// Tell the SDK config builder to use the Lazy Load system that was just}}
+\DoxyCodeLine{ \textcolor{comment}{// configured.}}
+\DoxyCodeLine{ LDServerConfigBuilder\_DataSystem\_LazyLoad(cfg\_builder, lazy\_builder);}
+
+\end{DoxyCode}
+
+
+This implementation is backed by \href{https://github.com/sewenew/redis-plus-plus}{\texttt{ Redis++}}, a C++ wrapper for the \href{https://github.com/redis/hiredis}{\texttt{ hiredis}} library. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{redis__source_8h_a292916a02304a2599b187b6c16c0de62}\label{redis__source_8h_a292916a02304a2599b187b6c16c0de62}} 
+\index{redis\_source.h@{redis\_source.h}!LDServerLazyLoadRedisSource\_New@{LDServerLazyLoadRedisSource\_New}}
+\index{LDServerLazyLoadRedisSource\_New@{LDServerLazyLoadRedisSource\_New}!redis\_source.h@{redis\_source.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadRedisSource\_New()}{LDServerLazyLoadRedisSource\_New()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+New (\begin{DoxyParamCaption}\item[{char const $\ast$}]{uri,  }\item[{char const $\ast$}]{prefix,  }\item[{struct \mbox{\hyperlink{structLDServerLazyLoadRedisResult}{LDServer\+Lazy\+Load\+Redis\+Result}} $\ast$}]{out\+\_\+result }\end{DoxyParamCaption})}
+
+
+
+Creates a new Redis data source suitable for usage in the SDK\textquotesingle{}s Lazy Load data system. 
+
+In this system, the SDK will query Redis for flag/segment data as required, with an in-\/memory cache to reduce the number of queries.
+
+Data is never written back to Redis.
+
+
+\begin{DoxyParams}{Parameters}
+{\em uri} & Redis URI string. Must not be NULL or empty string.\\
+\hline
+{\em prefix} & Prefix to use when reading SDK data from Redis. This allows multiple SDK environments to coexist in the same database, or for the SDK\textquotesingle{}s data to coexist with other unrelated data. Must not be NULL.\\
+\hline
+{\em out\+\_\+result} & Pointer to struct where the source pointer or an error message should be stored.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the source was created successfully; out\+\_\+result-\/$>$source will contain the pointer. The caller must either free the pointer with \mbox{\hyperlink{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free}}, OR pass it into the SDK\textquotesingle{}s configuration methods which will take ownership (in which case do not call \mbox{\hyperlink{redis__source_8h_af596d0c20151bcd6aef4a3099b3ca361}{LDServer\+Lazy\+Load\+Redis\+Source\+\_\+\+Free}}.) 
+\end{DoxyReturn}
