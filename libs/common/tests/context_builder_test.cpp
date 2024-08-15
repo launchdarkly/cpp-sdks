@@ -29,14 +29,14 @@ TEST(ContextBuilderTests, CanMakeBasicContext) {
 
 TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
     auto context = ContextBuilder()
-                       .Kind("user", "bobby-bobberson")
-                       .Name("Bob")
-                       .Anonymous(true)
-                       // Set a custom attribute.
-                       .Set("likesCats", true)
-                       // Set a private custom attribute.
-                       .SetPrivate("email", "email@email.email")
-                       .Build();
+                   .Kind("user", "bobby-bobberson")
+                   .Name("Bob")
+                   .Anonymous(true)
+                   // Set a custom attribute.
+                   .Set("likesCats", true)
+                   // Set a private custom attribute.
+                   .SetPrivate("email", "email@email.email")
+                   .Build();
 
     EXPECT_TRUE(context.Valid());
 
@@ -56,25 +56,25 @@ TEST(ContextBuilderTests, CanMakeSingleContextWithCustomAttributes) {
 TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
     auto context =
         ContextBuilder()
-            .Kind("user", "user-key")
-            .Anonymous(true)
-            .Name("test")
-            .Set("string", "potato")
-            .Set("int", 42)
-            .Set("double", 3.14)
-            .Set("array", {false, true, 42})
+        .Kind("user", "user-key")
+        .Anonymous(true)
+        .Name("test")
+        .Set("string", "potato")
+        .Set("int", 42)
+        .Set("double", 3.14)
+        .Set("array", {false, true, 42})
 
-            .SetPrivate("private", "this is private")
-            .AddPrivateAttribute("double")
-            .AddPrivateAttributes(std::vector<std::string>{"string", "int"})
-            .AddPrivateAttributes(
-                std::vector<AttributeReference>{"explicitArray"})
-            // Start the org kind.
-            .Kind("org", "org-key")
-            .Name("Macdonwalds")
-            .Set("explicitArray", Array{"egg", "ham"})
-            .Set("object", Object{{"string", "bacon"}, {"boolean", false}})
-            .Build();
+        .SetPrivate("private", "this is private")
+        .AddPrivateAttribute("double")
+        .AddPrivateAttributes(std::vector<std::string>{"string", "int"})
+        .AddPrivateAttributes(
+            std::vector<AttributeReference>{"explicitArray"})
+        // Start the org kind.
+        .Kind("org", "org-key")
+        .Name("Macdonwalds")
+        .Set("explicitArray", Array{"egg", "ham"})
+        .Set("object", Object{{"string", "bacon"}, {"boolean", false}})
+        .Build();
 
     EXPECT_TRUE(context.Valid());
 
@@ -94,7 +94,7 @@ TEST(ContextBuilderTests, CanBuildComplexMultiContext) {
     EXPECT_EQ(1,
               context.Attributes("user").PrivateAttributes().count("double"));
     EXPECT_EQ(1, context.Attributes("user").PrivateAttributes().count(
-                     "explicitArray"));
+                  "explicitArray"));
     EXPECT_EQ(1,
               context.Attributes("user").PrivateAttributes().count("string"));
     EXPECT_EQ(1,
@@ -177,11 +177,11 @@ TEST(ContextBuilderTests, AccessKindBuilderMultipleTimes) {
 
 TEST(ContextBuilderTests, AddAttributeToExistingContext) {
     auto context = ContextBuilder()
-                       .Kind("user", "potato")
-                       .Name("Bob")
-                       .Set("city", "Reno")
-                       .SetPrivate("private", "a")
-                       .Build();
+                   .Kind("user", "potato")
+                   .Name("Bob")
+                   .Set("city", "Reno")
+                   .SetPrivate("private", "a")
+                   .Build();
 
     auto builder = ContextBuilder(context);
     if (auto updater = builder.Kind("user")) {
@@ -196,16 +196,20 @@ TEST(ContextBuilderTests, AddAttributeToExistingContext) {
     EXPECT_EQ("Nevada", updated_context.Get("user", "state").AsString());
 
     EXPECT_EQ(2, updated_context.Attributes("user").PrivateAttributes().size());
-    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("private"));
-    EXPECT_EQ(1, updated_context.Attributes("user").PrivateAttributes().count("sneaky"));
+    EXPECT_EQ(
+        1, updated_context.Attributes("user").PrivateAttributes().count(
+            "private"));
+    EXPECT_EQ(
+        1, updated_context.Attributes("user").PrivateAttributes().count("sneaky"
+        ));
 }
 
 TEST(ContextBuilderTests, AddKindToExistingContext) {
     auto context = ContextBuilder()
-                       .Kind("user", "potato")
-                       .Name("Bob")
-                       .Set("city", "Reno")
-                       .Build();
+                   .Kind("user", "potato")
+                   .Name("Bob")
+                   .Set("city", "Reno")
+                   .Build();
 
     auto updated_context =
         ContextBuilder(context).Kind("org", "org-key").Build();
@@ -239,6 +243,64 @@ TEST(ContextBuilderTests, UseTheSameBuilderToBuildMultipleContexts) {
     EXPECT_EQ("Bob", context_c.Get("user", "name").AsString());
     EXPECT_EQ("Reno", context_c.Get("user", "city").AsString());
     EXPECT_EQ("tomato", context_c.Get("bob", "key").AsString());
+}
+
+TEST(ContextBuilderTests, CannotSetProtectedAttributes) {
+    auto builder = ContextBuilder();
+    auto context = builder.Kind("user", "potato").Set("_meta", "a").
+                           Set("kind", "b").Set("key", "c").Build();
+    ASSERT_TRUE(context.Valid());
+    EXPECT_EQ(context.Get("user", "_meta"), Value::Null());
+    EXPECT_EQ(context.Get("user", "kind"), Value::Null());
+    EXPECT_EQ(context.Get("user", "key"), "potato");
+}
+
+TEST(ContextBuilderTests, CannotMarkProtectedAttributesAsPrivate) {
+    auto builder = ContextBuilder();
+    auto context = builder.Kind("user", "potato").SetPrivate("_meta", "a").
+                           SetPrivate("kind", "b").SetPrivate("key", "c").
+                           Build();
+    ASSERT_TRUE(context.Valid());
+    EXPECT_EQ(context.Get("user", "_meta"), Value::Null());
+    EXPECT_EQ(context.Get("user", "kind"), Value::Null());
+    EXPECT_EQ(context.Get("user", "key"), "potato");
+    EXPECT_EQ(context.Attributes("user").PrivateAttributes().size(), 0);
+}
+
+TEST(ContextBuilderTests, CannotSetIncorrectTypedAttributes) {
+    auto builder = ContextBuilder();
+    auto context = builder.Kind("user", "potato").Set("anonymous", "hello").
+                           Set("name", 42).Build();
+    ASSERT_TRUE(context.Valid());
+    // By default, anonymous is false.
+    EXPECT_EQ(context.Get("user", "anonymous"), Value(false));
+    // By default, name is the empty string.
+    EXPECT_EQ(context.Get("user", "name"), Value(""));
+}
+
+TEST(ContextBuilderTests, CanSetCorrectTypedAttributes) {
+    auto builder = ContextBuilder();
+    auto context = builder.Kind("user", "potato").Set("anonymous", true).
+                           Set("name", "Bob").Build();
+    ASSERT_TRUE(context.Valid());
+    EXPECT_EQ(context.Get("user", "anonymous"), Value(true));
+    EXPECT_EQ(context.Get("user", "name"), Value("Bob"));
+}
+
+TEST(ContextBuilderTests, CanMarkTypedAttributesAsPrivate) {
+    auto builder = ContextBuilder();
+    auto context = builder.Kind("user", "potato").SetPrivate(
+        "anonymous", Value(true)).SetPrivate("name", Value("Bob")).Build();
+    ASSERT_TRUE(context.Valid());
+    // Even if these attributes cannot *actually* be redacted, the attributes builder
+    // still allows them to be marked private. Whether this should be allowed or not is
+    // up for debate (ideally we'd log it, but we don't have access to a logger. We could
+    // silently not allow it to be added to the private attributes list instead.)
+    EXPECT_EQ(context.Get("user", "anonymous"), Value(true));
+    EXPECT_EQ(context.Attributes("user").PrivateAttributes().count("anonymous"),
+              1);
+    EXPECT_EQ(context.Get("user", "name"), Value("Bob"));
+    EXPECT_EQ(context.Attributes("user").PrivateAttributes().count("name"), 1);
 }
 
 // NOLINTEND cppcoreguidelines-avoid-magic-numbers
