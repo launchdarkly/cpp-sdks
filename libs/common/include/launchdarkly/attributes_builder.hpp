@@ -31,7 +31,7 @@ public:
      * @param key The key for the kind.
      */
     AttributesBuilder(BuilderReturn& builder, std::string kind, std::string key)
-        : key_(std::move(key)), kind_(std::move(kind)), builder_(builder) {
+        : builder_(builder), kind_(std::move(kind)), key_(std::move(key)) {
     }
 
     /**
@@ -45,9 +45,9 @@ public:
     AttributesBuilder(BuilderReturn& builder,
                       std::string kind,
                       Attributes const& attributes)
-        : key_(attributes.Key()),
+        : builder_(builder),
           kind_(std::move(kind)),
-          builder_(builder),
+          key_(attributes.Key()),
           name_(attributes.Name()),
           anonymous_(attributes.Anonymous()),
           private_attributes_(attributes.PrivateAttributes()) {
