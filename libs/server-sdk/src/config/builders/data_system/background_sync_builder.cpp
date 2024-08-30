@@ -3,20 +3,22 @@
 #include "defaults.hpp"
 
 namespace launchdarkly::server_side::config::builders {
-
 BackgroundSyncBuilder::BackgroundSyncBuilder()
-    : bootstrap_builder_(), config_(Defaults::BackgroundSyncConfig()) {}
+    : bootstrap_builder_(), config_(Defaults::BackgroundSyncConfig()) {
+}
 
 BootstrapBuilder& BackgroundSyncBuilder::Bootstrapper() {
     return bootstrap_builder_;
 }
 
-BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Streaming source) {
+BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(
+    Streaming const& source) {
     config_.synchronizer_ = source.Build();
     return *this;
 }
 
-BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(Polling source) {
+BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(
+    Polling const& source) {
     config_.synchronizer_ = source.Build();
     return *this;
 }
@@ -33,5 +35,4 @@ BackgroundSyncBuilder& BackgroundSyncBuilder::Destination(
     copy.bootstrap_ = bootstrap_cfg;
     return copy;
 }
-
-}  // namespace launchdarkly::server_side::config::builders
+} // namespace launchdarkly::server_side::config::builders

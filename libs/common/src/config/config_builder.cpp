@@ -2,10 +2,10 @@
 #include <launchdarkly/config/shared/defaults.hpp>
 
 namespace launchdarkly::config::shared::builders {
-
 template <typename SDK>
 ConfigBuilder<SDK>::ConfigBuilder(std::string sdk_key)
-    : sdk_key_(std::move(sdk_key)) {}
+    : sdk_key_(std::move(sdk_key)) {
+}
 
 template <typename SDK>
 typename ConfigBuilder<SDK>::EndpointsBuilder&
@@ -71,6 +71,9 @@ ConfigBuilder<SDK>::Build() const {
     std::optional<std::string> app_tag = app_info_builder_.Build();
 
     auto data_source_config = data_source_builder_.Build();
+    if (!data_source_config) {
+        return tl::make_unexpected(data_source_config.error());
+    }
 
     auto http_properties = http_properties_builder_.Build();
 
@@ -85,11 +88,10 @@ ConfigBuilder<SDK>::Build() const {
             *endpoints_config,
             *events_config,
             app_tag,
-            std::move(data_source_config),
+            *data_source_config,
             std::move(http_properties),
             std::move(persistence)};
 }
 
 template class ConfigBuilder<config::shared::ClientSDK>;
-
-}  // namespace launchdarkly::config::shared::builders
+} // namespace launchdarkly::config::shared::builders

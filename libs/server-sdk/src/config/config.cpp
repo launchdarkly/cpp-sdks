@@ -1,7 +1,6 @@
 #include <launchdarkly/server_side/config/config.hpp>
 
 namespace launchdarkly::server_side {
-
 using namespace launchdarkly::config::shared;
 
 Config::Config(std::string sdk_key,
@@ -12,12 +11,14 @@ Config::Config(std::string sdk_key,
                config::built::DataSystemConfig data_system_config,
                built::HttpProperties http_properties)
     : sdk_key_(std::move(sdk_key)),
+      offline_(false),
       logging_(std::move(logging)),
       service_endpoints_(std::move(service_endpoints)),
-      events_(std::move(events)),
       application_tag_(std::move(application_tag)),
+      events_(std::move(events)),
       data_system_config_(std::move(data_system_config)),
-      http_properties_(std::move(http_properties)) {}
+      http_properties_(std::move(http_properties)) {
+}
 
 std::string const& Config::SdkKey() const {
     return sdk_key_;
@@ -46,5 +47,4 @@ built::HttpProperties const& Config::HttpProperties() const {
 built::Logging const& Config::Logging() const {
     return logging_;
 }
-
-}  // namespace launchdarkly::server_side
+} // namespace launchdarkly::server_side

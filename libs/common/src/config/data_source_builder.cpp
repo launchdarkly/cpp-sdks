@@ -1,28 +1,38 @@
 #include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 
 namespace launchdarkly::config::shared::builders {
-
 template <typename SDK>
-struct MethodVisitor {};
+struct MethodVisitor {
+};
 
 template <>
 struct MethodVisitor<ClientSDK> {
     using SDK = ClientSDK;
     using Result =
-        std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>;
+    tl::expected<std::variant<built::StreamingConfig<SDK>, built::PollingConfig<
+                                  SDK>>, Error>;
 
     Result operator()(StreamingBuilder<SDK> const& streaming) const {
-        return streaming.Build();
+        if (auto cfg_or_error = streaming.Build(); !cfg_or_error) {
+            return tl::make_unexpected(cfg_or_error.error());
+        } else {
+            return *cfg_or_error;
+        }
     }
 
     Result operator()(PollingBuilder<SDK> const& polling) const {
-        return polling.Build();
+        if (auto cfg_or_error = polling.Build(); !cfg_or_error) {
+            return tl::make_unexpected(cfg_or_error.error());
+        } else {
+            return *cfg_or_error;
+        }
     }
 };
 
 template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
-    : config_(Defaults<SDK>::StreamingConfig()) {}
+    : config_(Defaults<SDK>::StreamingConfig()) {
+}
 
 template <typename SDK>
 StreamingBuilder<SDK>& StreamingBuilder<SDK>::InitialReconnectDelay(
@@ -32,13 +42,21 @@ StreamingBuilder<SDK>& StreamingBuilder<SDK>::InitialReconnectDelay(
 }
 
 template <typename SDK>
-built::StreamingConfig<SDK> StreamingBuilder<SDK>::Build() const {
+StreamingBuilder<SDK>& StreamingBuilder<SDK>::Filter(std::string filter_key) {
+    config_.filter_key = std::move(filter_key);
+    return *this;
+}
+
+template <typename SDK>
+tl::expected<built::StreamingConfig<SDK>, Error> StreamingBuilder<
+    SDK>::Build() const {
     return config_;
 }
 
 template <typename SDK>
 PollingBuilder<SDK>::PollingBuilder()
-    : config_(Defaults<SDK>::PollingConfig()) {}
+    : config_(Defaults<SDK>::PollingConfig()) {
+}
 
 template <typename SDK>
 PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
@@ -48,12 +66,21 @@ PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
 }
 
 template <typename SDK>
-built::PollingConfig<SDK> PollingBuilder<SDK>::Build() const {
+PollingBuilder<SDK>& PollingBuilder<SDK>::Filter(std::string filter_key) {
+    config_.filter_key = std::move(filter_key);
+    return *this;
+}
+
+
+template <typename SDK>
+tl::expected<built::PollingConfig<SDK>, Error> PollingBuilder<
+    SDK>::Build() const {
     return config_;
 }
 
 DataSourceBuilder<ClientSDK>::DataSourceBuilder()
-    : with_reasons_(false), use_report_(false), method_(Streaming()) {}
+    : with_reasons_(false), use_report_(false), method_(Streaming()) {
+}
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::WithReasons(
     bool value) {
@@ -79,9 +106,14 @@ DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::Method(
     return *this;
 }
 
-built::DataSourceConfig<ClientSDK> DataSourceBuilder<ClientSDK>::Build() const {
-    return {std::visit(MethodVisitor<ClientSDK>(), method_), with_reasons_,
-            use_report_};
+tl::expected<built::DataSourceConfig<ClientSDK>, Error> DataSourceBuilder<
+    ClientSDK>::Build() const {
+    auto ds_config = std::visit(MethodVisitor<ClientSDK>(), method_);
+    if (!ds_config) {
+        return tl::make_unexpected(ds_config.error());
+    }
+    return built::DataSourceConfig<ClientSDK>{*ds_config, with_reasons_,
+                                              use_report_};
 }
 
 template class PollingBuilder<ClientSDK>;
@@ -89,5 +121,4 @@ template class PollingBuilder<ServerSDK>;
 
 template class StreamingBuilder<ClientSDK>;
 template class StreamingBuilder<ServerSDK>;
-
-}  // namespace launchdarkly::config::shared::builders
+} // namespace launchdarkly::config::shared::builders
