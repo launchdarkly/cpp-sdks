@@ -47,3 +47,21 @@ TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
             client_config->method)
         .poll_interval);
 }
+
+TEST(DataSourceBuilderTests, PollingEmptyFilterKeyReturnsError) {
+    auto ds_config = client_side::DataSourceBuilder::
+        Polling().Filter("")
+                 .Build();
+
+    EXPECT_FALSE(ds_config);
+    EXPECT_EQ(ds_config.error(), Error::kConfig_DataSource_EmptyFilterKey);
+}
+
+TEST(DataSourceBuilderTests, StreamingEmptyFilterKeyReturnsError) {
+    auto ds_config = client_side::DataSourceBuilder::
+        Streaming().Filter("")
+                   .Build();
+
+    EXPECT_FALSE(ds_config);
+    EXPECT_EQ(ds_config.error(), Error::kConfig_DataSource_EmptyFilterKey);
+}

@@ -2,9 +2,9 @@
 #include "defaults.hpp"
 
 namespace launchdarkly::server_side::config::builders {
-
 DataSystemBuilder::DataSystemBuilder()
-    : method_builder_(std::nullopt), config_(Defaults::DataSystemConfig()) {}
+    : method_builder_(std::nullopt), config_(Defaults::DataSystemConfig()) {
+}
 
 DataSystemBuilder& DataSystemBuilder::Method(BackgroundSync bg_sync) {
     method_builder_ = std::move(bg_sync);
@@ -29,16 +29,17 @@ tl::expected<built::DataSystemConfig, Error> DataSystemBuilder::Build() const {
     if (method_builder_) {
         auto lazy_or_background_cfg = std::visit(
             [](auto&& arg)
-                -> tl::expected<std::variant<built::LazyLoadConfig,
-                                             built::BackgroundSyncConfig>,
-                                Error> {
+            -> tl::expected<std::variant<built::LazyLoadConfig,
+                                         built::BackgroundSyncConfig>,
+                            Error> {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, BackgroundSync>) {
-                    return arg.Build();  // -> built::BackgroundSyncConfig
+                    return arg.Build();
+                    // -> tl::expected<built::BackgroundSyncConfig, Error>
                 } else if constexpr (std::is_same_v<T, LazyLoad>) {
                     return arg
-                        .Build();  // -> tl::expected<built::LazyLoadConfig,
-                                   // Error>
+                        .Build(); // -> tl::expected<built::LazyLoadConfig,
+                    // Error>
                 }
             },
             *method_builder_);
@@ -50,5 +51,4 @@ tl::expected<built::DataSystemConfig, Error> DataSystemBuilder::Build() const {
     }
     return config_;
 }
-
-}  // namespace launchdarkly::server_side::config::builders
+} // namespace launchdarkly::server_side::config::builders

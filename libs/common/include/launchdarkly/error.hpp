@@ -5,7 +5,6 @@
 #include <ostream>
 
 namespace launchdarkly {
-
 enum class Error : std::uint32_t {
     KReserved1 = 0,
     KReserved2 = 1,
@@ -21,6 +20,8 @@ enum class Error : std::uint32_t {
     kConfig_Events_ZeroCapacity = 300,
 
     kConfig_SDKKey_Empty = 400,
+
+    kConfig_DataSource_EmptyFilterKey = 500,
     /* Client-side errors: 10000-19999 */
     /* Server-side errors: 20000-29999 */
     kConfig_DataSystem_LazyLoad_MissingSource = 20000,
@@ -29,5 +30,4 @@ enum class Error : std::uint32_t {
 
 char const* ErrorToString(Error err);
 std::ostream& operator<<(std::ostream& os, Error const& err);
-
-}  // namespace launchdarkly
+} // namespace launchdarkly

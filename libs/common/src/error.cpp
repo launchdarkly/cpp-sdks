@@ -1,7 +1,6 @@
 #include <launchdarkly/error.hpp>
 
 namespace launchdarkly {
-
 std::ostream& operator<<(std::ostream& os, Error const& err) {
     os << ErrorToString(err);
     return os;
@@ -17,7 +16,7 @@ char const* ErrorToString(Error err) {
             return "endpoints: cannot specify empty URL";
         case Error::kConfig_Endpoints_AllURLsMustBeSet:
             return "endpoints: if any endpoint is specified, then all "
-                   "endpoints must be specified";
+                "endpoints must be specified";
         case Error::kConfig_ApplicationInfo_EmptyKeyOrValue:
             return "application info: cannot specify an empty key or value";
         case Error::kConfig_ApplicationInfo_ValueTooLong:
@@ -32,9 +31,11 @@ char const* ErrorToString(Error err) {
             return "sdk key: cannot be empty";
         case Error::kConfig_DataSystem_LazyLoad_MissingSource:
             return "data system: lazy load config requires a source";
+        case Error::kConfig_DataSource_EmptyFilterKey:
+            return "data source: filter key cannot be an empty string";
         case Error::kMax:
             break;
     }
     return "unknown";
 }
-}  // namespace launchdarkly
+} // namespace launchdarkly

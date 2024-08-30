@@ -12,14 +12,22 @@ BootstrapBuilder& BackgroundSyncBuilder::Bootstrapper() {
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(
-    Streaming const& source) {
-    config_.synchronizer_ = source.Build();
+    Streaming source) {
+    if (auto cfg = source.Build(); !cfg) {
+        synchronizer_cfg_ = tl::make_unexpected(cfg.error());
+    } else {
+        synchronizer_cfg_ = *cfg;
+    }
     return *this;
 }
 
 BackgroundSyncBuilder& BackgroundSyncBuilder::Synchronizer(
-    Polling const& source) {
-    config_.synchronizer_ = source.Build();
+    Polling source) {
+    if (auto cfg = source.Build(); !cfg) {
+        synchronizer_cfg_ = tl::make_unexpected(cfg.error());
+    } else {
+        synchronizer_cfg_ = *cfg;
+    }
     return *this;
 }
 
@@ -29,10 +37,17 @@ BackgroundSyncBuilder& BackgroundSyncBuilder::Destination(
     return *this;
 }
 
-[[nodiscard]] built::BackgroundSyncConfig BackgroundSyncBuilder::Build() const {
+[[nodiscard]] tl::expected<built::BackgroundSyncConfig, Error>
+BackgroundSyncBuilder::Build() const {
     auto const bootstrap_cfg = bootstrap_builder_.Build();
+
+    if (!synchronizer_cfg_) {
+        return tl::make_unexpected(synchronizer_cfg_.error());
+    }
+
     auto copy = config_;
     copy.bootstrap_ = bootstrap_cfg;
+    copy.synchronizer_ = *synchronizer_cfg_;
     return copy;
 }
 } // namespace launchdarkly::server_side::config::builders

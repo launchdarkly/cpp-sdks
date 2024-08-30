@@ -50,6 +50,9 @@ StreamingBuilder<SDK>& StreamingBuilder<SDK>::Filter(std::string filter_key) {
 template <typename SDK>
 tl::expected<built::StreamingConfig<SDK>, Error> StreamingBuilder<
     SDK>::Build() const {
+    if (config_.filter_key.empty()) {
+        return tl::make_unexpected(Error::kConfig_DataSource_EmptyFilterKey);
+    }
     return config_;
 }
 
@@ -75,6 +78,9 @@ PollingBuilder<SDK>& PollingBuilder<SDK>::Filter(std::string filter_key) {
 template <typename SDK>
 tl::expected<built::PollingConfig<SDK>, Error> PollingBuilder<
     SDK>::Build() const {
+    if (config_.filter_key.empty()) {
+        return tl::make_unexpected(Error::kConfig_DataSource_EmptyFilterKey);
+    }
     return config_;
 }
 
