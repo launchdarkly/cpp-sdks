@@ -43,7 +43,7 @@ public:
         std::chrono::milliseconds initial_reconnect_delay);
 
     /**
-     *  Filter sets the filter key for the streaming connection.
+     * Filter sets the filter key for the streaming connection.
      *
      * By default, the SDK is able to evaluate all flags in an environment.
      *
@@ -85,6 +85,26 @@ public:
      * @return Reference to this builder.
      */
     PollingBuilder& PollInterval(std::chrono::seconds poll_interval);
+
+    /**
+    * Filter sets the filter key for the polling connection.
+    *
+    * By default, the SDK is able to evaluate all flags in an environment.
+    *
+    * If this is undesirable - for example, because the environment contains
+    * thousands of flags, but this application only needs to evaluate
+    * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+    * and the filter's key specified here.
+    *
+    * Evaluations for flags that aren't part of the filtered environment will
+    * return default values.
+    *
+    * @param filter_key The filter key. If the key is malformed or nonexistent,
+    * then a full LaunchDarkly environment will be fetched. In the case of a
+    * malformed key, the SDK will additionally log a runtime error.
+    * @return Reference to this builder.
+    */
+    PollingBuilder& Filter(std::string filter_key);
 
     /**
      * Build the polling config. Used internal to the SDK.
