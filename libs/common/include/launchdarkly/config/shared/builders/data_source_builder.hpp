@@ -5,8 +5,8 @@
 #include <launchdarkly/config/shared/sdks.hpp>
 
 #include <chrono>
-#include <variant>
 #include <type_traits>
+#include <variant>
 
 namespace launchdarkly::config::shared::builders {
 /**
@@ -17,19 +17,17 @@ template <typename SDK>
 class DataSourceBuilder;
 
 template <typename T>
-struct is_server_sdk : std::false_type {
-};
+struct is_server_sdk : std::false_type {};
 
 template <>
-struct is_server_sdk<ServerSDK> : std::true_type {
-};
+struct is_server_sdk<ServerSDK> : std::true_type {};
 
 /**
  * Builds a configuration for a streaming data source.
  */
 template <typename SDK>
 class StreamingBuilder {
-public:
+   public:
     StreamingBuilder();
 
     /**
@@ -77,7 +75,7 @@ public:
      */
     [[nodiscard]] built::StreamingConfig<SDK> Build() const;
 
-private:
+   private:
     built::StreamingConfig<SDK> config_;
 };
 
@@ -86,7 +84,7 @@ private:
  */
 template <typename SDK>
 class PollingBuilder {
-public:
+   public:
     PollingBuilder();
 
     /**
@@ -97,23 +95,23 @@ public:
     PollingBuilder& PollInterval(std::chrono::seconds poll_interval);
 
     /**
-    * Sets the filter key for the polling connection.
-    *
-    * By default, the SDK is able to evaluate all flags in an environment.
-    *
-    * If this is undesirable - for example, because the environment contains
-    * thousands of flags, but this application only needs to evaluate
-    * a smaller, known subset - then a filter may be setup in LaunchDarkly,
-    * and the filter's key specified here.
-    *
-    * Evaluations for flags that aren't part of the filtered environment will
-    * return default values.
-    *
-    * @param filter_key The filter key. If the key is malformed or nonexistent,
-    * then a full LaunchDarkly environment will be fetched. In the case of a
-    * malformed key, the SDK will additionally log a runtime error.
-    * @return Reference to this builder.
-    */
+     * Sets the filter key for the polling connection.
+     *
+     * By default, the SDK is able to evaluate all flags in an environment.
+     *
+     * If this is undesirable - for example, because the environment contains
+     * thousands of flags, but this application only needs to evaluate
+     * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+     * and the filter's key specified here.
+     *
+     * Evaluations for flags that aren't part of the filtered environment will
+     * return default values.
+     *
+     * @param filter_key The filter key. If the key is malformed or nonexistent,
+     * then a full LaunchDarkly environment will be fetched. In the case of a
+     * malformed key, the SDK will additionally log a runtime error.
+     * @return Reference to this builder.
+     */
     template <typename T = SDK>
     std::enable_if_t<is_server_sdk<T>::value, PollingBuilder&> Filter(
         std::string filter_key) {
@@ -127,14 +125,13 @@ public:
      */
     [[nodiscard]] built::PollingConfig<SDK> Build() const;
 
-private:
+   private:
     built::PollingConfig<SDK> config_;
 };
 
-
 template <>
 class DataSourceBuilder<ClientSDK> {
-public:
+   public:
     using Streaming = StreamingBuilder<ClientSDK>;
     using Polling = PollingBuilder<ClientSDK>;
 
@@ -199,9 +196,9 @@ public:
      */
     [[nodiscard]] built::DataSourceConfig<ClientSDK> Build() const;
 
-private:
+   private:
     std::variant<Streaming, Polling> method_;
     bool with_reasons_;
     bool use_report_;
 };
-} // namespace launchdarkly::config::shared::builders
+}  // namespace launchdarkly::config::shared::builders

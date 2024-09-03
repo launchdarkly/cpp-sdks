@@ -76,7 +76,7 @@ LDServerConfigBuilder_Free(LDServerConfigBuilder builder) {
 
 LD_EXPORT(void)
 LDServerConfigBuilder_ServiceEndpoints_PollingBaseURL(LDServerConfigBuilder b,
-    char const* url) {
+                                                      char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
 
@@ -85,7 +85,7 @@ LDServerConfigBuilder_ServiceEndpoints_PollingBaseURL(LDServerConfigBuilder b,
 
 LD_EXPORT(void)
 LDServerConfigBuilder_ServiceEndpoints_StreamingBaseURL(LDServerConfigBuilder b,
-    char const* url) {
+                                                        char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
 
@@ -94,7 +94,7 @@ LDServerConfigBuilder_ServiceEndpoints_StreamingBaseURL(LDServerConfigBuilder b,
 
 LD_EXPORT(void)
 LDServerConfigBuilder_ServiceEndpoints_EventsBaseURL(LDServerConfigBuilder b,
-    char const* url) {
+                                                     char const* url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(url);
 

@@ -11,8 +11,7 @@ using namespace launchdarkly::server_side;
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
                              launchdarkly::Logger& logger)
-    : counter_{0}, executor_{std::move(executor)}, logger_{logger} {
-}
+    : counter_{0}, executor_{std::move(executor)}, logger_{logger} {}
 
 std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     std::string id = std::to_string(counter_++);
@@ -32,9 +31,9 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     auto& endpoints =
         config_builder.ServiceEndpoints()
-                      .EventsBaseUrl(default_endpoints.EventsBaseUrl())
-                      .PollingBaseUrl(default_endpoints.PollingBaseUrl())
-                      .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
+            .EventsBaseUrl(default_endpoints.EventsBaseUrl())
+            .PollingBaseUrl(default_endpoints.PollingBaseUrl())
+            .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
 
     if (in.serviceEndpoints) {
         if (in.serviceEndpoints->streaming) {

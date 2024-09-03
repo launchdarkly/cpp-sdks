@@ -27,8 +27,8 @@ struct StreamingConfig<ServerSDK> {
 inline bool operator==(StreamingConfig<ServerSDK> const& lhs,
                        StreamingConfig<ServerSDK> const& rhs) {
     return lhs.initial_reconnect_delay == rhs.initial_reconnect_delay &&
-           lhs.streaming_path == rhs.streaming_path && lhs.filter_key == rhs.
-           filter_key;
+           lhs.streaming_path == rhs.streaming_path &&
+           lhs.filter_key == rhs.filter_key;
 }
 
 template <typename SDK>
@@ -62,6 +62,5 @@ struct DataSourceConfig<ClientSDK> {
 };
 
 template <>
-struct DataSourceConfig<ServerSDK> {
-};
-} // namespace launchdarkly::config::shared::built
+struct DataSourceConfig<ServerSDK> {};
+}  // namespace launchdarkly::config::shared::built

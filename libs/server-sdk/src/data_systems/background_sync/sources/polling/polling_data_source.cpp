@@ -23,7 +23,8 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL";
 
 static char const* const kInvalidFilterKey =
-    "Invalid payload filter configured on polling data source, full environment "
+    "Invalid payload filter configured on polling data source, full "
+    "environment "
     "will be fetched.\nEnsure the filter key is not empty and was copied "
     "correctly from LaunchDarkly settings";
 
@@ -64,22 +65,22 @@ PollingDataSource::PollingDataSource(
     data_components::DataSourceStatusManager& status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
-    data_source_config,
+        data_source_config,
     config::built::HttpProperties const& http_properties)
     : logger_(logger),
       status_manager_(status_manager),
       requester_(ioc, http_properties.Tls()),
       polling_interval_(data_source_config.poll_interval),
-      request_(MakeRequest(logger_, data_source_config, endpoints,
-                           http_properties)),
+      request_(
+          MakeRequest(logger_, data_source_config, endpoints, http_properties)),
       timer_(ioc),
       sink_(nullptr) {
     if (polling_interval_ < data_source_config.min_polling_interval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
             << std::chrono::duration_cast<std::chrono::seconds>(
-                data_source_config.min_polling_interval)
-            .count()
+                   data_source_config.min_polling_interval)
+                   .count()
             << " seconds";
 
         polling_interval_ = data_source_config.min_polling_interval;
@@ -249,4 +250,4 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(timer_.get_executor(), completion);
     }
 }
-} // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::server_side::data_systems

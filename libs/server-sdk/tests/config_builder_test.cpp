@@ -11,15 +11,12 @@ using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config;
 
-class ConfigBuilderTest
-    : public ::testing::
-    Test {
+class ConfigBuilderTest : public ::testing::Test {
     // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-protected:
+   protected:
     Logger logger;
 
-    ConfigBuilderTest() : logger(logging::NullLogger()) {
-    }
+    ConfigBuilderTest() : logger(logging::NullLogger()) {}
 };
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_Succeeds) {
@@ -59,8 +56,7 @@ TEST_F(ConfigBuilderTest, CanSetStreamingPayloadFilterKey) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
         builders::DataSystemBuilder::BackgroundSync().Synchronizer(
-            builders::BackgroundSyncBuilder::Streaming().Filter(
-                "foo")));
+            builders::BackgroundSyncBuilder::Streaming().Filter("foo")));
 
     auto cfg = builder.Build();
 
@@ -85,8 +81,7 @@ TEST_F(ConfigBuilderTest, CanSetPollingPayloadFilterKey) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
         builders::DataSystemBuilder::BackgroundSync().Synchronizer(
-            builders::BackgroundSyncBuilder::Polling().Filter(
-                "foo")));
+            builders::BackgroundSyncBuilder::Polling().Filter("foo")));
 
     auto cfg = builder.Build();
 
@@ -112,8 +107,8 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->HttpProperties(),
               ::launchdarkly::config::shared::Defaults<
-              launchdarkly::config::shared::ServerSDK>::Defaults::
-              HttpProperties());
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  HttpProperties());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
@@ -121,8 +116,8 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->ServiceEndpoints(),
               ::launchdarkly::config::shared::Defaults<
-              launchdarkly::config::shared::ServerSDK>::Defaults::
-              ServiceEndpoints());
+                  launchdarkly::config::shared::ServerSDK>::Defaults::
+                  ServiceEndpoints());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
@@ -130,7 +125,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->Events(),
               ::launchdarkly::config::shared::Defaults<
-              launchdarkly::config::shared::ServerSDK>::Defaults::Events());
+                  launchdarkly::config::shared::ServerSDK>::Defaults::Events());
 }
 
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {

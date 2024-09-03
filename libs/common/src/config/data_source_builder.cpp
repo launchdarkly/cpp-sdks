@@ -1,15 +1,15 @@
 #include <launchdarkly/config/shared/builders/data_source_builder.hpp>
 
 namespace launchdarkly::config::shared::builders {
+
 template <typename SDK>
-struct MethodVisitor {
-};
+struct MethodVisitor {};
 
 template <>
 struct MethodVisitor<ClientSDK> {
     using SDK = ClientSDK;
     using Result =
-    std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>;
+        std::variant<built::StreamingConfig<SDK>, built::PollingConfig<SDK>>;
 
     Result operator()(StreamingBuilder<SDK> const& streaming) const {
         return streaming.Build();
@@ -22,8 +22,7 @@ struct MethodVisitor<ClientSDK> {
 
 template <typename SDK>
 StreamingBuilder<SDK>::StreamingBuilder()
-    : config_(Defaults<SDK>::StreamingConfig()) {
-}
+    : config_(Defaults<SDK>::StreamingConfig()) {}
 
 template <typename SDK>
 StreamingBuilder<SDK>& StreamingBuilder<SDK>::InitialReconnectDelay(
@@ -39,8 +38,7 @@ built::StreamingConfig<SDK> StreamingBuilder<SDK>::Build() const {
 
 template <typename SDK>
 PollingBuilder<SDK>::PollingBuilder()
-    : config_(Defaults<SDK>::PollingConfig()) {
-}
+    : config_(Defaults<SDK>::PollingConfig()) {}
 
 template <typename SDK>
 PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
@@ -55,8 +53,7 @@ built::PollingConfig<SDK> PollingBuilder<SDK>::Build() const {
 }
 
 DataSourceBuilder<ClientSDK>::DataSourceBuilder()
-    : with_reasons_(false), use_report_(false), method_(Streaming()) {
-}
+    : with_reasons_(false), use_report_(false), method_(Streaming()) {}
 
 DataSourceBuilder<ClientSDK>& DataSourceBuilder<ClientSDK>::WithReasons(
     bool value) {
@@ -92,4 +89,5 @@ template class PollingBuilder<ServerSDK>;
 
 template class StreamingBuilder<ClientSDK>;
 template class StreamingBuilder<ServerSDK>;
-} // namespace launchdarkly::config::shared::builders
+
+}  // namespace launchdarkly::config::shared::builders

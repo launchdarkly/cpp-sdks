@@ -24,7 +24,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDServerSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.5.3"); // {x-release-please-version}
+    ASSERT_STREQ(version, "3.5.3");  // {x-release-please-version}
 
     LDServerSDK_Free(sdk);
 }
@@ -46,7 +46,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    struct LDServerDataSourceStatusListener listener{};
+    struct LDServerDataSourceStatusListener listener {};
     LDServerDataSourceStatusListener_Init(&listener);
 
     listener.UserData = const_cast<char*>("Potato");
@@ -115,7 +115,7 @@ TEST(ClientBindings, ComplexDataSourceStatus) {
                   reinterpret_cast<LDServerDataSourceStatus>(&status)));
 
     EXPECT_EQ(200, LDServerDataSourceStatus_StateSince(
-                  reinterpret_cast<LDServerDataSourceStatus>(&status)));
+                       reinterpret_cast<LDServerDataSourceStatus>(&status)));
 
     LDDataSourceStatus_ErrorInfo info = LDServerDataSourceStatus_GetLastError(
         reinterpret_cast<LDServerDataSourceStatus>(&status));
@@ -188,12 +188,12 @@ TEST(ClientBindings, DoubleVariationPassesThroughDefault) {
     LDContext context = LDContextBuilder_Build(ctx_builder);
 
     std::string const flag = "weight";
-    std::vector<double> values = {0.0, 0.0001, 0.5, 1.234,
+    std::vector<double> values = {0.0,  0.0001, 0.5,  1.234,
                                   12.9, 13.211, 24.0, 1000.0};
     for (auto const& v : values) {
         ASSERT_EQ(LDServerSDK_DoubleVariation(sdk, context, "weight", v), v);
         ASSERT_EQ(LDServerSDK_DoubleVariationDetail(sdk, context, "weight", v,
-                      LD_DISCARD_DETAIL),
+                                                    LD_DISCARD_DETAIL),
                   v);
     }
 
@@ -302,7 +302,6 @@ TEST(ClientBindings, TlsConfigurationSystemCAFile) {
     LDServerConfig_Free(config);
 }
 
-
 TEST(ClientBindings, StreamingPayloadFilters) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
 
@@ -311,8 +310,8 @@ TEST(ClientBindings, StreamingPayloadFilters) {
 
     LDServerDataSourceStreamBuilder_Filter(stream_builder, "foo");
 
-    LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
-        cfg_builder, stream_builder);
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(cfg_builder,
+                                                              stream_builder);
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
@@ -329,8 +328,8 @@ TEST(ClientBindings, PollingPayloadFilters) {
 
     LDServerDataSourcePollBuilder_Filter(poll_builder, "foo");
 
-    LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
-        cfg_builder, poll_builder);
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(cfg_builder,
+                                                            poll_builder);
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);

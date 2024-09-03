@@ -17,10 +17,10 @@ static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 
 static char const* const kInvalidFilterKey =
-    "Invalid payload filter configured on polling data source, full environment "
+    "Invalid payload filter configured on polling data source, full "
+    "environment "
     "will be fetched.\nEnsure the filter key is not empty and was copied "
     "correctly from LaunchDarkly settings";
-
 
 std::string const& StreamingDataSource::Identity() const {
     static std::string const identity = "streaming data source";
@@ -38,9 +38,8 @@ StreamingDataSource::StreamingDataSource(
       logger_(logger),
       status_manager_(status_manager),
       http_config_(http_properties),
-      streaming_config_(streaming),
-      streaming_endpoint_(endpoints.StreamingBaseUrl()) {
-}
+      streaming_endpoint_(endpoints.StreamingBaseUrl()),
+      streaming_config_(streaming) {}
 
 void StreamingDataSource::StartAsync(
     data_interfaces::IDestination* dest,
@@ -108,7 +107,7 @@ void StreamingDataSource::StartAsync(
 
     if (http_config_.Tls().PeerVerifyMode() ==
         launchdarkly::config::shared::built::TlsOptions::VerifyMode::
-        kVerifyNone) {
+            kVerifyNone) {
         client_builder.skip_verify_peer(true);
     }
 
@@ -166,4 +165,4 @@ void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(io_, completion);
     }
 }
-} // namespace launchdarkly::server_side::data_systems
+}  // namespace launchdarkly::server_side::data_systems
