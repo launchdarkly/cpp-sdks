@@ -11,7 +11,6 @@
 #include <utility>
 
 namespace launchdarkly::server_side::data_systems {
-
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 
@@ -32,7 +31,8 @@ StreamingDataSource::StreamingDataSource(
       status_manager_(status_manager),
       http_config_(http_properties),
       streaming_config_(streaming),
-      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
+      streaming_endpoint_(endpoints.StreamingBaseUrl()) {
+}
 
 void StreamingDataSource::StartAsync(
     data_interfaces::IDestination* dest,
@@ -45,6 +45,10 @@ void StreamingDataSource::StartAsync(
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
                                           streaming_config_.streaming_path);
+
+    if (streaming_config_.filter_key && updated_url) {
+        updated_url->append("?filter=" + *streaming_config_.filter_key);
+    }
 
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {
@@ -92,7 +96,7 @@ void StreamingDataSource::StartAsync(
 
     if (http_config_.Tls().PeerVerifyMode() ==
         launchdarkly::config::shared::built::TlsOptions::VerifyMode::
-            kVerifyNone) {
+        kVerifyNone) {
         client_builder.skip_verify_peer(true);
     }
 
@@ -150,4 +154,4 @@ void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(io_, completion);
     }
 }
-}  // namespace launchdarkly::server_side::data_systems
+} // namespace launchdarkly::server_side::data_systems

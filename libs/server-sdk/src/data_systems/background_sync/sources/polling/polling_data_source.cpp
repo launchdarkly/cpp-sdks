@@ -28,6 +28,10 @@ static network::HttpRequest MakeRequest(
 
     url = network::AppendUrl(url, polling_config.polling_get_path);
 
+    if (polling_config.filter_key && url) {
+        url->append("?filter=" + *polling_config.filter_key);
+    }
+
     network::HttpRequest::BodyType body;
     network::HttpMethod method = network::HttpMethod::kGet;
 
@@ -48,7 +52,7 @@ PollingDataSource::PollingDataSource(
     data_components::DataSourceStatusManager& status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
-        data_source_config,
+    data_source_config,
     config::built::HttpProperties const& http_properties)
     : logger_(logger),
       status_manager_(status_manager),
@@ -61,8 +65,8 @@ PollingDataSource::PollingDataSource(
         LD_LOG(logger_, LogLevel::kWarn)
             << "Polling interval too frequent, defaulting to "
             << std::chrono::duration_cast<std::chrono::seconds>(
-                   data_source_config.min_polling_interval)
-                   .count()
+                data_source_config.min_polling_interval)
+            .count()
             << " seconds";
 
         polling_interval_ = data_source_config.min_polling_interval;
@@ -144,7 +148,6 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
             "polling response contained no body.");
-
     } else if (res.Status() == 304) {
         // This should be handled ahead of here, but if we get a 304,
         // and it didn't have an etag, we still don't want to try to
@@ -233,5 +236,4 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(timer_.get_executor(), completion);
     }
 }
-
-}  // namespace launchdarkly::server_side::data_systems
+} // namespace launchdarkly::server_side::data_systems
