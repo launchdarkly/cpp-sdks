@@ -40,6 +40,9 @@ static network::HttpRequest MakeRequest(
     if (polling_config.filter_key && url) {
         if (detail::ValidateFilterKey(*polling_config.filter_key)) {
             url->append("?filter=" + *polling_config.filter_key);
+            LD_LOG(logger, LogLevel::kDebug)
+                << "using payload filter '" << *polling_config.filter_key
+                << "'";
         } else {
             LD_LOG(logger, LogLevel::kError) << kInvalidFilterKey;
         }

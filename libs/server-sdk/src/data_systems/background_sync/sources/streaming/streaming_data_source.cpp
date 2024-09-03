@@ -57,6 +57,9 @@ void StreamingDataSource::StartAsync(
     if (streaming_config_.filter_key && updated_url) {
         if (detail::ValidateFilterKey(*streaming_config_.filter_key)) {
             updated_url->append("?filter=" + *streaming_config_.filter_key);
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "using payload filter '" << *streaming_config_.filter_key
+                << "'";
         } else {
             LD_LOG(logger_, LogLevel::kError) << kInvalidFilterKey;
         }
