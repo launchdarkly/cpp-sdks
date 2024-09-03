@@ -42,6 +42,8 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_deserializer.cpp
         data_components/serialization_adapters/json_destination.hpp
         data_components/serialization_adapters/json_destination.cpp
+        data_systems/background_sync/detail/payload_filter_validation/payload_filter_validation.hpp
+        data_systems/background_sync/detail/payload_filter_validation/payload_filter_validation.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp

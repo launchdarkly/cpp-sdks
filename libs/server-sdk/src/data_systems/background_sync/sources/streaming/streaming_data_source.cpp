@@ -2,6 +2,8 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
+#include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
+
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
@@ -13,6 +15,12 @@
 namespace launchdarkly::server_side::data_systems {
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
+
+static char const* const kInvalidFilterKey =
+    "Invalid payload filter configured on polling data source, full environment "
+    "will be fetched.\nEnsure the filter key is not empty and was copied "
+    "correctly from LaunchDarkly settings";
+
 
 std::string const& StreamingDataSource::Identity() const {
     static std::string const identity = "streaming data source";
@@ -47,7 +55,11 @@ void StreamingDataSource::StartAsync(
                                           streaming_config_.streaming_path);
 
     if (streaming_config_.filter_key && updated_url) {
-        updated_url->append("?filter=" + *streaming_config_.filter_key);
+        if (detail::ValidateFilterKey(*streaming_config_.filter_key)) {
+            updated_url->append("?filter=" + *streaming_config_.filter_key);
+        } else {
+            LD_LOG(logger_, LogLevel::kError) << kInvalidFilterKey;
+        }
     }
 
     // Bad URL, don't set the client. Start will then report the bad status.

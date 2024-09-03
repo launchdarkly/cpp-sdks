@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     std::string port = default_port;
     if (argc == 2) {
         port =
-            argv[1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            argv[1]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     try {
@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("tls:verify-peer");
         srv.add_capability("tls:skip-verify-peer");
         srv.add_capability("tls:custom-ca");
-
+        srv.add_capability("filtering");
+        srv.add_capability("filtering-strict");
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
         boost::asio::spawn(ioc.get_executor(), [&](auto yield) mutable {
@@ -56,12 +57,11 @@ int main(int argc, char* argv[]) {
 
         ioc.run();
         LD_LOG(logger, LogLevel::kInfo) << "bye!";
-
     } catch (boost::bad_lexical_cast&) {
         LD_LOG(logger, LogLevel::kError)
             << "invalid port (" << port
             << "), provide a number (no arguments defaults "
-               "to port "
+            "to port "
             << default_port << ")";
         return EXIT_FAILURE;
     } catch (std::exception const& e) {

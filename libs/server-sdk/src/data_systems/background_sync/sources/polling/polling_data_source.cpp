@@ -10,6 +10,8 @@
 
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
+#include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
+
 #include <boost/json.hpp>
 
 namespace launchdarkly::server_side::data_systems {
@@ -20,7 +22,13 @@ static char const* const kErrorPutInvalid =
 static char const* const kCouldNotParseEndpoint =
     "Could not parse polling endpoint URL";
 
+static char const* const kInvalidFilterKey =
+    "Invalid payload filter configured on polling data source, full environment "
+    "will be fetched.\nEnsure the filter key is not empty and was copied "
+    "correctly from LaunchDarkly settings";
+
 static network::HttpRequest MakeRequest(
+    Logger const& logger,
     config::built::BackgroundSyncConfig::PollingConfig const& polling_config,
     config::built::ServiceEndpoints const& endpoints,
     config::built::HttpProperties const& http_properties) {
@@ -29,7 +37,11 @@ static network::HttpRequest MakeRequest(
     url = network::AppendUrl(url, polling_config.polling_get_path);
 
     if (polling_config.filter_key && url) {
-        url->append("?filter=" + *polling_config.filter_key);
+        if (detail::ValidateFilterKey(*polling_config.filter_key)) {
+            url->append("?filter=" + *polling_config.filter_key);
+        } else {
+            LD_LOG(logger, LogLevel::kError) << kInvalidFilterKey;
+        }
     }
 
     network::HttpRequest::BodyType body;
@@ -58,7 +70,8 @@ PollingDataSource::PollingDataSource(
       status_manager_(status_manager),
       requester_(ioc, http_properties.Tls()),
       polling_interval_(data_source_config.poll_interval),
-      request_(MakeRequest(data_source_config, endpoints, http_properties)),
+      request_(MakeRequest(logger_, data_source_config, endpoints,
+                           http_properties)),
       timer_(ioc),
       sink_(nullptr) {
     if (polling_interval_ < data_source_config.min_polling_interval) {
