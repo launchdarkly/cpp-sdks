@@ -112,6 +112,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             event_config.FlushInterval(
                 std::chrono::milliseconds(*events.flushIntervalMs));
         }
+
     } else {
         event_config.Disable();
     }

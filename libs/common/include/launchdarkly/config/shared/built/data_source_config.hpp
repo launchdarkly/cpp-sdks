@@ -8,6 +8,7 @@
 #include <variant>
 
 namespace launchdarkly::config::shared::built {
+
 template <typename SDK>
 struct StreamingConfig;
 

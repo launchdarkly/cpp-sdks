@@ -13,6 +13,7 @@
 #include <utility>
 
 namespace launchdarkly::server_side::data_systems {
+
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
 

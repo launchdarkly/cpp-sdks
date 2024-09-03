@@ -201,4 +201,5 @@ class DataSourceBuilder<ClientSDK> {
     bool with_reasons_;
     bool use_report_;
 };
+
 }  // namespace launchdarkly::config::shared::builders

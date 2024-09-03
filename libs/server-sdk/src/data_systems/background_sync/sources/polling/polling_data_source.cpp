@@ -162,6 +162,7 @@ void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
             DataSourceStatus::DataSourceState::kInterrupted,
             DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
             "polling response contained no body.");
+
     } else if (res.Status() == 304) {
         // This should be handled ahead of here, but if we get a 304,
         // and it didn't have an etag, we still don't want to try to
@@ -250,4 +251,5 @@ void PollingDataSource::ShutdownAsync(std::function<void()> completion) {
         boost::asio::post(timer_.get_executor(), completion);
     }
 }
+
 }  // namespace launchdarkly::server_side::data_systems

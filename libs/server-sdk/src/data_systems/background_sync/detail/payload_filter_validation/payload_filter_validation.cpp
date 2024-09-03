@@ -9,8 +9,7 @@ bool ValidateFilterKey(std::string const& filter_key) {
     }
     try {
         return regex_search(filter_key,
-                            boost::regex(
-                                "^[a-zA-Z0-9][._\\-a-zA-Z0-9]*$"));
+                            boost::regex("^[a-zA-Z0-9][._\\-a-zA-Z0-9]*$"));
     } catch (boost::bad_expression) {
         // boost::bad_expression can be thrown by basic_regex when compiling a
         // regular expression.
@@ -21,4 +20,4 @@ bool ValidateFilterKey(std::string const& filter_key) {
         return false;
     }
 }
-} // namespace launchdarkly::server_side::data_systems::detail
+}  // namespace launchdarkly::server_side::data_systems::detail

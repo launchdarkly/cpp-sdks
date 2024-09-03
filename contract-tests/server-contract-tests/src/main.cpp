@@ -25,14 +25,14 @@ int main(int argc, char* argv[]) {
     std::string port = default_port;
     if (argc == 2) {
         port =
-            argv[1]; // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            argv[1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
 
     try {
         net::io_context ioc{1};
 
-        auto p = boost::lexical_cast<unsigned short>(port);
-        server srv(ioc, "0.0.0.0", p, logger);
+        auto const p = boost::lexical_cast<unsigned short>(port);
+        server srv{ioc, "0.0.0.0", p, logger};
 
         srv.add_capability("server-side");
         srv.add_capability("strongly-typed");
@@ -57,11 +57,12 @@ int main(int argc, char* argv[]) {
 
         ioc.run();
         LD_LOG(logger, LogLevel::kInfo) << "bye!";
+
     } catch (boost::bad_lexical_cast&) {
         LD_LOG(logger, LogLevel::kError)
             << "invalid port (" << port
             << "), provide a number (no arguments defaults "
-            "to port "
+               "to port "
             << default_port << ")";
         return EXIT_FAILURE;
     } catch (std::exception const& e) {
