@@ -12,7 +12,6 @@
 #include <variant>
 
 namespace launchdarkly::config::shared::builders {
-
 /**
  * Used to construct a DataSourceConfiguration for the specified SDK type.
  * @tparam SDK ClientSDK or ServerSDK.
@@ -25,7 +24,7 @@ class DataSourceBuilder;
  */
 template <typename SDK>
 class StreamingBuilder {
-   public:
+public:
     StreamingBuilder();
 
     /**
@@ -44,12 +43,31 @@ class StreamingBuilder {
         std::chrono::milliseconds initial_reconnect_delay);
 
     /**
+     *  Filter sets the filter key for the streaming connection.
+     *
+     * By default, the SDK is able to evaluate all flags in an environment.
+     *
+     * If this is undesirable - for example, because the environment contains
+     * thousands of flags, but this application only needs to evaluate
+     * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+     * and the filter's key specified here.
+     *
+     * Evaluations for flags that aren't part of the filtered environment will
+     * return default values.
+     * @param filter_key The filter key. If the key is malformed or nonexistent,
+     * then a full LaunchDarkly environment will be fetched. In the case of a
+     * malformed key, the SDK will additionally log a runtime error.
+     * @return Reference to this builder.
+     */
+    StreamingBuilder& Filter(std::string filter_key);
+
+    /**
      * Build the streaming config. Used internal to the SDK.
      * @return The built config.
      */
     [[nodiscard]] built::StreamingConfig<SDK> Build() const;
 
-   private:
+private:
     built::StreamingConfig<SDK> config_;
 };
 
@@ -58,7 +76,7 @@ class StreamingBuilder {
  */
 template <typename SDK>
 class PollingBuilder {
-   public:
+public:
     PollingBuilder();
 
     /**
@@ -74,13 +92,13 @@ class PollingBuilder {
      */
     [[nodiscard]] built::PollingConfig<SDK> Build() const;
 
-   private:
+private:
     built::PollingConfig<SDK> config_;
 };
 
 template <>
 class DataSourceBuilder<ClientSDK> {
-   public:
+public:
     using Streaming = StreamingBuilder<ClientSDK>;
     using Polling = PollingBuilder<ClientSDK>;
 
@@ -145,10 +163,9 @@ class DataSourceBuilder<ClientSDK> {
      */
     [[nodiscard]] built::DataSourceConfig<ClientSDK> Build() const;
 
-   private:
+private:
     std::variant<Streaming, Polling> method_;
     bool with_reasons_;
     bool use_report_;
 };
-
-}  // namespace launchdarkly::config::shared::builders
+} // namespace launchdarkly::config::shared::builders
