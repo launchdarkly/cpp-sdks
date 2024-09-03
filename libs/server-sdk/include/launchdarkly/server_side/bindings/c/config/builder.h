@@ -14,16 +14,17 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {  // only need to export C interface if
+extern "C" {
+// only need to export C interface if
 // used by C++ source code
 #endif
 
 typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
 typedef struct _LDServerDataSourceStreamBuilder*
-    LDServerDataSourceStreamBuilder;
+LDServerDataSourceStreamBuilder;
 typedef struct _LDServerDataSourcePollBuilder* LDServerDataSourcePollBuilder;
 typedef struct _LDServerHttpPropertiesTlsBuilder*
-    LDServerHttpPropertiesTlsBuilder;
+LDServerHttpPropertiesTlsBuilder;
 
 /**
  * Constructs a client-side config builder.
@@ -63,8 +64,8 @@ LDServerConfigBuilder_ServiceEndpoints_EventsBaseURL(LDServerConfigBuilder b,
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_ServiceEndpoints_RelayProxyBaseURL(
-    LDServerConfigBuilder b,
-    char const* url);
+ LDServerConfigBuilder b,
+ char const* url);
 
 /**
  * Sets an identifier for the application.
@@ -201,8 +202,8 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
-    LDServerConfigBuilder b,
-    LDServerDataSourceStreamBuilder stream_builder);
+ LDServerConfigBuilder b,
+ LDServerDataSourceStreamBuilder stream_builder);
 
 /**
  * Configures the Background Sync data system with a Polling synchronizer.
@@ -219,8 +220,8 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
-    LDServerConfigBuilder b,
-    LDServerDataSourcePollBuilder poll_builder);
+ LDServerConfigBuilder b,
+ LDServerDataSourcePollBuilder poll_builder);
 
 /**
  * Configures the Lazy Load data system. This method is mutually exclusive with
@@ -235,8 +236,8 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_LazyLoad(
-    LDServerConfigBuilder b,
-    LDServerLazyLoadBuilder lazy_load_builder);
+ LDServerConfigBuilder b,
+ LDServerLazyLoadBuilder lazy_load_builder);
 
 /**
  * Specify if the SDK's data system should be enabled or not.
@@ -274,8 +275,31 @@ LDServerDataSourceStreamBuilder_New();
  */
 LD_EXPORT(void)
 LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
-    LDServerDataSourceStreamBuilder b,
-    unsigned int milliseconds);
+ LDServerDataSourceStreamBuilder b,
+ unsigned int milliseconds);
+
+/**
+* Sets the filter key for the streaming connection.
+*
+* By default, the SDK is able to evaluate all flags in an environment.
+*
+* If this is undesirable - for example, because the environment contains
+* thousands of flags, but this application only needs to evaluate
+* a smaller, known subset - then a filter may be setup in LaunchDarkly,
+* and the filter's key specified here.
+*
+* Evaluations for flags that aren't part of the filtered environment will
+* return default values.
+*
+* @param b Streaming method builder. Must not be NULL.
+ * @param filter_key The filter key. Must not be NULL. If the key is malformed or
+ * nonexistent, then a full LaunchDarkly environment will be fetched. In the case
+ * of a malformed key, the SDK will additionally log a runtime error.
+*/
+LD_EXPORT(void)
+LDServerDataSourceStreamBuilder_Filter(
+ LDServerDataSourceStreamBuilder b,
+ char const* filter_key);
 
 /**
  * Frees a Streaming method builder. Do not call if the builder was consumed by
@@ -308,6 +332,29 @@ LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
                                         unsigned int seconds);
 
 /**
+* Sets the filter key for the polling connection.
+*
+* By default, the SDK is able to evaluate all flags in an environment.
+*
+* If this is undesirable - for example, because the environment contains
+* thousands of flags, but this application only needs to evaluate
+* a smaller, known subset - then a filter may be setup in LaunchDarkly,
+* and the filter's key specified here.
+*
+* Evaluations for flags that aren't part of the filtered environment will
+* return default values.
+*
+* @param b Polling method builder. Must not be NULL.
+* @param filter_key The filter key. Must not be NULL. If the key is malformed or
+* nonexistent, then a full LaunchDarkly environment will be fetched. In the case
+* of a malformed key, the SDK will additionally log a runtime error.
+*/
+LD_EXPORT(void)
+LDServerDataSourcePollBuilder_Filter(
+ LDServerDataSourcePollBuilder b,
+ char const* filter_key);
+
+/**
  * Frees a Polling method builder. Do not call if the builder was consumed by
  * the config builder.
  *
@@ -336,8 +383,8 @@ LDServerConfigBuilder_HttpProperties_WrapperName(LDServerConfigBuilder b,
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_HttpProperties_WrapperVersion(
-    LDServerConfigBuilder b,
-    char const* wrapper_version);
+ LDServerConfigBuilder b,
+ char const* wrapper_version);
 
 /**
  * Set a custom header value. May be called more than once with additional
@@ -359,8 +406,8 @@ LDServerConfigBuilder_HttpProperties_Header(LDServerConfigBuilder b,
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_HttpProperties_Tls(
-    LDServerConfigBuilder b,
-    LDServerHttpPropertiesTlsBuilder tls_builder);
+ LDServerConfigBuilder b,
+ LDServerHttpPropertiesTlsBuilder tls_builder);
 
 /**
  * Creates a new TLS options builder for the HttpProperties builder.
@@ -394,8 +441,8 @@ LDServerHttpPropertiesTlsBuilder_Free(LDServerHttpPropertiesTlsBuilder b);
  */
 LD_EXPORT(void)
 LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(
-    LDServerHttpPropertiesTlsBuilder b,
-    bool skip_verify_peer);
+ LDServerHttpPropertiesTlsBuilder b,
+ bool skip_verify_peer);
 
 /**
  * Configures TLS peer certificate verification to use a custom
@@ -414,8 +461,8 @@ LDServerHttpPropertiesTlsBuilder_SkipVerifyPeer(
  */
 LD_EXPORT(void)
 LDServerHttpPropertiesTlsBuilder_CustomCAFile(
-    LDServerHttpPropertiesTlsBuilder b,
-    char const* custom_ca_file);
+ LDServerHttpPropertiesTlsBuilder b,
+ char const* custom_ca_file);
 
 /**
  * Disables the default SDK logging.

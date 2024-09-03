@@ -13,10 +13,13 @@ using namespace launchdarkly::server_side::config;
 
 class ConfigBuilderTest
     : public ::testing::
-          Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
-   protected:
+    Test {
+    // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+protected:
     Logger logger;
-    ConfigBuilderTest() : logger(logging::NullLogger()) {}
+
+    ConfigBuilderTest() : logger(logging::NullLogger()) {
+    }
 };
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_Succeeds) {
@@ -52,13 +55,65 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_StreamingDefaultsAreUsed) {
     EXPECT_EQ(streaming_config, Defaults::SynchronizerConfig());
 }
 
+TEST_F(ConfigBuilderTest, CanSetStreamingPayloadFilterKey) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::BackgroundSync().Synchronizer(
+            builders::BackgroundSyncBuilder::Streaming().Filter(
+                "foo")));
+
+    auto cfg = builder.Build();
+
+    ASSERT_TRUE(std::holds_alternative<built::BackgroundSyncConfig>(
+        cfg->DataSystemConfig().system_));
+
+    auto const bg_sync_config =
+        std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(
+        std::holds_alternative<built::BackgroundSyncConfig::StreamingConfig>(
+            bg_sync_config.synchronizer_));
+
+    auto const streaming_config =
+        std::get<built::BackgroundSyncConfig::StreamingConfig>(
+            bg_sync_config.synchronizer_);
+
+    EXPECT_EQ(streaming_config.filter_key, "foo");
+}
+
+TEST_F(ConfigBuilderTest, CanSetPollingPayloadFilterKey) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::BackgroundSync().Synchronizer(
+            builders::BackgroundSyncBuilder::Polling().Filter(
+                "foo")));
+
+    auto cfg = builder.Build();
+
+    ASSERT_TRUE(std::holds_alternative<built::BackgroundSyncConfig>(
+        cfg->DataSystemConfig().system_));
+
+    auto const bg_sync_config =
+        std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(
+        std::holds_alternative<built::BackgroundSyncConfig::PollingConfig>(
+            bg_sync_config.synchronizer_));
+
+    auto const polling_config =
+        std::get<built::BackgroundSyncConfig::PollingConfig>(
+            bg_sync_config.synchronizer_);
+
+    EXPECT_EQ(polling_config.filter_key, "foo");
+}
+
 TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->HttpProperties(),
               ::launchdarkly::config::shared::Defaults<
-                  launchdarkly::config::shared::ServerSDK>::Defaults::
-                  HttpProperties());
+              launchdarkly::config::shared::ServerSDK>::Defaults::
+              HttpProperties());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
@@ -66,8 +121,8 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_ServiceEndpointDefaultsAreUsed) {
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->ServiceEndpoints(),
               ::launchdarkly::config::shared::Defaults<
-                  launchdarkly::config::shared::ServerSDK>::Defaults::
-                  ServiceEndpoints());
+              launchdarkly::config::shared::ServerSDK>::Defaults::
+              ServiceEndpoints());
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
@@ -75,7 +130,7 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
     auto cfg = builder.Build();
     ASSERT_EQ(cfg->Events(),
               ::launchdarkly::config::shared::Defaults<
-                  launchdarkly::config::shared::ServerSDK>::Defaults::Events());
+              launchdarkly::config::shared::ServerSDK>::Defaults::Events());
 }
 
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {

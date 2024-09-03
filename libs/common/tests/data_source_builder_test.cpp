@@ -11,37 +11,37 @@ using namespace launchdarkly;
 TEST(DataSourceBuilderTests, CanCreateStreamingClientConfig) {
     auto client_config =
         client_side::DataSourceBuilder()
-            .WithReasons(true)
-            .UseReport(true)
-            .Method(client_side::DataSourceBuilder::Streaming()
-                        .InitialReconnectDelay(std::chrono::milliseconds{1500}))
-            .Build();
+        .WithReasons(true)
+        .UseReport(true)
+        .Method(client_side::DataSourceBuilder::Streaming()
+            .InitialReconnectDelay(std::chrono::milliseconds{1500}))
+        .Build();
 
     EXPECT_TRUE(client_config.use_report);
     EXPECT_TRUE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::milliseconds{1500},
         std::get<
-            config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
+        config::shared::built::StreamingConfig<config::shared::ClientSDK>>(
             client_config.method)
-            .initial_reconnect_delay);
+        .initial_reconnect_delay);
 }
 
 TEST(DataSourceBuilderTests, CanCreatePollingClientConfig) {
     auto client_config =
         client_side::DataSourceBuilder()
-            .WithReasons(false)
-            .UseReport(false)
-            .Method(client_side::DataSourceBuilder::Polling().PollInterval(
-                std::chrono::seconds{88000}))
-            .Build();
+        .WithReasons(false)
+        .UseReport(false)
+        .Method(client_side::DataSourceBuilder::Polling().PollInterval(
+            std::chrono::seconds{88000}))
+        .Build();
 
     EXPECT_FALSE(client_config.use_report);
     EXPECT_FALSE(client_config.with_reasons);
     EXPECT_EQ(
         std::chrono::seconds{88000},
         std::get<
-            config::shared::built::PollingConfig<config::shared::ClientSDK>>(
+        config::shared::built::PollingConfig<config::shared::ClientSDK>>(
             client_config.method)
-            .poll_interval);
+        .poll_interval);
 }

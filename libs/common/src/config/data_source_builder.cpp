@@ -33,12 +33,6 @@ StreamingBuilder<SDK>& StreamingBuilder<SDK>::InitialReconnectDelay(
 }
 
 template <typename SDK>
-StreamingBuilder<SDK>& StreamingBuilder<SDK>::Filter(std::string filter_key) {
-    config_.filter_key = std::move(filter_key);
-    return *this;
-}
-
-template <typename SDK>
 built::StreamingConfig<SDK> StreamingBuilder<SDK>::Build() const {
     return config_;
 }
@@ -52,12 +46,6 @@ template <typename SDK>
 PollingBuilder<SDK>& PollingBuilder<SDK>::PollInterval(
     std::chrono::seconds poll_interval) {
     config_.poll_interval = poll_interval;
-    return *this;
-}
-
-template <typename SDK>
-PollingBuilder<SDK>& PollingBuilder<SDK>::Filter(std::string filter_key) {
-    config_.filter_key = std::move(filter_key);
     return *this;
 }
 

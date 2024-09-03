@@ -4,12 +4,9 @@
 #include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/config/shared/sdks.hpp>
 
-#include <launchdarkly/error.hpp>
-
-#include <tl/expected.hpp>
-
 #include <chrono>
 #include <variant>
+#include <type_traits>
 
 namespace launchdarkly::config::shared::builders {
 /**
@@ -18,6 +15,14 @@ namespace launchdarkly::config::shared::builders {
  */
 template <typename SDK>
 class DataSourceBuilder;
+
+template <typename T>
+struct is_server_sdk : std::false_type {
+};
+
+template <>
+struct is_server_sdk<ServerSDK> : std::true_type {
+};
 
 /**
  * Builds a configuration for a streaming data source.
@@ -43,7 +48,7 @@ public:
         std::chrono::milliseconds initial_reconnect_delay);
 
     /**
-     * Filter sets the filter key for the streaming connection.
+     * Sets the filter key for the streaming connection.
      *
      * By default, the SDK is able to evaluate all flags in an environment.
      *
@@ -59,7 +64,12 @@ public:
      * malformed key, the SDK will additionally log a runtime error.
      * @return Reference to this builder.
      */
-    StreamingBuilder& Filter(std::string filter_key);
+    template <typename T = SDK>
+    std::enable_if_t<is_server_sdk<T>::value, StreamingBuilder&> Filter(
+        std::string filter_key) {
+        config_.filter_key = std::move(filter_key);
+        return *this;
+    }
 
     /**
      * Build the streaming config. Used internal to the SDK.
@@ -87,7 +97,7 @@ public:
     PollingBuilder& PollInterval(std::chrono::seconds poll_interval);
 
     /**
-    * Filter sets the filter key for the polling connection.
+    * Sets the filter key for the polling connection.
     *
     * By default, the SDK is able to evaluate all flags in an environment.
     *
@@ -104,7 +114,12 @@ public:
     * malformed key, the SDK will additionally log a runtime error.
     * @return Reference to this builder.
     */
-    PollingBuilder& Filter(std::string filter_key);
+    template <typename T = SDK>
+    std::enable_if_t<is_server_sdk<T>::value, PollingBuilder&> Filter(
+        std::string filter_key) {
+        config_.filter_key = std::move(filter_key);
+        return *this;
+    }
 
     /**
      * Build the polling config. Used internal to the SDK.
@@ -115,6 +130,7 @@ public:
 private:
     built::PollingConfig<SDK> config_;
 };
+
 
 template <>
 class DataSourceBuilder<ClientSDK> {
@@ -138,7 +154,7 @@ public:
     DataSourceBuilder& WithReasons(bool value);
 
     /**
-     * Whether or not to use the REPORT verb to fetch flag settings.
+     * Whether to use the REPORT verb to fetch flag settings.
      *
      * If this is true, flag settings will be fetched with a REPORT request
      * including a JSON entity body with the context object.
