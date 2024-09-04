@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.3...launchdarkly-cpp-server-v3.6.0) (2024-09-04)
+
+
+### Features
+
+* server-side payload filters ([#435](https://github.com/launchdarkly/cpp-sdks/issues/435)) ([aaff0b8](https://github.com/launchdarkly/cpp-sdks/commit/aaff0b82a25e44fa104403f6de65404a51561a56))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.1 to 0.8.2
+    * launchdarkly-cpp-common bumped from 1.7.0 to 1.8.0
+
 ## [3.5.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.2...launchdarkly-cpp-server-v3.5.3) (2024-07-25)
 
 
