@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
     try {
         net::io_context ioc{1};
 
-        auto p = boost::lexical_cast<unsigned short>(port);
-        server srv(ioc, "0.0.0.0", p, logger);
+        auto const p = boost::lexical_cast<unsigned short>(port);
+        server srv{ioc, "0.0.0.0", p, logger};
 
         srv.add_capability("server-side");
         srv.add_capability("strongly-typed");
@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("tls:verify-peer");
         srv.add_capability("tls:skip-verify-peer");
         srv.add_capability("tls:custom-ca");
-
+        srv.add_capability("filtering");
+        srv.add_capability("filtering-strict");
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
         boost::asio::spawn(ioc.get_executor(), [&](auto yield) mutable {

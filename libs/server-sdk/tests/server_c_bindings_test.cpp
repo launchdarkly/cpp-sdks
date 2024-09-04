@@ -301,3 +301,39 @@ TEST(ClientBindings, TlsConfigurationSystemCAFile) {
 
     LDServerConfig_Free(config);
 }
+
+TEST(ClientBindings, StreamingPayloadFilters) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourceStreamBuilder stream_builder =
+        LDServerDataSourceStreamBuilder_New();
+
+    LDServerDataSourceStreamBuilder_Filter(stream_builder, "foo");
+
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(cfg_builder,
+                                                              stream_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, PollingPayloadFilters) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourcePollBuilder poll_builder =
+        LDServerDataSourcePollBuilder_New();
+
+    LDServerDataSourcePollBuilder_Filter(poll_builder, "foo");
+
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(cfg_builder,
+                                                            poll_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}

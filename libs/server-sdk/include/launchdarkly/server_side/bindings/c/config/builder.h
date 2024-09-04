@@ -14,8 +14,7 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {  // only need to export C interface if
-// used by C++ source code
+extern "C" {  // only need to export C interface if used by C++ source code
 #endif
 
 typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
@@ -278,6 +277,28 @@ LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
     unsigned int milliseconds);
 
 /**
+ * Sets the filter key for the streaming connection.
+ *
+ * By default, the SDK is able to evaluate all flags in an environment.
+ *
+ * If this is undesirable - for example, because the environment contains
+ * thousands of flags, but this application only needs to evaluate
+ * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+ * and the filter's key specified here.
+ *
+ * Evaluations for flags that aren't part of the filtered environment will
+ * return default values.
+ *
+ * @param b Streaming method builder. Must not be NULL.
+ * @param filter_key The filter key. Must not be NULL. If the key is malformed
+ * or nonexistent, then a full LaunchDarkly environment will be fetched. In the
+ * case of a malformed key, the SDK will additionally log a runtime error.
+ */
+LD_EXPORT(void)
+LDServerDataSourceStreamBuilder_Filter(LDServerDataSourceStreamBuilder b,
+                                       char const* filter_key);
+
+/**
  * Frees a Streaming method builder. Do not call if the builder was consumed by
  * the config builder.
  *
@@ -306,6 +327,28 @@ LDServerDataSourcePollBuilder_New();
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
                                         unsigned int seconds);
+
+/**
+ * Sets the filter key for the polling connection.
+ *
+ * By default, the SDK is able to evaluate all flags in an environment.
+ *
+ * If this is undesirable - for example, because the environment contains
+ * thousands of flags, but this application only needs to evaluate
+ * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+ * and the filter's key specified here.
+ *
+ * Evaluations for flags that aren't part of the filtered environment will
+ * return default values.
+ *
+ * @param b Polling method builder. Must not be NULL.
+ * @param filter_key The filter key. Must not be NULL. If the key is malformed
+ * or nonexistent, then a full LaunchDarkly environment will be fetched. In the
+ * case of a malformed key, the SDK will additionally log a runtime error.
+ */
+LD_EXPORT(void)
+LDServerDataSourcePollBuilder_Filter(LDServerDataSourcePollBuilder b,
+                                     char const* filter_key);
 
 /**
  * Frees a Polling method builder. Do not call if the builder was consumed by
