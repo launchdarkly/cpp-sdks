@@ -39,6 +39,8 @@ class StreamingDataSource final
     void ShutdownAsync(std::function<void()>) override;
 
    private:
+    void HandleErrorStateChange(sse::Error error, std::string error_string);
+
     Context context_;
     boost::asio::any_io_executor exec_;
     DataSourceStatusManager& status_manager_;

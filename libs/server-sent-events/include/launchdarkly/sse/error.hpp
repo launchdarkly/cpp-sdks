@@ -9,9 +9,6 @@
 namespace launchdarkly::sse {
 namespace errors {
 
-struct NoContent {};
-std::ostream& operator<<(std::ostream& out, NoContent const&);
-
 struct InvalidRedirectLocation {
     std::string location;
 };
@@ -32,11 +29,12 @@ std::ostream& operator<<(std::ostream& out, UnrecoverableClientError const&);
 
 }  // namespace errors
 
-using Error = std::variant<errors::NoContent,
-                           errors::InvalidRedirectLocation,
+using Error = std::variant<errors::InvalidRedirectLocation,
                            errors::NotRedirectable,
                            errors::ReadTimeout,
                            errors::UnrecoverableClientError>;
+
+bool IsRecoverable(Error const& error);
 
 std::ostream& operator<<(std::ostream& out, Error const& error);
 
