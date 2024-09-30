@@ -35,10 +35,12 @@ LD_EXPORT(void)
 LDContextBuilder_Free(LDContextBuilder builder);
 
 /**
- * Construct a context from a context builder.
+ * Construct a context from a context builder. The builder is automatically
+ * freed.
  *
- * When building a context using @ref LDContextBuilder_Build the builder will be
- * consumed and you do not need to call @ref LDContextBuilder_Free.
+ * WARNING: Do not call any other
+ * LDContextBuilder function on the provided LDContextBuilder after
+ * calling this function. It is undefined behavior.
  *
  * @param builder The builder to build a context from. Must not be NULL.
  * @return The built context.

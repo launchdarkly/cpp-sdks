@@ -532,7 +532,12 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Persistence_None(LDClientConfigBuilder b);
 
 /**
- * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.
+ * Creates an LDClientConfig. The LDClientConfigBuilder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDClientConfigBuilder function on the provided LDClientConfigBuilder after
+ * calling this function. It is undefined behavior.
+ *
  * On success, the config will be stored in out_config; otherwise,
  * out_config will be set to NULL and the returned LDStatus will indicate
  * the error.
