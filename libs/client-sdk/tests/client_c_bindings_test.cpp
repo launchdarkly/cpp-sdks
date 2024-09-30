@@ -194,3 +194,24 @@ TEST(ClientBindings, ComplexDataSourceStatus) {
 
     LDDataSourceStatus_ErrorInfo_Free(info);
 }
+
+TEST(ClientBindings, TestDataSourceStatusStateName) {
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(LD_DATASOURCESTATUS_STATE_VALID,
+                                               "unknown"),
+                 "VALID");
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(
+                     LD_DATASOURCESTATUS_STATE_OFFLINE, "unknown"),
+                 "OFFLINE");
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(
+                     LD_DATASOURCESTATUS_STATE_INITIALIZING, "unknown"),
+                 "INITIALIZING");
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(
+                     LD_DATASOURCESTATUS_STATE_SHUTDOWN, "unknown"),
+                 "SHUTDOWN");
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(
+                     LD_DATASOURCESTATUS_STATE_INTERRUPTED, "unknown"),
+                 "INTERRUPTED");
+    ASSERT_STREQ(LDDataSourceStatus_State_Name(
+                     LD_DATASOURCESTATUS_STATE_UNUSED_MAXVALUE, "unknown"),
+                 "unknown");
+}

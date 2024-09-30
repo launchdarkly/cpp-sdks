@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -15,7 +16,7 @@ namespace launchdarkly::client_side::data_sources {
 /**
  * Enumeration of possible data source states.
  */
-enum class DataSourceState {
+enum class DataSourceState : std::int32_t {
     /**
      * The initial state of the data source when the SDK is being
      * initialized.
@@ -62,14 +63,16 @@ enum class DataSourceState {
      * SDK key will never become valid), or because the SDK client was
      * explicitly shut down.
      */
-    kShutdown = 4,
-
-    // BackgroundDisabled,
-
-    // TODO: A plugin of sorts would likely be required to implement
-    // network availability.
-    // kNetworkUnavailable,
+    kShutdown = 4
 };
+
+/**
+ *
+ * @return Returns the name of the given DataSourceState as a string. If
+ * the enum value is not recognized, the default string value is returned.
+ */
+char const* GetDataSourceStateName(DataSourceState state,
+                                   char const* default_if_unknown);
 
 using DataSourceStatus =
     common::data_sources::DataSourceStatusBase<DataSourceState>;
