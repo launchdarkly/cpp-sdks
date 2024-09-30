@@ -134,18 +134,28 @@ ClientImpl::ClientImpl(Config in_cfg,
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
 }
 
-// Was an attempt made to initialize the data source, and did that attempt
-// succeed? The data source being connected, or not being connected due to
-// offline mode, both represent successful terminal states.
+// Returns true if the SDK can be considered initialized. We have defined
+// explicit configuration of offline mode as initialized.
+//
+// When online, we're initialized if we've obtained a payload and are healthy
+// (kValid) or obtained a payload and are unhealthy (kInterrupted).
+//
+// The purpose of this concept is to enable:
+//
+// (1) Resolving the StartAsync() promise. Once the SDK is no longer
+// initializing, this promise needs to indicate if the process was successful
+// or not.
+//
+// (2) Providing a getter for (1), if the user didn't check the promise or
+// otherwise need to poll the state. That's the Initialized() method.
+//
+// (3) As a diagnostic during evaluation, to log a message warning that a
+// cached (if persistence is being used) or default (if not) value will be
+// returned because the SDK is not yet initialized.
 static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
     return (state == DataSourceStatus::DataSourceState::kValid ||
-            state == DataSourceStatus::DataSourceState::kSetOffline);
-}
-
-// Was any attempt made to initialize the data source (with a successful or
-// permanent failure outcome?)
-static bool IsInitialized(DataSourceStatus::DataSourceState state) {
-    return state != DataSourceStatus::DataSourceState::kInitializing;
+            state == DataSourceStatus::DataSourceState::kSetOffline ||
+            state == DataSourceStatus::DataSourceState::kInterrupted);
 }
 
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
@@ -174,7 +184,8 @@ std::future<bool> ClientImpl::StartAsyncInternal() {
 
     status_manager_.OnDataSourceStatusChangeEx(
         [init_promise](data_sources::DataSourceStatus const& status) {
-            if (auto const state = status.State(); IsInitialized(state)) {
+            if (auto const state = status.State();
+                state != DataSourceStatus::DataSourceState::kInitializing) {
                 init_promise->set_value(
                     IsInitializedSuccessfully(status.State()));
                 return true; /* delete this change listener since the desired
@@ -193,7 +204,7 @@ std::future<bool> ClientImpl::StartAsync() {
 }
 
 bool ClientImpl::Initialized() const {
-    return IsInitialized(status_manager_.Status().State());
+    return IsInitializedSuccessfully(status_manager_.Status().State());
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
