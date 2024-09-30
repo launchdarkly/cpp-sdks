@@ -145,8 +145,7 @@ static bool IsInitializedSuccessfully(DataSourceStatus::DataSourceState state) {
 // Was any attempt made to initialize the data source (with a successful or
 // permanent failure outcome?)
 static bool IsInitialized(DataSourceStatus::DataSourceState state) {
-    return IsInitializedSuccessfully(state) ||
-           (state == DataSourceStatus::DataSourceState::kShutdown);
+    return state != DataSourceStatus::DataSourceState::kInitializing;
 }
 
 std::future<bool> ClientImpl::IdentifyAsync(Context context) {
@@ -155,7 +154,7 @@ std::future<bool> ClientImpl::IdentifyAsync(Context context) {
     event_processor_->SendAsync(events::IdentifyEventParams{
         std::chrono::system_clock::now(), std::move(context)});
 
-    return StartAsyncInternal(IsInitializedSuccessfully);
+    return StartAsyncInternal();
 }
 
 void ClientImpl::RestartDataSource() {
@@ -169,16 +168,15 @@ void ClientImpl::RestartDataSource() {
     data_source_->ShutdownAsync(start_op);
 }
 
-std::future<bool> ClientImpl::StartAsyncInternal(
-    std::function<bool(DataSourceStatus::DataSourceState)> result_predicate) {
+std::future<bool> ClientImpl::StartAsyncInternal() {
     auto init_promise = std::make_shared<std::promise<bool>>();
     auto init_future = init_promise->get_future();
 
     status_manager_.OnDataSourceStatusChangeEx(
-        [result = std::move(result_predicate),
-         init_promise](data_sources::DataSourceStatus const& status) {
+        [init_promise](data_sources::DataSourceStatus const& status) {
             if (auto const state = status.State(); IsInitialized(state)) {
-                init_promise->set_value(result(status.State()));
+                init_promise->set_value(
+                    IsInitializedSuccessfully(status.State()));
                 return true; /* delete this change listener since the desired
                                 state was reached */
             }
@@ -191,11 +189,11 @@ std::future<bool> ClientImpl::StartAsyncInternal(
 }
 
 std::future<bool> ClientImpl::StartAsync() {
-    return StartAsyncInternal(IsInitializedSuccessfully);
+    return StartAsyncInternal();
 }
 
 bool ClientImpl::Initialized() const {
-    return IsInitializedSuccessfully(status_manager_.Status().State());
+    return IsInitialized(status_manager_.Status().State());
 }
 
 std::unordered_map<Client::FlagKey, Value> ClientImpl::AllFlags() const {
