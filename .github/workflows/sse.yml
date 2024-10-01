@@ -32,8 +32,9 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.0.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@346636e580d3a19423a2e59c9f09cffe12695f25
         with:
           repo: 'sse-contract-tests'
+          branch: 'main'
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
