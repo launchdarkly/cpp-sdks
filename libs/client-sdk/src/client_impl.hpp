@@ -109,10 +109,7 @@ class ClientImpl : public IClient {
 
     void RestartDataSource();
 
-    std::future<bool> StartAsyncInternal(
-        std::function<bool(data_sources::DataSourceStatus::DataSourceState)>
-            predicate);
-
+    std::future<bool> StartAsyncInternal();
     Config config_;
     Logger logger_;
 

@@ -148,6 +148,8 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
     bool success = false;
     LDClientSDK_Start(sdk, 3000, &success);
 
+    EXPECT_TRUE(success);
+
     LDDataSourceStatus status_2 = LDClientSDK_DataSourceStatus_Status(sdk);
     EXPECT_EQ(LD_DATASOURCESTATUS_STATE_OFFLINE,
               LDDataSourceStatus_GetState(status_2));
@@ -155,6 +157,8 @@ TEST(ClientBindings, GetStatusOfOfflineClient) {
     EXPECT_EQ(nullptr, LDDataSourceStatus_GetLastError(status_2));
 
     EXPECT_NE(0, LDDataSourceStatus_StateSince(status_2));
+
+    EXPECT_TRUE(LDClientSDK_Initialized(sdk));
 
     LDDataSourceStatus_Free(status_1);
     LDDataSourceStatus_Free(status_2);
