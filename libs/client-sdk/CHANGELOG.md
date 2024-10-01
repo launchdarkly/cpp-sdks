@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.6.4...launchdarkly-cpp-client-v3.7.0) (2024-10-01)
+
+
+### Features
+
+* add client-side C binding for fetching data source state ([#442](https://github.com/launchdarkly/cpp-sdks/issues/442)) ([e8ca616](https://github.com/launchdarkly/cpp-sdks/commit/e8ca616001558216f81b72c7f20a162449e8c6b9))
+
+
+### Bug Fixes
+
+* client init state should not regress when data source interrupted ([#441](https://github.com/launchdarkly/cpp-sdks/issues/441)) ([4a7f1f9](https://github.com/launchdarkly/cpp-sdks/commit/4a7f1f90c9eafc307b50eb1ce125e7728246f19a))
+* improve handling of streaming error state changes/logging ([#439](https://github.com/launchdarkly/cpp-sdks/issues/439)) ([04e7e0e](https://github.com/launchdarkly/cpp-sdks/commit/04e7e0ef64b1933a63ad8d071a0a8f95ce666dc8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.2 to 0.8.3
+    * launchdarkly-cpp-sse-client bumped from 0.5.2 to 0.5.3
+
 ## [3.6.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.6.3...launchdarkly-cpp-client-v3.6.4) (2024-09-04)
 
 
