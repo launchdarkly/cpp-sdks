@@ -352,6 +352,14 @@ LDDataSourceStatus_GetState(LDDataSourceStatus status) {
         TO_DATASOURCESTATUS(status)->State());
 }
 
+LD_EXPORT(char const*)
+LDDataSourceStatus_State_Name(enum LDDataSourceStatus_State state,
+                              char const* default_if_unknown) {
+    return GetDataSourceStateName(
+        static_cast<data_sources::DataSourceStatus::DataSourceState>(state),
+        default_if_unknown);
+}
+
 LD_EXPORT(LDDataSourceStatus_ErrorInfo)
 LDDataSourceStatus_GetLastError(LDDataSourceStatus status) {
     LD_ASSERT_NOT_NULL(status);
