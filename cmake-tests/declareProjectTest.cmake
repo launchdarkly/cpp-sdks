@@ -33,8 +33,6 @@ macro(declare_add_subdirectory_test name)
             -DLAUNCHDARKLY_SOURCE_DIR=${PROJECT_SOURCE_DIR}
             # Do not setup all of the SDK's testing machinery, which would normally happen when calling add_subdirectory.
             -DBUILD_TESTING=OFF
-            # Forward variables from the SDK project to the test project, if set.
-            $<$<BOOL:${CMAKE_GENERATOR_PLATFORM}>:-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}>
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
@@ -78,8 +76,6 @@ macro(declare_find_package_test name)
             # Since project/CMakeLists.txt uses find_package(), it needs to know where to find
             # ldserverapiConfig.cmake. That can be found where the SDK is installed, which is CMAKE_INSTALL_PREFIX.
             -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
-            # Forward variables from the SDK project to the test project, if set.
-            $<$<BOOL:${CMAKE_GENERATOR_PLATFORM}>:-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}>
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
