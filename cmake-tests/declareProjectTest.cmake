@@ -33,6 +33,8 @@ macro(declare_add_subdirectory_test name)
             -DLAUNCHDARKLY_SOURCE_DIR=${PROJECT_SOURCE_DIR}
             # Do not setup all of the SDK's testing machinery, which would normally happen when calling add_subdirectory.
             -DBUILD_TESTING=OFF
+            -DBOOST_ROOT=${BOOST_ROOT}
+            -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
