@@ -35,8 +35,6 @@ macro(declare_add_subdirectory_test name)
             -DBUILD_TESTING=OFF
             # Forward variables from the SDK project to the test project, if set.
             $<$<BOOL:${CMAKE_GENERATOR_PLATFORM}>:-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}>
-            $<$<BOOL:${BOOST_ROOT}>:-DBOOST_ROOT=${BOOST_ROOT}>
-            $<$<BOOL:${OPENSSL_ROOT_DIR}>:-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}>
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
@@ -82,8 +80,6 @@ macro(declare_find_package_test name)
             -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
             # Forward variables from the SDK project to the test project, if set.
             $<$<BOOL:${CMAKE_GENERATOR_PLATFORM}>:-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}>
-            $<$<BOOL:${BOOST_ROOT}>:-DBOOST_ROOT=${BOOST_ROOT}>
-            $<$<BOOL:${OPENSSL_ROOT_DIR}>:-DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}>
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
