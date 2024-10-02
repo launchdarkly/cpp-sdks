@@ -1,18 +1,5 @@
 #!/bin/bash -e
 
-
-if [ -z "$BOOST_ROOT" ]; then
-  echo "BOOST_ROOT is not set. Please set it to the root directory boost so it can be forwarded to CMake integration
-  tests."
-  exit 1
-fi
-
-if [ -z "$OPENSSL_ROOT_DIR" ]; then
-  echo "OPENSSL_ROOT_DIR is not set. Please set it to the root directory of OpenSSL so it can be forwarded to CMake
-  integration tests."
-  exit 1
-fi
-
 function cleanup {
   cd ..
 }
