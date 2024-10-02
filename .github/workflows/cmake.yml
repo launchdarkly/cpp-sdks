@@ -1,0 +1,24 @@
+name: cmake-integration
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md' # Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ "main", "feat/**" ]
+    paths-ignore:
+      - '**.md'
+  schedule:
+    # Run daily at midnight PST
+    - cron: '0 8 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/build-cmake-integration-tests.sh
+      - run:
+          export CTEST_OUTPUT_ON_FAILURE=1
+          cd build/cmake-tests && ctest

@@ -65,6 +65,14 @@ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         OFF                                         # otherwise, off
 )
 
+# Add an option for enabling the "CMake Integration Tests" (see cmake-tests README).
+# These tests require testing to be enabled (BUILD_TESTING), but aren't unit tests, so are disabled by default.
+cmake_dependent_option(LD_CMAKE_INTEGRATION_TESTS
+        "Test integration of SDK into other CMake projects" OFF # Default to disabling the cmake integration tests.
+        "BUILD_TESTING" # Only expose if testing is enabled.
+        OFF # otherwise, off.
+)
+
 # The general strategy is to produce a fat artifact containing all of our dependencies so users
 # only have a single thing to link. We should support this either being a static or shared library.
 # Because OpenSSL is a large, and security relevant dependency, we should have a separate option
@@ -108,6 +116,13 @@ if (LD_BUILD_UNIT_TESTS)
     enable_testing()
 endif ()
 
+if (LD_CMAKE_INTEGRATION_TESTS)
+    message(STATUS "LaunchDarkly: building CMake integration tests")
+    add_subdirectory(cmake-tests)
+    enable_testing()
+endif ()
+
+
 if (LD_DYNAMIC_LINK_OPENSSL)
     message(STATUS "LaunchDarkly: searching for shared OpenSSL library")
     set(OPENSSL_USE_STATIC_LIBS OFF)
@@ -130,13 +145,13 @@ endif ()
 
 if (LD_BUILD_SHARED_LIBS)
     if (LD_BUILD_EXPORT_ALL_SYMBOLS)
-       message(STATUS "LaunchDarkly: exposing all symbols in shared libraries")
+        message(STATUS "LaunchDarkly: exposing all symbols in shared libraries")
     else ()
-       message(STATUS "LaunchDarkly: hiding all symbols in shared libraries except for C API")
-       set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-       set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-    endif()
-endif()
+        message(STATUS "LaunchDarkly: hiding all symbols in shared libraries except for C API")
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+    endif ()
+endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
