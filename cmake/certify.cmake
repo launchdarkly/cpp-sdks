@@ -7,6 +7,18 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
+if (POLICY CMP0169)
+    # TODO: Use FetchContent MakeAvailable. I believe this wasn't used because EXCLUDE_FROM_ALL needs to be passed (?).
+    cmake_policy(SET CMP0169 OLD)
+endif ()
+
+if (POLICY CMP0167)
+    # TODO: Update to use the Boost project's cmake config directly, since FindBoost was deprecated in
+    # cmake >= 3.30.
+    cmake_policy(SET CMP0167 OLD)
+endif ()
+
+
 FetchContent_Declare(boost_certify
         GIT_REPOSITORY https://github.com/djarek/certify.git
         GIT_TAG 97f5eebfd99a5d6e99d07e4820240994e4e59787

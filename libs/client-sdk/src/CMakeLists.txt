@@ -11,6 +11,8 @@ else ()
     add_library(${LIBNAME} STATIC)
 endif ()
 
+add_library(launchdarkly::client ALIAS ${LIBNAME})
+
 target_sources(${LIBNAME} PRIVATE
         ${HEADER_LIST}
         data_sources/streaming_data_source.cpp
@@ -40,13 +42,20 @@ target_sources(${LIBNAME} PRIVATE
         bindings/c/sdk.cpp
 )
 
-
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy)
 
+# Need the public headers to build.
+target_include_directories(${LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<INSTALL_INTERFACE:include>
+)
 
-add_library(launchdarkly::client ALIAS ${LIBNAME})
+# Minimum C++ standard needed for consuming the public API is C++17.
+target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+
 
 # Optional in case only the server SDK is being built.
 install(TARGETS ${LIBNAME} OPTIONAL)
@@ -57,11 +66,11 @@ endif ()
 # This will preserve it, but dependencies must do the same.
 
 install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
-        DESTINATION "include"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Need the public headers to build.
-target_include_directories(${LIBNAME} PUBLIC ../include)
 
-# Minimum C++ standard needed for consuming the public API is C++17.
-target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+install(
+        TARGETS ${LIBNAME} OPTIONAL
+        EXPORT launchdarklyTargets
+)

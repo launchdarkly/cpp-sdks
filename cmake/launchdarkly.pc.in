@@ -1,0 +1,10 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+
+Name: launchdarkly
+Description: LaunchDarkly Server and Client-side SDKs
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -llaunchdarkly_cpp_client -llaunchdarkly_cpp_server -llaunchdarkly_cpp_server_redis_source
+Cflags: -I${includedir}

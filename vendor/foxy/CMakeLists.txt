@@ -248,3 +248,7 @@ if (FOXY_FUZZ)
     target_link_options(uri-parser PRIVATE "-fsanitize=fuzzer")
 endif ()
 
+install(
+        TARGETS foxy
+        EXPORT launchdarklyTargets
+)

@@ -21,8 +21,6 @@ if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif ()
 
-include(GNUInstallDirs)
-
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
@@ -155,6 +153,13 @@ endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+
+if (POLICY CMP0167)
+    # TODO: Update to use the Boost project's cmake config directly, since FindBoost was deprecated in
+    # cmake >= 3.30.
+    cmake_policy(SET CMP0167 OLD)
+endif ()
+
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
@@ -185,3 +190,36 @@ if (LD_BUILD_EXAMPLES)
     message(STATUS "LaunchDarkly: building examples")
     add_subdirectory(examples)
 endif ()
+
+
+# Support installation of a cmake package.
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/launchdarkly-config-version.cmake"
+        COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarkly-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/launchdarkly-config-version.cmake"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/launchdarkly"
+)
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarkly.pc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/launchdarkly.pc
+)
+
+install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/launchdarkly.pc
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
+
+install(
+        EXPORT launchdarklyTargets
+        NAMESPACE launchdarkly::
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/launchdarkly"
+)
