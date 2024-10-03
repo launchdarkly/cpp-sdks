@@ -1,0 +1,2 @@
+include(declareProjectTest.cmake)
+add_subdirectory(test_add_subdirectory)

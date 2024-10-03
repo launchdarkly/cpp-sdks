@@ -1,0 +1,43 @@
+name: cmake-integration
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md' # Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ "main", "feat/**" ]
+    paths-ignore:
+      - '**.md'
+  schedule:
+    # Run daily at midnight PST
+    - cron: '0 8 * * *'
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cmake-test
+        with:
+          platform_version: '22.04'
+
+  test-macos:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/cmake-test
+        with:
+          platform_version: '12'
+
+  test-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ./.github/actions/cmake-test
+        env:
+          BOOST_ROOT: 'C:\local\boost_1_81_0\lib64-msvc-14.3'
+        with:
+          platform_version: 2022
+          toolset: msvc
