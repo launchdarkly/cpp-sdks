@@ -204,7 +204,7 @@ write_basic_package_version_file(
 install(FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarkly-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/launchdarkly-config-version.cmake"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/launchdarkly"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
 )
 
 configure_file(
@@ -221,5 +221,5 @@ install(
 install(
         EXPORT launchdarklyTargets
         NAMESPACE launchdarkly::
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/launchdarkly"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
 )
