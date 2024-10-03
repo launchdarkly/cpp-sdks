@@ -3,7 +3,7 @@
 This directory contains tests for various integration techniques that users of the
 LaunchDarkly C++ SDKs may employ.
 
-Each test takes the form of a minimal CMake project with a `CMakeLists.txt` and `main.c/main.cpp`.
+Each test takes the form of a minimal CMake project with a `CMakeLists.txt` and `main.cpp`.
 An additional `CMakeLists.txt` sets up the test properties.
 
 Structure:
@@ -11,12 +11,12 @@ Structure:
 ```
 some_test_directory
     project                 # Contains the CMake project under test.
-        - main.c[pp]        # Minimal code that invokes LaunchDarkly SDK.
+        - main.cpp          # Minimal code that invokes LaunchDarkly SDK.
         - CMakeLists.txt    # CMake configuration that builds the project executable.
     - CMakeLists.txt        # CMake configuration that sets up the CTest machinery for this test.
 ```
 
-*Important note about `main.c`/`main.cpp`*:
+*Important note about `main.cpp`*:
 
 The optimizer employed by whatever toolchain is building the project might omit function definitions in the SDK
 during static linking, if those functions are proven to be unused.
@@ -24,7 +24,7 @@ during static linking, if those functions are proven to be unused.
 The code in the main file should not have any branches that allow this to happen
 (such as a check for an SDK key, like in the hello demo projects.)
 
-This could obscure linker errors if the release artifacts are generated incorrectly.
+This could obscure linker errors that would have otherwise been caught.
 
 ## CMake test setup
 
@@ -51,21 +51,10 @@ Without setting these, the test would fail to build with the same compilers as t
 
 Additionally, certain variables must be forwarded to each test project CMake configuration.
 
-| Variable                   | Explanation                                                                                                              |
-|----------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `BOOST_ROOT`               | Path to Boost.                                                                                                           |
-| `OPENSSL_ROOT_DIR`         | Path to OpenSSL.                                                                                                         |
-| `CMAKE_GENERATOR_PLATFORM` | Windows build explicitly specifies x64 build, whereas the default project build would be x86. Linker errors would ensue. |
-
-The creation logic uses a series of CMake generator expressions (`$<...>`) to forward the variables
-in the table above from the main SDK project (which `add_subdirectory`'d each test) to the test projects.
-
-Simply specifying the variables directly using `-DVARIABLE=${VARIABLE}` as is normally done on the command line
-wouldn't work correctly. If the variable is empty in the SDK project (like when a system package can be used),
-then passing that empty string to the test project would cause the eventual `find_package(Boost/OpenSSL)` to fail, as
-passing those variables implies the user wants to override the find scripts.
-
-The generator expressions omit the `-D` entirely if the original variable is empty, otherwise they add it.
+| Variable           | Explanation      |
+|--------------------|------------------|
+| `BOOST_ROOT`       | Path to Boost.   |
+| `OPENSSL_ROOT_DIR` | Path to OpenSSL. |
 
 ## Tests
 
