@@ -80,7 +80,7 @@ macro(declare_find_package_test name)
             # Since the SDK depends on Boost, it's also going to need to know where BoostConfig.cmake is. Because the
             # CI host installs boost at BOOST_ROOT, and the boost installation comes with a BoostConfig, we can add it
             # here.
-            -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX};${BOOST_ROOT}"
+            "-DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX};${BOOST_ROOT}"
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
