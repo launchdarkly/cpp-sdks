@@ -1,7 +1,8 @@
+include(CMakeFindDependencyMacro)
 
-find_package(Boost 1.81 CONFIG REQUIRED COMPONENTS json url coroutine)
-find_package(OpenSSL CONFIG REQUIRED)
-find_package(tl-expected CONFIG REQUIRED)
-find_package(certify CONFIG REQUIRED)
+find_dependency(Boost 1.81 COMPONENTS json url coroutine)
+find_dependency(OpenSSL)
+find_dependency(tl-expected)
+find_dependency(certify)
 
 include(${CMAKE_CURRENT_LIST_DIR}/launchdarklyTargets.cmake)
