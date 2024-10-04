@@ -10,7 +10,7 @@
 #include <foxy/parse_uri.hpp>
 #include <boost/utility/string_view.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 TEST_CASE("uri_parts_test")
 {

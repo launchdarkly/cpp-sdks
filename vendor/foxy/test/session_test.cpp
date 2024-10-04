@@ -19,7 +19,7 @@
 #include <boost/beast/_experimental/test/stream.hpp>
 #include <boost/beast/_experimental/test/fail_count.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace asio = boost::asio;
 namespace http = boost::beast::http;

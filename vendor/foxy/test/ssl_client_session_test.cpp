@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using boost::system::error_code;
 using boost::asio::ip::tcp;
