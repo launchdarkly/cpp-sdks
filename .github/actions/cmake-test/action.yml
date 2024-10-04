@@ -36,10 +36,14 @@ runs:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
         CMAKE_INSTALL_PREFIX: ../LAUNCHDARKLY_INSTALL
+    - name: Build the SDK
+      shell: bash
+      run: |
+        cmake --build build
     - name: Install the SDK
       shell: bash
-      run:
-        cd build && cmake --install .
+      run: |
+        cmake --install build
     - name: Run CMake Integration Tests
       shell: bash
       run: |
