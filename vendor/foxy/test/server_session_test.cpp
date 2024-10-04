@@ -20,7 +20,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/core/ostream.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 #include <iostream>
 

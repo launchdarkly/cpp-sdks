@@ -3,7 +3,7 @@
 
 #include <boost/asio/io_context.hpp>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace asio = boost::asio;
 

@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 using boost::asio::ip::tcp;
 namespace ip   = boost::asio::ip;

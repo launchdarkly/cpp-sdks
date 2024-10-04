@@ -39,6 +39,11 @@ endif ()
 
 find_package(Threads REQUIRED)
 
+set(CMAKE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
+include(${CMAKE_FILES}/certify.cmake)
+
 add_library(
         foxy OBJECT
         include/foxy.hpp
@@ -153,6 +158,13 @@ target_link_libraries(
         certify::core
 )
 
+if (APPLE)
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+    find_library(SECURITY_LIBRARY Security)
+    target_link_libraries(foxy PRIVATE ${COREFOUNDATION_LIBRARY} ${SECURITY_LIBRARY})
+endif ()
+
+
 add_library(
         test_utils
 
@@ -167,7 +179,8 @@ option(BUILD_TESTING "Build Foxy Testsuite" OFF)
 if (BUILD_TESTING)
     include(CTest)
 
-    find_package(Catch2 CONFIG REQUIRED)
+    include(${CMAKE_FILES}/catch2.cmake)
+
     find_package(Boost ${foxy_minimum_boost_version} REQUIRED coroutine thread container)
 
     add_executable(
@@ -179,7 +192,6 @@ if (BUILD_TESTING)
             test/export_connect_fields_test.cpp
             test/iterator_test.cpp
             test/listener_test.cpp
-            test/main.cpp
             test/parse_uri_test.cpp
             test/pct_decode_test.cpp
             test/pct_encode_test.cpp
@@ -200,10 +212,11 @@ if (BUILD_TESTING)
             foxy_tests
             PRIVATE
             test_utils
-            Catch2::Catch2
+            Catch2::Catch2WithMain
             Boost::coroutine
             Boost::thread
             Boost::container
+            certify::core
     )
 
     file(COPY test/root-cas.pem DESTINATION ${CMAKE_BINARY_DIR})
@@ -247,4 +260,3 @@ if (FOXY_FUZZ)
     target_compile_options(uri-parser PRIVATE "-fsanitize=fuzzer")
     target_link_options(uri-parser PRIVATE "-fsanitize=fuzzer")
 endif ()
-

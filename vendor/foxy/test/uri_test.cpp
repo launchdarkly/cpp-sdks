@@ -12,7 +12,7 @@
 #include <vector>
 #include <algorithm>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace x3 = boost::spirit::x3;
 

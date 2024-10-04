@@ -20,7 +20,7 @@
 
 #include <memory>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 
 namespace asio = boost::asio;
 namespace http = boost::beast::http;
