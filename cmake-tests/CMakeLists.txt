@@ -1,2 +1,3 @@
 include(declareProjectTest.cmake)
+add_subdirectory(test_find_package)
 add_subdirectory(test_add_subdirectory)

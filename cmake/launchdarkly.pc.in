@@ -6,5 +6,5 @@ libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
 Name: launchdarkly
 Description: LaunchDarkly Server and Client-side SDKs
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -llaunchdarkly_cpp_client -llaunchdarkly_cpp_server -llaunchdarkly_cpp_server_redis_source
+Libs: -L${libdir} -llaunchdarkly-cpp-client -llaunchdarkly-cpp-server -llaunchdarkly-cpp-server-redis-source
 Cflags: -I${includedir}

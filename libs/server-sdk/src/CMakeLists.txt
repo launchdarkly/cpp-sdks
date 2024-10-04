@@ -76,7 +76,7 @@ target_sources(${LIBNAME}
 
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
+        PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal tl::expected foxy timestamp)
 
 
 if (LD_BUILD_SHARED_LIBS AND MSVC)

@@ -29,6 +29,7 @@ set(BUILD_TESTING OFF)
 FetchContent_GetProperties(boost_certify)
 if (NOT boost_certify_POPULATED)
     FetchContent_Populate(boost_certify)
+    # EXCLUDE_FROM_ALL is specified here because the installation of certify is broken.
     add_subdirectory(${boost_certify_SOURCE_DIR} ${boost_certify_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
 
