@@ -196,13 +196,13 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/launchdarkly-config-version.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/launchdarklyConfigVersion.cmake"
         COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarkly-config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/launchdarkly-config-version.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarklyConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/launchdarklyConfigVersion.cmake"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
 )
 

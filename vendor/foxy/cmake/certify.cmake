@@ -9,8 +9,8 @@ endif ()
 
 
 FetchContent_Declare(certify
-        GIT_REPOSITORY https://github.com/jens-diewald/certify.git
-        GIT_TAG 9185a824e2085b5632be542c0377204a05a4fa40
+        GIT_REPOSITORY https://github.com/cwaldren-ld/certify.git
+        GIT_TAG 8fc3024f97ffcc7442e30e1fe6ddff54b45e35d6
 )
 
 # The tests in certify don't compile.
@@ -21,8 +21,7 @@ FetchContent_MakeAvailable(certify)
 
 set(BUILD_TESTING ${PREVIOUS_BUILD_TESTING})
 
-# Override the include directories for certify::core
-target_include_directories(core INTERFACE
-        $<BUILD_INTERFACE:${certify_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+install(
+        TARGETS core
+        EXPORT launchdarklyTargets
 )
