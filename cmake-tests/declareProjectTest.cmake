@@ -75,9 +75,12 @@ macro(declare_find_package_test name)
             NAME ${test_prefix}_configure
             COMMAND
             ${CMAKE_COMMAND}
-            # Since project/CMakeLists.txt uses find_package(), it needs to know where to find
-            # ldserverapiConfig.cmake. That can be found where the SDK is installed, which is CMAKE_INSTALL_PREFIX.
-            -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
+            # Since project/CMakeLists.txt uses find_package(launchdarkly), it needs to know where to find
+            # launchdarklyConfig.cmake. That can be found where the SDK is installed, which is CMAKE_INSTALL_PREFIX.
+            # Since the SDK depends on Boost, it's also going to need to know where BoostConfig.cmake is. Because the
+            # CI host installs boost at BOOST_ROOT, and the boost installation comes with a BoostConfig, we can add it
+            # here.
+            -DCMAKE_PREFIX_PATH="${CMAKE_INSTALL_PREFIX};${BOOST_ROOT}"
             ${CMAKE_CURRENT_SOURCE_DIR}/project
     )
 
