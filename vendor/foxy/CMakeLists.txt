@@ -175,8 +175,14 @@ add_library(
 target_include_directories(test_utils PUBLIC test/include)
 target_link_libraries(test_utils PUBLIC foxy)
 
-option(BUILD_TESTING "Build Foxy Testsuite" OFF)
-if (BUILD_TESTING)
+cmake_dependent_option(FOXY_BUILD_TESTING
+        "Build the C++ unit tests."
+        ON
+        "BUILD_TESTING"
+        OFF
+)
+
+if (FOXY_BUILD_TESTING)
     include(CTest)
 
     include(${CMAKE_FILES}/catch2.cmake)

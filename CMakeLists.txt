@@ -163,7 +163,9 @@ endif ()
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
+set(FOXY_BUILD_TESTING OFF)
 add_subdirectory(vendor/foxy)
+
 
 # Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
