@@ -225,4 +225,17 @@ install(
         DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
 )
 
+set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_NAME "launchdarkly")
+set(CPACK_PACKAGE_VERSION "0.1.0")
+set(CPACK_PACKAGE_CONTACT "sdks@launchdarkly.com")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "LaunchDarkly C++ SDKs with C Bindings enable feature flagging, A/B testing, guarded rollouts, and more.")
+set(CPACK_PACKAGE_VENDOR "LaunchDarkly")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "sdks@launchdarkly.com")  # Debian-specific field
+set(CPACK_DEBIAN_PACKAGE_SECTION "libs")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+
+
+include(CPack)
 # TODO: get rid of the /cmake suffix on CMAKE_INSTALL_DATADIR in the SDK as well as in the certify dependency.
