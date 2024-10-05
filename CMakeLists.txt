@@ -222,3 +222,5 @@ install(
         NAMESPACE launchdarkly::
         DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
 )
+
+# TODO: get rid of the /cmake suffix on CMAKE_INSTALL_DATADIR in the SDK as well as in the certify dependency.

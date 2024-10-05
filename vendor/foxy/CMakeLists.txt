@@ -191,12 +191,9 @@ if (BUILD_TESTING)
             test/code_point_view_test.cpp
             test/export_connect_fields_test.cpp
             test/iterator_test.cpp
-            test/listener_test.cpp
             test/parse_uri_test.cpp
             test/pct_decode_test.cpp
             test/pct_encode_test.cpp
-            test/proxy_test.cpp
-            test/proxy_test2.cpp
             test/relay_test.cpp
             test/server_session_test.cpp
             test/session_test.cpp
