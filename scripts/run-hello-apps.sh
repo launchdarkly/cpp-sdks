@@ -42,6 +42,8 @@ trap cleanup EXIT
 
 cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D BUILD_TESTING=OFF  \
+               -D LD_DYNAMIC_LINK_OPENSSL=OFF \
+               -D LD_DYNAMIC_LINK_BOOST=OFF \
                -D LD_BUILD_SHARED_LIBS=$dynamic_linkage \
                -D LD_BUILD_EXPORT_ALL_SYMBOLS=$export_all_symbols ..
 
