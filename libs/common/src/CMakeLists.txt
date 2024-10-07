@@ -62,8 +62,6 @@ add_library(${LIBNAME} OBJECT
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
 
-install(TARGETS ${LIBNAME})
-
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
 install(DIRECTORY "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly"
@@ -81,8 +79,16 @@ target_link_libraries(${LIBNAME}
         OpenSSL::SSL
         Boost::disable_autolinking)
 
-# Need the public headers to build.
-target_include_directories(${LIBNAME} PUBLIC ../include)
+target_include_directories(${LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<INSTALL_INTERFACE:include>
+)
 
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+
+install(
+        TARGETS ${LIBNAME}
+        EXPORT ${PROJECT_NAME}Targets
+)

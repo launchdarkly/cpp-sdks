@@ -62,3 +62,10 @@ Additionally, certain variables must be forwarded to each test project CMake con
 
 Checks that a project can include the SDK as a sub-project, via `add_subdirectory`.
 This would be a likely use-case when the repo is a submodule of another project.
+
+### cmake_projects/test_find_package
+
+Checks that a project can include the SDK via `find_package(ldserverapi)`.
+This would be a likely use-case if the SDK was installed on the system by the user.
+
+**NOTE:** Requires SDK to be installed.
