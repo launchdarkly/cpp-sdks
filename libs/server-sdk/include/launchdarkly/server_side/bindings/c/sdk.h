@@ -31,6 +31,13 @@ typedef struct _LDServerSDK* LDServerSDK;
 /**
  * Constructs a new server-side LaunchDarkly SDK from a configuration.
  *
+ * @code
+ * LDServerSDK sdk = LDServerSDK_New(config);
+ *
+ * // Later, when the SDK is no longer in use:
+ * LDServerSDK_Free(sdk);
+ * @endcode
+ *
  * @param config The configuration. Ownership is transferred. Do not free or
  * access the LDServerConfig in any way after this call, otherwise behavior is
  * undefined. Must not be NULL.
@@ -42,6 +49,11 @@ LDServerSDK_New(LDServerConfig config);
 
 /**
  * Returns the version of the SDK.
+ *
+ * @code
+ * char const* version = LDServerSDK_Version();
+ * @endcode
+ *
  * @return String representation of the SDK version.
  */
 LD_EXPORT(char const*)
@@ -103,6 +115,10 @@ LDServerSDK_Start(LDServerSDK sdk,
  * Returns a boolean value indicating LaunchDarkly connection and flag state
  * within the client.
  *
+ * @code
+ * bool initialized = LDServerSDK_Initialized(sdk);
+ * @endcode
+ *
  * When you first start the client, once Start has completed, Initialized
  * should return true if and only if either 1. it connected to LaunchDarkly and
  * successfully retrieved flags, or 2. it started in offline mode so there's no
@@ -122,6 +138,11 @@ LDServerSDK_Initialized(LDServerSDK sdk);
 
 /**
  * Tracks that the given context performed an event with the given event name.
+ *
+ * @code
+ * LDServerSDK_TrackEvent(sdk, context, "my-event");
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
  * @param event_name Name of the event. Must not be NULL.
@@ -134,6 +155,19 @@ LDServerSDK_TrackEvent(LDServerSDK sdk,
 /**
  * Tracks that the given context performed an event with the given event
  * name, and associates it with a numeric metric and value.
+ *
+ * If the data parameter isn't needed, pass @c LDValue_NewNull() as the value:
+ * @code
+ * LDServerSDK_TrackMetric(sdk, context, "my-metric", 3.14, LDValue_NewNull());
+ * @endcode
+ *
+ * If the data parameter is needed (example using a string):
+ * @code
+ * LDServerSDK_TrackMetric(sdk, context, "my-metric", 3.14,
+ * LDValue_NewString("data"));
+ * @endcode
+ *
+ * If the metric value isn't needed, see \ref LDServerSDK_TrackData.
  *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
@@ -154,6 +188,11 @@ LDServerSDK_TrackMetric(LDServerSDK sdk,
 /**
  * Tracks that the given context performed an event with the given event
  * name, with additional JSON data.
+ *
+ * @code
+ * LDServerSDK_TrackData(sdk, context, "my-data", LDValue_NewString("data"));
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
  * @param event_name The name of the event. Must not be NULL.
@@ -171,6 +210,10 @@ LDServerSDK_TrackData(LDServerSDK sdk,
  *
  * You MUST pass `LD_NONBLOCKING` as the second parameter.
  *
+ * @code
+ * LDServerSDK_Flush(sdk, LD_NONBLOCKING);
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param milliseconds Must pass `LD_NONBLOCKING`.
  */
@@ -180,6 +223,10 @@ LDServerSDK_Flush(LDServerSDK sdk, unsigned int reserved);
 /**
  * Generates an identify event for the given context.
  *
+ * @code
+ * LDServerSDK_Identify(sdk, context);
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
  */
@@ -188,6 +235,11 @@ LDServerSDK_Identify(LDServerSDK sdk, LDContext context);
 
 /**
  * Returns the boolean value of a feature flag for a given flag key and context.
+ *
+ * @code
+ * bool value = LDServerSDK_BoolVariation(sdk, context, "my-flag", false);
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.
@@ -204,6 +256,15 @@ LDServerSDK_BoolVariation(LDServerSDK sdk,
 /**
  * Returns the boolean value of a feature flag for a given flag key and context,
  * and details that also describes the way the value was determined.
+ *
+ * @code
+ * LDEvalDetail detail;
+ * bool value = LDServerSDK_BoolVariationDetail(sdk, context, "my-flag", false,
+ * &detail);
+ * // Use the detail object, then free it.
+ * LDEvalDetail_Free(detail);
+ * @endcode
+ *
  * @param sdk SDK. Must not be NULL.
  * @param context The context. Ownership is NOT transferred. Must not be NULL.
  * @param flag_key The unique key for the feature flag. Must not be NULL.

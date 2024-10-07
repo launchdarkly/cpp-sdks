@@ -31,6 +31,7 @@ typedef struct _LDClientSDK* LDClientSDK;
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
  * context.
+ *
  * @param config The configuration. Ownership is transferred. Do not free or
  * access the LDClientConfig in any way after this call; behavior is undefined.
  * Must not be NULL.
