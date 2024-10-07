@@ -1,0 +1,14 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node45 [label="std::false_type",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node45 -> Node0 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node0 [label="launchdarkly::config\l::shared::builders::is\l_server_sdk\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structlaunchdarkly_1_1config_1_1shared_1_1builders_1_1is__server__sdk.html",tooltip=" "];
+  Node45 -> Node47 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node47 [label="launchdarkly::detail\l::has_build_method\< T,\l ReturnType, typename \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structlaunchdarkly_1_1detail_1_1has__build__method.html",tooltip=" "];
+  Node45 -> Node48 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node48 [label="launchdarkly::detail\l::has_result_type\< T,\l typename \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structlaunchdarkly_1_1detail_1_1has__result__type.html",tooltip=" "];
+}

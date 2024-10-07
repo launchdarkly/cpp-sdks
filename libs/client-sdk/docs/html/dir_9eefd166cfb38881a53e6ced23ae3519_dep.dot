@@ -1,0 +1,15 @@
+digraph "include/launchdarkly" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_cedd4e4923668d84dbfc7d96a6891ec8 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="include" fontname="Helvetica", fontsize="10", URL="dir_cedd4e4923668d84dbfc7d96a6891ec8.html"]
+  subgraph clusterdir_9eefd166cfb38881a53e6ced23ae3519 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_9eefd166cfb38881a53e6ced23ae3519.html"];
+    dir_9eefd166cfb38881a53e6ced23ae3519 [shape=plaintext label="launchdarkly"];
+  dir_22fb0d6462546642bc6c49f025f80bdc [shape=box label="client_side" fillcolor="white" style="filled" color="red" URL="dir_22fb0d6462546642bc6c49f025f80bdc.html"];
+  }
+  }
+  dir_bdd9a5d540de89e9fe90efdfc6973a4f [shape=box label="common" fillcolor="white" style="filled" color="red" URL="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html"];
+  dir_22fb0d6462546642bc6c49f025f80bdc->dir_bdd9a5d540de89e9fe90efdfc6973a4f [headlabel="15", labeldistance=1.5 headhref="dir_000003_000007.html"];
+}

@@ -1,0 +1,11 @@
+digraph "include/launchdarkly/client_side/bindings/c/config" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_56cf782ad72eb9b0d85f6b561abfcca4 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="c" fontname="Helvetica", fontsize="10", URL="dir_56cf782ad72eb9b0d85f6b561abfcca4.html"]
+  dir_8b2312f692eb637ec8d07ea0521427a7 [shape=box, label="config", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_8b2312f692eb637ec8d07ea0521427a7.html"];
+  }
+  dir_bdd9a5d540de89e9fe90efdfc6973a4f [shape=box label="common" fillcolor="white" style="filled" color="red" URL="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html"];
+  dir_8b2312f692eb637ec8d07ea0521427a7->dir_bdd9a5d540de89e9fe90efdfc6973a4f [headlabel="5", labeldistance=1.5 headhref="dir_000006_000007.html"];
+}

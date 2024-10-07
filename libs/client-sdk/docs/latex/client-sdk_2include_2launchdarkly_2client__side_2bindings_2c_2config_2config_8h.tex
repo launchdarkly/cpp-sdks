@@ -1,0 +1,35 @@
+\hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h}{}\doxysection{include/launchdarkly/client\+\_\+side/bindings/c/config/config.h File Reference}
+\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h}\index{include/launchdarkly/client\_side/bindings/c/config/config.h@{include/launchdarkly/client\_side/bindings/c/config/config.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/status.\+h$>$}\newline
+Include dependency graph for config.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acae071392ca38bd1019ee085dbd000d1}\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_acae071392ca38bd1019ee085dbd000d1}} 
+typedef struct \+\_\+\+LDClient\+Config $\ast$ {\bfseries LDClient\+Config}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_a118b1b5fabc95f178333f5a56e6e8762}{LDClient\+Config\+\_\+\+Free}} (LDClient\+Config config)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_a118b1b5fabc95f178333f5a56e6e8762}\label{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h_a118b1b5fabc95f178333f5a56e6e8762}} 
+\index{config.h@{config.h}!LDClientConfig\_Free@{LDClientConfig\_Free}}
+\index{LDClientConfig\_Free@{LDClientConfig\_Free}!config.h@{config.h}}
+\doxysubsubsection{\texorpdfstring{LDClientConfig\_Free()}{LDClientConfig\_Free()}}
+{\footnotesize\ttfamily LDClient\+Config\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDClient\+Config}]{config }\end{DoxyParamCaption})}
+
+Free an unused configuration. Configurations used to construct an LDClient\+SDK must not be be freed.
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & Config to free. \\
+\hline
+\end{DoxyParams}
