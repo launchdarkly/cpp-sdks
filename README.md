@@ -34,7 +34,7 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 ### Dependencies
 
 1. C++17 and above
-1. CMake 3.19 or higher
+1. CMake 3.24.2 or higher (due to Boost support)
 1. Ninja (if using the included build scripts)
 1. Boost version 1.81 or higher (**excluding** Boost 1.83, see note below)
 1. OpenSSL
