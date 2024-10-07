@@ -46,7 +46,7 @@ jobs:
           cpack --config build/CPackConfig.cmake
       - name: Install package
         run: |
-          dpkg -i launchdarkly-0.1.0.deb || apt-get install -fy
+          sudo dpkg -i launchdarkly-0.1.0.deb || apt-get install -fy
       - name: Verify installation
         run: |
           ls /usr/local/lib && ls /usr/local/include
