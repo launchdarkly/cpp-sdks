@@ -97,6 +97,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(GNUInstallDirs)
+set(LD_TARGETS_EXPORT_NAME ${PROJECT_NAME}Targets)
+set(LD_CMAKE_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(LD_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}")
+set(LD_CMAKE_PROJECT_CONFIG_FILE "${LD_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(LD_CMAKE_VERSION_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+
+
 if (LD_BUILD_UNIT_TESTS)
     message(STATUS "LaunchDarkly: building unit tests")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
@@ -189,21 +197,21 @@ endif ()
 
 # Support installation of a cmake package.
 include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
 
 write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
         COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME}"
+        ${LD_CMAKE_PROJECT_CONFIG_FILE}
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
 )
 
+
 install(
-        EXPORT "${PROJECT_NAME}Targets"
-        NAMESPACE "${PROJECT_NAME}::"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME}"
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
 )

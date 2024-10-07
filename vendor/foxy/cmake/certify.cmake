@@ -23,5 +23,5 @@ set(BUILD_TESTING ${PREVIOUS_BUILD_TESTING})
 
 install(
         TARGETS core
-        EXPORT "${PROJECT_NAME}Targets"
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
 )

@@ -69,5 +69,5 @@ install(DIRECTORY "${LaunchDarklyCPPClient_SOURCE_DIR}/include/launchdarkly"
 
 install(
         TARGETS ${LIBNAME} OPTIONAL
-        EXPORT "${PROJECT_NAME}Targets"
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
 )

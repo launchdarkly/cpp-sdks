@@ -259,5 +259,5 @@ endif ()
 
 install(
         TARGETS foxy
-        EXPORT "${PROJECT_NAME}Targets"
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
 )
