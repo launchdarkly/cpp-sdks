@@ -5,7 +5,7 @@
 #pragma once
 
 #include <launchdarkly/server_side/bindings/c/all_flags_state/all_flags_state.h>
-#include <launchdarkly/server_side/bindings/c/config/config.h>
+#include <launchdarkly/server_side/bindings/c/config/builder.h>
 
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
