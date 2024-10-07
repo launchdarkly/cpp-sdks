@@ -69,26 +69,3 @@ Checks that a project can include the SDK via `find_package(ldserverapi)`.
 This would be a likely use-case if the SDK was installed on the system by the user.
 
 **NOTE:** Requires SDK to be installed.
-
-### cmake_projects/test_find_package_cpp
-
-Checks that a C++ project can include the SDK via `find_package(ldserverapi)`.
-Also checks that C++ bindings can be included without compilation issues.
-
-**NOTE:** Requires SDK to be installed.
-
-### cmake_projects/test_find_package_compatible_version
-
-Checks that a project can include the SDK via `find_package(ldserverapi [version])`.
-This would be a likely use-case if the user depends on a particular version of the SDK,
-rather than accepting any version.
-
-**NOTE:** Requires SDK to be installed.
-
-### cmake_projects/test_find_package_incompatible_version
-
-Checks that a project will *fail* to configure if `find_package(ldserverapi [version])`
-is invoked with a version that isn't present on the system. The test uses a fictional
-version `10.0.0`.
-
-**NOTE:** Requires SDK to be installed.

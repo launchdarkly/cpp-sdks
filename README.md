@@ -49,7 +49,7 @@ GoogleTest is used for testing.
 
 For information on integrating an SDK package please refer to the SDK specific README.
 
-## CMake Usage
+## CMake Options
 
 Various CMake options are available to customize the client/server SDK builds.
 
@@ -66,29 +66,58 @@ Various CMake options are available to customize the client/server SDK builds.
 | `LD_DYNAMIC_LINK_OPENSSL`     | Whether OpenSSL is dynamically linked or not.                                                                                                                                                                                                                            | Off  (static link)                                     | N/A                                       |
 | `LD_BUILD_REDIS_SUPPORT`      | Whether the server-side Redis Source is built or not.                                                                                                                                                                                                                    | Off                                                    | N/A                                       |
 
-**Note:** _if building the SDKs as shared libraries, then unit tests won't be able to link correctly since the SDK's C++
-symbols aren't exposed. To run unit tests, build a static library._
-
 > [!WARNING]   
 > When building shared libraries C++ symbols are not exported, only the C API will be exported. This is because C++ does
-> not have a stable ABI.
+> not have a stable ABI. For this reason, the SDK's unit tests are not built in shared library mode.
 
-Basic usage example:
+## Building the SDK from Source
+
+To configure the SDK's CMake project:
 
 ```bash
-mkdir -p build && cd build
-cmake -G"Unix Makefiles" ..
+# Use 'make' as the build system.
+cmake -B build -S . -G"Unix Makefiles"
 ```
 
-Slightly more advanced example - build shared libraries, and don't build any of the testing components:
+To pass in config options defined in the table above, add them using `-D`:
 
 ```bash
-mkdir -p build  && cd build
-cmake -G"Unix Makefiles" -DLD_BUILD_SHARED_LIBS=On -DBUILD_TESTING=Off ..
+# Use 'make' as the build system, build shared libs, and disable testing.
+cmake -B build -S . -G"Unix Makefiles" \
+                    -DLD_BUILD_SHARED_LIBS=On \
+                    -DBUILD_TESTING=Off ..
 ```
 
 The example uses `make`, but you might instead use [Ninja](https://ninja-build.org/),
 MSVC, [etc.](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+
+## Incorporating the SDK via `add_subdirectory`
+
+The SDK can be incorporated into an existing application using CMake via `add_subdirectory.`.
+
+```cmake
+# Set SDK build options, for example:
+set(LD_BUILD_SHARED_LIBS On)
+
+add_subdirectory(path-to-cpp-sdks-repo)
+target_link_libraries(your-app PRIVATE launchdarkly::client)
+# ... or launchdarkly::server
+````
+
+## Incorporating the SDK via `find_package`
+
+> [!WARNING]   
+> Preliminary support for `find_package` is available. The package configuration is subject to change, do not expect it
+> to be stable as long as this notice is present.
+
+If you've installed the SDK on the build system via `cmake --install`, you can consume it from
+the target application like so:
+
+```cmake
+find_package(launchdarkly REQUIRED)
+target_link_libraries(your-app PRIVATE launchdarkly::launchdarkly-cpp-client)
+# ... or launchdarkly::launchdarkly-cpp-server
+```
 
 ## LaunchDarkly overview
 
