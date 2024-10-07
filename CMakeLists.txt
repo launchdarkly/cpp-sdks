@@ -203,7 +203,7 @@ install(FILES
 )
 
 install(
-        EXPORT ${PROJECT_NAME}Targets
+        EXPORT "${PROJECT_NAME}Targets"
         NAMESPACE "${PROJECT_NAME}::"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME}"
 )

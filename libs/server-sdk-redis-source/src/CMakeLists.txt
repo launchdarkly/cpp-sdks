@@ -51,5 +51,5 @@ target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
 
 install(
         TARGETS ${LIBNAME} OPTIONAL
-        EXPORT ${PROJECT_NAME}Targets
+        EXPORT "${PROJECT_NAME}Targets"
 )

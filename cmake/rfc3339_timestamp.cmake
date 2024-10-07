@@ -27,5 +27,5 @@ target_include_directories(timestamp PUBLIC
 )
 install(
         TARGETS timestamp
-        EXPORT ${PROJECT_NAME}Targets
+        EXPORT "${PROJECT_NAME}Targets"
 )
