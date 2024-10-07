@@ -154,12 +154,6 @@ endif ()
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
-if (POLICY CMP0167)
-    # TODO: Update to use the Boost project's cmake config directly, since FindBoost was deprecated in
-    # cmake >= 3.30.
-    cmake_policy(SET CMP0167 OLD)
-endif ()
-
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
@@ -198,29 +192,18 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/launchdarklyConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
         COMPATIBILITY SameMajorVersion
 )
 
 install(FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarklyConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/launchdarklyConfigVersion.cmake"
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
-)
-
-configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/launchdarkly.pc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/launchdarkly.pc
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME}"
 )
 
 install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/launchdarkly.pc
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-)
-
-
-install(
-        EXPORT launchdarklyTargets
-        NAMESPACE launchdarkly::
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/launchdarkly"
+        EXPORT ${PROJECT_NAME}Targets
+        NAMESPACE "${PROJECT_NAME}::"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/cmake/${CMAKE_PROJECT_NAME}"
 )
