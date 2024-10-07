@@ -24,6 +24,9 @@ project(
         "Session-based abstractions for Beast + URL parsing and pct-coding"
 )
 
+set(CMAKE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+include(${CMAKE_FILES}/certify.cmake)
+
 find_package(
         Boost ${foxy_minimum_boost_version}
         REQUIRED
@@ -163,8 +166,14 @@ add_library(
 target_include_directories(test_utils PUBLIC test/include)
 target_link_libraries(test_utils PUBLIC foxy)
 
-option(BUILD_TESTING "Build Foxy Testsuite" OFF)
-if (BUILD_TESTING)
+cmake_dependent_option(FOXY_BUILD_TESTING
+        "Build the C++ unit tests."
+        ON
+        "BUILD_TESTING"
+        OFF
+)
+
+if (FOXY_BUILD_TESTING)
     include(CTest)
 
     find_package(Catch2 CONFIG REQUIRED)
@@ -248,3 +257,7 @@ if (FOXY_FUZZ)
     target_link_options(uri-parser PRIVATE "-fsanitize=fuzzer")
 endif ()
 
+install(
+        TARGETS foxy
+        EXPORT ${PROJECT_NAME}Targets
+)
