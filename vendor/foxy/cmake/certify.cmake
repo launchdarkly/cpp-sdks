@@ -9,8 +9,8 @@ endif ()
 
 
 FetchContent_Declare(certify
-        GIT_REPOSITORY https://github.com/cwaldren-ld/certify.git
-        GIT_TAG 8fc3024f97ffcc7442e30e1fe6ddff54b45e35d6
+        GIT_REPOSITORY https://github.com/launchdarkly/certify.git
+        GIT_TAG 7116dd0e609ae44d037aa562736d3d59fce1b637
 )
 
 # The tests in certify don't compile.
