@@ -94,3 +94,19 @@ TEST(BackoffTests, BackoffDoesNotResetActiveConnectionWasTooShort) {
 
     EXPECT_EQ(8000, backoff.delay().count());
 }
+
+TEST(BackoffTests, BackoffDoesNotOverflowWhenAttemptsGreaterThan64) {
+    Backoff backoff(
+        std::chrono::milliseconds{1000}, std::chrono::milliseconds{30000}, 0,
+        std::chrono::milliseconds{60000}, [](auto ratio) { return 0; });
+
+    for (int i = 0; i < 65; i++) {
+        backoff.fail();
+    }
+
+    auto const val = backoff.delay();
+    EXPECT_FALSE(std::isnan(val.count()));
+    EXPECT_LE(val, std::chrono::milliseconds::max());
+    EXPECT_GT(val, std::chrono::milliseconds::min());
+    EXPECT_GT(val.count(), 0);
+}
