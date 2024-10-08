@@ -1,5 +1,6 @@
 #include "backoff_detail.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace launchdarkly::sse::detail {
