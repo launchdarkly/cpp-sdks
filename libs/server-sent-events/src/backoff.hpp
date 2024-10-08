@@ -6,7 +6,6 @@
 #include <random>
 
 namespace launchdarkly::sse {
-
 /**
  * Implements an algorithm for calculating the delay between connection
  * attempts.
@@ -52,35 +51,18 @@ class Backoff {
     /**
      * Get the current reconnect delay.
      */
-    std::chrono::milliseconds delay();
+    std::chrono::milliseconds delay() const;
 
    private:
-    /**
-     * Calculate an exponential backoff based on the initial retry time and
-     * the current attempt.
-     *
-     * @param attempt The current attempt count.
-     * @param initial The initial retry delay.
-     * @return The current backoff based on the number of attempts.
-     */
-    std::chrono::milliseconds calculate_backoff();
-
-    /**
-     * Produce a jittered version of the base value. This value will be adjusted
-     * randomly to be between 50% and 100% of the input duration.
-     *
-     * @param base The base duration to jitter.
-     * @return The jittered duration.
-     */
-    std::chrono::milliseconds jitter(std::chrono::milliseconds base);
-
     std::chrono::milliseconds initial_;
     std::chrono::milliseconds max_;
-    uint64_t attempt_;
+
+    std::uint64_t max_exponent_;
+    std::uint64_t attempt_;
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         active_since_;
     double const jitter_ratio_;
-    const std::chrono::milliseconds reset_interval_;
+    std::chrono::milliseconds const reset_interval_;
     // Default random generator. Used when random method not specified.
     std::function<double(double ratio)> random_;
     std::default_random_engine random_gen_;

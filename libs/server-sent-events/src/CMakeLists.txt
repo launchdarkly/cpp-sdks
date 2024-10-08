@@ -11,6 +11,7 @@ add_library(${LIBNAME} OBJECT
         parser.cpp
         event.cpp
         error.cpp
+        backoff_detail.cpp
         backoff.cpp)
 
 target_link_libraries(${LIBNAME}

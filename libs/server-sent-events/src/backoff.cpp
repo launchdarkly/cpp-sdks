@@ -1,22 +1,14 @@
 #include "backoff.hpp"
+#include "backoff_detail.hpp"
 
-static double const kDefaultJitterRatio = 0.5;
-static const std::chrono::milliseconds kDefaultResetInterval =
-    std::chrono::milliseconds{60'000};
+static constexpr double kDefaultJitterRatio = 0.5;
+static constexpr auto kDefaultResetInterval = std::chrono::milliseconds{60'000};
 
 namespace launchdarkly::sse {
 
-std::chrono::milliseconds Backoff::calculate_backoff() {
-    return initial_ * static_cast<uint64_t>(std::pow(2, attempt_ - 1));
-}
-
-std::chrono::milliseconds Backoff::jitter(std::chrono::milliseconds base) {
-    return std::chrono::milliseconds(static_cast<uint64_t>(
-        base.count() - (random_(jitter_ratio_) * base.count())));
-}
-
-std::chrono::milliseconds Backoff::delay() {
-    return jitter(std::min(calculate_backoff(), max_));
+std::chrono::milliseconds Backoff::delay() const {
+    return detail::delay(initial_, max_, attempt_, max_exponent_, jitter_ratio_,
+                         random_);
 }
 
 void Backoff::fail() {
@@ -50,9 +42,17 @@ Backoff::Backoff(std::chrono::milliseconds initial,
                  double jitter_ratio,
                  std::chrono::milliseconds reset_interval,
                  std::function<double(double ratio)> random)
-    : attempt_(1),
-      initial_(initial),
+    : initial_(initial),
       max_(max),
+      // This is necessary to constrain the exponent that is passed eventually
+      // into std::pow. Otherwise, we'll be operating with a number that is too
+      // large to be represented as a chrono::milliseconds and (depending on the
+      // platform) may result in a value of 0, negative, or some other
+      // unexpected value.
+      max_exponent_(std::ceil(
+          std::log2(max.count() / std::max(std::chrono::milliseconds{1}.count(),
+                                           initial.count())))),
+      attempt_(1),
       jitter_ratio_(jitter_ratio),
       reset_interval_(reset_interval),
       random_(random) {}
@@ -68,5 +68,4 @@ Backoff::Backoff(std::chrono::milliseconds initial,
                       0.0, kDefaultJitterRatio);
                   return distribution(this->random_gen_);
               }) {}
-
 }  // namespace launchdarkly::sse
