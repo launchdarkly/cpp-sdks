@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 include(CMakeDependentOption)
 
 project(
-        LaunchDarklyCPPSDKs
+        launchdarkly
         VERSION 0.1
         DESCRIPTION "LaunchDarkly C++ SDK Monorepo (Server/Client)"
         LANGUAGES CXX C
@@ -20,8 +20,6 @@ endif ()
 if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif ()
-
-include(GNUInstallDirs)
 
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
@@ -99,6 +97,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(GNUInstallDirs)
+set(LD_TARGETS_EXPORT_NAME ${PROJECT_NAME}Targets)
+set(LD_CMAKE_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(LD_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}")
+set(LD_CMAKE_PROJECT_CONFIG_FILE "${LD_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(LD_CMAKE_VERSION_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+
+
 if (LD_BUILD_UNIT_TESTS)
     message(STATUS "LaunchDarkly: building unit tests")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
@@ -155,11 +161,13 @@ endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
-include(${CMAKE_FILES}/certify.cmake)
+set(FOXY_BUILD_TESTING OFF)
 add_subdirectory(vendor/foxy)
+
 
 # Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
@@ -185,3 +193,25 @@ if (LD_BUILD_EXAMPLES)
     message(STATUS "LaunchDarkly: building examples")
     add_subdirectory(examples)
 endif ()
+
+
+# Support installation of a cmake package.
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
+        COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+        ${LD_CMAKE_PROJECT_CONFIG_FILE}
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
+)
+
+
+install(
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
+)

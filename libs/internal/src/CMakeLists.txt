@@ -56,8 +56,6 @@ target_compile_options(${LIBNAME} PRIVATE
         -Wno-deprecated-declarations>
 )
 
-install(TARGETS ${LIBNAME})
-
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
@@ -65,7 +63,16 @@ target_link_libraries(${LIBNAME}
         PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
 
 # Need the public headers to build.
-target_include_directories(${LIBNAME} PUBLIC ../include)
+target_include_directories(${LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<INSTALL_INTERFACE:include>
+)
 
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+
+install(
+        TARGETS ${LIBNAME}
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+)

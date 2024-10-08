@@ -25,7 +25,6 @@ endif ()
 include(FetchContent)
 
 include(${CMAKE_FILES}/expected.cmake)
-#include(${CMAKE_FILES}/foxy.cmake)
 
 # Add main SDK sources.
 add_subdirectory(src)
