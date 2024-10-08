@@ -1,9 +1,0 @@
-digraph "/home/runner/work/cpp-sdks/cpp-sdks/libs/common/include/launchdarkly/bindings/c/logging" {
-  compound=true
-  node [ fontsize="10", fontname="Helvetica"];
-  edge [ labelfontsize="10", labelfontname="Helvetica"];
-  subgraph clusterdir_8793f44c2d95502e0357555087a87bd0 {
-    graph [ bgcolor="#ddddee", pencolor="black", label="c" fontname="Helvetica", fontsize="10", URL="dir_8793f44c2d95502e0357555087a87bd0.html"]
-  dir_19febdf8894e7e350d8a2a28ddc7f162 [shape=box, label="logging", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_19febdf8894e7e350d8a2a28ddc7f162.html"];
-  }
-}
