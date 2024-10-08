@@ -1,5 +1,7 @@
 #include "backoff_detail.hpp"
 
+#include <cmath>
+
 namespace launchdarkly::sse::detail {
 std::chrono::milliseconds calculate_backoff(
     std::chrono::milliseconds const initial,
