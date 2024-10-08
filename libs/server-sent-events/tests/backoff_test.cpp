@@ -97,6 +97,35 @@ TEST(BackoffTests, BackoffDoesNotResetActiveConnectionWasTooShort) {
     EXPECT_EQ(8000, backoff.delay().count());
 }
 
+// This test specifically attempts to reproduce an overflow bug reported by a
+// customer that occurred using default backoff parameters after 55 attempts.
+TEST(BackoffTests, BackoffDoesNotOverflowAt55Attempts) {
+    Backoff backoff(
+        std::chrono::milliseconds{1000}, std::chrono::milliseconds{30000}, 0,
+        std::chrono::milliseconds{6000}, [](auto ratio) { return 0; });
+
+    constexpr std::size_t kAttemptsToReachMax = 5;
+    constexpr std::size_t kAttemptWhereOverflowOccurs = 54;
+
+    for (int i = 0; i < kAttemptsToReachMax; i++) {
+        backoff.fail();
+    }
+    // At 5 attempts, we've already reached maximum backoff, given the initial
+    // parameters.
+    EXPECT_EQ(std::chrono::milliseconds{30000}, backoff.delay());
+
+    // This should succeed even if the code was unprotected.
+    for (int i = 0; i < kAttemptWhereOverflowOccurs - kAttemptsToReachMax - 1;
+         i++) {
+        backoff.fail();
+        EXPECT_EQ(std::chrono::milliseconds{30000}, backoff.delay());
+    }
+
+    // This should trigger overflow in unprotected code.
+    backoff.fail();
+    EXPECT_EQ(std::chrono::milliseconds{30000}, backoff.delay());
+}
+
 class BackoffOverflowEndToEndTest
     : public ::testing::TestWithParam<std::uint64_t> {};
 
@@ -117,10 +146,9 @@ TEST_P(BackoffOverflowEndToEndTest, BackoffDoesNotOverflowWithVariousAttempts) {
 
     for (int i = 0; i < attempts; i++) {
         backoff.fail();
+        auto const val = backoff.delay();
+        EXPECT_EQ(val, std::chrono::milliseconds{30000});
     }
-
-    auto const val = backoff.delay();
-    EXPECT_EQ(val, std::chrono::milliseconds{30000});
 }
 
 INSTANTIATE_TEST_SUITE_P(VariousBackoffAttempts,
