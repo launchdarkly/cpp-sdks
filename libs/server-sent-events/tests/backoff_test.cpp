@@ -100,6 +100,14 @@ TEST(BackoffTests, BackoffDoesNotResetActiveConnectionWasTooShort) {
 class BackoffOverflowEndToEndTest
     : public ::testing::TestWithParam<std::uint64_t> {};
 
+// The purpose of this test is to simulate the SDK calling backoff.fail()
+// over and over again.
+//
+// Given a large amount of failed attempts, the calculation should remain at
+// the max backoff value and stay there.
+//
+// Since we can't simulate very large numbers of attempts (simply takes too
+// long), the free functions that Backoff delegates to are tested separately.
 TEST_P(BackoffOverflowEndToEndTest, BackoffDoesNotOverflowWithVariousAttempts) {
     Backoff backoff(
         std::chrono::milliseconds{1000}, std::chrono::milliseconds{30000}, 0,
@@ -122,6 +130,10 @@ INSTANTIATE_TEST_SUITE_P(VariousBackoffAttempts,
 class BackoffOverflowUnitTest : public ::testing::TestWithParam<std::uint64_t> {
 };
 
+// This test performs a straight calculation of the backoff given
+// a range of large values, including the maximum uint64_t which might be
+// reached at the heat death of the universe (or earlier, if there's a bug.)
+// It should not overflow, but remain at the max value.
 TEST_P(BackoffOverflowUnitTest,
        BackoffDoesNotOverflowWithVariousAttemptsInCalculateBackoff) {
     std::uint64_t const attempts = GetParam();
@@ -134,28 +146,17 @@ TEST_P(BackoffOverflowUnitTest,
     constexpr auto initial = std::chrono::milliseconds{1};
     constexpr auto max = std::chrono::milliseconds{32};
 
-    auto const milliseconds = launchdarkly::sse::detail::calculate_backoff(
+    auto const millisecondsA = launchdarkly::sse::detail::calculate_backoff(
         initial, attempts, max_exponent);
 
-    ASSERT_EQ(milliseconds, max);
-}
+    ASSERT_EQ(millisecondsA, max);
 
-TEST_P(BackoffOverflowUnitTest,
-       BackoffDoesNotOverflowWithVariousAttemptsInDelay) {
-    std::uint64_t const attempts = GetParam();
-
-    constexpr std::uint64_t max_exponent = 5;
-
-    // Given an exponent of 5, and initial delay of 1ms, the max should be
-    // 2^5 = 32 for any amount of attempts > 5.
-
-    constexpr auto initial = std::chrono::milliseconds{1};
-    constexpr auto max = std::chrono::milliseconds{32};
-
-    auto const milliseconds = launchdarkly::sse::detail::delay(
+    // Given a random function that always returns 0, this should be identical
+    // to calling calculate_backoff.
+    auto const millisecondsB = launchdarkly::sse::detail::delay(
         initial, max, attempts, max_exponent, 0, [](auto ratio) { return 0; });
 
-    ASSERT_EQ(milliseconds, max);
+    ASSERT_EQ(millisecondsB, max);
 }
 
 INSTANTIATE_TEST_SUITE_P(VariousBackoffAttempts,
