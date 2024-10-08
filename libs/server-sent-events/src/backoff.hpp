@@ -51,7 +51,7 @@ class Backoff {
     /**
      * Get the current reconnect delay.
      */
-    std::chrono::milliseconds delay() const;
+    [[nodiscard]] std::chrono::milliseconds delay() const;
 
    private:
     std::chrono::milliseconds initial_;

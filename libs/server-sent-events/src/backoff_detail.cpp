@@ -17,7 +17,8 @@ std::chrono::milliseconds jitter(std::chrono::milliseconds const base,
                                  double const jitter_ratio,
                                  std::function<double(double)> const& random) {
     double const jitter = random(jitter_ratio);
-    double const jittered_base = base.count() - (jitter * base.count());
+    double const jittered_base =
+        static_cast<double>(base.count()) - jitter * base.count();
     return std::chrono::milliseconds(static_cast<uint64_t>(jittered_base));
 }
 

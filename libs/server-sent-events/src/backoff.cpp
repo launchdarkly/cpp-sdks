@@ -55,7 +55,7 @@ Backoff::Backoff(std::chrono::milliseconds initial,
       attempt_(1),
       jitter_ratio_(jitter_ratio),
       reset_interval_(reset_interval),
-      random_(random) {}
+      random_(std::move(random)) {}
 
 Backoff::Backoff(std::chrono::milliseconds initial,
                  std::chrono::milliseconds max)
