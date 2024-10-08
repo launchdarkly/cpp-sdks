@@ -1,0 +1,12 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classlaunchdarkly_1_1server__side_1_1IChangeNotifier.html" title=" " alt="" coords="5,13,171,54"/>
+<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier.html" title=" " alt="" coords="219,5,399,61"/>
+<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination.html" title="IDestination represents a sink for data received by the SDK. A destination may be a database,..." alt="" coords="5,85,171,141"/>
+<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination.html" title="JsonDestination is responsible for converting flag and segment models into serialized data suitable f..." alt="" coords="219,85,399,141"/>
+<area shape="rect" id="node5" href="$classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore.html" title=" " alt="" coords="219,165,399,221"/>
+<area shape="rect" id="node6" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore.html" title="IStore provides shared ownership of flag and segment domain objects." alt="" coords="5,205,171,261"/>
+<area shape="rect" id="node7" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem.html" title="IDataSystem obtains data used for flag evaluations and makes it available to other components." alt="" coords="226,245,391,301"/>
+<area shape="rect" id="node8" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1BackgroundSync.html" title=" " alt="" coords="447,165,609,221"/>
+<area shape="rect" id="node9" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad.html" title=" " alt="" coords="447,245,609,301"/>
+<area shape="rect" id="node10" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem.html" title=" " alt="" coords="447,325,609,381"/>
+</map>
