@@ -146,14 +146,16 @@ TEST_P(BackoffOverflowEndToEndTest, BackoffDoesNotOverflowWithVariousAttempts) {
 
     for (int i = 0; i < attempts; i++) {
         backoff.fail();
-        auto const val = backoff.delay();
-        EXPECT_EQ(val, std::chrono::milliseconds{30000});
     }
+
+    auto const val = backoff.delay();
+    EXPECT_EQ(val, std::chrono::milliseconds{30000});
 }
 
-INSTANTIATE_TEST_SUITE_P(VariousBackoffAttempts,
-                         BackoffOverflowEndToEndTest,
-                         ::testing::Values<std::uint64_t>(63, 64, 65, 1000));
+INSTANTIATE_TEST_SUITE_P(
+    VariousBackoffAttempts,
+    BackoffOverflowEndToEndTest,
+    ::testing::Values<std::uint64_t>(10, 54, 55, 63, 64, 65, 500, 1000));
 
 class BackoffOverflowUnitTest : public ::testing::TestWithParam<std::uint64_t> {
 };
