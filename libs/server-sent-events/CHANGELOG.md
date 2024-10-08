@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.3...launchdarkly-cpp-sse-client-v0.5.4) (2024-10-08)
+
+
+### Bug Fixes
+
+* guard against overflow in sse backoff calculation ([#455](https://github.com/launchdarkly/cpp-sdks/issues/455)) ([a3c1e58](https://github.com/launchdarkly/cpp-sdks/commit/a3c1e5889a1104131b939615bfee65b7645da0f3))
+
 ## [0.5.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.2...launchdarkly-cpp-sse-client-v0.5.3) (2024-10-01)
 
 
