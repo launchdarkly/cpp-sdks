@@ -1,0 +1,235 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Memory\+Store Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Memory\+Store\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Memory\+Store\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ab8632c170d4890e9db09d6f1ef00b345}{Get\+Flag}} (std\+::string const \&key) const override
+\begin{DoxyCompactList}\small\item\em Get the flag named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a9a8882bff75e5977922bcfebf69e2b13}{Get\+Segment}} (std\+::string const \&key) const override
+\begin{DoxyCompactList}\small\item\em Get the segment named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a6363e20b2ff8d2a53e2e9cf68862b538}{All\+Flags}} () const override
+\begin{DoxyCompactList}\small\item\em Get a map of all flags. \end{DoxyCompactList}\item 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a07bfa1b870a2bdf2c163455c00e1e0f9}{All\+Segments}} () const override
+\begin{DoxyCompactList}\small\item\em Get a map of all segments. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_afe106fe607ef594281f1091e7f9ea6d8}{Initialized}} () const override
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ac98cd14669de05b2cf5954dccc970d03}{Identity}} () const override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a4b5c07f59e1556339e5b0d133d5fa74a}{Init}} (data\+\_\+model\+::\+SDKData\+Set data\+Set) override
+\begin{DoxyCompactList}\small\item\em Initialize the destination with a base set of data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Flag\+Descriptor flag) override
+\begin{DoxyCompactList}\small\item\em Upsert a flag named by key. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aea5358add90bd2e0e7d97bef101d3b47}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Segment\+Descriptor segment) override
+\begin{DoxyCompactList}\small\item\em Upsert a segment named by key. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ab2899a496d54b435b0ba07261fb746a8}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ab2899a496d54b435b0ba07261fb746a8}} 
+bool {\bfseries Remove\+Flag} (std\+::string const \&key)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a52696649f3c34a0254ba7e2209417205}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a52696649f3c34a0254ba7e2209417205}} 
+bool {\bfseries Remove\+Segment} (std\+::string const \&key)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aff2a4cfa2396c89b915bb114bf76194e}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aff2a4cfa2396c89b915bb114bf76194e}} 
+{\bfseries Memory\+Store} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_add9560805498c671d46937b1271266f1}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_add9560805498c671d46937b1271266f1}} 
+{\bfseries Memory\+Store} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a46c87c4c9d7f3b700330def16459dcd9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a46c87c4c9d7f3b700330def16459dcd9}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_afcdef7e2f58e9a50bd61da0c4a850283}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_afcdef7e2f58e9a50bd61da0c4a850283}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore}{Memory\+Store}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a6363e20b2ff8d2a53e2e9cf68862b538}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a6363e20b2ff8d2a53e2e9cf68862b538}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!AllFlags@{AllFlags}}
+\index{AllFlags@{AllFlags}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{AllFlags()}{AllFlags()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+All\+Flags (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get a map of all flags. 
+
+\begin{DoxyReturn}{Returns}
+Map of shared pointers to flags. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a7574d5eaa8987ed66d606f33f4175a3b}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a07bfa1b870a2bdf2c163455c00e1e0f9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a07bfa1b870a2bdf2c163455c00e1e0f9}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!AllSegments@{AllSegments}}
+\index{AllSegments@{AllSegments}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{AllSegments()}{AllSegments()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+All\+Segments (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get a map of all segments. 
+
+\begin{DoxyReturn}{Returns}
+Map of shared pointers to segments. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a8e036296e127cc08b2e7c98d928deccd}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ab8632c170d4890e9db09d6f1ef00b345}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ab8632c170d4890e9db09d6f1ef00b345}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!GetFlag@{GetFlag}}
+\index{GetFlag@{GetFlag}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{GetFlag()}{GetFlag()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Get\+Flag (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get the flag named by key. Returns nullptr if no such flag exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Shared pointer to the flag. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a4ba78a7cb766a43a019e96975f5db534}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a9a8882bff75e5977922bcfebf69e2b13}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a9a8882bff75e5977922bcfebf69e2b13}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!GetSegment@{GetSegment}}
+\index{GetSegment@{GetSegment}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{GetSegment()}{GetSegment()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Get\+Segment (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get the segment named by key. Returns nullptr if no such flag exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of the segment. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Shared pointer to the segment. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a20e5295343cf7dde8a257a62bc6f50c1}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ac98cd14669de05b2cf5954dccc970d03}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ac98cd14669de05b2cf5954dccc970d03}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the destination. Used in logs. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a389136e4ae7c3eaff99de40857c4b4e9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a4b5c07f59e1556339e5b0d133d5fa74a}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a4b5c07f59e1556339e5b0d133d5fa74a}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!Init@{Init}}
+\index{Init@{Init}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Init (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+SDKData\+Set}]{data\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Initialize the destination with a base set of data. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data\+\_\+set} & The initial data received by the SDK. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_afe106fe607ef594281f1091e7f9ea6d8}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_afe106fe607ef594281f1091e7f9ea6d8}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!Initialized@{Initialized}}
+\index{Initialized@{Initialized}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{Initialized()}{Initialized()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Initialized (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+True if the store has ever contained data. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aed68d9e37af193c2bb71629ea08c09ad}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Flag\+Descriptor}]{flag }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Upsert a flag named by key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Flag key. \\
+\hline
+{\em flag} & Flag descriptor. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aea5358add90bd2e0e7d97bef101d3b47}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aea5358add90bd2e0e7d97bef101d3b47}} 
+\index{launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_components::MemoryStore@{launchdarkly::server\_side::data\_components::MemoryStore}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Segment\+Descriptor}]{segment }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Upsert a segment named by key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Segment key. \\
+\hline
+{\em segment} & Segment descriptor. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+components/memory\+\_\+store/memory\+\_\+store.\+hpp\item 
+src/data\+\_\+components/memory\+\_\+store/memory\+\_\+store.\+cpp\end{DoxyCompactItemize}
