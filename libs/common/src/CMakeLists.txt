@@ -14,6 +14,8 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/persistence/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/serialization/*.hpp"
 )
 
 # Automatic library: static or dynamic based on user config.
@@ -53,6 +55,8 @@ add_library(${LIBNAME} OBJECT
         bindings/c/memory_routines.cpp
         bindings/c/data_source/error_info.cpp
         bindings/c/logging/log_level.cpp
+        serialization/json_errors.cpp
+        serialization/json_value.cpp
         log_level.cpp
         config/persistence_builder.cpp
         config/logging_builder.cpp
