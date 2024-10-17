@@ -1,6 +1,5 @@
 #pragma once
 
-#include <launchdarkly/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_primitives.hpp>
 
 #include <boost/core/ignore_unused.hpp>

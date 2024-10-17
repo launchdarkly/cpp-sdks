@@ -192,6 +192,16 @@ LD_EXPORT(unsigned int)
 LDValue_Count(LDValue val);
 
 /**
+ * Serializes the LDValue to a JSON value.
+ * @param val Target LDValue. Must not be NULL.
+ * @return A string containing the JSON representation of the LDValue. The
+ * string should be freed with @ref LDMemory_FreeString.
+ *
+ */
+LD_EXPORT(char*)
+LDValue_SerializeJSON(LDValue val);
+
+/**
  * Obtain iterator over an array-type @ref LDValue, otherwise NULL.
  *
  * The iterator starts at the first element.

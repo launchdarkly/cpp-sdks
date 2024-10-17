@@ -1,7 +1,8 @@
-#include <boost/json.hpp>
 #include <launchdarkly/detail/unreachable.hpp>
+#include <launchdarkly/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_value.hpp>
-#include <launchdarkly/serialization/value_mapping.hpp>
+
+#include <boost/json.hpp>
 
 namespace launchdarkly {
 // NOLINTBEGIN modernize-return-braced-init-list
