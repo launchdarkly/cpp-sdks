@@ -192,7 +192,12 @@ LD_EXPORT(unsigned int)
 LDValue_Count(LDValue val);
 
 /**
- * Serializes the LDValue to a JSON value.
+ * Serializes the LDValue to a JSON value. The returning string should be
+ * freed with @ref LDMemory_FreeString.
+ *
+ * Please note that numbers are serialized using scientific notation;
+ * for example the number 17 would be serialized as '1.7E1'.
+ *
  * @param val Target LDValue. Must not be NULL.
  * @return A string containing the JSON representation of the LDValue. The
  * string should be freed with @ref LDMemory_FreeString.
