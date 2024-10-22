@@ -21,6 +21,31 @@ char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
                                   char const* error_msg);
 
+void mySetFn(char const* storage_namespace,
+             char const* key,
+             char const* data,
+             void* user_data) {
+    printf("SetFn called\n");
+}
+
+void myRemoveFn(char const* storage_namespace,
+                char const* key,
+                void* user_data) {
+    printf("RemoveFn called\n");
+}
+
+size_t myReadFn(char const* storage_namespace,
+                char const* key,
+                char const** read_value,
+                void* user_data) {
+    printf("ReadFn called\n");
+    return 0;
+}
+
+void myFreeFn(char const* value, void* user_data) {
+    printf("FreeFn called\n");
+}
+
 int main() {
     char const* mobile_key = get_with_env_fallback(
         MOBILE_KEY, "LD_MOBILE_KEY",
@@ -31,6 +56,22 @@ int main() {
 
     LDClientConfigBuilder config_builder =
         LDClientConfigBuilder_New(mobile_key);
+
+    struct LDPersistence persistenceImpl;
+    LDPersistence_Init(&persistenceImpl);
+
+    persistenceImpl.Set = mySetFn;
+    persistenceImpl.Remove = myRemoveFn;
+    persistenceImpl.Read = myReadFn;
+    persistenceImpl.FreeRead = myFreeFn;
+    persistenceImpl.UserData = NULL;
+
+    LDPersistenceCustomBuilder persistenceBuilder =
+        LDPersistenceCustomBuilder_New();
+    LDPersistenceCustomBuilder_Implementation(persistenceBuilder,
+                                              persistenceImpl);
+    LDClientConfigBuilder_Persistence_Custom(config_builder,
+                                             persistenceBuilder);
 
     LDClientConfig config = NULL;
     LDStatus config_status =
