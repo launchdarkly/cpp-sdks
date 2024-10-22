@@ -88,9 +88,25 @@ struct LDPersistence {
 };
 
 /**
- * Initializes a custom persistence implementation. Must be called before
- * passing a custom implementation into configuration.
- * @param backend Implementation to initialize.
+ * Initializes an instance of LDPersistence with default function pointers,
+ * additionally setting UserData to NULL.
+ *
+ * This must be called after declaring the struct, but before setting any
+ * custom function pointers.
+ *
+ * Example:
+ * @code
+ * struct LDPersistence customPersistence;
+ * LDPersistence_Init(&customPersistence);
+ *
+ * customPersistence.SetFn = my_set_function;
+ * customPersistence.RemoveFn = my_remove_function;
+ * customPersistence.ReadFn = my_read_function;
+ * customPersistence.FreeFn = my_free_read_function;
+ * customPersistence.UserData = my_user_data_ptr;
+ * @endcode
+ *
+ * @param LDPersistence to initialize.
  */
 LD_EXPORT(void)
 LDPersistence_Init(struct LDPersistence* implementation);
