@@ -6,8 +6,8 @@
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 #include <launchdarkly/value.hpp>
 

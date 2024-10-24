@@ -7,7 +7,7 @@
 #include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/value.hpp>
 
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 
 #include <boost/json.hpp>
 

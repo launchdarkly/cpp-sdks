@@ -2,7 +2,7 @@
 #include <boost/json.hpp>
 #include <launchdarkly/serialization/json_context_aware_reference.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 namespace launchdarkly {

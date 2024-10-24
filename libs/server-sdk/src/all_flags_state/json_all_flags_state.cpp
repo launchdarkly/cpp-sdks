@@ -1,5 +1,5 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 
 #include <boost/core/ignore_unused.hpp>
