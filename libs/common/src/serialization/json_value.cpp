@@ -1,6 +1,6 @@
 #include <launchdarkly/detail/unreachable.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 
 #include <boost/json.hpp>
 
