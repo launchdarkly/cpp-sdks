@@ -1,7 +1,7 @@
 #pragma once
 
 #include <launchdarkly/data_model/sdk_data_set.hpp>
-#include <launchdarkly/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_errors.hpp>
 
 #include <boost/json/fwd.hpp>
 

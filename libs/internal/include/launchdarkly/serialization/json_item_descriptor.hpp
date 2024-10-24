@@ -1,8 +1,8 @@
 #pragma once
 
 #include <launchdarkly/data_model/item_descriptor.hpp>
-#include <launchdarkly/serialization/json_errors.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/json.hpp>
