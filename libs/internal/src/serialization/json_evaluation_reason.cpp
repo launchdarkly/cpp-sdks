@@ -1,4 +1,4 @@
-#include <launchdarkly/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 

@@ -30,9 +30,7 @@ add_library(${LIBNAME} OBJECT
         serialization/events/json_events.cpp
         serialization/json_attributes.cpp
         serialization/json_context.cpp
-        serialization/json_errors.cpp
         serialization/json_evaluation_reason.cpp
-        serialization/json_value.cpp
         serialization/value_mapping.cpp
         serialization/json_evaluation_result.cpp
         serialization/json_sdk_data_set.cpp

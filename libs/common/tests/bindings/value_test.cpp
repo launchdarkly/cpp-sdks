@@ -4,6 +4,8 @@
 #include "launchdarkly/bindings/c/object_builder.h"
 #include "launchdarkly/bindings/c/value.h"
 
+#include "launchdarkly/bindings/c/memory_routines.h"
+
 TEST(ValueCBindingTests, CanCreateNull) {
     auto* ptr = LDValue_NewNull();
 
@@ -167,4 +169,57 @@ TEST(ValueCBindingTests, CanCreateObject) {
     EXPECT_EQ(4, LDValue_Count(val_ptr));
 
     LDValue_Free(val_ptr);
+}
+
+// Helper to serialize an LDValue, automatically converts to
+// std::string and frees the result using LDMemory_FreeString.
+std::string serialize(LDValue const val) {
+    char* serialized = LDValue_SerializeJSON(val);
+    std::string result(serialized);
+    LDMemory_FreeString(serialized);
+    return result;
+}
+
+TEST(ValueCBindingTests, CanSerializeToJSON) {
+    auto* null_val = LDValue_NewNull();
+    auto* bool_val_true = LDValue_NewBool(true);
+    auto* bool_val_false = LDValue_NewBool(false);
+
+    auto* num_val = LDValue_NewNumber(17);
+    auto* float_val = LDValue_NewNumber(3.141);
+    auto* str_val = LDValue_NewString("Potato");
+
+    EXPECT_EQ("null", serialize(null_val));
+    EXPECT_EQ("true", serialize(bool_val_true));
+    EXPECT_EQ("false", serialize(bool_val_false));
+    EXPECT_EQ("1.7E1", serialize(num_val));
+    EXPECT_EQ("3.141E0", serialize(float_val));
+    EXPECT_EQ("\"Potato\"", serialize(str_val));
+
+    // Object builder is going to take care of freeing all the primitives
+    // (except for bool_val_false.)
+    auto* object_builder = LDObjectBuilder_New();
+    LDObjectBuilder_Add(object_builder, "null", null_val);
+    LDObjectBuilder_Add(object_builder, "bool", bool_val_true);
+    LDObjectBuilder_Add(object_builder, "num", num_val);
+    LDObjectBuilder_Add(object_builder, "float", float_val);
+    LDObjectBuilder_Add(object_builder, "str", str_val);
+
+    auto* obj_ptr = LDObjectBuilder_Build(object_builder);
+
+    EXPECT_EQ(
+        "{\"bool\":true,\"float\":3.141E0,\"null\":null,\"num\":1.7E1,\"str\":"
+        "\"Potato\"}",
+        serialize(obj_ptr));
+
+    LDValue_Free(obj_ptr);
+
+    // Array builder is going to take care of freeing bool_val_false.
+    auto* array_builder = LDArrayBuilder_New();
+    LDArrayBuilder_Add(array_builder, bool_val_false);
+    auto* array_ptr = LDArrayBuilder_Build(array_builder);
+
+    EXPECT_EQ("[false]", serialize(array_ptr));
+
+    LDValue_Free(array_ptr);
 }

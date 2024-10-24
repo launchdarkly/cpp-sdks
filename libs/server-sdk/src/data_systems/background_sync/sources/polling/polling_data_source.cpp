@@ -4,7 +4,7 @@
 #include <launchdarkly/network/http_error_messages.hpp>
 
 #include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 

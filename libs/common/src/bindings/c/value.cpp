@@ -7,6 +7,10 @@
 #include <launchdarkly/detail/unreachable.hpp>
 #include <launchdarkly/value.hpp>
 
+#include <launchdarkly/detail/serialization/json_value.hpp>
+
+#include <boost/json.hpp>
+
 using launchdarkly::Value;
 
 #define AS_VALUE(x) reinterpret_cast<Value*>(x)
@@ -93,6 +97,18 @@ LD_EXPORT(unsigned int) LDValue_Count(LDValue val) {
         default:
             return 0;
     }
+}
+
+LD_EXPORT(char*) LDValue_SerializeJSON(LDValue val) {
+    LD_ASSERT_NOT_NULL(val);
+
+    auto const value = AS_VALUE(val);
+
+    auto boost_value = boost::json::value_from(*value);
+
+    std::string json = boost::json::serialize(boost_value);
+
+    return strdup(json.c_str());
 }
 
 LD_EXPORT(LDValue_ArrayIter) LDValue_ArrayIter_New(LDValue val) {
