@@ -3,8 +3,7 @@
 #include <chrono>
 namespace launchdarkly::server_side {
 
-EventFactory::EventFactory(
-    launchdarkly::server_side::EventFactory::ReasonPolicy reason_policy)
+EventFactory::EventFactory(ReasonPolicy const reason_policy)
     : reason_policy_(reason_policy),
       now_([]() { return events::Date{std::chrono::system_clock::now()}; }) {}
 
