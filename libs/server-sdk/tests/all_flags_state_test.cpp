@@ -150,3 +150,19 @@ TEST(AllFlagsTest, FlagState) {
         return kvp.second == state;
     }));
 }
+
+TEST(AllFlagsTest, FlagStateCanBeConstructedWithPrerequisites) {
+    auto const prereqs = std::vector<std::string>{"a", "b", "c"};
+    AllFlagsState::State const state{
+        42, 1, std::nullopt, false, false, std::nullopt, prereqs};
+    ASSERT_EQ(state.Prerequisites(), prereqs);
+}
+
+// Similar to the previous test, but serves as a sanity check that the vector's
+// order was preserved.
+TEST(AllFlagsTest, FlagStateCanBeConstructedWithPrerequisitesReversed) {
+    auto const prereqs = std::vector<std::string>{"c", "b", "a"};
+    AllFlagsState::State const state{
+        42, 1, std::nullopt, false, false, std::nullopt, prereqs};
+    ASSERT_EQ(state.Prerequisites(), prereqs);
+}

@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace launchdarkly::server_side {
 
@@ -62,6 +63,14 @@ class AllFlagsState {
               bool track_reason,
               std::optional<std::uint64_t> debug_events_until_date);
 
+        State(std::uint64_t version,
+              std::optional<std::int64_t> variation,
+              std::optional<EvaluationReason> reason,
+              bool track_events,
+              bool track_reason,
+              std::optional<std::uint64_t> debug_events_until_date,
+              std::vector<std::string> prerequisites);
+
         /**
          * @return The flag's version number when it was evaluated.
          */
@@ -110,6 +119,12 @@ class AllFlagsState {
          */
         [[nodiscard]] bool OmitDetails() const;
 
+        /**
+         * @return The list of prerequisites for this flag in the order they
+         * were evaluated.
+         */
+        [[nodiscard]] std::vector<std::string> const& Prerequisites() const;
+
         friend class AllFlagsStateBuilder;
 
        private:
@@ -120,6 +135,7 @@ class AllFlagsState {
         bool track_reason_;
         std::optional<std::uint64_t> debug_events_until_date_;
         bool omit_details_;
+        std::vector<std::string> prerequisites_;
     };
 
     /**
