@@ -31,6 +31,11 @@ void tag_invoke(boost::json::value_from_tag const& unused,
             obj.emplace("debugEventsUntilDate", boost::json::value_from(*date));
         }
     }
+
+    if (auto const& prerequisites = state.Prerequisites();
+        !prerequisites.empty()) {
+        obj.emplace("prerequisites", boost::json::value_from(prerequisites));
+    }
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
