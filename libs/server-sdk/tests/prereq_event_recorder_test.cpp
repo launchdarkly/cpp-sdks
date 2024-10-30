@@ -61,8 +61,8 @@ TEST(PrereqEventRecorderTest, IgnoresEvalEventsWithoutPrereqOf) {
     auto const context = ContextBuilder().Kind("cat", "shadow").Build();
 
     // Receiving an eval event without a prereq_of field shouldn't actually
-    // happen when calling AllFlags, but regardless we should ignore it that
-    // would signify that this isn't a prerequisite.
+    // happen when calling AllFlags, but regardless we should ignore it because
+    // that would signify that it isn't a prerequisite.
     recorder.SendAsync(factory.Eval("not-a-prereq", context, std::nullopt,
                                     EvaluationReason::Fallthrough(false), false,
                                     std::nullopt));
