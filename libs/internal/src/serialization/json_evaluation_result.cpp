@@ -1,7 +1,7 @@
 #include <launchdarkly/detail/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
-#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/core/ignore_unused.hpp>
@@ -49,6 +49,10 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
                 return std::chrono::system_clock::time_point{
                     std::chrono::milliseconds{value}};
             });
+
+    auto* prerequisites_iter = json_obj.find("prerequisites");
+    auto prerequisites = ValueAsOpt<std::vector<std::string>>(
+        prerequisites_iter, json_obj.end());
 
     // Evaluation detail is directly de-serialized inline here.
     // This is because the shape of the evaluation detail is different
@@ -105,7 +109,8 @@ tl::expected<std::optional<EvaluationResult>, JsonError> tag_invoke(
         track_events,
         track_reason,
         debug_events_until_date,
-        EvaluationDetailInternal(std::move(value), variation, std::nullopt)};
+        EvaluationDetailInternal(std::move(value), variation, std::nullopt),
+        prerequisites};
 }
 
 void tag_invoke(boost::json::value_from_tag const& unused,
@@ -133,7 +138,14 @@ void tag_invoke(boost::json::value_from_tag const& unused,
             "debugEventsUntilDate",
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 evaluation_result.DebugEventsUntilDate()->time_since_epoch())
-            .count());
+                .count());
+    }
+
+    if (auto const prerequisites = evaluation_result.Prerequisites()) {
+        if (!prerequisites->empty()) {
+            obj.emplace("prerequisites",
+                        boost::json::value_from(prerequisites.value()));
+        }
     }
 
     auto& detail = evaluation_result.Detail();
@@ -149,4 +161,4 @@ void tag_invoke(boost::json::value_from_tag const& unused,
         obj.emplace("reason", reason_json);
     }
 }
-} // namespace launchdarkly
+}  // namespace launchdarkly
