@@ -1,4 +1,4 @@
-#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 
 namespace launchdarkly {
 tl::expected<std::optional<bool>, JsonError> tag_invoke(
