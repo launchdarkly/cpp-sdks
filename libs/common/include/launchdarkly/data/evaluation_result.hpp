@@ -48,6 +48,8 @@ class EvaluationResult {
      */
     [[nodiscard]] EvaluationDetailInternal const& Detail() const;
 
+    [[nodiscard]] std::vector<std::string> const& Prerequisites() const;
+
     EvaluationResult(
         uint64_t version,
         std::optional<uint64_t> flag_version,
@@ -65,6 +67,7 @@ class EvaluationResult {
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         debug_events_until_date_;
     EvaluationDetailInternal detail_;
+    std::vector<std::string> prerequisites_;
 };
 
 std::ostream& operator<<(std::ostream& out, EvaluationResult const& result);

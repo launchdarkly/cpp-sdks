@@ -31,6 +31,10 @@ EvaluationDetailInternal const& EvaluationResult::Detail() const {
     return detail_;
 }
 
+std::vector<std::string> const& EvaluationResult::Prerequisites() const {
+    return prerequisites_;
+}
+
 EvaluationResult::EvaluationResult(
     uint64_t version,
     std::optional<uint64_t> flag_version,
@@ -59,6 +63,14 @@ std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
             << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S");
     }
     out << " detail: " << result.Detail();
+    if (result.Prerequisites().size() > 0) {
+        out << " prerequisites: [";
+        for (std::size_t i = 0; i < result.Prerequisites().size(); i++) {
+            out << result.Prerequisites()[i]
+                << (i == result.Prerequisites().size() - 1 ? "" : ", ");
+        }
+        out << "]";
+    }
     out << "}";
     return out;
 }
@@ -69,7 +81,8 @@ bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs) {
            lhs.TrackEvents() == rhs.TrackEvents() &&
            lhs.Detail() == rhs.Detail() &&
            lhs.DebugEventsUntilDate() == rhs.DebugEventsUntilDate() &&
-           lhs.FlagVersion() == rhs.FlagVersion();
+           lhs.FlagVersion() == rhs.FlagVersion() &&
+           lhs.Prerequisites() == rhs.Prerequisites();
 }
 
 bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs) {
