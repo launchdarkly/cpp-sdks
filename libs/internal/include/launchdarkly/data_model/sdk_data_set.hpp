@@ -4,10 +4,7 @@
 #include <launchdarkly/data_model/item_descriptor.hpp>
 #include <launchdarkly/data_model/segment.hpp>
 
-#include <boost/json/value.hpp>
-#include <tl/expected.hpp>
-
-#include <optional>
+#include <string>
 #include <unordered_map>
 
 namespace launchdarkly::data_model {
