@@ -1,8 +1,8 @@
 {
-  "libs/client-sdk": "3.7.1",
+  "libs/client-sdk": "3.8.0",
   "libs/server-sent-events": "0.5.4",
-  "libs/common": "1.8.0",
-  "libs/internal": "0.8.3",
-  "libs/server-sdk": "3.6.2",
-  "libs/server-sdk-redis-source": "2.1.14"
+  "libs/common": "1.9.0",
+  "libs/internal": "0.9.0",
+  "libs/server-sdk": "3.7.0",
+  "libs/server-sdk-redis-source": "2.1.15"
 }

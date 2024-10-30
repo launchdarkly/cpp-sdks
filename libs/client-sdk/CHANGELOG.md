@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.7.1...launchdarkly-cpp-client-v3.8.0) (2024-10-30)
+
+
+### Features
+
+* add LDValue_SerializeJSON C binding ([90eb880](https://github.com/launchdarkly/cpp-sdks/commit/90eb880b7b769ba491c9da5734f5db7eda31f15e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.3 to 0.9.0
+    * launchdarkly-cpp-common bumped from 1.8.0 to 1.9.0
+
 ## [3.7.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.7.0...launchdarkly-cpp-client-v3.7.1) (2024-10-08)
 
 
