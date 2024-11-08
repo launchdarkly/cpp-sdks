@@ -52,8 +52,6 @@ class HttpProperties final {
     std::map<std::string, std::string> base_headers_;
     TlsOptions tls_;
     std::optional<std::string> http_proxy_;
-
-    // TODO: Proxy.
 };
 
 bool operator==(HttpProperties const& lhs, HttpProperties const& rhs);

@@ -10,8 +10,6 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/version.hpp>
 #include <boost/core/ignore_unused.hpp>
 
 #include "foxy/client_session.hpp"
@@ -19,7 +17,6 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -158,10 +155,10 @@ class FoxyClient
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
           handler_(std::move(handler)),
+          resp_(),
           session_(exec,
-                   launchdarkly::foxy::session_opts{
-                       ToOptRef(ssl_context_.get()), connect_timeout_}),
-          resp_() {}
+                   foxy::session_opts{ToOptRef(ssl_context_.get()),
+                                      connect_timeout_}) {}
 
     void Run() {
         session_.async_connect(host_, port_,
