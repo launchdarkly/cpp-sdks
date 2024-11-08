@@ -57,7 +57,8 @@ struct Defaults<ClientSDK> {
                 std::chrono::seconds{10},
                 std::chrono::seconds{10},
                 std::map<std::string, std::string>(),
-                TLS()};
+                TLS(),
+                std::nullopt};
     }
 
     static auto StreamingConfig() -> shared::built::StreamingConfig<ClientSDK> {

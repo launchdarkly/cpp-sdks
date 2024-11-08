@@ -30,7 +30,8 @@ class HttpProperties final {
                    std::chrono::milliseconds write_timeout,
                    std::chrono::milliseconds response_timeout,
                    std::map<std::string, std::string> base_headers,
-                   TlsOptions tls);
+                   TlsOptions tls,
+                   std::optional<std::string> http_proxy);
 
     [[nodiscard]] std::chrono::milliseconds ConnectTimeout() const;
     [[nodiscard]] std::chrono::milliseconds ReadTimeout() const;
@@ -41,6 +42,8 @@ class HttpProperties final {
 
     [[nodiscard]] TlsOptions const& Tls() const;
 
+    [[nodiscard]] std::optional<std::string> HttpProxy() const;
+
    private:
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds read_timeout_;
@@ -48,6 +51,7 @@ class HttpProperties final {
     std::chrono::milliseconds response_timeout_;
     std::map<std::string, std::string> base_headers_;
     TlsOptions tls_;
+    std::optional<std::string> http_proxy_;
 
     // TODO: Proxy.
 };
