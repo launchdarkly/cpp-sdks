@@ -1,10 +1,10 @@
 {
   "name": "launchdarkly-cpp-server",
   "description": "This package.json exists for modeling dependencies for the release process.",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "private": true,
   "dependencies": {
-    "launchdarkly-cpp-internal": "0.9.0",
+    "launchdarkly-cpp-internal": "0.10.0",
     "launchdarkly-cpp-common": "1.9.0",
     "launchdarkly-cpp-sse-client": "0.5.4"
   }

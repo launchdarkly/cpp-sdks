@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.7.0...launchdarkly-cpp-server-v3.8.0) (2024-11-08)
+
+
+### Features
+
+* expose prerequisite relations in AllFlags API ([#463](https://github.com/launchdarkly/cpp-sdks/issues/463)) ([56de5f5](https://github.com/launchdarkly/cpp-sdks/commit/56de5f5e8b1a9f44dab79544fc2954abb50b8b88))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.9.0 to 0.10.0
+
 ## [3.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.6.2...launchdarkly-cpp-server-v3.7.0) (2024-10-30)
 
 
