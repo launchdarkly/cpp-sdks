@@ -5,6 +5,7 @@
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
 #include "evaluation/evaluation_stack.hpp"
+#include "prereq_event_recorder/prereq_event_recorder.hpp"
 
 #include "data_interfaces/system/idata_system.hpp"
 
@@ -181,8 +182,6 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 
     AllFlagsStateBuilder builder{options};
 
-    EventScope no_events;
-
     auto all_flags = data_system_->AllFlags();
 
     // Because evaluating the flags may access many segments, tell the data
@@ -191,7 +190,7 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     // memory.)
     auto _ = data_system_->AllSegments();
 
-    for (auto const& [k, v] : all_flags) {
+    for (auto const& [key, v] : all_flags) {
         if (!v || !v->item) {
             continue;
         }
@@ -203,15 +202,20 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
             continue;
         }
 
-        EvaluationDetail<Value> detail =
-            evaluator_.Evaluate(flag, context, no_events);
+        PrereqEventRecorder recorder{key};
+
+        EvaluationDetail<Value> detail = evaluator_.Evaluate(
+            flag, context,
+            EventScope{&recorder, EventFactory::WithoutReasons()});
 
         bool in_experiment = flag.IsExperimentationEnabled(detail.Reason());
-        builder.AddFlag(k, detail.Value(),
+
+        builder.AddFlag(key, detail.Value(),
                         AllFlagsState::State{
                             flag.Version(), detail.VariationIndex(),
                             detail.Reason(), flag.trackEvents || in_experiment,
-                            in_experiment, flag.debugEventsUntilDate});
+                            in_experiment, flag.debugEventsUntilDate,
+                            std::move(recorder).TakePrerequisites()});
     }
 
     return builder.Build();

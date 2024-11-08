@@ -3,6 +3,8 @@
 #include <launchdarkly/events/data/common_events.hpp>
 #include <launchdarkly/events/data/server_events.hpp>
 
+#include <variant>
+
 namespace launchdarkly::events {
 
 using InputEvent = std::variant<FeatureEventParams,

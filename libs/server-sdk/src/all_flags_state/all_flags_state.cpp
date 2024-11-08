@@ -3,19 +3,36 @@
 namespace launchdarkly::server_side {
 
 AllFlagsState::State::State(
-    std::uint64_t version,
-    std::optional<std::int64_t> variation,
+    std::uint64_t const version,
+    std::optional<std::int64_t> const variation,
     std::optional<EvaluationReason> reason,
-    bool track_events,
-    bool track_reason,
-    std::optional<std::uint64_t> debug_events_until_date)
+    bool const track_events,
+    bool const track_reason,
+    std::optional<std::uint64_t> const debug_events_until_date)
+    : State(version,
+            variation,
+            std::move(reason),
+            track_events,
+            track_reason,
+            debug_events_until_date,
+            std::vector<std::string>{}) {}
+
+AllFlagsState::State::State(
+    std::uint64_t const version,
+    std::optional<std::int64_t> const variation,
+    std::optional<EvaluationReason> reason,
+    bool const track_events,
+    bool const track_reason,
+    std::optional<std::uint64_t> const debug_events_until_date,
+    std::vector<std::string> prerequisites)
     : version_(version),
       variation_(variation),
-      reason_(reason),
+      reason_(std::move(reason)),
       track_events_(track_events),
       track_reason_(track_reason),
       debug_events_until_date_(debug_events_until_date),
-      omit_details_(false) {}
+      omit_details_(false),
+      prerequisites_(std::move(prerequisites)) {}
 
 std::uint64_t AllFlagsState::State::Version() const {
     return version_;
@@ -35,6 +52,10 @@ bool AllFlagsState::State::TrackEvents() const {
 
 bool AllFlagsState::State::TrackReason() const {
     return track_reason_;
+}
+
+std::vector<std::string> const& AllFlagsState::State::Prerequisites() const {
+    return prerequisites_;
 }
 
 std::optional<std::uint64_t> const& AllFlagsState::State::DebugEventsUntilDate()
@@ -80,7 +101,8 @@ bool operator==(AllFlagsState::State const& lhs,
            lhs.TrackEvents() == rhs.TrackEvents() &&
            lhs.TrackReason() == rhs.TrackReason() &&
            lhs.DebugEventsUntilDate() == rhs.DebugEventsUntilDate() &&
-           lhs.OmitDetails() == rhs.OmitDetails();
+           lhs.OmitDetails() == rhs.OmitDetails() &&
+           lhs.Prerequisites() == rhs.Prerequisites();
 }
 
 }  // namespace launchdarkly::server_side
