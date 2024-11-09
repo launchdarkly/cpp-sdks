@@ -132,6 +132,7 @@ class FoxyClient
     std::shared_ptr<net::ssl::context> ssl_context_;
     std::string host_;
     std::string port_;
+    std::optional<std::string> http_proxy_;
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
@@ -144,6 +145,7 @@ class FoxyClient
                std::shared_ptr<net::ssl::context> ssl_context,
                std::string host,
                std::string port,
+               std::optional<std::string> http_proxy,
                http::request<http::string_body> req,
                std::chrono::milliseconds connect_timeout,
                std::chrono::milliseconds response_timeout,
@@ -151,6 +153,7 @@ class FoxyClient
         : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
           port_(std::move(port)),
+          http_proxy_(std::move(http_proxy)),
           req_(std::move(req)),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
@@ -161,7 +164,11 @@ class FoxyClient
                                       connect_timeout_}) {}
 
     void Run() {
-        session_.async_connect(host_, port_,
+        std::string host = host_;
+        if (http_proxy_) {
+            host = *http_proxy_;
+        }
+        session_.async_connect(host, port_,
                                beast::bind_front_handler(&FoxyClient::OnConnect,
                                                          shared_from_this()));
     }
@@ -344,8 +351,9 @@ class AsioRequester {
             }
 
             std::make_shared<FoxyClient>(
-                exec, std::move(ssl), request->Host(), service, beast_request,
-                properties.ConnectTimeout(), properties.ResponseTimeout(),
+                exec, std::move(ssl), request->Host(), service, std::nullopt,
+                beast_request, properties.ConnectTimeout(),
+                properties.ResponseTimeout(),
                 [exec, callback, request, this, redirect_count](auto res) {
                     NeedsRedirect(res)
                         ? InnerRequest(exec, MakeRedirectRequest(*request, res),

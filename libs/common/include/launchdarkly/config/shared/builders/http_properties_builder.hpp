@@ -179,6 +179,13 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
 
     /**
+     * Sets an HTTP proxy URL.
+     * @param http_proxy The proxy, for example 'http://proxy.example.com:8080'.
+     * @return A reference to this builder.
+     */
+    HttpPropertiesBuilder& HttpProxy(std::string http_proxy);
+
+    /**
      * Build a set of HttpProperties.
      * @return The built properties.
      */
@@ -193,6 +200,7 @@ class HttpPropertiesBuilder {
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
     TlsBuilder<SDK> tls_;
+    std::optional<std::string> http_proxy_;
 };
 
 }  // namespace launchdarkly::config::shared::builders
