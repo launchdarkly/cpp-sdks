@@ -659,8 +659,7 @@ std::shared_ptr<Client> Builder::build() {
 
         // An HTTP proxy talks http to the client. Setting https scheme
         // indicates a misconfiguration.
-        if (http_proxy_components->has_scheme() &&
-            http_proxy_components->scheme_id() != boost::urls::scheme::http) {
+        if (http_proxy_components->scheme_id() != boost::urls::scheme::http) {
             return nullptr;
         }
 
@@ -678,6 +677,8 @@ std::shared_ptr<Client> Builder::build() {
         tcp_port = http_proxy_components->has_port()
                        ? http_proxy_components->port()
                        : "80";
+
+        request.target(url_);
     }
 
     std::optional<ssl::context> ssl;
