@@ -130,6 +130,11 @@ HttpRequest::HttpRequest(std::string const& url,
         }
 
         http_proxy_host_ = http_proxy_uri_components->host();
+        if (http_proxy_host_ && *http_proxy_host_ == "") {
+            // This will be true if there is no scheme, like 'localhost:8080'.
+            valid_ = false;
+            return;
+        }
         if (http_proxy_uri_components->has_port()) {
             http_proxy_port_ = http_proxy_uri_components->port();
         }

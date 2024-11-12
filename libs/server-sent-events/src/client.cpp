@@ -648,10 +648,7 @@ std::shared_ptr<Client> Builder::build() {
                                ? uri_components->port()
                                : uri_components->scheme();
 
-    // Only allow http_proxy if the original request is HTTP. This is an
-    // artificial limitation before we support HTTP CONNECT.
-    if (http_proxy_ &&
-        uri_components->scheme_id() == boost::urls::scheme::http) {
+    if (http_proxy_) {
         auto http_proxy_components = boost::urls::parse_uri(*http_proxy_);
         if (!http_proxy_components) {
             return nullptr;
@@ -682,7 +679,8 @@ std::shared_ptr<Client> Builder::build() {
     }
 
     std::optional<ssl::context> ssl;
-    if (uri_components->scheme_id() == boost::urls::scheme::https) {
+    if (!http_proxy_ &&
+        uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
 
         ssl->set_default_verify_paths();

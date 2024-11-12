@@ -65,6 +65,17 @@ static http::verb ConvertMethod(HttpMethod method) {
     launchdarkly::detail::unreachable();
 }
 
+static std::string HostWithOptionalPort(
+    std::string host,
+    std::optional<std::string> const& port) {
+    if (!port || (*port == "80" || *port == "443")) {
+        return host;
+    }
+    host.append(":");
+    host.append(*port);
+    return host;
+}
+
 static http::request<http::string_body> MakeBeastRequest(
     HttpRequest const& request) {
     http::request<http::string_body> beast_request;
@@ -85,15 +96,18 @@ static http::request<http::string_body> MakeBeastRequest(
         beast_request.target(request.Path());
     }
 
+    // If we have an HTTP proxy set, we need to pass the entire path
+    // in the HTTP request's target (so the proxy knows where to send it).
     if (request.HttpProxyHost()) {
         beast_request.target(request.Url());
     }
 
-    beast_request.set(http::field::host, request.Host());
+    beast_request.set(http::field::host,
+                      HostWithOptionalPort(request.Host(), request.Port()));
 
     auto const& properties = request.Properties();
 
-    for (auto const& pair : request.Properties().BaseHeaders()) {
+    for (auto const& pair : properties.BaseHeaders()) {
         beast_request.set(pair.first, pair.second);
     }
 
@@ -348,7 +362,11 @@ class AsioRequester {
                 request->Port().value_or(request->Https() ? "443" : "80"));
 
             std::shared_ptr<ssl::context> ssl;
-            if (request->Https()) {
+            if (request->Https() && !request->HttpProxyHost()) {
+                // If the user requested an HTTP proxy, then we will be making
+                // an HTTP request to the proxy (and then the proxy will make
+                // an HTTPS request on our behalf to the target.) So, don't
+                // use the SSL client if we have HTTP proxy configured.
                 ssl = this->ssl_ctx_;
             }
 
