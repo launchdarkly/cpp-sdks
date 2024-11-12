@@ -33,10 +33,10 @@ HttpResult::HeadersType const& HttpResult::Headers() const {
 HttpResult::HttpResult(HttpResult::StatusCode status,
                        std::optional<std::string> body,
                        HttpResult::HeadersType headers)
-    : status_(status),
+    : error_(false),
+      status_(status),
       body_(std::move(body)),
-      headers_(std::move(headers)),
-      error_(false) {}
+      headers_(std::move(headers)) {}
 
 bool HttpResult::IsError() const {
     return error_;
@@ -47,7 +47,7 @@ std::optional<std::string> const& HttpResult::ErrorMessage() const {
 }
 
 HttpResult::HttpResult(std::optional<std::string> error_message)
-    : error_message_(std::move(error_message)), error_(true), status_(0) {}
+    : error_(true), error_message_(std::move(error_message)), status_(0) {}
 
 HttpMethod HttpRequest::Method() const {
     return method_;
@@ -73,14 +73,26 @@ std::string const& HttpRequest::Url() const {
     return url_;
 }
 
+std::optional<std::string> const& HttpRequest::HttpProxyHost() const {
+    return http_proxy_host_;
+}
+
+std::optional<std::string> const& HttpRequest::HttpProxyPort() const {
+    return http_proxy_port_;
+}
+
+// What I'm doing: supporting HTTP proxy in the AsioEventRequestor.
+// It's annoying that we have usage in SSE client but also here that both needs
+// to be updated.
+
 HttpRequest::HttpRequest(std::string const& url,
                          HttpMethod method,
                          config::shared::built::HttpProperties properties,
                          HttpRequest::BodyType body)
-    : properties_(std::move(properties)),
+    : url_(url),
       method_(method),
       body_(std::move(body)),
-      url_(url),
+      properties_(std::move(properties)),
       port_(std::nullopt) {
     auto uri_components = boost::urls::parse_uri(url);
 
@@ -108,20 +120,37 @@ HttpRequest::HttpRequest(std::string const& url,
     if (uri_components->has_port()) {
         port_ = uri_components->port();
     }
+
+    if (properties_.HttpProxy()) {
+        auto const http_proxy = properties_.HttpProxy().value();
+        auto http_proxy_uri_components = boost::urls::parse_uri(http_proxy);
+        if (!http_proxy_uri_components) {
+            valid_ = false;
+            return;
+        }
+
+        http_proxy_host_ = http_proxy_uri_components->host();
+        if (http_proxy_uri_components->has_port()) {
+            http_proxy_port_ = http_proxy_uri_components->port();
+        }
+    }
+
     valid_ = true;
 }
 
 HttpRequest::HttpRequest(HttpRequest& base_request,
                          config::shared::built::HttpProperties properties)
-    : properties_(std::move(properties)),
+    : url_(base_request.url_),
+      method_(base_request.method_),
+      body_(std::move(base_request.body_)),
+      properties_(std::move(properties)),
       host_(base_request.host_),
       port_(base_request.port_),
       path_(base_request.path_),
+      http_proxy_host_(base_request.http_proxy_host_),
+      http_proxy_port_(base_request.http_proxy_port_),
       is_https_(base_request.is_https_),
-      valid_(base_request.valid_),
-      url_(base_request.url_),
-      method_(base_request.method_),
-      body_(std::move(base_request.body_)) {}
+      valid_(base_request.valid_) {}
 
 std::optional<std::string> const& HttpRequest::Port() const {
     return port_;

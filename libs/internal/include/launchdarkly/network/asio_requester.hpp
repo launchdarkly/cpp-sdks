@@ -69,20 +69,26 @@ static http::request<http::string_body> MakeBeastRequest(
     HttpRequest const& request) {
     http::request<http::string_body> beast_request;
 
-    beast_request.method(ConvertMethod(request.Method()));
-    auto body = request.Body();
-    if (body) {
+    if (auto const body = request.Body()) {
         beast_request.body() = body.value();
     } else {
         beast_request.body() = "";
     }
+
+    beast_request.prepare_payload();
+
+    beast_request.method(ConvertMethod(request.Method()));
+
     if (request.Path().empty()) {
         beast_request.target("/");
     } else {
         beast_request.target(request.Path());
     }
 
-    beast_request.prepare_payload();
+    if (request.HttpProxyHost()) {
+        beast_request.target(request.Url());
+    }
+
     beast_request.set(http::field::host, request.Host());
 
     auto const& properties = request.Properties();
@@ -132,7 +138,6 @@ class FoxyClient
     std::shared_ptr<net::ssl::context> ssl_context_;
     std::string host_;
     std::string port_;
-    std::optional<std::string> http_proxy_;
     http::request<http::string_body> req_;
     std::chrono::milliseconds connect_timeout_;
     std::chrono::milliseconds response_timeout_;
@@ -145,7 +150,6 @@ class FoxyClient
                std::shared_ptr<net::ssl::context> ssl_context,
                std::string host,
                std::string port,
-               std::optional<std::string> http_proxy,
                http::request<http::string_body> req,
                std::chrono::milliseconds connect_timeout,
                std::chrono::milliseconds response_timeout,
@@ -153,7 +157,6 @@ class FoxyClient
         : ssl_context_(std::move(ssl_context)),
           host_(std::move(host)),
           port_(std::move(port)),
-          http_proxy_(std::move(http_proxy)),
           req_(std::move(req)),
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
@@ -164,11 +167,7 @@ class FoxyClient
                                       connect_timeout_}) {}
 
     void Run() {
-        std::string host = host_;
-        if (http_proxy_) {
-            host = *http_proxy_;
-        }
-        session_.async_connect(host, port_,
+        session_.async_connect(host_, port_,
                                beast::bind_front_handler(&FoxyClient::OnConnect,
                                                          shared_from_this()));
     }
@@ -342,8 +341,11 @@ class AsioRequester {
 
             const auto& properties = request->Properties();
 
-            std::string service =
-                request->Port().value_or(request->Https() ? "https" : "http");
+            std::string tcp_host =
+                request->HttpProxyHost().value_or(request->Host());
+
+            std::string tcp_port = request->HttpProxyPort().value_or(
+                request->Port().value_or(request->Https() ? "443" : "80"));
 
             std::shared_ptr<ssl::context> ssl;
             if (request->Https()) {
@@ -351,9 +353,8 @@ class AsioRequester {
             }
 
             std::make_shared<FoxyClient>(
-                exec, std::move(ssl), request->Host(), service, std::nullopt,
-                beast_request, properties.ConnectTimeout(),
-                properties.ResponseTimeout(),
+                exec, std::move(ssl), tcp_host, tcp_port, beast_request,
+                properties.ConnectTimeout(), properties.ResponseTimeout(),
                 [exec, callback, request, this, redirect_count](auto res) {
                     NeedsRedirect(res)
                         ? InnerRequest(exec, MakeRedirectRequest(*request, res),
