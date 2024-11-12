@@ -1,9 +1,7 @@
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
 #include <launchdarkly/config/shared/defaults.hpp>
-#include <launchdarkly/config/shared/sdks.hpp>
 
 #include <cstring>
-#include <utility>
 
 namespace launchdarkly::config::shared::builders {
 
@@ -124,6 +122,7 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Tls(
 }
 
 template <typename SDK>
+template <typename T, std::enable_if_t<std::is_same_v<T, ClientSDK>, int>>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::HttpProxy(
     std::string http_proxy) {
     http_proxy_ = std::move(http_proxy);
@@ -148,13 +147,15 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
             wrapper_name_ + "/" + wrapper_version_;
     }
 
-    return {connect_timeout_,
-            read_timeout_,
-            write_timeout_,
-            response_timeout_,
-            std::move(headers),
-            tls_.Build(),
-            http_proxy_.has_value() ? http_proxy_ : HttpProxyFromEnv()};
+    std::optional<std::string> http_proxy;
+
+    if constexpr (std::is_same_v<SDK, ClientSDK>) {
+        http_proxy = http_proxy_.has_value() ? http_proxy_ : HttpProxyFromEnv();
+    }
+
+    return {connect_timeout_,  read_timeout_,      write_timeout_,
+            response_timeout_, std::move(headers), tls_.Build(),
+            http_proxy};
 }
 
 template class TlsBuilder<config::shared::ClientSDK>;

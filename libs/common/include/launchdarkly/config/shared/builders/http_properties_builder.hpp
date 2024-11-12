@@ -7,8 +7,17 @@
 #include <vector>
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::config::shared::builders {
+
+// namespace detail {
+// template <typename T>
+// struct is_client_sdk : std::false_type {};
+//
+// template <>
+// struct is_client_sdk<config::shared::ClientSDK> : std::true_type {};
+// }  // namespace detail
 
 /**
  * Class used for building TLS options used within HttpProperties.
@@ -179,7 +188,10 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
 
     /**
-     * Specifies an HTTP proxy which the client should use to communicate
+     * NOTE: This method and the associated 'http_proxy' environment variable
+     * are only available for the client-side SDK.
+     *
+     * Specifies an HTTP proxy which the SDK should use to communicate
      * with LaunchDarkly.
      *
      * SDK <-- HTTP, plaintext --> Proxy <-- HTTPS --> LaunchDarkly
@@ -195,6 +207,9 @@ class HttpPropertiesBuilder {
      *
      * @param http_proxy HTTP proxy URL.
      */
+    template <
+        typename T = SDK,
+        std::enable_if_t<std::is_same_v<T, config::shared::ClientSDK>, int> = 0>
     HttpPropertiesBuilder& HttpProxy(std::string http_proxy);
 
     [[nodiscard]] built::HttpProperties Build() const;
