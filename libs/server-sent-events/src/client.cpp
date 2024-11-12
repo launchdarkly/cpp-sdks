@@ -591,6 +591,8 @@ Builder& Builder::custom_ca_file(std::string path) {
     return *this;
 }
 
+// Returns the host with a port appended, if the port is not 80 or 443.
+// Although not strictly necessary, it is meant to match what browsers do.
 std::string host_with_optional_port(
     boost::system::result<boost::urls::url_view> const& url) {
     if (url->has_port() && url->port() != "80" && url->port() != "443") {
@@ -662,11 +664,11 @@ std::shared_ptr<Client> Builder::build() {
 
         tcp_host = http_proxy_components->host();
 
-        // If they didn't specify a port, then the uri is of the form
-        // [http://]foo.bar at this point. Use port 80 if not specified.
+        // If they didn't specify a port, use the scheme as the service
+        //  (which we've enforced to be http above.)
         tcp_port = http_proxy_components->has_port()
                        ? http_proxy_components->port()
-                       : "80";
+                       : http_proxy_components->scheme();
 
         request.target(url_);
     }

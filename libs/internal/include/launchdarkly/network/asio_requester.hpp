@@ -65,6 +65,8 @@ static http::verb ConvertMethod(HttpMethod method) {
     launchdarkly::detail::unreachable();
 }
 
+// Returns the host with a port appended, if the port is not 80 or 443.
+// Although not strictly necessary, it is meant to match what browsers do.
 static std::string HostWithOptionalPort(
     std::string host,
     std::optional<std::string> const& port) {
