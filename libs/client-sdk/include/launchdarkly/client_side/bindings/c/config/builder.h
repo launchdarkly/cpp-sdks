@@ -422,6 +422,28 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* value);
 
 /**
+ * Specifies an HTTP proxy which the client should use to communicate
+ * with LaunchDarkly.
+ *
+ * SDK <-- HTTP, plaintext --> Proxy <-- HTTPS --> LaunchDarkly
+ *
+ * This setting affects streaming mode, polling mode, and event delivery.
+ * The argument should be of the form: 'http://proxy.example.com:8080'.
+ *
+ * The scheme must be 'http' and the port is optional (80 if not
+ * specified.)
+ *
+ * The SDK respects the 'http_proxy' environment variable as an alternative
+ * to this method. If both are set, this method takes precedence.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param http_proxy HTTP proxy URL. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_HttpProxy(LDClientConfigBuilder b,
+                                               char const* http_proxy);
+
+/**
  * Sets the TLS options builder. The builder is automatically freed.
  *
  * WARNING: Do not call any other

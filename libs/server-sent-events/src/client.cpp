@@ -660,13 +660,6 @@ std::shared_ptr<Client> Builder::build() {
             return nullptr;
         }
 
-        // Although a proxy might talk HTTP on port 443, that would be
-        // very weird and is likely a misconfiguration.
-        if (http_proxy_components->has_port() &&
-            http_proxy_components->port() == "443") {
-            return nullptr;
-        }
-
         tcp_host = http_proxy_components->host();
 
         // If they didn't specify a port, then the uri is of the form

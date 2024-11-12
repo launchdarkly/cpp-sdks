@@ -153,7 +153,7 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
             response_timeout_,
             std::move(headers),
             tls_.Build(),
-            http_proxy_ ? *http_proxy_ : HttpProxyFromEnv()};
+            http_proxy_.has_value() ? http_proxy_ : HttpProxyFromEnv()};
 }
 
 template class TlsBuilder<config::shared::ClientSDK>;

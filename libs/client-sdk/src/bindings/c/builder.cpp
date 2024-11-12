@@ -312,6 +312,15 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
 }
 
 LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_HttpProxy(LDClientConfigBuilder b,
+                                               char const* http_proxy) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(http_proxy);
+
+    TO_BUILDER(b)->HttpProperties().HttpProxy(http_proxy);
+}
+
+LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Tls(
     LDClientConfigBuilder b,
     LDClientHttpPropertiesTlsBuilder tls_builder) {
