@@ -11,14 +11,6 @@
 
 namespace launchdarkly::config::shared::builders {
 
-// namespace detail {
-// template <typename T>
-// struct is_client_sdk : std::false_type {};
-//
-// template <>
-// struct is_client_sdk<config::shared::ClientSDK> : std::true_type {};
-// }  // namespace detail
-
 /**
  * Class used for building TLS options used within HttpProperties.
  * @tparam SDK The SDK type to build options for. This affects the default
@@ -207,9 +199,8 @@ class HttpPropertiesBuilder {
      *
      * @param http_proxy HTTP proxy URL.
      */
-    template <
-        typename T = SDK,
-        std::enable_if_t<std::is_same_v<T, config::shared::ClientSDK>, int> = 0>
+    template <typename T = SDK,
+              std::enable_if_t<std::is_same_v<T, ClientSDK>, int> = 0>
     HttpPropertiesBuilder& HttpProxy(std::string http_proxy);
 
     [[nodiscard]] built::HttpProperties Build() const;
