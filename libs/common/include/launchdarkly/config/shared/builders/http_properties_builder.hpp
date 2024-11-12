@@ -201,7 +201,10 @@ class HttpPropertiesBuilder {
      */
     template <typename T = SDK,
               std::enable_if_t<std::is_same_v<T, ClientSDK>, int> = 0>
-    HttpPropertiesBuilder& HttpProxy(std::string http_proxy);
+    HttpPropertiesBuilder& HttpProxy(std::string http_proxy) {
+        http_proxy_ = std::move(http_proxy);
+        return *this;
+    }
 
     [[nodiscard]] built::HttpProperties Build() const;
 
