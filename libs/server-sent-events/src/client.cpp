@@ -623,7 +623,6 @@ std::shared_ptr<Client> Builder::build() {
     }
 
     auto request = request_;
-    request.body() = "";
 
     if (request.method() == http::verb::post ||
         request.method() == http::verb::report) {
@@ -633,6 +632,9 @@ std::shared_ptr<Client> Builder::build() {
             content_header == request.end()) {
             request.set(http::field::content_type, "text/plain");
         }
+    } else {
+        // If this is *not* a post or report, then make sure no body is sent.
+        request.body() = "";
     }
 
     request.prepare_payload();
