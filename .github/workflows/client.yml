@@ -43,7 +43,7 @@ jobs:
           cmake_target: launchdarkly-cpp-client
           simulate_release: true
   build-test-client-mac:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci

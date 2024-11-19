@@ -23,7 +23,7 @@ jobs:
           platform_version: '22.04'
 
   test-macos:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/cmake-test
