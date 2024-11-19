@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-latest, windows-2022, macos-12 ]
+        os: [ ubuntu-latest, windows-2022, macos-13 ]
     runs-on: ${{ matrix.os }}
     outputs:
       hashes-linux: ${{ steps.release-sdk.outputs.hashes-linux }}

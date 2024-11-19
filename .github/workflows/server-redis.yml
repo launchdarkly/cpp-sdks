@@ -28,7 +28,7 @@ jobs:
           cmake_target: launchdarkly-cpp-server-redis-source
           simulate_release: true
   build-redis-mac:
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
