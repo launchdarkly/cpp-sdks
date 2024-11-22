@@ -26,11 +26,11 @@ ProxyOptions::ProxyOptions(std::optional<std::string> http_proxy,
     : http_proxy_(std::move(http_proxy)),
       https_proxy_(std::move(https_proxy)) {}
 
-std::optional<std::string> ProxyOptions::HttpProxy() const {
+std::optional<std::string> ProxyOptions::Http() const {
     return http_proxy_;
 }
 
-std::optional<std::string> ProxyOptions::HttpsProxy() const {
+std::optional<std::string> ProxyOptions::Https() const {
     return https_proxy_;
 }
 
@@ -91,8 +91,7 @@ bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
 }
 
 bool operator==(ProxyOptions const& lhs, ProxyOptions const& rhs) {
-    return lhs.HttpProxy() == rhs.HttpProxy() &&
-           lhs.HttpsProxy() == rhs.HttpsProxy();
+    return lhs.Http() == rhs.Http() && lhs.Https() == rhs.Https();
 }
 
 }  // namespace launchdarkly::config::shared::built

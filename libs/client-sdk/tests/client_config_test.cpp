@@ -291,7 +291,7 @@ TEST(ClientConfigBindings, ProxyOptions) {
 
     auto client_config = reinterpret_cast<client_side::Config*>(config);
 
-    ASSERT_EQ(client_config->HttpProperties().Proxy().HttpProxy(),
+    ASSERT_EQ(client_config->HttpProperties().Proxy().Http(),
               "http://proxy.com:8080");
 
     LDClientConfig_Free(config);

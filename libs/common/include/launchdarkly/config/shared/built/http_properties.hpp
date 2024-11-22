@@ -29,8 +29,8 @@ class ProxyOptions final {
                  std::optional<std::string> https_proxy);
 
     ProxyOptions() = default;
-    [[nodiscard]] std::optional<std::string> HttpProxy() const;
-    [[nodiscard]] std::optional<std::string> HttpsProxy() const;
+    [[nodiscard]] std::optional<std::string> Http() const;
+    [[nodiscard]] std::optional<std::string> Https() const;
 
    private:
     std::optional<std::string> http_proxy_;

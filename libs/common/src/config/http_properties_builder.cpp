@@ -42,8 +42,8 @@ ProxyBuilder<SDK>::ProxyBuilder() : ProxyBuilder(Defaults<SDK>::NoProxy()) {}
 
 template <typename SDK>
 ProxyBuilder<SDK>::ProxyBuilder(built::ProxyOptions const& proxy) {
-    http_proxy_ = proxy.HttpProxy();
-    https_proxy_ = proxy.HttpsProxy();
+    http_proxy_ = proxy.Http();
+    https_proxy_ = proxy.Https();
 }
 
 static std::optional<std::string> StringFromEnv(char const* env) {
