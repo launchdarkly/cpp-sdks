@@ -504,6 +504,7 @@ class FoxyClient : public Client,
 
 Builder::Builder(net::any_io_executor ctx, std::string url)
     : url_{std::move(url)},
+      http_proxy_{std::nullopt},
       executor_{std::move(ctx)},
       read_timeout_{std::nullopt},
       write_timeout_{std::nullopt},
@@ -519,6 +520,11 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
     request_.method(http::verb::get);
     request_.set(http::field::accept, "text/event-stream");
     request_.set(http::field::cache_control, "no-cache");
+}
+
+Builder& Builder::http_proxy(std::string proxy) {
+    http_proxy_ = std::move(proxy);
+    return *this;
 }
 
 Builder& Builder::header(std::string const& name, std::string const& value) {
@@ -585,50 +591,93 @@ Builder& Builder::custom_ca_file(std::string path) {
     return *this;
 }
 
+// Returns the host with a port appended, if the port is not 80 or 443.
+// Although not strictly necessary, it is meant to match what browsers do.
+std::string host_with_optional_port(
+    boost::system::result<boost::urls::url_view> const& url) {
+    if (url->has_port() && url->port() != "80" && url->port() != "443") {
+        std::string host = url->host();
+        host.append(":");
+        host.append(url->port());
+        return host;
+    }
+    return url->host();
+}
+
+bool validate_scheme(boost::system::result<boost::urls::url_view> const& url) {
+    if (!url->has_scheme()) {
+        return false;
+    }
+    return url->scheme_id() == boost::urls::scheme::http ||
+           url->scheme_id() == boost::urls::scheme::https;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
         return nullptr;
     }
 
+    if (!validate_scheme(uri_components)) {
+        return nullptr;
+    }
+
     auto request = request_;
 
-    // If this isn't a post or report, ensure the body is empty.
-    if (request.method() != http::verb::post &&
-        request.method() != http::verb::report) {
-        request.body() = "";
-    } else {
-        // If it is, then setup Content-Type, only if one wasn't
-        // specified.
-        if (auto content_header = request.find(http::field::content_type);
+    if (request.method() == http::verb::post ||
+        request.method() == http::verb::report) {
+        // If this is a post or report, set the content type (if not already
+        // specified.)
+        if (auto const content_header = request.find(http::field::content_type);
             content_header == request.end()) {
             request.set(http::field::content_type, "text/plain");
         }
+    } else {
+        // If this is *not* a post or report, then make sure no body is sent.
+        request.body() = "";
     }
 
     request.prepare_payload();
 
-    std::string host = uri_components->host();
-
-    request.set(http::field::host, host);
+    request.set(http::field::host, host_with_optional_port(uri_components));
     request.target(uri_components->encoded_target());
 
-    if (uri_components->has_scheme()) {
-        if (!(uri_components->scheme_id() == boost::urls::scheme::http ||
-              uri_components->scheme_id() == boost::urls::scheme::https)) {
+    // We need to open a TCP socket to a host and port. The resolver takes
+    // either a port number, or a "service name". So if the uri has a port
+    // number, we'll use that - otherwise, we'll assume the service name is the
+    // scheme.
+
+    std::string tcp_host = uri_components->host();
+    std::string tcp_port = uri_components->has_port()
+                               ? uri_components->port()
+                               : uri_components->scheme();
+
+    if (http_proxy_) {
+        auto http_proxy_components = boost::urls::parse_uri(*http_proxy_);
+        if (!http_proxy_components) {
             return nullptr;
         }
+
+        // An HTTP proxy talks http to the client. Setting https scheme
+        // indicates a misconfiguration.
+        if (http_proxy_components->scheme_id() != boost::urls::scheme::http) {
+            return nullptr;
+        }
+
+        tcp_host = http_proxy_components->host();
+
+        // If they didn't specify a port, use the scheme as the service
+        //  (which we've enforced to be http above.)
+        tcp_port = http_proxy_components->has_port()
+                       ? http_proxy_components->port()
+                       : http_proxy_components->scheme();
+
+        request.target(url_);
     }
 
-    // The resolver accepts either a port number or a service name. If the
-    // URL specifies a port, use that - otherwise, pass in the scheme as the
-    // service name (which will be either http or https due to the check
-    // above.)
-    std::string service = uri_components->has_port() ? uri_components->port()
-                                                     : uri_components->scheme();
-
     std::optional<ssl::context> ssl;
-    if (uri_components->scheme_id() == boost::urls::scheme::https) {
+    if (!http_proxy_ &&
+        uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
 
         ssl->set_default_verify_paths();
@@ -644,10 +693,11 @@ std::shared_ptr<Client> Builder::build() {
         }
     }
 
-    return std::make_shared<FoxyClient>(
-        net::make_strand(executor_), request, host, service, connect_timeout_,
-        read_timeout_, write_timeout_, initial_reconnect_delay_, receiver_,
-        logging_cb_, error_cb_, std::move(ssl));
+    return std::make_shared<FoxyClient>(net::make_strand(executor_), request,
+                                        tcp_host, tcp_port, connect_timeout_,
+                                        read_timeout_, write_timeout_,
+                                        initial_reconnect_delay_, receiver_,
+                                        logging_cb_, error_cb_, std::move(ssl));
 }
 
 }  // namespace launchdarkly::sse

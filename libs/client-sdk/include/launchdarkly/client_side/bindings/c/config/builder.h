@@ -24,6 +24,9 @@ typedef struct _LDPersistenceCustomBuilder* LDPersistenceCustomBuilder;
 typedef struct _LDClientHttpPropertiesTlsBuilder*
     LDClientHttpPropertiesTlsBuilder;
 
+typedef struct _LDClientHttpPropertiesProxyBuilder*
+    LDClientHttpPropertiesProxyBuilder;
+
 typedef void (*SetFn)(char const* storage_namespace,
                       char const* key,
                       char const* data,
@@ -422,7 +425,63 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* value);
 
 /**
- * Sets the TLS options builder. The builder is automatically freed.
+ * Creates a new ProxyBuilder for the HttpProperties builder.
+ *
+ * If not passed into the HttpProperties
+ * builder, must be manually freed with LDClientHttpPropertiesProxyBuilder_Free.
+ *
+ * @return New builder for proxy options.
+ */
+LD_EXPORT(LDClientHttpPropertiesProxyBuilder)
+LDClientHttpPropertiesProxyBuilder_New(void);
+
+/**
+ * Frees a ProxyBuilder. Do not call if the builder was consumed by
+ * the HttpProperties builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_Free(LDClientHttpPropertiesProxyBuilder b);
+
+/**
+ * Specifies an HTTP proxy which the client should use for any HTTP requests.
+ *
+ * This setting affects streaming mode, polling mode, and event delivery.
+ * The argument should be of the form: 'http://proxy.example.com:8080'.
+ *
+ * The scheme must be 'http' and the port is optional (80 if not
+ * specified.)
+ *
+ * The SDK respects the 'http_proxy' environment variable as an alternative
+ * to this method. If both are set, this method takes precedence.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param http_proxy HTTP proxy URL. Must not be NULL.
+ */
+
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_HttpProxy(
+    LDClientHttpPropertiesProxyBuilder b,
+    char const* http_proxy);
+
+/**
+ * Sets the ProxyBuilder. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other LDClientHttpPropertiesProxyBuilder function on
+ * the provided LDClientHttpPropertiesProxyBuilder after calling this function.
+ * It is undefined behavior.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param proxy_builder The ProxyBuilder. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Proxy(
+    LDClientConfigBuilder b,
+    LDClientHttpPropertiesProxyBuilder proxy_builder);
+
+/**
+ * Sets the TlsBuilder. The builder is automatically freed.
  *
  * WARNING: Do not call any other
  * LDClientHttpPropertiesTlsBuilder function on the provided
@@ -430,7 +489,7 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
  * It is undefined behavior.
  *
  * @param b Client config builder. Must not be NULL.
- * @param tls_builder The TLS options builder. Must not be NULL.
+ * @param tls_builder The TlsBuilder. Must not be NULL.
  */
 LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Tls(

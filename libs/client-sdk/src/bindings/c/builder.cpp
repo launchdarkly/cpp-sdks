@@ -41,10 +41,17 @@ using namespace launchdarkly::client_side;
 #define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
     (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
 
-#define TO_TLS_BUILDER(ptr) (reinterpret_cast<TlsBuilder*>(ptr))
+#define TO_TLS_BUILDER(ptr) \
+    (reinterpret_cast<HttpPropertiesBuilder::TlsBuilder*>(ptr))
 
 #define FROM_TLS_BUILDER(ptr) \
     (reinterpret_cast<LDClientHttpPropertiesTlsBuilder>(ptr))
+
+#define TO_PROXY_BUILDER(ptr) \
+    (reinterpret_cast<HttpPropertiesBuilder::ProxyBuilder*>(ptr))
+
+#define FROM_PROXY_BUILDER(ptr) \
+    (reinterpret_cast<LDClientHttpPropertiesProxyBuilder>(ptr))
 
 class PersistenceImplementationWrapper : public IPersistence {
    public:
@@ -311,6 +318,38 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     TO_BUILDER(b)->HttpProperties().Header(key, value);
 }
 
+LD_EXPORT(LDClientHttpPropertiesProxyBuilder)
+LDClientHttpPropertiesProxyBuilder_New(void) {
+    return FROM_PROXY_BUILDER(new HttpPropertiesBuilder::ProxyBuilder());
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_Free(LDClientHttpPropertiesProxyBuilder b) {
+    delete TO_PROXY_BUILDER(b);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Proxy(
+    LDClientConfigBuilder b,
+    LDClientHttpPropertiesProxyBuilder proxy_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(proxy_builder);
+
+    TO_BUILDER(b)->HttpProperties().Proxy(*TO_PROXY_BUILDER(proxy_builder));
+
+    LDClientHttpPropertiesProxyBuilder_Free(proxy_builder);
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_HttpProxy(
+    LDClientHttpPropertiesProxyBuilder b,
+    char const* http_proxy) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(http_proxy);
+
+    TO_PROXY_BUILDER(b)->HttpProxy(http_proxy);
+}
+
 LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Tls(
     LDClientConfigBuilder b,
@@ -344,7 +383,7 @@ LDClientHttpPropertiesTlsBuilder_CustomCAFile(
 
 LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
 LDClientHttpPropertiesTlsBuilder_New(void) {
-    return FROM_TLS_BUILDER(new TlsBuilder());
+    return FROM_TLS_BUILDER(new HttpPropertiesBuilder::TlsBuilder());
 }
 
 LD_EXPORT(void)
