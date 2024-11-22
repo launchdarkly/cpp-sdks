@@ -51,6 +51,8 @@ struct Defaults<ClientSDK> {
 
     static auto TLS() -> shared::built::TlsOptions { return {}; }
 
+    static auto NoProxy() -> built::ProxyOptions { return {}; }
+
     static auto HttpProperties() -> shared::built::HttpProperties {
         return {std::chrono::seconds{10},
                 std::chrono::seconds{10},
@@ -58,7 +60,7 @@ struct Defaults<ClientSDK> {
                 std::chrono::seconds{10},
                 std::map<std::string, std::string>(),
                 TLS(),
-                std::nullopt};
+                NoProxy()};
     }
 
     static auto StreamingConfig() -> shared::built::StreamingConfig<ClientSDK> {
@@ -100,6 +102,8 @@ struct Defaults<ServerSDK> {
 
     static auto TLS() -> shared::built::TlsOptions { return {}; }
 
+    static auto NoProxy() -> built::ProxyOptions { return {}; }
+
     static auto HttpProperties() -> built::HttpProperties {
         return {std::chrono::seconds{10},
                 std::chrono::seconds{10},
@@ -107,7 +111,7 @@ struct Defaults<ServerSDK> {
                 std::chrono::seconds{10},
                 std::map<std::string, std::string>(),
                 TLS(),
-                std::nullopt};
+                NoProxy()};
     }
 
     static auto StreamingConfig() -> built::StreamingConfig<ServerSDK> {

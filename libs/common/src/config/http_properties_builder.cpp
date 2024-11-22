@@ -38,6 +38,33 @@ built::TlsOptions TlsBuilder<SDK>::Build() const {
 }
 
 template <typename SDK>
+ProxyBuilder<SDK>::ProxyBuilder() : ProxyBuilder(Defaults<SDK>::NoProxy()) {}
+
+template <typename SDK>
+ProxyBuilder<SDK>::ProxyBuilder(built::ProxyOptions const& proxy) {
+    http_proxy_ = proxy.HttpProxy();
+    https_proxy_ = proxy.HttpsProxy();
+}
+
+static std::optional<std::string> StringFromEnv(char const* env) {
+    if (char const* proxy = std::getenv(env)) {
+        if (strlen(proxy) > 0) {
+            return proxy;
+        }
+    }
+    return std::nullopt;
+}
+
+template <typename SDK>
+built::ProxyOptions ProxyBuilder<SDK>::Build() const {
+    if constexpr (std::is_same_v<SDK, ClientSDK>) {
+        return {http_proxy_ ? http_proxy_ : StringFromEnv("http_proxy"),
+                https_proxy_ ? https_proxy_ : StringFromEnv("https_proxy")};
+    }
+    return Defaults<SDK>::NoProxy();
+}
+
+template <typename SDK>
 HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder()
     : HttpPropertiesBuilder(shared::Defaults<SDK>::HttpProperties()) {}
 
@@ -50,7 +77,7 @@ HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
     response_timeout_ = properties.ResponseTimeout();
     base_headers_ = properties.BaseHeaders();
     tls_ = properties.Tls();
-    http_proxy_ = properties.HttpProxy();
+    proxy_ = properties.Proxy();
 }
 
 template <typename SDK>
@@ -116,18 +143,16 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Tls(
-    TlsBuilder<SDK> builder) {
+    TlsBuilder builder) {
     tls_ = std::move(builder);
     return *this;
 }
 
-static std::optional<std::string> HttpProxyFromEnv() {
-    if (char const* http_proxy = std::getenv("http_proxy")) {
-        if (strlen(http_proxy) > 0) {
-            return http_proxy;
-        }
-    }
-    return std::nullopt;
+template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Proxy(
+    ProxyBuilder builder) {
+    proxy_ = std::move(builder);
+    return *this;
 }
 
 template <typename SDK>
@@ -139,20 +164,17 @@ built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
             wrapper_name_ + "/" + wrapper_version_;
     }
 
-    std::optional<std::string> http_proxy;
-
-    if constexpr (std::is_same_v<SDK, ClientSDK>) {
-        http_proxy = http_proxy_.has_value() ? http_proxy_ : HttpProxyFromEnv();
-    }
-
     return {connect_timeout_,  read_timeout_,      write_timeout_,
             response_timeout_, std::move(headers), tls_.Build(),
-            http_proxy};
+            proxy_.Build()};
 }
 
-template class TlsBuilder<config::shared::ClientSDK>;
-template class TlsBuilder<config::shared::ServerSDK>;
+template class TlsBuilder<ClientSDK>;
+template class TlsBuilder<ServerSDK>;
 
-template class HttpPropertiesBuilder<config::shared::ClientSDK>;
-template class HttpPropertiesBuilder<config::shared::ServerSDK>;
+template class ProxyBuilder<ClientSDK>;
+template class ProxyBuilder<ServerSDK>;
+
+template class HttpPropertiesBuilder<ClientSDK>;
+template class HttpPropertiesBuilder<ServerSDK>;
 }  // namespace launchdarkly::config::shared::builders

@@ -24,6 +24,9 @@ typedef struct _LDPersistenceCustomBuilder* LDPersistenceCustomBuilder;
 typedef struct _LDClientHttpPropertiesTlsBuilder*
     LDClientHttpPropertiesTlsBuilder;
 
+typedef struct _LDClientHttpPropertiesProxyBuilder*
+    LDClientHttpPropertiesProxyBuilder;
+
 typedef void (*SetFn)(char const* storage_namespace,
                       char const* key,
                       char const* data,
@@ -420,6 +423,26 @@ LD_EXPORT(void)
 LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* key,
                                             char const* value);
+
+/**
+ * Creates a new proxy options builder for the HttpProperties builder.
+ *
+ * If not passed into the HttpProperties
+ * builder, must be manually freed with LDClientHttpPropertiesProxyBuilder_Free.
+ *
+ * @return New builder for proxy options.
+ */
+LD_EXPORT(LDClientHttpPropertiesProxyBuilder)
+LDClientHttpPropertiesProxyBuilder_New(void);
+
+/**
+ * Frees a proxy options builder. Do not call if the builder was consumed by
+ * the HttpProperties builder.
+ *
+ * @param b Builder to free.
+ */
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_Free(LDClientHttpPropertiesProxyBuilder b);
 
 /**
  * Specifies an HTTP proxy which the client should use to communicate

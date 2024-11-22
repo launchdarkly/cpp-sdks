@@ -121,8 +121,8 @@ HttpRequest::HttpRequest(std::string const& url,
         port_ = uri_components->port();
     }
 
-    if (properties_.HttpProxy()) {
-        auto const http_proxy = properties_.HttpProxy().value();
+    if (properties_.Proxy().HttpProxy()) {
+        auto const http_proxy = properties_.Proxy().HttpProxy().value();
         auto http_proxy_uri_components = boost::urls::parse_uri(http_proxy);
         if (!http_proxy_uri_components) {
             valid_ = false;
