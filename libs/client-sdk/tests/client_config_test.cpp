@@ -89,7 +89,15 @@ TEST(ClientConfigBindings, AllConfigs) {
         LDClientHttpPropertiesTlsBuilder_New();
     LDClientHttpPropertiesTlsBuilder_Free(tls_builder2);
 
-    LDClientConfigBuilder_Logging_Disable(builder);
+    LDClientHttpPropertiesProxyBuilder proxy_builder =
+        LDClientHttpPropertiesProxyBuilder_New();
+    LDClientHttpPropertiesProxyBuilder_HttpProxy(proxy_builder,
+                                                 "http://proxy:8080");
+    LDClientConfigBuilder_HttpProperties_Proxy(builder, proxy_builder);
+
+    LDClientHttpPropertiesProxyBuilder proxy_builder2 =
+        LDClientHttpPropertiesProxyBuilder_New();
+    LDClientHttpPropertiesProxyBuilder_Free(proxy_builder2);
 
     LDLoggingBasicBuilder log_builder = LDLoggingBasicBuilder_New();
     LDLoggingBasicBuilder_Level(log_builder, LD_LOG_WARN);
@@ -262,4 +270,29 @@ TEST(ClientConfigBindings, CustomLogger) {
     ASSERT_TRUE(args.write);
     ASSERT_EQ(args.write->level, LD_LOG_ERROR);
     ASSERT_EQ(args.write->msg, "hello");
+}
+
+TEST(ClientConfigBindings, ProxyOptions) {
+    using namespace launchdarkly;
+
+    LDClientConfigBuilder builder = LDClientConfigBuilder_New("sdk-123");
+
+    LDClientHttpPropertiesProxyBuilder proxy_builder =
+        LDClientHttpPropertiesProxyBuilder_New();
+
+    LDClientHttpPropertiesProxyBuilder_HttpProxy(proxy_builder,
+                                                 "http://proxy.com:8080");
+
+    LDClientConfigBuilder_HttpProperties_Proxy(builder, proxy_builder);
+
+    LDClientConfig config = nullptr;
+    LDStatus status = LDClientConfigBuilder_Build(builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    auto client_config = reinterpret_cast<client_side::Config*>(config);
+
+    ASSERT_EQ(client_config->HttpProperties().Proxy().HttpProxy(),
+              "http://proxy.com:8080");
+
+    LDClientConfig_Free(config);
 }
