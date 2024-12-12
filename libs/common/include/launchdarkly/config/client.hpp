@@ -23,6 +23,7 @@ using DataSourceBuilder = config::shared::builders::DataSourceBuilder<SDK>;
 using LoggingBuilder = config::shared::builders::LoggingBuilder;
 using PersistenceBuilder = config::shared::builders::PersistenceBuilder<SDK>;
 using TlsBuilder = config::shared::builders::TlsBuilder<SDK>;
+using ProxyBuilder = config::shared::builders::ProxyBuilder<SDK>;
 
 using Config = config::Config<SDK>;
 

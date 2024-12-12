@@ -47,6 +47,14 @@ class Builder {
     Builder(net::any_io_executor ioc, std::string url);
 
     /**
+     * Sets an HTTP proxy. Requests will be made to this proxy
+     * instead of the URL passed in the constructor.
+     * @param proxy The http proxy.
+     * @return Reference to this builder.
+     */
+    Builder& http_proxy(std::string proxy);
+
+    /**
      * Add a custom header to the initial request. The following headers
      * are added by default and can be overridden:
      *
@@ -163,6 +171,7 @@ class Builder {
 
    private:
     std::string url_;
+    std::optional<std::string> http_proxy_;
     net::any_io_executor executor_;
     http::request<http::string_body> request_;
     std::optional<std::chrono::milliseconds> read_timeout_;
