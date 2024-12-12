@@ -41,8 +41,7 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     if (in.proxy) {
         if (in.proxy->httpProxy) {
             config_builder.HttpProperties().Proxy(
-                HttpPropertiesBuilder::ProxyBuilder().HttpProxy(
-                    *in.proxy->httpProxy));
+                ProxyBuilder().HttpProxy(*in.proxy->httpProxy));
         }
     }
 

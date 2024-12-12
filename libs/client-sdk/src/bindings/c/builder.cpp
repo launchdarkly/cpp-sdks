@@ -41,14 +41,12 @@ using namespace launchdarkly::client_side;
 #define FROM_CUSTOM_PERSISTENCE_BUILDER(ptr) \
     (reinterpret_cast<LDPersistenceCustomBuilder>(ptr))
 
-#define TO_TLS_BUILDER(ptr) \
-    (reinterpret_cast<HttpPropertiesBuilder::TlsBuilder*>(ptr))
+#define TO_TLS_BUILDER(ptr) (reinterpret_cast<TlsBuilder*>(ptr))
 
 #define FROM_TLS_BUILDER(ptr) \
     (reinterpret_cast<LDClientHttpPropertiesTlsBuilder>(ptr))
 
-#define TO_PROXY_BUILDER(ptr) \
-    (reinterpret_cast<HttpPropertiesBuilder::ProxyBuilder*>(ptr))
+#define TO_PROXY_BUILDER(ptr) (reinterpret_cast<ProxyBuilder*>(ptr))
 
 #define FROM_PROXY_BUILDER(ptr) \
     (reinterpret_cast<LDClientHttpPropertiesProxyBuilder>(ptr))
@@ -320,7 +318,7 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
 
 LD_EXPORT(LDClientHttpPropertiesProxyBuilder)
 LDClientHttpPropertiesProxyBuilder_New(void) {
-    return FROM_PROXY_BUILDER(new HttpPropertiesBuilder::ProxyBuilder());
+    return FROM_PROXY_BUILDER(new ProxyBuilder());
 }
 
 LD_EXPORT(void)
@@ -383,7 +381,7 @@ LDClientHttpPropertiesTlsBuilder_CustomCAFile(
 
 LD_EXPORT(LDClientHttpPropertiesTlsBuilder)
 LDClientHttpPropertiesTlsBuilder_New(void) {
-    return FROM_TLS_BUILDER(new HttpPropertiesBuilder::TlsBuilder());
+    return FROM_TLS_BUILDER(new TlsBuilder());
 }
 
 LD_EXPORT(void)

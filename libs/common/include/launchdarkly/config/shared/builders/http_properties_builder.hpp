@@ -116,9 +116,6 @@ class ProxyBuilder {
 template <typename SDK>
 class HttpPropertiesBuilder {
    public:
-    using TlsBuilder = TlsBuilder<SDK>;
-    using ProxyBuilder = ProxyBuilder<SDK>;
-
     /**
      * Construct a new HttpPropertiesBuilder. The builder will use the default
      * properties based on the SDK type. Setting a property will override
@@ -222,14 +219,14 @@ class HttpPropertiesBuilder {
      * @param builder The TLS property builder.
      * @return A reference to this builder.
      */
-    HttpPropertiesBuilder& Tls(TlsBuilder builder);
+    HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
 
     /**
      *
      * @param builder Sets the builder for proxy properties.
      * @return A reference to this builder.
      */
-    HttpPropertiesBuilder& Proxy(ProxyBuilder builder);
+    HttpPropertiesBuilder& Proxy(ProxyBuilder<SDK> builder);
 
     [[nodiscard]] built::HttpProperties Build() const;
 
@@ -241,8 +238,8 @@ class HttpPropertiesBuilder {
     std::string wrapper_name_;
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
-    TlsBuilder tls_;
-    ProxyBuilder proxy_;
+    TlsBuilder<SDK> tls_;
+    ProxyBuilder<SDK> proxy_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

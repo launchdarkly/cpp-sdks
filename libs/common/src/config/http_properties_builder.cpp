@@ -143,14 +143,14 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Header(
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Tls(
-    TlsBuilder builder) {
+    TlsBuilder<SDK> builder) {
     tls_ = std::move(builder);
     return *this;
 }
 
 template <typename SDK>
 HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Proxy(
-    ProxyBuilder builder) {
+    ProxyBuilder<SDK> builder) {
     proxy_ = std::move(builder);
     return *this;
 }
