@@ -1,5 +1,5 @@
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
-#include <launchdarkly/serialization/json_value.hpp>
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 
 #include <boost/core/ignore_unused.hpp>
@@ -30,6 +30,11 @@ void tag_invoke(boost::json::value_from_tag const& unused,
         if (*date > 0) {
             obj.emplace("debugEventsUntilDate", boost::json::value_from(*date));
         }
+    }
+
+    if (auto const& prerequisites = state.Prerequisites();
+        !prerequisites.empty()) {
+        obj.emplace("prerequisites", boost::json::value_from(prerequisites));
     }
 }
 

@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 include(CMakeDependentOption)
 
 project(
-        LaunchDarklyCPPSDKs
+        launchdarkly
         VERSION 0.1
         DESCRIPTION "LaunchDarkly C++ SDK Monorepo (Server/Client)"
         LANGUAGES CXX C
@@ -21,11 +21,16 @@ if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif ()
 
-include(GNUInstallDirs)
-
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
+
+cmake_dependent_option(LD_BUILD_EXPORT_ALL_SYMBOLS
+        "Export all symbols when building shared libs. This is disabled by default because C++ ABI stability is not guaranteed. Use only if you have a specific requirement and understand the risks."
+        OFF
+        "LD_BUILD_SHARED_LIBS" # only relevant if building SDK as shared lib
+        OFF                    # otherwise, off.
+)
 
 cmake_dependent_option(LD_DYNAMIC_LINK_BOOST
         "Dynamically link boost instead of building with its static libraries"
@@ -58,6 +63,14 @@ cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         OFF                                         # otherwise, off
 )
 
+# Add an option for enabling the "CMake Integration Tests" (see cmake-tests README).
+# These tests require testing to be enabled (BUILD_TESTING), but aren't unit tests, so are disabled by default.
+cmake_dependent_option(LD_CMAKE_INTEGRATION_TESTS
+        "Test integration of SDK into other CMake projects" OFF # Default to disabling the cmake integration tests.
+        "BUILD_TESTING" # Only expose if testing is enabled.
+        OFF # otherwise, off.
+)
+
 # The general strategy is to produce a fat artifact containing all of our dependencies so users
 # only have a single thing to link. We should support this either being a static or shared library.
 # Because OpenSSL is a large, and security relevant dependency, we should have a separate option
@@ -84,6 +97,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(GNUInstallDirs)
+set(LD_TARGETS_EXPORT_NAME ${PROJECT_NAME}Targets)
+set(LD_CMAKE_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(LD_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/cmake/${PROJECT_NAME}")
+set(LD_CMAKE_PROJECT_CONFIG_FILE "${LD_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
+set(LD_CMAKE_VERSION_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+
+
 if (LD_BUILD_UNIT_TESTS)
     message(STATUS "LaunchDarkly: building unit tests")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_GLIBCXX_DEBUG")
@@ -100,6 +121,13 @@ if (LD_BUILD_UNIT_TESTS)
     include(${CMAKE_FILES}/googletest.cmake)
     enable_testing()
 endif ()
+
+if (LD_CMAKE_INTEGRATION_TESTS)
+    message(STATUS "LaunchDarkly: building CMake integration tests")
+    add_subdirectory(cmake-tests)
+    enable_testing()
+endif ()
+
 
 if (LD_DYNAMIC_LINK_OPENSSL)
     message(STATUS "LaunchDarkly: searching for shared OpenSSL library")
@@ -122,19 +150,24 @@ else ()
 endif ()
 
 if (LD_BUILD_SHARED_LIBS)
-    # When building a shared library we hide all symbols
-    # aside from this we have specifically exported for the C-API.
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+    if (LD_BUILD_EXPORT_ALL_SYMBOLS)
+        message(STATUS "LaunchDarkly: exposing all symbols in shared libraries")
+    else ()
+        message(STATUS "LaunchDarkly: hiding all symbols in shared libraries except for C API")
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+    endif ()
 endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+
 find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
-include(${CMAKE_FILES}/certify.cmake)
+set(FOXY_BUILD_TESTING OFF)
 add_subdirectory(vendor/foxy)
+
 
 # Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
@@ -160,3 +193,25 @@ if (LD_BUILD_EXAMPLES)
     message(STATUS "LaunchDarkly: building examples")
     add_subdirectory(examples)
 endif ()
+
+
+# Support installation of a cmake package.
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
+        COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+        ${LD_CMAKE_PROJECT_CONFIG_FILE}
+        ${LD_CMAKE_VERSION_CONFIG_FILE}
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
+)
+
+
+install(
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION ${LD_CONFIG_INSTALL_DIR}
+)

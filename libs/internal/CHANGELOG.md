@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.10.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.9.0...launchdarkly-cpp-internal-v0.10.0) (2024-11-08)
+
+
+### Features
+
+* expose prerequisite relations in AllFlags API ([#463](https://github.com/launchdarkly/cpp-sdks/issues/463)) ([56de5f5](https://github.com/launchdarkly/cpp-sdks/commit/56de5f5e8b1a9f44dab79544fc2954abb50b8b88))
+
+## [0.9.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.8.3...launchdarkly-cpp-internal-v0.9.0) (2024-10-30)
+
+
+### Features
+
+* add LDValue_SerializeJSON C binding ([90eb880](https://github.com/launchdarkly/cpp-sdks/commit/90eb880b7b769ba491c9da5734f5db7eda31f15e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 1.8.0 to 1.9.0
+
+## [0.8.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.8.2...launchdarkly-cpp-internal-v0.8.3) (2024-10-01)
+
+
+### Bug Fixes
+
+* improve handling of streaming error state changes/logging ([#439](https://github.com/launchdarkly/cpp-sdks/issues/439)) ([04e7e0e](https://github.com/launchdarkly/cpp-sdks/commit/04e7e0ef64b1933a63ad8d071a0a8f95ce666dc8))
+
+## [0.8.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.8.1...launchdarkly-cpp-internal-v0.8.2) (2024-09-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 1.7.0 to 1.8.0
+
 ## [0.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.8.0...launchdarkly-cpp-internal-v0.8.1) (2024-06-11)
 
 

@@ -22,12 +22,14 @@ template <>
 struct StreamingConfig<ServerSDK> {
     std::chrono::milliseconds initial_reconnect_delay;
     std::string streaming_path;
+    std::optional<std::string> filter_key;
 };
 
 inline bool operator==(StreamingConfig<ServerSDK> const& lhs,
                        StreamingConfig<ServerSDK> const& rhs) {
     return lhs.initial_reconnect_delay == rhs.initial_reconnect_delay &&
-           lhs.streaming_path == rhs.streaming_path;
+           lhs.streaming_path == rhs.streaming_path &&
+           lhs.filter_key == rhs.filter_key;
 }
 
 template <typename SDK>
@@ -46,6 +48,7 @@ struct PollingConfig<ServerSDK> {
     std::chrono::seconds poll_interval;
     std::string polling_get_path;
     std::chrono::seconds min_polling_interval;
+    std::optional<std::string> filter_key;
 };
 
 template <typename SDK>

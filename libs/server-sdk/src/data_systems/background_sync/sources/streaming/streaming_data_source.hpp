@@ -33,6 +33,8 @@ class StreamingDataSource final
     [[nodiscard]] std::string const& Identity() const override;
 
    private:
+    void HandleErrorStateChange(sse::Error error, std::string error_string);
+
     boost::asio::any_io_executor io_;
     Logger const& logger_;
 

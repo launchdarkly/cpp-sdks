@@ -18,6 +18,9 @@ namespace launchdarkly::internal::data_sources {
 template <typename TDataSourceStatus, typename TInterface>
 class DataSourceStatusManagerBase : public TInterface {
    public:
+    using StatusCodeType =
+        typename TDataSourceStatus::ErrorInfo::StatusCodeType;
+
     /**
      * Set the state.
      *
@@ -39,7 +42,7 @@ class DataSourceStatusManagerBase : public TInterface {
      * @param message The message to associate with the error.
      */
     void SetState(typename TDataSourceStatus::DataSourceState state,
-                  typename TDataSourceStatus::ErrorInfo::StatusCodeType code,
+                  StatusCodeType code,
                   std::string message) {
         {
             std::lock_guard lock(status_mutex_);

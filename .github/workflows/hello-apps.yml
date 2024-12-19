@@ -15,7 +15,7 @@ jobs:
   smoketest:
     strategy:
       matrix:
-        os: [ "ubuntu-22.04", "macos-12", "windows-2022" ]
+        os: [ "ubuntu-22.04", "macos-13", "windows-2022" ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -35,11 +35,17 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
-      - name: Dynamically Linked Hello Apps
+      - name: Dynamically Linked Hello Apps (C API only)
         shell: bash
         continue-on-error: true # TODO(SC-223804)
-        # Only the C bindings work with dynamic linking because C++ symbols are hidden
         run: ./scripts/run-hello-apps.sh dynamic hello-c-client hello-c-server
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+      - name: Dynamically Linked Hello Apps (C and C++ APIs)
+        shell: bash
+        continue-on-error: true # TODO(SC-223804)
+        run: ./scripts/run-hello-apps.sh dynamic-export-all-symbols hello-c-client hello-cpp-client hello-c-server hello-cpp-server
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}

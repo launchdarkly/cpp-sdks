@@ -30,6 +30,8 @@ target_sources(${LIBNAME}
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
         integrations/data_reader/kinds.cpp
+        prereq_event_recorder/prereq_event_recorder.cpp
+        prereq_event_recorder/prereq_event_recorder.hpp
         data_components/change_notifier/change_notifier.hpp
         data_components/change_notifier/change_notifier.cpp
         data_components/dependency_tracker/dependency_tracker.hpp
@@ -42,6 +44,8 @@ target_sources(${LIBNAME}
         data_components/serialization_adapters/json_deserializer.cpp
         data_components/serialization_adapters/json_destination.hpp
         data_components/serialization_adapters/json_destination.cpp
+        data_systems/background_sync/detail/payload_filter_validation/payload_filter_validation.hpp
+        data_systems/background_sync/detail/payload_filter_validation/payload_filter_validation.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
@@ -78,20 +82,27 @@ target_link_libraries(${LIBNAME}
 
 add_library(launchdarkly::server ALIAS ${LIBNAME})
 
-# Optional in case only the client SDK is being built.
-install(TARGETS ${LIBNAME} OPTIONAL)
 if (LD_BUILD_SHARED_LIBS AND MSVC)
-    install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION bin OPTIONAL)
+    install(FILES $<TARGET_PDB_FILE:${LIBNAME}> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
 endif ()
+
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
-
 install(DIRECTORY "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly"
-        DESTINATION "include"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # Need the public headers to build.
-target_include_directories(${LIBNAME} PUBLIC ../include)
+target_include_directories(${LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<INSTALL_INTERFACE:include>
+)
 
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+
+install(
+        TARGETS ${LIBNAME} OPTIONAL
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+)

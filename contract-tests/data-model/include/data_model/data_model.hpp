@@ -6,7 +6,6 @@
 #include "nlohmann/json.hpp"
 
 namespace nlohmann {
-
 template <typename T>
 struct adl_serializer<std::optional<T>> {
     static void to_json(json& j, std::optional<T> const& opt) {
@@ -41,18 +40,24 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTLSParams,
 struct ConfigStreamingParams {
     std::optional<std::string> baseUri;
     std::optional<uint32_t> initialRetryDelayMs;
+    std::optional<std::string> filter;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigStreamingParams,
                                                 baseUri,
-                                                initialRetryDelayMs);
+                                                initialRetryDelayMs,
+                                                filter);
 
 struct ConfigPollingParams {
     std::optional<std::string> baseUri;
     std::optional<uint32_t> pollIntervalMs;
+    std::optional<std::string> filter;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPollingParams,
                                                 baseUri,
-                                                pollIntervalMs);
+                                                pollIntervalMs,
+                                                filter);
 
 struct ConfigEventParams {
     std::optional<std::string> baseUri;
@@ -62,6 +67,7 @@ struct ConfigEventParams {
     std::vector<std::string> globalPrivateAttributes;
     std::optional<int> flushIntervalMs;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigEventParams,
                                                 baseUri,
                                                 capacity,
@@ -69,11 +75,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigEventParams,
                                                 allAttributesPrivate,
                                                 globalPrivateAttributes,
                                                 flushIntervalMs);
+
 struct ConfigServiceEndpointsParams {
     std::optional<std::string> streaming;
     std::optional<std::string> polling;
     std::optional<std::string> events;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigServiceEndpointsParams,
                                                 streaming,
                                                 polling,
@@ -84,6 +92,7 @@ struct ConfigClientSideParams {
     std::optional<bool> evaluationReasons;
     std::optional<bool> useReport;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigClientSideParams,
                                                 initialContext,
                                                 evaluationReasons,
@@ -93,6 +102,7 @@ struct ConfigTags {
     std::optional<std::string> applicationId;
     std::optional<std::string> applicationVersion;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTags,
                                                 applicationId,
                                                 applicationVersion);
@@ -109,6 +119,7 @@ struct ConfigParams {
     std::optional<ConfigTags> tags;
     std::optional<ConfigTLSParams> tls;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 credential,
                                                 startWaitTimeMs,
@@ -141,6 +152,7 @@ inline void to_json(nlohmann::json& nlohmann_json_j,
     nlohmann_json_j["private"] = nlohmann_json_t._private;
     nlohmann_json_j["custom"] = nlohmann_json_t.custom;
 }
+
 inline void from_json(nlohmann::json const& nlohmann_json_j,
                       ContextSingleParams& nlohmann_json_t) {
     ContextSingleParams nlohmann_json_default_obj;
@@ -184,11 +196,13 @@ struct CreateInstanceParams {
     ConfigParams configuration;
     std::string tag;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CreateInstanceParams,
                                                 configuration,
                                                 tag);
 
 enum class ValueType { Bool = 1, Int, Double, String, Any, Unspecified };
+
 NLOHMANN_JSON_SERIALIZE_ENUM(ValueType,
                              {{ValueType::Bool, "bool"},
                               {ValueType::Int, "int"},
@@ -205,6 +219,7 @@ struct EvaluateFlagParams {
     bool detail;
     EvaluateFlagParams();
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagParams,
                                                 flagKey,
                                                 context,
@@ -217,6 +232,7 @@ struct EvaluateFlagResponse {
     std::optional<uint32_t> variationIndex;
     std::optional<nlohmann::json> reason;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateFlagResponse,
                                                 value,
                                                 variationIndex,
@@ -228,14 +244,17 @@ struct EvaluateAllFlagParams {
     std::optional<bool> clientSideOnly;
     std::optional<bool> detailsOnlyForTrackedFlags;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagParams,
                                                 context,
                                                 withReasons,
                                                 clientSideOnly,
                                                 detailsOnlyForTrackedFlags);
+
 struct EvaluateAllFlagsResponse {
     nlohmann::json state;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(EvaluateAllFlagsResponse,
                                                 state);
 
@@ -246,6 +265,7 @@ struct CustomEventParams {
     std::optional<bool> omitNullData;
     std::optional<double> metricValue;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CustomEventParams,
                                                 eventKey,
                                                 context,
@@ -256,6 +276,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CustomEventParams,
 struct IdentifyEventParams {
     nlohmann::json context;
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(IdentifyEventParams, context);
 
 enum class Command {
@@ -268,6 +289,7 @@ enum class Command {
     ContextBuild,
     ContextConvert
 };
+
 NLOHMANN_JSON_SERIALIZE_ENUM(Command,
                              {{Command::Unknown, nullptr},
                               {Command::EvaluateFlag, "evaluate"},
@@ -288,6 +310,7 @@ struct CommandParams {
     std::optional<ContextConvertParams> contextConvert;
     CommandParams();
 };
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(CommandParams,
                                                 command,
                                                 evaluate,

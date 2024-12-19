@@ -14,6 +14,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/logging/*.hpp"
         "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/*.hpp"
+        "${LaunchDarklyCommonSdk_SOURCE_DIR}/include/launchdarkly/data_sources/persistence/*.hpp"
 )
 
 # Automatic library: static or dynamic based on user config.
@@ -53,6 +54,8 @@ add_library(${LIBNAME} OBJECT
         bindings/c/memory_routines.cpp
         bindings/c/data_source/error_info.cpp
         bindings/c/logging/log_level.cpp
+        serialization/json_errors.cpp
+        serialization/json_value.cpp
         log_level.cpp
         config/persistence_builder.cpp
         config/logging_builder.cpp
@@ -61,8 +64,6 @@ add_library(${LIBNAME} OBJECT
 )
 
 add_library(launchdarkly::common ALIAS ${LIBNAME})
-
-install(TARGETS ${LIBNAME})
 
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
@@ -81,8 +82,16 @@ target_link_libraries(${LIBNAME}
         OpenSSL::SSL
         Boost::disable_autolinking)
 
-# Need the public headers to build.
-target_include_directories(${LIBNAME} PUBLIC ../include)
+target_include_directories(${LIBNAME}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+        $<INSTALL_INTERFACE:include>
+)
 
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
+
+install(
+        TARGETS ${LIBNAME}
+        EXPORT ${LD_TARGETS_EXPORT_NAME}
+)

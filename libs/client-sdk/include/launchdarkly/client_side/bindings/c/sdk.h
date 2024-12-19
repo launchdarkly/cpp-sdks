@@ -4,7 +4,7 @@
 // NOLINTBEGIN modernize-use-using
 #pragma once
 
-#include <launchdarkly/client_side/bindings/c/config/config.h>
+#include <launchdarkly/client_side/bindings/c/config/builder.h>
 
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
@@ -31,6 +31,7 @@ typedef struct _LDClientSDK* LDClientSDK;
 /**
  * Constructs a new client-side LaunchDarkly SDK from a configuration and
  * context.
+ *
  * @param config The configuration. Ownership is transferred. Do not free or
  * access the LDClientConfig in any way after this call; behavior is undefined.
  * Must not be NULL.
@@ -501,8 +502,22 @@ enum LDDataSourceStatus_State {
      * SDK key will never become valid), or because the SDK client was
      * explicitly shut down.
      */
-    LD_DATASOURCESTATUS_STATE_SHUTDOWN = 4
+    LD_DATASOURCESTATUS_STATE_SHUTDOWN = 4,
+
+    LD_DATASOURCESTATUS_STATE_UNUSED_MAXVALUE =
+        INT32_MAX /* Used to ensure the underlying type is
+                   * at least 32 bits. */
 };
+
+/**
+ * @param state The state to convert to a string.
+ * @param default_if_unknown The default string to return if the state is not
+ * recognized.
+ * @return Returns the name of the given LDDataSourceStatus_State.
+ */
+LD_EXPORT(char const*)
+LDDataSourceStatus_State_Name(enum LDDataSourceStatus_State state,
+                              char const* default_if_unknown);
 
 /**
  * Get an enumerated value representing the overall current state of the data

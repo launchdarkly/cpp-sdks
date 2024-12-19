@@ -24,7 +24,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDServerSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.5.3");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.8.0");  // {x-release-please-version}
 
     LDServerSDK_Free(sdk);
 }
@@ -294,6 +294,42 @@ TEST(ClientBindings, TlsConfigurationSystemCAFile) {
     LDServerHttpPropertiesTlsBuilder_CustomCAFile(tls, "");
 
     LDServerConfigBuilder_HttpProperties_Tls(cfg_builder, tls);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, StreamingPayloadFilters) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourceStreamBuilder stream_builder =
+        LDServerDataSourceStreamBuilder_New();
+
+    LDServerDataSourceStreamBuilder_Filter(stream_builder, "foo");
+
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(cfg_builder,
+                                                              stream_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, PollingPayloadFilters) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourcePollBuilder poll_builder =
+        LDServerDataSourcePollBuilder_New();
+
+    LDServerDataSourcePollBuilder_Filter(poll_builder, "foo");
+
+    LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(cfg_builder,
+                                                            poll_builder);
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
