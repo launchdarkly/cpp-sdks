@@ -140,7 +140,7 @@ class FoxyClient : public Client,
 
         create_session();
         create_parser();
-        backoff_timer_.expires_from_now(backoff_.delay());
+        backoff_timer_.expires_after(backoff_.delay());
         backoff_timer_.async_wait(beast::bind_front_handler(
             &FoxyClient::on_backoff, shared_from_this()));
     }

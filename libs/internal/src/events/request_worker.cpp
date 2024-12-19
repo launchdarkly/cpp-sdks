@@ -109,7 +109,7 @@ void RequestWorker::OnDeliveryAttempt(network::HttpResult const& result,
                     << tag_ << "error posting " << batch_->Count()
                     << " event(s) (will retry): HTTP error " << result.Status();
             }
-            timer_.expires_from_now(retry_delay_);
+            timer_.expires_after(retry_delay_);
             timer_.async_wait([this, callback](boost::system::error_code ec) {
                 if (ec) {
                     return;

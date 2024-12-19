@@ -168,7 +168,7 @@ void AsioEventProcessor<SDK>::ScheduleFlush() {
     LD_LOG(logger_, LogLevel::kDebug) << "event-processor: scheduling flush in "
                                       << flush_interval_.count() << "ms";
 
-    timer_.expires_from_now(flush_interval_);
+    timer_.expires_after(flush_interval_);
     timer_.async_wait([this](boost::system::error_code ec) {
         if (ec) {
             LD_LOG(logger_, LogLevel::kDebug)
