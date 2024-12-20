@@ -37,13 +37,13 @@ void EventOutbox::do_shutdown(beast::error_code ec) {
 void EventOutbox::post_event(launchdarkly::sse::Event event) {
     auto http_request = build_request(callback_counter_++, std::move(event));
     outbox_.push(http_request);
-    flush_timer_.expires_after(boost::posix_time::milliseconds(0));
+    flush_timer_.expired_from_now(boost::posix_time::milliseconds(0));
 }
 
 void EventOutbox::post_error(launchdarkly::sse::Error error) {
     auto http_request = build_request(callback_counter_++, error);
     outbox_.push(http_request);
-    flush_timer_.expires_after(boost::posix_time::milliseconds(0));
+    flush_timer_.expired_from_now(boost::posix_time::milliseconds(0));
 }
 
 void EventOutbox::run() {
@@ -133,7 +133,7 @@ void EventOutbox::on_flush_timer(boost::system::error_code ec) {
     }
 
     // If the outbox is empty, wait a bit before trying again.
-    flush_timer_.expires_after(kFlushInterval);
+    flush_timer_.expired_from_now(kFlushInterval);
     flush_timer_.async_wait(beast::bind_front_handler(
         &EventOutbox::on_flush_timer, shared_from_this()));
 }
