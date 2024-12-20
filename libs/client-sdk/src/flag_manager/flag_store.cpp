@@ -1,5 +1,3 @@
-#include <boost/json/system_error.hpp>
-
 #include "flag_store.hpp"
 
 #include <launchdarkly/encoding/sha_256.hpp>
