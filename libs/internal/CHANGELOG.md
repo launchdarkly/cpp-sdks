@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.10.0...launchdarkly-cpp-internal-v0.10.1) (2025-01-28)
+
+
+### Bug Fixes
+
+* Remove type alias import for JSON system_error that was removed in boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Remove vendored boost file to compile with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Update usage of the steady_timer to be compatible with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+
 ## [0.10.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.9.0...launchdarkly-cpp-internal-v0.10.0) (2024-11-08)
 
 

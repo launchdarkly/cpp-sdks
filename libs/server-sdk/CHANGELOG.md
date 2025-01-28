@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.8.0...launchdarkly-cpp-server-v3.8.1) (2025-01-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.10.0 to 0.10.1
+    * launchdarkly-cpp-sse-client bumped from 0.5.4 to 0.5.5
+
 ## [3.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.7.0...launchdarkly-cpp-server-v3.8.0) (2024-11-08)
 
 
