@@ -95,6 +95,7 @@ void FlagUpdater::Upsert(Context const& context,
         return;
     }
 
+    flag_store_.Upsert(key, descriptor);
     if (HasListeners()) {
         // Existed and updated.
         if (existing && descriptor.item) {
@@ -112,7 +113,6 @@ void FlagUpdater::Upsert(Context const& context,
             // Do nothing.
         }
     }
-    flag_store_.Upsert(key, descriptor);
 }
 
 bool FlagUpdater::HasListeners() const {
