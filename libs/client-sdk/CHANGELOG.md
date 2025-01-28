@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.8.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.8.1...launchdarkly-cpp-client-v3.8.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* Change notification consistency. ([#473](https://github.com/launchdarkly/cpp-sdks/issues/473)) ([45fd755](https://github.com/launchdarkly/cpp-sdks/commit/45fd755171aeadd0055a474aa4975f92c15d56fd))
+* Remove type alias import for JSON system_error that was removed in boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Remove vendored boost file to compile with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Update usage of the steady_timer to be compatible with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.10.0 to 0.10.1
+    * launchdarkly-cpp-sse-client bumped from 0.5.4 to 0.5.5
+
 ## [3.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.8.0...launchdarkly-cpp-client-v3.8.1) (2024-11-08)
 
 
