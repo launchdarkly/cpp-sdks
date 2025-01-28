@@ -1,0 +1,18 @@
+<map id="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/status.h" name="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/status.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="273,5,493,75"/>
+<area shape="rect" id="Node000002" href="$logging__builder_8h.html" title=" " alt="" coords="61,240,281,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,66,171,92,136,107,115,124,108,137,105,151,110,182,124,211,143,238,138,241,119,214,104,183,100,151,103,136,111,121,133,103,169,87,259,61"/>
+<area shape="rect" id="Node000004" href="$server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h.html" title=" " alt="" coords="237,365,397,419"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="379,89,361,192,325,365,320,364,355,192,373,88"/>
+<area shape="rect" id="Node000005" href="$sdk_8h.html" title="LaunchDarkly Server&#45;side C Bindings." alt="" coords="295,475,455,529"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="397,87,410,154,420,239,422,333,419,381,411,427,393,475,388,474,406,426,413,380,417,333,415,240,404,155,392,88"/>
+<area shape="rect" id="Node000006" href="$log__level_8h.html" title=" " alt="" coords="125,123,345,192"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="331,85,280,124,277,120,328,81"/>
+<area shape="rect" id="Node000007" href="$c__binding__helpers_8hpp_source.html" title=" " alt="" coords="472,123,679,192"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="453,80,520,120,518,125,450,84"/>
+<area shape="rect" id="Node000003" href="$log__backend__wrapper_8hpp_source.html" title=" " alt="" coords="5,357,212,427"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="149,323,129,358,125,356,144,320"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="226,316,285,363,282,367,223,320"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="340,431,363,473,359,476,335,433"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="212,206,192,241,188,238,207,203"/>
+</map>

@@ -1,0 +1,217 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Lazy\+Load Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+
+
+{\ttfamily \#include $<$lazy\+\_\+load\+\_\+system.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Lazy\+Load\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Lazy\+Load\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_1_1Kinds}{Kinds}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a578b6eab9b79f79cb40ba7ff9f252a26}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a578b6eab9b79f79cb40ba7ff9f252a26} 
+using {\bfseries Clock\+Type} = std\+::chrono\+::steady\+\_\+clock
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a0b4a78a528aa34f2170fe4cff32c61f5}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a0b4a78a528aa34f2170fe4cff32c61f5} 
+using {\bfseries Time\+Fn} = std\+::function$<$ std\+::chrono\+::time\+\_\+point$<$ Clock\+Type $>$()$>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a1558430b04dd9e033388c6a00cdebcb5}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a1558430b04dd9e033388c6a00cdebcb5} 
+{\bfseries Lazy\+Load} (Logger const \&logger, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{config\+::built\+::\+Lazy\+Load\+Config}} cfg, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\+\_\+components\+::\+Data\+Source\+Status\+Manager}} \&status\+\_\+manager)
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a85073d0d11cd213ed5f1278ee6399c11}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a85073d0d11cd213ed5f1278ee6399c11} 
+{\bfseries Lazy\+Load} (Logger const \&logger, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{config\+::built\+::\+Lazy\+Load\+Config}} cfg, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\+\_\+components\+::\+Data\+Source\+Status\+Manager}} \&status\+\_\+manager, Time\+Fn time)
+\item 
+std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9}{Identity}} () const override
+\item 
+std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a71a29e55b52949a599b1d617184444c1}{Get\+Flag}} (std\+::string const \&key) const override
+\begin{DoxyCompactList}\small\item\em Get the flag named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_af1e6faf51c6ea060f8eb921e6c05c1f2}{Get\+Segment}} (std\+::string const \&key) const override
+\begin{DoxyCompactList}\small\item\em Get the segment named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a8de6ec861d34d2a989eb84329ca0acf6}{All\+Flags}} () const override
+\begin{DoxyCompactList}\small\item\em Get a map of all flags. \end{DoxyCompactList}\item 
+std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a12b3360ab4b0590aae888250662a65c7}{All\+Segments}} () const override
+\begin{DoxyCompactList}\small\item\em Get a map of all segments. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_ae43d4d07da6807ce78660b5bb88a2ddf}{Initialize}} () override
+\begin{DoxyCompactList}\small\item\em Initializes the system. This method will be called before any of the IStore methods are called. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_adce11937d1ee628ebdee3ffd13ff82f0}{Initialized}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+System}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IData\+System} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} const \&item)=delete
+\item 
+{\bfseries IData\+System} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \&\&)=delete
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IStore} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} const \&item)=delete
+\item 
+{\bfseries IStore} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{Lazy\+Load} implements a Data System that pulls data from a persistent store on-\/demand. It is intended for use cases where holding an entire environment in memory isn\textquotesingle{}t desired, or for uses that disallow direct communication with Launch\+Darkly servers.
+
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{Lazy\+Load} is able to remain efficient because it caches responses from the store. Over time, data becomes stale causing the system to refresh data. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a8de6ec861d34d2a989eb84329ca0acf6}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a8de6ec861d34d2a989eb84329ca0acf6} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!AllFlags@{AllFlags}}
+\index{AllFlags@{AllFlags}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{AllFlags()}{AllFlags()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+All\+Flags (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get a map of all flags. 
+
+\begin{DoxyReturn}{Returns}
+Map of shared pointers to flags. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aab3ad143afd8d3bfbf103e4c22f5c315}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a12b3360ab4b0590aae888250662a65c7}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a12b3360ab4b0590aae888250662a65c7} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!AllSegments@{AllSegments}}
+\index{AllSegments@{AllSegments}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{AllSegments()}{AllSegments()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+All\+Segments (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get a map of all segments. 
+
+\begin{DoxyReturn}{Returns}
+Map of shared pointers to segments. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a5707e17162ae05227f09c567f142dc22}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a71a29e55b52949a599b1d617184444c1}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a71a29e55b52949a599b1d617184444c1} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!GetFlag@{GetFlag}}
+\index{GetFlag@{GetFlag}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{GetFlag()}{GetFlag()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+Get\+Flag (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get the flag named by key. Returns nullptr if no such flag exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Shared pointer to the flag. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a790063d9f03072942e3bb35871540b89}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_af1e6faf51c6ea060f8eb921e6c05c1f2}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_af1e6faf51c6ea060f8eb921e6c05c1f2} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!GetSegment@{GetSegment}}
+\index{GetSegment@{GetSegment}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{GetSegment()}{GetSegment()}}
+{\footnotesize\ttfamily std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+Get\+Segment (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Get the segment named by key. Returns nullptr if no such flag exists. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of the segment. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Shared pointer to the segment. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_ae6178b4579573fd078b79026ebe27402}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the system. Used in logs. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aeef92ebb488f9c80a56e105b6d9afbd9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+System}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_ae43d4d07da6807ce78660b5bb88a2ddf}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_ae43d4d07da6807ce78660b5bb88a2ddf} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+Initialize (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Initializes the system. This method will be called before any of the IStore methods are called. 
+
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aad81fd69209cf2d62a12e8563bbaa2a0}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+System}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_adce11937d1ee628ebdee3ffd13ff82f0}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_adce11937d1ee628ebdee3ffd13ff82f0} 
+\index{launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}!Initialized@{Initialized}}
+\index{Initialized@{Initialized}!launchdarkly::server\_side::data\_systems::LazyLoad@{launchdarkly::server\_side::data\_systems::LazyLoad}}
+\doxysubsubsection{\texorpdfstring{Initialized()}{Initialized()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load\+::\+Initialized (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+True if the store has ever contained data. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aed68d9e37af193c2bb71629ea08c09ad}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/lazy\+\_\+load/lazy\+\_\+load\+\_\+system.\+hpp\item 
+src/data\+\_\+systems/lazy\+\_\+load/lazy\+\_\+load\+\_\+system.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,32 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::Event\+Factory Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory}{}\label{classlaunchdarkly_1_1server__side_1_1EventFactory}\index{launchdarkly::server\_side::EventFactory@{launchdarkly::server\_side::EventFactory}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_ab444201b397393e24504e34786f71edd}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_ab444201b397393e24504e34786f71edd} 
+events\+::\+Input\+Event {\bfseries Unknown\+Flag} (std\+::string const \&key, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&ctx, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ detail, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} default\+\_\+val) const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_aff5af3ab1b4f0e8da9d5fe4983fe0d05}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_aff5af3ab1b4f0e8da9d5fe4983fe0d05} 
+events\+::\+Input\+Event {\bfseries Eval} (std\+::string const \&key, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&ctx, std\+::optional$<$ data\+\_\+model\+::\+Flag $>$ const \&flag, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ detail, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} default\+\_\+value, std\+::optional$<$ std\+::string $>$ prereq\+\_\+of) const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_a7e8900f48080b3d3974170ffa21cebff}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_a7e8900f48080b3d3974170ffa21cebff} 
+events\+::\+Input\+Event {\bfseries Identify} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} ctx) const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_ac2282d1e7b9fde297518513a094e377b}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_ac2282d1e7b9fde297518513a094e377b} 
+events\+::\+Input\+Event {\bfseries Custom} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&ctx, std\+::string event\+\_\+name, std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ data, std\+::optional$<$ double $>$ metric\+\_\+value) const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_a4f546bb44f454bf3cb058945a9bff61e}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_a4f546bb44f454bf3cb058945a9bff61e} 
+static \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventFactory}{Event\+Factory}} {\bfseries With\+Reasons} ()
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1EventFactory_ae3daae0d4a2679986ea4b05fe1897f8a}\label{classlaunchdarkly_1_1server__side_1_1EventFactory_ae3daae0d4a2679986ea4b05fe1897f8a} 
+static \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventFactory}{Event\+Factory}} {\bfseries Without\+Reasons} ()
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/events/event\+\_\+factory.\+hpp\item 
+src/events/event\+\_\+factory.\+cpp\end{DoxyCompactItemize}

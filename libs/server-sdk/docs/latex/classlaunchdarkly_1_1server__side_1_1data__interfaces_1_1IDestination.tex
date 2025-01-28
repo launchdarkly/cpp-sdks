@@ -1,0 +1,129 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IDestination Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}\index{launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}}
+
+
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination} represents a sink for data received by the SDK. A destination may be a database, local file, etc.  
+
+
+
+
+{\ttfamily \#include $<$idestination.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IDestination\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88}{Init}} (data\+\_\+model\+::\+SDKData\+Set data\+\_\+set)=0
+\begin{DoxyCompactList}\small\item\em Initialize the destination with a base set of data. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Flag\+Descriptor flag)=0
+\begin{DoxyCompactList}\small\item\em Upsert a flag named by key. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Segment\+Descriptor segment)=0
+\begin{DoxyCompactList}\small\item\em Upsert a segment named by key. \end{DoxyCompactList}\item 
+virtual std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a402588f99129123bb00670a187d5e2f8}{Identity}} () const =0
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a6c5d6db01050e4384f9d62ea8b4fc452}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a6c5d6db01050e4384f9d62ea8b4fc452} 
+{\bfseries IDestination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} const \&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a9e64f63e26fa323243b5813e741dbb30}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a9e64f63e26fa323243b5813e741dbb30} 
+{\bfseries IDestination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \&\&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_aeaea05d261d5bbcc1d27c8951a05f608}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_aeaea05d261d5bbcc1d27c8951a05f608} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} const \&)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a37623287490fe894eccd5884671ef88f}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a37623287490fe894eccd5884671ef88f} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination} represents a sink for data received by the SDK. A destination may be a database, local file, etc. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a402588f99129123bb00670a187d5e2f8}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a402588f99129123bb00670a187d5e2f8} 
+\index{launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the destination. Used in logs. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_ac4277b8c5eadd6c85b640d9278ff417e}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Change\+Notifier}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_ac98cd14669de05b2cf5954dccc970d03}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a571542a817c0ca734ee8c448c70cc398}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88} 
+\index{launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}!Init@{Init}}
+\index{Init@{Init}!launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}}
+\doxysubsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination\+::\+Init (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+SDKData\+Set}]{data\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Initialize the destination with a base set of data. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data\+\_\+set} & The initial data received by the SDK. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_afb60521a379bd0a59dc243f95be924f8}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Change\+Notifier}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a66e2b7b5c77385f924fd1f3fe86b0e2d}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_a4b5c07f59e1556339e5b0d133d5fa74a}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18} 
+\index{launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Flag\+Descriptor}]{flag }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Upsert a flag named by key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Flag key. \\
+\hline
+{\em flag} & Flag descriptor. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_aa04140880d8722055d702215a521453d}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Change\+Notifier}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a} 
+\index{launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_interfaces::IDestination@{launchdarkly::server\_side::data\_interfaces::IDestination}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Segment\+Descriptor}]{segment }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Upsert a segment named by key. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Segment key. \\
+\hline
+{\em segment} & Segment descriptor. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_ad587c2d9ca231d20199c751f9b32f421}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Change\+Notifier}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aea5358add90bd2e0e7d97bef101d3b47}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Memory\+Store}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a238d8bdc87cd54676a1d2216e9079f1b}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/destination/idestination.\+hpp\end{DoxyCompactItemize}

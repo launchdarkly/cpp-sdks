@@ -1,0 +1,70 @@
+\doxysection{logging\+\_\+builder.\+h}
+\hypertarget{logging__builder_8h_source}{}\label{logging__builder_8h_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/config/logging\_builder.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/config/logging\_builder.h}}
+\mbox{\hyperlink{logging__builder_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{log__level_8h}{launchdarkly/bindings/c/logging/log\_level.h}}>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{status_8h}{launchdarkly/bindings/c/status.h}}>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00015\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDLoggingBasicBuilder*\ LDLoggingBasicBuilder;}
+\DoxyCodeLine{00020\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDLoggingCustomBuilder*\ LDLoggingCustomBuilder;}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{typedef}\ bool\ (*EnabledFn)(\textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ level,\ \textcolor{keywordtype}{void}*\ user\_data);}
+\DoxyCodeLine{00023\ \textcolor{keyword}{typedef}\ void\ (*WriteFn)(\textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ level,}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ msg,}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ user\_data);}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00030\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structLDLogBackend}{LDLogBackend}}\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ EnabledFn\ \mbox{\hyperlink{structLDLogBackend_af8e2fb0e3bedaeff0e3b503bb00bfe68}{Enabled}};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00044\ \ \ \ \ WriteFn\ \mbox{\hyperlink{structLDLogBackend_ae721caa42925f7e3c7271f40f2a352d1}{Write}};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}*\ \mbox{\hyperlink{structLDLogBackend_a1e1e4409e3b0a7272304261309bff6b8}{UserData}};}
+\DoxyCodeLine{00050\ \};}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00057\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00058\ \mbox{\hyperlink{logging__builder_8h_aca8d7b5e03679f923c4a9e0cd40584f9}{LDLogBackend\_Init}}(struct\ \mbox{\hyperlink{structLDLogBackend}{LDLogBackend}}*\ backend);}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00067\ LD\_EXPORT(LDLoggingBasicBuilder)}
+\DoxyCodeLine{00068\ \mbox{\hyperlink{logging__builder_8h_a7b51bd679ab03d80f049cd0d2636e30f}{LDLoggingBasicBuilder\_New}}();}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00075\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00076\ \mbox{\hyperlink{logging__builder_8h_a2ff7aae81a65d2142f0825d881299901}{LDLoggingBasicBuilder\_Free}}(LDLoggingBasicBuilder\ b);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00083\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00084\ \mbox{\hyperlink{logging__builder_8h_a26b3debce158ab6b21d7292b66d214aa}{LDLoggingBasicBuilder\_Level}}(LDLoggingBasicBuilder\ b,\ enum\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ level);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00095\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00096\ \mbox{\hyperlink{logging__builder_8h_a1ff196017fe8279f4d399455b93693fe}{LDLoggingBasicBuilder\_Tag}}(LDLoggingBasicBuilder\ b,\ \textcolor{keywordtype}{char}\ const*\ tag);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00105\ LD\_EXPORT(LDLoggingCustomBuilder)}
+\DoxyCodeLine{00106\ \mbox{\hyperlink{logging__builder_8h_ae9bf175f4ce0d45b8844f7f36367ef67}{LDLoggingCustomBuilder\_New}}();}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00113\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00114\ \mbox{\hyperlink{logging__builder_8h_a2d71106c48e0b7b0d6cca40119fa7df4}{LDLoggingCustomBuilder\_Free}}(LDLoggingCustomBuilder\ b);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00122\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00123\ \mbox{\hyperlink{logging__builder_8h_adf21308a3bd3494564f42102bd6a81ee}{LDLoggingCustomBuilder\_Backend}}(LDLoggingCustomBuilder\ b,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ struct\ \mbox{\hyperlink{structLDLogBackend}{LDLogBackend}}\ backend);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00127\ \}}
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

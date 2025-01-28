@@ -1,0 +1,86 @@
+\doxysection{expiration\+\_\+tracker.\+hpp}
+\hypertarget{expiration__tracker_8hpp_source}{}\label{expiration__tracker_8hpp_source}\index{src/data\_components/expiration\_tracker/expiration\_tracker.hpp@{src/data\_components/expiration\_tracker/expiration\_tracker.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../dependency\_tracker/data\_kind.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../dependency\_tracker/tagged\_data.hpp"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <array>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_components\ \{}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker}{ExpirationTracker}}\ \{}
+\DoxyCodeLine{00017\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keyword}{using\ }TimePoint\ =\ std::chrono::time\_point<std::chrono::steady\_clock>;}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{TrackState}}\ \{}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa7f09073342255cf27ab166f375b9915}{kFresh}},}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9a322cf4f0f13c381710407d820cf569f1}{kStale}},}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa5b0f2b48fc50446ec6b24bd7be8bef9}{kNotTracked}}}
+\DoxyCodeLine{00036\ \ \ \ \ \};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}}(std::string\ \textcolor{keyword}{const}\&\ key,\ TimePoint\ expiration);}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a1efd05a50c667724dff8f161444d7adf}{Remove}}(std::string\ \textcolor{keyword}{const}\&\ key);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{TrackState}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b}{State}}(std::string\ \textcolor{keyword}{const}\&\ key,\ TimePoint\ current\_time)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}}(DataKind\ kind,\ std::string\ \textcolor{keyword}{const}\&\ key,\ TimePoint\ expiration);}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a1efd05a50c667724dff8f161444d7adf}{Remove}}(DataKind\ kind,\ std::string\ \textcolor{keyword}{const}\&\ key);}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00087\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{TrackState}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b}{State}}(DataKind\ kind,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TimePoint\ current\_time)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ad59c1d83ab4900ad09b19eb6a1454bd8}{Clear}}();}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00102\ \ \ \ \ std::vector<std::pair<std::optional<DataKind>,\ std::string>>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a0b0621833a3c96fd4a5d52f3deddc55a}{Prune}}(}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ TimePoint\ current\_time);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keyword}{using\ }TtlMap\ =\ std::unordered\_map<std::string,\ TimePoint>;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ TtlMap\ unscoped\_;}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{TrackState}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b}{State}}(TimePoint\ expiration,\ TimePoint\ current\_time);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{class\ }ScopedTtls\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ ScopedTtls();}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }DataType\ =}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ std::array<TaggedData<TtlMap>,}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}std::underlying\_type\_t<DataKind>\textcolor{keyword}{>}(}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataKind::kKindCount)>;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ Set(DataKind\ kind,\ std::string\ \textcolor{keyword}{const}\&\ key,\ TimePoint\ expiration);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ Remove(DataKind\ kind,\ std::string\ \textcolor{keyword}{const}\&\ key);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ std::optional<TimePoint>\ Get(DataKind\ kind,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ Clear();}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{typename}\ DataType::iterator\ begin();}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{typename}\ DataType::iterator\ end();}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ DataType\ data\_;}
+\DoxyCodeLine{00132\ \ \ \ \ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ ScopedTtls\ scoped\_;}
+\DoxyCodeLine{00135\ \};}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ std::ostream\&\ operator<<(std::ostream\&\ out,}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{ExpirationTracker::TrackState}}\ \textcolor{keyword}{const}\&\ state);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_components}}
+
+\end{DoxyCode}

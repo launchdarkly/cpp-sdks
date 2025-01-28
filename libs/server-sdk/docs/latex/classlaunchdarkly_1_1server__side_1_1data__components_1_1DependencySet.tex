@@ -1,0 +1,61 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Dependency\+Set Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet}{}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet}\index{launchdarkly::server\_side::data\_components::DependencySet@{launchdarkly::server\_side::data\_components::DependencySet}}
+
+
+{\ttfamily \#include $<$dependency\+\_\+tracker.\+hpp$>$}
+
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7023e4d4516a43229d1b92a7560ef7fa}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7023e4d4516a43229d1b92a7560ef7fa} 
+using {\bfseries Data\+Type} = std\+::array$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1TaggedData}{Tagged\+Data}}$<$ std\+::set$<$ std\+::string $>$ $>$, static\+\_\+cast$<$ std\+::size\+\_\+t $>$(Data\+Kind\+::k\+Kind\+Count)$>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7480e342faf0be81d66691502a2865b9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7480e342faf0be81d66691502a2865b9} 
+void {\bfseries Set} (Data\+Kind kind, std\+::string key)
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a09244855cef4d6b09d116146637ba55c}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a09244855cef4d6b09d116146637ba55c} 
+void {\bfseries Remove} (Data\+Kind kind, std\+::string const \&key)
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_ab869f8e0cae5cf331288d825733a15dc}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_ab869f8e0cae5cf331288d825733a15dc} 
+bool {\bfseries Contains} (Data\+Kind kind, std\+::string const \&key) const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a366f3c834b22a215a5a9c41cee39580a}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a366f3c834b22a215a5a9c41cee39580a} 
+std\+::set$<$ std\+::string $>$ const \& {\bfseries Set\+For\+Kind} (Data\+Kind kind)
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a783774ef6b2e14b89bb45db68bc6e3fb}{Size}} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_aaa3dbc5062fab0b5116828d3fb00a9dd}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_aaa3dbc5062fab0b5116828d3fb00a9dd} 
+Data\+Type\+::const\+\_\+iterator {\bfseries begin} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7e6e023a03905015a56642b0dc3a6881}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a7e6e023a03905015a56642b0dc3a6881} 
+Data\+Type\+::const\+\_\+iterator {\bfseries end} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Class used to maintain a set of dependencies. Each dependency may be either a flag or segment. For instance, if we have a flagA, which has a prerequisite of flagB, and a segment\+Match targeting segmentA, then its dependency set would be 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[\{DataKind::kFlag,\ \textcolor{stringliteral}{"{}flagB"{}}\},\ \{DataKind::kSegment,\ \textcolor{stringliteral}{"{}segmentA"{}}\}]}
+
+\end{DoxyCode}
+ 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a783774ef6b2e14b89bb45db68bc6e3fb}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet_a783774ef6b2e14b89bb45db68bc6e3fb} 
+\index{launchdarkly::server\_side::data\_components::DependencySet@{launchdarkly::server\_side::data\_components::DependencySet}!Size@{Size}}
+\index{Size@{Size}!launchdarkly::server\_side::data\_components::DependencySet@{launchdarkly::server\_side::data\_components::DependencySet}}
+\doxysubsubsection{\texorpdfstring{Size()}{Size()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Dependency\+Set\+::\+Size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Return the size of all the data kind sets. \begin{DoxyReturn}{Returns}
+The combined size of all the data kind sets. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+components/dependency\+\_\+tracker/dependency\+\_\+tracker.\+hpp\item 
+src/data\+\_\+components/dependency\+\_\+tracker/dependency\+\_\+tracker.\+cpp\end{DoxyCompactItemize}

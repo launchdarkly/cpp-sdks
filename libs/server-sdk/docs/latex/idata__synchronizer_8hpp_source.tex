@@ -1,0 +1,38 @@
+\doxysection{idata\+\_\+synchronizer.\+hpp}
+\hypertarget{idata__synchronizer_8hpp_source}{}\label{idata__synchronizer_8hpp_source}\index{src/data\_interfaces/source/idata\_synchronizer.hpp@{src/data\_interfaces/source/idata\_synchronizer.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/sdk\_data\_set.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}../destination/idestination.hpp"{}}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_interfaces\ \{}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a4a29361abb48987f400f1dc0f620b29e}{StartAsync}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}*\ destination,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::SDKDataSet\ \textcolor{keyword}{const}*\ bootstrap\_data)\ =\ 0;}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a80f940e3f01259d0aac10648749c8db8}{ShutdownAsync}}(std::function<\textcolor{keywordtype}{void}()>\ complete)\ =\ 0;}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00052\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a046f11ab323b2d6263ea702f1435f74e}{Identity}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{\string~IDataSynchronizer}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00055\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00057\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00058\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IDataSynchronizer}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00062\ \};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_interfaces}}
+
+\end{DoxyCode}

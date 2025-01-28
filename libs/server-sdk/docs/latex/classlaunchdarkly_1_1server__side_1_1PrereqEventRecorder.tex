@@ -1,0 +1,58 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::Prereq\+Event\+Recorder Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder}{}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder}\index{launchdarkly::server\_side::PrereqEventRecorder@{launchdarkly::server\_side::PrereqEventRecorder}}
+
+
+{\ttfamily \#include $<$prereq\+\_\+event\+\_\+recorder.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::Prereq\+Event\+Recorder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=231pt]{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::Prereq\+Event\+Recorder\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=231pt]{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_aaf4b253da01ccf387ab63e9fb36c3719}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_aaf4b253da01ccf387ab63e9fb36c3719} 
+{\bfseries Prereq\+Event\+Recorder} (std\+::string flag\+\_\+key)
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_ac9a1bea4ba50b0d2c0207c5fca69a9bb}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_ac9a1bea4ba50b0d2c0207c5fca69a9bb} 
+void {\bfseries Send\+Async} (events\+::\+Input\+Event event) override
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_abd4857e41ffade4c121afc1851f6f1d8}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_abd4857e41ffade4c121afc1851f6f1d8} 
+void {\bfseries Flush\+Async} () override
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a51fff28cbe235919c1f9c2d8ef6bf5b3}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a51fff28cbe235919c1f9c2d8ef6bf5b3} 
+void {\bfseries Shutdown\+Async} () override
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a7a17451cc3e2daf4a44bad5900833fb2}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a7a17451cc3e2daf4a44bad5900833fb2} 
+std\+::vector$<$ std\+::string $>$ const \& {\bfseries Prerequisites} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a2dd72326007016d13a7d5b05c9c613eb}\label{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder_a2dd72326007016d13a7d5b05c9c613eb} 
+std\+::vector$<$ std\+::string $>$ \&\& {\bfseries Take\+Prerequisites} () \&\&
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This class is meant only to record direct prerequisites of a flag. That is, although it will be passed events for all prerequisites seen during an evaluation via Send\+Async, it will only store those that are a direct prerequisite of the parent flag passed in the constructor.
+
+As a future improvement, it would be possible to unify the \doxylink{classlaunchdarkly_1_1server__side_1_1EventScope}{Event\+Scope} mechanism currently used by the Evaluator to send events with a class similar to this one, or to refactor the Evaluator to include prerequisite information in the returned \doxylink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail} (or a new Result class, which would be a composite of the \doxylink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail} and a vector of prerequisites.) 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/prereq\+\_\+event\+\_\+recorder/prereq\+\_\+event\+\_\+recorder.\+hpp\item 
+src/prereq\+\_\+event\+\_\+recorder/prereq\+\_\+event\+\_\+recorder.\+cpp\end{DoxyCompactItemize}

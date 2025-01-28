@@ -1,0 +1,141 @@
+\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/config/lazy\+\_\+load\+\_\+builder/lazy\+\_\+load\+\_\+builder.h File Reference}
+\hypertarget{lazy__load__builder_8h}{}\label{lazy__load__builder_8h}\index{include/launchdarkly/server\_side/bindings/c/config/lazy\_load\_builder/lazy\_load\_builder.h@{include/launchdarkly/server\_side/bindings/c/config/lazy\_load\_builder/lazy\_load\_builder.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+Include dependency graph for lazy\+\_\+load\+\_\+builder.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{lazy__load__builder_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=226pt]{lazy__load__builder_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{lazy__load__builder_8h_a82d96d08720548130ce66b6ad640edae}\label{lazy__load__builder_8h_a82d96d08720548130ce66b6ad640edae} 
+typedef struct \+\_\+\+LDServer\+Lazy\+Load\+Builder \texorpdfstring{$\ast$}{*} {\bfseries LDServer\+Lazy\+Load\+Builder}
+\item 
+\Hypertarget{lazy__load__builder_8h_aaa27dbf2d57b4b0158814582b01fcdb5}\label{lazy__load__builder_8h_aaa27dbf2d57b4b0158814582b01fcdb5} 
+typedef struct \+\_\+\+LDServer\+Lazy\+Load\+Source\+Ptr \texorpdfstring{$\ast$}{*} {\bfseries LDServer\+Lazy\+Load\+Source\+Ptr}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy}} \{ {\bfseries LD\+\_\+\+LAZYLOAD\+\_\+\+CACHE\+\_\+\+EVICTION\+\_\+\+POLICY\+\_\+\+DISABLED} = 0
+ \}
+\begin{DoxyCompactList}\small\item\em Specifies the action taken when a data item within the in-\/memory cache expires. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{lazy__load__builder_8h_a3bf542cf9d1115583a93f9ff7ba4352e}{LDServer\+Lazy\+Load\+Builder\+\_\+\+New}} ()
+\item 
+\mbox{\hyperlink{lazy__load__builder_8h_a96ec96417c8c145cd915d99c2c627c51}{LDServer\+Lazy\+Load\+Builder\+\_\+\+Free}} (LDServer\+Lazy\+Load\+Builder b)
+\begin{DoxyCompactList}\small\item\em Frees the memory associated with a Lazy Load builder. Do not call if the builder was consumed by the SDK config builder. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{lazy__load__builder_8h_a5c99f469f07f8cf8aeef32ce8c6407e8}{LDServer\+Lazy\+Load\+Builder\+\_\+\+Source\+Ptr}} (LDServer\+Lazy\+Load\+Builder b, LDServer\+Lazy\+Load\+Source\+Ptr source)
+\item 
+\mbox{\hyperlink{lazy__load__builder_8h_ad7f9a41ac14037d53906c211bdf279cd}{LDServer\+Lazy\+Load\+Builder\+\_\+\+Cache\+Refresh\+Ms}} (LDServer\+Lazy\+Load\+Builder b, unsigned int milliseconds)
+\begin{DoxyCompactList}\small\item\em Specify the duration data items should live in-\/memory before requiring a refresh via the database. The chosen \doxylink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy} affects usage of this TTL. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{lazy__load__builder_8h_a685e95a2890d76b681fde9e127261a27}{LDServer\+Lazy\+Load\+Builder\+\_\+\+Cache\+Policy}} (LDServer\+Lazy\+Load\+Builder b, enum \mbox{\hyperlink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy}} policy)
+\begin{DoxyCompactList}\small\item\em Specify the eviction policy when a data item\textquotesingle{}s TTL expires. At this time, only LD\+\_\+\+LAZYLOAD\+\_\+\+CACHE\+\_\+\+EVICTION\+\_\+\+POLICY\+\_\+\+DISABLED is supported (the default), which leaves stale items in the cache until they can be refreshed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}\label{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDLazyLoadCacheEvictionPolicy@{LDLazyLoadCacheEvictionPolicy}}
+\index{LDLazyLoadCacheEvictionPolicy@{LDLazyLoadCacheEvictionPolicy}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDLazyLoadCacheEvictionPolicy}{LDLazyLoadCacheEvictionPolicy}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy}}}
+
+
+
+Specifies the action taken when a data item within the in-\/memory cache expires. 
+
+At this time, the default policy is the only supported policy so there is no need to explicitely set it. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{lazy__load__builder_8h_a685e95a2890d76b681fde9e127261a27}\label{lazy__load__builder_8h_a685e95a2890d76b681fde9e127261a27} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDServerLazyLoadBuilder\_CachePolicy@{LDServerLazyLoadBuilder\_CachePolicy}}
+\index{LDServerLazyLoadBuilder\_CachePolicy@{LDServerLazyLoadBuilder\_CachePolicy}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadBuilder\_CachePolicy()}{LDServerLazyLoadBuilder\_CachePolicy()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Builder\+\_\+\+Cache\+Policy (\begin{DoxyParamCaption}\item[{LDServer\+Lazy\+Load\+Builder}]{b,  }\item[{enum \mbox{\hyperlink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy}}}]{policy }\end{DoxyParamCaption})}
+
+
+
+Specify the eviction policy when a data item\textquotesingle{}s TTL expires. At this time, only LD\+\_\+\+LAZYLOAD\+\_\+\+CACHE\+\_\+\+EVICTION\+\_\+\+POLICY\+\_\+\+DISABLED is supported (the default), which leaves stale items in the cache until they can be refreshed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & The builder. Must not be NULL. \\
+\hline
+{\em policy} & The eviction policy. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{lazy__load__builder_8h_ad7f9a41ac14037d53906c211bdf279cd}\label{lazy__load__builder_8h_ad7f9a41ac14037d53906c211bdf279cd} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDServerLazyLoadBuilder\_CacheRefreshMs@{LDServerLazyLoadBuilder\_CacheRefreshMs}}
+\index{LDServerLazyLoadBuilder\_CacheRefreshMs@{LDServerLazyLoadBuilder\_CacheRefreshMs}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadBuilder\_CacheRefreshMs()}{LDServerLazyLoadBuilder\_CacheRefreshMs()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Builder\+\_\+\+Cache\+Refresh\+Ms (\begin{DoxyParamCaption}\item[{LDServer\+Lazy\+Load\+Builder}]{b,  }\item[{unsigned int}]{milliseconds }\end{DoxyParamCaption})}
+
+
+
+Specify the duration data items should live in-\/memory before requiring a refresh via the database. The chosen \doxylink{lazy__load__builder_8h_ad2ce0689e13bd40a032c62e972c7e4b5}{LDLazy\+Load\+Cache\+Eviction\+Policy} affects usage of this TTL. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & The builder. Must not be NULL. \\
+\hline
+{\em milliseconds} & The time-\/to-\/live for an item in milliseconds. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{lazy__load__builder_8h_a96ec96417c8c145cd915d99c2c627c51}\label{lazy__load__builder_8h_a96ec96417c8c145cd915d99c2c627c51} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDServerLazyLoadBuilder\_Free@{LDServerLazyLoadBuilder\_Free}}
+\index{LDServerLazyLoadBuilder\_Free@{LDServerLazyLoadBuilder\_Free}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadBuilder\_Free()}{LDServerLazyLoadBuilder\_Free()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+Lazy\+Load\+Builder}]{b }\end{DoxyParamCaption})}
+
+
+
+Frees the memory associated with a Lazy Load builder. Do not call if the builder was consumed by the SDK config builder. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & The builder to free. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{lazy__load__builder_8h_a3bf542cf9d1115583a93f9ff7ba4352e}\label{lazy__load__builder_8h_a3bf542cf9d1115583a93f9ff7ba4352e} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDServerLazyLoadBuilder\_New@{LDServerLazyLoadBuilder\_New}}
+\index{LDServerLazyLoadBuilder\_New@{LDServerLazyLoadBuilder\_New}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadBuilder\_New()}{LDServerLazyLoadBuilder\_New()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Builder\+\_\+\+New (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Creates a Lazy Load builder which can be used as the SDK\textquotesingle{}s data system.
+
+In Lazy Load mode, the SDK will query a source for data as required, with an in-\/memory cache to reduce the number of queries. This enables usage of databases for storing feature flag/segment data.
+
+In contrast, the Background Sync system injects data into the SDK asynchronously (either instantly as updates happen, in streaming mode; or periodically, in polling mode).
+
+Background Sync mode is preferred for most use cases, but Lazy Load may be beneficial when no connection to Launch\+Darkly is required, such as when using the Relay Proxy to populate a database. \Hypertarget{lazy__load__builder_8h_a5c99f469f07f8cf8aeef32ce8c6407e8}\label{lazy__load__builder_8h_a5c99f469f07f8cf8aeef32ce8c6407e8} 
+\index{lazy\_load\_builder.h@{lazy\_load\_builder.h}!LDServerLazyLoadBuilder\_SourcePtr@{LDServerLazyLoadBuilder\_SourcePtr}}
+\index{LDServerLazyLoadBuilder\_SourcePtr@{LDServerLazyLoadBuilder\_SourcePtr}!lazy\_load\_builder.h@{lazy\_load\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerLazyLoadBuilder\_SourcePtr()}{LDServerLazyLoadBuilder\_SourcePtr()}}
+{\footnotesize\ttfamily LDServer\+Lazy\+Load\+Builder\+\_\+\+Source\+Ptr (\begin{DoxyParamCaption}\item[{LDServer\+Lazy\+Load\+Builder}]{b,  }\item[{LDServer\+Lazy\+Load\+Source\+Ptr}]{source }\end{DoxyParamCaption})}
+
+Configures the Lazy Load system with a source via opaque pointer to C++ ISerialized\+Data\+Reader.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & The builder. Must not be NULL. \\
+\hline
+{\em source} & The source pointer. Behavior is undefined if the pointer is not an ISerialized\+Data\+Reader. Must not be NULL. \\
+\hline
+\end{DoxyParams}

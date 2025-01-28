@@ -1,0 +1,59 @@
+\doxysection{semver\+\_\+operations.\+hpp}
+\hypertarget{semver__operations_8hpp_source}{}\label{semver__operations_8hpp_source}\index{src/evaluation/detail/semver\_operations.hpp@{src/evaluation/detail/semver\_operations.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <variant>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::evaluation::detail\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \{}
+\DoxyCodeLine{00020\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{using\ }VersionType\ =\ std::uint64\_t;}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{using\ }Token\ =\ std::variant<VersionType,\ std::string>;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d}{SemVer}}();}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00039\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d}{SemVer}}(VersionType\ major,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ VersionType\ minor,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ VersionType\ patch,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ std::vector<Token>\ prerelease);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d}{SemVer}}(VersionType\ major,\ VersionType\ minor,\ VersionType\ patch);}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ [[nodiscard]]\ SemVer::VersionType\ Major()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00053\ \ \ \ \ [[nodiscard]]\ SemVer::VersionType\ Minor()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00054\ \ \ \ \ [[nodiscard]]\ SemVer::VersionType\ Patch()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ [[nodiscard]]\ std::optional<std::vector<Token>>\ \textcolor{keyword}{const}\&\ Prerelease()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00064\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{static}\ std::optional<SemVer>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a5a4fe9ea5d8353010445d74395393a11}{Parse}}(std::string\ \textcolor{keyword}{const}\&\ value);}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00067\ \ \ \ \ VersionType\ major\_;}
+\DoxyCodeLine{00068\ \ \ \ \ VersionType\ minor\_;}
+\DoxyCodeLine{00069\ \ \ \ \ VersionType\ patch\_;}
+\DoxyCodeLine{00070\ \ \ \ \ std::optional<std::vector<Token>>\ prerelease\_;}
+\DoxyCodeLine{00071\ \};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{keywordtype}{bool}\ operator<(SemVer::Token\ \textcolor{keyword}{const}\&\ lhs,\ SemVer::Token\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{keywordtype}{bool}\ operator<(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{keywordtype}{bool}\ operator>(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00085\ std::ostream\&\ operator<<(std::ostream\&\ out,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{SemVer}}\ \textcolor{keyword}{const}\&\ semver);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ std::ostream\&\ operator<<(std::ostream\&\ out,\ SemVer::Token\ \textcolor{keyword}{const}\&\ semver\_token);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::evaluation::detail}}
+
+\end{DoxyCode}

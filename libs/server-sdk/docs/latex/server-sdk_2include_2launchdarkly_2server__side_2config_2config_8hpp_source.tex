@@ -1,0 +1,49 @@
+\doxysection{config.\+hpp}
+\hypertarget{server-sdk_2include_2launchdarkly_2server__side_2config_2config_8hpp_source}{}\label{server-sdk_2include_2launchdarkly_2server__side_2config_2config_8hpp_source}\index{include/launchdarkly/server\_side/config/config.hpp@{include/launchdarkly/server\_side/config/config.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/all\_built.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/data\_system/data\_system\_config.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1Config}{Config}}\ \{}
+\DoxyCodeLine{00009\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00010\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1Config}{Config}}(std::string\ sdk\_key,}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}{config::built::Logging}}\ logging,}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config::built::ServiceEndpoints}}\ endpoints,}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{config::built::Events}}\ events,}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::string>\ application\_tag,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1DataSystemConfig}{config::built::DataSystemConfig}}\ data\_system\_config,}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::built::HttpProperties}}\ http\_properties);}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ SdkKey()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config::built::ServiceEndpoints}}\ \textcolor{keyword}{const}\&\ ServiceEndpoints()}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{config::built::Events}}\ \textcolor{keyword}{const}\&\ Events()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ [[nodiscard]]\ std::optional<std::string>\ \textcolor{keyword}{const}\&\ ApplicationTag()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1DataSystemConfig}{config::built::DataSystemConfig}}\ \textcolor{keyword}{const}\&\ DataSystemConfig()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::built::HttpProperties}}\ \textcolor{keyword}{const}\&\ HttpProperties()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}{config::built::Logging}}\ \textcolor{keyword}{const}\&\ Logging()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00034\ \ \ \ \ std::string\ sdk\_key\_;}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{bool}\ offline\_;}
+\DoxyCodeLine{00036\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1Logging}{config::built::Logging}}\ logging\_;}
+\DoxyCodeLine{00037\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config::built::ServiceEndpoints}}\ service\_endpoints\_;}
+\DoxyCodeLine{00038\ \ \ \ \ std::optional<std::string>\ application\_tag\_;}
+\DoxyCodeLine{00039\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{config::built::Events}}\ events\_;}
+\DoxyCodeLine{00040\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1DataSystemConfig}{config::built::DataSystemConfig}}\ data\_system\_config\_;}
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::built::HttpProperties}}\ http\_properties\_;}
+\DoxyCodeLine{00042\ \};}
+\DoxyCodeLine{00043\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

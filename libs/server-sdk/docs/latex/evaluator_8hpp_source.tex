@@ -1,0 +1,57 @@
+\doxysection{evaluator.\+hpp}
+\hypertarget{evaluator_8hpp_source}{}\label{evaluator_8hpp_source}\index{src/evaluation/evaluator.hpp@{src/evaluation/evaluator.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/context.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/data/evaluation\_detail.hpp>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/flag.hpp>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}evaluation\_error.hpp"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}evaluation\_stack.hpp"{}}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}../data\_interfaces/store/istore.hpp"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}../events/event\_scope.hpp"{}}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::evaluation\ \{}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Evaluator}{Evaluator}}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Evaluator}{Evaluator}}(Logger\&\ logger,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{data\_interfaces::IStore}}\ \textcolor{keyword}{const}\&\ source);}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00036\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Evaluator_aae0774ec72987717e37a26b91b4b6338}{Evaluate}}(}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ data\_model::Flag\ \textcolor{keyword}{const}\&\ flag,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope}{EventScope}}\ \textcolor{keyword}{const}\&\ event\_scope);}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00048\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Evaluator_aae0774ec72987717e37a26b91b4b6338}{Evaluate}}(data\_model::Flag\ \textcolor{keyword}{const}\&\ flag,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00052\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Evaluator_aae0774ec72987717e37a26b91b4b6338}{Evaluate}}(}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ std::optional<std::string>\ parent\_key,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ data\_model::Flag\ \textcolor{keyword}{const}\&\ flag,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}{EvaluationStack}}\&\ stack,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope}{EventScope}}\ \textcolor{keyword}{const}\&\ event\_scope);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ FlagVariation(}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ data\_model::Flag\ \textcolor{keyword}{const}\&\ flag,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ data\_model::Flag::Variation\ variation\_index,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{EvaluationReason}}\ reason)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ OffValue(}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ data\_model::Flag\ \textcolor{keyword}{const}\&\ flag,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{EvaluationReason}}\ reason)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordtype}{void}\ LogError(std::string\ \textcolor{keyword}{const}\&\ key,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1Error}{Error}}\ \textcolor{keyword}{const}\&\ error)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ Logger\&\ logger\_;}
+\DoxyCodeLine{00071\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{data\_interfaces::IStore}}\ \textcolor{keyword}{const}\&\ source\_;}
+\DoxyCodeLine{00072\ \};}
+\DoxyCodeLine{00073\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::evaluation}}
+
+\end{DoxyCode}

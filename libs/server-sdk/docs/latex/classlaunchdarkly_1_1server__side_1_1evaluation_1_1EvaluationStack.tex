@@ -1,0 +1,57 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::evaluation\+::Evaluation\+Stack Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}{}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+
+
+{\ttfamily \#include $<$evaluation\+\_\+stack.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d}{Notice\+Prerequisite}} (std\+::string prerequisite\+\_\+key)
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a}{Notice\+Segment}} (std\+::string segment\+\_\+key)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}{Evaluation\+Stack} is used to track which segments and flags have been noticed during evaluation in order to detect circular references. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!NoticePrerequisite@{NoticePrerequisite}}
+\index{NoticePrerequisite@{NoticePrerequisite}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{NoticePrerequisite()}{NoticePrerequisite()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Notice\+Prerequisite (\begin{DoxyParamCaption}\item[{std\+::string}]{prerequisite\+\_\+key }\end{DoxyParamCaption})}
+
+If the given prerequisite key has not been seen, marks it as seen and returns a \doxylink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard} object. Otherwise, returns std\+::nullopt.
+
+
+\begin{DoxyParams}{Parameters}
+{\em prerequisite\+\_\+key} & Key of the prerequisite. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard} object if not seen before, otherwise std\+::nullopt. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!NoticeSegment@{NoticeSegment}}
+\index{NoticeSegment@{NoticeSegment}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{NoticeSegment()}{NoticeSegment()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Notice\+Segment (\begin{DoxyParamCaption}\item[{std\+::string}]{segment\+\_\+key }\end{DoxyParamCaption})}
+
+If the given segment key has not been seen, marks it as seen and returns a \doxylink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard} object. Otherwise, returns std\+::nullopt.
+
+
+\begin{DoxyParams}{Parameters}
+{\em prerequisite\+\_\+key} & Key of the segment. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard} object if not seen before, otherwise std\+::nullopt. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/evaluation/evaluation\+\_\+stack.\+hpp\item 
+src/evaluation/evaluation\+\_\+stack.\+cpp\end{DoxyCompactItemize}

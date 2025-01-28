@@ -1,0 +1,205 @@
+\doxysection{launchdarkly\+::config\+::shared\+::builders\+::Events\+Builder\texorpdfstring{$<$}{<} SDK \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+
+
+{\ttfamily \#include $<$events\+\_\+builder.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a7d92a42b45b2c043d383ecac74617470}{Events\+Builder}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a1a689c35e5b61308b95a2f5b6c7a2f95}{Enabled}} (bool enabled)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ae74e6ddca1a52b4eaf3f9d60a08c3256}{Disable}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ab7546976e1d129500f88476012d2bdaf}{Capacity}} (std\+::size\+\_\+t capacity)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a999ee341dcf36b412e14ec5c923cceff}{Flush\+Interval}} (std\+::chrono\+::milliseconds interval)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a9c4c34e10bae53dd6f676d1c89740eb2}{All\+Attributes\+Private}} (bool all\+\_\+attributes\+\_\+private)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_abcaa823696413e5bb977850ebec81da1}{Private\+Attributes}} (Attribute\+Reference\+::\+Set\+Type private\+\_\+attrs)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a279ccdb763483b0e3f12d812cbb35fcb}{Private\+Attribute}} (\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}} attribute)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}} \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a68f44efab5815020e7fbe6f115e9dab5}{Context\+Keys\+Capacity}} (std\+::size\+\_\+t capacity)
+\begin{DoxyCompactList}\small\item\em Specifies the number of unique context keys that can be remembered by the index event generation logic before needing to evict keys from memory in LRU order. \end{DoxyCompactList}\item 
+tl\+::expected$<$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{built\+::\+Events}}, Error $>$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_aae0bfae0e2912d4eec9fb18d7dbfb5ca}{Build}} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_acbbbed478054bda366acadab667d3a2e}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_acbbbed478054bda366acadab667d3a2e} 
+bool {\bfseries operator==} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ const \&lhs, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ const \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename SDK$>$\newline
+class launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder$<$ SDK $>$}
+\doxylink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder} allows for specification of parameters related to the SDK\textquotesingle{}s event processor.
+
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em SDK} & Type of SDK, such as \doxylink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{Client\+SDK} or \doxylink{structlaunchdarkly_1_1config_1_1shared_1_1ServerSDK}{Server\+SDK}. \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a7d92a42b45b2c043d383ecac74617470}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a7d92a42b45b2c043d383ecac74617470} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!EventsBuilder@{EventsBuilder}}
+\index{EventsBuilder@{EventsBuilder}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{EventsBuilder()}{EventsBuilder()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Events\+Builder (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Constructs an \doxylink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a9c4c34e10bae53dd6f676d1c89740eb2}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a9c4c34e10bae53dd6f676d1c89740eb2} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!AllAttributesPrivate@{AllAttributesPrivate}}
+\index{AllAttributesPrivate@{AllAttributesPrivate}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{AllAttributesPrivate()}{AllAttributesPrivate()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+All\+Attributes\+Private (\begin{DoxyParamCaption}\item[{bool}]{all\+\_\+attributes\+\_\+private }\end{DoxyParamCaption})}
+
+Attribute privacy indicates whether or not attributes should be retained by Launch\+Darkly after being sent upon initialization, and if attributes should later be sent in events.
+
+Attribute privacy may be specified in 3 ways\+:
+
+(1) To specify that all attributes should be considered private -\/ not just those designated private on a per-\/context basis -\/ call this method with true as the parameter.
+
+(2) To specify that a specific set of attributes should be considered private -\/ in addition to those designated private on a per-\/context basis
+\begin{DoxyItemize}
+\item call \doxylink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_abcaa823696413e5bb977850ebec81da1}{Private\+Attributes} or Private\+Attribute.
+\end{DoxyItemize}
+
+(3) To specify private attributes on a per-\/context basis, it is not necessary to call either of these methods, as the default behavior is to treat all attributes as non-\/private unless otherwise specified.
+
+
+\begin{DoxyParams}{Parameters}
+{\em all\+\_\+attributes\+\_\+private} & True for behavior of (1), false for default behavior of (2) or (3). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_aae0bfae0e2912d4eec9fb18d7dbfb5ca}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_aae0bfae0e2912d4eec9fb18d7dbfb5ca} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!Build@{Build}}
+\index{Build@{Build}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Build()}{Build()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+tl\+::expected$<$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{built\+::\+Events}}, Error $>$ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Build (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Builds Events configuration, if the configuration is valid. \begin{DoxyReturn}{Returns}
+Events config, or error. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ab7546976e1d129500f88476012d2bdaf}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ab7546976e1d129500f88476012d2bdaf} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!Capacity@{Capacity}}
+\index{Capacity@{Capacity}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Capacity()}{Capacity()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Capacity (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{capacity }\end{DoxyParamCaption})}
+
+Sets the capacity of the event processor. When more events are generated within the processor\textquotesingle{}s flush interval than this value, events will be dropped. 
+\begin{DoxyParams}{Parameters}
+{\em capacity} & Event queue capacity. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a68f44efab5815020e7fbe6f115e9dab5}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a68f44efab5815020e7fbe6f115e9dab5} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!ContextKeysCapacity@{ContextKeysCapacity}}
+\index{ContextKeysCapacity@{ContextKeysCapacity}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{ContextKeysCapacity()}{ContextKeysCapacity()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Context\+Keys\+Capacity (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{capacity }\end{DoxyParamCaption})}
+
+
+
+Specifies the number of unique context keys that can be remembered by the index event generation logic before needing to evict keys from memory in LRU order. 
+
+After reaching capacity, it\textquotesingle{}s possible that a previously-\/indexed context may cause generation of a redundant index event.
+
+
+\begin{DoxyParams}{Parameters}
+{\em capacity} & Maximum unique context keys to remember. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ae74e6ddca1a52b4eaf3f9d60a08c3256}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_ae74e6ddca1a52b4eaf3f9d60a08c3256} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!Disable@{Disable}}
+\index{Disable@{Disable}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Disable()}{Disable()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Disable (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Alias for Enabled(false). \begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a1a689c35e5b61308b95a2f5b6c7a2f95}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a1a689c35e5b61308b95a2f5b6c7a2f95} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!Enabled@{Enabled}}
+\index{Enabled@{Enabled}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{Enabled()}{Enabled()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Enabled (\begin{DoxyParamCaption}\item[{bool}]{enabled }\end{DoxyParamCaption})}
+
+Specify if event-\/sending should be enabled or not. By default, events are enabled. 
+\begin{DoxyParams}{Parameters}
+{\em enabled} & True to enable. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a999ee341dcf36b412e14ec5c923cceff}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a999ee341dcf36b412e14ec5c923cceff} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!FlushInterval@{FlushInterval}}
+\index{FlushInterval@{FlushInterval}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{FlushInterval()}{FlushInterval()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Flush\+Interval (\begin{DoxyParamCaption}\item[{std\+::chrono\+::milliseconds}]{interval }\end{DoxyParamCaption})}
+
+Sets the flush interval of the event processor. The processor queues outgoing events based on the capacity parameter; these events are then delivered based on the flush interval. 
+\begin{DoxyParams}{Parameters}
+{\em interval} & Interval between automatic flushes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a279ccdb763483b0e3f12d812cbb35fcb}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_a279ccdb763483b0e3f12d812cbb35fcb} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!PrivateAttribute@{PrivateAttribute}}
+\index{PrivateAttribute@{PrivateAttribute}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{PrivateAttribute()}{PrivateAttribute()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Private\+Attribute (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{Attribute\+Reference}}}]{attribute }\end{DoxyParamCaption})}
+
+Specifies a single private attribute. May be called multiple times with additional private attributes. 
+\begin{DoxyParams}{Parameters}
+{\em attribute} & Attribute to mark private. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_abcaa823696413e5bb977850ebec81da1}\label{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder_abcaa823696413e5bb977850ebec81da1} 
+\index{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}!PrivateAttributes@{PrivateAttributes}}
+\index{PrivateAttributes@{PrivateAttributes}!launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$@{launchdarkly::config::shared::builders::EventsBuilder$<$ SDK $>$}}
+\doxysubsubsection{\texorpdfstring{PrivateAttributes()}{PrivateAttributes()}}
+{\footnotesize\ttfamily template$<$typename SDK $>$ \\
+\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{Events\+Builder}}$<$ SDK $>$ \& \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly\+::config\+::shared\+::builders\+::\+Events\+Builder}}$<$ SDK $>$\+::\+Private\+Attributes (\begin{DoxyParamCaption}\item[{Attribute\+Reference\+::\+Set\+Type}]{private\+\_\+attrs }\end{DoxyParamCaption})}
+
+Specify a set of private attributes. Any existing private attributes are overwritten. \begin{DoxyReturn}{Returns}
+Reference to this builder. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/events\+\_\+builder.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/config/events\+\_\+builder.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,51 @@
+\doxysection{LDFlag\+Listener Struct Reference}
+\hypertarget{structLDFlagListener}{}\label{structLDFlagListener}\index{LDFlagListener@{LDFlagListener}}
+
+
+{\ttfamily \#include $<$flag\+\_\+listener.\+h$>$}
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Flag\+Changed\+Callback\+Fn \mbox{\hyperlink{structLDFlagListener_a6972b03fff5b8610973ed9cbac5613fb}{Flag\+Changed}}
+\item 
+void \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{structLDFlagListener_aa31ceb863843e77e6e4218af0e626a3c}{User\+Data}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a feature flag listener which may be used to listen for flag changes. The struct should be initialized using LDFlag\+Listener\+\_\+\+Init before use. 
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{structLDFlagListener_a6972b03fff5b8610973ed9cbac5613fb}\label{structLDFlagListener_a6972b03fff5b8610973ed9cbac5613fb} 
+\index{LDFlagListener@{LDFlagListener}!FlagChanged@{FlagChanged}}
+\index{FlagChanged@{FlagChanged}!LDFlagListener@{LDFlagListener}}
+\doxysubsubsection{\texorpdfstring{FlagChanged}{FlagChanged}}
+{\footnotesize\ttfamily Flag\+Changed\+Callback\+Fn LDFlag\+Listener\+::\+Flag\+Changed}
+
+Callback function which is invoked for flag changes.
+
+The provided pointers are only valid for the duration of the function call (excluding User\+Data, whose lifetime is controlled by the caller).
+
+
+\begin{DoxyParams}{Parameters}
+{\em flag\+\_\+key} & The name of the flag that changed. \\
+\hline
+{\em new\+\_\+value} & The new value of the flag. If there was not an new value, because the flag was deleted, then the LDValue will be of a null type. Check the deleted parameter to see if a flag was deleted. \\
+\hline
+{\em old\+\_\+value} & The old value of the flag. If there was not an old value, for instance a newly created flag, then the Value will be of a null type. \\
+\hline
+{\em deleted} & True if the flag has been deleted. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{structLDFlagListener_aa31ceb863843e77e6e4218af0e626a3c}\label{structLDFlagListener_aa31ceb863843e77e6e4218af0e626a3c} 
+\index{LDFlagListener@{LDFlagListener}!UserData@{UserData}}
+\index{UserData@{UserData}!LDFlagListener@{LDFlagListener}}
+\doxysubsubsection{\texorpdfstring{UserData}{UserData}}
+{\footnotesize\ttfamily void\texorpdfstring{$\ast$}{*} LDFlag\+Listener\+::\+User\+Data}
+
+User\+Data is forwarded into callback functions. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/\mbox{\hyperlink{flag__listener_8h}{flag\+\_\+listener.\+h}}\end{DoxyCompactItemize}

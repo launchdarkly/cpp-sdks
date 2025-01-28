@@ -1,0 +1,26 @@
+\doxysection{tagged\+\_\+data.\+hpp}
+\hypertarget{tagged__data_8hpp_source}{}\label{tagged__data_8hpp_source}\index{src/data\_components/dependency\_tracker/tagged\_data.hpp@{src/data\_components/dependency\_tracker/tagged\_data.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}data\_kind.hpp"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_components\ \{}
+\DoxyCodeLine{00012\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Storage>}
+\DoxyCodeLine{00013\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1TaggedData}{TaggedData}}\ \{}
+\DoxyCodeLine{00014\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1TaggedData}{TaggedData}}(DataKind\ \textcolor{keyword}{const}\ kind)\ :\ kind\_(kind)\ \{\}}
+\DoxyCodeLine{00016\ \ \ \ \ [[nodiscard]]\ DataKind\ Kind()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ kind\_;\ \}}
+\DoxyCodeLine{00017\ \ \ \ \ [[nodiscard]]\ Storage\ \textcolor{keyword}{const}\&\ Data()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ storage\_;\ \}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ [[nodiscard]]\ Storage\&\ Data()\ \{\ \textcolor{keywordflow}{return}\ storage\_;\ \}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00022\ \ \ \ \ DataKind\ kind\_;}
+\DoxyCodeLine{00023\ \ \ \ \ Storage\ storage\_;}
+\DoxyCodeLine{00024\ \};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_components}}
+
+\end{DoxyCode}

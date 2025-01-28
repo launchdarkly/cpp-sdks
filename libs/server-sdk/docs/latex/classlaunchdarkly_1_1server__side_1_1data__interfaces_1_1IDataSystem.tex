@@ -1,0 +1,109 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IData\+System Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}\index{launchdarkly::server\_side::data\_interfaces::IDataSystem@{launchdarkly::server\_side::data\_interfaces::IDataSystem}}
+
+
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System} obtains data used for flag evaluations and makes it available to other components.  
+
+
+
+
+{\ttfamily \#include $<$idata\+\_\+system.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IData\+System\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IData\+System\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aeef92ebb488f9c80a56e105b6d9afbd9}{Identity}} () const =0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aad81fd69209cf2d62a12e8563bbaa2a0}{Initialize}} ()=0
+\begin{DoxyCompactList}\small\item\em Initializes the system. This method will be called before any of the \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore} methods are called. \end{DoxyCompactList}\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aee463a9e9358ed0057d0f3acd35b86b2}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aee463a9e9358ed0057d0f3acd35b86b2} 
+{\bfseries IData\+System} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} const \&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_a020ac25809e214744c016715da99c8df}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_a020ac25809e214744c016715da99c8df} 
+{\bfseries IData\+System} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \&\&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_a8c998d18c731e845e74113264c598a81}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_a8c998d18c731e845e74113264c598a81} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} const \&)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_acc1a0ace18134d87df3dfc22cee861f4}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_acc1a0ace18134d87df3dfc22cee861f4} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System}} \&\&)=delete
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IStore}}}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a790063d9f03072942e3bb35871540b89}{Get\+Flag}} (std\+::string const \&key) const =0
+\begin{DoxyCompactList}\small\item\em Get the flag named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+virtual std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_ae6178b4579573fd078b79026ebe27402}{Get\+Segment}} (std\+::string const \&key) const =0
+\begin{DoxyCompactList}\small\item\em Get the segment named by key. Returns nullptr if no such flag exists. \end{DoxyCompactList}\item 
+virtual std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Flag\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aab3ad143afd8d3bfbf103e4c22f5c315}{All\+Flags}} () const =0
+\begin{DoxyCompactList}\small\item\em Get a map of all flags. \end{DoxyCompactList}\item 
+virtual std\+::unordered\+\_\+map$<$ std\+::string, std\+::shared\+\_\+ptr$<$ data\+\_\+model\+::\+Segment\+Descriptor $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a5707e17162ae05227f09c567f142dc22}{All\+Segments}} () const =0
+\begin{DoxyCompactList}\small\item\em Get a map of all segments. \end{DoxyCompactList}\item 
+virtual bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aed68d9e37af193c2bb71629ea08c09ad}{Initialized}} () const =0
+\item 
+{\bfseries IStore} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} const \&item)=delete
+\item 
+{\bfseries IStore} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{IData\+System} obtains data used for flag evaluations and makes it available to other components. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aeef92ebb488f9c80a56e105b6d9afbd9}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aeef92ebb488f9c80a56e105b6d9afbd9} 
+\index{launchdarkly::server\_side::data\_interfaces::IDataSystem@{launchdarkly::server\_side::data\_interfaces::IDataSystem}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IDataSystem@{launchdarkly::server\_side::data\_interfaces::IDataSystem}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+System\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the system. Used in logs. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1BackgroundSync_a2cbca16af273c47f71fc54db7d31f00d}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Background\+Sync}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_aef575e06c5bb4026aeaf4a1c039aaf46}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Offline\+System}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aad81fd69209cf2d62a12e8563bbaa2a0}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem_aad81fd69209cf2d62a12e8563bbaa2a0} 
+\index{launchdarkly::server\_side::data\_interfaces::IDataSystem@{launchdarkly::server\_side::data\_interfaces::IDataSystem}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!launchdarkly::server\_side::data\_interfaces::IDataSystem@{launchdarkly::server\_side::data\_interfaces::IDataSystem}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+System\+::\+Initialize (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Initializes the system. This method will be called before any of the \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore} methods are called. 
+
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1BackgroundSync_ab4dc6f5080aa5e7f1009a99d17691cfc}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Background\+Sync}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_ae43d4d07da6807ce78660b5bb88a2ddf}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Lazy\+Load}}, and \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_a90656828eb3298aef951901d521b5492}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Offline\+System}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/system/idata\+\_\+system.\+hpp\end{DoxyCompactItemize}

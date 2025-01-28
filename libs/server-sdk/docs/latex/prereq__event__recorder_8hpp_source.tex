@@ -1,0 +1,37 @@
+\doxysection{prereq\+\_\+event\+\_\+recorder.\+hpp}
+\hypertarget{prereq__event__recorder_8hpp_source}{}\label{prereq__event__recorder_8hpp_source}\index{src/prereq\_event\_recorder/prereq\_event\_recorder.hpp@{src/prereq\_event\_recorder/prereq\_event\_recorder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/events/event\_processor\_interface.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder}{PrereqEventRecorder}}\ final\ :\ \textcolor{keyword}{public}\ events::IEventProcessor\ \{}
+\DoxyCodeLine{00023\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1PrereqEventRecorder}{PrereqEventRecorder}}(std::string\ flag\_key);}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keywordtype}{void}\ SendAsync(events::InputEvent\ event)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{comment}{/*\ No-\/op\ */}}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{void}\ FlushAsync()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{comment}{/*\ No-\/op\ */}}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keywordtype}{void}\ ShutdownAsync()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \ \ std::vector<std::string>\ \textcolor{keyword}{const}\&\ Prerequisites()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ std::vector<std::string>\&\&\ TakePrerequisites()\ \&\&;}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00039\ \ \ \ \ std::string\ \textcolor{keyword}{const}\ flag\_key\_;}
+\DoxyCodeLine{00040\ \ \ \ \ std::vector<std::string>\ prereqs\_;}
+\DoxyCodeLine{00041\ \};}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

@@ -1,0 +1,112 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::evaluation\+::detail\+::Sem\+Ver Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}\index{launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}}
+
+
+{\ttfamily \#include $<$semver\+\_\+operations.\+hpp$>$}
+
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a504718ea8461c4d3031d2f8188bff829}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a504718ea8461c4d3031d2f8188bff829} 
+using {\bfseries Version\+Type} = std\+::uint64\+\_\+t
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a94b97d4d8229bfc4af289c3822c238ba}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a94b97d4d8229bfc4af289c3822c238ba} 
+using {\bfseries Token} = std\+::variant$<$ Version\+Type, std\+::string $>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d}{Sem\+Ver}} ()
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a33e6d458b023db850c53372a8d2e7e5b}{Sem\+Ver}} (Version\+Type major, Version\+Type minor, Version\+Type patch, std\+::vector$<$ Token $>$ prerelease)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a36a929030741681ee08a63886bd60c24}{Sem\+Ver}} (Version\+Type major, Version\+Type minor, Version\+Type patch)
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a1aa2f17818f2c17b60ef389b360ca2b7}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a1aa2f17818f2c17b60ef389b360ca2b7} 
+Sem\+Ver\+::\+Version\+Type {\bfseries Major} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a0b80086febacbb1d74429ed16886dfe3}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a0b80086febacbb1d74429ed16886dfe3} 
+Sem\+Ver\+::\+Version\+Type {\bfseries Minor} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a299479d00fcc6420ba3db253271f8067}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a299479d00fcc6420ba3db253271f8067} 
+Sem\+Ver\+::\+Version\+Type {\bfseries Patch} () const
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a303c5583bd79e0e72ef3e50d991f808a}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a303c5583bd79e0e72ef3e50d991f808a} 
+std\+::optional$<$ std\+::vector$<$ Token $>$ $>$ const \& {\bfseries Prerelease} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a5a4fe9ea5d8353010445d74395393a11}{Parse}} (std\+::string const \&value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents a Launch\+Darkly-\/flavored Semantic Version v2.
+
+Semantic versions can be compared using ==, \texorpdfstring{$<$}{<}, and \texorpdfstring{$>$}{>}.
+
+The main difference from the official spec is that missing minor and patch versions are allowed, i.\+e. "{}1"{} means "{}1.\+0.\+0"{} and "{}1.\+2"{} means "{}1.\+2.\+0"{}. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_aae8755b0a1362bd980070579fde24b1d} 
+\index{launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}!SemVer@{SemVer}}
+\index{SemVer@{SemVer}!launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}}
+\doxysubsubsection{\texorpdfstring{SemVer()}{SemVer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::detail\+::\+Sem\+Ver\+::\+Sem\+Ver (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Constructs a \doxylink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver} representing "{}0.\+0.\+0"{}. \Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a33e6d458b023db850c53372a8d2e7e5b}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a33e6d458b023db850c53372a8d2e7e5b} 
+\index{launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}!SemVer@{SemVer}}
+\index{SemVer@{SemVer}!launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}}
+\doxysubsubsection{\texorpdfstring{SemVer()}{SemVer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::detail\+::\+Sem\+Ver\+::\+Sem\+Ver (\begin{DoxyParamCaption}\item[{Version\+Type}]{major,  }\item[{Version\+Type}]{minor,  }\item[{Version\+Type}]{patch,  }\item[{std\+::vector$<$ Token $>$}]{prerelease }\end{DoxyParamCaption})}
+
+Constructs a \doxylink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver} from a major, minor, patch, and prerelease. The prerelease consists of list of string/nonzero-\/number tokens, e.\+g. \mbox{[}"{}alpha"{}, 1"{}\mbox{]}. 
+\begin{DoxyParams}{Parameters}
+{\em major} & Major version. \\
+\hline
+{\em minor} & Minor version. \\
+\hline
+{\em patch} & Patch version. \\
+\hline
+{\em prerelease} & Prerelease tokens. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a36a929030741681ee08a63886bd60c24}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a36a929030741681ee08a63886bd60c24} 
+\index{launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}!SemVer@{SemVer}}
+\index{SemVer@{SemVer}!launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}}
+\doxysubsubsection{\texorpdfstring{SemVer()}{SemVer()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::detail\+::\+Sem\+Ver\+::\+Sem\+Ver (\begin{DoxyParamCaption}\item[{Version\+Type}]{major,  }\item[{Version\+Type}]{minor,  }\item[{Version\+Type}]{patch }\end{DoxyParamCaption})}
+
+Constructs a \doxylink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver} from a major, minor, and patch. 
+\begin{DoxyParams}{Parameters}
+{\em major} & Major version. \\
+\hline
+{\em minor} & Minor version. \\
+\hline
+{\em patch} & Patch version. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a5a4fe9ea5d8353010445d74395393a11}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer_a5a4fe9ea5d8353010445d74395393a11} 
+\index{launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}!Parse@{Parse}}
+\index{Parse@{Parse}!launchdarkly::server\_side::evaluation::detail::SemVer@{launchdarkly::server\_side::evaluation::detail::SemVer}}
+\doxysubsubsection{\texorpdfstring{Parse()}{Parse()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver}} $>$ launchdarkly\+::server\+\_\+side\+::evaluation\+::detail\+::\+Sem\+Ver\+::\+Parse (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Attempts to parse a semantic version string, returning std\+::nullopt on failure. Build information is discarded. 
+\begin{DoxyParams}{Parameters}
+{\em value} & Version string, e.\+g. "{}1.\+2.\+3-\/alpha.\+1"{}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1detail_1_1SemVer}{Sem\+Ver} on success, or std\+::nullopt on failure. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/evaluation/detail/semver\+\_\+operations.\+hpp\item 
+src/evaluation/detail/semver\+\_\+operations.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,36 @@
+\doxysection{all\+\_\+flags\+\_\+state\+\_\+builder.\+hpp}
+\hypertarget{all__flags__state__builder_8hpp_source}{}\label{all__flags__state__builder_8hpp_source}\index{src/all\_flags\_state/all\_flags\_state\_builder.hpp@{src/all\_flags\_state/all\_flags\_state\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/client.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keywordtype}{bool}\ IsSet(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ options,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ flag);}
+\DoxyCodeLine{00013\ \textcolor{keywordtype}{bool}\ NotSet(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ options,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ flag);}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsStateBuilder}{AllFlagsStateBuilder}}\ \{}
+\DoxyCodeLine{00016\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsStateBuilder}{AllFlagsStateBuilder}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ options);}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsStateBuilder_a13022d26a50be0bf356d5e7d71f6bfd4}{AddFlag}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ value,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{AllFlagsState::State}}\ state);}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00038\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState}{AllFlagsState}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsStateBuilder_a4456ea06e20f1c819433d230ae7cd211}{Build}}();}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ options\_;}
+\DoxyCodeLine{00042\ \ \ \ \ std::unordered\_map<std::string,\ AllFlagsState::State>\ flags\_state\_;}
+\DoxyCodeLine{00043\ \ \ \ \ std::unordered\_map<std::string,\ Value>\ evaluations\_;}
+\DoxyCodeLine{00044\ \};}
+\DoxyCodeLine{00045\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

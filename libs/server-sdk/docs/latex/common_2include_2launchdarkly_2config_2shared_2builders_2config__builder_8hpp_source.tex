@@ -1,0 +1,75 @@
+\doxysection{config\+\_\+builder.\+hpp}
+\hypertarget{common_2include_2launchdarkly_2config_2shared_2builders_2config__builder_8hpp_source}{}\label{common_2include_2launchdarkly_2config_2shared_2builders_2config__builder_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/config\_builder.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/config\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/app\_info\_builder.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/data\_source\_builder.hpp>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/endpoints\_builder.hpp>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/events\_builder.hpp>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/http\_properties\_builder.hpp>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/logging\_builder.hpp>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/persistence\_builder.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/config.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}tl/expected.hpp"{}}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::builders\ \{}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00025\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder}{ConfigBuilder}}\ \{}
+\DoxyCodeLine{00026\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1Config}{Result}}\ =\ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1Config}{Config<SDK>}};}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\ =}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{launchdarkly::config::shared::builders::EndpointsBuilder<SDK>}};}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{EventsBuilder}}\ =}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{launchdarkly::config::shared::builders::EventsBuilder<SDK>}};}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\ =}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{launchdarkly::config::shared::builders::DataSourceBuilder<SDK>}};}
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\ =}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{launchdarkly::config::shared::builders::HttpPropertiesBuilder<SDK>}};}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{PersistenceBuilder}}\ =}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{launchdarkly::config::shared::builders::PersistenceBuilder<SDK>}};}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1LoggingBuilder}{LoggingBuilder}}\ =}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1LoggingBuilder}{launchdarkly::config::shared::builders::LoggingBuilder}};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder}{ConfigBuilder}}(std::string\ sdk\_key);}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00053\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_ae28867ba563432a91f355d04f45daec2}{ServiceEndpoints}}();}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1AppInfoBuilder}{AppInfoBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a7c8a85da9a24f46bb95250b8e8472622}{AppInfo}}();}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00069\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder}{ConfigBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a4f66740b0d1135bf40dd23abce9bb345}{Offline}}(\textcolor{keywordtype}{bool}\ offline);}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00077\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{EventsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_ab1f571af15a78b083b331053c1d1e5c8}{Events}}();}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00085\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a58842a183246e86b3aff0fd026913001}{DataSource}}();}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00093\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a91abff066eff61c34cd0094c9388cb54}{HttpProperties}}();}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00100\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1LoggingBuilder}{LoggingBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a3f81437b901dce4126484ad2cf9d41d7}{Logging}}();}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00107\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{PersistenceBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a0951c1afd8b17b390ee307505e9a043f}{Persistence}}();}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00113\ \ \ \ \ tl::expected<Result,\ Error>\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1ConfigBuilder_a59db2f4df0b635ca4ae48933caba96b2}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00116\ \ \ \ \ std::string\ sdk\_key\_;}
+\DoxyCodeLine{00117\ \ \ \ \ std::optional<bool>\ offline\_;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\ service\_endpoints\_builder\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1AppInfoBuilder}{AppInfoBuilder}}\ app\_info\_builder\_;}
+\DoxyCodeLine{00121\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{EventsBuilder}}\ events\_builder\_;}
+\DoxyCodeLine{00122\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\ data\_source\_builder\_;}
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\ http\_properties\_builder\_;}
+\DoxyCodeLine{00124\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1LoggingBuilder}{LoggingBuilder}}\ logging\_config\_builder\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PersistenceBuilder}{PersistenceBuilder}}\ persistence\_builder\_;}
+\DoxyCodeLine{00126\ \};}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::builders}}
+
+\end{DoxyCode}

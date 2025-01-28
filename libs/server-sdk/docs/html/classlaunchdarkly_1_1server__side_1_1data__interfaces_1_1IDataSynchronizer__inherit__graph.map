@@ -1,0 +1,7 @@
+<map id="launchdarkly::server_side::data_interfaces::IDataSynchronizer" name="launchdarkly::server_side::data_interfaces::IDataSynchronizer">
+<area shape="rect" id="Node000001" title="IDataSynchronizer obtains data via a background synchronization mechanism, updating an IDestination w..." alt="" coords="5,45,171,100"/>
+<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource.html" title=" " alt="" coords="219,5,382,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,52,219,45,220,51,185,57"/>
+<area shape="rect" id="Node000003" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource.html" title=" " alt="" coords="219,84,383,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,88,219,94,218,99,184,93"/>
+</map>
