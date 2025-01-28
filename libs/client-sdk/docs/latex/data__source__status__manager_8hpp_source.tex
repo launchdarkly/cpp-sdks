@@ -1,0 +1,34 @@
+\doxysection{data\+\_\+source\+\_\+status\+\_\+manager.\+hpp}
+\hypertarget{data__source__status__manager_8hpp_source}{}\label{data__source__status__manager_8hpp_source}\index{src/data\_sources/data\_source\_status\_manager.hpp@{src/data\_sources/data\_source\_status\_manager.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <boost/signals2.hpp>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <launchdarkly/client\_side/data\_source\_status.hpp>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/connection.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_sources/data\_source\_status\_manager\_base.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::data\_sources\ \{}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}}
+\DoxyCodeLine{00015\ \ \ \ \ :\ \textcolor{keyword}{public}\ internal::data\_sources::DataSourceStatusManagerBase<}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \ \ DataSourceStatus,}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \ \ IDataSourceStatusProvider>\ \{}
+\DoxyCodeLine{00018\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00019\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{\string~DataSourceStatusManager}}()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00022\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00023\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00026\ \};}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::data\_sources}}
+
+\end{DoxyCode}

@@ -1,0 +1,81 @@
+\doxysection{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence Class Reference}
+\hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=244pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Flag\+Persistence\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=244pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa0db63091e9c32f41e23d372f8eebc5f}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa0db63091e9c32f41e23d372f8eebc5f} 
+using {\bfseries Time\+Stampsource} = std\+::function$<$ std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$()$>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa46898c078abfd1f0c836d50a11df718}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_aa46898c078abfd1f0c836d50a11df718} 
+{\bfseries Flag\+Persistence} (std\+::string const \&sdk\+\_\+key, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&sink, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{Flag\+Store}} \&flag\+\_\+store, std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classIPersistence}{IPersistence}} $>$ persistence, Logger \&logger, std\+::size\+\_\+t max\+\_\+cached\+\_\+contexts, Time\+Stampsource time\+\_\+stamper=\mbox{[}$\,$\mbox{]}() \{ return std\+::chrono\+::system\+\_\+clock\+::now();\})
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_abbe6444643777f973047d0c9fde2d6b6}{Init}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$ data) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5defdb41e1c4a20028db95b4497fb2a3}{Upsert}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context, std\+::string key, Item\+Descriptor item) override
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8aa278ff86b18c612d74347f72116b5b}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a8aa278ff86b18c612d74347f72116b5b} 
+void {\bfseries Load\+Cached} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&context)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{launchdarkly\+::client\+\_\+side\+::\+IData\+Source\+Update\+Sink}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&item)=delete
+\item 
+{\bfseries IData\+Source\+Update\+Sink} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_abbe6444643777f973047d0c9fde2d6b6}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_abbe6444643777f973047d0c9fde2d6b6} 
+\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}!Init@{Init}}
+\index{Init@{Init}!launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+\doxysubsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence\+::\+Init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context,  }\item[{std\+::unordered\+\_\+map$<$ std\+::string, Item\+Descriptor $>$}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{launchdarkly\+::client\+\_\+side\+::\+IData\+Source\+Update\+Sink}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5defdb41e1c4a20028db95b4497fb2a3}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence_a5defdb41e1c4a20028db95b4497fb2a3} 
+\index{launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::client\_side::flag\_manager::FlagPersistence@{launchdarkly::client\_side::flag\_manager::FlagPersistence}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Flag\+Persistence\+::\+Upsert (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} const \&}]{context,  }\item[{std\+::string}]{key,  }\item[{Item\+Descriptor}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{launchdarkly\+::client\+\_\+side\+::\+IData\+Source\+Update\+Sink}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/flag\+\_\+manager/flag\+\_\+persistence.\+hpp\item 
+src/flag\+\_\+manager/flag\+\_\+persistence.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,50 @@
+\doxysection{endpoints\+\_\+builder.\+hpp}
+\hypertarget{endpoints__builder_8hpp_source}{}\label{endpoints__builder_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/endpoints\_builder.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/endpoints\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/service\_endpoints.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/error.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}tl/expected.hpp"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::builders\ \{}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }EndpointsBuilder;}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00018\ \textcolor{keywordtype}{bool}\ operator==(EndpointsBuilder<SDK>\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ EndpointsBuilder<SDK>\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00028\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\ \{}
+\DoxyCodeLine{00029\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keywordtype}{bool}\ \textcolor{keyword}{operator}==<SDK>(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder<SDK>}}\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder<SDK>}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00035\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a435370b557227e4c12ae7def977d061c}{EndpointsBuilder}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00042\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a699047e54ddfa1e090967cf7151595ba}{PollingBaseUrl}}(std::string\ url);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00049\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a082ca5fd82330e9e59f4588f65b242ae}{StreamingBaseUrl}}(std::string\ url);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a36d0a5f1173482ade92f4938c497e20a}{EventsBaseUrl}}(std::string\ url);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00064\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder}{EndpointsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a8f8eec460b9d0a21474b93e38a638020}{RelayProxyBaseURL}}(std::string\ \textcolor{keyword}{const}\&\ url);}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00072\ \ \ \ \ [[nodiscard]]\ tl::expected<built::ServiceEndpoints,\ Error>\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder_a5fb94ae9be2fc5c40021916295b14b03}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00075\ \ \ \ \ std::optional<std::string>\ polling\_base\_url\_;}
+\DoxyCodeLine{00076\ \ \ \ \ std::optional<std::string>\ streaming\_base\_url\_;}
+\DoxyCodeLine{00077\ \ \ \ \ std::optional<std::string>\ events\_base\_url\_;}
+\DoxyCodeLine{00078\ \};}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::builders}}
+
+\end{DoxyCode}

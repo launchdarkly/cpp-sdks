@@ -1,0 +1,194 @@
+\doxysection{sdk.\+h}
+\hypertarget{sdk_8h_source}{}\label{sdk_8h_source}\index{include/launchdarkly/client\_side/bindings/c/sdk.h@{include/launchdarkly/client\_side/bindings/c/sdk.h}}
+\mbox{\hyperlink{sdk_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00004\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2builder_8h}{launchdarkly/client\_side/bindings/c/config/builder.h}}>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{context_8h}{launchdarkly/bindings/c/context.h}}>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{evaluation__detail_8h}{launchdarkly/bindings/c/data/evaluation\_detail.h}}>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{error__info_8h}{launchdarkly/bindings/c/data\_source/error\_info.h}}>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{flag__listener_8h}{launchdarkly/bindings/c/flag\_listener.h}}>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{listener__connection_8h}{launchdarkly/bindings/c/listener\_connection.h}}>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{memory__routines_8h}{launchdarkly/bindings/c/memory\_routines.h}}>}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__function__argument__macro__definitions_8h}{launchdarkly/bindings/c/shared\_function\_argument\_macro\_definitions.h}}>}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{status_8h}{launchdarkly/bindings/c/status.h}}>}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{value_8h}{launchdarkly/bindings/c/value.h}}>}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#include\ <time.h>}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00025\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00026\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDClientSDK*\ LDClientSDK;}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00044\ LD\_EXPORT(LDClientSDK)}
+\DoxyCodeLine{00045\ \mbox{\hyperlink{sdk_8h_af0b03e8bd60c9fa4b418fabff2d6f42d}{LDClientSDK\_New}}(LDClientConfig\ config,\ LDContext\ context);}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ LD\_EXPORT(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*)}
+\DoxyCodeLine{00052\ \mbox{\hyperlink{sdk_8h_acb1c5fb5ee55dc25ffa0830f03d4f94e}{LDClientSDK\_Version}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00101\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00102\ \mbox{\hyperlink{sdk_8h_ab8b83ba5c8203f7ce654942ed13591ac}{LDClientSDK\_Start}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ milliseconds,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}*\ out\_succeeded);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00124\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00125\ \mbox{\hyperlink{sdk_8h_a10d7f6412562cf9ced8310a2b6d42b1d}{LDClientSDK\_Initialized}}(LDClientSDK\ sdk);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00132\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00133\ \mbox{\hyperlink{sdk_8h_a2065068761f1102ee7ba6f0e905947aa}{LDClientSDK\_TrackEvent}}(LDClientSDK\ sdk,\ \textcolor{keywordtype}{char}\ const*\ event\_name);}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00149\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00150\ \mbox{\hyperlink{sdk_8h_a6129083c7288674df10ea3c3d6911ff0}{LDClientSDK\_TrackMetric}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ event\_name,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ metric\_value,}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ data);}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00165\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00166\ \mbox{\hyperlink{sdk_8h_abb1dc7bdfadea71e006f7cbbf05cffed}{LDClientSDK\_TrackData}}(LDClientSDK\ sdk,\ \textcolor{keywordtype}{char}\ const*\ event\_name,\ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ data);}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00176\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00177\ \mbox{\hyperlink{sdk_8h_a1fc8786eb65ccd95efe75bfe0f445536}{LDClientSDK\_Flush}}(LDClientSDK\ sdk,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ reserved);}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00230\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00231\ \mbox{\hyperlink{sdk_8h_a7adc06d078a2f0ef249b09746addb19f}{LDClientSDK\_Identify}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDContext\ context,}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ milliseconds,}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}*\ out\_succeeded);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00244\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00245\ \mbox{\hyperlink{sdk_8h_aa563a7a83c6a6874c498fca487b325ef}{LDClientSDK\_BoolVariation}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ default\_value);}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00261\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00262\ \mbox{\hyperlink{sdk_8h_a4e27d61697ad5d25e3e160a2c821d58c}{LDClientSDK\_BoolVariationDetail}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ default\_value,}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDEvalDetail*\ out\_detail);}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00277\ LD\_EXPORT(\textcolor{keywordtype}{char}*)}
+\DoxyCodeLine{00278\ \mbox{\hyperlink{sdk_8h_aee5557ec0ca22a7e5974544f238dbc4d}{LDClientSDK\_StringVariation}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ default\_value);}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00296\ LD\_EXPORT(\textcolor{keywordtype}{char}*)}
+\DoxyCodeLine{00297\ \mbox{\hyperlink{sdk_8h_ac750eb9713be553bc9fa9da7207e0330}{LDClientSDK\_StringVariationDetail}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ default\_value,}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDEvalDetail*\ out\_detail);}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00310\ LD\_EXPORT(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{00311\ \mbox{\hyperlink{sdk_8h_a23432e0b0c0135bc63b4aa2451ea6ed5}{LDClientSDK\_IntVariation}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ default\_value);}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00327\ LD\_EXPORT(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{00328\ \mbox{\hyperlink{sdk_8h_abc228f9f49e82120bab59005a21d02ae}{LDClientSDK\_IntVariationDetail}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ default\_value,}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDEvalDetail*\ out\_detail);}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00341\ LD\_EXPORT(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{00342\ \mbox{\hyperlink{sdk_8h_aab9af2b4d2133f580d4b65c2a9640423}{LDClientSDK\_DoubleVariation}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ default\_value);}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00358\ LD\_EXPORT(\textcolor{keywordtype}{int})}
+\DoxyCodeLine{00359\ \mbox{\hyperlink{sdk_8h_ad28e856386222748a801f0ca12f9dc88}{LDClientSDK\_DoubleVariationDetail}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ default\_value,}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDEvalDetail*\ out\_detail);}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00374\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00375\ \mbox{\hyperlink{sdk_8h_a44e498268105fd2e95ce8c218249463e}{LDClientSDK\_JsonVariation}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ default\_value);}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00393\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00394\ \mbox{\hyperlink{sdk_8h_a2d007914374af331b19eb0b3ff290103}{LDClientSDK\_JsonVariationDetail}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ default\_value,}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDEvalDetail*\ out\_detail);}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00420\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00421\ \mbox{\hyperlink{sdk_8h_a9313e6cf3e19445a8af0ba86460ada27}{LDClientSDK\_AllFlags}}(LDClientSDK\ sdk);}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00427\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00428\ \mbox{\hyperlink{sdk_8h_a56f5799bc010e44803fe48b8908a56f5}{LDClientSDK\_Free}}(LDClientSDK\ sdk);}
+\DoxyCodeLine{00429\ }
+\DoxyCodeLine{00447\ LD\_EXPORT(\mbox{\hyperlink{listener__connection_8h_a424bc119d8823bbfbd4cd29ca64b79ad}{LDListenerConnection}})}
+\DoxyCodeLine{00448\ \mbox{\hyperlink{sdk_8h_ab8ed7b538b95028ec7f6db233218ca1e}{LDClientSDK\_FlagNotifier\_OnFlagChange}}(LDClientSDK\ sdk,}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ flag\_key,}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ struct\ \mbox{\hyperlink{structLDFlagListener}{LDFlagListener}}\ listener);}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ typedef\ struct\ \_LDDataSourceStatus*\ LDDataSourceStatus;}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00457\ enum\ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084}{LDDataSourceStatus\_State}}\ \{}
+\DoxyCodeLine{00467\ \ \ \ \ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084ab087f34f39ce7978a916b3b9378cf320}{LD\_DATASOURCESTATUS\_STATE\_INITIALIZING}}\ =\ 0,}
+\DoxyCodeLine{00468\ }
+\DoxyCodeLine{00478\ \ \ \ \ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084a9cfb97309461053b0c7a38c0eb890a1d}{LD\_DATASOURCESTATUS\_STATE\_VALID}}\ =\ 1,}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00490\ \ \ \ \ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084a9606ca4f9abd923a7762e37708c09c25}{LD\_DATASOURCESTATUS\_STATE\_INTERRUPTED}}\ =\ 2,}
+\DoxyCodeLine{00491\ }
+\DoxyCodeLine{00495\ \ \ \ \ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084ad95896b4279ad8f79f8106c312ea2a47}{LD\_DATASOURCESTATUS\_STATE\_OFFLINE}}\ =\ 3,}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00505\ \ \ \ \ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084a724ef0e7d86e22099676d823d6d87f55}{LD\_DATASOURCESTATUS\_STATE\_SHUTDOWN}}\ =\ 4,}
+\DoxyCodeLine{00506\ }
+\DoxyCodeLine{00507\ \ \ \ \ LD\_DATASOURCESTATUS\_STATE\_UNUSED\_MAXVALUE\ =}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ INT32\_MAX\ \textcolor{comment}{/*\ Used\ to\ ensure\ the\ underlying\ type\ is}}
+\DoxyCodeLine{00509\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ at\ least\ 32\ bits.\ */}}
+\DoxyCodeLine{00510\ \};}
+\DoxyCodeLine{00511\ }
+\DoxyCodeLine{00518\ LD\_EXPORT(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*)}
+\DoxyCodeLine{00519\ \mbox{\hyperlink{sdk_8h_af06eb67449a9edf1393cd49c3a9437ed}{LDDataSourceStatus\_State\_Name}}(\textcolor{keyword}{enum}\ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084}{LDDataSourceStatus\_State}}\ state,}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ default\_if\_unknown);}
+\DoxyCodeLine{00521\ }
+\DoxyCodeLine{00526\ LD\_EXPORT(\textcolor{keyword}{enum}\ \mbox{\hyperlink{sdk_8h_ad9d337289d53448c8a5e5081b5c0a084}{LDDataSourceStatus\_State}})}
+\DoxyCodeLine{00527\ \mbox{\hyperlink{sdk_8h_a9c213918253da3603d24e8739e9c8bf0}{LDDataSourceStatus\_GetState}}(LDDataSourceStatus\ status);}
+\DoxyCodeLine{00528\ }
+\DoxyCodeLine{00545\ LD\_EXPORT(LDDataSourceStatus\_ErrorInfo)}
+\DoxyCodeLine{00546\ \mbox{\hyperlink{sdk_8h_a96317e7b6a96e45fbad74f3edf20edb1}{LDDataSourceStatus\_GetLastError}}(LDDataSourceStatus\ status);}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00566\ LD\_EXPORT(time\_t)}
+\DoxyCodeLine{00567\ \mbox{\hyperlink{sdk_8h_a1dbb4da4d393a505f13ff9f79c441a18}{LDDataSourceStatus\_StateSince}}(LDDataSourceStatus\ status);}
+\DoxyCodeLine{00568\ }
+\DoxyCodeLine{00569\ typedef\ \textcolor{keywordtype}{void}\ (*DataSourceStatusCallbackFn)(LDDataSourceStatus\ status,}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ user\_data);}
+\DoxyCodeLine{00571\ }
+\DoxyCodeLine{00578\ struct\ \mbox{\hyperlink{structLDDataSourceStatusListener}{LDDataSourceStatusListener}}\ \{}
+\DoxyCodeLine{00587\ \ \ \ \ DataSourceStatusCallbackFn\ \mbox{\hyperlink{structLDDataSourceStatusListener_aa28fef67ddb86e68b1464956cf03b9ff}{StatusChanged}};}
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00592\ \ \ \ \ \textcolor{keywordtype}{void}*\ \mbox{\hyperlink{structLDDataSourceStatusListener_a1c07150c27a6aa033a499c505110263e}{UserData}};}
+\DoxyCodeLine{00593\ \};}
+\DoxyCodeLine{00594\ }
+\DoxyCodeLine{00610\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00611\ \mbox{\hyperlink{sdk_8h_abeb111cacccf1330bf15793b7fbcadce}{LDDataSourceStatusListener\_Init}}(\textcolor{keyword}{struct}\ \mbox{\hyperlink{structLDDataSourceStatusListener}{LDDataSourceStatusListener}}*\ listener);}
+\DoxyCodeLine{00612\ }
+\DoxyCodeLine{00624\ LD\_EXPORT(\mbox{\hyperlink{listener__connection_8h_a424bc119d8823bbfbd4cd29ca64b79ad}{LDListenerConnection}})}
+\DoxyCodeLine{00625\ \mbox{\hyperlink{sdk_8h_a2a309537cbd6e331bdaa20f7bec8d0e2}{LDClientSDK\_DataSourceStatus\_OnStatusChange}}(}
+\DoxyCodeLine{00626\ \ \ \ \ LDClientSDK\ sdk,}
+\DoxyCodeLine{00627\ \ \ \ \ \textcolor{keyword}{struct}\ \mbox{\hyperlink{structLDDataSourceStatusListener}{LDDataSourceStatusListener}}\ listener);}
+\DoxyCodeLine{00628\ }
+\DoxyCodeLine{00634\ LD\_EXPORT(LDDataSourceStatus)}
+\DoxyCodeLine{00635\ \mbox{\hyperlink{sdk_8h_ab19a7318c49bddbfe6b8b0d7047d14db}{LDClientSDK\_DataSourceStatus\_Status}}(LDClientSDK\ sdk);}
+\DoxyCodeLine{00636\ }
+\DoxyCodeLine{00641\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00642\ \mbox{\hyperlink{sdk_8h_af24e3c060b293ef764e295eade71e961}{LDDataSourceStatus\_Free}}(LDDataSourceStatus\ status);}
+\DoxyCodeLine{00643\ }
+\DoxyCodeLine{00644\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00645\ \}}
+\DoxyCodeLine{00646\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00647\ }
+\DoxyCodeLine{00648\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

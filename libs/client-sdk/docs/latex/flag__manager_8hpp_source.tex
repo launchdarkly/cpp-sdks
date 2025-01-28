@@ -1,0 +1,35 @@
+\doxysection{flag\+\_\+manager.\+hpp}
+\hypertarget{flag__manager_8hpp_source}{}\label{flag__manager_8hpp_source}\index{src/flag\_manager/flag\_manager.hpp@{src/flag\_manager/flag\_manager.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}flag\_persistence.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}flag\_store.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}flag\_updater.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/context.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::flag\_manager\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagManager}{FlagManager}}\ \{}
+\DoxyCodeLine{00012\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00013\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagManager}{FlagManager}}(std::string\ \textcolor{keyword}{const}\&\ sdk\_key,}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Logger\&\ logger,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ max\_cached\_contexts,}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::shared\_ptr<IPersistence>\ persistence);}
+\DoxyCodeLine{00017\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IDataSourceUpdateSink}}\&\ Updater();}
+\DoxyCodeLine{00018\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlagNotifier}}\&\ Notifier();}
+\DoxyCodeLine{00019\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{FlagStore}}\ \textcolor{keyword}{const}\&\ Store()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{void}\ LoadCache(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context);}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{FlagStore}}\ flag\_store\_;}
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater}{FlagUpdater}}\ flag\_updater\_;}
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{FlagPersistence}}\ persistence\_updater\_;}
+\DoxyCodeLine{00027\ \};}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::flag\_manager}}
+
+\end{DoxyCode}

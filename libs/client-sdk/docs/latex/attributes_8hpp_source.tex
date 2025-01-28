@@ -1,0 +1,129 @@
+\doxysection{attributes.\+hpp}
+\hypertarget{attributes_8hpp_source}{}\label{attributes_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/attributes.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/attributes.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <unordered\_set>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/attribute\_reference.hpp>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{Attributes}}\ final\ \{}
+\DoxyCodeLine{00016\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_acefaa8d39ae389b43e287b97cc7c8967}{Key}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00029\ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_af92ffa2164e5bf0d29d170e888c71599}{Name}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a3347f8d8b39ba5b1298d49bf19e1b153}{Anonymous}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a2f69dfa797b919f1ce68a5a3b1cf29c3}{CustomAttributes}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00047\ \ \ \ \ AttributeReference::SetType\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a418d7e2b6951a8c8630b3d1637c38c49}{PrivateAttributes}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_acaf92a71471eb5bbb5681882ba26b335}{Get}}(}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{launchdarkly::AttributeReference}}\ \textcolor{keyword}{const}\&\ ref)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a7190f97fd76042d6f04963204971167c}{Valid}}())\ \{}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Cannot\ index\ by\ invalid\ references.}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classlaunchdarkly_1_1Value_afaa69d329adc3b5367a321a49f660513}{launchdarkly::Value::Null}}();}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_a095436d3b368215420b34e6e637cdf13}{IsKind}}())\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Cannot\ access\ kind.}}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classlaunchdarkly_1_1Value_afaa69d329adc3b5367a321a49f660513}{launchdarkly::Value::Null}}();}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}{Depth}}()\ ==\ 1)\ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Handle\ built-\/in\ attributes.}}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}{Component}}(0)\ ==\ \textcolor{stringliteral}{"{}key"{}})\ \{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ key\_;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}{Component}}(0)\ ==\ \textcolor{stringliteral}{"{}name"{}})\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ name\_;}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}{Component}}(0)\ ==\ \textcolor{stringliteral}{"{}anonymous"{}})\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ anonymous\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ \textcolor{keyword}{const}*\ node\ =\ \&custom\_attributes\_;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ found\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{size\_t}\ index\ =\ 0;\ index\ <\ ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_adc495988e70a4ef942a68b232f9a6085}{Depth}}();\ index++)\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ component\ =\ ref.\mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference_af5e40e622802212cfc76df309097c4c5}{Component}}(index);}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (node-\/>\mbox{\hyperlink{classlaunchdarkly_1_1Value_aac5710ac0f896b7a51d8f4af3f620d3e}{IsObject}}())\ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ map\ =\ node-\/>\mbox{\hyperlink{classlaunchdarkly_1_1Value_a06f179b4f2db21364d79f830acd0570c}{AsObject}}();}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ search\ =\ map.Find(component);\ search\ !=\ map.end())\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ node\ =\ \&search-\/>second;}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ found\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ found\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!found)\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{classlaunchdarkly_1_1Value_afaa69d329adc3b5367a321a49f660513}{launchdarkly::Value::Null}}();}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *node;}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a9c54b0af062e246223733ba3882f9893}{Attributes}}(std::string\ key,}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::string>\ name,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ anonymous,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ attributes,}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AttributeReference::SetType\ private\_attributes\ =}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AttributeReference::SetType())}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ :\ key\_(std::move(key)),}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ name\_(std::move(name)),}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ anonymous\_(anonymous),}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ private\_attributes\_(std::move(private\_attributes)),}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ custom\_attributes\_(std::move(attributes))\ \{\}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keyword}{friend}\ std::ostream\&\ operator<<(std::ostream\&\ out,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{Attributes}}\ \textcolor{keyword}{const}\&\ attrs)\ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}\{key:\ "{}}\ <<\ attrs.key\_\ <<\ \textcolor{stringliteral}{"{},\ "{}}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ name:\ "{}}\ <<\ attrs.name\_\ <<\ \textcolor{stringliteral}{"{}\ anonymous:\ "{}}\ <<\ attrs.anonymous\_}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ private:\ ["{}};}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ first\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ private\_attribute\ :\ attrs.private\_attributes\_)\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (first)\ \{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{},\ "{}};}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ private\_attribute;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}]\ "{}}}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ custom:\ "{}}\ <<\ attrs.custom\_attributes\_\ <<\ \textcolor{stringliteral}{"{}\}"{}};}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out;}
+\DoxyCodeLine{00142\ \ \ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a9c54b0af062e246223733ba3882f9893}{Attributes}}(Attributes\ \textcolor{keyword}{const}\&\ context)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a9c54b0af062e246223733ba3882f9893}{Attributes}}(Attributes\&\&\ context)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \string~Attributes()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a9c54b0af062e246223733ba3882f9893}{Attributes}}\&\ operator=(Attributes\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes_a9c54b0af062e246223733ba3882f9893}{Attributes}}\&\ operator=(Attributes\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{comment}{//\ Built-\/in\ attributes.}}
+\DoxyCodeLine{00156\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ key\_;}
+\DoxyCodeLine{00157\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ name\_;}
+\DoxyCodeLine{00158\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ anonymous\_;}
+\DoxyCodeLine{00159\ \ \ \ \ AttributeReference::SetType\ private\_attributes\_;}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ custom\_attributes\_;}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{comment}{//\ Kinds\ are\ contained\ at\ the\ context\ level,\ not\ inside\ attributes.}}
+\DoxyCodeLine{00164\ \};}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

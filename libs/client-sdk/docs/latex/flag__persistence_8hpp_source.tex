@@ -1,0 +1,69 @@
+\doxysection{flag\+\_\+persistence.\+hpp}
+\hypertarget{flag__persistence_8hpp_source}{}\label{flag__persistence_8hpp_source}\index{src/flag\_manager/flag\_persistence.hpp@{src/flag\_manager/flag\_persistence.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}../data\_sources/data\_source\_update\_sink.hpp"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}context\_index.hpp"{}}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}flag\_store.hpp"{}}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <launchdarkly/context.hpp>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <launchdarkly/persistence/persistence.hpp>}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::flag\_manager\ \{}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ std::string\ PersistenceEncodeKey(std::string\ \textcolor{keyword}{const}\&\ input);}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{FlagPersistence}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IDataSourceUpdateSink}}\ \{}
+\DoxyCodeLine{00020\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{using\ }TimeStampsource\ =}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ std::function<std::chrono::time\_point<std::chrono::system\_clock>()>;}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence}{FlagPersistence}}(}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ sdk\_key,}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IDataSourceUpdateSink}}\&\ sink,}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{FlagStore}}\&\ flag\_store,}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ std::shared\_ptr<IPersistence>\ persistence,}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ Logger\&\ logger,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ std::size\_t\ max\_cached\_contexts,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ TimeStampsource\ time\_stamper\ =\ []()\ \{}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::chrono::system\_clock::now();}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{void}\ Init(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context,}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::unordered\_map<std::string,\ ItemDescriptor>\ data)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ Upsert(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ItemDescriptor\ item)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{void}\ LoadCached(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ std::string\ global\_namespace\_\ =\ \textcolor{stringliteral}{"{}LaunchDarkly"{}};}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ std::string\ index\_key\_\ =\ \textcolor{stringliteral}{"{}ContextIndex"{}};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ Logger\&\ logger\_;}
+\DoxyCodeLine{00049\ \ \ \ \ std::size\_t\ max\_cached\_contexts\_;}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IDataSourceUpdateSink}}\&\ sink\_;}
+\DoxyCodeLine{00052\ \ \ \ \ std::shared\_ptr<IPersistence>\ persistence\_;}
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keyword}{mutable}\ std::recursive\_mutex\ persistence\_mutex\_;}
+\DoxyCodeLine{00054\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagStore}{FlagStore}}\&\ flag\_store\_;}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ std::string\ environment\_namespace\_;}
+\DoxyCodeLine{00057\ \ \ \ \ TimeStampsource\ time\_stamper\_;}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}\ GetIndex();}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keywordtype}{void}\ StoreCache(std::string\ \textcolor{keyword}{const}\&\ context\_id);}
+\DoxyCodeLine{00061\ \};}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::flag\_manager}}
+
+\end{DoxyCode}

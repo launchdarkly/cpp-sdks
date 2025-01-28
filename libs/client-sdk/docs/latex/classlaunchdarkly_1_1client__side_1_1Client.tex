@@ -1,0 +1,511 @@
+\doxysection{launchdarkly\+::client\+\_\+side\+::Client Class Reference}
+\hypertarget{classlaunchdarkly_1_1client__side_1_1Client}{}\label{classlaunchdarkly_1_1client__side_1_1Client}\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::Client\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=192pt]{classlaunchdarkly_1_1client__side_1_1Client__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::Client\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=192pt]{classlaunchdarkly_1_1client__side_1_1Client__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a97ac8f2317ec983c981a3f40753079c4}\label{classlaunchdarkly_1_1client__side_1_1Client_a97ac8f2317ec983c981a3f40753079c4} 
+using {\bfseries Flag\+Key} = std\+::string
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types inherited from \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{launchdarkly\+::client\+\_\+side\+::\+IClient}}}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{Flag\+Key}} = std\+::string
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a9fdb410a817838c6b0403d0b12d67c52}\label{classlaunchdarkly_1_1client__side_1_1Client_a9fdb410a817838c6b0403d0b12d67c52} 
+{\bfseries Client} (\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1Config}{Config}} config, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} context)
+\item 
+std\+::future$<$ bool $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a41d122017bfeeedaf472857e6774a500}{Start\+Async}} () override
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6}{Initialized}} () const override
+\item 
+std\+::unordered\+\_\+map$<$ Flag\+Key, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a4b7d0edaa68689b5bf1927b972d81c51}{All\+Flags}} () const override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453}{Track}} (std\+::string event\+\_\+name, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} data, double metric\+\_\+value) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a69f89b96c69b9d72146fde64375f6d5e}{Track}} (std\+::string event\+\_\+name, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} data) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a7c4ec4ae3cb04cb4fac27335834f3257}{Track}} (std\+::string event\+\_\+name) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ad19e6199bff8c0c0caa94e28f44ded3f}{Flush\+Async}} () override
+\item 
+std\+::future$<$ bool $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a62fc1fe135495b72fa37ecedf5a2c7e2}{Identify\+Async}} (\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} context) override
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a3181fce58254e59484842c745299724a}{Bool\+Variation}} (Flag\+Key const \&key, bool default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ bool $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a81d57edf13a87562d328174d7f9d6f09}{Bool\+Variation\+Detail}} (Flag\+Key const \&key, bool default\+\_\+value) override
+\item 
+std\+::string \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a8ceb29d498baee8c334823758a85d711}{String\+Variation}} (Flag\+Key const \&key, std\+::string default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a38353999d92299ebd1bc015866cbb212}{String\+Variation\+Detail}} (Flag\+Key const \&key, std\+::string default\+\_\+value) override
+\item 
+double \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a0ae5f32d413c2bfa26e78a0d72e9eee4}{Double\+Variation}} (Flag\+Key const \&key, double default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ double $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a1e4d5cb27d928d3fd0391b5ca485e875}{Double\+Variation\+Detail}} (Flag\+Key const \&key, double default\+\_\+value) override
+\item 
+int \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae625d04b9ca3317bbe48fe61e2d5a89b}{Int\+Variation}} (Flag\+Key const \&key, int default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ int $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a4b9948039c2387fc0dc98b590f82eb0d}{Int\+Variation\+Detail}} (Flag\+Key const \&key, int default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a77d1c3d0d81aeb1f632ac6ab16719b6e}{Json\+Variation}} (Flag\+Key const \&key, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a022ba44ac1f16c3d83e339b5bf6c6875}{Json\+Variation\+Detail}} (Flag\+Key const \&key, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} default\+\_\+value) override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSourceStatusProvider}{data\+\_\+sources\+::\+IData\+Source\+Status\+Provider}} \& \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_adedade4cae0355b19f954907dbcf2362}{Data\+Source\+Status}} () override
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{flag\+\_\+manager\+::\+IFlag\+Notifier}} \& \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a0406a57e9c751b013696f6f7663a7170}{Flag\+Notifier}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{launchdarkly\+::client\+\_\+side\+::\+IClient}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IClient} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} const \&item)=delete
+\item 
+{\bfseries IClient} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}} \&\&)=delete
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static char const \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a6caf30ff74cb40dfbf22117c0f42c268}{Version}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a4b7d0edaa68689b5bf1927b972d81c51}\label{classlaunchdarkly_1_1client__side_1_1Client_a4b7d0edaa68689b5bf1927b972d81c51} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!AllFlags@{AllFlags}}
+\index{AllFlags@{AllFlags}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{AllFlags()}{AllFlags()}}
+{\footnotesize\ttfamily std\+::unordered\+\_\+map$<$ Flag\+Key, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+All\+Flags (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a map from feature flag keys to feature flag values for the current context.
+
+This method will not send analytics events back to Launch\+Darkly.
+
+\begin{DoxyReturn}{Returns}
+A map from feature flag keys to values for the current context. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ac30e1f4785fc5e970daaf9bc01c476fc}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a3181fce58254e59484842c745299724a}\label{classlaunchdarkly_1_1client__side_1_1Client_a3181fce58254e59484842c745299724a} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!BoolVariation@{BoolVariation}}
+\index{BoolVariation@{BoolVariation}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{BoolVariation()}{BoolVariation()}}
+{\footnotesize\ttfamily bool launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Bool\+Variation (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{bool}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the boolean value of a feature flag for a given flag key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the selected context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ac0e920faf5eb423f6de578f538174e63}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a81d57edf13a87562d328174d7f9d6f09}\label{classlaunchdarkly_1_1client__side_1_1Client_a81d57edf13a87562d328174d7f9d6f09} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!BoolVariationDetail@{BoolVariationDetail}}
+\index{BoolVariationDetail@{BoolVariationDetail}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{BoolVariationDetail()}{BoolVariationDetail()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ bool $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Bool\+Variation\+Detail (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{bool}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the boolean value of a feature flag for a given flag key, in an object that also describes the way the value was determined.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An evaluation detail object. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_adc0f87673d177eb5cd17f7423b6f53f8}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_adedade4cae0355b19f954907dbcf2362}\label{classlaunchdarkly_1_1client__side_1_1Client_adedade4cae0355b19f954907dbcf2362} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!DataSourceStatus@{DataSourceStatus}}
+\index{DataSourceStatus@{DataSourceStatus}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{DataSourceStatus()}{DataSourceStatus()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSourceStatusProvider}{data\+\_\+sources\+::\+IData\+Source\+Status\+Provider}} \& launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Data\+Source\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns an interface which provides methods for subscribing to data source status. \begin{DoxyReturn}{Returns}
+A data source status provider. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ae0e1925b1d20cb0822b20e959978126d}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a0ae5f32d413c2bfa26e78a0d72e9eee4}\label{classlaunchdarkly_1_1client__side_1_1Client_a0ae5f32d413c2bfa26e78a0d72e9eee4} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!DoubleVariation@{DoubleVariation}}
+\index{DoubleVariation@{DoubleVariation}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{DoubleVariation()}{DoubleVariation()}}
+{\footnotesize\ttfamily double launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Double\+Variation (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{double}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the double value of a feature flag for a given flag key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the selected context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a0e14294b53f69be948babb8bb8f69064}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a1e4d5cb27d928d3fd0391b5ca485e875}\label{classlaunchdarkly_1_1client__side_1_1Client_a1e4d5cb27d928d3fd0391b5ca485e875} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!DoubleVariationDetail@{DoubleVariationDetail}}
+\index{DoubleVariationDetail@{DoubleVariationDetail}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{DoubleVariationDetail()}{DoubleVariationDetail()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ double $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Double\+Variation\+Detail (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{double}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the double value of a feature flag for a given flag key, in an object that also describes the way the value was determined.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An evaluation detail object. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a3b5085f4d44bac411618d449ed6a3e83}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a0406a57e9c751b013696f6f7663a7170}\label{classlaunchdarkly_1_1client__side_1_1Client_a0406a57e9c751b013696f6f7663a7170} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!FlagNotifier@{FlagNotifier}}
+\index{FlagNotifier@{FlagNotifier}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{FlagNotifier()}{FlagNotifier()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{flag\+\_\+manager\+::\+IFlag\+Notifier}} \& launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Flag\+Notifier (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns an interface which provides methods for subscribing to data flag changes. \begin{DoxyReturn}{Returns}
+A flag notifier. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ad7b9c979c787eb9bd15d3b4775138947}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_ad19e6199bff8c0c0caa94e28f44ded3f}\label{classlaunchdarkly_1_1client__side_1_1Client_ad19e6199bff8c0c0caa94e28f44ded3f} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!FlushAsync@{FlushAsync}}
+\index{FlushAsync@{FlushAsync}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{FlushAsync()}{FlushAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Flush\+Async (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Tells the client that all pending analytics events (if any) should be delivered as soon as possible. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_adcadd25f7f652dd7e934bf88f9763d4f}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a62fc1fe135495b72fa37ecedf5a2c7e2}\label{classlaunchdarkly_1_1client__side_1_1Client_a62fc1fe135495b72fa37ecedf5a2c7e2} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!IdentifyAsync@{IdentifyAsync}}
+\index{IdentifyAsync@{IdentifyAsync}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{IdentifyAsync()}{IdentifyAsync()}}
+{\footnotesize\ttfamily std\+::future$<$ bool $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Identify\+Async (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}}]{context }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Changes the current evaluation context, requests flags for that context from Launch\+Darkly if online, and generates an analytics event to tell Launch\+Darkly about the context.
+
+Only one Identify\+Async can be in progress at once; calling it concurrently invokes undefined behavior.
+
+To block until the identify operation is complete, call wait() on the returned future.
+
+The returned future will resolve to true or false based on the logic outlined on \doxylink{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6}{Initialized}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em context} & The new evaluation context. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a97bd5f8e5c1db9eb0405b03862cb2984}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6}\label{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!Initialized@{Initialized}}
+\index{Initialized@{Initialized}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{Initialized()}{Initialized()}}
+{\footnotesize\ttfamily bool launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Initialized (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a boolean value indicating Launch\+Darkly connection and flag state within the client.
+
+When you first start the client, once Start\+Async has completed, Initialized should return true if and only if either 1. it connected to Launch\+Darkly and successfully retrieved flags, or 2. it started in offline mode so there\textquotesingle{}s no need to connect to Launch\+Darkly.
+
+If the client timed out trying to connect to LD, then Initialized returns false (even if we do have cached flags).
+
+If the client connected and got a 401 error, Initialized will return false.
+
+This serves the purpose of letting the app know that there was a problem of some kind.
+
+\begin{DoxyReturn}{Returns}
+True if the client is initialized. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_aac08999be1302b76544b7cc72af26a22}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_ae625d04b9ca3317bbe48fe61e2d5a89b}\label{classlaunchdarkly_1_1client__side_1_1Client_ae625d04b9ca3317bbe48fe61e2d5a89b} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!IntVariation@{IntVariation}}
+\index{IntVariation@{IntVariation}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{IntVariation()}{IntVariation()}}
+{\footnotesize\ttfamily int launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Int\+Variation (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{int}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the int value of a feature flag for a given flag key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the selected context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a88c4222b9f6fb65c446dfa530595fe23}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a4b9948039c2387fc0dc98b590f82eb0d}\label{classlaunchdarkly_1_1client__side_1_1Client_a4b9948039c2387fc0dc98b590f82eb0d} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!IntVariationDetail@{IntVariationDetail}}
+\index{IntVariationDetail@{IntVariationDetail}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{IntVariationDetail()}{IntVariationDetail()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ int $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Int\+Variation\+Detail (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{int}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the int value of a feature flag for a given flag key, in an object that also describes the way the value was determined.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An evaluation detail object. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afaaacc3e53ea0e51647a5dd293e5af94}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a77d1c3d0d81aeb1f632ac6ab16719b6e}\label{classlaunchdarkly_1_1client__side_1_1Client_a77d1c3d0d81aeb1f632ac6ab16719b6e} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!JsonVariation@{JsonVariation}}
+\index{JsonVariation@{JsonVariation}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{JsonVariation()}{JsonVariation()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Json\+Variation (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the JSON value of a feature flag for a given flag key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the selected context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a298d89a0d94bd696ab216dea8fb9d0b0}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a022ba44ac1f16c3d83e339b5bf6c6875}\label{classlaunchdarkly_1_1client__side_1_1Client_a022ba44ac1f16c3d83e339b5bf6c6875} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!JsonVariationDetail@{JsonVariationDetail}}
+\index{JsonVariationDetail@{JsonVariationDetail}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{JsonVariationDetail()}{JsonVariationDetail()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Json\+Variation\+Detail (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the JSON value of a feature flag for a given flag key, in an object that also describes the way the value was determined.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An evaluation detail object. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a38284565ae14b25819513902ed87f14d}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a41d122017bfeeedaf472857e6774a500}\label{classlaunchdarkly_1_1client__side_1_1Client_a41d122017bfeeedaf472857e6774a500} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!StartAsync@{StartAsync}}
+\index{StartAsync@{StartAsync}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{StartAsync()}{StartAsync()}}
+{\footnotesize\ttfamily std\+::future$<$ bool $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Start\+Async (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Connects the client to Launch\+Darkly\textquotesingle{}s flag delivery endpoints.
+
+Start\+Async must be called once for the SDK to start receiving flag data. Start\+Async only needs to be called one time for the lifetime of the SDK client. To change the context associated with evaluations please call the Identify\+Async method.
+
+The returned future will resolve to true or false based on the logic outlined on \doxylink{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6}{Initialized}.
+
+Blocking indefinitely on the future (e.\+g. by calling .get() or .wait()) is highly discouraged. Instead, use a method that takes a timeout like .wait\+\_\+for() or .wait\+\_\+until(), or do not wait.
+
+Otherwise, the application may hang indefinitely if the client cannot connect to Launch\+Darkly.
+
+While the client is connecting asynchronously, it is safe to call variation methods, which will return application-\/defined default values.
+
+The client will always continue to attempt to connect asynchronously after being started unless it encounters an unrecoverable error. The returned promise timing out does not affect this behavior. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ad56ea641a2789c87b14d111c83109955}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a8ceb29d498baee8c334823758a85d711}\label{classlaunchdarkly_1_1client__side_1_1Client_a8ceb29d498baee8c334823758a85d711} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!StringVariation@{StringVariation}}
+\index{StringVariation@{StringVariation}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{StringVariation()}{StringVariation()}}
+{\footnotesize\ttfamily std\+::string launchdarkly\+::client\+\_\+side\+::\+Client\+::\+String\+Variation (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{std\+::string}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the string value of a feature flag for a given flag key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the selected context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a720c9b96af736ba7f091cd66a906f8d4}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a38353999d92299ebd1bc015866cbb212}\label{classlaunchdarkly_1_1client__side_1_1Client_a38353999d92299ebd1bc015866cbb212} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!StringVariationDetail@{StringVariationDetail}}
+\index{StringVariationDetail@{StringVariationDetail}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{StringVariationDetail()}{StringVariationDetail()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ std\+::string $>$ launchdarkly\+::client\+\_\+side\+::\+Client\+::\+String\+Variation\+Detail (\begin{DoxyParamCaption}\item[{Flag\+Key const \&}]{key,  }\item[{std\+::string}]{default\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the string value of a feature flag for a given flag key, in an object that also describes the way the value was determined.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The unique feature key for the feature flag. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An evaluation detail object. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_aa793e30b4e9c1bcb29c042eac25d3f69}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a7c4ec4ae3cb04cb4fac27335834f3257}\label{classlaunchdarkly_1_1client__side_1_1Client_a7c4ec4ae3cb04cb4fac27335834f3257} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!Track@{Track}}
+\index{Track@{Track}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{Track()}{Track()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Track (\begin{DoxyParamCaption}\item[{std\+::string}]{event\+\_\+name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Tracks that the current context performed an event for the given event name.
+
+
+\begin{DoxyParams}{Parameters}
+{\em event\+\_\+name} & The name of the event. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a537efc7c085ddcd57f9815773bc4dff1}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a69f89b96c69b9d72146fde64375f6d5e}\label{classlaunchdarkly_1_1client__side_1_1Client_a69f89b96c69b9d72146fde64375f6d5e} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!Track@{Track}}
+\index{Track@{Track}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{Track()}{Track()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Track (\begin{DoxyParamCaption}\item[{std\+::string}]{event\+\_\+name,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Tracks that the current context performed an event for the given event name, with additional JSON data.
+
+
+\begin{DoxyParams}{Parameters}
+{\em event\+\_\+name} & The name of the event. \\
+\hline
+{\em data} & A JSON value containing additional data associated with the event. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afa2d2fb87c6cfd9ff4235a0c2ef4f32d}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453}\label{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!Track@{Track}}
+\index{Track@{Track}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{Track()}{Track()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Track (\begin{DoxyParamCaption}\item[{std\+::string}]{event\+\_\+name,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}}]{data,  }\item[{double}]{metric\+\_\+value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Tracks that the current context performed an event for the given event name, and associates it with a numeric metric value.
+
+
+\begin{DoxyParams}{Parameters}
+{\em event\+\_\+name} & The name of the event. \\
+\hline
+{\em data} & A JSON value containing additional data associated with the event. \\
+\hline
+{\em metric\+\_\+value} & this value is used by the Launch\+Darkly experimentation feature in numeric custom metrics, and will also be returned as part of the custom event for Data Export \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a55017e2158e864c64463da046080d54b}{launchdarkly\+::client\+\_\+side\+::\+IClient}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1Client_a6caf30ff74cb40dfbf22117c0f42c268}\label{classlaunchdarkly_1_1client__side_1_1Client_a6caf30ff74cb40dfbf22117c0f42c268} 
+\index{launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}!Version@{Version}}
+\index{Version@{Version}!launchdarkly::client\_side::Client@{launchdarkly::client\_side::Client}}
+\doxysubsubsection{\texorpdfstring{Version()}{Version()}}
+{\footnotesize\ttfamily char const  \texorpdfstring{$\ast$}{*} launchdarkly\+::client\+\_\+side\+::\+Client\+::\+Version (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Returns the version of the SDK. \begin{DoxyReturn}{Returns}
+String representing version of the SDK. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/client\+\_\+side/client.\+hpp\item 
+src/client.\+cpp\end{DoxyCompactItemize}

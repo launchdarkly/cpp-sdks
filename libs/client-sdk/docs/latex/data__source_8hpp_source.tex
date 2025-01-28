@@ -1,0 +1,26 @@
+\doxysection{data\+\_\+source.\+hpp}
+\hypertarget{data__source_8hpp_source}{}\label{data__source_8hpp_source}\index{src/data\_sources/data\_source.hpp@{src/data\_sources/data\_source.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <future>}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::data\_sources\ \{}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\ \{}
+\DoxyCodeLine{00007\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Start()\ =\ 0;}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ ShutdownAsync(std::function<\textcolor{keywordtype}{void}()>)\ =\ 0;}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{\string~IDataSource}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00011\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00012\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00013\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00014\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00017\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00018\ \};}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::data\_sources}}
+
+\end{DoxyCode}

@@ -1,0 +1,94 @@
+\doxysection{context.\+hpp}
+\hypertarget{context_8hpp_source}{}\label{context_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/context.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/context.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/attributes.hpp>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1ContextErrors}{ContextErrors}}\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ std::string\ kInvalidKind\ =}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)"{}Kind\ contained\ invalid\ characters.\ A\ kind\ may\ contain\ ASCII\ letters\ "{}}}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}or\ "{}}}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}numbers,\ as\ well\ as\ '.',\ '-\/',\ and\ '\_'.\(\backslash\)"{}"{}};}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{comment}{//\ For\ now\ disallow\ an\ empty\ key.\ This\ may\ need\ changed\ if\ anonymous\ key}}
+\DoxyCodeLine{00017\ \ \ \ \ \textcolor{comment}{//\ generation\ and\ persistence\ is\ added.}}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ std::string\ kInvalidKey\ =}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)"{}The\ key\ for\ a\ context\ may\ not\ be\ empty.\(\backslash\)"{}"{}};}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ std::string\ kMissingKinds\ =}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\(\backslash\)"{}The\ context\ must\ contain\ at\ least\ 1\ kind.\(\backslash\)"{}"{}};}
+\DoxyCodeLine{00022\ \};}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{ContextBuilder}};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ final\ \{}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{ContextBuilder}};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00038\ \ \ \ \ [[nodiscard]]\ std::vector<std::string>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a47ea2fc02b48fcf0a9a3e6c6e708546c}{Kinds}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00048\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{launchdarkly::Attributes}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Attributes}{Attributes}}(}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ kind)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00060\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a2819bdd269c4b7fb77bface74cd95330}{Get}}(}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ kind,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1AttributeReference}{launchdarkly::AttributeReference}}\ \textcolor{keyword}{const}\&\ ref)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00069\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a35673de824588131cb16f1f4f8094a76}{Valid}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ valid\_;\ \}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00074\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a4ec976736f8370ef5acc94b36adb5187}{CanonicalKey}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00081\ \ \ \ \ [[nodiscard]]\ std::map<std::string,\ std::string>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a476d61b2aa297bc3b965743e277b43d5}{KindsToKeys}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00090\ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1Context_a1c53a08858ffea58b21eb70d4c327518}{errors}}()\ \{\ \textcolor{keywordflow}{return}\ errors\_;\ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{friend}\ std::ostream\&\ operator<<(std::ostream\&\ out,\ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context)\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (context.valid\_)\ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}\{contexts:\ ["{}};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ first\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ kind\ :\ context.attributes\_)\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (first)\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{},\ "{}};}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}kind:\ "{}}\ <<\ kind.first\ <<\ \textcolor{stringliteral}{"{}\ attributes:\ "{}}\ <<\ kind.second;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}]"{}};}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}\{invalid:\ errors:\ ["{}}\ <<\ context.errors\_\ <<\ \textcolor{stringliteral}{"{}]"{}};}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out;}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \string~Context()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00113\ \ \ \ \ Context(Context\ \textcolor{keyword}{const}\&\ context)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00114\ \ \ \ \ Context(Context\&\&\ context)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00115\ \ \ \ \ Context\&\ operator=(Context\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00116\ \ \ \ \ Context\&\ operator=(Context\&\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00122\ \ \ \ \ Context(std::string\ error\_message);}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00128\ \ \ \ \ Context(std::map<std::string,\ launchdarkly::Attributes>\ attributes);}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ std::map<std::string,\ launchdarkly::Attributes>\ attributes\_;}
+\DoxyCodeLine{00131\ \ \ \ \ std::vector<std::string>\ kinds\_;}
+\DoxyCodeLine{00132\ \ \ \ \ std::map<std::string,\ std::string>\ kinds\_to\_keys\_;}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordtype}{bool}\ valid\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00134\ \ \ \ \ std::string\ errors\_;}
+\DoxyCodeLine{00135\ \ \ \ \ std::string\ canonical\_key\_;}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ std::string\ make\_canonical\_key();}
+\DoxyCodeLine{00138\ \};}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

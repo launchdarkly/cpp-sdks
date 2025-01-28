@@ -1,0 +1,92 @@
+\doxysection{data\+\_\+source\+\_\+builder.\+hpp}
+\hypertarget{data__source__builder_8hpp_source}{}\label{data__source__builder_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/data\_source\_builder.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/data\_source\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/data\_source\_config.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/defaults.hpp>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/sdks.hpp>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <type\_traits>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <variant>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::builders\ \{}
+\DoxyCodeLine{00016\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00017\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}};}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00020\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1builders_1_1is__server__sdk}{is\_server\_sdk}}\ :\ std::false\_type\ \{\};}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00023\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1builders_1_1is__server__sdk}{is\_server\_sdk}}<\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ServerSDK}{ServerSDK}}>\ :\ std::true\_type\ \{\};}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00029\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{StreamingBuilder}}\ \{}
+\DoxyCodeLine{00030\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00031\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{StreamingBuilder}}();}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00045\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{StreamingBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a27063b54f854b0e8eea8c137ac07be77}{InitialReconnectDelay}}(}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ initial\_reconnect\_delay);}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T\ =\ SDK>}
+\DoxyCodeLine{00066\ \ \ \ \ std::enable\_if\_t<is\_server\_sdk<T>::value,\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{StreamingBuilder}}\&>\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_afe7697c979aee398420a56023a17c387}{Filter}}(}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ std::string\ filter\_key)\ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ config\_.filter\_key\ =\ std::move(filter\_key);}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00070\ \ \ \ \ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00076\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{built::StreamingConfig<SDK>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder_a577874d4440b3408f3c7c29501ae98c3}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00079\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{built::StreamingConfig<SDK>}}\ config\_;}
+\DoxyCodeLine{00080\ \};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00085\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00086\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{PollingBuilder}}\ \{}
+\DoxyCodeLine{00087\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00088\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{PollingBuilder}}();}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00095\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{PollingBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder_a1c3d77913ec076ed8023387b409f3e7f}{PollInterval}}(std::chrono::seconds\ poll\_interval);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T\ =\ SDK>}
+\DoxyCodeLine{00116\ \ \ \ \ std::enable\_if\_t<is\_server\_sdk<T>::value,\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{PollingBuilder}}\&>\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder_a8b26e7887b5fe61c32cabcaf584ac030}{Filter}}(}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ std::string\ filter\_key)\ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ config\_.filter\_key\ =\ std::move(filter\_key);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00120\ \ \ \ \ \}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00126\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{built::PollingConfig<SDK>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder_a7888325d8b34c5c95489161fbdc1d156}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00129\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{built::PollingConfig<SDK>}}\ config\_;}
+\DoxyCodeLine{00130\ \};}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{keyword}{template}\ <>}
+\DoxyCodeLine{00133\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}<\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{ClientSDK}}>\ \{}
+\DoxyCodeLine{00134\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming}}\ =\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{StreamingBuilder<ClientSDK>}};}
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{Polling}}\ =\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{PollingBuilder<ClientSDK>}};}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}();}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00151\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\&\ WithReasons(\textcolor{keywordtype}{bool}\ value);}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00166\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\&\ UseReport(\textcolor{keywordtype}{bool}\ value);}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00178\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder_3_01ClientSDK_01_4_a8cbc9dc1c5c1bf66039d18d056ab90c1}{Method}}(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming}}\ stream\_builder);}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00190\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder}{DataSourceBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1DataSourceBuilder_3_01ClientSDK_01_4_adae3680c1c715568c832635a2d9ea1d7}{Method}}(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{Polling}}\ polling\_builder);}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00197\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1DataSourceConfig}{built::DataSourceConfig<ClientSDK>}}\ Build()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00200\ \ \ \ \ std::variant<Streaming,\ Polling>\ method\_;}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keywordtype}{bool}\ with\_reasons\_;}
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{keywordtype}{bool}\ use\_report\_;}
+\DoxyCodeLine{00203\ \};}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::builders}}
+
+\end{DoxyCode}

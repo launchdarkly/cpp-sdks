@@ -1,0 +1,26 @@
+\doxysection{log\+\_\+backend\+\_\+wrapper.\+hpp}
+\hypertarget{log__backend__wrapper_8hpp_source}{}\label{log__backend__wrapper_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/bindings/c/config/log\_backend\_wrapper.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/bindings/c/config/log\_backend\_wrapper.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{logging__builder_8h}{launchdarkly/bindings/c/config/logging\_builder.h}}>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/log\_backend.hpp>}}
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classLogBackendWrapper}{LogBackendWrapper}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1ILogBackend}{launchdarkly::ILogBackend}}\ \{}
+\DoxyCodeLine{00010\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classLogBackendWrapper}{LogBackendWrapper}}(\mbox{\hyperlink{structLDLogBackend}{LDLogBackend}}\ backend)\ :\ backend\_(backend)\ \{\}}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classLogBackendWrapper_a874eecffa3865a66c1f5f5a7fd377216}{Enabled}}(launchdarkly::LogLevel\ level)\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{override}\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ backend\_.\mbox{\hyperlink{structLDLogBackend_af8e2fb0e3bedaeff0e3b503bb00bfe68}{Enabled}}(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\textcolor{keyword}{>}(level),}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ backend\_.\mbox{\hyperlink{structLDLogBackend_a1e1e4409e3b0a7272304261309bff6b8}{UserData}});}
+\DoxyCodeLine{00015\ \ \ \ \ \}}
+\DoxyCodeLine{00016\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classLogBackendWrapper_a26a38feb3ba92dbe4adbb93387178a45}{Write}}(launchdarkly::LogLevel\ level,}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ message)\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{override}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ backend\_.\mbox{\hyperlink{structLDLogBackend_ae721caa42925f7e3c7271f40f2a352d1}{Write}}(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\textcolor{keyword}{>}(level),\ message.c\_str(),}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ backend\_.\mbox{\hyperlink{structLDLogBackend_a1e1e4409e3b0a7272304261309bff6b8}{UserData}});}
+\DoxyCodeLine{00020\ \ \ \ \ \}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00023\ \ \ \ \ \mbox{\hyperlink{structLDLogBackend}{LDLogBackend}}\ backend\_;}
+\DoxyCodeLine{00024\ \};}
+
+\end{DoxyCode}

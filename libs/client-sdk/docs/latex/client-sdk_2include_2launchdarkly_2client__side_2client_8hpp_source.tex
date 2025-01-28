@@ -1,0 +1,155 @@
+\doxysection{client.\+hpp}
+\hypertarget{client-sdk_2include_2launchdarkly_2client__side_2client_8hpp_source}{}\label{client-sdk_2include_2launchdarkly_2client__side_2client_8hpp_source}\index{include/launchdarkly/client\_side/client.hpp@{include/launchdarkly/client\_side/client.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <future>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/context.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <launchdarkly/client\_side/data\_source\_status.hpp>}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <launchdarkly/client\_side/flag\_notifier.hpp>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/client.hpp>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <launchdarkly/data/evaluation\_detail.hpp>}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side\ \{}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\ \{}
+\DoxyCodeLine{00027\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ =\ std::string;}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{virtual}\ std::future<bool>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ad56ea641a2789c87b14d111c83109955}{StartAsync}}()\ =\ 0;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00080\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_aac08999be1302b76544b7cc72af26a22}{Initialized}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00090\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::unordered\_map<FlagKey,\ Value>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ac30e1f4785fc5e970daaf9bc01c476fc}{AllFlags}}()}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a55017e2158e864c64463da046080d54b}{Track}}(std::string\ event\_name,}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ data,}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ metric\_value)\ =\ 0;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afa2d2fb87c6cfd9ff4235a0c2ef4f32d}{Track}}(std::string\ event\_name,\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ data)\ =\ 0;}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a537efc7c085ddcd57f9815773bc4dff1}{Track}}(std::string\ event\_name)\ =\ 0;}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_adcadd25f7f652dd7e934bf88f9763d4f}{FlushAsync}}()\ =\ 0;}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keyword}{virtual}\ std::future<bool>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a97bd5f8e5c1db9eb0405b03862cb2984}{IdentifyAsync}}(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ context)\ =\ 0;}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ac0e920faf5eb423f6de578f538174e63}{BoolVariation}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,\ \textcolor{keywordtype}{bool}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00169\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<bool>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_adc0f87673d177eb5cd17f7423b6f53f8}{BoolVariationDetail}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{virtual}\ std::string\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a720c9b96af736ba7f091cd66a906f8d4}{StringVariation}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<std::string>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_aa793e30b4e9c1bcb29c042eac25d3f69}{StringVariationDetail}}(}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ std::string\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a0e14294b53f69be948babb8bb8f69064}{DoubleVariation}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<double>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a3b5085f4d44bac411618d449ed6a3e83}{DoubleVariationDetail}}(}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a88c4222b9f6fb65c446dfa530595fe23}{IntVariation}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,\ \textcolor{keywordtype}{int}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<int>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afaaacc3e53ea0e51647a5dd293e5af94}{IntVariationDetail}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a298d89a0d94bd696ab216dea8fb9d0b0}{JsonVariation}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_a38284565ae14b25819513902ed87f14d}{JsonVariationDetail}}(}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_afadd9f50308b3926a5177065a1cdaeff}{FlagKey}}\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ default\_value)\ =\ 0;}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSourceStatusProvider}{data\_sources::IDataSourceStatusProvider}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ae0e1925b1d20cb0822b20e959978126d}{DataSourceStatus}}()\ =\ 0;}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{flag\_manager::IFlagNotifier}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient_ad7b9c979c787eb9bd15d3b4775138947}{FlagNotifier}}()\ =\ 0;}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{\string~IClient}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00276\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00277\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00278\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00279\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00282\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00283\ \};}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client}{Client}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IClient}{IClient}}\ \{}
+\DoxyCodeLine{00286\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00287\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client}{Client}}(\mbox{\hyperlink{structlaunchdarkly_1_1config_1_1Config}{Config}}\ config,\ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ context);}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \ \ \ \ std::future<bool>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a41d122017bfeeedaf472857e6774a500}{StartAsync}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_af625d6a19eb21ea1c427f3570aeb6dc6}{Initialized}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{keyword}{using\ }FlagKey\ =\ std::string;}
+\DoxyCodeLine{00294\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<FlagKey,\ Value>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a4b7d0edaa68689b5bf1927b972d81c51}{AllFlags}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453}{Track}}(std::string\ event\_name,}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ data,}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ metric\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00299\ }
+\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453}{Track}}(std::string\ event\_name,\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ data)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae0d9f424e7ffbc751eacedca27b2c453}{Track}}(std::string\ event\_name)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ad19e6199bff8c0c0caa94e28f44ded3f}{FlushAsync}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00306\ \ \ \ \ std::future<bool>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a62fc1fe135495b72fa37ecedf5a2c7e2}{IdentifyAsync}}(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ context)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00307\ }
+\DoxyCodeLine{00308\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a3181fce58254e59484842c745299724a}{BoolVariation}}(FlagKey\ \textcolor{keyword}{const}\&\ key,\ \textcolor{keywordtype}{bool}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<bool>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a81d57edf13a87562d328174d7f9d6f09}{BoolVariationDetail}}(FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ std::string\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a8ceb29d498baee8c334823758a85d711}{StringVariation}}(FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<std::string>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a38353999d92299ebd1bc015866cbb212}{StringVariationDetail}}(}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ std::string\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00319\ }
+\DoxyCodeLine{00320\ \ \ \ \ \textcolor{keywordtype}{double}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a0ae5f32d413c2bfa26e78a0d72e9eee4}{DoubleVariation}}(FlagKey\ \textcolor{keyword}{const}\&\ key,\ \textcolor{keywordtype}{double}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<double>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a1e4d5cb27d928d3fd0391b5ca485e875}{DoubleVariationDetail}}(}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{double}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00325\ }
+\DoxyCodeLine{00326\ \ \ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_ae625d04b9ca3317bbe48fe61e2d5a89b}{IntVariation}}(FlagKey\ \textcolor{keyword}{const}\&\ key,\ \textcolor{keywordtype}{int}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<int>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a4b9948039c2387fc0dc98b590f82eb0d}{IntVariationDetail}}(FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a77d1c3d0d81aeb1f632ac6ab16719b6e}{JsonVariation}}(FlagKey\ \textcolor{keyword}{const}\&\ key,\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{EvaluationDetail<Value>}}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a022ba44ac1f16c3d83e339b5bf6c6875}{JsonVariationDetail}}(FlagKey\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\ default\_value)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00335\ }
+\DoxyCodeLine{00336\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSourceStatusProvider}{data\_sources::IDataSourceStatusProvider}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_adedade4cae0355b19f954907dbcf2362}{DataSourceStatus}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00337\ }
+\DoxyCodeLine{00338\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{flag\_manager::IFlagNotifier}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a0406a57e9c751b013696f6f7663a7170}{FlagNotifier}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00344\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1Client_a6caf30ff74cb40dfbf22117c0f42c268}{Version}}();}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ \textcolor{keyword}{const}\ kVersion\ =}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}3.8.2"{}};\ \ \textcolor{comment}{//\ \{x-\/release-\/please-\/version\}}}
+\DoxyCodeLine{00349\ \ \ \ \ std::unique\_ptr<IClient>\ client;}
+\DoxyCodeLine{00350\ \};}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side}}
+
+\end{DoxyCode}
