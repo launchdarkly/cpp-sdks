@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <launchdarkly/config/shared/sdks.hpp>
 
 namespace launchdarkly::config::shared::builders {
 
@@ -65,6 +66,48 @@ class TlsBuilder {
     enum built::TlsOptions::VerifyMode verify_mode_;
     std::optional<std::string> custom_ca_file_;
 };
+
+template <typename SDK>
+class ProxyBuilder {
+   public:
+    ProxyBuilder();
+
+    ProxyBuilder(built::ProxyOptions const& proxy);
+
+    /**
+     * NOTE: This method and the associated 'http_proxy' environment variable
+     * are only available for the client-side SDK.
+     *
+     * Specifies an HTTP proxy which the SDK should use to communicate
+     * with LaunchDarkly.
+     *
+     * SDK <-- HTTP, plaintext --> Proxy <-- HTTPS --> LaunchDarkly
+     *
+     * This setting affects streaming mode, polling mode, and event delivery.
+     * The argument should be of the form: 'http://proxy.example.com:8080'.
+     *
+     * The scheme must be 'http' and the port is optional (80 if not
+     * specified.)
+     *
+     * The SDK respects the 'http_proxy' environment variable as an alternative
+     * to this method. If both are set, this method takes precedence.
+     *
+     * @param http_proxy HTTP proxy URL.
+     */
+    template <typename T = SDK,
+              std::enable_if_t<std::is_same_v<T, ClientSDK>, int> = 0>
+    ProxyBuilder& HttpProxy(std::string http_proxy) {
+        http_proxy_ = std::move(http_proxy);
+        return *this;
+    }
+
+    [[nodiscard]] built::ProxyOptions Build() const;
+
+   private:
+    std::optional<std::string> http_proxy_;
+    std::optional<std::string> https_proxy_;
+};
+
 /**
  * Class used for building a set of HttpProperties.
  * @tparam SDK The SDK type to build properties for. This affects the default
@@ -179,9 +222,12 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
 
     /**
-     * Build a set of HttpProperties.
-     * @return The built properties.
+     *
+     * @param builder Sets the builder for proxy properties.
+     * @return A reference to this builder.
      */
+    HttpPropertiesBuilder& Proxy(ProxyBuilder<SDK> builder);
+
     [[nodiscard]] built::HttpProperties Build() const;
 
    private:
@@ -193,6 +239,7 @@ class HttpPropertiesBuilder {
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
     TlsBuilder<SDK> tls_;
+    ProxyBuilder<SDK> proxy_;
 };
 
 }  // namespace launchdarkly::config::shared::builders
