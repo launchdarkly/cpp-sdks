@@ -1,9 +1,9 @@
 #include "data_source_event_handler.hpp"
 
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/serialization/json_evaluation_result.hpp>
 #include <launchdarkly/serialization/json_item_descriptor.hpp>
-#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/core/ignore_unused.hpp>
@@ -12,7 +12,7 @@
 
 #include <utility>
 
-#include "tl/expected.hpp"
+#include <tl/expected.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 
@@ -76,10 +76,10 @@ DataSourceEventHandler::DataSourceEventHandler(
     IDataSourceUpdateSink& handler,
     Logger const& logger,
     DataSourceStatusManager& status_manager)
-    : context_(context),
-      handler_(handler),
+    : handler_(handler),
       logger_(logger),
-      status_manager_(status_manager) {}
+      status_manager_(status_manager),
+      context_(context) {}
 
 DataSourceEventHandler::MessageStatus DataSourceEventHandler::HandleMessage(
     std::string const& type,
