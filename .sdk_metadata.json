@@ -11,7 +11,8 @@
       ],
       "releases": {
         "tag-prefix": "launchdarkly-cpp-client-"
-      }
+      },
+      "userAgents": ["CPPClient"]
     },
     "cpp-server-sdk": {
       "name": "C++ Server SDK",
@@ -23,7 +24,8 @@
       ],
       "releases": {
         "tag-prefix": "launchdarkly-cpp-server-"
-      }
+      },
+      "userAgents": ["CPPServer"]
     }
   }
 }
