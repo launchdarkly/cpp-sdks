@@ -12,14 +12,14 @@ on:
 
 jobs:
   build-test-sse:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
   contract-tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       # Port the test service (implemented in this repo) should bind to.
       TEST_SERVICE_PORT: 8123

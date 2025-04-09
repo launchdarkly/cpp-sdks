@@ -15,7 +15,7 @@ jobs:
   smoketest:
     strategy:
       matrix:
-        os: [ "ubuntu-22.04", "macos-13", "windows-2022" ]
+        os: [ "ubuntu-24.04", "macos-13", "windows-2022" ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
