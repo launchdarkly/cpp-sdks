@@ -96,6 +96,9 @@ class HttpRequest {
 
     [[nodiscard]] bool Https() const;
 
+    [[nodiscard]] std::optional<std::string> const& HttpProxyHost() const;
+    [[nodiscard]] std::optional<std::string> const& HttpProxyPort() const;
+
     /**
      * Indicates if a request is valid. Meaning that it has correctly formed
      * data that can be used to make an http request.
@@ -126,6 +129,8 @@ class HttpRequest {
     std::string host_;
     std::optional<std::string> port_;
     std::string path_;
+    std::optional<std::string> http_proxy_host_;
+    std::optional<std::string> http_proxy_port_;
     std::map<std::string, std::string> params_;
     bool is_https_;
     bool valid_;

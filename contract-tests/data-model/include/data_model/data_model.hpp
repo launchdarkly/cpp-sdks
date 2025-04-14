@@ -37,6 +37,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTLSParams,
                                                 skipVerifyPeer,
                                                 customCAFile);
 
+struct ConfigProxyParams {
+    std::optional<std::string> httpProxy;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigProxyParams, httpProxy);
+
 struct ConfigStreamingParams {
     std::optional<std::string> baseUri;
     std::optional<uint32_t> initialRetryDelayMs;
@@ -118,6 +124,7 @@ struct ConfigParams {
     std::optional<ConfigClientSideParams> clientSide;
     std::optional<ConfigTags> tags;
     std::optional<ConfigTLSParams> tls;
+    std::optional<ConfigProxyParams> proxy;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -130,7 +137,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 serviceEndpoints,
                                                 clientSide,
                                                 tags,
-                                                tls);
+                                                tls,
+                                                proxy);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;

@@ -10,8 +10,6 @@
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/version.hpp>
 #include <boost/core/ignore_unused.hpp>
 
 #include "foxy/client_session.hpp"
@@ -19,7 +17,6 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -68,29 +65,51 @@ static http::verb ConvertMethod(HttpMethod method) {
     launchdarkly::detail::unreachable();
 }
 
+// Returns the host with a port appended, if the port is not 80 or 443.
+// Although not strictly necessary, it is meant to match what browsers do.
+static std::string HostWithOptionalPort(
+    std::string host,
+    std::optional<std::string> const& port) {
+    if (!port || (*port == "80" || *port == "443")) {
+        return host;
+    }
+    host.append(":");
+    host.append(*port);
+    return host;
+}
+
 static http::request<http::string_body> MakeBeastRequest(
     HttpRequest const& request) {
     http::request<http::string_body> beast_request;
 
-    beast_request.method(ConvertMethod(request.Method()));
-    auto body = request.Body();
-    if (body) {
+    if (auto const body = request.Body()) {
         beast_request.body() = body.value();
     } else {
         beast_request.body() = "";
     }
+
+    beast_request.prepare_payload();
+
+    beast_request.method(ConvertMethod(request.Method()));
+
     if (request.Path().empty()) {
         beast_request.target("/");
     } else {
         beast_request.target(request.Path());
     }
 
-    beast_request.prepare_payload();
-    beast_request.set(http::field::host, request.Host());
+    // If we have an HTTP proxy set, we need to pass the entire path
+    // in the HTTP request's target (so the proxy knows where to send it).
+    if (request.HttpProxyHost()) {
+        beast_request.target(request.Url());
+    }
+
+    beast_request.set(http::field::host,
+                      HostWithOptionalPort(request.Host(), request.Port()));
 
     auto const& properties = request.Properties();
 
-    for (auto const& pair : request.Properties().BaseHeaders()) {
+    for (auto const& pair : properties.BaseHeaders()) {
         beast_request.set(pair.first, pair.second);
     }
 
@@ -158,10 +177,10 @@ class FoxyClient
           connect_timeout_(connect_timeout),
           response_timeout_(response_timeout),
           handler_(std::move(handler)),
+          resp_(),
           session_(exec,
-                   launchdarkly::foxy::session_opts{
-                       ToOptRef(ssl_context_.get()), connect_timeout_}),
-          resp_() {}
+                   foxy::session_opts{ToOptRef(ssl_context_.get()),
+                                      connect_timeout_}) {}
 
     void Run() {
         session_.async_connect(host_, port_,
@@ -338,16 +357,23 @@ class AsioRequester {
 
             const auto& properties = request->Properties();
 
-            std::string service =
-                request->Port().value_or(request->Https() ? "https" : "http");
+            std::string tcp_host =
+                request->HttpProxyHost().value_or(request->Host());
+
+            std::string tcp_port = request->HttpProxyPort().value_or(
+                request->Port().value_or(request->Https() ? "443" : "80"));
 
             std::shared_ptr<ssl::context> ssl;
-            if (request->Https()) {
+            if (request->Https() && !request->HttpProxyHost()) {
+                // If the user requested an HTTP proxy, then we will be making
+                // an HTTP request to the proxy (and then the proxy will make
+                // an HTTPS request on our behalf to the target.) So, don't
+                // use the SSL client if we have HTTP proxy configured.
                 ssl = this->ssl_ctx_;
             }
 
             std::make_shared<FoxyClient>(
-                exec, std::move(ssl), request->Host(), service, beast_request,
+                exec, std::move(ssl), tcp_host, tcp_port, beast_request,
                 properties.ConnectTimeout(), properties.ResponseTimeout(),
                 [exec, callback, request, this, redirect_count](auto res) {
                     NeedsRedirect(res)

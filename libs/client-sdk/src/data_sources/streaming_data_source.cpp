@@ -121,6 +121,10 @@ void StreamingDataSource::Start() {
         client_builder.custom_ca_file(*ca_file);
     }
 
+    if (http_config_.Proxy().Http()) {
+        client_builder.http_proxy(*http_config_.Proxy().Http());
+    }
+
     auto weak_self = weak_from_this();
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {

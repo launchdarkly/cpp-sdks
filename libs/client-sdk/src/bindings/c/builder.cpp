@@ -46,6 +46,11 @@ using namespace launchdarkly::client_side;
 #define FROM_TLS_BUILDER(ptr) \
     (reinterpret_cast<LDClientHttpPropertiesTlsBuilder>(ptr))
 
+#define TO_PROXY_BUILDER(ptr) (reinterpret_cast<ProxyBuilder*>(ptr))
+
+#define FROM_PROXY_BUILDER(ptr) \
+    (reinterpret_cast<LDClientHttpPropertiesProxyBuilder>(ptr))
+
 class PersistenceImplementationWrapper : public IPersistence {
    public:
     explicit PersistenceImplementationWrapper(LDPersistence impl)
@@ -309,6 +314,38 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
     LD_ASSERT_NOT_NULL(value);
 
     TO_BUILDER(b)->HttpProperties().Header(key, value);
+}
+
+LD_EXPORT(LDClientHttpPropertiesProxyBuilder)
+LDClientHttpPropertiesProxyBuilder_New(void) {
+    return FROM_PROXY_BUILDER(new ProxyBuilder());
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_Free(LDClientHttpPropertiesProxyBuilder b) {
+    delete TO_PROXY_BUILDER(b);
+}
+
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Proxy(
+    LDClientConfigBuilder b,
+    LDClientHttpPropertiesProxyBuilder proxy_builder) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(proxy_builder);
+
+    TO_BUILDER(b)->HttpProperties().Proxy(*TO_PROXY_BUILDER(proxy_builder));
+
+    LDClientHttpPropertiesProxyBuilder_Free(proxy_builder);
+}
+
+LD_EXPORT(void)
+LDClientHttpPropertiesProxyBuilder_HttpProxy(
+    LDClientHttpPropertiesProxyBuilder b,
+    char const* http_proxy) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(http_proxy);
+
+    TO_PROXY_BUILDER(b)->HttpProxy(http_proxy);
 }
 
 LD_EXPORT(void)
