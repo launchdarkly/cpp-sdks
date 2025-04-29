@@ -5,12 +5,6 @@
 namespace launchdarkly::sse {
 namespace errors {
 
-std::ostream& operator<<(std::ostream& out, NoContent const&) {
-    out << "received HTTP error 204 (no content) - giving up "
-           "permanently";
-    return out;
-}
-
 std::ostream& operator<<(std::ostream& out,
                          InvalidRedirectLocation const& invalid) {
     out << "received invalid redirect from server, cannot follow ("
@@ -58,6 +52,10 @@ std::string ErrorToString(Error const& error) {
     std::stringstream ss;
     ss << error;
     return ss.str();
+}
+
+bool IsRecoverable(Error const& error) {
+    return std::holds_alternative<errors::ReadTimeout>(error);
 }
 
 }  // namespace launchdarkly::sse

@@ -140,7 +140,7 @@ class FoxyClient : public Client,
 
         create_session();
         create_parser();
-        backoff_timer_.expires_from_now(backoff_.delay());
+        backoff_timer_.expires_after(backoff_.delay());
         backoff_timer_.async_wait(beast::bind_front_handler(
             &FoxyClient::on_backoff, shared_from_this()));
     }
@@ -222,7 +222,8 @@ class FoxyClient : public Client,
 
         if (status_class == beast::http::status_class::successful) {
             if (response.result() == beast::http::status::no_content) {
-                errors_(errors::NoContent{});
+                errors_(
+                    errors::UnrecoverableClientError{http::status::no_content});
                 return;
             }
             if (!correct_content_type(response)) {
@@ -354,7 +355,6 @@ class FoxyClient : public Client,
             // available.
             logger_("exception closing stream: " + std::string(err.what()));
         }
-
 
         // Ideally we would call session_->async_shutdown() here to gracefully
         // terminate the SSL session. For unknown reasons, this call appears to

@@ -11,11 +11,11 @@ using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config;
 
-class ConfigBuilderTest
-    : public ::testing::
-          Test {  // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
+class ConfigBuilderTest : public ::testing::Test {
+    // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
    protected:
     Logger logger;
+
     ConfigBuilderTest() : logger(logging::NullLogger()) {}
 };
 
@@ -50,6 +50,56 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_StreamingDefaultsAreUsed) {
             bg_sync_config.synchronizer_);
 
     EXPECT_EQ(streaming_config, Defaults::SynchronizerConfig());
+}
+
+TEST_F(ConfigBuilderTest, CanSetStreamingPayloadFilterKey) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::BackgroundSync().Synchronizer(
+            builders::BackgroundSyncBuilder::Streaming().Filter("foo")));
+
+    auto cfg = builder.Build();
+
+    ASSERT_TRUE(std::holds_alternative<built::BackgroundSyncConfig>(
+        cfg->DataSystemConfig().system_));
+
+    auto const bg_sync_config =
+        std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(
+        std::holds_alternative<built::BackgroundSyncConfig::StreamingConfig>(
+            bg_sync_config.synchronizer_));
+
+    auto const streaming_config =
+        std::get<built::BackgroundSyncConfig::StreamingConfig>(
+            bg_sync_config.synchronizer_);
+
+    EXPECT_EQ(streaming_config.filter_key, "foo");
+}
+
+TEST_F(ConfigBuilderTest, CanSetPollingPayloadFilterKey) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::BackgroundSync().Synchronizer(
+            builders::BackgroundSyncBuilder::Polling().Filter("foo")));
+
+    auto cfg = builder.Build();
+
+    ASSERT_TRUE(std::holds_alternative<built::BackgroundSyncConfig>(
+        cfg->DataSystemConfig().system_));
+
+    auto const bg_sync_config =
+        std::get<built::BackgroundSyncConfig>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(
+        std::holds_alternative<built::BackgroundSyncConfig::PollingConfig>(
+            bg_sync_config.synchronizer_));
+
+    auto const polling_config =
+        std::get<built::BackgroundSyncConfig::PollingConfig>(
+            bg_sync_config.synchronizer_);
+
+    EXPECT_EQ(polling_config.filter_key, "foo");
 }
 
 TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {

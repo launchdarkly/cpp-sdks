@@ -145,8 +145,9 @@ class LazyLoad final : public data_interfaces::IDataSystem {
         std::function<
             data_interfaces::IDataReader::CollectionResult<Item>()> const&
             getter) const {
-        // Storing an expiry time so that the 'all' key and the individual
-        // item keys will expire at the same time.
+        // The 'all' key and the individual item keys should expire
+        // at exactly the same time, because there is no separate data item
+        // for 'all' - it exists only to rate limit the refresh of all items.
         auto const updated_expiry = ExpiryTime();
 
         // Refreshing 'all' for this item is always rate limited, even if
@@ -158,7 +159,7 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
             for (auto item : *all_items) {
                 cache_.Upsert(item.first, std::move(item.second));
-                tracker_.Add(item.first, updated_expiry);
+                tracker_.Add(item_kind, item.first, updated_expiry);
             }
         } else {
             status_manager_.SetState(

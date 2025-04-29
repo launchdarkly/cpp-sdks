@@ -1,6 +1,6 @@
 #pragma once
 
-#include <launchdarkly/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_errors.hpp>
 #include <launchdarkly/value.hpp>
 
 #include <boost/json/fwd.hpp>

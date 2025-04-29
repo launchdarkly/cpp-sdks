@@ -1,4 +1,3 @@
-#include <launchdarkly/server_side/bindings/c/config/builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 
 #include <launchdarkly/bindings/c/context_builder.h>

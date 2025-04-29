@@ -3,7 +3,7 @@
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/data_model/context_aware_reference.hpp>
 #include <launchdarkly/serialization/json_context_kind.hpp>
-#include <launchdarkly/serialization/json_errors.hpp>
+#include <launchdarkly/detail/serialization/json_errors.hpp>
 #include <launchdarkly/serialization/value_mapping.hpp>
 
 #include <boost/json.hpp>

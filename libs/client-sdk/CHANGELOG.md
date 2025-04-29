@@ -1,5 +1,87 @@
 # Changelog
 
+## [3.8.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.8.1...launchdarkly-cpp-client-v3.8.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* Change notification consistency. ([#473](https://github.com/launchdarkly/cpp-sdks/issues/473)) ([45fd755](https://github.com/launchdarkly/cpp-sdks/commit/45fd755171aeadd0055a474aa4975f92c15d56fd))
+* Remove type alias import for JSON system_error that was removed in boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Remove vendored boost file to compile with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+* Update usage of the steady_timer to be compatible with boost 1.87. ([c0ef518](https://github.com/launchdarkly/cpp-sdks/commit/c0ef518b79d50adfea8c9dabb6061d70119d34b6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.10.0 to 0.10.1
+    * launchdarkly-cpp-sse-client bumped from 0.5.4 to 0.5.5
+
+## [3.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.8.0...launchdarkly-cpp-client-v3.8.1) (2024-11-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.9.0 to 0.10.0
+
+## [3.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.7.1...launchdarkly-cpp-client-v3.8.0) (2024-10-30)
+
+
+### Features
+
+* add LDValue_SerializeJSON C binding ([90eb880](https://github.com/launchdarkly/cpp-sdks/commit/90eb880b7b769ba491c9da5734f5db7eda31f15e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.3 to 0.9.0
+    * launchdarkly-cpp-common bumped from 1.8.0 to 1.9.0
+
+## [3.7.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.7.0...launchdarkly-cpp-client-v3.7.1) (2024-10-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-sse-client bumped from 0.5.3 to 0.5.4
+
+## [3.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.6.4...launchdarkly-cpp-client-v3.7.0) (2024-10-01)
+
+
+### Features
+
+* add client-side C binding for fetching data source state ([#442](https://github.com/launchdarkly/cpp-sdks/issues/442)) ([e8ca616](https://github.com/launchdarkly/cpp-sdks/commit/e8ca616001558216f81b72c7f20a162449e8c6b9))
+
+
+### Bug Fixes
+
+* client init state should not regress when data source interrupted ([#441](https://github.com/launchdarkly/cpp-sdks/issues/441)) ([4a7f1f9](https://github.com/launchdarkly/cpp-sdks/commit/4a7f1f90c9eafc307b50eb1ce125e7728246f19a))
+* improve handling of streaming error state changes/logging ([#439](https://github.com/launchdarkly/cpp-sdks/issues/439)) ([04e7e0e](https://github.com/launchdarkly/cpp-sdks/commit/04e7e0ef64b1933a63ad8d071a0a8f95ce666dc8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.2 to 0.8.3
+    * launchdarkly-cpp-sse-client bumped from 0.5.2 to 0.5.3
+
+## [3.6.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.6.3...launchdarkly-cpp-client-v3.6.4) (2024-09-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.1 to 0.8.2
+    * launchdarkly-cpp-common bumped from 1.7.0 to 1.8.0
+
 ## [3.6.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.6.2...launchdarkly-cpp-client-v3.6.3) (2024-07-25)
 
 

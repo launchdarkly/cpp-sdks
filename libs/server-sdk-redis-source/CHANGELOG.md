@@ -1,5 +1,59 @@
 # Changelog
 
+## [2.1.17](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.16...launchdarkly-cpp-server-redis-source-v2.1.17) (2025-01-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.8.0 to 3.8.1
+
+## [2.1.16](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.15...launchdarkly-cpp-server-redis-source-v2.1.16) (2024-11-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.7.0 to 3.8.0
+
+## [2.1.15](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.14...launchdarkly-cpp-server-redis-source-v2.1.15) (2024-10-30)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.6.2 to 3.7.0
+
+## [2.1.14](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.13...launchdarkly-cpp-server-redis-source-v2.1.14) (2024-10-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.6.1 to 3.6.2
+
+## [2.1.13](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.12...launchdarkly-cpp-server-redis-source-v2.1.13) (2024-10-01)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.6.0 to 3.6.1
+
+## [2.1.12](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.11...launchdarkly-cpp-server-redis-source-v2.1.12) (2024-09-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.5.3 to 3.6.0
+
 ## [2.1.11](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.10...launchdarkly-cpp-server-redis-source-v2.1.11) (2024-07-25)
 
 

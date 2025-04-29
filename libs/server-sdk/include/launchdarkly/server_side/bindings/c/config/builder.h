@@ -14,8 +14,7 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {  // only need to export C interface if
-// used by C++ source code
+extern "C" {  // only need to export C interface if used by C++ source code
 #endif
 
 typedef struct _LDServerConfigBuilder* LDServerConfigBuilder;
@@ -186,7 +185,13 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
                                               char const* attribute_reference);
 
 /**
- * Configures the Background Sync data system with a Streaming synchronizer.
+ * Configures the Background Sync data system with a Streaming synchronizer. The
+ * builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDServerDataSourceStreamBuilder function on the provided
+ * LDServerDataSourceStreamBuilder after calling this function. It is undefined
+ * behavior.
  *
  * This is the default data system configuration for the SDK.
  *
@@ -197,7 +202,7 @@ LDServerConfigBuilder_Events_PrivateAttribute(LDServerConfigBuilder b,
  *
  * @param b Server config builder. Must not be NULL.
  * @param stream_builder The streaming builder. The builder is consumed; do not
- * free it.
+ * free it. Must not be NULL.
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
@@ -205,7 +210,13 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
     LDServerDataSourceStreamBuilder stream_builder);
 
 /**
- * Configures the Background Sync data system with a Polling synchronizer.
+ * Configures the Background Sync data system with a Polling synchronizer. The
+ * builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDServerDataSourcePollBuilder function on the provided
+ * LDServerDataSourcePollBuilder after calling this function. It is undefined
+ * behavior.
  *
  * This synchronizer may be chosen to override the default Streaming mode.
  *
@@ -215,7 +226,7 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Streaming(
  *
  * @param b Server config builder. Must not be NULL.
  * @param poll_builder The polling builder. The builder is consumed; do not free
- * it.
+ * it. Must not be NULL.
  */
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
@@ -223,8 +234,14 @@ LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(
     LDServerDataSourcePollBuilder poll_builder);
 
 /**
- * Configures the Lazy Load data system. This method is mutually exclusive with
+ * Configures the Lazy Load data system. The builder is automatically consumed.
+ *
+ * This method is mutually exclusive with
  * the BackgroundSync_Polling and BackgroundSync_Streaming builders.
+ *
+ * WARNING: Do not call any other
+ * LDServerLazyLoadBuilder function on the provided LDServerLazyLoadBuilder
+ * after calling this function. It is undefined behavior.
  *
  * In this mode the SDK will query a data source on-demand as required, with an
  * in-memory cache to reduce the number of queries.
@@ -278,6 +295,28 @@ LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
     unsigned int milliseconds);
 
 /**
+ * Sets the filter key for the streaming connection.
+ *
+ * By default, the SDK is able to evaluate all flags in an environment.
+ *
+ * If this is undesirable - for example, because the environment contains
+ * thousands of flags, but this application only needs to evaluate
+ * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+ * and the filter's key specified here.
+ *
+ * Evaluations for flags that aren't part of the filtered environment will
+ * return default values.
+ *
+ * @param b Streaming method builder. Must not be NULL.
+ * @param filter_key The filter key. Must not be NULL. If the key is malformed
+ * or nonexistent, then a full LaunchDarkly environment will be fetched. In the
+ * case of a malformed key, the SDK will additionally log a runtime error.
+ */
+LD_EXPORT(void)
+LDServerDataSourceStreamBuilder_Filter(LDServerDataSourceStreamBuilder b,
+                                       char const* filter_key);
+
+/**
  * Frees a Streaming method builder. Do not call if the builder was consumed by
  * the config builder.
  *
@@ -306,6 +345,28 @@ LDServerDataSourcePollBuilder_New();
 LD_EXPORT(void)
 LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
                                         unsigned int seconds);
+
+/**
+ * Sets the filter key for the polling connection.
+ *
+ * By default, the SDK is able to evaluate all flags in an environment.
+ *
+ * If this is undesirable - for example, because the environment contains
+ * thousands of flags, but this application only needs to evaluate
+ * a smaller, known subset - then a filter may be setup in LaunchDarkly,
+ * and the filter's key specified here.
+ *
+ * Evaluations for flags that aren't part of the filtered environment will
+ * return default values.
+ *
+ * @param b Polling method builder. Must not be NULL.
+ * @param filter_key The filter key. Must not be NULL. If the key is malformed
+ * or nonexistent, then a full LaunchDarkly environment will be fetched. In the
+ * case of a malformed key, the SDK will additionally log a runtime error.
+ */
+LD_EXPORT(void)
+LDServerDataSourcePollBuilder_Filter(LDServerDataSourcePollBuilder b,
+                                     char const* filter_key);
 
 /**
  * Frees a Polling method builder. Do not call if the builder was consumed by
@@ -353,7 +414,13 @@ LDServerConfigBuilder_HttpProperties_Header(LDServerConfigBuilder b,
                                             char const* value);
 
 /**
- * Sets the TLS options builder. The builder is consumed; do not free it.
+ * Sets the TLS options builder. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDServerHttpPropertiesTlsBuilder function on the provided
+ * LDServerHttpPropertiesTlsBuilder after calling this function. It is undefined
+ * behavior.
+ *
  * @param b Server config builder. Must not be NULL.
  * @param tls_builder The TLS options builder. Must not be NULL.
  */
@@ -425,7 +492,12 @@ LD_EXPORT(void)
 LDServerConfigBuilder_Logging_Disable(LDServerConfigBuilder b);
 
 /**
- * Configures the SDK with basic logging.
+ * Configures the SDK with basic logging. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDLoggingBasicBuilder function on the provided LDLoggingBasicBuilder after
+ * calling this function. It is undefined behavior.
+ *
  * @param b  Server config builder. Must not be NULL.
  * @param basic_builder The basic logging builder. Must not be NULL.
  */
@@ -443,7 +515,12 @@ LDServerConfigBuilder_Logging_Custom(LDServerConfigBuilder b,
                                      LDLoggingCustomBuilder custom_builder);
 
 /**
- * Creates an LDClientConfig. The LDServerConfigBuilder is consumed.
+ * Creates an LDClientConfig. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDServerConfigBuilder function on the provided LDServerConfigBuilder after
+ * calling this function. It is undefined behavior.
+ *
  * On success, the config will be stored in out_config; otherwise,
  * out_config will be set to NULL and the returned LDStatus will indicate
  * the error.

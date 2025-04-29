@@ -42,6 +42,37 @@ TEST(AllFlagsTest, DefaultOptions) {
     ASSERT_EQ(got, expected);
 }
 
+TEST(AllFlagsTest, DefaultOptionsExposesPrerequisiteRelations) {
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
+
+    builder.AddFlag("myFlag", true,
+                    AllFlagsState::State{42,
+                                         1,
+                                         std::nullopt,
+                                         false,
+                                         false,
+                                         std::nullopt,
+                                         {"prereq1", "prereq2"}});
+
+    auto state = builder.Build();
+    ASSERT_TRUE(state.Valid());
+
+    auto expected = boost::json::parse(R"({
+        "myFlag": true,
+        "$flagsState": {
+            "myFlag": {
+                "version": 42,
+                "variation": 1,
+                "prerequisites": ["prereq1", "prereq2"]
+            }
+        },
+        "$valid": true
+    })");
+
+    auto got = boost::json::value_from(state);
+    ASSERT_EQ(got, expected);
+}
+
 TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
     AllFlagsStateBuilder builder{
         AllFlagsState::Options::DetailsOnlyForTrackedFlags};
@@ -81,6 +112,55 @@ TEST(AllFlagsTest, DetailsOnlyForTrackedFlags) {
     ASSERT_EQ(got, expected);
 }
 
+TEST(AllFlagsTest, DetailsOnlyForTrackedFlagsExposesPrerequisiteRelations) {
+    AllFlagsStateBuilder builder{
+        AllFlagsState::Options::DetailsOnlyForTrackedFlags};
+    builder.AddFlag("myFlagTracked", true,
+                    AllFlagsState::State{42,
+                                         1,
+                                         EvaluationReason::Fallthrough(false),
+                                         true,
+                                         true,
+                                         std::nullopt,
+                                         {"prereq1", "prereq2"}});
+    builder.AddFlag("myFlagUntracked", true,
+                    AllFlagsState::State{42,
+                                         1,
+                                         EvaluationReason::Fallthrough(false),
+                                         false,
+                                         false,
+                                         std::nullopt,
+                                         {"prereq1", "prereq2"}});
+
+    auto state = builder.Build();
+    ASSERT_TRUE(state.Valid());
+
+    auto expected = boost::json::parse(R"({
+        "myFlagTracked" : true,
+        "myFlagUntracked" : true,
+        "$flagsState": {
+            "myFlagTracked": {
+                "version": 42,
+                "variation": 1,
+                "reason":{
+                    "kind" : "FALLTHROUGH"
+                },
+                "trackReason" : true,
+                "trackEvents" : true,
+                "prerequisites" : ["prereq1", "prereq2"]
+            },
+            "myFlagUntracked" : {
+                "variation" : 1,
+                "prerequisites" : ["prereq1", "prereq2"]
+            }
+        },
+        "$valid": true
+    })");
+
+    auto got = boost::json::value_from(state);
+    ASSERT_EQ(got, expected);
+}
+
 TEST(AllFlagsTest, IncludeReasons) {
     AllFlagsStateBuilder builder{AllFlagsState::Options::IncludeReasons};
     builder.AddFlag(
@@ -99,6 +179,38 @@ TEST(AllFlagsTest, IncludeReasons) {
                 "reason" : {
                     "kind": "FALLTHROUGH"
                 }
+            }
+        },
+        "$valid": true
+    })");
+
+    auto got = boost::json::value_from(state);
+    ASSERT_EQ(got, expected);
+}
+
+TEST(AllFlagsTest, IncludeReasonsExposesPrerequisiteRelations) {
+    AllFlagsStateBuilder builder{AllFlagsState::Options::IncludeReasons};
+    builder.AddFlag("myFlag", true,
+                    AllFlagsState::State{42,
+                                         1,
+                                         EvaluationReason::Fallthrough(false),
+                                         false,
+                                         false,
+                                         std::nullopt,
+                                         {"prereq1", "prereq2"}});
+    auto state = builder.Build();
+    ASSERT_TRUE(state.Valid());
+
+    auto expected = boost::json::parse(R"({
+        "myFlag": true,
+        "$flagsState": {
+            "myFlag": {
+                "version": 42,
+                "variation": 1,
+                "reason" : {
+                    "kind": "FALLTHROUGH"
+                },
+                "prerequisites": ["prereq1", "prereq2"]
             }
         },
         "$valid": true
@@ -130,12 +242,38 @@ TEST(AllFlagsTest, FlagValues) {
     }));
 }
 
-TEST(AllFlagsTest, FlagState) {
+TEST(AllFlagsTest, FlagStatePassedInIsEquivalentToRetrievedState) {
     AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
 
     std::size_t const kNumFlags = 10;
 
-    AllFlagsState::State state{42, 1, std::nullopt, false, false, std::nullopt};
+    AllFlagsState::State state{
+        42, 1, std::nullopt, false, false, std::nullopt, {"a", "b", "c"}};
+    for (std::size_t i = 0; i < kNumFlags; i++) {
+        builder.AddFlag("myFlag" + std::to_string(i), "value", state);
+    }
+
+    auto all_flags_state = builder.Build();
+
+    auto const& states = all_flags_state.States();
+
+    ASSERT_EQ(states.size(), kNumFlags);
+
+    ASSERT_TRUE(std::all_of(states.begin(), states.end(), [&](auto const& kvp) {
+        return kvp.second == state;
+    }));
+}
+
+// Similar to the test above but with the prerequisite list reversed, as a
+// sanity check that the list order is preserved.
+TEST(AllFlagsTest,
+     FlagStatePassedInIsEquivalentToRetrievedState_ReversedPrereqs) {
+    AllFlagsStateBuilder builder{AllFlagsState::Options::Default};
+
+    std::size_t const kNumFlags = 10;
+
+    AllFlagsState::State state{
+        42, 1, std::nullopt, false, false, std::nullopt, {"c", "b", "a"}};
     for (std::size_t i = 0; i < kNumFlags; i++) {
         builder.AddFlag("myFlag" + std::to_string(i), "value", state);
     }

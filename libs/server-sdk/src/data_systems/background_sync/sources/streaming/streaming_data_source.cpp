@@ -2,6 +2,8 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
+#include "../../detail/payload_filter_validation/payload_filter_validation.hpp"
+
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/post.hpp>
@@ -14,6 +16,12 @@ namespace launchdarkly::server_side::data_systems {
 
 static char const* const kCouldNotParseEndpoint =
     "Could not parse streaming endpoint URL";
+
+static char const* const kInvalidFilterKey =
+    "Invalid payload filter configured on polling data source, full "
+    "environment "
+    "will be fetched.\nEnsure the filter key is not empty and was copied "
+    "correctly from LaunchDarkly settings";
 
 std::string const& StreamingDataSource::Identity() const {
     static std::string const identity = "streaming data source";
@@ -31,8 +39,8 @@ StreamingDataSource::StreamingDataSource(
       logger_(logger),
       status_manager_(status_manager),
       http_config_(http_properties),
-      streaming_config_(streaming),
-      streaming_endpoint_(endpoints.StreamingBaseUrl()) {}
+      streaming_endpoint_(endpoints.StreamingBaseUrl()),
+      streaming_config_(streaming) {}
 
 void StreamingDataSource::StartAsync(
     data_interfaces::IDestination* dest,
@@ -45,6 +53,17 @@ void StreamingDataSource::StartAsync(
 
     auto updated_url = network::AppendUrl(streaming_endpoint_,
                                           streaming_config_.streaming_path);
+
+    if (streaming_config_.filter_key && updated_url) {
+        if (detail::ValidateFilterKey(*streaming_config_.filter_key)) {
+            updated_url->append("?filter=" + *streaming_config_.filter_key);
+            LD_LOG(logger_, LogLevel::kDebug)
+                << "using payload filter '" << *streaming_config_.filter_key
+                << "'";
+        } else {
+            LD_LOG(logger_, LogLevel::kError) << kInvalidFilterKey;
+        }
+    }
 
     // Bad URL, don't set the client. Start will then report the bad status.
     if (!updated_url) {
@@ -118,12 +137,11 @@ void StreamingDataSource::StartAsync(
 
     client_builder.errors([weak_self](auto error) {
         if (auto self = weak_self.lock()) {
-            std::string error_string = launchdarkly::sse::ErrorToString(error);
-            LD_LOG(self->logger_, LogLevel::kError) << error_string;
-            self->status_manager_.SetState(
-                DataSourceStatus::DataSourceState::kOff,
-                DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse,
-                std::move(error_string));
+            std::string error_string = sse::ErrorToString(error);
+            LD_LOG(self->logger_, sse::IsRecoverable(error) ? LogLevel::kDebug
+                                                            : LogLevel::kError);
+            self->HandleErrorStateChange(std::move(error),
+                                         std::move(error_string));
         }
     });
 
@@ -138,6 +156,52 @@ void StreamingDataSource::StartAsync(
         return;
     }
     client_->async_connect();
+}
+
+template <class>
+inline constexpr bool always_false_v = false;
+
+void StreamingDataSource::HandleErrorStateChange(sse::Error error,
+                                                 std::string error_string) {
+    auto const state = sse::IsRecoverable(error) ? DataSourceState::kInterrupted
+                                                 : DataSourceState::kOff;
+    std::visit(
+        [this, state, error_string = std::move(error_string)](auto error) {
+            using T = std::decay_t<decltype(error)>;
+            if constexpr (std::is_same_v<T, sse::errors::ReadTimeout>) {
+                this->status_manager_.SetState(
+                    state,
+                    DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+                    std::move(error_string));
+
+            } else if constexpr (std::is_same_v<
+                                     T,
+                                     sse::errors::UnrecoverableClientError>) {
+                this->status_manager_.SetState(
+                    state,
+                    static_cast<data_components::DataSourceStatusManager::
+                                    StatusCodeType>(error.status),
+                    std::move(error_string));
+
+            } else if constexpr (std::is_same_v<
+                                     T, sse::errors::InvalidRedirectLocation>) {
+                this->status_manager_.SetState(
+                    state,
+                    DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+                    std::move(error_string));
+
+            } else if constexpr (std::is_same_v<T,
+                                                sse::errors::NotRedirectable>) {
+                this->status_manager_.SetState(
+                    state,
+                    DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+                    std::move(error_string));
+            } else {
+                static_assert(always_false_v<decltype(error)>,
+                              "non-exhaustive visitor");
+            }
+        },
+        std::move(error));
 }
 
 void StreamingDataSource::ShutdownAsync(std::function<void()> completion) {

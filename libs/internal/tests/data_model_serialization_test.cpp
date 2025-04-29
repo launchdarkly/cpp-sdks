@@ -3,7 +3,7 @@
 #include <boost/json/value_from.hpp>
 
 #include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_rule_clause.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>

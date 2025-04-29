@@ -1,5 +1,84 @@
 # Changelog
 
+## [3.8.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.8.0...launchdarkly-cpp-server-v3.8.1) (2025-01-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.10.0 to 0.10.1
+    * launchdarkly-cpp-sse-client bumped from 0.5.4 to 0.5.5
+
+## [3.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.7.0...launchdarkly-cpp-server-v3.8.0) (2024-11-08)
+
+
+### Features
+
+* expose prerequisite relations in AllFlags API ([#463](https://github.com/launchdarkly/cpp-sdks/issues/463)) ([56de5f5](https://github.com/launchdarkly/cpp-sdks/commit/56de5f5e8b1a9f44dab79544fc2954abb50b8b88))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.9.0 to 0.10.0
+
+## [3.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.6.2...launchdarkly-cpp-server-v3.7.0) (2024-10-30)
+
+
+### Features
+
+* add LDValue_SerializeJSON C binding ([90eb880](https://github.com/launchdarkly/cpp-sdks/commit/90eb880b7b769ba491c9da5734f5db7eda31f15e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.3 to 0.9.0
+    * launchdarkly-cpp-common bumped from 1.8.0 to 1.9.0
+
+## [3.6.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.6.1...launchdarkly-cpp-server-v3.6.2) (2024-10-08)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-sse-client bumped from 0.5.3 to 0.5.4
+
+## [3.6.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.6.0...launchdarkly-cpp-server-v3.6.1) (2024-10-01)
+
+
+### Bug Fixes
+
+* improve caching behavior of database integration ([#444](https://github.com/launchdarkly/cpp-sdks/issues/444)) ([5f47864](https://github.com/launchdarkly/cpp-sdks/commit/5f4786467888bdb15b10d342e12a1c7fb9094ca6))
+* improve handling of streaming error state changes/logging ([#439](https://github.com/launchdarkly/cpp-sdks/issues/439)) ([04e7e0e](https://github.com/launchdarkly/cpp-sdks/commit/04e7e0ef64b1933a63ad8d071a0a8f95ce666dc8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.2 to 0.8.3
+    * launchdarkly-cpp-sse-client bumped from 0.5.2 to 0.5.3
+
+## [3.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.3...launchdarkly-cpp-server-v3.6.0) (2024-09-04)
+
+
+### Features
+
+* server-side payload filters ([#435](https://github.com/launchdarkly/cpp-sdks/issues/435)) ([aaff0b8](https://github.com/launchdarkly/cpp-sdks/commit/aaff0b82a25e44fa104403f6de65404a51561a56))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.8.1 to 0.8.2
+    * launchdarkly-cpp-common bumped from 1.7.0 to 1.8.0
+
 ## [3.5.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.5.2...launchdarkly-cpp-server-v3.5.3) (2024-07-25)
 
 

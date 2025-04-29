@@ -1,0 +1,51 @@
+# This is a composite to allow sharing these steps into other workflows.
+# It isn't a shared workflow, because then it isn't convenient to add
+# additional package-specific steps.
+name: CMake Integration Test
+description: 'CMake integration test suitable for running on multiple platforms.'
+inputs:
+  platform_version:
+    description: 'Boost platform version'
+    required: false
+    default: "22.04"
+  toolset:
+    description: 'Boost toolset'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Install Ninja
+      uses: ./.github/actions/install-ninja
+    - name: Install boost
+      uses: ./.github/actions/install-boost
+      id: install-boost
+      with:
+        platform_version: ${{ inputs.platform_version }}
+        toolset: ${{ inputs.toolset }}
+    - name: Install OpenSSL
+      uses: ./.github/actions/install-openssl
+      id: install-openssl
+    - name: Configure CMake Integration Tests
+      shell: bash
+      run: ./scripts/configure-cmake-integration-tests.sh
+      env:
+        # These will be injected into the SDK CMake project on the command line, via "-D BOOST_ROOT=..."
+        # and   "-D OPENSSL_ROOT_DIR=...". When the integration tests are configured, they will then be passed
+        # along in the same manner to those test projects via the command line.
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        CMAKE_INSTALL_PREFIX: ../LAUNCHDARKLY_INSTALL
+    - name: Build the SDK
+      shell: bash
+      run: |
+        cmake --build build
+    - name: Install the SDK
+      shell: bash
+      run: |
+        cmake --install build
+    - name: Run CMake Integration Tests
+      shell: bash
+      run: |
+        export CTEST_OUTPUT_ON_FAILURE=1
+        cd build/cmake-tests && ctest

@@ -1,7 +1,7 @@
 #include <launchdarkly/server_side/integrations/data_reader/kinds.hpp>
 
 #include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_primitives.hpp>
+#include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/serialization/json_segment.hpp>
 
 #include <boost/json.hpp>

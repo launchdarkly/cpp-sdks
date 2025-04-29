@@ -88,9 +88,25 @@ struct LDPersistence {
 };
 
 /**
- * Initializes a custom persistence implementation. Must be called before
- * passing a custom implementation into configuration.
- * @param backend Implementation to initialize.
+ * Initializes an instance of LDPersistence with default function pointers,
+ * additionally setting UserData to NULL.
+ *
+ * This must be called after declaring the struct, but before setting any
+ * custom function pointers.
+ *
+ * Example:
+ * @code
+ * struct LDPersistence customPersistence;
+ * LDPersistence_Init(&customPersistence);
+ *
+ * customPersistence.SetFn = my_set_function;
+ * customPersistence.RemoveFn = my_remove_function;
+ * customPersistence.ReadFn = my_read_function;
+ * customPersistence.FreeFn = my_free_read_function;
+ * customPersistence.UserData = my_user_data_ptr;
+ * @endcode
+ *
+ * @param LDPersistence to initialize.
  */
 LD_EXPORT(void)
 LDPersistence_Init(struct LDPersistence* implementation);
@@ -264,7 +280,12 @@ LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_UseReport(LDClientConfigBuilder b,
                                            bool use_report);
 /**
- * Set the streaming configuration for the builder.
+ * Set the streaming configuration for the builder. The builder is automatically
+ * freed.
+ *
+ * WARNING: Do not call any other
+ * LDDataSourceStreamBuilder function on the provided LDDataSourceStreamBuilder
+ * after calling this function. It is undefined behavior.
  *
  * A data source may either be streaming or polling. Setting a streaming
  * builder indicates the data source will use streaming. Setting a polling
@@ -272,7 +293,7 @@ LDClientConfigBuilder_DataSource_UseReport(LDClientConfigBuilder b,
  *
  * @param b Client config builder. Must not be NULL.
  * @param stream_builder The streaming builder. The builder is consumed; do not
- * free it.
+ * free it. Must not be NULL.
  */
 LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_MethodStream(
@@ -280,7 +301,12 @@ LDClientConfigBuilder_DataSource_MethodStream(
     LDDataSourceStreamBuilder stream_builder);
 
 /**
- * Set the polling configuration for the builder.
+ * Set the polling configuration for the builder. The builder is automatically
+ * freed
+ *
+ * WARNING: Do not call any other
+ * LDDataSourcePollBuilder function on the provided  LDDataSourcePollBuilder
+ * after calling this function. It is undefined behavior.
  *
  * A data source may either be streaming or polling. Setting a stream
  * builder indicates the data source will use streaming. Setting a polling
@@ -288,7 +314,7 @@ LDClientConfigBuilder_DataSource_MethodStream(
  *
  * @param b Client config builder. Must not be NULL.
  * @param poll_builder The polling builder. The builder is consumed; do not free
- * it.
+ * it. Must not be NULL.
  */
 LD_EXPORT(void)
 LDClientConfigBuilder_DataSource_MethodPoll(
@@ -396,7 +422,13 @@ LDClientConfigBuilder_HttpProperties_Header(LDClientConfigBuilder b,
                                             char const* value);
 
 /**
- * Sets the TLS options builder. The builder is consumed; do not free it.
+ * Sets the TLS options builder. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDClientHttpPropertiesTlsBuilder function on the provided
+ * LDClientHttpPropertiesTlsBuilder after calling this function.
+ * It is undefined behavior.
+ *
  * @param b Client config builder. Must not be NULL.
  * @param tls_builder The TLS options builder. Must not be NULL.
  */
@@ -468,7 +500,14 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b);
 
 /**
- * Configures the SDK with basic logging.
+ * Configures the SDK with basic logging. The logging builder is
+ * automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDLoggingBasicBuilder function on the provided
+ * LDLoggingBasicBuilder after calling this function.
+ * It is undefined behavior.
+ *
  * @param b  Client config builder. Must not be NULL.
  * @param basic_builder The basic logging builder. Must not be NULL.
  */
@@ -477,7 +516,13 @@ LDClientConfigBuilder_Logging_Basic(LDClientConfigBuilder b,
                                     LDLoggingBasicBuilder basic_builder);
 
 /**
- * Configures the SDK with custom logging.
+ * Configures the SDK with custom logging. The custom builder is automatically
+ * freed.
+ *
+ * WARNING: Do not call any other
+ * LDLoggingCustomBuilder function on the provided LDLoggingCustomBuilder after
+ * calling this function. It is undefined behavior.
+ *
  * @param b  Client config builder. Must not be NULL.
  * @param custom_builder The custom logging builder. Must not be NULL.
  */
@@ -514,7 +559,14 @@ LDPersistenceCustomBuilder_Implementation(LDPersistenceCustomBuilder b,
                                           struct LDPersistence impl);
 
 /**
- * Configures the SDK with custom persistence.
+ * Configures the SDK with custom persistence. The persistence builder
+ * is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDPersistenceCustomBuilder function on the provided
+ * LDPersistenceCustomBuilder after calling this function. It is undefined
+ * behavior.
+ *
  * @param b  Client config builder. Must not be NULL.
  * @param custom_builder The custom persistence builder. Must not be NULL.
  * @return
@@ -532,7 +584,12 @@ LD_EXPORT(void)
 LDClientConfigBuilder_Persistence_None(LDClientConfigBuilder b);
 
 /**
- * Creates an LDClientConfig. The LDClientConfigBuilder is consumed.
+ * Creates an LDClientConfig. The builder is automatically freed.
+ *
+ * WARNING: Do not call any other
+ * LDClientConfigBuilder function on the provided LDClientConfigBuilder after
+ * calling this function. It is undefined behavior.
+ *
  * On success, the config will be stored in out_config; otherwise,
  * out_config will be set to NULL and the returned LDStatus will indicate
  * the error.

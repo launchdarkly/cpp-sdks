@@ -52,12 +52,15 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         if (in.streaming->baseUri) {
             endpoints.StreamingBaseUrl(*in.streaming->baseUri);
         }
+        auto streaming = decltype(datasystem)::Streaming();
         if (in.streaming->initialRetryDelayMs) {
-            auto streaming = decltype(datasystem)::Streaming();
             streaming.InitialReconnectDelay(
                 std::chrono::milliseconds(*in.streaming->initialRetryDelayMs));
-            datasystem.Synchronizer(std::move(streaming));
         }
+        if (in.streaming->filter) {
+            streaming.Filter(*in.streaming->filter);
+        }
+        datasystem.Synchronizer(std::move(streaming));
     }
 
     if (in.polling) {
@@ -71,6 +74,9 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
                     std::chrono::duration_cast<std::chrono::seconds>(
                         std::chrono::milliseconds(
                             *in.polling->pollIntervalMs)));
+            }
+            if (in.polling->filter) {
+                method.Filter(*in.polling->filter);
             }
             datasystem.Synchronizer(std::move(method));
         }

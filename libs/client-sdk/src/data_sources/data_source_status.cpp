@@ -4,26 +4,27 @@
 
 namespace launchdarkly::client_side::data_sources {
 
-std::ostream& operator<<(std::ostream& out,
-                         DataSourceStatus::DataSourceState const& state) {
+char const* GetDataSourceStateName(DataSourceState state,
+                                   char const* default_if_unknown) {
     switch (state) {
         case DataSourceStatus::DataSourceState::kInitializing:
-            out << "INITIALIZING";
-            break;
+            return "INITIALIZING";
         case DataSourceStatus::DataSourceState::kValid:
-            out << "VALID";
-            break;
+            return "VALID";
         case DataSourceStatus::DataSourceState::kInterrupted:
-            out << "INTERRUPTED";
-            break;
+            return "INTERRUPTED";
         case DataSourceStatus::DataSourceState::kSetOffline:
-            out << "OFFLINE";
-            break;
+            return "OFFLINE";
         case DataSourceStatus::DataSourceState::kShutdown:
-            out << "SHUTDOWN";
-            break;
+            return "SHUTDOWN";
+        default:
+            return default_if_unknown;
     }
+}
 
+std::ostream& operator<<(std::ostream& out,
+                         DataSourceStatus::DataSourceState const& state) {
+    out << GetDataSourceStateName(state, "UNKNOWN");
     return out;
 }
 

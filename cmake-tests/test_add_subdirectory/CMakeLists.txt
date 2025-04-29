@@ -1,0 +1,2 @@
+declare_add_subdirectory_test(test_add_subdirectory)
+add_build_step(test_add_subdirectory)

@@ -247,6 +247,15 @@ LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(
 }
 
 LD_EXPORT(void)
+LDServerDataSourceStreamBuilder_Filter(LDServerDataSourceStreamBuilder b,
+                                       char const* filter_key) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(filter_key);
+
+    TO_STREAM_BUILDER(b)->Filter(filter_key);
+}
+
+LD_EXPORT(void)
 LDServerDataSourceStreamBuilder_Free(LDServerDataSourceStreamBuilder b) {
     delete TO_STREAM_BUILDER(b);
 }
@@ -261,6 +270,15 @@ LDServerDataSourcePollBuilder_IntervalS(LDServerDataSourcePollBuilder b,
     LD_ASSERT_NOT_NULL(b);
 
     TO_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});
+}
+
+LD_EXPORT(void)
+LDServerDataSourcePollBuilder_Filter(LDServerDataSourcePollBuilder b,
+                                     char const* filter_key) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(filter_key);
+
+    TO_POLL_BUILDER(b)->Filter(filter_key);
 }
 
 LD_EXPORT(void)

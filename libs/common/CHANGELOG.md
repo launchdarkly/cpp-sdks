@@ -1,6 +1,20 @@
 # Changelog
 
 
+## [1.9.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.8.0...launchdarkly-cpp-common-v1.9.0) (2024-10-30)
+
+
+### Features
+
+* add LDValue_SerializeJSON C binding ([90eb880](https://github.com/launchdarkly/cpp-sdks/commit/90eb880b7b769ba491c9da5734f5db7eda31f15e))
+
+## [1.8.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.7.0...launchdarkly-cpp-common-v1.8.0) (2024-09-04)
+
+
+### Features
+
+* server-side payload filters ([#435](https://github.com/launchdarkly/cpp-sdks/issues/435)) ([aaff0b8](https://github.com/launchdarkly/cpp-sdks/commit/aaff0b82a25e44fa104403f6de65404a51561a56))
+
 ## [1.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.6.0...launchdarkly-cpp-common-v1.7.0) (2024-05-30)
 
 

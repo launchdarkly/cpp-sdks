@@ -207,13 +207,21 @@ TEST(FlagUpdaterEventTests, SecondInitWithUpdateProducesEvents) {
 
     std::atomic_bool got_event(false);
     notifier->OnFlagChange(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA", [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->OldValue().AsString());
             EXPECT_EQ("potato", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_FALSE(event->Deleted());
+
+            // The value in the store should be consistent with the new value.
+            EXPECT_EQ(event->NewValue().AsString(), manager.Get("flagA")
+                                                        .get()
+                                                        ->item.value()
+                                                        .Detail()
+                                                        .Value()
+                                                        .AsString());
         });
 
     updater.Init(
@@ -283,13 +291,21 @@ TEST(FlagUpdaterDataTests, PatchWithUpdateProducesEvent) {
 
     std::atomic_bool got_event(false);
     notifier->OnFlagChange(
-        "flagA", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagA",
+        [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
             EXPECT_EQ("test", event->OldValue().AsString());
             EXPECT_EQ("second", event->NewValue().AsString());
             EXPECT_EQ("flagA", event->FlagName());
             EXPECT_FALSE(event->Deleted());
+            // The value in the store should be consistent with the new value.
+            EXPECT_EQ(event->NewValue().AsString(), manager.Get("flagA")
+                                                        .get()
+                                                        ->item.value()
+                                                        .Detail()
+                                                        .Value()
+                                                        .AsString());
         });
 
     updater.Init(
@@ -317,13 +333,22 @@ TEST(FlagUpdaterEventTests, PatchWithNewFlagProducesEvent) {
 
     std::atomic_bool got_event(false);
     notifier->OnFlagChange(
-        "flagB", [&got_event](std::shared_ptr<FlagValueChangeEvent> event) {
+        "flagB",
+        [&got_event, &manager](std::shared_ptr<FlagValueChangeEvent> event) {
             got_event.store(true);
 
             EXPECT_TRUE(event->OldValue().IsNull());
             EXPECT_EQ("second", event->NewValue().AsString());
             EXPECT_EQ("flagB", event->FlagName());
             EXPECT_FALSE(event->Deleted());
+
+            // The value in the store should be consistent with the new value.
+            EXPECT_EQ(event->NewValue().AsString(), manager.Get("flagB")
+                                                        .get()
+                                                        ->item.value()
+                                                        .Detail()
+                                                        .Value()
+                                                        .AsString());
         });
 
     updater.Init(
