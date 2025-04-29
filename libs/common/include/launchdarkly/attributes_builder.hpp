@@ -91,9 +91,11 @@ public:
     /**
      * Add or update an attribute in the context.
      *
-     * This method cannot be used to set the key, kind, name, anonymous, or
-     * _meta property of a context. The specific methods on the context builder,
-     * or attributes builder, should be used.
+     * This method cannot be used to set the key, kind, or _meta property
+     * of a context. The anonymous and name properties can be set, but must
+     * be of the correct types (boolean and string respectively). The specific
+     * methods on the context builder or attributes builder can also be used
+     * for these properties.
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.
@@ -104,9 +106,11 @@ public:
     /**
      * Add or update a private attribute in the context.
      *
-     * This method cannot be used to set the key, kind, name, or anonymous
-     * property of a context. The specific methods on the context builder, or
-     * attributes builder, should be used.
+     * This method cannot be used to set the key, kind, or _meta property
+     * of a context. The anonymous and name properties can be set, but must
+     * be of the correct types (boolean and string respectively). The specific
+     * methods on the context builder or attributes builder can also be used
+     * for these properties.
      *
      * Once you have set an attribute private it will remain in the private
      * list even if you call `set` afterward. This method is just a convenience
@@ -147,7 +151,7 @@ public:
      * launchdarkly::config::shared::builders::EventsBuilder<SDK>::PrivateAttribute.
      *
      * The attributes "kind" and "key", and the "_meta" attributes cannot be
-     * made private.
+     * made private. The "anonymous" attribute can be marked private, but will not be redacted.
      *
      * In this example, firstName is marked as private, but lastName is not:
      *
