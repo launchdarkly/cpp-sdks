@@ -1,6 +1,18 @@
 # Changelog
 
 
+## [1.10.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.9.0...launchdarkly-cpp-common-v1.10.0) (2025-05-02)
+
+
+### Features
+
+* generate events for flag prerequisites ([#465](https://github.com/launchdarkly/cpp-sdks/issues/465)) ([30378a1](https://github.com/launchdarkly/cpp-sdks/commit/30378a10b97ac46591ffd6fd3db43be14a60fad6))
+
+
+### Bug Fixes
+
+* handle setting protected/type-enforced attributes correctly ([#433](https://github.com/launchdarkly/cpp-sdks/issues/433)) ([d73de43](https://github.com/launchdarkly/cpp-sdks/commit/d73de432867a696be4fd7604eea21235ea9a6a9f))
+
 ## [1.9.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.8.0...launchdarkly-cpp-common-v1.9.0) (2024-10-30)
 
 

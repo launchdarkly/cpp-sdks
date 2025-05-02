@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(
         LaunchDarklyCPPClient
-        VERSION 3.8.2 # {x-release-please-version}
+        VERSION 3.9.0 # {x-release-please-version}
         DESCRIPTION "LaunchDarkly C++ Client SDK"
         LANGUAGES CXX C
 )
