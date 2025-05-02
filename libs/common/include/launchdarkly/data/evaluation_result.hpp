@@ -48,6 +48,9 @@ class EvaluationResult {
      */
     [[nodiscard]] EvaluationDetailInternal const& Detail() const;
 
+    [[nodiscard]] std::optional<std::vector<std::string>> const& Prerequisites()
+        const;
+
     EvaluationResult(
         uint64_t version,
         std::optional<uint64_t> flag_version,
@@ -57,6 +60,16 @@ class EvaluationResult {
             debug_events_until_date,
         EvaluationDetailInternal detail);
 
+    EvaluationResult(
+        uint64_t version,
+        std::optional<uint64_t> flag_version,
+        bool track_events,
+        bool track_reason,
+        std::optional<std::chrono::time_point<std::chrono::system_clock>>
+            debug_events_until_date,
+        EvaluationDetailInternal detail,
+        std::optional<std::vector<std::string>> prerequisites);
+
    private:
     uint64_t version_;
     std::optional<uint64_t> flag_version_;
@@ -65,6 +78,7 @@ class EvaluationResult {
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         debug_events_until_date_;
     EvaluationDetailInternal detail_;
+    std::optional<std::vector<std::string>> prerequisites_;
 };
 
 std::ostream& operator<<(std::ostream& out, EvaluationResult const& result);

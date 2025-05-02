@@ -305,6 +305,26 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     auto const& flag = *(desc->item);
     auto const& detail = flag.Detail();
 
+    // The Prerequisites vector represents the evaluated prerequisites of
+    // this flag. We need to generate events for both this flag and its
+    // prerequisites (recursively), which is necessary to ensure LaunchDarkly
+    // analytics functions properly.
+    //
+    // We're using JsonVariation because the type of the
+    // prerequisite is both unknown and irrelevant to emitting the events.
+    //
+    // We're passing Value::Null() to match a server-side SDK's behavior when
+    // evaluating prerequisites.
+    //
+    // NOTE: if "hooks" functionality is implemented into this SDK, take care
+    // that evaluating prerequisites does not trigger hooks. This may require
+    // refactoring the code below to not use JsonVariation.
+    if (auto const prereqs = flag.Prerequisites()) {
+        for (auto const& prereq : *prereqs) {
+            JsonVariation(prereq, Value::Null());
+        }
+    }
+
     if (check_type && default_value.Type() != Value::Type::kNull &&
         detail.Value().Type() != default_value.Type()) {
         auto error_reason =

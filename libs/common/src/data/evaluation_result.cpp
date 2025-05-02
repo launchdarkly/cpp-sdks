@@ -31,6 +31,11 @@ EvaluationDetailInternal const& EvaluationResult::Detail() const {
     return detail_;
 }
 
+std::optional<std::vector<std::string>> const& EvaluationResult::Prerequisites()
+    const {
+    return prerequisites_;
+}
+
 EvaluationResult::EvaluationResult(
     uint64_t version,
     std::optional<uint64_t> flag_version,
@@ -39,12 +44,30 @@ EvaluationResult::EvaluationResult(
     std::optional<std::chrono::time_point<std::chrono::system_clock>>
         debug_events_until_date,
     EvaluationDetailInternal detail)
+    : EvaluationResult(version,
+                       flag_version,
+                       track_events,
+                       track_reason,
+                       debug_events_until_date,
+                       std::move(detail),
+                       {}) {}
+
+EvaluationResult::EvaluationResult(
+    uint64_t version,
+    std::optional<uint64_t> flag_version,
+    bool track_events,
+    bool track_reason,
+    std::optional<std::chrono::time_point<std::chrono::system_clock>>
+        debug_events_until_date,
+    EvaluationDetailInternal detail,
+    std::optional<std::vector<std::string>> prerequisites)
     : version_(version),
       flag_version_(flag_version),
       track_events_(track_events),
       track_reason_(track_reason),
       debug_events_until_date_(debug_events_until_date),
-      detail_(std::move(detail)) {}
+      detail_(std::move(detail)),
+      prerequisites_(std::move(prerequisites)) {}
 
 std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
     out << "{";
@@ -59,6 +82,14 @@ std::ostream& operator<<(std::ostream& out, EvaluationResult const& result) {
             << std::put_time(std::gmtime(&as_time_t), "%Y-%m-%d %H:%M:%S");
     }
     out << " detail: " << result.Detail();
+    if (auto const prerequisites = result.Prerequisites()) {
+        out << " prerequisites: [";
+        for (std::size_t i = 0; i < prerequisites->size(); i++) {
+            out << prerequisites->at(i)
+                << (i == prerequisites->size() - 1 ? "" : ", ");
+        }
+        out << "]";
+    }
     out << "}";
     return out;
 }
@@ -69,7 +100,8 @@ bool operator==(EvaluationResult const& lhs, EvaluationResult const& rhs) {
            lhs.TrackEvents() == rhs.TrackEvents() &&
            lhs.Detail() == rhs.Detail() &&
            lhs.DebugEventsUntilDate() == rhs.DebugEventsUntilDate() &&
-           lhs.FlagVersion() == rhs.FlagVersion();
+           lhs.FlagVersion() == rhs.FlagVersion() &&
+           lhs.Prerequisites() == rhs.Prerequisites();
 }
 
 bool operator!=(EvaluationResult const& lhs, EvaluationResult const& rhs) {
