@@ -1,5 +1,0 @@
-<map id="launchdarkly::server_side::integrations::SegmentKind" name="launchdarkly::server_side::integrations::SegmentKind">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,160,163"/>
-<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind.html" title="Represents the kind of a serialized item. The purpose of this interface is to allow for determining a..." alt="" coords="5,5,160,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,74,85,108,80,108,80,74"/>
-</map>

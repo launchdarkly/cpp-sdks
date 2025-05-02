@@ -1,5 +1,0 @@
-<map id="launchdarkly::detail::has_build_method&lt; T, ReturnType, std::void_t&lt; decltype(std::declval&lt; T &gt;().Build())&gt; &gt;" name="launchdarkly::detail::has_build_method&lt; T, ReturnType, std::void_t&lt; decltype(std::declval&lt; T &gt;().Build())&gt; &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="287,5,472,89"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,13,239,82"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="252,45,287,45,287,50,252,50"/>
-</map>

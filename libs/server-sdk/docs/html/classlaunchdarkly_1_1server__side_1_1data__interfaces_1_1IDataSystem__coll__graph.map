@@ -1,5 +1,0 @@
-<map id="launchdarkly::server_side::data_interfaces::IDataSystem" name="launchdarkly::server_side::data_interfaces::IDataSystem">
-<area shape="rect" id="Node000001" title="IDataSystem obtains data used for flag evaluations and makes it available to other components." alt="" coords="5,108,171,163"/>
-<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore.html" title="IStore provides shared ownership of flag and segment domain objects." alt="" coords="5,5,171,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,74,91,108,85,108,85,74"/>
-</map>
