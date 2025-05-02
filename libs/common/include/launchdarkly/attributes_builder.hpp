@@ -1,13 +1,13 @@
 #pragma once
 
-#include <string>
-
 #include <launchdarkly/attribute_reference.hpp>
 #include <launchdarkly/attributes.hpp>
 #include <launchdarkly/value.hpp>
 
-namespace launchdarkly {
+#include <map>
+#include <string>
 
+namespace launchdarkly {
 class ContextBuilder;
 
 /**
@@ -22,7 +22,7 @@ template <class BuilderReturn, class BuildType>
 class AttributesBuilder final {
     friend class ContextBuilder;
 
-   public:
+public:
     /**
      * Create an attributes builder with the given kind and key.
      * @param builder The context builder associated with this attributes
@@ -31,7 +31,8 @@ class AttributesBuilder final {
      * @param key The key for the kind.
      */
     AttributesBuilder(BuilderReturn& builder, std::string kind, std::string key)
-        : key_(std::move(key)), kind_(std::move(kind)), builder_(builder) {}
+        : builder_(builder), kind_(std::move(kind)), key_(std::move(key)) {
+    }
 
     /**
      * Crate an attributes builder with the specified kind, and pre-populated
@@ -44,9 +45,9 @@ class AttributesBuilder final {
     AttributesBuilder(BuilderReturn& builder,
                       std::string kind,
                       Attributes const& attributes)
-        : key_(attributes.Key()),
+        : builder_(builder),
           kind_(std::move(kind)),
-          builder_(builder),
+          key_(attributes.Key()),
           name_(attributes.Name()),
           anonymous_(attributes.Anonymous()),
           private_attributes_(attributes.PrivateAttributes()) {
@@ -90,24 +91,26 @@ class AttributesBuilder final {
     /**
      * Add or update an attribute in the context.
      *
-     * This method cannot be used to set the key, kind, name, anonymous, or
-     * _meta property of a context. The specific methods on the context builder,
-     * or attributes builder, should be used.
+     * This method cannot be used to set the key, kind, or _meta property
+     * of a context. The anonymous and name properties can be set, but must
+     * be of the correct types (boolean and string respectively). The specific
+     * methods on the context builder or attributes builder can also be used
+     * for these properties.
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.
-     * @param private_attribute If the attribute should be considered private:
-     * that is, the value will not be sent to LaunchDarkly in analytics events.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& Set(std::string name, launchdarkly::Value value);
+    AttributesBuilder& Set(std::string name, Value value);
 
     /**
      * Add or update a private attribute in the context.
      *
-     * This method cannot be used to set the key, kind, name, or anonymous
-     * property of a context. The specific methods on the context builder, or
-     * attributes builder, should be used.
+     * This method cannot be used to set the key, kind, or _meta property
+     * of a context. The anonymous and name properties can be set, but must
+     * be of the correct types (boolean and string respectively). The specific
+     * methods on the context builder or attributes builder can also be used
+     * for these properties.
      *
      * Once you have set an attribute private it will remain in the private
      * list even if you call `set` afterward. This method is just a convenience
@@ -115,11 +118,9 @@ class AttributesBuilder final {
      *
      * @param name The name of the attribute.
      * @param value The value for the attribute.
-     * @param private_attribute If the attribute should be considered private:
-     * that is, the value will not be sent to LaunchDarkly in analytics events.
      * @return A reference to the current builder.
      */
-    AttributesBuilder& SetPrivate(std::string name, launchdarkly::Value value);
+    AttributesBuilder& SetPrivate(std::string name, Value value);
 
     /**
      * Designate a context attribute, or properties within them, as private:
@@ -150,7 +151,7 @@ class AttributesBuilder final {
      * launchdarkly::config::shared::builders::EventsBuilder<SDK>::PrivateAttribute.
      *
      * The attributes "kind" and "key", and the "_meta" attributes cannot be
-     * made private.
+     * made private. The "anonymous" attribute can be marked private, but will not be redacted.
      *
      * In this example, firstName is marked as private, but lastName is not:
      *
@@ -216,7 +217,7 @@ class AttributesBuilder final {
      */
     [[nodiscard]] BuildType Build() const { return builder_.Build(); }
 
-   private:
+private:
     BuilderReturn& builder_;
 
     /**
@@ -229,15 +230,16 @@ class AttributesBuilder final {
     Attributes BuildAttributes() const;
 
     AttributesBuilder& Set(std::string name,
-                           launchdarkly::Value value,
+                           Value value,
                            bool private_attribute);
+
 
     std::string kind_;
     std::string key_;
     std::string name_;
     bool anonymous_ = false;
 
-    std::map<std::string, launchdarkly::Value> values_;
+    std::map<std::string, Value> values_;
     AttributeReference::SetType private_attributes_;
 };
-}  // namespace launchdarkly
+} // namespace launchdarkly

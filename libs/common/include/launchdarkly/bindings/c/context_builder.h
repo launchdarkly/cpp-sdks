@@ -94,8 +94,8 @@ LDContextBuilder_Attributes_Set(LDContextBuilder builder,
  * A subsequent call to @ref LDContextBuilder_Attributes_Set, for the same
  * attribute, will not remove the private status.
  *
- * This method cannot be used to set the `key`, `kind`, `name`, or `anonymous`
- * property of a context.
+ * This method cannot be used to set the `key`, `kind`, or `_meta`
+ * property of a context. The `anonymous` and `name` properties can be set, but must be of the correct types.
  *
  * Adding a @ref LDValue to the builder will consume that value.
  *
@@ -179,7 +179,7 @@ LDContextBuilder_Attributes_SetAnonymous(LDContextBuilder builder,
  * - @ref LDClientConfigBuilder_Events_PrivateAttribute
  *
  * The attributes "kind" and "key", and the "_meta" attributes cannot be
- * made private.
+ * made private. The "anonymous" attribute can be marked private, but will not be redacted.
  *
  * @param builder The builder. Must not be NULL.
  * @param kind The kind to set the attribute as private for. Must not be NULL.
