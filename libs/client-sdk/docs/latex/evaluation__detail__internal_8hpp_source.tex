@@ -1,0 +1,47 @@
+\doxysection{evaluation\+\_\+detail\+\_\+internal.\+hpp}
+\hypertarget{evaluation__detail__internal_8hpp_source}{}\label{evaluation__detail__internal_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data/evaluation\_detail\_internal.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data/evaluation\_detail\_internal.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstddef>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/data/evaluation\_reason.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \{}
+\DoxyCodeLine{00030\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00036\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal_adacc8208e6269ab60222d23517ab2f8a}{Value}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00043\ \ \ \ \ [[nodiscard]]\ std::optional<std::size\_t>\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal_ae9ccd7b789d0a81455f05c09e5656a31}{VariationIndex}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00049\ \ \ \ \ [[nodiscard]]\ std::optional<std::reference\_wrapper<EvaluationReason\ const>>}
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal_a784802258fffc6fde4505111ed303255}{Reason}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}(\mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ value,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::size\_t>\ variation\_index,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<EvaluationReason>\ reason);}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keyword}{friend}\ std::ostream\&\ operator<<(std::ostream\&\ out,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ detail);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00060\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{launchdarkly::Value}}\ value\_;}
+\DoxyCodeLine{00061\ \ \ \ \ std::optional<std::size\_t>\ variation\_index\_;}
+\DoxyCodeLine{00062\ \ \ \ \ std::optional<EvaluationReason>\ reason\_;}
+\DoxyCodeLine{00063\ \};}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00067\ \textcolor{keywordtype}{bool}\ operator!=(\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

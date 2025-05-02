@@ -1,0 +1,514 @@
+\doxysection{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/value.h File Reference}
+\hypertarget{value_8h}{}\label{value_8h}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/value.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/value.h}}
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+Include dependency graph for value.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=284pt]{value_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{value_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \+\_\+\+LDValue \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}
+\item 
+typedef struct \+\_\+\+LDValue\+\_\+\+Object\+Iter \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}
+\item 
+typedef struct \+\_\+\+LDValue\+\_\+\+Array\+Iter \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168f}{LDValue\+Type}} \{ \newline
+\mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa41d9b85181a2a33e5bc514a1efacd3f4}{LDValue\+Type\+\_\+\+Null}}
+, \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa0528726c6804ebd26ec3f31f9bf68600}{LDValue\+Type\+\_\+\+Bool}}
+, \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa8907fd952611a5e2c4f683eac21da466}{LDValue\+Type\+\_\+\+Number}}
+, \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa976916d8730f6a2cdbe5d4611e1e4718}{LDValue\+Type\+\_\+\+String}}
+, \newline
+\mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa411fd218abdad8378f1357554fa13569}{LDValue\+Type\+\_\+\+Array}}
+, \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa4947f87a6b8f52c94f454a4753aba91a}{LDValue\+Type\+\_\+\+Object}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{value_8h_ab4316cda4726f08d364e320ccfd35755}{LDValue\+\_\+\+New\+Null}} ()
+\item 
+\mbox{\hyperlink{value_8h_aa2a8dc023a969406f4e013bc2322018c}{LDValue\+\_\+\+New\+Bool}} (bool val)
+\item 
+\mbox{\hyperlink{value_8h_aa0d2dc808d0d802e4c70dd566a697b77}{LDValue\+\_\+\+New\+Number}} (double val)
+\item 
+\mbox{\hyperlink{value_8h_a112364277c8b1bf74dfb8a4a483fa27a}{LDValue\+\_\+\+New\+String}} (char const \texorpdfstring{$\ast$}{*}val)
+\item 
+\mbox{\hyperlink{value_8h_a1e4c2187c238eaeea42d73e9684e51f7}{LDValue\+\_\+\+New\+Value}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a5d9df547e0c7bd911fd8b0f56048c73a}{LDValue\+\_\+\+Type}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_afb0c7f8ac13c9cac25d2ab45930b2c21}{LDValue\+\_\+\+Get\+Bool}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a9d8c737c58fbc4f335f3bab42a6670a4}{LDValue\+\_\+\+Get\+Number}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a3ac27be4c58020d3100a72dfb3c6e444}{LDValue\+\_\+\+Get\+String}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a8484824901363a5bfbed7a1254179d23}{LDValue\+\_\+\+Count}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_a95f7b2bb9e3086bd3f9c80031662a06e}{LDValue\+\_\+\+Serialize\+JSON}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_ab8e48a1a361b9a1b3700972e48548dd8}{LDValue\+\_\+\+Array\+Iter\+\_\+\+New}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_af7ce751f8b19c4cdd1827109595711aa}{LDValue\+\_\+\+Array\+Iter\+\_\+\+Next}} (\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_a7030ab185f656140ae53e79d03567276}{LDValue\+\_\+\+Array\+Iter\+\_\+\+End}} (\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_afe02574a4c4172996a8810dcb5050c6c}{LDValue\+\_\+\+Array\+Iter\+\_\+\+Value}} (\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_a6940a76b691288f482413725446e666d}{LDValue\+\_\+\+Array\+Iter\+\_\+\+Free}} (\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_a103e0d5cc1b178bcef3330da7b45ef5d}{LDValue\+\_\+\+Object\+Iter\+\_\+\+New}} (\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} val)
+\item 
+\mbox{\hyperlink{value_8h_aeb0ed8ead9a3da1024eb998f0d9cfe9b}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Next}} (\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_afe06bb84d8f6071654e8d9bb0d56ccf2}{LDValue\+\_\+\+Object\+Iter\+\_\+\+End}} (\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_ac0e3a6b79172a34cbb007056adb22fb2}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Value}} (\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_ac781697519df63478978fd11c1909b79}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Key}} (\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}} iter)
+\item 
+\mbox{\hyperlink{value_8h_a0726e8bb1b144d4ff99f8b8f984c31ab}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Free}} (\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}} iter)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\Hypertarget{value_8h_ab2f8b088f5deaa20a08e2725df94e630}\label{value_8h_ab2f8b088f5deaa20a08e2725df94e630} 
+\index{value.h@{value.h}!LDValue@{LDValue}}
+\index{LDValue@{LDValue}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue}{LDValue}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDValue\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}
+
+Value represents any of the data types supported by JSON, all of which can be used for a Launch\+Darkly feature flag variation, or for an attribute in an evaluation context. Value instances are immutable.
+
+A basic LDValue types can be created directly using the LDValue\+\_\+\+New\texorpdfstring{$\ast$}{*} methods. This includes\+: null-\/type, boolean-\/type, number-\/type, and string-\/type.
+
+An array-\/type or object-\/type LDValue must be created using \doxylink{array__builder_8h_aae0264773c468639ac9848809d81bbdb}{LDArray\+Builder\+\_\+\+New()} or \doxylink{object__builder_8h_ae521b70c852125ecd77ed9cc49369794}{LDObject\+Builder\+\_\+\+New()}.
+
+Basic LDValue types can be converted to raw types using the LDValue\+\_\+\+Get\texorpdfstring{$\ast$}{*} methods.
+
+Accessing the members of object-\/type or array-\/type type must be done using iteration. \Hypertarget{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}\label{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d} 
+\index{value.h@{value.h}!LDValue\_ArrayIter@{LDValue\_ArrayIter}}
+\index{LDValue\_ArrayIter@{LDValue\_ArrayIter}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter}{LDValue\_ArrayIter}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDValue\+\_\+\+Array\+Iter\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}}
+
+LDValue\+\_\+\+Array\+Iter is a handle to an iterator, bound to an \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. It can be used to obtain the values of an array.
+
+The iterator must be destroyed after use using \doxylink{value_8h_a6940a76b691288f482413725446e666d}{LDValue\+\_\+\+Array\+Iter\+\_\+\+Free}. An iterator for an LDValue that has been freed should not be used. \Hypertarget{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}\label{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5} 
+\index{value.h@{value.h}!LDValue\_ObjectIter@{LDValue\_ObjectIter}}
+\index{LDValue\_ObjectIter@{LDValue\_ObjectIter}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter}{LDValue\_ObjectIter}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDValue\+\_\+\+Object\+Iter\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}
+
+LDValue\+\_\+\+Object\+Iter is a handle to an iterator, bound to an \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. It can be used to obtain the keys and values of an object.
+
+The iterator must be destroyed after use using \doxylink{value_8h_a0726e8bb1b144d4ff99f8b8f984c31ab}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Free}. An iterator for an LDValue that has been freed should not be used. 
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168f}\label{value_8h_a518676a2bd451ce16626dba8b9a5168f} 
+\index{value.h@{value.h}!LDValueType@{LDValueType}}
+\index{LDValueType@{LDValueType}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValueType}{LDValueType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168f}{LDValue\+Type}}}
+
+Describes the type of an LDValue. These correspond to the standard types in JSON. \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_Null@{LDValueType\_Null}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_Null@{LDValueType\_Null}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa41d9b85181a2a33e5bc514a1efacd3f4}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa41d9b85181a2a33e5bc514a1efacd3f4} 
+LDValue\+Type\+\_\+\+Null&The value is null. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_Bool@{LDValueType\_Bool}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_Bool@{LDValueType\_Bool}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa0528726c6804ebd26ec3f31f9bf68600}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa0528726c6804ebd26ec3f31f9bf68600} 
+LDValue\+Type\+\_\+\+Bool&The value is a boolean. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_Number@{LDValueType\_Number}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_Number@{LDValueType\_Number}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa8907fd952611a5e2c4f683eac21da466}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa8907fd952611a5e2c4f683eac21da466} 
+LDValue\+Type\+\_\+\+Number&The value is a number. JSON does not have separate types for integers and floats. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_String@{LDValueType\_String}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_String@{LDValueType\_String}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa976916d8730f6a2cdbe5d4611e1e4718}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa976916d8730f6a2cdbe5d4611e1e4718} 
+LDValue\+Type\+\_\+\+String&The value is a string. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_Array@{LDValueType\_Array}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_Array@{LDValueType\_Array}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa411fd218abdad8378f1357554fa13569}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa411fd218abdad8378f1357554fa13569} 
+LDValue\+Type\+\_\+\+Array&The value is an array. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LDValueType\_Object@{LDValueType\_Object}!value.h@{value.h}}\index{value.h@{value.h}!LDValueType\_Object@{LDValueType\_Object}}}\Hypertarget{value_8h_a518676a2bd451ce16626dba8b9a5168fa4947f87a6b8f52c94f454a4753aba91a}\label{value_8h_a518676a2bd451ce16626dba8b9a5168fa4947f87a6b8f52c94f454a4753aba91a} 
+LDValue\+Type\+\_\+\+Object&The value is an object. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{value_8h_a7030ab185f656140ae53e79d03567276}\label{value_8h_a7030ab185f656140ae53e79d03567276} 
+\index{value.h@{value.h}!LDValue\_ArrayIter\_End@{LDValue\_ArrayIter\_End}}
+\index{LDValue\_ArrayIter\_End@{LDValue\_ArrayIter\_End}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter\_End()}{LDValue\_ArrayIter\_End()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Array\+Iter\+\_\+\+End (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Check if an array-\/type iterator is at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to check. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the iterator is at the end. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a6940a76b691288f482413725446e666d}\label{value_8h_a6940a76b691288f482413725446e666d} 
+\index{value.h@{value.h}!LDValue\_ArrayIter\_Free@{LDValue\_ArrayIter\_Free}}
+\index{LDValue\_ArrayIter\_Free@{LDValue\_ArrayIter\_Free}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter\_Free()}{LDValue\_ArrayIter\_Free()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Array\+Iter\+\_\+\+Free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Destroy an array iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{value_8h_ab8e48a1a361b9a1b3700972e48548dd8}\label{value_8h_ab8e48a1a361b9a1b3700972e48548dd8} 
+\index{value.h@{value.h}!LDValue\_ArrayIter\_New@{LDValue\_ArrayIter\_New}}
+\index{LDValue\_ArrayIter\_New@{LDValue\_ArrayIter\_New}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter\_New()}{LDValue\_ArrayIter\_New()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Array\+Iter\+\_\+\+New (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain iterator over an array-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}, otherwise NULL.
+
+The iterator starts at the first element.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Iterator, or NULL if not an array-\/type. The iterator must should be destroyed with \doxylink{value_8h_a6940a76b691288f482413725446e666d}{LDValue\+\_\+\+Array\+Iter\+\_\+\+Free()}. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_af7ce751f8b19c4cdd1827109595711aa}\label{value_8h_af7ce751f8b19c4cdd1827109595711aa} 
+\index{value.h@{value.h}!LDValue\_ArrayIter\_Next@{LDValue\_ArrayIter\_Next}}
+\index{LDValue\_ArrayIter\_Next@{LDValue\_ArrayIter\_Next}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter\_Next()}{LDValue\_ArrayIter\_Next()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Array\+Iter\+\_\+\+Next (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Move the array-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{value_8h_afe02574a4c4172996a8810dcb5050c6c}\label{value_8h_afe02574a4c4172996a8810dcb5050c6c} 
+\index{value.h@{value.h}!LDValue\_ArrayIter\_Value@{LDValue\_ArrayIter\_Value}}
+\index{LDValue\_ArrayIter\_Value@{LDValue\_ArrayIter\_Value}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ArrayIter\_Value()}{LDValue\_ArrayIter\_Value()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Array\+Iter\+\_\+\+Value (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a60a215dcf5fcf9f3da9c1ecc0c97ab7d}{LDValue\+\_\+\+Array\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Get the value for the array-\/type iterator. The value\textquotesingle{}s lifetime is valid only for as long as the iterator. To obtain a copy, call \doxylink{value_8h_a1e4c2187c238eaeea42d73e9684e51f7}{LDValue\+\_\+\+New\+Value} with the result.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to get a value for. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The value reference. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a8484824901363a5bfbed7a1254179d23}\label{value_8h_a8484824901363a5bfbed7a1254179d23} 
+\index{value.h@{value.h}!LDValue\_Count@{LDValue\_Count}}
+\index{LDValue\_Count@{LDValue\_Count}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_Count()}{LDValue\_Count()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Count (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain number of \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue} elements stored in an array-\/type LDValue, or number of key/\+LDValue pairs stored in an object-\/type LDValue.
+
+If not an array-\/type or object-\/type, returns 0.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Count of LDValue elements, or 0 if not array-\/type/object-\/type. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a977c046a68f9451f14d5b9a35bbb0292}\label{value_8h_a977c046a68f9451f14d5b9a35bbb0292} 
+\index{value.h@{value.h}!LDValue\_Free@{LDValue\_Free}}
+\index{LDValue\_Free@{LDValue\_Free}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_Free()}{LDValue\_Free()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Frees an \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}.
+
+An LDValue should only be freed when directly owned by the caller, i.\+e., it was never moved into an array or object builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & LDValue to free. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{value_8h_afb0c7f8ac13c9cac25d2ab45930b2c21}\label{value_8h_afb0c7f8ac13c9cac25d2ab45930b2c21} 
+\index{value.h@{value.h}!LDValue\_GetBool@{LDValue\_GetBool}}
+\index{LDValue\_GetBool@{LDValue\_GetBool}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_GetBool()}{LDValue\_GetBool()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Get\+Bool (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain value of a boolean-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}, otherwise returns false.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Boolean value, or false if not boolean-\/type. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a9d8c737c58fbc4f335f3bab42a6670a4}\label{value_8h_a9d8c737c58fbc4f335f3bab42a6670a4} 
+\index{value.h@{value.h}!LDValue\_GetNumber@{LDValue\_GetNumber}}
+\index{LDValue\_GetNumber@{LDValue\_GetNumber}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_GetNumber()}{LDValue\_GetNumber()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Get\+Number (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain value of a number-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}, otherwise return 0. 
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Number value, or 0 if not number-\/type. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a3ac27be4c58020d3100a72dfb3c6e444}\label{value_8h_a3ac27be4c58020d3100a72dfb3c6e444} 
+\index{value.h@{value.h}!LDValue\_GetString@{LDValue\_GetString}}
+\index{LDValue\_GetString@{LDValue\_GetString}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_GetString()}{LDValue\_GetString()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Get\+String (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain value of a string-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}, otherwise returns pointer to an empty string.
+
+The returned string is only valid for the lifetime of the LDValue. If you need the string outside this lifetime, then a copy should be made.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+String value, or empty string if not string-\/type. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_aa2a8dc023a969406f4e013bc2322018c}\label{value_8h_aa2a8dc023a969406f4e013bc2322018c} 
+\index{value.h@{value.h}!LDValue\_NewBool@{LDValue\_NewBool}}
+\index{LDValue\_NewBool@{LDValue\_NewBool}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_NewBool()}{LDValue\_NewBool()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+New\+Bool (\begin{DoxyParamCaption}\item[{bool}]{val }\end{DoxyParamCaption})}
+
+Allocates a new boolean-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. 
+\begin{DoxyParams}{Parameters}
+{\em val} & Boolean. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+New LDValue. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_ab4316cda4726f08d364e320ccfd35755}\label{value_8h_ab4316cda4726f08d364e320ccfd35755} 
+\index{value.h@{value.h}!LDValue\_NewNull@{LDValue\_NewNull}}
+\index{LDValue\_NewNull@{LDValue\_NewNull}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_NewNull()}{LDValue\_NewNull()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+New\+Null (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Allocates a new null-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. {\itshape WARNING!} A {\ttfamily NULL} pointer is not a valid LDValue; to represent null (the JSON type), use this constructor.
+
+\begin{DoxyReturn}{Returns}
+New LDValue. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_aa0d2dc808d0d802e4c70dd566a697b77}\label{value_8h_aa0d2dc808d0d802e4c70dd566a697b77} 
+\index{value.h@{value.h}!LDValue\_NewNumber@{LDValue\_NewNumber}}
+\index{LDValue\_NewNumber@{LDValue\_NewNumber}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_NewNumber()}{LDValue\_NewNumber()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+New\+Number (\begin{DoxyParamCaption}\item[{double}]{val }\end{DoxyParamCaption})}
+
+Allocates a new number-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. 
+\begin{DoxyParams}{Parameters}
+{\em val} & Double value. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+New LDValue. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a112364277c8b1bf74dfb8a4a483fa27a}\label{value_8h_a112364277c8b1bf74dfb8a4a483fa27a} 
+\index{value.h@{value.h}!LDValue\_NewString@{LDValue\_NewString}}
+\index{LDValue\_NewString@{LDValue\_NewString}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_NewString()}{LDValue\_NewString()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+New\+String (\begin{DoxyParamCaption}\item[{char const \texorpdfstring{$\ast$}{*}}]{val }\end{DoxyParamCaption})}
+
+Allocates a new string-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}.
+
+The input string will be copied.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Constant reference to a string. The string is copied. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+New LDValue. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a1e4c2187c238eaeea42d73e9684e51f7}\label{value_8h_a1e4c2187c238eaeea42d73e9684e51f7} 
+\index{value.h@{value.h}!LDValue\_NewValue@{LDValue\_NewValue}}
+\index{LDValue\_NewValue@{LDValue\_NewValue}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_NewValue()}{LDValue\_NewValue()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+New\+Value (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Allocates an \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue} by cloning an existing LDValue.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & The source value. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+New LDValue. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_afe06bb84d8f6071654e8d9bb0d56ccf2}\label{value_8h_afe06bb84d8f6071654e8d9bb0d56ccf2} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_End@{LDValue\_ObjectIter\_End}}
+\index{LDValue\_ObjectIter\_End@{LDValue\_ObjectIter\_End}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_End()}{LDValue\_ObjectIter\_End()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+End (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Check if an object-\/type iterator is at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to check. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the iterator is at the end. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a0726e8bb1b144d4ff99f8b8f984c31ab}\label{value_8h_a0726e8bb1b144d4ff99f8b8f984c31ab} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_Free@{LDValue\_ObjectIter\_Free}}
+\index{LDValue\_ObjectIter\_Free@{LDValue\_ObjectIter\_Free}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_Free()}{LDValue\_ObjectIter\_Free()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+Free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Destroy an object iterator. 
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to destroy. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{value_8h_ac781697519df63478978fd11c1909b79}\label{value_8h_ac781697519df63478978fd11c1909b79} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_Key@{LDValue\_ObjectIter\_Key}}
+\index{LDValue\_ObjectIter\_Key@{LDValue\_ObjectIter\_Key}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_Key()}{LDValue\_ObjectIter\_Key()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+Key (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Get the key for an object-\/type iterator.
+
+The returned key has a lifetime attached to that of the \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to get a key for. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The key. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a103e0d5cc1b178bcef3330da7b45ef5d}\label{value_8h_a103e0d5cc1b178bcef3330da7b45ef5d} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_New@{LDValue\_ObjectIter\_New}}
+\index{LDValue\_ObjectIter\_New@{LDValue\_ObjectIter\_New}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_New()}{LDValue\_ObjectIter\_New()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+New (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Obtain iterator over an object-\/type \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}, otherwise NULL.
+
+The iterator starts at the first element.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Iterator, or NULL if not an object-\/type. The iterator must should be destroyed with \doxylink{value_8h_a0726e8bb1b144d4ff99f8b8f984c31ab}{LDValue\+\_\+\+Object\+Iter\+\_\+\+Free()}. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_aeb0ed8ead9a3da1024eb998f0d9cfe9b}\label{value_8h_aeb0ed8ead9a3da1024eb998f0d9cfe9b} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_Next@{LDValue\_ObjectIter\_Next}}
+\index{LDValue\_ObjectIter\_Next@{LDValue\_ObjectIter\_Next}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_Next()}{LDValue\_ObjectIter\_Next()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+Next (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Move the object-\/type iterator to the next item. Should only be done for an iterator which is not at the end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to advance. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{value_8h_ac0e3a6b79172a34cbb007056adb22fb2}\label{value_8h_ac0e3a6b79172a34cbb007056adb22fb2} 
+\index{value.h@{value.h}!LDValue\_ObjectIter\_Value@{LDValue\_ObjectIter\_Value}}
+\index{LDValue\_ObjectIter\_Value@{LDValue\_ObjectIter\_Value}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_ObjectIter\_Value()}{LDValue\_ObjectIter\_Value()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Object\+Iter\+\_\+\+Value (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_a9d1e5eb270ba2186970c7ad4492e5aa5}{LDValue\+\_\+\+Object\+Iter}}}]{iter }\end{DoxyParamCaption})}
+
+Get the value for an object-\/type iterator. The value\textquotesingle{}s lifetime is valid only for as long as the iterator. To obtain a copy, call \doxylink{value_8h_a1e4c2187c238eaeea42d73e9684e51f7}{LDValue\+\_\+\+New\+Value}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em iter} & The iterator to get a value for. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The value. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a95f7b2bb9e3086bd3f9c80031662a06e}\label{value_8h_a95f7b2bb9e3086bd3f9c80031662a06e} 
+\index{value.h@{value.h}!LDValue\_SerializeJSON@{LDValue\_SerializeJSON}}
+\index{LDValue\_SerializeJSON@{LDValue\_SerializeJSON}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_SerializeJSON()}{LDValue\_SerializeJSON()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Serialize\+JSON (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Serializes the LDValue to a JSON value. The returning string should be freed with \doxylink{memory__routines_8h_a9376a9e19799e2919a74099870dd2f06}{LDMemory\+\_\+\+Free\+String}.
+
+Please note that numbers are serialized using scientific notation; for example the number 17 would be serialized as \textquotesingle{}1.\+7\+E1\textquotesingle{}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em val} & Target LDValue. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A string containing the JSON representation of the LDValue. The string should be freed with \doxylink{memory__routines_8h_a9376a9e19799e2919a74099870dd2f06}{LDMemory\+\_\+\+Free\+String}. 
+\end{DoxyReturn}
+\Hypertarget{value_8h_a5d9df547e0c7bd911fd8b0f56048c73a}\label{value_8h_a5d9df547e0c7bd911fd8b0f56048c73a} 
+\index{value.h@{value.h}!LDValue\_Type@{LDValue\_Type}}
+\index{LDValue\_Type@{LDValue\_Type}!value.h@{value.h}}
+\doxysubsubsection{\texorpdfstring{LDValue\_Type()}{LDValue\_Type()}}
+{\footnotesize\ttfamily LDValue\+\_\+\+Type (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{val }\end{DoxyParamCaption})}
+
+Returns the type of an \doxylink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}. 
+\begin{DoxyParams}{Parameters}
+{\em val} & LDValue to inspect. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Type of the LDValue, or LDValue\+Type\+\_\+\+Unrecognized if the type is unrecognized. 
+\end{DoxyReturn}

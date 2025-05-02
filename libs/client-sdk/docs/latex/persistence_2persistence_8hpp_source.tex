@@ -1,0 +1,22 @@
+\doxysection{persistence.\+hpp}
+\hypertarget{persistence_2persistence_8hpp_source}{}\label{persistence_2persistence_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/persistence/persistence.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/persistence/persistence.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classIPersistence}{IPersistence}}\ \{}
+\DoxyCodeLine{00035\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classIPersistence_a72ee055e7403a50cd8c032d0874ca9c1}{Set}}(std::string\ storage\_namespace,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ data)\ \textcolor{keyword}{noexcept}\ =\ 0;}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classIPersistence_a3993308cf6fef5590110df8d7f47668a}{Remove}}(std::string\ storage\_namespace,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key)\ \textcolor{keyword}{noexcept}\ =\ 0;}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{virtual}\ std::optional<std::string>\ \mbox{\hyperlink{classIPersistence_ac368bf4e4255b4b4d860f3adb9f72b60}{Read}}(std::string\ storage\_namespace,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key)\ \textcolor{keyword}{noexcept}\ =\ 0;}
+\DoxyCodeLine{00068\ \};}
+
+\end{DoxyCode}

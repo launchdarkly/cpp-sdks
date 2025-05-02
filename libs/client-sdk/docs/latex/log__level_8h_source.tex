@@ -1,0 +1,43 @@
+\doxysection{log\+\_\+level.\+h}
+\hypertarget{log__level_8h_source}{}\label{log__level_8h_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/logging/log\_level.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/logging/log\_level.h}}
+\mbox{\hyperlink{log__level_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{status_8h}{launchdarkly/bindings/c/status.h}}>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00014\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00015\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00022\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ \{}
+\DoxyCodeLine{00023\ \ \ \ \ LD\_LOG\_DEBUG\ =\ 0,}
+\DoxyCodeLine{00024\ \ \ \ \ LD\_LOG\_INFO\ =\ 1,}
+\DoxyCodeLine{00025\ \ \ \ \ LD\_LOG\_WARN\ =\ 2,}
+\DoxyCodeLine{00026\ \ \ \ \ LD\_LOG\_ERROR\ =\ 3,}
+\DoxyCodeLine{00027\ \ \ \ \ LD\_UNUSED\_MAXVALUE\ =\ INT32\_MAX\ \textcolor{comment}{/*\ Used\ to\ ensure\ the\ underlying\ type\ is}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ at\ least\ 32\ bits.\ */}}
+\DoxyCodeLine{00029\ \};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00038\ LD\_EXPORT(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*)}
+\DoxyCodeLine{00039\ \mbox{\hyperlink{log__level_8h_adcc43a9628e714d45f12d305b483fa7d}{LDLogLevel\_Name}}(\textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ level,\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ level\_if\_unknown);}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00049\ LD\_EXPORT(\textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}})}
+\DoxyCodeLine{00050\ \mbox{\hyperlink{log__level_8h_aa0fcb189491198d54e25f1d0032850e2}{LDLogLevel\_Enum}}(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ level,\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{log__level_8h_a350a93aa37f635cf7e778121189bb49c}{LDLogLevel}}\ level\_if\_unknown);}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00053\ \}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

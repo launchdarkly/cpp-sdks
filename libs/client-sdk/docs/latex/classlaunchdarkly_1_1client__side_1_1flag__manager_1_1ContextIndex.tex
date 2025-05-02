@@ -1,0 +1,79 @@
+\doxysection{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::Context\+Index Class Reference}
+\hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}\index{launchdarkly::client\_side::flag\_manager::ContextIndex@{launchdarkly::client\_side::flag\_manager::ContextIndex}}
+
+
+{\ttfamily \#include $<$context\+\_\+index.\+hpp$>$}
+
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_1_1IndexEntry}{Index\+Entry}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a4e1d25bb4020e7226e5aef0c3f1b46fb}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a4e1d25bb4020e7226e5aef0c3f1b46fb} 
+using {\bfseries Index} = std\+::vector$<$ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_1_1IndexEntry}{Index\+Entry}} $>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_ac7eda92f4462046ccde95314108b225c}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_ac7eda92f4462046ccde95314108b225c} 
+{\bfseries Context\+Index} (Index)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a930ef1448f3033f15475d313c4e64b31}{Notice}} (std\+::string id, std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$ timestamp)
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_ad332e2d192cfc99b5745253626606f34}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_ad332e2d192cfc99b5745253626606f34} 
+Index const \& {\bfseries Entries} () const
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_aa2c9b680f19e83ca0849f2ec7ea41eab}{Prune}} (std\+::size\+\_\+t max\+Contexts)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Used internally to track which contexts have flag data in the persistent store.
+
+This exists because we can\textquotesingle{}t assume that the persistent store mechanism has an "{}enumerate all the keys that exist under such-\/and-\/such prefix"{} capability, so we need a table of contents at a fixed location. The only information being tracked here is, for each flag data set that exists in storage,
+\begin{DoxyEnumerate}
+\item a context identifier (hashed fully-\/qualified key) and
+\item timestamp when it was last accessed, to support an LRU eviction pattern. 
+\end{DoxyEnumerate}
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a930ef1448f3033f15475d313c4e64b31}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a930ef1448f3033f15475d313c4e64b31} 
+\index{launchdarkly::client\_side::flag\_manager::ContextIndex@{launchdarkly::client\_side::flag\_manager::ContextIndex}!Notice@{Notice}}
+\index{Notice@{Notice}!launchdarkly::client\_side::flag\_manager::ContextIndex@{launchdarkly::client\_side::flag\_manager::ContextIndex}}
+\doxysubsubsection{\texorpdfstring{Notice()}{Notice()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Context\+Index\+::\+Notice (\begin{DoxyParamCaption}\item[{std\+::string}]{id,  }\item[{std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::system\+\_\+clock $>$}]{timestamp }\end{DoxyParamCaption})}
+
+Indicate that a context was accessed. This will add it to the index if it was not already present. If it was present, then it will update the timestamp for the context.
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & The id of the context. \\
+\hline
+{\em timestamp} & The time the context is noticed. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_aa2c9b680f19e83ca0849f2ec7ea41eab}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_aa2c9b680f19e83ca0849f2ec7ea41eab} 
+\index{launchdarkly::client\_side::flag\_manager::ContextIndex@{launchdarkly::client\_side::flag\_manager::ContextIndex}!Prune@{Prune}}
+\index{Prune@{Prune}!launchdarkly::client\_side::flag\_manager::ContextIndex@{launchdarkly::client\_side::flag\_manager::ContextIndex}}
+\doxysubsubsection{\texorpdfstring{Prune()}{Prune()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+Context\+Index\+::\+Prune (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{max\+Contexts }\end{DoxyParamCaption})}
+
+Prune the index returning a list of the removed context keys
+
+
+\begin{DoxyParams}{Parameters}
+{\em max\+Contexts} & The maximum number of contexts to retain. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of the contexts that were pruned. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/flag\+\_\+manager/context\+\_\+index.\+hpp\item 
+src/flag\+\_\+manager/context\+\_\+index.\+cpp\end{DoxyCompactItemize}

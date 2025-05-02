@@ -1,0 +1,72 @@
+\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Null\+Data\+Source Class Reference}
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource}{}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource}\index{launchdarkly::client\_side::data\_sources::NullDataSource@{launchdarkly::client\_side::data\_sources::NullDataSource}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Null\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=199pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Null\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=199pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_af16a69855569ea1e15e4c4a0e3c4aeae}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_af16a69855569ea1e15e4c4a0e3c4aeae} 
+{\bfseries Null\+Data\+Source} (boost\+::asio\+::any\+\_\+io\+\_\+executor exec, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{Data\+Source\+Status\+Manager}} \&status\+\_\+manager)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_a3920791517a67cb18e1df37acd76e2e4}{Start}} () override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_aaf412f56a465c5ae80aff905cfce19d4}{Shutdown\+Async}} (std\+::function$<$ void()$>$) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IData\+Source} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} const \&item)=delete
+\item 
+{\bfseries IData\+Source} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IData\+Source}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_aaf412f56a465c5ae80aff905cfce19d4}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_aaf412f56a465c5ae80aff905cfce19d4} 
+\index{launchdarkly::client\_side::data\_sources::NullDataSource@{launchdarkly::client\_side::data\_sources::NullDataSource}!ShutdownAsync@{ShutdownAsync}}
+\index{ShutdownAsync@{ShutdownAsync}!launchdarkly::client\_side::data\_sources::NullDataSource@{launchdarkly::client\_side::data\_sources::NullDataSource}}
+\doxysubsubsection{\texorpdfstring{ShutdownAsync()}{ShutdownAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Null\+Data\+Source\+::\+Shutdown\+Async (\begin{DoxyParamCaption}\item[{std\+::function$<$ void()$>$}]{complete }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source}}.
+
+\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_a3920791517a67cb18e1df37acd76e2e4}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1NullDataSource_a3920791517a67cb18e1df37acd76e2e4} 
+\index{launchdarkly::client\_side::data\_sources::NullDataSource@{launchdarkly::client\_side::data\_sources::NullDataSource}!Start@{Start}}
+\index{Start@{Start}!launchdarkly::client\_side::data\_sources::NullDataSource@{launchdarkly::client\_side::data\_sources::NullDataSource}}
+\doxysubsubsection{\texorpdfstring{Start()}{Start()}}
+{\footnotesize\ttfamily void launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+Null\+Data\+Source\+::\+Start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::\+IData\+Source}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/null\+\_\+data\+\_\+source.\+hpp\item 
+src/data\+\_\+sources/null\+\_\+data\+\_\+source.\+cpp\end{DoxyCompactItemize}

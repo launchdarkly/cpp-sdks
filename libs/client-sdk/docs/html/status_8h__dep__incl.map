@@ -1,0 +1,21 @@
+<map id="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/status.h" name="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/status.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="186,5,406,75"/>
+<area shape="rect" id="Node000002" href="$logging__builder_8h.html" title=" " alt="" coords="87,240,307,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,70,133,92,116,107,102,124,93,141,91,156,94,172,102,191,119,216,142,238,139,242,115,220,97,193,89,174,86,157,88,140,97,121,112,103,130,88,171,65"/>
+<area shape="rect" id="Node000004" href="$client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2builder_8h.html" title=" " alt="" coords="293,365,450,419"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="329,85,346,122,363,189,372,257,375,364,370,364,366,257,357,190,341,124,324,88"/>
+<area shape="rect" id="Node000005" href="$sdk_8h.html" title="LaunchDarkly Client&#45;side C Bindings." alt="" coords="118,475,276,529"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="174,67,125,90,104,105,86,124,57,163,35,200,19,236,10,271,9,307,15,345,29,384,51,425,65,442,81,456,120,478,117,482,78,461,61,446,47,428,24,386,10,346,3,308,5,271,14,234,30,197,53,160,82,121,101,101,123,85,172,62"/>
+<area shape="rect" id="Node000006" href="$log__level_8h.html" title=" " alt="" coords="112,123,332,192"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="269,88,246,124,242,121,264,85"/>
+<area shape="rect" id="Node000007" href="$c__binding__helpers_8hpp_source.html" title=" " alt="" coords="408,123,615,192"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="372,79,450,120,447,125,369,83"/>
+<area shape="rect" id="Node000008" href="$client-sdk_2include_2launchdarkly_2client__side_2bindings_2c_2config_2config_8h.html" title=" " alt="" coords="490,247,648,302"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="420,53,484,64,546,79,597,98,616,109,630,121,638,137,641,154,635,188,617,221,596,249,592,245,613,218,630,186,636,153,633,138,626,124,613,113,595,102,544,84,483,69,419,58"/>
+<area shape="rect" id="Node000003" href="$log__backend__wrapper_8hpp_source.html" title=" " alt="" coords="62,357,268,427"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,324,177,358,172,356,181,322"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="261,315,333,362,330,367,258,319"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="319,429,241,477,238,472,316,424"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="215,206,207,240,202,239,209,205"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="514,311,418,367,415,362,511,307"/>
+</map>

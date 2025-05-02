@@ -1,0 +1,50 @@
+\doxysection{context\+\_\+index.\+hpp}
+\hypertarget{context__index_8hpp_source}{}\label{context__index_8hpp_source}\index{src/flag\_manager/context\_index.hpp@{src/flag\_manager/context\_index.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <boost/json.hpp>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::flag\_manager\ \{}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}\ \{}
+\DoxyCodeLine{00025\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_1_1IndexEntry}{IndexEntry}}\ \{}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_1_1IndexEntry}{IndexEntry}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_1_1IndexEntry}{IndexEntry}}(}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keywordtype}{id},}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::time\_point<std::chrono::system\_clock>\ timestamp);}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ std::string\ id;}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ std::chrono::time\_point<std::chrono::system\_clock>\ timestamp;}
+\DoxyCodeLine{00036\ \ \ \ \ \};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{using\ }Index\ =\ std::vector<IndexEntry>;}
+\DoxyCodeLine{00039\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}(Index);}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_a930ef1448f3033f15475d313c4e64b31}{Notice}}(std::string\ \textcolor{keywordtype}{id},}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::time\_point<std::chrono::system\_clock>\ timestamp);}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ [[nodiscard]]\ Index\ \textcolor{keyword}{const}\&\ Entries()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00061\ \ \ \ \ std::vector<std::string>\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex_aa2c9b680f19e83ca0849f2ec7ea41eab}{Prune}}(std::size\_t\ maxContexts);}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00064\ \ \ \ \ Index\ index\_;}
+\DoxyCodeLine{00065\ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \textcolor{keywordtype}{void}\ tag\_invoke(boost::json::value\_from\_tag\ \textcolor{keyword}{const}\&\ unused,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::json::value\&\ json\_value,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}\ \textcolor{keyword}{const}\&\ index);}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1ContextIndex}{ContextIndex}}\ tag\_invoke(boost::json::value\_to\_tag<ContextIndex>\ \textcolor{keyword}{const}\&\ unused,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::json::value\ \textcolor{keyword}{const}\&\ json\_value);}
+\DoxyCodeLine{00073\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::flag\_manager}}
+
+\end{DoxyCode}

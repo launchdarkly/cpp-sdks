@@ -1,0 +1,71 @@
+\doxysection{evaluation\+\_\+result.\+hpp}
+\hypertarget{evaluation__result_8hpp_source}{}\label{evaluation__result_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data/evaluation\_result.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data/evaluation\_result.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/data/evaluation\_detail\_internal.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \{}
+\DoxyCodeLine{00016\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ [[nodiscard]]\ uint64\_t\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_a9081e79ef7118bdce625bf2a90547b34}{Version}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ \ \ \ \ [[nodiscard]]\ std::optional<uint64\_t>\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_ab5c7bfcc353a095a4c6b1ea3e0a8a127}{FlagVersion}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00030\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_afce2b33aa4f16322e03f07b9aa69bb42}{TrackEvents}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00035\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_a9abc1205ef7ff61d37d8049cd913b414}{TrackReason}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00042\ \ \ \ \ [[nodiscard]]\ std::optional<}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ std::chrono::time\_point<std::chrono::system\_clock>>}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_a46dacf9eef1f62f3479aed6281ebd9a2}{DebugEventsUntilDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00049\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult_a503772452b3bf3b4cce015ba5c278de4}{Detail}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ [[nodiscard]]\ std::optional<std::vector<std::string>>\ \textcolor{keyword}{const}\&\ Prerequisites()}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const};}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}(}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ uint64\_t\ version,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ std::optional<uint64\_t>\ flag\_version,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ std::optional<std::chrono::time\_point<std::chrono::system\_clock>>}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ debug\_events\_until\_date,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ detail);}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}(}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ uint64\_t\ version,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ std::optional<uint64\_t>\ flag\_version,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ std::optional<std::chrono::time\_point<std::chrono::system\_clock>>}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ debug\_events\_until\_date,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ detail,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ std::optional<std::vector<std::string>>\ prerequisites);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00074\ \ \ \ \ uint64\_t\ version\_;}
+\DoxyCodeLine{00075\ \ \ \ \ std::optional<uint64\_t>\ flag\_version\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason\_;}
+\DoxyCodeLine{00078\ \ \ \ \ std::optional<std::chrono::time\_point<std::chrono::system\_clock>>}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ debug\_events\_until\_date\_;}
+\DoxyCodeLine{00080\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetailInternal}{EvaluationDetailInternal}}\ detail\_;}
+\DoxyCodeLine{00081\ \ \ \ \ std::optional<std::vector<std::string>>\ prerequisites\_;}
+\DoxyCodeLine{00082\ \};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ std::ostream\&\ operator<<(std::ostream\&\ out,\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \textcolor{keyword}{const}\&\ result);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00087\ \textcolor{keywordtype}{bool}\ operator!=(\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationResult}{EvaluationResult}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

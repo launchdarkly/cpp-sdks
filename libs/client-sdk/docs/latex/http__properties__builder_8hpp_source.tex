@@ -1,0 +1,79 @@
+\doxysection{http\+\_\+properties\+\_\+builder.\+hpp}
+\hypertarget{http__properties__builder_8hpp_source}{}\label{http__properties__builder_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/http\_properties\_builder.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/builders/http\_properties\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/http\_properties.hpp>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::builders\ \{}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00019\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder}{TlsBuilder}}\ \{}
+\DoxyCodeLine{00020\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder_a8293de68b9e73289a0dc3307d55fcd1f}{TlsBuilder}}();}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00034\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder_a8293de68b9e73289a0dc3307d55fcd1f}{TlsBuilder}}(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{built::TlsOptions}}\ \textcolor{keyword}{const}\&\ tls);}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder}{TlsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder_a760d7ebe85c9b1240d9283ee6725bc93}{SkipVerifyPeer}}(\textcolor{keywordtype}{bool}\ skip\_verify\_peer);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder}{TlsBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder_a6ef5b8203bb9f1ae41335e6a009d42c0}{CustomCAFile}}(std::string\ custom\_ca\_file);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00062\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{built::TlsOptions}}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder_afeda8e103cc6774703f6b6969b8452a4}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{enum}\ built::TlsOptions::VerifyMode\ verify\_mode\_;}
+\DoxyCodeLine{00066\ \ \ \ \ std::optional<std::string>\ custom\_ca\_file\_;}
+\DoxyCodeLine{00067\ \};}
+\DoxyCodeLine{00073\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00074\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\ \{}
+\DoxyCodeLine{00075\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00081\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_aea74916b98cb32c2d9d993fe6cdcba85}{HttpPropertiesBuilder}}();}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_aea74916b98cb32c2d9d993fe6cdcba85}{HttpPropertiesBuilder}}(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{built::HttpProperties}}\ \textcolor{keyword}{const}\&\ properties);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00104\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a0183d39a57c60ad366b737291553d649}{ConnectTimeout}}(}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ connect\_timeout);}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00114\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a3533b06fa4f7c84f3a4ce0091ed7ebcf}{ReadTimeout}}(std::chrono::milliseconds\ read\_timeout);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_af30b0d5c134726985d11ceabdf6237c0}{WriteTimeout}}(}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ write\_timeout);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00133\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_ac47156e751cc529e0caf8cb4cb387bf5}{ResponseTimeout}}(}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ response\_timeout);}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00143\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a29746194f74e0cb51dcc7357d8e1ab14}{WrapperName}}(std::string\ wrapper\_name);}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00152\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a29d2fa019b3222c0a63730b91e0e324a}{WrapperVersion}}(std::string\ wrapper\_version);}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00161\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a5e8756f235f45cdf7a5b726607271571}{Headers}}(}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ std::map<std::string,\ std::string>\ base\_headers);}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00171\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_ae3ca260b953bbc5d8f0cbf2f56a703c9}{Header}}(std::string\ key,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::string>\ value);}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00179\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder}{HttpPropertiesBuilder}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_a093b6fc32be1236adb174079d06271ee}{Tls}}(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder}{TlsBuilder<SDK>}}\ builder);}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00185\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{built::HttpProperties}}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder_ad51355320c9e89431616e1f52503b32e}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00188\ \ \ \ \ std::chrono::milliseconds\ connect\_timeout\_;}
+\DoxyCodeLine{00189\ \ \ \ \ std::chrono::milliseconds\ read\_timeout\_;}
+\DoxyCodeLine{00190\ \ \ \ \ std::chrono::milliseconds\ write\_timeout\_;}
+\DoxyCodeLine{00191\ \ \ \ \ std::chrono::milliseconds\ response\_timeout\_;}
+\DoxyCodeLine{00192\ \ \ \ \ std::string\ wrapper\_name\_;}
+\DoxyCodeLine{00193\ \ \ \ \ std::string\ wrapper\_version\_;}
+\DoxyCodeLine{00194\ \ \ \ \ std::map<std::string,\ std::string>\ base\_headers\_;}
+\DoxyCodeLine{00195\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1TlsBuilder}{TlsBuilder<SDK>}}\ tls\_;}
+\DoxyCodeLine{00196\ \};}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::builders}}
+
+\end{DoxyCode}

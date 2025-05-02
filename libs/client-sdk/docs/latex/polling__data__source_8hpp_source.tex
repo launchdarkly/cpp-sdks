@@ -1,0 +1,66 @@
+\doxysection{polling\+\_\+data\+\_\+source.\+hpp}
+\hypertarget{polling__data__source_8hpp_source}{}\label{polling__data__source_8hpp_source}\index{src/data\_sources/polling\_data\_source.hpp@{src/data\_sources/polling\_data\_source.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}data\_source.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}data\_source\_event\_handler.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}data\_source\_status\_manager.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}data\_source\_update\_sink.hpp"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/data\_source\_config.hpp>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/http\_properties.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/service\_endpoints.hpp>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <launchdarkly/network/asio\_requester.hpp>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ <boost/asio/any\_io\_executor.hpp>}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side::data\_sources\ \{}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1PollingDataSource}{PollingDataSource}}}
+\DoxyCodeLine{00021\ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource}{IDataSource}},}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \textcolor{keyword}{public}\ std::enable\_shared\_from\_this<PollingDataSource>\ \{}
+\DoxyCodeLine{00023\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1PollingDataSource}{PollingDataSource}}(}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config::shared::built::ServiceEndpoints}}\ \textcolor{keyword}{const}\&\ endpoints,}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1DataSourceConfig}{config::shared::built::DataSourceConfig}}<}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{config::shared::ClientSDK}}>\ \textcolor{keyword}{const}\&\ data\_source\_config,}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::shared::built::HttpProperties}}\ \textcolor{keyword}{const}\&\ http\_properties,}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ boost::asio::any\_io\_executor\ ioc,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IDataSourceUpdateSink}}\&\ handler,}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\ status\_manager,}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger);}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keywordtype}{void}\ Start()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{void}\ ShutdownAsync(std::function<\textcolor{keywordtype}{void}()>)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordtype}{void}\ DoPoll();}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{void}\ HandlePollResult(network::HttpResult\ res);}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ std::string\ string\_context\_;}
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{DataSourceStatusManager}}\&\ status\_manager\_;}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceEventHandler}{DataSourceEventHandler}}\ data\_source\_handler\_;}
+\DoxyCodeLine{00045\ \ \ \ \ std::string\ polling\_endpoint\_;}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ network::AsioRequester\ requester\_;}
+\DoxyCodeLine{00048\ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger\_;}
+\DoxyCodeLine{00049\ \ \ \ \ boost::asio::any\_io\_executor\ ioc\_;}
+\DoxyCodeLine{00050\ \ \ \ \ std::chrono::seconds\ polling\_interval\_;}
+\DoxyCodeLine{00051\ \ \ \ \ network::HttpRequest\ request\_;}
+\DoxyCodeLine{00052\ \ \ \ \ std::optional<std::string>\ etag\_;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ boost::asio::steady\_timer\ timer\_;}
+\DoxyCodeLine{00055\ \ \ \ \ std::chrono::time\_point<std::chrono::system\_clock>\ last\_poll\_start\_;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ StartPollingTimer();}
+\DoxyCodeLine{00058\ \};}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side::data\_sources}}
+
+\end{DoxyCode}
