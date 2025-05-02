@@ -1,0 +1,48 @@
+\doxysection{all\+\_\+flags\+\_\+state.\+h}
+\hypertarget{all__flags__state_8h_source}{}\label{all__flags__state_8h_source}\index{include/launchdarkly/server\_side/bindings/c/all\_flags\_state/all\_flags\_state.h@{include/launchdarkly/server\_side/bindings/c/all\_flags\_state/all\_flags\_state.h}}
+\mbox{\hyperlink{all__flags__state_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{value_8h}{launchdarkly/bindings/c/value.h}}>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00010\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00011\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDAllFlagsState*\ LDAllFlagsState;}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00021\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00022\ \mbox{\hyperlink{all__flags__state_8h_a326d0d86e591faf905aa0fe0b9c5f60f}{LDAllFlagsState\_Free}}(LDAllFlagsState\ state);}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00034\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00035\ \mbox{\hyperlink{all__flags__state_8h_a3e75424c1a11dc1b2a15f8c56bc6ac76}{LDAllFlagsState\_Valid}}(LDAllFlagsState\ state);}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00046\ LD\_EXPORT(\textcolor{keywordtype}{char}*)}
+\DoxyCodeLine{00047\ \mbox{\hyperlink{all__flags__state_8h_aed28d32312ccd343be70d4ff328e5142}{LDAllFlagsState\_SerializeJSON}}(LDAllFlagsState\ state);}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00073\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00074\ \mbox{\hyperlink{all__flags__state_8h_ae21095bad27769082ca6764d656d9299}{LDAllFlagsState\_Value}}(LDAllFlagsState\ state,\ \textcolor{keywordtype}{char}\ const*\ flag\_key);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00090\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00091\ \mbox{\hyperlink{all__flags__state_8h_aeca483147b1c7cef43f9603d1950df2c}{LDAllFlagsState\_Map}}(LDAllFlagsState\ state);}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00106\ enum\ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}{LDAllFlagsState\_Options}}\ \{}
+\DoxyCodeLine{00110\ \ \ \ \ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05afbbdd20f24438b24c72ca321eb65da01}{LD\_ALLFLAGSSTATE\_DEFAULT}}\ =\ 0,}
+\DoxyCodeLine{00115\ \ \ \ \ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05aad06d0765c0265ca45061ba241f91775}{LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS}}\ =\ (1\ <<\ 0),}
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05ad0fa772b2f168f9b8806fe359e8f8139}{LD\_ALLFLAGSSTATE\_DETAILS\_ONLY\_FOR\_TRACKED\_FLAGS}}\ =\ (1\ <<\ 1),}
+\DoxyCodeLine{00128\ \ \ \ \ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05a8b9e50efc011dedf4dfb2da0fb2691b9}{LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY}}\ =\ (1\ <<\ 2)}
+\DoxyCodeLine{00129\ \};}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00132\ \}}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

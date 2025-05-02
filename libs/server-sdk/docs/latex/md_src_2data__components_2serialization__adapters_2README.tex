@@ -1,0 +1,36 @@
+\chapter{Adapters}
+\hypertarget{md_src_2data__components_2serialization__adapters_2README}{}\label{md_src_2data__components_2serialization__adapters_2README}\index{Adapters@{Adapters}}
+\label{md_src_2data__components_2serialization__adapters_2README_autotoc_md0}%
+\Hypertarget{md_src_2data__components_2serialization__adapters_2README_autotoc_md0}%
+ Contains utilities for converting from in-\/memory evaluation models to serialized models, and back again.
+
+This is a useful building block for implementing various Bootstrapper/\+Synchronizers/\+Destinations.
+
+For example, to build a new Destination that ferries data to Redis, you might pull the {\ttfamily JSONDestination} off the shelf.
+
+It accepts memory models, serializes them, and forwards to any {\ttfamily ISerialized\+Destination}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{IDestination\ -\/>\ (serialization\ step)\ -\/>\ ISerializedDestination}
+
+\end{DoxyCode}
+
+
+To handle pulling data out of Redis, use the {\ttfamily JSONSource}. It pulls from any {\ttfamily ISerialized\+Data\+Source}, deserializes it, and passes it back up by implementing {\ttfamily IData\+Source}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{IDataSource\ <-\/\ (deserialization\ step)\ <-\/\ ISerializedDataSource}
+
+\end{DoxyCode}
+
+
+On the other hand, to build a new Bootstrapper that pulls JSON from a web service, you might pull the {\ttfamily JSONSource} off the shelf. It accepts JSON models, deserializes them, and forwards to any {\ttfamily IDestination}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ISerializedDestination\ -\/>\ (deserialization\ step)\ -\/>\ IDestination}
+
+\end{DoxyCode}
+ 

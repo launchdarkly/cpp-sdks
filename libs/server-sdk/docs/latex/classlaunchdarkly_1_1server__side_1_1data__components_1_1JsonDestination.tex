@@ -1,0 +1,178 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Json\+Destination Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+
+
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{Json\+Destination} is responsible for converting flag and segment models into serialized data suitable for storage in an ISerialized\+Destination.  
+
+
+
+
+{\ttfamily \#include $<$json\+\_\+destination.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Json\+Destination\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Json\+Destination\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_1_1Kinds}{Kinds}}
+\begin{DoxyCompactList}\small\item\em These are public so they can be referenced in tests. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a7312df0bbe02dea188180983c3d6b608}{Json\+Destination}} (Logger const \&logger, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{data\+\_\+interfaces\+::\+ISerialized\+Destination}} \&destination)
+\begin{DoxyCompactList}\small\item\em Construct the \doxylink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{Json\+Destination} with the given ISerialized\+Destination. Calls to Upsert will trigger serialization and store to the destination. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a66e2b7b5c77385f924fd1f3fe86b0e2d}{Init}} (data\+\_\+model\+::\+SDKData\+Set data\+\_\+set) override
+\begin{DoxyCompactList}\small\item\em Initialize the destination with an SDK data set. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Flag\+Descriptor flag) override
+\begin{DoxyCompactList}\small\item\em Upsert data for the flag named by key. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a238d8bdc87cd54676a1d2216e9079f1b}{Upsert}} (std\+::string const \&key, data\+\_\+model\+::\+Segment\+Descriptor segment) override
+\begin{DoxyCompactList}\small\item\em Upsert data for the segment named by key. \end{DoxyCompactList}\item 
+std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a571542a817c0ca734ee8c448c70cc398}{Identity}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IDestination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} const \&item)=delete
+\item 
+{\bfseries IDestination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{Json\+Destination} is responsible for converting flag and segment models into serialized data suitable for storage in an ISerialized\+Destination. 
+
+By encapsulating the serialization logic here, different adapters can be swapped in if our serialization format ever changes.
+
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{Json\+Destination} does not currently initialize ISerialized\+Destination with a flag-\/dependency-\/order payload, which is required to minimize bugs in stores without atomic transactions (e.\+g. Dynamo\+DB).
+
+Instead, it sorts items within a collection using \textquotesingle{}operator\texorpdfstring{$<$}{<}\textquotesingle{} on their keys, giving which is enough determinism for testing purposes.
+
+TODO(sc-\/225327)\+: Implement topographic sort as prerequisite for Dynamo\+DB. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a7312df0bbe02dea188180983c3d6b608}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a7312df0bbe02dea188180983c3d6b608} 
+\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}!JsonDestination@{JsonDestination}}
+\index{JsonDestination@{JsonDestination}!launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+\doxysubsubsection{\texorpdfstring{JsonDestination()}{JsonDestination()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination\+::\+Json\+Destination (\begin{DoxyParamCaption}\item[{Logger const \&}]{logger,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{data\+\_\+interfaces\+::\+ISerialized\+Destination}} \&}]{destination }\end{DoxyParamCaption})}
+
+
+
+Construct the \doxylink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{Json\+Destination} with the given ISerialized\+Destination. Calls to Upsert will trigger serialization and store to the destination. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em logger} & Used for logging storage errors. \\
+\hline
+{\em destination} & Where data should be forwarded. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a571542a817c0ca734ee8c448c70cc398}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a571542a817c0ca734ee8c448c70cc398} 
+\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of this destination. Used in logs. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a402588f99129123bb00670a187d5e2f8}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a66e2b7b5c77385f924fd1f3fe86b0e2d}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a66e2b7b5c77385f924fd1f3fe86b0e2d} 
+\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}!Init@{Init}}
+\index{Init@{Init}!launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+\doxysubsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination\+::\+Init (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+SDKData\+Set}]{data\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Initialize the destination with an SDK data set. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data\+\_\+set} & The initial data. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9} 
+\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Flag\+Descriptor}]{flag }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Upsert data for the flag named by key. 
+
+If the descriptor represents a deleted item, a tombstone will be forwarded to the ISerialized\+Destination.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of flag. \\
+\hline
+{\em flag} & Descriptor of flag. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a238d8bdc87cd54676a1d2216e9079f1b}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a238d8bdc87cd54676a1d2216e9079f1b} 
+\index{launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_components::JsonDestination@{launchdarkly::server\_side::data\_components::JsonDestination}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Json\+Destination\+::\+Upsert (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{data\+\_\+model\+::\+Segment\+Descriptor}]{segment }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Upsert data for the segment named by key. 
+
+If the descriptor represents a deleted item, a tombstone will be forwarded to the ISerialized\+Destination.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & Key of segment. \\
+\hline
+{\em segment} & Descriptor of segment. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IDestination}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+components/serialization\+\_\+adapters/json\+\_\+destination.\+hpp\item 
+src/data\+\_\+components/serialization\+\_\+adapters/json\+\_\+destination.\+cpp\end{DoxyCompactItemize}

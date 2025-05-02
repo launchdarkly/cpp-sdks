@@ -1,0 +1,196 @@
+\doxysection{lazy\+\_\+load\+\_\+system.\+hpp}
+\hypertarget{lazy__load__system_8hpp_source}{}\label{lazy__load__system_8hpp_source}\index{src/data\_systems/lazy\_load/lazy\_load\_system.hpp@{src/data\_systems/lazy\_load/lazy\_load\_system.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../../../include/launchdarkly/server\_side/integrations/data\_reader/kinds.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../../data\_components/expiration\_tracker/expiration\_tracker.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}../../data\_components/memory\_store/memory\_store.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}../../data\_components/status\_notifications/data\_source\_status\_manager.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/source/idata\_reader.hpp"{}}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/system/idata\_system.hpp"{}}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/data\_system/lazy\_load\_config.hpp>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/integrations/data\_reader/iserialized\_data\_reader.hpp>}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/descriptors.hpp>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <launchdarkly/detail/unreachable.hpp>}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_systems\ \{}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{LazyLoad}}\ final\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{data\_interfaces::IDataSystem}}\ \{}
+\DoxyCodeLine{00029\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{using\ }ClockType\ =\ std::chrono::steady\_clock;}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keyword}{using\ }TimeFn\ =\ std::function<std::chrono::time\_point<ClockType>()>;}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{LazyLoad}}(Logger\ \textcolor{keyword}{const}\&\ logger,}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{config::built::LazyLoadConfig}}\ cfg,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager);}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad}{LazyLoad}}(Logger\ \textcolor{keyword}{const}\&\ logger,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{config::built::LazyLoadConfig}}\ cfg,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ TimeFn\ time);}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9}{Identity}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \ std::shared\_ptr<data\_model::FlagDescriptor>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a71a29e55b52949a599b1d617184444c1}{GetFlag}}(}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ std::shared\_ptr<data\_model::SegmentDescriptor>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_af1e6faf51c6ea060f8eb921e6c05c1f2}{GetSegment}}(}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ std::unordered\_map<std::string,\ std::shared\_ptr<data\_model::FlagDescriptor>>}
+\DoxyCodeLine{00051\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a8de6ec861d34d2a989eb84329ca0acf6}{AllFlags}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ std::unordered\_map<std::string,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::shared\_ptr<data\_model::SegmentDescriptor>>}
+\DoxyCodeLine{00055\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a12b3360ab4b0590aae888250662a65c7}{AllSegments}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_ae43d4d07da6807ce78660b5bb88a2ddf}{Initialize}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_adce11937d1ee628ebdee3ffd13ff82f0}{Initialized}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{comment}{//\ Public\ for\ usage\ in\ tests.}}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_1_1Kinds}{Kinds}}\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind}{integrations::FlagKind}}\ \textcolor{keyword}{const}\ Flag;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1SegmentKind}{integrations::SegmentKind}}\ \textcolor{keyword}{const}\ Segment;}
+\DoxyCodeLine{00065\ \ \ \ \ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshAllFlags()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshAllSegments()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshInitState()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshFlag(std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshSegment(std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{keyword}{static}\ std::string\ CacheTraceMsg(}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{data\_components::ExpirationTracker::TrackState}}\ state);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ TResult>}
+\DoxyCodeLine{00078\ \ \ \ \ TResult\ Get(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{data\_components::ExpirationTracker::TrackState}}\ \textcolor{keyword}{const}\ state,}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::function<\textcolor{keywordtype}{void}(\textcolor{keywordtype}{void})>\ \textcolor{keyword}{const}\&\ refresh,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::function<TResult(\textcolor{keywordtype}{void})>\ \textcolor{keyword}{const}\&\ get)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ LD\_LOG(logger\_,\ LogLevel::kDebug)}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1LazyLoad_a358f9b28625eea0dc210914ae2bf15a9}{Identity}}()\ <<\ \textcolor{stringliteral}{"{}:\ get\ "{}}\ <<\ key\ <<\ \textcolor{stringliteral}{"{}\ -\/\ "{}}\ <<\ CacheTraceMsg(state);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (state)\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9a322cf4f0f13c381710407d820cf569f1}{data\_components::ExpirationTracker::TrackState::kStale}}:}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [[fallthrough]];}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa5b0f2b48fc50446ec6b24bd7be8bef9}{data\_components::ExpirationTracker::TrackState::kNotTracked}}:}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ refresh();}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [[fallthrough]];}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa7f09073342255cf27ab166f375b9915}{data\_components::ExpirationTracker::TrackState::kFresh}}:}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ get();}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ detail::unreachable();}
+\DoxyCodeLine{00096\ \ \ \ \ \}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Item,\ \textcolor{keyword}{typename}\ Evictor>}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshItem(}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ data\_components::DataKind\ \textcolor{keyword}{const}\ kind,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ std::function<data\_interfaces::IDataReader::SingleResult<Item>(}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&)>\ \textcolor{keyword}{const}\&\ getter,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ Evictor\&\&\ evictor)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Refreshing\ this\ item\ is\ always\ rate\ limited,\ even}}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ the\ refresh\ has\ an\ error.}}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}}(kind,\ key,\ ExpiryTime());}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ expected\_item\ =\ getter(key))\ \{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ status\_manager\_.SetState(DataSourceState::kValid);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ optional\_item\ =\ *expected\_item)\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cache\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}{Upsert}}(key,\ std::move(*optional\_item));}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ the\ item\ is\ actually\ *missing*\ -\/\ not\ just\ a\ deleted}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ tombstone\ representation\ -\/\ it\ implies\ that\ the\ source}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ was\ re-\/initialized.\ In\ this\ case,\ the\ correct\ thing\ to\ do}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ is\ evict\ it\ from\ the\ memory\ cache}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LD\_LOG(logger\_,\ LogLevel::kDebug)}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ kind\ <<\ key\ <<\ \textcolor{stringliteral}{"{}\ requested\ but\ not\ found\ via\ "{}}}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ reader\_-\/>Identity();}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (evictor(key))\ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LD\_LOG(logger\_,\ LogLevel::kDebug)}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}removed\ "{}}\ <<\ kind\ <<\ \textcolor{stringliteral}{"{}\ "{}}\ <<\ key\ <<\ \textcolor{stringliteral}{"{}\ from\ cache"{}};}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ status\_manager\_.SetState(}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataSourceState::kInterrupted,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ common::data\_sources::DataSourceStatusErrorKind::kUnknown,}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ expected\_item.error());}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ there's\ a\ persistent\ error,\ it\ will\ be\ logged\ at\ the\ refresh}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ interval.}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ LD\_LOG(logger\_,\ LogLevel::kError)}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}failed\ to\ refresh\ "{}}\ <<\ kind\ <<\ \textcolor{stringliteral}{"{}\ "{}}\ <<\ key\ <<\ \textcolor{stringliteral}{"{}\ via\ "{}}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ reader\_-\/>Identity()\ <<\ \textcolor{stringliteral}{"{}:\ "{}}\ <<\ expected\_item.error();}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00139\ \ \ \ \ \}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Item>}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordtype}{void}\ RefreshAll(}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ all\_item\_key,}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ data\_components::DataKind\ \textcolor{keyword}{const}\ item\_kind,}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ std::function<}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ data\_interfaces::IDataReader::CollectionResult<Item>()>\ \textcolor{keyword}{const}\&}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ getter)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ The\ 'all'\ key\ and\ the\ individual\ item\ keys\ should\ expire}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ at\ exactly\ the\ same\ time,\ because\ there\ is\ no\ separate\ data\ item}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ 'all'\ -\/\ it\ exists\ only\ to\ rate\ limit\ the\ refresh\ of\ all\ items.}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ \textcolor{keyword}{const}\ updated\_expiry\ =\ ExpiryTime();}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Refreshing\ 'all'\ for\ this\ item\ is\ always\ rate\ limited,\ even\ if}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ refresh\ has\ an\ error.}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}}(all\_item\_key,\ updated\_expiry);}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\textcolor{keyword}{auto}\ all\_items\ =\ getter())\ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ status\_manager\_.SetState(DataSourceState::kValid);}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ item\ :\ *all\_items)\ \{}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cache\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1MemoryStore_aeadc16d5cfa94938fb67cb5c7b003e40}{Upsert}}(item.first,\ std::move(item.second));}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}}(item\_kind,\ item.first,\ updated\_expiry);}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ status\_manager\_.SetState(}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataSourceState::kInterrupted,}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ common::data\_sources::DataSourceStatusErrorKind::kUnknown,}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ all\_items.error());}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ there's\ a\ persistent\ error,\ it\ will\ be\ logged\ at\ the}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ refresh\ interval.}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ LD\_LOG(logger\_,\ LogLevel::kError)}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}failed\ to\ refresh\ all\ "{}}\ <<\ item\_kind\ <<\ \textcolor{stringliteral}{"{}s\ via\ "{}}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ reader\_-\/>Identity()\ <<\ \textcolor{stringliteral}{"{}:\ "{}}\ <<\ all\_items.error();}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00176\ \ \ \ \ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ ClockType::time\_point\ ExpiryTime()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger\_;}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keyword}{mutable}\ data\_components::MemoryStore\ cache\_;}
+\DoxyCodeLine{00183\ \ \ \ \ std::unique\_ptr<data\_interfaces::IDataReader>\ reader\_;}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ data\_components::DataSourceStatusManager\&\ status\_manager\_;}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{mutable}\ data\_components::ExpirationTracker\ tracker\_;}
+\DoxyCodeLine{00188\ \ \ \ \ TimeFn\ time\_;}
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{keyword}{mutable}\ std::optional<bool>\ initialized\_;}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ ClockType::duration\ fresh\_duration\_;}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keyword}{struct\ }Keys\ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ std::string\ \textcolor{keyword}{const}\ kAllFlags\ =\ \textcolor{stringliteral}{"{}allFlags"{}};}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ std::string\ \textcolor{keyword}{const}\ kAllSegments\ =\ \textcolor{stringliteral}{"{}allSegments"{}};}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{inline}\ std::string\ \textcolor{keyword}{const}\ kInitialized\ =\ \textcolor{stringliteral}{"{}initialized"{}};}
+\DoxyCodeLine{00197\ \ \ \ \ \};}
+\DoxyCodeLine{00198\ \};}
+\DoxyCodeLine{00199\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_systems}}
+
+\end{DoxyCode}

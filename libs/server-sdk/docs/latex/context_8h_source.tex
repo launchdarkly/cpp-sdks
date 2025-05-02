@@ -1,0 +1,60 @@
+\doxysection{context.\+h}
+\hypertarget{context_8h_source}{}\label{context_8h_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/context.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/context.h}}
+\mbox{\hyperlink{context_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{value_8h}{launchdarkly/bindings/c/value.h}}>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00012\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDContext*\ LDContext;}
+\DoxyCodeLine{00017\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDContext\_PrivateAttributesIter*}
+\DoxyCodeLine{00018\ \ \ \ \ LDContext\_PrivateAttributesIter;}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00025\ LD\_EXPORT(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*)}
+\DoxyCodeLine{00026\ \mbox{\hyperlink{context_8h_a9cc6c38f971002e55f552c14c636c7f2}{LDContext\_CanonicalKey}}(LDContext\ context);}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00034\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00035\ \mbox{\hyperlink{context_8h_a4fdd8b4b9a8d9ffd94805248d12edadb}{LDContext\_Valid}}(LDContext\ context);}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00042\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00043\ \mbox{\hyperlink{context_8h_a16c9d7779a0d8d505e1070fe0f329235}{LDContext\_Free}}(LDContext\ context);}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00061\ LD\_EXPORT(\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}})}
+\DoxyCodeLine{00062\ \mbox{\hyperlink{context_8h_a37f7a021394c6fd4caceeceee09b6761}{LDContext\_Get}}(LDContext\ context,\ \textcolor{keywordtype}{char}\ const*\ kind,\ \textcolor{keywordtype}{char}\ const*\ ref);}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00073\ LD\_EXPORT(\textcolor{keywordtype}{char}\ const*)}
+\DoxyCodeLine{00074\ \mbox{\hyperlink{context_8h_a34ddea0b8839f54a8d76e1701feea5e8}{LDContext\_Errors}}(LDContext\ context);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00090\ LD\_EXPORT(LDContext\_PrivateAttributesIter)}
+\DoxyCodeLine{00091\ \mbox{\hyperlink{context_8h_aa6d1d0cfe3f4e823af84e7bfa72d1352}{LDContext\_PrivateAttributesIter\_New}}(LDContext\ context,\ \textcolor{keywordtype}{char}\ const*\ kind);}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00098\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00099\ \mbox{\hyperlink{context_8h_a9fefbd4774fba8704ff5676d766231df}{LDContext\_PrivateAttributesIter\_Free}}(LDContext\_PrivateAttributesIter\ iter);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00106\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00107\ \mbox{\hyperlink{context_8h_ac8874d90c2bbfd618371a256855d6c62}{LDContext\_PrivateAttributesIter\_Next}}(LDContext\_PrivateAttributesIter\ iter);}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00115\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00116\ \mbox{\hyperlink{context_8h_ac40e34c78a651e8f5cf345cba76b9f47}{LDContext\_PrivateAttributesIter\_End}}(LDContext\_PrivateAttributesIter\ iter);}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00126\ LD\_EXPORT(\textcolor{keywordtype}{char}\ const*)}
+\DoxyCodeLine{00127\ \mbox{\hyperlink{context_8h_aa935323c86dfa22eb6a62522d0726fa4}{LDContext\_PrivateAttributesIter\_Value}}(LDContext\_PrivateAttributesIter\ iter);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

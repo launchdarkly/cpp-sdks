@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="15,15,161,55"/>
+<area shape="rect" id="Node000001" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource.html" title=" " alt="" coords="219,5,382,60"/>
+<area shape="poly" id="edge18_Node000000_Node000001" title=" " alt="" coords="174,32,219,31,219,36,174,37"/>
+<area shape="rect" id="Node000003" href="$classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource.html" title=" " alt="" coords="219,84,383,139"/>
+<area shape="poly" id="edge19_Node000000_Node000003" title=" " alt="" coords="159,58,224,81,223,86,157,63"/>
+<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer.html" title="IDataSynchronizer obtains data via a background synchronization mechanism, updating an IDestination w..." alt="" coords="5,81,171,136"/>
+<area shape="poly" id="edge20_Node000002_Node000001" title=" " alt="" coords="177,74,223,58,225,63,179,79"/>
+<area shape="poly" id="edge21_Node000002_Node000003" title=" " alt="" coords="185,107,218,108,218,113,185,113"/>
+</map>

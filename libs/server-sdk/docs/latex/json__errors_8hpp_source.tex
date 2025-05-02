@@ -1,0 +1,34 @@
+\doxysection{json\+\_\+errors.\+hpp}
+\hypertarget{json__errors_8hpp_source}{}\label{json__errors_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/detail/serialization/json\_errors.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/detail/serialization/json\_errors.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00003\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00004\ \textcolor{keyword}{enum\ class}\ JsonError\ \{}
+\DoxyCodeLine{00005\ \ \ \ \ kSchemaFailure\ =}
+\DoxyCodeLine{00006\ \ \ \ \ \ \ \ \ 0,\ \ \textcolor{comment}{//\ Generic\ catchall\ for\ JSON\ not\ matching\ our\ expected\ values.}}
+\DoxyCodeLine{00007\ \ \ \ \ kContextMissingKindField\ =\ 100,}
+\DoxyCodeLine{00008\ \ \ \ \ kContextInvalidKindField\ =\ 101,}
+\DoxyCodeLine{00009\ \ \ \ \ kContextMustBeObject\ =\ 102,}
+\DoxyCodeLine{00010\ \ \ \ \ kContextMissingKeyField\ =\ 103,}
+\DoxyCodeLine{00011\ \ \ \ \ kContextInvalidKeyField\ =\ 104,}
+\DoxyCodeLine{00012\ \ \ \ \ kContextInvalidNameField\ =\ 105,}
+\DoxyCodeLine{00013\ \ \ \ \ kContextInvalidAnonymousField\ =\ 106,}
+\DoxyCodeLine{00014\ \ \ \ \ kContextInvalidMetaField\ =\ 107,}
+\DoxyCodeLine{00015\ \ \ \ \ kContextInvalidSecondaryField\ =\ 108,}
+\DoxyCodeLine{00016\ \ \ \ \ kContextInvalidAttributeReference\ =\ 109,}
+\DoxyCodeLine{00017\ \ \ \ \ kContextInvalidPrivateAttributesField\ =\ 110,}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{comment}{//\ The\ tombstone\ representation\ has\ a\ 'deleted'\ field,\ but\ it's\ false}}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{comment}{//\ instead\ of\ true\ as\ required.}}
+\DoxyCodeLine{00021\ \ \ \ \ kTombstoneInvalidDeletedField\ =\ 200,}
+\DoxyCodeLine{00022\ \};}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ std::ostream\&\ operator<<(std::ostream\&\ os,\ JsonError\ \textcolor{keyword}{const}\&\ err);}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ ErrorToString(JsonError\ err);}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

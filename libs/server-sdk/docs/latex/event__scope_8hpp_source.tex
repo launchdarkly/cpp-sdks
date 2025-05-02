@@ -1,0 +1,34 @@
+\doxysection{event\+\_\+scope.\+hpp}
+\hypertarget{event__scope_8hpp_source}{}\label{event__scope_8hpp_source}\index{src/events/event\_scope.hpp@{src/events/event\_scope.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/events/event\_processor\_interface.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}event\_factory.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope}{EventScope}}\ \{}
+\DoxyCodeLine{00015\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00023\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope_a477945be8f690eb6d939d0291fc2fc01}{EventScope}}(events::IEventProcessor*\ processor,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventFactory}{EventFactory}}\ factory)}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ :\ processor\_(processor),\ factory\_(std::move(factory))\ \{\}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope_a731bc25afd5aa9d4aeec6859f7f0abd1}{EventScope}}()\ :\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope}{EventScope}}(nullptr,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventFactory}{EventFactory}}::WithoutReasons())\ \{\}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Callable>}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventScope_a02d505741473eccd153aa5dbde022af6}{Send}}(Callable\&\&\ callable)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (processor\_)\ \{}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ processor\_-\/>SendAsync(callable(factory\_));}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00041\ \ \ \ \ \}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00044\ \ \ \ \ events::IEventProcessor*\ processor\_;}
+\DoxyCodeLine{00045\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1EventFactory}{EventFactory}}\ \textcolor{keyword}{const}\ factory\_;}
+\DoxyCodeLine{00046\ \};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

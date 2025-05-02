@@ -1,0 +1,22 @@
+\doxysection{timestamp\+\_\+operations.\+hpp}
+\hypertarget{timestamp__operations_8hpp_source}{}\label{timestamp__operations_8hpp_source}\index{src/evaluation/detail/timestamp\_operations.hpp@{src/evaluation/detail/timestamp\_operations.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::evaluation::detail\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{using\ }Clock\ =\ std::chrono::system\_clock;}
+\DoxyCodeLine{00012\ \textcolor{keyword}{using\ }Timepoint\ =\ Clock::time\_point;}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ [[nodiscard]]\ std::optional<Timepoint>\ ToTimepoint(Value\ \textcolor{keyword}{const}\&\ value);}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::evaluation::detail}}
+
+\end{DoxyCode}

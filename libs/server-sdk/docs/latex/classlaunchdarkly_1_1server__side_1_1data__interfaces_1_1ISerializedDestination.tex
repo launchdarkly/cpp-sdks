@@ -1,0 +1,175 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::ISerialized\+Destination Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+
+
+This interface is used for persisting data to databases, or any other component that can store feature flag / segment data.  
+
+
+
+
+{\ttfamily \#include $<$iserialized\+\_\+destination.\+hpp$>$}
+
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f}{Init\+Result}} \{ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fa8c632159fa131f09d04f94e3cbcd8782}{k\+Success}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fae3587c730cc1aa530fa4ddc9c4204e97}{k\+Error}}
+ \}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}{Upsert\+Result}} \{ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea8c632159fa131f09d04f94e3cbcd8782}{k\+Success}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aeae3587c730cc1aa530fa4ddc9c4204e97}{k\+Error}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea9712af4cb7593726d30738fe3e9750e2}{k\+Not\+Updated}}
+ \}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a46f1013f4cafff6b94dba195d22d9dec}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a46f1013f4cafff6b94dba195d22d9dec} 
+using {\bfseries Key} = std\+::string
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a5d596a2f8a09a09cadd3b284e2d1921c}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a5d596a2f8a09a09cadd3b284e2d1921c} 
+{\footnotesize template$<$typename T $>$ }\\using {\bfseries Keyed} = std\+::pair$<$ Key, T $>$
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_aab2165fa9f841f00a99bb4d0c4ca561e}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_aab2165fa9f841f00a99bb4d0c4ca561e} 
+using {\bfseries Ordered\+Namepace} = std\+::vector$<$ Keyed$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{integrations\+::\+Serialized\+Item\+Descriptor}} $>$ $>$
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a696cd954aaf532e7227809b9eb972e75}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a696cd954aaf532e7227809b9eb972e75} 
+using {\bfseries Item\+Collection} = std\+::pair$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{integrations\+::\+ISerialized\+Item\+Kind}} const  \&, Ordered\+Namepace $>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f}{Init\+Result}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a7916bfd384affc766e393f924cf1b169}{Init}} (std\+::vector$<$ Item\+Collection $>$ sdk\+\_\+data\+\_\+set)=0
+\begin{DoxyCompactList}\small\item\em Overwrites the Destination\textquotesingle{}s contents with a set of items for each collection. All previous data should be disgraded regardless of versioning. \end{DoxyCompactList}\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}{Upsert\+Result}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ae266b678249b8e553e18604cfca80a40}{Upsert}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{integrations\+::\+ISerialized\+Item\+Kind}} const \&kind, std\+::string const \&key, \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{integrations\+::\+Serialized\+Item\+Descriptor}} item)=0
+\begin{DoxyCompactList}\small\item\em Upserts a single item (update if exist, insert if not.) \end{DoxyCompactList}\item 
+virtual std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a2f3aa0e643eaab0f8c440edcda23141f}{Identity}} () const =0
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a1e72ecdd4b261c74251aa23e95acf3f4}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a1e72ecdd4b261c74251aa23e95acf3f4} 
+{\bfseries ISerialized\+Destination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} const \&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_acdb537a3e8550d49a11a229952bba364}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_acdb537a3e8550d49a11a229952bba364} 
+{\bfseries ISerialized\+Destination} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} \&\&item)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a5aaaf44c8236a9ddc86455d7a8475478}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a5aaaf44c8236a9ddc86455d7a8475478} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} const \&)=delete
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ab1c516a02424470c4fa22a04955dbfde}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ab1c516a02424470c4fa22a04955dbfde} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{ISerialized\+Destination}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This interface is used for persisting data to databases, or any other component that can store feature flag / segment data. 
+
+The SDK automatically converts between its in-\/memory data model and a serialized string form, which is what this interface interacts with.
+
+Each item in the store is conceptually a Serialized\+Item\+Descriptor containing a version and the serialized form. The serialized form might represent a flag/segment, or a "{}tombstone"{} representing the (absence) of an item.
+
+It\textquotesingle{}s possible to satisfy the interface in two ways\+:
+
+
+\begin{DoxyEnumerate}
+\item The Destination can store the version number, deleted state, and item separately. This is preferred because it avoids the need to deserialize the entire item just to inspect the version/deleted state when performing an Upsert operation. If implementing this strategy, the Destination may ignore deleted Serialize\+Item\+Descriptor\textquotesingle{}s serialized\+Item members on Upserts.
+\item If there\textquotesingle{}s no way to store the version number, deleted state, and item separately in an efficient way, then the store may instead persist the serialized\+Item as-\/is during an Upsert. The item will contain a "{}tombstone"{} representation which the SDK will later use to determine if the item is deleted or not. 
+\end{DoxyEnumerate}
+
+\doxysubsection{Member Enumeration Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f} 
+\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!InitResult@{InitResult}}
+\index{InitResult@{InitResult}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+\doxysubsubsection{\texorpdfstring{InitResult}{InitResult}}
+{\footnotesize\ttfamily enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+ISerialized\+Destination\+::\+Init\+Result}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kSuccess@{kSuccess}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!kSuccess@{kSuccess}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fa8c632159fa131f09d04f94e3cbcd8782}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fa8c632159fa131f09d04f94e3cbcd8782} 
+k\+Success&The init operation completed successfully. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kError@{kError}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!kError@{kError}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fae3587c730cc1aa530fa4ddc9c4204e97}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fae3587c730cc1aa530fa4ddc9c4204e97} 
+k\+Error&There was an error with the init operation. \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae} 
+\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!UpsertResult@{UpsertResult}}
+\index{UpsertResult@{UpsertResult}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+\doxysubsubsection{\texorpdfstring{UpsertResult}{UpsertResult}}
+{\footnotesize\ttfamily enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+ISerialized\+Destination\+::\+Upsert\+Result}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kSuccess@{kSuccess}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!kSuccess@{kSuccess}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea8c632159fa131f09d04f94e3cbcd8782}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea8c632159fa131f09d04f94e3cbcd8782} 
+k\+Success&The upsert completed successfully. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kError@{kError}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!kError@{kError}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aeae3587c730cc1aa530fa4ddc9c4204e97}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aeae3587c730cc1aa530fa4ddc9c4204e97} 
+k\+Error&There was an error with the upsert operation. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kNotUpdated@{kNotUpdated}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!kNotUpdated@{kNotUpdated}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea9712af4cb7593726d30738fe3e9750e2}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea9712af4cb7593726d30738fe3e9750e2} 
+k\+Not\+Updated&The upsert did not encounter errors, but the version of the existing item was greater than that the version of the upsert item. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a2f3aa0e643eaab0f8c440edcda23141f}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a2f3aa0e643eaab0f8c440edcda23141f} 
+\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+ISerialized\+Destination\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the destination. Used in logs. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a7916bfd384affc766e393f924cf1b169}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a7916bfd384affc766e393f924cf1b169} 
+\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!Init@{Init}}
+\index{Init@{Init}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+\doxysubsubsection{\texorpdfstring{Init()}{Init()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608f}{Init\+Result}} launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+ISerialized\+Destination\+::\+Init (\begin{DoxyParamCaption}\item[{std\+::vector$<$ Item\+Collection $>$}]{sdk\+\_\+data\+\_\+set }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Overwrites the Destination\textquotesingle{}s contents with a set of items for each collection. All previous data should be disgraded regardless of versioning. 
+
+The update should be done atomically. If that\textquotesingle{}s not possible, the store must first add or update each item in the same order that they are given in the input data, and then delete any previously stored items that were not in the input data.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk\+\_\+data\+\_\+set} & A series of collections, where each collection is named by an ISerialized\+Item\+Kind and contains a list of key/value pairs representing the key of the item and the serialized form of the item. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fa8c632159fa131f09d04f94e3cbcd8782}{Init\+Result\+::k\+Success} if all data items were stored, or \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ac1c7597c422bc6d8aa412926191c608fae3587c730cc1aa530fa4ddc9c4204e97}{Init\+Result\+::k\+Error} if any error occoured. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ae266b678249b8e553e18604cfca80a40}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_ae266b678249b8e553e18604cfca80a40} 
+\index{launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}!Upsert@{Upsert}}
+\index{Upsert@{Upsert}!launchdarkly::server\_side::data\_interfaces::ISerializedDestination@{launchdarkly::server\_side::data\_interfaces::ISerializedDestination}}
+\doxysubsubsection{\texorpdfstring{Upsert()}{Upsert()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}{Upsert\+Result}} launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+ISerialized\+Destination\+::\+Upsert (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind}{integrations\+::\+ISerialized\+Item\+Kind}} const \&}]{kind,  }\item[{std\+::string const \&}]{key,  }\item[{\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{integrations\+::\+Serialized\+Item\+Descriptor}}}]{item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Upserts a single item (update if exist, insert if not.) 
+
+If the given key already exists in the collection named by kind, then the Destination must check the version number corresponding to that key. Note that the item corresponding to that key may be a tombstone representing an absent item.
+
+If the version of the existing item is \texorpdfstring{$>$}{>}= the version of the new item, return \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea9712af4cb7593726d30738fe3e9750e2}{Upsert\+Result\+::k\+Not\+Updated}. If the Destination can\textquotesingle{}t determine the version number of the existing item without full deserialization, then it may call \doxylink{classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind_adc4a77ceecf2f835a30467095327ef8c}{integrations\+::\+ISerialized\+Item\+Kind\+::\+Version} on the data to obtain it.
+
+If the given item\textquotesingle{}s deleted flag is true, the Destination must persist this fact. It can either store a tombstone (value of serialized\+Item), or if deletion state is stored separate from the item, it can use that mechanism. In any case, it should not delete/forget about the item.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The item kind. \\
+\hline
+{\em key} & The item key. \\
+\hline
+{\em item} & Serialized form of the item. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea8c632159fa131f09d04f94e3cbcd8782}{Upsert\+Result\+::k\+Success} if the operation was successful. \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aeae3587c730cc1aa530fa4ddc9c4204e97}{Upsert\+Result\+::k\+Error} if an error occured. Otherwise, \doxylink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600aea9712af4cb7593726d30738fe3e9750e2}{Upsert\+Result\+::k\+Not\+Updated} if the existing item version was greater than the version passed in. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/destination/iserialized\+\_\+destination.\+hpp\end{DoxyCompactItemize}

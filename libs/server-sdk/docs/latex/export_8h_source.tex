@@ -1,0 +1,18 @@
+\doxysection{export.\+h}
+\hypertarget{export_8h_source}{}\label{export_8h_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/export.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/export.h}}
+\mbox{\hyperlink{export_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#ifdef\ DOXYGEN\_SHOULD\_SKIP\_THIS}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#define\ LD\_EXPORT(x)\ x}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#ifdef\ \_WIN32}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#define\ LD\_EXPORT(x)\ \_\_declspec(dllexport)\ x}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#define\ LD\_EXPORT(x)\ \_\_attribute\_\_((visibility("{}default"{})))\ x}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

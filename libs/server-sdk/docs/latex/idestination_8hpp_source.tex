@@ -1,0 +1,37 @@
+\doxysection{idestination.\+hpp}
+\hypertarget{idestination_8hpp_source}{}\label{idestination_8hpp_source}\index{src/data\_interfaces/destination/idestination.hpp@{src/data\_interfaces/destination/idestination.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/descriptors.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/sdk\_data\_set.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_interfaces\ \{}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\ \{}
+\DoxyCodeLine{00015\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a50cb864e7f5f331a7c64138e394a8f88}{Init}}(data\_model::SDKDataSet\ data\_set)\ =\ 0;}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a768c04c46d7e205faa8b1af0ccd45e18}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00028\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::FlagDescriptor\ flag)\ =\ 0;}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_ae07061c51605292b877b6ed314b5576a}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::SegmentDescriptor\ segment)\ =\ 0;}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00041\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination_a402588f99129123bb00670a187d5e2f8}{Identity}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00045\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00046\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{\string~IDestination}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{IDestination}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00051\ \};}
+\DoxyCodeLine{00052\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_interfaces}}
+
+\end{DoxyCode}

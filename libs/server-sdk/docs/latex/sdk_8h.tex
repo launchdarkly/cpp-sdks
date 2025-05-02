@@ -1,0 +1,768 @@
+\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/sdk.h File Reference}
+\hypertarget{sdk_8h}{}\label{sdk_8h}\index{include/launchdarkly/server\_side/bindings/c/sdk.h@{include/launchdarkly/server\_side/bindings/c/sdk.h}}
+
+
+Launch\+Darkly Server-\/side C Bindings.  
+
+
+{\ttfamily \#include $<$launchdarkly/server\+\_\+side/bindings/c/all\+\_\+flags\+\_\+state/all\+\_\+flags\+\_\+state.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/server\+\_\+side/bindings/c/config/builder.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/context.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/data/evaluation\+\_\+detail.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/data\+\_\+source/error\+\_\+info.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/listener\+\_\+connection.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/memory\+\_\+routines.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/shared\+\_\+function\+\_\+argument\+\_\+macro\+\_\+definitions.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/status.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/value.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+Include dependency graph for sdk.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{sdk_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDServerDataSourceStatusListener}{LDServer\+Data\+Source\+Status\+Listener}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{sdk_8h_a177845b4bc5379cada2d821acf646b64}\label{sdk_8h_a177845b4bc5379cada2d821acf646b64} 
+typedef struct \+\_\+\+LDServer\+SDK \texorpdfstring{$\ast$}{*} {\bfseries LDServer\+SDK}
+\item 
+\Hypertarget{sdk_8h_ae75bd089a7345ee39c1f6214efdf46b0}\label{sdk_8h_ae75bd089a7345ee39c1f6214efdf46b0} 
+typedef struct \+\_\+\+LDServer\+Data\+Source\+Status \texorpdfstring{$\ast$}{*} {\bfseries LDServer\+Data\+Source\+Status}
+\item 
+\Hypertarget{sdk_8h_ab253b68fe7e421e0937dfca791fe4f32}\label{sdk_8h_ab253b68fe7e421e0937dfca791fe4f32} 
+typedef void(\texorpdfstring{$\ast$}{*} {\bfseries Server\+Data\+Source\+Status\+Callback\+Fn}) (LDServer\+Data\+Source\+Status status, void \texorpdfstring{$\ast$}{*}user\+\_\+data)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5}{LDServer\+Data\+Source\+Status\+\_\+\+State}} \{ \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5a3d0a06ff6a8b98679e55b5fc88f18e79}{LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INITIALIZING}} = 0
+, \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5ac17385560b7b7c3743c5676a626788fe}{LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+VALID}} = 1
+, \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5a290e68f19b47295d4c381576ceffcee9}{LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED}} = 2
+, \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5a90125cdd4d3565bcdf4d27d38f933603}{LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+OFF}} = 3
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{sdk_8h_a761fccfc4cf3e0e4d5fc347552f855cf}{LDServer\+SDK\+\_\+\+New}} (LDServer\+Config config)
+\item 
+\mbox{\hyperlink{sdk_8h_a709599682e340ecfb1fe2f15482eca49}{LDServer\+SDK\+\_\+\+Version}} (void)
+\item 
+\mbox{\hyperlink{sdk_8h_a58b0a48cbf9ae25e3681e000ad3bccef}{LDServer\+SDK\+\_\+\+Start}} (LDServer\+SDK sdk, unsigned int milliseconds, bool \texorpdfstring{$\ast$}{*}out\+\_\+succeeded)
+\item 
+\mbox{\hyperlink{sdk_8h_a50b76e70a71c2fac33c93ec04279d539}{LDServer\+SDK\+\_\+\+Initialized}} (LDServer\+SDK sdk)
+\item 
+\mbox{\hyperlink{sdk_8h_a75524786259227a9b8dc0d38bffc0853}{LDServer\+SDK\+\_\+\+Track\+Event}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}event\+\_\+name)
+\item 
+\mbox{\hyperlink{sdk_8h_a78f1f4240ef6518c6853c290b4cf7011}{LDServer\+SDK\+\_\+\+Track\+Metric}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}event\+\_\+name, double metric\+\_\+value, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} data)
+\item 
+\mbox{\hyperlink{sdk_8h_a4ed0fe4f3cd7d5681b7367f5621f4c65}{LDServer\+SDK\+\_\+\+Track\+Data}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}event\+\_\+name, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} data)
+\item 
+\mbox{\hyperlink{sdk_8h_a494d13be512d1eba59c59138f8d28c58}{LDServer\+SDK\+\_\+\+Flush}} (LDServer\+SDK sdk, unsigned int reserved)
+\item 
+\mbox{\hyperlink{sdk_8h_ae181de7a07622a61e7cc78d29abb58eb}{LDServer\+SDK\+\_\+\+Identify}} (LDServer\+SDK sdk, LDContext context)
+\item 
+\mbox{\hyperlink{sdk_8h_a6feab0fb25d881df2ead48bc79a8ce2e}{LDServer\+SDK\+\_\+\+Bool\+Variation}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, bool default\+\_\+value)
+\item 
+\mbox{\hyperlink{sdk_8h_a7211048ed3d4adb40fac6b80fbe6c373}{LDServer\+SDK\+\_\+\+Bool\+Variation\+Detail}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, bool default\+\_\+value, LDEval\+Detail \texorpdfstring{$\ast$}{*}out\+\_\+detail)
+\item 
+\mbox{\hyperlink{sdk_8h_abe287bd914f0296bf951c4024835ea76}{LDServer\+SDK\+\_\+\+String\+Variation}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, char const \texorpdfstring{$\ast$}{*}default\+\_\+value)
+\item 
+\mbox{\hyperlink{sdk_8h_a8719b084e23ec6fff05dcd7e31f8da18}{LDServer\+SDK\+\_\+\+String\+Variation\+Detail}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, char const \texorpdfstring{$\ast$}{*}default\+\_\+value, LDEval\+Detail \texorpdfstring{$\ast$}{*}out\+\_\+detail)
+\item 
+\mbox{\hyperlink{sdk_8h_a8bd32ce92c4f5b6a29452939c0f5746d}{LDServer\+SDK\+\_\+\+Int\+Variation}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, int default\+\_\+value)
+\item 
+\mbox{\hyperlink{sdk_8h_a4adaea5f2b77f8de5559f3bdc1538924}{LDServer\+SDK\+\_\+\+Int\+Variation\+Detail}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, int default\+\_\+value, LDEval\+Detail \texorpdfstring{$\ast$}{*}out\+\_\+detail)
+\item 
+\mbox{\hyperlink{sdk_8h_a600ff51eb9f47a7d6334b5405eeb0454}{LDServer\+SDK\+\_\+\+Double\+Variation}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, double default\+\_\+value)
+\item 
+\mbox{\hyperlink{sdk_8h_a1d79989c99b8474d2849875d468669ee}{LDServer\+SDK\+\_\+\+Double\+Variation\+Detail}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, double default\+\_\+value, LDEval\+Detail \texorpdfstring{$\ast$}{*}out\+\_\+detail)
+\item 
+\mbox{\hyperlink{sdk_8h_a0bc3f3832ca22b2f9fe4fa521e07ca3e}{LDServer\+SDK\+\_\+\+Json\+Variation}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} default\+\_\+value)
+\item 
+\mbox{\hyperlink{sdk_8h_ac6ba91a3f9563664f2d72a1a9b1810dd}{LDServer\+SDK\+\_\+\+Json\+Variation\+Detail}} (LDServer\+SDK sdk, LDContext context, char const \texorpdfstring{$\ast$}{*}flag\+\_\+key, \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} default\+\_\+value, LDEval\+Detail \texorpdfstring{$\ast$}{*}out\+\_\+detail)
+\item 
+\mbox{\hyperlink{sdk_8h_a1818dc11a268da7d0587c009976c14d8}{LDServer\+SDK\+\_\+\+All\+Flags\+State}} (LDServer\+SDK sdk, LDContext context, enum \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}{LDAll\+Flags\+State\+\_\+\+Options}} options)
+\item 
+\mbox{\hyperlink{sdk_8h_a7a1b777c97161f7bd197f0406819bb12}{LDServer\+SDK\+\_\+\+Free}} (LDServer\+SDK sdk)
+\item 
+\mbox{\hyperlink{sdk_8h_abd93fb91561a337a9765b13ab2c74871}{LDServer\+Data\+Source\+Status\+\_\+\+Get\+State}} (LDServer\+Data\+Source\+Status status)
+\item 
+\mbox{\hyperlink{sdk_8h_a6945d193bf78e9e415b7dcc41ff4e7dc}{LDServer\+Data\+Source\+Status\+\_\+\+Get\+Last\+Error}} (LDServer\+Data\+Source\+Status status)
+\item 
+\mbox{\hyperlink{sdk_8h_a9ca49ab2f975ea4e7e929d1edcf211fc}{LDServer\+Data\+Source\+Status\+\_\+\+State\+Since}} (LDServer\+Data\+Source\+Status status)
+\item 
+\mbox{\hyperlink{sdk_8h_afe05fdcfb24816f6581dad971b3351d0}{LDServer\+Data\+Source\+Status\+Listener\+\_\+\+Init}} (struct \mbox{\hyperlink{structLDServerDataSourceStatusListener}{LDServer\+Data\+Source\+Status\+Listener}} \texorpdfstring{$\ast$}{*}listener)
+\item 
+\mbox{\hyperlink{sdk_8h_aabe40438afc97b3507a1c8db38e570ea}{LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+On\+Status\+Change}} (LDServer\+SDK sdk, struct \mbox{\hyperlink{structLDServerDataSourceStatusListener}{LDServer\+Data\+Source\+Status\+Listener}} listener)
+\item 
+\mbox{\hyperlink{sdk_8h_a166701e862ed10927c42be1f72c7d0f2}{LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+Status}} (LDServer\+SDK sdk)
+\item 
+\mbox{\hyperlink{sdk_8h_a10bd436afaab1f706b3f49de5bbd89b8}{LDServer\+Data\+Source\+Status\+\_\+\+Free}} (LDServer\+Data\+Source\+Status status)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side C Bindings. 
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{sdk_8h_ad21c615ab6be4dc20454598044944ca5}\label{sdk_8h_ad21c615ab6be4dc20454598044944ca5} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatus\_State@{LDServerDataSourceStatus\_State}}
+\index{LDServerDataSourceStatus\_State@{LDServerDataSourceStatus\_State}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatus\_State}{LDServerDataSourceStatus\_State}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{sdk_8h_ad21c615ab6be4dc20454598044944ca5}{LDServer\+Data\+Source\+Status\+\_\+\+State}}}
+
+Enumeration of possible data source states. \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_SERVERDATASOURCESTATUS\_STATE\_INITIALIZING@{LD\_SERVERDATASOURCESTATUS\_STATE\_INITIALIZING}!sdk.h@{sdk.h}}\index{sdk.h@{sdk.h}!LD\_SERVERDATASOURCESTATUS\_STATE\_INITIALIZING@{LD\_SERVERDATASOURCESTATUS\_STATE\_INITIALIZING}}}\Hypertarget{sdk_8h_ad21c615ab6be4dc20454598044944ca5a3d0a06ff6a8b98679e55b5fc88f18e79}\label{sdk_8h_ad21c615ab6be4dc20454598044944ca5a3d0a06ff6a8b98679e55b5fc88f18e79} 
+LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INITIALIZING&The initial state of the data source when the SDK is being initialized.
+
+If it encounters an error that requires it to retry initialization, the state will remain at k\+Initializing until it either succeeds and becomes LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+VALID, or permanently fails and becomes LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+SHUTDOWN. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_SERVERDATASOURCESTATUS\_STATE\_VALID@{LD\_SERVERDATASOURCESTATUS\_STATE\_VALID}!sdk.h@{sdk.h}}\index{sdk.h@{sdk.h}!LD\_SERVERDATASOURCESTATUS\_STATE\_VALID@{LD\_SERVERDATASOURCESTATUS\_STATE\_VALID}}}\Hypertarget{sdk_8h_ad21c615ab6be4dc20454598044944ca5ac17385560b7b7c3743c5676a626788fe}\label{sdk_8h_ad21c615ab6be4dc20454598044944ca5ac17385560b7b7c3743c5676a626788fe} 
+LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+VALID&Indicates that the data source is currently operational and has not had any problems since the last time it received data.
+
+In streaming mode, this means that there is currently an open stream connection and that at least one initial message has been received on the stream. In polling mode, it means that the last poll request succeeded. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_SERVERDATASOURCESTATUS\_STATE\_INTERRUPTED@{LD\_SERVERDATASOURCESTATUS\_STATE\_INTERRUPTED}!sdk.h@{sdk.h}}\index{sdk.h@{sdk.h}!LD\_SERVERDATASOURCESTATUS\_STATE\_INTERRUPTED@{LD\_SERVERDATASOURCESTATUS\_STATE\_INTERRUPTED}}}\Hypertarget{sdk_8h_ad21c615ab6be4dc20454598044944ca5a290e68f19b47295d4c381576ceffcee9}\label{sdk_8h_ad21c615ab6be4dc20454598044944ca5a290e68f19b47295d4c381576ceffcee9} 
+LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED&Indicates that the data source encountered an error that it will attempt to recover from.
+
+In streaming mode, this means that the stream connection failed, or had to be dropped due to some other error, and will be retried after a backoff delay. In polling mode, it means that the last poll request failed, and a new poll request will be made after the configured polling interval. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_SERVERDATASOURCESTATUS\_STATE\_OFF@{LD\_SERVERDATASOURCESTATUS\_STATE\_OFF}!sdk.h@{sdk.h}}\index{sdk.h@{sdk.h}!LD\_SERVERDATASOURCESTATUS\_STATE\_OFF@{LD\_SERVERDATASOURCESTATUS\_STATE\_OFF}}}\Hypertarget{sdk_8h_ad21c615ab6be4dc20454598044944ca5a90125cdd4d3565bcdf4d27d38f933603}\label{sdk_8h_ad21c615ab6be4dc20454598044944ca5a90125cdd4d3565bcdf4d27d38f933603} 
+LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+OFF&Indicates that the data source has been permanently shut down.
+
+This could be because it encountered an unrecoverable error (for instance, the Launch\+Darkly service rejected the SDK key; an invalid SDK key will never become valid), or because the SDK client was explicitly shut down. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{sdk_8h_a10bd436afaab1f706b3f49de5bbd89b8}\label{sdk_8h_a10bd436afaab1f706b3f49de5bbd89b8} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatus\_Free@{LDServerDataSourceStatus\_Free}}
+\index{LDServerDataSourceStatus\_Free@{LDServerDataSourceStatus\_Free}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatus\_Free()}{LDServerDataSourceStatus\_Free()}}
+{\footnotesize\ttfamily LDServer\+Data\+Source\+Status\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+Data\+Source\+Status}]{status }\end{DoxyParamCaption})}
+
+Frees the data source status. 
+\begin{DoxyParams}{Parameters}
+{\em status} & The data source status to free. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a6945d193bf78e9e415b7dcc41ff4e7dc}\label{sdk_8h_a6945d193bf78e9e415b7dcc41ff4e7dc} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatus\_GetLastError@{LDServerDataSourceStatus\_GetLastError}}
+\index{LDServerDataSourceStatus\_GetLastError@{LDServerDataSourceStatus\_GetLastError}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatus\_GetLastError()}{LDServerDataSourceStatus\_GetLastError()}}
+{\footnotesize\ttfamily LDServer\+Data\+Source\+Status\+\_\+\+Get\+Last\+Error (\begin{DoxyParamCaption}\item[{LDServer\+Data\+Source\+Status}]{status }\end{DoxyParamCaption})}
+
+Information about the last error that the data source encountered, if any. If there has not been an error, then NULL will be returned.
+
+If a non-\/\+NULL value is returned, then it should be freed using LDData\+Source\+Status\+\_\+\+Error\+Info\+\_\+\+Free.
+
+This property should be updated whenever the data source encounters a problem, even if it does not cause the state to change. For instance, if a stream connection fails and the state changes to LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED, and then subsequent attempts to restart the connection also fail, the state will remain LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED but the error information will be updated each time-- and the last error will still be reported in this property even if the state later becomes LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+VALID. \Hypertarget{sdk_8h_abd93fb91561a337a9765b13ab2c74871}\label{sdk_8h_abd93fb91561a337a9765b13ab2c74871} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatus\_GetState@{LDServerDataSourceStatus\_GetState}}
+\index{LDServerDataSourceStatus\_GetState@{LDServerDataSourceStatus\_GetState}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatus\_GetState()}{LDServerDataSourceStatus\_GetState()}}
+{\footnotesize\ttfamily LDServer\+Data\+Source\+Status\+\_\+\+Get\+State (\begin{DoxyParamCaption}\item[{LDServer\+Data\+Source\+Status}]{status }\end{DoxyParamCaption})}
+
+Get an enumerated value representing the overall current state of the data source. \Hypertarget{sdk_8h_a9ca49ab2f975ea4e7e929d1edcf211fc}\label{sdk_8h_a9ca49ab2f975ea4e7e929d1edcf211fc} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatus\_StateSince@{LDServerDataSourceStatus\_StateSince}}
+\index{LDServerDataSourceStatus\_StateSince@{LDServerDataSourceStatus\_StateSince}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatus\_StateSince()}{LDServerDataSourceStatus\_StateSince()}}
+{\footnotesize\ttfamily LDServer\+Data\+Source\+Status\+\_\+\+State\+Since (\begin{DoxyParamCaption}\item[{LDServer\+Data\+Source\+Status}]{status }\end{DoxyParamCaption})}
+
+The date/time that the value of State most recently changed, in seconds since epoch.
+
+The meaning of this depends on the current state\+:
+\begin{DoxyItemize}
+\item For LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INITIALIZING, it is the time that the SDK started initializing.
+\item For LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+VALID, it is the time that the data source most recently entered a valid state, after previously having been LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INITIALIZING or an invalid state such as LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED.
+\item For LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+INTERRUPTED, it is the time that the data source most recently entered an error state, after previously having been Data\+Source\+State\+::k\+Valid.
+\item For LD\+\_\+\+SERVERDATASOURCESTATUS\+\_\+\+STATE\+\_\+\+SHUTDOWN, it is the time that the data source encountered an unrecoverable error or that the SDK was explicitly shut down. 
+\end{DoxyItemize}\Hypertarget{sdk_8h_afe05fdcfb24816f6581dad971b3351d0}\label{sdk_8h_afe05fdcfb24816f6581dad971b3351d0} 
+\index{sdk.h@{sdk.h}!LDServerDataSourceStatusListener\_Init@{LDServerDataSourceStatusListener\_Init}}
+\index{LDServerDataSourceStatusListener\_Init@{LDServerDataSourceStatusListener\_Init}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerDataSourceStatusListener\_Init()}{LDServerDataSourceStatusListener\_Init()}}
+{\footnotesize\ttfamily LDServer\+Data\+Source\+Status\+Listener\+\_\+\+Init (\begin{DoxyParamCaption}\item[{struct \mbox{\hyperlink{structLDServerDataSourceStatusListener}{LDServer\+Data\+Source\+Status\+Listener}} \texorpdfstring{$\ast$}{*}}]{listener }\end{DoxyParamCaption})}
+
+Initializes a data source status change listener. Must be called before passing the listener to LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+On\+Status\+Change.
+
+If the Status\+Changed member of the listener struct is not set (NULL), then the function will not register a listener. In that case the return value will be NULL.
+
+Create the struct, initialize the struct, set the Status\+Changed handler and optionally User\+Data, and then pass the struct to LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+On\+Status\+Change. NULL will be returned if the Status\+Changed member of the listener struct is NULL.
+
+
+\begin{DoxyParams}{Parameters}
+{\em listener} & Listener to initialize. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a1818dc11a268da7d0587c009976c14d8}\label{sdk_8h_a1818dc11a268da7d0587c009976c14d8} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_AllFlagsState@{LDServerSDK\_AllFlagsState}}
+\index{LDServerSDK\_AllFlagsState@{LDServerSDK\_AllFlagsState}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_AllFlagsState()}{LDServerSDK\_AllFlagsState()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+All\+Flags\+State (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{enum \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}{LDAll\+Flags\+State\+\_\+\+Options}}}]{options }\end{DoxyParamCaption})}
+
+Evaluates all flags for a context, returning a data structure containing the results and additional flag metadata.
+
+The method\textquotesingle{}s behavior can be controlled by passing a combination of one or more options.
+
+A common use-\/case for All\+Flags\+State is to generate data suitable for bootstrapping the client-\/side Java\+Script SDK.
+
+This method will not send analytics events back to Launch\+Darkly.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context against which all flags will be evaluated. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em options} & A combination of one or more options. Pass LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DEFAULT for default behavior. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An All\+Flags\+State data structure. Must be freed with LDAll\+Flags\+State\+\_\+\+Free. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a6feab0fb25d881df2ead48bc79a8ce2e}\label{sdk_8h_a6feab0fb25d881df2ead48bc79a8ce2e} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_BoolVariation@{LDServerSDK\_BoolVariation}}
+\index{LDServerSDK\_BoolVariation@{LDServerSDK\_BoolVariation}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_BoolVariation()}{LDServerSDK\_BoolVariation()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Bool\+Variation (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{bool}]{default\+\_\+value }\end{DoxyParamCaption})}
+
+Returns the boolean value of a feature flag for a given flag key and context.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ value\ =\ \mbox{\hyperlink{sdk_8h_a6feab0fb25d881df2ead48bc79a8ce2e}{LDServerSDK\_BoolVariation}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/flag"{}},\ \textcolor{keyword}{false});}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a7211048ed3d4adb40fac6b80fbe6c373}\label{sdk_8h_a7211048ed3d4adb40fac6b80fbe6c373} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_BoolVariationDetail@{LDServerSDK\_BoolVariationDetail}}
+\index{LDServerSDK\_BoolVariationDetail@{LDServerSDK\_BoolVariationDetail}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_BoolVariationDetail()}{LDServerSDK\_BoolVariationDetail()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Bool\+Variation\+Detail (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{bool}]{default\+\_\+value,  }\item[{LDEval\+Detail \texorpdfstring{$\ast$}{*}}]{out\+\_\+detail }\end{DoxyParamCaption})}
+
+Returns the boolean value of a feature flag for a given flag key and context, and details that also describes the way the value was determined.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{LDEvalDetail\ detail;}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ value\ =\ \mbox{\hyperlink{sdk_8h_a7211048ed3d4adb40fac6b80fbe6c373}{LDServerSDK\_BoolVariationDetail}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/flag"{}},\ \textcolor{keyword}{false},}
+\DoxyCodeLine{\&detail);}
+\DoxyCodeLine{\textcolor{comment}{//\ Use\ the\ detail\ object,\ then\ free\ it.}}
+\DoxyCodeLine{\mbox{\hyperlink{evaluation__detail_8h_a35e3d721f0147eab281a2ceb55da04e9}{LDEvalDetail\_Free}}(detail);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+{\em detail} & Out parameter to store the details. May pass LD\+\_\+\+DISCARD\+\_\+\+DETAILS or NULL to discard the details. The details object must be freed with LDEval\+Detail\+\_\+\+Free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_aabe40438afc97b3507a1c8db38e570ea}\label{sdk_8h_aabe40438afc97b3507a1c8db38e570ea} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_DataSourceStatus\_OnStatusChange@{LDServerSDK\_DataSourceStatus\_OnStatusChange}}
+\index{LDServerSDK\_DataSourceStatus\_OnStatusChange@{LDServerSDK\_DataSourceStatus\_OnStatusChange}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_DataSourceStatus\_OnStatusChange()}{LDServerSDK\_DataSourceStatus\_OnStatusChange()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+On\+Status\+Change (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{struct \mbox{\hyperlink{structLDServerDataSourceStatusListener}{LDServer\+Data\+Source\+Status\+Listener}}}]{listener }\end{DoxyParamCaption})}
+
+Listen for changes to the data source status.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em listener} & The listener, whose Status\+Changed callback will be invoked, when the data source status changes. Must not be NULL.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A LDListener\+Connection. The connection can be freed using LDListener\+Connection\+\_\+\+Free and the listener can be disconnected using LDListener\+Connection\+\_\+\+Disconnect. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a166701e862ed10927c42be1f72c7d0f2}\label{sdk_8h_a166701e862ed10927c42be1f72c7d0f2} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_DataSourceStatus\_Status@{LDServerSDK\_DataSourceStatus\_Status}}
+\index{LDServerSDK\_DataSourceStatus\_Status@{LDServerSDK\_DataSourceStatus\_Status}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_DataSourceStatus\_Status()}{LDServerSDK\_DataSourceStatus\_Status()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Data\+Source\+Status\+\_\+\+Status (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk }\end{DoxyParamCaption})}
+
+The current status of the data source.
+
+The caller must free the returned value using LDServer\+Data\+Source\+Status\+\_\+\+Free. \Hypertarget{sdk_8h_a600ff51eb9f47a7d6334b5405eeb0454}\label{sdk_8h_a600ff51eb9f47a7d6334b5405eeb0454} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_DoubleVariation@{LDServerSDK\_DoubleVariation}}
+\index{LDServerSDK\_DoubleVariation@{LDServerSDK\_DoubleVariation}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_DoubleVariation()}{LDServerSDK\_DoubleVariation()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Double\+Variation (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{double}]{default\+\_\+value }\end{DoxyParamCaption})}
+
+Returns the double value of a feature flag for a given flag key and context. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a1d79989c99b8474d2849875d468669ee}\label{sdk_8h_a1d79989c99b8474d2849875d468669ee} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_DoubleVariationDetail@{LDServerSDK\_DoubleVariationDetail}}
+\index{LDServerSDK\_DoubleVariationDetail@{LDServerSDK\_DoubleVariationDetail}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_DoubleVariationDetail()}{LDServerSDK\_DoubleVariationDetail()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Double\+Variation\+Detail (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{double}]{default\+\_\+value,  }\item[{LDEval\+Detail \texorpdfstring{$\ast$}{*}}]{out\+\_\+detail }\end{DoxyParamCaption})}
+
+Returns the double value of a feature flag for a given flag key and context, and details that also describes the way the value was determined. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+{\em detail} & Out parameter to store the details. May pass LD\+\_\+\+DISCARD\+\_\+\+DETAILS or NULL to discard the details. The details object must be freed with LDEval\+Detail\+\_\+\+Free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a494d13be512d1eba59c59138f8d28c58}\label{sdk_8h_a494d13be512d1eba59c59138f8d28c58} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Flush@{LDServerSDK\_Flush}}
+\index{LDServerSDK\_Flush@{LDServerSDK\_Flush}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Flush()}{LDServerSDK\_Flush()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Flush (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{unsigned int}]{reserved }\end{DoxyParamCaption})}
+
+Requests delivery of all pending analytic events (if any).
+
+You MUST pass {\ttfamily LD\+\_\+\+NONBLOCKING} as the second parameter.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a494d13be512d1eba59c59138f8d28c58}{LDServerSDK\_Flush}}(sdk,\ LD\_NONBLOCKING);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em milliseconds} & Must pass {\ttfamily LD\+\_\+\+NONBLOCKING}. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a7a1b777c97161f7bd197f0406819bb12}\label{sdk_8h_a7a1b777c97161f7bd197f0406819bb12} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Free@{LDServerSDK\_Free}}
+\index{LDServerSDK\_Free@{LDServerSDK\_Free}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Free()}{LDServerSDK\_Free()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk }\end{DoxyParamCaption})}
+
+Frees the SDK\textquotesingle{}s resources, shutting down any connections. May block. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_ae181de7a07622a61e7cc78d29abb58eb}\label{sdk_8h_ae181de7a07622a61e7cc78d29abb58eb} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Identify@{LDServerSDK\_Identify}}
+\index{LDServerSDK\_Identify@{LDServerSDK\_Identify}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Identify()}{LDServerSDK\_Identify()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Identify (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context }\end{DoxyParamCaption})}
+
+Generates an identify event for the given context.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_ae181de7a07622a61e7cc78d29abb58eb}{LDServerSDK\_Identify}}(sdk,\ context);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a50b76e70a71c2fac33c93ec04279d539}\label{sdk_8h_a50b76e70a71c2fac33c93ec04279d539} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Initialized@{LDServerSDK\_Initialized}}
+\index{LDServerSDK\_Initialized@{LDServerSDK\_Initialized}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Initialized()}{LDServerSDK\_Initialized()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Initialized (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk }\end{DoxyParamCaption})}
+
+Returns a boolean value indicating Launch\+Darkly connection and flag state within the client.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ initialized\ =\ \mbox{\hyperlink{sdk_8h_a50b76e70a71c2fac33c93ec04279d539}{LDServerSDK\_Initialized}}(sdk);}
+
+\end{DoxyCode}
+
+
+When you first start the client, once Start has completed, Initialized should return true if and only if either 1. it connected to Launch\+Darkly and successfully retrieved flags, or 2. it started in offline mode so there\textquotesingle{}s no need to connect to Launch\+Darkly.
+
+If the client timed out trying to connect to LD, then Initialized returns false (even if we do have cached flags). If the client connected and got a 401 error, Initialized is will return false. This serves the purpose of letting the app know that there was a problem of some kind.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if initialized. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a8bd32ce92c4f5b6a29452939c0f5746d}\label{sdk_8h_a8bd32ce92c4f5b6a29452939c0f5746d} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_IntVariation@{LDServerSDK\_IntVariation}}
+\index{LDServerSDK\_IntVariation@{LDServerSDK\_IntVariation}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_IntVariation()}{LDServerSDK\_IntVariation()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Int\+Variation (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{int}]{default\+\_\+value }\end{DoxyParamCaption})}
+
+Returns the int value of a feature flag for a given flag key and context. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a4adaea5f2b77f8de5559f3bdc1538924}\label{sdk_8h_a4adaea5f2b77f8de5559f3bdc1538924} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_IntVariationDetail@{LDServerSDK\_IntVariationDetail}}
+\index{LDServerSDK\_IntVariationDetail@{LDServerSDK\_IntVariationDetail}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_IntVariationDetail()}{LDServerSDK\_IntVariationDetail()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Int\+Variation\+Detail (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{int}]{default\+\_\+value,  }\item[{LDEval\+Detail \texorpdfstring{$\ast$}{*}}]{out\+\_\+detail }\end{DoxyParamCaption})}
+
+Returns the int value of a feature flag for a given flag key and context, and details that also describes the way the value was determined. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+{\em detail} & Out parameter to store the details. May pass LD\+\_\+\+DISCARD\+\_\+\+DETAILS or NULL to discard the details. The details object must be freed with LDEval\+Detail\+\_\+\+Free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a0bc3f3832ca22b2f9fe4fa521e07ca3e}\label{sdk_8h_a0bc3f3832ca22b2f9fe4fa521e07ca3e} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_JsonVariation@{LDServerSDK\_JsonVariation}}
+\index{LDServerSDK\_JsonVariation@{LDServerSDK\_JsonVariation}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_JsonVariation()}{LDServerSDK\_JsonVariation()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Json\+Variation (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{default\+\_\+value }\end{DoxyParamCaption})}
+
+Returns the JSON value of a feature flag for a given flag key and context. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. Ownership is NOT transferred. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or a copy of default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. The returned value must be freed using LDValue\+\_\+\+Free. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_ac6ba91a3f9563664f2d72a1a9b1810dd}\label{sdk_8h_ac6ba91a3f9563664f2d72a1a9b1810dd} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_JsonVariationDetail@{LDServerSDK\_JsonVariationDetail}}
+\index{LDServerSDK\_JsonVariationDetail@{LDServerSDK\_JsonVariationDetail}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_JsonVariationDetail()}{LDServerSDK\_JsonVariationDetail()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Json\+Variation\+Detail (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{default\+\_\+value,  }\item[{LDEval\+Detail \texorpdfstring{$\ast$}{*}}]{out\+\_\+detail }\end{DoxyParamCaption})}
+
+Returns the JSON value of a feature flag for a given flag key and context, and details that also describes the way the value was determined. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. Ownership is NOT transferred. \\
+\hline
+{\em detail} & Out parameter to store the details. May pass LD\+\_\+\+DISCARD\+\_\+\+DETAILS or NULL to discard the details. The details object must be freed with LDEval\+Detail\+\_\+\+Free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or a copy of default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. The returned value must be freed using LDValue\+\_\+\+Free. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a761fccfc4cf3e0e4d5fc347552f855cf}\label{sdk_8h_a761fccfc4cf3e0e4d5fc347552f855cf} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_New@{LDServerSDK\_New}}
+\index{LDServerSDK\_New@{LDServerSDK\_New}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_New()}{LDServerSDK\_New()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+New (\begin{DoxyParamCaption}\item[{LDServer\+Config}]{config }\end{DoxyParamCaption})}
+
+Constructs a new server-\/side Launch\+Darkly SDK from a configuration.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{LDServerSDK\ sdk\ =\ \mbox{\hyperlink{sdk_8h_a761fccfc4cf3e0e4d5fc347552f855cf}{LDServerSDK\_New}}(config);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{//\ Later,\ when\ the\ SDK\ is\ no\ longer\ in\ use:}}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a7a1b777c97161f7bd197f0406819bb12}{LDServerSDK\_Free}}(sdk);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & The configuration. Ownership is transferred. Do not free or access the LDServer\+Config in any way after this call, otherwise behavior is undefined. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+New SDK instance. Must be freed with LDServer\+SDK\+\_\+\+Free when no longer needed. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a58b0a48cbf9ae25e3681e000ad3bccef}\label{sdk_8h_a58b0a48cbf9ae25e3681e000ad3bccef} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Start@{LDServerSDK\_Start}}
+\index{LDServerSDK\_Start@{LDServerSDK\_Start}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Start()}{LDServerSDK\_Start()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Start (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{unsigned int}]{milliseconds,  }\item[{bool \texorpdfstring{$\ast$}{*}}]{out\+\_\+succeeded }\end{DoxyParamCaption})}
+
+Starts the SDK, initiating a connection to Launch\+Darkly if not offline.
+
+Only one Start call can be in progress at once; calling it concurrently invokes undefined behavior.
+
+The method may be blocking or asynchronous depending on the arguments.
+
+To block, pass a positive milliseconds value and an optional pointer to a boolean. The return value will be true if the SDK started within the specified timeframe, or false if the operation couldn\textquotesingle{}t complete in time. The value of out\+\_\+succeeded will be true if the SDK successfully initialized.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ initialized\_successfully;}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (\mbox{\hyperlink{sdk_8h_a58b0a48cbf9ae25e3681e000ad3bccef}{LDServerSDK\_Start}}(client,\ 5000,\ \&initialized\_successfully))\ \{}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ The\ client\ was\ able\ to\ initialize\ in\ less\ than\ 5\ seconds.}}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ (initialized\_successfully)\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Initialization\ succeeded.}}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Initialization\ failed.}}
+\DoxyCodeLine{\ \ \ \ \}}
+\DoxyCodeLine{\}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{\ \ \ \textcolor{comment}{//\ The\ client\ is\ still\ initializing.}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+To start asynchronously, pass {\ttfamily LD\+\_\+\+NONBLOCKING}. In this case, the return value will be false and you may pass NULL to out\+\_\+succeeded.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Returns\ immediately.}}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a58b0a48cbf9ae25e3681e000ad3bccef}{LDServerSDK\_Start}}(client,\ LD\_NONBLOCKING,\ NULL);}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em milliseconds} & Milliseconds to wait for initialization or {\ttfamily LD\+\_\+\+NONBLOCKING} to return immediately. \\
+\hline
+{\em out\+\_\+succeeded} & Pointer to bool representing successful initialization. Only modified if a positive milliseconds value is passed; may be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the client started within the specified timeframe. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_abe287bd914f0296bf951c4024835ea76}\label{sdk_8h_abe287bd914f0296bf951c4024835ea76} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_StringVariation@{LDServerSDK\_StringVariation}}
+\index{LDServerSDK\_StringVariation@{LDServerSDK\_StringVariation}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_StringVariation()}{LDServerSDK\_StringVariation()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+String\+Variation (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{default\+\_\+value }\end{DoxyParamCaption})}
+
+Returns the string value of a feature flag for a given flag key and context. Ensure the string is freed with LDMemory\+\_\+\+Free\+String. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or a copy of default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. Must be freed with LDMemory\+\_\+\+Free\+String. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a8719b084e23ec6fff05dcd7e31f8da18}\label{sdk_8h_a8719b084e23ec6fff05dcd7e31f8da18} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_StringVariationDetail@{LDServerSDK\_StringVariationDetail}}
+\index{LDServerSDK\_StringVariationDetail@{LDServerSDK\_StringVariationDetail}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_StringVariationDetail()}{LDServerSDK\_StringVariationDetail()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+String\+Variation\+Detail (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{flag\+\_\+key,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{default\+\_\+value,  }\item[{LDEval\+Detail \texorpdfstring{$\ast$}{*}}]{out\+\_\+detail }\end{DoxyParamCaption})}
+
+Returns the string value of a feature flag for a given flag key and context, and details that also describes the way the value was determined. Ensure the string is freed with LDMemory\+\_\+\+Free\+String. 
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & The unique key for the feature flag. Must not be NULL. \\
+\hline
+{\em default\+\_\+value} & The default value of the flag. \\
+\hline
+{\em detail} & Out parameter to store the details. May pass LD\+\_\+\+DISCARD\+\_\+\+DETAILS or NULL to discard the details. The details object must be freed with LDEval\+Detail\+\_\+\+Free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The variation for the given context, or a copy of default\+\_\+value if the flag is disabled in the Launch\+Darkly control panel. Must be freed with LDMemory\+\_\+\+Free\+String. 
+\end{DoxyReturn}
+\Hypertarget{sdk_8h_a4ed0fe4f3cd7d5681b7367f5621f4c65}\label{sdk_8h_a4ed0fe4f3cd7d5681b7367f5621f4c65} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_TrackData@{LDServerSDK\_TrackData}}
+\index{LDServerSDK\_TrackData@{LDServerSDK\_TrackData}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_TrackData()}{LDServerSDK\_TrackData()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Track\+Data (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{event\+\_\+name,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{data }\end{DoxyParamCaption})}
+
+Tracks that the given context performed an event with the given event name, with additional JSON data.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a4ed0fe4f3cd7d5681b7367f5621f4c65}{LDServerSDK\_TrackData}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/data"{}},\ \mbox{\hyperlink{value_8h_a112364277c8b1bf74dfb8a4a483fa27a}{LDValue\_NewString}}(\textcolor{stringliteral}{"{}data"{}}));}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & The name of the event. Must not be NULL. \\
+\hline
+{\em data} & A JSON value containing additional data associated with the event. Ownership is transferred. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a75524786259227a9b8dc0d38bffc0853}\label{sdk_8h_a75524786259227a9b8dc0d38bffc0853} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_TrackEvent@{LDServerSDK\_TrackEvent}}
+\index{LDServerSDK\_TrackEvent@{LDServerSDK\_TrackEvent}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_TrackEvent()}{LDServerSDK\_TrackEvent()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Track\+Event (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{event\+\_\+name }\end{DoxyParamCaption})}
+
+Tracks that the given context performed an event with the given event name.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a75524786259227a9b8dc0d38bffc0853}{LDServerSDK\_TrackEvent}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/event"{}});}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & Name of the event. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a78f1f4240ef6518c6853c290b4cf7011}\label{sdk_8h_a78f1f4240ef6518c6853c290b4cf7011} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_TrackMetric@{LDServerSDK\_TrackMetric}}
+\index{LDServerSDK\_TrackMetric@{LDServerSDK\_TrackMetric}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_TrackMetric()}{LDServerSDK\_TrackMetric()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Track\+Metric (\begin{DoxyParamCaption}\item[{LDServer\+SDK}]{sdk,  }\item[{LDContext}]{context,  }\item[{char const \texorpdfstring{$\ast$}{*}}]{event\+\_\+name,  }\item[{double}]{metric\+\_\+value,  }\item[{\mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}}]{data }\end{DoxyParamCaption})}
+
+Tracks that the given context performed an event with the given event name, and associates it with a numeric metric and value.
+
+If the data parameter isn\textquotesingle{}t needed, pass {\ttfamily \doxylink{value_8h_ab4316cda4726f08d364e320ccfd35755}{LDValue\+\_\+\+New\+Null()}} as the value\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a78f1f4240ef6518c6853c290b4cf7011}{LDServerSDK\_TrackMetric}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/metric"{}},\ 3.14,\ \mbox{\hyperlink{value_8h_ab4316cda4726f08d364e320ccfd35755}{LDValue\_NewNull}}());}
+
+\end{DoxyCode}
+
+
+If the data parameter is needed (example using a string)\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{sdk_8h_a78f1f4240ef6518c6853c290b4cf7011}{LDServerSDK\_TrackMetric}}(sdk,\ context,\ \textcolor{stringliteral}{"{}my-\/metric"{}},\ 3.14,}
+\DoxyCodeLine{\mbox{\hyperlink{value_8h_a112364277c8b1bf74dfb8a4a483fa27a}{LDValue\_NewString}}(\textcolor{stringliteral}{"{}data"{}}));}
+
+\end{DoxyCode}
+
+
+If the metric value isn\textquotesingle{}t needed, see \doxylink{sdk_8h_a4ed0fe4f3cd7d5681b7367f5621f4c65}{LDServer\+SDK\+\_\+\+Track\+Data}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sdk} & SDK. Must not be NULL. \\
+\hline
+{\em context} & The context. Ownership is NOT transferred. Must not be NULL. \\
+\hline
+{\em event\+\_\+name} & The name of the event. Must not be NULL. \\
+\hline
+{\em metric\+\_\+value} & This value is used by the Launch\+Darkly experimentation feature in numeric custom metrics, and will also be returned as part of the custom event for Data Export. \\
+\hline
+{\em data} & A JSON value containing additional data associated with the event. Ownership is transferred into the SDK. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sdk_8h_a709599682e340ecfb1fe2f15482eca49}\label{sdk_8h_a709599682e340ecfb1fe2f15482eca49} 
+\index{sdk.h@{sdk.h}!LDServerSDK\_Version@{LDServerSDK\_Version}}
+\index{LDServerSDK\_Version@{LDServerSDK\_Version}!sdk.h@{sdk.h}}
+\doxysubsubsection{\texorpdfstring{LDServerSDK\_Version()}{LDServerSDK\_Version()}}
+{\footnotesize\ttfamily LDServer\+SDK\+\_\+\+Version (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Returns the version of the SDK.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ version\ =\ \mbox{\hyperlink{sdk_8h_a709599682e340ecfb1fe2f15482eca49}{LDServerSDK\_Version}}();}
+
+\end{DoxyCode}
+
+
+\begin{DoxyReturn}{Returns}
+String representation of the SDK version. 
+\end{DoxyReturn}

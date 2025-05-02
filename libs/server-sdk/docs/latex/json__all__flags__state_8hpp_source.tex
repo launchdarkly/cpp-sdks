@@ -1,0 +1,22 @@
+\doxysection{json\+\_\+all\+\_\+flags\+\_\+state.\+hpp}
+\hypertarget{json__all__flags__state_8hpp_source}{}\label{json__all__flags__state_8hpp_source}\index{include/launchdarkly/server\_side/serialization/json\_all\_flags\_state.hpp@{include/launchdarkly/server\_side/serialization/json\_all\_flags\_state.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/all\_flags\_state.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <boost/json/fwd.hpp>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keywordtype}{void}\ tag\_invoke(boost::json::value\_from\_tag\ \textcolor{keyword}{const}\&\ unused,}
+\DoxyCodeLine{00010\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::json::value\&\ json\_value,}
+\DoxyCodeLine{00011\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ server\_side::AllFlagsState::State\ \textcolor{keyword}{const}\&\ state);}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keywordtype}{void}\ tag\_invoke(boost::json::value\_from\_tag\ \textcolor{keyword}{const}\&\ unused,}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::json::value\&\ json\_value,}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ server\_side::AllFlagsState\ \textcolor{keyword}{const}\&\ state);}
+\DoxyCodeLine{00016\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

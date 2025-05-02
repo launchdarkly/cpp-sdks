@@ -1,0 +1,21 @@
+<map id="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/config/logging_builder.h" name="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/config/logging_builder.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="190,5,410,75"/>
+<area shape="rect" id="Node000002" href="$log__level_8h.html" title=" " alt="" coords="217,123,382,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="302,75,302,108,297,108,297,75"/>
+<area shape="rect" id="Node000003" href="$export_8h.html" title="Export macros for C bindings." alt="" coords="24,299,189,339"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="191,77,142,100,93,130,49,167,14,212,8,231,14,249,31,272,53,289,50,294,27,275,9,252,3,231,9,209,45,163,90,125,139,95,189,72"/>
+<area shape="rect" id="Node000004" href="$status_8h.html" title=" " alt="" coords="24,211,189,251"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="261,77,207,125,133,202,129,199,203,121,257,73"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="332,306,414,331"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="368,73,406,97,444,128,477,166,500,210,505,231,499,252,485,270,468,284,429,305,427,300,465,280,482,266,495,249,500,231,495,212,472,169,440,132,403,101,366,77"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="410,218,485,243"/>
+<area shape="poly" id="edge12_Node000001_Node000006" title=" " alt="" coords="348,73,373,95,397,121,423,164,441,204,436,206,418,166,392,124,369,99,344,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="286,165,250,206,203,253,150,293,146,289,199,249,246,203,282,161"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="258,165,162,208,160,203,256,160"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="319,162,335,184,350,210,365,252,373,292,367,293,360,254,345,212,331,187,315,165"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="334,160,418,209,415,214,331,165"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="264,218,335,243"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="302,163,302,204,297,204,297,163"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="109,251,109,285,104,285,104,251"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="166,248,325,299,324,304,164,253"/>
+</map>

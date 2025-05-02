@@ -1,0 +1,57 @@
+\doxysection{streaming\+\_\+data\+\_\+source.\+hpp}
+\hypertarget{streaming__data__source_8hpp_source}{}\label{streaming__data__source_8hpp_source}\index{src/data\_systems/background\_sync/sources/streaming/streaming\_data\_source.hpp@{src/data\_systems/background\_sync/sources/streaming/streaming\_data\_source.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}event\_handler.hpp"{}}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}../../../../data\_components/status\_notifications/data\_source\_status\_manager.hpp"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}../../../../data\_interfaces/destination/idestination.hpp"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}../../../../data\_interfaces/source/idata\_synchronizer.hpp"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/all\_built.hpp>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <launchdarkly/sse/client.hpp>}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <boost/asio/any\_io\_executor.hpp>}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_systems\ \{}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource}{StreamingDataSource}}\ final}
+\DoxyCodeLine{00018\ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{data\_interfaces::IDataSynchronizer}},}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \textcolor{keyword}{public}\ std::enable\_shared\_from\_this<StreamingDataSource>\ \{}
+\DoxyCodeLine{00020\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource}{StreamingDataSource}}(}
+\DoxyCodeLine{00022\ \ \ \ \ \ \ \ \ boost::asio::any\_io\_executor\ io,}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger,}
+\DoxyCodeLine{00024\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager,}
+\DoxyCodeLine{00025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config::built::ServiceEndpoints}}\ \textcolor{keyword}{const}\&\ endpoints,}
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{config::built::BackgroundSyncConfig::StreamingConfig}}\ \textcolor{keyword}{const}\&\ streaming,}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::built::HttpProperties}}\ \textcolor{keyword}{const}\&\ http\_properties);}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a12af921b47c558c05f1f21cf0c8839f3}{StartAsync}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{data\_interfaces::IDestination}}*\ dest,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::SDKDataSet\ \textcolor{keyword}{const}*\ bootstrap\_data)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a9a05aad6d9edfa5752c9173ba7e12d90}{ShutdownAsync}}(std::function<\textcolor{keywordtype}{void}()>\ completion)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1StreamingDataSource_a27eb2c2564ee0a1b9585490b2e667cfc}{Identity}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{void}\ HandleErrorStateChange(sse::Error\ error,\ std::string\ error\_string);}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ boost::asio::any\_io\_executor\ io\_;}
+\DoxyCodeLine{00039\ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger\_;}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager\_;}
+\DoxyCodeLine{00042\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config::built::HttpProperties}}\ http\_config\_;}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \ std::optional<DataSourceEventHandler>\ event\_handler\_;}
+\DoxyCodeLine{00045\ \ \ \ \ std::string\ streaming\_endpoint\_;}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1StreamingConfig}{config::built::BackgroundSyncConfig::StreamingConfig}}\ streaming\_config\_;}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ std::shared\_ptr<sse::Client>\ client\_;}
+\DoxyCodeLine{00050\ \};}
+\DoxyCodeLine{00051\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_systems}}
+
+\end{DoxyCode}

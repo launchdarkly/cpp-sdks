@@ -1,0 +1,36 @@
+\doxysection{lazy\+\_\+load\+\_\+builder.\+hpp}
+\hypertarget{lazy__load__builder_8hpp_source}{}\label{lazy__load__builder_8hpp_source}\index{include/launchdarkly/server\_side/config/builders/data\_system/lazy\_load\_builder.hpp@{include/launchdarkly/server\_side/config/builders/data\_system/lazy\_load\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/data\_system/lazy\_load\_config.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/integrations/data\_reader/iserialized\_data\_reader.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/error.hpp>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::config::builders\ \{}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{LazyLoadBuilder}}\ \{}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keyword}{using\ }SourcePtr\ =\ std::shared\_ptr<integrations::ISerializedDataReader>;}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{EvictionPolicy}}\ =\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{built::LazyLoadConfig::EvictionPolicy}};}
+\DoxyCodeLine{00033\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a34bf8745cd55b999e7d6a5ac4185290a}{LazyLoadBuilder}}();}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{LazyLoadBuilder}}\&\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a14ad8758b87a2d33a5d087374e4fbcd2}{Source}}(SourcePtr\ source);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{LazyLoadBuilder}}\&\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a10bb232346b38953898fe9d12c1f416e}{CacheRefresh}}(std::chrono::milliseconds\ ttl);}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00059\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder}{LazyLoadBuilder}}\&\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1LazyLoadBuilder_a6e2efeccf2263c431e7bd10c3e0fc59a}{CacheEviction}}(\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig_aff371f9e60dada43c7a3c96e03171359}{EvictionPolicy}}\ policy);}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ [[nodiscard]]\ tl::expected<built::LazyLoadConfig,\ Error>\ Build()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00064\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1LazyLoadConfig}{built::LazyLoadConfig}}\ config\_;}
+\DoxyCodeLine{00065\ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::config::builders}}
+
+\end{DoxyCode}

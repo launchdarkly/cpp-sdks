@@ -1,0 +1,113 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Polling\+Data\+Source Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource}{}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource}\index{launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}}
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Polling\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Polling\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ac814c7eb75ace992cba8f70954abd0cd}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ac814c7eb75ace992cba8f70954abd0cd} 
+{\bfseries Polling\+Data\+Source} (boost\+::asio\+::any\+\_\+io\+\_\+executor const \&ioc, Logger const \&logger, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\+\_\+components\+::\+Data\+Source\+Status\+Manager}} \&status\+\_\+manager, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config\+::built\+::\+Service\+Endpoints}} const \&endpoints, \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1PollingConfig}{config\+::built\+::\+Background\+Sync\+Config\+::\+Polling\+Config}} const \&data\+\_\+source\+\_\+config, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} const \&http\+\_\+properties)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ad51e7083f7b7f12d30f44dd93968d5a4}{Start\+Async}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{data\+\_\+interfaces\+::\+IDestination}} \texorpdfstring{$\ast$}{*}dest, data\+\_\+model\+::\+SDKData\+Set const \texorpdfstring{$\ast$}{*}bootstrap\+\_\+data) override
+\begin{DoxyCompactList}\small\item\em Starts synchronizing data into the given IDestination. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a3e37d0a7417f413179b9f4dd5528c3e3}{Shutdown\+Async}} (std\+::function$<$ void()$>$ completion) override
+\begin{DoxyCompactList}\small\item\em Stops the synchronization mechanism. Stop will be called only once after Start\+Async. Stop should not block, but should invoke the completion function once shutdown. \end{DoxyCompactList}\item 
+std\+::string const \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a2595758b566de384295e5ea6a22e8500}{Identity}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions inherited from \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer}}}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries IData\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} const \&item)=delete
+\item 
+{\bfseries IData\+Synchronizer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \&\&item)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} const \&)=delete
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer}{IData\+Synchronizer}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a2595758b566de384295e5ea6a22e8500}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a2595758b566de384295e5ea6a22e8500} 
+\index{launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+Identity of the synchronizer. Used in logs. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a046f11ab323b2d6263ea702f1435f74e}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a3e37d0a7417f413179b9f4dd5528c3e3}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_a3e37d0a7417f413179b9f4dd5528c3e3} 
+\index{launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}!ShutdownAsync@{ShutdownAsync}}
+\index{ShutdownAsync@{ShutdownAsync}!launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}}
+\doxysubsubsection{\texorpdfstring{ShutdownAsync()}{ShutdownAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source\+::\+Shutdown\+Async (\begin{DoxyParamCaption}\item[{std\+::function$<$ void()$>$}]{complete }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Stops the synchronization mechanism. Stop will be called only once after Start\+Async. Stop should not block, but should invoke the completion function once shutdown. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em complete} & A callback to be invoked on completion. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a80f940e3f01259d0aac10648749c8db8}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer}}.
+
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ad51e7083f7b7f12d30f44dd93968d5a4}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1PollingDataSource_ad51e7083f7b7f12d30f44dd93968d5a4} 
+\index{launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}!StartAsync@{StartAsync}}
+\index{StartAsync@{StartAsync}!launchdarkly::server\_side::data\_systems::PollingDataSource@{launchdarkly::server\_side::data\_systems::PollingDataSource}}
+\doxysubsubsection{\texorpdfstring{StartAsync()}{StartAsync()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Polling\+Data\+Source\+::\+Start\+Async (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{data\+\_\+interfaces\+::\+IDestination}} \texorpdfstring{$\ast$}{*}}]{destination,  }\item[{data\+\_\+model\+::\+SDKData\+Set const \texorpdfstring{$\ast$}{*}}]{bootstrap\+\_\+data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Starts synchronizing data into the given IDestination. 
+
+The second parameter, boostrap\+\_\+data, may be nullptr meaning no bootstrap data is present in the SDK and a full synchronization must be initiated.
+
+If bootstrap\+\_\+data is not nullptr, then it contains data obtained by the SDK during the bootstrap process. The pointer is valid only for this call.
+
+The data may be used to optimize the synchronization process, e.\+g. by obtaining a diff rather than a full dataset.
+
+
+\begin{DoxyParams}{Parameters}
+{\em destination} & The destination to synchronize data into. Pointer is invalid after the Shutdown\+Async completion handler is called. \\
+\hline
+{\em bootstrap\+\_\+data} & Optional bootstrap data. Pointer is valid only for this call. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSynchronizer_a4a29361abb48987f400f1dc0f620b29e}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IData\+Synchronizer}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/background\+\_\+sync/sources/polling/polling\+\_\+data\+\_\+source.\+hpp\item 
+src/data\+\_\+systems/background\+\_\+sync/sources/polling/polling\+\_\+data\+\_\+source.\+cpp\end{DoxyCompactItemize}

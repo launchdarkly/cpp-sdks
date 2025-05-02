@@ -1,0 +1,7 @@
+<map id="launchdarkly::server_side::data_components::ChangeNotifier" name="launchdarkly::server_side::data_components::ChangeNotifier">
+<area shape="rect" id="Node000001" title=" " alt="" coords="219,41,399,96"/>
+<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination.html" title="IDestination represents a sink for data received by the SDK. A destination may be a database,..." alt="" coords="5,5,171,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,46,219,51,218,57,184,51"/>
+<area shape="rect" id="Node000003" href="$classlaunchdarkly_1_1server__side_1_1IChangeNotifier.html" title=" " alt="" coords="5,85,171,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,86,218,81,219,86,185,92"/>
+</map>

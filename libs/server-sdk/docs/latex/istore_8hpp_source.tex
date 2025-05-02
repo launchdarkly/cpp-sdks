@@ -1,0 +1,45 @@
+\doxysection{istore.\+hpp}
+\hypertarget{istore_8hpp_source}{}\label{istore_8hpp_source}\index{src/data\_interfaces/store/istore.hpp@{src/data\_interfaces/store/istore.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/descriptors.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_interfaces\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\ \{}
+\DoxyCodeLine{00016\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00022\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::shared\_ptr<data\_model::FlagDescriptor>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a790063d9f03072942e3bb35871540b89}{GetFlag}}(}
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00030\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::shared\_ptr<data\_model::SegmentDescriptor>}
+\DoxyCodeLine{00031\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_ae6178b4579573fd078b79026ebe27402}{GetSegment}}(std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00037\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ unordered\_map<std::string,\ std::shared\_ptr<data\_model::FlagDescriptor>>}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aab3ad143afd8d3bfbf103e4c22f5c315}{AllFlags}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00045\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ std::unordered\_map<}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ std::string,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ std::shared\_ptr<data\_model::SegmentDescriptor>>}
+\DoxyCodeLine{00048\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_a5707e17162ae05227f09c567f142dc22}{AllSegments}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00053\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore_aed68d9e37af193c2bb71629ea08c09ad}{Initialized}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{\string~IStore}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00057\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00058\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00059\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00062\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{IStore}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00063\ \};}
+\DoxyCodeLine{00064\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_interfaces}}
+
+\end{DoxyCode}

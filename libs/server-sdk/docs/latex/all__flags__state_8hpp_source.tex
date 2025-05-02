@@ -1,0 +1,105 @@
+\doxysection{all\+\_\+flags\+\_\+state.\+hpp}
+\hypertarget{all__flags__state_8hpp_source}{}\label{all__flags__state_8hpp_source}\index{include/launchdarkly/server\_side/all\_flags\_state.hpp@{include/launchdarkly/server\_side/all\_flags\_state.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/data/evaluation\_reason.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/value.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState}{AllFlagsState}}\ \{}
+\DoxyCodeLine{00028\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{Options}}\ :\ std::uint8\_t\ \{}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52a7a1920d61156abc05a60135aefe8bc67}{Default}}\ =\ 0,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52a4049055d936ea2a4c6f5f8969063f4d3}{IncludeReasons}}\ =\ (1\ <<\ 0),}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52abcd23397d3afdff809ad9530ed3f8f63}{DetailsOnlyForTrackedFlags}}\ =\ (1\ <<\ 1),}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52ac46a01f9c697a297848ab2daff0fe733}{ClientSideOnly}}\ =\ (1\ <<\ 2)}
+\DoxyCodeLine{00052\ \ \ \ \ \};}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{State}}\ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{State}}(std::uint64\_t\ version,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::int64\_t>\ variation,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<EvaluationReason>\ reason,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::uint64\_t>\ debug\_events\_until\_date);}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{State}}(std::uint64\_t\ version,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::int64\_t>\ variation,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<EvaluationReason>\ reason,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::uint64\_t>\ debug\_events\_until\_date,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::string>\ prerequisites);}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ [[nodiscard]]\ std::uint64\_t\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a3850239b2039bbddb46ad2465506e61d}{Version}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ [[nodiscard]]\ std::optional<std::int64\_t>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1837f872bd8e540732660c94b8d4b4a4}{Variation}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ [[nodiscard]]\ std::optional<EvaluationReason>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a40aa53a1bdbfb84b5ccb900b25b2c30f}{Reason}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ac7f93495cc0a8672aa403e155f33d442}{TrackEvents}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ad63b578713aa90d0f9932054d256fea6}{TrackReason}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ [[nodiscard]]\ std::optional<std::uint64\_t>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a1cad89b4f25d62f5ee1746e9f5ce1310}{DebugEventsUntilDate}}()}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_a92a753d9c3f36399bf35dfbd231e248d}{OmitDetails}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ [[nodiscard]]\ std::vector<std::string>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State_ae58b02ac5f5d3f5696569de887eed9da}{Prerequisites}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsStateBuilder}{AllFlagsStateBuilder}};}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ std::uint64\_t\ version\_;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ std::optional<std::int64\_t>\ variation\_;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ std::optional<EvaluationReason>\ reason\_;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_events\_;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ track\_reason\_;}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ std::optional<std::uint64\_t>\ debug\_events\_until\_date\_;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ omit\_details\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ std::vector<std::string>\ prerequisites\_;}
+\DoxyCodeLine{00139\ \ \ \ \ \};}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00146\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_af34e98c020878fba3c04f37d94c729ee}{Valid}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00151\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ State>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac4a64d0f618fdc00a6cea7a9a0e6c05e}{States}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00156\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<std::string,\ Value>\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_a05803f4201117fd077f3fe9f62b4c862}{Values}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00161\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_a31556194c2ffc55aaaa90c8ec2a15124}{AllFlagsState}}();}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00168\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_a31556194c2ffc55aaaa90c8ec2a15124}{AllFlagsState}}(std::unordered\_map<std::string,\ Value>\ evaluations,}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::unordered\_map<std::string,\ class\ State>\ flags\_state);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordtype}{bool}\ \textcolor{keyword}{const}\ valid\_;}
+\DoxyCodeLine{00173\ \ \ \ \ std::unordered\_map<std::string,\ class\ State>\ \textcolor{keyword}{const}\ flags\_state\_;}
+\DoxyCodeLine{00174\ \ \ \ \ std::unordered\_map<std::string,\ Value>\ \textcolor{keyword}{const}\ evaluations\_;}
+\DoxyCodeLine{00175\ \};}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \textcolor{keywordtype}{void}\ operator|=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ rhs);}
+\DoxyCodeLine{00178\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ operator|(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ lhs,}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ rhs);}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ operator\&(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ lhs,}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_ac804725414620447576f928c670d0c52}{AllFlagsState::Options}}\ rhs);}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{class}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{AllFlagsState::State}}\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{class}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State}{AllFlagsState::State}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState}{AllFlagsState}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1AllFlagsState}{AllFlagsState}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

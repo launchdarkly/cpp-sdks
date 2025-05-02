@@ -1,0 +1,187 @@
+\doxysection{builder.\+h}
+\hypertarget{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_source}{}\label{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_source}\index{include/launchdarkly/server\_side/bindings/c/config/builder.h@{include/launchdarkly/server\_side/bindings/c/config/builder.h}}
+\mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2config_8h}{launchdarkly/server\_side/bindings/c/config/config.h}}>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazy__load__builder_8h}{launchdarkly/server\_side/bindings/c/config/lazy\_load\_builder/lazy\_load\_builder.h}}>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{logging__builder_8h}{launchdarkly/bindings/c/config/logging\_builder.h}}>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{status_8h}{launchdarkly/bindings/c/status.h}}>}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00017\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDServerConfigBuilder*\ LDServerConfigBuilder;}
+\DoxyCodeLine{00021\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDServerDataSourceStreamBuilder*}
+\DoxyCodeLine{00022\ \ \ \ \ LDServerDataSourceStreamBuilder;}
+\DoxyCodeLine{00023\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDServerDataSourcePollBuilder*\ LDServerDataSourcePollBuilder;}
+\DoxyCodeLine{00024\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDServerHttpPropertiesTlsBuilder*}
+\DoxyCodeLine{00025\ \ \ \ \ LDServerHttpPropertiesTlsBuilder;}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00030\ LD\_EXPORT(LDServerConfigBuilder)}
+\DoxyCodeLine{00031\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_addd8fb0faf076daf5ec271f5cbade489}{LDServerConfigBuilder\_New}}(\textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ sdk\_key);}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00038\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00039\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_acce10416f1473b8da72e1d112c5394db}{LDServerConfigBuilder\_ServiceEndpoints\_PollingBaseURL}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ url);}
+\DoxyCodeLine{00046\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00047\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_af18bc2ee610f9cb879f20b69c08e7e2e}{LDServerConfigBuilder\_ServiceEndpoints\_StreamingBaseURL}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ url);}
+\DoxyCodeLine{00054\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00055\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_afc06b8f43984f45c1d00ab4a84811aec}{LDServerConfigBuilder\_ServiceEndpoints\_EventsBaseURL}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ url);}
+\DoxyCodeLine{00063\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00064\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ac4a369686bac5cb8f0dc77cc6dc75930}{LDServerConfigBuilder\_ServiceEndpoints\_RelayProxyBaseURL}}(}
+\DoxyCodeLine{00065\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ url);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00074\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00075\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_aff129eeb9ded0dd0d8dfdfeea4306dbb}{LDServerConfigBuilder\_AppInfo\_Identifier}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ app\_id);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00085\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00086\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ab406a9bcf885a822ef6dd05724e01380}{LDServerConfigBuilder\_AppInfo\_Version}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ app\_version);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00101\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00102\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ad18f6c7c7a4228c1d9a7ef1e9993a15e}{LDServerConfigBuilder\_Offline}}(LDServerConfigBuilder\ b,\ \textcolor{keywordtype}{bool}\ offline);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00110\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00111\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a34aba1b84cfe772860e61ef38f546082}{LDServerConfigBuilder\_Events\_Enabled}}(LDServerConfigBuilder\ b,\ \textcolor{keywordtype}{bool}\ enabled);}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00125\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00126\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a1ce8f8a4428bc44c69a064310ccff2e9}{LDServerConfigBuilder\_Events\_ContextKeysCapacity}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ context\_keys\_capacity);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00136\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00137\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a117a5fbe9060b0db25d30640743472ab}{LDServerConfigBuilder\_Events\_Capacity}}(LDServerConfigBuilder\ b,\ \textcolor{keywordtype}{size\_t}\ capacity);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00146\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00147\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_aea55a083189e0324c2d7daff1164a100}{LDServerConfigBuilder\_Events\_FlushIntervalMs}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ milliseconds);}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00173\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00174\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a7e3b287cceca4b71163866c12f106749}{LDServerConfigBuilder\_Events\_AllAttributesPrivate}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ all\_attributes\_private);}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00183\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00184\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a7b4cbd58b065a5032883f745a13d70e2}{LDServerConfigBuilder\_Events\_PrivateAttribute}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ attribute\_reference);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00207\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00208\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_aa6d8086b6aef51a800ac74617986a781}{LDServerConfigBuilder\_DataSystem\_BackgroundSync\_Streaming}}(}
+\DoxyCodeLine{00209\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00210\ \ \ \ \ LDServerDataSourceStreamBuilder\ stream\_builder);}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00231\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00232\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_add6ac097cfda3f8ed5603190a80077f7}{LDServerConfigBuilder\_DataSystem\_BackgroundSync\_Polling}}(}
+\DoxyCodeLine{00233\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00234\ \ \ \ \ LDServerDataSourcePollBuilder\ poll\_builder);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00253\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00254\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a8f20f7ad7f283cb12c99582452dc33b7}{LDServerConfigBuilder\_DataSystem\_LazyLoad}}(}
+\DoxyCodeLine{00255\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00256\ \ \ \ \ LDServerLazyLoadBuilder\ lazy\_load\_builder);}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00267\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00268\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a0865acfe54eab04ca3fc228c7ab9b7cd}{LDServerConfigBuilder\_DataSystem\_Enabled}}(LDServerConfigBuilder\ b,\ \textcolor{keywordtype}{bool}\ enabled);}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00278\ LD\_EXPORT(LDServerDataSourceStreamBuilder)}
+\DoxyCodeLine{00279\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a0bdbfe9deb5c8bd4aac10fc826938789}{LDServerDataSourceStreamBuilder\_New}}();}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00292\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00293\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a93bd4e715dffce365576a2008819988d}{LDServerDataSourceStreamBuilder\_InitialReconnectDelayMs}}(}
+\DoxyCodeLine{00294\ \ \ \ \ LDServerDataSourceStreamBuilder\ b,}
+\DoxyCodeLine{00295\ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ milliseconds);}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00315\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00316\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_af495d9e17acfe8f47f85f018164fe4f8}{LDServerDataSourceStreamBuilder\_Filter}}(LDServerDataSourceStreamBuilder\ b,}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ filter\_key);}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00325\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00326\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_af9b88cacba4432b7d6bcd60f3d6d3dfd}{LDServerDataSourceStreamBuilder\_Free}}(LDServerDataSourceStreamBuilder\ b);}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00337\ LD\_EXPORT(LDServerDataSourcePollBuilder)}
+\DoxyCodeLine{00338\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a0e83b37b08a47704255c6ffcb8691512}{LDServerDataSourcePollBuilder\_New}}();}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00345\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00346\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a8b5801740083ccf83bcb3f49905e4052}{LDServerDataSourcePollBuilder\_IntervalS}}(LDServerDataSourcePollBuilder\ b,}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ seconds);}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00367\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00368\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a01dfb4ed5084cafafd75e276b8b88a42}{LDServerDataSourcePollBuilder\_Filter}}(LDServerDataSourcePollBuilder\ b,}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ filter\_key);}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00377\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00378\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a9d6f60574a9ddc85deec6721be9cf809}{LDServerDataSourcePollBuilder\_Free}}(LDServerDataSourcePollBuilder\ b);}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00387\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00388\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_adc1e66b06959fb1caf4e622f82b83ab5}{LDServerConfigBuilder\_HttpProperties\_WrapperName}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ wrapper\_name);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00398\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00399\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ad6a7deb4083d63beea3a476a45967fb0}{LDServerConfigBuilder\_HttpProperties\_WrapperVersion}}(}
+\DoxyCodeLine{00400\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00401\ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ wrapper\_version);}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00411\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00412\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ad69414466ccbc50ae0e48c7bb2e37ee0}{LDServerConfigBuilder\_HttpProperties\_Header}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ key,}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ value);}
+\DoxyCodeLine{00415\ }
+\DoxyCodeLine{00427\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00428\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a10f285772d46849310eb13a2f3b1ae3f}{LDServerConfigBuilder\_HttpProperties\_Tls}}(}
+\DoxyCodeLine{00429\ \ \ \ \ LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00430\ \ \ \ \ LDServerHttpPropertiesTlsBuilder\ tls\_builder);}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00440\ LD\_EXPORT(LDServerHttpPropertiesTlsBuilder)}
+\DoxyCodeLine{00441\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ae48dbad18464d0c77a6aced7dbc1ad89}{LDServerHttpPropertiesTlsBuilder\_New}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00442\ }
+\DoxyCodeLine{00449\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00450\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_adf2f2f4635f0b3dc1fe313f0585f29e8}{LDServerHttpPropertiesTlsBuilder\_Free}}(LDServerHttpPropertiesTlsBuilder\ b);}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00462\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00463\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_aefd584091028adb4f32f8a63ff8a0f9e}{LDServerHttpPropertiesTlsBuilder\_SkipVerifyPeer}}(}
+\DoxyCodeLine{00464\ \ \ \ \ LDServerHttpPropertiesTlsBuilder\ b,}
+\DoxyCodeLine{00465\ \ \ \ \ \textcolor{keywordtype}{bool}\ skip\_verify\_peer);}
+\DoxyCodeLine{00466\ }
+\DoxyCodeLine{00482\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00483\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_ab3eeb4a4a3d05460635912e7d5fa2710}{LDServerHttpPropertiesTlsBuilder\_CustomCAFile}}(}
+\DoxyCodeLine{00484\ \ \ \ \ LDServerHttpPropertiesTlsBuilder\ b,}
+\DoxyCodeLine{00485\ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ custom\_ca\_file);}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00491\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00492\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_af772cf05a5a2331316792fdb8d7035b8}{LDServerConfigBuilder\_Logging\_Disable}}(LDServerConfigBuilder\ b);}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00504\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00505\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a27705f635ea9de8bf5c6d235cfc319ff}{LDServerConfigBuilder\_Logging\_Basic}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDLoggingBasicBuilder\ basic\_builder);}
+\DoxyCodeLine{00507\ }
+\DoxyCodeLine{00513\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00514\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a5475ef6c221d43abad6a82dba6bdeff5}{LDServerConfigBuilder\_Logging\_Custom}}(LDServerConfigBuilder\ b,}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDLoggingCustomBuilder\ custom\_builder);}
+\DoxyCodeLine{00516\ }
+\DoxyCodeLine{00532\ LD\_EXPORT(LDStatus)}
+\DoxyCodeLine{00533\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_abe4d11f6a2bcaca052ea22830ff7b77b}{LDServerConfigBuilder\_Build}}(LDServerConfigBuilder\ builder,}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LDServerConfig*\ out\_config);}
+\DoxyCodeLine{00535\ }
+\DoxyCodeLine{00540\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00541\ \mbox{\hyperlink{server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h_a82a0ec10343b77bedd8ddfab5b2a3c8f}{LDServerConfigBuilder\_Free}}(LDServerConfigBuilder\ builder);}
+\DoxyCodeLine{00542\ }
+\DoxyCodeLine{00543\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00544\ \}}
+\DoxyCodeLine{00545\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00546\ }
+\DoxyCodeLine{00547\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

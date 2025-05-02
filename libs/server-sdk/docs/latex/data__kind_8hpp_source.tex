@@ -1,0 +1,32 @@
+\doxysection{data\+\_\+kind.\+hpp}
+\hypertarget{data__kind_8hpp_source}{}\label{data__kind_8hpp_source}\index{src/data\_components/dependency\_tracker/data\_kind.hpp@{src/data\_components/dependency\_tracker/data\_kind.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/detail/unreachable.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <cstddef>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_components\ \{}
+\DoxyCodeLine{00009\ \textcolor{keyword}{enum\ class}\ DataKind\ :\ std::size\_t\ \{\ kFlag\ =\ 0,\ kSegment\ =\ 1,\ kKindCount\ =\ 2\ \};}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{inline}\ std::ostream\&\ operator<<(std::ostream\&\ out,\ DataKind\ \textcolor{keyword}{const}\&\ kind)\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keywordflow}{switch}\ (kind)\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ DataKind::kFlag:}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}flag"{}};}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out;}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ DataKind::kSegment:}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}segment"{}};}
+\DoxyCodeLine{00018\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out;}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ DataKind::kKindCount:}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ \ \ \ \ out\ <<\ \textcolor{stringliteral}{"{}kind\_count"{}};}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out;}
+\DoxyCodeLine{00022\ \ \ \ \ \}}
+\DoxyCodeLine{00023\ \ \ \ \ detail::unreachable();}
+\DoxyCodeLine{00024\ \}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_components}}
+
+\end{DoxyCode}

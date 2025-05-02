@@ -1,0 +1,131 @@
+\doxysection{change\+\_\+notifier.\+hpp}
+\hypertarget{src_2data__components_2change__notifier_2change__notifier_8hpp_source}{}\label{src_2data__components_2change__notifier_2change__notifier_8hpp_source}\index{src/data\_components/change\_notifier/change\_notifier.hpp@{src/data\_components/change\_notifier/change\_notifier.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/destination/idestination.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/store/istore.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}../dependency\_tracker/dependency\_tracker.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_model/descriptors.hpp>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/change\_notifier.hpp>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <boost/signals2/signal.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_components\ \{}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\ final\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{data\_interfaces::IDestination}},}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IChangeNotifier}{IChangeNotifier}}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Storage>}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{using\ }Collection\ =\ data\_model::SDKDataSet::Collection<std::string,\ Storage>;}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Storage>}
+\DoxyCodeLine{00023\ \ \ \ \ \textcolor{keyword}{using\ }SharedItem\ =\ std::shared\_ptr<data\_model::ItemDescriptor<Storage>>;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Storage>}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{using\ }SharedCollection\ =}
+\DoxyCodeLine{00027\ \ \ \ \ \ \ \ \ std::unordered\_map<std::string,\ SharedItem<Storage>>;}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}(IDestination\&\ sink,\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{data\_interfaces::IStore}}\ \textcolor{keyword}{const}\&\ source);}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ std::unique\_ptr<IConnection>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_afd8edfdb60ee116a509c9e8e4f252311}{OnFlagChange}}(ChangeHandler\ handler)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_afb60521a379bd0a59dc243f95be924f8}{Init}}(data\_model::SDKDataSet\ data\_set)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_aa04140880d8722055d702215a521453d}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::FlagDescriptor\ flag)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_aa04140880d8722055d702215a521453d}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::SegmentDescriptor\ segment)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier_ac4277b8c5eadd6c85b640d9278ff417e}{Identity}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{\string~ChangeNotifier}}()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00045\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\ \textcolor{keyword}{const}\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00046\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ChangeNotifier}{ChangeNotifier}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{bool}\ HasListeners()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ FlagOrSegment>}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ UpsertCommon(DataKind\ kind,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SharedItem<FlagOrSegment>\ existing,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::ItemDescriptor<FlagOrSegment>\ updated)\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (existing\ \&\&\ (updated.version\ <=\ existing-\/>version))\ \{}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Out\ of\ order\ update,\ ignore\ it.}}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ dependency\_tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencyTracker_a90018f698a8b0d95ecd18b61e299249b}{UpdateDependencies}}(key,\ updated);}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (HasListeners())\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ updated\_deps\ =\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet}{DependencySet}}();}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ dependency\_tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencyTracker_acbaba9e2c04f43d73f86b5f20b7a7a82}{CalculateChanges}}(kind,\ key,\ updated\_deps);}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ NotifyChanges(updated\_deps);}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ sink\_.Upsert(key,\ updated);}
+\DoxyCodeLine{00070\ \ \ \ \ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ FlagOrSegment>}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keywordtype}{void}\ CalculateChanges(}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ DataKind\ kind,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ SharedCollection<FlagOrSegment>\ \textcolor{keyword}{const}\&\ existing\_flags\_or\_segments,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ Collection<FlagOrSegment>\ \textcolor{keyword}{const}\&\ new\_flags\_or\_segments,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet}{DependencySet}}\&\ updated\_items)\ \{}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ old\_flag\_or\_segment\ :\ existing\_flags\_or\_segments)\ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ new\_flag\_or\_segment\ =}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_flags\_or\_segments.find(old\_flag\_or\_segment.first);}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (new\_flag\_or\_segment\ !=\ new\_flags\_or\_segments.end()\ \&\&}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ new\_flag\_or\_segment-\/>second.version\ <=}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ old\_flag\_or\_segment.second-\/>version)\ \{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Deleted.}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ dependency\_tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencyTracker_acbaba9e2c04f43d73f86b5f20b7a7a82}{CalculateChanges}}(}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kind,\ old\_flag\_or\_segment.first,\ updated\_items);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ \textcolor{keyword}{const}\&\ flag\_or\_segment\ :\ new\_flags\_or\_segments)\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ oldItem\ =}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ existing\_flags\_or\_segments.find(flag\_or\_segment.first);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (oldItem\ !=\ existing\_flags\_or\_segments.end()\ \&\&}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flag\_or\_segment.second.version\ <=\ oldItem-\/>second-\/>version)\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Updated\ or\ new.}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ dependency\_tracker\_.\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencyTracker_acbaba9e2c04f43d73f86b5f20b7a7a82}{CalculateChanges}}(kind,\ flag\_or\_segment.first,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ updated\_items);}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00104\ \ \ \ \ \}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordtype}{void}\ NotifyChanges(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencySet}{DependencySet}}\ changes);}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ IDestination\&\ sink\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IStore}{data\_interfaces::IStore}}\ \textcolor{keyword}{const}\&\ source\_;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ boost::signals2::signal<void(std::shared\_ptr<ChangeSet>)>\ signals\_;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{comment}{//\ Recursive\ mutex\ so\ that\ has\_listeners\ can\ non-\/conditionally\ lock}}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{comment}{//\ the\ mutex.\ Otherwise,\ a\ pre-\/condition\ for\ the\ call\ would\ be\ holding}}
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{comment}{//\ the\ mutex,\ which\ is\ more\ difficult\ to\ keep\ consistent\ over\ the\ code}}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{comment}{//\ lifetime.}}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{comment}{//\ Signals\ themselves\ are\ thread-\/safe,\ and\ this\ mutex\ only\ allows\ us\ to}}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{comment}{//\ prevent\ the\ addition\ of\ listeners\ between\ the\ listener\ check,\ calculation}}
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{comment}{//\ and\ dispatch\ of\ events.}}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{mutable}\ std::recursive\_mutex\ signal\_mutex\_;}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DependencyTracker}{DependencyTracker}}\ dependency\_tracker\_;}
+\DoxyCodeLine{00124\ \};}
+\DoxyCodeLine{00125\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_components}}
+
+\end{DoxyCode}

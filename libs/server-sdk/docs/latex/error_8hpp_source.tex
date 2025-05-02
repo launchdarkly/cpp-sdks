@@ -1,0 +1,39 @@
+\doxysection{error.\+hpp}
+\hypertarget{error_8hpp_source}{}\label{error_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/error.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/error.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <limits>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{enum\ class}\ Error\ :\ std::uint32\_t\ \{}
+\DoxyCodeLine{00010\ \ \ \ \ KReserved1\ =\ 0,}
+\DoxyCodeLine{00011\ \ \ \ \ KReserved2\ =\ 1,}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{comment}{/*\ Common\ lib\ errors:\ 2-\/9999\ */}}
+\DoxyCodeLine{00013\ \ \ \ \ kConfig\_Endpoints\_EmptyURL\ =\ 100,}
+\DoxyCodeLine{00014\ \ \ \ \ kConfig\_Endpoints\_AllURLsMustBeSet\ =\ 101,}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ kConfig\_ApplicationInfo\_EmptyKeyOrValue\ =\ 200,}
+\DoxyCodeLine{00017\ \ \ \ \ kConfig\_ApplicationInfo\_ValueTooLong\ =\ 201,}
+\DoxyCodeLine{00018\ \ \ \ \ kConfig\_ApplicationInfo\_InvalidKeyCharacters\ =\ 202,}
+\DoxyCodeLine{00019\ \ \ \ \ kConfig\_ApplicationInfo\_InvalidValueCharacters\ =\ 203,}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \ kConfig\_Events\_ZeroCapacity\ =\ 300,}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ kConfig\_SDKKey\_Empty\ =\ 400,}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{comment}{/*\ Client-\/side\ errors:\ 10000-\/19999\ */}}
+\DoxyCodeLine{00025\ \ \ \ \ \textcolor{comment}{/*\ Server-\/side\ errors:\ 20000-\/29999\ */}}
+\DoxyCodeLine{00026\ \ \ \ \ kConfig\_DataSystem\_LazyLoad\_MissingSource\ =\ 20000,}
+\DoxyCodeLine{00027\ \ \ \ \ kMax\ =\ std::numeric\_limits<std::uint32\_t>::max()}
+\DoxyCodeLine{00028\ \};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{keywordtype}{char}\ \textcolor{keyword}{const}*\ ErrorToString(Error\ err);}
+\DoxyCodeLine{00031\ std::ostream\&\ operator<<(std::ostream\&\ os,\ Error\ \textcolor{keyword}{const}\&\ err);}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}

@@ -1,0 +1,74 @@
+\doxysection{events.\+hpp}
+\hypertarget{events_8hpp_source}{}\label{events_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/events.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/events.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/attribute\_reference.hpp>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <cstddef>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <unordered\_map>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::builders\ \{}
+\DoxyCodeLine{00012\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00013\ \textcolor{keyword}{class\ }EventsBuilder;}
+\DoxyCodeLine{00014\ \}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::built\ \{}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{Events}}\ final\ \{}
+\DoxyCodeLine{00019\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ SDK>}
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EventsBuilder}{builders::EventsBuilder}};}
+\DoxyCodeLine{00044\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{Events}}(\textcolor{keywordtype}{bool}\ enabled,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ capacity,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ flush\_interval,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ std::string\ path,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ all\_attributes\_private,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ AttributeReference::SetType\ private\_attrs,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ delivery\_retry\_delay,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ flush\_workers,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::size\_t>\ context\_keys\_cache\_capacity);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00057\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a57b36251a93400de84e2579ac0aae68b}{Enabled}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00062\ \ \ \ \ [[nodiscard]]\ std::size\_t\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a37a2fbb446fe6fb1ab903e0bd1b5b5ff}{Capacity}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00067\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a7d5220341c0b3337c6b56aee7d3a4516}{FlushInterval}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00070\ \textcolor{comment}{\ \ \ \ \ *\ If\ an\ event\ payload\ fails\ to\ be\ delivered\ and\ can\ be\ retried,\ how\ long}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ \ \ \ \ *\ to\ wait\ before\ retrying.}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00073\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ DeliveryRetryDelay()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00078\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a27232f71865107b5cd0f38020602e179}{Path}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00083\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_afa4ecf0554992886a670e1343b9da066}{AllAttributesPrivate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00088\ \ \ \ \ [[nodiscard]]\ AttributeReference::SetType\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a06dde63ff4102ce660892908129097ff}{PrivateAttributes}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00093\ \ \ \ \ [[nodiscard]]\ std::size\_t\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a335b875cf22532c0da9af8bab0b2d4ff}{FlushWorkers}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00100\ \ \ \ \ [[nodiscard]]\ std::optional<std::size\_t>\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events_a1d622b02fb38d2b9775b2e748b7bc5ad}{ContextKeysCacheCapacity}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordtype}{bool}\ enabled\_;}
+\DoxyCodeLine{00104\ \ \ \ \ std::size\_t\ capacity\_;}
+\DoxyCodeLine{00105\ \ \ \ \ std::chrono::milliseconds\ flush\_interval\_;}
+\DoxyCodeLine{00106\ \ \ \ \ std::string\ path\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keywordtype}{bool}\ all\_attributes\_private\_;}
+\DoxyCodeLine{00108\ \ \ \ \ AttributeReference::SetType\ private\_attributes\_;}
+\DoxyCodeLine{00109\ \ \ \ \ std::chrono::milliseconds\ delivery\_retry\_delay\_;}
+\DoxyCodeLine{00110\ \ \ \ \ std::size\_t\ flush\_workers\_;}
+\DoxyCodeLine{00111\ \ \ \ \ std::optional<std::size\_t>\ context\_keys\_cache\_capacity\_;}
+\DoxyCodeLine{00112\ \};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{Events}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1Events}{Events}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::built}}
+
+\end{DoxyCode}

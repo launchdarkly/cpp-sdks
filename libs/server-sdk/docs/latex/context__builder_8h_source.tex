@@ -1,0 +1,68 @@
+\doxysection{context\+\_\+builder.\+h}
+\hypertarget{context__builder_8h_source}{}\label{context__builder_8h_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/context\_builder.h@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/bindings/c/context\_builder.h}}
+\mbox{\hyperlink{context__builder_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{//\ NOLINTBEGIN\ modernize-\/use-\/using}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{context_8h}{launchdarkly/bindings/c/context.h}}>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{export_8h}{launchdarkly/bindings/c/export.h}}>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{value_8h}{launchdarkly/bindings/c/value.h}}>}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <stdbool.h>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00013\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{\ \ \textcolor{comment}{//\ only\ need\ to\ export\ C\ interface\ if}}
+\DoxyCodeLine{00014\ \textcolor{comment}{//\ used\ by\ C++\ source\ code}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\_LDContextBuilder*\ LDContextBuilder;}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00023\ LD\_EXPORT(LDContextBuilder)}
+\DoxyCodeLine{00024\ \mbox{\hyperlink{context__builder_8h_a26fc763e1475988dd43638b3eb958f67}{LDContextBuilder\_New}}();}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00034\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00035\ \mbox{\hyperlink{context__builder_8h_aa8beb4a1f789238d503274d09e2ffb0a}{LDContextBuilder\_Free}}(LDContextBuilder\ builder);}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00048\ LD\_EXPORT(LDContext)}
+\DoxyCodeLine{00049\ \mbox{\hyperlink{context__builder_8h_a3b3a5575196a7c649d41c2df09fb6d1c}{LDContextBuilder\_Build}}(LDContextBuilder\ builder);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00067\ LD\_EXPORT(\textcolor{keywordtype}{void})}
+\DoxyCodeLine{00068\ \mbox{\hyperlink{context__builder_8h_a845af0716e4812414a51e27aff9af474}{LDContextBuilder\_AddKind}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ key);}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00084\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00085\ \mbox{\hyperlink{context__builder_8h_ae2231a4865f1afd1fe843284a5f2b342}{LDContextBuilder\_Attributes\_Set}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ attr\_name,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ val);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00112\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00113\ \mbox{\hyperlink{context__builder_8h_abb83baac7882f3e768be7abee33f6773}{LDContextBuilder\_Attributes\_SetPrivate}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ attr\_key,}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}}\ val);}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00130\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00131\ \mbox{\hyperlink{context__builder_8h_a9fd7b3c2ff07d9fbfab16d467d947780}{LDContextBuilder\_Attributes\_SetName}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ name);}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00145\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00146\ \mbox{\hyperlink{context__builder_8h_ac5885649cc1d1ebe17ff34d1f53a9199}{LDContextBuilder\_Attributes\_SetAnonymous}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ anonymous);}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00188\ LD\_EXPORT(\textcolor{keywordtype}{bool})}
+\DoxyCodeLine{00189\ \mbox{\hyperlink{context__builder_8h_a99c9b76243c9599232f5300ab8dee355}{LDContextBuilder\_Attributes\_AddPrivateAttribute}}(LDContextBuilder\ builder,}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ kind,}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{char}\ const*\ attr\_ref);}
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00193\ \}}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00195\ \textcolor{comment}{//\ NOLINTEND\ modernize-\/use-\/using}}
+
+\end{DoxyCode}

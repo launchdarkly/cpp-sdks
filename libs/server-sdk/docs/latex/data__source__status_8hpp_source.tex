@@ -1,0 +1,59 @@
+\doxysection{data\+\_\+source\+\_\+status.\+hpp}
+\hypertarget{data__source__status_8hpp_source}{}\label{data__source__status_8hpp_source}\index{include/launchdarkly/server\_side/data\_source\_status.hpp@{include/launchdarkly/server\_side/data\_source\_status.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstddef>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <memory>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/connection.hpp>}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ <launchdarkly/data\_sources/data\_source\_status\_base.hpp>}}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side\ \{}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{enum\ class}\ DataSourceState\ \{}
+\DoxyCodeLine{00026\ \ \ \ \ kInitializing\ =\ 0,}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00038\ \ \ \ \ kValid\ =\ 1,}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00050\ \ \ \ \ kInterrupted\ =\ 2,}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00060\ \ \ \ \ kOff\ =\ 3,}
+\DoxyCodeLine{00061\ \};}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{keyword}{using\ }DataSourceStatus\ =}
+\DoxyCodeLine{00064\ \ \ \ \ common::data\_sources::DataSourceStatusBase<DataSourceState>;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00069\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\ \{}
+\DoxyCodeLine{00070\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00075\ \ \ \ \ [[nodiscard]]\ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{DataSourceStatus}}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider_a0ba06ad67de56889adc0685ddc65140e}{Status}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keyword}{virtual}\ std::unique\_ptr<IConnection>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider_a119e09a6ea137c081588bcf06dd0cf8e}{OnDataSourceStatusChange}}(}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ std::function<\textcolor{keywordtype}{void}(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{DataSourceStatus}}\ status)>\ handler)\ =\ 0;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keyword}{virtual}\ std::unique\_ptr<IConnection>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider_a94e516f06949f8efbcd589441f03ac4d}{OnDataSourceStatusChangeEx}}(}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ std::function<\textcolor{keywordtype}{bool}(\mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{DataSourceStatus}}\ status)>\ handler)\ =\ 0;}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{\string~IDataSourceStatusProvider}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00098\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\ \textcolor{keyword}{const}\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00099\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\&\&\ item)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00100\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\ \textcolor{keyword}{const}\&)\ =}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00102\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\&\ operator=(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00105\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1IDataSourceStatusProvider}{IDataSourceStatusProvider}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00106\ \};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ std::ostream\&\ operator<<(std::ostream\&\ out,}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataSourceStatus::DataSourceState\ \textcolor{keyword}{const}\&\ state);}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ std::ostream\&\ operator<<(std::ostream\&\ out,\ \mbox{\hyperlink{classlaunchdarkly_1_1common_1_1data__sources_1_1DataSourceStatusBase}{DataSourceStatus}}\ \textcolor{keyword}{const}\&\ status);}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side}}
+
+\end{DoxyCode}

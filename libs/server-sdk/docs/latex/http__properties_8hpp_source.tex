@@ -1,0 +1,64 @@
+\doxysection{http\+\_\+properties.\+hpp}
+\hypertarget{http__properties_8hpp_source}{}\label{http__properties_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/http\_properties.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/shared/built/http\_properties.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <chrono>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <map>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::config::shared::built\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ final\ \{}
+\DoxyCodeLine{00012\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keyword}{enum\ class}\ VerifyMode\ \{\ kVerifyPeer,\ kVerifyNone\ \};}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}(VerifyMode\ verify\_mode);}
+\DoxyCodeLine{00015\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}(VerifyMode\ verify\_mode,}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::optional<std::string>\ ca\_bundle\_path);}
+\DoxyCodeLine{00017\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}();}
+\DoxyCodeLine{00018\ \ \ \ \ [[nodiscard]]\ VerifyMode\ PeerVerifyMode()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00019\ \ \ \ \ [[nodiscard]]\ std::optional<std::string>\ \textcolor{keyword}{const}\&\ CustomCAFile()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00022\ \ \ \ \ VerifyMode\ verify\_mode\_;}
+\DoxyCodeLine{00023\ \ \ \ \ std::optional<std::string>\ ca\_bundle\_path\_;}
+\DoxyCodeLine{00024\ \};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{HttpProperties}}\ final\ \{}
+\DoxyCodeLine{00027\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{HttpProperties}}(std::chrono::milliseconds\ connect\_timeout,}
+\DoxyCodeLine{00029\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ read\_timeout,}
+\DoxyCodeLine{00030\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ write\_timeout,}
+\DoxyCodeLine{00031\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::chrono::milliseconds\ response\_timeout,}
+\DoxyCodeLine{00032\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::map<std::string,\ std::string>\ base\_headers,}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ tls);}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ ConnectTimeout()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00036\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ ReadTimeout()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00037\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ WriteTimeout()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ [[nodiscard]]\ std::chrono::milliseconds\ ResponseTimeout()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00040\ \ \ \ \ [[nodiscard]]\ std::map<std::string,\ std::string>\ \textcolor{keyword}{const}\&\ BaseHeaders()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ \textcolor{keyword}{const}\&\ Tls()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00045\ \ \ \ \ std::chrono::milliseconds\ connect\_timeout\_;}
+\DoxyCodeLine{00046\ \ \ \ \ std::chrono::milliseconds\ read\_timeout\_;}
+\DoxyCodeLine{00047\ \ \ \ \ std::chrono::milliseconds\ write\_timeout\_;}
+\DoxyCodeLine{00048\ \ \ \ \ std::chrono::milliseconds\ response\_timeout\_;}
+\DoxyCodeLine{00049\ \ \ \ \ std::map<std::string,\ std::string>\ base\_headers\_;}
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ tls\_;}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{comment}{//\ TODO:\ Proxy.}}
+\DoxyCodeLine{00053\ \};}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{HttpProperties}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{HttpProperties}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00056\ \textcolor{keywordtype}{bool}\ operator==(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ \textcolor{keyword}{const}\&\ lhs,\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1TlsOptions}{TlsOptions}}\ \textcolor{keyword}{const}\&\ rhs);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::config::shared::built}}
+
+\end{DoxyCode}

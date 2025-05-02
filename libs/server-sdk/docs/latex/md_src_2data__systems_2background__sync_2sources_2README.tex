@@ -1,0 +1,15 @@
+\chapter{Data Source Implementations}
+\hypertarget{md_src_2data__systems_2background__sync_2sources_2README}{}\label{md_src_2data__systems_2background__sync_2sources_2README}\index{Data Source Implementations@{Data Source Implementations}}
+\label{md_src_2data__systems_2background__sync_2sources_2README_autotoc_md1}%
+\Hypertarget{md_src_2data__systems_2background__sync_2sources_2README_autotoc_md1}%
+ This directory contains data sources for use in the Background Sync system.
+
+These sources implement {\ttfamily IData\+Synchronizer}, which provides an interface that allows for passing in an {\ttfamily IDestination} to which data updates should be sent.
+
+There are two primary sources supported by the server-\/side SDK.
+
+One is the \href{./streaming}{\texttt{ streaming}} source\+: it receives updates from a web-\/service (via Server-\/\+Sent Events).
+
+The other is \href{./polling}{\texttt{ polling}}\+: it periodically hits an endpoint to retrieve a full payload of flag data.
+
+By default, the SDK uses the streaming source. Users can optionally configure the polling source if streaming isn\textquotesingle{}t feasible or desired. 

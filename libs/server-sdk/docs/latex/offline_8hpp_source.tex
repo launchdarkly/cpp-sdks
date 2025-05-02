@@ -1,0 +1,36 @@
+\doxysection{offline.\+hpp}
+\hypertarget{offline_8hpp_source}{}\label{offline_8hpp_source}\index{src/data\_systems/offline.hpp@{src/data\_systems/offline.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../data\_components/status\_notifications/data\_source\_status\_manager.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../data\_interfaces/system/idata\_system.hpp"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_systems\ \{}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem}{OfflineSystem}}\ final\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDataSystem}{data\_interfaces::IDataSystem}}\ \{}
+\DoxyCodeLine{00009\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00010\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem}{OfflineSystem}}(\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager);}
+\DoxyCodeLine{00011\ \ \ \ \ [[nodiscard]]\ std::shared\_ptr<data\_model::FlagDescriptor>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_a70a286bc76d4a035bf0654696340f5f1}{GetFlag}}(}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00013\ \ \ \ \ [[nodiscard]]\ std::shared\_ptr<data\_model::SegmentDescriptor>\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_a7c2a22193f9a3fb8043878df055b016d}{GetSegment}}(}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00015\ \ \ \ \ [[nodiscard]]\ std::}
+\DoxyCodeLine{00016\ \ \ \ \ \ \ \ \ unordered\_map<std::string,\ std::shared\_ptr<data\_model::FlagDescriptor>>}
+\DoxyCodeLine{00017\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_ad1279890c3c98ae79e253e9df3ccfb4f}{AllFlags}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00018\ \ \ \ \ [[nodiscard]]\ std::unordered\_map<}
+\DoxyCodeLine{00019\ \ \ \ \ \ \ \ \ std::string,}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ std::shared\_ptr<data\_model::SegmentDescriptor>>}
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_a27090a1f1db452f356dd58d62252f34c}{AllSegments}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00022\ \ \ \ \ [[nodiscard]]\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_ac6dc27bc523681e170270732ed033a09}{Initialized}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00023\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_aef575e06c5bb4026aeaf4a1c039aaf46}{Identity}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00024\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1OfflineSystem_a90656828eb3298aef951901d521b5492}{Initialize}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1DataSourceStatusManager}{data\_components::DataSourceStatusManager}}\&\ status\_manager\_;}
+\DoxyCodeLine{00028\ \};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_systems}}
+
+\end{DoxyCode}

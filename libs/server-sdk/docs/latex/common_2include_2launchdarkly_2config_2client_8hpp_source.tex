@@ -1,0 +1,35 @@
+\doxysection{client.\+hpp}
+\hypertarget{common_2include_2launchdarkly_2config_2client_8hpp_source}{}\label{common_2include_2launchdarkly_2config_2client_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/client.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/config/client.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/app\_info\_builder.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/config\_builder.hpp>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/endpoints\_builder.hpp>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/events\_builder.hpp>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/built/persistence.hpp>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/defaults.hpp>}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/sdks.hpp>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::client\_side\ \{}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{keyword}{using\ }SDK\ =\ config::shared::ClientSDK;}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{using\ }Defaults\ =\ config::shared::Defaults<SDK>;}
+\DoxyCodeLine{00016\ \textcolor{keyword}{using\ }AppInfoBuilder\ =\ config::shared::builders::AppInfoBuilder;}
+\DoxyCodeLine{00017\ \textcolor{keyword}{using\ }EndpointsBuilder\ =\ config::shared::builders::EndpointsBuilder<SDK>;}
+\DoxyCodeLine{00018\ \textcolor{keyword}{using\ }ConfigBuilder\ =\ config::shared::builders::ConfigBuilder<SDK>;}
+\DoxyCodeLine{00019\ \textcolor{keyword}{using\ }EventsBuilder\ =\ config::shared::builders::EventsBuilder<SDK>;}
+\DoxyCodeLine{00020\ \textcolor{keyword}{using\ }HttpPropertiesBuilder\ =}
+\DoxyCodeLine{00021\ \ \ \ \ config::shared::builders::HttpPropertiesBuilder<SDK>;}
+\DoxyCodeLine{00022\ \textcolor{keyword}{using\ }DataSourceBuilder\ =\ config::shared::builders::DataSourceBuilder<SDK>;}
+\DoxyCodeLine{00023\ \textcolor{keyword}{using\ }LoggingBuilder\ =\ config::shared::builders::LoggingBuilder;}
+\DoxyCodeLine{00024\ \textcolor{keyword}{using\ }PersistenceBuilder\ =\ config::shared::builders::PersistenceBuilder<SDK>;}
+\DoxyCodeLine{00025\ \textcolor{keyword}{using\ }TlsBuilder\ =\ config::shared::builders::TlsBuilder<SDK>;}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{using\ }Config\ =\ config::Config<SDK>;}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::client\_side}}
+
+\end{DoxyCode}

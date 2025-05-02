@@ -1,0 +1,45 @@
+\doxysection{serialized\+\_\+item\+\_\+descriptor.\+hpp}
+\hypertarget{serialized__item__descriptor_8hpp_source}{}\label{serialized__item__descriptor_8hpp_source}\index{include/launchdarkly/server\_side/integrations/data\_reader/serialized\_item\_descriptor.hpp@{include/launchdarkly/server\_side/integrations/data\_reader/serialized\_item\_descriptor.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <optional>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <ostream>}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::integrations\ \{}
+\DoxyCodeLine{00012\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{SerializedItemDescriptor}}\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ std::uint64\_t\ version;}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00021\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor_aee2e7e1caa4461486044b79abdb8fa28}{deleted}};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ std::string\ serializedItem;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{SerializedItemDescriptor}}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor_a57bda88155586d1dd3e2a77eef2cb4d0}{Present}}(std::uint64\_t\ \textcolor{keyword}{const}\ version,}
+\DoxyCodeLine{00033\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ data)\ \{}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{SerializedItemDescriptor}}\{version,\ \textcolor{keyword}{false},\ std::move(data)\};}
+\DoxyCodeLine{00035\ \ \ \ \ \}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{SerializedItemDescriptor}}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor_aeb1feb8468b592553bdd3d540a027ade}{Tombstone}}(std::uint64\_t\ \textcolor{keyword}{const}\ version,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ tombstone\_rep)\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1integrations_1_1SerializedItemDescriptor}{SerializedItemDescriptor}}\{version,\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(tombstone\_rep)\};}
+\DoxyCodeLine{00053\ \ \ \ \ \}}
+\DoxyCodeLine{00054\ \};}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator==(SerializedItemDescriptor\ \textcolor{keyword}{const}\&\ lhs,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SerializedItemDescriptor\ \textcolor{keyword}{const}\&\ rhs)\ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordflow}{return}\ lhs.version\ ==\ rhs.version\ \&\&\ lhs.deleted\ ==\ rhs.deleted\ \&\&}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ lhs.serializedItem\ ==\ rhs.serializedItem;}
+\DoxyCodeLine{00060\ \}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ PrintTo(SerializedItemDescriptor\ \textcolor{keyword}{const}\&\ item,\ std::ostream*\ os)\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ *os\ <<\ \textcolor{stringliteral}{"{}\{version="{}}\ <<\ item.version\ <<\ \textcolor{stringliteral}{"{},\ deleted="{}}\ <<\ item.deleted}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{},\ item="{}}\ <<\ item.serializedItem\ <<\ \textcolor{stringliteral}{"{}\}"{}};}
+\DoxyCodeLine{00065\ \}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::integrations}}
+
+\end{DoxyCode}

@@ -1,0 +1,51 @@
+\doxysection{json\+\_\+destination.\+hpp}
+\hypertarget{json__destination_8hpp_source}{}\label{json__destination_8hpp_source}\index{src/data\_components/serialization\_adapters/json\_destination.hpp@{src/data\_components/serialization\_adapters/json\_destination.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}../../../include/launchdarkly/server\_side/integrations/data\_reader/kinds.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/destination/idestination.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}../../data\_interfaces/destination/iserialized\_destination.hpp"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/logging/logger.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::data\_components\ \{}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{JsonDestination}}\ final\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IDestination}{data\_interfaces::IDestination}}\ \{}
+\DoxyCodeLine{00032\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00040\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination}{JsonDestination}}(Logger\ \textcolor{keyword}{const}\&\ logger,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{data\_interfaces::ISerializedDestination}}\&\ destination);}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a66e2b7b5c77385f924fd1f3fe86b0e2d}{Init}}(data\_model::SDKDataSet\ data\_set)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::FlagDescriptor\ flag)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a81044867a1eb16548dbaf5f6c9347ff9}{Upsert}}(std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_model::SegmentDescriptor\ segment)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00076\ \ \ \ \ [[nodiscard]]\ std::string\ \textcolor{keyword}{const}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_a571542a817c0ca734ee8c448c70cc398}{Identity}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__components_1_1JsonDestination_1_1Kinds}{Kinds}}\ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind}{integrations::FlagKind}}\ \textcolor{keyword}{const}\ Flag;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1SegmentKind}{integrations::SegmentKind}}\ \textcolor{keyword}{const}\ Segment;}
+\DoxyCodeLine{00084\ \ \ \ \ \};}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keywordtype}{void}\ LogUpsertResult(}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ key,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ std::string\ \textcolor{keyword}{const}\&\ data\_type,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination_a40ca53aeddc40e2458d4e9ef0bb600ae}{data\_interfaces::ISerializedDestination::UpsertResult}}\ \textcolor{keyword}{const}\&\ result)}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ Logger\ \textcolor{keyword}{const}\&\ logger\_;}
+\DoxyCodeLine{00094\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1ISerializedDestination}{data\_interfaces::ISerializedDestination}}\&\ dest\_;}
+\DoxyCodeLine{00095\ \ \ \ \ std::string\ \textcolor{keyword}{const}\ ident\_;}
+\DoxyCodeLine{00096\ \};}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::data\_components}}
+
+\end{DoxyCode}

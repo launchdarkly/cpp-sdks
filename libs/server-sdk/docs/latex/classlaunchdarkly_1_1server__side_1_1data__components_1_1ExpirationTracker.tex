@@ -1,0 +1,180 @@
+\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::Expiration\+Tracker Class Reference}
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker}{}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker}\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{Track\+State}} \{ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa7f09073342255cf27ab166f375b9915}{k\+Fresh}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9a322cf4f0f13c381710407d820cf569f1}{k\+Stale}}
+, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa5b0f2b48fc50446ec6b24bd7be8bef9}{k\+Not\+Tracked}}
+ \}
+\item 
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a68f7021d15a075a2d1199b3714741f28}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a68f7021d15a075a2d1199b3714741f28} 
+using {\bfseries Time\+Point} = std\+::chrono\+::time\+\_\+point$<$ std\+::chrono\+::steady\+\_\+clock $>$
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}{Add}} (std\+::string const \&key, Time\+Point expiration)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a1efd05a50c667724dff8f161444d7adf}{Remove}} (std\+::string const \&key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{Track\+State}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b}{State}} (std\+::string const \&key, Time\+Point current\+\_\+time) const
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_adca4300f6a6b371dedcc03dff8800cfd}{Add}} (Data\+Kind kind, std\+::string const \&key, Time\+Point expiration)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aee567015d1ed2e54a32b5bc1ad9d67ba}{Remove}} (Data\+Kind kind, std\+::string const \&key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{Track\+State}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a9c35935f959e07addbd0d9ef2374873e}{State}} (Data\+Kind kind, std\+::string const \&key, Time\+Point current\+\_\+time) const
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ad59c1d83ab4900ad09b19eb6a1454bd8}{Clear}} ()
+\item 
+std\+::vector$<$ std\+::pair$<$ std\+::optional$<$ Data\+Kind $>$, std\+::string $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a0b0621833a3c96fd4a5d52f3deddc55a}{Prune}} (Time\+Point current\+\_\+time)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Enumeration Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!TrackState@{TrackState}}
+\index{TrackState@{TrackState}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{TrackState}{TrackState}}
+{\footnotesize\ttfamily enum class \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Track\+State}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+The state of the key in the tracker. \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kFresh@{kFresh}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!kFresh@{kFresh}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa7f09073342255cf27ab166f375b9915}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa7f09073342255cf27ab166f375b9915} 
+k\+Fresh&The key is tracked and the key expiration is in the future. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kStale@{kStale}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!kStale@{kStale}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9a322cf4f0f13c381710407d820cf569f1}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9a322cf4f0f13c381710407d820cf569f1} 
+k\+Stale&The key is tracked and the expiration is either now or in the past. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{kNotTracked@{kNotTracked}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!kNotTracked@{kNotTracked}}}\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa5b0f2b48fc50446ec6b24bd7be8bef9}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9aa5b0f2b48fc50446ec6b24bd7be8bef9} 
+k\+Not\+Tracked&The key is not being tracked. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_adca4300f6a6b371dedcc03dff8800cfd}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_adca4300f6a6b371dedcc03dff8800cfd} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Add@{Add}}
+\index{Add@{Add}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Add()}{Add()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Add (\begin{DoxyParamCaption}\item[{Data\+Kind}]{kind,  }\item[{std\+::string const \&}]{key,  }\item[{Time\+Point}]{expiration }\end{DoxyParamCaption})}
+
+Add a scoped key to the tracker. Will use the specified TTL for the kind.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The scope (kind) of the key. \\
+\hline
+{\em key} & The key to track. \\
+\hline
+{\em expiration} & The time that the key expires. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aefe612f8d8a71bd544a450cee64cbc36} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Add@{Add}}
+\index{Add@{Add}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Add()}{Add()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Add (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{Time\+Point}]{expiration }\end{DoxyParamCaption})}
+
+Add an unscoped key to the tracker.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to track. \\
+\hline
+{\em expiration} & The time that the key expires. used. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ad59c1d83ab4900ad09b19eb6a1454bd8}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ad59c1d83ab4900ad09b19eb6a1454bd8} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Clear@{Clear}}
+\index{Clear@{Clear}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Clear (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Stop tracking all keys. \Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a0b0621833a3c96fd4a5d52f3deddc55a}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a0b0621833a3c96fd4a5d52f3deddc55a} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Prune@{Prune}}
+\index{Prune@{Prune}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Prune()}{Prune()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::pair$<$ std\+::optional$<$ Data\+Kind $>$, std\+::string $>$ $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Prune (\begin{DoxyParamCaption}\item[{Time\+Point}]{current\+\_\+time }\end{DoxyParamCaption})}
+
+Prune expired keys from the tracker. 
+\begin{DoxyParams}{Parameters}
+{\em current\+\_\+time} & The current time. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of all the kinds and associated keys that expired. Unscoped keys will have std\+::nullopt as the kind. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aee567015d1ed2e54a32b5bc1ad9d67ba}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_aee567015d1ed2e54a32b5bc1ad9d67ba} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Remove@{Remove}}
+\index{Remove@{Remove}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Remove()}{Remove()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Remove (\begin{DoxyParamCaption}\item[{Data\+Kind}]{kind,  }\item[{std\+::string const \&}]{key }\end{DoxyParamCaption})}
+
+Remove a scoped key from the tracker.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The scope (kind) of the key. \\
+\hline
+{\em key} & The key to stop tracking. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a1efd05a50c667724dff8f161444d7adf}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a1efd05a50c667724dff8f161444d7adf} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!Remove@{Remove}}
+\index{Remove@{Remove}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{Remove()}{Remove()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+Remove (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption})}
+
+Remove an unscoped key from the tracker.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to stop tracking. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a9c35935f959e07addbd0d9ef2374873e}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a9c35935f959e07addbd0d9ef2374873e} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!State@{State}}
+\index{State@{State}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{State()}{State()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{Expiration\+Tracker\+::\+Track\+State}} launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+State (\begin{DoxyParamCaption}\item[{Data\+Kind}]{kind,  }\item[{std\+::string const \&}]{key,  }\item[{Time\+Point}]{current\+\_\+time }\end{DoxyParamCaption}) const}
+
+Check the state of a scoped key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em kind} & The scope (kind) of the key. \\
+\hline
+{\em key} & The key to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The state of the key. 
+\end{DoxyReturn}
+\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b}\label{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_a2c40926d16ac25266e850a8c1e2e175b} 
+\index{launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}!State@{State}}
+\index{State@{State}!launchdarkly::server\_side::data\_components::ExpirationTracker@{launchdarkly::server\_side::data\_components::ExpirationTracker}}
+\doxysubsubsection{\texorpdfstring{State()}{State()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker_ab88f3eb0f18f4fb0c2e52747c76fe3c9}{Expiration\+Tracker\+::\+Track\+State}} launchdarkly\+::server\+\_\+side\+::data\+\_\+components\+::\+Expiration\+Tracker\+::\+State (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{Time\+Point}]{current\+\_\+time }\end{DoxyParamCaption}) const}
+
+Check the state of an unscoped key.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to check. \\
+\hline
+{\em current\+\_\+time} & The current time. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The state of the key. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+components/expiration\+\_\+tracker/expiration\+\_\+tracker.\+hpp\item 
+src/data\+\_\+components/expiration\+\_\+tracker/expiration\+\_\+tracker.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,38 @@
+\doxysection{background\+\_\+sync\+\_\+builder.\+hpp}
+\hypertarget{background__sync__builder_8hpp_source}{}\label{background__sync__builder_8hpp_source}\index{include/launchdarkly/server\_side/config/builders/data\_system/background\_sync\_builder.hpp@{include/launchdarkly/server\_side/config/builders/data\_system/background\_sync\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/builders/data\_system/bootstrap\_builder.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/builders/data\_system/data\_destination\_builder.hpp>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <launchdarkly/server\_side/config/built/data\_system/background\_sync\_config.hpp>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <launchdarkly/config/shared/builders/data\_source\_builder.hpp>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{namespace\ }launchdarkly::server\_side::config::builders\ \{}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BackgroundSyncBuilder}{BackgroundSyncBuilder}}\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming}}\ =}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{launchdarkly::config::shared::builders::StreamingBuilder<launchdarkly::config::shared::ServerSDK>}};}
+\DoxyCodeLine{00014\ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{Polling}}\ =\ \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{launchdarkly::config::shared::builders::PollingBuilder<launchdarkly::config::shared::ServerSDK>}};}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BackgroundSyncBuilder}{BackgroundSyncBuilder}}();}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BootstrapBuilder}{BootstrapBuilder}}\&\ Bootstrapper();}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BackgroundSyncBuilder}{BackgroundSyncBuilder}}\&\ Synchronizer(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1StreamingBuilder}{Streaming}}\ source);}
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BackgroundSyncBuilder}{BackgroundSyncBuilder}}\&\ Synchronizer(\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1PollingBuilder}{Polling}}\ source);}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BackgroundSyncBuilder}{BackgroundSyncBuilder}}\&\ Destination(\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1DataDestinationBuilder}{DataDestinationBuilder}}\ destination);}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \ \ \ \ [[nodiscard]]\ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1BackgroundSyncConfig}{built::BackgroundSyncConfig}}\ Build()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1BootstrapBuilder}{BootstrapBuilder}}\ bootstrap\_builder\_;}
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1config_1_1built_1_1BackgroundSyncConfig}{built::BackgroundSyncConfig}}\ config\_;}
+\DoxyCodeLine{00030\ \};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly::server\_side::config::builders}}
+
+\end{DoxyCode}

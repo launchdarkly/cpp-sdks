@@ -1,0 +1,35 @@
+\doxysection{context\+\_\+builder.\+hpp}
+\hypertarget{context__builder_8hpp_source}{}\label{context__builder_8hpp_source}\index{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/context\_builder.hpp@{/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/context\_builder.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <launchdarkly/attributes\_builder.hpp>}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <launchdarkly/context.hpp>}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{keyword}{namespace\ }launchdarkly\ \{}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00062\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{ContextBuilder}}\ final\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{friend}\ \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{AttributesBuilder<ContextBuilder,\ Context>}};}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00066\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{ContextBuilder}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00077\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder}{ContextBuilder}}(\mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \textcolor{keyword}{const}\&\ context);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00091\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{AttributesBuilder<ContextBuilder,\ Context>}}\&\ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_a4247914d7983ca0f38130c3ddd66ba03}{Kind}}(std::string\ \textcolor{keyword}{const}\&\ kind,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ key);}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00101\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1AttributesBuilder}{AttributesBuilder<ContextBuilder,\ Context>}}*\ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_a4247914d7983ca0f38130c3ddd66ba03}{Kind}}(std::string\ \textcolor{keyword}{const}\&\ kind);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}}\ \mbox{\hyperlink{classlaunchdarkly_1_1ContextBuilder_ac68260d897d11399fa2ab448bd548f73}{Build}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00115\ \ \ \ \ std::map<std::string,\ AttributesBuilder<ContextBuilder,\ Context>>\ builders\_;}
+\DoxyCodeLine{00116\ \};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \}\ \ \textcolor{comment}{//\ namespace\ launchdarkly}}
+
+\end{DoxyCode}
