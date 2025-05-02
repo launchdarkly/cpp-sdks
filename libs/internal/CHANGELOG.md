@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.10.1...launchdarkly-cpp-internal-v0.11.0) (2025-05-02)
+
+
+### Features
+
+* generate events for flag prerequisites ([#465](https://github.com/launchdarkly/cpp-sdks/issues/465)) ([30378a1](https://github.com/launchdarkly/cpp-sdks/commit/30378a10b97ac46591ffd6fd3db43be14a60fad6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-common bumped from 1.9.0 to 1.10.0
+
 ## [0.10.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.10.0...launchdarkly-cpp-internal-v0.10.1) (2025-01-28)
 
 
