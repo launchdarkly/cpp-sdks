@@ -69,5 +69,5 @@ TEST(EventScope, ForwardsCorrectEventTypes) {
     ASSERT_TRUE(processor.Kind<events::IdentifyEventParams>(0));
     ASSERT_TRUE(processor.Kind<events::FeatureEventParams>(1));
     ASSERT_TRUE(processor.Kind<events::FeatureEventParams>(2));
-    ASSERT_TRUE(processor.Kind<events::ServerTrackEventParams>(3));
+    ASSERT_TRUE(processor.Kind<events::TrackEventParams>(3));
 }

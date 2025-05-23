@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("service-endpoints");
         srv.add_capability("tags");
         srv.add_capability("client-independence");
-        srv.add_capability("inline-context");
+        srv.add_capability("inline-context-all");
         srv.add_capability("anonymous-redaction");
         srv.add_capability("tls:verify-peer");
         srv.add_capability("tls:skip-verify-peer");

@@ -1,6 +1,6 @@
+#include <launchdarkly/detail/serialization/json_value.hpp>
 #include <launchdarkly/serialization/events/json_events.hpp>
 #include <launchdarkly/serialization/json_evaluation_reason.hpp>
-#include <launchdarkly/detail/serialization/json_value.hpp>
 
 namespace launchdarkly::events {
 void tag_invoke(boost::json::value_from_tag const& tag,
@@ -83,7 +83,7 @@ void tag_invoke(boost::json::value_from_tag const& tag,
     obj.emplace("kind", "custom");
     obj.emplace("creationDate", boost::json::value_from(event.creation_date));
     obj.emplace("key", event.key);
-    obj.emplace("contextKeys", boost::json::value_from(event.context_keys));
+    obj.emplace("context", event.context);
     if (event.data) {
         obj.emplace("data", boost::json::value_from(*event.data));
     }

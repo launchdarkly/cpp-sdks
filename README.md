@@ -20,7 +20,7 @@ This includes shared libraries, used by SDKs and other tools, as well as SDKs.
 ## Organization
 
 | Directory      | Description                                                                                                                                                                                                                |
- |----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | .github        | Contains CI and release process workflows and actions.                                                                                                                                                                     |
 | examples       | Contains examples (hello-world style).                                                                                                                                                                                     |
 | contract-tests | Contains contract test service.                                                                                                                                                                                            |

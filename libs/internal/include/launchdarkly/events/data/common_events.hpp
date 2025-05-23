@@ -27,19 +27,18 @@ struct Date {
 struct TrackEventParams {
     Date creation_date;
     std::string key;
-    ContextKeys context_keys;
+    Context context;
     std::optional<Value> data;
     std::optional<double> metric_value;
 };
 
-struct ServerTrackEventParams {
-    TrackEventParams base;
-    Context context;
+struct TrackEvent {
+    Date creation_date;
+    std::string key;
+    EventContext context;
+    std::optional<Value> data;
+    std::optional<double> metric_value;
 };
-
-using ClientTrackEventParams = TrackEventParams;
-
-using TrackEvent = TrackEventParams;
 
 struct IdentifyEventParams {
     Date creation_date;
