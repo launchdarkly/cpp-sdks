@@ -21,7 +21,7 @@ name: Publish SDK Artifacts
 
 jobs:
   split-input:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       sdk_path: ${{ steps.split-string.outputs.SDK_PATH }}
       sdk_cmake_target: ${{ steps.split-string.outputs.SDK_CMAKE_TARGET }}
@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-latest, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-13 ]
     runs-on: ${{ matrix.os }}
     outputs:
       hashes-linux: ${{ steps.release-sdk.outputs.hashes-linux }}
