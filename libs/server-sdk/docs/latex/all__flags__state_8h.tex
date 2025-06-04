@@ -1,0 +1,185 @@
+\hypertarget{all__flags__state_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/all\+\_\+flags\+\_\+state/all\+\_\+flags\+\_\+state.h File Reference}
+\label{all__flags__state_8h}\index{include/launchdarkly/server\_side/bindings/c/all\_flags\_state/all\_flags\_state.h@{include/launchdarkly/server\_side/bindings/c/all\_flags\_state/all\_flags\_state.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$launchdarkly/bindings/c/value.\+h$>$}\newline
+Include dependency graph for all\+\_\+flags\+\_\+state.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=294pt]{all__flags__state_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=200pt]{all__flags__state_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{all__flags__state_8h_ae3ee990bdd9aeef9595e57f180be2b99}\label{all__flags__state_8h_ae3ee990bdd9aeef9595e57f180be2b99}} 
+typedef struct \+\_\+\+LDAll\+Flags\+State $\ast$ {\bfseries LDAll\+Flags\+State}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}{LDAll\+Flags\+State\+\_\+\+Options}} \{ \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05afbbdd20f24438b24c72ca321eb65da01}{LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DEFAULT}} = 0
+, \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05aad06d0765c0265ca45061ba241f91775}{LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+INCLUDE\+\_\+\+REASONS}} = (1 $<$$<$ 0)
+, \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05ad0fa772b2f168f9b8806fe359e8f8139}{LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DETAILS\+\_\+\+ONLY\+\_\+\+FOR\+\_\+\+TRACKED\+\_\+\+FLAGS}} = (1 $<$$<$ 1)
+, \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05a8b9e50efc011dedf4dfb2da0fb2691b9}{LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+CLIENT\+\_\+\+SIDE\+\_\+\+ONLY}} = (1 $<$$<$ 2)
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{all__flags__state_8h_a326d0d86e591faf905aa0fe0b9c5f60f}{LDAll\+Flags\+State\+\_\+\+Free}} (LDAll\+Flags\+State state)
+\item 
+\mbox{\hyperlink{all__flags__state_8h_a3e75424c1a11dc1b2a15f8c56bc6ac76}{LDAll\+Flags\+State\+\_\+\+Valid}} (LDAll\+Flags\+State state)
+\item 
+\mbox{\hyperlink{all__flags__state_8h_aed28d32312ccd343be70d4ff328e5142}{LDAll\+Flags\+State\+\_\+\+Serialize\+JSON}} (LDAll\+Flags\+State state)
+\item 
+\mbox{\hyperlink{all__flags__state_8h_ae21095bad27769082ca6764d656d9299}{LDAll\+Flags\+State\+\_\+\+Value}} (LDAll\+Flags\+State state, char const $\ast$flag\+\_\+key)
+\item 
+\mbox{\hyperlink{all__flags__state_8h_aeca483147b1c7cef43f9603d1950df2c}{LDAll\+Flags\+State\+\_\+\+Map}} (LDAll\+Flags\+State state)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}\label{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_Options@{LDAllFlagsState\_Options}}
+\index{LDAllFlagsState\_Options@{LDAllFlagsState\_Options}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_Options}{LDAllFlagsState\_Options}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05}{LDAll\+Flags\+State\+\_\+\+Options}}}
+
+Defines options that may be used with \mbox{\hyperlink{sdk_8h_a1818dc11a268da7d0587c009976c14d8}{LDServer\+SDK\+\_\+\+All\+Flags\+State}}. To obtain default behavior, pass {\ttfamily LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DEFAULT}.
+
+It is possible to combine multiple options by ORing them together.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{LDAllFlagsState state = \mbox{\hyperlink{sdk_8h_a1818dc11a268da7d0587c009976c14d8}{LDServerSDK\_AllFlagsState}}(sdk, context,}
+\DoxyCodeLine{   \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05aad06d0765c0265ca45061ba241f91775}{LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS}} | \mbox{\hyperlink{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05a8b9e50efc011dedf4dfb2da0fb2691b9}{LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY}}}
+\DoxyCodeLine{);}
+
+\end{DoxyCode}
+ \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_ALLFLAGSSTATE\_DEFAULT@{LD\_ALLFLAGSSTATE\_DEFAULT}!all\_flags\_state.h@{all\_flags\_state.h}}\index{all\_flags\_state.h@{all\_flags\_state.h}!LD\_ALLFLAGSSTATE\_DEFAULT@{LD\_ALLFLAGSSTATE\_DEFAULT}}}\mbox{\Hypertarget{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05afbbdd20f24438b24c72ca321eb65da01}\label{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05afbbdd20f24438b24c72ca321eb65da01}} 
+LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DEFAULT&Default behavior. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS@{LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS}!all\_flags\_state.h@{all\_flags\_state.h}}\index{all\_flags\_state.h@{all\_flags\_state.h}!LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS@{LD\_ALLFLAGSSTATE\_INCLUDE\_REASONS}}}\mbox{\Hypertarget{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05aad06d0765c0265ca45061ba241f91775}\label{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05aad06d0765c0265ca45061ba241f91775}} 
+LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+INCLUDE\+\_\+\+REASONS&Include evaluation reasons in the state object. By default, they are not. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_ALLFLAGSSTATE\_DETAILS\_ONLY\_FOR\_TRACKED\_FLAGS@{LD\_ALLFLAGSSTATE\_DETAILS\_ONLY\_FOR\_TRACKED\_FLAGS}!all\_flags\_state.h@{all\_flags\_state.h}}\index{all\_flags\_state.h@{all\_flags\_state.h}!LD\_ALLFLAGSSTATE\_DETAILS\_ONLY\_FOR\_TRACKED\_FLAGS@{LD\_ALLFLAGSSTATE\_DETAILS\_ONLY\_FOR\_TRACKED\_FLAGS}}}\mbox{\Hypertarget{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05ad0fa772b2f168f9b8806fe359e8f8139}\label{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05ad0fa772b2f168f9b8806fe359e8f8139}} 
+LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+DETAILS\+\_\+\+ONLY\+\_\+\+FOR\+\_\+\+TRACKED\+\_\+\+FLAGS&Include detailed flag metadata only for flags with event tracking or debugging turned on.
+
+This reduces the size of the JSON data if you are passing the flag state to the front end. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY@{LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY}!all\_flags\_state.h@{all\_flags\_state.h}}\index{all\_flags\_state.h@{all\_flags\_state.h}!LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY@{LD\_ALLFLAGSSTATE\_CLIENT\_SIDE\_ONLY}}}\mbox{\Hypertarget{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05a8b9e50efc011dedf4dfb2da0fb2691b9}\label{all__flags__state_8h_af805163c3e16f0197ec9547f2d799d05a8b9e50efc011dedf4dfb2da0fb2691b9}} 
+LD\+\_\+\+ALLFLAGSSTATE\+\_\+\+CLIENT\+\_\+\+SIDE\+\_\+\+ONLY&Include only flags marked for use with the client-\/side SDK. By default, all flags are included. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{all__flags__state_8h_a326d0d86e591faf905aa0fe0b9c5f60f}\label{all__flags__state_8h_a326d0d86e591faf905aa0fe0b9c5f60f}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_Free@{LDAllFlagsState\_Free}}
+\index{LDAllFlagsState\_Free@{LDAllFlagsState\_Free}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_Free()}{LDAllFlagsState\_Free()}}
+{\footnotesize\ttfamily LDAll\+Flags\+State\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDAll\+Flags\+State}]{state }\end{DoxyParamCaption})}
+
+Frees an LDAll\+Flags\+State. 
+\begin{DoxyParams}{Parameters}
+{\em state} & The state to free. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void 
+\end{DoxyReturn}
+\mbox{\Hypertarget{all__flags__state_8h_aeca483147b1c7cef43f9603d1950df2c}\label{all__flags__state_8h_aeca483147b1c7cef43f9603d1950df2c}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_Map@{LDAllFlagsState\_Map}}
+\index{LDAllFlagsState\_Map@{LDAllFlagsState\_Map}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_Map()}{LDAllFlagsState\_Map()}}
+{\footnotesize\ttfamily LDAll\+Flags\+State\+\_\+\+Map (\begin{DoxyParamCaption}\item[{LDAll\+Flags\+State}]{state }\end{DoxyParamCaption})}
+
+Returns an object-\/type \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} where the keys are flag keys and the values are the flag values for the LDContext used to generate this state.
+
+The LDValue is owned by the caller and must be freed. This may cause a large heap allocation. If you\textquotesingle{}re interested in bootstrapping a client-\/side SDK, this is not the right method\+: see \mbox{\hyperlink{all__flags__state_8h_aed28d32312ccd343be70d4ff328e5142}{LDAll\+Flags\+State\+\_\+\+Serialize\+JSON}}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & An LDAll\+Flags\+State. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An object-\/type LDValue of flag-\/key/flag-\/value pairs. The caller MUST free this value using \mbox{\hyperlink{value_8h_a977c046a68f9451f14d5b9a35bbb0292}{LDValue\+\_\+\+Free}}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{all__flags__state_8h_aed28d32312ccd343be70d4ff328e5142}\label{all__flags__state_8h_aed28d32312ccd343be70d4ff328e5142}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_SerializeJSON@{LDAllFlagsState\_SerializeJSON}}
+\index{LDAllFlagsState\_SerializeJSON@{LDAllFlagsState\_SerializeJSON}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_SerializeJSON()}{LDAllFlagsState\_SerializeJSON()}}
+{\footnotesize\ttfamily LDAll\+Flags\+State\+\_\+\+Serialize\+JSON (\begin{DoxyParamCaption}\item[{LDAll\+Flags\+State}]{state }\end{DoxyParamCaption})}
+
+Serializes the LDAll\+Flags\+State to a JSON string.
+
+This JSON is suitable for bootstrapping a client-\/side SDK.
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & The LDAll\+Flag\+State to serialize. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A JSON string representing the LDAll\+Flags\+State. The caller must free the string using \mbox{\hyperlink{memory__routines_8h_a9376a9e19799e2919a74099870dd2f06}{LDMemory\+\_\+\+Free\+String}}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{all__flags__state_8h_a3e75424c1a11dc1b2a15f8c56bc6ac76}\label{all__flags__state_8h_a3e75424c1a11dc1b2a15f8c56bc6ac76}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_Valid@{LDAllFlagsState\_Valid}}
+\index{LDAllFlagsState\_Valid@{LDAllFlagsState\_Valid}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_Valid()}{LDAllFlagsState\_Valid()}}
+{\footnotesize\ttfamily LDAll\+Flags\+State\+\_\+\+Valid (\begin{DoxyParamCaption}\item[{LDAll\+Flags\+State}]{state }\end{DoxyParamCaption})}
+
+True if the LDAll\+Flags\+State is valid. False if there was an error, such as the data source being unavailable.
+
+An invalid LDAll\+Flags\+State can still be serialized successfully to a JSON string.
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & The LDAll\+Flag\+State to check for validity. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the state is valid, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{all__flags__state_8h_ae21095bad27769082ca6764d656d9299}\label{all__flags__state_8h_ae21095bad27769082ca6764d656d9299}} 
+\index{all\_flags\_state.h@{all\_flags\_state.h}!LDAllFlagsState\_Value@{LDAllFlagsState\_Value}}
+\index{LDAllFlagsState\_Value@{LDAllFlagsState\_Value}!all\_flags\_state.h@{all\_flags\_state.h}}
+\doxysubsubsection{\texorpdfstring{LDAllFlagsState\_Value()}{LDAllFlagsState\_Value()}}
+{\footnotesize\ttfamily LDAll\+Flags\+State\+\_\+\+Value (\begin{DoxyParamCaption}\item[{LDAll\+Flags\+State}]{state,  }\item[{char const $\ast$}]{flag\+\_\+key }\end{DoxyParamCaption})}
+
+Returns the flag value for the context used to generate this LDAll\+Flags\+State.
+
+In order to avoid copying when a large value is accessed, the returned \mbox{\hyperlink{value_8h_ab2f8b088f5deaa20a08e2725df94e630}{LDValue}} is a reference and NOT DIRECTLY OWNED by the caller. Its lifetime is managed by the parent LDAll\+Flags\+State object.
+
+{\itshape WARNING!} Do not free the returned LDValue. Do not in any way access the returned LDValue after the LDAll\+Flags\+State has been freed.
+
+If the flag has no value, returns an LDValue of type \mbox{\hyperlink{value_8h_a518676a2bd451ce16626dba8b9a5168fa41d9b85181a2a33e5bc514a1efacd3f4}{LDValue\+Type\+\_\+\+Null}}.
+
+To obtain a caller-\/owned copy of the LDValue not subject to these restrictions, call \mbox{\hyperlink{value_8h_a1e4c2187c238eaeea42d73e9684e51f7}{LDValue\+\_\+\+New\+Value}} on the result.
+
+
+\begin{DoxyParams}{Parameters}
+{\em state} & An LDAll\+Flags\+State. Must not be NULL. \\
+\hline
+{\em flag\+\_\+key} & Key of the flag. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The evaluation result of the flag. The caller MUST NOT free this value and MUST NOT access this value after the LDAll\+Flags\+State has been freed. 
+\end{DoxyReturn}
