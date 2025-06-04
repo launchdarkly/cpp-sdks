@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.11.0...launchdarkly-cpp-internal-v0.12.0) (2025-06-04)
+
+
+### Features
+
+* Inline context for custom events ([#477](https://github.com/launchdarkly/cpp-sdks/issues/477)) ([6a96b13](https://github.com/launchdarkly/cpp-sdks/commit/6a96b135a2a02535c767de44b903ea51d905b1a3))
+
 ## [0.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.10.1...launchdarkly-cpp-internal-v0.11.0) (2025-05-02)
 
 

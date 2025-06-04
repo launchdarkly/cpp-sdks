@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.19](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.18...launchdarkly-cpp-server-redis-source-v2.1.19) (2025-06-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-server bumped from 3.8.2 to 3.9.0
+
 ## [2.1.18](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.17...launchdarkly-cpp-server-redis-source-v2.1.18) (2025-05-02)
 
 
