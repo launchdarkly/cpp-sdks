@@ -1,7 +1,0 @@
-<map id="launchdarkly::client_side::data_sources::StreamingDataSource" name="launchdarkly::client_side::data_sources::StreamingDataSource">
-<area shape="rect" id="Node000001" title=" " alt="" coords="316,41,480,96"/>
-<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1client__side_1_1data__sources_1_1IDataSource.html" title=" " alt="" coords="57,5,216,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,43,316,55,316,60,230,48"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="5,85,268,125"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="281,82,315,77,316,83,282,87"/>
-</map>

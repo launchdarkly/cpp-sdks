@@ -1,7 +1,0 @@
-<map id="launchdarkly::client_side::IDataSourceUpdateSink" name="launchdarkly::client_side::IDataSourceUpdateSink">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,53,224,93"/>
-<area shape="rect" id="Node000002" href="$classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagPersistence.html" title=" " alt="" coords="272,5,433,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="237,49,271,44,272,49,238,55"/>
-<area shape="rect" id="Node000003" href="$classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagUpdater.html" title=" " alt="" coords="272,84,433,139"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,90,272,96,271,101,237,95"/>
-</map>
