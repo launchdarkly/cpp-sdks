@@ -43,10 +43,9 @@ events::InputEvent EventFactory::Custom(
     std::string event_name,
     std::optional<Value> data,
     std::optional<double> metric_value) const {
-    return events::ServerTrackEventParams{
-        {now_(), std::move(event_name), ctx.KindsToKeys(), std::move(data),
-         metric_value},
-        ctx};
+    return events::TrackEventParams{now_(), std::move(event_name),
+                                    std::move(ctx), std::move(data),
+                                    metric_value};
 }
 
 events::InputEvent EventFactory::FeatureRequest(

@@ -221,9 +221,7 @@ void ClientImpl::TrackInternal(std::string event_name,
                                std::optional<Value> data,
                                std::optional<double> metric_value) {
     event_processor_->SendAsync(events::TrackEventParams{
-        std::chrono::system_clock::now(), std::move(event_name),
-        ReadContextSynchronized(
-            [](Context const& c) { return c.KindsToKeys(); }),
+        std::chrono::system_clock::now(), std::move(event_name), context_,
         std::move(data), metric_value});
 }
 
