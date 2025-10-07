@@ -6,7 +6,7 @@
 #include <tuple>
 
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -159,7 +159,7 @@ class RequestWorker {
     State state_;
 
     /* Component used to perform HTTP operations. */
-    network::AsioRequester requester_;
+    network::Requester requester_;
 
     /* Current event batch; only present if AsyncDeliver was called and
      * request is in-flight or a retry is taking place. */

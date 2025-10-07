@@ -9,7 +9,7 @@
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <launchdarkly/config/shared/built/service_endpoints.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/requester.hpp>
 
 #include <chrono>
 
@@ -44,7 +44,7 @@ class PollingDataSource
     DataSourceEventHandler data_source_handler_;
     std::string polling_endpoint_;
 
-    network::AsioRequester requester_;
+    network::Requester requester_;
     Logger const& logger_;
     boost::asio::any_io_executor ioc_;
     std::chrono::seconds polling_interval_;

@@ -56,9 +56,11 @@ target_compile_options(${LIBNAME} PRIVATE
 
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
 
+find_package(CURL)
+
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
+        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy CURL::libcurl)
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME}
