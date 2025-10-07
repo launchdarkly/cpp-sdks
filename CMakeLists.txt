@@ -21,6 +21,14 @@ if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif ()
 
+# This policy is designed to force a choice between the old behavior of an integrated FindBoost implementation
+# and the implementation provided in by boost.
+if(POLICY CMP0167)
+    # Uses the BoostConfig.cmake included with the boost distribution.
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
+
 option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
 
 option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)

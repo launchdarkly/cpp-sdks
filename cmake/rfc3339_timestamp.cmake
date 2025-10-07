@@ -5,7 +5,7 @@ FetchContent_Declare(timestamp
 
 FetchContent_GetProperties(timestamp)
 if (NOT timestamp_POPULATED)
-    FetchContent_Populate(timestamp)
+    FetchContent_MakeAvailable(timestamp)
 endif ()
 
 add_library(timestamp OBJECT
