@@ -428,7 +428,7 @@ TEST(VariationOrRolloutTests, SerializeVariation) {
 #if BOOST_VERSION >= 108300
     auto json = boost::json::value_from(variation, VariationOrRolloutContext());
 #else
-    auto json = boost::json::value_from(var_or_roll);
+    auto json = boost::json::value_from(variation);
 #endif
     auto expected = boost::json::parse(R"({"variation":5})");
     EXPECT_EQ(expected, json);
