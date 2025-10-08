@@ -423,8 +423,13 @@ TEST(RolloutTests, SerializeAllFields) {
 TEST(VariationOrRolloutTests, SerializeVariation) {
     data_model::Flag::VariationOrRollout variation = 5;
 
-    auto json = boost::json::value_from(variation, VariationOrRolloutContext());
 
+    //Explanation in value_mapping.hpp.
+#if BOOST_VERSION >= 108300
+    auto json = boost::json::value_from(variation, VariationOrRolloutContext());
+#else
+    auto json = boost::json::value_from(var_or_roll);
+#endif
     auto expected = boost::json::parse(R"({"variation":5})");
     EXPECT_EQ(expected, json);
 }
@@ -440,7 +445,13 @@ TEST(VariationOrRolloutTests, SerializeRollout) {
         data_model::Flag::Rollout::WeightedVariation::Untracked(1, 2), {3, 4}};
     data_model::Flag::VariationOrRollout var_or_roll;
     var_or_roll.emplace<Rollout>(rollout);
+    //Explanation in value_mapping.hpp.
+#if BOOST_VERSION >= 108300
     auto json = boost::json::value_from(var_or_roll, VariationOrRolloutContext());
+#else
+    auto json = boost::json::value_from(var_or_roll);
+#endif
+
 
     auto expected = boost::json::parse(R"({
     "rollout":{
