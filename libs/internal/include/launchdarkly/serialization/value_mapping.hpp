@@ -5,6 +5,7 @@
 #include <boost/core/ignore_unused.hpp>
 #include <boost/json.hpp>
 #include <tl/expected.hpp>
+#include <boost/version.hpp>
 
 #include <optional>
 #include <type_traits>
@@ -195,7 +196,16 @@ void WriteMinimal(boost::json::object& obj,
                   T const& val,
                   std::function<bool()> const& predicate, const C &c) {
     if (predicate()) {
+        // In Boost 1.83 the ability to have a conversion context was added.
+        // It also introduces the potential for the wrong conversion to be used,
+        // so for boost 1.83 and greater we use a conversion context to ensure
+        // the correct serialization is used.
+#if BOOST_VERSION >= 108300
         obj.emplace(key, boost::json::value_from(val, c));
+#else
+        boost::ignore_unused(c);
+        obj.emplace(key, boost::json::value_from(val));
+#endif
     }
 }
 
