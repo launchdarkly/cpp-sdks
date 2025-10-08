@@ -10,7 +10,7 @@ endif ()
 
 FetchContent_Declare(certify
         GIT_REPOSITORY https://github.com/launchdarkly/certify.git
-        GIT_TAG f8578ace64a2b832e75657cc6fd60bb9260c57ad
+        GIT_TAG 71023298ae232ee01cc7c4c80ea19b7b12bfeb19
 )
 
 # The tests in certify don't compile.
