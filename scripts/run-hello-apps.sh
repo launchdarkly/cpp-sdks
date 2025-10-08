@@ -41,6 +41,7 @@ cd build-"$1" || exit
 trap cleanup EXIT
 
 echo Boost dir $Boost_DIR
+echo Boost root $BOOST_ROOT
 
 cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D BUILD_TESTING=OFF  \
