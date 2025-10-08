@@ -39,7 +39,8 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        brew install boost
+        brew install boost@1.85
+        brew link boost@1.85
 #        echo "BOOST_ROOT=$(brew --prefix boost)" >> $GITHUB_OUTPUT
 
     - name: Determine root
