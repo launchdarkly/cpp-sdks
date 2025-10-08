@@ -35,7 +35,7 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
           CMAKE_PREFIX_PATH: ${{ steps.install-boost.outputs.CMAKE_PREFIX_PATH }}
-          Boost_DIR: ${{ steps.install-openssl.outputs.Boost_DIR }}
+          Boost_DIR: ${{ steps.install-boost.outputs.Boost_DIR }}
 
       - name: Dynamically Linked Hello Apps (C API only)
         shell: bash
