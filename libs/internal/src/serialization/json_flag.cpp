@@ -255,7 +255,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 void tag_invoke(
     boost::json::value_from_tag const& unused,
     boost::json::value& json_value,
-    data_model::Flag::VariationOrRollout const& variation_or_rollout) {
+    data_model::Flag::VariationOrRollout const& variation_or_rollout, const VariationOrRolloutContext&) {
     auto& obj = json_value.emplace_object();
     std::visit(
         [&obj](auto&& arg) {
@@ -364,7 +364,7 @@ void tag_invoke(boost::json::value_from_tag const& unused,
                 }
             },
             flag.fallthrough);
-    });
+    }, VariationOrRolloutContext());
     WriteMinimal(obj, "clientSideAvailability", flag.clientSideAvailability,
                  [&]() {
                      return flag.clientSideAvailability.usingEnvironmentId ||
