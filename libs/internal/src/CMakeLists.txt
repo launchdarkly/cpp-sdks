@@ -27,6 +27,7 @@ add_library(${LIBNAME} OBJECT
         logging/logger.cpp
         network/http_error_messages.cpp
         network/http_requester.cpp
+        network/curl_requester.cpp
         serialization/events/json_events.cpp
         serialization/json_attributes.cpp
         serialization/json_context.cpp
