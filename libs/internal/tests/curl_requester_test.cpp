@@ -72,10 +72,10 @@ class TestHttpServer {
 
        private:
         void HandleRequest() {
-            http::response<http::string_body> res = handler_(req_);
-            res.prepare_payload();
+            res_ = handler_(req_);
+            res_.prepare_payload();
 
-            http::async_write(socket_, res,
+            http::async_write(socket_, res_,
                               [self = shared_from_this()](
                                   beast::error_code ec, std::size_t) {
                                   self->socket_.shutdown(
@@ -86,6 +86,7 @@ class TestHttpServer {
         tcp::socket socket_;
         beast::flat_buffer buffer_;
         http::request<http::string_body> req_;
+        http::response<http::string_body> res_;
         std::function<http::response<http::string_body>(
             http::request<http::string_body> const&)>
             handler_;
