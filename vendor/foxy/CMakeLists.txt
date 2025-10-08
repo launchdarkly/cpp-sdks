@@ -37,7 +37,6 @@ include(${CMAKE_FILES}/certify.cmake)
 find_package(
         Boost ${foxy_minimum_boost_version}
         REQUIRED
-        system
         date_time
 )
 
@@ -155,7 +154,6 @@ target_link_libraries(
 
         PUBLIC
         Boost::boost
-        Boost::system
         Boost::date_time
         OpenSSL::SSL
         Threads::Threads
