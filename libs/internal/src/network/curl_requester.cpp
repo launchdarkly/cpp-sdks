@@ -1,11 +1,26 @@
-#include "../../include/launchdarkly/network/curl_requester.hpp"
 #include "launchdarkly/network/curl_requester.hpp"
 #include <curl/curl.h>
 #include <memory>
-#include <sstream>
 
 namespace launchdarkly::network {
 
+// Custom HTTP method strings
+static constexpr auto const* kHttpMethodPut = "PUT";
+static constexpr auto const* kHttpMethodReport = "REPORT";
+
+// Header parsing constants
+static constexpr auto kHttpPrefix = "HTTP/";
+static constexpr auto const* kCrLf = "\r\n";
+static constexpr auto const* kLf = "\n";
+static constexpr auto const* kWhitespace = " \t";
+static constexpr auto const* kWhitespaceWithNewlines = " \t\r\n";
+static constexpr auto const* kHeaderSeparator = ": ";
+
+// Error messages
+static constexpr auto const* kErrorMalformedRequest = "The request was malformed and could not be made.";
+static constexpr auto const* kErrorCurlInit = "Failed to initialize CURL";
+static constexpr auto const* kErrorHeaderAppend = "Failed to append headers to CURL";
+static constexpr auto const* kErrorCurlPrefix = "CURL error: ";
 
 // Callback for writing response data
 //
@@ -21,7 +36,7 @@ static size_t WriteCallback(void* contents, const size_t size, const size_t data
 // Callback for reading request headers
 //
 // https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
-// Our user data is our HttpResult::HeadersType wich we populate with
+// Our user data is our HttpResult::HeadersType that we populate with
 // headers as we receive them.
 static size_t HeaderCallback(const char* buffer, const size_t size, const size_t dataSize, void* userdata) {
     const size_t total_size = size * dataSize;
@@ -30,7 +45,7 @@ static size_t HeaderCallback(const char* buffer, const size_t size, const size_t
     std::string header(buffer, total_size);
 
     // Skip status line and empty lines
-    if (header.find("HTTP/") == 0 || header == "\r\n" || header == "\n") {
+    if (header.find(kHttpPrefix) == 0 || header == kCrLf || header == kLf) {
         return total_size;
     }
 
@@ -40,8 +55,8 @@ static size_t HeaderCallback(const char* buffer, const size_t size, const size_t
         std::string value = header.substr(colon_pos + 1);
 
         // Trim whitespace
-        value.erase(0, value.find_first_not_of(" \t"));
-        value.erase(value.find_last_not_of(" \t\r\n") + 1);
+        value.erase(0, value.find_first_not_of(kWhitespace));
+        value.erase(value.find_last_not_of(kWhitespaceWithNewlines) + 1);
 
         headers->insert_or_assign(key, value);
     }
@@ -49,27 +64,12 @@ static size_t HeaderCallback(const char* buffer, const size_t size, const size_t
     return total_size;
 }
 
-// Convert HttpMethod to CURL method string
-static const char* MethodToCurlString(HttpMethod method) {
-    switch (method) {
-        case HttpMethod::kGet:
-            return "GET";
-        case HttpMethod::kPost:
-            return "POST";
-        case HttpMethod::kPut:
-            return "PUT";
-        case HttpMethod::kReport:
-            return "REPORT";
-    }
-    return "GET";
-}
-
 CurlRequester::CurlRequester(net::any_io_executor ctx, TlsOptions const& tls_options)
     : ctx_(std::move(ctx)), tls_options_(tls_options) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
-void CurlRequester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) {
+void CurlRequester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const {
     // Post the request to the executor to perform it asynchronously
     // Implementation note: We may want to consider if we do this on its own thread
     // and then post the result back to the executor.
@@ -82,7 +82,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     // Validate request
     if (!request.Valid()) {
         boost::asio::post(ctx_, [cb = std::move(cb)]() {
-            cb(HttpResult("The request was malformed and could not be made."));
+            cb(HttpResult(kErrorMalformedRequest));
         });
         return;
     }
@@ -90,7 +90,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     CURL* curl = curl_easy_init();
     if (!curl) {
         boost::asio::post(ctx_, [cb = std::move(cb)]() {
-            cb(HttpResult("Failed to initialize CURL"));
+            cb(HttpResult(kErrorCurlInit));
         });
         return;
     }
@@ -105,7 +105,6 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     curl_easy_setopt(curl, CURLOPT_URL, request.Url().c_str());
 
     // Set HTTP method
-    const char* method_str = MethodToCurlString(request.Method());
     if (request.Method() == HttpMethod::kPost) {
         // Basically CURLOPT_POST is a flag that indicates this is a post.
         // Passing 1 enables this flag.
@@ -113,9 +112,9 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
         // should override that with the correct value.
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
     } else if (request.Method() == HttpMethod::kPut) {
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodPut);
     } else if (request.Method() == HttpMethod::kReport) {
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "REPORT");
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodReport);
     } else if (request.Method() == HttpMethod::kGet) {
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
     }
@@ -131,7 +130,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     struct curl_slist* headers = nullptr;
     auto const& base_headers = request.Properties().BaseHeaders();
     for (auto const& [key, value] : base_headers) {
-        std::string header = key + ": " + value;
+        std::string header = key + kHeaderSeparator + value;
         // The first call to curl_slist_append will create the list.
         // Subsequent calls will return either the same pointer, or null.
         // In the case they return null, we need to clean up any previous result
@@ -142,7 +141,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
                 curl_slist_free_all(headers);
             }
             boost::asio::post(ctx_, [cb = std::move(cb)]() {
-                cb(HttpResult("Failed to append headers to CURL"));
+                cb(HttpResult(kErrorHeaderAppend));
             });
             return;
         }
@@ -197,7 +196,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
 
     // Check for errors
     if (res != CURLE_OK) {
-        std::string error_message = "CURL error: ";
+        std::string error_message = kErrorCurlPrefix;
         error_message += curl_easy_strerror(res);
         boost::asio::post(ctx_, [cb = std::move(cb), error_message = std::move(error_message)]() {
             cb(HttpResult(error_message));

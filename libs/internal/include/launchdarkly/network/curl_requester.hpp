@@ -15,7 +15,7 @@ class CurlRequester {
 public:
     CurlRequester(net::any_io_executor ctx, TlsOptions const& tls_options);
 
-    void Request(HttpRequest request, std::function<void(const HttpResult&)> cb);
+    void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const;
 
 private:
     void PerformRequest(const HttpRequest& request, std::function<void(const HttpResult&)> cb) const;
