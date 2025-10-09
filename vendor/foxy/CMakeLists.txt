@@ -11,6 +11,13 @@ cmake_minimum_required(VERSION 3.13)
 
 set(foxy_minimum_boost_version 1.75)
 
+# This policy is designed to force a choice between the old behavior of an integrated FindBoost implementation
+# and the implementation provided in by boost.
+if(POLICY CMP0167)
+    # Uses the BoostConfig.cmake included with the boost distribution.
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 project(
         foxy
 
@@ -30,7 +37,6 @@ include(${CMAKE_FILES}/certify.cmake)
 find_package(
         Boost ${foxy_minimum_boost_version}
         REQUIRED
-        system
         date_time
 )
 
@@ -148,7 +154,6 @@ target_link_libraries(
 
         PUBLIC
         Boost::boost
-        Boost::system
         Boost::date_time
         OpenSSL::SSL
         Threads::Threads

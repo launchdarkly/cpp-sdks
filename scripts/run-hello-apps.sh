@@ -40,6 +40,9 @@ cd build-"$1" || exit
 # script ends.
 trap cleanup EXIT
 
+echo Boost dir $Boost_DIR
+echo Boost root $BOOST_ROOT
+
 cmake -G Ninja -D CMAKE_BUILD_TYPE=Release \
                -D BUILD_TESTING=OFF  \
                -D LD_BUILD_SHARED_LIBS=$dynamic_linkage \

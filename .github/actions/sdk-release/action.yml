@@ -100,6 +100,7 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       env:
+        Boost_DIR: ${{ steps.install-boost.outputs.Boost_DIR }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
       run: ./scripts/build-release-windows.sh ${{ inputs.sdk_cmake_target }}
