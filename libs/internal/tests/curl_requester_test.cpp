@@ -26,7 +26,7 @@ using launchdarkly::network::HttpResult;
 // Simple HTTP server for testing
 class TestHttpServer {
    public:
-    TestHttpServer(net::io_context& ioc, unsigned short port)
+    TestHttpServer(net::io_context& ioc, const unsigned short port)
         : acceptor_(ioc, tcp::endpoint(tcp::v4(), port)),
           socket_(ioc) {
         port_ = acceptor_.local_endpoint().port();
@@ -35,7 +35,7 @@ class TestHttpServer {
     unsigned short port() const { return port_; }
 
     void Accept() {
-        acceptor_.async_accept(socket_, [this](beast::error_code ec) {
+        acceptor_.async_accept(socket_, [this](const beast::error_code& ec) {
             if (!ec) {
                 std::make_shared<Session>(std::move(socket_), handler_)
                     ->Run();
@@ -61,7 +61,7 @@ class TestHttpServer {
         void Run() {
             http::async_read(
                 socket_, buffer_, req_,
-                [self = shared_from_this()](beast::error_code ec,
+                [self = shared_from_this()](const beast::error_code& ec,
                                             std::size_t bytes_transferred) {
                     boost::ignore_unused(bytes_transferred);
                     if (!ec) {
@@ -120,7 +120,7 @@ class CurlRequesterTest : public ::testing::Test {
         }
     }
 
-    std::string GetServerUrl(std::string const& path = "/") {
+    std::string GetServerUrl(std::string const& path = "/") const {
         return "http://127.0.0.1:" + std::to_string(server_->port()) + path;
     }
 
