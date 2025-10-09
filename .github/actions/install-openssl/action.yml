@@ -32,7 +32,7 @@ runs:
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        choco install openssl --version 3.5.3 -y --no-progress
+        choco install openssl --version 3.5.4 -y --no-progress
         if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
           echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> $GITHUB_OUTPUT
         else

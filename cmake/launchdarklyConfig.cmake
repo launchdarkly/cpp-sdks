@@ -8,6 +8,13 @@ if (NOT DEFINED Boost_USE_STATIC_LIBS)
     endif ()
 endif ()
 
+# This policy is designed to force a choice between the old behavior of an integrated FindBoost implementation
+# and the implementation provided in by boost.
+if(POLICY CMP0167)
+    # Uses the BoostConfig.cmake included with the boost distribution.
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 find_dependency(Boost 1.81 COMPONENTS json url coroutine)
 find_dependency(OpenSSL)
 find_dependency(tl-expected)
