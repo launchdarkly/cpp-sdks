@@ -6,17 +6,25 @@
 
 namespace launchdarkly::network {
 
+
 // Callback for writing response data
-static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-    size_t total_size = size * nmemb;
-    std::string* str = static_cast<std::string*>(userp);
-    str->append(static_cast<char*>(contents), total_size);
+//
+// https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
+// Our userdata is a std::string which we accumulate the body in.
+static size_t WriteCallback(void* contents, const size_t size, const size_t dataSize, void* userdata) {
+    const size_t total_size = size * dataSize;
+    const auto stringData = static_cast<std::string*>(userdata);
+    stringData->append(static_cast<char*>(contents), total_size);
     return total_size;
 }
 
 // Callback for reading request headers
-static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
-    size_t total_size = size * nitems;
+//
+// https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
+// Our user data is our HttpResult::HeadersType wich we populate with
+// headers as we receive them.
+static size_t HeaderCallback(const char* buffer, const size_t size, const size_t dataSize, void* userdata) {
+    const size_t total_size = size * dataSize;
     auto* headers = static_cast<HttpResult::HeadersType*>(userdata);
 
     std::string header(buffer, total_size);
@@ -27,9 +35,8 @@ static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* use
     }
 
     // Parse header
-    size_t colon_pos = header.find(':');
-    if (colon_pos != std::string::npos) {
-        std::string key = header.substr(0, colon_pos);
+    if (const size_t colon_pos = header.find(':'); colon_pos != std::string::npos) {
+        const std::string key = header.substr(0, colon_pos);
         std::string value = header.substr(colon_pos + 1);
 
         // Trim whitespace
@@ -64,12 +71,14 @@ CurlRequester::CurlRequester(net::any_io_executor ctx, TlsOptions const& tls_opt
 
 void CurlRequester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) {
     // Post the request to the executor to perform it asynchronously
+    // Implementation note: We may want to consider if we do this on its own thread
+    // and then post the result back to the executor.
     boost::asio::post(ctx_, [this, request = std::move(request), cb = std::move(cb)]() mutable {
         PerformRequest(std::move(request), std::move(cb));
     });
 }
 
-void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const HttpResult&)> cb) {
+void CurlRequester::PerformRequest(const HttpRequest& request, std::function<void(const HttpResult&)> cb) const {
     // Validate request
     if (!request.Valid()) {
         boost::asio::post(ctx_, [cb = std::move(cb)]() {
@@ -86,7 +95,7 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
         return;
     }
 
-    // Use RAII to ensure cleanup
+    // Use a unique_ptr to manage the cleanup of our curl instance.
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl_guard(curl, curl_easy_cleanup);
 
     std::string response_body;
@@ -98,6 +107,10 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
     // Set HTTP method
     const char* method_str = MethodToCurlString(request.Method());
     if (request.Method() == HttpMethod::kPost) {
+        // Basically CURLOPT_POST is a flag that indicates this is a post.
+        // Passing 1 enables this flag.
+        // This will also set a content type, but the headers for the request
+        // should override that with the correct value.
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
     } else if (request.Method() == HttpMethod::kPut) {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -119,15 +132,29 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
     auto const& base_headers = request.Properties().BaseHeaders();
     for (auto const& [key, value] : base_headers) {
         std::string header = key + ": " + value;
-        headers = curl_slist_append(headers, header.c_str());
+        // The first call to curl_slist_append will create the list.
+        // Subsequent calls will return either the same pointer, or null.
+        // In the case they return null, we need to clean up any previous result
+        // and abort the operation.
+        const auto appendResult = curl_slist_append(headers, header.c_str());
+        if (!appendResult) {
+            if (headers) {
+                curl_slist_free_all(headers);
+            }
+            boost::asio::post(ctx_, [cb = std::move(cb)]() {
+                cb(HttpResult("Failed to append headers to CURL"));
+            });
+            return;
+        }
+        headers = appendResult;
     }
     if (headers) {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     }
 
     // Set timeouts (convert from milliseconds to seconds)
-    long connect_timeout = request.Properties().ConnectTimeout().count() / 1000;
-    long response_timeout = request.Properties().ResponseTimeout().count() / 1000;
+    const long connect_timeout = request.Properties().ConnectTimeout().count() / 1000;
+    const long response_timeout = request.Properties().ResponseTimeout().count() / 1000;
 
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout > 0 ? connect_timeout : 30L);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, response_timeout > 0 ? response_timeout : 60L);
@@ -139,6 +166,9 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        // 1 or 2 seem to basically be the same, but the documentation says to
+        // use 2, and that it would default to 2.
+        // https://curl.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
         // Set custom CA file if provided
