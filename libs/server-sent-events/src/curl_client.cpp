@@ -127,7 +127,7 @@ std::string CurlClient::build_url() const {
     return url;
 }
 
-void CurlClient::setup_curl_options(CURL* curl) {
+struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
     // Set URL
     curl_easy_setopt(curl, CURLOPT_URL, build_url().c_str());
 
@@ -171,17 +171,19 @@ void CurlClient::setup_curl_options(CURL* curl) {
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     }
 
-    // Set timeouts
-    long connect_timeout_sec = connect_timeout_
-                                   ? connect_timeout_->count() / 1000
-                                   : kNoTimeout.count() / 1000;
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout_sec);
+    // Set timeouts with millisecond precision
+    if (connect_timeout_) {
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_->count());
+    }
 
-    // For read timeout, we use low speed limit (bytes/sec) and low speed time
+    // For read timeout, use progress callback
     if (read_timeout_) {
-        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
-        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME,
-                         read_timeout_->count() / 1000);
+        effective_read_timeout_ = read_timeout_;
+        last_progress_time_ = std::chrono::steady_clock::now();
+        last_download_amount_ = 0;
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
     }
 
     // Set TLS options
@@ -205,6 +207,38 @@ void CurlClient::setup_curl_options(CURL* curl) {
 
     // Don't follow redirects automatically - we'll handle them ourselves
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+
+    return headers;
+}
+
+int CurlClient::ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
+                                 curl_off_t ultotal, curl_off_t ulnow) {
+    auto* client = static_cast<CurlClient*>(clientp);
+
+    if (client->shutting_down_) {
+        return 1;  // Abort the transfer
+    }
+
+    // Check if we've exceeded the read timeout
+    if (client->effective_read_timeout_) {
+        auto now = std::chrono::steady_clock::now();
+
+        // If download amount has changed, update the last progress time
+        if (dlnow != client->last_download_amount_) {
+            client->last_download_amount_ = dlnow;
+            client->last_progress_time_ = now;
+        } else {
+            // No new data - check if we've exceeded the timeout
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - client->last_progress_time_);
+
+            if (elapsed > *client->effective_read_timeout_) {
+                return 1;  // Abort the transfer
+            }
+        }
+    }
+
+    return 0;  // Continue
 }
 
 size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
@@ -272,6 +306,11 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
                     client->current_event_->data.pop_back();
                 }
 
+                // Update last_event_id_ only when dispatching a completed event
+                if (client->current_event_->id) {
+                    client->last_event_id_ = client->current_event_->id;
+                }
+
                 // Dispatch event on executor thread
                 auto event_data = client->current_event_->data;
                 auto event_type = client->current_event_->type.empty()
@@ -335,7 +374,6 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
             client->current_event_->data += '\n';
         } else if (field_name == "id") {
             if (field_value.find('\0') == std::string::npos) {
-                client->last_event_id_ = field_value;
                 client->current_event_->id = field_value;
             }
         }
@@ -363,10 +401,53 @@ size_t CurlClient::HeaderCallback(char* buffer, size_t size, size_t nitems,
     return total_size;
 }
 
+bool CurlClient::handle_redirect(long response_code, CURL* curl) {
+    // Check if this is a redirect status
+    if (response_code != 301 && response_code != 307) {
+        return false;
+    }
+
+    // Get the Location header
+    char* location = nullptr;
+    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &location);
+
+    if (!location || std::string(location).empty()) {
+        // Invalid redirect, let FoxyClient behavior handle it
+        return false;
+    }
+
+    // Parse the redirect URL
+    auto location_url = boost::urls::parse_uri(location);
+    if (!location_url) {
+        report_error(errors::InvalidRedirectLocation{location});
+        return true;
+    }
+
+    // Update host and target
+    host_ = location_url->host();
+    req_.set(http::field::host, host_);
+    req_.target(location_url->encoded_target());
+
+    if (location_url->has_port()) {
+        port_ = location_url->port();
+    } else {
+        port_ = location_url->scheme();
+    }
+
+    // Signal that we should retry with the new location
+    return true;
+}
+
 void CurlClient::perform_request() {
     if (shutting_down_) {
         return;
     }
+
+    // Clear parser state for new connection
+    buffered_line_.reset();
+    complete_lines_.clear();
+    current_event_.reset();
+    begin_CR_ = false;
 
     curl_active_ = true;
 
@@ -379,7 +460,7 @@ void CurlClient::perform_request() {
         return;
     }
 
-    setup_curl_options(curl);
+    struct curl_slist* headers = setup_curl_options(curl);
 
     // Perform the request
     CURLcode res = curl_easy_perform(curl);
@@ -388,8 +469,36 @@ void CurlClient::perform_request() {
     long response_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-    curl_easy_cleanup(curl);
+    // Free headers before cleanup
+    if (headers) {
+        curl_slist_free_all(headers);
+    }
 
+    // Handle HTTP status codes
+    auto status = static_cast<http::status>(response_code);
+    auto status_class = http::to_status_class(status);
+
+    // Handle redirects
+    if (status_class == http::status_class::redirection) {
+        bool should_redirect = handle_redirect(response_code, curl);
+        curl_easy_cleanup(curl);
+        curl_active_ = false;
+
+        if (should_redirect) {
+            // Retry with new location
+            if (!shutting_down_) {
+                perform_request();
+            }
+            return;
+        }
+        // Invalid redirect - report error
+        boost::asio::post(executor_, [self = shared_from_this()]() {
+            self->report_error(errors::NotRedirectable{});
+        });
+        return;
+    }
+
+    curl_easy_cleanup(curl);
     curl_active_ = false;
 
     if (shutting_down_) {
@@ -398,17 +507,21 @@ void CurlClient::perform_request() {
 
     // Handle result
     if (res != CURLE_OK) {
-        std::string error_msg = "CURL error: " + std::string(curl_easy_strerror(res));
-        boost::asio::post(executor_, [self = shared_from_this(),
-                                      error_msg = std::move(error_msg)]() {
-            self->async_backoff(error_msg);
-        });
+        // Check if the error was due to progress callback aborting (read timeout)
+        if (res == CURLE_ABORTED_BY_CALLBACK && effective_read_timeout_) {
+            boost::asio::post(executor_, [self = shared_from_this()]() {
+                self->report_error(errors::ReadTimeout{self->read_timeout_});
+                self->async_backoff("aborting read of response body (timeout)");
+            });
+        } else {
+            std::string error_msg = "CURL error: " + std::string(curl_easy_strerror(res));
+            boost::asio::post(executor_, [self = shared_from_this(),
+                                          error_msg = std::move(error_msg)]() {
+                self->async_backoff(error_msg);
+            });
+        }
         return;
     }
-
-    // Handle HTTP status codes
-    auto status = static_cast<http::status>(response_code);
-    auto status_class = http::to_status_class(status);
 
     if (status_class == http::status_class::successful) {
         if (status == http::status::no_content) {

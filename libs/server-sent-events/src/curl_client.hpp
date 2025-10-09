@@ -58,7 +58,11 @@ class CurlClient : public Client,
     void report_error(Error error);
 
     std::string build_url() const;
-    void setup_curl_options(CURL* curl);
+    struct curl_slist* setup_curl_options(CURL* curl);
+    bool handle_redirect(long response_code, CURL* curl);
+
+    static int ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
+                                curl_off_t ultotal, curl_off_t ulnow);
 
     boost::asio::any_io_executor executor_;
     std::string host_;
@@ -92,6 +96,11 @@ class CurlClient : public Client,
     std::optional<std::string> buffered_line_;
     std::deque<std::string> complete_lines_;
     bool begin_CR_;
+
+    // Progress tracking for read timeout
+    std::chrono::steady_clock::time_point last_progress_time_;
+    curl_off_t last_download_amount_;
+    std::optional<std::chrono::milliseconds> effective_read_timeout_;
 };
 
 }  // namespace launchdarkly::sse

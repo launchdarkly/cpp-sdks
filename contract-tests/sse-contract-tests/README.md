@@ -5,6 +5,30 @@ the other.
 
 This project implements the test service for the C++ EventSource client.
 
+### Usage
+
+```bash
+sse-tests [PORT] [--use-curl]
+```
+
+- `PORT`: Optional port number (defaults to 8123)
+- `--use-curl`: Optional flag to use the CURL-based SSE client implementation instead of the default Boost.Beast/Foxy implementation
+
+Examples:
+```bash
+# Start on default port 8123 with Foxy client
+./sse-tests
+
+# Start on port 9000 with Foxy client
+./sse-tests 9000
+
+# Start on default port with CURL client
+./sse-tests --use-curl
+
+# Start on port 9000 with CURL client
+./sse-tests 9000 --use-curl
+```
+
 **session (session.hpp)**
 
 This provides a simple REST API for creating/destroying

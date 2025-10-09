@@ -22,16 +22,25 @@ int main(int argc, char* argv[]) {
 
     std::string const default_port = "8123";
     std::string port = default_port;
-    if (argc == 2) {
-        port =
-            argv[1];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    bool use_curl = false;
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (arg == "--use-curl") {
+            use_curl = true;
+            LD_LOG(logger, LogLevel::kInfo) << "Using CURL implementation for SSE clients";
+        } else if (i == 1 && arg.find("--") != 0) {
+            // First non-flag argument is the port
+            port = arg;
+        }
     }
 
     try {
         net::io_context ioc{1};
 
         server srv(ioc, "0.0.0.0", boost::lexical_cast<unsigned short>(port),
-                   logger);
+                   logger, use_curl);
 
         srv.add_capability("headers");
         srv.add_capability("comments");
