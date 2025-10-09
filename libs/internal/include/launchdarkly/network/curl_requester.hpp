@@ -18,7 +18,8 @@ public:
     void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const;
 
 private:
-    void PerformRequest(const HttpRequest& request, std::function<void(const HttpResult&)> cb) const;
+    static void PerformRequestStatic(net::any_io_executor ctx, TlsOptions const& tls_options,
+                                      const HttpRequest& request, std::function<void(const HttpResult&)> cb);
 
     net::any_io_executor ctx_;
     TlsOptions tls_options_;

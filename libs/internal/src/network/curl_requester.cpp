@@ -71,17 +71,20 @@ CurlRequester::CurlRequester(net::any_io_executor ctx, TlsOptions const& tls_opt
 
 void CurlRequester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const {
     // Post the request to the executor to perform it asynchronously
-    // Implementation note: We may want to consider if we do this on its own thread
-    // and then post the result back to the executor.
-    boost::asio::post(ctx_, [this, request = std::move(request), cb = std::move(cb)]() mutable {
-        PerformRequest(std::move(request), std::move(cb));
+    // Copy ctx_ and tls_options_ to avoid capturing 'this' and causing use-after-free
+    // if the CurlRequester is destroyed while the operation is in flight.
+    auto ctx = ctx_;
+    auto tls_options = tls_options_;
+    boost::asio::post(ctx, [ctx, tls_options, request = std::move(request), cb = std::move(cb)]() mutable {
+        PerformRequestStatic(ctx, tls_options, std::move(request), std::move(cb));
     });
 }
 
-void CurlRequester::PerformRequest(const HttpRequest& request, std::function<void(const HttpResult&)> cb) const {
+void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions const& tls_options,
+                                          const HttpRequest& request, std::function<void(const HttpResult&)> cb) {
     // Validate request
     if (!request.Valid()) {
-        boost::asio::post(ctx_, [cb = std::move(cb)]() {
+        boost::asio::post(ctx, [cb = std::move(cb)]() {
             cb(HttpResult(kErrorMalformedRequest));
         });
         return;
@@ -89,7 +92,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
 
     CURL* curl = curl_easy_init();
     if (!curl) {
-        boost::asio::post(ctx_, [cb = std::move(cb)]() {
+        boost::asio::post(ctx, [cb = std::move(cb)]() {
             cb(HttpResult(kErrorCurlInit));
         });
         return;
@@ -101,8 +104,11 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     std::string response_body;
     HttpResult::HeadersType response_headers;
 
+    // Store URL to keep it alive for the duration of the request
+    std::string url = request.Url();
+
     // Set URL
-    curl_easy_setopt(curl, CURLOPT_URL, request.Url().c_str());
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
     // Set HTTP method
     if (request.Method() == HttpMethod::kPost) {
@@ -140,7 +146,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
             if (headers) {
                 curl_slist_free_all(headers);
             }
-            boost::asio::post(ctx_, [cb = std::move(cb)]() {
+            boost::asio::post(ctx, [cb = std::move(cb)]() {
                 cb(HttpResult(kErrorHeaderAppend));
             });
             return;
@@ -151,16 +157,16 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     }
 
-    // Set timeouts (convert from milliseconds to seconds)
-    const long connect_timeout = request.Properties().ConnectTimeout().count() / 1000;
-    const long response_timeout = request.Properties().ResponseTimeout().count() / 1000;
+    // Set timeouts with millisecond precision
+    const long connect_timeout_ms = request.Properties().ConnectTimeout().count();
+    const long response_timeout_ms = request.Properties().ResponseTimeout().count();
 
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, connect_timeout > 0 ? connect_timeout : 30L);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, response_timeout > 0 ? response_timeout : 60L);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_ms > 0 ? connect_timeout_ms : 30000L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, response_timeout_ms > 0 ? response_timeout_ms : 60000L);
 
     // Set TLS options
     using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
-    if (tls_options_.PeerVerifyMode() == VerifyMode::kVerifyNone) {
+    if (tls_options.PeerVerifyMode() == VerifyMode::kVerifyNone) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
@@ -171,8 +177,8 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
         // Set custom CA file if provided
-        if (tls_options_.CustomCAFile().has_value()) {
-            curl_easy_setopt(curl, CURLOPT_CAINFO, tls_options_.CustomCAFile()->c_str());
+        if (tls_options.CustomCAFile().has_value()) {
+            curl_easy_setopt(curl, CURLOPT_CAINFO, tls_options.CustomCAFile()->c_str());
         }
     }
 
@@ -198,7 +204,7 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     if (res != CURLE_OK) {
         std::string error_message = kErrorCurlPrefix;
         error_message += curl_easy_strerror(res);
-        boost::asio::post(ctx_, [cb = std::move(cb), error_message = std::move(error_message)]() {
+        boost::asio::post(ctx, [cb = std::move(cb), error_message = std::move(error_message)]() {
             cb(HttpResult(error_message));
         });
         return;
@@ -209,9 +215,9 @@ void CurlRequester::PerformRequest(const HttpRequest& request, std::function<voi
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
     // Post the success result back to the executor
-    boost::asio::post(ctx_, [cb = std::move(cb), response_code,
-                              response_body = std::move(response_body),
-                              response_headers = std::move(response_headers)]() mutable {
+    boost::asio::post(ctx, [cb = std::move(cb), response_code,
+                            response_body = std::move(response_body),
+                            response_headers = std::move(response_headers)]() mutable {
         cb(HttpResult(static_cast<HttpResult::StatusCode>(response_code),
                       std::move(response_body),
                       std::move(response_headers)));
