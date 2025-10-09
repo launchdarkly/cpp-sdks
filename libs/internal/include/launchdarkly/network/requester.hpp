@@ -1,7 +1,8 @@
 #pragma once
 
 #include "http_requester.hpp"
-#include "asio_requester.hpp"
+// #include "asio_requester.hpp"
+#include "curl_requester.hpp"
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <functional>
 
@@ -12,7 +13,7 @@ using TlsOptions = config::shared::built::TlsOptions;
 
 typedef std::function<void(const HttpResult &res)> CallbackFunction;
 class Requester {
-    AsioRequester innerRequester_;
+    CurlRequester innerRequester_;
 public:
     Requester(net::any_io_executor ctx, TlsOptions const& tls_options): innerRequester_(ctx, tls_options) {}
 

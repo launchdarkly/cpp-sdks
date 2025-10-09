@@ -72,13 +72,17 @@ void CurlRequester::Request(HttpRequest request, std::function<void(const HttpRe
 void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const HttpResult&)> cb) {
     // Validate request
     if (!request.Valid()) {
-        cb(HttpResult("The request was malformed and could not be made."));
+        boost::asio::post(ctx_, [cb = std::move(cb)]() {
+            cb(HttpResult("The request was malformed and could not be made."));
+        });
         return;
     }
 
     CURL* curl = curl_easy_init();
     if (!curl) {
-        cb(HttpResult("Failed to initialize CURL"));
+        boost::asio::post(ctx_, [cb = std::move(cb)]() {
+            cb(HttpResult("Failed to initialize CURL"));
+        });
         return;
     }
 
@@ -165,7 +169,9 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
     if (res != CURLE_OK) {
         std::string error_message = "CURL error: ";
         error_message += curl_easy_strerror(res);
-        cb(HttpResult(error_message));
+        boost::asio::post(ctx_, [cb = std::move(cb), error_message = std::move(error_message)]() {
+            cb(HttpResult(error_message));
+        });
         return;
     }
 
@@ -173,10 +179,14 @@ void CurlRequester::PerformRequest(HttpRequest request, std::function<void(const
     long response_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-    // Create success result
-    cb(HttpResult(static_cast<HttpResult::StatusCode>(response_code),
-                  std::move(response_body),
-                  std::move(response_headers)));
+    // Post the success result back to the executor
+    boost::asio::post(ctx_, [cb = std::move(cb), response_code,
+                              response_body = std::move(response_body),
+                              response_headers = std::move(response_headers)]() mutable {
+        cb(HttpResult(static_cast<HttpResult::StatusCode>(response_code),
+                      std::move(response_body),
+                      std::move(response_headers)));
+    });
 }
 
 }

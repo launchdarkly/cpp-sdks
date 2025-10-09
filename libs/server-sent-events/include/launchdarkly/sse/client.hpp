@@ -154,6 +154,15 @@ class Builder {
     Builder& custom_ca_file(std::string path);
 
     /**
+     * Use the CURL-based implementation instead of the default Boost.Beast/Foxy
+     * implementation.
+     *
+     * @param use_curl True to use CURL implementation, false for Foxy.
+     * @return Reference to this builder.
+     */
+    Builder& use_curl(bool use_curl);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -174,6 +183,7 @@ class Builder {
     ErrorCallback error_cb_;
     bool skip_verify_peer_;
     std::optional<std::string> custom_ca_file_;
+    bool use_curl_;
 };
 
 /**

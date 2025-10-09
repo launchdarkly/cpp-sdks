@@ -1,0 +1,97 @@
+#pragma once
+
+#include <launchdarkly/sse/client.hpp>
+#include "backoff.hpp"
+#include "parser.hpp"
+
+#include <curl/curl.h>
+#include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/beast/http/string_body.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <thread>
+
+namespace launchdarkly::sse {
+
+namespace http = boost::beast::http;
+namespace net = boost::asio;
+
+class CurlClient : public Client,
+                   public std::enable_shared_from_this<CurlClient> {
+   public:
+    CurlClient(boost::asio::any_io_executor executor,
+               http::request<http::string_body> req,
+               std::string host,
+               std::string port,
+               std::optional<std::chrono::milliseconds> connect_timeout,
+               std::optional<std::chrono::milliseconds> read_timeout,
+               std::optional<std::chrono::milliseconds> write_timeout,
+               std::optional<std::chrono::milliseconds> initial_reconnect_delay,
+               Builder::EventReceiver receiver,
+               Builder::LogCallback logger,
+               Builder::ErrorCallback errors,
+               bool skip_verify_peer,
+               std::optional<std::string> custom_ca_file);
+
+    ~CurlClient() override;
+
+    void async_connect() override;
+    void async_shutdown(std::function<void()> completion) override;
+
+   private:
+    void do_run();
+    void do_shutdown(std::function<void()> completion);
+    void async_backoff(std::string const& reason);
+    void on_backoff(boost::system::error_code ec);
+    void perform_request();
+
+    static size_t WriteCallback(char* data, size_t size, size_t nmemb, void* userp);
+    static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
+
+    void log_message(std::string const& message);
+    void report_error(Error error);
+
+    std::string build_url() const;
+    void setup_curl_options(CURL* curl);
+
+    boost::asio::any_io_executor executor_;
+    std::string host_;
+    std::string port_;
+    http::request<http::string_body> req_;
+
+    std::optional<std::chrono::milliseconds> connect_timeout_;
+    std::optional<std::chrono::milliseconds> read_timeout_;
+    std::optional<std::chrono::milliseconds> write_timeout_;
+
+    Builder::EventReceiver event_receiver_;
+    Builder::LogCallback logger_;
+    Builder::ErrorCallback errors_;
+
+    bool skip_verify_peer_;
+    std::optional<std::string> custom_ca_file_;
+
+    Backoff backoff_;
+    boost::asio::steady_timer backoff_timer_;
+
+    std::optional<std::string> last_event_id_;
+    std::optional<detail::Event> current_event_;
+
+    std::atomic<bool> shutting_down_;
+    std::atomic<bool> curl_active_;
+
+    std::unique_ptr<std::thread> request_thread_;
+    std::mutex shutdown_mutex_;
+
+    // SSE parser state
+    std::optional<std::string> buffered_line_;
+    std::deque<std::string> complete_lines_;
+    bool begin_CR_;
+};
+
+}  // namespace launchdarkly::sse

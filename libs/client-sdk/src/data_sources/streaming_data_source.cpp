@@ -88,6 +88,8 @@ void StreamingDataSource::Start() {
 
     auto client_builder = launchdarkly::sse::Builder(exec_, url.buffer());
 
+    client_builder.use_curl(true);
+
     client_builder.method(data_source_config_.use_report
                               ? boost::beast::http::verb::report
                               : boost::beast::http::verb::get);

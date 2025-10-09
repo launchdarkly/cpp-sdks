@@ -8,15 +8,18 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 add_library(${LIBNAME} OBJECT
         ${HEADER_LIST}
         client.cpp
+        curl_client.cpp
         parser.cpp
         event.cpp
         error.cpp
         backoff_detail.cpp
         backoff.cpp)
 
+find_package(CURL)
+
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers foxy
-        PRIVATE Boost::url Boost::disable_autolinking
+        PRIVATE Boost::url Boost::disable_autolinking CURL::libcurl
 )
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
