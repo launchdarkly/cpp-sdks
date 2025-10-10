@@ -7,6 +7,9 @@
 
 namespace launchdarkly {
 
+struct VariationOrRolloutContext {};
+
+
 tl::expected<std::optional<data_model::Flag::Rollout>, JsonError> tag_invoke(
     boost::json::value_to_tag<
         tl::expected<std::optional<data_model::Flag::Rollout>,
@@ -68,6 +71,11 @@ namespace data_model {
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 data_model::Flag::Rollout const& rollout);
+
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout, const VariationOrRolloutContext&);
 
 void tag_invoke(
     boost::json::value_from_tag const& unused,
