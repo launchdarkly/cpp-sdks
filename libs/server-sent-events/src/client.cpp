@@ -635,11 +635,12 @@ std::shared_ptr<Client> Builder::build() {
                                                      : uri_components->scheme();
 
     if (use_curl_) {
+        bool use_https = uri_components->scheme_id() == boost::urls::scheme::https;
         return std::make_shared<CurlClient>(
             net::make_strand(executor_), request, host, service,
             connect_timeout_, read_timeout_, write_timeout_,
             initial_reconnect_delay_, receiver_, logging_cb_, error_cb_,
-            skip_verify_peer_, custom_ca_file_);
+            skip_verify_peer_, custom_ca_file_, use_https);
     }
 
     std::optional<ssl::context> ssl;

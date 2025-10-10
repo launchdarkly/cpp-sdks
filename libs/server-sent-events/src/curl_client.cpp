@@ -34,7 +34,8 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
                        Builder::LogCallback logger,
                        Builder::ErrorCallback errors,
                        bool skip_verify_peer,
-                       std::optional<std::string> custom_ca_file)
+                       std::optional<std::string> custom_ca_file,
+                       bool use_https)
     :
       host_(std::move(host)),
       port_(std::move(port)),
@@ -47,6 +48,7 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
       errors_(std::move(errors)),
       skip_verify_peer_(skip_verify_peer),
       custom_ca_file_(std::move(custom_ca_file)),
+      use_https_(use_https),
       backoff_(initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
                kDefaultMaxBackoffDelay),
       last_event_id_(std::nullopt),
@@ -130,13 +132,13 @@ void CurlClient::on_backoff(boost::system::error_code ec) {
 }
 
 std::string CurlClient::build_url() const {
-    std::string scheme = (port_ == "https" || port_ == "443") ? "https" : "http";
+    std::string scheme = use_https_ ? "https" : "http";
 
     std::string url = scheme + "://" + host_;
 
-    // Add port if it's not the default for the scheme
-    if ((scheme == "https" && port_ != "https" && port_ != "443") ||
-        (scheme == "http" && port_ != "http" && port_ != "80")) {
+    // Add port if it's not the default service name
+    // port_ can be either a port number (like "8123") or service name (like "https"/"http")
+    if (port_ != "https" && port_ != "http") {
         url += ":" + port_;
     }
 
