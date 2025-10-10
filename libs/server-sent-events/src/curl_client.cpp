@@ -74,9 +74,16 @@ CurlClient::~CurlClient() {
 #endif
     }
 
-    // Clear keepalive reference
+    // Join the request thread if it exists and is joinable
     {
         std::lock_guard<std::mutex> lock(request_thread_mutex_);
+        if (request_thread_ && request_thread_->joinable()) {
+            // Release lock before joining to avoid holding mutex during join
+            std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
+            request_thread_mutex_.unlock();
+            thread_to_join->join();
+            request_thread_mutex_.lock();
+        }
         keepalive_.reset();
     }
 }
@@ -95,14 +102,17 @@ void CurlClient::do_run() {
     {
         std::lock_guard<std::mutex> request_thread_guard(request_thread_mutex_);
 
+        // Join any previous thread before starting a new one
+        if (request_thread_ && request_thread_->joinable()) {
+            request_thread_->join();
+        }
+
         // Store a keepalive reference to ensure destructor doesn't run on request thread
         keepalive_ = shared_from_this();
 
         // Capture only raw 'this' pointer, not shared_ptr
         request_thread_ = std::make_unique<std::thread>(
             [this]() { this->perform_request(); });
-
-        request_thread_->detach();
     }
 }
 
@@ -478,23 +488,13 @@ bool CurlClient::handle_redirect(long response_code, CURL* curl) {
 
 void CurlClient::perform_request() {
     // RAII guard to clear keepalive when function exits
-    // This ensures destructor never runs on this thread
+    // Since we join the thread before destroying the object, we can safely clear keepalive here
     struct KeepaliveGuard {
         CurlClient* client;
         explicit KeepaliveGuard(CurlClient* c) : client(c) {}
         ~KeepaliveGuard() {
-            if (!client->shutting_down_) {
-                // Post to executor so keepalive is cleared on executor thread
-                boost::asio::post(client->backoff_timer_.get_executor(),
-                                  [client = this->client]() {
-                                      std::lock_guard<std::mutex> lock(client->request_thread_mutex_);
-                                      client->keepalive_.reset();
-                                  });
-            } else {
-                // During shutdown, clear immediately since executor may be gone
-                std::lock_guard<std::mutex> lock(client->request_thread_mutex_);
-                client->keepalive_.reset();
-            }
+            std::lock_guard<std::mutex> lock(client->request_thread_mutex_);
+            client->keepalive_.reset();
         }
     } guard(this);
 
@@ -652,8 +652,28 @@ void CurlClient::do_shutdown(std::function<void()> completion) {
     shutting_down_ = true;
     backoff_timer_.cancel();
 
-    // Note: CURL requests in progress will be aborted via the write callback
-    // returning 0 when shutting_down_ is true
+    // Close the socket to abort the CURL operation
+    curl_socket_t sock = curl_socket_.load();
+    if (sock != CURL_SOCKET_BAD) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
+    }
+
+    // Join the request thread if it exists and is joinable
+    {
+        std::lock_guard<std::mutex> lock(request_thread_mutex_);
+        if (request_thread_ && request_thread_->joinable()) {
+            // Release lock before joining to avoid holding mutex during join
+            std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
+            request_thread_mutex_.unlock();
+            thread_to_join->join();
+            request_thread_mutex_.lock();
+        }
+        keepalive_.reset();
+    }
 
     if (completion) {
         completion();
