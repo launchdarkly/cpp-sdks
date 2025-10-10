@@ -53,6 +53,7 @@ class CurlClient : public Client,
 
     static size_t WriteCallback(char* data, size_t size, size_t nmemb, void* userp);
     static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
+    static curl_socket_t OpenSocketCallback(void* clientp, curlsocktype purpose, struct curl_sockaddr* address);
 
     void log_message(std::string const& message);
     void report_error(Error error);
@@ -64,7 +65,6 @@ class CurlClient : public Client,
     static int ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
                                 curl_off_t ultotal, curl_off_t ulnow);
 
-    boost::asio::any_io_executor executor_;
     std::string host_;
     std::string port_;
     http::request<http::string_body> req_;
@@ -81,16 +81,18 @@ class CurlClient : public Client,
     std::optional<std::string> custom_ca_file_;
 
     Backoff backoff_;
-    boost::asio::steady_timer backoff_timer_;
 
     std::optional<std::string> last_event_id_;
     std::optional<detail::Event> current_event_;
 
     std::atomic<bool> shutting_down_;
-    std::atomic<bool> curl_active_;
+    std::atomic<curl_socket_t> curl_socket_;
 
     std::unique_ptr<std::thread> request_thread_;
-    std::mutex shutdown_mutex_;
+    std::mutex request_thread_mutex_;
+
+    // Keepalive reference to prevent destructor from running on request thread
+    std::shared_ptr<CurlClient> keepalive_;
 
     // SSE parser state
     std::optional<std::string> buffered_line_;
@@ -101,6 +103,7 @@ class CurlClient : public Client,
     std::chrono::steady_clock::time_point last_progress_time_;
     curl_off_t last_download_amount_;
     std::optional<std::chrono::milliseconds> effective_read_timeout_;
+    boost::asio::steady_timer backoff_timer_;
 };
 
 }  // namespace launchdarkly::sse

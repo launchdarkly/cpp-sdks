@@ -35,7 +35,7 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
                        Builder::ErrorCallback errors,
                        bool skip_verify_peer,
                        std::optional<std::string> custom_ca_file)
-    : executor_(std::move(executor)),
+    :
       host_(std::move(host)),
       port_(std::move(port)),
       req_(std::move(req)),
@@ -49,26 +49,38 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
       custom_ca_file_(std::move(custom_ca_file)),
       backoff_(initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
                kDefaultMaxBackoffDelay),
-      backoff_timer_(executor_),
       last_event_id_(std::nullopt),
       current_event_(std::nullopt),
       shutting_down_(false),
-      curl_active_(false),
+      curl_socket_(CURL_SOCKET_BAD),
       buffered_line_(std::nullopt),
-      begin_CR_(false) {
+      begin_CR_(false),
+      backoff_timer_(std::move(executor)) {
 }
 
 CurlClient::~CurlClient() {
     shutting_down_ = true;
     backoff_timer_.cancel();
 
-    if (request_thread_ && request_thread_->joinable()) {
-        request_thread_->join();
+    // Close the socket to abort the CURL operation
+    curl_socket_t sock = curl_socket_.load();
+    if (sock != CURL_SOCKET_BAD) {
+#ifdef _WIN32
+        closesocket(sock);
+#else
+        close(sock);
+#endif
+    }
+
+    // Clear keepalive reference
+    {
+        std::lock_guard<std::mutex> lock(request_thread_mutex_);
+        keepalive_.reset();
     }
 }
 
 void CurlClient::async_connect() {
-    boost::asio::post(executor_,
+    boost::asio::post(backoff_timer_.get_executor(),
                       [self = shared_from_this()]() { self->do_run(); });
 }
 
@@ -78,12 +90,18 @@ void CurlClient::do_run() {
     }
 
     // Start request in a separate thread since CURL blocks
-    request_thread_ = std::make_unique<std::thread>(
-        [self = shared_from_this()]() { self->perform_request(); });
+    {
+        std::lock_guard<std::mutex> request_thread_guard(request_thread_mutex_);
 
-    // Detach so we don't have to wait for it during shutdown
-    request_thread_->detach();
-    request_thread_.reset();
+        // Store a keepalive reference to ensure destructor doesn't run on request thread
+        keepalive_ = shared_from_this();
+
+        // Capture only raw 'this' pointer, not shared_ptr
+        request_thread_ = std::make_unique<std::thread>(
+            [this]() { this->perform_request(); });
+
+        request_thread_->detach();
+    }
 }
 
 void CurlClient::async_backoff(std::string const& reason) {
@@ -204,6 +222,8 @@ struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, OpenSocketCallback);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, this);
 
     // Don't follow redirects automatically - we'll handle them ourselves
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
@@ -239,6 +259,22 @@ int CurlClient::ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t d
     }
 
     return 0;  // Continue
+}
+
+curl_socket_t CurlClient::OpenSocketCallback(void* clientp,
+                                              curlsocktype purpose,
+                                              struct curl_sockaddr* address) {
+    auto* client = static_cast<CurlClient*>(clientp);
+
+    // Create the socket
+    curl_socket_t sockfd = socket(address->family, address->socktype, address->protocol);
+
+    // Store it so we can close it during shutdown
+    if (sockfd != CURL_SOCKET_BAD) {
+        client->curl_socket_ = sockfd;
+    }
+
+    return sockfd;
 }
 
 size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
@@ -318,7 +354,7 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
                                       : client->current_event_->type;
                 auto event_id = client->current_event_->id;
 
-                boost::asio::post(client->executor_,
+                boost::asio::post(client->backoff_timer_.get_executor(),
                                   [receiver = client->event_receiver_,
                                    type = std::move(event_type),
                                    data = std::move(event_data),
@@ -336,7 +372,7 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
         if (colon_pos == 0) {
             // Comment line, dispatch it
             std::string comment = line.substr(1);
-            boost::asio::post(client->executor_,
+            boost::asio::post(client->backoff_timer_.get_executor(),
                               [receiver = client->event_receiver_,
                                comment = std::move(comment)]() {
                                   receiver(Event("comment", comment));
@@ -439,6 +475,27 @@ bool CurlClient::handle_redirect(long response_code, CURL* curl) {
 }
 
 void CurlClient::perform_request() {
+    // RAII guard to clear keepalive when function exits
+    // This ensures destructor never runs on this thread
+    struct KeepaliveGuard {
+        CurlClient* client;
+        explicit KeepaliveGuard(CurlClient* c) : client(c) {}
+        ~KeepaliveGuard() {
+            if (!client->shutting_down_) {
+                // Post to executor so keepalive is cleared on executor thread
+                boost::asio::post(client->backoff_timer_.get_executor(),
+                                  [client = this->client]() {
+                                      std::lock_guard<std::mutex> lock(client->request_thread_mutex_);
+                                      client->keepalive_.reset();
+                                  });
+            } else {
+                // During shutdown, clear immediately since executor may be gone
+                std::lock_guard<std::mutex> lock(client->request_thread_mutex_);
+                client->keepalive_.reset();
+            }
+        }
+    } guard(this);
+
     if (shutting_down_) {
         return;
     }
@@ -449,14 +506,13 @@ void CurlClient::perform_request() {
     current_event_.reset();
     begin_CR_ = false;
 
-    curl_active_ = true;
-
     CURL* curl = curl_easy_init();
     if (!curl) {
-        boost::asio::post(executor_, [self = shared_from_this()]() {
-            self->async_backoff("failed to initialize CURL");
-        });
-        curl_active_ = false;
+        if (!shutting_down_) {
+            boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
+                self->async_backoff("failed to initialize CURL");
+            });
+        }
         return;
     }
 
@@ -482,7 +538,6 @@ void CurlClient::perform_request() {
     if (status_class == http::status_class::redirection) {
         bool should_redirect = handle_redirect(response_code, curl);
         curl_easy_cleanup(curl);
-        curl_active_ = false;
 
         if (should_redirect) {
             // Retry with new location
@@ -492,14 +547,15 @@ void CurlClient::perform_request() {
             return;
         }
         // Invalid redirect - report error
-        boost::asio::post(executor_, [self = shared_from_this()]() {
-            self->report_error(errors::NotRedirectable{});
-        });
+        if (!shutting_down_) {
+            boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
+                self->report_error(errors::NotRedirectable{});
+            });
+        }
         return;
     }
 
     curl_easy_cleanup(curl);
-    curl_active_ = false;
 
     if (shutting_down_) {
         return;
@@ -507,70 +563,84 @@ void CurlClient::perform_request() {
 
     // Handle result
     if (res != CURLE_OK) {
-        // Check if the error was due to progress callback aborting (read timeout)
-        if (res == CURLE_ABORTED_BY_CALLBACK && effective_read_timeout_) {
-            boost::asio::post(executor_, [self = shared_from_this()]() {
-                self->report_error(errors::ReadTimeout{self->read_timeout_});
-                self->async_backoff("aborting read of response body (timeout)");
-            });
-        } else {
-            std::string error_msg = "CURL error: " + std::string(curl_easy_strerror(res));
-            boost::asio::post(executor_, [self = shared_from_this(),
-                                          error_msg = std::move(error_msg)]() {
-                self->async_backoff(error_msg);
-            });
+        if (!shutting_down_) {
+            // Check if the error was due to progress callback aborting (read timeout)
+            if (res == CURLE_ABORTED_BY_CALLBACK && effective_read_timeout_) {
+                boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
+                    self->report_error(errors::ReadTimeout{self->read_timeout_});
+                    self->async_backoff("aborting read of response body (timeout)");
+                });
+            } else {
+                std::string error_msg = "CURL error: " + std::string(curl_easy_strerror(res));
+                boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this(),
+                                              error_msg = std::move(error_msg)]() {
+                    self->async_backoff(error_msg);
+                });
+            }
         }
         return;
     }
 
     if (status_class == http::status_class::successful) {
         if (status == http::status::no_content) {
-            boost::asio::post(executor_, [self = shared_from_this()]() {
-                self->report_error(errors::UnrecoverableClientError{http::status::no_content});
-            });
+            if (!shutting_down_) {
+                boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
+                    self->report_error(errors::UnrecoverableClientError{http::status::no_content});
+                });
+            }
             return;
         }
-        log_message("connected");
+        if (!shutting_down_) {
+            log_message("connected");
+        }
         backoff_.succeed();
         // Connection ended normally, reconnect
-        boost::asio::post(executor_,
-                          [self = shared_from_this()]() {
-                              self->async_backoff("connection closed normally");
-                          });
+        if (!shutting_down_) {
+            boost::asio::post(backoff_timer_.get_executor(),
+                              [self = shared_from_this()]() {
+                                  self->async_backoff("connection closed normally");
+                              });
+        }
         return;
     }
 
     if (status_class == http::status_class::client_error) {
-        bool recoverable = (status == http::status::bad_request ||
-                            status == http::status::request_timeout ||
-                            status == http::status::too_many_requests);
+        if (!shutting_down_) {
+            bool recoverable = (status == http::status::bad_request ||
+                                status == http::status::request_timeout ||
+                                status == http::status::too_many_requests);
 
-        if (recoverable) {
-            std::stringstream ss;
-            ss << "HTTP status " << static_cast<int>(status);
-            boost::asio::post(executor_, [self = shared_from_this(),
-                                          reason = ss.str()]() {
-                self->async_backoff(reason);
-            });
-        } else {
-            boost::asio::post(executor_, [self = shared_from_this(), status]() {
-                self->report_error(errors::UnrecoverableClientError{status});
-            });
+            if (recoverable) {
+                std::stringstream ss;
+                ss << "HTTP status " << static_cast<int>(status);
+                boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this(),
+                                              reason = ss.str()]() {
+                    self->async_backoff(reason);
+                });
+            } else {
+                boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this(), status]() {
+                    self->report_error(errors::UnrecoverableClientError{status});
+                });
+            }
         }
         return;
     }
 
     // Server error or other - backoff and retry
-    std::stringstream ss;
-    ss << "HTTP status " << static_cast<int>(status);
-    boost::asio::post(executor_,
-                      [self = shared_from_this(), reason = ss.str()]() {
-                          self->async_backoff(reason);
-                      });
+    if (!shutting_down_) {
+        std::stringstream ss;
+        ss << "HTTP status " << static_cast<int>(status);
+        boost::asio::post(backoff_timer_.get_executor(),
+                          [self = shared_from_this(), reason = ss.str()]() {
+                              self->async_backoff(reason);
+                          });
+    }
+
+    // Keepalive will be cleared by guard's destructor when function exits
 }
 
 void CurlClient::async_shutdown(std::function<void()> completion) {
-    boost::asio::post(executor_, [self = shared_from_this(),
+    boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this(),
                                   completion = std::move(completion)]() {
         self->do_shutdown(std::move(completion));
     });
@@ -589,12 +659,12 @@ void CurlClient::do_shutdown(std::function<void()> completion) {
 }
 
 void CurlClient::log_message(std::string const& message) {
-    boost::asio::post(executor_,
+    boost::asio::post(backoff_timer_.get_executor(),
                       [logger = logger_, message]() { logger(message); });
 }
 
 void CurlClient::report_error(Error error) {
-    boost::asio::post(executor_, [errors = errors_, error = std::move(error)]() {
+    boost::asio::post(backoff_timer_.get_executor(), [errors = errors_, error = std::move(error)]() {
         errors(error);
     });
 }
