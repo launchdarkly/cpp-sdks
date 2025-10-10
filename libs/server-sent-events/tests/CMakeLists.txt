@@ -16,6 +16,6 @@ endif ()
 
 add_executable(gtest_${LIBNAME}
         ${tests})
-target_link_libraries(gtest_${LIBNAME} launchdarkly::sse foxy GTest::gtest_main)
+target_link_libraries(gtest_${LIBNAME} launchdarkly::sse foxy GTest::gtest_main GTest::gmock)
 
 gtest_discover_tests(gtest_${LIBNAME})
