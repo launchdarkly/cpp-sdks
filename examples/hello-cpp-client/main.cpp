@@ -29,10 +29,7 @@ int main() {
         "variable.\n"
         "The value of MOBILE_KEY in main.c takes priority over LD_MOBILE_KEY.");
 
-    auto builder = ConfigBuilder(mobile_key);
-    builder.HttpProperties().Proxy("socks5h://puser:ppass@localhost:1080");
-    auto config = builder.Build();
-
+    auto config = ConfigBuilder(mobile_key).Build();
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;

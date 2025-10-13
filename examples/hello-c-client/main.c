@@ -32,8 +32,6 @@ int main() {
     LDClientConfigBuilder config_builder =
         LDClientConfigBuilder_New(mobile_key);
 
-    LDClientConfigBuilder_HttpProperties_Proxy(config_builder, "socks5h://puser:ppass@localhost:1080");
-
     LDClientConfig config = NULL;
     LDStatus config_status =
         LDClientConfigBuilder_Build(config_builder, &config);
@@ -61,7 +59,6 @@ int main() {
     } else {
         printf("SDK initialization didn't complete in %dms\n",
                INIT_TIMEOUT_MILLISECONDS);
-        LDClientSDK_Free(client);
         return 1;
     }
 
