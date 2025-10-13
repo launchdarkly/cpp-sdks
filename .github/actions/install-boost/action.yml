@@ -14,6 +14,9 @@ outputs:
   BOOST_ROOT:
     description: The location of the installed boost.
     value: ${{ steps.determine-root.outputs.BOOST_ROOT }}
+  Boost_DIR:
+    description: Location of cmake support for boost.
+    value: ${{ steps.boost-download.outputs.Boost_DIR }}
 runs:
   using: composite
   steps:

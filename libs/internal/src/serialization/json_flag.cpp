@@ -273,6 +273,13 @@ void tag_invoke(
         variation_or_rollout);
 }
 
+void tag_invoke(
+    boost::json::value_from_tag const& unused,
+    boost::json::value& json_value,
+    data_model::Flag::VariationOrRollout const& variation_or_rollout) {
+    tag_invoke(unused, json_value, variation_or_rollout, VariationOrRolloutContext());
+}
+
 void tag_invoke(boost::json::value_from_tag const& unused,
                 boost::json::value& json_value,
                 data_model::Flag::Prerequisite const& prerequisite) {

@@ -51,10 +51,10 @@ Without setting these, the test would fail to build with the same compilers as t
 
 Additionally, certain variables must be forwarded to each test project CMake configuration.
 
-| Variable           | Explanation      |
-|--------------------|------------------|
-| `BOOST_ROOT`       | Path to Boost.   |
-| `OPENSSL_ROOT_DIR` | Path to OpenSSL. |
+| Variable           | Explanation                                                                                             |
+|--------------------|---------------------------------------------------------------------------------------------------------|
+| `Boost_DIR`        | Path to boost CMAKE configuration.  Example: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0' |
+| `OPENSSL_ROOT_DIR` | Path to OpenSSL.                                                                                        |
 
 ## Tests
 

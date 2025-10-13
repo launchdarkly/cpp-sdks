@@ -12,6 +12,14 @@ project(
         LANGUAGES CXX C
 )
 
+# Boost is using some deprecated built-ins which causes build errors when compiling foxy on mac.
+# For now disable the warnings for deprecated built-ins while using Apple's toolchains.
+add_compile_options(
+        $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>>:-Wno-deprecated-builtins>
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-deprecated-builtins>
+)
+
+
 # Allow BOOST_ROOT to be set by CI without warnings.
 if (POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
