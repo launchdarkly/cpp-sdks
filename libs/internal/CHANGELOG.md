@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.12.0...launchdarkly-cpp-internal-v0.12.1) (2025-10-10)
+
+
+### Bug Fixes
+
+* Ensure that serialization of a variation or rollout uses the correct overload. ([#483](https://github.com/launchdarkly/cpp-sdks/issues/483)) ([b598803](https://github.com/launchdarkly/cpp-sdks/commit/b5988039e986ea50c5a165bd5c388f205a7876bd))
+
 ## [0.12.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.11.0...launchdarkly-cpp-internal-v0.12.0) (2025-06-04)
 
 
