@@ -4,5 +4,5 @@
   "libs/common": "1.10.0",
   "libs/internal": "0.12.1",
   "libs/server-sdk": "3.9.1",
-  "libs/server-sdk-redis-source": "2.1.20"
+  "libs/server-sdk-redis-source": "2.2.0"
 }

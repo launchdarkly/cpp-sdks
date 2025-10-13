@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.20...launchdarkly-cpp-server-redis-source-v2.2.0) (2025-10-13)
+
+
+### Features
+
+* Update to hiredis 1.3 ([#485](https://github.com/launchdarkly/cpp-sdks/issues/485)) ([3315e6d](https://github.com/launchdarkly/cpp-sdks/commit/3315e6da4785ca61cfc15e1c6a11ffa15a56ef41))
+
 ## [2.1.20](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.1.19...launchdarkly-cpp-server-redis-source-v2.1.20) (2025-10-10)
 
 
