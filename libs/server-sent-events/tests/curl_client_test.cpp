@@ -844,3 +844,271 @@ TEST(CurlClientTest, HandlesRapidEvents) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
+
+// Shutdown-specific tests - critical for preventing crashes/hangs in user applications
+
+TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
+    // Tests curl_client.cpp:138 - on_backoff checks shutting_down_
+    // This ensures clean shutdown during backoff/retry wait period
+    std::atomic<int> connection_attempts{0};
+
+    auto handler = [&](auto const&, auto send_response, auto, auto) {
+        connection_attempts++;
+        // Return 500 to trigger backoff
+        http::response<http::string_body> res{http::status::internal_server_error, 11};
+        res.body() = "Error";
+        res.prepare_payload();
+        send_response(res);
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) { collector.add_event(std::move(e)); })
+        .initial_reconnect_delay(2000ms)  // Long delay to ensure we shutdown during wait
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+
+    // Wait for first connection attempt to complete
+    std::this_thread::sleep_for(200ms);
+    EXPECT_GE(connection_attempts.load(), 1);
+
+    // Now shutdown while it's waiting in backoff
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should complete quickly despite long backoff delay
+    EXPECT_LT(shutdown_duration, 1000ms);
+
+    // Should NOT have made another connection attempt during backoff
+    EXPECT_EQ(1, connection_attempts.load());
+}
+
+TEST(CurlClientTest, ShutdownDuringDataReception) {
+    // Tests curl_client.cpp:235 - WriteCallback checks shutting_down_
+    // This covers the branch where we abort during SSE data parsing
+    SimpleLatch server_sending(1);
+    SimpleLatch client_received_some(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event, auto) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        // Send events continuously
+        for (int i = 0; i < 100; i++) {
+            if (!send_sse_event(SSEFormatter::event("event " + std::to_string(i)))) {
+                return;  // Connection closed or error - stop sending
+            }
+            if (i == 2) {
+                server_sending.count_down();
+            }
+            std::this_thread::sleep_for(10ms);  // Slow enough to allow shutdown mid-stream
+        }
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) {
+            collector.add_event(std::move(e));
+            if (collector.events().size() >= 2) {
+                client_received_some.count_down();
+            }
+        })
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+
+    // Wait until server is sending and client has received some events
+    ASSERT_TRUE(server_sending.wait_for(5000ms));
+    ASSERT_TRUE(client_received_some.wait_for(5000ms));
+
+    // Shutdown while WriteCallback is actively processing data
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should complete quickly even during active data transfer
+    EXPECT_LT(shutdown_duration, 2000ms);
+}
+
+TEST(CurlClientTest, ShutdownDuringProgressCallback) {
+    // Tests curl_client.cpp:188 - ProgressCallback checks shutting_down_
+    // This ensures we can abort during slow data transfer
+    SimpleLatch server_started(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event, auto) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        server_started.count_down();
+
+        // Send one event then pause (simulating slow connection)
+        send_sse_event(SSEFormatter::event("first"));
+        std::this_thread::sleep_for(5000ms);  // Pause to simulate slow connection
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) { collector.add_event(std::move(e)); })
+        .read_timeout(10000ms)  // Long timeout so ProgressCallback is called but doesn't abort
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+
+    // Wait for first event and server pause
+    ASSERT_TRUE(server_started.wait_for(5000ms));
+    ASSERT_TRUE(collector.wait_for_events(1, 5000ms));
+
+    // Shutdown while ProgressCallback is being invoked during the pause
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should abort the transfer quickly
+    EXPECT_LT(shutdown_duration, 2000ms);
+}
+
+TEST(CurlClientTest, MultipleShutdownCalls) {
+    // Ensures multiple shutdown calls don't cause issues (idempotency test)
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::simple_event("test"));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) { collector.add_event(std::move(e)); })
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+    ASSERT_TRUE(collector.wait_for_events(1));
+
+    // Call shutdown multiple times in rapid succession
+    SimpleLatch shutdown_latch1(1);
+    SimpleLatch shutdown_latch2(1);
+    SimpleLatch shutdown_latch3(1);
+
+    client->async_shutdown([&] { shutdown_latch1.count_down(); });
+    client->async_shutdown([&] { shutdown_latch2.count_down(); });
+    client->async_shutdown([&] { shutdown_latch3.count_down(); });
+
+    // All shutdown completions should be called
+    EXPECT_TRUE(shutdown_latch1.wait_for(5000ms));
+    EXPECT_TRUE(shutdown_latch2.wait_for(5000ms));
+    EXPECT_TRUE(shutdown_latch3.wait_for(5000ms));
+}
+
+TEST(CurlClientTest, ShutdownAfterConnectionClosed) {
+    // Tests shutdown when connection has already ended naturally
+    MockSSEServer server;
+    auto port = server.start([](auto const&, auto send_response, auto send_sse_event, auto close) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("only event"));
+        std::this_thread::sleep_for(10ms);
+        close();  // Server closes connection
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) { collector.add_event(std::move(e)); })
+        .initial_reconnect_delay(500ms)  // Will try to reconnect after close
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+    ASSERT_TRUE(collector.wait_for_events(1));
+
+    // Wait for connection to close and reconnect attempt to start
+    std::this_thread::sleep_for(200ms);
+
+    // Shutdown after natural connection close
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
+    // Tests curl_client.cpp:439 - perform_request checks shutting_down_ at start
+    // Server that delays before responding to test shutdown during connection phase
+    SimpleLatch connection_started(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event, auto close) {
+        connection_started.count_down();
+        // Delay before responding
+        std::this_thread::sleep_for(500ms);
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("test"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
+        .receiver([&](Event e) { collector.add_event(std::move(e)); })
+        .use_curl(true)
+        .build();
+
+    client->async_connect();
+
+    // Wait for connection to start but shutdown before it completes
+    ASSERT_TRUE(connection_started.wait_for(5000ms));
+    std::this_thread::sleep_for(50ms);  // Give CURL time to start but not finish
+
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should abort the pending connection quickly
+    EXPECT_LT(shutdown_duration, 2000ms);
+
+    // Should not have received any events since we shutdown during connection
+    EXPECT_EQ(0, collector.events().size());
+}

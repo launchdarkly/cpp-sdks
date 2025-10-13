@@ -6,11 +6,12 @@
 #include <memory>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <functional>
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include <mutex>
+#include <vector>
 
 namespace launchdarkly::sse::test {
 
@@ -29,7 +30,7 @@ public:
     using RequestHandler = std::function<void(
         http::request<http::string_body> const& req,
         std::function<void(http::response<http::string_body>)> send_response,
-        std::function<void(std::string const&)> send_sse_event,
+        std::function<bool(std::string const&)> send_sse_event,
         std::function<void()> close_connection
     )>;
 
@@ -49,7 +50,6 @@ public:
      * Returns the port number.
      */
     uint16_t start(RequestHandler handler, bool use_ssl = false) {
-        std::cout << "[MockServer] start: initializing server" << std::endl;
         handler_ = std::move(handler);
         use_ssl_ = use_ssl;
 
@@ -63,18 +63,12 @@ public:
         port_ = acceptor_.local_endpoint().port();
         running_ = true;
 
-        std::cout << "[MockServer] Server bound to port " << port_ << std::endl;
-
         // Start accepting connections in a background thread
         server_thread_ = std::thread([this]() {
-            std::cout << "[MockServer] Background thread started" << std::endl;
             do_accept();
-            std::cout << "[MockServer] About to run io_context" << std::endl;
             ioc_.run();
-            std::cout << "[MockServer] io_context.run() exited" << std::endl;
         });
 
-        std::cout << "[MockServer] Server started on port " << port_ << std::endl;
         return port_;
     }
 
@@ -84,6 +78,17 @@ public:
         }
 
         running_ = false;
+
+        // Close all active connections
+        {
+            std::lock_guard<std::mutex> lock(connections_mutex_);
+            for (auto& conn : active_connections_) {
+                if (auto c = conn.lock()) {
+                    c->force_close();
+                }
+            }
+            active_connections_.clear();
+        }
 
         boost::system::error_code ec;
         acceptor_.close(ec);
@@ -105,19 +110,12 @@ public:
 private:
     void do_accept() {
         if (!running_) {
-            std::cout << "[MockServer] do_accept: not running, returning" << std::endl;
             return;
         }
 
-        std::cout << "[MockServer] do_accept: waiting for connection on port " << port_ << std::endl;
         acceptor_.async_accept(
             [this](boost::system::error_code ec, tcp::socket socket) {
-                if (ec) {
-                    std::cout << "[MockServer] async_accept error: " << ec.message() << std::endl;
-                } else {
-                    std::cout << "[MockServer] Connection accepted from "
-                              << socket.remote_endpoint().address().to_string()
-                              << ":" << socket.remote_endpoint().port() << std::endl;
+                if (!ec) {
                     handle_connection(std::move(socket));
                 }
 
@@ -128,11 +126,16 @@ private:
     }
 
     void handle_connection(tcp::socket socket) {
-        std::cout << "[MockServer] handle_connection: creating Connection object" << std::endl;
         auto conn = std::make_shared<Connection>(
             std::move(socket), handler_);
+
+        // Track active connections
+        {
+            std::lock_guard<std::mutex> lock(connections_mutex_);
+            active_connections_.push_back(conn);
+        }
+
         conn->start();
-        std::cout << "[MockServer] handle_connection: Connection started" << std::endl;
     }
 
     struct Connection : std::enable_shared_from_this<Connection> {
@@ -149,38 +152,34 @@ private:
         }
 
         void start() {
-            std::cout << "[Connection] start: beginning read" << std::endl;
             do_read();
         }
 
+        void force_close() {
+            closed_ = true;
+            boost::system::error_code ec;
+            socket_.shutdown(tcp::socket::shutdown_both, ec);
+            socket_.close(ec);
+        }
+
         void do_read() {
-            std::cout << "[Connection] do_read: async_read started" << std::endl;
             auto self = shared_from_this();
             http::async_read(
                 socket_,
                 buffer_,
                 req_,
-                [self](boost::system::error_code ec, std::size_t bytes) {
-                    if (ec) {
-                        std::cout << "[Connection] async_read error: " << ec.message() << std::endl;
-                        return;
+                [self](boost::system::error_code ec, std::size_t) {
+                    if (!ec) {
+                        self->handle_request();
                     }
-                    std::cout << "[Connection] async_read success: " << bytes << " bytes read" << std::endl;
-                    std::cout << "[Connection] Request: " << self->req_.method_string() << " "
-                              << self->req_.target() << std::endl;
-                    self->handle_request();
                 });
         }
 
         void handle_request() {
-            std::cout << "[Connection] handle_request: setting up callbacks" << std::endl;
             auto self = shared_from_this();
 
             auto send_response = [self](http::response<http::string_body> res) {
-                std::cout << "[Connection] send_response called: status=" << res.result_int()
-                          << ", chunked=" << res.chunked() << std::endl;
                 if (self->closed_) {
-                    std::cout << "[Connection] send_response: already closed, skipping" << std::endl;
                     return;
                 }
 
@@ -188,18 +187,11 @@ private:
 
                 // For error responses and redirects (with body or no SSE), write complete response
                 if (res.result() != http::status::ok || !res.chunked()) {
-                    std::cout << "[Connection] Sending complete response" << std::endl;
                     http::write(self->socket_, res, ec);
-                    if (ec) {
-                        std::cout << "[Connection] Error writing response: " << ec.message() << std::endl;
-                    } else {
-                        std::cout << "[Connection] Complete response sent successfully" << std::endl;
-                    }
                     return;
                 }
 
                 // For SSE (chunked OK responses), manually send headers to keep connection open
-                std::cout << "[Connection] Sending SSE response headers" << std::endl;
                 std::ostringstream oss;
                 oss << "HTTP/1.1 " << res.result_int() << " " << res.reason() << "\r\n";
                 for (auto const& field : res) {
@@ -208,20 +200,12 @@ private:
                 oss << "\r\n";  // End of headers
 
                 std::string header_str = oss.str();
-                std::cout << "[Connection] Headers to send:\n" << header_str << std::endl;
                 net::write(self->socket_, net::buffer(header_str), ec);
-                if (ec) {
-                    std::cout << "[Connection] Error writing headers: " << ec.message() << std::endl;
-                } else {
-                    std::cout << "[Connection] Headers sent successfully, " << header_str.size() << " bytes" << std::endl;
-                }
             };
 
-            auto send_sse_event = [self](std::string const& data) {
-                std::cout << "[Connection] send_sse_event called: " << data.size() << " bytes" << std::endl;
+            auto send_sse_event = [self](std::string const& data) -> bool {
                 if (self->closed_) {
-                    std::cout << "[Connection] send_sse_event: already closed, skipping" << std::endl;
-                    return;
+                    return false;
                 }
 
                 boost::system::error_code ec;
@@ -231,21 +215,19 @@ private:
                 chunk << std::hex << data.size() << "\r\n" << data << "\r\n";
                 std::string chunk_str = chunk.str();
 
-                std::cout << "[Connection] Sending chunk: size=" << data.size()
-                          << ", total chunk size=" << chunk_str.size() << " bytes" << std::endl;
-
                 net::write(self->socket_, net::buffer(chunk_str), ec);
+
+                // If write failed, mark connection as closed to prevent further writes
                 if (ec) {
-                    std::cout << "[Connection] Error writing SSE data: " << ec.message() << std::endl;
-                } else {
-                    std::cout << "[Connection] SSE chunk sent successfully" << std::endl;
+                    self->closed_ = true;
+                    return false;
                 }
+
+                return true;
             };
 
             auto close_connection = [self]() {
-                std::cout << "[Connection] close_connection called" << std::endl;
                 if (self->closed_) {
-                    std::cout << "[Connection] Already closed" << std::endl;
                     return;
                 }
                 self->closed_ = true;
@@ -253,29 +235,13 @@ private:
                 // Send final chunk terminator for chunked encoding
                 boost::system::error_code ec;
                 std::string final_chunk = "0\r\n\r\n";
-                std::cout << "[Connection] Sending final chunk terminator" << std::endl;
                 net::write(self->socket_, net::buffer(final_chunk), ec);
-                if (ec) {
-                    std::cout << "[Connection] Error writing final chunk: " << ec.message() << std::endl;
-                } else {
-                    std::cout << "[Connection] Final chunk sent" << std::endl;
-                }
 
                 self->socket_.shutdown(tcp::socket::shutdown_both, ec);
-                if (ec) {
-                    std::cout << "[Connection] Error during shutdown: " << ec.message() << std::endl;
-                }
                 self->socket_.close(ec);
-                if (ec) {
-                    std::cout << "[Connection] Error during close: " << ec.message() << std::endl;
-                } else {
-                    std::cout << "[Connection] Connection closed successfully" << std::endl;
-                }
             };
 
-            std::cout << "[Connection] Calling handler" << std::endl;
             handler_(req_, send_response, send_sse_event, close_connection);
-            std::cout << "[Connection] Handler returned" << std::endl;
         }
     };
 
@@ -286,6 +252,8 @@ private:
     std::atomic<bool> running_;
     std::atomic<uint16_t> port_;
     bool use_ssl_;
+    std::mutex connections_mutex_;
+    std::vector<std::weak_ptr<Connection>> active_connections_;
 };
 
 /**
@@ -349,13 +317,11 @@ public:
             res.keep_alive(true);
             res.chunked(true);
 
-            // Send response headers
             send_response(res);
+            if (!send_sse_event(SSEFormatter::event(data))) {
+                return;  // Connection closed or error
+            }
 
-            // Send SSE event
-            send_sse_event(SSEFormatter::event(data));
-
-            // Close connection after a brief delay
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             close();
         };
@@ -376,7 +342,9 @@ public:
             send_response(res);
 
             for (auto const& data : events) {
-                send_sse_event(SSEFormatter::event(data));
+                if (!send_sse_event(SSEFormatter::event(data))) {
+                    return;  // Connection closed or error
+                }
                 std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
 
@@ -453,7 +421,9 @@ public:
                 info += "body: " + req.body() + "\n";
             }
 
-            send_sse_event(SSEFormatter::event(info));
+            if (!send_sse_event(SSEFormatter::event(info))) {
+                return;  // Connection closed or error
+            }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
             close();
