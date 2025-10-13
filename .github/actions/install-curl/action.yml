@@ -34,14 +34,14 @@ runs:
       id: windows-action
       shell: bash
       run: |
-        # Download CURL 8.16.0 with OpenSSL for Windows (MSVC build)
-        curl -L https://curl.se/windows/dl-8.16.0/curl-8.16.0-win64-msvc.zip -o curl.zip
+        # Download CURL 8.16.0 with OpenSSL for Windows (MinGW build, compatible with MSVC)
+        curl -L https://curl.se/windows/dl-8.16.0_6/curl-8.16.0_6-win64-mingw.zip -o curl.zip
 
         # Extract to C:\curl-install
         7z x curl.zip -oC:\curl-install
 
-        # The archive extracts to a subdirectory named curl-8.16.0-win64-msvc
-        echo "CURL_ROOT=C:\\curl-install\\curl-8.16.0-win64-msvc" >> $GITHUB_OUTPUT
+        # The archive extracts to a subdirectory named curl-8.16.0_6-win64-mingw
+        echo "CURL_ROOT=C:\\curl-install\\curl-8.16.0_6-win64-mingw" >> $GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
