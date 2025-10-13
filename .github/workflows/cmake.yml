@@ -22,6 +22,17 @@ jobs:
         with:
           platform_version: '22.04'
 
+  test-ubuntu-curl:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CURL
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+      - uses: ./.github/actions/cmake-test
+        with:
+          platform_version: '22.04'
+          cmake_extra_args: '-DLD_CURL_NETWORKING=ON'
+
   test-macos:
     runs-on: macos-13
     steps:
@@ -29,6 +40,17 @@ jobs:
       - uses: ./.github/actions/cmake-test
         with:
           platform_version: '12'
+
+  test-macos-curl:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CURL
+        run: brew install curl
+      - uses: ./.github/actions/cmake-test
+        with:
+          platform_version: '12'
+          cmake_extra_args: '-DLD_CURL_NETWORKING=ON'
 
   test-windows:
     runs-on: windows-2022
@@ -41,3 +63,20 @@ jobs:
         with:
           platform_version: 2022
           toolset: msvc
+
+  test-windows-curl:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ./.github/actions/install-curl
+        id: install-curl
+      - uses: ./.github/actions/cmake-test
+        env:
+          Boost_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0'
+          CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+          CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
+        with:
+          platform_version: 2022
+          toolset: msvc
+          cmake_extra_args: '-DLD_CURL_NETWORKING=ON'

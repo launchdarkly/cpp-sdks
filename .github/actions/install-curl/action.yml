@@ -1,0 +1,63 @@
+name: Install CURL
+description: 'Install CURL development libraries for all platforms.'
+
+outputs:
+  CURL_ROOT:
+    description: The location of the installed CURL.
+    value: ${{ steps.determine-root.outputs.CURL_ROOT }}
+
+runs:
+  using: composite
+  steps:
+    # Linux: Install via apt-get
+    - name: Install CURL for Ubuntu
+      if: runner.os == 'Linux'
+      id: apt-action
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev
+        echo "CURL_ROOT=/usr" >> $GITHUB_OUTPUT
+
+    # macOS: Install via homebrew
+    - name: Install CURL for macOS
+      if: runner.os == 'macOS'
+      id: brew-action
+      shell: bash
+      run: |
+        brew install curl
+        echo "CURL_ROOT=$(brew --prefix curl)" >> $GITHUB_OUTPUT
+
+    # Windows: Download pre-built binaries from curl.se
+    - name: Install CURL for Windows
+      if: runner.os == 'Windows'
+      id: windows-action
+      shell: bash
+      run: |
+        # Download CURL 8.16.0 with OpenSSL for Windows (MSVC build)
+        curl -L https://curl.se/windows/dl-8.16.0/curl-8.16.0-win64-msvc.zip -o curl.zip
+
+        # Extract to C:\curl-install
+        7z x curl.zip -oC:\curl-install
+
+        # The archive extracts to a subdirectory named curl-8.16.0-win64-msvc
+        echo "CURL_ROOT=C:\\curl-install\\curl-8.16.0-win64-msvc" >> $GITHUB_OUTPUT
+
+    - name: Determine root
+      id: determine-root
+      shell: bash
+      run: |
+        if [ ! -z "$ROOT_APT" ]; then
+          echo "CURL_ROOT=$ROOT_APT" >> $GITHUB_OUTPUT
+          echo Setting CURL_ROOT to "$ROOT_APT"
+        elif [ ! -z "$ROOT_BREW" ]; then
+          echo "CURL_ROOT=$ROOT_BREW" >> $GITHUB_OUTPUT
+          echo Setting CURL_ROOT to "$ROOT_BREW"
+        elif [ ! -z "$ROOT_WINDOWS" ]; then
+          echo "CURL_ROOT=$ROOT_WINDOWS" >> $GITHUB_OUTPUT
+          echo Setting CURL_ROOT to "$ROOT_WINDOWS"
+        fi
+      env:
+        ROOT_APT: ${{ steps.apt-action.outputs.CURL_ROOT }}
+        ROOT_BREW: ${{ steps.brew-action.outputs.CURL_ROOT }}
+        ROOT_WINDOWS: ${{ steps.windows-action.outputs.CURL_ROOT }}
