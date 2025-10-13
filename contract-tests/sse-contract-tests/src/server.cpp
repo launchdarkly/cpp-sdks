@@ -13,11 +13,10 @@ using launchdarkly::LogLevel;
 server::server(net::io_context& ioc,
                std::string const& address,
                unsigned short port,
-               launchdarkly::Logger& logger,
-               bool use_curl)
+               launchdarkly::Logger& logger)
     : listener_{ioc.get_executor(),
                 tcp::endpoint(boost::asio::ip::make_address(address), port)},
-      entity_manager_{ioc.get_executor(), logger, use_curl},
+      entity_manager_{ioc.get_executor(), logger},
       logger_{logger} {
     LD_LOG(logger_, LogLevel::kInfo)
         << "server: listening on " << address << ":" << port;

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef LD_CURL_NETWORKING
+
 #include <launchdarkly/sse/client.hpp>
 #include "backoff.hpp"
 #include "parser.hpp"
@@ -109,3 +111,5 @@ class CurlClient : public Client,
 };
 
 }  // namespace launchdarkly::sse
+
+#endif  // LD_CURL_NETWORKING

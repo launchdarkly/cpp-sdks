@@ -4,6 +4,7 @@
 #include <chrono>
 #include <functional>
 #include <tuple>
+#include <variant>
 
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/requester.hpp>

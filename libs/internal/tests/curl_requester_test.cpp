@@ -1,3 +1,5 @@
+#ifdef LD_CURL_NETWORKING
+
 #include <gtest/gtest.h>
 
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>
@@ -326,3 +328,5 @@ TEST_F(CurlRequesterTest, HandlesInvalidUrl) {
     ASSERT_TRUE(callback_called);
     EXPECT_TRUE(result.IsError());
 }
+
+#endif  // LD_CURL_NETWORKING

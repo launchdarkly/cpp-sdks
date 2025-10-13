@@ -108,6 +108,8 @@ option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
 option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
 
+option(LD_CURL_NETWORKING "Enable CURL-based networking for SSE client (alternative to Boost.Beast/Foxy)" OFF)
+
 # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
 # it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
 # so that we only need to build the client or server for a given release (if only the client or server were affected.)

@@ -4,9 +4,8 @@
 using launchdarkly::LogLevel;
 
 EntityManager::EntityManager(boost::asio::any_io_executor executor,
-                             launchdarkly::Logger& logger,
-                             bool use_curl)
-    : counter_{0}, executor_{std::move(executor)}, logger_{logger}, use_curl_{use_curl} {}
+                             launchdarkly::Logger& logger)
+    : counter_{0}, executor_{std::move(executor)}, logger_{logger} {}
 
 std::optional<std::string> EntityManager::create(ConfigParams const& params) {
     std::string id = std::to_string(counter_++);
@@ -39,11 +38,6 @@ std::optional<std::string> EntityManager::create(ConfigParams const& params) {
     if (params.initialDelayMs) {
         client_builder.initial_reconnect_delay(
             std::chrono::milliseconds(*params.initialDelayMs));
-    }
-
-    // Use the global CURL setting from command line
-    if (use_curl_) {
-        client_builder.use_curl(true);
     }
 
     client_builder.logger([this](std::string msg) {

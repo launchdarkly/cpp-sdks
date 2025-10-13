@@ -18,4 +18,8 @@ add_executable(gtest_${LIBNAME}
         ${tests})
 target_link_libraries(gtest_${LIBNAME} launchdarkly::sse foxy GTest::gtest_main GTest::gmock)
 
+if (LD_CURL_NETWORKING)
+    target_compile_definitions(gtest_${LIBNAME} PRIVATE LD_CURL_NETWORKING)
+endif()
+
 gtest_discover_tests(gtest_${LIBNAME})

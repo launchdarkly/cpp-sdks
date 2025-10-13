@@ -14,6 +14,7 @@
 #include <chrono>
 
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 namespace launchdarkly::client_side::data_sources {
 

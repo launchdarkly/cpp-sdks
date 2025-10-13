@@ -30,13 +30,11 @@ class server {
      * @param address Address to bind.
      * @param port Port to bind.
      * @param logger Logger.
-     * @param use_curl Whether to use CURL implementation for SSE clients.
      */
     server(net::io_context& ioc,
            std::string const& address,
            unsigned short port,
-           launchdarkly::Logger& logger,
-           bool use_curl = false);
+           launchdarkly::Logger& logger);
     /**
      * Advertise an optional test-harness capability, such as "comments".
      * @param cap

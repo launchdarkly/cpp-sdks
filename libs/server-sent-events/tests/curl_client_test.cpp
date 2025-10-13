@@ -1,3 +1,5 @@
+#ifdef LD_CURL_NETWORKING
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -132,7 +134,6 @@ TEST(CurlClientTest, ConnectsToHttpServer) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -156,7 +157,6 @@ TEST(CurlClientTest, HandlesMultipleEvents) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -193,7 +193,6 @@ TEST(CurlClientTest, ParsesEventWithType) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -227,7 +226,6 @@ TEST(CurlClientTest, ParsesEventWithId) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -261,7 +259,6 @@ TEST(CurlClientTest, ParsesMultiLineData) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -299,7 +296,6 @@ TEST(CurlClientTest, HandlesComments) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -341,7 +337,6 @@ TEST(CurlClientTest, SupportsPostMethod) {
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .method(http::verb::post)
         .body("test body")
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -378,7 +373,6 @@ TEST(CurlClientTest, SupportsReportMethod) {
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .method(http::verb::report)
         .body("test body")
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -419,7 +413,6 @@ TEST(CurlClientTest, SendsCustomHeaders) {
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .header("X-Custom-Header", "custom-value")
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -444,7 +437,6 @@ TEST(CurlClientTest, Handles404Error) {
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .errors([&](Error e) { collector.add_error(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -481,7 +473,6 @@ TEST(CurlClientTest, Handles500Error) {
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .errors([&](Error e) { collector.add_error(std::move(e)); })
         .initial_reconnect_delay(50ms)  // Short delay for test
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -517,7 +508,6 @@ TEST(CurlClientTest, FollowsRedirects) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(redirect_port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -554,7 +544,6 @@ TEST(CurlClientTest, ShutdownStopsClient) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -582,7 +571,6 @@ TEST(CurlClientTest, CanShutdownBeforeConnection) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     // Shutdown immediately without connecting
@@ -611,7 +599,6 @@ TEST(CurlClientTest, HandlesImmediateClose) {
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .errors([&](Error e) { collector.add_error(std::move(e)); })
         .initial_reconnect_delay(50ms)  // Short delay for test
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -656,7 +643,6 @@ TEST(CurlClientTest, RespectsReadTimeout) {
         .errors([&](Error e) { collector.add_error(std::move(e)); })
         .read_timeout(500ms)  // Short timeout for test
         .initial_reconnect_delay(50ms)
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -687,8 +673,7 @@ TEST(CurlClientTest, NoThreadLeaksAfterMultipleConnections) {
 
         auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
             .receiver([&](Event e) { collector.add_event(std::move(e)); })
-            .use_curl(true)
-            .build();
+                .build();
 
         client->async_connect();
         ASSERT_TRUE(collector.wait_for_events(1));
@@ -725,8 +710,7 @@ TEST(CurlClientTest, DestructorCleansUpProperly) {
     {
         auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
             .receiver([&](Event e) { collector.add_event(std::move(e)); })
-            .use_curl(true)
-            .build();
+                .build();
 
         client->async_connect();
         ASSERT_TRUE(collector.wait_for_events(1));
@@ -758,7 +742,6 @@ TEST(CurlClientTest, HandlesEmptyEventData) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -792,7 +775,6 @@ TEST(CurlClientTest, HandlesEventWithOnlyType) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -831,7 +813,6 @@ TEST(CurlClientTest, HandlesRapidEvents) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -870,7 +851,6 @@ TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .initial_reconnect_delay(2000ms)  // Long delay to ensure we shutdown during wait
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -930,7 +910,6 @@ TEST(CurlClientTest, ShutdownDuringDataReception) {
                 client_received_some.count_down();
             }
         })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -977,7 +956,6 @@ TEST(CurlClientTest, ShutdownDuringProgressCallback) {
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .read_timeout(10000ms)  // Long timeout so ProgressCallback is called but doesn't abort
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -1007,7 +985,6 @@ TEST(CurlClientTest, MultipleShutdownCalls) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -1048,7 +1025,6 @@ TEST(CurlClientTest, ShutdownAfterConnectionClosed) {
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
         .initial_reconnect_delay(500ms)  // Will try to reconnect after close
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -1091,7 +1067,6 @@ TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .use_curl(true)
         .build();
 
     client->async_connect();
@@ -1112,3 +1087,4 @@ TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
     // Should not have received any events since we shutdown during connection
     EXPECT_EQ(0, collector.events().size());
 }
+#endif  // LD_CURL_NETWORKING

@@ -26,7 +26,6 @@ class EntityManager {
     boost::asio::any_io_executor executor_;
 
     launchdarkly::Logger& logger_;
-    bool use_curl_;
 
    public:
     /**
@@ -34,11 +33,9 @@ class EntityManager {
      * entities (SSE clients + event channel back to test harness).
      * @param executor Executor.
      * @param logger Logger.
-     * @param use_curl Whether to use CURL implementation for SSE clients.
      */
     EntityManager(boost::asio::any_io_executor executor,
-                  launchdarkly::Logger& logger,
-                  bool use_curl = false);
+                  launchdarkly::Logger& logger);
     /**
      * Create an entity with the given configuration.
      * @param params Config of the entity.

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef LD_CURL_NETWORKING
+
 #include "http_requester.hpp"
 #include "asio_requester.hpp"
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -26,3 +28,5 @@ private:
 };
 
 } // namespace launchdarkly::network
+
+#endif  // LD_CURL_NETWORKING

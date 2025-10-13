@@ -10,7 +10,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} OBJECT
+set(INTERNAL_SOURCES
         ${HEADER_LIST}
         context_filter.cpp
         events/asio_event_processor.cpp
@@ -27,7 +27,7 @@ add_library(${LIBNAME} OBJECT
         logging/logger.cpp
         network/http_error_messages.cpp
         network/http_requester.cpp
-        network/curl_requester.cpp
+        network/requester.cpp
         serialization/events/json_events.cpp
         serialization/json_attributes.cpp
         serialization/json_context.cpp
@@ -47,6 +47,14 @@ add_library(${LIBNAME} OBJECT
         encoding/sha_1.cpp
         signals/boost_signal_connection.cpp)
 
+if (LD_CURL_NETWORKING)
+    message(STATUS "LaunchDarkly Internal: CURL networking enabled")
+    find_package(CURL REQUIRED)
+    list(APPEND INTERNAL_SOURCES network/curl_requester.cpp)
+endif()
+
+add_library(${LIBNAME} OBJECT ${INTERNAL_SOURCES})
+
 add_library(launchdarkly::internal ALIAS ${LIBNAME})
 
 # TODO(SC-209963): Remove once OpenSSL deprecated hash function usage has been updated
@@ -57,11 +65,14 @@ target_compile_options(${LIBNAME} PRIVATE
 
 message(STATUS "LaunchDarklyInternalSdk_SOURCE_DIR=${LaunchDarklyInternalSdk_SOURCE_DIR}")
 
-find_package(CURL)
-
 target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
-        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy CURL::libcurl)
+        PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
+
+if (LD_CURL_NETWORKING)
+    target_link_libraries(${LIBNAME} PRIVATE CURL::libcurl)
+    target_compile_definitions(${LIBNAME} PRIVATE LD_CURL_NETWORKING)
+endif()
 
 # Need the public headers to build.
 target_include_directories(${LIBNAME}

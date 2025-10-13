@@ -1,3 +1,5 @@
+#ifdef LD_CURL_NETWORKING
+
 #include "launchdarkly/network/curl_requester.hpp"
 #include <curl/curl.h>
 #include <memory>
@@ -224,4 +226,6 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
     });
 }
 
-}
+}  // namespace launchdarkly::network
+
+#endif  // LD_CURL_NETWORKING

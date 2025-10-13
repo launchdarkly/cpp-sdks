@@ -1,4 +1,6 @@
 #include <boost/json.hpp>
+#include <boost/asio/error.hpp>
+#include <boost/asio/post.hpp>
 
 #include <launchdarkly/client_side/data_source_status.hpp>
 #include <launchdarkly/config/shared/builders/http_properties_builder.hpp>

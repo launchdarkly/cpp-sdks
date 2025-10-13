@@ -1,3 +1,5 @@
+#ifdef LD_CURL_NETWORKING
+
 #include "curl_client.hpp"
 
 #include <boost/asio/post.hpp>
@@ -692,3 +694,5 @@ void CurlClient::report_error(Error error) {
 }
 
 }  // namespace launchdarkly::sse
+
+#endif  // LD_CURL_NETWORKING
