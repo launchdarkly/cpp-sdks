@@ -32,16 +32,29 @@ runs:
     - name: Install CURL for Windows
       if: runner.os == 'Windows'
       id: windows-action
-      shell: bash
+      shell: pwsh
       run: |
         # Download CURL 8.16.0 with OpenSSL for Windows (MinGW build, compatible with MSVC)
-        curl -L https://curl.se/windows/dl-8.16.0_6/curl-8.16.0_6-win64-mingw.zip -o curl.zip
+        $url = "https://curl.se/windows/dl-8.16.0_6/curl-8.16.0_6-win64-mingw.zip"
+        $output = "curl.zip"
+
+        Write-Host "Downloading CURL from $url"
+        Invoke-WebRequest -Uri $url -OutFile $output -MaximumRetryCount 3 -RetryIntervalSec 5
+
+        # Verify the download
+        $fileInfo = Get-Item $output
+        Write-Host "Downloaded file size: $($fileInfo.Length) bytes"
 
         # Extract to C:\curl-install
-        7z x curl.zip -oC:\curl-install
+        Write-Host "Extracting CURL archive..."
+        Expand-Archive -Path $output -DestinationPath "C:\curl-install" -Force
+
+        # Verify extraction
+        Write-Host "Extracted contents:"
+        Get-ChildItem -Path "C:\curl-install" -Recurse -Depth 1
 
         # The archive extracts to a subdirectory named curl-8.16.0_6-win64-mingw
-        echo "CURL_ROOT=C:\\curl-install\\curl-8.16.0_6-win64-mingw" >> $GITHUB_OUTPUT
+        echo "CURL_ROOT=C:\curl-install\curl-8.16.0_6-win64-mingw" >> $env:GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
