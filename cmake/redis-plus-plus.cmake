@@ -5,9 +5,10 @@ include(FetchContent)
 
 FetchContent_Declare(hiredis
         GIT_REPOSITORY https://github.com/redis/hiredis.git
-        GIT_TAG 60e5075d4ac77424809f855ba3e398df7aacefe8
+        # 1.3.0
+        GIT_TAG ccad7ebaf99310957004661d1c5f82d2a33ebd10
         GIT_SHALLOW TRUE
-        SOURCE_DIR _deps/hiredis
+        SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/hiredis
         OVERRIDE_FIND_PACKAGE
 )
 
@@ -22,7 +23,8 @@ set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
 # when it tries to do feature detection on hiredis.
 FetchContent_Declare(redis-plus-plus
         GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
-        GIT_TAG 1.3.7
+        # Post 1.3.15. Required to support FetchContent post 1.3.7 where it was broken.
+        GIT_TAG 84f37e95d9112193fd433f65402d3d183f0b9cf7
         GIT_SHALLOW TRUE
 )
 
