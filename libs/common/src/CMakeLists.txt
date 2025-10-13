@@ -91,6 +91,10 @@ target_include_directories(${LIBNAME}
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
 
+if (LD_CURL_NETWORKING)
+    target_compile_definitions(${LIBNAME} PUBLIC LD_CURL_NETWORKING)
+endif()
+
 install(
         TARGETS ${LIBNAME}
         EXPORT ${LD_TARGETS_EXPORT_NAME}

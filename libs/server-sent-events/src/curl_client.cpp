@@ -37,7 +37,8 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
                        Builder::ErrorCallback errors,
                        bool skip_verify_peer,
                        std::optional<std::string> custom_ca_file,
-                       bool use_https)
+                       bool use_https,
+                       std::optional<std::string> proxy_url)
     :
     host_(std::move(host)),
     port_(std::move(port)),
@@ -51,6 +52,7 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
     skip_verify_peer_(skip_verify_peer),
     custom_ca_file_(std::move(custom_ca_file)),
     use_https_(use_https),
+    proxy_url_(std::move(proxy_url)),
     backoff_(initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
              kDefaultMaxBackoffDelay),
     last_event_id_(std::nullopt),
@@ -230,6 +232,14 @@ struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
             curl_easy_setopt(curl, CURLOPT_CAINFO, custom_ca_file_->c_str());
         }
     }
+
+    // Set proxy if configured
+    // When proxy_url_ is set, it takes precedence over environment variables.
+    // Empty string explicitly disables proxy (overrides environment variables).
+    if (proxy_url_) {
+        curl_easy_setopt(curl, CURLOPT_PROXY, proxy_url_->c_str());
+    }
+    // If proxy_url_ is std::nullopt, CURL will use environment variables (default behavior)
 
     // Set callbacks
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);

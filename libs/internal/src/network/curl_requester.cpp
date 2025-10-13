@@ -184,6 +184,15 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
         }
     }
 
+    // Set proxy if configured
+    // When proxy URL is set, it takes precedence over environment variables.
+    // Empty string explicitly disables proxy (overrides environment variables).
+    auto const& proxy_url = request.Properties().Proxy().Url();
+    if (proxy_url.has_value()) {
+        curl_easy_setopt(curl, CURLOPT_PROXY, proxy_url->c_str());
+    }
+    // If proxy URL is std::nullopt, CURL will use environment variables (default behavior)
+
     // Set callbacks
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);

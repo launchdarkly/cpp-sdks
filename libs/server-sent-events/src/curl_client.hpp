@@ -40,7 +40,8 @@ class CurlClient : public Client,
                Builder::ErrorCallback errors,
                bool skip_verify_peer,
                std::optional<std::string> custom_ca_file,
-               bool use_https);
+               bool use_https,
+               std::optional<std::string> proxy_url);
 
     ~CurlClient() override;
 
@@ -83,6 +84,7 @@ class CurlClient : public Client,
     bool skip_verify_peer_;
     std::optional<std::string> custom_ca_file_;
     bool use_https_;
+    std::optional<std::string> proxy_url_;
 
     Backoff backoff_;
 

@@ -30,7 +30,10 @@ int main() {
         "variable.\n"
         "The value of SDK_KEY in main.c takes priority over LD_SDK_KEY.");
 
-    auto config = ConfigBuilder(sdk_key).Build();
+    auto builder = ConfigBuilder(sdk_key);
+    builder.HttpProperties().Proxy("socks5h://puser:ppass@proxy:1080");
+    auto config = builder.Build();
+
     if (!config) {
         std::cout << "error: config is invalid: " << config.error() << '\n';
         return 1;

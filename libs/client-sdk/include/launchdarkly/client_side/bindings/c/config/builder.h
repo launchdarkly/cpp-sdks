@@ -493,6 +493,33 @@ LDClientHttpPropertiesTlsBuilder_CustomCAFile(
     char const* custom_ca_file);
 
 /**
+ * Sets proxy configuration for HTTP requests.
+ *
+ * When using CURL networking (LD_CURL_NETWORKING=ON), this controls proxy
+ * behavior. The proxy URL takes precedence over environment variables
+ * (ALL_PROXY, HTTP_PROXY, HTTPS_PROXY).
+ *
+ * Supported proxy types (when CURL networking is enabled):
+ * - HTTP proxies: "http://proxy:port"
+ * - HTTPS proxies: "https://proxy:port"
+ * - SOCKS4 proxies: "socks4://proxy:port"
+ * - SOCKS5 proxies: "socks5://proxy:port" or "socks5://user:pass@proxy:port"
+ * - SOCKS5 with DNS through proxy: "socks5h://proxy:port"
+ *
+ * Passing an empty string explicitly disables proxy (overrides environment
+ * variables).
+ *
+ * When CURL networking is disabled, attempting to configure a non-empty proxy
+ * will cause the Build function to fail.
+ *
+ * @param b Client config builder. Must not be NULL.
+ * @param proxy_url Proxy URL or empty string to disable. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Proxy(LDClientConfigBuilder b,
+                                           char const* proxy_url);
+
+/**
  * Disables the default SDK logging.
  * @param b Client config builder. Must not be NULL.
  */

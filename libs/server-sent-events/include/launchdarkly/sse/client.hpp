@@ -154,6 +154,26 @@ class Builder {
     Builder& custom_ca_file(std::string path);
 
     /**
+     * Specify a proxy URL for the connection. When set, it takes precedence
+     * over environment variables (ALL_PROXY, HTTP_PROXY, HTTPS_PROXY).
+     *
+     * Supported proxy types (when CURL networking is enabled):
+     * - HTTP proxies: "http://proxy:port"
+     * - HTTPS proxies: "https://proxy:port"
+     * - SOCKS4 proxies: "socks4://proxy:port"
+     * - SOCKS5 proxies: "socks5://proxy:port" or "socks5://user:pass@proxy:port"
+     * - SOCKS5 with DNS through proxy: "socks5h://proxy:port"
+     *
+     * Passing an empty string explicitly disables proxy (overrides environment variables).
+     * Passing std::nullopt (or not calling this method) uses environment variables.
+     *
+     * @param url Proxy URL, empty string to disable, or std::nullopt for environment variables
+     * @return Reference to this builder.
+     * @throws std::runtime_error if proxy is configured without CURL networking support
+     */
+    Builder& proxy(std::optional<std::string> url);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -174,6 +194,7 @@ class Builder {
     ErrorCallback error_cb_;
     bool skip_verify_peer_;
     std::optional<std::string> custom_ca_file_;
+    std::optional<std::string> proxy_url_;
 };
 
 /**
