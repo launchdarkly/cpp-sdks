@@ -5,7 +5,7 @@ include(FetchContent)
 
 FetchContent_Declare(hiredis
         GIT_REPOSITORY https://github.com/redis/hiredis.git
-        GIT_TAG 60e5075d4ac77424809f855ba3e398df7aacefe8
+        GIT_TAG ccad7ebaf99310957004661d1c5f82d2a33ebd10
         GIT_SHALLOW TRUE
         SOURCE_DIR _deps/hiredis
         OVERRIDE_FIND_PACKAGE
