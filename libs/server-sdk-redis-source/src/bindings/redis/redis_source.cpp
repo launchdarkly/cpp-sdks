@@ -5,7 +5,7 @@
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/error.hpp>
 
-#include <redis++.h>
+#include <sw/redis++/redis++.h>
 
 using namespace launchdarkly::server_side::integrations;
 

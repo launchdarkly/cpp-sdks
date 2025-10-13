@@ -4,7 +4,7 @@
 #include <launchdarkly/serialization/json_segment.hpp>
 
 #include <gtest/gtest.h>
-#include <redis++.h>
+#include <sw/redis++/redis++.h>
 #include <boost/json.hpp>
 
 #include <string>

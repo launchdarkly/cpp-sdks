@@ -9,7 +9,7 @@
 
 #include "prefixed_redis_client.hpp"
 
-#include <redis++.h>
+#include <sw/redis++/redis++.h>
 
 #include <boost/json.hpp>
 

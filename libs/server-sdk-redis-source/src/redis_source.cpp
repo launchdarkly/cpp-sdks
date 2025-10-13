@@ -1,6 +1,6 @@
 #include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
 
-#include <redis++.h>
+#include <sw/redis++/redis++.h>
 
 namespace launchdarkly::server_side::integrations {
 tl::expected<std::unique_ptr<RedisDataSource>, std::string>
