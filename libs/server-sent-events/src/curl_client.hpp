@@ -50,21 +50,20 @@ class CurlClient : public Client,
 
    private:
     void do_run();
-    void do_shutdown(std::function<void()> completion);
+    void do_shutdown(const std::function<void()>& completion);
     void async_backoff(std::string const& reason);
-    void on_backoff(boost::system::error_code ec);
+    void on_backoff(const boost::system::error_code& ec);
     void perform_request();
 
-    static size_t WriteCallback(char* data, size_t size, size_t nmemb, void* userp);
-    static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
-    static curl_socket_t OpenSocketCallback(void* clientp, curlsocktype purpose, struct curl_sockaddr* address);
+    static size_t WriteCallback(const char* data, size_t size, size_t nmemb, void* userp);
+    static size_t HeaderCallback(const char* buffer, size_t size, size_t nitems, void* userdata);
+    static curl_socket_t OpenSocketCallback(void* clientp, curlsocktype purpose, const struct curl_sockaddr* address);
 
     void log_message(std::string const& message);
     void report_error(Error error);
 
     std::string build_url() const;
     bool setup_curl_options(CURL* curl, struct curl_slist** headers);
-    bool handle_redirect(long response_code, CURL* curl);
 
     static int ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
                                 curl_off_t ultotal, curl_off_t ulnow);

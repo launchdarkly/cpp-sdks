@@ -24,6 +24,12 @@ auto const kDefaultInitialReconnectDelay = std::chrono::seconds(1);
 // Maximum duration between backoff attempts.
 auto const kDefaultMaxBackoffDelay = std::chrono::seconds(30);
 
+constexpr auto kCurlTransferContinue = 0;
+constexpr auto kCurlTransferAbort = 1;
+
+constexpr auto kHttpStatusCodeMovedPermanently = 301;
+constexpr auto kHttpStatusCodeTemporaryRedirect= 307;
+
 CurlClient::CurlClient(boost::asio::any_io_executor executor,
                        http::request<http::string_body> req,
                        std::string host,
@@ -80,10 +86,10 @@ CurlClient::~CurlClient() {
 
     // Join the request thread if it exists and is joinable
     {
-        std::lock_guard<std::mutex> lock(request_thread_mutex_);
+        std::lock_guard lock(request_thread_mutex_);
         if (request_thread_ && request_thread_->joinable()) {
             // Release lock before joining to avoid holding mutex during join
-            std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
+            const std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
             request_thread_mutex_.unlock();
             thread_to_join->join();
             request_thread_mutex_.lock();
@@ -104,7 +110,7 @@ void CurlClient::do_run() {
 
     // Start request in a separate thread since CURL blocks
     {
-        std::lock_guard<std::mutex> request_thread_guard(request_thread_mutex_);
+        std::lock_guard request_thread_guard(request_thread_mutex_);
 
         // Join any previous thread before starting a new one
         if (request_thread_ && request_thread_->joinable()) {
@@ -133,12 +139,12 @@ void CurlClient::async_backoff(std::string const& reason) {
 
     backoff_timer_.expires_after(backoff_.delay());
     backoff_timer_.async_wait([self = shared_from_this()](
-                                  boost::system::error_code ec) {
+                                  const boost::system::error_code& ec) {
         self->on_backoff(ec);
     });
 }
 
-void CurlClient::on_backoff(boost::system::error_code ec) {
+void CurlClient::on_backoff(const boost::system::error_code& ec) {
     if (ec == boost::asio::error::operation_aborted || shutting_down_) {
         return;
     }
@@ -146,7 +152,7 @@ void CurlClient::on_backoff(boost::system::error_code ec) {
 }
 
 std::string CurlClient::build_url() const {
-    std::string scheme = use_https_ ? "https" : "http";
+    const std::string scheme = use_https_ ? "https" : "http";
 
     std::string url = scheme + "://" + host_;
 
@@ -161,7 +167,7 @@ std::string CurlClient::build_url() const {
     return url;
 }
 
-bool CurlClient::setup_curl_options(CURL* curl, struct curl_slist** out_headers) {
+bool CurlClient::setup_curl_options(CURL* curl, curl_slist** out_headers) {
     // Helper macro to check curl_easy_setopt return values
     // Returns false on error to signal setup failure
     #define CURL_SETOPT_CHECK(handle, option, parameter) \
@@ -261,8 +267,9 @@ bool CurlClient::setup_curl_options(CURL* curl, struct curl_slist** out_headers)
     CURL_SETOPT_CHECK(curl, CURLOPT_OPENSOCKETFUNCTION, OpenSocketCallback);
     CURL_SETOPT_CHECK(curl, CURLOPT_OPENSOCKETDATA, this);
 
-    // Don't follow redirects automatically - we'll handle them ourselves
-    CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 0L);
+    // Follow redirects
+    CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_MAXREDIRS, 20L);
 
     #undef CURL_SETOPT_CHECK
 
@@ -270,17 +277,20 @@ bool CurlClient::setup_curl_options(CURL* curl, struct curl_slist** out_headers)
     return true;
 }
 
+// Handle CURL progress.
+//
+// https://curl.se/libcurl/c/CURLOPT_XFERINFOFUNCTION.html
 int CurlClient::ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
                                  curl_off_t ultotal, curl_off_t ulnow) {
     auto* client = static_cast<CurlClient*>(clientp);
 
     if (client->shutting_down_) {
-        return 1;  // Abort the transfer
+        return kCurlTransferAbort;
     }
 
     // Check if we've exceeded the read timeout
     if (client->effective_read_timeout_) {
-        auto now = std::chrono::steady_clock::now();
+        const auto now = std::chrono::steady_clock::now();
 
         // If download amount has changed, update the last progress time
         if (dlnow != client->last_download_amount_) {
@@ -292,17 +302,20 @@ int CurlClient::ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t d
                 now - client->last_progress_time_);
 
             if (elapsed > *client->effective_read_timeout_) {
-                return 1;  // Abort the transfer
+                return kCurlTransferAbort;
             }
         }
     }
 
-    return 0;  // Continue
+    return kCurlTransferContinue;
 }
 
+// Handle the curl socket opening.
+//
+// https://curl.se/libcurl/c/CURLOPT_OPENSOCKETFUNCTION.html
 curl_socket_t CurlClient::OpenSocketCallback(void* clientp,
                                               curlsocktype purpose,
-                                              struct curl_sockaddr* address) {
+                                              const curl_sockaddr* address) {
     auto* client = static_cast<CurlClient*>(clientp);
 
     // Create the socket
@@ -316,7 +329,10 @@ curl_socket_t CurlClient::OpenSocketCallback(void* clientp,
     return sockfd;
 }
 
-size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
+// Callback for writing response data
+//
+// https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html
+size_t CurlClient::WriteCallback(const char* data, size_t size, size_t nmemb,
                                   void* userp) {
     size_t total_size = size * nmemb;
     auto* client = static_cast<CurlClient*>(userp);
@@ -332,8 +348,8 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
     size_t i = 0;
     while (i < body.size()) {
         // Find next line delimiter
-        size_t delimiter_pos = body.find_first_of("\r\n", i);
-        size_t append_size = (delimiter_pos == std::string::npos)
+        const size_t delimiter_pos = body.find_first_of("\r\n", i);
+        const size_t append_size = (delimiter_pos == std::string::npos)
                                  ? (body.size() - i)
                                  : (delimiter_pos - i);
 
@@ -407,7 +423,7 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
         }
 
         // Parse field
-        size_t colon_pos = line.find(':');
+        const size_t colon_pos = line.find(':');
         if (colon_pos == 0) {
             // Comment line, dispatch it
             std::string comment = line.substr(1);
@@ -458,59 +474,23 @@ size_t CurlClient::WriteCallback(char* data, size_t size, size_t nmemb,
     return total_size;
 }
 
-size_t CurlClient::HeaderCallback(char* buffer, size_t size, size_t nitems,
+// Callback for reading request headers
+//
+// https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
+size_t CurlClient::HeaderCallback(const char* buffer, size_t size, size_t nitems,
                                    void* userdata) {
-    size_t total_size = size * nitems;
+    const size_t total_size = size * nitems;
     auto* client = static_cast<CurlClient*>(userdata);
 
-    std::string header(buffer, total_size);
-
     // Check for Content-Type header
-    if (header.find("Content-Type:") == 0 ||
-        header.find("content-type:") == 0) {
+    if (const std::string header(buffer, total_size); header.find("Content-Type:") == 0 ||
+                                                      header.find("content-type:") == 0) {
         if (header.find("text/event-stream") == std::string::npos) {
             client->log_message("warning: unexpected Content-Type: " + header);
         }
     }
 
     return total_size;
-}
-
-bool CurlClient::handle_redirect(long response_code, CURL* curl) {
-    // Check if this is a redirect status
-    if (response_code != 301 && response_code != 307) {
-        return false;
-    }
-
-    // Get the Location header
-    char* location = nullptr;
-    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &location);
-
-    if (!location || std::string(location).empty()) {
-        // Invalid redirect, let FoxyClient behavior handle it
-        return false;
-    }
-
-    // Parse the redirect URL
-    auto location_url = boost::urls::parse_uri(location);
-    if (!location_url) {
-        report_error(errors::InvalidRedirectLocation{location});
-        return true;
-    }
-
-    // Update host and target
-    host_ = location_url->host();
-    req_.set(http::field::host, host_);
-    req_.target(location_url->encoded_target());
-
-    if (location_url->has_port()) {
-        port_ = location_url->port();
-    } else {
-        port_ = location_url->scheme();
-    }
-
-    // Signal that we should retry with the new location
-    return true;
 }
 
 void CurlClient::perform_request() {
@@ -545,7 +525,7 @@ void CurlClient::perform_request() {
         return;
     }
 
-    struct curl_slist* headers = nullptr;
+    curl_slist* headers = nullptr;
     if (!setup_curl_options(curl, &headers)) {
         // setup_curl_options returned false, indicating an error (it already logged the error)
         curl_easy_cleanup(curl);
@@ -573,31 +553,20 @@ void CurlClient::perform_request() {
     auto status = static_cast<http::status>(response_code);
     auto status_class = http::to_status_class(status);
 
-    // Handle redirects
-    if (status_class == http::status_class::redirection) {
-        bool should_redirect = handle_redirect(response_code, curl);
-        curl_easy_cleanup(curl);
-
-        if (should_redirect) {
-            // Retry with new location
-            if (!shutting_down_) {
-                perform_request();
-            }
-            return;
-        }
-        // Invalid redirect - report error
-        if (!shutting_down_) {
-            boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
-                self->report_error(errors::NotRedirectable{});
-            });
-        }
-        return;
-    }
-
     curl_easy_cleanup(curl);
 
     if (shutting_down_) {
         return;
+    }
+
+    if (status_class == http::status_class::redirection) {
+        // The internal CURL handling of redirects failed.
+        // This situation is likely the result of a missing redirect header
+        // or empty header.
+        boost::asio::post(backoff_timer_.get_executor(),
+                          [self = shared_from_this()]() {
+                              self->report_error(errors::NotRedirectable{});
+                          });
     }
 
     // Handle result
@@ -681,11 +650,11 @@ void CurlClient::perform_request() {
 void CurlClient::async_shutdown(std::function<void()> completion) {
     boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this(),
                                   completion = std::move(completion)]() {
-        self->do_shutdown(std::move(completion));
+        self->do_shutdown(completion);
     });
 }
 
-void CurlClient::do_shutdown(std::function<void()> completion) {
+void CurlClient::do_shutdown(const std::function<void()>& completion) {
     shutting_down_ = true;
     backoff_timer_.cancel();
 
@@ -704,7 +673,7 @@ void CurlClient::do_shutdown(std::function<void()> completion) {
         std::lock_guard<std::mutex> lock(request_thread_mutex_);
         if (request_thread_ && request_thread_->joinable()) {
             // Release lock before joining to avoid holding mutex during join
-            std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
+            const std::unique_ptr<std::thread> thread_to_join = std::move(request_thread_);
             request_thread_mutex_.unlock();
             thread_to_join->join();
             request_thread_mutex_.lock();
