@@ -161,30 +161,42 @@ std::string CurlClient::build_url() const {
     return url;
 }
 
-struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
+bool CurlClient::setup_curl_options(CURL* curl, struct curl_slist** out_headers) {
+    // Helper macro to check curl_easy_setopt return values
+    // Returns false on error to signal setup failure
+    #define CURL_SETOPT_CHECK(handle, option, parameter) \
+        do { \
+            CURLcode code = curl_easy_setopt(handle, option, parameter); \
+            if (code != CURLE_OK) { \
+                log_message("curl_easy_setopt failed for " #option ": " + \
+                           std::string(curl_easy_strerror(code))); \
+                return false; \
+            } \
+        } while(0)
+
     // Set URL
-    curl_easy_setopt(curl, CURLOPT_URL, build_url().c_str());
+    CURL_SETOPT_CHECK(curl, CURLOPT_URL, build_url().c_str());
 
     // Set HTTP method
     switch (req_.method()) {
         case http::verb::get:
-            curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+            CURL_SETOPT_CHECK(curl, CURLOPT_HTTPGET, 1L);
             break;
         case http::verb::post:
-            curl_easy_setopt(curl, CURLOPT_POST, 1L);
+            CURL_SETOPT_CHECK(curl, CURLOPT_POST, 1L);
             break;
         case http::verb::report:
-            curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "REPORT");
+            CURL_SETOPT_CHECK(curl, CURLOPT_CUSTOMREQUEST, "REPORT");
             break;
         default:
-            curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+            CURL_SETOPT_CHECK(curl, CURLOPT_HTTPGET, 1L);
             break;
     }
 
     // Set request body if present
     if (!req_.body().empty()) {
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, req_.body().c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, req_.body().size());
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS, req_.body().c_str());
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE, req_.body().size());
     }
 
     // Set headers
@@ -202,12 +214,12 @@ struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
     }
 
     if (headers) {
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, headers);
     }
 
     // Set timeouts with millisecond precision
     if (connect_timeout_) {
-        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_->count());
+        CURL_SETOPT_CHECK(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_->count());
     }
 
     // For read timeout, use progress callback
@@ -215,21 +227,21 @@ struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
         effective_read_timeout_ = read_timeout_;
         last_progress_time_ = std::chrono::steady_clock::now();
         last_download_amount_ = 0;
-        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
-        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, this);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
+        CURL_SETOPT_CHECK(curl, CURLOPT_XFERINFODATA, this);
+        CURL_SETOPT_CHECK(curl, CURLOPT_NOPROGRESS, 0L);
     }
 
     // Set TLS options
     if (skip_verify_peer_) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
         if (custom_ca_file_) {
-            curl_easy_setopt(curl, CURLOPT_CAINFO, custom_ca_file_->c_str());
+            CURL_SETOPT_CHECK(curl, CURLOPT_CAINFO, custom_ca_file_->c_str());
         }
     }
 
@@ -237,22 +249,25 @@ struct curl_slist* CurlClient::setup_curl_options(CURL* curl) {
     // When proxy_url_ is set, it takes precedence over environment variables.
     // Empty string explicitly disables proxy (overrides environment variables).
     if (proxy_url_) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, proxy_url_->c_str());
+        CURL_SETOPT_CHECK(curl, CURLOPT_PROXY, proxy_url_->c_str());
     }
     // If proxy_url_ is std::nullopt, CURL will use environment variables (default behavior)
 
     // Set callbacks
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, OpenSocketCallback);
-    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, this);
+    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEDATA, this);
+    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
+    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERDATA, this);
+    CURL_SETOPT_CHECK(curl, CURLOPT_OPENSOCKETFUNCTION, OpenSocketCallback);
+    CURL_SETOPT_CHECK(curl, CURLOPT_OPENSOCKETDATA, this);
 
     // Don't follow redirects automatically - we'll handle them ourselves
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 0L);
 
-    return headers;
+    #undef CURL_SETOPT_CHECK
+
+    *out_headers = headers;
+    return true;
 }
 
 int CurlClient::ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,
@@ -530,7 +545,17 @@ void CurlClient::perform_request() {
         return;
     }
 
-    struct curl_slist* headers = setup_curl_options(curl);
+    struct curl_slist* headers = nullptr;
+    if (!setup_curl_options(curl, &headers)) {
+        // setup_curl_options returned false, indicating an error (it already logged the error)
+        curl_easy_cleanup(curl);
+        if (!shutting_down_) {
+            boost::asio::post(backoff_timer_.get_executor(), [self = shared_from_this()]() {
+                self->async_backoff("failed to set CURL options");
+            });
+        }
+        return;
+    }
 
     // Perform the request
     CURLcode res = curl_easy_perform(curl);

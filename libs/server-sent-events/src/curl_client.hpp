@@ -63,7 +63,7 @@ class CurlClient : public Client,
     void report_error(Error error);
 
     std::string build_url() const;
-    struct curl_slist* setup_curl_options(CURL* curl);
+    bool setup_curl_options(CURL* curl, struct curl_slist** headers);
     bool handle_redirect(long response_code, CURL* curl);
 
     static int ProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t dlnow,

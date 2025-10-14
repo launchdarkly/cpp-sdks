@@ -103,6 +103,22 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
     // Use a unique_ptr to manage the cleanup of our curl instance.
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl_guard(curl, curl_easy_cleanup);
 
+    // Helper macro to check curl_easy_setopt return values
+    // Note: This macro captures ctx and cb by reference for error reporting
+    #define CURL_SETOPT_CHECK(handle, option, parameter) \
+        do { \
+            CURLcode code = curl_easy_setopt(handle, option, parameter); \
+            if (code != CURLE_OK) { \
+                std::string error_message = kErrorCurlPrefix; \
+                error_message += "curl_easy_setopt failed for " #option ": "; \
+                error_message += curl_easy_strerror(code); \
+                boost::asio::post(ctx, [cb = std::move(cb), error_message = std::move(error_message)]() { \
+                    cb(HttpResult(error_message)); \
+                }); \
+                return; \
+            } \
+        } while(0)
+
     std::string response_body;
     HttpResult::HeadersType response_headers;
 
@@ -110,7 +126,7 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
     std::string url = request.Url();
 
     // Set URL
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    CURL_SETOPT_CHECK(curl, CURLOPT_URL, url.c_str());
 
     // Set HTTP method
     if (request.Method() == HttpMethod::kPost) {
@@ -118,20 +134,20 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
         // Passing 1 enables this flag.
         // This will also set a content type, but the headers for the request
         // should override that with the correct value.
-        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_POST, 1L);
     } else if (request.Method() == HttpMethod::kPut) {
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodPut);
+        CURL_SETOPT_CHECK(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodPut);
     } else if (request.Method() == HttpMethod::kReport) {
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodReport);
+        CURL_SETOPT_CHECK(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodReport);
     } else if (request.Method() == HttpMethod::kGet) {
-        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPGET, 1L);
     }
 
     // Set request body if present
     if (request.Body().has_value()) {
         const std::string& body = request.Body().value();
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, body.size());
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS, body.c_str());
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE, body.size());
     }
 
     // Set headers
@@ -156,31 +172,31 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
         headers = appendResult;
     }
     if (headers) {
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, headers);
     }
 
     // Set timeouts with millisecond precision
     const long connect_timeout_ms = request.Properties().ConnectTimeout().count();
     const long response_timeout_ms = request.Properties().ResponseTimeout().count();
 
-    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_ms > 0 ? connect_timeout_ms : 30000L);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, response_timeout_ms > 0 ? response_timeout_ms : 60000L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_ms > 0 ? connect_timeout_ms : 30000L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_TIMEOUT_MS, response_timeout_ms > 0 ? response_timeout_ms : 60000L);
 
     // Set TLS options
     using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
     if (tls_options.PeerVerifyMode() == VerifyMode::kVerifyNone) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         // 1 or 2 seem to basically be the same, but the documentation says to
         // use 2, and that it would default to 2.
         // https://curl.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
         // Set custom CA file if provided
         if (tls_options.CustomCAFile().has_value()) {
-            curl_easy_setopt(curl, CURLOPT_CAINFO, tls_options.CustomCAFile()->c_str());
+            CURL_SETOPT_CHECK(curl, CURLOPT_CAINFO, tls_options.CustomCAFile()->c_str());
         }
     }
 
@@ -189,19 +205,19 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
     // Empty string explicitly disables proxy (overrides environment variables).
     auto const& proxy_url = request.Properties().Proxy().Url();
     if (proxy_url.has_value()) {
-        curl_easy_setopt(curl, CURLOPT_PROXY, proxy_url->c_str());
+        CURL_SETOPT_CHECK(curl, CURLOPT_PROXY, proxy_url->c_str());
     }
     // If proxy URL is std::nullopt, CURL will use environment variables (default behavior)
 
     // Set callbacks
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &response_headers);
+    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEDATA, &response_body);
+    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
+    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERDATA, &response_headers);
 
     // Follow redirects
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 20L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    CURL_SETOPT_CHECK(curl, CURLOPT_MAXREDIRS, 20L);
 
     // Perform the request
     CURLcode res = curl_easy_perform(curl);
