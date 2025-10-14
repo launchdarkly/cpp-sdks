@@ -20,4 +20,8 @@ find_dependency(OpenSSL)
 find_dependency(tl-expected)
 find_dependency(certify)
 
+if (LD_CURL_NETWORKING)
+    find_dependency(CURL)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/launchdarklyTargets.cmake)
