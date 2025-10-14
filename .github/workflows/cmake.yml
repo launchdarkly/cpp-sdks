@@ -26,9 +26,12 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Install CURL
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+      - uses: ./.github/actions/install-curl
+        id: install-curl
       - uses: ./.github/actions/cmake-test
+        env:
+          CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+          CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
         with:
           platform_version: '22.04'
           cmake_extra_args: '-DLD_CURL_NETWORKING=ON'
@@ -45,9 +48,12 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - name: Install CURL
-        run: brew install curl
+      - uses: ./.github/actions/install-curl
+        id: install-curl
       - uses: ./.github/actions/cmake-test
+        env:
+          CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+          CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
         with:
           platform_version: '12'
           cmake_extra_args: '-DLD_CURL_NETWORKING=ON'
