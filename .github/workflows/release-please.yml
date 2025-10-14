@@ -15,7 +15,8 @@ jobs:
       package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
       package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      # https://github.com/googleapis/release-please-action/releases/tag/v4.3.0
+      - uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +34,8 @@ jobs:
       hashes-windows: ${{ steps.release-client.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - id: release-client
         name: Full release of libs/client-sdk
         uses: ./.github/actions/sdk-release
@@ -57,7 +59,8 @@ jobs:
       hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - id: release-server
         name: Full release of libs/server-sdk
         uses: ./.github/actions/sdk-release
@@ -81,7 +84,8 @@ jobs:
       hashes-windows: ${{ steps.release-server-redis.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source
         uses: ./.github/actions/sdk-release

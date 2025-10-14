@@ -21,14 +21,16 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
@@ -37,7 +39,8 @@ jobs:
   build-test-server:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -45,7 +48,8 @@ jobs:
   build-test-server-mac:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -54,8 +58,10 @@ jobs:
   build-test-server-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: ilammy/msvc-dev-cmd@v1
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server

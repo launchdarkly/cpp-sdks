@@ -11,6 +11,10 @@ inputs:
   toolset:
     description: 'Boost toolset'
     required: false
+  cmake_extra_args:
+    description: 'Extra arguments to pass to CMake'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -36,6 +40,7 @@ runs:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
         CMAKE_INSTALL_PREFIX: ../LAUNCHDARKLY_INSTALL
+        CMAKE_EXTRA_ARGS: ${{ inputs.cmake_extra_args }}
     - name: Build the SDK
       shell: bash
       run: |

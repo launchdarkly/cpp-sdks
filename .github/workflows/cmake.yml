@@ -17,7 +17,8 @@ jobs:
   test-ubuntu:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/cmake-test
         with:
           platform_version: '22.04'
@@ -25,7 +26,8 @@ jobs:
   test-ubuntu-curl:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - name: Install CURL
         run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
       - uses: ./.github/actions/cmake-test
@@ -36,7 +38,8 @@ jobs:
   test-macos:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/cmake-test
         with:
           platform_version: '12'
@@ -44,7 +47,8 @@ jobs:
   test-macos-curl:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - name: Install CURL
         run: brew install curl
       - uses: ./.github/actions/cmake-test
@@ -55,8 +59,10 @@ jobs:
   test-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: ilammy/msvc-dev-cmd@v1
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/cmake-test
         env:
           Boost_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0'
@@ -67,8 +73,10 @@ jobs:
   test-windows-curl:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: ilammy/msvc-dev-cmd@v1
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/install-curl
         id: install-curl
       - uses: ./.github/actions/cmake-test
