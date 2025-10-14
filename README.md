@@ -92,6 +92,49 @@ cmake -B build -S . -G"Unix Makefiles" \
 The example uses `make`, but you might instead use [Ninja](https://ninja-build.org/),
 MSVC, [etc.](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 
+### Building with CURL Networking
+
+By default, the SDK uses Boost.Beast/Foxy for HTTP networking. To use CURL instead, enable the `LD_CURL_NETWORKING` option:
+
+```bash
+cmake -B build -S . -DLD_CURL_NETWORKING=ON
+```
+
+#### CURL Requirements by Platform
+
+**Linux/macOS:**
+Install CURL development libraries via your package manager:
+```bash
+# Ubuntu/Debian
+sudo apt-get install libcurl4-openssl-dev
+
+# macOS
+brew install curl
+```
+
+**Windows (MSVC):**
+CURL must be built from source using MSVC to ensure ABI compatibility. A helper script is provided:
+
+```powershell
+.\scripts\build-curl-windows.ps1 -Version "8.11.1" -InstallPrefix "C:\curl-install"
+```
+
+Then configure the SDK with:
+```powershell
+cmake -B build -S . -DLD_CURL_NETWORKING=ON `
+    -DCURL_ROOT="C:\curl-install" `
+    -DCMAKE_PREFIX_PATH="C:\curl-install"
+```
+
+The `build-curl-windows.ps1` script:
+- Downloads CURL source from curl.se
+- Builds static libraries with MSVC using CMake
+- Uses Windows Schannel for SSL (no OpenSSL dependency)
+- Installs to the specified prefix directory
+
+> [!NOTE]
+> Pre-built CURL binaries from curl.se (MinGW builds) are **not** compatible with MSVC and will cause linker errors.
+
 ## Incorporating the SDK via `add_subdirectory`
 
 The SDK can be incorporated into an existing application using CMake via `add_subdirectory.`.

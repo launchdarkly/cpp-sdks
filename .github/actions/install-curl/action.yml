@@ -28,42 +28,20 @@ runs:
         brew install curl
         echo "CURL_ROOT=$(brew --prefix curl)" >> $GITHUB_OUTPUT
 
-    # Windows: Build CURL from source with MSVC
+    # Windows: Build CURL from source with MSVC using helper script
     - name: Install CURL for Windows
       if: runner.os == 'Windows'
       id: windows-action
       shell: pwsh
       run: |
-        Write-Host "Building CURL from source with MSVC..."
+        # Use the build script from the repository
+        & "${{ github.workspace }}\scripts\build-curl-windows.ps1" -Version "8.11.1" -InstallPrefix "C:\curl-install"
 
-        # Download CURL source
-        $version = "8.11.1"
-        $url = "https://curl.se/download/curl-$version.tar.gz"
-        $output = "curl-$version.tar.gz"
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "CURL build failed"
+          exit 1
+        }
 
-        Write-Host "Downloading CURL $version source from $url"
-        Invoke-WebRequest -Uri $url -OutFile $output -MaximumRetryCount 3 -RetryIntervalSec 5
-
-        # Extract
-        Write-Host "Extracting..."
-        tar -xzf $output
-
-        # Build with CMake (MSVC)
-        cd "curl-$version"
-
-        Write-Host "Configuring CURL with CMake..."
-        cmake -G "Visual Studio 17 2022" -A x64 `
-          -DCMAKE_INSTALL_PREFIX="C:\curl-install" `
-          -DBUILD_SHARED_LIBS=OFF `
-          -DCURL_USE_SCHANNEL=ON `
-          -DCURL_DISABLE_TESTS=ON `
-          -DBUILD_TESTING=OFF `
-          -S . -B build
-
-        Write-Host "Building CURL..."
-        cmake --build build --config Release --target install
-
-        Write-Host "CURL installed to C:\curl-install"
         echo "CURL_ROOT=C:\curl-install" >> $env:GITHUB_OUTPUT
 
     - name: Determine root
