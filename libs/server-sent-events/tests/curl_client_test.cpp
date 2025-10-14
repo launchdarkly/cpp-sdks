@@ -794,7 +794,7 @@ TEST(CurlClientTest, HandlesRapidEvents) {
     MockSSEServer server;
     const int num_events = 100;
 
-    auto port = server.start([](auto const&, auto send_response, auto send_sse_event, auto close) {
+    auto port = server.start([num_events](auto const&, auto send_response, auto send_sse_event, auto close) {
         http::response<http::string_body> res{http::status::ok, 11};
         res.set(http::field::content_type, "text/event-stream");
         res.chunked(true);
