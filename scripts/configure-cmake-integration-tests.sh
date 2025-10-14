@@ -20,4 +20,5 @@ cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
                -D OPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR" \
                -D LD_TESTING_SANITIZERS=OFF \
                -D CMAKE_INSTALL_PREFIX="$CMAKE_INSTALL_PREFIX" \
-               -D LD_BUILD_EXAMPLES=OFF ..
+               -D LD_BUILD_EXAMPLES=OFF \
+               $CMAKE_EXTRA_ARGS ..
