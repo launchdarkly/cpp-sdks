@@ -28,33 +28,43 @@ runs:
         brew install curl
         echo "CURL_ROOT=$(brew --prefix curl)" >> $GITHUB_OUTPUT
 
-    # Windows: Download pre-built binaries from curl.se
+    # Windows: Build CURL from source with MSVC
     - name: Install CURL for Windows
       if: runner.os == 'Windows'
       id: windows-action
       shell: pwsh
       run: |
-        # Download CURL 8.16.0 with OpenSSL for Windows (MinGW build, compatible with MSVC)
-        $url = "https://curl.se/windows/dl-8.16.0_6/curl-8.16.0_6-win64-mingw.zip"
-        $output = "curl.zip"
+        Write-Host "Building CURL from source with MSVC..."
 
-        Write-Host "Downloading CURL from $url"
+        # Download CURL source
+        $version = "8.11.1"
+        $url = "https://curl.se/download/curl-$version.tar.gz"
+        $output = "curl-$version.tar.gz"
+
+        Write-Host "Downloading CURL $version source from $url"
         Invoke-WebRequest -Uri $url -OutFile $output -MaximumRetryCount 3 -RetryIntervalSec 5
 
-        # Verify the download
-        $fileInfo = Get-Item $output
-        Write-Host "Downloaded file size: $($fileInfo.Length) bytes"
+        # Extract
+        Write-Host "Extracting..."
+        tar -xzf $output
 
-        # Extract to C:\curl-install
-        Write-Host "Extracting CURL archive..."
-        Expand-Archive -Path $output -DestinationPath "C:\curl-install" -Force
+        # Build with CMake (MSVC)
+        cd "curl-$version"
 
-        # Verify extraction
-        Write-Host "Extracted contents:"
-        Get-ChildItem -Path "C:\curl-install" -Recurse -Depth 1
+        Write-Host "Configuring CURL with CMake..."
+        cmake -G "Visual Studio 17 2022" -A x64 `
+          -DCMAKE_INSTALL_PREFIX="C:\curl-install" `
+          -DBUILD_SHARED_LIBS=OFF `
+          -DCURL_USE_SCHANNEL=ON `
+          -DCURL_DISABLE_TESTS=ON `
+          -DBUILD_TESTING=OFF `
+          -S . -B build
 
-        # The archive extracts to a subdirectory named curl-8.16.0_6-win64-mingw
-        echo "CURL_ROOT=C:\curl-install\curl-8.16.0_6-win64-mingw" >> $env:GITHUB_OUTPUT
+        Write-Host "Building CURL..."
+        cmake --build build --config Release --target install
+
+        Write-Host "CURL installed to C:\curl-install"
+        echo "CURL_ROOT=C:\curl-install" >> $env:GITHUB_OUTPUT
 
     - name: Determine root
       id: determine-root
