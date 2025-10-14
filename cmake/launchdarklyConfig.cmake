@@ -20,8 +20,9 @@ find_dependency(OpenSSL)
 find_dependency(tl-expected)
 find_dependency(certify)
 
-if (LD_CURL_NETWORKING)
-    find_dependency(CURL)
-endif()
+# If the SDK was built with CURL networking support, CURL::libcurl will be
+# referenced in the exported targets, so we need to find it.
+# We use find_package directly with QUIET so it doesn't fail if CURL isn't needed.
+find_package(CURL QUIET)
 
 include(${CMAKE_CURRENT_LIST_DIR}/launchdarklyTargets.cmake)
