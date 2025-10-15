@@ -8,10 +8,6 @@ project(
         LANGUAGES CXX
 )
 
-if (LD_CURL_NETWORKING)
-        target_compile_definitions(${LIBNAME} PUBLIC LD_CURL_NETWORKING)
-endif()
-
 include(${CMAKE_FILES}/json.cmake)
 
 add_executable(client-tests
@@ -30,5 +26,9 @@ target_link_libraries(client-tests PRIVATE
         Boost::coroutine
         contract-test-data-model
         )
+
+if (LD_CURL_NETWORKING)
+        target_compile_definitions(client-tests PUBLIC LD_CURL_NETWORKING)
+endif()
 
 target_include_directories(client-tests PUBLIC include)
