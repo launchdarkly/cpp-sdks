@@ -8,6 +8,10 @@ project(
         LANGUAGES CXX
 )
 
+if (LD_CURL_NETWORKING)
+        target_compile_definitions(${LIBNAME} PUBLIC LD_CURL_NETWORKING)
+endif()
+
 include(${CMAKE_FILES}/json.cmake)
 
 add_executable(client-tests
