@@ -18,109 +18,160 @@
 #include <optional>
 #include <string>
 #include <thread>
-#include <boost/asio/post.hpp>
 
 namespace launchdarkly::sse {
-namespace http = boost::beast::http;
+namespace http = beast::http;
 namespace net = boost::asio;
 
-struct RequestContext {
+/**
+ * The lifecycle of the CurlClient is managed in an RAII manner. This introduces
+ * some complexity with interaction with CURL, which requires a thread to be
+ * driven. The desutruction of the CurlClient will signal that the CURL thread
+ * should stop. Though depending on the operation it may linger for some
+ * time.
+ *
+ * The CurlClient itself is not accessible from the CURL thread and instead
+ * all their shared state is in a RequestContext. The lifetime of this context
+ * can exceed that of the CurlClient while CURL shuts down. This approach
+ * prevents the lifetime of the CurlClient being attached to that of the
+ * curl thread.
+ */
+class CurlClient final : public Client,
+                         public std::enable_shared_from_this<CurlClient> {
+    class RequestContext {
+        // Only items used by both the curl thread and the executor/main
+        // thread need to be mutex protected.
+        std::mutex mutex_;
+        std::atomic<bool> shutting_down_;
+        std::atomic<curl_socket_t> curl_socket_;
+        std::function<void(std::string)> do_backoff_;
+        std::function<void(Event)> on_receive_;
+        std::function<void(Error)> on_error_;
+        std::function<void()> reset_backoff_;
+        std::function<void(std::string)> log_message_;
+        // End mutex protected items.
 
-    // SSE parser state
-    std::optional<std::string> buffered_line_;
-    std::deque<std::string> complete_lines_;
-    bool begin_CR_;
+    public:
+        // SSE parser state
+        std::optional<std::string> buffered_line;
+        std::deque<std::string> complete_lines;
+        bool begin_CR;
 
-    // Progress tracking for read timeout
-    std::chrono::steady_clock::time_point last_progress_time_;
-    curl_off_t last_download_amount_;
-    std::optional<std::chrono::milliseconds> effective_read_timeout_;
+        // Progress tracking for read timeout
+        std::chrono::steady_clock::time_point last_progress_time;
+        curl_off_t last_download_amount;
 
-    // Only items used by both the curl thread and the executor/main
-    // thread need to be mutex protected.
-    std::mutex mutex_;
-    std::atomic<bool> shutting_down_;
-    std::atomic<curl_socket_t> curl_socket_;
-    std::function<void(std::string)> doBackoff_;
-    std::function<void(Event)> onReceive_;
-    std::function<void(Error)> onError_;
-    std::function<void()> resetBackoff_;
-    // End mutex protected items.
 
-    std::optional<std::string> last_event_id_;
-    std::optional<detail::Event> current_event_;
+        std::optional<std::string> last_event_id;
+        std::optional<detail::Event> current_event;
 
-    boost::asio::any_io_executor executor_;
-    http::request<http::string_body> req_;
-    std::string url_;
+        const http::request<http::string_body> req;
+        const std::string url;
+        const std::optional<std::chrono::milliseconds> connect_timeout;
+        const std::optional<std::chrono::milliseconds> read_timeout;
+        const std::optional<std::chrono::milliseconds> write_timeout;
+        const std::optional<std::string> custom_ca_file;
+        const std::optional<std::string> proxy_url;
+        const bool skip_verify_peer;
 
-    std::optional<std::chrono::milliseconds> connect_timeout_;
-    std::optional<std::chrono::milliseconds> read_timeout_;
-    std::optional<std::chrono::milliseconds> write_timeout_;
-    std::optional<std::string> custom_ca_file_;
-    std::optional<std::string> proxy_url_;
-
-    bool skip_verify_peer_;
-
-    void backoff(const std::string& message) {
-        std::lock_guard lock(mutex_);
-        if (shutting_down_) {
-            return;
+        void backoff(const std::string& message) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            do_backoff_(message);
         }
-        doBackoff_(message);
-    }
 
-    void error(const Error& error) {
-        std::lock_guard lock(mutex_);
-        if (shutting_down_) {
-            return;
+        void error(const Error& error) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            on_error_(error);
         }
-        onError_(error);
-    }
 
-    void receive(const Event& event) {
-        std::lock_guard lock(mutex_);
-        if (shutting_down_) {
-            return;
+        void receive(const Event& event) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            on_receive_(event);
         }
-        onReceive_(event);
-    }
 
-    RequestContext(std::string url,
-                   http::request<http::string_body> req,
-                   std::optional<std::chrono::milliseconds> connect_timeout,
-                   std::optional<std::chrono::milliseconds> read_timeout,
-                   std::optional<std::chrono::milliseconds> write_timeout,
-                   std::optional<std::string> custom_ca_file,
-                   std::optional<std::string> proxy_url,
-                   bool skip_verify_peer,
-                   std::function<void(std::string)> doBackoff,
-                   std::function<void(Event)> onReceive,
-                   std::function<void(Error)> onError,
-                   std::function<void()> resetBackoff
-        ) : curl_socket_(CURL_SOCKET_BAD),
-            buffered_line_(std::nullopt),
-            begin_CR_(false),
-            last_download_amount_(0),
-            shutting_down_(false),
-            last_event_id_(std::nullopt), current_event_(std::nullopt),
-            req_(std::move(req)),
-            url_(std::move(url)),
-            connect_timeout_(connect_timeout),
-            read_timeout_(read_timeout),
-            write_timeout_(write_timeout),
-            custom_ca_file_(std::move(custom_ca_file)),
-            proxy_url_(std::move(proxy_url)),
-            skip_verify_peer_(skip_verify_peer),
-            doBackoff_(std::move(doBackoff)),
-            onReceive_(std::move(onReceive)),
-            onError_(std::move(onError)),
-            resetBackoff_(std::move(resetBackoff)) {
-    }
-};
+        void reset_backoff() {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            reset_backoff_();
+        }
 
-class CurlClient : public Client,
-                   public std::enable_shared_from_this<CurlClient> {
+        void log_message(const std::string& message) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            log_message_(message);
+        }
+
+        bool is_shutting_down() {
+            return shutting_down_;
+        }
+
+        void set_curl_socket(curl_socket_t curl_socket) {
+            std::lock_guard lock(mutex_);
+            curl_socket_ = curl_socket;
+        }
+
+        void shutdown() {
+            std::lock_guard lock(mutex_);
+            shutting_down_ = true;
+            if (curl_socket_ != CURL_SOCKET_BAD) {
+#ifdef _WIN32
+                closesocket(curl_socket_);
+#else
+                close(curl_socket_);
+#endif
+            }
+        }
+
+
+        RequestContext(std::string url,
+                       http::request<http::string_body> req,
+                       std::optional<std::chrono::milliseconds> connect_timeout,
+                       std::optional<std::chrono::milliseconds> read_timeout,
+                       std::optional<std::chrono::milliseconds> write_timeout,
+                       std::optional<std::string> custom_ca_file,
+                       std::optional<std::string> proxy_url,
+                       bool skip_verify_peer,
+                       std::function<void(std::string)> doBackoff,
+                       std::function<void(Event)> onReceive,
+                       std::function<void(Error)> onError,
+                       std::function<void()> resetBackoff,
+                       std::function<void(std::string)> log_message
+            ) : shutting_down_(false),
+                curl_socket_(CURL_SOCKET_BAD),
+                do_backoff_(std::move(doBackoff)),
+                on_receive_(std::move(onReceive)),
+                on_error_(std::move(onError)),
+                reset_backoff_(std::move(resetBackoff)),
+                log_message_(std::move(log_message)),
+                buffered_line(std::nullopt),
+                begin_CR(false),
+                last_download_amount(0),
+                last_event_id(std::nullopt),
+                current_event(std::nullopt),
+                req(std::move(req)),
+                url(std::move(url)),
+                connect_timeout(connect_timeout),
+                read_timeout(read_timeout),
+                write_timeout(write_timeout),
+                custom_ca_file(std::move(custom_ca_file)),
+                proxy_url(std::move(proxy_url)),
+                skip_verify_peer(skip_verify_peer) {
+        }
+    };
+
 public:
     CurlClient(boost::asio::any_io_executor executor,
                http::request<http::string_body> req,
@@ -167,7 +218,7 @@ private:
     void log_message(std::string const& message);
     void report_error(Error error);
 
-    std::string build_url(http::request<http::string_body> req) const;
+    std::string build_url(const http::request<http::string_body>& req) const;
     static bool SetupCurlOptions(CURL* curl,
                                  curl_slist** headers,
                                  RequestContext& context);

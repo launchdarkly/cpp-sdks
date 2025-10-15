@@ -4,7 +4,6 @@
 
 #include <boost/asio/post.hpp>
 #include <boost/beast/http/status.hpp>
-#include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
 
 #include <sstream>
@@ -83,26 +82,13 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
             boost::asio::post(backoff_timer_.get_executor(), [this]() {
                 backoff_.succeed();
             });
+        }, [this](const std::string& message) {
+            log_message(message);
         });
 }
 
 CurlClient::~CurlClient() {
-    {
-        // When shutting down we want to retain the lock while we set shutdown.
-        // This will ensure this blocks until any outstanding use of the "this"
-        // pointer is complete.
-        std::lock_guard lock(request_context_->mutex_);
-        request_context_->shutting_down_ = true;
-        // Close the socket to abort the CURL operation
-        curl_socket_t sock = request_context_->curl_socket_.load();
-        if (sock != CURL_SOCKET_BAD) {
-#ifdef _WIN32
-            closesocket(sock);
-#else
-            close(sock);
-#endif
-        }
-    }
+    request_context_->shutdown();
     backoff_timer_.cancel();
 }
 
@@ -112,7 +98,7 @@ void CurlClient::async_connect() {
 }
 
 void CurlClient::do_run() const {
-    if (request_context_->shutting_down_) {
+    if (request_context_->is_shutting_down()) {
         return;
     }
 
@@ -146,14 +132,15 @@ void CurlClient::async_backoff(std::string const& reason) {
 void CurlClient::on_backoff(const boost::system::error_code& ec) const {
     {
         if (ec == boost::asio::error::operation_aborted || request_context_->
-            shutting_down_) {
+            is_shutting_down()) {
             return;
         }
     }
     do_run();
 }
 
-std::string CurlClient::build_url(http::request<http::string_body> req) const {
+std::string CurlClient::build_url(
+    const http::request<http::string_body>& req) const {
     const std::string scheme = use_https_ ? "https" : "http";
 
     std::string url = scheme + "://" + host_;
@@ -178,17 +165,17 @@ bool CurlClient::SetupCurlOptions(CURL* curl,
         do { \
             CURLcode code = curl_easy_setopt(handle, option, parameter); \
             if (code != CURLE_OK) { \
-                /*log_message("curl_easy_setopt failed for " #option ": " +*/ \
-                            /*std::string(curl_easy_strerror(code))); */\
+                context.log_message("curl_easy_setopt failed for " #option ": " + \
+                            std::string(curl_easy_strerror(code))); \
                 return false; \
             } \
         } while(0)
 
     // Set URL
-    CURL_SETOPT_CHECK(curl, CURLOPT_URL, context.url_.c_str());
+    CURL_SETOPT_CHECK(curl, CURLOPT_URL, context.url.c_str());
 
     // Set HTTP method
-    switch (context.req_.method()) {
+    switch (context.req.method()) {
         case http::verb::get:
             CURL_SETOPT_CHECK(curl, CURLOPT_HTTPGET, 1L);
             break;
@@ -204,25 +191,25 @@ bool CurlClient::SetupCurlOptions(CURL* curl,
     }
 
     // Set request body if present
-    if (!context.req_.body().empty()) {
+    if (!context.req.body().empty()) {
         CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS,
-                          context.req_.body().c_str());
+                          context.req.body().c_str());
         CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE,
-                          context.req_.body().size());
+                          context.req.body().size());
     }
 
     // Set headers
     struct curl_slist* headers = nullptr;
-    for (auto const& field : context.req_) {
+    for (auto const& field : context.req) {
         std::string header = std::string(field.name_string()) + ": " +
                              std::string(field.value());
         headers = curl_slist_append(headers, header.c_str());
     }
 
     // Add Last-Event-ID if we have one
-    if (context.last_event_id_ && !context.last_event_id_->empty()) {
+    if (context.last_event_id && !context.last_event_id->empty()) {
         std::string last_event_header =
-            "Last-Event-ID: " + *context.last_event_id_;
+            "Last-Event-ID: " + *context.last_event_id;
         headers = curl_slist_append(headers, last_event_header.c_str());
     }
 
@@ -231,40 +218,39 @@ bool CurlClient::SetupCurlOptions(CURL* curl,
     }
 
     // Set timeouts with millisecond precision
-    if (context.connect_timeout_) {
+    if (context.connect_timeout) {
         CURL_SETOPT_CHECK(curl, CURLOPT_CONNECTTIMEOUT_MS,
-                          context.connect_timeout_->count());
+                          context.connect_timeout->count());
     }
 
     // For read timeout, use progress callback
-    if (context.read_timeout_) {
-        context.effective_read_timeout_ = context.read_timeout_;
-        context.last_progress_time_ = std::chrono::steady_clock::now();
-        context.last_download_amount_ = 0;
+    if (context.read_timeout) {
+        context.last_progress_time = std::chrono::steady_clock::now();
+        context.last_download_amount = 0;
         CURL_SETOPT_CHECK(curl, CURLOPT_XFERINFOFUNCTION, ProgressCallback);
         CURL_SETOPT_CHECK(curl, CURLOPT_XFERINFODATA, &context);
         CURL_SETOPT_CHECK(curl, CURLOPT_NOPROGRESS, 0L);
     }
 
     // Set TLS options
-    if (context.skip_verify_peer_) {
+    if (context.skip_verify_peer) {
         CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
         CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
-        if (context.custom_ca_file_) {
+        if (context.custom_ca_file) {
             CURL_SETOPT_CHECK(curl, CURLOPT_CAINFO,
-                              context.custom_ca_file_->c_str());
+                              context.custom_ca_file->c_str());
         }
     }
 
     // Set proxy if configured
     // When proxy_url_ is set, it takes precedence over environment variables.
     // Empty string explicitly disables proxy (overrides environment variables).
-    if (context.proxy_url_) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_PROXY, context.proxy_url_->c_str());
+    if (context.proxy_url) {
+        CURL_SETOPT_CHECK(curl, CURLOPT_PROXY, context.proxy_url->c_str());
     }
     // If proxy_url_ is std::nullopt, CURL will use environment variables (default behavior)
 
@@ -296,25 +282,25 @@ int CurlClient::ProgressCallback(void* clientp,
                                  curl_off_t ulnow) {
     auto* context = static_cast<RequestContext*>(clientp);
 
-    if (context->shutting_down_) {
+    if (context->is_shutting_down()) {
         return kCurlTransferAbort;
     }
 
     // Check if we've exceeded the read timeout
-    if (context->effective_read_timeout_) {
+    if (context->read_timeout) {
         const auto now = std::chrono::steady_clock::now();
 
         // If download amount has changed, update the last progress time
-        if (dlnow != context->last_download_amount_) {
-            context->last_download_amount_ = dlnow;
-            context->last_progress_time_ = now;
+        if (dlnow != context->last_download_amount) {
+            context->last_download_amount = dlnow;
+            context->last_progress_time = now;
         } else {
             // No new data - check if we've exceeded the timeout
             auto elapsed = std::chrono::duration_cast<
                 std::chrono::milliseconds>(
-                now - context->last_progress_time_);
+                now - context->last_progress_time);
 
-            if (elapsed > *context->effective_read_timeout_) {
+            if (elapsed > *context->read_timeout) {
                 return kCurlTransferAbort;
             }
         }
@@ -337,8 +323,7 @@ curl_socket_t CurlClient::OpenSocketCallback(void* clientp,
 
     // Store it so we can close it during shutdown
     if (sockfd != CURL_SOCKET_BAD) {
-        std::lock_guard lock(context->mutex_);
-        context->curl_socket_ = sockfd;
+        context->set_curl_socket(sockfd);
     }
 
     return sockfd;
@@ -354,7 +339,7 @@ size_t CurlClient::WriteCallback(const char* data,
     size_t total_size = size * nmemb;
     auto* context = static_cast<RequestContext*>(userp);
 
-    if (context->shutting_down_) {
+    if (context->is_shutting_down()) {
         return 0; // Abort the transfer
     }
 
@@ -371,10 +356,10 @@ size_t CurlClient::WriteCallback(const char* data,
                                        : (delimiter_pos - i);
 
         // Append to buffered line
-        if (context->buffered_line_.has_value()) {
-            context->buffered_line_->append(body.substr(i, append_size));
+        if (context->buffered_line.has_value()) {
+            context->buffered_line->append(body.substr(i, append_size));
         } else {
-            context->buffered_line_ = std::string(body.substr(i, append_size));
+            context->buffered_line = std::string(body.substr(i, append_size));
         }
 
         i += append_size;
@@ -385,52 +370,52 @@ size_t CurlClient::WriteCallback(const char* data,
 
         // Handle line delimiters
         if (body[i] == '\r') {
-            context->complete_lines_.push_back(*context->buffered_line_);
-            context->buffered_line_.reset();
-            context->begin_CR_ = true;
+            context->complete_lines.push_back(*context->buffered_line);
+            context->buffered_line.reset();
+            context->begin_CR = true;
             i++;
         } else if (body[i] == '\n') {
-            if (context->begin_CR_) {
-                context->begin_CR_ = false;
+            if (context->begin_CR) {
+                context->begin_CR = false;
             } else {
-                context->complete_lines_.push_back(*context->buffered_line_);
-                context->buffered_line_.reset();
+                context->complete_lines.push_back(*context->buffered_line);
+                context->buffered_line.reset();
             }
             i++;
         }
     }
 
     // Parse completed lines into events
-    while (!context->complete_lines_.empty()) {
-        std::string line = std::move(context->complete_lines_.front());
-        context->complete_lines_.pop_front();
+    while (!context->complete_lines.empty()) {
+        std::string line = std::move(context->complete_lines.front());
+        context->complete_lines.pop_front();
 
         if (line.empty()) {
             // Empty line indicates end of event
-            if (context->current_event_) {
+            if (context->current_event) {
                 // Trim trailing newline from data
-                if (!context->current_event_->data.empty() &&
-                    context->current_event_->data.back() == '\n') {
-                    context->current_event_->data.pop_back();
+                if (!context->current_event->data.empty() &&
+                    context->current_event->data.back() == '\n') {
+                    context->current_event->data.pop_back();
                 }
 
                 // Update last_event_id_ only when dispatching a completed event
-                if (context->current_event_->id) {
-                    context->last_event_id_ = context->current_event_->id;
+                if (context->current_event->id) {
+                    context->last_event_id = context->current_event->id;
                 }
 
                 // Dispatch event on executor thread
-                auto event_data = context->current_event_->data;
-                auto event_type = context->current_event_->type.empty()
+                auto event_data = context->current_event->data;
+                auto event_type = context->current_event->type.empty()
                                       ? "message"
-                                      : context->current_event_->type;
-                auto event_id = context->current_event_->id;
+                                      : context->current_event->type;
+                auto event_id = context->current_event->id;
                 context->receive(Event(
                     std::move(event_type),
                     std::move(event_data),
                     std::move(event_id)));
 
-                context->current_event_.reset();
+                context->current_event.reset();
             }
             continue;
         }
@@ -462,20 +447,20 @@ size_t CurlClient::WriteCallback(const char* data,
         }
 
         // Initialize event if needed
-        if (!context->current_event_) {
-            context->current_event_.emplace(detail::Event{});
-            context->current_event_->id = context->last_event_id_;
+        if (!context->current_event) {
+            context->current_event.emplace(detail::Event{});
+            context->current_event->id = context->last_event_id;
         }
 
         // Handle field
         if (field_name == "event") {
-            context->current_event_->type = field_value;
+            context->current_event->type = field_value;
         } else if (field_name == "data") {
-            context->current_event_->data += field_value;
-            context->current_event_->data += '\n';
+            context->current_event->data += field_value;
+            context->current_event->data += '\n';
         } else if (field_name == "id") {
             if (field_value.find('\0') == std::string::npos) {
-                context->current_event_->id = field_value;
+                context->current_event->id = field_value;
             }
         }
         // retry field is ignored for now
@@ -507,19 +492,19 @@ size_t CurlClient::HeaderCallback(const char* buffer,
 }
 
 void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
-    if (context->shutting_down_) {
+    if (context->is_shutting_down()) {
         return;
     }
 
     // Clear parser state for new connection
-    context->buffered_line_.reset();
-    context->complete_lines_.clear();
-    context->current_event_.reset();
-    context->begin_CR_ = false;
+    context->buffered_line.reset();
+    context->complete_lines.clear();
+    context->current_event.reset();
+    context->begin_CR = false;
 
     CURL* curl = curl_easy_init();
     if (!curl) {
-        if (context->shutting_down_) {
+        if (context->is_shutting_down()) {
             return;
         }
 
@@ -532,7 +517,7 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
         // setup_curl_options returned false, indicating an error (it already logged the error)
         curl_easy_cleanup(curl);
 
-        if (context->shutting_down_) {
+        if (context->is_shutting_down()) {
             return;
         }
 
@@ -558,7 +543,7 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
 
     curl_easy_cleanup(curl);
 
-    if (context->shutting_down_) {
+    if (context->is_shutting_down()) {
         return;
     }
 
@@ -571,15 +556,15 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
 
     // Handle result
     if (res != CURLE_OK) {
-        if (context->shutting_down_) {
+        if (context->is_shutting_down()) {
             return;
         }
 
         // Check if the error was due to progress callback aborting (read timeout)
         if (res == CURLE_ABORTED_BY_CALLBACK && context->
-            effective_read_timeout_) {
+            read_timeout) {
             context->error(errors::ReadTimeout{
-                context->read_timeout_
+                context->read_timeout
             });
             context->backoff("aborting read of response body (timeout)");
         } else {
@@ -593,25 +578,25 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
 
     if (status_class == http::status_class::successful) {
         if (status == http::status::no_content) {
-            if (!context->shutting_down_) {
+            if (!context->is_shutting_down()) {
                 context->error(errors::UnrecoverableClientError{
                     http::status::no_content});
             }
             return;
         }
-        if (!context->shutting_down_) {
+        if (!context->is_shutting_down()) {
             // log_message("connected");
         }
-        context->resetBackoff_();
+        context->reset_backoff();
         // Connection ended normally, reconnect
-        if (!context->shutting_down_) {
+        if (!context->is_shutting_down()) {
             context->backoff("connection closed normally");
         }
         return;
     }
 
     if (status_class == http::status_class::client_error) {
-        if (!context->shutting_down_) {
+        if (!context->is_shutting_down()) {
             bool recoverable = (status == http::status::bad_request ||
                                 status == http::status::request_timeout ||
                                 status == http::status::too_many_requests);
@@ -630,7 +615,7 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
 
     {
         // Server error or other - backoff and retry
-        if (!context->shutting_down_) {
+        if (!context->is_shutting_down()) {
             std::stringstream ss;
             ss << "HTTP status " << static_cast<int>(status);
             context->backoff(ss.str());
@@ -648,19 +633,7 @@ void CurlClient::async_shutdown(std::function<void()> completion) {
 }
 
 void CurlClient::do_shutdown(const std::function<void()>& completion) {
-    request_context_->shutting_down_ = true;
-    {
-        std::lock_guard lock(request_context_->mutex_);
-        // Close the socket to abort the CURL operation
-        curl_socket_t sock = request_context_->curl_socket_.load();
-        if (sock != CURL_SOCKET_BAD) {
-#ifdef _WIN32
-            closesocket(sock);
-#else
-            close(sock);
-#endif
-        }
-    }
+    request_context_->shutdown();
     backoff_timer_.cancel();
 
     if (completion) {
