@@ -65,16 +65,24 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
         std::move(proxy_url),
         skip_verify_peer,
         [this](const std::string& message) {
-            async_backoff(message);
+            boost::asio::post(backoff_timer_.get_executor(), [this, message]() {
+                async_backoff(message);
+            });
         },
         [this](const Event& event) {
-            event_receiver_(event);
+            boost::asio::post(backoff_timer_.get_executor(), [this, event]() {
+                event_receiver_(event);
+            });
         },
         [this](const Error& error) {
-            report_error(error);
+            boost::asio::post(backoff_timer_.get_executor(), [this, error]() {
+                report_error(error);
+            });
         },
         [this]() {
-            backoff_.succeed();
+            boost::asio::post(backoff_timer_.get_executor(), [this]() {
+                backoff_.succeed();
+            });
         });
 }
 
