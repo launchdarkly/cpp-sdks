@@ -100,6 +100,11 @@ By default, the SDK uses Boost.Beast/Foxy for HTTP networking. To use CURL inste
 cmake -B build -S . -DLD_CURL_NETWORKING=ON
 ```
 
+> [!WARNING]
+> CURL support for the **server-side SDK** is currently **experimental**. It is subject to change and may not be fully tested for production use.
+
+Proxy support does not apply to the redis persistent store implementation for the server-side SDK.
+
 #### CURL Requirements by Platform
 
 **Linux/macOS:**
