@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("tls:skip-verify-peer");
         srv.add_capability("tls:custom-ca");
         srv.add_capability("client-prereq-events");
+        srv.add_capability("http-proxy");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
