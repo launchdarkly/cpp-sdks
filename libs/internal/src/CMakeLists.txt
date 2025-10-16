@@ -50,7 +50,7 @@ set(INTERNAL_SOURCES
 if (LD_CURL_NETWORKING)
     message(STATUS "LaunchDarkly Internal: CURL networking enabled")
     find_package(CURL REQUIRED)
-    list(APPEND INTERNAL_SOURCES network/curl_requester.cpp)
+    list(APPEND INTERNAL_SOURCES network/curl_requester.cpp network/curl_multi_manager.cpp)
 endif()
 
 add_library(${LIBNAME} OBJECT ${INTERNAL_SOURCES})

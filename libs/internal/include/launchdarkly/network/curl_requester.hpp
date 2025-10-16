@@ -4,6 +4,7 @@
 
 #include "http_requester.hpp"
 #include "asio_requester.hpp"
+#include "curl_multi_manager.hpp"
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <functional>
 
@@ -20,11 +21,14 @@ public:
     void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const;
 
 private:
-    static void PerformRequestStatic(net::any_io_executor ctx, TlsOptions const& tls_options,
-                                      const HttpRequest& request, std::function<void(const HttpResult&)> cb);
+    static void PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> multi_manager,
+                                       TlsOptions const& tls_options,
+                                       const HttpRequest& request,
+                                       std::function<void(const HttpResult&)> cb);
 
     net::any_io_executor ctx_;
     TlsOptions tls_options_;
+    std::shared_ptr<CurlMultiManager> multi_manager_;
 };
 
 } // namespace launchdarkly::network

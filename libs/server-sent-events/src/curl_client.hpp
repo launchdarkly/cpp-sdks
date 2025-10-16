@@ -4,11 +4,12 @@
 
 #include <launchdarkly/sse/client.hpp>
 #include "backoff.hpp"
-#include "backoff_timer.hpp"
+#include "curl_multi_manager.hpp"
 #include "parser.hpp"
 
 #include <curl/curl.h>
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/beast/http/string_body.hpp>
 
 #include <atomic>
@@ -221,8 +222,9 @@ private:
     void do_run();
     void do_shutdown(const std::function<void()>& completion);
     void async_backoff(std::string const& reason);
-    void on_backoff(bool cancelled);
-    static void PerformRequest(
+    void on_backoff(boost::system::error_code const& ec);
+    static void PerformRequestWithMulti(
+        std::shared_ptr<CurlMultiManager> multi_manager,
         std::shared_ptr<RequestContext> context);
 
     static size_t WriteCallback(const char* data,
@@ -262,7 +264,8 @@ private:
     Builder::ErrorCallback errors_;
 
     bool use_https_;
-    BackoffTimer backoff_timer_;
+    boost::asio::steady_timer backoff_timer_;
+    std::shared_ptr<CurlMultiManager> multi_manager_;
 
     Backoff backoff_;
 };

@@ -51,7 +51,8 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
     logger_(std::move(logger)),
     errors_(std::move(errors)),
     use_https_(use_https),
-    backoff_timer_(std::move(executor)),
+    backoff_timer_(executor),
+    multi_manager_(CurlMultiManager::create(executor)),
     backoff_(initial_reconnect_delay.value_or(kDefaultInitialReconnectDelay),
              kDefaultMaxBackoffDelay) {
     request_context_ = std::make_shared<RequestContext>(
@@ -129,12 +130,8 @@ void CurlClient::do_run() {
                                          self->log_message(message);
                                      }
                                  }));
-    // Start request in a separate thread since CURL blocks
-    // Capture only raw 'this' pointer, not shared_ptr
-    std::thread t(
-        [ctx]() { PerformRequest(ctx); });
-
-    t.detach();
+    // Start request using CURL multi (non-blocking)
+    PerformRequestWithMulti(multi_manager_, ctx);
 }
 
 void CurlClient::async_backoff(std::string const& reason) {
@@ -148,20 +145,17 @@ void CurlClient::async_backoff(std::string const& reason) {
 
     log_message(msg.str());
 
-    // auto weak_self = weak_from_this();
-    backoff_timer_.expires_after(backoff_.delay(),
-        [this](bool cancelled) {
-            if (request_context_->is_shutting_down()) {
-                return;
-            }
-            // if (const auto self = weak_self.lock()) {
-                on_backoff(cancelled);
-            // }
-        });
+    auto weak_self = weak_from_this();
+    backoff_timer_.expires_after(backoff_.delay());
+    backoff_timer_.async_wait([weak_self](const boost::system::error_code& ec) {
+        if (auto self = weak_self.lock()) {
+            self->on_backoff(ec);
+        }
+    });
 }
 
-void CurlClient::on_backoff(bool cancelled) {
-    if (cancelled || request_context_->is_shutting_down()) {
+void CurlClient::on_backoff(boost::system::error_code const& ec) {
+    if (ec || request_context_->is_shutting_down()) {
         return;
     }
     do_run();
@@ -519,8 +513,11 @@ size_t CurlClient::HeaderCallback(const char* buffer,
     return total_size;
 }
 
-void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
-    std::cout << "CurlClient::PerformRequest: " << context->url << std::endl;
+void CurlClient::PerformRequestWithMulti(
+    std::shared_ptr<CurlMultiManager> multi_manager,
+    std::shared_ptr<RequestContext> context) {
+
+    std::cout << "CurlClient::PerformRequestWithMulti: " << context->url << std::endl;
     if (context->is_shutting_down()) {
         return;
     }
@@ -554,104 +551,92 @@ void CurlClient::PerformRequest(std::shared_ptr<RequestContext> context) {
         return;
     }
 
-    // Perform the request
-    CURLcode res = curl_easy_perform(curl);
+    // Add handle to multi manager for async processing
+    multi_manager->add_handle(curl, [context, headers](CURL* easy, CURLcode res) {
+        // Get response code
+        long response_code = 0;
+        curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
 
-    // Get response code
-    long response_code = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+        // Free headers before cleanup
+        if (headers) {
+            curl_slist_free_all(headers);
+        }
 
-    // Free headers before cleanup
-    if (headers) {
-        curl_slist_free_all(headers);
-    }
+        // Handle HTTP status codes
+        auto status = static_cast<http::status>(response_code);
+        auto status_class = http::to_status_class(status);
 
-    // Handle HTTP status codes
-    auto status = static_cast<http::status>(response_code);
-    auto status_class = http::to_status_class(status);
+        curl_easy_cleanup(easy);
 
-    curl_easy_cleanup(curl);
-
-    if (context->is_shutting_down()) {
-        return;
-    }
-
-    if (status_class == http::status_class::redirection) {
-        // The internal CURL handling of redirects failed.
-        // This situation is likely the result of a missing redirect header
-        // or empty header.
-        context->error(errors::NotRedirectable{});
-    }
-
-    // Handle result
-    if (res != CURLE_OK) {
         if (context->is_shutting_down()) {
             return;
         }
 
-        // Check if the error was due to progress callback aborting (read timeout)
-        if (res == CURLE_ABORTED_BY_CALLBACK && context->
-            read_timeout) {
-            context->error(errors::ReadTimeout{
-                context->read_timeout
-            });
-            context->backoff("aborting read of response body (timeout)");
-        } else {
-            std::string error_msg = "CURL error: " + std::string(
-                                        curl_easy_strerror(res));
-            context->backoff(error_msg);
+        if (status_class == http::status_class::redirection) {
+            // The internal CURL handling of redirects failed.
+            // This situation is likely the result of a missing redirect header
+            // or empty header.
+            context->error(errors::NotRedirectable{});
+            return;
         }
 
-        return;
-    }
+        // Handle result
+        if (res != CURLE_OK) {
+            if (context->is_shutting_down()) {
+                return;
+            }
 
-    if (status_class == http::status_class::successful) {
-        if (status == http::status::no_content) {
+            // Check if the error was due to progress callback aborting (read timeout)
+            if (res == CURLE_ABORTED_BY_CALLBACK && context->read_timeout) {
+                context->error(errors::ReadTimeout{context->read_timeout});
+                context->backoff("aborting read of response body (timeout)");
+            } else {
+                std::string error_msg = "CURL error: " + std::string(curl_easy_strerror(res));
+                context->backoff(error_msg);
+            }
+
+            return;
+        }
+
+        if (status_class == http::status_class::successful) {
+            if (status == http::status::no_content) {
+                if (!context->is_shutting_down()) {
+                    context->error(errors::UnrecoverableClientError{http::status::no_content});
+                }
+                return;
+            }
+            context->reset_backoff();
+            // Connection ended normally, reconnect
             if (!context->is_shutting_down()) {
-                context->error(errors::UnrecoverableClientError{
-                    http::status::no_content});
+                context->backoff("connection closed normally");
             }
             return;
         }
-        if (!context->is_shutting_down()) {
-            // log_message("connected");
-        }
-        context->reset_backoff();
-        // Connection ended normally, reconnect
-        if (!context->is_shutting_down()) {
-            context->backoff("connection closed normally");
-        }
-        return;
-    }
 
-    if (status_class == http::status_class::client_error) {
-        if (!context->is_shutting_down()) {
-            bool recoverable = (status == http::status::bad_request ||
-                                status == http::status::request_timeout ||
-                                status == http::status::too_many_requests);
+        if (status_class == http::status_class::client_error) {
+            if (!context->is_shutting_down()) {
+                bool recoverable = (status == http::status::bad_request ||
+                                    status == http::status::request_timeout ||
+                                    status == http::status::too_many_requests);
 
-            if (recoverable) {
-                std::stringstream ss;
-                ss << "HTTP status " << static_cast<int>(status);
-                context->backoff(ss.str());
-            } else {
-                context->error(errors::UnrecoverableClientError{
-                    status});
+                if (recoverable) {
+                    std::stringstream ss;
+                    ss << "HTTP status " << static_cast<int>(status);
+                    context->backoff(ss.str());
+                } else {
+                    context->error(errors::UnrecoverableClientError{status});
+                }
             }
+            return;
         }
-        return;
-    }
 
-    {
         // Server error or other - backoff and retry
         if (!context->is_shutting_down()) {
             std::stringstream ss;
             ss << "HTTP status " << static_cast<int>(status);
             context->backoff(ss.str());
         }
-    }
-
-    // Keepalive will be cleared by guard's destructor when function exits
+    });
 }
 
 void CurlClient::async_shutdown(std::function<void()> completion) {

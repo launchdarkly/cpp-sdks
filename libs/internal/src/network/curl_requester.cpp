@@ -67,44 +67,65 @@ static size_t HeaderCallback(const char* buffer, const size_t size, const size_t
 }
 
 CurlRequester::CurlRequester(net::any_io_executor ctx, TlsOptions const& tls_options)
-    : ctx_(std::move(ctx)), tls_options_(tls_options) {
+    : ctx_(std::move(ctx)),
+      tls_options_(tls_options),
+      multi_manager_(CurlMultiManager::create(ctx_)) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
 void CurlRequester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) const {
-    // Post the request to the executor to perform it asynchronously
-    // Copy ctx_ and tls_options_ to avoid capturing 'this' and causing use-after-free
-    // if the CurlRequester is destroyed while the operation is in flight.
-    auto ctx = ctx_;
+    // Copy necessary data to avoid capturing 'this'
+    auto multi_manager = multi_manager_;
     auto tls_options = tls_options_;
-    boost::asio::post(ctx, [ctx, tls_options, request = std::move(request), cb = std::move(cb)]() mutable {
-        PerformRequestStatic(ctx, tls_options, std::move(request), std::move(cb));
+
+    boost::asio::post(ctx_, [multi_manager, tls_options, request = std::move(request), cb = std::move(cb)]() mutable {
+        PerformRequestWithMulti(multi_manager, tls_options, std::move(request), std::move(cb));
     });
 }
 
-void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions const& tls_options,
-                                          const HttpRequest& request, std::function<void(const HttpResult&)> cb) {
+void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> multi_manager,
+                                             TlsOptions const& tls_options,
+                                             const HttpRequest& request,
+                                             std::function<void(const HttpResult&)> cb) {
     // Validate request
     if (!request.Valid()) {
-        boost::asio::post(ctx, [cb = std::move(cb)]() {
-            cb(HttpResult(kErrorMalformedRequest));
-        });
+        cb(HttpResult(kErrorMalformedRequest));
         return;
     }
 
     CURL* curl = curl_easy_init();
     if (!curl) {
-        boost::asio::post(ctx, [cb = std::move(cb)]() {
-            cb(HttpResult(kErrorCurlInit));
-        });
+        cb(HttpResult(kErrorCurlInit));
         return;
     }
 
-    // Use a unique_ptr to manage the cleanup of our curl instance.
-    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl_guard(curl, curl_easy_cleanup);
+    // Create context to hold data for this request
+    // This will be cleaned up in the completion callback
+    struct RequestContext {
+        CURL* curl;
+        curl_slist* headers;
+        std::string url;
+        std::string body; // Keep body alive
+        std::string response_body;
+        HttpResult::HeadersType response_headers;
+        std::function<void(const HttpResult&)> callback;
+
+        ~RequestContext() {
+            if (headers) {
+                curl_slist_free_all(headers);
+            }
+            if (curl) {
+                curl_easy_cleanup(curl);
+            }
+        }
+    };
+
+    auto ctx = std::make_shared<RequestContext>();
+    ctx->curl = curl;
+    ctx->headers = nullptr;
+    ctx->callback = std::move(cb);
 
     // Helper macro to check curl_easy_setopt return values
-    // Note: This macro captures ctx and cb by reference for error reporting
     #define CURL_SETOPT_CHECK(handle, option, parameter) \
         do { \
             CURLcode code = curl_easy_setopt(handle, option, parameter); \
@@ -112,21 +133,16 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
                 std::string error_message = kErrorCurlPrefix; \
                 error_message += "curl_easy_setopt failed for " #option ": "; \
                 error_message += curl_easy_strerror(code); \
-                boost::asio::post(ctx, [cb = std::move(cb), error_message = std::move(error_message)]() { \
-                    cb(HttpResult(error_message)); \
-                }); \
+                ctx->callback(HttpResult(error_message)); \
                 return; \
             } \
         } while(0)
 
-    std::string response_body;
-    HttpResult::HeadersType response_headers;
-
     // Store URL to keep it alive for the duration of the request
-    std::string url = request.Url();
+    ctx->url = request.Url();
 
     // Set URL
-    CURL_SETOPT_CHECK(curl, CURLOPT_URL, url.c_str());
+    CURL_SETOPT_CHECK(curl, CURLOPT_URL, ctx->url.c_str());
 
     // Set HTTP method
     if (request.Method() == HttpMethod::kPost) {
@@ -145,34 +161,28 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
 
     // Set request body if present
     if (request.Body().has_value()) {
-        const std::string& body = request.Body().value();
-        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS, body.c_str());
-        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE, body.size());
+        ctx->body = request.Body().value();
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS, ctx->body.c_str());
+        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE, ctx->body.size());
     }
 
     // Set headers
-    struct curl_slist* headers = nullptr;
     auto const& base_headers = request.Properties().BaseHeaders();
     for (auto const& [key, value] : base_headers) {
         std::string header = key + kHeaderSeparator + value;
-        // The first call to curl_slist_append will create the list.
-        // Subsequent calls will return either the same pointer, or null.
-        // In the case they return null, we need to clean up any previous result
-        // and abort the operation.
-        const auto appendResult = curl_slist_append(headers, header.c_str());
+        const auto appendResult = curl_slist_append(ctx->headers, header.c_str());
         if (!appendResult) {
-            if (headers) {
-                curl_slist_free_all(headers);
+            if (ctx->headers) {
+                curl_slist_free_all(ctx->headers);
+                ctx->headers = nullptr;
             }
-            boost::asio::post(ctx, [cb = std::move(cb)]() {
-                cb(HttpResult(kErrorHeaderAppend));
-            });
+            ctx->callback(HttpResult(kErrorHeaderAppend));
             return;
         }
-        headers = appendResult;
+        ctx->headers = appendResult;
     }
-    if (headers) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, headers);
+    if (ctx->headers) {
+        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, ctx->headers);
     }
 
     // Set timeouts with millisecond precision
@@ -211,43 +221,37 @@ void CurlRequester::PerformRequestStatic(net::any_io_executor ctx, TlsOptions co
 
     // Set callbacks
     CURL_SETOPT_CHECK(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEDATA, &response_body);
+    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEDATA, &ctx->response_body);
     CURL_SETOPT_CHECK(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
-    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERDATA, &response_headers);
+    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERDATA, &ctx->response_headers);
 
     // Follow redirects
     CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 1L);
     CURL_SETOPT_CHECK(curl, CURLOPT_MAXREDIRS, 20L);
 
-    // Perform the request
-    CURLcode res = curl_easy_perform(curl);
+    #undef CURL_SETOPT_CHECK
 
-    // Cleanup headers
-    if (headers) {
-        curl_slist_free_all(headers);
-    }
+    // Add handle to multi manager for async processing
+    multi_manager->add_handle(curl, [ctx](CURL* easy, CURLcode result) {
+        // This callback runs on the executor when the request completes
 
-    // Check for errors
-    if (res != CURLE_OK) {
-        std::string error_message = kErrorCurlPrefix;
-        error_message += curl_easy_strerror(res);
-        boost::asio::post(ctx, [cb = std::move(cb), error_message = std::move(error_message)]() {
-            cb(HttpResult(error_message));
-        });
-        return;
-    }
+        // Check for errors
+        if (result != CURLE_OK) {
+            std::string error_message = kErrorCurlPrefix;
+            error_message += curl_easy_strerror(result);
+            ctx->callback(HttpResult(error_message));
+            return;
+        }
 
-    // Get HTTP response code
-    long response_code = 0;
-    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+        // Get HTTP response code
+        long response_code = 0;
+        curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
 
-    // Post the success result back to the executor
-    boost::asio::post(ctx, [cb = std::move(cb), response_code,
-                            response_body = std::move(response_body),
-                            response_headers = std::move(response_headers)]() mutable {
-        cb(HttpResult(static_cast<HttpResult::StatusCode>(response_code),
-                      std::move(response_body),
-                      std::move(response_headers)));
+        // Invoke the user's callback with the result
+        ctx->callback(HttpResult(
+            static_cast<HttpResult::StatusCode>(response_code),
+            std::move(ctx->response_body),
+            std::move(ctx->response_headers)));
     });
 }
 

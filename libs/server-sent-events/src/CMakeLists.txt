@@ -12,14 +12,12 @@ set(SSE_SOURCES
         event.cpp
         error.cpp
         backoff_detail.cpp
-        backoff.cpp
-        curl_client.cpp
-        backoff_timer.cpp)
+        backoff.cpp)
 
 if (LD_CURL_NETWORKING)
     message(STATUS "LaunchDarkly SSE: CURL networking enabled")
     find_package(CURL REQUIRED)
-    list(APPEND SSE_SOURCES)
+    list(APPEND SSE_SOURCES curl_client.cpp curl_multi_manager.cpp)
 endif()
 
 add_library(${LIBNAME} OBJECT ${SSE_SOURCES})
