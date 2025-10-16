@@ -4,11 +4,11 @@
 
 #include <launchdarkly/sse/client.hpp>
 #include "backoff.hpp"
+#include "backoff_timer.hpp"
 #include "parser.hpp"
 
 #include <curl/curl.h>
 #include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/beast/http/string_body.hpp>
 
 #include <atomic>
@@ -38,18 +38,36 @@ namespace net = boost::asio;
  */
 class CurlClient final : public Client,
                          public std::enable_shared_from_this<CurlClient> {
+    struct Callbacks {
+        std::function<void(std::string)> do_backoff;
+        std::function<void(Event)> on_receive;
+        std::function<void(Error)> on_error;
+        std::function<void()> reset_backoff;
+        std::function<void(std::string)> log_message;
+
+        Callbacks(
+            std::function<void(std::string)> do_backoff,
+            std::function<void(Event)> on_receive,
+            std::function<void(Error)> on_error,
+            std::function<void()> reset_backoff,
+            std::function<void(std::string)> log_message
+            ) :
+            do_backoff(std::move(do_backoff)),
+            on_receive(std::move(on_receive)),
+            on_error(std::move(on_error)),
+            reset_backoff(std::move(reset_backoff)),
+            log_message(std::move(log_message)) {
+        }
+    };
+
     class RequestContext {
         // Only items used by both the curl thread and the executor/main
         // thread need to be mutex protected.
         std::mutex mutex_;
         std::atomic<bool> shutting_down_;
         std::atomic<curl_socket_t> curl_socket_;
-        std::function<void(std::string)> do_backoff_;
-        std::function<void(Event)> on_receive_;
-        std::function<void(Error)> on_error_;
-        std::function<void()> reset_backoff_;
-        std::function<void(std::string)> log_message_;
         // End mutex protected items.
+        std::optional<Callbacks> callbacks_;
 
     public:
         // SSE parser state
@@ -79,7 +97,9 @@ class CurlClient final : public Client,
             if (shutting_down_) {
                 return;
             }
-            do_backoff_(message);
+            if (callbacks_) {
+                callbacks_->do_backoff(message);
+            }
         }
 
         void error(const Error& error) {
@@ -87,7 +107,9 @@ class CurlClient final : public Client,
             if (shutting_down_) {
                 return;
             }
-            on_error_(error);
+            if (callbacks_) {
+                callbacks_->on_error(error);
+            }
         }
 
         void receive(const Event& event) {
@@ -95,7 +117,9 @@ class CurlClient final : public Client,
             if (shutting_down_) {
                 return;
             }
-            on_receive_(event);
+            if (callbacks_) {
+                callbacks_->on_receive(event);
+            }
         }
 
         void reset_backoff() {
@@ -103,7 +127,9 @@ class CurlClient final : public Client,
             if (shutting_down_) {
                 return;
             }
-            reset_backoff_();
+            if (callbacks_) {
+                callbacks_->reset_backoff();
+            }
         }
 
         void log_message(const std::string& message) {
@@ -111,7 +137,14 @@ class CurlClient final : public Client,
             if (shutting_down_) {
                 return;
             }
-            log_message_(message);
+            if (callbacks_) {
+                callbacks_->log_message(message);
+            }
+        }
+
+        void set_callbacks(Callbacks callbacks) {
+            std::lock_guard lock(mutex_);
+            callbacks_ = std::move(callbacks);
         }
 
         bool is_shutting_down() {
@@ -143,19 +176,9 @@ class CurlClient final : public Client,
                        std::optional<std::chrono::milliseconds> write_timeout,
                        std::optional<std::string> custom_ca_file,
                        std::optional<std::string> proxy_url,
-                       bool skip_verify_peer,
-                       std::function<void(std::string)> doBackoff,
-                       std::function<void(Event)> onReceive,
-                       std::function<void(Error)> onError,
-                       std::function<void()> resetBackoff,
-                       std::function<void(std::string)> log_message
+                       bool skip_verify_peer
             ) : shutting_down_(false),
                 curl_socket_(CURL_SOCKET_BAD),
-                do_backoff_(std::move(doBackoff)),
-                on_receive_(std::move(onReceive)),
-                on_error_(std::move(onError)),
-                reset_backoff_(std::move(resetBackoff)),
-                log_message_(std::move(log_message)),
                 buffered_line(std::nullopt),
                 begin_CR(false),
                 last_download_amount(0),
@@ -195,10 +218,10 @@ public:
     void async_shutdown(std::function<void()> completion) override;
 
 private:
-    void do_run() const;
+    void do_run();
     void do_shutdown(const std::function<void()>& completion);
     void async_backoff(std::string const& reason);
-    void on_backoff(const boost::system::error_code& ec) const;
+    void on_backoff(bool cancelled);
     static void PerformRequest(
         std::shared_ptr<RequestContext> context);
 
@@ -239,7 +262,7 @@ private:
     Builder::ErrorCallback errors_;
 
     bool use_https_;
-    boost::asio::steady_timer backoff_timer_;
+    BackoffTimer backoff_timer_;
 
     Backoff backoff_;
 };
