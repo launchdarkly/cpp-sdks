@@ -64,11 +64,9 @@ CurlClient::CurlClient(boost::asio::any_io_executor executor,
         std::move(custom_ca_file),
         std::move(proxy_url),
         skip_verify_peer);
-    std::cout << "Curl client created: " << host << std::endl;
 }
 
 CurlClient::~CurlClient() {
-    std::cout << "Curl client destructing: " << request_context_->url << std::endl;
     request_context_->shutdown();
     backoff_timer_.cancel();
 }
@@ -85,49 +83,55 @@ void CurlClient::do_run() {
 
     auto ctx = request_context_;
     auto weak_self = weak_from_this();
-    ctx->set_callbacks(Callbacks([weak_self, ctx](const std::string& message) {
-                                    std::cout << "Backoff " << ctx->url << " " << message << std::endl;
-                                     if (auto self = weak_self.lock()) {
-                                         boost::asio::post(
-                                             self->backoff_timer_.
-                                                   get_executor(),
-                                             [self, message]() {
-                                                 self->async_backoff(message);
-                                             });
+    std::weak_ptr<RequestContext> weak_ctx = ctx;
+    ctx->set_callbacks(Callbacks([weak_self, weak_ctx](const std::string& message) {
+                                     if (auto ctx = weak_ctx.lock()) {
+                                         if (auto self = weak_self.lock()) {
+                                             boost::asio::post(
+                                                 self->backoff_timer_.
+                                                       get_executor(),
+                                                 [self, message]() {
+                                                     self->async_backoff(message);
+                                                 });
+                                         }
                                      }
                                  },
-                                 [weak_self, ctx](const Event& event) {
-                                     std::cout << "Event " << ctx->url << " " << event.data() << std::endl;
-                                     if (auto self = weak_self.lock()) {
-                                         boost::asio::post(
-                                             self->backoff_timer_.
-                                                   get_executor(),
-                                             [self, event]() {
-                                                 self->event_receiver_(event);
-                                             });
+                                 [weak_self, weak_ctx](const Event& event) {
+                                     if (auto ctx = weak_ctx.lock()) {
+                                         if (auto self = weak_self.lock()) {
+                                             boost::asio::post(
+                                                 self->backoff_timer_.
+                                                       get_executor(),
+                                                 [self, event]() {
+                                                     self->event_receiver_(event);
+                                                 });
+                                         }
                                      }
                                  },
-                                 [weak_self, ctx](const Error& error) {
-                                     std::cout << "Error " << ctx->url << " " << error << std::endl;
-                                     if (const auto self = weak_self.lock()) {
-                                         // report_error does an asio post.
-                                         self->report_error(error);
+                                 [weak_self, weak_ctx](const Error& error) {
+                                     if (auto ctx = weak_ctx.lock()) {
+                                         if (const auto self = weak_self.lock()) {
+                                             // report_error does an asio post.
+                                             self->report_error(error);
+                                         }
                                      }
                                  },
-                                 [weak_self, ctx]() {
-                                     std::cout << "Reset backoff" << ctx->url << std::endl;
-                                     if (const auto self = weak_self.lock()) {
-                                         boost::asio::post(
-                                             self->backoff_timer_.
-                                                   get_executor(),
-                                             [self]() {
-                                                 self->backoff_.succeed();
-                                             });
+                                 [weak_self, weak_ctx]() {
+                                     if (auto ctx = weak_ctx.lock()) {
+                                         if (const auto self = weak_self.lock()) {
+                                             boost::asio::post(
+                                                 self->backoff_timer_.
+                                                       get_executor(),
+                                                 [self]() {
+                                                     self->backoff_.succeed();
+                                                 });
+                                         }
                                      }
-                                 }, [weak_self, ctx](const std::string& message) {
-                                     std::cout << "Log " << ctx->url << " " << message << std::endl;
-                                     if (const auto self = weak_self.lock()) {
-                                         self->log_message(message);
+                                 }, [weak_self, weak_ctx](const std::string& message) {
+                                     if (auto ctx = weak_ctx.lock()) {
+                                         if (const auto self = weak_self.lock()) {
+                                             self->log_message(message);
+                                         }
                                      }
                                  }));
     // Start request using CURL multi (non-blocking)
@@ -517,7 +521,6 @@ void CurlClient::PerformRequestWithMulti(
     std::shared_ptr<CurlMultiManager> multi_manager,
     std::shared_ptr<RequestContext> context) {
 
-    std::cout << "CurlClient::PerformRequestWithMulti: " << context->url << std::endl;
     if (context->is_shutting_down()) {
         return;
     }
@@ -552,15 +555,18 @@ void CurlClient::PerformRequestWithMulti(
     }
 
     // Add handle to multi manager for async processing
-    multi_manager->add_handle(curl, [context, headers](CURL* easy, CURLcode res) {
+    // Headers will be freed automatically by CurlMultiManager
+    std::weak_ptr<RequestContext> weak_context = context;
+    multi_manager->add_handle(curl, headers, [weak_context](CURL* easy, CURLcode res) {
+        auto context = weak_context.lock();
+        if (!context) {
+            curl_easy_cleanup(easy);
+            return;
+        }
+
         // Get response code
         long response_code = 0;
         curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
-
-        // Free headers before cleanup
-        if (headers) {
-            curl_slist_free_all(headers);
-        }
 
         // Handle HTTP status codes
         auto status = static_cast<http::status>(response_code);

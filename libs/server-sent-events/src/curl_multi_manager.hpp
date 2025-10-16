@@ -54,9 +54,10 @@ public:
     /**
      * Add an easy handle to be managed.
      * @param easy The CURL easy handle (must be configured)
+     * @param headers The curl_slist headers (will be freed automatically)
      * @param callback Called when the transfer completes
      */
-    void add_handle(CURL* easy, CompletionCallback callback);
+    void add_handle(CURL* easy, curl_slist* headers, CompletionCallback callback);
 
     /**
      * Remove an easy handle from management.
@@ -86,12 +87,18 @@ private:
     // Per-socket data
     struct SocketInfo {
         curl_socket_t sockfd;
-        std::unique_ptr<boost::asio::posix::stream_descriptor> descriptor;
+        std::shared_ptr<boost::asio::posix::stream_descriptor> descriptor;
         int action{0}; // CURL_POLL_IN, CURL_POLL_OUT, etc.
     };
 
     void start_socket_monitor(SocketInfo* socket_info, int action);
     void stop_socket_monitor(SocketInfo* socket_info);
+
+    // Helper methods to start individual read/write monitoring (breaks circular ref)
+    void start_read_monitor(curl_socket_t sockfd,
+                           std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor);
+    void start_write_monitor(curl_socket_t sockfd,
+                            std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor);
 
     boost::asio::any_io_executor executor_;
     CURLM* multi_handle_;
@@ -99,6 +106,7 @@ private:
 
     std::mutex mutex_;
     std::map<CURL*, CompletionCallback> callbacks_;
+    std::map<CURL*, curl_slist*> headers_;
     int still_running_{0};
 };
 

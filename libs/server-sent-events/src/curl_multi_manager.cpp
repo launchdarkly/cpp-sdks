@@ -33,20 +33,54 @@ CurlMultiManager::CurlMultiManager(boost::asio::any_io_executor executor)
 
 CurlMultiManager::~CurlMultiManager() {
     if (multi_handle_) {
+        // Extract and clear pending handles, callbacks, and headers
+        std::map<CURL*, CompletionCallback> pending_callbacks;
+        std::map<CURL*, curl_slist*> pending_headers;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            pending_callbacks = std::move(callbacks_);
+            pending_headers = std::move(headers_);
+            callbacks_.clear();
+            headers_.clear();
+        }
+
+        // Remove handles from multi and cleanup resources
+        // Do NOT invoke callbacks as they may access destroyed objects
+        for (auto& [easy, callback] : pending_callbacks) {
+            curl_multi_remove_handle(multi_handle_, easy);
+
+            // Free headers if they exist for this handle
+            auto header_it = pending_headers.find(easy);
+            if (header_it != pending_headers.end() && header_it->second) {
+                curl_slist_free_all(header_it->second);
+            }
+
+            curl_easy_cleanup(easy);
+        }
+
         curl_multi_cleanup(multi_handle_);
     }
 }
 
-void CurlMultiManager::add_handle(CURL* easy, CompletionCallback callback) {
+void CurlMultiManager::add_handle(CURL* easy, curl_slist* headers, CompletionCallback callback) {
     {
         std::lock_guard<std::mutex> lock(mutex_);
         callbacks_[easy] = std::move(callback);
+        headers_[easy] = headers;
     }
 
     CURLMcode rc = curl_multi_add_handle(multi_handle_, easy);
     if (rc != CURLM_OK) {
         std::lock_guard<std::mutex> lock(mutex_);
         callbacks_.erase(easy);
+
+        // Free headers on error
+        auto header_it = headers_.find(easy);
+        if (header_it != headers_.end() && header_it->second) {
+            curl_slist_free_all(header_it->second);
+        }
+        headers_.erase(easy);
+
         std::cerr << "Failed to add handle to multi: "
                   << curl_multi_strerror(rc) << std::endl;
     }
@@ -57,6 +91,13 @@ void CurlMultiManager::remove_handle(CURL* easy) {
 
     std::lock_guard<std::mutex> lock(mutex_);
     callbacks_.erase(easy);
+
+    // Free headers if they exist
+    auto header_it = headers_.find(easy);
+    if (header_it != headers_.end() && header_it->second) {
+        curl_slist_free_all(header_it->second);
+    }
+    headers_.erase(easy);
 }
 
 int CurlMultiManager::socket_callback(CURL* easy, curl_socket_t s, int what,
@@ -144,6 +185,7 @@ void CurlMultiManager::check_multi_info() {
             CURLcode result = msg->data.result;
 
             CompletionCallback callback;
+            curl_slist* headers = nullptr;
             {
                 std::lock_guard<std::mutex> lock(mutex_);
                 auto it = callbacks_.find(easy);
@@ -151,10 +193,22 @@ void CurlMultiManager::check_multi_info() {
                     callback = std::move(it->second);
                     callbacks_.erase(it);
                 }
+
+                // Get and remove headers
+                auto header_it = headers_.find(easy);
+                if (header_it != headers_.end()) {
+                    headers = header_it->second;
+                    headers_.erase(header_it);
+                }
             }
 
             // Remove from multi handle
             curl_multi_remove_handle(multi_handle_, easy);
+
+            // Free headers
+            if (headers) {
+                curl_slist_free_all(headers);
+            }
 
             // Invoke completion callback
             if (callback) {
@@ -170,41 +224,85 @@ void CurlMultiManager::check_multi_info() {
 void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info, int action) {
     if (!socket_info->descriptor) {
         // Create descriptor for this socket
-        socket_info->descriptor = std::make_unique<
+        socket_info->descriptor = std::make_shared<
             boost::asio::posix::stream_descriptor>(executor_);
         socket_info->descriptor->assign(socket_info->sockfd);
     }
 
     socket_info->action = action;
 
-    auto weak_self = weak_from_this();
     curl_socket_t sockfd = socket_info->sockfd;
+    std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor = socket_info->descriptor;
 
     // Monitor for read events
     if (action & CURL_POLL_IN) {
-        socket_info->descriptor->async_wait(
-            boost::asio::posix::stream_descriptor::wait_read,
-            [weak_self, sockfd](const boost::system::error_code& ec) {
-                if (!ec) {
-                    if (auto self = weak_self.lock()) {
-                        self->handle_socket_action(sockfd, CURL_CSELECT_IN);
-                    }
-                }
-            });
+        start_read_monitor(sockfd, weak_descriptor);
     }
 
     // Monitor for write events
     if (action & CURL_POLL_OUT) {
-        socket_info->descriptor->async_wait(
-            boost::asio::posix::stream_descriptor::wait_write,
-            [weak_self, sockfd](const boost::system::error_code& ec) {
-                if (!ec) {
-                    if (auto self = weak_self.lock()) {
-                        self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
-                    }
-                }
-            });
+        start_write_monitor(sockfd, weak_descriptor);
     }
+}
+
+void CurlMultiManager::start_read_monitor(
+    curl_socket_t sockfd,
+    std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor) {
+
+    auto descriptor = weak_descriptor.lock();
+    if (!descriptor) {
+        return;
+    }
+
+    auto weak_self = weak_from_this();
+
+    descriptor->async_wait(
+        boost::asio::posix::stream_descriptor::wait_read,
+        [weak_self, sockfd, weak_descriptor](const boost::system::error_code& ec) {
+            if (ec) {
+                return;
+            }
+
+            auto self = weak_self.lock();
+            if (!self) {
+                return;
+            }
+
+            self->handle_socket_action(sockfd, CURL_CSELECT_IN);
+
+            // Re-register for continuous monitoring
+            self->start_read_monitor(sockfd, weak_descriptor);
+        });
+}
+
+void CurlMultiManager::start_write_monitor(
+    curl_socket_t sockfd,
+    std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor) {
+
+    auto descriptor = weak_descriptor.lock();
+    if (!descriptor) {
+        return;
+    }
+
+    auto weak_self = weak_from_this();
+
+    descriptor->async_wait(
+        boost::asio::posix::stream_descriptor::wait_write,
+        [weak_self, sockfd, weak_descriptor](const boost::system::error_code& ec) {
+            if (ec) {
+                return;
+            }
+
+            auto self = weak_self.lock();
+            if (!self) {
+                return;
+            }
+
+            self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
+
+            // Re-register for continuous monitoring
+            self->start_write_monitor(sockfd, weak_descriptor);
+        });
 }
 
 void CurlMultiManager::stop_socket_monitor(SocketInfo* socket_info) {

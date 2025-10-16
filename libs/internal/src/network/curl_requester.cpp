@@ -103,7 +103,6 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     // This will be cleaned up in the completion callback
     struct RequestContext {
         CURL* curl;
-        curl_slist* headers;
         std::string url;
         std::string body; // Keep body alive
         std::string response_body;
@@ -111,9 +110,7 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
         std::function<void(const HttpResult&)> callback;
 
         ~RequestContext() {
-            if (headers) {
-                curl_slist_free_all(headers);
-            }
+            // Headers are managed by CurlMultiManager
             if (curl) {
                 curl_easy_cleanup(curl);
             }
@@ -122,8 +119,10 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
 
     auto ctx = std::make_shared<RequestContext>();
     ctx->curl = curl;
-    ctx->headers = nullptr;
     ctx->callback = std::move(cb);
+
+    // Headers will be managed by CurlMultiManager
+    curl_slist* headers = nullptr;
 
     // Helper macro to check curl_easy_setopt return values
     #define CURL_SETOPT_CHECK(handle, option, parameter) \
@@ -133,6 +132,9 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
                 std::string error_message = kErrorCurlPrefix; \
                 error_message += "curl_easy_setopt failed for " #option ": "; \
                 error_message += curl_easy_strerror(code); \
+                if (headers) { \
+                    curl_slist_free_all(headers); \
+                } \
                 ctx->callback(HttpResult(error_message)); \
                 return; \
             } \
@@ -170,19 +172,18 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     auto const& base_headers = request.Properties().BaseHeaders();
     for (auto const& [key, value] : base_headers) {
         std::string header = key + kHeaderSeparator + value;
-        const auto appendResult = curl_slist_append(ctx->headers, header.c_str());
+        const auto appendResult = curl_slist_append(headers, header.c_str());
         if (!appendResult) {
-            if (ctx->headers) {
-                curl_slist_free_all(ctx->headers);
-                ctx->headers = nullptr;
+            if (headers) {
+                curl_slist_free_all(headers);
             }
             ctx->callback(HttpResult(kErrorHeaderAppend));
             return;
         }
-        ctx->headers = appendResult;
+        headers = appendResult;
     }
-    if (ctx->headers) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, ctx->headers);
+    if (headers) {
+        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, headers);
     }
 
     // Set timeouts with millisecond precision
@@ -232,7 +233,8 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     #undef CURL_SETOPT_CHECK
 
     // Add handle to multi manager for async processing
-    multi_manager->add_handle(curl, [ctx](CURL* easy, CURLcode result) {
+    // Headers will be freed automatically by CurlMultiManager
+    multi_manager->add_handle(curl, headers, [ctx](CURL* easy, CURLcode result) {
         // This callback runs on the executor when the request completes
 
         // Check for errors
