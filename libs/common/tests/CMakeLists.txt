@@ -20,4 +20,8 @@ add_executable(gtest_${LIBNAME}
         ${tests})
 target_link_libraries(gtest_${LIBNAME} launchdarkly::common launchdarkly::internal foxy GTest::gtest_main)
 
+if (LD_CURL_NETWORKING)
+    target_link_libraries(gtest_${LIBNAME} launchdarkly::networking)
+endif()
+
 gtest_discover_tests(gtest_${LIBNAME})

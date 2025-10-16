@@ -20,6 +20,7 @@ target_link_libraries(gtest_${LIBNAME} launchdarkly::common launchdarkly::intern
 
 if (LD_CURL_NETWORKING)
     target_compile_definitions(gtest_${LIBNAME} PRIVATE LD_CURL_NETWORKING)
+    target_link_libraries(gtest_${LIBNAME} launchdarkly::networking)
 endif()
 
 gtest_discover_tests(gtest_${LIBNAME})
