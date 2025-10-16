@@ -4,7 +4,7 @@
 
 #include "http_requester.hpp"
 #include "asio_requester.hpp"
-#include "curl_multi_manager.hpp"
+#include <launchdarkly/network/curl_multi_manager.hpp>
 #include <launchdarkly/config/shared/built/http_properties.hpp>
 #include <functional>
 

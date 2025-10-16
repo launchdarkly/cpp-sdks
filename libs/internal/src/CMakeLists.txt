@@ -50,7 +50,7 @@ set(INTERNAL_SOURCES
 if (LD_CURL_NETWORKING)
     message(STATUS "LaunchDarkly Internal: CURL networking enabled")
     find_package(CURL REQUIRED)
-    list(APPEND INTERNAL_SOURCES network/curl_requester.cpp network/curl_multi_manager.cpp)
+    list(APPEND INTERNAL_SOURCES network/curl_requester.cpp)
 endif()
 
 add_library(${LIBNAME} OBJECT ${INTERNAL_SOURCES})
@@ -70,7 +70,7 @@ target_link_libraries(${LIBNAME}
         PRIVATE Boost::url Boost::json OpenSSL::SSL Boost::disable_autolinking Boost::headers tl::expected foxy)
 
 if (LD_CURL_NETWORKING)
-    target_link_libraries(${LIBNAME} PRIVATE CURL::libcurl)
+    target_link_libraries(${LIBNAME} PRIVATE CURL::libcurl launchdarkly::networking)
     target_compile_definitions(${LIBNAME} PRIVATE LD_CURL_NETWORKING)
 endif()
 

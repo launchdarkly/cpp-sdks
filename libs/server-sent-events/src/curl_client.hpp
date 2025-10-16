@@ -3,8 +3,8 @@
 #ifdef LD_CURL_NETWORKING
 
 #include <launchdarkly/sse/client.hpp>
+#include <launchdarkly/network/curl_multi_manager.hpp>
 #include "backoff.hpp"
-#include "curl_multi_manager.hpp"
 #include "parser.hpp"
 
 #include <curl/curl.h>
@@ -23,6 +23,8 @@
 namespace launchdarkly::sse {
 namespace http = beast::http;
 namespace net = boost::asio;
+
+using launchdarkly::network::CurlMultiManager;
 
 /**
  * The lifecycle of the CurlClient is managed in an RAII manner. This introduces

@@ -27,4 +27,8 @@ target_link_libraries(sse-tests PRIVATE
         Boost::coroutine
         )
 
+if (LD_CURL_NETWORKING)
+    target_link_libraries(sse-tests PRIVATE launchdarkly::networking)
+endif()
+
 target_include_directories(sse-tests PUBLIC include)

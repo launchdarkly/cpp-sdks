@@ -205,6 +205,13 @@ add_subdirectory(vendor/foxy)
 
 # Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
+
+if (LD_CURL_NETWORKING)
+    message(STATUS "LaunchDarkly: building networking library (CURL support)")
+    find_package(CURL REQUIRED)
+    add_subdirectory(libs/networking)
+endif()
+
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 
