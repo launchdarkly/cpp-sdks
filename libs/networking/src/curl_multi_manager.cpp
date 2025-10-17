@@ -33,15 +33,23 @@ CurlMultiManager::CurlMultiManager(boost::asio::any_io_executor executor)
 
 CurlMultiManager::~CurlMultiManager() {
     if (multi_handle_) {
-        // Extract and clear pending handles, callbacks, and headers
+        // Extract and clear pending handles, callbacks, headers, and sockets
         std::map<CURL*, CompletionCallback> pending_callbacks;
         std::map<CURL*, curl_slist*> pending_headers;
+        std::map<curl_socket_t, SocketInfo> pending_sockets;
         {
             std::lock_guard<std::mutex> lock(mutex_);
             pending_callbacks = std::move(callbacks_);
             pending_headers = std::move(headers_);
+            pending_sockets = std::move(sockets_);
             callbacks_.clear();
             headers_.clear();
+            sockets_.clear();
+        }
+
+        // Clean up all remaining sockets
+        for (auto& [sockfd, socket_info] : pending_sockets) {
+            stop_socket_monitor(&socket_info);
         }
 
         // Remove handles from multi and cleanup resources
@@ -103,22 +111,20 @@ void CurlMultiManager::remove_handle(CURL* easy) {
 int CurlMultiManager::socket_callback(CURL* easy, curl_socket_t s, int what,
                                      void* userp, void* socketp) {
     auto* manager = static_cast<CurlMultiManager*>(userp);
-    auto* socket_info = static_cast<SocketInfo*>(socketp);
+
+    std::lock_guard<std::mutex> lock(manager->mutex_);
 
     if (what == CURL_POLL_REMOVE) {
-        if (socket_info) {
-            manager->stop_socket_monitor(socket_info);
-            curl_multi_assign(manager->multi_handle_, s, nullptr);
-            delete socket_info;
+        // Remove socket from managed container
+        auto it = manager->sockets_.find(s);
+        if (it != manager->sockets_.end()) {
+            manager->stop_socket_monitor(&it->second);
+            manager->sockets_.erase(it);
         }
     } else {
-        if (!socket_info) {
-            // New socket
-            socket_info = new SocketInfo{s, nullptr, 0};
-            curl_multi_assign(manager->multi_handle_, s, socket_info);
-        }
-
-        manager->start_socket_monitor(socket_info, what);
+        // Add or update socket in managed container
+        auto [it, inserted] = manager->sockets_.try_emplace(s, SocketInfo{s, nullptr, 0});
+        manager->start_socket_monitor(&it->second, what);
     }
 
     return 0;
@@ -229,6 +235,8 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info, int action)
         socket_info->descriptor->assign(socket_info->sockfd);
     }
 
+    // Check if action has changed
+    bool action_changed = (socket_info->action != action);
     socket_info->action = action;
 
     auto weak_self = weak_from_this();
@@ -236,72 +244,86 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info, int action)
 
     // Monitor for read events
     if (action & CURL_POLL_IN) {
-        // Use weak_ptr to safely detect when descriptor is deleted
-        std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor = socket_info->descriptor;
+        // Only create new handler if we don't have one or if action changed
+        if (!socket_info->read_handler || action_changed) {
+            // Use weak_ptr to safely detect when descriptor is deleted
+            std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor = socket_info->descriptor;
 
-        // Use shared_ptr for recursive lambda
-        auto read_handler = std::make_shared<std::function<void()>>();
-        *read_handler = [weak_self, sockfd, weak_descriptor, read_handler]() {
-            // Check if manager and descriptor are still valid
-            auto self = weak_self.lock();
-            auto descriptor = weak_descriptor.lock();
-            if (!self || !descriptor) {
-                return;
-            }
+            // Create and store handler in SocketInfo to keep it alive
+            // Use weak_ptr in capture to avoid circular reference
+            socket_info->read_handler = std::make_shared<std::function<void()>>();
+            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info->read_handler;
+            *socket_info->read_handler = [weak_self, sockfd, weak_descriptor, weak_read_handler]() {
+                // Check if manager and descriptor are still valid
+                auto self = weak_self.lock();
+                auto descriptor = weak_descriptor.lock();
+                if (!self || !descriptor) {
+                    return;
+                }
 
-            descriptor->async_wait(
-                boost::asio::posix::stream_descriptor::wait_read,
-                [weak_self, sockfd, weak_descriptor, read_handler](const boost::system::error_code& ec) {
-                    // If operation was canceled or had an error, don't re-register
-                    if (ec) {
-                        return;
-                    }
+                descriptor->async_wait(
+                    boost::asio::posix::stream_descriptor::wait_read,
+                    [weak_self, sockfd, weak_descriptor, weak_read_handler](const boost::system::error_code& ec) {
+                        // If operation was canceled or had an error, don't re-register
+                        if (ec) {
+                            return;
+                        }
 
-                    if (auto self = weak_self.lock()) {
-                        self->handle_socket_action(sockfd, CURL_CSELECT_IN);
+                        if (auto self = weak_self.lock()) {
+                            self->handle_socket_action(sockfd, CURL_CSELECT_IN);
 
-                        // Always try to re-register for continuous monitoring
-                        // The validity check at the top of read_handler will stop it if needed
-                        (*read_handler)();  // Recursive call
-                    }
-                });
-        };
-        (*read_handler)();  // Initial call
+                            // Always try to re-register for continuous monitoring
+                            // The validity check at the top of read_handler will stop it if needed
+                            if (auto handler = weak_read_handler.lock()) {
+                                (*handler)();  // Recursive call
+                            }
+                        }
+                    });
+            };
+            (*socket_info->read_handler)();  // Initial call
+        }
     }
 
     // Monitor for write events
     if (action & CURL_POLL_OUT) {
-        // Use weak_ptr to safely detect when descriptor is deleted
-        std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor = socket_info->descriptor;
+        // Only create new handler if we don't have one or if action changed
+        if (!socket_info->write_handler || action_changed) {
+            // Use weak_ptr to safely detect when descriptor is deleted
+            std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor = socket_info->descriptor;
 
-        // Use shared_ptr for recursive lambda
-        auto write_handler = std::make_shared<std::function<void()>>();
-        *write_handler = [weak_self, sockfd, weak_descriptor, write_handler]() {
-            // Check if manager and descriptor are still valid
-            auto self = weak_self.lock();
-            auto descriptor = weak_descriptor.lock();
-            if (!self || !descriptor) {
-                return;
-            }
+            // Create and store handler in SocketInfo to keep it alive
+            // Use weak_ptr in capture to avoid circular reference
+            socket_info->write_handler = std::make_shared<std::function<void()>>();
+            std::weak_ptr<std::function<void()>> weak_write_handler = socket_info->write_handler;
+            *socket_info->write_handler = [weak_self, sockfd, weak_descriptor, weak_write_handler]() {
+                // Check if manager and descriptor are still valid
+                auto self = weak_self.lock();
+                auto descriptor = weak_descriptor.lock();
+                if (!self || !descriptor) {
+                    return;
+                }
 
-            descriptor->async_wait(
-                boost::asio::posix::stream_descriptor::wait_write,
-                [weak_self, sockfd, weak_descriptor, write_handler](const boost::system::error_code& ec) {
-                    // If operation was canceled or had an error, don't re-register
-                    if (ec) {
-                        return;
-                    }
+                descriptor->async_wait(
+                    boost::asio::posix::stream_descriptor::wait_write,
+                    [weak_self, sockfd, weak_descriptor, weak_write_handler](const boost::system::error_code& ec) {
+                        // If operation was canceled or had an error, don't re-register
+                        if (ec) {
+                            return;
+                        }
 
-                    if (auto self = weak_self.lock()) {
-                        self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
+                        if (auto self = weak_self.lock()) {
+                            self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
 
-                        // Always try to re-register for continuous monitoring
-                        // The validity check at the top of write_handler will stop it if needed
-                        (*write_handler)();  // Recursive call
-                    }
-                });
-        };
-        (*write_handler)();  // Initial call
+                            // Always try to re-register for continuous monitoring
+                            // The validity check at the top of write_handler will stop it if needed
+                            if (auto handler = weak_write_handler.lock()) {
+                                (*handler)();  // Recursive call
+                            }
+                        }
+                    });
+            };
+            (*socket_info->write_handler)();  // Initial call
+        }
     }
 }
 
@@ -311,6 +333,9 @@ void CurlMultiManager::stop_socket_monitor(SocketInfo* socket_info) {
         socket_info->descriptor->release();
         socket_info->descriptor.reset();
     }
+    // Clear handlers to break any weak_ptr references
+    socket_info->read_handler.reset();
+    socket_info->write_handler.reset();
 }
 
 } // namespace launchdarkly::network

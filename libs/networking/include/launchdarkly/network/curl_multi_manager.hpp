@@ -89,6 +89,9 @@ private:
         curl_socket_t sockfd;
         std::shared_ptr<boost::asio::posix::stream_descriptor> descriptor;
         int action{0}; // CURL_POLL_IN, CURL_POLL_OUT, etc.
+        // Keep handlers alive - we own them and they only capture weak_ptr to avoid circular refs
+        std::shared_ptr<std::function<void()>> read_handler;
+        std::shared_ptr<std::function<void()>> write_handler;
     };
 
     void start_socket_monitor(SocketInfo* socket_info, int action);
@@ -101,6 +104,7 @@ private:
     std::mutex mutex_;
     std::map<CURL*, CompletionCallback> callbacks_;
     std::map<CURL*, curl_slist*> headers_;
+    std::map<curl_socket_t, SocketInfo> sockets_;  // Managed socket info
     int still_running_{0};
 };
 
