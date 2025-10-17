@@ -416,7 +416,7 @@ void CurlClient::PerformRequestWithMulti(
     // Initialize parser for new connection (last_event_id is tracked separately)
     context->init_parser();
 
-    CURL* curl = curl_easy_init();
+    std::shared_ptr<CURL>curl (curl_easy_init(), curl_easy_cleanup);
     if (!curl) {
         if (context->is_shutting_down()) {
             return;
@@ -427,9 +427,8 @@ void CurlClient::PerformRequestWithMulti(
     }
 
     curl_slist* headers = nullptr;
-    if (!SetupCurlOptions(curl, &headers, *context)) {
+    if (!SetupCurlOptions(curl.get(), &headers, *context)) {
         // setup_curl_options returned false, indicating an error (it already logged the error)
-        curl_easy_cleanup(curl);
 
         if (context->is_shutting_down()) {
             return;
@@ -445,7 +444,6 @@ void CurlClient::PerformRequestWithMulti(
     multi_manager->add_handle(curl, headers, [weak_context](CURL* easy, CURLcode res) {
         auto context = weak_context.lock();
         if (!context) {
-            curl_easy_cleanup(easy);
             return;
         }
 
@@ -457,7 +455,6 @@ void CurlClient::PerformRequestWithMulti(
         auto status = static_cast<http::status>(response_code);
         auto status_class = http::to_status_class(status);
 
-        curl_easy_cleanup(easy);
 
         if (context->is_shutting_down()) {
             return;

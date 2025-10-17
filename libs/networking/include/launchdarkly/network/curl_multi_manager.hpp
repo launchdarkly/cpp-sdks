@@ -60,7 +60,7 @@ public:
      * @param headers The curl_slist headers (will be freed automatically)
      * @param callback Called when the transfer completes
      */
-    void add_handle(CURL* easy,
+    void add_handle(std::shared_ptr<CURL> easy,
                     curl_slist* headers,
                     CompletionCallback callback);
 
@@ -112,6 +112,7 @@ private:
     std::mutex mutex_;
     std::map<CURL*, CompletionCallback> callbacks_;
     std::map<CURL*, curl_slist*> headers_;
+    std::map<CURL*, std::shared_ptr<CURL>> handles_;
     std::map<curl_socket_t, SocketInfo> sockets_; // Managed socket info
     int still_running_{0};
 };

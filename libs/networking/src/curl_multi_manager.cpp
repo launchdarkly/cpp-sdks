@@ -43,34 +43,32 @@ CurlMultiManager::~CurlMultiManager() {
                 curl_slist_free_all(header_it->second);
             }
 
-            curl_easy_cleanup(easy);
+            // curl_easy_cleanup(easy);
         }
     }
 }
 
-void CurlMultiManager::add_handle(CURL* easy,
+void CurlMultiManager::add_handle(std::shared_ptr<CURL> easy,
                                   curl_slist* headers,
                                   CompletionCallback callback) {
-    {
-        std::lock_guard lock(mutex_);
-        callbacks_[easy] = std::move(callback);
-        headers_[easy] = headers;
-    }
-
-    if (const CURLMcode rc = curl_multi_add_handle(multi_handle_.get(), easy);
+    if (const CURLMcode rc = curl_multi_add_handle(
+            multi_handle_.get(), easy.get());
         rc != CURLM_OK) {
-        std::lock_guard lock(mutex_);
-        callbacks_.erase(easy);
-
         // Free headers on error
-        if (const auto header_it = headers_.find(easy);
-            header_it != headers_.end() && header_it->second) {
-            curl_slist_free_all(header_it->second);
+        if (headers) {
+            curl_slist_free_all(headers);
         }
-        headers_.erase(easy);
 
         std::cerr << "Failed to add handle to multi: "
             << curl_multi_strerror(rc) << std::endl;
+        return;
+    }
+
+    {
+        std::lock_guard lock(mutex_);
+        callbacks_[easy.get()] = std::move(callback);
+        headers_[easy.get()] = headers;
+        handles_[easy.get()] = easy;
     }
 }
 
@@ -78,14 +76,16 @@ void CurlMultiManager::remove_handle(CURL* easy) {
     curl_multi_remove_handle(multi_handle_.get(), easy);
 
     std::lock_guard lock(mutex_);
-    callbacks_.erase(easy);
 
     // Free headers if they exist
     if (const auto header_it = headers_.find(easy);
         header_it != headers_.end() && header_it->second) {
         curl_slist_free_all(header_it->second);
     }
+
+    callbacks_.erase(easy);
     headers_.erase(easy);
+    handles_.erase(easy);
 }
 
 int CurlMultiManager::socket_callback(CURL* easy,
@@ -182,10 +182,12 @@ void CurlMultiManager::check_multi_info() {
             curl_slist* headers = nullptr;
             {
                 std::lock_guard lock(mutex_);
+
                 if (auto it = callbacks_.find(easy); it != callbacks_.end()) {
                     callback = std::move(it->second);
                     callbacks_.erase(it);
                 }
+                callbacks_.erase(easy);
 
                 // Get and remove headers
                 if (auto header_it = headers_.find(easy);
@@ -193,6 +195,8 @@ void CurlMultiManager::check_multi_info() {
                     headers = header_it->second;
                     headers_.erase(header_it);
                 }
+
+                handles_.erase(easy);
             }
 
             // Remove from multi handle
@@ -224,10 +228,12 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
         // Assign the CURL socket to the ASIO socket
         // tcp::socket::assign works with native socket handles on both platforms
         boost::system::error_code ec;
-        socket_info->handle->assign(boost::asio::ip::tcp::v4(), socket_info->sockfd, ec);
+        socket_info->handle->assign(boost::asio::ip::tcp::v4(),
+                                    socket_info->sockfd, ec);
 
         if (ec) {
-            std::cerr << "Failed to assign socket: " << ec.message() << std::endl;
+            std::cerr << "Failed to assign socket: " << ec.message() <<
+                std::endl;
             socket_info->handle.reset();
             return;
         }
@@ -249,36 +255,41 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
 
             // Create and store handler in SocketInfo to keep it alive
             // Use weak_ptr in capture to avoid circular reference
-            socket_info->read_handler = std::make_shared<std::function<void()>>();
-            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info->read_handler;
-            *socket_info->read_handler = [weak_self, sockfd, weak_handle, weak_read_handler]() {
-                // Check if manager and handle are still valid
-                const auto self = weak_self.lock();
-                const auto handle = weak_handle.lock();
-                if (!self || !handle) {
-                    return;
-                }
+            socket_info->read_handler = std::make_shared<std::function<void
+                ()>>();
+            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info
+                ->read_handler;
+            *socket_info->read_handler = [weak_self, sockfd, weak_handle,
+                    weak_read_handler]() {
+                    // Check if manager and handle are still valid
+                    const auto self = weak_self.lock();
+                    const auto handle = weak_handle.lock();
+                    if (!self || !handle) {
+                        return;
+                    }
 
-                handle->async_wait(
-                    boost::asio::ip::tcp::socket::wait_read,
-                    [weak_self, sockfd, weak_handle, weak_read_handler](
+                    handle->async_wait(
+                        boost::asio::ip::tcp::socket::wait_read,
+                        [weak_self, sockfd, weak_handle, weak_read_handler](
                         const boost::system::error_code& ec) {
-                        // If operation was canceled or had an error, don't re-register
-                        if (ec) {
-                            return;
-                        }
-
-                        if (const auto self = weak_self.lock()) {
-                            self->handle_socket_action(sockfd, CURL_CSELECT_IN);
-
-                            // Always try to re-register for continuous monitoring
-                            // The validity check at the top of read_handler will stop it if needed
-                            if (const auto handler = weak_read_handler.lock()) {
-                                (*handler)(); // Recursive call
+                            // If operation was canceled or had an error, don't re-register
+                            if (ec) {
+                                return;
                             }
-                        }
-                    });
-            };
+
+                            if (const auto self = weak_self.lock()) {
+                                self->handle_socket_action(
+                                    sockfd, CURL_CSELECT_IN);
+
+                                // Always try to re-register for continuous monitoring
+                                // The validity check at the top of read_handler will stop it if needed
+                                if (const auto handler = weak_read_handler.
+                                    lock()) {
+                                    (*handler)(); // Recursive call
+                                }
+                            }
+                        });
+                };
             (*socket_info->read_handler)(); // Initial call
         }
     }
@@ -292,36 +303,41 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
 
             // Create and store handler in SocketInfo to keep it alive
             // Use weak_ptr in capture to avoid circular reference
-            socket_info->write_handler = std::make_shared<std::function<void()>>();
-            std::weak_ptr<std::function<void()>> weak_write_handler = socket_info->write_handler;
-            *socket_info->write_handler = [weak_self, sockfd, weak_handle, weak_write_handler]() {
-                // Check if manager and handle are still valid
-                const auto self = weak_self.lock();
-                const auto handle = weak_handle.lock();
-                if (!self || !handle) {
-                    return;
-                }
+            socket_info->write_handler = std::make_shared<std::function<void
+                ()>>();
+            std::weak_ptr<std::function<void()>> weak_write_handler =
+                socket_info->write_handler;
+            *socket_info->write_handler = [weak_self, sockfd, weak_handle,
+                    weak_write_handler]() {
+                    // Check if manager and handle are still valid
+                    const auto self = weak_self.lock();
+                    const auto handle = weak_handle.lock();
+                    if (!self || !handle) {
+                        return;
+                    }
 
-                handle->async_wait(
-                    boost::asio::ip::tcp::socket::wait_write,
-                    [weak_self, sockfd, weak_handle, weak_write_handler](
+                    handle->async_wait(
+                        boost::asio::ip::tcp::socket::wait_write,
+                        [weak_self, sockfd, weak_handle, weak_write_handler](
                         const boost::system::error_code& ec) {
-                        // If operation was canceled or had an error, don't re-register
-                        if (ec) {
-                            return;
-                        }
-
-                        if (const auto self = weak_self.lock()) {
-                            self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
-
-                            // Always try to re-register for continuous monitoring
-                            // The validity check at the top of write_handler will stop it if needed
-                            if (const auto handler = weak_write_handler.lock()) {
-                                (*handler)(); // Recursive call
+                            // If operation was canceled or had an error, don't re-register
+                            if (ec) {
+                                return;
                             }
-                        }
-                    });
-            };
+
+                            if (const auto self = weak_self.lock()) {
+                                self->handle_socket_action(
+                                    sockfd, CURL_CSELECT_OUT);
+
+                                // Always try to re-register for continuous monitoring
+                                // The validity check at the top of write_handler will stop it if needed
+                                if (const auto handler = weak_write_handler.
+                                    lock()) {
+                                    (*handler)(); // Recursive call
+                                }
+                            }
+                        });
+                };
             (*socket_info->write_handler)(); // Initial call
         }
     }

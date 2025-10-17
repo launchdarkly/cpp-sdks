@@ -829,7 +829,6 @@ TEST(CurlClientTest, HandlesRapidEvents) {
 // Shutdown-specific tests - critical for preventing crashes/hangs in user applications
 
 TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
-    // Tests curl_client.cpp:138 - on_backoff checks shutting_down_
     // This ensures clean shutdown during backoff/retry wait period
     std::atomic<int> connection_attempts{0};
 
@@ -874,7 +873,6 @@ TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
 }
 
 TEST(CurlClientTest, ShutdownDuringDataReception) {
-    // Tests curl_client.cpp:235 - WriteCallback checks shutting_down_
     // This covers the branch where we abort during SSE data parsing
     SimpleLatch server_sending(1);
     SimpleLatch client_received_some(1);
@@ -901,12 +899,13 @@ TEST(CurlClientTest, ShutdownDuringDataReception) {
     auto port = server.start(handler);
 
     IoContextRunner runner;
-    EventCollector collector;
+    // Shared ptr to prevent handling events during destruction.
+    std::shared_ptr<EventCollector> collector = std::make_shared<EventCollector>();
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
-        .receiver([&](Event e) {
-            collector.add_event(std::move(e));
-            if (collector.events().size() >= 2) {
+        .receiver([collector, &client_received_some](Event e) {
+            collector->add_event(std::move(e));
+            if (collector->events().size() >= 2) {
                 client_received_some.count_down();
             }
         })
@@ -930,7 +929,6 @@ TEST(CurlClientTest, ShutdownDuringDataReception) {
 }
 
 TEST(CurlClientTest, ShutdownDuringProgressCallback) {
-    // Tests curl_client.cpp:188 - ProgressCallback checks shutting_down_
     // This ensures we can abort during slow data transfer
     SimpleLatch server_started(1);
 
@@ -1040,7 +1038,6 @@ TEST(CurlClientTest, ShutdownAfterConnectionClosed) {
 }
 
 TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
-    // Tests curl_client.cpp:439 - perform_request checks shutting_down_ at start
     // Server that delays before responding to test shutdown during connection phase
     SimpleLatch connection_started(1);
 

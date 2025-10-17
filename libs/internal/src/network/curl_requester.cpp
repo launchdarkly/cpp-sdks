@@ -93,7 +93,7 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
         return;
     }
 
-    CURL* curl = curl_easy_init();
+    std::shared_ptr<CURL>curl (curl_easy_init(), curl_easy_cleanup);
     if (!curl) {
         cb(HttpResult(kErrorCurlInit));
         return;
@@ -102,23 +102,14 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     // Create context to hold data for this request
     // This will be cleaned up in the completion callback
     struct RequestContext {
-        CURL* curl;
         std::string url;
         std::string body; // Keep body alive
         std::string response_body;
         HttpResult::HeadersType response_headers;
         std::function<void(const HttpResult&)> callback;
-
-        ~RequestContext() {
-            // Headers are managed by CurlMultiManager
-            if (curl) {
-                curl_easy_cleanup(curl);
-            }
-        }
     };
 
     auto ctx = std::make_shared<RequestContext>();
-    ctx->curl = curl;
     ctx->callback = std::move(cb);
 
     // Headers will be managed by CurlMultiManager
@@ -144,7 +135,7 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     ctx->url = request.Url();
 
     // Set URL
-    CURL_SETOPT_CHECK(curl, CURLOPT_URL, ctx->url.c_str());
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_URL, ctx->url.c_str());
 
     // Set HTTP method
     if (request.Method() == HttpMethod::kPost) {
@@ -152,20 +143,20 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
         // Passing 1 enables this flag.
         // This will also set a content type, but the headers for the request
         // should override that with the correct value.
-        CURL_SETOPT_CHECK(curl, CURLOPT_POST, 1L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_POST, 1L);
     } else if (request.Method() == HttpMethod::kPut) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodPut);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_CUSTOMREQUEST, kHttpMethodPut);
     } else if (request.Method() == HttpMethod::kReport) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_CUSTOMREQUEST, kHttpMethodReport);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_CUSTOMREQUEST, kHttpMethodReport);
     } else if (request.Method() == HttpMethod::kGet) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPGET, 1L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_HTTPGET, 1L);
     }
 
     // Set request body if present
     if (request.Body().has_value()) {
         ctx->body = request.Body().value();
-        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDS, ctx->body.c_str());
-        CURL_SETOPT_CHECK(curl, CURLOPT_POSTFIELDSIZE, ctx->body.size());
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_POSTFIELDS, ctx->body.c_str());
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_POSTFIELDSIZE, ctx->body.size());
     }
 
     // Set headers
@@ -183,31 +174,31 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
         headers = appendResult;
     }
     if (headers) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_HTTPHEADER, headers);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_HTTPHEADER, headers);
     }
 
     // Set timeouts with millisecond precision
     const long connect_timeout_ms = request.Properties().ConnectTimeout().count();
     const long response_timeout_ms = request.Properties().ResponseTimeout().count();
 
-    CURL_SETOPT_CHECK(curl, CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_ms > 0 ? connect_timeout_ms : 30000L);
-    CURL_SETOPT_CHECK(curl, CURLOPT_TIMEOUT_MS, response_timeout_ms > 0 ? response_timeout_ms : 60000L);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_CONNECTTIMEOUT_MS, connect_timeout_ms > 0 ? connect_timeout_ms : 30000L);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_TIMEOUT_MS, response_timeout_ms > 0 ? response_timeout_ms : 60000L);
 
     // Set TLS options
     using VerifyMode = config::shared::built::TlsOptions::VerifyMode;
     if (tls_options.PeerVerifyMode() == VerifyMode::kVerifyNone) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_SSL_VERIFYHOST, 0L);
     } else {
-        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_SSL_VERIFYPEER, 1L);
         // 1 or 2 seem to basically be the same, but the documentation says to
         // use 2, and that it would default to 2.
         // https://curl.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
-        CURL_SETOPT_CHECK(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_SSL_VERIFYHOST, 2L);
 
         // Set custom CA file if provided
         if (tls_options.CustomCAFile().has_value()) {
-            CURL_SETOPT_CHECK(curl, CURLOPT_CAINFO, tls_options.CustomCAFile()->c_str());
+            CURL_SETOPT_CHECK(curl.get(), CURLOPT_CAINFO, tls_options.CustomCAFile()->c_str());
         }
     }
 
@@ -216,19 +207,19 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
     // Empty string explicitly disables proxy (overrides environment variables).
     auto const& proxy_url = request.Properties().Proxy().Url();
     if (proxy_url.has_value()) {
-        CURL_SETOPT_CHECK(curl, CURLOPT_PROXY, proxy_url->c_str());
+        CURL_SETOPT_CHECK(curl.get(), CURLOPT_PROXY, proxy_url->c_str());
     }
     // If proxy URL is std::nullopt, CURL will use environment variables (default behavior)
 
     // Set callbacks
-    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-    CURL_SETOPT_CHECK(curl, CURLOPT_WRITEDATA, &ctx->response_body);
-    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
-    CURL_SETOPT_CHECK(curl, CURLOPT_HEADERDATA, &ctx->response_headers);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_WRITEDATA, &ctx->response_body);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_HEADERDATA, &ctx->response_headers);
 
     // Follow redirects
-    CURL_SETOPT_CHECK(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    CURL_SETOPT_CHECK(curl, CURLOPT_MAXREDIRS, 20L);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
+    CURL_SETOPT_CHECK(curl.get(), CURLOPT_MAXREDIRS, 20L);
 
     #undef CURL_SETOPT_CHECK
 
