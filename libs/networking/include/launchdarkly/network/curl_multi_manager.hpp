@@ -13,7 +13,6 @@
 #include <mutex>
 
 namespace launchdarkly::network {
-
 /**
  * Manages CURL multi interface integrated with ASIO event loop.
  *
@@ -57,7 +56,9 @@ public:
      * @param headers The curl_slist headers (will be freed automatically)
      * @param callback Called when the transfer completes
      */
-    void add_handle(CURL* easy, curl_slist* headers, CompletionCallback callback);
+    void add_handle(CURL* easy,
+                    curl_slist* headers,
+                    CompletionCallback callback);
 
     /**
      * Remove an easy handle from management.
@@ -69,8 +70,11 @@ private:
     explicit CurlMultiManager(boost::asio::any_io_executor executor);
 
     // Called by CURL when socket state changes
-    static int socket_callback(CURL* easy, curl_socket_t s, int what,
-                              void* userp, void* socketp);
+    static int socket_callback(CURL* easy,
+                               curl_socket_t s,
+                               int what,
+                               void* userp,
+                               void* socketp);
 
     // Called by CURL when timer should be set
     static int timer_callback(CURLM* multi, long timeout_ms, void* userp);
@@ -95,19 +99,18 @@ private:
     };
 
     void start_socket_monitor(SocketInfo* socket_info, int action);
-    void stop_socket_monitor(SocketInfo* socket_info);
 
     boost::asio::any_io_executor executor_;
-    CURLM* multi_handle_;
+    // CURLM* multi_handle_;
+    std::unique_ptr<CURLM, decltype(&curl_multi_cleanup)> multi_handle_;
     boost::asio::steady_timer timer_;
 
     std::mutex mutex_;
     std::map<CURL*, CompletionCallback> callbacks_;
     std::map<CURL*, curl_slist*> headers_;
-    std::map<curl_socket_t, SocketInfo> sockets_;  // Managed socket info
+    std::map<curl_socket_t, SocketInfo> sockets_; // Managed socket info
     int still_running_{0};
 };
-
 } // namespace launchdarkly::network
 
 #endif  // LD_CURL_NETWORKING
