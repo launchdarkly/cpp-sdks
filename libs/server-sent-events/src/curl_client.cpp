@@ -441,7 +441,7 @@ void CurlClient::PerformRequestWithMulti(
     // Add handle to multi manager for async processing
     // Headers will be freed automatically by CurlMultiManager
     std::weak_ptr<RequestContext> weak_context = context;
-    multi_manager->add_handle(curl, headers, [weak_context](CURL* easy, CURLcode res) {
+    multi_manager->add_handle(curl, headers, [weak_context](std::shared_ptr<CURL> easy, CURLcode res) {
         auto context = weak_context.lock();
         if (!context) {
             return;
@@ -449,7 +449,7 @@ void CurlClient::PerformRequestWithMulti(
 
         // Get response code
         long response_code = 0;
-        curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
+        curl_easy_getinfo(easy.get(), CURLINFO_RESPONSE_CODE, &response_code);
 
         // Handle HTTP status codes
         auto status = static_cast<http::status>(response_code);

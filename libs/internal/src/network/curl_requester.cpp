@@ -225,7 +225,7 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
 
     // Add handle to multi manager for async processing
     // Headers will be freed automatically by CurlMultiManager
-    multi_manager->add_handle(curl, headers, [ctx](CURL* easy, CURLcode result) {
+    multi_manager->add_handle(curl, headers, [ctx](std::shared_ptr<CURL> easy, CURLcode result) {
         // This callback runs on the executor when the request completes
 
         // Check for errors
@@ -238,7 +238,7 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
 
         // Get HTTP response code
         long response_code = 0;
-        curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &response_code);
+        curl_easy_getinfo(easy.get(), CURLINFO_RESPONSE_CODE, &response_code);
 
         // Invoke the user's callback with the result
         ctx->callback(HttpResult(

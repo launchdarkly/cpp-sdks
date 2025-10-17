@@ -70,22 +70,6 @@ void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
     }
 }
 
-void CurlMultiManager::remove_handle(CURL* easy) {
-    curl_multi_remove_handle(multi_handle_.get(), easy);
-
-    std::lock_guard lock(mutex_);
-
-    // Free headers if they exist
-    if (const auto header_it = headers_.find(easy);
-        header_it != headers_.end() && header_it->second) {
-        curl_slist_free_all(header_it->second);
-    }
-
-    callbacks_.erase(easy);
-    headers_.erase(easy);
-    handles_.erase(easy);
-}
-
 int CurlMultiManager::socket_callback(CURL* easy,
                                       curl_socket_t s,
                                       int what,
@@ -193,8 +177,6 @@ void CurlMultiManager::check_multi_info() {
                     headers = header_it->second;
                     headers_.erase(header_it);
                 }
-
-                handles_.erase(easy);
             }
 
             // Remove from multi handle
@@ -205,11 +187,17 @@ void CurlMultiManager::check_multi_info() {
                 curl_slist_free_all(headers);
             }
 
+            // We don't need to keep the curl handle alive any longer, but we
+            // do want the handle to remain active for the duration of the
+            // callback.
+            auto handle = handles_[easy];
+            handles_.erase(easy);
+
             // Invoke completion callback
             if (callback) {
                 boost::asio::post(executor_, [callback = std::move(callback),
-                                      easy, result]() {
-                                      callback(easy, result);
+                                      easy, result, handle]() {
+                                      callback(handle, result);
                                   });
             }
         }

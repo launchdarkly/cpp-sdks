@@ -37,7 +37,7 @@ public:
      * Callback invoked when an easy handle completes (success or error).
      * Parameters: CURL* easy handle, CURLcode result
      */
-    using CompletionCallback = std::function<void(CURL*, CURLcode)>;
+    using CompletionCallback = std::function<void(std::shared_ptr<CURL>, CURLcode)>;
 
     /**
      * Create a CurlMultiManager on the given executor.
@@ -63,12 +63,6 @@ public:
     void add_handle(const std::shared_ptr<CURL>& easy,
                     curl_slist* headers,
                     CompletionCallback callback);
-
-    /**
-     * Remove an easy handle from management.
-     * @param easy The CURL easy handle to remove
-     */
-    void remove_handle(CURL* easy);
 
 private:
     explicit CurlMultiManager(boost::asio::any_io_executor executor);
