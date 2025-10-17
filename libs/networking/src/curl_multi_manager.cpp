@@ -217,15 +217,20 @@ void CurlMultiManager::check_multi_info() {
 void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                                             const int action) {
     if (!socket_info->handle) {
-        // Create handle for this socket
+        // Create tcp::socket and assign the native socket handle
+        // This works cross-platform (Windows and POSIX)
         socket_info->handle = std::make_shared<SocketHandle>(executor_);
-#ifdef _WIN32
-        // On Windows, we need to cast the socket to HANDLE for stream_handle
-        socket_info->handle->assign(reinterpret_cast<HANDLE>(socket_info->sockfd));
-#else
-        // On POSIX, we can assign the socket descriptor directly
-        socket_info->handle->assign(socket_info->sockfd);
-#endif
+
+        // Assign the CURL socket to the ASIO socket
+        // tcp::socket::assign works with native socket handles on both platforms
+        boost::system::error_code ec;
+        socket_info->handle->assign(boost::asio::ip::tcp::v4(), socket_info->sockfd, ec);
+
+        if (ec) {
+            std::cerr << "Failed to assign socket: " << ec.message() << std::endl;
+            socket_info->handle.reset();
+            return;
+        }
     }
 
     // Check if action has changed
@@ -255,7 +260,7 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                 }
 
                 handle->async_wait(
-                    SocketHandle::wait_read,
+                    boost::asio::ip::tcp::socket::wait_read,
                     [weak_self, sockfd, weak_handle, weak_read_handler](
                         const boost::system::error_code& ec) {
                         // If operation was canceled or had an error, don't re-register
@@ -298,7 +303,7 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                 }
 
                 handle->async_wait(
-                    SocketHandle::wait_write,
+                    boost::asio::ip::tcp::socket::wait_write,
                     [weak_self, sockfd, weak_handle, weak_write_handler](
                         const boost::system::error_code& ec) {
                         // If operation was canceled or had an error, don't re-register

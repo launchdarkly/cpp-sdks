@@ -4,11 +4,7 @@
 
 #include <curl/curl.h>
 #include <boost/asio/any_io_executor.hpp>
-#ifdef _WIN32
-#include <boost/asio/windows/stream_handle.hpp>
-#else
-#include <boost/asio/posix/stream_descriptor.hpp>
-#endif
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #include <functional>
@@ -18,12 +14,8 @@
 
 namespace launchdarkly::network {
 
-// Platform-specific socket handle type
-#ifdef _WIN32
-using SocketHandle = boost::asio::windows::stream_handle;
-#else
-using SocketHandle = boost::asio::posix::stream_descriptor;
-#endif
+// Use tcp::socket for cross-platform socket operations
+using SocketHandle = boost::asio::ip::tcp::socket;
 
 /**
  * Manages CURL multi interface integrated with ASIO event loop.
@@ -35,7 +27,7 @@ using SocketHandle = boost::asio::posix::stream_descriptor;
  *
  * Key features:
  * - Non-blocking I/O using curl_multi_socket_action
- * - Socket monitoring via ASIO (posix::stream_descriptor on POSIX, windows::stream_handle on Windows)
+ * - Cross-platform socket monitoring via ASIO tcp::socket
  * - Timer integration with ASIO steady_timer
  * - Thread-safe operation on ASIO executor
  */
