@@ -232,10 +232,9 @@ bool CurlClient::SetupCurlOptions(CURL* curl,
         headers = curl_slist_append(headers, header.c_str());
     }
 
-    // Add Last-Event-ID if we have one
+    // Add Last-Event-ID if we have one from previous connection
     if (context.last_event_id && !context.last_event_id->empty()) {
-        std::string last_event_header =
-            "Last-Event-ID: " + *context.last_event_id;
+        std::string last_event_header = "Last-Event-ID: " + *context.last_event_id;
         headers = curl_slist_append(headers, last_event_header.c_str());
     }
 
@@ -322,7 +321,7 @@ int CurlClient::ProgressCallback(void* clientp,
             context->last_progress_time = now;
         } else {
             // No new data - check if we've exceeded the timeout
-            auto elapsed = std::chrono::duration_cast<
+            const auto elapsed = std::chrono::duration_cast<
                 std::chrono::milliseconds>(
                 now - context->last_progress_time);
 
@@ -369,128 +368,17 @@ size_t CurlClient::WriteCallback(const char* data,
         return 0; // Abort the transfer
     }
 
-    // Parse SSE data
-    std::string_view body(data, total_size);
-
-    // Parse stream into lines
-    size_t i = 0;
-    while (i < body.size()) {
-        // Find next line delimiter
-        const size_t delimiter_pos = body.find_first_of("\r\n", i);
-        const size_t append_size = (delimiter_pos == std::string::npos)
-                                       ? (body.size() - i)
-                                       : (delimiter_pos - i);
-
-        // Append to buffered line
-        if (context->buffered_line.has_value()) {
-            context->buffered_line->append(body.substr(i, append_size));
-        } else {
-            context->buffered_line = std::string(body.substr(i, append_size));
+    // Set up the event receiver callback for the parser
+    context->parser_body->on_event([context](Event event) {
+        // Track last event ID for reconnection
+        if (event.id()) {
+            context->last_event_id = event.id();
         }
+        context->receive(std::move(event));
+    });
 
-        i += append_size;
-
-        if (i >= body.size()) {
-            break;
-        }
-
-        // Handle line delimiters
-        if (body[i] == '\r') {
-            context->complete_lines.push_back(*context->buffered_line);
-            context->buffered_line.reset();
-            context->begin_CR = true;
-            i++;
-        } else if (body[i] == '\n') {
-            if (context->begin_CR) {
-                context->begin_CR = false;
-            } else {
-                context->complete_lines.push_back(*context->buffered_line);
-                context->buffered_line.reset();
-            }
-            i++;
-        }
-    }
-
-    // Parse completed lines into events
-    while (!context->complete_lines.empty()) {
-        std::string line = std::move(context->complete_lines.front());
-        context->complete_lines.pop_front();
-
-        if (line.empty()) {
-            // Empty line indicates end of event
-            if (context->current_event) {
-                // Trim trailing newline from data
-                if (!context->current_event->data.empty() &&
-                    context->current_event->data.back() == '\n') {
-                    context->current_event->data.pop_back();
-                }
-
-                // Update last_event_id_ only when dispatching a completed event
-                if (context->current_event->id) {
-                    context->last_event_id = context->current_event->id;
-                }
-
-                // Dispatch event on executor thread
-                auto event_data = context->current_event->data;
-                auto event_type = context->current_event->type.empty()
-                                      ? "message"
-                                      : context->current_event->type;
-                auto event_id = context->current_event->id;
-                context->receive(Event(
-                    std::move(event_type),
-                    std::move(event_data),
-                    std::move(event_id)));
-
-                context->current_event.reset();
-            }
-            continue;
-        }
-
-        // Parse field
-        const size_t colon_pos = line.find(':');
-        if (colon_pos == 0) {
-            // Comment line, dispatch it
-            std::string comment = line.substr(1);
-
-            context->receive(Event("comment", comment));
-            continue;
-        }
-
-        std::string field_name;
-        std::string field_value;
-
-        if (colon_pos == std::string::npos) {
-            field_name = line;
-            field_value = "";
-        } else {
-            field_name = line.substr(0, colon_pos);
-            field_value = line.substr(colon_pos + 1);
-
-            // Remove leading space from value if present
-            if (!field_value.empty() && field_value[0] == ' ') {
-                field_value = field_value.substr(1);
-            }
-        }
-
-        // Initialize event if needed
-        if (!context->current_event) {
-            context->current_event.emplace(detail::Event{});
-            context->current_event->id = context->last_event_id;
-        }
-
-        // Handle field
-        if (field_name == "event") {
-            context->current_event->type = field_value;
-        } else if (field_name == "data") {
-            context->current_event->data += field_value;
-            context->current_event->data += '\n';
-        } else if (field_name == "id") {
-            if (field_value.find('\0') == std::string::npos) {
-                context->current_event->id = field_value;
-            }
-        }
-        // retry field is ignored for now
-    }
+    const std::string_view data_view(data, total_size);
+    context->parser_reader->put(data_view);
 
     return total_size;
 }
@@ -525,11 +413,8 @@ void CurlClient::PerformRequestWithMulti(
         return;
     }
 
-    // Clear parser state for new connection
-    context->buffered_line.reset();
-    context->complete_lines.clear();
-    context->current_event.reset();
-    context->begin_CR = false;
+    // Initialize parser for new connection (last_event_id is tracked separately)
+    context->init_parser();
 
     CURL* curl = curl_easy_init();
     if (!curl) {

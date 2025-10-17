@@ -73,18 +73,17 @@ class CurlClient final : public Client,
         std::optional<Callbacks> callbacks_;
 
     public:
-        // SSE parser state
-        std::optional<std::string> buffered_line;
-        std::deque<std::string> complete_lines;
-        bool begin_CR;
+        // SSE parser using common parser from parser.hpp
+        using ParserBody = detail::EventBody<std::function<void(Event)>>;
+        std::unique_ptr<typename ParserBody::value_type> parser_body;
+        std::unique_ptr<typename ParserBody::reader> parser_reader;
+
+        // Track last event ID for reconnection (separate from parser state)
+        std::optional<std::string> last_event_id;
 
         // Progress tracking for read timeout
         std::chrono::steady_clock::time_point last_progress_time;
         curl_off_t last_download_amount;
-
-
-        std::optional<std::string> last_event_id;
-        std::optional<detail::Event> current_event;
 
         const http::request<http::string_body> req;
         const std::string url;
@@ -182,11 +181,7 @@ class CurlClient final : public Client,
                        bool skip_verify_peer
             ) : shutting_down_(false),
                 curl_socket_(CURL_SOCKET_BAD),
-                buffered_line(std::nullopt),
-                begin_CR(false),
                 last_download_amount(0),
-                last_event_id(std::nullopt),
-                current_event(std::nullopt),
                 req(std::move(req)),
                 url(std::move(url)),
                 connect_timeout(connect_timeout),
@@ -195,6 +190,12 @@ class CurlClient final : public Client,
                 custom_ca_file(std::move(custom_ca_file)),
                 proxy_url(std::move(proxy_url)),
                 skip_verify_peer(skip_verify_peer) {
+        }
+
+        void init_parser() {
+            parser_body = std::make_unique<typename ParserBody::value_type>();
+            parser_reader = std::make_unique<typename ParserBody::reader>(*parser_body);
+            parser_reader->init();
         }
     };
 
