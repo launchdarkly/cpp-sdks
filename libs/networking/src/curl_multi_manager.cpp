@@ -42,13 +42,11 @@ CurlMultiManager::~CurlMultiManager() {
                 header_it != headers_.end() && header_it->second) {
                 curl_slist_free_all(header_it->second);
             }
-
-            // curl_easy_cleanup(easy);
         }
     }
 }
 
-void CurlMultiManager::add_handle(std::shared_ptr<CURL> easy,
+void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
                                   curl_slist* headers,
                                   CompletionCallback callback) {
     if (const CURLMcode rc = curl_multi_add_handle(

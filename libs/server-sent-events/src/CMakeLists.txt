@@ -16,7 +16,6 @@ set(SSE_SOURCES
 
 if (LD_CURL_NETWORKING)
     message(STATUS "LaunchDarkly SSE: CURL networking enabled")
-    find_package(CURL REQUIRED)
     list(APPEND SSE_SOURCES curl_client.cpp)
 endif()
 
@@ -28,7 +27,7 @@ target_link_libraries(${LIBNAME}
 )
 
 if (LD_CURL_NETWORKING)
-    target_link_libraries(${LIBNAME} PRIVATE CURL::libcurl launchdarkly::networking)
+    target_link_libraries(${LIBNAME} PRIVATE launchdarkly::networking)
     target_compile_definitions(${LIBNAME} PRIVATE LD_CURL_NETWORKING)
 endif()
 

@@ -60,7 +60,7 @@ public:
      * @param headers The curl_slist headers (will be freed automatically)
      * @param callback Called when the transfer completes
      */
-    void add_handle(std::shared_ptr<CURL> easy,
+    void add_handle(const std::shared_ptr<CURL>& easy,
                     curl_slist* headers,
                     CompletionCallback callback);
 

@@ -15,9 +15,10 @@ add_library(launchdarkly::networking ALIAS ${LIBNAME})
 message(STATUS "LaunchDarklyNetworking_SOURCE_DIR=${LaunchDarklyNetworking_SOURCE_DIR}")
 
 target_link_libraries(${LIBNAME}
+        PUBLIC
+        CURL::libcurl
         PRIVATE
         Boost::headers
-        CURL::libcurl
         Boost::disable_autolinking
 )
 
