@@ -19,3 +19,5 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-networking
           use_curl: 'true'
+          # Project doesn't have tests at this time.
+          run_tests: 'false'
