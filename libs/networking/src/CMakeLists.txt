@@ -17,8 +17,8 @@ message(STATUS "LaunchDarklyNetworking_SOURCE_DIR=${LaunchDarklyNetworking_SOURC
 target_link_libraries(${LIBNAME}
         PUBLIC
         CURL::libcurl
-        PRIVATE
         Boost::headers
+        PRIVATE
         Boost::disable_autolinking
 )
 
