@@ -216,11 +216,16 @@ void CurlMultiManager::check_multi_info() {
 
 void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                                             const int action) {
-    if (!socket_info->descriptor) {
-        // Create descriptor for this socket
-        socket_info->descriptor = std::make_shared<
-            boost::asio::posix::stream_descriptor>(executor_);
-        socket_info->descriptor->assign(socket_info->sockfd);
+    if (!socket_info->handle) {
+        // Create handle for this socket
+        socket_info->handle = std::make_shared<SocketHandle>(executor_);
+#ifdef _WIN32
+        // On Windows, we need to cast the socket to HANDLE for stream_handle
+        socket_info->handle->assign(reinterpret_cast<HANDLE>(socket_info->sockfd));
+#else
+        // On POSIX, we can assign the socket descriptor directly
+        socket_info->handle->assign(socket_info->sockfd);
+#endif
     }
 
     // Check if action has changed
@@ -234,46 +239,41 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
     if (action & CURL_POLL_IN) {
         // Only create new handler if we don't have one or if action changed
         if (!socket_info->read_handler || action_changed) {
-            // Use weak_ptr to safely detect when descriptor is deleted
-            std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor
-                = socket_info->descriptor;
+            // Use weak_ptr to safely detect when handle is deleted
+            std::weak_ptr<SocketHandle> weak_handle = socket_info->handle;
 
             // Create and store handler in SocketInfo to keep it alive
             // Use weak_ptr in capture to avoid circular reference
-            socket_info->read_handler = std::make_shared<std::function<void
-                ()>>();
-            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info
-                ->read_handler;
-            *socket_info->read_handler = [weak_self, sockfd, weak_descriptor,
-                    weak_read_handler]() {
-                    // Check if manager and descriptor are still valid
-                    const auto self = weak_self.lock();
-                    const auto descriptor = weak_descriptor.lock();
-                    if (!self || !descriptor) {
-                        return;
-                    }
+            socket_info->read_handler = std::make_shared<std::function<void()>>();
+            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info->read_handler;
+            *socket_info->read_handler = [weak_self, sockfd, weak_handle, weak_read_handler]() {
+                // Check if manager and handle are still valid
+                const auto self = weak_self.lock();
+                const auto handle = weak_handle.lock();
+                if (!self || !handle) {
+                    return;
+                }
 
-                    descriptor->async_wait(
-                        boost::asio::posix::stream_descriptor::wait_read,
-                        [weak_self, sockfd, weak_descriptor, weak_read_handler](
+                handle->async_wait(
+                    SocketHandle::wait_read,
+                    [weak_self, sockfd, weak_handle, weak_read_handler](
                         const boost::system::error_code& ec) {
-                            // If operation was canceled or had an error, don't re-register
-                            if (ec) {
-                                return;
-                            }
+                        // If operation was canceled or had an error, don't re-register
+                        if (ec) {
+                            return;
+                        }
 
-                            if (const auto self = weak_self.lock()) {
-                                self->handle_socket_action(
-                                    sockfd, CURL_CSELECT_IN);
+                        if (const auto self = weak_self.lock()) {
+                            self->handle_socket_action(sockfd, CURL_CSELECT_IN);
 
-                                // Always try to re-register for continuous monitoring
-                                // The validity check at the top of read_handler will stop it if needed
-                                if (const auto handler = weak_read_handler.lock()) {
-                                    (*handler)(); // Recursive call
-                                }
+                            // Always try to re-register for continuous monitoring
+                            // The validity check at the top of read_handler will stop it if needed
+                            if (const auto handler = weak_read_handler.lock()) {
+                                (*handler)(); // Recursive call
                             }
-                        });
-                };
+                        }
+                    });
+            };
             (*socket_info->read_handler)(); // Initial call
         }
     }
@@ -282,46 +282,41 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
     if (action & CURL_POLL_OUT) {
         // Only create new handler if we don't have one or if action changed
         if (!socket_info->write_handler || action_changed) {
-            // Use weak_ptr to safely detect when descriptor is deleted
-            std::weak_ptr<boost::asio::posix::stream_descriptor> weak_descriptor
-                = socket_info->descriptor;
+            // Use weak_ptr to safely detect when handle is deleted
+            std::weak_ptr<SocketHandle> weak_handle = socket_info->handle;
 
             // Create and store handler in SocketInfo to keep it alive
             // Use weak_ptr in capture to avoid circular reference
-            socket_info->write_handler = std::make_shared<std::function<void
-                ()>>();
-            std::weak_ptr<std::function<void()>> weak_write_handler =
-                socket_info->write_handler;
-            *socket_info->write_handler = [weak_self, sockfd, weak_descriptor,
-                    weak_write_handler]() {
-                    // Check if manager and descriptor are still valid
-                    const auto self = weak_self.lock();
-                    const auto descriptor = weak_descriptor.lock();
-                    if (!self || !descriptor) {
-                        return;
-                    }
+            socket_info->write_handler = std::make_shared<std::function<void()>>();
+            std::weak_ptr<std::function<void()>> weak_write_handler = socket_info->write_handler;
+            *socket_info->write_handler = [weak_self, sockfd, weak_handle, weak_write_handler]() {
+                // Check if manager and handle are still valid
+                const auto self = weak_self.lock();
+                const auto handle = weak_handle.lock();
+                if (!self || !handle) {
+                    return;
+                }
 
-                    descriptor->async_wait(
-                        boost::asio::posix::stream_descriptor::wait_write,
-                        [weak_self, sockfd, weak_descriptor, weak_write_handler
-                        ](const boost::system::error_code& ec) {
-                            // If operation was canceled or had an error, don't re-register
-                            if (ec) {
-                                return;
+                handle->async_wait(
+                    SocketHandle::wait_write,
+                    [weak_self, sockfd, weak_handle, weak_write_handler](
+                        const boost::system::error_code& ec) {
+                        // If operation was canceled or had an error, don't re-register
+                        if (ec) {
+                            return;
+                        }
+
+                        if (const auto self = weak_self.lock()) {
+                            self->handle_socket_action(sockfd, CURL_CSELECT_OUT);
+
+                            // Always try to re-register for continuous monitoring
+                            // The validity check at the top of write_handler will stop it if needed
+                            if (const auto handler = weak_write_handler.lock()) {
+                                (*handler)(); // Recursive call
                             }
-
-                            if (const auto self = weak_self.lock()) {
-                                self->handle_socket_action(
-                                    sockfd, CURL_CSELECT_OUT);
-
-                                // Always try to re-register for continuous monitoring
-                                // The validity check at the top of write_handler will stop it if needed
-                                if (const auto handler = weak_write_handler.lock()) {
-                                    (*handler)(); // Recursive call
-                                }
-                            }
-                        });
-                };
+                        }
+                    });
+            };
             (*socket_info->write_handler)(); // Initial call
         }
     }
