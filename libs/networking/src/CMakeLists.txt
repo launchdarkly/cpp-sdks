@@ -31,7 +31,11 @@ target_include_directories(${LIBNAME}
 # Minimum C++ standard needed for consuming the public API is C++17.
 target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
 
-target_compile_definitions(${LIBNAME} PUBLIC LD_CURL_NETWORKING)
+target_compile_definitions(${LIBNAME}
+    PUBLIC
+        LD_CURL_NETWORKING
+        BOOST_ASIO_HEADER_ONLY
+)
 
 # Using PUBLIC_HEADERS would flatten the include.
 # This will preserve it, but dependencies must do the same.
