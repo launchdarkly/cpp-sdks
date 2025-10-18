@@ -18,6 +18,8 @@ target_link_libraries(${LIBNAME}
         PUBLIC
         CURL::libcurl
         Boost::headers
+        PRIVATE
+        Boost::disable_autolinking
 )
 
 # Need the public headers to build.
@@ -33,6 +35,8 @@ target_compile_features(${LIBNAME} PUBLIC cxx_std_17)
 target_compile_definitions(${LIBNAME}
     PUBLIC
         LD_CURL_NETWORKING
+        BOOST_ASIO_SEPARATE_COMPILATION=1
+        BOOST_BEAST_SEPARATE_COMPILATION=1
 )
 
 # Using PUBLIC_HEADERS would flatten the include.
