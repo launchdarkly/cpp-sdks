@@ -441,11 +441,23 @@ void CurlClient::PerformRequestWithMulti(
     // Add handle to multi manager for async processing
     // Headers will be freed automatically by CurlMultiManager
     std::weak_ptr<RequestContext> weak_context = context;
-    multi_manager->add_handle(curl, headers, [weak_context](std::shared_ptr<CURL> easy, CURLcode res) {
+    multi_manager->add_handle(curl, headers, [weak_context](std::shared_ptr<CURL> easy, CurlMultiManager::Result result) {
         auto context = weak_context.lock();
         if (!context) {
             return;
         }
+
+        // Check if this was a read timeout from the multi manager
+        if (result.type == CurlMultiManager::Result::Type::ReadTimeout) {
+            if (!context->is_shutting_down()) {
+                context->error(errors::ReadTimeout{context->read_timeout});
+                context->backoff("read timeout - no data received");
+            }
+            return;
+        }
+
+        // Handle CURLcode result
+        CURLcode res = result.curl_code;
 
         // Get response code
         long response_code = 0;
@@ -524,7 +536,7 @@ void CurlClient::PerformRequestWithMulti(
             ss << "HTTP status " << static_cast<int>(status);
             context->backoff(ss.str());
         }
-    });
+    }, context->read_timeout);
 }
 
 void CurlClient::async_shutdown(std::function<void()> completion) {

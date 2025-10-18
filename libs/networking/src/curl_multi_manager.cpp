@@ -48,7 +48,8 @@ CurlMultiManager::~CurlMultiManager() {
 
 void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
                                   curl_slist* headers,
-                                  CompletionCallback callback) {
+                                  CompletionCallback callback,
+                                  std::optional<std::chrono::milliseconds> read_timeout) {
     if (const CURLMcode rc = curl_multi_add_handle(
             multi_handle_.get(), easy.get());
         rc != CURLM_OK) {
@@ -67,6 +68,24 @@ void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
         callbacks_[easy.get()] = std::move(callback);
         headers_[easy.get()] = headers;
         handles_[easy.get()] = easy;
+
+        // Setup read timeout timer if specified
+        if (read_timeout) {
+            auto timer = std::make_shared<boost::asio::steady_timer>(executor_);
+            handle_timeouts_[easy.get()] = HandleTimeoutInfo{read_timeout, timer};
+
+            // Start the timeout timer
+            timer->expires_after(*read_timeout);
+            auto weak_self = weak_from_this();
+            CURL* easy_ptr = easy.get();
+            timer->async_wait([weak_self, easy_ptr](const boost::system::error_code& ec) {
+                if (!ec) {
+                    if (auto self = weak_self.lock()) {
+                        self->handle_read_timeout(easy_ptr);
+                    }
+                }
+            });
+        }
     }
 }
 
@@ -78,6 +97,9 @@ int CurlMultiManager::socket_callback(CURL* easy,
     auto* manager = static_cast<CurlMultiManager*>(userp);
 
     std::lock_guard lock(manager->mutex_);
+
+    // Reset read timeout on any socket activity
+    manager->reset_read_timeout(easy);
 
     if (what == CURL_POLL_REMOVE) {
         // Remove socket from managed container
@@ -177,6 +199,13 @@ void CurlMultiManager::check_multi_info() {
                     headers = header_it->second;
                     headers_.erase(header_it);
                 }
+
+                // Cancel and remove timeout timer
+                if (auto timeout_it = handle_timeouts_.find(easy);
+                    timeout_it != handle_timeouts_.end()) {
+                    timeout_it->second.timer->cancel();
+                    handle_timeouts_.erase(timeout_it);
+                }
             }
 
             // Remove from multi handle
@@ -197,7 +226,7 @@ void CurlMultiManager::check_multi_info() {
             if (callback) {
                 boost::asio::post(executor_, [callback = std::move(callback),
                                       result, handle]() {
-                                      callback(handle, result);
+                                      callback(handle, Result::FromCurlCode(result));
                                   });
             }
         }
@@ -243,7 +272,7 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
             // Use weak_ptr in capture to avoid circular reference
             socket_info->read_handler = std::make_shared<std::function<void
                 ()>>();
-            std::weak_ptr<std::function<void()>> weak_read_handler = socket_info
+            std::weak_ptr weak_read_handler = socket_info
                 ->read_handler;
             *socket_info->read_handler = [weak_self, sockfd, weak_handle,
                     weak_read_handler]() {
@@ -326,6 +355,83 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                 };
             (*socket_info->write_handler)(); // Initial call
         }
+    }
+}
+
+void CurlMultiManager::reset_read_timeout(CURL* easy) {
+    // Must be called with mutex_ locked
+    auto timeout_it = handle_timeouts_.find(easy);
+    if (timeout_it != handle_timeouts_.end() && timeout_it->second.timer) {
+        auto& timeout_info = timeout_it->second;
+        timeout_info.timer->cancel();
+        timeout_info.timer->expires_after(*timeout_info.timeout_duration);
+
+        auto weak_self = weak_from_this();
+        CURL* easy_ptr = easy;
+        timeout_info.timer->async_wait([weak_self, easy_ptr](const boost::system::error_code& ec) {
+            if (!ec) {
+                if (auto self = weak_self.lock()) {
+                    self->handle_read_timeout(easy_ptr);
+                }
+            }
+        });
+    }
+}
+
+void CurlMultiManager::handle_read_timeout(CURL* easy) {
+    CompletionCallback callback;
+    curl_slist* headers = nullptr;
+    std::shared_ptr<CURL> handle;
+
+    {
+        std::lock_guard lock(mutex_);
+
+        // Check if handle still exists
+        auto it = callbacks_.find(easy);
+        if (it == callbacks_.end()) {
+            return;  // Handle already completed
+        }
+
+        // Get and remove callback
+        callback = std::move(it->second);
+        callbacks_.erase(it);
+
+        // Get and remove headers
+        if (auto header_it = headers_.find(easy);
+            header_it != headers_.end()) {
+            headers = header_it->second;
+            headers_.erase(header_it);
+        }
+
+        // Get and remove handle
+        if (auto handle_it = handles_.find(easy);
+            handle_it != handles_.end()) {
+            handle = handle_it->second;
+            handles_.erase(handle_it);
+        }
+
+        // Remove timeout info
+        if (auto timeout_it = handle_timeouts_.find(easy);
+            timeout_it != handle_timeouts_.end()) {
+            timeout_it->second.timer->cancel();
+            handle_timeouts_.erase(timeout_it);
+        }
+    }
+
+    // Remove from multi handle
+    curl_multi_remove_handle(multi_handle_.get(), easy);
+
+    // Free headers
+    if (headers) {
+        curl_slist_free_all(headers);
+    }
+
+    // Invoke completion callback with read timeout result
+    if (callback) {
+        boost::asio::post(executor_, [callback = std::move(callback),
+                                      handle]() {
+                                      callback(handle, Result::FromReadTimeout());
+                                  });
     }
 }
 } // namespace launchdarkly::network

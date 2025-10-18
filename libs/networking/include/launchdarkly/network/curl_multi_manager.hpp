@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 namespace launchdarkly::network {
 
@@ -34,10 +35,31 @@ using SocketHandle = boost::asio::ip::tcp::socket;
 class CurlMultiManager : public std::enable_shared_from_this<CurlMultiManager> {
 public:
     /**
-     * Callback invoked when an easy handle completes (success or error).
-     * Parameters: CURL* easy handle, CURLcode result
+     * Result of a CURL operation - either CURLcode or read timeout.
      */
-    using CompletionCallback = std::function<void(std::shared_ptr<CURL>, CURLcode)>;
+    struct Result {
+        enum class Type {
+            CurlCode,
+            ReadTimeout
+        };
+
+        Type type;
+        CURLcode curl_code;  // Only valid if type == CurlCode
+
+        static Result FromCurlCode(CURLcode code) {
+            return Result{Type::CurlCode, code};
+        }
+
+        static Result FromReadTimeout() {
+            return Result{Type::ReadTimeout, CURLE_OK};
+        }
+    };
+
+    /**
+     * Callback invoked when an easy handle completes (success or error).
+     * Parameters: CURL* easy handle, Result
+     */
+    using CompletionCallback = std::function<void(std::shared_ptr<CURL>, Result)>;
 
     /**
      * Create a CurlMultiManager on the given executor.
@@ -59,10 +81,12 @@ public:
      * @param easy The CURL easy handle (must be configured)
      * @param headers The curl_slist headers (will be freed automatically)
      * @param callback Called when the transfer completes
+     * @param read_timeout Optional read timeout duration
      */
     void add_handle(const std::shared_ptr<CURL>& easy,
                     curl_slist* headers,
-                    CompletionCallback callback);
+                    CompletionCallback callback,
+                    std::optional<std::chrono::milliseconds> read_timeout = std::nullopt);
 
 private:
     explicit CurlMultiManager(boost::asio::any_io_executor executor);
@@ -86,6 +110,9 @@ private:
     // Check for completed transfers
     void check_multi_info();
 
+    // Handle read timeout for a specific handle
+    void handle_read_timeout(CURL* easy);
+
     // Per-socket data
     struct SocketInfo {
         curl_socket_t sockfd;
@@ -98,6 +125,15 @@ private:
 
     void start_socket_monitor(SocketInfo* socket_info, int action);
 
+    // Reset read timeout timer for a handle
+    void reset_read_timeout(CURL* easy);
+
+    // Per-handle read timeout data
+    struct HandleTimeoutInfo {
+        std::optional<std::chrono::milliseconds> timeout_duration;
+        std::shared_ptr<boost::asio::steady_timer> timer;
+    };
+
     boost::asio::any_io_executor executor_;
     // CURLM* multi_handle_;
     std::unique_ptr<CURLM, decltype(&curl_multi_cleanup)> multi_handle_;
@@ -107,6 +143,7 @@ private:
     std::map<CURL*, CompletionCallback> callbacks_;
     std::map<CURL*, curl_slist*> headers_;
     std::map<CURL*, std::shared_ptr<CURL>> handles_;
+    std::map<CURL*, HandleTimeoutInfo> handle_timeouts_;
     std::map<curl_socket_t, SocketInfo> sockets_; // Managed socket info
     int still_running_{0};
 };

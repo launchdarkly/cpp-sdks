@@ -225,13 +225,19 @@ void CurlRequester::PerformRequestWithMulti(std::shared_ptr<CurlMultiManager> mu
 
     // Add handle to multi manager for async processing
     // Headers will be freed automatically by CurlMultiManager
-    multi_manager->add_handle(curl, headers, [ctx](std::shared_ptr<CURL> easy, CURLcode result) {
+    multi_manager->add_handle(curl, headers, [ctx](std::shared_ptr<CURL> easy, CurlMultiManager::Result result) {
         // This callback runs on the executor when the request completes
 
+        // Handle read timeout (shouldn't happen for regular requests, but handle it anyway)
+        if (result.type == CurlMultiManager::Result::Type::ReadTimeout) {
+            ctx->callback(HttpResult("Request timed out"));
+            return;
+        }
+
         // Check for errors
-        if (result != CURLE_OK) {
+        if (result.curl_code != CURLE_OK) {
             std::string error_message = kErrorCurlPrefix;
-            error_message += curl_easy_strerror(result);
+            error_message += curl_easy_strerror(result.curl_code);
             ctx->callback(HttpResult(error_message));
             return;
         }
