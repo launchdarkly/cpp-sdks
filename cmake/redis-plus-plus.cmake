@@ -24,7 +24,7 @@ set(REDIS_PLUS_PLUS_BUILD_TEST OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(redis-plus-plus
         GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
         # Post 1.3.15. Required to support FetchContent post 1.3.7 where it was broken.
-        GIT_TAG 84f37e95d9112193fd433f65402d3d183f0b9cf7
+        GIT_TAG fc67c2ebf929ae2cf3b31d959767233f39c5df6a
         GIT_SHALLOW TRUE
 )
 
