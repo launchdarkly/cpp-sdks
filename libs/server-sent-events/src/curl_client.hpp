@@ -27,20 +27,22 @@ namespace net = boost::asio;
 using launchdarkly::network::CurlMultiManager;
 
 /**
- * The lifecycle of the CurlClient is managed in an RAII manner. This introduces
- * some complexity with interaction with CURL, which requires a thread to be
- * driven. The desutruction of the CurlClient will signal that the CURL thread
- * should stop. Though depending on the operation it may linger for some
- * time.
- *
- * The CurlClient itself is not accessible from the CURL thread and instead
- * all their shared state is in a RequestContext. The lifetime of this context
- * can exceed that of the CurlClient while CURL shuts down. This approach
- * prevents the lifetime of the CurlClient being attached to that of the
- * curl thread.
+ * The CurlClient uses the CURL multi-socket interface to allow for
+ * single-threaded usage of CURL. We drive this usage using boost::asio
+ * and every thing is executed in the IO context provided during client
+ * construction. Calling into the API of the client could be done from threads
+ * other than the IO context thread, so some thread-safety is required to
+ * manage those interactions. For example the CurlClient destructor will
+ * be ran on whatever thread last retains a reference to the client.
  */
 class CurlClient final : public Client,
                          public std::enable_shared_from_this<CurlClient> {
+    /**
+    * Structure containing callbacks between the CURL interactions and the
+    * IO executor. Callbacks are set while a connection is being established,
+    * instead of at construction time, to allow the use of weak_from_self.
+    * The weak_from_self method cannot be used during the constructor.
+    */
     struct Callbacks {
         std::function<void(std::string)> do_backoff;
         std::function<void(Event)> on_receive;
@@ -63,6 +65,16 @@ class CurlClient final : public Client,
         }
     };
 
+    /**
+    * The request context represents the state required by the executing CURL
+    * request. Not directly including the shared data in the CurlClient allows
+    * for easy seperation of its lifetime from that of the CURL client. This
+    * facilitates destruction of the CurlClient being used to stop in-progress
+    * requests.
+    *
+    * Also the CURL client can be destructed and pending tasks will still
+    * have a valid RequestContext and will detect the shutdown.
+    */
     class RequestContext {
         // Only items used by both the curl thread and the executor/main
         // thread need to be mutex protected.

@@ -4,8 +4,6 @@
 
 #include <boost/asio/post.hpp>
 
-#include <iostream>
-
 namespace launchdarkly::network {
 std::shared_ptr<CurlMultiManager> CurlMultiManager::create(
     boost::asio::any_io_executor executor) {
@@ -49,7 +47,8 @@ CurlMultiManager::~CurlMultiManager() {
 void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
                                   curl_slist* headers,
                                   CompletionCallback callback,
-                                  std::optional<std::chrono::milliseconds> read_timeout) {
+                                  std::optional<std::chrono::milliseconds>
+                                  read_timeout) {
     if (const CURLMcode rc = curl_multi_add_handle(
             multi_handle_.get(), easy.get());
         rc != CURLM_OK) {
@@ -58,8 +57,6 @@ void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
             curl_slist_free_all(headers);
         }
 
-        std::cerr << "Failed to add handle to multi: "
-            << curl_multi_strerror(rc) << std::endl;
         return;
     }
 
@@ -72,19 +69,21 @@ void CurlMultiManager::add_handle(const std::shared_ptr<CURL>& easy,
         // Setup read timeout timer if specified
         if (read_timeout) {
             auto timer = std::make_shared<boost::asio::steady_timer>(executor_);
-            handle_timeouts_[easy.get()] = HandleTimeoutInfo{read_timeout, timer};
+            handle_timeouts_[easy.get()] = HandleTimeoutInfo{
+                read_timeout, timer};
 
             // Start the timeout timer
             timer->expires_after(*read_timeout);
             auto weak_self = weak_from_this();
             CURL* easy_ptr = easy.get();
-            timer->async_wait([weak_self, easy_ptr](const boost::system::error_code& ec) {
-                if (!ec) {
-                    if (auto self = weak_self.lock()) {
-                        self->handle_read_timeout(easy_ptr);
+            timer->async_wait(
+                [weak_self, easy_ptr](const boost::system::error_code& ec) {
+                    if (!ec) {
+                        if (auto self = weak_self.lock()) {
+                            self->handle_read_timeout(easy_ptr);
+                        }
                     }
-                }
-            });
+                });
         }
     }
 }
@@ -153,14 +152,11 @@ int CurlMultiManager::timer_callback(CURLM* multi,
 void CurlMultiManager::handle_socket_action(curl_socket_t s,
                                             const int event_bitmask) {
     int running_handles = 0;
-    const CURLMcode rc = curl_multi_socket_action(multi_handle_.get(), s,
-                                                  event_bitmask,
-                                                  &running_handles);
-
-    if (rc != CURLM_OK) {
-        std::cerr << "curl_multi_socket_action failed: "
-            << curl_multi_strerror(rc) << std::endl;
-    }
+    // This can return an error code, but checking the multi_info will be
+    // sufficient without additional handling for this error code.
+    curl_multi_socket_action(multi_handle_.get(), s,
+                             event_bitmask,
+                             &running_handles);
 
     check_multi_info();
 
@@ -191,7 +187,6 @@ void CurlMultiManager::check_multi_info() {
                     callback = std::move(it->second);
                     callbacks_.erase(it);
                 }
-                callbacks_.erase(easy);
 
                 // Get and remove headers
                 if (auto header_it = headers_.find(easy);
@@ -226,7 +221,8 @@ void CurlMultiManager::check_multi_info() {
             if (callback) {
                 boost::asio::post(executor_, [callback = std::move(callback),
                                       result, handle]() {
-                                      callback(handle, Result::FromCurlCode(result));
+                                      callback(
+                                          handle, Result::FromCurlCode(result));
                                   });
             }
         }
@@ -247,8 +243,6 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                                     socket_info->sockfd, ec);
 
         if (ec) {
-            std::cerr << "Failed to assign socket: " << ec.message() <<
-                std::endl;
             socket_info->handle.reset();
             return;
         }
@@ -368,13 +362,14 @@ void CurlMultiManager::reset_read_timeout(CURL* easy) {
 
         auto weak_self = weak_from_this();
         CURL* easy_ptr = easy;
-        timeout_info.timer->async_wait([weak_self, easy_ptr](const boost::system::error_code& ec) {
-            if (!ec) {
-                if (auto self = weak_self.lock()) {
-                    self->handle_read_timeout(easy_ptr);
+        timeout_info.timer->async_wait(
+            [weak_self, easy_ptr](const boost::system::error_code& ec) {
+                if (!ec) {
+                    if (auto self = weak_self.lock()) {
+                        self->handle_read_timeout(easy_ptr);
+                    }
                 }
-            }
-        });
+            });
     }
 }
 
@@ -389,7 +384,7 @@ void CurlMultiManager::handle_read_timeout(CURL* easy) {
         // Check if handle still exists
         auto it = callbacks_.find(easy);
         if (it == callbacks_.end()) {
-            return;  // Handle already completed
+            return; // Handle already completed
         }
 
         // Get and remove callback
@@ -429,9 +424,9 @@ void CurlMultiManager::handle_read_timeout(CURL* easy) {
     // Invoke completion callback with read timeout result
     if (callback) {
         boost::asio::post(executor_, [callback = std::move(callback),
-                                      handle]() {
-                                      callback(handle, Result::FromReadTimeout());
-                                  });
+                              handle]() {
+                              callback(handle, Result::FromReadTimeout());
+                          });
     }
 }
 } // namespace launchdarkly::network
