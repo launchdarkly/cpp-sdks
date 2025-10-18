@@ -220,7 +220,7 @@ TEST_F(CurlRequesterTest, HandlesCustomHeaders) {
     server_->SetHandler(
         [](http::request<http::string_body> const& req)
             -> http::response<http::string_body> {
-            auto header_it = req.find("X-Custom-Header");
+            const auto header_it = req.find("X-Custom-Header");
             EXPECT_NE(req.end(), header_it);
             if (header_it != req.end()) {
                 EXPECT_EQ("custom-value", header_it->value());
@@ -275,7 +275,7 @@ TEST_F(CurlRequesterTest, Handles404Status) {
     });
 
     net::io_context client_ioc;
-    CurlRequester requester(
+    const CurlRequester requester(
         client_ioc.get_executor(),
         launchdarkly::config::shared::built::TlsOptions());
 
@@ -304,8 +304,8 @@ TEST_F(CurlRequesterTest, Handles404Status) {
 
 TEST_F(CurlRequesterTest, HandlesInvalidUrl) {
     net::io_context client_ioc;
-    CurlRequester requester(
-        client_ioc.get_executor(),
+    const CurlRequester requester(
+    client_ioc.get_executor(),
         launchdarkly::config::shared::built::TlsOptions());
 
     HttpRequest request("not a valid url", HttpMethod::kGet,

@@ -68,11 +68,11 @@ class CurlClient final : public Client,
     /**
     * The request context represents the state required by the executing CURL
     * request. Not directly including the shared data in the CurlClient allows
-    * for easy seperation of its lifetime from that of the CURL client. This
+    * for easy separation of its lifetime from that of the CURL client. This
     * facilitates destruction of the CurlClient being used to stop in-progress
     * requests.
     *
-    * Also the CURL client can be destructed and pending tasks will still
+    * The CURL client can be destructed and pending tasks will still
     * have a valid RequestContext and will detect the shutdown.
     */
     class RequestContext {
@@ -80,15 +80,14 @@ class CurlClient final : public Client,
         // thread need to be mutex protected.
         std::mutex mutex_;
         std::atomic<bool> shutting_down_;
-        std::atomic<curl_socket_t> curl_socket_;
         // End mutex protected items.
         std::optional<Callbacks> callbacks_;
 
     public:
         // SSE parser using common parser from parser.hpp
         using ParserBody = detail::EventBody<std::function<void(Event)>>;
-        std::unique_ptr<typename ParserBody::value_type> parser_body;
-        std::unique_ptr<typename ParserBody::reader> parser_reader;
+        std::unique_ptr<ParserBody::value_type> parser_body;
+        std::unique_ptr<ParserBody::reader> parser_reader;
 
         // Track last event ID for reconnection (separate from parser state)
         std::optional<std::string> last_event_id;
@@ -165,23 +164,10 @@ class CurlClient final : public Client,
             return shutting_down_;
         }
 
-        void set_curl_socket(curl_socket_t curl_socket) {
-            std::lock_guard lock(mutex_);
-            curl_socket_ = curl_socket;
-        }
-
         void shutdown() {
             std::lock_guard lock(mutex_);
             shutting_down_ = true;
-            if (curl_socket_ != CURL_SOCKET_BAD) {
-#ifdef _WIN32
-                closesocket(curl_socket_);
-#else
-                close(curl_socket_);
-#endif
-            }
         }
-
 
         RequestContext(std::string url,
                        http::request<http::string_body> req,
@@ -190,9 +176,8 @@ class CurlClient final : public Client,
                        std::optional<std::chrono::milliseconds> write_timeout,
                        std::optional<std::string> custom_ca_file,
                        std::optional<std::string> proxy_url,
-                       bool skip_verify_peer
+                       const bool skip_verify_peer
             ) : shutting_down_(false),
-                curl_socket_(CURL_SOCKET_BAD),
                 last_download_amount(0),
                 req(std::move(req)),
                 url(std::move(url)),

@@ -25,12 +25,6 @@ using SocketHandle = boost::asio::ip::tcp::socket;
  * multi interface with Boost.ASIO. Instead of blocking threads, CURL notifies
  * us via callbacks when sockets need attention, and we use ASIO to monitor
  * those sockets asynchronously.
- *
- * Key features:
- * - Non-blocking I/O using curl_multi_socket_action
- * - Cross-platform socket monitoring via ASIO tcp::socket
- * - Timer integration with ASIO steady_timer
- * - Thread-safe operation on ASIO executor
  */
 class CurlMultiManager : public std::enable_shared_from_this<CurlMultiManager> {
 public:
@@ -135,7 +129,6 @@ private:
     };
 
     boost::asio::any_io_executor executor_;
-    // CURLM* multi_handle_;
     std::unique_ptr<CURLM, decltype(&curl_multi_cleanup)> multi_handle_;
     boost::asio::steady_timer timer_;
 

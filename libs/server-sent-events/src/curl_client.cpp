@@ -346,11 +346,6 @@ curl_socket_t CurlClient::OpenSocketCallback(void* clientp,
     curl_socket_t sockfd = socket(address->family, address->socktype,
                                   address->protocol);
 
-    // Store it so we can close it during shutdown
-    if (sockfd != CURL_SOCKET_BAD) {
-        context->set_curl_socket(sockfd);
-    }
-
     return sockfd;
 }
 

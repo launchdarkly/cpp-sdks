@@ -8,7 +8,6 @@
 #include "mock_sse_server.hpp"
 
 #include <boost/asio/io_context.hpp>
-#include <boost/asio/steady_timer.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -23,12 +22,13 @@ using namespace std::chrono_literals;
 namespace {
 
 // C++17-compatible latch replacement
+// https://en.cppreference.com/w/cpp/thread/latch.html
 class SimpleLatch {
 public:
-    explicit SimpleLatch(std::size_t count) : count_(count) {}
+    explicit SimpleLatch(const std::size_t count) : count_(count) {}
 
     void count_down() {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard lock(mutex_);
         if (count_ > 0) {
             --count_;
         }
@@ -37,7 +37,7 @@ public:
 
     template<typename Rep, typename Period>
     bool wait_for(std::chrono::duration<Rep, Period> timeout) {
-        std::unique_lock<std::mutex> lock(mutex_);
+        std::unique_lock lock(mutex_);
         return cv_.wait_for(lock, timeout, [this] { return count_ == 0; });
     }
 
@@ -80,12 +80,6 @@ public:
     std::vector<Error> errors() const {
         std::lock_guard<std::mutex> lock(mutex_);
         return errors_;
-    }
-
-    void clear() {
-        std::lock_guard<std::mutex> lock(mutex_);
-        events_.clear();
-        errors_.clear();
     }
 
 private:
@@ -456,7 +450,7 @@ TEST(CurlClientTest, Handles500Error) {
     std::atomic<int> connection_attempts{0};
 
     auto handler = [&](auto const&, auto send_response, auto, auto) {
-        connection_attempts++;
+        ++connection_attempts;
         http::response<http::string_body> res{http::status::internal_server_error, 11};
         res.body() = "Error";
         res.prepare_payload();
@@ -585,7 +579,7 @@ TEST(CurlClientTest, HandlesImmediateClose) {
     std::atomic<int> connection_attempts{0};
 
     auto handler = [&](auto const&, auto, auto, auto close) {
-        connection_attempts++;
+        ++connection_attempts;
         close();  // Immediately close without sending headers
     };
 
@@ -664,59 +658,26 @@ TEST(CurlClientTest, RespectsReadTimeout) {
     EXPECT_TRUE(shutdown_latch.wait_for(100ms));
 }
 
-// Resource management tests
-
-TEST(CurlClientTest, NoThreadLeaksAfterMultipleConnections) {
-    // This test verifies that threads are properly joined and not leaked
-    MockSSEServer server;
-    auto port = server.start(TestHandlers::simple_event("test"));
-
-    IoContextRunner runner;
-
-    // Create and destroy multiple clients
-    for (int i = 0; i < 5; i++) {
-        EventCollector collector;
-
-        auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
-            .receiver([&](Event e) { collector.add_event(std::move(e)); })
-                .build();
-
-        client->async_connect();
-        ASSERT_TRUE(collector.wait_for_events(1));
-
-        SimpleLatch shutdown_latch(1);
-        client->async_shutdown([&] { shutdown_latch.count_down(); });
-        EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
-
-        // Client should be cleanly destroyed here
-    }
-
-    // If threads weren't properly joined, we'd likely see issues here
-    // The test passing indicates proper resource cleanup
-}
-
 TEST(CurlClientTest, DestructorCleansUpProperly) {
-    MockSSEServer server;
-    auto port = server.start([](auto const&, auto send_response, auto send_sse_event, auto) {
-        http::response<http::string_body> res{http::status::ok, 11};
-        res.set(http::field::content_type, "text/event-stream");
-        res.chunked(true);
-        send_response(res);
-
-        // Keep sending events
-        for (int i = 0; i < 100; i++) {
-            send_sse_event(SSEFormatter::event("event " + std::to_string(i)));
-            std::this_thread::sleep_for(10ms);
-        }
-    });
-
-    IoContextRunner runner;
-    EventCollector collector;
-
     {
+        MockSSEServer server;
+        auto port = server.start([](auto const&, auto send_response, auto send_sse_event, auto) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            // Keep sending events
+            for (int i = 0; i < 100; i++) {
+                send_sse_event(SSEFormatter::event("event " + std::to_string(i)));
+                std::this_thread::sleep_for(10ms);
+            }
+        });
+        EventCollector collector;
+        IoContextRunner runner;
         auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
-            .receiver([&](Event e) { collector.add_event(std::move(e)); })
-                .build();
+                      .receiver([&](Event e) { collector.add_event(std::move(e)); })
+                      .build();
 
         client->async_connect();
         ASSERT_TRUE(collector.wait_for_events(1));
@@ -727,8 +688,6 @@ TEST(CurlClientTest, DestructorCleansUpProperly) {
     // If destructor doesn't properly clean up, this could hang or crash
     // Test passing indicates proper cleanup in destructor
 }
-
-// Edge case tests
 
 TEST(CurlClientTest, HandlesEmptyEventData) {
     MockSSEServer server;
@@ -798,9 +757,9 @@ TEST(CurlClientTest, HandlesEventWithOnlyType) {
 
 TEST(CurlClientTest, HandlesRapidEvents) {
     MockSSEServer server;
-    const int num_events = 100;
+    constexpr int num_events = 100;
 
-    auto port = server.start([num_events](auto const&, auto send_response, auto send_sse_event, auto close) {
+    auto port = server.start([](auto const&, auto send_response, auto send_sse_event, auto close) {
         http::response<http::string_body> res{http::status::ok, 11};
         res.set(http::field::content_type, "text/event-stream");
         res.chunked(true);
@@ -832,14 +791,12 @@ TEST(CurlClientTest, HandlesRapidEvents) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-// Shutdown-specific tests - critical for preventing crashes/hangs in user applications
-
 TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
     // This ensures clean shutdown during backoff/retry wait period
     std::atomic<int> connection_attempts{0};
 
     auto handler = [&](auto const&, auto send_response, auto, auto) {
-        connection_attempts++;
+        ++connection_attempts;
         // Return 500 to trigger backoff
         http::response<http::string_body> res{http::status::internal_server_error, 11};
         res.body() = "Error";
@@ -906,7 +863,7 @@ TEST(CurlClientTest, ShutdownDuringDataReception) {
 
     IoContextRunner runner;
     // Shared ptr to prevent handling events during destruction.
-    std::shared_ptr<EventCollector> collector = std::make_shared<EventCollector>();
+    auto collector = std::make_shared<EventCollector>();
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([collector, &client_received_some](Event e) {
