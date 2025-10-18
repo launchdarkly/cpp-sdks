@@ -53,14 +53,25 @@ int main() {
         }
     } else {
         std::cout << "*** SDK initialization didn't complete in "
-                  << INIT_TIMEOUT_MILLISECONDS << "ms\n";
+            << INIT_TIMEOUT_MILLISECONDS << "ms\n";
         return 1;
     }
 
     bool const flag_value = client.BoolVariation(FEATURE_FLAG_KEY, false);
 
     std::cout << "*** Feature flag '" << FEATURE_FLAG_KEY << "' is "
-              << (flag_value ? "true" : "false") << " for this user\n\n";
+        << (flag_value ? "true" : "false") << " for this user\n\n";
+
+    client.FlagNotifier().OnFlagChange("my-boolean-flag",
+                                       [](const std::shared_ptr<
+                                           flag_manager::FlagValueChangeEvent>
+                                       & change_event) {
+                                           std::cout << "my-boolean-flag changed! " << change_event->NewValue() << std::endl;
+                                       });
+
+    // Keep it running.
+    std::string in;
+    std::cin >> in;
 
     return 0;
 }
