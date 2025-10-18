@@ -391,14 +391,14 @@ size_t CurlClient::HeaderCallback(const char* buffer,
                                   size_t nitems,
                                   void* userdata) {
     const size_t total_size = size * nitems;
-    auto* client = static_cast<CurlClient*>(userdata);
+    auto* context = static_cast<RequestContext*>(userdata);
 
     // Check for Content-Type header
     if (const std::string header(buffer, total_size);
         header.find("Content-Type:") == 0 ||
         header.find("content-type:") == 0) {
         if (header.find("text/event-stream") == std::string::npos) {
-            client->log_message("warning: unexpected Content-Type: " + header);
+            context->log_message("warning: unexpected Content-Type: " + header);
         }
     }
 
