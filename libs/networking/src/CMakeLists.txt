@@ -17,6 +17,7 @@ message(STATUS "LaunchDarklyNetworking_SOURCE_DIR=${LaunchDarklyNetworking_SOURC
 target_link_libraries(${LIBNAME}
         PUBLIC
         CURL::libcurl
+        Boost::headers
 )
 
 # Need the public headers to build.
