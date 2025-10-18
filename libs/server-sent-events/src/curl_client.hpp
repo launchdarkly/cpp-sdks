@@ -80,6 +80,7 @@ class CurlClient final : public Client,
         // thread need to be mutex protected.
         std::mutex mutex_;
         std::atomic<bool> shutting_down_;
+        std::atomic<curl_socket_t> curl_socket_;
         // End mutex protected items.
         std::optional<Callbacks> callbacks_;
 
@@ -164,10 +165,23 @@ class CurlClient final : public Client,
             return shutting_down_;
         }
 
+        void set_curl_socket(curl_socket_t curl_socket) {
+            std::lock_guard lock(mutex_);
+            curl_socket_ = curl_socket;
+        }
+
         void shutdown() {
             std::lock_guard lock(mutex_);
             shutting_down_ = true;
+            if (curl_socket_ != CURL_SOCKET_BAD) {
+#ifdef _WIN32
+                closesocket(curl_socket_);
+#else
+                close(curl_socket_);
+#endif
+            }
         }
+
 
         RequestContext(std::string url,
                        http::request<http::string_body> req,
@@ -176,8 +190,9 @@ class CurlClient final : public Client,
                        std::optional<std::chrono::milliseconds> write_timeout,
                        std::optional<std::string> custom_ca_file,
                        std::optional<std::string> proxy_url,
-                       const bool skip_verify_peer
+                       bool skip_verify_peer
             ) : shutting_down_(false),
+                curl_socket_(CURL_SOCKET_BAD),
                 last_download_amount(0),
                 req(std::move(req)),
                 url(std::move(url)),
