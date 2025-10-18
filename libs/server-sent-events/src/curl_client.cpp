@@ -326,6 +326,7 @@ int CurlClient::ProgressCallback(void* clientp,
                 now - context->last_progress_time);
 
             if (elapsed > *context->read_timeout) {
+                context->log_message("Read timeout, aborting curl transfer.");
                 return kCurlTransferAbort;
             }
         }

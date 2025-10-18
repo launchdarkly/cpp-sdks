@@ -196,7 +196,7 @@ void CurlMultiManager::check_multi_info() {
             // Invoke completion callback
             if (callback) {
                 boost::asio::post(executor_, [callback = std::move(callback),
-                                      easy, result, handle]() {
+                                      result, handle]() {
                                       callback(handle, result);
                                   });
             }

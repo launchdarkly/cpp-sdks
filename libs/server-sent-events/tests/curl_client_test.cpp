@@ -640,7 +640,13 @@ TEST(CurlClientTest, RespectsReadTimeout) {
 
     auto client = Builder(runner.context().get_executor(), "http://localhost:" + std::to_string(port))
         .receiver([&](Event e) { collector.add_event(std::move(e)); })
-        .errors([&](Error e) { collector.add_error(std::move(e)); })
+        .errors([&](Error e) {
+            std::cerr << "Error" << e.index() << std::endl;
+            collector.add_error(std::move(e));
+        })
+        .logger([&](const std::string& message) {
+            std::cerr << "log_message" << message << std::endl;
+        })
         .read_timeout(500ms)  // Short timeout for test
         .initial_reconnect_delay(50ms)
         .build();
@@ -648,14 +654,14 @@ TEST(CurlClientTest, RespectsReadTimeout) {
     client->async_connect();
 
     // Should receive the first event
-    ASSERT_TRUE(collector.wait_for_events(1, 2000ms));
+    ASSERT_TRUE(collector.wait_for_events(1, 100ms));
 
     // Then should get a timeout error
-    ASSERT_TRUE(collector.wait_for_errors(1, 3000ms));
+    ASSERT_TRUE(collector.wait_for_errors(1, 1000ms));
 
     SimpleLatch shutdown_latch(1);
     client->async_shutdown([&] { shutdown_latch.count_down(); });
-    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    EXPECT_TRUE(shutdown_latch.wait_for(100ms));
 }
 
 // Resource management tests
