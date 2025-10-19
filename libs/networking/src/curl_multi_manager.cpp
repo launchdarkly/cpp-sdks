@@ -2,6 +2,7 @@
 
 #include "launchdarkly/network/curl_multi_manager.hpp"
 
+#include <iostream>
 #include <boost/asio/post.hpp>
 
 namespace launchdarkly::network {
@@ -93,6 +94,8 @@ int CurlMultiManager::socket_callback(CURL* easy,
                                       int what,
                                       void* userp,
                                       void* socketp) {
+
+    std::cout << "socket_callback: what: " << what << " socket: " << s << std::endl;
     auto* manager = static_cast<CurlMultiManager*>(userp);
 
     std::lock_guard lock(manager->mutex_);
@@ -101,6 +104,7 @@ int CurlMultiManager::socket_callback(CURL* easy,
     manager->reset_read_timeout(easy);
 
     if (what == CURL_POLL_REMOVE) {
+        std::cout << "socket_callback: remove: " << s << std::endl;
         // Remove socket from managed container
         if (const auto it = manager->sockets_.find(s);
             it != manager->sockets_.end()) {
@@ -257,6 +261,7 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
 
     // Monitor for read events
     if (action & CURL_POLL_IN) {
+        std::cout << "start_socket_monitor: poll in: " << socket_info->sockfd << std::endl;
         // Only create new handler if we don't have one or if action changed
         if (!socket_info->read_handler || action_changed) {
             // Use weak_ptr to safely detect when handle is deleted
@@ -301,10 +306,13 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                 };
             (*socket_info->read_handler)(); // Initial call
         }
+    } else {
+        socket_info->read_handler.reset();
     }
 
     // Monitor for write events
     if (action & CURL_POLL_OUT) {
+        std::cout << "start_socket_monitor: poll out: " << socket_info->sockfd << std::endl;
         // Only create new handler if we don't have one or if action changed
         if (!socket_info->write_handler || action_changed) {
             // Use weak_ptr to safely detect when handle is deleted
@@ -349,6 +357,8 @@ void CurlMultiManager::start_socket_monitor(SocketInfo* socket_info,
                 };
             (*socket_info->write_handler)(); // Initial call
         }
+    } else {
+        socket_info->write_handler.reset();
     }
 }
 

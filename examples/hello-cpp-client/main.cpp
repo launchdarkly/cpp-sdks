@@ -12,7 +12,7 @@
 
 // Set INIT_TIMEOUT_MILLISECONDS to the amount of time you will wait for
 // the client to become initialized.
-#define INIT_TIMEOUT_MILLISECONDS 3000
+#define INIT_TIMEOUT_MILLISECONDS 9999999999
 
 char const* get_with_env_fallback(char const* source_val,
                                   char const* env_variable,
