@@ -1,0 +1,211 @@
+\hypertarget{classlaunchdarkly_1_1EvaluationReason}{}\doxysection{launchdarkly\+::Evaluation\+Reason Class Reference}
+\label{classlaunchdarkly_1_1EvaluationReason}\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+
+
+{\ttfamily \#include $<$evaluation\+\_\+reason.\+hpp$>$}
+
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{Kind}} \{ \newline
+{\bfseries k\+Off} = 0
+, {\bfseries k\+Fallthrough} = 1
+, {\bfseries k\+Target\+Match} = 2
+, {\bfseries k\+Rule\+Match} = 3
+, \newline
+{\bfseries k\+Prerequisite\+Failed} = 4
+, {\bfseries k\+Error} = 5
+ \}
+\item 
+enum class \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Error\+Kind}} \{ \newline
+{\bfseries k\+Client\+Not\+Ready} = 0
+, {\bfseries k\+User\+Not\+Specified} = 1
+, {\bfseries k\+Flag\+Not\+Found} = 2
+, {\bfseries k\+Wrong\+Type} = 3
+, \newline
+{\bfseries k\+Malformed\+Flag} = 4
+, {\bfseries k\+Exception} = 5
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{Kind}} const  \& \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_afe115cb3f0139eccdab08a1d2f326a5e}{Kind}} () const
+\item 
+std\+::optional$<$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Error\+Kind}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a82d00a56d54668d82c91dad1a1079f09}{Error\+Kind}} () const
+\item 
+std\+::optional$<$ std\+::size\+\_\+t $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_af28717d93f3f68f4c0f1b01a47631f84}{Rule\+Index}} () const
+\item 
+std\+::optional$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_ac28b7fc02915caae210520905dcf6817}{Rule\+Id}} () const
+\item 
+std\+::optional$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_aaa51a5be8c46ffe689cbe859751542d1}{Prerequisite\+Key}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a9ae7c15a67a999fe815116037dbf2a0c}{In\+Experiment}} () const
+\item 
+std\+::optional$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_ace7c3920bc1870bfb5e85082f9a92e3e}{Big\+Segment\+Status}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a5a7aafcde43a188c4331779f4b0070b7}\label{classlaunchdarkly_1_1EvaluationReason_a5a7aafcde43a188c4331779f4b0070b7}} 
+{\bfseries Evaluation\+Reason} (enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{Kind}} kind, std\+::optional$<$ enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Error\+Kind}} $>$ error\+\_\+kind, std\+::optional$<$ std\+::size\+\_\+t $>$ rule\+\_\+index, std\+::optional$<$ std\+::string $>$ rule\+\_\+id, std\+::optional$<$ std\+::string $>$ prerequisite\+\_\+key, bool in\+\_\+experiment, std\+::optional$<$ std\+::string $>$ big\+\_\+segment\+\_\+status)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_ae67a56141383f5086c834683ededdeb0}\label{classlaunchdarkly_1_1EvaluationReason_ae67a56141383f5086c834683ededdeb0}} 
+{\bfseries Evaluation\+Reason} (enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Error\+Kind}} error\+\_\+kind)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_abd5fddcd4299eb85c8e54845fb0e6e26}{Off}} ()
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_ab4505e5afc9c6af24df62f77f3dc895a}{Prerequisite\+Failed}} (std\+::string prerequisite\+\_\+key)
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a182031b6bbc36768bc53918f300194f1}{Target\+Match}} ()
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a1b494627a5c65f75f58f78dd086757fa}{Fallthrough}} (bool in\+\_\+experiment)
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a4448e164c34787ca0b62661602852a08}{Rule\+Match}} (std\+::size\+\_\+t rule\+\_\+index, std\+::optional$<$ std\+::string $>$ rule\+\_\+id, bool in\+\_\+experiment)
+\item 
+static \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a0200e699dbdaf901398e14a62dcdd62c}{Malformed\+Flag}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_ab089ddebae8c845e13166794a5681e49}\label{classlaunchdarkly_1_1EvaluationReason_ab089ddebae8c845e13166794a5681e49}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{Kind}} const \&kind)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a9b6abcfa9b08b71ced8a63293df429e2}\label{classlaunchdarkly_1_1EvaluationReason_a9b6abcfa9b08b71ced8a63293df429e2}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Error\+Kind}} const \&kind)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a7d73b35ff866e482c0b39fb3c3a81c8e}\label{classlaunchdarkly_1_1EvaluationReason_a7d73b35ff866e482c0b39fb3c3a81c8e}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&out, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} const \&reason)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Describes the reason that a flag evaluation produced a particular value. 
+
+\doxysubsection{Member Enumeration Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}\label{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!ErrorKind@{ErrorKind}}
+\index{ErrorKind@{ErrorKind}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{ErrorKind}{ErrorKind}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{launchdarkly\+::\+Evaluation\+Reason\+::\+Error\+Kind}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Do not change these values. They must remain stable for the C API. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}\label{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!Kind@{Kind}}
+\index{Kind@{Kind}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{Kind}{Kind}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{launchdarkly\+::\+Evaluation\+Reason\+::\+Kind}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+Do not change these values. They must remain stable for the C API. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_ace7c3920bc1870bfb5e85082f9a92e3e}\label{classlaunchdarkly_1_1EvaluationReason_ace7c3920bc1870bfb5e85082f9a92e3e}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!BigSegmentStatus@{BigSegmentStatus}}
+\index{BigSegmentStatus@{BigSegmentStatus}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{BigSegmentStatus()}{BigSegmentStatus()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::string $>$ launchdarkly\+::\+Evaluation\+Reason\+::\+Big\+Segment\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Describes the validity of Big Segment information, if and only if the flag evaluation required querying at least one Big Segment.
+
+
+\begin{DoxyItemize}
+\item {\ttfamily \char`\"{}\+HEALTHY\char`\"{}}\+: The Big Segment query involved in the flag evaluation was successful, and the segment state is considered up to date.
+\item {\ttfamily \char`\"{}\+STALE\char`\"{}}\+: The Big Segment query involved in the flag evaluation was successful, but the segment state may not be up to date
+\item {\ttfamily \char`\"{}\+NOT\+\_\+\+CONFIGURED\char`\"{}}\+: Big Segments could not be queried for the flag evaluation because the SDK configuration did not include a Big Segment store.
+\item {\ttfamily \char`\"{}\+STORE\+\_\+\+ERROR\char`\"{}}\+: The Big Segment query involved in the flag evaluation failed, for instance due to a database error. 
+\end{DoxyItemize}\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a82d00a56d54668d82c91dad1a1079f09}\label{classlaunchdarkly_1_1EvaluationReason_a82d00a56d54668d82c91dad1a1079f09}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!ErrorKind@{ErrorKind}}
+\index{ErrorKind@{ErrorKind}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{ErrorKind()}{ErrorKind()}}
+{\footnotesize\ttfamily std\+::optional$<$ enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{Evaluation\+Reason\+::\+Error\+Kind}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a957db90a9f200d2f53fb3df66a916eaa}{launchdarkly\+::\+Evaluation\+Reason\+::\+Error\+Kind}} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+A further description of the error condition, if the Kind was Kind\+::k\+Error. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a1b494627a5c65f75f58f78dd086757fa}\label{classlaunchdarkly_1_1EvaluationReason_a1b494627a5c65f75f58f78dd086757fa}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!Fallthrough@{Fallthrough}}
+\index{Fallthrough@{Fallthrough}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{Fallthrough()}{Fallthrough()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Fallthrough (\begin{DoxyParamCaption}\item[{bool}]{in\+\_\+experiment }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag evaluated to its fallthrough value. 
+\begin{DoxyParams}{Parameters}
+{\em in\+\_\+experiment} & Whether the flag is part of an experiment. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a9ae7c15a67a999fe815116037dbf2a0c}\label{classlaunchdarkly_1_1EvaluationReason_a9ae7c15a67a999fe815116037dbf2a0c}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!InExperiment@{InExperiment}}
+\index{InExperiment@{InExperiment}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{InExperiment()}{InExperiment()}}
+{\footnotesize\ttfamily bool launchdarkly\+::\+Evaluation\+Reason\+::\+In\+Experiment (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Whether the evaluation was part of an experiment.
+
+This is true if the evaluation resulted in an experiment rollout and served one of the variations in the experiment. Otherwise it is false or undefined. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_afe115cb3f0139eccdab08a1d2f326a5e}\label{classlaunchdarkly_1_1EvaluationReason_afe115cb3f0139eccdab08a1d2f326a5e}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!Kind@{Kind}}
+\index{Kind@{Kind}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{Kind()}{Kind()}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{Evaluation\+Reason\+::\+Kind}} const  \& \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a6e90e7947236403dd0d097f746e341fe}{launchdarkly\+::\+Evaluation\+Reason\+::\+Kind}} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The general category of the reason. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a0200e699dbdaf901398e14a62dcdd62c}\label{classlaunchdarkly_1_1EvaluationReason_a0200e699dbdaf901398e14a62dcdd62c}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!MalformedFlag@{MalformedFlag}}
+\index{MalformedFlag@{MalformedFlag}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{MalformedFlag()}{MalformedFlag()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Malformed\+Flag (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag data was malformed. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_abd5fddcd4299eb85c8e54845fb0e6e26}\label{classlaunchdarkly_1_1EvaluationReason_abd5fddcd4299eb85c8e54845fb0e6e26}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!Off@{Off}}
+\index{Off@{Off}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{Off()}{Off()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Off (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag was off. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_ab4505e5afc9c6af24df62f77f3dc895a}\label{classlaunchdarkly_1_1EvaluationReason_ab4505e5afc9c6af24df62f77f3dc895a}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!PrerequisiteFailed@{PrerequisiteFailed}}
+\index{PrerequisiteFailed@{PrerequisiteFailed}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{PrerequisiteFailed()}{PrerequisiteFailed()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Prerequisite\+Failed (\begin{DoxyParamCaption}\item[{std\+::string}]{prerequisite\+\_\+key }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag didn\textquotesingle{}t return a variation due to a prerequisite failing. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_aaa51a5be8c46ffe689cbe859751542d1}\label{classlaunchdarkly_1_1EvaluationReason_aaa51a5be8c46ffe689cbe859751542d1}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!PrerequisiteKey@{PrerequisiteKey}}
+\index{PrerequisiteKey@{PrerequisiteKey}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{PrerequisiteKey()}{PrerequisiteKey()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::string $>$ launchdarkly\+::\+Evaluation\+Reason\+::\+Prerequisite\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The key of the failed prerequisite flag, if the kind was {\ttfamily \char`\"{}\+PREREQUISITE\+\_\+\+FAILED\char`\"{}}. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_ac28b7fc02915caae210520905dcf6817}\label{classlaunchdarkly_1_1EvaluationReason_ac28b7fc02915caae210520905dcf6817}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!RuleId@{RuleId}}
+\index{RuleId@{RuleId}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{RuleId()}{RuleId()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::string $>$ launchdarkly\+::\+Evaluation\+Reason\+::\+Rule\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The unique identifier of the matched rule, if the kind was {\ttfamily \char`\"{}\+RULE\+\_\+\+MATCH\char`\"{}}. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_af28717d93f3f68f4c0f1b01a47631f84}\label{classlaunchdarkly_1_1EvaluationReason_af28717d93f3f68f4c0f1b01a47631f84}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!RuleIndex@{RuleIndex}}
+\index{RuleIndex@{RuleIndex}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{RuleIndex()}{RuleIndex()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::size\+\_\+t $>$ launchdarkly\+::\+Evaluation\+Reason\+::\+Rule\+Index (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+The index of the matched rule (0 for the first), if the kind was {\ttfamily \char`\"{}\+RULE\+\_\+\+MATCH\char`\"{}}. \mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a4448e164c34787ca0b62661602852a08}\label{classlaunchdarkly_1_1EvaluationReason_a4448e164c34787ca0b62661602852a08}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!RuleMatch@{RuleMatch}}
+\index{RuleMatch@{RuleMatch}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{RuleMatch()}{RuleMatch()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Rule\+Match (\begin{DoxyParamCaption}\item[{std\+::size\+\_\+t}]{rule\+\_\+index,  }\item[{std\+::optional$<$ std\+::string $>$}]{rule\+\_\+id,  }\item[{bool}]{in\+\_\+experiment }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag evaluated to a particular variation because it matched a rule. 
+\begin{DoxyParams}{Parameters}
+{\em rule\+\_\+index} & Index of the rule. \\
+\hline
+{\em rule\+\_\+id} & ID of the rule. \\
+\hline
+{\em in\+\_\+experiment} & Whether the flag is part of an experiment. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1EvaluationReason_a182031b6bbc36768bc53918f300194f1}\label{classlaunchdarkly_1_1EvaluationReason_a182031b6bbc36768bc53918f300194f1}} 
+\index{launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}!TargetMatch@{TargetMatch}}
+\index{TargetMatch@{TargetMatch}!launchdarkly::EvaluationReason@{launchdarkly::EvaluationReason}}
+\doxysubsubsection{\texorpdfstring{TargetMatch()}{TargetMatch()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason}{Evaluation\+Reason}} launchdarkly\+::\+Evaluation\+Reason\+::\+Target\+Match (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+The flag evaluated to a particular variation due to a target match. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/include/launchdarkly/data/evaluation\+\_\+reason.\+hpp\item 
+/home/runner/work/cpp-\/sdks/cpp-\/sdks/libs/common/src/data/evaluation\+\_\+reason.\+cpp\end{DoxyCompactItemize}
