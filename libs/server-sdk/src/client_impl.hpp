@@ -52,9 +52,24 @@ class ClientImpl : public IClient {
                Value data,
                double metric_value) override;
 
+    void Track(Context const& ctx,
+               std::string event_name,
+               Value data,
+               double metric_value,
+               hooks::HookContext const& hook_context) override;
+
     void Track(Context const& ctx, std::string event_name, Value data) override;
 
+    void Track(Context const& ctx,
+               std::string event_name,
+               Value data,
+               hooks::HookContext const& hook_context) override;
+
     void Track(Context const& ctx, std::string event_name) override;
+
+    void Track(Context const& ctx,
+               std::string event_name,
+               hooks::HookContext const& hook_context) override;
 
     void FlushAsync() override;
 
@@ -64,43 +79,98 @@ class ClientImpl : public IClient {
                        FlagKey const& key,
                        bool default_value) override;
 
+    bool BoolVariation(Context const& ctx,
+                       FlagKey const& key,
+                       bool default_value,
+                       hooks::HookContext const& hook_context) override;
+
     EvaluationDetail<bool> BoolVariationDetail(Context const& ctx,
                                                FlagKey const& key,
                                                bool default_value) override;
 
+    EvaluationDetail<bool> BoolVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        bool default_value,
+        hooks::HookContext const& hook_context) override;
+
     std::string StringVariation(Context const& ctx,
                                 FlagKey const& key,
                                 std::string default_value) override;
+
+    std::string StringVariation(Context const& ctx,
+                                FlagKey const& key,
+                                std::string default_value,
+                                hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<std::string> StringVariationDetail(
         Context const& ctx,
         FlagKey const& key,
         std::string default_value) override;
 
+    EvaluationDetail<std::string> StringVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) override;
+
     double DoubleVariation(Context const& ctx,
                            FlagKey const& key,
                            double default_value) override;
+
+    double DoubleVariation(Context const& ctx,
+                           FlagKey const& key,
+                           double default_value,
+                           hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<double> DoubleVariationDetail(
         Context const& ctx,
         FlagKey const& key,
         double default_value) override;
 
+    EvaluationDetail<double> DoubleVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        double default_value,
+        hooks::HookContext const& hook_context) override;
+
     int IntVariation(Context const& ctx,
                      FlagKey const& key,
                      int default_value) override;
+
+    int IntVariation(Context const& ctx,
+                     FlagKey const& key,
+                     int default_value,
+                     hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<int> IntVariationDetail(Context const& ctx,
                                              FlagKey const& key,
                                              int default_value) override;
 
+    EvaluationDetail<int> IntVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        int default_value,
+        hooks::HookContext const& hook_context) override;
+
     Value JsonVariation(Context const& ctx,
                         FlagKey const& key,
                         Value default_value) override;
 
+    Value JsonVariation(Context const& ctx,
+                        FlagKey const& key,
+                        Value default_value,
+                        hooks::HookContext const& hook_context) override;
+
     EvaluationDetail<Value> JsonVariationDetail(Context const& ctx,
                                                 FlagKey const& key,
                                                 Value default_value) override;
+
+    EvaluationDetail<Value> JsonVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        Value default_value,
+        hooks::HookContext const& hook_context) override;
 
     IDataSourceStatusProvider& DataSourceStatus() override;
 
@@ -113,16 +183,19 @@ class ClientImpl : public IClient {
         Context const& ctx,
         FlagKey const& key,
         Value const& default_value,
-        EventScope const& scope);
+        EventScope const& scope,
+        hooks::HookContext const& hook_context);
 
     template <typename T>
     [[nodiscard]] EvaluationDetail<T> VariationDetail(
         Context const& ctx,
         enum Value::Type value_type,
         IClient::FlagKey const& key,
-        Value const& default_value) {
+        Value const& default_value,
+        hooks::HookContext const& hook_context) {
         auto result =
-            VariationInternal(ctx, key, default_value, events_with_reasons_);
+            VariationInternal(ctx, key, default_value, events_with_reasons_,
+                              hook_context);
         if (result.Value().Type() == value_type) {
             return EvaluationDetail<T>{result.Value(), result.VariationIndex(),
                                        result.Reason()};
@@ -134,7 +207,8 @@ class ClientImpl : public IClient {
     [[nodiscard]] Value Variation(Context const& ctx,
                                   enum Value::Type value_type,
                                   std::string const& key,
-                                  Value const& default_value);
+                                  Value const& default_value,
+                                  hooks::HookContext const& hook_context);
 
     [[nodiscard]] EvaluationDetail<Value> PostEvaluation(
         std::string const& key,
@@ -151,7 +225,8 @@ class ClientImpl : public IClient {
     void TrackInternal(Context const& ctx,
                        std::string event_name,
                        std::optional<Value> data,
-                       std::optional<double> metric_value);
+                       std::optional<double> metric_value,
+                       hooks::HookContext const& hook_context);
 
     std::future<bool> StartAsyncInternal(
         std::function<bool(DataSourceStatus::DataSourceState)> predicate);

@@ -228,7 +228,8 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
 void ClientImpl::TrackInternal(Context const& ctx,
                                std::string event_name,
                                std::optional<Value> data,
-                               std::optional<double> metric_value) {
+                               std::optional<double> metric_value,
+                               hooks::HookContext const& hook_context) {
     events_default_.Send([&](EventFactory const& factory) {
         return factory.Custom(ctx, std::move(event_name), std::move(data),
                               metric_value);
@@ -236,9 +237,9 @@ void ClientImpl::TrackInternal(Context const& ctx,
 
     // Execute afterTrack hooks
     if (!config_.Hooks().empty()) {
-        hooks::TrackSeriesContext hook_context(ctx, event_name, metric_value,
-                                                data, std::nullopt);
-        hooks::ExecuteAfterTrack(config_.Hooks(), hook_context, logger_);
+        hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
+                                                data, hook_context, std::nullopt);
+        hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 }
 
@@ -246,17 +247,45 @@ void ClientImpl::Track(Context const& ctx,
                        std::string event_name,
                        Value data,
                        double metric_value) {
+    static hooks::HookContext empty_hook_context;
     this->TrackInternal(ctx, std::move(event_name), std::move(data),
-                        metric_value);
+                        metric_value, empty_hook_context);
+}
+
+void ClientImpl::Track(Context const& ctx,
+                       std::string event_name,
+                       Value data,
+                       double metric_value,
+                       hooks::HookContext const& hook_context) {
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        metric_value, hook_context);
 }
 
 void ClientImpl::Track(Context const& ctx, std::string event_name, Value data) {
+    static hooks::HookContext empty_hook_context;
     this->TrackInternal(ctx, std::move(event_name), std::move(data),
-                        std::nullopt);
+                        std::nullopt, empty_hook_context);
+}
+
+void ClientImpl::Track(Context const& ctx,
+                       std::string event_name,
+                       Value data,
+                       hooks::HookContext const& hook_context) {
+    this->TrackInternal(ctx, std::move(event_name), std::move(data),
+                        std::nullopt, hook_context);
 }
 
 void ClientImpl::Track(Context const& ctx, std::string event_name) {
-    this->TrackInternal(ctx, std::move(event_name), std::nullopt, std::nullopt);
+    static hooks::HookContext empty_hook_context;
+    this->TrackInternal(ctx, std::move(event_name), std::nullopt, std::nullopt,
+                        empty_hook_context);
+}
+
+void ClientImpl::Track(Context const& ctx,
+                       std::string event_name,
+                       hooks::HookContext const& hook_context) {
+    this->TrackInternal(ctx, std::move(event_name), std::nullopt, std::nullopt,
+                        hook_context);
 }
 
 void ClientImpl::FlushAsync() {
@@ -289,8 +318,10 @@ void ClientImpl::LogVariationCall(std::string const& key,
 Value ClientImpl::Variation(Context const& ctx,
                             enum Value::Type value_type,
                             IClient::FlagKey const& key,
-                            Value const& default_value) {
-    auto result = *VariationInternal(ctx, key, default_value, events_default_);
+                            Value const& default_value,
+                            hooks::HookContext const& hook_context) {
+    auto result = *VariationInternal(ctx, key, default_value, events_default_,
+                                     hook_context);
     if (result.Type() != value_type) {
         return default_value;
     }
@@ -301,7 +332,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     Context const& context,
     IClient::FlagKey const& key,
     Value const& default_value,
-    EventScope const& event_scope) {
+    EventScope const& event_scope,
+    hooks::HookContext const& hook_context) {
     // Determine method name based on which event scope is being used
     std::string const& method = (&event_scope == &events_with_reasons_)
                                     ? kMethodVariationDetail
@@ -310,10 +342,10 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     // Execute beforeEvaluation hooks
     std::optional<hooks::EvaluationSeriesExecutor> executor;
     if (!config_.Hooks().empty()) {
-        hooks::EvaluationSeriesContext hook_context(
-            key, context, default_value, method, std::nullopt);
+        hooks::EvaluationSeriesContext series_context(
+            key, context, default_value, method, hook_context, std::nullopt);
         executor.emplace(config_.Hooks(), logger_);
-        executor->BeforeEvaluation(hook_context);
+        executor->BeforeEvaluation(series_context);
     }
 
     if (auto error = PreEvaluationChecks(context)) {
@@ -322,9 +354,9 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
         // Execute afterEvaluation hooks
         if (executor) {
-            hooks::EvaluationSeriesContext hook_context(
-                key, context, default_value, method, std::nullopt);
-            executor->AfterEvaluation(hook_context, detail);
+            hooks::EvaluationSeriesContext series_context(
+                key, context, default_value, method, hook_context, std::nullopt);
+            executor->AfterEvaluation(series_context, detail);
         }
 
         return detail;
@@ -343,9 +375,9 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
         // Execute afterEvaluation hooks
         if (executor) {
-            hooks::EvaluationSeriesContext hook_context(
-                key, context, default_value, method, std::nullopt);
-            executor->AfterEvaluation(hook_context, detail);
+            hooks::EvaluationSeriesContext series_context(
+                key, context, default_value, method, hook_context, std::nullopt);
+            executor->AfterEvaluation(series_context, detail);
         }
 
         return detail;
@@ -358,9 +390,9 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 
     // Execute afterEvaluation hooks
     if (executor) {
-        hooks::EvaluationSeriesContext hook_context(
-            key, context, default_value, method, std::nullopt);
-        executor->AfterEvaluation(hook_context, detail);
+        hooks::EvaluationSeriesContext series_context(
+            key, context, default_value, method, hook_context, std::nullopt);
+        executor->AfterEvaluation(series_context, detail);
     }
 
     return detail;
@@ -425,67 +457,170 @@ EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     bool default_value) {
-    return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value,
+                                 empty_hook_context);
+}
+
+EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    bool default_value,
+    hooks::HookContext const& hook_context) {
+    return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value,
+                                 hook_context);
 }
 
 bool ClientImpl::BoolVariation(Context const& ctx,
                                IClient::FlagKey const& key,
                                bool default_value) {
-    return Variation(ctx, Value::Type::kBool, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return Variation(ctx, Value::Type::kBool, key, default_value,
+                     empty_hook_context);
+}
+
+bool ClientImpl::BoolVariation(Context const& ctx,
+                               IClient::FlagKey const& key,
+                               bool default_value,
+                               hooks::HookContext const& hook_context) {
+    return Variation(ctx, Value::Type::kBool, key, default_value,
+                     hook_context);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
     Context const& ctx,
     ClientImpl::FlagKey const& key,
     std::string default_value) {
+    static hooks::HookContext empty_hook_context;
     return VariationDetail<std::string>(ctx, Value::Type::kString, key,
-                                        default_value);
+                                        default_value, empty_hook_context);
+}
+
+EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
+    Context const& ctx,
+    ClientImpl::FlagKey const& key,
+    std::string default_value,
+    hooks::HookContext const& hook_context) {
+    return VariationDetail<std::string>(ctx, Value::Type::kString, key,
+                                        default_value, hook_context);
 }
 
 std::string ClientImpl::StringVariation(Context const& ctx,
                                         IClient::FlagKey const& key,
                                         std::string default_value) {
-    return Variation(ctx, Value::Type::kString, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return Variation(ctx, Value::Type::kString, key, default_value,
+                     empty_hook_context);
+}
+
+std::string ClientImpl::StringVariation(Context const& ctx,
+                                        IClient::FlagKey const& key,
+                                        std::string default_value,
+                                        hooks::HookContext const& hook_context) {
+    return Variation(ctx, Value::Type::kString, key, default_value,
+                     hook_context);
 }
 
 EvaluationDetail<double> ClientImpl::DoubleVariationDetail(
     Context const& ctx,
     ClientImpl::FlagKey const& key,
     double default_value) {
+    static hooks::HookContext empty_hook_context;
     return VariationDetail<double>(ctx, Value::Type::kNumber, key,
-                                   default_value);
+                                   default_value, empty_hook_context);
+}
+
+EvaluationDetail<double> ClientImpl::DoubleVariationDetail(
+    Context const& ctx,
+    ClientImpl::FlagKey const& key,
+    double default_value,
+    hooks::HookContext const& hook_context) {
+    return VariationDetail<double>(ctx, Value::Type::kNumber, key,
+                                   default_value, hook_context);
 }
 
 double ClientImpl::DoubleVariation(Context const& ctx,
                                    IClient::FlagKey const& key,
                                    double default_value) {
-    return Variation(ctx, Value::Type::kNumber, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return Variation(ctx, Value::Type::kNumber, key, default_value,
+                     empty_hook_context);
+}
+
+double ClientImpl::DoubleVariation(Context const& ctx,
+                                   IClient::FlagKey const& key,
+                                   double default_value,
+                                   hooks::HookContext const& hook_context) {
+    return Variation(ctx, Value::Type::kNumber, key, default_value,
+                     hook_context);
 }
 
 EvaluationDetail<int> ClientImpl::IntVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     int default_value) {
-    return VariationDetail<int>(ctx, Value::Type::kNumber, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return VariationDetail<int>(ctx, Value::Type::kNumber, key, default_value,
+                                empty_hook_context);
+}
+
+EvaluationDetail<int> ClientImpl::IntVariationDetail(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    int default_value,
+    hooks::HookContext const& hook_context) {
+    return VariationDetail<int>(ctx, Value::Type::kNumber, key, default_value,
+                                hook_context);
 }
 
 int ClientImpl::IntVariation(Context const& ctx,
                              IClient::FlagKey const& key,
                              int default_value) {
-    return Variation(ctx, Value::Type::kNumber, key, default_value);
+    static hooks::HookContext empty_hook_context;
+    return Variation(ctx, Value::Type::kNumber, key, default_value,
+                     empty_hook_context);
+}
+
+int ClientImpl::IntVariation(Context const& ctx,
+                             IClient::FlagKey const& key,
+                             int default_value,
+                             hooks::HookContext const& hook_context) {
+    return Variation(ctx, Value::Type::kNumber, key, default_value,
+                     hook_context);
 }
 
 EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
     Context const& ctx,
     IClient::FlagKey const& key,
     Value default_value) {
-    return VariationInternal(ctx, key, default_value, events_with_reasons_);
+    static hooks::HookContext empty_hook_context;
+    return VariationInternal(ctx, key, default_value, events_with_reasons_,
+                             empty_hook_context);
+}
+
+EvaluationDetail<Value> ClientImpl::JsonVariationDetail(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    Value default_value,
+    hooks::HookContext const& hook_context) {
+    return VariationInternal(ctx, key, default_value, events_with_reasons_,
+                             hook_context);
 }
 
 Value ClientImpl::JsonVariation(Context const& ctx,
                                 IClient::FlagKey const& key,
                                 Value default_value) {
-    return *VariationInternal(ctx, key, default_value, events_default_);
+    static hooks::HookContext empty_hook_context;
+    return *VariationInternal(ctx, key, default_value, events_default_,
+                              empty_hook_context);
+}
+
+Value ClientImpl::JsonVariation(Context const& ctx,
+                                IClient::FlagKey const& key,
+                                Value default_value,
+                                hooks::HookContext const& hook_context) {
+    return *VariationInternal(ctx, key, default_value, events_default_,
+                              hook_context);
 }
 
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {

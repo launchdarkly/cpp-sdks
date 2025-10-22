@@ -15,6 +15,60 @@
 namespace launchdarkly::server_side::hooks {
 
 /**
+ * HookContext allows passing arbitrary data from the caller through to hooks.
+ *
+ * This is particularly useful for async frameworks where thread-local storage
+ * doesn't work, such as passing OpenTelemetry span parents or other contextual
+ * information that hooks need to access.
+ *
+ * Example use case:
+ * @code
+ * // Caller creates context with span parent
+ * HookContext ctx;
+ * ctx.Set("otel_span_parent", std::make_shared<std::any>(span_context));
+ *
+ * // Pass to variation method
+ * client.BoolVariation(context, "flag-key", false, ctx);
+ *
+ * // Hook accesses the span parent
+ * auto span_parent = hook_context.Get("otel_span_parent");
+ * @endcode
+ */
+class HookContext {
+   public:
+    /**
+     * Constructs an empty HookContext.
+     */
+    HookContext() = default;
+
+    /**
+     * Sets a value in the context.
+     * @param key The key to set.
+     * @param value The shared_ptr to any type to associate with the key.
+     * @return Reference to this context for chaining.
+     */
+    HookContext& Set(std::string key, std::shared_ptr<std::any> value);
+
+    /**
+     * Retrieves a value from the context.
+     * @param key The key to look up.
+     * @return The shared_ptr if present, or std::nullopt if not found.
+     */
+    [[nodiscard]] std::optional<std::shared_ptr<std::any>> Get(
+        std::string const& key) const;
+
+    /**
+     * Checks if a key exists in the context.
+     * @param key The key to check.
+     * @return True if the key exists, false otherwise.
+     */
+    [[nodiscard]] bool Has(std::string const& key) const;
+
+   private:
+    std::map<std::string, std::shared_ptr<std::any>> data_;
+};
+
+/**
  * Metadata about a hook implementation.
  *
  * Lifetime: Objects of this type are owned by the hook
@@ -195,12 +249,14 @@ class EvaluationSeriesContext {
      * @param context The context against which the flag is being evaluated.
      * @param default_value The default value for the evaluation.
      * @param method The method being executed.
+     * @param hook_context Additional context data provided by the caller.
      * @param environment_id Optional environment ID.
      */
     EvaluationSeriesContext(std::string flag_key,
                             Context const& context,
                             Value default_value,
                             std::string method,
+                            HookContext const& hook_context,
                             std::optional<std::string> environment_id);
 
     /**
@@ -259,11 +315,25 @@ class EvaluationSeriesContext {
      */
     [[nodiscard]] std::optional<std::string_view> EnvironmentId() const;
 
+    /**
+     * Returns the hook context provided by the caller.
+     *
+     * This contains arbitrary data that the caller wants to pass through
+     * to hooks, such as OpenTelemetry span parents.
+     *
+     * Lifetime: The returned reference is valid only during the execution
+     * of the current hook stage.
+     *
+     * @return Reference to the hook context.
+     */
+    [[nodiscard]] HookContext const& HookCtx() const;
+
    private:
     std::string flag_key_;
     Context const& context_;
     Value default_value_;
     std::string method_;
+    HookContext const& hook_context_;
     std::optional<std::string> environment_id_;
 };
 
@@ -284,12 +354,14 @@ class TrackSeriesContext {
      * @param key The event key.
      * @param metric_value Optional metric value.
      * @param data Optional application-specified data.
+     * @param hook_context Additional context data provided by the caller.
      * @param environment_id Optional environment ID.
      */
     TrackSeriesContext(Context const& context,
                        std::string key,
                        std::optional<double> metric_value,
                        std::optional<Value> data,
+                       HookContext const& hook_context,
                        std::optional<std::string> environment_id);
 
     /**
@@ -342,11 +414,25 @@ class TrackSeriesContext {
      */
     [[nodiscard]] std::optional<std::string_view> EnvironmentId() const;
 
+    /**
+     * Returns the hook context provided by the caller.
+     *
+     * This contains arbitrary data that the caller wants to pass through
+     * to hooks, such as OpenTelemetry span parents.
+     *
+     * Lifetime: The returned reference is valid only during the execution
+     * of the current hook stage.
+     *
+     * @return Reference to the hook context.
+     */
+    [[nodiscard]] HookContext const& HookCtx() const;
+
    private:
     Context const& context_;
     std::string key_;
     std::optional<double> metric_value_;
     std::optional<Value> data_;
+    HookContext const& hook_context_;
     std::optional<std::string> environment_id_;
 };
 

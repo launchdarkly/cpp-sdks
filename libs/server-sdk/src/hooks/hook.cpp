@@ -4,6 +4,27 @@
 
 namespace launchdarkly::server_side::hooks {
 
+// HookContext implementation
+
+HookContext& HookContext::Set(std::string key,
+                               std::shared_ptr<std::any> value) {
+    data_[std::move(key)] = std::move(value);
+    return *this;
+}
+
+std::optional<std::shared_ptr<std::any>> HookContext::Get(
+    std::string const& key) const {
+    auto it = data_.find(key);
+    if (it != data_.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
+bool HookContext::Has(std::string const& key) const {
+    return data_.find(key) != data_.end();
+}
+
 // HookMetadata implementation
 
 HookMetadata::HookMetadata(std::string name) : name_(std::move(name)) {}
@@ -86,11 +107,13 @@ EvaluationSeriesContext::EvaluationSeriesContext(
     Context const& context,
     Value default_value,
     std::string method,
+    HookContext const& hook_context,
     std::optional<std::string> environment_id)
     : flag_key_(std::move(flag_key)),
       context_(context),
       default_value_(std::move(default_value)),
       method_(std::move(method)),
+      hook_context_(hook_context),
       environment_id_(std::move(environment_id)) {}
 
 std::string_view EvaluationSeriesContext::FlagKey() const {
@@ -116,6 +139,10 @@ std::optional<std::string_view> EvaluationSeriesContext::EnvironmentId() const {
     return std::nullopt;
 }
 
+HookContext const& EvaluationSeriesContext::HookCtx() const {
+    return hook_context_;
+}
+
 // TrackSeriesContext implementation
 
 TrackSeriesContext::TrackSeriesContext(
@@ -123,11 +150,13 @@ TrackSeriesContext::TrackSeriesContext(
     std::string key,
     std::optional<double> metric_value,
     std::optional<Value> data,
+    HookContext const& hook_context,
     std::optional<std::string> environment_id)
     : context_(context),
       key_(std::move(key)),
       metric_value_(metric_value),
       data_(std::move(data)),
+      hook_context_(hook_context),
       environment_id_(std::move(environment_id)) {}
 
 Context const& TrackSeriesContext::TrackContext() const {
@@ -151,6 +180,10 @@ std::optional<std::string_view> TrackSeriesContext::EnvironmentId() const {
         return *environment_id_;
     }
     return std::nullopt;
+}
+
+HookContext const& TrackSeriesContext::HookCtx() const {
+    return hook_context_;
 }
 
 // Hook base implementation

@@ -829,3 +829,133 @@ TEST_F(HooksTest, SharedPtrAllowsMutationAcrossStages) {
 
     EXPECT_EQ(hook->final_count_, 15);
 }
+
+// Test HookContext for passing caller data to hooks (e.g., OpenTelemetry span parents)
+TEST_F(HooksTest, HookContextBasicFunctionality) {
+    HookContext ctx;
+
+    // Set values
+    auto span_parent = std::make_shared<std::any>(std::string("span-parent-123"));
+    auto trace_id = std::make_shared<std::any>(42);
+
+    ctx.Set("span_parent", span_parent);
+    ctx.Set("trace_id", trace_id);
+
+    // Check existence
+    EXPECT_TRUE(ctx.Has("span_parent"));
+    EXPECT_TRUE(ctx.Has("trace_id"));
+    EXPECT_FALSE(ctx.Has("nonexistent"));
+
+    // Retrieve values
+    auto retrieved_span = ctx.Get("span_parent");
+    ASSERT_TRUE(retrieved_span.has_value());
+    auto span_str = std::any_cast<std::string>(*(*retrieved_span));
+    EXPECT_EQ(span_str, "span-parent-123");
+
+    auto retrieved_trace = ctx.Get("trace_id");
+    ASSERT_TRUE(retrieved_trace.has_value());
+    auto trace_val = std::any_cast<int>(*(*retrieved_trace));
+    EXPECT_EQ(trace_val, 42);
+}
+
+// Test that hooks can access HookContext from EvaluationSeriesContext
+// This simulates the OpenTelemetry span parent use case
+TEST_F(HooksTest, HookAccessesCallerProvidedContext) {
+    struct SpanContext {
+        std::string trace_id;
+        std::string parent_span_id;
+    };
+
+    class OTelHook : public Hook {
+       public:
+        explicit OTelHook(std::string name) : metadata_(std::move(name)) {}
+
+        HookMetadata const& Metadata() const override { return metadata_; }
+
+        EvaluationSeriesData BeforeEvaluation(
+            EvaluationSeriesContext const& series_context,
+            EvaluationSeriesData data) override {
+            // Access span parent from caller's context
+            auto span_parent_any = series_context.HookCtx().Get("span_parent");
+            if (span_parent_any) {
+                auto span_parent =
+                    std::any_cast<SpanContext>(*(*span_parent_any));
+                received_trace_id_ = span_parent.trace_id;
+                received_parent_span_ = span_parent.parent_span_id;
+
+                // Create new span as child
+                auto new_span = std::make_shared<std::any>(SpanContext{
+                    span_parent.trace_id, "child-span-" + received_parent_span_});
+
+                EvaluationSeriesDataBuilder builder(data);
+                builder.SetShared("span", new_span);
+                return builder.Build();
+            }
+            return data;
+        }
+
+        EvaluationSeriesData AfterEvaluation(
+            EvaluationSeriesContext const& series_context,
+            EvaluationSeriesData data,
+            EvaluationDetail<Value> const& detail) override {
+            // Close the span
+            auto span_any = data.GetShared("span");
+            if (span_any) {
+                auto span = std::any_cast<SpanContext>(*(*span_any));
+                closed_span_trace_ = span.trace_id;
+            }
+            return data;
+        }
+
+        std::string received_trace_id_;
+        std::string received_parent_span_;
+        std::string closed_span_trace_;
+
+       private:
+        HookMetadata metadata_;
+    };
+
+    auto hook = std::make_shared<OTelHook>("OTelHook");
+
+    auto config = ConfigBuilder("sdk-key")
+                      .Offline(true)
+                      .Hooks(hook)
+                      .Build()
+                      .value();
+
+    Client client(std::move(config));
+
+    // Create a HookContext with span parent information (simulating OpenTelemetry)
+    HookContext hook_context;
+    SpanContext span_parent{"trace-123", "parent-span-456"};
+    hook_context.Set("span_parent",
+                     std::make_shared<std::any>(span_parent));
+
+    // Call variation with the HookContext
+    client.BoolVariation(context_, "test-flag", false, hook_context);
+
+    // Verify hook received the span parent information
+    EXPECT_EQ(hook->received_trace_id_, "trace-123");
+    EXPECT_EQ(hook->received_parent_span_, "parent-span-456");
+    EXPECT_EQ(hook->closed_span_trace_, "trace-123");
+}
+
+// Test HookContext chaining
+TEST_F(HooksTest, HookContextChaining) {
+    HookContext ctx;
+    auto val1 = std::make_shared<std::any>(1);
+    auto val2 = std::make_shared<std::any>(2);
+
+    ctx.Set("key1", val1).Set("key2", val2);
+
+    EXPECT_TRUE(ctx.Has("key1"));
+    EXPECT_TRUE(ctx.Has("key2"));
+
+    auto retrieved1 = ctx.Get("key1");
+    ASSERT_TRUE(retrieved1.has_value());
+    EXPECT_EQ(std::any_cast<int>(*(*retrieved1)), 1);
+
+    auto retrieved2 = ctx.Get("key2");
+    ASSERT_TRUE(retrieved2.has_value());
+    EXPECT_EQ(std::any_cast<int>(*(*retrieved2)), 2);
+}
