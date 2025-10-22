@@ -16,7 +16,7 @@ This test validates that the LaunchDarkly C++ Client SDK properly uses CURL for 
 
 Polling can be validated by changing the hello-cpp-client application to use polling.
 
-## Test Architecturegit
+## Test Architecture
 
 The test uses Docker Compose with network isolation to validate proxy functionality:
 
