@@ -2,6 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/*.hpp"
+        "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/hooks/*.hpp"
 )
 
 if (LD_BUILD_SHARED_LIBS)
@@ -68,6 +69,9 @@ target_sources(${LIBNAME}
         evaluation/detail/semver_operations.cpp
         evaluation/detail/timestamp_operations.cpp
         events/event_factory.cpp
+        hooks/hook.cpp
+        hooks/hook_executor.hpp
+        hooks/hook_executor.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp
         bindings/c/config.cpp

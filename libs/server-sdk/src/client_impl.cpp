@@ -36,6 +36,10 @@ auto const kAsioConcurrencyHint = 1;
 // connection in this amount of time.
 auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
+// Hook method names
+static const std::string kMethodVariation = "Variation";
+static const std::string kMethodVariationDetail = "VariationDetail";
+
 static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
     Config const& config,
@@ -229,6 +233,13 @@ void ClientImpl::TrackInternal(Context const& ctx,
         return factory.Custom(ctx, std::move(event_name), std::move(data),
                               metric_value);
     });
+
+    // Execute afterTrack hooks
+    if (!config_.Hooks().empty()) {
+        hooks::TrackSeriesContext hook_context(ctx, event_name, metric_value,
+                                                data, std::nullopt);
+        hooks::ExecuteAfterTrack(config_.Hooks(), hook_context, logger_);
+    }
 }
 
 void ClientImpl::Track(Context const& ctx,
@@ -291,9 +302,32 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     IClient::FlagKey const& key,
     Value const& default_value,
     EventScope const& event_scope) {
+    // Determine method name based on which event scope is being used
+    std::string const& method = (&event_scope == &events_with_reasons_)
+                                    ? kMethodVariationDetail
+                                    : kMethodVariation;
+
+    // Execute beforeEvaluation hooks
+    std::optional<hooks::EvaluationSeriesExecutor> executor;
+    if (!config_.Hooks().empty()) {
+        hooks::EvaluationSeriesContext hook_context(
+            key, context, default_value, method, std::nullopt);
+        executor.emplace(config_.Hooks(), logger_);
+        executor->BeforeEvaluation(hook_context);
+    }
+
     if (auto error = PreEvaluationChecks(context)) {
-        return PostEvaluation(key, context, default_value, *error, event_scope,
-                              std::nullopt);
+        auto detail = PostEvaluation(key, context, default_value, *error,
+                                     event_scope, std::nullopt);
+
+        // Execute afterEvaluation hooks
+        if (executor) {
+            hooks::EvaluationSeriesContext hook_context(
+                key, context, default_value, method, std::nullopt);
+            executor->AfterEvaluation(hook_context, detail);
+        }
+
+        return detail;
     }
 
     auto flag_rule = data_system_->GetFlag(key);
@@ -303,15 +337,33 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     LogVariationCall(key, flag_present);
 
     if (!flag_present) {
-        return PostEvaluation(key, context, default_value,
-                              EvaluationReason::ErrorKind::kFlagNotFound,
-                              event_scope, std::nullopt);
+        auto detail = PostEvaluation(key, context, default_value,
+                                     EvaluationReason::ErrorKind::kFlagNotFound,
+                                     event_scope, std::nullopt);
+
+        // Execute afterEvaluation hooks
+        if (executor) {
+            hooks::EvaluationSeriesContext hook_context(
+                key, context, default_value, method, std::nullopt);
+            executor->AfterEvaluation(hook_context, detail);
+        }
+
+        return detail;
     }
 
     EvaluationDetail<Value> result =
         evaluator_.Evaluate(*flag_rule->item, context, event_scope);
-    return PostEvaluation(key, context, default_value, result, event_scope,
-                          flag_rule.get()->item);
+    auto detail = PostEvaluation(key, context, default_value, result,
+                                 event_scope, flag_rule.get()->item);
+
+    // Execute afterEvaluation hooks
+    if (executor) {
+        hooks::EvaluationSeriesContext hook_context(
+            key, context, default_value, method, std::nullopt);
+        executor->AfterEvaluation(hook_context, detail);
+    }
+
+    return detail;
 }
 
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(

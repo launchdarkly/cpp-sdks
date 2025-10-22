@@ -4,6 +4,7 @@
 #include "data_interfaces/system/idata_system.hpp"
 #include "evaluation/evaluator.hpp"
 #include "events/event_scope.hpp"
+#include "hooks/hook_executor.hpp"
 
 #include <launchdarkly/config/client.hpp>
 #include <launchdarkly/context.hpp>

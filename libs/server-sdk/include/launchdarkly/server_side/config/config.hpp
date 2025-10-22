@@ -2,6 +2,10 @@
 
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 #include <launchdarkly/server_side/config/built/data_system/data_system_config.hpp>
+#include <launchdarkly/server_side/hooks/hook.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace launchdarkly::server_side {
 
@@ -13,7 +17,8 @@ struct Config {
            config::built::Events events,
            std::optional<std::string> application_tag,
            config::built::DataSystemConfig data_system_config,
-           config::built::HttpProperties http_properties);
+           config::built::HttpProperties http_properties,
+           std::vector<std::shared_ptr<hooks::Hook>> hooks);
 
     [[nodiscard]] std::string const& SdkKey() const;
 
@@ -30,6 +35,9 @@ struct Config {
 
     [[nodiscard]] config::built::Logging const& Logging() const;
 
+    [[nodiscard]] std::vector<std::shared_ptr<hooks::Hook>> const& Hooks()
+        const;
+
    private:
     std::string sdk_key_;
     bool offline_;
@@ -39,5 +47,6 @@ struct Config {
     config::built::Events events_;
     config::built::DataSystemConfig data_system_config_;
     config::built::HttpProperties http_properties_;
+    std::vector<std::shared_ptr<hooks::Hook>> hooks_;
 };
 }  // namespace launchdarkly::server_side

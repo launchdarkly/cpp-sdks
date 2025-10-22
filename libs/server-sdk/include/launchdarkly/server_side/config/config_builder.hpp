@@ -2,6 +2,10 @@
 
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
+#include <launchdarkly/server_side/hooks/hook.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace launchdarkly::server_side {
 
@@ -74,6 +78,14 @@ class ConfigBuilder {
     ConfigBuilder& Offline(bool offline);
 
     /**
+     * Adds a hook to the SDK configuration.
+     * Hooks are executed in the order they are added.
+     * @param hook A shared pointer to a hook implementation.
+     * @return Reference to this.
+     */
+    ConfigBuilder& Hooks(std::shared_ptr<hooks::Hook> hook);
+
+    /**
      * Builds a Configuration, suitable for passing into an instance of Client.
      * @return
      */
@@ -89,5 +101,6 @@ class ConfigBuilder {
     config::builders::DataSystemBuilder data_system_builder_;
     config::builders::HttpPropertiesBuilder http_properties_builder_;
     config::builders::LoggingBuilder logging_config_builder_;
+    std::vector<std::shared_ptr<hooks::Hook>> hooks_;
 };
 }  // namespace launchdarkly::server_side
