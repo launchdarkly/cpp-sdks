@@ -41,8 +41,7 @@ EvaluationSeriesData::EvaluationSeriesData(
     : data_(std::move(data)) {}
 
 std::optional<Value> EvaluationSeriesData::Get(std::string const& key) const {
-    auto it = data_.find(key);
-    if (it != data_.end() && it->second.value) {
+    if (const auto it = data_.find(key); it != data_.end() && it->second.value) {
         return it->second.value;
     }
     return std::nullopt;
