@@ -184,7 +184,8 @@ class ClientImpl : public IClient {
         FlagKey const& key,
         Value const& default_value,
         EventScope const& scope,
-        hooks::HookContext const& hook_context);
+        hooks::HookContext const& hook_context,
+        std::string const& method_name);
 
     template <typename T>
     [[nodiscard]] EvaluationDetail<T> VariationDetail(
@@ -192,10 +193,11 @@ class ClientImpl : public IClient {
         enum Value::Type value_type,
         IClient::FlagKey const& key,
         Value const& default_value,
-        hooks::HookContext const& hook_context) {
+        hooks::HookContext const& hook_context,
+        std::string const& method_name) {
         auto result =
             VariationInternal(ctx, key, default_value, events_with_reasons_,
-                              hook_context);
+                              hook_context, method_name);
         if (result.Value().Type() == value_type) {
             return EvaluationDetail<T>{result.Value(), result.VariationIndex(),
                                        result.Reason()};
@@ -208,7 +210,8 @@ class ClientImpl : public IClient {
                                   enum Value::Type value_type,
                                   std::string const& key,
                                   Value const& default_value,
-                                  hooks::HookContext const& hook_context);
+                                  hooks::HookContext const& hook_context,
+                                  std::string const& method_name);
 
     [[nodiscard]] EvaluationDetail<Value> PostEvaluation(
         std::string const& key,

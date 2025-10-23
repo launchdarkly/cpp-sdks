@@ -549,7 +549,7 @@ TEST_F(HooksTest, EvaluationContextProvidesCorrectInformation) {
     client.StringVariation(context_, "test-flag", "default-value");
 
     EXPECT_EQ(hook->flag_key_, "test-flag");
-    EXPECT_EQ(hook->method_, "Variation");
+    EXPECT_EQ(hook->method_, "StringVariation");
     EXPECT_EQ(hook->default_value_, Value("default-value"));
     EXPECT_TRUE(hook->has_context_);
 }
@@ -585,12 +585,30 @@ TEST_F(HooksTest, MethodNameDistinguishesVariationTypes) {
                       .value();
 
     Client client(std::move(config));
+
+    // Test all variation methods
     client.BoolVariation(context_, "test-flag", false);
     client.BoolVariationDetail(context_, "test-flag", false);
+    client.StringVariation(context_, "test-flag", "default");
+    client.StringVariationDetail(context_, "test-flag", "default");
+    client.DoubleVariation(context_, "test-flag", 0.0);
+    client.DoubleVariationDetail(context_, "test-flag", 0.0);
+    client.IntVariation(context_, "test-flag", 0);
+    client.IntVariationDetail(context_, "test-flag", 0);
+    client.JsonVariation(context_, "test-flag", Value::Null());
+    client.JsonVariationDetail(context_, "test-flag", Value::Null());
 
-    ASSERT_EQ(hook->methods_.size(), 2);
-    EXPECT_EQ(hook->methods_[0], "Variation");
-    EXPECT_EQ(hook->methods_[1], "VariationDetail");
+    ASSERT_EQ(hook->methods_.size(), 10);
+    EXPECT_EQ(hook->methods_[0], "BoolVariation");
+    EXPECT_EQ(hook->methods_[1], "BoolVariationDetail");
+    EXPECT_EQ(hook->methods_[2], "StringVariation");
+    EXPECT_EQ(hook->methods_[3], "StringVariationDetail");
+    EXPECT_EQ(hook->methods_[4], "DoubleVariation");
+    EXPECT_EQ(hook->methods_[5], "DoubleVariationDetail");
+    EXPECT_EQ(hook->methods_[6], "IntVariation");
+    EXPECT_EQ(hook->methods_[7], "IntVariationDetail");
+    EXPECT_EQ(hook->methods_[8], "JsonVariation");
+    EXPECT_EQ(hook->methods_[9], "JsonVariationDetail");
 }
 
 // Test EvaluationSeriesData builder functionality

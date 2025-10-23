@@ -17,10 +17,6 @@ namespace launchdarkly::server_side::hooks {
 /**
  * HookContext allows passing arbitrary data from the caller through to hooks.
  *
- * This is particularly useful for async frameworks where thread-local storage
- * doesn't work, such as passing OpenTelemetry span parents or other contextual
- * information that hooks need to access.
- *
  * Example use case:
  * @code
  * // Caller creates context with span parent

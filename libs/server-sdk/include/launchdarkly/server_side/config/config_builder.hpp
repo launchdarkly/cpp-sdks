@@ -79,7 +79,7 @@ class ConfigBuilder {
 
     /**
      * Adds a hook to the SDK configuration.
-     * Hooks are executed in the order they are added.
+     *
      * @param hook A shared pointer to a hook implementation.
      * @return Reference to this.
      */

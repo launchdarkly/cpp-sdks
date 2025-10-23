@@ -58,7 +58,7 @@ void EvaluationSeriesExecutor::LogHookError(
     std::string const& stage,
     std::string const& hook_name,
     std::string const& flag_name,
-    std::string const& error_message) {
+    std::string const& error_message) const {
     LD_LOG(logger_, LogLevel::kError)
         << "[hooks] During evaluation of flag \"" << flag_name << "\", stage \""
         << stage << "\" of hook \"" << hook_name
@@ -67,7 +67,7 @@ void EvaluationSeriesExecutor::LogHookError(
 
 void ExecuteAfterTrack(std::vector<std::shared_ptr<Hook>> const& hooks,
                        TrackSeriesContext const& context,
-                       Logger& logger) {
+                       const Logger& logger) {
     // Execute hooks in order of registration
     for (auto const& hook : hooks) {
         try {

@@ -54,7 +54,7 @@ class EvaluationSeriesExecutor {
     void LogHookError(std::string const& stage,
                       std::string const& hook_name,
                       std::string const& flag_name,
-                      std::string const& error_message);
+                      std::string const& error_message) const;
 };
 
 /**
@@ -62,6 +62,6 @@ class EvaluationSeriesExecutor {
  */
 void ExecuteAfterTrack(std::vector<std::shared_ptr<Hook>> const& hooks,
                        TrackSeriesContext const& context,
-                       Logger& logger);
+                       const Logger& logger);
 
 }  // namespace launchdarkly::server_side::hooks

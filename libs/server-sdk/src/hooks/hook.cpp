@@ -14,8 +14,7 @@ HookContext& HookContext::Set(std::string key,
 
 std::optional<std::shared_ptr<std::any>> HookContext::Get(
     std::string const& key) const {
-    auto it = data_.find(key);
-    if (it != data_.end()) {
+    if (const auto it = data_.find(key); it != data_.end()) {
         return it->second;
     }
     return std::nullopt;
@@ -51,8 +50,7 @@ std::optional<Value> EvaluationSeriesData::Get(std::string const& key) const {
 
 std::optional<std::shared_ptr<std::any>> EvaluationSeriesData::GetShared(
     std::string const& key) const {
-    auto it = data_.find(key);
-    if (it != data_.end() && it->second.shared) {
+    if (const auto it = data_.find(key); it != data_.end() && it->second.shared) {
         return it->second.shared;
     }
     return std::nullopt;
