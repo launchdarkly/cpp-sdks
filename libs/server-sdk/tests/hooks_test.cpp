@@ -31,6 +31,7 @@ class RecordingHook : public Hook {
     struct TrackCall {
         std::string key;
         std::optional<double> metric_value;
+        std::optional<Value> data;
     };
 
     explicit RecordingHook(std::string name) : metadata_(std::move(name)) {}
@@ -77,6 +78,7 @@ class RecordingHook : public Hook {
         TrackCall call;
         call.key = std::string(series_context.Key());
         call.metric_value = series_context.MetricValue();
+        call.data = series_context.Data();
         track_calls_.push_back(call);
     }
 
@@ -441,6 +443,46 @@ TEST_F(HooksTest, AfterTrackWithMetricValue) {
     EXPECT_EQ(calls[0].key, "test-event");
     ASSERT_TRUE(calls[0].metric_value.has_value());
     EXPECT_EQ(*calls[0].metric_value, 42.5);
+}
+
+// Test that data is properly passed to afterTrack hooks
+// This test would catch use-after-move bugs with ASAN
+TEST_F(HooksTest, AfterTrackReceivesData) {
+    auto hook = std::make_shared<RecordingHook>("TestHook");
+
+    auto config = ConfigBuilder("sdk-key")
+                      .Offline(true)
+                      .Hooks(hook)
+                      .Build()
+                      .value();
+
+    Client client(std::move(config));
+
+    // Test with string data
+    client.Track(context_, "test-event", Value("test-data"));
+
+    auto const& calls = hook->GetTrackCalls();
+    ASSERT_EQ(calls.size(), 1);
+    EXPECT_EQ(calls[0].key, "test-event");
+    ASSERT_TRUE(calls[0].data.has_value());
+    EXPECT_EQ(calls[0].data->AsString(), "test-data");
+
+    hook->Reset();
+
+    // Test with complex data
+    auto complex_data = Value::Object({{"field1", Value("value1")}, {"field2", Value(42)}});
+    client.Track(context_, "test-event-2", complex_data, 99.5);
+
+    auto const& calls2 = hook->GetTrackCalls();
+    ASSERT_EQ(calls2.size(), 1);
+    EXPECT_EQ(calls2[0].key, "test-event-2");
+    ASSERT_TRUE(calls2[0].data.has_value());
+    EXPECT_EQ(calls2[0].data->Type(), Value::Type::kObject);
+    auto const& obj = calls2[0].data->AsObject();
+    EXPECT_EQ(obj["field1"].AsString(), "value1");
+    EXPECT_EQ(obj["field2"].AsInt(), 42);
+    ASSERT_TRUE(calls2[0].metric_value.has_value());
+    EXPECT_EQ(*calls2[0].metric_value, 99.5);
 }
 
 // Requirement 1.3.4: afterTrack handlers execute in order of registration

@@ -239,17 +239,27 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::optional<Value> data,
                                std::optional<double> metric_value,
                                hooks::HookContext const& hook_context) {
-    events_default_.Send([&](EventFactory const& factory) {
-        return factory.Custom(ctx, std::move(event_name), std::move(data),
-                              metric_value);
-    });
 
-    // Execute afterTrack hooks
+    if (!ctx.Valid()) {
+        LD_LOG(logger_, LogLevel::kWarn) << "Track method called with an invalid context";
+        return;
+    }
+    // Execute afterTrack hooks before moving the data
+    // Typically we would execute this after the data has been enqueued.
+    // In this SDK doing so would introduce a performance penalty because we
+    // would need to copy the event_name and data.
+    // In this SDK the data is type-safe, and will be enqueued, so it makes
+    // minimal functional difference.
     if (!config_.Hooks().empty()) {
         hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
                                                 data, hook_context, std::nullopt);
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
+
+    events_default_.Send([&](EventFactory const& factory) {
+        return factory.Custom(ctx, std::move(event_name), std::move(data),
+                              metric_value);
+    });
 }
 
 void ClientImpl::Track(Context const& ctx,
