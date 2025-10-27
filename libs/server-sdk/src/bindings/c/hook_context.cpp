@@ -20,8 +20,7 @@ LDHookContext_Set(LDHookContext hook_context,
     LD_ASSERT(hook_context != nullptr);
     LD_ASSERT(key != nullptr);
 
-    const auto shared_any = std::make_shared<std::any>(
-        const_cast<void*>(value));
+    const auto shared_any = std::make_shared<std::any>(value);
     // The "any" wrapper will be allocated and deleted, but the contents
     // of the "any" will not.
     AS_HOOK_CONTEXT(hook_context)->Set(key, shared_any);
@@ -38,7 +37,7 @@ LDHookContext_Get(LDHookContext hook_context,
     const auto result = AS_HOOK_CONTEXT(hook_context)->Get(key);
     if (result.has_value() && *result != nullptr) {
         try {
-            *out_value = std::any_cast<void*>(*result->get());
+            *out_value = std::any_cast<const void*>(*result->get());
             return true;
         } catch (std::bad_any_cast const&) {
             // The stored value wasn't a void*, return false
