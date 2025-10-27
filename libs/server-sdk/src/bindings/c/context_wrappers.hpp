@@ -21,16 +21,14 @@ namespace launchdarkly::server_side::bindings {
 /**
  * @brief Wrapper for EvaluationSeriesContext.
  *
- * Holds a reference to the C++ context plus a copy of the default value
- * so we can safely return pointers to it from C accessor functions.
+ * Holds a reference to the C++ context.
  */
 struct EvaluationSeriesContextWrapper {
     hooks::EvaluationSeriesContext const& context;
-    Value default_value_copy;
 
     explicit EvaluationSeriesContextWrapper(
         hooks::EvaluationSeriesContext const& ctx)
-        : context(ctx), default_value_copy(ctx.DefaultValue()) {}
+        : context(ctx) {}
 };
 
 /**

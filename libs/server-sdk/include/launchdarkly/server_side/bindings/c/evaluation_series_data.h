@@ -12,8 +12,8 @@
  * - Data returned from hook callbacks transfers ownership to the SDK
  * - Data received in callbacks can be modified and returned (ownership transfer)
  * - Keys are copied by the SDK
- * - Values retrieved with GetValue() are heap-allocated copies that must be
- *   freed by the caller using LDValue_Free()
+ * - Values retrieved with GetValue() are temporary - valid only during callback
+ * - Do not call LDValue_Free() on values retrieved with GetValue()
  * - Values stored with SetValue() are copied into the data object
  * - Pointers (void*) lifetime is managed by the application
  *
@@ -53,17 +53,16 @@ LDEvaluationSeriesData_New(void);
 /**
  * @brief Get a Value from the evaluation series data.
  *
- * OWNERSHIP: Returns a heap-allocated copy of the value. The caller is
- * responsible for freeing it with LDValue_Free().
+ * LIFETIME: Returns a temporary value valid only during the callback.
+ * Do not call LDValue_Free() on the returned value.
  *
  * USAGE:
  * @code
  *   LDValue value;
  *   if (LDEvaluationSeriesData_GetValue(data, "timestamp", &value)) {
- *       // Use value
+ *       // Use value (valid only during callback)
  *       double timestamp = LDValue_GetNumber(value);
- *       // Must free when done
- *       LDValue_Free(value);
+ *       // Do NOT call LDValue_Free(value)
  *   }
  * @endcode
  *
@@ -71,8 +70,8 @@ LDEvaluationSeriesData_New(void);
  * @param key Key to look up. Must be null-terminated UTF-8 string.
  *            Must not be NULL.
  * @param out_value Pointer to receive the value. Must not be NULL.
- *                  Set to a heap-allocated LDValue that must be freed with
- *                  LDValue_Free() when no longer needed.
+ *                  Set to a temporary LDValue (valid only during callback).
+ *                  Do not call LDValue_Free() on this value.
  * @return true if key was found and contains a Value, false otherwise.
  */
 LD_EXPORT(bool)

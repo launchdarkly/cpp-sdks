@@ -39,10 +39,9 @@ LDEvaluationSeriesData_GetValue(LDServerSDKEvaluationSeriesData data,
     LD_ASSERT(key != nullptr);
     LD_ASSERT(out_value != nullptr);
 
-    if (const auto result = AS_EVAL_SERIES_DATA_CONST(data)->Get(key); result.
-        has_value()) {
-        // Heap-allocate a copy of the value - caller must free with LDValue_Free
-        *out_value = AS_VALUE(new Value(*result));
+    if (const auto result = AS_EVAL_SERIES_DATA_CONST(data)->Get(key); result.has_value()) {
+        // Return a pointer to the existing value - no heap allocation needed
+        *out_value = AS_VALUE(&result->get());
         return true;
     }
     *out_value = nullptr;

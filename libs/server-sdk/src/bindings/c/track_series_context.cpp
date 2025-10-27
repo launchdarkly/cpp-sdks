@@ -37,7 +37,8 @@ LDTrackSeriesContext_Data(LDServerSDKTrackSeriesContext track_context,
 
     auto data = AS_WRAPPER(track_context)->context.Data();
     if (data.has_value()) {
-        *out_data = AS_VALUE(&(*data));
+        // Return a pointer to the existing value - no heap allocation needed
+        *out_data = AS_VALUE(&data->get());
         return true;
     }
     *out_data = nullptr;

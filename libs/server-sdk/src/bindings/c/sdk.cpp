@@ -407,5 +407,301 @@ LD_EXPORT(void) LDServerDataSourceStatus_Free(LDServerDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
 }
 
+// HookContext variations
+
+#define AS_HOOK_CONTEXT(ptr) \
+    (reinterpret_cast<launchdarkly::server_side::hooks::HookContext*>(ptr))
+
+LD_EXPORT(void)
+LDServerSDK_TrackEvent_WithHookContext(LDServerSDK sdk,
+                                       LDContext context,
+                                       char const* event_name,
+                                       LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(event_name);
+
+    if (hook_context) {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
+                          *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name);
+    }
+}
+
+LD_EXPORT(void)
+LDServerSDK_TrackMetric_WithHookContext(LDServerSDK sdk,
+                                        LDContext context,
+                                        char const* event_name,
+                                        double metric_value,
+                                        LDValue data,
+                                        LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(event_name);
+    LD_ASSERT_NOT_NULL(data);
+
+    if (hook_context) {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
+                          *TO_VALUE(data), metric_value,
+                          *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
+                          *TO_VALUE(data), metric_value);
+    }
+}
+
+LD_EXPORT(void)
+LDServerSDK_TrackData_WithHookContext(LDServerSDK sdk,
+                                      LDContext context,
+                                      char const* event_name,
+                                      LDValue data,
+                                      LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(event_name);
+    LD_ASSERT_NOT_NULL(data);
+
+    if (hook_context) {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
+                          *TO_VALUE(data), *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
+                          *TO_VALUE(data));
+    }
+}
+
+LD_EXPORT(bool)
+LDServerSDK_BoolVariation_WithHookContext(LDServerSDK sdk,
+                                          LDContext context,
+                                          char const* flag_key,
+                                          bool default_value,
+                                          LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    if (hook_context) {
+        return TO_SDK(sdk)->BoolVariation(*TO_CONTEXT(context), flag_key,
+                                         default_value,
+                                         *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        return TO_SDK(sdk)->BoolVariation(*TO_CONTEXT(context), flag_key,
+                                         default_value);
+    }
+}
+
+LD_EXPORT(bool)
+LDServerSDK_BoolVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                LDContext context,
+                                                char const* flag_key,
+                                                bool default_value,
+                                                LDHookContext hook_context,
+                                                LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(out_detail);
+
+    auto result = hook_context
+        ? TO_SDK(sdk)->BoolVariationDetail(*TO_CONTEXT(context),
+                                          flag_key, default_value,
+                                          *AS_HOOK_CONTEXT(hook_context))
+        : TO_SDK(sdk)->BoolVariationDetail(*TO_CONTEXT(context),
+                                          flag_key, default_value);
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
+    return result.Value();
+}
+
+LD_EXPORT(char*)
+LDServerSDK_StringVariation_WithHookContext(LDServerSDK sdk,
+                                            LDContext context,
+                                            char const* flag_key,
+                                            char const* default_value,
+                                            LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
+
+    std::string result;
+    if (hook_context) {
+        result = TO_SDK(sdk)->StringVariation(*TO_CONTEXT(context), flag_key,
+                                              default_value,
+                                              *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        result = TO_SDK(sdk)->StringVariation(*TO_CONTEXT(context), flag_key,
+                                              default_value);
+    }
+
+    char* value = static_cast<char*>(malloc(result.size() + 1));
+    std::strcpy(value, result.c_str());
+    return value;
+}
+
+LD_EXPORT(char*)
+LDServerSDK_StringVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                  LDContext context,
+                                                  char const* flag_key,
+                                                  char const* default_value,
+                                                  LDHookContext hook_context,
+                                                  LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
+    LD_ASSERT_NOT_NULL(out_detail);
+
+    auto result = hook_context
+        ? TO_SDK(sdk)->StringVariationDetail(*TO_CONTEXT(context),
+                                            flag_key, default_value,
+                                            *AS_HOOK_CONTEXT(hook_context))
+        : TO_SDK(sdk)->StringVariationDetail(*TO_CONTEXT(context),
+                                            flag_key, default_value);
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
+
+    char* value = static_cast<char*>(malloc(result.Value().size() + 1));
+    std::strcpy(value, result.Value().c_str());
+    return value;
+}
+
+LD_EXPORT(int)
+LDServerSDK_IntVariation_WithHookContext(LDServerSDK sdk,
+                                         LDContext context,
+                                         char const* flag_key,
+                                         int default_value,
+                                         LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    if (hook_context) {
+        return TO_SDK(sdk)->IntVariation(*TO_CONTEXT(context), flag_key,
+                                        default_value,
+                                        *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        return TO_SDK(sdk)->IntVariation(*TO_CONTEXT(context), flag_key,
+                                        default_value);
+    }
+}
+
+LD_EXPORT(int)
+LDServerSDK_IntVariationDetail_WithHookContext(LDServerSDK sdk,
+                                               LDContext context,
+                                               char const* flag_key,
+                                               int default_value,
+                                               LDHookContext hook_context,
+                                               LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(out_detail);
+
+    auto result = hook_context
+        ? TO_SDK(sdk)->IntVariationDetail(*TO_CONTEXT(context),
+                                         flag_key, default_value,
+                                         *AS_HOOK_CONTEXT(hook_context))
+        : TO_SDK(sdk)->IntVariationDetail(*TO_CONTEXT(context),
+                                         flag_key, default_value);
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
+    return result.Value();
+}
+
+LD_EXPORT(double)
+LDServerSDK_DoubleVariation_WithHookContext(LDServerSDK sdk,
+                                            LDContext context,
+                                            char const* flag_key,
+                                            double default_value,
+                                            LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+
+    if (hook_context) {
+        return TO_SDK(sdk)->DoubleVariation(*TO_CONTEXT(context), flag_key,
+                                           default_value,
+                                           *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        return TO_SDK(sdk)->DoubleVariation(*TO_CONTEXT(context), flag_key,
+                                           default_value);
+    }
+}
+
+LD_EXPORT(double)
+LDServerSDK_DoubleVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                  LDContext context,
+                                                  char const* flag_key,
+                                                  double default_value,
+                                                  LDHookContext hook_context,
+                                                  LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(out_detail);
+
+    auto result = hook_context
+        ? TO_SDK(sdk)->DoubleVariationDetail(*TO_CONTEXT(context),
+                                            flag_key, default_value,
+                                            *AS_HOOK_CONTEXT(hook_context))
+        : TO_SDK(sdk)->DoubleVariationDetail(*TO_CONTEXT(context),
+                                            flag_key, default_value);
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
+    return result.Value();
+}
+
+LD_EXPORT(LDValue)
+LDServerSDK_JsonVariation_WithHookContext(LDServerSDK sdk,
+                                          LDContext context,
+                                          char const* flag_key,
+                                          LDValue default_value,
+                                          LDHookContext hook_context) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
+
+    Value result;
+    if (hook_context) {
+        result = TO_SDK(sdk)->JsonVariation(*TO_CONTEXT(context), flag_key,
+                                            *TO_VALUE(default_value),
+                                            *AS_HOOK_CONTEXT(hook_context));
+    } else {
+        result = TO_SDK(sdk)->JsonVariation(*TO_CONTEXT(context), flag_key,
+                                            *TO_VALUE(default_value));
+    }
+
+    return FROM_VALUE(new Value(std::move(result)));
+}
+
+LD_EXPORT(LDValue)
+LDServerSDK_JsonVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                LDContext context,
+                                                char const* flag_key,
+                                                LDValue default_value,
+                                                LDHookContext hook_context,
+                                                LDEvalDetail* out_detail) {
+    LD_ASSERT_NOT_NULL(sdk);
+    LD_ASSERT_NOT_NULL(context);
+    LD_ASSERT_NOT_NULL(flag_key);
+    LD_ASSERT_NOT_NULL(default_value);
+    LD_ASSERT_NOT_NULL(out_detail);
+
+    auto result = hook_context
+        ? TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context),
+                                          flag_key,
+                                          *TO_VALUE(default_value),
+                                          *AS_HOOK_CONTEXT(hook_context))
+        : TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context),
+                                          flag_key,
+                                          *TO_VALUE(default_value));
+
+    *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
+    return FROM_VALUE(new Value(std::move(result.Value())));
+}
+
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast
 // NOLINTEND OCInconsistentNamingInspection

@@ -40,7 +40,7 @@ EvaluationSeriesData::EvaluationSeriesData(
     std::map<std::string, DataEntry> data)
     : data_(std::move(data)) {}
 
-std::optional<Value> EvaluationSeriesData::Get(std::string const& key) const {
+std::optional<std::reference_wrapper<Value const>> EvaluationSeriesData::Get(std::string const& key) const {
     if (const auto it = data_.find(key); it != data_.end() && it->second.value) {
         return it->second.value;
     }
@@ -121,7 +121,7 @@ Context const& EvaluationSeriesContext::EvaluationContext() const {
     return context_;
 }
 
-Value EvaluationSeriesContext::DefaultValue() const {
+Value const& EvaluationSeriesContext::DefaultValue() const {
     return default_value_;
 }
 
@@ -168,7 +168,7 @@ std::optional<double> TrackSeriesContext::MetricValue() const {
     return metric_value_;
 }
 
-std::optional<Value> TrackSeriesContext::Data() const {
+std::optional<std::reference_wrapper<Value const>> TrackSeriesContext::Data() const {
     return data_;
 }
 

@@ -33,8 +33,8 @@ LD_EXPORT(LDValue)
 LDEvaluationSeriesContext_DefaultValue(
     LDServerSDKEvaluationSeriesContext eval_context) {
     LD_ASSERT(eval_context != nullptr);
-    // Return pointer to the copy stored in the wrapper
-    return AS_VALUE(&AS_WRAPPER(eval_context)->default_value_copy);
+    // Return pointer to the value in the C++ context (no copy needed)
+    return AS_VALUE(&AS_WRAPPER(eval_context)->context.DefaultValue());
 }
 
 LD_EXPORT(char const*)

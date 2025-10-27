@@ -3,12 +3,15 @@
  * @brief C bindings for read-only track context passed to afterTrack hooks.
  *
  * TrackSeriesContext provides information about a track event to hook callbacks.
- * All data is read-only and valid only during the callback execution.
+ * Most data is read-only and valid only during the callback execution.
  *
- * LIFETIME:
+ * LIFETIME AND OWNERSHIP:
  * - All context parameters are temporary - valid only during callback
- * - Do not store pointers to context data
- * - Copy any needed data (strings, values) if you need to retain it
+ * - Do not store pointers to context, key, or environment ID strings
+ * - Data retrieved with LDTrackSeriesContext_Data() is temporary - valid only
+ *   during callback
+ * - Do not call LDValue_Free() on data retrieved with LDTrackSeriesContext_Data()
+ * - Metric values and hook context are temporary - valid only during callback
  */
 
 #pragma once
@@ -51,11 +54,24 @@ LDTrackSeriesContext_Context(LDServerSDKTrackSeriesContext track_context);
 /**
  * @brief Get the application-specified data for the track call, if any.
  *
+ * LIFETIME: Returns a temporary value valid only during the callback.
+ * Do not call LDValue_Free() on the returned value.
+ *
+ * USAGE:
+ * @code
+ *   LDValue data;
+ *   if (LDTrackSeriesContext_Data(track_context, &data)) {
+ *       // Use data (valid only during callback)
+ *       char const* str = LDValue_GetString(data);
+ *       // Do NOT call LDValue_Free(data)
+ *   }
+ * @endcode
+ *
  * @param track_context Track context. Must not be NULL.
  * @param out_data Pointer to receive the data value. Must not be NULL.
- *                 Set to NULL if no data was provided.
- *                 Valid only during the callback execution.
- *                 Do not call LDValue_Free() on this.
+ *                 Set to a temporary LDValue (valid only during callback).
+ *                 Do not call LDValue_Free() on this value. Set to NULL if no
+ *                 data was provided.
  * @return true if data was provided, false if no data.
  */
 LD_EXPORT(bool)

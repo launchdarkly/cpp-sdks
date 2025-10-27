@@ -303,7 +303,6 @@ static LDServerSDKEvaluationSeriesData DataPassing_AfterEvaluation(
         char const* str = LDValue_GetString(retrieved_value);
         EXPECT_STREQ(str, "test-string");
         tracker->calls.push_back("after:got_value");
-        LDValue_Free(retrieved_value);  // Free heap-allocated copy
     }
 
     // Retrieve the pointer
@@ -576,14 +575,12 @@ TEST(ServerCBindingsHooksTest, EvaluationSeriesDataBuilder) {
     EXPECT_TRUE(found);
     if (found) {
         EXPECT_STREQ(LDValue_GetString(retrieved), "test");
-        LDValue_Free(retrieved);
     }
 
     found = LDEvaluationSeriesData_GetValue(new_data, "key2", &retrieved);
     EXPECT_TRUE(found);
     if (found) {
         EXPECT_DOUBLE_EQ(LDValue_GetNumber(retrieved), 42.5);
-        LDValue_Free(retrieved);
     }
 
     void* retrieved_ptr = nullptr;

@@ -115,13 +115,15 @@ class EvaluationSeriesData {
     /**
      * Retrieves a Value from the series data.
      *
-     * Lifetime: The returned Value is a copy and can be stored safely.
+     * Lifetime: The returned reference (if present) is valid only during
+     * the execution of the current hook stage. If you need the value
+     * beyond this call, make a copy.
      *
      * @param key The key to look up.
-     * @return The value if present, or std::nullopt if not found or if the
-     * key maps to a shared_ptr.
+     * @return Reference to the value if present, or std::nullopt if not found
+     * or if the key maps to a shared_ptr.
      */
-    [[nodiscard]] std::optional<Value> Get(std::string const& key) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<Value const>> Get(std::string const& key) const;
 
     /**
      * Retrieves a shared_ptr to any type from the series data.
@@ -280,11 +282,13 @@ class EvaluationSeriesContext {
     /**
      * Returns the default value provided to the variation method.
      *
-     * Lifetime: The returned Value is a copy and can be stored safely.
+     * Lifetime: The returned Value reference is valid only during
+     * the execution of the current hook stage. If you need the value
+     * beyond this call, make a copy.
      *
-     * @return The default value.
+     * @return Reference to the default value.
      */
-    [[nodiscard]] Value DefaultValue() const;
+    [[nodiscard]] Value const& DefaultValue() const;
 
     /**
      * Returns the method being executed.
@@ -391,11 +395,13 @@ class TrackSeriesContext {
     /**
      * Returns the application-specified data associated with the track call.
      *
-     * Lifetime: The returned Value is a copy and can be stored safely.
+     * Lifetime: The returned reference (if present) is valid only during
+     * the execution of the current hook stage. If you need the value
+     * beyond this call, make a copy.
      *
-     * @return The data, or std::nullopt if not provided.
+     * @return Reference to the data, or std::nullopt if not provided.
      */
-    [[nodiscard]] std::optional<Value> Data() const;
+    [[nodiscard]] std::optional<std::reference_wrapper<Value const>> Data() const;
 
     /**
      * Returns the environment ID if available.
