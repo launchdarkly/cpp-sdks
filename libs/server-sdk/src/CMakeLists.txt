@@ -76,6 +76,13 @@ target_sources(${LIBNAME}
         bindings/c/builder.cpp
         bindings/c/config.cpp
         bindings/c/all_flags_state/all_flags_state.cpp
+        bindings/c/hook.cpp
+        bindings/c/hook_context.cpp
+        bindings/c/hook_wrapper.hpp
+        bindings/c/hook_wrapper.cpp
+        bindings/c/evaluation_series_context.cpp
+        bindings/c/evaluation_series_data.cpp
+        bindings/c/track_series_context.cpp
 )
 
 
