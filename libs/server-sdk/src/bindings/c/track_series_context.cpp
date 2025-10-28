@@ -1,12 +1,12 @@
 #include <launchdarkly/server_side/bindings/c/track_series_context.h>
-#include "context_wrappers.hpp"
+#include <launchdarkly/server_side/hooks/hook.hpp>
 
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/value.h>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 
-#define AS_WRAPPER(ptr) \
-    (reinterpret_cast<launchdarkly::server_side::bindings::TrackSeriesContextWrapper const*>(ptr))
+#define AS_TRACK_SERIES_CONTEXT(ptr) \
+    (reinterpret_cast<launchdarkly::server_side::hooks::TrackSeriesContext const*>(ptr))
 
 #define AS_CONTEXT(ptr) \
     (reinterpret_cast<LDContext>(const_cast<launchdarkly::Context*>(ptr)))
@@ -20,13 +20,13 @@
 LD_EXPORT(char const*)
 LDTrackSeriesContext_Key(LDServerSDKTrackSeriesContext track_context) {
     LD_ASSERT(track_context != nullptr);
-    return AS_WRAPPER(track_context)->context.Key().data();
+    return AS_TRACK_SERIES_CONTEXT(track_context)->Key().data();
 }
 
 LD_EXPORT(LDContext)
 LDTrackSeriesContext_Context(LDServerSDKTrackSeriesContext track_context) {
     LD_ASSERT(track_context != nullptr);
-    return AS_CONTEXT(&AS_WRAPPER(track_context)->context.TrackContext());
+    return AS_CONTEXT(&AS_TRACK_SERIES_CONTEXT(track_context)->TrackContext());
 }
 
 LD_EXPORT(bool)
@@ -35,7 +35,7 @@ LDTrackSeriesContext_Data(LDServerSDKTrackSeriesContext track_context,
     LD_ASSERT(track_context != nullptr);
     LD_ASSERT(out_data != nullptr);
 
-    auto data = AS_WRAPPER(track_context)->context.Data();
+    auto data = AS_TRACK_SERIES_CONTEXT(track_context)->Data();
     if (data.has_value()) {
         // Return a pointer to the existing value - no heap allocation needed
         *out_data = AS_VALUE(&data->get());
@@ -51,7 +51,7 @@ LDTrackSeriesContext_MetricValue(LDServerSDKTrackSeriesContext track_context,
     LD_ASSERT(track_context != nullptr);
     LD_ASSERT(out_metric_value != nullptr);
 
-    auto metric = AS_WRAPPER(track_context)->context.MetricValue();
+    auto metric = AS_TRACK_SERIES_CONTEXT(track_context)->MetricValue();
     if (metric.has_value()) {
         *out_metric_value = *metric;
         return true;
@@ -62,12 +62,12 @@ LDTrackSeriesContext_MetricValue(LDServerSDKTrackSeriesContext track_context,
 LD_EXPORT(LDHookContext)
 LDTrackSeriesContext_HookContext(LDServerSDKTrackSeriesContext track_context) {
     LD_ASSERT(track_context != nullptr);
-    return AS_HOOK_CONTEXT(&AS_WRAPPER(track_context)->context.HookCtx());
+    return AS_HOOK_CONTEXT(&AS_TRACK_SERIES_CONTEXT(track_context)->HookCtx());
 }
 
 LD_EXPORT(char const*)
 LDTrackSeriesContext_EnvironmentId(LDServerSDKTrackSeriesContext track_context) {
     LD_ASSERT(track_context != nullptr);
-    auto env_id = AS_WRAPPER(track_context)->context.EnvironmentId();
+    auto env_id = AS_TRACK_SERIES_CONTEXT(track_context)->EnvironmentId();
     return env_id.has_value() ? env_id->data() : nullptr;
 }

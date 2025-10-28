@@ -1,5 +1,4 @@
 #include "hook_wrapper.hpp"
-#include "context_wrappers.hpp"
 
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
 #include <launchdarkly/bindings/c/value.h>
@@ -8,15 +7,15 @@
 #include <cassert>
 
 // Helper macros for type conversions
-#define AS_EVAL_SERIES_CONTEXT_WRAPPER(ptr) \
-    (reinterpret_cast<LDServerSDKEvaluationSeriesContext>(ptr))
+#define AS_EVAL_SERIES_CONTEXT(ptr) \
+    (reinterpret_cast<LDServerSDKEvaluationSeriesContext>(const_cast<launchdarkly::server_side::hooks::EvaluationSeriesContext*>(ptr)))
 
 #define AS_EVAL_SERIES_DATA(ptr) \
     (reinterpret_cast<LDServerSDKEvaluationSeriesData>( \
         &const_cast<launchdarkly::server_side::hooks::EvaluationSeriesData&>(ptr)))
 
-#define AS_TRACK_SERIES_CONTEXT_WRAPPER(ptr) \
-    (reinterpret_cast<LDServerSDKTrackSeriesContext>(ptr))
+#define AS_TRACK_SERIES_CONTEXT(ptr) \
+    (reinterpret_cast<LDServerSDKTrackSeriesContext>(const_cast<launchdarkly::server_side::hooks::TrackSeriesContext*>(ptr)))
 
 #define AS_EVAL_DETAIL(ptr) \
     (reinterpret_cast<LDEvalDetail>( \
@@ -48,12 +47,9 @@ hooks::EvaluationSeriesData CHookWrapper::BeforeEvaluation(
         return data;
     }
 
-    // Create wrapper on stack - holds context reference + default value copy
-    EvaluationSeriesContextWrapper wrapper(series_context);
-
-    // Convert to C types
+    // Convert to C types - cast context directly
     const auto c_series_context =
-        AS_EVAL_SERIES_CONTEXT_WRAPPER(&wrapper);
+        AS_EVAL_SERIES_CONTEXT(&series_context);
 
     // Create a heap-allocated copy of the data to pass to C callback
     // This gives the callback ownership that it can return or modify
@@ -61,7 +57,7 @@ hooks::EvaluationSeriesData CHookWrapper::BeforeEvaluation(
         reinterpret_cast<LDServerSDKEvaluationSeriesData>(
             new hooks::EvaluationSeriesData(data));
 
-    // Call the C callback - wrapper stays alive for entire call
+    // Call the C callback - context stays alive for entire call
     LDServerSDKEvaluationSeriesData result_data =
         before_evaluation_(c_series_context, c_data_input, user_data_);
 
@@ -95,12 +91,9 @@ hooks::EvaluationSeriesData CHookWrapper::AfterEvaluation(
         return data;
     }
 
-    // Create wrapper on stack - holds context reference + default value copy
-    EvaluationSeriesContextWrapper wrapper(series_context);
-
-    // Convert to C types
+    // Convert to C types - cast context directly
     const auto c_series_context =
-        AS_EVAL_SERIES_CONTEXT_WRAPPER(&wrapper);
+        AS_EVAL_SERIES_CONTEXT(&series_context);
 
     // Create a heap-allocated copy of the data to pass to C callback
     // This gives the callback ownership that it can return or modify
@@ -110,7 +103,7 @@ hooks::EvaluationSeriesData CHookWrapper::AfterEvaluation(
 
     const auto c_detail = AS_EVAL_DETAIL(&detail);
 
-    // Call the C callback - wrapper stays alive for entire call
+    // Call the C callback - context stays alive for entire call
     LDServerSDKEvaluationSeriesData result_data =
         after_evaluation_(c_series_context, c_data_input, c_detail, user_data_);
 
@@ -142,14 +135,11 @@ void CHookWrapper::AfterTrack(
         return;
     }
 
-    // Create wrapper on stack - holds context reference
-    TrackSeriesContextWrapper wrapper(series_context);
-
-    // Convert to C type
+    // Convert to C type - cast context directly
     const auto c_series_context =
-        AS_TRACK_SERIES_CONTEXT_WRAPPER(&wrapper);
+        AS_TRACK_SERIES_CONTEXT(&series_context);
 
-    // Call the C callback - wrapper stays alive for entire call
+    // Call the C callback - context stays alive for entire call
     after_track_(c_series_context, user_data_);
 }
 
