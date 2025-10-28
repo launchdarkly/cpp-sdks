@@ -146,13 +146,13 @@ TrackSeriesContext::TrackSeriesContext(
     Context const& context,
     std::string key,
     std::optional<double> metric_value,
-    std::optional<Value> data,
+    std::optional<std::reference_wrapper<Value const>> data,
     HookContext const& hook_context,
     std::optional<std::string> environment_id)
     : context_(context),
       key_(std::move(key)),
       metric_value_(metric_value),
-      data_(std::move(data)),
+      data_(data),
       hook_context_(hook_context),
       environment_id_(std::move(environment_id)) {}
 

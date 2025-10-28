@@ -353,14 +353,14 @@ class TrackSeriesContext {
      * @param context The context associated with the track call.
      * @param key The event key.
      * @param metric_value Optional metric value.
-     * @param data Optional application-specified data.
+     * @param data Optional reference to application-specified data.
      * @param hook_context Additional context data provided by the caller.
      * @param environment_id Optional environment ID.
      */
     TrackSeriesContext(Context const& context,
                        std::string key,
                        std::optional<double> metric_value,
-                       std::optional<Value> data,
+                       std::optional<std::reference_wrapper<Value const>> data,
                        HookContext const& hook_context,
                        std::optional<std::string> environment_id);
 
@@ -433,7 +433,7 @@ class TrackSeriesContext {
     Context const& context_;
     std::string key_;
     std::optional<double> metric_value_;
-    std::optional<Value> data_;
+    std::optional<std::reference_wrapper<Value const>> data_;
     HookContext const& hook_context_;
     std::optional<std::string> environment_id_;
 };

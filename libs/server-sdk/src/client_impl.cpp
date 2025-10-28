@@ -252,7 +252,7 @@ void ClientImpl::TrackInternal(Context const& ctx,
     // minimal functional difference.
     if (!config_.Hooks().empty()) {
         hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
-                                                data, hook_context, std::nullopt);
+                                                  data, hook_context, std::nullopt);
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 

@@ -449,6 +449,8 @@ LDServerSDK_TrackMetric_WithHookContext(LDServerSDK sdk,
         TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
                           *TO_VALUE(data), metric_value);
     }
+
+    LDValue_Free(data);
 }
 
 LD_EXPORT(void)
@@ -469,6 +471,8 @@ LDServerSDK_TrackData_WithHookContext(LDServerSDK sdk,
         TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
                           *TO_VALUE(data));
     }
+
+    LDValue_Free(data);
 }
 
 LD_EXPORT(bool)
