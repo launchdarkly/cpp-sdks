@@ -6,6 +6,8 @@
 #include <launchdarkly/detail/c_binding_helpers.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
+#include "hook_wrapper.hpp"
+
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config::builders;
 
@@ -433,6 +435,19 @@ LDServerConfigBuilder_Logging_Custom(LDServerConfigBuilder b,
         TO_CUSTOM_LOGGING_BUILDER(custom_builder);
     TO_BUILDER(b)->Logging().Logging(*cb);
     LDLoggingCustomBuilder_Free(custom_builder);
+}
+
+LD_EXPORT(void)
+LDServerConfigBuilder_Hooks(LDServerConfigBuilder builder,
+                            struct LDServerSDKHook hook) {
+    LD_ASSERT_NOT_NULL(builder);
+    LD_ASSERT_NOT_NULL(hook.Name);
+
+    // Create a wrapper that bridges C callbacks to C++ Hook interface
+    auto hook_wrapper = std::make_shared<bindings::CHookWrapper>(hook);
+
+    // Register the wrapper with the config builder
+    TO_BUILDER(builder)->Hooks(hook_wrapper);
 }
 
 // NOLINTEND cppcoreguidelines-pro-type-reinterpret-cast

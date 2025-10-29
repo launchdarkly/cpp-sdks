@@ -34,6 +34,13 @@ ConfigBuilder& ConfigBuilder::Offline(bool const offline) {
     return *this;
 }
 
+ConfigBuilder& ConfigBuilder::Hooks(std::shared_ptr<hooks::Hook> hook) {
+    if (hook) {
+        hooks_.push_back(std::move(hook));
+    }
+    return *this;
+}
+
 tl::expected<Config, Error> ConfigBuilder::Build() const {
     auto sdk_key = sdk_key_;
     if (sdk_key.empty()) {
@@ -76,7 +83,8 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
             *events_config,
             app_tag,
             std::move(*data_system_config),
-            std::move(http_properties)};
+            std::move(http_properties),
+            hooks_};
 }
 
 }  // namespace launchdarkly::server_side

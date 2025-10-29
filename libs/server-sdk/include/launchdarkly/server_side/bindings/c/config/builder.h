@@ -5,6 +5,7 @@
 
 #include <launchdarkly/server_side/bindings/c/config/config.h>
 #include <launchdarkly/server_side/bindings/c/config/lazy_load_builder/lazy_load_builder.h>
+#include <launchdarkly/server_side/bindings/c/hook.h>
 
 #include <launchdarkly/bindings/c/config/logging_builder.h>
 #include <launchdarkly/bindings/c/export.h>
@@ -540,6 +541,25 @@ LDServerConfigBuilder_Logging_Basic(LDServerConfigBuilder b,
 LD_EXPORT(void)
 LDServerConfigBuilder_Logging_Custom(LDServerConfigBuilder b,
                                      LDLoggingCustomBuilder custom_builder);
+
+/**
+ * Registers a hook with the SDK.
+ *
+ * Hooks allow you to instrument SDK behavior for logging, analytics,
+ * or distributed tracing (e.g. OpenTelemetry).
+ *
+ * Multiple hooks can be registered. They execute in the order registered.
+ *
+ * LIFETIME: The hook struct is copied during this call. The Name string
+ * must remain valid until LDServerConfigBuilder_Build() is called.
+ * UserData and function pointers must remain valid for the SDK lifetime.
+ *
+ * @param builder Configuration builder. Must not be NULL.
+ * @param hook Hook to register. The struct is copied. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_Hooks(LDServerConfigBuilder builder,
+                            struct LDServerSDKHook hook);
 
 /**
  * Creates an LDClientConfig. The builder is automatically freed.

@@ -6,6 +6,7 @@
 
 #include <launchdarkly/server_side/bindings/c/all_flags_state/all_flags_state.h>
 #include <launchdarkly/server_side/bindings/c/config/builder.h>
+#include <launchdarkly/server_side/bindings/c/hook_context.h>
 
 #include <launchdarkly/bindings/c/context.h>
 #include <launchdarkly/bindings/c/data/evaluation_detail.h>
@@ -429,6 +430,304 @@ LDServerSDK_JsonVariationDetail(LDServerSDK sdk,
                                 char const* flag_key,
                                 LDValue default_value,
                                 LDEvalDetail* out_detail);
+
+/**
+ * Tracks that the given context performed an event with the given event name,
+ * passing a hook context for custom hook data.
+ *
+ * @code
+ * LDHookContext hook_ctx = LDHookContext_New();
+ * // Set custom data in hook_ctx...
+ * LDServerSDK_TrackEvent_WithHookContext(sdk, context, "my-event", hook_ctx);
+ * LDHookContext_Free(hook_ctx);
+ * @endcode
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param event_name Name of the event. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ */
+LD_EXPORT(void)
+LDServerSDK_TrackEvent_WithHookContext(LDServerSDK sdk,
+                                       LDContext context,
+                                       char const* event_name,
+                                       LDHookContext hook_context);
+
+/**
+ * Tracks that the given context performed an event with the given event
+ * name, associates it with a numeric metric and value, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param event_name The name of the event. Must not be NULL.
+ * @param metric_value This value is used by the LaunchDarkly experimentation
+ * feature in numeric custom metrics, and will also be returned as part of the
+ * custom event for Data Export.
+ * @param data A JSON value containing additional data associated with the
+ * event. Ownership is transferred into the SDK. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ */
+LD_EXPORT(void)
+LDServerSDK_TrackMetric_WithHookContext(LDServerSDK sdk,
+                                        LDContext context,
+                                        char const* event_name,
+                                        double metric_value,
+                                        LDValue data,
+                                        LDHookContext hook_context);
+
+/**
+ * Tracks that the given context performed an event with the given event
+ * name, with additional JSON data, and passes a hook context for custom
+ * hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param event_name The name of the event. Must not be NULL.
+ * @param data A JSON value containing additional data associated with the
+ * event. Ownership is transferred. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ */
+LD_EXPORT(void)
+LDServerSDK_TrackData_WithHookContext(LDServerSDK sdk,
+                                      LDContext context,
+                                      char const* event_name,
+                                      LDValue data,
+                                      LDHookContext hook_context);
+
+/**
+ * Returns the boolean value of a feature flag for a given flag key and context,
+ * passing a hook context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(bool)
+LDServerSDK_BoolVariation_WithHookContext(LDServerSDK sdk,
+                                          LDContext context,
+                                          char const* flag_key,
+                                          bool default_value,
+                                          LDHookContext hook_context);
+
+/**
+ * Returns the boolean value of a feature flag for a given flag key and context,
+ * details that describe the way the value was determined, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @param out_detail Pointer to evaluation detail. Must not be NULL. The value
+ * written to the pointer must be freed with LDEvalDetail_Free when no longer
+ * needed.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(bool)
+LDServerSDK_BoolVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                LDContext context,
+                                                char const* flag_key,
+                                                bool default_value,
+                                                LDHookContext hook_context,
+                                                LDEvalDetail* out_detail);
+
+/**
+ * Returns the string value of a feature flag for a given flag key and context,
+ * passing a hook context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDMemory_FreeString when no longer needed.
+ */
+LD_EXPORT(char*)
+LDServerSDK_StringVariation_WithHookContext(LDServerSDK sdk,
+                                            LDContext context,
+                                            char const* flag_key,
+                                            char const* default_value,
+                                            LDHookContext hook_context);
+
+/**
+ * Returns the string value of a feature flag for a given flag key and context,
+ * details that describe the way the value was determined, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @param out_detail Pointer to evaluation detail. Must not be NULL. The value
+ * written to the pointer must be freed with LDEvalDetail_Free when no longer
+ * needed.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDMemory_FreeString when no longer needed.
+ */
+LD_EXPORT(char*)
+LDServerSDK_StringVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                  LDContext context,
+                                                  char const* flag_key,
+                                                  char const* default_value,
+                                                  LDHookContext hook_context,
+                                                  LDEvalDetail* out_detail);
+
+/**
+ * Returns the integer value of a feature flag for a given flag key and context,
+ * passing a hook context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDServerSDK_IntVariation_WithHookContext(LDServerSDK sdk,
+                                         LDContext context,
+                                         char const* flag_key,
+                                         int default_value,
+                                         LDHookContext hook_context);
+
+/**
+ * Returns the integer value of a feature flag for a given flag key and context,
+ * details that describe the way the value was determined, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @param out_detail Pointer to evaluation detail. Must not be NULL. The value
+ * written to the pointer must be freed with LDEvalDetail_Free when no longer
+ * needed.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(int)
+LDServerSDK_IntVariationDetail_WithHookContext(LDServerSDK sdk,
+                                               LDContext context,
+                                               char const* flag_key,
+                                               int default_value,
+                                               LDHookContext hook_context,
+                                               LDEvalDetail* out_detail);
+
+/**
+ * Returns the double value of a feature flag for a given flag key and context,
+ * passing a hook context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(double)
+LDServerSDK_DoubleVariation_WithHookContext(LDServerSDK sdk,
+                                            LDContext context,
+                                            char const* flag_key,
+                                            double default_value,
+                                            LDHookContext hook_context);
+
+/**
+ * Returns the double value of a feature flag for a given flag key and context,
+ * details that describe the way the value was determined, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @param out_detail Pointer to evaluation detail. Must not be NULL. The value
+ * written to the pointer must be freed with LDEvalDetail_Free when no longer
+ * needed.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel.
+ */
+LD_EXPORT(double)
+LDServerSDK_DoubleVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                  LDContext context,
+                                                  char const* flag_key,
+                                                  double default_value,
+                                                  LDHookContext hook_context,
+                                                  LDEvalDetail* out_detail);
+
+/**
+ * Returns the JSON value of a feature flag for a given flag key and context,
+ * passing a hook context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. Ownership is NOT
+ * transferred. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDValue_Free when no longer needed.
+ */
+LD_EXPORT(LDValue)
+LDServerSDK_JsonVariation_WithHookContext(LDServerSDK sdk,
+                                          LDContext context,
+                                          char const* flag_key,
+                                          LDValue default_value,
+                                          LDHookContext hook_context);
+
+/**
+ * Returns the JSON value of a feature flag for a given flag key and context,
+ * details that describe the way the value was determined, and passes a hook
+ * context for custom hook data.
+ *
+ * @param sdk SDK. Must not be NULL.
+ * @param context The context. Ownership is NOT transferred. Must not be NULL.
+ * @param flag_key The unique key for the feature flag. Must not be NULL.
+ * @param default_value The default value of the flag. Ownership is NOT
+ * transferred. Must not be NULL.
+ * @param hook_context Hook context for passing data to hooks. Ownership is NOT
+ * transferred. May be NULL.
+ * @param out_detail Pointer to evaluation detail. Must not be NULL. The value
+ * written to the pointer must be freed with LDEvalDetail_Free when no longer
+ * needed.
+ * @return The variation for the given context, or default_value if the
+ * flag is disabled in the LaunchDarkly control panel. Must be freed with
+ * LDValue_Free when no longer needed.
+ */
+LD_EXPORT(LDValue)
+LDServerSDK_JsonVariationDetail_WithHookContext(LDServerSDK sdk,
+                                                LDContext context,
+                                                char const* flag_key,
+                                                LDValue default_value,
+                                                LDHookContext hook_context,
+                                                LDEvalDetail* out_detail);
 
 /**
  * Evaluates all flags for a context, returning a data structure containing

@@ -3,6 +3,7 @@
 #include <launchdarkly/context.hpp>
 #include <launchdarkly/data/evaluation_detail.hpp>
 #include <launchdarkly/server_side/config/config.hpp>
+#include <launchdarkly/server_side/hooks/hook.hpp>
 #include <launchdarkly/value.hpp>
 
 #include <launchdarkly/server_side/all_flags_state.hpp>
@@ -109,6 +110,27 @@ class IClient {
 
     /**
      * Tracks that the current context performed an event for the given event
+     * name, and associates it with a numeric metric value.
+     *
+     * @param event_name The name of the event.
+     * @param data A JSON value containing additional data associated with the
+     * event.
+     * @param metric_value this value is used by the LaunchDarkly
+     * experimentation feature in numeric custom metrics, and will also be
+     * returned as part of the custom event for Data Export
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     */
+    virtual void Track(Context const& ctx,
+                       std::string event_name,
+                       Value data,
+                       double metric_value,
+                       hooks::HookContext const& hook_context) = 0;
+
+    /**
+     * Tracks that the current context performed an event for the given event
      * name, with additional JSON data.
      *
      * @param event_name The name of the event.
@@ -121,11 +143,42 @@ class IClient {
 
     /**
      * Tracks that the current context performed an event for the given event
+     * name, with additional JSON data.
+     *
+     * @param event_name The name of the event.
+     * @param data A JSON value containing additional data associated with the
+     * event.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     */
+    virtual void Track(Context const& ctx,
+                       std::string event_name,
+                       Value data,
+                       hooks::HookContext const& hook_context) = 0;
+
+    /**
+     * Tracks that the current context performed an event for the given event
      * name.
      *
      * @param event_name The name of the event.
      */
     virtual void Track(Context const& ctx, std::string event_name) = 0;
+
+    /**
+     * Tracks that the current context performed an event for the given event
+     * name.
+     *
+     * @param event_name The name of the event.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     */
+    virtual void Track(Context const& ctx,
+                       std::string event_name,
+                       hooks::HookContext const& hook_context) = 0;
 
     /**
      * Tells the client that all pending analytics events (if any) should be
@@ -154,6 +207,23 @@ class IClient {
                                bool default_value) = 0;
 
     /**
+     * Returns the boolean value of a feature flag for a given flag key.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
+     */
+    virtual bool BoolVariation(Context const& ctx,
+                               FlagKey const& key,
+                               bool default_value,
+                               hooks::HookContext const& hook_context) = 0;
+
+    /**
      * Returns the boolean value of a feature flag for a given flag key, in an
      * object that also describes the way the value was determined.
      *
@@ -166,6 +236,24 @@ class IClient {
                                                        bool default_value) = 0;
 
     /**
+     * Returns the boolean value of a feature flag for a given flag key, in an
+     * object that also describes the way the value was determined.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return An evaluation detail object.
+     */
+    virtual EvaluationDetail<bool> BoolVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        bool default_value,
+        hooks::HookContext const& hook_context) = 0;
+
+    /**
      * Returns the string value of a feature flag for a given flag key.
      *
      * @param key The unique feature key for the feature flag.
@@ -176,6 +264,23 @@ class IClient {
     virtual std::string StringVariation(Context const& ctx,
                                         FlagKey const& key,
                                         std::string default_value) = 0;
+
+    /**
+     * Returns the string value of a feature flag for a given flag key.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
+     */
+    virtual std::string StringVariation(Context const& ctx,
+                                        FlagKey const& key,
+                                        std::string default_value,
+                                        hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns the string value of a feature flag for a given flag key, in an
@@ -191,6 +296,24 @@ class IClient {
         std::string default_value) = 0;
 
     /**
+     * Returns the string value of a feature flag for a given flag key, in an
+     * object that also describes the way the value was determined.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return An evaluation detail object.
+     */
+    virtual EvaluationDetail<std::string> StringVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) = 0;
+
+    /**
      * Returns the double value of a feature flag for a given flag key.
      *
      * @param key The unique feature key for the feature flag.
@@ -201,6 +324,23 @@ class IClient {
     virtual double DoubleVariation(Context const& ctx,
                                    FlagKey const& key,
                                    double default_value) = 0;
+
+    /**
+     * Returns the double value of a feature flag for a given flag key.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
+     */
+    virtual double DoubleVariation(Context const& ctx,
+                                   FlagKey const& key,
+                                   double default_value,
+                                   hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns the double value of a feature flag for a given flag key, in an
@@ -216,6 +356,24 @@ class IClient {
         double default_value) = 0;
 
     /**
+     * Returns the double value of a feature flag for a given flag key, in an
+     * object that also describes the way the value was determined.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return An evaluation detail object.
+     */
+    virtual EvaluationDetail<double> DoubleVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        double default_value,
+        hooks::HookContext const& hook_context) = 0;
+
+    /**
      * Returns the int value of a feature flag for a given flag key.
      *
      * @param key The unique feature key for the feature flag.
@@ -226,6 +384,23 @@ class IClient {
     virtual int IntVariation(Context const& ctx,
                              FlagKey const& key,
                              int default_value) = 0;
+
+    /**
+     * Returns the int value of a feature flag for a given flag key.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
+     */
+    virtual int IntVariation(Context const& ctx,
+                             FlagKey const& key,
+                             int default_value,
+                             hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns the int value of a feature flag for a given flag key, in an
@@ -240,6 +415,24 @@ class IClient {
                                                      int default_value) = 0;
 
     /**
+     * Returns the int value of a feature flag for a given flag key, in an
+     * object that also describes the way the value was determined.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return An evaluation detail object.
+     */
+    virtual EvaluationDetail<int> IntVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        int default_value,
+        hooks::HookContext const& hook_context) = 0;
+
+    /**
      * Returns the JSON value of a feature flag for a given flag key.
      *
      * @param key The unique feature key for the feature flag.
@@ -250,6 +443,23 @@ class IClient {
     virtual Value JsonVariation(Context const& ctx,
                                 FlagKey const& key,
                                 Value default_value) = 0;
+
+    /**
+     * Returns the JSON value of a feature flag for a given flag key.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return The variation for the selected context, or default_value if the
+     * flag is disabled in the LaunchDarkly control panel
+     */
+    virtual Value JsonVariation(Context const& ctx,
+                                FlagKey const& key,
+                                Value default_value,
+                                hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns the JSON value of a feature flag for a given flag key, in an
@@ -263,6 +473,24 @@ class IClient {
         Context const& ctx,
         FlagKey const& key,
         Value default_value) = 0;
+
+    /**
+     * Returns the JSON value of a feature flag for a given flag key, in an
+     * object that also describes the way the value was determined.
+     *
+     * @param key The unique feature key for the feature flag.
+     * @param default_value The default value of the flag.
+     * @param hook_context Additional context data to pass to hooks. This is
+     * only needed when propagating data to hooks, such as OpenTelemetry span
+     * parents in asynchronous web frameworks where thread-local storage does
+     * not work. Most applications do not need to use this parameter.
+     * @return An evaluation detail object.
+     */
+    virtual EvaluationDetail<Value> JsonVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        Value default_value,
+        hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns an interface which provides methods for subscribing to data
@@ -300,9 +528,24 @@ class Client : public IClient {
                Value data,
                double metric_value) override;
 
+    void Track(Context const& ctx,
+               std::string event_name,
+               Value data,
+               double metric_value,
+               hooks::HookContext const& hook_context) override;
+
     void Track(Context const& ctx, std::string event_name, Value data) override;
 
+    void Track(Context const& ctx,
+               std::string event_name,
+               Value data,
+               hooks::HookContext const& hook_context) override;
+
     void Track(Context const& ctx, std::string event_name) override;
+
+    void Track(Context const& ctx,
+               std::string event_name,
+               hooks::HookContext const& hook_context) override;
 
     void FlushAsync() override;
 
@@ -312,43 +555,98 @@ class Client : public IClient {
                        FlagKey const& key,
                        bool default_value) override;
 
+    bool BoolVariation(Context const& ctx,
+                       FlagKey const& key,
+                       bool default_value,
+                       hooks::HookContext const& hook_context) override;
+
     EvaluationDetail<bool> BoolVariationDetail(Context const& ctx,
                                                FlagKey const& key,
                                                bool default_value) override;
 
+    EvaluationDetail<bool> BoolVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        bool default_value,
+        hooks::HookContext const& hook_context) override;
+
     std::string StringVariation(Context const& ctx,
                                 FlagKey const& key,
                                 std::string default_value) override;
+
+    std::string StringVariation(Context const& ctx,
+                                FlagKey const& key,
+                                std::string default_value,
+                                hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<std::string> StringVariationDetail(
         Context const& ctx,
         FlagKey const& key,
         std::string default_value) override;
 
+    EvaluationDetail<std::string> StringVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) override;
+
     double DoubleVariation(Context const& ctx,
                            FlagKey const& key,
                            double default_value) override;
+
+    double DoubleVariation(Context const& ctx,
+                           FlagKey const& key,
+                           double default_value,
+                           hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<double> DoubleVariationDetail(
         Context const& ctx,
         FlagKey const& key,
         double default_value) override;
 
+    EvaluationDetail<double> DoubleVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        double default_value,
+        hooks::HookContext const& hook_context) override;
+
     int IntVariation(Context const& ctx,
                      FlagKey const& key,
                      int default_value) override;
+
+    int IntVariation(Context const& ctx,
+                     FlagKey const& key,
+                     int default_value,
+                     hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<int> IntVariationDetail(Context const& ctx,
                                              FlagKey const& key,
                                              int default_value) override;
 
+    EvaluationDetail<int> IntVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        int default_value,
+        hooks::HookContext const& hook_context) override;
+
     Value JsonVariation(Context const& ctx,
                         FlagKey const& key,
                         Value default_value) override;
 
+    Value JsonVariation(Context const& ctx,
+                        FlagKey const& key,
+                        Value default_value,
+                        hooks::HookContext const& hook_context) override;
+
     EvaluationDetail<Value> JsonVariationDetail(Context const& ctx,
                                                 FlagKey const& key,
                                                 Value default_value) override;
+
+    EvaluationDetail<Value> JsonVariationDetail(
+        Context const& ctx,
+        FlagKey const& key,
+        Value default_value,
+        hooks::HookContext const& hook_context) override;
 
     IDataSourceStatusProvider& DataSourceStatus() override;
 

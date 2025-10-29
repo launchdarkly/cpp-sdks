@@ -25,7 +25,7 @@ FetchContent_Declare(redis-plus-plus
         GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
         # Post 1.3.15. Required to support FetchContent post 1.3.7 where it was broken.
         GIT_TAG fc67c2ebf929ae2cf3b31d959767233f39c5df6a
-        GIT_SHALLOW TRUE
+        GIT_SHALLOW FALSE
 )
 
 FetchContent_MakeAvailable(redis-plus-plus)
