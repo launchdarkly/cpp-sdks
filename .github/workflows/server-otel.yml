@@ -22,7 +22,8 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-server-otel
           install_curl: true
-          simulate_release: true
+          # We don't produce release artifacts.
+          simulate_release: false
   build-otel-mac:
     runs-on: macos-13
     steps:
@@ -32,7 +33,8 @@ jobs:
           cmake_target: launchdarkly-cpp-server-otel
           platform_version: 12
           install_curl: true
-          simulate_release: true
+          # We don't produce release artifacts.
+          simulate_release: false
   build-test-otel-windows:
     runs-on: windows-2022
     steps:
@@ -48,4 +50,5 @@ jobs:
           platform_version: 2022
           toolset: msvc
           install_curl: true
-          simulate_windows_release: true
+          # We don't produce release artifacts.
+          simulate_windows_release: false
