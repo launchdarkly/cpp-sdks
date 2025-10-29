@@ -10,6 +10,7 @@ on:
           - libs/client-sdk
           - libs/server-sdk
           - libs/server-sdk-redis-source
+          - libs/server-sdk-otel
 name: Publish Documentation
 jobs:
   build-publish:

@@ -1,0 +1,9 @@
+{
+  "name": "launchdarkly-cpp-server-otel",
+  "description": "This package.json exists for modeling dependencies for the release process.",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "launchdarkly-cpp-server": "3.9.1"
+  }
+}

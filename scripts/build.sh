@@ -24,12 +24,24 @@ if [ "$1" == "launchdarkly-cpp-server-redis-source" ] || [ "$1" == "gtest_launch
   build_redis="ON"
 fi
 
-
+# Special case: OpenTelemetry support requires additional dependencies.
+# Enable OTEL support and fetch deps when building OTEL targets.
+# Disable contract tests for OTEL builds to avoid dependency conflicts.
+build_otel="OFF"
+build_otel_fetch_deps="OFF"
+build_contract_tests="$2"
+if [ "$1" == "launchdarkly-cpp-server-otel" ] || [ "$1" == "gtest_launchdarkly-cpp-server-otel" ]; then
+  build_otel="ON"
+  build_otel_fetch_deps="ON"
+  build_contract_tests="OFF"
+fi
 
 cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
                -D BUILD_TESTING="$2" \
                -D LD_BUILD_UNIT_TESTS="$2" \
-               -D LD_BUILD_CONTRACT_TESTS="$2" \
-               -D LD_BUILD_REDIS_SUPPORT="$build_redis" ..
+               -D LD_BUILD_CONTRACT_TESTS="$build_contract_tests" \
+               -D LD_BUILD_REDIS_SUPPORT="$build_redis" \
+               -D LD_BUILD_OTEL_SUPPORT="$build_otel" \
+               -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" ..
 
 cmake --build . --target "$1"

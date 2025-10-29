@@ -13,10 +13,19 @@ if [ "$1" == "launchdarkly-cpp-server-redis-source" ]; then
   build_redis="ON"
 fi
 
+# Special case: OpenTelemetry support requires additional dependencies.
+# Enable OTEL support and fetch deps when building OTEL targets.
+build_otel="OFF"
+build_otel_fetch_deps="OFF"
+if [ "$1" == "launchdarkly-cpp-server-otel" ]; then
+  build_otel="ON"
+  build_otel_fetch_deps="ON"
+fi
+
 # Build a static release.
 mkdir -p build-static && cd build-static
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D BUILD_TESTING=OFF -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_OTEL_SUPPORT="$build_otel" -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" -D BUILD_TESTING=OFF -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
 cmake --install .
@@ -25,7 +34,7 @@ cd ..
 # Build a dynamic release.
 mkdir -p build-dynamic && cd build-dynamic
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_OTEL_SUPPORT="$build_otel" -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
 
 cmake --build . --target "$1"
 cmake --install .
