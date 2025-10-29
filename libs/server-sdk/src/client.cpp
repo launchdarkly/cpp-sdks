@@ -47,12 +47,34 @@ void Client::Track(Context const& ctx,
     client->Track(ctx, std::move(event_name), std::move(data), metric_value);
 }
 
+void Client::Track(Context const& ctx,
+                   std::string event_name,
+                   Value data,
+                   double metric_value,
+                   hooks::HookContext const& hook_context) {
+    client->Track(ctx, std::move(event_name), std::move(data), metric_value,
+                  hook_context);
+}
+
 void Client::Track(Context const& ctx, std::string event_name, Value data) {
     client->Track(ctx, std::move(event_name), std::move(data));
 }
 
+void Client::Track(Context const& ctx,
+                   std::string event_name,
+                   Value data,
+                   hooks::HookContext const& hook_context) {
+    client->Track(ctx, std::move(event_name), std::move(data), hook_context);
+}
+
 void Client::Track(Context const& ctx, std::string event_name) {
     client->Track(ctx, std::move(event_name));
+}
+
+void Client::Track(Context const& ctx,
+                   std::string event_name,
+                   hooks::HookContext const& hook_context) {
+    client->Track(ctx, std::move(event_name), hook_context);
 }
 
 void Client::FlushAsync() {
@@ -69,16 +91,39 @@ bool Client::BoolVariation(Context const& ctx,
     return client->BoolVariation(ctx, key, default_value);
 }
 
+bool Client::BoolVariation(Context const& ctx,
+                           FlagKey const& key,
+                           bool default_value,
+                           hooks::HookContext const& hook_context) {
+    return client->BoolVariation(ctx, key, default_value, hook_context);
+}
+
 EvaluationDetail<bool> Client::BoolVariationDetail(Context const& ctx,
                                                    FlagKey const& key,
                                                    bool default_value) {
     return client->BoolVariationDetail(ctx, key, default_value);
 }
 
+EvaluationDetail<bool> Client::BoolVariationDetail(
+    Context const& ctx,
+    FlagKey const& key,
+    bool default_value,
+    hooks::HookContext const& hook_context) {
+    return client->BoolVariationDetail(ctx, key, default_value, hook_context);
+}
+
 std::string Client::StringVariation(Context const& ctx,
                                     FlagKey const& key,
                                     std::string default_value) {
     return client->StringVariation(ctx, key, std::move(default_value));
+}
+
+std::string Client::StringVariation(Context const& ctx,
+                                    FlagKey const& key,
+                                    std::string default_value,
+                                    hooks::HookContext const& hook_context) {
+    return client->StringVariation(ctx, key, std::move(default_value),
+                                    hook_context);
 }
 
 EvaluationDetail<std::string> Client::StringVariationDetail(
@@ -88,10 +133,26 @@ EvaluationDetail<std::string> Client::StringVariationDetail(
     return client->StringVariationDetail(ctx, key, std::move(default_value));
 }
 
+EvaluationDetail<std::string> Client::StringVariationDetail(
+    Context const& ctx,
+    FlagKey const& key,
+    std::string default_value,
+    hooks::HookContext const& hook_context) {
+    return client->StringVariationDetail(ctx, key, std::move(default_value),
+                                         hook_context);
+}
+
 double Client::DoubleVariation(Context const& ctx,
                                FlagKey const& key,
                                double default_value) {
     return client->DoubleVariation(ctx, key, default_value);
+}
+
+double Client::DoubleVariation(Context const& ctx,
+                               FlagKey const& key,
+                               double default_value,
+                               hooks::HookContext const& hook_context) {
+    return client->DoubleVariation(ctx, key, default_value, hook_context);
 }
 
 EvaluationDetail<double> Client::DoubleVariationDetail(Context const& ctx,
@@ -100,10 +161,26 @@ EvaluationDetail<double> Client::DoubleVariationDetail(Context const& ctx,
     return client->DoubleVariationDetail(ctx, key, default_value);
 }
 
+EvaluationDetail<double> Client::DoubleVariationDetail(
+    Context const& ctx,
+    FlagKey const& key,
+    double default_value,
+    hooks::HookContext const& hook_context) {
+    return client->DoubleVariationDetail(ctx, key, default_value,
+                                         hook_context);
+}
+
 int Client::IntVariation(Context const& ctx,
                          FlagKey const& key,
                          int default_value) {
     return client->IntVariation(ctx, key, default_value);
+}
+
+int Client::IntVariation(Context const& ctx,
+                         FlagKey const& key,
+                         int default_value,
+                         hooks::HookContext const& hook_context) {
+    return client->IntVariation(ctx, key, default_value, hook_context);
 }
 
 EvaluationDetail<int> Client::IntVariationDetail(Context const& ctx,
@@ -112,16 +189,41 @@ EvaluationDetail<int> Client::IntVariationDetail(Context const& ctx,
     return client->IntVariationDetail(ctx, key, default_value);
 }
 
+EvaluationDetail<int> Client::IntVariationDetail(
+    Context const& ctx,
+    FlagKey const& key,
+    int default_value,
+    hooks::HookContext const& hook_context) {
+    return client->IntVariationDetail(ctx, key, default_value, hook_context);
+}
+
 Value Client::JsonVariation(Context const& ctx,
                             FlagKey const& key,
                             Value default_value) {
     return client->JsonVariation(ctx, key, std::move(default_value));
 }
 
+Value Client::JsonVariation(Context const& ctx,
+                            FlagKey const& key,
+                            Value default_value,
+                            hooks::HookContext const& hook_context) {
+    return client->JsonVariation(ctx, key, std::move(default_value),
+                                 hook_context);
+}
+
 EvaluationDetail<Value> Client::JsonVariationDetail(Context const& ctx,
                                                     FlagKey const& key,
                                                     Value default_value) {
     return client->JsonVariationDetail(ctx, key, std::move(default_value));
+}
+
+EvaluationDetail<Value> Client::JsonVariationDetail(
+    Context const& ctx,
+    FlagKey const& key,
+    Value default_value,
+    hooks::HookContext const& hook_context) {
+    return client->JsonVariationDetail(ctx, key, std::move(default_value),
+                                       hook_context);
 }
 
 IDataSourceStatusProvider& Client::DataSourceStatus() {
