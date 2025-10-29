@@ -90,6 +90,10 @@ target_link_libraries(${LIBNAME}
         PUBLIC launchdarkly::common
         PRIVATE Boost::headers Boost::json Boost::url launchdarkly::sse launchdarkly::internal foxy timestamp)
 
+if (LD_CURL_NETWORKING)
+    target_link_libraries(${LIBNAME} PRIVATE launchdarkly::networking)
+endif()
+
 
 add_library(launchdarkly::server ALIAS ${LIBNAME})
 

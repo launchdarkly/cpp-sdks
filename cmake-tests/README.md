@@ -55,6 +55,38 @@ Additionally, certain variables must be forwarded to each test project CMake con
 |--------------------|---------------------------------------------------------------------------------------------------------|
 | `Boost_DIR`        | Path to boost CMAKE configuration.  Example: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0' |
 | `OPENSSL_ROOT_DIR` | Path to OpenSSL.                                                                                        |
+| `CMAKE_EXTRA_ARGS` | Additional CMake arguments to pass to the SDK configuration. Example: '-DLD_CURL_NETWORKING=ON'         |
+| `CURL_ROOT`        | Path to CURL installation (required when building with `-DLD_CURL_NETWORKING=ON`).                     |
+| `CMAKE_PREFIX_PATH`| Additional paths for CMake to search for packages (often set to `CURL_ROOT` for CURL builds).          |
+
+## Testing with CURL Networking
+
+The SDK can be built with CURL networking support instead of the default Boost.Beast/Foxy implementation
+by passing `-DLD_CURL_NETWORKING=ON` to CMake. To test the CMake integration with CURL enabled:
+
+1. Set the environment variables before running the configuration script:
+```bash
+export CMAKE_EXTRA_ARGS="-DLD_CURL_NETWORKING=ON"
+export CURL_ROOT=/path/to/curl  # or /usr on most Linux systems
+export CMAKE_PREFIX_PATH=$CURL_ROOT
+./scripts/configure-cmake-integration-tests.sh
+```
+
+2. Build and install the SDK:
+```bash
+cmake --build build
+cmake --install build
+```
+
+3. Run the integration tests:
+```bash
+cd build/cmake-tests
+ctest --output-on-failure
+```
+
+The `launchdarklyConfig.cmake` file will automatically detect and find CURL when the SDK was built
+with CURL support, using `find_package(CURL QUIET)`. This allows downstream projects using
+`find_package(launchdarkly)` to work seamlessly whether the SDK was built with CURL or Boost.Beast.
 
 ## Tests
 

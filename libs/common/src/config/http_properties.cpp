@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <utility>
 
 #include <launchdarkly/config/shared/built/http_properties.hpp>
@@ -22,18 +23,37 @@ std::optional<std::string> const& TlsOptions::CustomCAFile() const {
     return ca_bundle_path_;
 }
 
+ProxyOptions::ProxyOptions(std::optional<std::string> url)
+    : url_(std::move(url)) {
+#ifndef LD_CURL_NETWORKING
+    if (url_.has_value() && !url_->empty()) {
+        throw std::runtime_error(
+            "Proxy configuration requires CURL networking support. "
+            "Please rebuild with -DLD_CURL_NETWORKING=ON");
+    }
+#endif
+}
+
+ProxyOptions::ProxyOptions() : ProxyOptions(std::nullopt) {}
+
+std::optional<std::string> const& ProxyOptions::Url() const {
+    return url_;
+}
+
 HttpProperties::HttpProperties(std::chrono::milliseconds connect_timeout,
                                std::chrono::milliseconds read_timeout,
                                std::chrono::milliseconds write_timeout,
                                std::chrono::milliseconds response_timeout,
                                std::map<std::string, std::string> base_headers,
-                               TlsOptions tls)
+                               TlsOptions tls,
+                               ProxyOptions proxy)
     : connect_timeout_(connect_timeout),
       read_timeout_(read_timeout),
       write_timeout_(write_timeout),
       response_timeout_(response_timeout),
       base_headers_(std::move(base_headers)),
-      tls_(std::move(tls)) {}
+      tls_(std::move(tls)),
+      proxy_(std::move(proxy)) {}
 
 std::chrono::milliseconds HttpProperties::ConnectTimeout() const {
     return connect_timeout_;
@@ -59,16 +79,25 @@ TlsOptions const& HttpProperties::Tls() const {
     return tls_;
 }
 
+ProxyOptions const& HttpProperties::Proxy() const {
+    return proxy_;
+}
+
 bool operator==(HttpProperties const& lhs, HttpProperties const& rhs) {
     return lhs.ReadTimeout() == rhs.ReadTimeout() &&
            lhs.WriteTimeout() == rhs.WriteTimeout() &&
            lhs.ConnectTimeout() == rhs.ConnectTimeout() &&
-           lhs.BaseHeaders() == rhs.BaseHeaders() && lhs.Tls() == rhs.Tls();
+           lhs.BaseHeaders() == rhs.BaseHeaders() && lhs.Tls() == rhs.Tls() &&
+           lhs.Proxy() == rhs.Proxy();
 }
 
 bool operator==(TlsOptions const& lhs, TlsOptions const& rhs) {
     return lhs.PeerVerifyMode() == rhs.PeerVerifyMode() &&
            lhs.CustomCAFile() == rhs.CustomCAFile();
+}
+
+bool operator==(ProxyOptions const& lhs, ProxyOptions const& rhs) {
+    return lhs.Url() == rhs.Url();
 }
 
 }  // namespace launchdarkly::config::shared::built

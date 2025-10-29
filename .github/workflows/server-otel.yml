@@ -21,6 +21,7 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-otel
+          install_curl: true
           simulate_release: true
   build-otel-mac:
     runs-on: macos-13
@@ -30,6 +31,7 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-server-otel
           platform_version: 12
+          install_curl: true
           simulate_release: true
   build-test-otel-windows:
     runs-on: windows-2022
@@ -45,4 +47,5 @@ jobs:
           cmake_target: launchdarkly-cpp-server-otel
           platform_version: 2022
           toolset: msvc
+          install_curl: true
           simulate_windows_release: true

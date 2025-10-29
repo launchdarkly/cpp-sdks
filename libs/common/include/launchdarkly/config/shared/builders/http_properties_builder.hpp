@@ -179,6 +179,21 @@ class HttpPropertiesBuilder {
     HttpPropertiesBuilder& Tls(TlsBuilder<SDK> builder);
 
     /**
+     * Sets proxy configuration for HTTP requests.
+     *
+     * When set, the proxy URL takes precedence over environment variables
+     * (ALL_PROXY, HTTP_PROXY, HTTPS_PROXY).
+     *
+     * @param url Proxy URL:
+     *            - std::nullopt: Use environment variables (default)
+     *            - Non-empty string: Use this proxy URL
+     *            - Empty string: Explicitly disable proxy (overrides environment variables)
+     * @return A reference to this builder.
+     * @throws std::runtime_error if proxy is configured without CURL networking support
+     */
+    HttpPropertiesBuilder& Proxy(std::optional<std::string> url);
+
+    /**
      * Build a set of HttpProperties.
      * @return The built properties.
      */
@@ -193,6 +208,7 @@ class HttpPropertiesBuilder {
     std::string wrapper_version_;
     std::map<std::string, std::string> base_headers_;
     TlsBuilder<SDK> tls_;
+    built::ProxyOptions proxy_;
 };
 
 }  // namespace launchdarkly::config::shared::builders

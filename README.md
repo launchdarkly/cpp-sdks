@@ -65,6 +65,7 @@ Various CMake options are available to customize the client/server SDK builds.
 | `LD_DYNAMIC_LINK_BOOST`       | If building SDK as shared lib, whether to dynamically link Boost or not. Ensure that the shared boost libraries are present on the target system.                                                                                                                        | On (link boost dynamically when producing shared libs) | `LD_BUILD_SHARED_LIBS`                    |
 | `LD_DYNAMIC_LINK_OPENSSL`     | Whether OpenSSL is dynamically linked or not.                                                                                                                                                                                                                            | Off  (static link)                                     | N/A                                       |
 | `LD_BUILD_REDIS_SUPPORT`      | Whether the server-side Redis Source is built or not.                                                                                                                                                                                                                    | Off                                                    | N/A                                       |
+| `LD_CURL_NETWORKING`          | Enable CURL-based networking for all HTTP requests (SSE streams and event delivery). When OFF, Boost.Beast/Foxy is used instead. CURL must be available as a dependency when this option is ON.                                                                          | Off                                                    | N/A                                       |
 
 > [!WARNING]   
 > When building shared libraries C++ symbols are not exported, only the C API will be exported. This is because C++ does
@@ -90,6 +91,54 @@ cmake -B build -S . -G"Unix Makefiles" \
 
 The example uses `make`, but you might instead use [Ninja](https://ninja-build.org/),
 MSVC, [etc.](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+
+### Building with CURL Networking
+
+By default, the SDK uses Boost.Beast/Foxy for HTTP networking. To use CURL instead, enable the `LD_CURL_NETWORKING` option:
+
+```bash
+cmake -B build -S . -DLD_CURL_NETWORKING=ON
+```
+
+> [!WARNING]
+> CURL support for the **server-side SDK** is currently **experimental**. It is subject to change and may not be fully tested for production use.
+
+Proxy support does not apply to the redis persistent store implementation for the server-side SDK.
+
+#### CURL Requirements by Platform
+
+**Linux/macOS:**
+Install CURL development libraries via your package manager:
+```bash
+# Ubuntu/Debian
+sudo apt-get install libcurl4-openssl-dev
+
+# macOS
+brew install curl
+```
+
+**Windows (MSVC):**
+CURL must be built from source using MSVC to ensure ABI compatibility. A helper script is provided:
+
+```powershell
+.\scripts\build-curl-windows.ps1 -Version "8.11.1" -InstallPrefix "C:\curl-install"
+```
+
+Then configure the SDK with:
+```powershell
+cmake -B build -S . -DLD_CURL_NETWORKING=ON `
+    -DCURL_ROOT="C:\curl-install" `
+    -DCMAKE_PREFIX_PATH="C:\curl-install"
+```
+
+The `build-curl-windows.ps1` script:
+- Downloads CURL source from curl.se
+- Builds static libraries with MSVC using CMake
+- Uses Windows Schannel for SSL (no OpenSSL dependency)
+- Installs to the specified prefix directory
+
+> [!NOTE]
+> Pre-built CURL binaries from curl.se (MinGW builds) are **not** compatible with MSVC and will cause linker errors.
 
 ## Incorporating the SDK via `add_subdirectory`
 

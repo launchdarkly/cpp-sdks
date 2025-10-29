@@ -38,6 +38,12 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             .PollingBaseUrl(default_endpoints.PollingBaseUrl())
             .StreamingBaseUrl(default_endpoints.StreamingBaseUrl());
 
+    if (in.proxy) {
+        if (in.proxy->httpProxy) {
+            config_builder.HttpProperties().Proxy(*in.proxy->httpProxy);
+        }
+    }
+
     if (in.serviceEndpoints) {
         if (in.serviceEndpoints->streaming) {
             endpoints.StreamingBaseUrl(*in.serviceEndpoints->streaming);

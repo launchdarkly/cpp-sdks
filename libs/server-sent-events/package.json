@@ -3,5 +3,7 @@
   "description": "This package.json exists for modeling dependencies for the release process.",
   "private": true,
   "version": "0.5.5",
-  "dependencies": {}
+  "dependencies": {
+    "launchdarkly-cpp-networking": "0.1.0"
+  }
 }

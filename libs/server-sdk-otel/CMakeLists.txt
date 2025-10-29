@@ -29,6 +29,12 @@ if (LD_BUILD_OTEL_FETCH_DEPS)
     message("LaunchDarkly: fetching OpenTelemetry dependencies for local/CI build")
     include(FetchContent)
 
+    # Find system curl first to prevent OpenTelemetry from building it
+    find_package(CURL REQUIRED)
+    if(CURL_FOUND)
+        message(STATUS "LaunchDarkly: found system CURL at ${CURL_LIBRARIES}")
+    endif()
+
     # Configure OpenTelemetry options with sensible defaults
     set(WITH_OTLP_HTTP ON CACHE BOOL "Build with OTLP HTTP exporter" FORCE)
     set(WITH_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)

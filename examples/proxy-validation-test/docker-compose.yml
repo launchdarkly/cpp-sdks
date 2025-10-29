@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # SOCKS5 proxy server - connected to BOTH internal network and internet
+  proxy:
+    image: serjs/go-socks5-proxy:latest
+    container_name: ld-proxy-test
+    environment:
+      - PROXY_USER=proxyuser
+      - PROXY_PASSWORD=proxypass
+      - PROXY_PORT=1080
+    ports:
+      - "1080:1080"
+    networks:
+      - internal  # Can communicate with client
+      - default   # Has internet access
+
+  # SDK client application - ONLY on internal network (no direct internet)
+  client:
+    build:
+      context: ../..
+      dockerfile: examples/proxy-validation-test/Dockerfile
+    container_name: ld-client-test
+    depends_on:
+      - proxy
+    # Give proxy a few seconds to start
+    command: sh -c "sleep 5 && /test-proxy.sh"
+    environment:
+      - LD_MOBILE_KEY=${LD_MOBILE_KEY}
+      # Use socks5h:// to perform DNS resolution through the proxy
+      - ALL_PROXY=socks5h://proxyuser:proxypass@proxy:1080
+      - LD_LOG_LEVEL=debug
+    networks:
+      - internal  # Only internal network - no direct internet access!
+    dns:
+      - 8.8.8.8
+    cap_drop:
+      - ALL
+
+networks:
+  # Internal network with no internet access
+  internal:
+    driver: bridge
+    internal: true  # This blocks external access!
+  # Default network (has internet access) - only proxy uses this

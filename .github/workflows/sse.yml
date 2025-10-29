@@ -18,6 +18,16 @@ jobs:
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
+
+  build-test-sse-curl:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: launchdarkly-sse-client
+          use_curl: true
+
   contract-tests:
     runs-on: ubuntu-22.04
     env:
@@ -30,6 +40,28 @@ jobs:
         with:
           cmake_target: sse-tests
           run_tests: false
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
+        with:
+          repo: 'sse-contract-tests'
+          branch: 'main'
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  contract-tests-curl:
+    runs-on: ubuntu-22.04
+    env:
+      # Port the test service (implemented in this repo) should bind to.
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: sse-tests
+          run_tests: false
+          use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
       - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
