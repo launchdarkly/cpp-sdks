@@ -1,7 +1,10 @@
 #include <launchdarkly/events/detail/parse_date_header.hpp>
 #include <launchdarkly/events/detail/request_worker.hpp>
+#include <boost/beast/http/status.hpp>
 
 namespace launchdarkly::events::detail {
+
+namespace http = boost::beast::http;
 
 RequestWorker::RequestWorker(boost::asio::any_io_executor io,
                              std::chrono::milliseconds retry_after,

@@ -51,6 +51,7 @@ HttpPropertiesBuilder<SDK>::HttpPropertiesBuilder(
     response_timeout_ = properties.ResponseTimeout();
     base_headers_ = properties.BaseHeaders();
     tls_ = properties.Tls();
+    proxy_ = properties.Proxy();
 }
 
 template <typename SDK>
@@ -122,16 +123,23 @@ HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Tls(
 }
 
 template <typename SDK>
+HttpPropertiesBuilder<SDK>& HttpPropertiesBuilder<SDK>::Proxy(
+    std::optional<std::string> url) {
+    proxy_ = built::ProxyOptions(std::move(url));
+    return *this;
+}
+
+template <typename SDK>
 built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
     if (!wrapper_name_.empty()) {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
         headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
             wrapper_name_ + "/" + wrapper_version_;
         return {connect_timeout_,  read_timeout_,        write_timeout_,
-                response_timeout_, headers_with_wrapper, tls_.Build()};
+                response_timeout_, headers_with_wrapper, tls_.Build(), proxy_};
     }
     return {connect_timeout_,  read_timeout_, write_timeout_,
-            response_timeout_, base_headers_, tls_.Build()};
+            response_timeout_, base_headers_, tls_.Build(), proxy_};
 }
 
 template class TlsBuilder<config::shared::ClientSDK>;

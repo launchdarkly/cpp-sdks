@@ -5,7 +5,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
 )
 
 # Automatic library: static or dynamic based on user config.
-add_library(${LIBNAME} OBJECT
+set(SSE_SOURCES
         ${HEADER_LIST}
         client.cpp
         parser.cpp
@@ -14,10 +14,22 @@ add_library(${LIBNAME} OBJECT
         backoff_detail.cpp
         backoff.cpp)
 
+if (LD_CURL_NETWORKING)
+    message(STATUS "LaunchDarkly SSE: CURL networking enabled")
+    list(APPEND SSE_SOURCES curl_client.cpp)
+endif()
+
+add_library(${LIBNAME} OBJECT ${SSE_SOURCES})
+
 target_link_libraries(${LIBNAME}
         PUBLIC OpenSSL::SSL Boost::headers foxy
         PRIVATE Boost::url Boost::disable_autolinking
 )
+
+if (LD_CURL_NETWORKING)
+    target_link_libraries(${LIBNAME} PRIVATE launchdarkly::networking)
+    target_compile_definitions(${LIBNAME} PRIVATE LD_CURL_NETWORKING)
+endif()
 
 add_library(launchdarkly::sse ALIAS ${LIBNAME})
 

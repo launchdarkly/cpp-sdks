@@ -353,6 +353,15 @@ LDClientHttpPropertiesTlsBuilder_Free(LDClientHttpPropertiesTlsBuilder b) {
 }
 
 LD_EXPORT(void)
+LDClientConfigBuilder_HttpProperties_Proxy(LDClientConfigBuilder b,
+                                           char const* proxy_url) {
+    LD_ASSERT_NOT_NULL(b);
+    LD_ASSERT_NOT_NULL(proxy_url);
+
+    TO_BUILDER(b)->HttpProperties().Proxy(proxy_url);
+}
+
+LD_EXPORT(void)
 LDClientConfigBuilder_Logging_Disable(LDClientConfigBuilder b) {
     LD_ASSERT_NOT_NULL(b);
 

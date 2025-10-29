@@ -8,6 +8,9 @@
 
 #include "backoff.hpp"
 #include "parser.hpp"
+#ifdef LD_CURL_NETWORKING
+#include "curl_client.hpp"
+#endif
 
 #include <boost/beast/http/parser.hpp>
 #include <boost/beast/http/read.hpp>
@@ -513,7 +516,8 @@ Builder::Builder(net::any_io_executor ctx, std::string url)
       receiver_([](launchdarkly::sse::Event const&) {}),
       error_cb_([](auto err) {}),
       skip_verify_peer_(false),
-      custom_ca_file_(std::nullopt) {
+      custom_ca_file_(std::nullopt),
+      proxy_url_(std::nullopt) {
     request_.version(11);
     request_.set(http::field::user_agent, kDefaultUserAgent);
     request_.method(http::verb::get);
@@ -585,6 +589,18 @@ Builder& Builder::custom_ca_file(std::string path) {
     return *this;
 }
 
+Builder& Builder::proxy(std::optional<std::string> url) {
+#ifndef LD_CURL_NETWORKING
+    if (url.has_value() && !url->empty()) {
+        throw std::runtime_error(
+            "Proxy configuration requires CURL networking support. "
+            "Please rebuild with -DLD_CURL_NETWORKING=ON");
+    }
+#endif
+    proxy_url_ = std::move(url);
+    return *this;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
@@ -627,6 +643,14 @@ std::shared_ptr<Client> Builder::build() {
     std::string service = uri_components->has_port() ? uri_components->port()
                                                      : uri_components->scheme();
 
+#ifdef LD_CURL_NETWORKING
+        bool use_https = uri_components->scheme_id() == boost::urls::scheme::https;
+        return std::make_shared<CurlClient>(
+            net::make_strand(executor_), request, host, service,
+            connect_timeout_, read_timeout_, write_timeout_,
+            initial_reconnect_delay_, receiver_, logging_cb_, error_cb_,
+            skip_verify_peer_, custom_ca_file_, use_https, proxy_url_);
+#else
     std::optional<ssl::context> ssl;
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
         ssl = launchdarkly::foxy::make_ssl_ctx(ssl::context::tlsv12_client);
@@ -648,6 +672,7 @@ std::shared_ptr<Client> Builder::build() {
         net::make_strand(executor_), request, host, service, connect_timeout_,
         read_timeout_, write_timeout_, initial_reconnect_delay_, receiver_,
         logging_cb_, error_cb_, std::move(ssl));
+#endif
 }
 
 }  // namespace launchdarkly::sse

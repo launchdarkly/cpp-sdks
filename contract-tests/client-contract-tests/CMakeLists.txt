@@ -27,4 +27,8 @@ target_link_libraries(client-tests PRIVATE
         contract-test-data-model
         )
 
+if (LD_CURL_NETWORKING)
+        target_compile_definitions(client-tests PUBLIC LD_CURL_NETWORKING)
+endif()
+
 target_include_directories(client-tests PUBLIC include)

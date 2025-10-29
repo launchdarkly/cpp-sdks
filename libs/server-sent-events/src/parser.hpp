@@ -62,6 +62,16 @@ struct EventBody<EventReceiver>::reader {
     std::optional<Event> event_;
 
    public:
+    // Constructor for standalone use (curl_client) - no Boost types required
+    explicit reader(value_type& body)
+        : body_(body),
+          buffered_line_(),
+          complete_lines_(),
+          begin_CR_(false),
+          event_() {
+    }
+
+    // Constructor for Boost Beast HTTP body reader (FoxyClient)
     template <bool isRequest, class Fields>
     reader(http::header<isRequest, Fields>& h, value_type& body)
         : body_(body),
@@ -87,6 +97,11 @@ struct EventBody<EventReceiver>::reader {
         ec = {};
     }
 
+    // Simplified init for standalone use - no Boost types required
+    void init() {
+        // Nothing to initialize
+    }
+
     /**
      * Store buffers.
      * This is called zero or more times with parsed body octets.
@@ -102,6 +117,16 @@ struct EventBody<EventReceiver>::reader {
         parse_stream(buffers_to_string(buffers));
         parse_events();
         return buffer_bytes(buffers);
+    }
+
+    /**
+     * Simplified put for standalone use - no Boost types required.
+     * Feed data into the parser. This can be called multiple times as data arrives.
+     * @param data The data to parse
+     */
+    void put(std::string_view data) {
+        parse_stream(data);
+        parse_events();
     }
 
     /**
@@ -124,20 +149,20 @@ struct EventBody<EventReceiver>::reader {
     // Appends the body to the buffered line until reaching any of the
     // characters specified within the search parameter. The search parameter is
     // treated as an array of search characters, not as a single token.
-    size_t append_up_to(boost::string_view body, std::string const& search) {
+    size_t append_up_to(std::string_view body, std::string const& search) {
         std::size_t index = body.find_first_of(search);
         if (index != std::string::npos) {
             body.remove_suffix(body.size() - index);
         }
         if (buffered_line_.has_value()) {
-            buffered_line_->append(body.to_string());
+            buffered_line_->append(body);
         } else {
             buffered_line_ = std::string{body};
         }
         return index == std::string::npos ? body.size() : index;
     }
 
-    void parse_stream(boost::string_view body) {
+    void parse_stream(std::string_view body) {
         size_t i = 0;
         while (i < body.size()) {
             i += this->append_up_to(body.substr(i, body.length() - i), "\r\n");

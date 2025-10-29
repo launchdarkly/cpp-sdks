@@ -26,6 +26,7 @@
     },
     "libs/server-sent-events": {},
     "libs/common": {},
-    "libs/internal": {}
+    "libs/internal": {},
+    "libs/networking": {}
   }
 }

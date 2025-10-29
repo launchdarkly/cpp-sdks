@@ -72,6 +72,13 @@ cmake_dependent_option(LD_TESTING_SANITIZERS
         OFF                     # otherwise, off
 )
 
+cmake_dependent_option(LD_BUILD_COVERAGE
+        "Enable code coverage instrumentation for unit tests."
+        OFF                     # default to off since it requires specific build configuration
+        "LD_BUILD_UNIT_TESTS"   # only expose if unit tests enabled
+        OFF                     # otherwise, off
+)
+
 cmake_dependent_option(LD_BUILD_CONTRACT_TESTS
         "Build contract test service."
         OFF                                         # default to disabling contract tests, since they require running a service
@@ -100,6 +107,8 @@ option(LD_DYNAMIC_LINK_OPENSSL
 option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
 option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
+
+option(LD_CURL_NETWORKING "Enable CURL-based networking for SSE client (alternative to Boost.Beast/Foxy)" OFF)
 
 # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
 # it will cause a full build. This disables that, allowing us to build piecemeal instead. This is useful
@@ -134,6 +143,15 @@ if (LD_BUILD_UNIT_TESTS)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak")
         endif ()
     endif ()
+    if (LD_BUILD_COVERAGE)
+        message(STATUS "LaunchDarkly: enabling code coverage")
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+            set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+        else()
+            message(WARNING "Code coverage requested but compiler ${CMAKE_CXX_COMPILER_ID} is not supported. Coverage will not be enabled.")
+        endif()
+    endif()
     include(${CMAKE_FILES}/googletest.cmake)
     enable_testing()
 endif ()
@@ -187,6 +205,13 @@ add_subdirectory(vendor/foxy)
 
 # Common, internal, and server-sent-events are built as "object" libraries.
 add_subdirectory(libs/common)
+
+if (LD_CURL_NETWORKING)
+    message(STATUS "LaunchDarkly: building networking library (CURL support)")
+    find_package(CURL REQUIRED)
+    add_subdirectory(libs/networking)
+endif()
+
 add_subdirectory(libs/internal)
 add_subdirectory(libs/server-sent-events)
 

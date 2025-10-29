@@ -40,7 +40,10 @@ runs:
     - name: Install OpenSSL
       uses: ./.github/actions/install-openssl
       id: install-openssl
-    - name: Build Linux Artifacts
+    - name: Install CURL
+      uses: ./.github/actions/install-curl
+      id: install-curl
+    - name: Build Linux Artifacts (Boost.Beast)
       if: runner.os == 'Linux'
       shell: bash
       run: |
@@ -52,6 +55,17 @@ runs:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+
+    - name: Build Linux Artifacts (CURL)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        ./scripts/build-release.sh ${{ inputs.sdk_cmake_target }} --with-curl
+      env:
+        WORKSPACE: ${{ inputs.sdk_path }}
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
 
     - name: Archive Release Linux - GCC/x64/Static
       if: runner.os == 'Linux'
@@ -69,19 +83,48 @@ runs:
         type: 'zip'
         filename: 'linux-gcc-x64-dynamic.zip'
 
+    - name: Determine CURL artifact suffix for server SDK
+      if: runner.os == 'Linux'
+      shell: bash
+      id: curl-suffix-linux
+      run: |
+        if [[ "${{ inputs.sdk_cmake_target }}" == "launchdarkly-cpp-server" ]]; then
+          echo "suffix=-experimental" >> $GITHUB_OUTPUT
+        else
+          echo "suffix=" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Archive Release Linux - GCC/x64/Static/CURL
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-curl/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-static-curl${{ steps.curl-suffix-linux.outputs.suffix }}.zip'
+
+    - name: Archive Release Linux - GCC/x64/Dynamic/CURL
+      if: runner.os == 'Linux'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-curl/release'
+        type: 'zip'
+        filename: 'linux-gcc-x64-dynamic-curl${{ steps.curl-suffix-linux.outputs.suffix }}.zip'
+
     - name: Hash Linux Build Artifacts for provenance
       if: runner.os == 'Linux'
       shell: bash
       id: hash-linux
       run: |
-        echo "hashes-linux=$(sha256sum linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
+        CURL_SUFFIX="${{ steps.curl-suffix-linux.outputs.suffix }}"
+        echo "hashes-linux=$(sha256sum linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip linux-gcc-x64-static-curl${CURL_SUFFIX}.zip linux-gcc-x64-dynamic-curl${CURL_SUFFIX}.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Linux Build Artifacts
       if: runner.os == 'Linux'
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip --clobber
+        CURL_SUFFIX="${{ steps.curl-suffix-linux.outputs.suffix }}"
+        gh release upload ${{ inputs.tag_name }} linux-gcc-x64-static.zip linux-gcc-x64-dynamic.zip linux-gcc-x64-static-curl${CURL_SUFFIX}.zip linux-gcc-x64-dynamic-curl${CURL_SUFFIX}.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
 
@@ -96,7 +139,7 @@ runs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Build Windows Artifacts
+    - name: Build Windows Artifacts (Boost.Beast)
       if: runner.os == 'Windows'
       shell: bash
       env:
@@ -104,6 +147,17 @@ runs:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
       run: ./scripts/build-release-windows.sh ${{ inputs.sdk_cmake_target }}
+
+    - name: Build Windows Artifacts (CURL)
+      if: runner.os == 'Windows'
+      shell: bash
+      env:
+        Boost_DIR: ${{ steps.install-boost.outputs.Boost_DIR }}
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+        CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
+      run: ./scripts/build-release-windows.sh ${{ inputs.sdk_cmake_target }} --with-curl
 
     - name: Archive Release Windows - MSVC/x64/Static
       if: runner.os == 'Windows'
@@ -137,23 +191,68 @@ runs:
         type: 'zip'
         filename: 'windows-msvc-x64-dynamic-debug.zip'
 
+    - name: Determine CURL artifact suffix for server SDK
+      if: runner.os == 'Windows'
+      shell: bash
+      id: curl-suffix-windows
+      run: |
+        if [[ "${{ inputs.sdk_cmake_target }}" == "launchdarkly-cpp-server" ]]; then
+          echo "suffix=-experimental" >> $GITHUB_OUTPUT
+        else
+          echo "suffix=" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Archive Release Windows - MSVC/x64/Static/CURL
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-curl/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic/CURL
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-curl/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Static/Debug/CURL
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-debug-curl/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-static-debug-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
+
+    - name: Archive Release Windows - MSVC/x64/Dynamic/Debug/CURL
+      if: runner.os == 'Windows'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-debug-curl/release'
+        type: 'zip'
+        filename: 'windows-msvc-x64-dynamic-debug-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
+
     - name: Hash Windows Build Artifacts for provenance
       if: runner.os == 'Windows'
       shell: bash
       id: hash-windows
       run: |
-        echo "hashes-windows=$(sha256sum windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
+        CURL_SUFFIX="${{ steps.curl-suffix-windows.outputs.suffix }}"
+        echo "hashes-windows=$(sha256sum windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip windows-msvc-x64-static-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-curl${CURL_SUFFIX}.zip windows-msvc-x64-static-debug-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-debug-curl${CURL_SUFFIX}.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Windows Build Artifacts
       if: runner.os == 'Windows'
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip --clobber
+        CURL_SUFFIX="${{ steps.curl-suffix-windows.outputs.suffix }}"
+        gh release upload ${{ inputs.tag_name }} windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip windows-msvc-x64-static-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-curl${CURL_SUFFIX}.zip windows-msvc-x64-static-debug-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-debug-curl${CURL_SUFFIX}.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
 
-    - name: Build Mac Artifacts
+    - name: Build Mac Artifacts (Boost.Beast)
       id: brew-action
       if: runner.os == 'macOS'
       shell: bash
@@ -162,6 +261,16 @@ runs:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+
+    - name: Build Mac Artifacts (CURL)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: ./scripts/build-release.sh ${{ inputs.sdk_cmake_target }} --with-curl
+      env:
+        WORKSPACE: ${{ inputs.sdk_path }}
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+        OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
 
     - name: Archive Release Mac - AppleClang/x64/Static
       if: runner.os == 'macOS'
@@ -179,18 +288,47 @@ runs:
         type: 'zip'
         filename: 'mac-clang-x64-dynamic.zip'
 
+    - name: Determine CURL artifact suffix for server SDK
+      if: runner.os == 'macOS'
+      shell: bash
+      id: curl-suffix-macos
+      run: |
+        if [[ "${{ inputs.sdk_cmake_target }}" == "launchdarkly-cpp-server" ]]; then
+          echo "suffix=-experimental" >> $GITHUB_OUTPUT
+        else
+          echo "suffix=" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Archive Release Mac - AppleClang/x64/Static/CURL
+      if: runner.os == 'macOS'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-static-curl/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-static-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
+
+    - name: Archive Release Mac - AppleClang/x64/Dynamic/CURL
+      if: runner.os == 'macOS'
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        path: 'build-dynamic-curl/release'
+        type: 'zip'
+        filename: 'mac-clang-x64-dynamic-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
+
     - name: Hash Mac Build Artifacts for provenance
       if: runner.os == 'macOS'
       shell: bash
       id: hash-macos
       run: |
-        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
+        CURL_SUFFIX="${{ steps.curl-suffix-macos.outputs.suffix }}"
+        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip mac-clang-x64-static-curl${CURL_SUFFIX}.zip mac-clang-x64-dynamic-curl${CURL_SUFFIX}.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Mac Build Artifacts
       if: runner.os == 'macOS'
       shell: bash
       run: |
         ls
-        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip --clobber
+        CURL_SUFFIX="${{ steps.curl-suffix-macos.outputs.suffix }}"
+        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip mac-clang-x64-static-curl${CURL_SUFFIX}.zip mac-clang-x64-dynamic-curl${CURL_SUFFIX}.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}

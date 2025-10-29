@@ -47,6 +47,10 @@ int main(int argc, char* argv[]) {
         srv.add_capability("tls:skip-verify-peer");
         srv.add_capability("tls:custom-ca");
         srv.add_capability("client-prereq-events");
+        // Proxies are supported only with CURL networking.
+#ifdef LD_CURL_NETWORKING
+        srv.add_capability("http-proxy");
+#endif
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
