@@ -9,7 +9,7 @@
 
 namespace launchdarkly::server_side::integrations::otel {
 
-// Basic smoke test
+// Basic construction tests
 TEST(TracingHookTest, ConstructsWithDefaultOptions) {
     TracingHook hook;
     EXPECT_EQ(hook.Metadata().Name(), "LaunchDarkly OpenTelemetry Tracing Hook");
@@ -26,6 +26,7 @@ TEST(TracingHookTest, ConstructsWithCustomOptions) {
     EXPECT_EQ(hook.Metadata().Name(), "LaunchDarkly OpenTelemetry Tracing Hook");
 }
 
+// Options builder tests
 TEST(TracingHookOptionsBuilderTest, BuildsDefaultOptions) {
     auto options = TracingHookOptionsBuilder().Build();
 
@@ -67,10 +68,79 @@ TEST(TracingHookOptionsBuilderTest, ChainsMethods) {
     EXPECT_EQ(options.EnvironmentId().value(), "staging");
 }
 
-// TODO: Add integration tests with mock OpenTelemetry components
-// TODO: Add tests for BeforeEvaluation and AfterEvaluation
-// TODO: Add tests for span event creation
-// TODO: Add tests for span creation when enabled
-// TODO: Add tests for HookContext span injection
+TEST(TracingHookOptionsBuilderTest, IncludeValueDefaultsFalse) {
+    auto options = TracingHookOptionsBuilder()
+                       .CreateSpans(true)
+                       .Build();
+
+    EXPECT_FALSE(options.IncludeValue());
+    EXPECT_TRUE(options.CreateSpans());
+}
+
+TEST(TracingHookOptionsBuilderTest, CreateSpansDefaultsFalse) {
+    auto options = TracingHookOptionsBuilder()
+                       .IncludeValue(true)
+                       .Build();
+
+    EXPECT_TRUE(options.IncludeValue());
+    EXPECT_FALSE(options.CreateSpans());
+}
+
+TEST(TracingHookOptionsBuilderTest, CanSetMultipleOptions) {
+    auto options = TracingHookOptionsBuilder()
+                       .IncludeValue(true)
+                       .CreateSpans(true)
+                       .EnvironmentId("dev")
+                       .Build();
+
+    EXPECT_TRUE(options.IncludeValue());
+    EXPECT_TRUE(options.CreateSpans());
+    ASSERT_TRUE(options.EnvironmentId().has_value());
+    EXPECT_EQ(options.EnvironmentId().value(), "dev");
+}
+
+TEST(TracingHookOptionsBuilderTest, EnvironmentIdIsOptional) {
+    auto options1 = TracingHookOptionsBuilder()
+                        .IncludeValue(true)
+                        .Build();
+    EXPECT_FALSE(options1.EnvironmentId().has_value());
+
+    auto options2 = TracingHookOptionsBuilder()
+                        .CreateSpans(true)
+                        .Build();
+    EXPECT_FALSE(options2.EnvironmentId().has_value());
+}
+
+TEST(TracingHookOptionsBuilderTest, BuilderIsReusable) {
+    auto builder = TracingHookOptionsBuilder()
+                       .IncludeValue(true)
+                       .CreateSpans(true);
+
+    auto options1 = builder.Build();
+    auto options2 = builder.EnvironmentId("test").Build();
+
+    EXPECT_TRUE(options1.IncludeValue());
+    EXPECT_TRUE(options2.IncludeValue());
+    EXPECT_FALSE(options1.EnvironmentId().has_value());
+    EXPECT_TRUE(options2.EnvironmentId().has_value());
+}
+
+// Metadata tests
+TEST(TracingHookTest, MetadataNameIsCorrect) {
+    TracingHook hook;
+    EXPECT_EQ(hook.Metadata().Name(), "LaunchDarkly OpenTelemetry Tracing Hook");
+}
+
+TEST(TracingHookTest, MetadataIsConsistent) {
+    auto options = TracingHookOptionsBuilder()
+                       .IncludeValue(true)
+                       .CreateSpans(true)
+                       .EnvironmentId("production")
+                       .Build();
+    TracingHook hook(options);
+
+    // Metadata should be the same regardless of options
+    EXPECT_EQ(hook.Metadata().Name(), "LaunchDarkly OpenTelemetry Tracing Hook");
+}
 
 }  // namespace launchdarkly::server_side::integrations::otel
