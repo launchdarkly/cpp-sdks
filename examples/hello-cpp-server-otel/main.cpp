@@ -11,6 +11,7 @@
 
 #include <opentelemetry/exporters/otlp/otlp_http_exporter_factory.h>
 #include <opentelemetry/exporters/otlp/otlp_http_exporter_options.h>
+#include <opentelemetry/sdk/resource/resource.h>
 #include <opentelemetry/sdk/trace/simple_processor_factory.h>
 #include <opentelemetry/sdk/trace/tracer_provider_factory.h>
 #include <opentelemetry/trace/provider.h>
@@ -46,16 +47,29 @@ namespace trace_sdk = opentelemetry::sdk::trace;
 namespace nostd = opentelemetry::nostd;
 
 // Initialize OpenTelemetry
-void InitTracer() {
+void InitTracer(char const* sdk_key) {
     opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
-    opts.url = "http://localhost:4318/v1/traces";
+
+    // Check for custom endpoint from environment variable
+    if (char const* custom_endpoint = std::getenv("LD_OTEL_ENDPOINT");
+        custom_endpoint && strlen(custom_endpoint)) {
+        opts.url = std::string(custom_endpoint);
+    } else {
+        opts.url = "https://otel.observability.app.launchdarkly.com:4318/v1/traces";
+    }
+
+    // Create resource with highlight.project_id attribute
+    auto resource_attributes = opentelemetry::sdk::resource::ResourceAttributes{
+        {"highlight.project_id", sdk_key}
+    };
+    auto resource = opentelemetry::sdk::resource::Resource::Create(resource_attributes);
 
     auto exporter =
         opentelemetry::exporter::otlp::OtlpHttpExporterFactory::Create(opts);
     auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(
         std::move(exporter));
     const std::shared_ptr<trace_api::TracerProvider> provider =
-        trace_sdk::TracerProviderFactory::Create(std::move(processor));
+        trace_sdk::TracerProviderFactory::Create(std::move(processor), resource);
     trace_api::Provider::SetTracerProvider(provider);
 }
 
@@ -253,9 +267,6 @@ private:
 };
 
 int main() {
-    // Initialize OpenTelemetry
-    InitTracer();
-
     // Initialize LaunchDarkly
     char const* sdk_key = get_with_env_fallback(
         SDK_KEY, "LD_SDK_KEY",
@@ -263,6 +274,9 @@ int main() {
         "SDK key first.\n\nAlternatively, set the LD_SDK_KEY environment "
         "variable.\n"
         "The value of SDK_KEY in main.cpp takes priority over LD_SDK_KEY.");
+
+    // Initialize OpenTelemetry
+    InitTracer(sdk_key);
 
     // Create the OpenTelemetry tracing hook using builder pattern
     auto hook_options =
@@ -315,7 +329,7 @@ int main() {
         std::cout << "*** Weather server running on http://0.0.0.0:8080\n";
         std::cout << "*** Try: curl http://localhost:8080/weather\n";
         std::cout <<
-            "*** OpenTelemetry tracing enabled (OTLP HTTP to localhost:4318)\n";
+            "*** OpenTelemetry tracing enabled, sending traces to LaunchDarkly\n";
         std::cout <<
             "*** LaunchDarkly integration enabled with OpenTelemetry tracing hook\n\n";
 

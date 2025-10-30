@@ -16,7 +16,6 @@ This example demonstrates how to integrate the LaunchDarkly C++ Server SDK with 
 - CMake 3.19 or later
 - Boost 1.81 or later
 - LaunchDarkly SDK key
-- OpenTelemetry collector (or compatible backend) running on `localhost:4318`
 
 ## Building
 
@@ -30,21 +29,7 @@ cmake --build . --target hello-cpp-server-otel
 
 ## Running
 
-### 1. Start an OpenTelemetry Collector
-
-The easiest way is using Docker:
-
-```bash
-docker run -p 4318:4318 otel/opentelemetry-collector:latest
-```
-
-Or use Jaeger (which has a built-in OTLP receiver):
-
-```bash
-docker run -d -p 16686:16686 -p 4318:4318 jaegertracing/all-in-one:latest
-```
-
-### 2. Set Your LaunchDarkly SDK Key
+### 1. Set Your LaunchDarkly SDK Key
 
 Either edit `main.cpp` and set the `SDK_KEY` constant, or use an environment variable:
 
@@ -52,11 +37,11 @@ Either edit `main.cpp` and set the `SDK_KEY` constant, or use an environment var
 export LD_SDK_KEY=your-sdk-key-here
 ```
 
-### 3. Create a Feature Flag
+### 2. Create a Feature Flag
 
 In your LaunchDarkly dashboard, create a boolean flag named `show-detailed-weather`.
 
-### 4. Run the Example
+### 3. Run the Example
 
 ```bash
 ./build/examples/hello-cpp-server-otel/hello-cpp-server-otel
@@ -69,74 +54,36 @@ You should see:
 
 *** Weather server running on http://0.0.0.0:8080
 *** Try: curl http://localhost:8080/weather
-*** OpenTelemetry tracing enabled (OTLP HTTP to localhost:4318)
+*** OpenTelemetry tracing enabled, sending traces to LaunchDarkly
 *** LaunchDarkly integration enabled with OpenTelemetry tracing hook
 ```
 
-### 5. Make Requests
+### 4. Make Requests
 
 ```bash
 curl http://localhost:8080/weather
 ```
 
-### 6. View Traces
+### 5. View Traces in LaunchDarkly
 
-If using Jaeger, open http://localhost:16686 in your browser. You should see traces with:
+1. Go to your LaunchDarkly project
+2. Navigate to the Observability section
+3. View traces containing your feature flag evaluations with attributes:
+   - `feature_flag.key`: "show-detailed-weather"
+   - `feature_flag.provider.name`: "LaunchDarkly"
+   - `feature_flag.context.id`: Context canonical key
+   - `feature_flag.result.value`: The flag value (since `IncludeValue` is enabled)
 
-- HTTP request spans
-- Feature flag evaluation events with attributes:
-  - `feature_flag.key`: "show-detailed-weather"
-  - `feature_flag.provider.name`: "LaunchDarkly"
-  - `feature_flag.context.id`: Context canonical key
-  - `feature_flag.result.value`: The flag value (since `IncludeValue` is enabled)
+### Custom OTLP Endpoint
 
-## How It Works
+To send traces to a different OpenTelemetry collector, set the `LD_OTEL_ENDPOINT` environment variable:
 
-### OpenTelemetry Setup
-
-```cpp
-void InitTracer() {
-    opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
-    opts.url = "http://localhost:4318/v1/traces";
-
-    auto exporter = opentelemetry::exporter::otlp::OtlpHttpExporterFactory::Create(opts);
-    auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
-    std::shared_ptr<trace_api::TracerProvider> provider =
-            trace_sdk::TracerProviderFactory::Create(std::move(processor));
-    trace_api::Provider::SetTracerProvider(provider);
-}
+```bash
+export LD_OTEL_ENDPOINT=http://localhost:4318/v1/traces
+./build/examples/hello-cpp-server-otel/hello-cpp-server-otel
 ```
 
-### LaunchDarkly Hook Setup
-
-```cpp
-auto hook_options = launchdarkly::server_side::integrations::otel::TracingHookOptionsBuilder()
-                        .IncludeValue(true)   // Include flag values in traces
-                        .CreateSpans(false)   // Only create span events, not full spans
-                        .Build();
-auto tracing_hook = std::make_shared<launchdarkly::server_side::integrations::otel::TracingHook>(hook_options);
-
-auto config = launchdarkly::server_side::ConfigBuilder(sdk_key)
-        .Hooks(tracing_hook)
-        .Build();
-```
-
-### Passing Parent Span Context
-
-When using async frameworks like Boost.Beast, you need to manually pass the parent span:
-
-```cpp
-auto span = tracer->StartSpan("HTTP GET /weather");
-auto scope = trace_api::Scope(span);
-
-// Create hook context with the span
-auto hook_ctx = launchdarkly::server_side::integrations::otel::MakeHookContextWithSpan(span);
-
-// Pass it to the evaluation
-auto flag_value = ld_client->BoolVariation(context, "my-flag", false, hook_ctx);
-```
-
-This ensures feature flag events appear as children of the correct span.
+Note: The `/v1/traces` path is automatically appended to the endpoint.
 
 ## What You'll See
 
@@ -146,23 +93,20 @@ This ensures feature flag events appear as children of the correct span.
 *** SDK successfully initialized!
 
 *** Weather server running on http://0.0.0.0:8080
+*** Try: curl http://localhost:8080/weather
+*** OpenTelemetry tracing enabled, sending traces to LaunchDarkly
+*** LaunchDarkly integration enabled with OpenTelemetry tracing hook
 ```
 
-### In Your Traces
+### In LaunchDarkly Observability
 
-Each HTTP request will have:
+Navigate to your LaunchDarkly project's Observability section to view traces. Each HTTP request will have:
 1. **Root Span**: "HTTP GET /weather" with HTTP attributes
-2. **Span Event**: "feature_flag" with LaunchDarkly evaluation details
-
-Example trace structure:
-```
-HTTP GET /weather (span)
-  └─ feature_flag (event)
-     ├─ feature_flag.key: "show-detailed-weather"
-     ├─ feature_flag.provider.name: "LaunchDarkly"
-     ├─ feature_flag.context.id: "user:weather-api-user"
-     └─ feature_flag.result.value: "true"
-```
+2. **Feature Flag Event**: Attached to the span with evaluation details:
+   - `feature_flag.key`: "show-detailed-weather"
+   - `feature_flag.provider.name`: "LaunchDarkly"
+   - `feature_flag.context.id`: "user:weather-api-user"
+   - `feature_flag.result.value`: The evaluated flag value
 
 ## Customization
 
