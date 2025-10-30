@@ -1,6 +1,5 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/version.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <iostream>
 #include <memory>
@@ -58,8 +57,9 @@ void InitTracer(char const* sdk_key) {
         opts.url = "https://otel.observability.app.launchdarkly.com:4318/v1/traces";
     }
 
-    // Create resource with highlight.project_id attribute
+    // Create resource with service name and highlight.project_id attribute
     auto resource_attributes = opentelemetry::sdk::resource::ResourceAttributes{
+        {"service.name", "weather-server"},
         {"highlight.project_id", sdk_key}
     };
     auto resource = opentelemetry::sdk::resource::Resource::Create(resource_attributes);
@@ -171,6 +171,7 @@ class session : public std::enable_shared_from_this<session> {
     tcp::socket socket_;
     beast::flat_buffer buffer_;
     http::request<http::string_body> req_;
+    std::shared_ptr<http::response<http::string_body>> res_;
     std::shared_ptr<launchdarkly::server_side::Client> ld_client_;
 
 public:
@@ -197,11 +198,11 @@ private:
 
     void do_write() {
         auto self = shared_from_this();
-        auto res = std::make_shared<http::response<http::string_body>>(
+        res_ = std::make_shared<http::response<http::string_body>>(
             handle_request(std::move(req_), ld_client_));
 
-        http::async_write(socket_, *res,
-                          [self, res](beast::error_code ec, std::size_t) {
+        http::async_write(socket_, *res_,
+                          [self](beast::error_code ec, std::size_t) {
                               self->socket_.shutdown(
                                   tcp::socket::shutdown_send, ec);
                           });
