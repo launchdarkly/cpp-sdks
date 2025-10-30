@@ -32,15 +32,6 @@ else
   suffix=""
 fi
 
-# Special case: OpenTelemetry support requires additional dependencies.
-# Enable OTEL support and fetch deps when building OTEL targets.
-build_otel="OFF"
-build_otel_fetch_deps="OFF"
-if [ "$1" == "launchdarkly-cpp-server-otel" ]; then
-  build_otel="ON"
-  build_otel_fetch_deps="ON"
-fi
-
 # Build a static release.
 mkdir -p "build-static${suffix}" && cd "build-static${suffix}"
 mkdir -p release

@@ -32,7 +32,6 @@ if [ "$3" == "true" ]; then
 fi
 # Special case: OpenTelemetry support requires additional dependencies.
 # Enable OTEL support and fetch deps when building OTEL targets.
-# Disable contract tests for OTEL builds to avoid dependency conflicts.
 build_otel="OFF"
 build_otel_fetch_deps="OFF"
 build_contract_tests="$2"
