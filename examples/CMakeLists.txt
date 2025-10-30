@@ -8,3 +8,7 @@ if (LD_BUILD_REDIS_SUPPORT)
     add_subdirectory(hello-cpp-server-redis)
     add_subdirectory(hello-c-server-redis)
 endif ()
+
+if (LD_BUILD_OTEL_SUPPORT)
+    add_subdirectory(hello-cpp-server-otel)
+endif ()

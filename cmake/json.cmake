@@ -9,8 +9,9 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
     cmake_policy(SET CMP0135 NEW)
 endif ()
 
-FetchContent_Declare(json
+# Use the same FetchContent name as OpenTelemetry to avoid duplicate targets
+FetchContent_Declare(nlohmann_json
         URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
 
-FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(nlohmann_json)
