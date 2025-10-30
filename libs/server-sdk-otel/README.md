@@ -141,7 +141,7 @@ launchdarkly::server_side::Client client(std::move(config));
 // This will use the active span based on your open telemetry context managent. For asynchronous frameworks handling 
 // multiple requests per-thread, either custom context management is required, or the parent span can be explicitly
 // provided. Refer to `Passing Parent Span Explicitly`.
-/
+
 bool result = client.BoolVariation(context, "my-flag", false);
 ```
 
