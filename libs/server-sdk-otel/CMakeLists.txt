@@ -24,6 +24,10 @@ endif ()
 # Option for local development and CI builds
 option(LD_BUILD_OTEL_FETCH_DEPS "Fetch OpenTelemetry dependencies for local/CI builds" OFF)
 
+# Allow users to specify which version of OpenTelemetry to fetch
+# Default to v1.23.0 (commit ea1f0d61ce5baa5584b097266bf133d1f31e3607)
+set(LD_OTEL_CPP_VERSION "ea1f0d61ce5baa5584b097266bf133d1f31e3607" CACHE STRING "OpenTelemetry C++ SDK version (git tag or commit hash)")
+
 if (LD_BUILD_OTEL_FETCH_DEPS)
     # For local development and CI: fetch OpenTelemetry with sensible defaults
     message("LaunchDarkly: fetching OpenTelemetry dependencies for local/CI build")
@@ -44,7 +48,7 @@ if (LD_BUILD_OTEL_FETCH_DEPS)
     FetchContent_Declare(
         opentelemetry-cpp
         GIT_REPOSITORY https://github.com/open-telemetry/opentelemetry-cpp.git
-        GIT_TAG ea1f0d61ce5baa5584b097266bf133d1f31e3607  # v1.23.0
+        GIT_TAG ${LD_OTEL_CPP_VERSION}
     )
     FetchContent_MakeAvailable(opentelemetry-cpp)
 else()
