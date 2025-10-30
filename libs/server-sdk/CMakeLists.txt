@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(
         LaunchDarklyCPPServer
-        VERSION 3.9.1 # {x-release-please-version}
+        VERSION 3.10.0 # {x-release-please-version}
         DESCRIPTION "LaunchDarkly C++ Server SDK"
         LANGUAGES CXX C
 )
