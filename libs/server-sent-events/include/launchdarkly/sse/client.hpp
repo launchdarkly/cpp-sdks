@@ -207,6 +207,15 @@ class Client {
     virtual ~Client() = default;
     virtual void async_connect() = 0;
     virtual void async_shutdown(std::function<void()> completion) = 0;
+
+    /**
+     * Restart the connection with exponential backoff. This should be called
+     * when the SDK detects invalid data from the stream and needs to
+     * reconnect. The backoff mechanism prevents rapid reconnection attempts
+     * that could overload the service.
+     * @param reason A description of why the restart was triggered (for logging)
+     */
+    virtual void async_restart(std::string const& reason) = 0;
 };
 
 }  // namespace launchdarkly::sse
