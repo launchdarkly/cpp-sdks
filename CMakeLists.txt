@@ -108,6 +108,8 @@ option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
 option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
 
+option(LD_BUILD_OTEL_SUPPORT "Build OpenTelemetry integration." OFF)
+
 option(LD_CURL_NETWORKING "Enable CURL-based networking for SSE client (alternative to Boost.Beast/Foxy)" OFF)
 
 # If using 'make' as the build system, CMake causes the 'install' target to have a dependency on 'all', meaning
@@ -218,6 +220,11 @@ add_subdirectory(libs/server-sent-events)
 if (LD_BUILD_REDIS_SUPPORT)
     message("LaunchDarkly: building server-side redis support")
     add_subdirectory(libs/server-sdk-redis-source)
+endif ()
+
+if (LD_BUILD_OTEL_SUPPORT)
+    message("LaunchDarkly: building OpenTelemetry integration")
+    add_subdirectory(libs/server-sdk-otel)
 endif ()
 
 # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.

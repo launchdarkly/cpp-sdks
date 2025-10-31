@@ -33,6 +33,10 @@ inputs:
     description: 'Whether to enable CURL networking (LD_CURL_NETWORKING=ON)'
     required: false
     default: 'false'
+  install_curl:
+    description: 'Whether to install CURL development libraries. Required for OpenTelemetry builds (server-sdk-otel), but does not enable CURL networking for the SDK itself.'
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -49,7 +53,7 @@ runs:
       uses: ./.github/actions/install-openssl
       id: install-openssl
     - name: Install CURL
-      if: inputs.use_curl == 'true'
+      if: inputs.use_curl == 'true' || inputs.install_curl == 'true'
       uses: ./.github/actions/install-curl
       id: install-curl
     - name: Build Library

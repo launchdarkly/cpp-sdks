@@ -14,6 +14,8 @@ jobs:
       package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
       package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
       package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
+      package-server-otel-released: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
+      package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -142,3 +144,4 @@ jobs:
       upload-assets: true
       upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
       provenance-name: ${{ format('{0}-server-redis-multiple-provenance.intoto.jsonl', matrix.os) }}
+

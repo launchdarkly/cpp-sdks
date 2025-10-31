@@ -24,6 +24,13 @@
         "CMakeLists.txt"
       ]
     },
+    "libs/server-sdk-otel": {
+      "release-as": "0.1.0",
+      "bump-minor-pre-major": true,
+      "extra-files": [
+        "CMakeLists.txt"
+      ]
+    },
     "libs/server-sent-events": {},
     "libs/common": {},
     "libs/internal": {},
