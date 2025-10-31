@@ -133,8 +133,12 @@ template <typename SDK>
 built::HttpProperties HttpPropertiesBuilder<SDK>::Build() const {
     if (!wrapper_name_.empty()) {
         std::map<std::string, std::string> headers_with_wrapper(base_headers_);
-        headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
-            wrapper_name_ + "/" + wrapper_version_;
+        if (wrapper_version_.empty()) {
+            headers_with_wrapper["X-LaunchDarkly-Wrapper"] = wrapper_name_;
+        } else {
+            headers_with_wrapper["X-LaunchDarkly-Wrapper"] =
+                wrapper_name_ + "/" + wrapper_version_;
+        }
         return {connect_timeout_,  read_timeout_,        write_timeout_,
                 response_timeout_, headers_with_wrapper, tls_.Build(), proxy_};
     }

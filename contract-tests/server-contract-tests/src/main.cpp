@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("client-prereq-events");
         srv.add_capability("evaluation-hooks");
         srv.add_capability("track-hooks");
+        srv.add_capability("wrapper");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
