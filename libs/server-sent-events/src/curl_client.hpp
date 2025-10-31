@@ -170,6 +170,21 @@ class CurlClient final : public Client,
             curl_socket_ = curl_socket;
         }
 
+        void abort_transfer() {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            if (curl_socket_ != CURL_SOCKET_BAD) {
+#ifdef _WIN32
+                closesocket(curl_socket_);
+#else
+                close(curl_socket_);
+#endif
+                curl_socket_ = CURL_SOCKET_BAD;
+            }
+        }
+
         void shutdown() {
             std::lock_guard lock(mutex_);
             shutting_down_ = true;
@@ -232,6 +247,7 @@ public:
 
     void async_connect() override;
     void async_shutdown(std::function<void()> completion) override;
+    void async_restart(std::string const& reason) override;
 
 private:
     void do_run();

@@ -76,6 +76,17 @@ void CurlClient::async_connect() {
                       [self = shared_from_this()]() { self->do_run(); });
 }
 
+void CurlClient::async_restart(std::string const& reason) {
+    boost::asio::post(backoff_timer_.get_executor(),
+                      [self = shared_from_this(), reason]() {
+                          // Close the socket to abort the current transfer.
+                          // CURL will detect the error and call the completion
+                          // handler, which will trigger backoff and reconnection.
+                          self->log_message("async_restart: aborting transfer due to " + reason);
+                          self->request_context_->abort_transfer();
+                      });
+}
+
 void CurlClient::do_run() {
     if (request_context_->is_shutting_down()) {
         return;

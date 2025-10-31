@@ -32,7 +32,6 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip-from ./contract-tests/server-contract-tests/test-suppressions.txt'
           token: ${{ secrets.GITHUB_TOKEN }}
 
   contract-tests-curl:
@@ -54,7 +53,6 @@ jobs:
         with:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
-          extra_params: '-skip-from ./contract-tests/server-contract-tests/test-suppressions.txt'
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-server:

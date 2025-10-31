@@ -41,6 +41,10 @@ tl::expected<DataSourceEventHandler::Patch, JsonError> Patch(
     if (!data.has_value()) {
         return tl::unexpected(JsonError::kSchemaFailure);
     }
+    // Check if the optional is empty (indicates null data)
+    if (!data->has_value()) {
+        return tl::unexpected(JsonError::kSchemaFailure);
+    }
     return DataSourceEventHandler::Patch{
         TStreamingDataKind::Key(path),
         data_model::ItemDescriptor<TData>(data->value())};

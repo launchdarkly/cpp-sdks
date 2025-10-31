@@ -161,6 +161,29 @@ class FoxyClient : public Client,
             beast::bind_front_handler(&FoxyClient::do_run, shared_from_this()));
     }
 
+    void async_restart(std::string const& reason) override {
+        boost::asio::post(
+            session_->get_executor(),
+            beast::bind_front_handler(&FoxyClient::do_restart,
+                                      shared_from_this(), reason));
+    }
+
+    void do_restart(std::string const& reason) {
+        // Cancel any ongoing read operations
+        try {
+            if (session_->stream.is_ssl()) {
+                session_->stream.ssl().next_layer().cancel();
+            } else {
+                session_->stream.plain().cancel();
+            }
+        } catch (boost::system::system_error const& err) {
+            logger_("exception canceling stream during restart: " +
+                    std::string(err.what()));
+        }
+        // Trigger backoff and reconnect
+        async_backoff(reason);
+    }
+
     void do_run() {
         session_->async_connect(
             host_, port_,
