@@ -13,9 +13,11 @@ jobs:
   cpp-linter:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.4
+        # https://github.com/MarkusJx/install-boost/releases/tag/v2.4.4
+        uses: MarkusJx/install-boost@3039450bb3dd2e8630d1cf10ec39cb1da3054bbd
         id: install-boost
         with:
           boost_version: 1.81.0
@@ -25,7 +27,8 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -S . -B /home/runner/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-      - uses: cpp-linter/cpp-linter-action@v2.4.2
+      # https://github.com/cpp-linter/cpp-linter-action/releases/tag/v2.4.2
+      - uses: cpp-linter/cpp-linter-action@e84192cfd882b66bc5b84d5d6f80fe7802161f34
         id: linter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
