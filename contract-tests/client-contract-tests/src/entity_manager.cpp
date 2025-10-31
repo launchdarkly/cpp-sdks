@@ -146,6 +146,15 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         config_builder.HttpProperties().Tls(std::move(builder));
     }
 
+    if (in.wrapper) {
+        if (!in.wrapper->name.empty()) {
+            config_builder.HttpProperties().WrapperName(in.wrapper->name);
+        }
+        if (!in.wrapper->version.empty()) {
+            config_builder.HttpProperties().WrapperVersion(in.wrapper->version);
+        }
+    }
+
     auto config = config_builder.Build();
     if (!config) {
         LD_LOG(logger_, LogLevel::kWarn)
