@@ -48,6 +48,8 @@ int main(int argc, char* argv[]) {
         srv.add_capability("filtering");
         srv.add_capability("filtering-strict");
         srv.add_capability("client-prereq-events");
+        srv.add_capability("evaluation-hooks");
+        srv.add_capability("track-hooks");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
