@@ -143,6 +143,13 @@ struct ConfigHooksParams {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigHooksParams, hooks);
 
+struct ConfigWrapper {
+    std::string name;
+    std::string version;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
+
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
@@ -156,6 +163,7 @@ struct ConfigParams {
     std::optional<ConfigTLSParams> tls;
     std::optional<ConfigProxyParams> proxy;
     std::optional<ConfigHooksParams> hooks;
+    std::optional<ConfigWrapper> wrapper;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -170,7 +178,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 tags,
                                                 tls,
                                                 proxy,
-                                                hooks);
+                                                hooks,
+                                                wrapper);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
