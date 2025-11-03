@@ -51,6 +51,9 @@ int main(int argc, char* argv[]) {
         srv.add_capability("evaluation-hooks");
         srv.add_capability("track-hooks");
         srv.add_capability("wrapper");
+#ifdef LD_REDIS_SUPPORT_ENABLED
+        srv.add_capability("persistent-data-store-redis");
+#endif
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 

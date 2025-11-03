@@ -7,6 +7,10 @@
 
 #include <boost/json.hpp>
 
+#ifdef LD_REDIS_SUPPORT_ENABLED
+#include <launchdarkly/server_side/integrations/redis/redis_source.hpp>
+#endif
+
 using launchdarkly::LogLevel;
 using namespace launchdarkly::server_side;
 
@@ -153,6 +157,56 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             config_builder.HttpProperties().WrapperVersion(in.wrapper->version);
         }
     }
+
+#ifdef LD_REDIS_SUPPORT_ENABLED
+    if (in.persistentDataStore) {
+        if (in.persistentDataStore->store.type == "redis") {
+            std::string prefix =
+                in.persistentDataStore->store.prefix.value_or("launchdarkly");
+
+            auto redis_result = launchdarkly::server_side::integrations::
+                RedisDataSource::Create(in.persistentDataStore->store.dsn,
+                                        prefix);
+
+            if (!redis_result) {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "entity_manager: couldn't create Redis data source: "
+                    << redis_result.error();
+                return std::nullopt;
+            }
+
+            auto lazy_load = config::builders::LazyLoadBuilder();
+            lazy_load.Source(std::move(*redis_result));
+
+            // Configure cache mode
+            // Default is 5 minutes, but contract tests may specify:
+            // - "off": disable caching (fetch from DB every time)
+            // - "ttl": custom TTL in milliseconds
+            // - "infinite": never expire cached items
+            if (in.persistentDataStore->cache.mode == "off") {
+                lazy_load.CacheRefresh(std::chrono::seconds(0));
+            } else if (in.persistentDataStore->cache.mode == "ttl") {
+                if (in.persistentDataStore->cache.ttlMs) {
+                    lazy_load.CacheRefresh(std::chrono::milliseconds(
+                        *in.persistentDataStore->cache.ttlMs));
+                }
+            } else if (in.persistentDataStore->cache.mode == "infinite") {
+                // Use a very large TTL to effectively never expire
+                lazy_load.CacheRefresh(std::chrono::hours(24 * 365));
+            }
+            // If no mode specified, the default 5-minute TTL is used
+
+            config_builder.DataSystem().Method(
+                config::builders::DataSystemBuilder::LazyLoad(
+                    std::move(lazy_load)));
+        } else {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "entity_manager: unsupported persistent store type: "
+                << in.persistentDataStore->store.type;
+            return std::nullopt;
+        }
+    }
+#endif
 
     auto config = config_builder.Build();
     if (!config) {

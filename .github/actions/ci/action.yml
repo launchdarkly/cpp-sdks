@@ -37,6 +37,10 @@ inputs:
     description: 'Whether to install CURL development libraries. Required for OpenTelemetry builds (server-sdk-otel), but does not enable CURL networking for the SDK itself.'
     required: false
     default: 'false'
+  use_redis:
+    description: 'Whether to enable Redis support (LD_BUILD_REDIS_SUPPORT=ON)'
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -58,7 +62,7 @@ runs:
       id: install-curl
     - name: Build Library
       shell: bash
-      run: ./scripts/build.sh ${{ inputs.cmake_target }} ON ${{ inputs.use_curl }}
+      run: ./scripts/build.sh ${{ inputs.cmake_target }} ON ${{ inputs.use_curl }} ${{ inputs.use_redis }}
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         Boost_DIR: ${{ steps.install-boost.outputs.Boost_DIR }}
@@ -69,7 +73,7 @@ runs:
       id: build-tests
       if: inputs.run_tests == 'true'
       shell: bash
-      run: ./scripts/build.sh gtest_${{ inputs.cmake_target }} ON ${{ inputs.use_curl }}
+      run: ./scripts/build.sh gtest_${{ inputs.cmake_target }} ON ${{ inputs.use_curl }} ${{ inputs.use_redis }}
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         Boost_DIR: ${{ steps.install-boost.outputs.Boost_DIR }}

@@ -150,6 +150,34 @@ struct ConfigWrapper {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
 
+struct ConfigPersistentCache {
+    std::string mode;  // "off", "ttl", "infinite"
+    std::optional<int> ttlMs;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentCache,
+                                                mode,
+                                                ttlMs);
+
+struct ConfigPersistentStore {
+    std::string type;  // "redis", "consul", "dynamodb"
+    std::string dsn;
+    std::optional<std::string> prefix;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentStore,
+                                                type,
+                                                dsn,
+                                                prefix);
+
+struct ConfigPersistentDataStore {
+    ConfigPersistentStore store;
+    ConfigPersistentCache cache;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentDataStore,
+                                                store,
+                                                cache);
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
@@ -164,6 +192,7 @@ struct ConfigParams {
     std::optional<ConfigProxyParams> proxy;
     std::optional<ConfigHooksParams> hooks;
     std::optional<ConfigWrapper> wrapper;
+    std::optional<ConfigPersistentDataStore> persistentDataStore;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -179,7 +208,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 tls,
                                                 proxy,
                                                 hooks,
-                                                wrapper);
+                                                wrapper,
+                                                persistentDataStore);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
