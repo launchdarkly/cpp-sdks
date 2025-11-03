@@ -4,6 +4,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "launchdarkly-cpp-server": "3.9.1"
+    "launchdarkly-cpp-server": "3.10.0"
   }
 }

@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.10.1...launchdarkly-cpp-client-v3.11.0) (2025-11-03)
+
+
+### Features
+
+* Add proxy support when using CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+* Add support for CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.12.1 to 0.13.0
+    * launchdarkly-cpp-common bumped from 1.10.0 to 1.11.0
+    * launchdarkly-cpp-sse-client bumped from 0.5.5 to 0.6.0
+
 ## [3.10.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.10.0...launchdarkly-cpp-client-v3.10.1) (2025-10-10)
 
 
