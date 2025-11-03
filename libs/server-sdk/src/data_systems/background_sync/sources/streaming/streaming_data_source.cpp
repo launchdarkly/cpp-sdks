@@ -127,9 +127,18 @@ void StreamingDataSource::StartAsync(
 
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
-            self->event_handler_->HandleMessage(event.type(), event.data());
-            // TODO: Use the result of handle message to restart the
-            // event source if we got bad data. sc-204387
+            auto status =
+                self->event_handler_->HandleMessage(event.type(), event.data());
+            if (status == DataSourceEventHandler::MessageStatus::kInvalidMessage) {
+                // Invalid data received - restart the connection with backoff
+                // to get a fresh stream. The backoff mechanism prevents rapid
+                // reconnection attempts.
+                LD_LOG(self->logger_, LogLevel::kWarn)
+                    << "Received invalid data from stream, restarting connection";
+                if (self->client_) {
+                    self->client_->async_restart("invalid data in stream");
+                }
+            }
         }
     });
 

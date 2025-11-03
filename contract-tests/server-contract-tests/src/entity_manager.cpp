@@ -1,4 +1,5 @@
 #include "entity_manager.hpp"
+#include "contract_test_hook.hpp"
 
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
@@ -135,6 +136,22 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             builder.CustomCAFile(*in.tls->customCAFile);
         }
         config_builder.HttpProperties().Tls(std::move(builder));
+    }
+
+    if (in.hooks) {
+        for (auto const& hook_config : in.hooks->hooks) {
+            auto hook = std::make_shared<ContractTestHook>(executor_, hook_config);
+            config_builder.Hooks(hook);
+        }
+    }
+
+    if (in.wrapper) {
+        if (!in.wrapper->name.empty()) {
+            config_builder.HttpProperties().WrapperName(in.wrapper->name);
+        }
+        if (!in.wrapper->version.empty()) {
+            config_builder.HttpProperties().WrapperVersion(in.wrapper->version);
+        }
     }
 
     auto config = config_builder.Build();

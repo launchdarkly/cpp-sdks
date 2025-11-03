@@ -113,6 +113,43 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTags,
                                                 applicationId,
                                                 applicationVersion);
 
+enum class HookStage {
+    BeforeEvaluation,
+    AfterEvaluation,
+    AfterTrack
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(HookStage,
+                             {{HookStage::BeforeEvaluation, "beforeEvaluation"},
+                              {HookStage::AfterEvaluation, "afterEvaluation"},
+                              {HookStage::AfterTrack, "afterTrack"}})
+
+struct ConfigHookInstance {
+    std::string name;
+    std::string callbackUri;
+    std::optional<std::unordered_map<std::string, std::unordered_map<std::string, nlohmann::json>>> data;
+    std::optional<std::unordered_map<std::string, std::string>> errors;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigHookInstance,
+                                                name,
+                                                callbackUri,
+                                                data,
+                                                errors);
+
+struct ConfigHooksParams {
+    std::vector<ConfigHookInstance> hooks;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigHooksParams, hooks);
+
+struct ConfigWrapper {
+    std::string name;
+    std::string version;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
+
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
@@ -125,6 +162,8 @@ struct ConfigParams {
     std::optional<ConfigTags> tags;
     std::optional<ConfigTLSParams> tls;
     std::optional<ConfigProxyParams> proxy;
+    std::optional<ConfigHooksParams> hooks;
+    std::optional<ConfigWrapper> wrapper;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -138,7 +177,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 clientSide,
                                                 tags,
                                                 tls,
-                                                proxy);
+                                                proxy,
+                                                hooks,
+                                                wrapper);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
