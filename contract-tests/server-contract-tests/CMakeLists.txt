@@ -28,4 +28,9 @@ target_link_libraries(server-tests PRIVATE
         contract-test-data-model
         )
 
+if (LD_BUILD_REDIS_SUPPORT)
+    target_link_libraries(server-tests PRIVATE launchdarkly::server_redis_source)
+    target_compile_definitions(server-tests PRIVATE LD_REDIS_SUPPORT_ENABLED)
+endif ()
+
 target_include_directories(server-tests PUBLIC include)
