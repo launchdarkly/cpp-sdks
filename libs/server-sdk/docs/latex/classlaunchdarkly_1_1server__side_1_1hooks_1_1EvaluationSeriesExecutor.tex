@@ -1,0 +1,85 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Evaluation\+Series\+Executor Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor}\index{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}}
+
+
+{\ttfamily \#include $<$hook\+\_\+executor.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a69814d068ee1a40c603bca4a22ae3b3c}{Evaluation\+Series\+Executor}} (std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}{Hook}} $>$$>$ const \&hooks, Logger \&logger)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a7d99eaeb02856b8640a2f26d17ae223d}{Before\+Evaluation}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&context)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a43bb6a6320a6b6c108e581ee23e2e0f7}{After\+Evaluation}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&context, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ const \&detail)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Executes hooks for a single evaluation series. Each instance handles one evaluation from before\+Evaluation through after\+Evaluation.
+
+Handles exceptions/errors from hooks and logs them without affecting the evaluation operation.
+
+THREADING AND LIFETIME GUARANTEES\+:
+\begin{DoxyItemize}
+\item All hook callbacks are executed SYNCHRONOUSLY in the same thread as the caller of the SDK method (e.\+g., Bool\+Variation, Track).
+\item \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}{Hook}} callbacks complete before control returns to the caller.
+\item \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} objects (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}}, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1TrackSeriesContext}{Track\+Series\+Context}}) passed to hooks are stack-\/allocated and remain valid for the entire duration of the callback.
+\item This synchronous execution model is CRITICAL for the C bindings, which return pointers to internal data that are only valid during the callback. Asynchronous execution would create dangling pointers.
+\item \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}{Hook}} implementations MUST NOT store references, pointers, or string\+\_\+views from context objects beyond the immediate callback execution.
+\end{DoxyItemize}
+
+IMPLEMENTATION REQUIREMENTS\+:
+\begin{DoxyItemize}
+\item Do NOT introduce async hook execution without redesigning the C bindings.
+\item Do NOT move hook execution to background threads.
+\item If async hooks are needed in the future, the C bindings must be changed to return heap-\/allocated copies instead of pointers to stack data. 
+\end{DoxyItemize}
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a69814d068ee1a40c603bca4a22ae3b3c}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a69814d068ee1a40c603bca4a22ae3b3c}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}!EvaluationSeriesExecutor@{EvaluationSeriesExecutor}}
+\index{EvaluationSeriesExecutor@{EvaluationSeriesExecutor}!launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}}
+\doxysubsubsection{\texorpdfstring{EvaluationSeriesExecutor()}{EvaluationSeriesExecutor()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Executor\+::\+Evaluation\+Series\+Executor (\begin{DoxyParamCaption}\item[{std\+::vector$<$ std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}{Hook}} $>$$>$ const \&}]{hooks,  }\item[{Logger \&}]{logger }\end{DoxyParamCaption})}
+
+Constructs an evaluation series executor. 
+\begin{DoxyParams}{Parameters}
+{\em hooks} & The list of hooks to execute. \\
+\hline
+{\em logger} & Logger for reporting hook errors. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a43bb6a6320a6b6c108e581ee23e2e0f7}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a43bb6a6320a6b6c108e581ee23e2e0f7}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}!AfterEvaluation@{AfterEvaluation}}
+\index{AfterEvaluation@{AfterEvaluation}!launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}}
+\doxysubsubsection{\texorpdfstring{AfterEvaluation()}{AfterEvaluation()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Executor\+::\+After\+Evaluation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&}]{context,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ const \&}]{detail }\end{DoxyParamCaption})}
+
+Executes after\+Evaluation stages for all hooks in reverse order of registration. 
+\begin{DoxyParams}{Parameters}
+{\em context} & The evaluation context. \\
+\hline
+{\em detail} & The evaluation result. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a7d99eaeb02856b8640a2f26d17ae223d}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesExecutor_a7d99eaeb02856b8640a2f26d17ae223d}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}!BeforeEvaluation@{BeforeEvaluation}}
+\index{BeforeEvaluation@{BeforeEvaluation}!launchdarkly::server\_side::hooks::EvaluationSeriesExecutor@{launchdarkly::server\_side::hooks::EvaluationSeriesExecutor}}
+\doxysubsubsection{\texorpdfstring{BeforeEvaluation()}{BeforeEvaluation()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Executor\+::\+Before\+Evaluation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&}]{context }\end{DoxyParamCaption})}
+
+Executes before\+Evaluation stages for all hooks in order of registration. 
+\begin{DoxyParams}{Parameters}
+{\em context} & The evaluation context. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/hooks/hook\+\_\+executor.\+hpp\item 
+src/hooks/hook\+\_\+executor.\+cpp\end{DoxyCompactItemize}
