@@ -1,0 +1,6 @@
+<map id="include/launchdarkly/server_side/bindings/c/hook.h" name="include/launchdarkly/server_side/bindings/c/hook.h">
+<area shape="rect" id="node1" title="C bindings for LaunchDarkly SDK hooks." alt="" coords="93,5,253,61"/>
+<area shape="rect" id="node2" href="$server-sdk_2include_2launchdarkly_2server__side_2bindings_2c_2config_2builder_8h.html" title=" " alt="" coords="5,109,165,165"/>
+<area shape="rect" id="node4" href="$hook__wrapper_8hpp.html" title="C++ wrapper that bridges C hook callbacks to C++ Hook interface." alt="" coords="189,117,336,158"/>
+<area shape="rect" id="node3" href="$sdk_8h.html" title="LaunchDarkly Server&#45;side C Bindings." alt="" coords="5,213,165,269"/>
+</map>

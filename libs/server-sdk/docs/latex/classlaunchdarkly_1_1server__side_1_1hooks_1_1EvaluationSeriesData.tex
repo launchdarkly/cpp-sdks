@@ -1,0 +1,127 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Evaluation\+Series\+Data Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+
+
+{\ttfamily \#include $<$hook.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0c03cae01a9030039c6612d9aeea976c}{Evaluation\+Series\+Data}} ()
+\item 
+std\+::optional$<$ std\+::reference\+\_\+wrapper$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} const  $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_af2ddcaf18666bb3faac566de924e7860}{Get}} (std\+::string const \&key) const
+\item 
+std\+::optional$<$ std\+::shared\+\_\+ptr$<$ std\+::any $>$ $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0609d6bee3a1f98526a90cd2ea30caaf}{Get\+Shared}} (std\+::string const \&key) const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a6b76613d09a0ee87c18a43cbae2793de}{Has}} (std\+::string const \&key) const
+\item 
+std\+::vector$<$ std\+::string $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a2988d2ff2ebbdf82020728b7e2238f1b}{Keys}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a6abfee3019f51d3f9717b6ec44614464}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a6abfee3019f51d3f9717b6ec44614464}} 
+class {\bfseries Evaluation\+Series\+Data\+Builder}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Immutable data that can be passed between hook stages. Provides readonly access to data passed between hook stages.
+
+Supports two types of data\+:
+\begin{DoxyItemize}
+\item \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}\+: Launch\+Darkly \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} types (strings, numbers, booleans, etc.)
+\item std\+::shared\+\_\+ptr$<$std\+::any$>$\+: Arbitrary objects (e.\+g., Open\+Telemetry spans)
+\end{DoxyItemize}
+
+Lifetime\+: Objects of this type are valid only during the execution of a hook stage. Do not store references or pointers to this data. If you need data beyond the stage execution, copy it. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0c03cae01a9030039c6612d9aeea976c}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0c03cae01a9030039c6612d9aeea976c}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}!EvaluationSeriesData@{EvaluationSeriesData}}
+\index{EvaluationSeriesData@{EvaluationSeriesData}!launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+\doxysubsubsection{\texorpdfstring{EvaluationSeriesData()}{EvaluationSeriesData()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+::\+Evaluation\+Series\+Data (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Constructs empty series data. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_af2ddcaf18666bb3faac566de924e7860}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_af2ddcaf18666bb3faac566de924e7860}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}!Get@{Get}}
+\index{Get@{Get}!launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::reference\+\_\+wrapper$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} const  $>$ $>$ launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+::\+Get (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Retrieves a \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} from the series data.
+
+Lifetime\+: The returned reference (if present) is valid only during the execution of the current hook stage. If you need the value beyond this call, make a copy.
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to look up. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Reference to the value if present, or std\+::nullopt if not found or if the key maps to a shared\+\_\+ptr. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0609d6bee3a1f98526a90cd2ea30caaf}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a0609d6bee3a1f98526a90cd2ea30caaf}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}!GetShared@{GetShared}}
+\index{GetShared@{GetShared}!launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+\doxysubsubsection{\texorpdfstring{GetShared()}{GetShared()}}
+{\footnotesize\ttfamily std\+::optional$<$ std\+::shared\+\_\+ptr$<$ std\+::any $>$ $>$ launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+::\+Get\+Shared (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Retrieves a shared\+\_\+ptr to any type from the series data.
+
+Use this for storing arbitrary objects like Open\+Telemetry spans that need to be passed from before\+Evaluation to after\+Evaluation.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto} span = data.GetShared(\textcolor{stringliteral}{"{}span"{}});}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (span) \{}
+\DoxyCodeLine{    \textcolor{keyword}{auto} typed\_span = std::any\_cast<MySpanType>(*span);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to look up. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The shared\+\_\+ptr if present, or std\+::nullopt if not found or if the key maps to a \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a6b76613d09a0ee87c18a43cbae2793de}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a6b76613d09a0ee87c18a43cbae2793de}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}!Has@{Has}}
+\index{Has@{Has}!launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+\doxysubsubsection{\texorpdfstring{Has()}{Has()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+::\+Has (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key }\end{DoxyParamCaption}) const}
+
+Checks if a key exists in the series data. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The key to check. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the key exists, false otherwise. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a2988d2ff2ebbdf82020728b7e2238f1b}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData_a2988d2ff2ebbdf82020728b7e2238f1b}} 
+\index{launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}!Keys@{Keys}}
+\index{Keys@{Keys}!launchdarkly::server\_side::hooks::EvaluationSeriesData@{launchdarkly::server\_side::hooks::EvaluationSeriesData}}
+\doxysubsubsection{\texorpdfstring{Keys()}{Keys()}}
+{\footnotesize\ttfamily std\+::vector$<$ std\+::string $>$ launchdarkly\+::server\+\_\+side\+::hooks\+::\+Evaluation\+Series\+Data\+::\+Keys (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns all keys in the series data.
+
+Lifetime\+: The returned vector contains copies of the keys and can be stored safely.
+
+\begin{DoxyReturn}{Returns}
+Vector of all keys. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/hooks/hook.\+hpp\item 
+src/hooks/hook.\+cpp\end{DoxyCompactItemize}
