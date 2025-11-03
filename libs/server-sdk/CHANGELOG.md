@@ -1,5 +1,29 @@
 # Changelog
 
+## [3.10.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.9.1...launchdarkly-cpp-server-v3.10.0) (2025-11-03)
+
+
+### Features
+
+* Add proxy support when using CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+* Add support for CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+* Add support for hooks. ([03e2a59](https://github.com/launchdarkly/cpp-sdks/commit/03e2a59bc6b39fbc390b12f8041fd63a9993df66))
+
+
+### Bug Fixes
+
+* Discard track events when the associated context is invalid. ([03e2a59](https://github.com/launchdarkly/cpp-sdks/commit/03e2a59bc6b39fbc390b12f8041fd63a9993df66))
+* Handle null payloads. ([#497](https://github.com/launchdarkly/cpp-sdks/issues/497)) ([d12b7a0](https://github.com/launchdarkly/cpp-sdks/commit/d12b7a00b8055ba5aabc8179d7d459d4d28db32f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-internal bumped from 0.12.1 to 0.13.0
+    * launchdarkly-cpp-common bumped from 1.10.0 to 1.11.0
+    * launchdarkly-cpp-sse-client bumped from 0.5.5 to 0.6.0
+
 ## [3.9.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.9.0...launchdarkly-cpp-server-v3.9.1) (2025-10-10)
 
 

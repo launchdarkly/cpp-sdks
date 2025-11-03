@@ -1,6 +1,19 @@
 # Changelog
 
 
+## [1.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.10.0...launchdarkly-cpp-common-v1.11.0) (2025-11-03)
+
+
+### Features
+
+* Add proxy support when using CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+* Add support for CURL networking. ([c9a6b17](https://github.com/launchdarkly/cpp-sdks/commit/c9a6b17aa7673c7b2b5f984b3e7027153ab1d16c))
+
+
+### Bug Fixes
+
+* Correctly handle a wrapper name without a wrapper version. ([245dd97](https://github.com/launchdarkly/cpp-sdks/commit/245dd970e0cede00b1ea6e8b69371ea9597ad24c))
+
 ## [1.10.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.9.0...launchdarkly-cpp-common-v1.10.0) (2025-05-02)
 
 
