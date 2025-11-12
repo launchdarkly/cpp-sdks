@@ -1,6 +1,0 @@
-<map id="include/launchdarkly/server_side/bindings/c/hook_context.h" name="include/launchdarkly/server_side/bindings/c/hook_context.h">
-<area shape="rect" id="node1" title="C bindings for passing caller data to hooks." alt="" coords="250,5,410,61"/>
-<area shape="rect" id="node2" href="$evaluation__series__context_8h.html" title="C bindings for read&#45;only evaluation context passed to hooks." alt="" coords="5,109,225,165"/>
-<area shape="rect" id="node3" href="$sdk_8h.html" title="LaunchDarkly Server&#45;side C Bindings." alt="" coords="250,109,410,165"/>
-<area shape="rect" id="node4" href="$track__series__context_8h.html" title="C bindings for read&#45;only track context passed to afterTrack hooks." alt="" coords="434,109,618,165"/>
-</map>
