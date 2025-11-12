@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.6.0...launchdarkly-cpp-sse-client-v0.6.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* Handle missing data field in SSE parsing. ([#503](https://github.com/launchdarkly/cpp-sdks/issues/503)) ([03b1d11](https://github.com/launchdarkly/cpp-sdks/commit/03b1d11adbb6b2725535d6d3ec1044091fd38fe1))
+
 ## [0.6.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.5.5...launchdarkly-cpp-sse-client-v0.6.0) (2025-11-03)
 
 
