@@ -1,9 +1,9 @@
 {
   "name": "launchdarkly-cpp-server-redis-source",
   "description": "This package.json exists for modeling dependencies for the release process.",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "dependencies": {
-    "launchdarkly-cpp-server": "3.10.0"
+    "launchdarkly-cpp-server": "3.10.1"
   }
 }

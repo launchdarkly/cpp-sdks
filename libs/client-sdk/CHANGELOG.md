@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.11.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.11.0...launchdarkly-cpp-client-v3.11.1) (2025-11-12)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * launchdarkly-cpp-sse-client bumped from 0.6.0 to 0.6.1
+
 ## [3.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.10.1...launchdarkly-cpp-client-v3.11.0) (2025-11-03)
 
 
