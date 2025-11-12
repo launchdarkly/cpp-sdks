@@ -22,7 +22,8 @@ jobs:
         ports:
           - 6379:6379
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -30,7 +31,8 @@ jobs:
   build-redis-mac:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -40,8 +42,10 @@ jobs:
   build-test-redis-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-      - uses: ilammy/msvc-dev-cmd@v1
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci
         env:
           BOOST_LIBRARY_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3'
