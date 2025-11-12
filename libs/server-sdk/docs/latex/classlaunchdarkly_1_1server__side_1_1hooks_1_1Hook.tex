@@ -1,0 +1,127 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}{}\doxysection{launchdarkly\+::server\+\_\+side\+::hooks\+::Hook Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook}\index{launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}}
+
+
+{\ttfamily \#include $<$hook.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::hooks\+::Hook\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=249pt]{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata}{Hook\+Metadata}} const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a11899ead579705a35d23df6c8eb75a2f}{Metadata}} () const =0
+\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_afcebeba31bf7ee8601fa64eafe89f7d6}{Before\+Evaluation}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&series\+\_\+context, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} data)
+\item 
+virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a55ebaf0b95cc396b2c6de5f2ee4847e4}{After\+Evaluation}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&series\+\_\+context, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} data, \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ const \&detail)
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_ac94ffa6169efea2fa51b50e44a454186}{After\+Track}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1TrackSeriesContext}{Track\+Series\+Context}} const \&series\+\_\+context)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Base interface for hook implementations.
+
+All stage methods have default implementations that take no action, allowing hook implementations to only override the stages they need.
+
+This interface is designed for forward compatibility -\/ new stages can be added without breaking existing hook implementations.
+
+IMPORTANT LIFETIME CONSIDERATIONS\+:
+\begin{DoxyItemize}
+\item All context objects passed to hook stages are valid only during the execution of that stage.
+\item Do not store references, pointers, or string\+\_\+views from context objects.
+\item If you need data beyond the immediate execution of a stage, copy it to owned types (std\+::string, \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}}, etc.).
+\item \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} should only be used within the stage or returned to be passed to the next stage. 
+\end{DoxyItemize}
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a55ebaf0b95cc396b2c6de5f2ee4847e4}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a55ebaf0b95cc396b2c6de5f2ee4847e4}} 
+\index{launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}!AfterEvaluation@{AfterEvaluation}}
+\index{AfterEvaluation@{AfterEvaluation}!launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}}
+\doxysubsubsection{\texorpdfstring{AfterEvaluation()}{AfterEvaluation()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+::\+After\+Evaluation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&}]{series\+\_\+context,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}}}]{data,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1EvaluationDetail}{Evaluation\+Detail}}$<$ \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} $>$ const \&}]{detail }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Called after a flag has been evaluated.
+
+
+\begin{DoxyParams}{Parameters}
+{\em series\+\_\+context} & \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} for this evaluation (valid only during this call). \\
+\hline
+{\em data} & Data from the before stage. \\
+\hline
+{\em detail} & The evaluation result. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Data to pass to the next stage (currently unused). 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1bindings_1_1CHookWrapper_a0ad08c97d32112d147cf92d5c6cfe906}{launchdarkly\+::server\+\_\+side\+::bindings\+::\+CHook\+Wrapper}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_ac94ffa6169efea2fa51b50e44a454186}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_ac94ffa6169efea2fa51b50e44a454186}} 
+\index{launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}!AfterTrack@{AfterTrack}}
+\index{AfterTrack@{AfterTrack}!launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}}
+\doxysubsubsection{\texorpdfstring{AfterTrack()}{AfterTrack()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+::\+After\+Track (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1TrackSeriesContext}{Track\+Series\+Context}} const \&}]{series\+\_\+context }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Called after a custom event has been enqueued via Track.
+
+
+\begin{DoxyParams}{Parameters}
+{\em series\+\_\+context} & \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} for this track call (valid only during this call). \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1bindings_1_1CHookWrapper_a7bd17815faa1407f6f616265ef6034ce}{launchdarkly\+::server\+\_\+side\+::bindings\+::\+CHook\+Wrapper}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_afcebeba31bf7ee8601fa64eafe89f7d6}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_afcebeba31bf7ee8601fa64eafe89f7d6}} 
+\index{launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}!BeforeEvaluation@{BeforeEvaluation}}
+\index{BeforeEvaluation@{BeforeEvaluation}!launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}}
+\doxysubsubsection{\texorpdfstring{BeforeEvaluation()}{BeforeEvaluation()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}} launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+::\+Before\+Evaluation (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesContext}{Evaluation\+Series\+Context}} const \&}]{series\+\_\+context,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1EvaluationSeriesData}{Evaluation\+Series\+Data}}}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Called before a flag is evaluated.
+
+
+\begin{DoxyParams}{Parameters}
+{\em series\+\_\+context} & \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} for this evaluation (valid only during this call). \\
+\hline
+{\em data} & Data from previous stage (empty for first stage). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Data to pass to the next stage. 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1bindings_1_1CHookWrapper_afdf6a2be27ad2d68e87421e8077e2157}{launchdarkly\+::server\+\_\+side\+::bindings\+::\+CHook\+Wrapper}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a11899ead579705a35d23df6c8eb75a2f}\label{classlaunchdarkly_1_1server__side_1_1hooks_1_1Hook_a11899ead579705a35d23df6c8eb75a2f}} 
+\index{launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}!Metadata@{Metadata}}
+\index{Metadata@{Metadata}!launchdarkly::server\_side::hooks::Hook@{launchdarkly::server\_side::hooks::Hook}}
+\doxysubsubsection{\texorpdfstring{Metadata()}{Metadata()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1hooks_1_1HookMetadata}{Hook\+Metadata}} const\& launchdarkly\+::server\+\_\+side\+::hooks\+::\+Hook\+::\+Metadata (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns metadata about this hook. \begin{DoxyReturn}{Returns}
+Reference to hook metadata. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1bindings_1_1CHookWrapper_a783f6968bb802809addf93dbed022403}{launchdarkly\+::server\+\_\+side\+::bindings\+::\+CHook\+Wrapper}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/hooks/hook.\+hpp\item 
+src/hooks/hook.\+cpp\end{DoxyCompactItemize}
