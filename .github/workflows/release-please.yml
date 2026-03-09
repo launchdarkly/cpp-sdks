@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15 ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15 ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
@@ -77,7 +77,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15 ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
