@@ -28,6 +28,7 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
           simulate_release: true
+          use_redis: true
   build-redis-mac:
     runs-on: macos-13
     steps:
@@ -39,6 +40,7 @@ jobs:
           platform_version: 12
           run_tests: false # TODO: figure out how to run Redis service on Mac
           simulate_release: true
+          use_redis: true
   build-test-redis-windows:
     runs-on: windows-2022
     steps:
@@ -57,3 +59,4 @@ jobs:
           toolset: msvc
           run_tests: false # TODO: figure out how to run Redis service on Windows
           simulate_windows_release: true
+          use_redis: true
