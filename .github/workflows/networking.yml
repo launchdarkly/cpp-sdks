@@ -14,7 +14,8 @@ jobs:
   build-test-networking:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-networking

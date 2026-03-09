@@ -45,7 +45,8 @@ jobs:
       hashes-windows: ${{ steps.release-sdk.outputs.hashes-windows }}
       hashes-macos: ${{ steps.release-sdk.outputs.hashes-macos }}
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
         with:
           ref: ${{ inputs.tag }}
       - id: release-sdk

@@ -10,7 +10,7 @@ void Event::append_data(std::string const& input) {
 }
 
 void Event::trim_trailing_newline() {
-    if (data[data.size() - 1] == '\n') {
+    if (!data.empty() && data[data.size() - 1] == '\n') {
         data.resize(data.size() - 1);
     }
 }

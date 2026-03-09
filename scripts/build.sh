@@ -38,6 +38,12 @@ if [ "$4" == "true" ]; then
 elif [ "$4" == "false" ]; then
   build_redis="OFF"
 fi
+
+# Set build type to Debug when testing is enabled
+build_type="Release"
+if [ "$2" == "ON" ]; then
+  build_type="Debug"
+fi
 # Special case: OpenTelemetry support requires additional dependencies.
 # Enable OTEL support and fetch deps when building OTEL targets.
 build_otel="OFF"
@@ -50,6 +56,7 @@ fi
 
 echo "==== Build Configuration ===="
 echo "Target: $1"
+echo "CMAKE_BUILD_TYPE: $build_type"
 echo "BUILD_TESTING: $2"
 echo "LD_BUILD_UNIT_TESTS: $2"
 echo "LD_BUILD_CONTRACT_TESTS: $2"
@@ -59,7 +66,8 @@ echo "LD_BUILD_OTEL_SUPPORT: $build_otel"
 echo "LD_BUILD_OTEL_FETCH_DEPS: $build_otel_fetch_deps"
 echo "============================="
 
-cmake -G Ninja -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
+cmake -G Ninja -D CMAKE_BUILD_TYPE="$build_type" \
+               -D CMAKE_COMPILE_WARNING_AS_ERROR=TRUE \
                -D BUILD_TESTING="$2" \
                -D LD_BUILD_UNIT_TESTS="$2" \
                -D LD_BUILD_CONTRACT_TESTS="$2" \

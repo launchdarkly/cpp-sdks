@@ -14,7 +14,8 @@ jobs:
   build-test-sse:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
@@ -22,7 +23,8 @@ jobs:
   build-test-sse-curl:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
@@ -35,14 +37,16 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: sse-tests
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
         with:
           repo: 'sse-contract-tests'
           branch: 'main'
@@ -56,7 +60,8 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
-      - uses: actions/checkout@v4
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: sse-tests
@@ -64,7 +69,8 @@ jobs:
           use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - uses: launchdarkly/gh-actions/actions/contract-tests@contract-tests-v1.1.0
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
         with:
           repo: 'sse-contract-tests'
           branch: 'main'
