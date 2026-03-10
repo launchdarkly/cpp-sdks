@@ -18,6 +18,10 @@ inputs:
     required: true
   sdk_cmake_target:
     description: 'CMake target of the sdk, e.g. launchdarkly-cpp-client.'
+  mac_artifact_arch:
+    description: 'Architecture label for macOS artifacts (x64 or arm64).'
+    required: false
+    default: 'x64'
 outputs:
   hashes-linux:
     description: "base64-encoded sha256 hash of linux build artifacts"
@@ -272,21 +276,21 @@ runs:
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
         CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
 
-    - name: Archive Release Mac - AppleClang/x64/Static
+    - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static
       if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-static/release'
         type: 'zip'
-        filename: 'mac-clang-x64-static.zip'
+        filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-static.zip'
 
-    - name: Archive Release Mac - AppleClang/x64/Dynamic
+    - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic
       if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-dynamic/release'
         type: 'zip'
-        filename: 'mac-clang-x64-dynamic.zip'
+        filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-dynamic.zip'
 
     - name: Determine CURL artifact suffix for server SDK
       if: runner.os == 'macOS'
@@ -299,21 +303,21 @@ runs:
           echo "suffix=" >> $GITHUB_OUTPUT
         fi
 
-    - name: Archive Release Mac - AppleClang/x64/Static/CURL
+    - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static/CURL
       if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-static-curl/release'
         type: 'zip'
-        filename: 'mac-clang-x64-static-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
+        filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-static-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
 
-    - name: Archive Release Mac - AppleClang/x64/Dynamic/CURL
+    - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic/CURL
       if: runner.os == 'macOS'
       uses: thedoctor0/zip-release@0.7.1
       with:
         path: 'build-dynamic-curl/release'
         type: 'zip'
-        filename: 'mac-clang-x64-dynamic-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
+        filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-dynamic-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
 
     - name: Hash Mac Build Artifacts for provenance
       if: runner.os == 'macOS'
@@ -321,7 +325,8 @@ runs:
       id: hash-macos
       run: |
         CURL_SUFFIX="${{ steps.curl-suffix-macos.outputs.suffix }}"
-        echo "hashes-macos=$(shasum -a 256 mac-clang-x64-static.zip mac-clang-x64-dynamic.zip mac-clang-x64-static-curl${CURL_SUFFIX}.zip mac-clang-x64-dynamic-curl${CURL_SUFFIX}.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
+        ARCH="${{ inputs.mac_artifact_arch }}"
+        echo "hashes-macos=$(shasum -a 256 mac-clang-${ARCH}-static.zip mac-clang-${ARCH}-dynamic.zip mac-clang-${ARCH}-static-curl${CURL_SUFFIX}.zip mac-clang-${ARCH}-dynamic-curl${CURL_SUFFIX}.zip | base64 -b 0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Mac Build Artifacts
       if: runner.os == 'macOS'
@@ -329,6 +334,7 @@ runs:
       run: |
         ls
         CURL_SUFFIX="${{ steps.curl-suffix-macos.outputs.suffix }}"
-        gh release upload ${{ inputs.tag_name }} mac-clang-x64-static.zip mac-clang-x64-dynamic.zip mac-clang-x64-static-curl${CURL_SUFFIX}.zip mac-clang-x64-dynamic-curl${CURL_SUFFIX}.zip --clobber
+        ARCH="${{ inputs.mac_artifact_arch }}"
+        gh release upload ${{ inputs.tag_name }} mac-clang-${ARCH}-static.zip mac-clang-${ARCH}-dynamic.zip mac-clang-${ARCH}-static-curl${CURL_SUFFIX}.zip mac-clang-${ARCH}-dynamic-curl${CURL_SUFFIX}.zip --clobber
       env:
         GH_TOKEN: ${{ inputs.github_token }}
