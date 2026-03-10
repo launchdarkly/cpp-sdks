@@ -30,7 +30,6 @@ jobs:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/install-curl
         id: install-curl
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
       - uses: ./.github/actions/cmake-test
         env:
           CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
