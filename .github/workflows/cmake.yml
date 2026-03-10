@@ -30,7 +30,6 @@ jobs:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/install-curl
         id: install-curl
-        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
       - uses: ./.github/actions/cmake-test
         env:
           CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
@@ -40,7 +39,7 @@ jobs:
           cmake_extra_args: '-DLD_CURL_NETWORKING=ON'
 
   test-macos:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -49,7 +48,7 @@ jobs:
           platform_version: '12'
 
   test-macos-curl:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955

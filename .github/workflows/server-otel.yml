@@ -26,7 +26,7 @@ jobs:
           # We don't produce release artifacts.
           simulate_release: false
   build-otel-mac:
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955

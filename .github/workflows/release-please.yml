@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15-large ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
@@ -48,11 +48,30 @@ jobs:
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
 
+  release-client-mac-arm64:
+    runs-on: macos-15
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
+    outputs:
+      hashes-macos-arm64: ${{ steps.release-client.outputs.hashes-macos }}
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-client
+        name: Full release of libs/client-sdk (macOS arm64)
+        uses: ./.github/actions/sdk-release
+        with:
+          tag_name: ${{ needs.release-please.outputs.package-client-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/client-sdk'
+          sdk_cmake_target: 'launchdarkly-cpp-client'
+          mac_artifact_arch: 'arm64'
+
   release-server:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15-large ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
@@ -73,11 +92,30 @@ jobs:
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
 
+  release-server-mac-arm64:
+    runs-on: macos-15
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
+    outputs:
+      hashes-macos-arm64: ${{ steps.release-server.outputs.hashes-macos }}
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server
+        name: Full release of libs/server-sdk (macOS arm64)
+        uses: ./.github/actions/sdk-release
+        with:
+          tag_name: ${{ needs.release-please.outputs.package-server-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk'
+          sdk_cmake_target: 'launchdarkly-cpp-server'
+          mac_artifact_arch: 'arm64'
+
   release-server-redis:
     strategy:
       matrix:
         # Each of the platforms for which release-artifacts need generated.
-        os: [ ubuntu-22.04, windows-2022, macos-13 ]
+        os: [ ubuntu-22.04, windows-2022, macos-15-large ]
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
@@ -98,6 +136,25 @@ jobs:
           sdk_path: 'libs/server-sdk-redis-source'
           sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
 
+  release-server-redis-mac-arm64:
+    runs-on: macos-15
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
+    outputs:
+      hashes-macos-arm64: ${{ steps.release-server-redis.outputs.hashes-macos }}
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server-redis
+        name: Full release of libs/server-sdk-redis-source (macOS arm64)
+        uses: ./.github/actions/sdk-release
+        with:
+          tag_name: ${{ needs.release-please.outputs.package-server-redis-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk-redis-source'
+          sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
+          mac_artifact_arch: 'arm64'
+
   release-client-provenance:
     needs: [ 'release-please', 'release-client' ]
     strategy:
@@ -114,6 +171,19 @@ jobs:
       upload-assets: true
       upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
       provenance-name: ${{ format('{0}-client-multiple-provenance.intoto.jsonl', matrix.os) }}
+
+  release-client-mac-arm64-provenance:
+    needs: [ 'release-please', 'release-client-mac-arm64' ]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.release-client-mac-arm64.outputs.hashes-macos-arm64 }}"
+      upload-assets: true
+      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
+      provenance-name: 'macos-arm64-client-multiple-provenance.intoto.jsonl'
 
   release-server-provenance:
     needs: [ 'release-please', 'release-server' ]
@@ -132,6 +202,19 @@ jobs:
       upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
       provenance-name: ${{ format('{0}-server-multiple-provenance.intoto.jsonl', matrix.os) }}
 
+  release-server-mac-arm64-provenance:
+    needs: [ 'release-please', 'release-server-mac-arm64' ]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.release-server-mac-arm64.outputs.hashes-macos-arm64 }}"
+      upload-assets: true
+      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
+      provenance-name: 'macos-arm64-server-multiple-provenance.intoto.jsonl'
+
   release-server-redis-provenance:
     needs: [ 'release-please', 'release-server-redis' ]
     strategy:
@@ -149,3 +232,15 @@ jobs:
       upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
       provenance-name: ${{ format('{0}-server-redis-multiple-provenance.intoto.jsonl', matrix.os) }}
 
+  release-server-redis-mac-arm64-provenance:
+    needs: [ 'release-please', 'release-server-redis-mac-arm64' ]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: "${{ needs.release-server-redis-mac-arm64.outputs.hashes-macos-arm64 }}"
+      upload-assets: true
+      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
+      provenance-name: 'macos-arm64-server-redis-multiple-provenance.intoto.jsonl'
