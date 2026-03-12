@@ -38,9 +38,9 @@ inputs:
     required: false
     default: 'false'
   use_redis:
-    description: 'Whether to enable Redis support (LD_BUILD_REDIS_SUPPORT=ON)'
+    description: 'Whether to enable Redis support (LD_BUILD_REDIS_SUPPORT=ON). Leave unset to preserve automatic detection for Redis targets.'
     required: false
-    default: 'false'
+    default: ''
 
 runs:
   using: composite
