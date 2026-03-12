@@ -181,14 +181,14 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
             // Configure cache mode
             // Default is 5 minutes, but contract tests may specify:
             // - "off": disable caching (fetch from DB every time)
-            // - "ttl": custom TTL in milliseconds
+            // - "ttl": custom TTL in seconds (test harness sends seconds)
             // - "infinite": never expire cached items
             if (in.persistentDataStore->cache.mode == "off") {
                 lazy_load.CacheRefresh(std::chrono::seconds(0));
             } else if (in.persistentDataStore->cache.mode == "ttl") {
-                if (in.persistentDataStore->cache.ttlMs) {
-                    lazy_load.CacheRefresh(std::chrono::milliseconds(
-                        *in.persistentDataStore->cache.ttlMs));
+                if (in.persistentDataStore->cache.ttl) {
+                    lazy_load.CacheRefresh(std::chrono::seconds(
+                        *in.persistentDataStore->cache.ttl));
                 }
             } else if (in.persistentDataStore->cache.mode == "infinite") {
                 // Use a very large TTL to effectively never expire

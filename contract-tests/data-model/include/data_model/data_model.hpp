@@ -152,12 +152,12 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
 
 struct ConfigPersistentCache {
     std::string mode;  // "off", "ttl", "infinite"
-    std::optional<int> ttlMs;
+    std::optional<int> ttl;  // TTL in seconds (sent by test harness as "ttl")
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigPersistentCache,
                                                 mode,
-                                                ttlMs);
+                                                ttl);
 
 struct ConfigPersistentStore {
     std::string type;  // "redis", "consul", "dynamodb"
