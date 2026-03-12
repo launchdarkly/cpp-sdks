@@ -27,7 +27,6 @@ jobs:
         with:
           cmake_target: server-tests
           run_tests: false
-          use_redis: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
       # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
@@ -36,7 +35,6 @@ jobs:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          enable_persistence_tests: true
 
   contract-tests-curl:
     runs-on: ubuntu-22.04
@@ -52,7 +50,6 @@ jobs:
           cmake_target: server-tests
           run_tests: false
           use_curl: true
-          use_redis: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
       # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
@@ -61,7 +58,6 @@ jobs:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          enable_persistence_tests: true
 
   build-test-server:
     runs-on: ubuntu-22.04
