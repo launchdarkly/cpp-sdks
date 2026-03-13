@@ -12,7 +12,20 @@
       "releases": {
         "tag-prefix": "launchdarkly-cpp-client-"
       },
-      "userAgents": ["CPPClient"]
+      "userAgents": ["CPPClient"],
+      "features": {
+        "allFlags": { "introduced": "1.0" },
+        "appMetadata": { "introduced": "3.0" },
+        "bigSegments": { "introduced": "1.0" },
+        "contexts": { "introduced": "3.0" },
+        "experimentation": { "introduced": "2.4.8" },
+        "flagChanges": { "introduced": "1.0" },
+        "inlineContextCustomEvents": { "introduced": "3.10" },
+        "privateAttrs": { "introduced": "1.0" },
+        "relayProxyProxy": { "introduced": "1.0" },
+        "track": { "introduced": "1.0" },
+        "variationDetail": { "introduced": "1.0" }
+      }
     },
     "cpp-server-sdk": {
       "name": "C++ Server SDK",
@@ -25,7 +38,24 @@
       "releases": {
         "tag-prefix": "launchdarkly-cpp-server-"
       },
-      "userAgents": ["CPPServer"]
+      "userAgents": ["CPPServer"],
+      "features": {
+        "allFlags": { "introduced": "1.0" },
+        "appMetadata": { "introduced": "3.0" },
+        "contexts": { "introduced": "3.0" },
+        "experimentation": { "introduced": "2.4" },
+        "fileDataSource": { "introduced": "2.6" },
+        "inlineContextCustomEvents": { "introduced": "3.9" },
+        "offlineMode": { "introduced": "1.0" },
+        "privateAttrs": { "introduced": "1.0" },
+        "relayProxyDaemon": { "introduced": "1.2" },
+        "relayProxyProxy": { "introduced": "1.0" },
+        "storingData": { "introduced": "1.2" },
+        "storingDataRedis": { "introduced": "1.2" },
+        "testDataSource": { "introduced": "2.6" },
+        "track": { "introduced": "1.0" },
+        "variationDetail": { "introduced": "1.0" }
+      }
     }
   }
 }
