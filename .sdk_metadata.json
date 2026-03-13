@@ -21,11 +21,11 @@
         "experimentation": { "introduced": "2.4.8" },
         "flagChanges": { "introduced": "1.0" },
         "inlineContextCustomEvents": { "introduced": "3.10" },
-        "offlineMode": { "introduced": "3.0" },
+        "offlineMode": { "introduced": "1.0" },
         "privateAttrs": { "introduced": "1.0" },
         "relayProxyProxy": { "introduced": "1.0" },
         "track": { "introduced": "1.0" },
-        "variationDetail": { "introduced": "1.0" }
+        "variationDetail": { "introduced": "1.1" }
       }
     },
     "cpp-server-sdk": {
