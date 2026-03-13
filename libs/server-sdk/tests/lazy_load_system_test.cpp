@@ -283,7 +283,7 @@ TEST_F(LazyLoadTest, AllSegmentsRefreshesIndividualSegment) {
     ASSERT_EQ(segment2->version, 2);
 }
 
-TEST_F(LazyLoadTest, InitializedReturnsTrueEvenWhenSourceNotInitialized) {
+TEST_F(LazyLoadTest, InitializeNotQueriedRepeatedly) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
@@ -292,10 +292,8 @@ TEST_F(LazyLoadTest, InitializedReturnsTrueEvenWhenSourceNotInitialized) {
 
     data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
-    // In lazy load mode, Initialized() always returns true even when the
-    // underlying source reports not initialized ($inited key not found).
     for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_TRUE(lazy_load.Initialized());
+        ASSERT_FALSE(lazy_load.Initialized());
     }
 }
 
@@ -331,46 +329,24 @@ TEST_F(LazyLoadTest, InitializeCalledAgainAfterTTL) {
     data_systems::LazyLoad const lazy_load(logger, config, status_manager,
                                            [&]() { return now; });
 
-    // Always returns true even when source reports not initialized.
     for (std::size_t i = 0; i < 10; i++) {
-        ASSERT_TRUE(lazy_load.Initialized());
+        ASSERT_FALSE(lazy_load.Initialized());
         now += std::chrono::seconds(1);
     }
 
-    // Still true after TTL when source now reports initialized.
     for (std::size_t i = 0; i < 10; i++) {
         ASSERT_TRUE(lazy_load.Initialized());
     }
 }
 
-TEST_F(LazyLoadTest, InitializedLogsWarningWhenSourceNotInitialized) {
+TEST_F(LazyLoadTest, CanEvaluateWhenNotInitialized) {
     built::LazyLoadConfig const config{
         built::LazyLoadConfig::EvictionPolicy::Disabled,
         std::chrono::seconds(10), mock_reader};
 
-    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(false));
-
     data_systems::LazyLoad const lazy_load(logger, config, status_manager);
 
-    ASSERT_TRUE(lazy_load.Initialized());
-
-    // A warning should have been logged about $inited not being found.
-    ASSERT_TRUE(spy_logger_backend->Contains(
-        0, LogLevel::kWarn, "$inited"));
-}
-
-TEST_F(LazyLoadTest, InitializedDoesNotLogWarningWhenSourceIsInitialized) {
-    built::LazyLoadConfig const config{
-        built::LazyLoadConfig::EvictionPolicy::Disabled,
-        std::chrono::seconds(10), mock_reader};
-
-    EXPECT_CALL(*mock_reader, Initialized).WillOnce(Return(true));
-
-    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
-
-    ASSERT_TRUE(lazy_load.Initialized());
-
-    // No warning should be logged when source is properly initialized.
-    // Only debug-level messages should be present (or none at all).
-    ASSERT_TRUE(spy_logger_backend->Count(0));
+    // LazyLoad can always serve evaluations on demand, even if not
+    // initialized (i.e. $inited key not found in store).
+    ASSERT_TRUE(lazy_load.CanEvaluateWhenNotInitialized());
 }

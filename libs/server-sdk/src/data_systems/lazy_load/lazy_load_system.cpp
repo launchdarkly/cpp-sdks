@@ -79,12 +79,9 @@ std::string const& LazyLoad::Identity() const {
 
 void LazyLoad::Initialize() {
     status_manager_.SetState(DataSourceState::kInitializing);
-    // In lazy load mode, we always consider the system ready for
-    // evaluations. The Initialized() call here will log a warning if
-    // the underlying source reports not initialized (e.g. $inited key
-    // not found), but we proceed regardless.
-    Initialized();
-    status_manager_.SetState(DataSourceState::kValid);
+    if (Initialized()) {
+        status_manager_.SetState(DataSourceState::kValid);
+    }
 }
 
 std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
@@ -124,35 +121,25 @@ LazyLoad::AllSegments() const {
 }
 
 bool LazyLoad::Initialized() const {
-    /* In lazy load mode, the system is always considered initialized for
-     * the purpose of flag evaluations. Data is fetched on-demand from the
-     * underlying source regardless of the $inited key state.
-     *
-     * However, we still check the underlying source's initialized state
-     * so we can warn if $inited is not set. A properly configured
-     * Relay Proxy or other SDK populating the store should set the
-     * $inited key. */
+    /* Since the memory store isn't provisioned with an initial SDKDataSet
+     * like in the Background Sync system, we can't forward this call to
+     * MemoryStore::Initialized(). Instead, we need to check the state of the
+     * underlying source. */
 
     auto const state = tracker_.State(Keys::kInitialized, time_());
     if (initialized_.has_value()) {
+        /* Once initialized, we can always return true. */
         if (initialized_.value()) {
             return true;
         }
+        /* If not yet initialized, then we can return false only if the state is
+         * fresh - otherwise we should make an attempt to refresh. */
         if (data_components::ExpirationTracker::TrackState::kFresh == state) {
-            return true;
+            return false;
         }
     }
     RefreshInitState();
-    if (!initialized_.value_or(false) && !logged_init_warning_) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "LazyLoad: data source reports not initialized "
-               "(the $inited key was not found in the store). "
-               "Evaluations will proceed using available data. "
-               "Typically a Relay Proxy or other SDK should set this "
-               "key; verify your configuration if this is unexpected.";
-        logged_init_warning_ = true;
-    }
-    return true;
+    return initialized_.value_or(false);
 }
 
 void LazyLoad::RefreshAllFlags() const {

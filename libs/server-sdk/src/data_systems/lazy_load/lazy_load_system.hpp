@@ -58,6 +58,10 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
+    [[nodiscard]] bool CanEvaluateWhenNotInitialized() const override {
+        return true;
+    }
+
     // Public for usage in tests.
     struct Kinds {
         static integrations::FlagKind const Flag;
@@ -187,7 +191,6 @@ class LazyLoad final : public data_interfaces::IDataSystem {
     mutable data_components::ExpirationTracker tracker_;
     TimeFn time_;
     mutable std::optional<bool> initialized_;
-    mutable bool logged_init_warning_{false};
 
     ClockType::duration fresh_duration_;
 
