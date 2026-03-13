@@ -18,6 +18,7 @@
 
 #include <boost/utility/string_view.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/version.hpp>
 
 #include <type_traits>
 #include <array>
@@ -88,6 +89,18 @@ launchdarkly::foxy::detail::export_connect_fields(boost::beast::http::basic_fiel
   // iterate the `src` fields, moving any connect headers and the corresponding tokens to the `dst`
   // fields
   //
+  // Boost 1.90 removed proxy_authentication_info, proxy_features, and
+  // proxy_instruction from boost::beast::http::field.
+#if BOOST_VERSION >= 109000
+  auto const hop_by_hops = std::array<http::field, 8>{http::field::connection,
+                                                      http::field::keep_alive,
+                                                      http::field::proxy_authenticate,
+                                                      http::field::proxy_authorization,
+                                                      http::field::proxy_connection,
+                                                      http::field::te,
+                                                      http::field::trailer,
+                                                      http::field::transfer_encoding};
+#else
   auto const hop_by_hops = std::array<http::field, 11>{http::field::connection,
                                                        http::field::keep_alive,
                                                        http::field::proxy_authenticate,
@@ -99,6 +112,7 @@ launchdarkly::foxy::detail::export_connect_fields(boost::beast::http::basic_fiel
                                                        http::field::te,
                                                        http::field::trailer,
                                                        http::field::transfer_encoding};
+#endif
 
   auto const is_connect_opt =
     [&connect_opts,

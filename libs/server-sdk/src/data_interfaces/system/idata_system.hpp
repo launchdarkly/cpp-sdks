@@ -21,6 +21,22 @@ class IDataSystem : public IStore {
      */
     virtual void Initialize() = 0;
 
+    /**
+     * @brief Returns true if the data system is capable of serving
+     * flag evaluations even when Initialized() returns false.
+     *
+     * This is the case for Lazy Load (daemon mode), where data can be
+     * fetched on-demand from the persistent store regardless of whether
+     * the $inited key has been set. In contrast, Background Sync
+     * cannot serve evaluations until initial data is received.
+     *
+     * When this returns true, the evaluation path should log a warning
+     * (rather than returning CLIENT_NOT_READY) if Initialized() is false.
+     */
+    [[nodiscard]] virtual bool CanEvaluateWhenNotInitialized() const {
+        return false;
+    }
+
     virtual ~IDataSystem() override = default;
     IDataSystem(IDataSystem const& item) = delete;
     IDataSystem(IDataSystem&& item) = delete;
