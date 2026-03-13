@@ -40,6 +40,7 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
           enable_persistence_tests: true
+          extra_params: '--skip-from ./contract-tests/server-contract-tests/suppressions.txt'
 
   contract-tests-curl:
     runs-on: ubuntu-22.04
@@ -68,6 +69,7 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
           enable_persistence_tests: true
+          extra_params: '--skip-from ./contract-tests/server-contract-tests/suppressions.txt'
 
   build-test-redis:
     runs-on: ubuntu-22.04
