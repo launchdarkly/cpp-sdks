@@ -58,6 +58,10 @@ class LazyLoad final : public data_interfaces::IDataSystem {
 
     bool Initialized() const override;
 
+    [[nodiscard]] bool CanEvaluateWhenNotInitialized() const override {
+        return true;
+    }
+
     // Public for usage in tests.
     struct Kinds {
         static integrations::FlagKind const Flag;

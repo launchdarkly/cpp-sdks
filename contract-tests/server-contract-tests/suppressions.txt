@@ -1,0 +1,12 @@
+persistent data store/redis/read-write/initializes store when data received
+persistent data store/redis/read-write/applies updates to store
+persistent data store/redis/read-write/data source updates respect versioning
+persistent data store/redis/read-write/data source deletions respect versioning
+persistent data store/redis/read-write/cache mode infinite/does not cache flag miss
+persistent data store/redis/read-write/cache mode infinite/sdk reflects data source updates even with cache
+persistent data store/redis/read-write/cache mode infinite/ignores direct database modifications
+persistent data store/redis/read-write/cache mode infinite/ignores dropped flags
+persistent data store/redis/read-write/cache mode ttl/does not cache flag miss
+persistent data store/redis/read-write/cache mode ttl/sdk reflects data source updates even with cache
+persistent data store/redis/read-write/cache mode ttl/ignores direct database modifications
+persistent data store/redis/read-write/cache mode ttl/ignores dropped flags

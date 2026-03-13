@@ -338,3 +338,15 @@ TEST_F(LazyLoadTest, InitializeCalledAgainAfterTTL) {
         ASSERT_TRUE(lazy_load.Initialized());
     }
 }
+
+TEST_F(LazyLoadTest, CanEvaluateWhenNotInitialized) {
+    built::LazyLoadConfig const config{
+        built::LazyLoadConfig::EvictionPolicy::Disabled,
+        std::chrono::seconds(10), mock_reader};
+
+    data_systems::LazyLoad const lazy_load(logger, config, status_manager);
+
+    // LazyLoad can always serve evaluations on demand, even if not
+    // initialized (i.e. $inited key not found in store).
+    ASSERT_TRUE(lazy_load.CanEvaluateWhenNotInitialized());
+}
