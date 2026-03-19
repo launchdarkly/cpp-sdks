@@ -79,9 +79,25 @@ std::string const& LazyLoad::Identity() const {
 
 void LazyLoad::Initialize() {
     status_manager_.SetState(DataSourceState::kInitializing);
-    if (Initialized()) {
-        status_manager_.SetState(DataSourceState::kValid);
+
+    // In lazy load (daemon) mode, the data system is always considered
+    // initialized immediately — it can fetch data on demand from the
+    // persistent store. This is consistent with Go, Java, and .NET SDKs
+    // which use a NullDataSource that immediately reports initialized.
+    //
+    // The store's $inited key state is a separate concern: if a Relay
+    // Proxy or other SDK hasn't set $inited, we log a warning but
+    // proceed. This matches the Node SDK pattern where the data source
+    // initializes immediately but the store state drives the warning.
+    if (!reader_->Initialized()) {
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "LazyLoad: the $inited key was not found in the store. "
+               "Evaluations will proceed using available data. Typically "
+               "a Relay Proxy or other SDK should set this key; verify "
+               "your configuration if this is unexpected.";
     }
+
+    status_manager_.SetState(DataSourceState::kValid);
 }
 
 std::shared_ptr<data_model::FlagDescriptor> LazyLoad::GetFlag(
@@ -121,25 +137,13 @@ LazyLoad::AllSegments() const {
 }
 
 bool LazyLoad::Initialized() const {
-    /* Since the memory store isn't provisioned with an initial SDKDataSet
-     * like in the Background Sync system, we can't forward this call to
-     * MemoryStore::Initialized(). Instead, we need to check the state of the
-     * underlying source. */
-
-    auto const state = tracker_.State(Keys::kInitialized, time_());
-    if (initialized_.has_value()) {
-        /* Once initialized, we can always return true. */
-        if (initialized_.value()) {
-            return true;
-        }
-        /* If not yet initialized, then we can return false only if the state is
-         * fresh - otherwise we should make an attempt to refresh. */
-        if (data_components::ExpirationTracker::TrackState::kFresh == state) {
-            return false;
-        }
-    }
-    RefreshInitState();
-    return initialized_.value_or(false);
+    /* In lazy load (daemon) mode, the data system is always considered
+     * initialized. It can serve evaluations on demand from the persistent
+     * store regardless of whether the $inited key has been set.
+     *
+     * This is consistent with Go/Java/.NET SDKs where the NullDataSource
+     * used in daemon mode always returns IsInitialized() = true. */
+    return true;
 }
 
 void LazyLoad::RefreshAllFlags() const {
@@ -152,11 +156,6 @@ void LazyLoad::RefreshAllSegments() const {
     RefreshAll<data_model::Segment>(
         Keys::kAllSegments, data_components::DataKind::kSegment,
         [this]() { return reader_->AllSegments(); });
-}
-
-void LazyLoad::RefreshInitState() const {
-    initialized_ = reader_->Initialized();
-    tracker_.Add(Keys::kInitialized, ExpiryTime());
 }
 
 void LazyLoad::RefreshSegment(std::string const& segment_key) const {
