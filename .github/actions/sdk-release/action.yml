@@ -73,7 +73,7 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Static
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static/release'
         type: 'zip'
@@ -81,7 +81,7 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Dynamic
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic/release'
         type: 'zip'
@@ -100,7 +100,7 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Static/CURL
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static-curl/release'
         type: 'zip'
@@ -108,7 +108,7 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Dynamic/CURL
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic-curl/release'
         type: 'zip'
@@ -141,7 +141,7 @@ runs:
 
     - name: Configure MSVC
       if: runner.os == 'Windows'
-      uses: ilammy/msvc-dev-cmd@v1
+      uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
     - name: Build Windows Artifacts (Boost.Beast)
       if: runner.os == 'Windows'
@@ -165,7 +165,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static/release'
         type: 'zip'
@@ -173,7 +173,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Dynamic
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic/release'
         type: 'zip'
@@ -181,7 +181,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static/Debug
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static-debug/release'
         type: 'zip'
@@ -189,7 +189,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/Debug
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic-debug/release'
         type: 'zip'
@@ -208,7 +208,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static-curl/release'
         type: 'zip'
@@ -216,7 +216,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic-curl/release'
         type: 'zip'
@@ -224,7 +224,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static/Debug/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static-debug-curl/release'
         type: 'zip'
@@ -232,7 +232,7 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/Debug/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic-debug-curl/release'
         type: 'zip'
@@ -278,7 +278,7 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static/release'
         type: 'zip'
@@ -286,7 +286,7 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic/release'
         type: 'zip'
@@ -305,7 +305,7 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static/CURL
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-static-curl/release'
         type: 'zip'
@@ -313,7 +313,7 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic/CURL
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@0.7.1
+      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
       with:
         path: 'build-dynamic-curl/release'
         type: 'zip'
