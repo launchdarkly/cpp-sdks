@@ -86,10 +86,10 @@ jobs:
             echo "=== Contents of test-dynamic.zip ==="
             unzip -l test-dynamic.zip
 
-            # Verify the path structure inside the zip
+            # Verify the path structure inside the zip using zipinfo
             echo ""
             echo "=== Verifying path structure ==="
-            STATIC_LIST=$(unzip -l test-static.zip | tail -n +4 | head -n -2 | awk '{print $4}')
+            STATIC_LIST=$(zipinfo -1 test-static.zip)
             echo "Files in static zip:"
             echo "$STATIC_LIST"
 
@@ -101,7 +101,7 @@ jobs:
               exit 1
             fi
 
-            DYNAMIC_LIST=$(unzip -l test-dynamic.zip | tail -n +4 | head -n -2 | awk '{print $4}')
+            DYNAMIC_LIST=$(zipinfo -1 test-dynamic.zip)
             echo "Files in dynamic zip:"
             echo "$DYNAMIC_LIST"
 
