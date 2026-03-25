@@ -165,6 +165,7 @@ jobs:
       actions: read
       id-token: write
       contents: write
+      pull-requests: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
     with:
       base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
