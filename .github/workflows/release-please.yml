@@ -7,6 +7,9 @@ name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       package-client-released: ${{ steps.release.outputs['libs/client-sdk--release_created'] }}
       package-client-tag: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
