@@ -90,8 +90,7 @@ TEST(ServerIntentPayloadTests, WrongTypeReturnsSchemaFailure) {
 TEST(ServerIntentPayloadTests, MissingIdReturnsSchemaFailure) {
     auto result = boost::json::value_to<
         tl::expected<std::optional<ServerIntentPayload>, JsonError>>(
-        boost::json::parse(
-            R"({"target":1,"intentCode":"none","reason":"r"})"));
+        boost::json::parse(R"({"target":1,"intentCode":"none","reason":"r"})"));
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), JsonError::kSchemaFailure);
 }
@@ -135,9 +134,8 @@ TEST(ServerIntentPayloadTests, NullReturnsNullopt) {
 
 TEST(ServerIntentTests, DeserializesValidIntent) {
     auto result = boost::json::value_to<
-        tl::expected<std::optional<ServerIntent>, JsonError>>(
-        boost::json::parse(
-            R"({"payloads":[{"id":"abc","target":1,"intentCode":"xfer-full","reason":"r"}]})"));
+        tl::expected<std::optional<ServerIntent>, JsonError>>(boost::json::parse(
+        R"({"payloads":[{"id":"abc","target":1,"intentCode":"xfer-full","reason":"r"}]})"));
     ASSERT_TRUE(result);
     ASSERT_TRUE(result.value());
     ASSERT_EQ(result.value()->payloads.size(), 1u);
@@ -183,9 +181,8 @@ TEST(ServerIntentTests, NullReturnsNullopt) {
 
 TEST(PutObjectTests, DeserializesValidPutObject) {
     auto result = boost::json::value_to<
-        tl::expected<std::optional<PutObject>, JsonError>>(
-        boost::json::parse(
-            R"({"version":5,"kind":"flag","key":"my-flag","object":{"on":true}})"));
+        tl::expected<std::optional<PutObject>, JsonError>>(boost::json::parse(
+        R"({"version":5,"kind":"flag","key":"my-flag","object":{"on":true}})"));
     ASSERT_TRUE(result);
     ASSERT_TRUE(result.value());
     ASSERT_EQ(result.value()->version, std::int64_t{5});
@@ -205,8 +202,7 @@ TEST(PutObjectTests, MissingObjectReturnsSchemaFailure) {
 TEST(PutObjectTests, MissingVersionReturnsSchemaFailure) {
     auto result = boost::json::value_to<
         tl::expected<std::optional<PutObject>, JsonError>>(
-        boost::json::parse(
-            R"({"kind":"flag","key":"k","object":{}})"));
+        boost::json::parse(R"({"kind":"flag","key":"k","object":{}})"));
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), JsonError::kSchemaFailure);
 }
@@ -250,8 +246,7 @@ TEST(PutObjectTests, NullReturnsNullopt) {
 TEST(DeleteObjectTests, DeserializesValidDeleteObject) {
     auto result = boost::json::value_to<
         tl::expected<std::optional<DeleteObject>, JsonError>>(
-        boost::json::parse(
-            R"({"version":3,"kind":"segment","key":"my-seg"})"));
+        boost::json::parse(R"({"version":3,"kind":"segment","key":"my-seg"})"));
     ASSERT_TRUE(result);
     ASSERT_TRUE(result.value());
     ASSERT_EQ(result.value()->version, std::int64_t{3});
@@ -350,9 +345,9 @@ TEST(PayloadTransferredTests, NullReturnsNullopt) {
 // ============================================================================
 
 TEST(GoodbyeTests, DeserializesWithReason) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<Goodbye>, JsonError>>(
-        boost::json::parse(R"({"reason":"shutting down"})"));
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            boost::json::parse(R"({"reason":"shutting down"})"));
     ASSERT_TRUE(result);
     ASSERT_TRUE(result.value());
     ASSERT_TRUE(result.value()->reason);
@@ -360,26 +355,26 @@ TEST(GoodbyeTests, DeserializesWithReason) {
 }
 
 TEST(GoodbyeTests, DeserializesWithoutReason) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<Goodbye>, JsonError>>(
-        boost::json::parse(R"({})"));
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            boost::json::parse(R"({})"));
     ASSERT_TRUE(result);
     ASSERT_TRUE(result.value());
     ASSERT_FALSE(result.value()->reason);
 }
 
 TEST(GoodbyeTests, WrongTypeReturnsSchemaFailure) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<Goodbye>, JsonError>>(
-        boost::json::parse(R"("goodbye")"));
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            boost::json::parse(R"("goodbye")"));
     ASSERT_FALSE(result);
     ASSERT_EQ(result.error(), JsonError::kSchemaFailure);
 }
 
 TEST(GoodbyeTests, NullReturnsNullopt) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<Goodbye>, JsonError>>(
-        boost::json::parse(R"(null)"));
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            boost::json::parse(R"(null)"));
     ASSERT_TRUE(result);
     ASSERT_FALSE(result.value());
 }

@@ -58,9 +58,8 @@ tl::expected<std::optional<IntentCode>, JsonError> tag_invoke(
     boost::json::value const& json_value);
 
 tl::expected<std::optional<ServerIntentPayload>, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<std::optional<ServerIntentPayload>, JsonError>> const&
-        unused,
+    boost::json::value_to_tag<tl::expected<std::optional<ServerIntentPayload>,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value);
 
 tl::expected<std::optional<ServerIntent>, JsonError> tag_invoke(
@@ -79,9 +78,8 @@ tl::expected<std::optional<DeleteObject>, JsonError> tag_invoke(
     boost::json::value const& json_value);
 
 tl::expected<std::optional<PayloadTransferred>, JsonError> tag_invoke(
-    boost::json::value_to_tag<
-        tl::expected<std::optional<PayloadTransferred>, JsonError>> const&
-        unused,
+    boost::json::value_to_tag<tl::expected<std::optional<PayloadTransferred>,
+                                           JsonError>> const& unused,
     boost::json::value const& json_value);
 
 tl::expected<std::optional<Goodbye>, JsonError> tag_invoke(
