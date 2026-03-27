@@ -1,8 +1,6 @@
 #include "memory_store.hpp"
 
-#include <launchdarkly/data_model/fdv2_change.hpp>
-
-#include <variant>
+#include <launchdarkly/detail/unreachable.hpp>
 
 namespace launchdarkly::server_side::data_components {
 
@@ -86,20 +84,24 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
     return segments_.erase(key) == 1;
 }
 
-void MemoryStore::Apply(data_model::FDv2ChangeSet const& changeSet) {
+void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
     std::lock_guard lock{data_mutex_};
 
-    if (changeSet.type == data_model::FDv2ChangeSet::Type::kNone) {
-        return;
+    switch (changeSet.type) {
+        case data_model::FDv2ChangeSet::Type::kNone:
+            return;
+        case data_model::FDv2ChangeSet::Type::kPartial:
+            break;
+        case data_model::FDv2ChangeSet::Type::kFull:
+            initialized_ = true;
+            flags_.clear();
+            segments_.clear();
+            break;
+        default:
+            detail::unreachable();
     }
 
-    if (changeSet.type == data_model::FDv2ChangeSet::Type::kFull) {
-        initialized_ = true;
-        flags_.clear();
-        segments_.clear();
-    }
-
-    for (auto change : changeSet.changes) {
+    for (auto& change : changeSet.changes) {
         if (std::holds_alternative<data_model::FlagDescriptor>(change.object)) {
             auto& flag_descriptor =
                 std::get<data_model::FlagDescriptor>(change.object);

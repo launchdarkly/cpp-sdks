@@ -46,7 +46,7 @@ class MemoryStore final : public data_interfaces::IStore,
 
     bool RemoveSegment(std::string const& key);
 
-    void Apply(data_model::FDv2ChangeSet const& changeSet);
+    void Apply(data_model::FDv2ChangeSet changeSet);
 
     MemoryStore() = default;
     ~MemoryStore() override = default;
