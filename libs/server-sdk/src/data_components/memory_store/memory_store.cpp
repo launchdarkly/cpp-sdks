@@ -1,5 +1,9 @@
 #include "memory_store.hpp"
 
+#include <launchdarkly/data_model/fdv2_change.hpp>
+
+#include <variant>
+
 namespace launchdarkly::server_side::data_components {
 
 std::shared_ptr<data_model::FlagDescriptor> MemoryStore::GetFlag(
@@ -80,6 +84,51 @@ bool MemoryStore::RemoveFlag(std::string const& key) {
 bool MemoryStore::RemoveSegment(std::string const& key) {
     std::lock_guard lock{data_mutex_};
     return segments_.erase(key) == 1;
+}
+
+void MemoryStore::Apply(data_model::FDv2ChangeSet const& changeSet) {
+    std::lock_guard lock{data_mutex_};
+
+    if (changeSet.type == data_model::FDv2ChangeSet::Type::kNone) {
+        return;
+    }
+
+    if (changeSet.type == data_model::FDv2ChangeSet::Type::kFull) {
+        initialized_ = true;
+        flags_.clear();
+        segments_.clear();
+    }
+
+    for (auto change : changeSet.changes) {
+        if (std::holds_alternative<data_model::FlagDescriptor>(change.object)) {
+            auto& flag_descriptor =
+                std::get<data_model::FlagDescriptor>(change.object);
+
+            auto existing_flag = flags_.find(change.key);
+            if (existing_flag != flags_.end() &&
+                existing_flag->second->version >= flag_descriptor.version) {
+                continue;
+            }
+
+            flags_[change.key] = std::make_shared<data_model::FlagDescriptor>(
+                std::move(flag_descriptor));
+        } else if (std::holds_alternative<data_model::SegmentDescriptor>(
+                       change.object)) {
+            auto& segment_descriptor =
+                std::get<data_model::SegmentDescriptor>(change.object);
+
+            auto existing_segment = segments_.find(change.key);
+            if (existing_segment != segments_.end() &&
+                existing_segment->second->version >=
+                    segment_descriptor.version) {
+                continue;
+            }
+
+            segments_[change.key] =
+                std::make_shared<data_model::SegmentDescriptor>(
+                    std::move(segment_descriptor));
+        }
+    }
 }
 
 }  // namespace launchdarkly::server_side::data_components
