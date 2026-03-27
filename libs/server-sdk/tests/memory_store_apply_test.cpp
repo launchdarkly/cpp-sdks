@@ -43,7 +43,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_IsNoOp) {
 
 TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
     MemoryStore store;
-    store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kNone, {}, Selector{}});
+    std::ignore = store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kNone, {}, Selector{}});
     EXPECT_FALSE(store.Initialized());
 }
 
@@ -54,7 +54,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
 TEST(MemoryStoreApplyTest, ApplyFull_SetsInitialized) {
     MemoryStore store;
     ASSERT_FALSE(store.Initialized());
-    store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kFull, {}, Selector{}});
+    std::ignore = store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kFull, {}, Selector{}});
     EXPECT_TRUE(store.Initialized());
 }
 

@@ -85,8 +85,8 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
 }
 
 ApplyResult MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
-    ApplyResult result;
     std::lock_guard lock{data_mutex_};
+    ApplyResult result;
 
     switch (changeSet.type) {
         case data_model::FDv2ChangeSet::Type::kNone:
