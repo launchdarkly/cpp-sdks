@@ -84,15 +84,24 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
     return segments_.erase(key) == 1;
 }
 
-void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
+ApplyResult MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
+    ApplyResult result;
     std::lock_guard lock{data_mutex_};
 
     switch (changeSet.type) {
         case data_model::FDv2ChangeSet::Type::kNone:
-            return;
+            return result;
         case data_model::FDv2ChangeSet::Type::kPartial:
             break;
         case data_model::FDv2ChangeSet::Type::kFull:
+            // When there's a full change, any current keys are considered
+            // changed, regardless of whether they are in the new set.
+            for (auto const& [key, _] : flags_) {
+                result.flags.insert(key);
+            }
+            for (auto const& [key, _] : segments_) {
+                result.segments.insert(key);
+            }
             initialized_ = true;
             flags_.clear();
             segments_.clear();
@@ -114,6 +123,7 @@ void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
 
             flags_[change.key] = std::make_shared<data_model::FlagDescriptor>(
                 std::move(flag_descriptor));
+            result.flags.insert(change.key);
         } else if (std::holds_alternative<data_model::SegmentDescriptor>(
                        change.object)) {
             auto& segment_descriptor =
@@ -129,8 +139,11 @@ void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
             segments_[change.key] =
                 std::make_shared<data_model::SegmentDescriptor>(
                     std::move(segment_descriptor));
+            result.segments.insert(change.key);
         }
     }
+
+    return result;
 }
 
 }  // namespace launchdarkly::server_side::data_components
