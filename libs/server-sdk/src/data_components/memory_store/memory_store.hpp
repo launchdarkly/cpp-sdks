@@ -9,14 +9,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 namespace launchdarkly::server_side::data_components {
-
-struct ApplyResult {
-    std::unordered_set<std::string> flags;
-    std::unordered_set<std::string> segments;
-};
 
 class MemoryStore final : public data_interfaces::IStore,
                           public data_interfaces::IDestination {
@@ -52,7 +46,7 @@ class MemoryStore final : public data_interfaces::IStore,
 
     bool RemoveSegment(std::string const& key);
 
-    [[nodiscard]] ApplyResult Apply(data_model::FDv2ChangeSet changeSet);
+    void Apply(data_model::FDv2ChangeSet changeSet);
 
     MemoryStore() = default;
     ~MemoryStore() override = default;

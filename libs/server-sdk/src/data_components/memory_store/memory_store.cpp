@@ -84,24 +84,15 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
     return segments_.erase(key) == 1;
 }
 
-ApplyResult MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
+void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
     std::lock_guard lock{data_mutex_};
-    ApplyResult result;
 
     switch (changeSet.type) {
         case data_model::FDv2ChangeSet::Type::kNone:
-            return result;
+            return;
         case data_model::FDv2ChangeSet::Type::kPartial:
             break;
         case data_model::FDv2ChangeSet::Type::kFull:
-            // When there's a full change, any current keys are considered
-            // changed, regardless of whether they are in the new set.
-            for (auto const& [key, _] : flags_) {
-                result.flags.insert(key);
-            }
-            for (auto const& [key, _] : segments_) {
-                result.segments.insert(key);
-            }
             initialized_ = true;
             flags_.clear();
             segments_.clear();
@@ -112,38 +103,15 @@ ApplyResult MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
 
     for (auto& change : changeSet.changes) {
         if (std::holds_alternative<data_model::FlagDescriptor>(change.object)) {
-            auto& flag_descriptor =
-                std::get<data_model::FlagDescriptor>(change.object);
-
-            auto existing_flag = flags_.find(change.key);
-            if (existing_flag != flags_.end() &&
-                existing_flag->second->version >= flag_descriptor.version) {
-                continue;
-            }
-
             flags_[change.key] = std::make_shared<data_model::FlagDescriptor>(
-                std::move(flag_descriptor));
-            result.flags.insert(change.key);
+                std::move(std::get<data_model::FlagDescriptor>(change.object)));
         } else if (std::holds_alternative<data_model::SegmentDescriptor>(
                        change.object)) {
-            auto& segment_descriptor =
-                std::get<data_model::SegmentDescriptor>(change.object);
-
-            auto existing_segment = segments_.find(change.key);
-            if (existing_segment != segments_.end() &&
-                existing_segment->second->version >=
-                    segment_descriptor.version) {
-                continue;
-            }
-
             segments_[change.key] =
-                std::make_shared<data_model::SegmentDescriptor>(
-                    std::move(segment_descriptor));
-            result.segments.insert(change.key);
+                std::make_shared<data_model::SegmentDescriptor>(std::move(
+                    std::get<data_model::SegmentDescriptor>(change.object)));
         }
     }
-
-    return result;
 }
 
 }  // namespace launchdarkly::server_side::data_components
