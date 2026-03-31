@@ -40,10 +40,10 @@ jobs:
         # Each of the platforms for which release-artifacts need generated.
         os: [ ubuntu-22.04, windows-2022, macos-15-large ]
     runs-on: ${{ matrix.os }}
-    outputs:
-      hashes-linux: ${{ steps.release-sdk.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-sdk.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-sdk.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -58,12 +58,32 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: ${{ needs.split-input.outputs.sdk_path}}
           sdk_cmake_target: ${{ needs.split-input.outputs.sdk_cmake_target}}
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-sdk.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-sdk.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-sdk.outputs.hashes-macos }}
+        run: |
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | base64 -d > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | base64 -d > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | base64 -d > checksums.txt
+          fi
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-sdk-mac-arm64:
     needs: split-input
     runs-on: macos-15
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-sdk.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -78,33 +98,13 @@ jobs:
           sdk_path: ${{ needs.split-input.outputs.sdk_path}}
           sdk_cmake_target: ${{ needs.split-input.outputs.sdk_cmake_target}}
           mac_artifact_arch: 'arm64'
-
-  release-sdk-provenance:
-    needs: [ 'release-sdk' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-sdk.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ inputs.tag }}
-      provenance-name: ${{ format('{0}-multiple-provenance.intoto.jsonl', matrix.os) }}
-
-  release-sdk-mac-arm64-provenance:
-    needs: [ 'release-sdk-mac-arm64' ]
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-sdk-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ inputs.tag }}
-      provenance-name: 'macos-arm64-multiple-provenance.intoto.jsonl'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-sdk.outputs.hashes-macos }}
+        run: |
+          echo "${HASHES}" | base64 -d > checksums.txt
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
