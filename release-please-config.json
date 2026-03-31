@@ -10,7 +10,8 @@
         "tests/client_c_bindings_test.cpp",
         "tests/client_test.cpp",
         "CMakeLists.txt"
-      ]
+      ],
+      "force-tag-creation": true
     },
     "libs/server-sdk": {
       "extra-files": [
@@ -18,22 +19,33 @@
         "tests/server_c_bindings_test.cpp",
         "tests/client_test.cpp",
         "CMakeLists.txt"
-      ]
+      ],
+      "force-tag-creation": true
     },
     "libs/server-sdk-redis-source": {
       "extra-files": [
         "CMakeLists.txt"
-      ]
+      ],
+      "force-tag-creation": true
     },
     "libs/server-sdk-otel": {
       "bump-minor-pre-major": true,
       "extra-files": [
         "CMakeLists.txt"
-      ]
+      ],
+      "force-tag-creation": true
     },
-    "libs/server-sent-events": {},
-    "libs/common": {},
-    "libs/internal": {},
-    "libs/networking": {}
+    "libs/server-sent-events": {
+      "force-tag-creation": true
+    },
+    "libs/common": {
+      "force-tag-creation": true
+    },
+    "libs/internal": {
+      "force-tag-creation": true
+    },
+    "libs/networking": {
+      "force-tag-creation": true
+    }
   }
 }

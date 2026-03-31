@@ -16,6 +16,11 @@ on:
           - libs/client-sdk:launchdarkly-cpp-client
           - libs/server-sdk:launchdarkly-cpp-server
           - libs/server-sdk-redis-source:launchdarkly-cpp-server-redis-source
+      publish_release:
+        description: 'Publish (un-draft) the release after all artifacts are uploaded?'
+        type: boolean
+        required: false
+        default: true
 
 name: Publish SDK Artifacts
 
@@ -76,7 +81,6 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-checksums: checksums.txt
-
   release-sdk-mac-arm64:
     needs: split-input
     runs-on: macos-15
@@ -108,3 +112,19 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-checksums: checksums.txt
+
+  publish-release:
+    needs: ['release-sdk', 'release-sdk-mac-arm64']
+    if: ${{ inputs.publish_release }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ inputs.tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
