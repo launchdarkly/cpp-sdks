@@ -1,5 +1,7 @@
 #include "memory_store.hpp"
 
+#include <launchdarkly/detail/unreachable.hpp>
+
 namespace launchdarkly::server_side::data_components {
 
 std::shared_ptr<data_model::FlagDescriptor> MemoryStore::GetFlag(
@@ -80,6 +82,36 @@ bool MemoryStore::RemoveFlag(std::string const& key) {
 bool MemoryStore::RemoveSegment(std::string const& key) {
     std::lock_guard lock{data_mutex_};
     return segments_.erase(key) == 1;
+}
+
+void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
+    std::lock_guard lock{data_mutex_};
+
+    switch (changeSet.type) {
+        case data_model::FDv2ChangeSet::Type::kNone:
+            return;
+        case data_model::FDv2ChangeSet::Type::kPartial:
+            break;
+        case data_model::FDv2ChangeSet::Type::kFull:
+            initialized_ = true;
+            flags_.clear();
+            segments_.clear();
+            break;
+        default:
+            detail::unreachable();
+    }
+
+    for (auto& change : changeSet.changes) {
+        if (std::holds_alternative<data_model::FlagDescriptor>(change.object)) {
+            flags_[change.key] = std::make_shared<data_model::FlagDescriptor>(
+                std::move(std::get<data_model::FlagDescriptor>(change.object)));
+        } else if (std::holds_alternative<data_model::SegmentDescriptor>(
+                       change.object)) {
+            segments_[change.key] =
+                std::make_shared<data_model::SegmentDescriptor>(std::move(
+                    std::get<data_model::SegmentDescriptor>(change.object)));
+        }
+    }
 }
 
 }  // namespace launchdarkly::server_side::data_components

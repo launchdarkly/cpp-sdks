@@ -3,6 +3,8 @@
 #include "../../data_interfaces/destination/idestination.hpp"
 #include "../../data_interfaces/store/istore.hpp"
 
+#include <launchdarkly/data_model/fdv2_change.hpp>
+
 #include <memory>
 #include <mutex>
 #include <string>
@@ -43,6 +45,8 @@ class MemoryStore final : public data_interfaces::IStore,
     bool RemoveFlag(std::string const& key);
 
     bool RemoveSegment(std::string const& key);
+
+    void Apply(data_model::FDv2ChangeSet changeSet);
 
     MemoryStore() = default;
     ~MemoryStore() override = default;
