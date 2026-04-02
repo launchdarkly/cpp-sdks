@@ -56,8 +56,13 @@ struct FDv2SourceResult {
         bool fdv1_fallback;
     };
 
-    using Value =
-        std::variant<ChangeSet, Interrupted, TerminalError, Shutdown, Goodbye>;
+    /**
+     * Next() returned because the timeout expired before a result arrived.
+     */
+    struct Timeout {};
+
+    using Value = std::variant<ChangeSet, Interrupted, TerminalError, Shutdown,
+                               Goodbye, Timeout>;
 
     Value value;
 };

@@ -25,7 +25,7 @@ class IFDv2Synchronizer {
      * Subsequent calls continue reading from the same connection.
      *
      * If the timeout expires before a result arrives, returns
-     * FDv2SourceResult::Interrupted. The orchestrator uses this to evaluate
+     * FDv2SourceResult::Timeout. The orchestrator uses this to evaluate
      * fallback conditions.
      *
      * Close() may be called from another thread to unblock Next(), in which
