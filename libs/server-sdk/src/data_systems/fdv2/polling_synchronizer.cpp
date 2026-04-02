@@ -134,8 +134,7 @@ data_interfaces::FDv2SourceResult FDv2PollingSynchronizer::Next(
 
     if (timed_out) {
         return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kUnknown, 0, "polling timeout"), false}};
+            data_interfaces::FDv2SourceResult::Timeout{}};
     }
 
     return HandlePollResult(*result_);
