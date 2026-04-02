@@ -119,12 +119,14 @@ jobs:
           HASHES_WINDOWS: ${{ steps.release-client.outputs.hashes-windows }}
           HASHES_MACOS: ${{ steps.release-client.outputs.hashes-macos }}
         run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
           if [ -n "${HASHES_LINUX}" ]; then
-            echo "${HASHES_LINUX}" | base64 -d > checksums.txt
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_WINDOWS}" ]; then
-            echo "${HASHES_WINDOWS}" | base64 -d > checksums.txt
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_MACOS}" ]; then
-            echo "${HASHES_MACOS}" | base64 -d > checksums.txt
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
       - name: Attest build provenance
@@ -156,7 +158,8 @@ jobs:
         env:
           HASHES: ${{ steps.release-client.outputs.hashes-macos }}
         run: |
-          echo "${HASHES}" | base64 -d > checksums.txt
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
       - name: Attest build provenance
         uses: actions/attest@v4
@@ -193,12 +196,14 @@ jobs:
           HASHES_WINDOWS: ${{ steps.release-server.outputs.hashes-windows }}
           HASHES_MACOS: ${{ steps.release-server.outputs.hashes-macos }}
         run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
           if [ -n "${HASHES_LINUX}" ]; then
-            echo "${HASHES_LINUX}" | base64 -d > checksums.txt
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_WINDOWS}" ]; then
-            echo "${HASHES_WINDOWS}" | base64 -d > checksums.txt
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_MACOS}" ]; then
-            echo "${HASHES_MACOS}" | base64 -d > checksums.txt
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
       - name: Attest build provenance
@@ -230,7 +235,8 @@ jobs:
         env:
           HASHES: ${{ steps.release-server.outputs.hashes-macos }}
         run: |
-          echo "${HASHES}" | base64 -d > checksums.txt
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
       - name: Attest build provenance
         uses: actions/attest@v4
@@ -267,12 +273,14 @@ jobs:
           HASHES_WINDOWS: ${{ steps.release-server-redis.outputs.hashes-windows }}
           HASHES_MACOS: ${{ steps.release-server-redis.outputs.hashes-macos }}
         run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
           if [ -n "${HASHES_LINUX}" ]; then
-            echo "${HASHES_LINUX}" | base64 -d > checksums.txt
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_WINDOWS}" ]; then
-            echo "${HASHES_WINDOWS}" | base64 -d > checksums.txt
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_MACOS}" ]; then
-            echo "${HASHES_MACOS}" | base64 -d > checksums.txt
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
       - name: Attest build provenance
@@ -304,7 +312,8 @@ jobs:
         env:
           HASHES: ${{ steps.release-server-redis.outputs.hashes-macos }}
         run: |
-          echo "${HASHES}" | base64 -d > checksums.txt
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
       - name: Attest build provenance
         uses: actions/attest@v4
