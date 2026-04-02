@@ -1,0 +1,21 @@
+name: 'Zip Release'
+description: 'Creates a zip archive from a specified path. Works on Linux, macOS, and Windows using built-in runner tools.'
+inputs:
+  path:
+    description: 'The path to archive (relative to working directory).'
+    required: true
+  filename:
+    description: 'The output zip filename.'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Create zip (Linux/macOS)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: zip -r "${{ inputs.filename }}" ${{ inputs.path }}
+
+    - name: Create zip (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      run: 7z a -tzip "${{ inputs.filename }}" ${{ inputs.path }}

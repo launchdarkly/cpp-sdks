@@ -73,18 +73,16 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Static
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static/release'
-        type: 'zip'
         filename: 'linux-gcc-x64-static.zip'
 
     - name: Archive Release Linux - GCC/x64/Dynamic
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic/release'
-        type: 'zip'
         filename: 'linux-gcc-x64-dynamic.zip'
 
     - name: Determine CURL artifact suffix for server SDK
@@ -100,18 +98,16 @@ runs:
 
     - name: Archive Release Linux - GCC/x64/Static/CURL
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static-curl/release'
-        type: 'zip'
         filename: 'linux-gcc-x64-static-curl${{ steps.curl-suffix-linux.outputs.suffix }}.zip'
 
     - name: Archive Release Linux - GCC/x64/Dynamic/CURL
       if: runner.os == 'Linux'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic-curl/release'
-        type: 'zip'
         filename: 'linux-gcc-x64-dynamic-curl${{ steps.curl-suffix-linux.outputs.suffix }}.zip'
 
     - name: Hash Linux Build Artifacts for provenance
@@ -165,34 +161,30 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-static.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-dynamic.zip'
 
     - name: Archive Release Windows - MSVC/x64/Static/Debug
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static-debug/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-static-debug.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/Debug
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic-debug/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-dynamic-debug.zip'
 
     - name: Determine CURL artifact suffix for server SDK
@@ -208,34 +200,30 @@ runs:
 
     - name: Archive Release Windows - MSVC/x64/Static/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static-curl/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-static-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic-curl/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-dynamic-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
 
     - name: Archive Release Windows - MSVC/x64/Static/Debug/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static-debug-curl/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-static-debug-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
 
     - name: Archive Release Windows - MSVC/x64/Dynamic/Debug/CURL
       if: runner.os == 'Windows'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic-debug-curl/release'
-        type: 'zip'
         filename: 'windows-msvc-x64-dynamic-debug-curl${{ steps.curl-suffix-windows.outputs.suffix }}.zip'
 
     - name: Hash Windows Build Artifacts for provenance
@@ -278,18 +266,16 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static/release'
-        type: 'zip'
         filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-static.zip'
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic/release'
-        type: 'zip'
         filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-dynamic.zip'
 
     - name: Determine CURL artifact suffix for server SDK
@@ -305,18 +291,16 @@ runs:
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Static/CURL
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-static-curl/release'
-        type: 'zip'
         filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-static-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
 
     - name: Archive Release Mac - AppleClang/${{ inputs.mac_artifact_arch }}/Dynamic/CURL
       if: runner.os == 'macOS'
-      uses: thedoctor0/zip-release@a24011d8d445e4da5935a7e73c1f98e22a439464 # 0.7.1
+      uses: ./.github/actions/zip-release
       with:
         path: 'build-dynamic-curl/release'
-        type: 'zip'
         filename: 'mac-clang-${{ inputs.mac_artifact_arch }}-dynamic-curl${{ steps.curl-suffix-macos.outputs.suffix }}.zip'
 
     - name: Hash Mac Build Artifacts for provenance
