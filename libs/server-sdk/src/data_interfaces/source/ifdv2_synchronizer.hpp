@@ -2,6 +2,8 @@
 
 #include "fdv2_source_result.hpp"
 
+#include <launchdarkly/data_model/selector.hpp>
+
 #include <chrono>
 #include <string>
 
@@ -29,9 +31,12 @@ class IFDv2Synchronizer {
      * Close() may be called from another thread to unblock Next(), in which
      * case Next() returns FDv2SourceResult::Shutdown.
      *
-     * @param timeout Maximum time to wait for the next result.
+     * @param timeout  Maximum time to wait for the next result.
+     * @param selector The selector to send with the request, reflecting any
+     *                 changesets applied since the previous call.
      */
-    virtual FDv2SourceResult Next(std::chrono::milliseconds timeout) = 0;
+    virtual FDv2SourceResult Next(std::chrono::milliseconds timeout,
+                                  data_model::Selector selector) = 0;
 
     /**
      * Unblocks any in-progress Next() call, causing it to return
