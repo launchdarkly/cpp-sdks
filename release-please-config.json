@@ -4,6 +4,7 @@
   ],
   "packages": {
     "libs/client-sdk": {
+      "component": "launchdarkly-cpp-client",
       "extra-files": [
         "include/launchdarkly/client_side/client.hpp",
         "tests/client_c_bindings_test.cpp",
@@ -12,6 +13,7 @@
       ]
     },
     "libs/server-sdk": {
+      "component": "launchdarkly-cpp-server",
       "extra-files": [
         "include/launchdarkly/server_side/client.hpp",
         "tests/server_c_bindings_test.cpp",
@@ -20,19 +22,29 @@
       ]
     },
     "libs/server-sdk-redis-source": {
+      "component": "launchdarkly-cpp-server-redis-source",
       "extra-files": [
         "CMakeLists.txt"
       ]
     },
     "libs/server-sdk-otel": {
+      "component": "launchdarkly-cpp-server-otel",
       "bump-minor-pre-major": true,
       "extra-files": [
         "CMakeLists.txt"
       ]
     },
-    "libs/server-sent-events": {},
-    "libs/common": {},
-    "libs/internal": {},
-    "libs/networking": {}
+    "libs/server-sent-events": {
+      "component": "launchdarkly-cpp-sse-client"
+    },
+    "libs/common": {
+      "component": "launchdarkly-cpp-common"
+    },
+    "libs/internal": {
+      "component": "launchdarkly-cpp-internal"
+    },
+    "libs/networking": {
+      "component": "launchdarkly-cpp-networking"
+    }
   }
 }

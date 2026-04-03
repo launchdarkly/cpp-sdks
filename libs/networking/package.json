@@ -1,5 +1,5 @@
 {
-  "name": "launchdarkly-cpp-networking",
+  "name": "@launchdarkly/cpp-networking",
   "description": "This package.json exists for modeling dependencies for the release process.",
   "version": "0.2.0",
   "private": true
