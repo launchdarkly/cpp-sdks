@@ -73,7 +73,7 @@ data_interfaces::FDv2SourceResult FDv2PollingInitializer::Run() {
             << kIdentity << ": invalid polling endpoint URL";
         return data_interfaces::FDv2SourceResult{
             data_interfaces::FDv2SourceResult::TerminalError{
-                MakeError(ErrorKind::kNetworkError, 0,
+                MakeError(ErrorKind::kUnknown, 0,
                           "invalid polling endpoint URL"),
                 false}};
     }
