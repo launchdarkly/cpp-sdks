@@ -186,11 +186,19 @@ AllFlagsState ClientImpl::AllFlagsState(Context const& context,
     std::unordered_map<Client::FlagKey, Value> result;
 
     if (!Initialized()) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << "AllFlagsState() called before client has finished "
-               "initializing. Data source not available. Returning empty state";
+        if (data_system_->CanEvaluateWhenNotInitialized()) {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before LaunchDarkly client "
+                   "initialization completed; using last known values "
+                   "from data store";
+        } else {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "AllFlagsState() called before client has finished "
+                   "initializing. Data source not available. Returning "
+                   "empty state";
 
-        return {};
+            return {};
+        }
     }
 
     AllFlagsStateBuilder builder{options};
@@ -418,7 +426,16 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
 std::optional<enum EvaluationReason::ErrorKind> ClientImpl::PreEvaluationChecks(
     Context const& context) const {
     if (!Initialized()) {
-        return EvaluationReason::ErrorKind::kClientNotReady;
+        if (data_system_->CanEvaluateWhenNotInitialized()) {
+            LD_LOG(logger_, LogLevel::kWarn)
+                << "Evaluation called before LaunchDarkly client "
+                   "initialization completed; using last known values "
+                   "from data store. The $inited key was not found in "
+                   "the store; typically a Relay Proxy or other SDK "
+                   "should set this key.";
+        } else {
+            return EvaluationReason::ErrorKind::kClientNotReady;
+        }
     }
     if (!context.Valid()) {
         return EvaluationReason::ErrorKind::kUserNotSpecified;
