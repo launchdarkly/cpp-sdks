@@ -5,6 +5,7 @@
   "draft": true,
   "packages": {
     "libs/client-sdk": {
+      "component": "launchdarkly-cpp-client",
       "extra-files": [
         "include/launchdarkly/client_side/client.hpp",
         "tests/client_c_bindings_test.cpp",
@@ -14,6 +15,7 @@
       "force-tag-creation": true
     },
     "libs/server-sdk": {
+      "component": "launchdarkly-cpp-server",
       "extra-files": [
         "include/launchdarkly/server_side/client.hpp",
         "tests/server_c_bindings_test.cpp",
@@ -23,12 +25,14 @@
       "force-tag-creation": true
     },
     "libs/server-sdk-redis-source": {
+      "component": "launchdarkly-cpp-server-redis-source",
       "extra-files": [
         "CMakeLists.txt"
       ],
       "force-tag-creation": true
     },
     "libs/server-sdk-otel": {
+      "component": "launchdarkly-cpp-server-otel",
       "bump-minor-pre-major": true,
       "extra-files": [
         "CMakeLists.txt"
@@ -36,15 +40,19 @@
       "force-tag-creation": true
     },
     "libs/server-sent-events": {
+      "component": "launchdarkly-cpp-sse-client",
       "force-tag-creation": true
     },
     "libs/common": {
+      "component": "launchdarkly-cpp-common",
       "force-tag-creation": true
     },
     "libs/internal": {
+      "component": "launchdarkly-cpp-internal",
       "force-tag-creation": true
     },
     "libs/networking": {
+      "component": "launchdarkly-cpp-networking",
       "force-tag-creation": true
     }
   }
