@@ -367,3 +367,19 @@ jobs:
           gh release edit "$TAG_NAME"
           --repo ${{ github.repository }}
           --draft=false
+
+  publish-release-server-otel:
+    needs: ['release-please']
+    if: ${{ needs.release-please.outputs.package-server-otel-released == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-otel-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
