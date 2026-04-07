@@ -167,11 +167,11 @@ void FDv2PollingSynchronizer::DoPoll(
                 [this, promise](std::array<std::size_t, 2> order,
                                 network::HttpResult poll_result,
                                 boost::system::error_code) mutable {
-                    if (order[0] == 0) {
-                        promise->set_value(HandlePollResult(poll_result));
-                    } else if (closed_) {
+                    if (closed_) {
                         promise->set_value(
                             FDv2SourceResult{FDv2SourceResult::Shutdown{}});
+                    } else if (order[0] == 0) {
+                        promise->set_value(HandlePollResult(poll_result));
                     } else {
                         promise->set_value(
                             FDv2SourceResult{FDv2SourceResult::Timeout{}});
