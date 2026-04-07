@@ -26,8 +26,8 @@ static boost::json::value MakePutObject(std::string const& kind,
                                         std::string const& key,
                                         std::string const& object_json) {
     return boost::json::parse(R"({"version":1,"kind":")" + kind +
-                              R"(","key":")" + key +
-                              R"(","object":)" + object_json + "}");
+                              R"(","key":")" + key + R"(","object":)" +
+                              object_json + "}");
 }
 
 static boost::json::value MakeDeleteObject(std::string const& kind,
@@ -51,7 +51,8 @@ static boost::json::value MakePayloadTransferred(std::string const& state,
 TEST(FDv2ProtocolHandlerTest, NoneIntentEmitsEmptyChangeSetImmediately) {
     FDv2ProtocolHandler handler;
 
-    auto result = handler.HandleEvent("server-intent", MakeServerIntent("none"));
+    auto result =
+        handler.HandleEvent("server-intent", MakeServerIntent("none"));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -67,15 +68,16 @@ TEST(FDv2ProtocolHandlerTest, NoneIntentEmitsEmptyChangeSetImmediately) {
 TEST(FDv2ProtocolHandlerTest, FullIntentEmitsChangeSetOnPayloadTransferred) {
     FDv2ProtocolHandler handler;
 
-    auto r1 = handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    auto r1 =
+        handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
     EXPECT_TRUE(std::holds_alternative<std::monostate>(r1));
 
-    auto r2 = handler.HandleEvent(
-        "put-object", MakePutObject("flag", "my-flag", kFlagJson));
+    auto r2 = handler.HandleEvent("put-object",
+                                  MakePutObject("flag", "my-flag", kFlagJson));
     EXPECT_TRUE(std::holds_alternative<std::monostate>(r2));
 
-    auto r3 = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("state-abc", 7));
+    auto r3 = handler.HandleEvent("payload-transferred",
+                                  MakePayloadTransferred("state-abc", 7));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&r3);
     ASSERT_NE(cs, nullptr);
@@ -95,10 +97,11 @@ TEST(FDv2ProtocolHandlerTest, FullIntentAccumulatesMultipleObjects) {
                         MakePutObject("flag", "flag-1", kFlagJson));
     handler.HandleEvent("put-object",
                         MakePutObject("flag", "flag-2", kFlagJson));
-    handler.HandleEvent("delete-object", MakeDeleteObject("segment", "seg-1", 5));
+    handler.HandleEvent("delete-object",
+                        MakeDeleteObject("segment", "seg-1", 5));
 
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -106,7 +109,8 @@ TEST(FDv2ProtocolHandlerTest, FullIntentAccumulatesMultipleObjects) {
     EXPECT_EQ(cs->changes.size(), 3u);
 }
 
-TEST(FDv2ProtocolHandlerTest, SecondServerIntentMidTransferDiscardsAccumulatedChanges) {
+TEST(FDv2ProtocolHandlerTest,
+     SecondServerIntentMidTransferDiscardsAccumulatedChanges) {
     FDv2ProtocolHandler handler;
 
     // Start a full transfer and accumulate a change.
@@ -116,14 +120,15 @@ TEST(FDv2ProtocolHandlerTest, SecondServerIntentMidTransferDiscardsAccumulatedCh
 
     // A second server-intent arrives before payload-transferred.
     // The first transfer's accumulated changes should be discarded.
-    auto r = handler.HandleEvent("server-intent", MakeServerIntent("xfer-changes"));
+    auto r =
+        handler.HandleEvent("server-intent", MakeServerIntent("xfer-changes"));
     EXPECT_TRUE(std::holds_alternative<std::monostate>(r));
 
     // Only the flag from the second transfer should appear in the changeset.
     handler.HandleEvent("put-object",
                         MakePutObject("flag", "flag-2", kFlagJson));
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("state-new", 2));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("state-new", 2));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -143,8 +148,8 @@ TEST(FDv2ProtocolHandlerTest, PartialIntentEmitsPartialChangeSet) {
     handler.HandleEvent("put-object",
                         MakePutObject("segment", "my-seg", kSegmentJson));
 
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("state-xyz", 3));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("state-xyz", 3));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -163,13 +168,14 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsSilentlySkipped) {
     FDv2ProtocolHandler handler;
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-    handler.HandleEvent("put-object",
-                        MakePutObject("experiment", "exp-1", R"({"key":"exp-1","version":1})"));
+    handler.HandleEvent(
+        "put-object",
+        MakePutObject("experiment", "exp-1", R"({"key":"exp-1","version":1})"));
     handler.HandleEvent("put-object",
                         MakePutObject("flag", "my-flag", kFlagJson));
 
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -182,11 +188,13 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsSilentlySkipped) {
     FDv2ProtocolHandler handler;
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-    handler.HandleEvent("delete-object", MakeDeleteObject("experiment", "exp-1", 1));
-    handler.HandleEvent("delete-object", MakeDeleteObject("flag", "my-flag", 2));
+    handler.HandleEvent("delete-object",
+                        MakeDeleteObject("experiment", "exp-1", 1));
+    handler.HandleEvent("delete-object",
+                        MakeDeleteObject("flag", "my-flag", 2));
 
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -199,7 +207,8 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsSilentlySkipped) {
 // error event → discard accumulated data, return Error::kServerError
 // ============================================================================
 
-TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) {
+TEST(FDv2ProtocolHandlerTest,
+     ErrorEventDiscardsAccumulatedDataAndReturnsError) {
     FDv2ProtocolHandler handler;
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
@@ -207,8 +216,7 @@ TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) 
                         MakePutObject("flag", "my-flag", kFlagJson));
 
     auto result = handler.HandleEvent(
-        "error",
-        boost::json::parse(R"({"reason":"something went wrong"})"));
+        "error", boost::json::parse(R"({"reason":"something went wrong"})"));
 
     auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
     ASSERT_NE(err, nullptr);
@@ -220,8 +228,8 @@ TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) 
     // After the error the handler is reset. A subsequent full transfer should
     // produce an empty changeset (no leftover data from before the error).
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-    auto result2 = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result2 = handler.HandleEvent("payload-transferred",
+                                       MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result2);
     ASSERT_NE(cs, nullptr);
@@ -269,8 +277,7 @@ TEST(FDv2ProtocolHandlerTest, GoodbyeEventReturnsGoodbye) {
     FDv2ProtocolHandler handler;
 
     auto result = handler.HandleEvent(
-        "goodbye",
-        boost::json::parse(R"({"reason":"shutting down"})"));
+        "goodbye", boost::json::parse(R"({"reason":"shutting down"})"));
 
     auto* gb = std::get_if<Goodbye>(&result);
     ASSERT_NE(gb, nullptr);
@@ -295,8 +302,7 @@ TEST(FDv2ProtocolHandlerTest, GoodbyeWithoutReasonReturnsGoodbye) {
 TEST(FDv2ProtocolHandlerTest, HeartbeatReturnsMonostate) {
     FDv2ProtocolHandler handler;
 
-    auto result =
-        handler.HandleEvent("heartbeat", boost::json::parse(R"({})"));
+    auto result = handler.HandleEvent("heartbeat", boost::json::parse(R"({})"));
     EXPECT_TRUE(std::holds_alternative<std::monostate>(result));
 }
 
@@ -324,8 +330,8 @@ TEST(FDv2ProtocolHandlerTest, PutBeforeServerIntentIsIgnored) {
     EXPECT_TRUE(std::holds_alternative<std::monostate>(r1));
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -347,8 +353,8 @@ TEST(FDv2ProtocolHandlerTest, ResetClearsState) {
     // After reset, payload-transferred with no prior server-intent produces
     // a full changeset with no changes.
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
@@ -358,8 +364,8 @@ TEST(FDv2ProtocolHandlerTest, ResetClearsState) {
 TEST(FDv2ProtocolHandlerTest, PayloadTransferredWithoutServerIntentIsError) {
     FDv2ProtocolHandler handler;
 
-    auto result = handler.HandleEvent(
-        "payload-transferred", MakePayloadTransferred("s", 1));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
 
     auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
     ASSERT_NE(err, nullptr);

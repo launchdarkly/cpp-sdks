@@ -285,11 +285,12 @@ class AsioRequester {
     auto Request(HttpRequest request, CompletionToken&& token) {
         return boost::asio::async_initiate<CompletionToken, void(HttpResult)>(
             [this](auto handler, HttpRequest req) {
-                InnerRequest(net::make_strand(ctx_), std::move(req),
-                             [h = std::move(handler)](HttpResult result) mutable {
-                                 std::move(h)(std::move(result));
-                             },
-                             0);
+                InnerRequest(
+                    net::make_strand(ctx_), std::move(req),
+                    [h = std::move(handler)](HttpResult result) mutable {
+                        std::move(h)(std::move(result));
+                    },
+                    0);
             },
             token, std::move(request));
     }
@@ -329,7 +330,7 @@ class AsioRequester {
                                  redirect_count]() mutable {
             auto beast_request = MakeBeastRequest(*request);
 
-            const auto& properties = request->Properties();
+            auto const& properties = request->Properties();
 
             std::string service =
                 request->Port().value_or(request->Https() ? "https" : "http");

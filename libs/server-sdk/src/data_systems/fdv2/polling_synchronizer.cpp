@@ -112,27 +112,27 @@ void FDv2PollingSynchronizer::DoNext(
             boost::asio::experimental::make_parallel_group(
                 timer_.async_wait(boost::asio::deferred),
                 timeout_timer->async_wait(boost::asio::deferred))
-                .async_wait(boost::asio::experimental::wait_for_one(),
-                            boost::asio::bind_cancellation_slot(
-                                cancel_signal_.slot(),
-                                [this, deadline, selector = std::move(selector),
-                                 promise, timeout_timer](
-                                    std::array<std::size_t, 2> order,
-                                    boost::system::error_code,
-                                    boost::system::error_code) mutable {
-                                    if (closed_) {
-                                        promise->set_value(FDv2SourceResult{
-                                            FDv2SourceResult::Shutdown{}});
-                                        return;
-                                    }
-                                    if (order[0] == 1) {
-                                        promise->set_value(FDv2SourceResult{
-                                            FDv2SourceResult::Timeout{}});
-                                        return;
-                                    }
-                                    DoPoll(deadline, selector,
-                                           std::move(promise));
-                                }));
+                .async_wait(
+                    boost::asio::experimental::wait_for_one(),
+                    boost::asio::bind_cancellation_slot(
+                        cancel_signal_.slot(),
+                        [this, deadline, selector = std::move(selector),
+                         promise,
+                         timeout_timer](std::array<std::size_t, 2> order,
+                                        boost::system::error_code,
+                                        boost::system::error_code) mutable {
+                            if (closed_) {
+                                promise->set_value(FDv2SourceResult{
+                                    FDv2SourceResult::Shutdown{}});
+                                return;
+                            }
+                            if (order[0] == 1) {
+                                promise->set_value(FDv2SourceResult{
+                                    FDv2SourceResult::Timeout{}});
+                                return;
+                            }
+                            DoPoll(deadline, selector, std::move(promise));
+                        }));
             return;
         }
     }
