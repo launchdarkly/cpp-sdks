@@ -319,11 +319,27 @@ FDv2SourceResult FDv2PollingSynchronizer::HandlePollResult(
                 return FDv2SourceResult{
                     FDv2SourceResult::Goodbye{goodbye->reason, false}};
             }
-            if (auto* error = std::get_if<FDv2Error>(&result)) {
-                std::string msg = "Server error: " + error->reason;
-                LD_LOG(logger_, LogLevel::kInfo) << kIdentity << ": " << msg;
+            if (auto* error =
+                    std::get_if<FDv2ProtocolHandler::Error>(&result)) {
+                if (error->kind ==
+                    FDv2ProtocolHandler::Error::Kind::kServerError) {
+                    auto const& id = error->server_error->id;
+                    std::string msg =
+                        "An issue was encountered receiving updates for "
+                        "payload '" +
+                        id.value_or("") + "' with reason: '" + error->message +
+                        "'. Automatic retry will occur.";
+                    LD_LOG(logger_, LogLevel::kInfo)
+                        << kIdentity << ": " << msg;
+                    return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                        MakeError(ErrorKind::kErrorResponse, 0, std::move(msg)),
+                        false}};
+                }
+                LD_LOG(logger_, LogLevel::kError)
+                    << kIdentity << ": " << error->message;
                 return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kUnknown, 0, std::move(msg)), false}};
+                    MakeError(ErrorKind::kInvalidData, 0, error->message),
+                    false}};
             }
         }
 

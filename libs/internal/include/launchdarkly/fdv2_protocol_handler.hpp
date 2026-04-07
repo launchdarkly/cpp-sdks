@@ -22,15 +22,62 @@ namespace launchdarkly {
 class FDv2ProtocolHandler {
    public:
     /**
+     * Typed error returned by HandleEvent. Carries the original underlying
+     * error context rather than converting to a plain string.
+     */
+    struct Error {
+        enum class Kind {
+            kJsonError,      // Failed to deserialise an event's data field.
+            kProtocolError,  // Out-of-order or unexpected event.
+            kServerError,    // Server sent a valid 'error' event.
+        };
+
+        Kind kind;
+        std::string message;
+
+        /**
+         * Set for kJsonError when the tl::expected parse returned an error.
+         * Nullopt when parse succeeded but the data value was null.
+         */
+        std::optional<JsonError> json_error;
+
+        /**
+         * Set for kServerError: the full wire error including id and reason.
+         */
+        std::optional<FDv2Error> server_error;
+
+        /** JSON deserialisation failed — carries the original JsonError. */
+        static Error JsonParseError(JsonError err, std::string msg) {
+            return {Kind::kJsonError, std::move(msg), err, std::nullopt};
+        }
+        /** Parse succeeded but data was null — no underlying JsonError. */
+        static Error JsonParseError(std::string msg) {
+            return {Kind::kJsonError, std::move(msg), std::nullopt,
+                    std::nullopt};
+        }
+        /** Out-of-order or unexpected protocol event. */
+        static Error ProtocolError(std::string msg) {
+            return {Kind::kProtocolError, std::move(msg), std::nullopt,
+                    std::nullopt};
+        }
+        /** Server sent a well-formed 'error' event. */
+        static Error ServerError(FDv2Error err) {
+            return {Kind::kServerError, err.reason, std::nullopt,
+                    std::move(err)};
+        }
+    };
+
+    /**
      * Result of handling a single FDv2 event:
      * - monostate: no output yet (accumulating, heartbeat, or unknown event)
      * - FDv2ChangeSet: complete changeset ready to apply
-     * - FDv2Error: server reported an error; discard partial data
+     * - Error: protocol error (JSON parse failure, protocol violation, or
+     *          server-sent error event)
      * - Goodbye: server is closing; caller should rotate sources
      */
     using Result = std::variant<std::monostate,
                                 data_model::FDv2ChangeSet,
-                                FDv2Error,
+                                Error,
                                 Goodbye>;
 
     /**

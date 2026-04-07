@@ -153,7 +153,7 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsSilentlySkipped) {
 }
 
 // ============================================================================
-// error event → discard accumulated data, return FDv2Error
+// error event → discard accumulated data, return Error::kServerError
 // ============================================================================
 
 TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) {
@@ -167,9 +167,12 @@ TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) 
         "error",
         boost::json::parse(R"({"reason":"something went wrong"})"));
 
-    auto* err = std::get_if<FDv2Error>(&result);
+    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
     ASSERT_NE(err, nullptr);
-    EXPECT_EQ(err->reason, "something went wrong");
+    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kServerError);
+    ASSERT_TRUE(err->server_error.has_value());
+    EXPECT_EQ(err->server_error->reason, "something went wrong");
+    EXPECT_FALSE(err->server_error->id.has_value());
 
     // After the error the handler is reset. A subsequent full transfer should
     // produce an empty changeset (no leftover data from before the error).
@@ -180,6 +183,39 @@ TEST(FDv2ProtocolHandlerTest, ErrorEventDiscardsAccumulatedDataAndReturnsError) 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result2);
     ASSERT_NE(cs, nullptr);
     EXPECT_TRUE(cs->changes.empty());
+}
+
+TEST(FDv2ProtocolHandlerTest, ErrorEventWithIdSetsServerId) {
+    FDv2ProtocolHandler handler;
+
+    auto result = handler.HandleEvent(
+        "error",
+        boost::json::parse(R"({"id":"payload-123","reason":"overloaded"})"));
+
+    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
+    ASSERT_NE(err, nullptr);
+    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kServerError);
+    ASSERT_TRUE(err->server_error.has_value());
+    ASSERT_TRUE(err->server_error->id.has_value());
+    EXPECT_EQ(*err->server_error->id, "payload-123");
+    EXPECT_EQ(err->server_error->reason, "overloaded");
+}
+
+TEST(FDv2ProtocolHandlerTest, MalformedPutObjectReturnsJsonError) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+
+    // 'object' field is missing required flag fields — deserialisation fails.
+    auto result = handler.HandleEvent(
+        "put-object",
+        boost::json::parse(
+            R"({"version":1,"kind":"flag","key":"f","object":{}})"));
+
+    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
+    ASSERT_NE(err, nullptr);
+    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kJsonError);
+    EXPECT_TRUE(err->json_error.has_value());
 }
 
 // ============================================================================
@@ -282,5 +318,7 @@ TEST(FDv2ProtocolHandlerTest, PayloadTransferredWithoutServerIntentIsError) {
     auto result = handler.HandleEvent(
         "payload-transferred", MakePayloadTransferred("s", 1));
 
-    EXPECT_NE(std::get_if<FDv2Error>(&result), nullptr);
+    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
+    ASSERT_NE(err, nullptr);
+    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kProtocolError);
 }

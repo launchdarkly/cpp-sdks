@@ -18,10 +18,12 @@ static char const* const kPayloadTransferred = "payload-transferred";
 static char const* const kError = "error";
 static char const* const kGoodbye = "goodbye";
 
+using Error = FDv2ProtocolHandler::Error;
+
 // Returns the parsed FDv2Change on success, nullopt for unknown kinds (which
-// should be silently skipped for forward-compatibility), or an error string if
+// should be silently skipped for forward-compatibility), or an Error if
 // a known kind fails to deserialize.
-static tl::expected<std::optional<data_model::FDv2Change>, std::string>
+static tl::expected<std::optional<data_model::FDv2Change>, Error>
 ParsePut(PutObject const& put) {
     if (put.kind == "flag") {
         auto result = boost::json::value_to<
@@ -30,11 +32,13 @@ ParsePut(PutObject const& put) {
         // One bad flag aborts the entire transfer so the store is never
         // left in a partially-updated state.
         if (!result) {
-            return tl::make_unexpected("could not deserialize flag '" +
-                                       put.key + "'");
+            return tl::make_unexpected(Error::JsonParseError(
+                result.error(),
+                "could not deserialize flag '" + put.key + "'"));
         }
         if (!result->has_value()) {
-            return tl::make_unexpected("flag '" + put.key + "' object was null");
+            return tl::make_unexpected(
+                Error::JsonParseError("flag '" + put.key + "' object was null"));
         }
         return data_model::FDv2Change{
             put.key,
@@ -47,12 +51,13 @@ ParsePut(PutObject const& put) {
         // One bad segment aborts the entire transfer so the store is never
         // left in a partially-updated state.
         if (!result) {
-            return tl::make_unexpected("could not deserialize segment '" +
-                                       put.key + "'");
+            return tl::make_unexpected(Error::JsonParseError(
+                result.error(),
+                "could not deserialize segment '" + put.key + "'"));
         }
         if (!result->has_value()) {
-            return tl::make_unexpected("segment '" + put.key +
-                                       "' object was null");
+            return tl::make_unexpected(Error::JsonParseError(
+                "segment '" + put.key + "' object was null"));
         }
         return data_model::FDv2Change{
             put.key,
@@ -84,11 +89,12 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
             tl::expected<std::optional<ServerIntent>, JsonError>>(data);
         if (!result) {
             Reset();
-            return FDv2Error{std::nullopt, "could not deserialize server-intent"};
+            return Error::JsonParseError(result.error(),
+                                         "could not deserialize server-intent");
         }
         if (!result->has_value()) {
             Reset();
-            return FDv2Error{std::nullopt, "server-intent data was null"};
+            return Error::JsonParseError("server-intent data was null");
         }
         auto const& intent = **result;
         if (intent.payloads.empty()) {
@@ -118,16 +124,17 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
             tl::expected<std::optional<PutObject>, JsonError>>(data);
         if (!result) {
             Reset();
-            return FDv2Error{std::nullopt, "could not deserialize put-object"};
+            return Error::JsonParseError(result.error(),
+                                         "could not deserialize put-object");
         }
         if (!result->has_value()) {
             Reset();
-            return FDv2Error{std::nullopt, "put-object data was null"};
+            return Error::JsonParseError("put-object data was null");
         }
         auto change = ParsePut(**result);
         if (!change) {
             Reset();
-            return FDv2Error{std::nullopt, std::move(change.error())};
+            return std::move(change.error());
         }
         if (*change) {
             changes_.push_back(std::move(**change));
@@ -143,11 +150,12 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
             tl::expected<std::optional<DeleteObject>, JsonError>>(data);
         if (!result) {
             Reset();
-            return FDv2Error{std::nullopt, "could not deserialize delete-object"};
+            return Error::JsonParseError(result.error(),
+                                         "could not deserialize delete-object");
         }
         if (!result->has_value()) {
             Reset();
-            return FDv2Error{std::nullopt, "delete-object data was null"};
+            return Error::JsonParseError("delete-object data was null");
         }
         auto const& del = **result;
         // Silently skip unknown kinds for forward-compatibility.
@@ -161,20 +169,20 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     if (event_type == kPayloadTransferred) {
         if (state_ == State::kInactive) {
             Reset();
-            return FDv2Error{std::nullopt,
-                             "payload-transferred received without an active "
-                             "server-intent"};
+            return Error::ProtocolError(
+                "payload-transferred received without an active "
+                "server-intent");
         }
         auto result = boost::json::value_to<
             tl::expected<std::optional<PayloadTransferred>, JsonError>>(data);
         if (!result) {
             Reset();
-            return FDv2Error{std::nullopt,
-                             "could not deserialize payload-transferred"};
+            return Error::JsonParseError(
+                result.error(), "could not deserialize payload-transferred");
         }
         if (!result->has_value()) {
             Reset();
-            return FDv2Error{std::nullopt, "payload-transferred data was null"};
+            return Error::JsonParseError("payload-transferred data was null");
         }
         auto const& transferred = **result;
         auto type = (state_ == State::kPartial)
@@ -194,12 +202,13 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
             tl::expected<std::optional<FDv2Error>, JsonError>>(data);
         Reset();
         if (!result) {
-            return FDv2Error{std::nullopt, "could not deserialize error event"};
+            return Error::JsonParseError(result.error(),
+                                         "could not deserialize error event");
         }
         if (!result->has_value()) {
-            return FDv2Error{std::nullopt, "error event data was null"};
+            return Error::JsonParseError("error event data was null");
         }
-        return **result;
+        return Error::ServerError(std::move(**result));
     }
 
     if (event_type == kGoodbye) {
