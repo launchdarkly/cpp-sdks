@@ -4,10 +4,12 @@
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
 #include <boost/json.hpp>
+#include <boost/url/parse.hpp>
+#include <boost/url/url.hpp>
 
 namespace launchdarkly::server_side::data_systems {
 
-char const* const kFDv2PollPath = "/sdk/poll";
+static char const* const kFDv2PollPath = "/sdk/poll";
 
 static char const* const kErrorParsingBody =
     "Could not parse FDv2 polling response";
@@ -32,22 +34,24 @@ network::HttpRequest MakeFDv2PollRequest(
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
     std::optional<std::string> const& filter_key) {
-    auto url = std::make_optional(endpoints.PollingBaseUrl());
-    url = network::AppendUrl(url, kFDv2PollPath);
-
-    bool has_query = false;
-    if (selector.value && url) {
-        url->append("?basis=" + selector.value->state);
-        has_query = true;
-    }
-
-    if (filter_key && url) {
-        url->append(has_query ? "&filter=" : "?filter=");
-        url->append(*filter_key);
-    }
-
     config::builders::HttpPropertiesBuilder const builder(http_properties);
-    return {url.value_or(""), network::HttpMethod::kGet, builder.Build(),
+
+    auto parsed = boost::urls::parse_uri(endpoints.PollingBaseUrl());
+    if (!parsed) {
+        return {"", network::HttpMethod::kGet, builder.Build(),
+                network::HttpRequest::BodyType{}};
+    }
+
+    boost::urls::url u = parsed.value();
+    u.set_path(u.path() + kFDv2PollPath);
+    if (selector.value) {
+        u.params().append({"basis", selector.value->state});
+    }
+    if (filter_key) {
+        u.params().append({"filter", *filter_key});
+    }
+
+    return {std::string(u.buffer()), network::HttpMethod::kGet, builder.Build(),
             network::HttpRequest::BodyType{}};
 }
 
@@ -149,7 +153,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     std::get_if<FDv2ProtocolHandler::Error>(&result)) {
                 if (error->kind ==
                     FDv2ProtocolHandler::Error::Kind::kServerError) {
-                    auto const& id = error->server_error->id;
+                    auto const& id = error->server_error.value().id;
                     std::string msg =
                         "An issue was encountered receiving updates for "
                         "payload '" +

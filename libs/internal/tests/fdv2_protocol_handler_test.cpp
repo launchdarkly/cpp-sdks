@@ -106,6 +106,32 @@ TEST(FDv2ProtocolHandlerTest, FullIntentAccumulatesMultipleObjects) {
     EXPECT_EQ(cs->changes.size(), 3u);
 }
 
+TEST(FDv2ProtocolHandlerTest, SecondServerIntentMidTransferDiscardsAccumulatedChanges) {
+    FDv2ProtocolHandler handler;
+
+    // Start a full transfer and accumulate a change.
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "flag-1", kFlagJson));
+
+    // A second server-intent arrives before payload-transferred.
+    // The first transfer's accumulated changes should be discarded.
+    auto r = handler.HandleEvent("server-intent", MakeServerIntent("xfer-changes"));
+    EXPECT_TRUE(std::holds_alternative<std::monostate>(r));
+
+    // Only the flag from the second transfer should appear in the changeset.
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "flag-2", kFlagJson));
+    auto result = handler.HandleEvent(
+        "payload-transferred", MakePayloadTransferred("state-new", 2));
+
+    auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+    ASSERT_NE(cs, nullptr);
+    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kPartial);
+    ASSERT_EQ(cs->changes.size(), 1u);
+    EXPECT_EQ(cs->changes[0].key, "flag-2");
+}
+
 // ============================================================================
 // kTransferChanges intent
 // ============================================================================
@@ -141,6 +167,23 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsSilentlySkipped) {
                         MakePutObject("experiment", "exp-1", R"({"key":"exp-1","version":1})"));
     handler.HandleEvent("put-object",
                         MakePutObject("flag", "my-flag", kFlagJson));
+
+    auto result = handler.HandleEvent(
+        "payload-transferred", MakePayloadTransferred("s", 1));
+
+    auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+    ASSERT_NE(cs, nullptr);
+    // Only the known kind (flag) should appear.
+    EXPECT_EQ(cs->changes.size(), 1u);
+    EXPECT_EQ(cs->changes[0].key, "my-flag");
+}
+
+TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsSilentlySkipped) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("delete-object", MakeDeleteObject("experiment", "exp-1", 1));
+    handler.HandleEvent("delete-object", MakeDeleteObject("flag", "my-flag", 2));
 
     auto result = handler.HandleEvent(
         "payload-transferred", MakePayloadTransferred("s", 1));

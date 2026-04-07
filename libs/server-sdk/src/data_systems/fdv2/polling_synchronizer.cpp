@@ -130,19 +130,19 @@ void FDv2PollingSynchronizer::DoNext(
                                             FDv2SourceResult::Timeout{}});
                                         return;
                                     }
-                                    DoPoll(deadline, std::move(selector),
+                                    DoPoll(deadline, selector,
                                            std::move(promise));
                                 }));
             return;
         }
     }
 
-    DoPoll(deadline, std::move(selector), std::move(promise));
+    DoPoll(deadline, selector, std::move(promise));
 }
 
 void FDv2PollingSynchronizer::DoPoll(
     std::chrono::time_point<std::chrono::steady_clock> deadline,
-    data_model::Selector selector,
+    data_model::Selector const& selector,
     std::shared_ptr<std::promise<FDv2SourceResult>> promise) {
     if (closed_) {
         promise->set_value(FDv2SourceResult{FDv2SourceResult::Shutdown{}});

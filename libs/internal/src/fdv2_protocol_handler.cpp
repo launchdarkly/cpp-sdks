@@ -122,6 +122,7 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
     if (intent.payloads.empty()) {
         return std::monostate{};
     }
+    // The protocol defines exactly one payload per intent.
     auto const& code = intent.payloads[0].intent_code;
     changes_.clear();
     if (code == IntentCode::kTransferFull) {
@@ -237,6 +238,7 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleError(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleGoodbye(
     boost::json::value const& data) {
+    Reset();
     auto result =
         boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
             data);

@@ -14,9 +14,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-// Path for the FDv2 polling endpoint.
-extern char const* const kFDv2PollPath;
-
 // Build a polling HTTP GET request for the FDv2 endpoint.
 network::HttpRequest MakeFDv2PollRequest(
     config::built::ServiceEndpoints const& endpoints,

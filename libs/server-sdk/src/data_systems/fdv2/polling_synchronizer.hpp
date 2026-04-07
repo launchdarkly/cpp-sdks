@@ -65,7 +65,7 @@ class FDv2PollingSynchronizer final
     // Called on the ASIO thread. Fires the HTTP request and waits for the
     // response or timeout, then sets the promise.
     void DoPoll(std::chrono::time_point<std::chrono::steady_clock> deadline,
-                data_model::Selector selector,
+                data_model::Selector const& selector,
                 std::shared_ptr<std::promise<data_interfaces::FDv2SourceResult>>
                     promise);
 
