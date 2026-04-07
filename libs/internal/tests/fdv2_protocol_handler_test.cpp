@@ -275,3 +275,12 @@ TEST(FDv2ProtocolHandlerTest, ResetClearsState) {
     ASSERT_NE(cs, nullptr);
     EXPECT_TRUE(cs->changes.empty());
 }
+
+TEST(FDv2ProtocolHandlerTest, PayloadTransferredWithoutServerIntentIsError) {
+    FDv2ProtocolHandler handler;
+
+    auto result = handler.HandleEvent(
+        "payload-transferred", MakePayloadTransferred("s", 1));
+
+    EXPECT_NE(std::get_if<FDv2Error>(&result), nullptr);
+}

@@ -159,6 +159,12 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     }
 
     if (event_type == kPayloadTransferred) {
+        if (state_ == State::kInactive) {
+            Reset();
+            return FDv2Error{std::nullopt,
+                             "payload-transferred received without an active "
+                             "server-intent"};
+        }
         auto result = boost::json::value_to<
             tl::expected<std::optional<PayloadTransferred>, JsonError>>(data);
         if (!result) {
