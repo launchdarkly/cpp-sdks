@@ -20,7 +20,8 @@ static char const* const kErrorMissingEvents =
 static char const* const kErrorIncompletePayload =
     "FDv2 polling response did not contain a complete payload";
 
-using ErrorInfo = data_interfaces::FDv2SourceResult::ErrorInfo;
+using data_interfaces::FDv2SourceResult;
+using ErrorInfo = FDv2SourceResult::ErrorInfo;
 using ErrorKind = ErrorInfo::ErrorKind;
 
 static ErrorInfo MakeError(ErrorKind kind,
@@ -63,36 +64,36 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     data_model::Selector selector,
     std::optional<std::string> filter_key)
     : logger_(logger),
-      requester_(executor, http_properties.Tls()),
-      request_(MakeRequest(logger, endpoints, http_properties, selector,
-                           filter_key)) {}
+      request_(MakeRequest(logger,
+                           endpoints,
+                           http_properties,
+                           selector,
+                           filter_key)),
+      requester_(executor, http_properties.Tls()) {}
 
-data_interfaces::FDv2SourceResult FDv2PollingInitializer::Run() {
+FDv2SourceResult FDv2PollingInitializer::Run() {
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError)
             << kIdentity << ": invalid polling endpoint URL";
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::TerminalError{
-                MakeError(ErrorKind::kUnknown, 0,
-                          "invalid polling endpoint URL"),
-                false}};
+        return FDv2SourceResult{FDv2SourceResult::TerminalError{
+            MakeError(ErrorKind::kUnknown, 0, "invalid polling endpoint URL"),
+            false}};
     }
 
-    auto shared_result =
-        std::make_shared<std::optional<network::HttpResult>>();
+    auto shared_result = std::make_shared<std::optional<network::HttpResult>>();
 
-    requester_.Request(request_, [this, shared_result](network::HttpResult res) {
-        std::lock_guard guard(mutex_);
-        *shared_result = std::move(res);
-        cv_.notify_one();
-    });
+    requester_.Request(request_,
+                       [this, shared_result](network::HttpResult res) {
+                           std::lock_guard guard(mutex_);
+                           *shared_result = std::move(res);
+                           cv_.notify_one();
+                       });
 
     std::unique_lock lock(mutex_);
     cv_.wait(lock, [&] { return shared_result->has_value() || closed_; });
 
     if (closed_) {
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::Shutdown{}};
+        return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
     }
 
     auto http_result = std::move(**shared_result);
@@ -112,72 +113,64 @@ std::string const& FDv2PollingInitializer::Identity() const {
     return identity;
 }
 
-data_interfaces::FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
+FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
     network::HttpResult const& res) {
     if (res.IsError()) {
         auto const& msg = res.ErrorMessage();
         std::string error_msg = msg.has_value() ? *msg : "unknown error";
-        LD_LOG(logger_, LogLevel::kWarn)
-            << kIdentity << ": " << error_msg;
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg)),
-                false}};
+        LD_LOG(logger_, LogLevel::kWarn) << kIdentity << ": " << error_msg;
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg)),
+            false}};
     }
 
     if (res.Status() == 304) {
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::ChangeSet{
-                data_model::FDv2ChangeSet{
-                    data_model::FDv2ChangeSet::Type::kNone, {}, {}},
-                false}};
+        return FDv2SourceResult{FDv2SourceResult::ChangeSet{
+            data_model::FDv2ChangeSet{
+                data_model::FDv2ChangeSet::Type::kNone, {}, {}},
+            false}};
     }
 
     if (res.Status() == 200) {
         auto const& body = res.Body();
         if (!body) {
-            return data_interfaces::FDv2SourceResult{
-                data_interfaces::FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0,
-                              "polling response contained no body"),
-                    false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0,
+                          "polling response contained no body"),
+                false}};
         }
 
         boost::system::error_code ec;
         auto parsed = boost::json::parse(*body, ec);
         if (ec) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingBody;
-            return data_interfaces::FDv2SourceResult{
-                data_interfaces::FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
-                    false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
+                false}};
         }
 
         auto const* obj = parsed.if_object();
         if (!obj) {
             LD_LOG(logger_, LogLevel::kError) << kErrorParsingBody;
-            return data_interfaces::FDv2SourceResult{
-                data_interfaces::FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
-                    false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
+                false}};
         }
 
         auto const* events_val = obj->if_contains("events");
         if (!events_val) {
             LD_LOG(logger_, LogLevel::kError) << kErrorMissingEvents;
-            return data_interfaces::FDv2SourceResult{
-                data_interfaces::FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
-                    false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
+                false}};
         }
 
         auto const* events_arr = events_val->if_array();
         if (!events_arr) {
             LD_LOG(logger_, LogLevel::kError) << kErrorMissingEvents;
-            return data_interfaces::FDv2SourceResult{
-                data_interfaces::FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
-                    false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
+                false}};
         }
 
         for (auto const& event_val : *events_arr) {
@@ -204,51 +197,42 @@ data_interfaces::FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
 
             if (auto* changeset =
                     std::get_if<data_model::FDv2ChangeSet>(&result)) {
-                return data_interfaces::FDv2SourceResult{
-                    data_interfaces::FDv2SourceResult::ChangeSet{
-                        std::move(*changeset), false}};
+                return FDv2SourceResult{
+                    FDv2SourceResult::ChangeSet{std::move(*changeset), false}};
             }
             if (auto* goodbye = std::get_if<Goodbye>(&result)) {
-                return data_interfaces::FDv2SourceResult{
-                    data_interfaces::FDv2SourceResult::Goodbye{goodbye->reason,
-                                                               false}};
+                return FDv2SourceResult{
+                    FDv2SourceResult::Goodbye{goodbye->reason, false}};
             }
             if (auto* error = std::get_if<FDv2Error>(&result)) {
                 std::string msg = "Server error: " + error->reason;
-                LD_LOG(logger_, LogLevel::kInfo)
-                    << kIdentity << ": " << msg;
-                return data_interfaces::FDv2SourceResult{
-                    data_interfaces::FDv2SourceResult::Interrupted{
-                        MakeError(ErrorKind::kUnknown, 0, std::move(msg)),
-                        false}};
+                LD_LOG(logger_, LogLevel::kInfo) << kIdentity << ": " << msg;
+                return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                    MakeError(ErrorKind::kUnknown, 0, std::move(msg)), false}};
             }
         }
 
         LD_LOG(logger_, LogLevel::kError) << kErrorIncompletePayload;
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload),
-                false}};
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload),
+            false}};
     }
 
     if (network::IsRecoverableStatus(res.Status())) {
         std::string msg = network::ErrorForStatusCode(
             res.Status(), "FDv2 polling request", "will retry");
         LD_LOG(logger_, LogLevel::kWarn) << kIdentity << ": " << msg;
-        return data_interfaces::FDv2SourceResult{
-            data_interfaces::FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kErrorResponse, res.Status(),
-                          std::move(msg)),
-                false}};
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg)),
+            false}};
     }
 
     std::string msg = network::ErrorForStatusCode(
         res.Status(), "FDv2 polling request", std::nullopt);
     LD_LOG(logger_, LogLevel::kError) << kIdentity << ": " << msg;
-    return data_interfaces::FDv2SourceResult{
-        data_interfaces::FDv2SourceResult::TerminalError{
-            MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg)),
-            false}};
+    return FDv2SourceResult{FDv2SourceResult::TerminalError{
+        MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg)),
+        false}};
 }
 
 }  // namespace launchdarkly::server_side::data_systems
