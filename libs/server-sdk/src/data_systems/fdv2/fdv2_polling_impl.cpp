@@ -36,12 +36,12 @@ network::HttpRequest MakeFDv2PollRequest(
     url = network::AppendUrl(url, kFDv2PollPath);
 
     bool has_query = false;
-    if (selector.value) {
+    if (selector.value && url) {
         url->append("?basis=" + selector.value->state);
         has_query = true;
     }
 
-    if (filter_key) {
+    if (filter_key && url) {
         url->append(has_query ? "&filter=" : "?filter=");
         url->append(*filter_key);
     }
