@@ -49,6 +49,8 @@ target_sources(${LIBNAME}
         data_systems/background_sync/detail/payload_filter_validation/payload_filter_validation.cpp
         data_systems/background_sync/sources/polling/polling_data_source.hpp
         data_systems/background_sync/sources/polling/polling_data_source.cpp
+        data_systems/fdv2/fdv2_polling_impl.hpp
+        data_systems/fdv2/fdv2_polling_impl.cpp
         data_systems/fdv2/polling_initializer.hpp
         data_systems/fdv2/polling_initializer.cpp
         data_systems/fdv2/polling_synchronizer.hpp
