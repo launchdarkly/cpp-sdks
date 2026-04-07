@@ -23,8 +23,8 @@ using Error = FDv2ProtocolHandler::Error;
 // Returns the parsed FDv2Change on success, nullopt for unknown kinds (which
 // should be silently skipped for forward-compatibility), or an Error if
 // a known kind fails to deserialize.
-static tl::expected<std::optional<data_model::FDv2Change>, Error>
-ParsePut(PutObject const& put) {
+static tl::expected<std::optional<data_model::FDv2Change>, Error> ParsePut(
+    PutObject const& put) {
     if (put.kind == "flag") {
         auto result = boost::json::value_to<
             tl::expected<std::optional<data_model::Flag>, JsonError>>(
@@ -37,8 +37,8 @@ ParsePut(PutObject const& put) {
                 "could not deserialize flag '" + put.key + "'"));
         }
         if (!result->has_value()) {
-            return tl::make_unexpected(
-                Error::JsonParseError("flag '" + put.key + "' object was null"));
+            return tl::make_unexpected(Error::JsonParseError(
+                "flag '" + put.key + "' object was null"));
         }
         return data_model::FDv2Change{
             put.key,
@@ -60,9 +60,8 @@ ParsePut(PutObject const& put) {
                 "segment '" + put.key + "' object was null"));
         }
         return data_model::FDv2Change{
-            put.key,
-            data_model::ItemDescriptor<data_model::Segment>{
-                std::move(**result)}};
+            put.key, data_model::ItemDescriptor<data_model::Segment>{
+                         std::move(**result)}};
     }
     // Silently skip unknown kinds for forward-compatibility.
     return std::nullopt;
@@ -84,12 +83,24 @@ static data_model::FDv2Change MakeDeleteChange(DeleteObject const& del) {
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     std::string_view event_type,
     boost::json::value const& data) {
-    if (event_type == kServerIntent) { return HandleServerIntent(data); }
-    if (event_type == kPutObject) { return HandlePutObject(data); }
-    if (event_type == kDeleteObject) { return HandleDeleteObject(data); }
-    if (event_type == kPayloadTransferred) { return HandlePayloadTransferred(data); }
-    if (event_type == kError) { return HandleError(data); }
-    if (event_type == kGoodbye) { return HandleGoodbye(data); }
+    if (event_type == kServerIntent) {
+        return HandleServerIntent(data);
+    }
+    if (event_type == kPutObject) {
+        return HandlePutObject(data);
+    }
+    if (event_type == kDeleteObject) {
+        return HandleDeleteObject(data);
+    }
+    if (event_type == kPayloadTransferred) {
+        return HandlePayloadTransferred(data);
+    }
+    if (event_type == kError) {
+        return HandleError(data);
+    }
+    if (event_type == kGoodbye) {
+        return HandleGoodbye(data);
+    }
     // heartbeat and unrecognized events: no-op.
     return std::monostate{};
 }
@@ -120,9 +131,8 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
     } else {
         // kNone or kUnknown: emit an empty changeset immediately.
         state_ = State::kInactive;
-        return data_model::FDv2ChangeSet{data_model::FDv2ChangeSet::Type::kNone,
-                                        {},
-                                        data_model::Selector{}};
+        return data_model::FDv2ChangeSet{
+            data_model::FDv2ChangeSet::Type::kNone, {}, data_model::Selector{}};
     }
     return std::monostate{};
 }
@@ -203,10 +213,9 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
                     ? data_model::FDv2ChangeSet::Type::kPartial
                     : data_model::FDv2ChangeSet::Type::kFull;
     data_model::FDv2ChangeSet changeset{
-        type,
-        std::move(changes_),
-        data_model::Selector{data_model::Selector::State{
-            transferred.version, transferred.state}}};
+        type, std::move(changes_),
+        data_model::Selector{data_model::Selector::State{transferred.version,
+                                                         transferred.state}}};
     Reset();
     return changeset;
 }
@@ -228,8 +237,9 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleError(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleGoodbye(
     boost::json::value const& data) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<Goodbye>, JsonError>>(data);
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            data);
     if (!result) {
         return Goodbye{std::nullopt};
     }

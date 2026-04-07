@@ -19,7 +19,9 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     data_model::Selector selector,
     std::optional<std::string> filter_key)
     : logger_(logger),
-      request_(MakeFDv2PollRequest(endpoints, http_properties, selector,
+      request_(MakeFDv2PollRequest(endpoints,
+                                   http_properties,
+                                   selector,
                                    filter_key)),
       requester_(executor, http_properties.Tls()) {}
 

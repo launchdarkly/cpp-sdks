@@ -75,10 +75,8 @@ class FDv2ProtocolHandler {
      *          server-sent error event)
      * - Goodbye: server is closing; caller should rotate sources
      */
-    using Result = std::variant<std::monostate,
-                                data_model::FDv2ChangeSet,
-                                Error,
-                                Goodbye>;
+    using Result =
+        std::variant<std::monostate, data_model::FDv2ChangeSet, Error, Goodbye>;
 
     /**
      * Process one FDv2 event.
