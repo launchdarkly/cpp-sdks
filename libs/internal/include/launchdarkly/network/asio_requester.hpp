@@ -283,22 +283,15 @@ class AsioRequester {
 
     template <typename CompletionToken>
     auto Request(HttpRequest request, CompletionToken&& token) {
-        // TODO: Clang-tidy wants to pass the request by reference, but I am not
-        // confident that lifetime would make sense.
-
-        namespace asio = boost::asio;
-        namespace system = boost::system;
-
-        using Sig = void(HttpResult result);
-        using Result = asio::async_result<std::decay_t<CompletionToken>, Sig>;
-        using Handler = typename Result::completion_handler_type;
-
-        Handler handler(std::forward<decltype(token)>(token));
-        Result result(handler);
-
-        InnerRequest(net::make_strand(ctx_), request, std::move(handler), 0);
-
-        return result.get();
+        return boost::asio::async_initiate<CompletionToken, void(HttpResult)>(
+            [this](auto handler, HttpRequest req) {
+                InnerRequest(net::make_strand(ctx_), std::move(req),
+                             [h = std::move(handler)](HttpResult result) mutable {
+                                 std::move(h)(std::move(result));
+                             },
+                             0);
+            },
+            token, std::move(request));
     }
 
    private:
