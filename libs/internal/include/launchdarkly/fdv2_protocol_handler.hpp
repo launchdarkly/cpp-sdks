@@ -102,6 +102,13 @@ class FDv2ProtocolHandler {
    private:
     enum class State { kInactive, kFull, kPartial };
 
+    Result HandleServerIntent(boost::json::value const& data);
+    Result HandlePutObject(boost::json::value const& data);
+    Result HandleDeleteObject(boost::json::value const& data);
+    Result HandlePayloadTransferred(boost::json::value const& data);
+    Result HandleError(boost::json::value const& data);
+    Result HandleGoodbye(boost::json::value const& data);
+
     State state_ = State::kInactive;
     std::vector<data_model::FDv2Change> changes_;
 };

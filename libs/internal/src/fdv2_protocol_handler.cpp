@@ -84,147 +84,159 @@ static data_model::FDv2Change MakeDeleteChange(DeleteObject const& del) {
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     std::string_view event_type,
     boost::json::value const& data) {
-    if (event_type == kServerIntent) {
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<ServerIntent>, JsonError>>(data);
-        if (!result) {
-            Reset();
-            return Error::JsonParseError(result.error(),
-                                         "could not deserialize server-intent");
-        }
-        if (!result->has_value()) {
-            Reset();
-            return Error::JsonParseError("server-intent data was null");
-        }
-        auto const& intent = **result;
-        if (intent.payloads.empty()) {
-            return std::monostate{};
-        }
-        auto const& code = intent.payloads[0].intent_code;
-        changes_.clear();
-        if (code == IntentCode::kTransferFull) {
-            state_ = State::kFull;
-        } else if (code == IntentCode::kTransferChanges) {
-            state_ = State::kPartial;
-        } else {
-            // kNone or kUnknown: emit an empty changeset immediately.
-            state_ = State::kInactive;
-            return data_model::FDv2ChangeSet{data_model::FDv2ChangeSet::Type::kNone,
-                                            {},
-                                            data_model::Selector{}};
-        }
-        return std::monostate{};
-    }
-
-    if (event_type == kPutObject) {
-        if (state_ == State::kInactive) {
-            return std::monostate{};
-        }
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<PutObject>, JsonError>>(data);
-        if (!result) {
-            Reset();
-            return Error::JsonParseError(result.error(),
-                                         "could not deserialize put-object");
-        }
-        if (!result->has_value()) {
-            Reset();
-            return Error::JsonParseError("put-object data was null");
-        }
-        auto change = ParsePut(**result);
-        if (!change) {
-            Reset();
-            return std::move(change.error());
-        }
-        if (*change) {
-            changes_.push_back(std::move(**change));
-        }
-        return std::monostate{};
-    }
-
-    if (event_type == kDeleteObject) {
-        if (state_ == State::kInactive) {
-            return std::monostate{};
-        }
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<DeleteObject>, JsonError>>(data);
-        if (!result) {
-            Reset();
-            return Error::JsonParseError(result.error(),
-                                         "could not deserialize delete-object");
-        }
-        if (!result->has_value()) {
-            Reset();
-            return Error::JsonParseError("delete-object data was null");
-        }
-        auto const& del = **result;
-        // Silently skip unknown kinds for forward-compatibility.
-        if (del.kind != "flag" && del.kind != "segment") {
-            return std::monostate{};
-        }
-        changes_.push_back(MakeDeleteChange(del));
-        return std::monostate{};
-    }
-
-    if (event_type == kPayloadTransferred) {
-        if (state_ == State::kInactive) {
-            Reset();
-            return Error::ProtocolError(
-                "payload-transferred received without an active "
-                "server-intent");
-        }
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<PayloadTransferred>, JsonError>>(data);
-        if (!result) {
-            Reset();
-            return Error::JsonParseError(
-                result.error(), "could not deserialize payload-transferred");
-        }
-        if (!result->has_value()) {
-            Reset();
-            return Error::JsonParseError("payload-transferred data was null");
-        }
-        auto const& transferred = **result;
-        auto type = (state_ == State::kPartial)
-                        ? data_model::FDv2ChangeSet::Type::kPartial
-                        : data_model::FDv2ChangeSet::Type::kFull;
-        data_model::FDv2ChangeSet changeset{
-            type,
-            std::move(changes_),
-            data_model::Selector{data_model::Selector::State{
-                transferred.version, transferred.state}}};
-        Reset();
-        return changeset;
-    }
-
-    if (event_type == kError) {
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<FDv2Error>, JsonError>>(data);
-        Reset();
-        if (!result) {
-            return Error::JsonParseError(result.error(),
-                                         "could not deserialize error event");
-        }
-        if (!result->has_value()) {
-            return Error::JsonParseError("error event data was null");
-        }
-        return Error::ServerError(std::move(**result));
-    }
-
-    if (event_type == kGoodbye) {
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<Goodbye>, JsonError>>(data);
-        if (!result) {
-            return Goodbye{std::nullopt};
-        }
-        if (!result->has_value()) {
-            return Goodbye{std::nullopt};
-        }
-        return **result;
-    }
-
+    if (event_type == kServerIntent) { return HandleServerIntent(data); }
+    if (event_type == kPutObject) { return HandlePutObject(data); }
+    if (event_type == kDeleteObject) { return HandleDeleteObject(data); }
+    if (event_type == kPayloadTransferred) { return HandlePayloadTransferred(data); }
+    if (event_type == kError) { return HandleError(data); }
+    if (event_type == kGoodbye) { return HandleGoodbye(data); }
     // heartbeat and unrecognized events: no-op.
     return std::monostate{};
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
+    boost::json::value const& data) {
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<ServerIntent>, JsonError>>(data);
+    if (!result) {
+        Reset();
+        return Error::JsonParseError(result.error(),
+                                     "could not deserialize server-intent");
+    }
+    if (!result->has_value()) {
+        Reset();
+        return Error::JsonParseError("server-intent data was null");
+    }
+    auto const& intent = **result;
+    if (intent.payloads.empty()) {
+        return std::monostate{};
+    }
+    auto const& code = intent.payloads[0].intent_code;
+    changes_.clear();
+    if (code == IntentCode::kTransferFull) {
+        state_ = State::kFull;
+    } else if (code == IntentCode::kTransferChanges) {
+        state_ = State::kPartial;
+    } else {
+        // kNone or kUnknown: emit an empty changeset immediately.
+        state_ = State::kInactive;
+        return data_model::FDv2ChangeSet{data_model::FDv2ChangeSet::Type::kNone,
+                                        {},
+                                        data_model::Selector{}};
+    }
+    return std::monostate{};
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
+    boost::json::value const& data) {
+    if (state_ == State::kInactive) {
+        return std::monostate{};
+    }
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<PutObject>, JsonError>>(data);
+    if (!result) {
+        Reset();
+        return Error::JsonParseError(result.error(),
+                                     "could not deserialize put-object");
+    }
+    if (!result->has_value()) {
+        Reset();
+        return Error::JsonParseError("put-object data was null");
+    }
+    auto change = ParsePut(**result);
+    if (!change) {
+        Reset();
+        return std::move(change.error());
+    }
+    if (*change) {
+        changes_.push_back(std::move(**change));
+    }
+    return std::monostate{};
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleDeleteObject(
+    boost::json::value const& data) {
+    if (state_ == State::kInactive) {
+        return std::monostate{};
+    }
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<DeleteObject>, JsonError>>(data);
+    if (!result) {
+        Reset();
+        return Error::JsonParseError(result.error(),
+                                     "could not deserialize delete-object");
+    }
+    if (!result->has_value()) {
+        Reset();
+        return Error::JsonParseError("delete-object data was null");
+    }
+    auto const& del = **result;
+    // Silently skip unknown kinds for forward-compatibility.
+    if (del.kind != "flag" && del.kind != "segment") {
+        return std::monostate{};
+    }
+    changes_.push_back(MakeDeleteChange(del));
+    return std::monostate{};
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
+    boost::json::value const& data) {
+    if (state_ == State::kInactive) {
+        Reset();
+        return Error::ProtocolError(
+            "payload-transferred received without an active "
+            "server-intent");
+    }
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<PayloadTransferred>, JsonError>>(data);
+    if (!result) {
+        Reset();
+        return Error::JsonParseError(
+            result.error(), "could not deserialize payload-transferred");
+    }
+    if (!result->has_value()) {
+        Reset();
+        return Error::JsonParseError("payload-transferred data was null");
+    }
+    auto const& transferred = **result;
+    auto type = (state_ == State::kPartial)
+                    ? data_model::FDv2ChangeSet::Type::kPartial
+                    : data_model::FDv2ChangeSet::Type::kFull;
+    data_model::FDv2ChangeSet changeset{
+        type,
+        std::move(changes_),
+        data_model::Selector{data_model::Selector::State{
+            transferred.version, transferred.state}}};
+    Reset();
+    return changeset;
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleError(
+    boost::json::value const& data) {
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<FDv2Error>, JsonError>>(data);
+    Reset();
+    if (!result) {
+        return Error::JsonParseError(result.error(),
+                                     "could not deserialize error event");
+    }
+    if (!result->has_value()) {
+        return Error::JsonParseError("error event data was null");
+    }
+    return Error::ServerError(std::move(**result));
+}
+
+FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleGoodbye(
+    boost::json::value const& data) {
+    auto result = boost::json::value_to<
+        tl::expected<std::optional<Goodbye>, JsonError>>(data);
+    if (!result) {
+        return Goodbye{std::nullopt};
+    }
+    if (!result->has_value()) {
+        return Goodbye{std::nullopt};
+    }
+    return **result;
 }
 
 void FDv2ProtocolHandler::Reset() {
