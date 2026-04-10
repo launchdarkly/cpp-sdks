@@ -13,6 +13,14 @@ namespace launchdarkly::async {
 // requires all captured variables to be copy-constructible, which prevents
 // storing lambdas that capture move-only types.
 //
+// Continuation is used to represent units of work passed to executors. An
+// executor is a callable with signature void(Continuation<void()>) that
+// schedules the work to run somewhere — for example, on an ASIO io_context:
+//
+//   auto executor = [&ioc](Continuation<void()> work) {
+//       boost::asio::post(ioc, std::move(work));
+//   };
+//
 // The primary template is declared but not defined; only the partial
 // specialization below (which splits Sig into R and Args...) is usable.
 // This lets callers write Continuation<void()> instead of Continuation<void>.
@@ -39,6 +47,8 @@ class Continuation<R(Args...)> {
     std::unique_ptr<Base> impl_;
 
    public:
+    // Constructs a Continuation from any callable F. F may be a lambda,
+    // function pointer, or other callable; it need not be copy-constructible.
     // F&& is a forwarding reference: accepts any callable by move or copy,
     // then moves it into Impl<F> so Continuation itself owns the callable.
     template <typename F>
@@ -47,6 +57,8 @@ class Continuation<R(Args...)> {
     Continuation(Continuation&&) = default;
     Continuation& operator=(Continuation&&) = default;
 
+    // Invokes the stored callable with the given arguments.
+    // Returns whatever the callable returns.
     R operator()(Args... args) {
         return impl_->call(std::forward<Args>(args)...);
     }
@@ -76,9 +88,17 @@ struct future_value<Future<T>> {
     using type = T;
 };
 
-// TODO: Document why things are what they are.
+// PromiseInternal holds the shared state between a Promise and its associated
+// Futures: the result value, the mutex protecting it, and the list of
+// continuations waiting to run when the result is set.
+//
+// This is an internal class and not intended to be used directly. Promise and
+// Future each hold a shared_ptr<PromiseInternal>, which lets multiple Future
+// copies all refer to the same underlying state, and lets Promise and Future
+// have independent lifetimes while the shared state remains alive as long as
+// either end holds it.
+//
 // TODO: Is it okay that the shared_ptr lets copies mutate the result??
-
 template <typename T>
 class PromiseInternal {
    public:
@@ -87,6 +107,9 @@ class PromiseInternal {
     PromiseInternal(PromiseInternal const&) = delete;
     PromiseInternal(PromiseInternal&&) = delete;
 
+    // Sets the result and schedules all registered continuations via their
+    // executors. Returns true if the result was set, or false if it was already
+    // set by a previous call to Resolve.
     bool Resolve(T result) {
         std::lock_guard lock(mutex_);
         if (result_->has_value()) {
@@ -103,11 +126,14 @@ class PromiseInternal {
         return true;
     }
 
+    // Returns true if Resolve has been called.
     bool IsFinished() const {
         std::lock_guard lock(mutex_);
         return result_->has_value();
     }
 
+    // Returns a reference to the result. The caller must ensure IsFinished()
+    // is true before calling this.
     T const& GetResult() const {
         std::lock_guard lock(mutex_);
         return **result_;
@@ -208,6 +234,21 @@ class PromiseInternal {
         continuations_;
 };
 
+// Promise is the write end of a one-shot async value, similar to std::promise.
+// Create a Promise<T>, hand its Future to a consumer via GetFuture(), then
+// call Resolve() exactly once to deliver the value.
+//
+// Promise is move-only: it cannot be copied, but it can be moved. This
+// prevents accidentally resolving the same promise from two places.
+//
+// Using std::expected<V, E> as T is the recommended way to represent
+// operations that may fail:
+//
+//   Promise<std::expected<int, std::string>> promise;
+//   Future<std::expected<int, std::string>> future = promise.GetFuture();
+//   // ... hand future to a consumer, then later:
+//   promise.Resolve(42);                            // success
+//   promise.Resolve(std::unexpected("timed out"));  // failure
 template <typename T>
 class Promise {
    public:
@@ -216,14 +257,44 @@ class Promise {
     Promise(Promise const&) = delete;
     Promise(Promise&&) = default;
 
+    // Sets the result to the given value and schedules any continuations that
+    // were registered via Future::Then. Returns true if the result was set, or
+    // false if Resolve was already called.
     bool Resolve(T result) { return internal_->Resolve(result); }
 
+    // Returns a Future that will resolve when this Promise is resolved.
+    // May be called multiple times; each call returns a Future referring to
+    // the same underlying state.
     Future<T> GetFuture() { return Future(internal_); }
 
    private:
     std::shared_ptr<PromiseInternal<T>> internal_;
 };
 
+// Future is the read end of a one-shot async value, similar to std::future,
+// but with support for chaining via Then.
+//
+// A Future is obtained from Promise::GetFuture(). Multiple copies of a Future
+// may exist and all refer to the same underlying result. When the associated
+// Promise is resolved, all continuations registered via Then are scheduled.
+//
+// Unlike std::future, Future does not support blocking on the result directly.
+// Instead, use Then to attach work that runs once the value is available.
+//
+// Example using std::expected<V, E> to represent a fallible async operation:
+//
+//   boost::asio::io_context ioc;
+//   auto executor = [&ioc](Continuation<void()> work) {
+//       boost::asio::post(ioc, std::move(work));
+//   };
+//
+//   Future<std::expected<float, std::string>> result = future.Then(
+//       [](std::expected<int, std::string> const& val)
+//               -> std::expected<float, std::string> {
+//           if (!val) return std::unexpected(val.error());
+//           return *val * 1.5f;
+//       },
+//       executor);
 template <typename T>
 class Future {
    public:
@@ -233,11 +304,24 @@ class Future {
     Future(Future const&) = default;
     Future(Future&&) = default;
 
+    // Returns true if the associated Promise has been resolved.
     bool IsFinished() const { return internal_->IsFinished(); }
 
+    // Returns a reference to the result. The caller must ensure IsFinished()
+    // is true before calling this. The reference is valid for the lifetime of
+    // the Future (or any copy of it).
     T const& GetResult() const { return internal_->GetResult(); }
 
-    // Then where the continuation returns R directly, yielding Future<R>.
+    // Registers a continuation to run when this Future resolves, returning a
+    // new Future<R> that resolves to the continuation's return value.
+    //
+    // Parameters:
+    //   continuation - Called with the resolved T const& when this Future
+    //                  resolves. Must return a value of type R (not a Future).
+    //   executor     - Called with the work to schedule when this Future
+    //                  resolves. Controls where and when the continuation runs.
+    //
+    // Returns a Future<R> that resolves to whatever the continuation returns.
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
@@ -249,8 +333,25 @@ class Future {
                                std::move(executor));
     }
 
-    // Then where the continuation returns Future<T2> (i.e. R = Future<T2>),
-    // yielding a flattened Future<T2> that resolves when the inner future does.
+    // Registers a continuation to run when this Future resolves, where the
+    // continuation itself returns a Future<T2>. Returns a flattened Future<T2>
+    // that resolves when the inner future does, avoiding Future<Future<T2>>.
+    // Use this overload to chain async operations that themselves return a
+    // Future, avoiding a nested Future<Future<T2>>:
+    //
+    //   Future<std::expected<Data, Err>> result = future.Then(
+    //       [](std::expected<Key, Err> const& key) {
+    //           return fetch(key);  // fetch returns Future<expected<Data, Err>>
+    //       },
+    //       executor);
+    //
+    // Parameters:
+    //   continuation - Called with the resolved T const& when this Future
+    //                  resolves. Must return a Future<T2>.
+    //   executor     - Called with the work to schedule when this Future
+    //                  resolves, and again when the inner Future resolves.
+    //
+    // Returns a Future<T2> that resolves when the inner Future<T2> resolves.
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
