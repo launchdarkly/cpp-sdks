@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <functional>
@@ -417,5 +418,96 @@ class Future {
    private:
     std::shared_ptr<PromiseInternal<T>> internal_;
 };
+
+// WhenAll takes a variadic list of Futures (each with potentially different
+// value types) and returns a Future<std::monostate> that resolves once all
+// of the input futures have resolved. The result carries no value; callers
+// who need the individual results can read them from their original futures
+// after WhenAll resolves.
+//
+// If called with no arguments, the returned future is already resolved.
+//
+// Example:
+//
+//   Future<int> f1 = ...;
+//   Future<std::string> f2 = ...;
+//   WhenAll(f1, f2).Then(
+//       [&](std::monostate const&) {
+//           // f1 and f2 are both finished here.
+//           use(*f1.GetResult(), *f2.GetResult());
+//           return std::monostate{};
+//       },
+//       executor);
+template <typename... Ts>
+Future<std::monostate> WhenAll(Future<Ts>... futures) {
+    Promise<std::monostate> promise;
+    Future<std::monostate> result = promise.GetFuture();
+
+    if constexpr (sizeof...(Ts) == 0) {
+        promise.Resolve(std::monostate{});
+        return result;
+    }
+
+    auto shared_promise =
+        std::make_shared<Promise<std::monostate>>(std::move(promise));
+    auto count = std::make_shared<std::atomic<std::size_t>>(sizeof...(Ts));
+
+    auto attach = [&](auto future) {
+        future.Then(
+            [shared_promise, count](auto const&) -> std::monostate {
+                if (count->fetch_sub(1) == 1) {
+                    shared_promise->Resolve(std::monostate{});
+                }
+                return std::monostate{};
+            },
+            [](Continuation<void()> f) { f(); });
+    };
+
+    (attach(futures), ...);
+
+    return result;
+}
+
+// WhenAny takes a variadic list of Futures (each with potentially different
+// value types) and returns a Future<std::size_t> that resolves with the
+// 0-based index of whichever input future resolves first. The caller can use
+// the index to identify the winning future and read its result directly.
+//
+// If called with no arguments, the returned future never resolves.
+//
+// Example:
+//
+//   Future<int> f0 = ...;
+//   Future<std::string> f1 = ...;
+//   WhenAny(f0, f1).Then(
+//       [&](std::size_t const& index) {
+//           if (index == 0) use(*f0.GetResult());
+//           else            use(*f1.GetResult());
+//           return std::monostate{};
+//       },
+//       executor);
+template <typename... Ts>
+Future<std::size_t> WhenAny(Future<Ts>... futures) {
+    Promise<std::size_t> promise;
+    Future<std::size_t> result = promise.GetFuture();
+
+    auto shared_promise =
+        std::make_shared<Promise<std::size_t>>(std::move(promise));
+
+    std::size_t index = 0;
+    auto attach = [&](auto future) {
+        std::size_t i = index++;
+        future.Then(
+            [shared_promise, i](auto const&) -> std::monostate {
+                shared_promise->Resolve(i);
+                return std::monostate{};
+            },
+            [](Continuation<void()> f) { f(); });
+    };
+
+    (attach(futures), ...);
+
+    return result;
+}
 
 }  // namespace launchdarkly::async

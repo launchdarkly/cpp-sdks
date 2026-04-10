@@ -9,6 +9,45 @@
 
 using namespace launchdarkly::async;
 
+TEST(Promise, SimplePromise) {
+    Promise<int> promise;
+    Future<int> future = promise.GetFuture();
+
+    Future<float> future2 = future.Then(
+        [](int const& inner) { return static_cast<float>(inner * 2.0); },
+        [](Continuation<void()> f) { f(); });
+
+    promise.Resolve(43);
+
+    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(*result, 86.0f);
+}
+
+TEST(Promise, ASIOTest) {
+    boost::asio::io_context ioc;
+    auto work = boost::asio::make_work_guard(ioc);
+    std::thread ioc_thread([&]() { ioc.run(); });
+
+    Promise<int> promise;
+    Future<int> future = promise.GetFuture();
+
+    Future<float> future2 = future.Then(
+        [](int const& inner) { return static_cast<float>(inner * 2.0); },
+        [&ioc](Continuation<void()> f) {
+            boost::asio::post(ioc, [f = std::move(f)]() mutable { f(); });
+        });
+
+    promise.Resolve(42);
+
+    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FLOAT_EQ(*result, 84.0f);
+
+    work.reset();
+    ioc_thread.join();
+}
+
 TEST(Promise, GetResultNotFinished) {
     Promise<int> promise;
     Future<int> future = promise.GetFuture();
@@ -53,9 +92,9 @@ TEST(Promise, ContinueByReturningFuture) {
     Promise<int> promise2;
     Future<int> future2 = promise2.GetFuture();
 
-    Future<int> chained = promise1.GetFuture().Then(
-        [future2](int const&) { return future2; },
-        [](Continuation<void()> f) { f(); });
+    Future<int> chained =
+        promise1.GetFuture().Then([future2](int const&) { return future2; },
+                                  [](Continuation<void()> f) { f(); });
 
     promise1.Resolve(0);
     promise2.Resolve(42);
@@ -71,9 +110,8 @@ TEST(Promise, ResolvedBeforeContinuation) {
 
     promise.Resolve(21);
 
-    Future<int> future2 = future.Then(
-        [](int const& val) { return val * 2; },
-        [](Continuation<void()> f) { f(); });
+    Future<int> future2 = future.Then([](int const& val) { return val * 2; },
+                                      [](Continuation<void()> f) { f(); });
 
     auto& result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
@@ -84,9 +122,8 @@ TEST(Promise, ResolvedAfterContinuation) {
     Promise<int> promise;
     Future<int> future = promise.GetFuture();
 
-    Future<int> future2 = future.Then(
-        [](int const& val) { return val * 2; },
-        [](Continuation<void()> f) { f(); });
+    Future<int> future2 = future.Then([](int const& val) { return val * 2; },
+                                      [](Continuation<void()> f) { f(); });
 
     promise.Resolve(21);
 
@@ -140,11 +177,10 @@ TEST(Promise, MoveOnlyCallback) {
     Future<int> future = promise.GetFuture();
 
     auto captured = std::make_unique<int>(2);
-    Future<int> future2 = future.Then(
-        [captured = std::move(captured)](int const& val) {
-            return val * *captured;
-        },
-        [](Continuation<void()> f) { f(); });
+    Future<int> future2 =
+        future.Then([captured = std::move(captured)](
+                        int const& val) { return val * *captured; },
+                    [](Continuation<void()> f) { f(); });
 
     promise.Resolve(21);
 
@@ -161,8 +197,15 @@ TEST(Promise, ResultMovedWhenPossible) {
         int value;
         int* copy_count;
         explicit Counted(int v, int* c) : value(v), copy_count(c) {}
-        Counted(Counted const& o) : value(o.value), copy_count(o.copy_count) { ++(*copy_count); }
-        Counted& operator=(Counted const& o) { value = o.value; copy_count = o.copy_count; ++(*copy_count); return *this; }
+        Counted(Counted const& o) : value(o.value), copy_count(o.copy_count) {
+            ++(*copy_count);
+        }
+        Counted& operator=(Counted const& o) {
+            value = o.value;
+            copy_count = o.copy_count;
+            ++(*copy_count);
+            return *this;
+        }
         Counted(Counted&&) noexcept = default;
         Counted& operator=(Counted&&) noexcept = default;
     };
@@ -186,8 +229,15 @@ TEST(Promise, CallbackMovedWhenPossible) {
         int value;
         int* copy_count;
         explicit Counted(int v, int* c) : value(v), copy_count(c) {}
-        Counted(Counted const& o) : value(o.value), copy_count(o.copy_count) { ++(*copy_count); }
-        Counted& operator=(Counted const& o) { value = o.value; copy_count = o.copy_count; ++(*copy_count); return *this; }
+        Counted(Counted const& o) : value(o.value), copy_count(o.copy_count) {
+            ++(*copy_count);
+        }
+        Counted& operator=(Counted const& o) {
+            value = o.value;
+            copy_count = o.copy_count;
+            ++(*copy_count);
+            return *this;
+        }
         Counted(Counted&&) noexcept = default;
         Counted& operator=(Counted&&) noexcept = default;
     };
@@ -198,19 +248,18 @@ TEST(Promise, CallbackMovedWhenPossible) {
     Counted multiplier{2, &copies};
     copies = 0;  // reset after construction
 
-    future.Then(
-        [multiplier = std::move(multiplier)](int const& val) mutable {
-            return val * multiplier.value;
-        },
-        [](Continuation<void()> f) { f(); });
+    future.Then([multiplier = std::move(multiplier)](
+                    int const& val) mutable { return val * multiplier.value; },
+                [](Continuation<void()> f) { f(); });
 
     EXPECT_EQ(copies, 0);
 
     promise.Resolve(21);
 }
 
-// Demonstrates using std::monostate as a void-like result type for fire-and-forget
-// async operations where the completion matters but no value is produced.
+// Demonstrates using std::monostate as a void-like result type for
+// fire-and-forget async operations where the completion matters but no value is
+// produced.
 TEST(Promise, MonostateVoidLike) {
     Promise<std::monostate> promise;
     Future<std::monostate> future = promise.GetFuture();
@@ -258,42 +307,100 @@ TEST(Promise, ExpectedFailure) {
     EXPECT_EQ(result->error(), "timed out");
 }
 
-
-TEST(Promise, SimplePromise) {
-    Promise<int> promise;
-    Future<int> future = promise.GetFuture();
-
-    Future<float> future2 = future.Then(
-        [](int const& inner) { return static_cast<float>(inner * 2.0); },
-        [](Continuation<void()> f) { f(); });
-
-    promise.Resolve(43);
-
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
-    ASSERT_TRUE(result.has_value());
-    EXPECT_FLOAT_EQ(*result, 86.0f);
+TEST(WhenAll, NoFutures) {
+    Future<std::monostate> result = WhenAll();
+    EXPECT_TRUE(result.IsFinished());
 }
 
-TEST(Promise, ASIOTest) {
-    boost::asio::io_context ioc;
-    auto work = boost::asio::make_work_guard(ioc);
-    std::thread ioc_thread([&]() { ioc.run(); });
+// Verifies WhenAll resolves when all futures are already resolved.
+TEST(WhenAll, AllAlreadyResolved) {
+    Promise<int> p1;
+    Promise<std::string> p2;
 
-    Promise<int> promise;
-    Future<int> future = promise.GetFuture();
+    p1.Resolve(1);
+    p2.Resolve("hello");
 
-    Future<float> future2 = future.Then(
-        [](int const& inner) { return static_cast<float>(inner * 2.0); },
-        [&ioc](Continuation<void()> f) {
-            boost::asio::post(ioc, [f = std::move(f)]() mutable { f(); });
-        });
+    Future<std::monostate> result = WhenAll(p1.GetFuture(), p2.GetFuture());
+    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+}
 
-    promise.Resolve(42);
+// Verifies WhenAll resolves only after all futures resolve, using futures of
+// mixed value types. The original futures still hold their results afterward.
+TEST(WhenAll, ResolvesAfterAll) {
+    Promise<int> p1;
+    Promise<std::string> p2;
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
-    ASSERT_TRUE(result.has_value());
-    EXPECT_FLOAT_EQ(*result, 84.0f);
+    Future<int> f1 = p1.GetFuture();
+    Future<std::string> f2 = p2.GetFuture();
 
-    work.reset();
-    ioc_thread.join();
+    Future<std::monostate> result = WhenAll(f1, f2);
+
+    EXPECT_FALSE(result.IsFinished());
+    p1.Resolve(42);
+    EXPECT_FALSE(result.IsFinished());
+    p2.Resolve("done");
+
+    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*f1.GetResult(), 42);
+    EXPECT_EQ(*f2.GetResult(), "done");
+}
+
+// Verifies that WhenAny resolves with the index of the first future to resolve.
+TEST(WhenAny, FirstResolved) {
+    Promise<int> p0;
+    Promise<int> p1;
+    Promise<int> p2;
+
+    Future<std::size_t> result =
+        WhenAny(p0.GetFuture(), p1.GetFuture(), p2.GetFuture());
+
+    EXPECT_FALSE(result.IsFinished());
+    p1.Resolve(42);
+
+    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*r, 1u);
+}
+
+// Verifies that WhenAny works with futures of mixed value types, and that
+// resolving a later future after the winner does not change the result.
+TEST(WhenAny, MixedTypesFirstWins) {
+    Promise<int> p0;
+    Promise<std::string> p1;
+
+    Future<int> f0 = p0.GetFuture();
+    Future<std::string> f1 = p1.GetFuture();
+
+    Future<std::variant<int, std::string>> result = WhenAny(f0, f1).Then(
+        [f0, f1](size_t const& index) -> std::variant<int, std::string> {
+            if (index == 0) {
+                return f0.GetResult().value();
+            } else {
+                return f1.GetResult().value();
+            }
+        },
+        [](Continuation<void()> f) { f(); });
+
+    p1.Resolve("hello");
+    p0.Resolve(99);
+
+    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(std::get<std::string>(*result.GetResult()), "hello");
+}
+
+// Verifies that WhenAny resolves immediately if a future is already resolved.
+TEST(WhenAny, AlreadyResolved) {
+    Promise<int> p0;
+    Promise<int> p1;
+
+    p0.Resolve(42);
+
+    Future<std::size_t> result = WhenAny(p0.GetFuture(), p1.GetFuture());
+
+    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*r, 0u);
 }
