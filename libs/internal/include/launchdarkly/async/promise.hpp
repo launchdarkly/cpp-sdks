@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -116,7 +118,12 @@ class PromiseInternal {
             return false;
         }
 
-        *result_ = result;
+        // Move result into storage if possible; otherwise copy.
+        if constexpr (std::is_move_assignable_v<T>) {
+            *result_ = std::move(result);
+        } else {
+            *result_ = result;
+        }
 
         for (auto& continuation : continuations_) {
             continuation(result_);
@@ -132,11 +139,12 @@ class PromiseInternal {
         return result_->has_value();
     }
 
-    // Returns a reference to the result. The caller must ensure IsFinished()
-    // is true before calling this.
-    T const& GetResult() const {
+    // Returns a const reference to the optional result. The optional contains
+    // a value if resolved, or is empty if not yet resolved. The reference is
+    // valid for the lifetime of any Future referring to this PromiseInternal.
+    std::optional<T> const& GetResult() const {
         std::lock_guard lock(mutex_);
-        return **result_;
+        return *result_;
     }
 
     // Then where the continuation returns R directly, yielding Future<R>.
@@ -227,7 +235,7 @@ class PromiseInternal {
     }
 
    private:
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
     std::shared_ptr<std::optional<T>> result_{
         new std::optional<T>(std::nullopt)};
     std::vector<Continuation<void(std::shared_ptr<std::optional<T>>)>>
@@ -241,14 +249,14 @@ class PromiseInternal {
 // Promise is move-only: it cannot be copied, but it can be moved. This
 // prevents accidentally resolving the same promise from two places.
 //
-// Using std::expected<V, E> as T is the recommended way to represent
+// Using tl::expected<V, E> as T is the recommended way to represent
 // operations that may fail:
 //
-//   Promise<std::expected<int, std::string>> promise;
-//   Future<std::expected<int, std::string>> future = promise.GetFuture();
+//   Promise<tl::expected<int, std::string>> promise;
+//   Future<tl::expected<int, std::string>> future = promise.GetFuture();
 //   // ... hand future to a consumer, then later:
 //   promise.Resolve(42);                            // success
-//   promise.Resolve(std::unexpected("timed out"));  // failure
+//   promise.Resolve(tl::unexpected("timed out"));  // failure
 template <typename T>
 class Promise {
    public:
@@ -260,7 +268,13 @@ class Promise {
     // Sets the result to the given value and schedules any continuations that
     // were registered via Future::Then. Returns true if the result was set, or
     // false if Resolve was already called.
-    bool Resolve(T result) { return internal_->Resolve(result); }
+    bool Resolve(T result) {
+        if constexpr (std::is_move_constructible_v<T>) {
+            return internal_->Resolve(std::move(result));
+        } else {
+            return internal_->Resolve(result);
+        }
+    }
 
     // Returns a Future that will resolve when this Promise is resolved.
     // May be called multiple times; each call returns a Future referring to
@@ -281,17 +295,17 @@ class Promise {
 // Unlike std::future, Future does not support blocking on the result directly.
 // Instead, use Then to attach work that runs once the value is available.
 //
-// Example using std::expected<V, E> to represent a fallible async operation:
+// Example using tl::expected<V, E> to represent a fallible async operation:
 //
 //   boost::asio::io_context ioc;
 //   auto executor = [&ioc](Continuation<void()> work) {
 //       boost::asio::post(ioc, std::move(work));
 //   };
 //
-//   Future<std::expected<float, std::string>> result = future.Then(
-//       [](std::expected<int, std::string> const& val)
-//               -> std::expected<float, std::string> {
-//           if (!val) return std::unexpected(val.error());
+//   Future<tl::expected<float, std::string>> result = future.Then(
+//       [](tl::expected<int, std::string> const& val)
+//               -> tl::expected<float, std::string> {
+//           if (!val) return tl::unexpected(val.error());
 //           return *val * 1.5f;
 //       },
 //       executor);
@@ -307,10 +321,45 @@ class Future {
     // Returns true if the associated Promise has been resolved.
     bool IsFinished() const { return internal_->IsFinished(); }
 
-    // Returns a reference to the result. The caller must ensure IsFinished()
-    // is true before calling this. The reference is valid for the lifetime of
-    // the Future (or any copy of it).
-    T const& GetResult() const { return internal_->GetResult(); }
+    // Returns a const reference to the optional result. The optional contains
+    // a value if resolved, or is empty if not yet resolved. The reference is
+    // valid for the lifetime of this Future (or any copy of it).
+    std::optional<T> const& GetResult() const { return internal_->GetResult(); }
+
+    // Blocks the calling thread until the future resolves or the timeout
+    // expires. Returns a const reference to the optional result: the optional
+    // contains a value if resolved within the timeout, or is empty if the
+    // timeout expired first. The reference is valid for the lifetime of this
+    // Future (or any copy of it).
+    template <typename Rep, typename Period>
+    std::optional<T> const& WaitForResult(
+        std::chrono::duration<Rep, Period> timeout) {
+        struct State {
+            std::mutex mutex;
+            std::condition_variable cv;
+            bool ready = false;
+        };
+        auto state = std::make_shared<State>();
+
+        // The continuation ignores T entirely (returning a dummy int) so that
+        // T is not required to be copyable. The executor signals the cv when
+        // called, since being called means the original future has resolved.
+        Then(
+            [](T const&) { return 0; },
+            [state](Continuation<void()> work) {
+                {
+                    std::lock_guard<std::mutex> lock(state->mutex);
+                    state->ready = true;
+                }
+                state->cv.notify_one();
+                work();
+            });
+
+        std::unique_lock<std::mutex> lock(state->mutex);
+        state->cv.wait_for(lock, timeout, [&state] { return state->ready; });
+
+        return GetResult();
+    }
 
     // Registers a continuation to run when this Future resolves, returning a
     // new Future<R> that resolves to the continuation's return value.
@@ -339,8 +388,8 @@ class Future {
     // Use this overload to chain async operations that themselves return a
     // Future, avoiding a nested Future<Future<T2>>:
     //
-    //   Future<std::expected<Data, Err>> result = future.Then(
-    //       [](std::expected<Key, Err> const& key) {
+    //   Future<tl::expected<Data, Err>> result = future.Then(
+    //       [](tl::expected<Key, Err> const& key) {
     //           return fetch(key);  // fetch returns Future<expected<Data, Err>>
     //       },
     //       executor);
