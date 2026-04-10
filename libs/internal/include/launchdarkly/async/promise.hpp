@@ -12,11 +12,18 @@ namespace launchdarkly::async {
 // for C++23's std::move_only_function. It exists because C++17's std::function
 // requires all captured variables to be copy-constructible, which prevents
 // storing lambdas that capture move-only types.
+//
+// The primary template is declared but not defined; only the partial
+// specialization below (which splits Sig into R and Args...) is usable.
+// This lets callers write Continuation<void()> instead of Continuation<void>.
 template <typename Sig>
 class Continuation;
 
 template <typename R, typename... Args>
 class Continuation<R(Args...)> {
+    // Base and Impl form a classic type-erasure pair. Base is a non-template
+    // abstract interface stored via unique_ptr, giving a stable type regardless
+    // of F. Impl<F> is the concrete template subclass that holds and calls F.
     struct Base {
         virtual R call(Args...) = 0;
         virtual ~Base() = default;
@@ -32,6 +39,8 @@ class Continuation<R(Args...)> {
     std::unique_ptr<Base> impl_;
 
    public:
+    // F&& is a forwarding reference: accepts any callable by move or copy,
+    // then moves it into Impl<F> so Continuation itself owns the callable.
     template <typename F>
     Continuation(F&& f)
         : impl_(std::make_unique<Impl<F>>(std::forward<F>(f))) {}
@@ -48,6 +57,24 @@ class Promise;
 
 template <typename T>
 class Future;
+
+// Type trait to detect whether a type is a Future<T>. The primary template
+// defaults to false; the partial specialization matches Future<T> specifically.
+template <typename T>
+struct is_future : std::false_type {};
+
+template <typename T>
+struct is_future<Future<T>> : std::true_type {};
+
+// Type trait to extract T from Future<T>. Only the partial specialization is
+// defined, so using future_value on a non-Future type is a compile error.
+template <typename T>
+struct future_value;
+
+template <typename T>
+struct future_value<Future<T>> {
+    using type = T;
+};
 
 // TODO: Document why things are what they are.
 // TODO: Is it okay that the shared_ptr lets copies mutate the result??
@@ -86,13 +113,18 @@ class PromiseInternal {
         return **result_;
     }
 
-    template <typename F, typename T2 = std::invoke_result_t<F, T const&>>
-    Future<T2> Then(F&& continuation,
-                    std::function<void(Continuation<void()>)> executor) {
-        Promise<T2> newPromise;
+    // Then where the continuation returns R directly, yielding Future<R>.
+    template <typename F,
+              // Deduce R from what F returns when called with T const&.
+              typename R = std::invoke_result_t<F, T const&>,
+              // Disable when R is a Future so the flattening overload wins instead.
+              typename = std::enable_if_t<!is_future<R>::value>>
+    Future<R> Then(F&& continuation,
+                   std::function<void(Continuation<void()>)> executor) {
+        Promise<R> newPromise;
         std::lock_guard lock(mutex_);
 
-        Future<T2> newFuture = newPromise.GetFuture();
+        Future<R> newFuture = newPromise.GetFuture();
 
         if (result_->has_value()) {
             executor(Continuation<void()>(
@@ -110,12 +142,62 @@ class PromiseInternal {
              executor](std::shared_ptr<std::optional<T>> result) mutable {
                 executor(Continuation<void()>(
                     [newPromise = std::move(newPromise),
-                     continuation = std::move(continuation), result]() mutable {
+                     continuation = std::move(continuation),
+                     result]() mutable {
                         newPromise.Resolve(continuation(**result));
                     }));
             });
 
         return newFuture;
+    }
+
+    // Then where the continuation returns Future<T2> (i.e. R = Future<T2>),
+    // yielding a flattened Future<T2> that resolves when the inner future does.
+    template <typename F,
+              // Deduce R from what F returns when called with T const&.
+              typename R = std::invoke_result_t<F, T const&>,
+              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not Future<Future<T2>>.
+              typename T2 = typename future_value<R>::type,
+              // Only enabled when R is a Future; otherwise the direct overload wins.
+              typename = std::enable_if_t<is_future<R>::value>>
+    Future<T2> Then(F&& continuation,
+                    std::function<void(Continuation<void()>)> executor) {
+        Promise<T2> outerPromise;
+        std::lock_guard lock(mutex_);
+
+        Future<T2> outerFuture = outerPromise.GetFuture();
+
+        auto do_work = [outerPromise = std::move(outerPromise),
+                        continuation = std::move(continuation),
+                        executor](T const& val) mutable {
+            Future<T2> innerFuture = continuation(val);
+            innerFuture.Then(
+                [outerPromise = std::move(outerPromise)](
+                    T2 const& inner_val) mutable -> T2 {
+                    outerPromise.Resolve(inner_val);
+                    return inner_val;
+                },
+                executor);
+        };
+
+        if (result_->has_value()) {
+            executor(Continuation<void()>(
+                [do_work = std::move(do_work), result = result_]() mutable {
+                    do_work(**result);
+                }));
+            return outerFuture;
+        }
+
+        continuations_.push_back(
+            [do_work = std::move(do_work),
+             executor](std::shared_ptr<std::optional<T>> result) mutable {
+                executor(Continuation<void()>(
+                    [do_work = std::move(do_work), result]() mutable {
+                        do_work(**result);
+                    }));
+            });
+
+        return outerFuture;
     }
 
    private:
@@ -155,7 +237,27 @@ class Future {
 
     T const& GetResult() const { return internal_->GetResult(); }
 
-    template <typename F, typename T2 = std::invoke_result_t<F, T const&>>
+    // Then where the continuation returns R directly, yielding Future<R>.
+    template <typename F,
+              // Deduce R from what F returns when called with T const&.
+              typename R = std::invoke_result_t<F, T const&>,
+              // Disable when R is a Future so the flattening overload wins instead.
+              typename = std::enable_if_t<!is_future<R>::value>>
+    Future<R> Then(F&& continuation,
+                   std::function<void(Continuation<void()>)> executor) {
+        return internal_->Then(std::forward<F>(continuation),
+                               std::move(executor));
+    }
+
+    // Then where the continuation returns Future<T2> (i.e. R = Future<T2>),
+    // yielding a flattened Future<T2> that resolves when the inner future does.
+    template <typename F,
+              // Deduce R from what F returns when called with T const&.
+              typename R = std::invoke_result_t<F, T const&>,
+              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not Future<Future<T2>>.
+              typename T2 = typename future_value<R>::type,
+              // Only enabled when R is a Future; otherwise the direct overload wins.
+              typename = std::enable_if_t<is_future<R>::value>>
     Future<T2> Then(F&& continuation,
                     std::function<void(Continuation<void()>)> executor) {
         return internal_->Then(std::forward<F>(continuation),
