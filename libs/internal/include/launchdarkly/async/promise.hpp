@@ -114,22 +114,29 @@ class PromiseInternal {
     // executors. Returns true if the result was set, or false if it was already
     // set by a previous call to Resolve.
     bool Resolve(T result) {
-        std::lock_guard lock(mutex_);
-        if (result_->has_value()) {
-            return false;
+        std::vector<Continuation<void(std::shared_ptr<std::optional<T>>)>>
+            to_call;
+        {
+            std::lock_guard lock(mutex_);
+            if (result_->has_value()) {
+                return false;
+            }
+
+            // Move result into storage if possible; otherwise copy.
+            if constexpr (std::is_move_assignable_v<T>) {
+                *result_ = std::move(result);
+            } else {
+                *result_ = result;
+            }
+
+            to_call = std::move(continuations_);
         }
 
-        // Move result into storage if possible; otherwise copy.
-        if constexpr (std::is_move_assignable_v<T>) {
-            *result_ = std::move(result);
-        } else {
-            *result_ = result;
-        }
-
-        for (auto& continuation : continuations_) {
+        // Call continuations outside the lock so that continuations which
+        // re-enter this future (e.g. via GetResult or Then) don't deadlock.
+        for (auto& continuation : to_call) {
             continuation(result_);
         }
-        continuations_.clear();
 
         return true;
     }
@@ -157,32 +164,39 @@ class PromiseInternal {
     Future<R> Then(F&& continuation,
                    std::function<void(Continuation<void()>)> executor) {
         Promise<R> newPromise;
-        std::lock_guard lock(mutex_);
-
         Future<R> newFuture = newPromise.GetFuture();
 
-        if (result_->has_value()) {
-            executor(Continuation<void()>(
-                [newPromise = std::move(newPromise),
-                 continuation = std::move(continuation),
-                 result = result_]() mutable {
-                    newPromise.Resolve(continuation(**result));
-                }));
-            return newFuture;
-        }
+        std::shared_ptr<std::optional<T>> already_resolved;
+        {
+            std::lock_guard lock(mutex_);
 
-        continuations_.push_back(
-            [newPromise = std::move(newPromise),
-             continuation = std::move(continuation),
-             executor](std::shared_ptr<std::optional<T>> result) mutable {
-                executor(Continuation<void()>(
+            if (result_->has_value()) {
+                already_resolved = result_;
+            } else {
+                continuations_.push_back(
                     [newPromise = std::move(newPromise),
                      continuation = std::move(continuation),
-                     result]() mutable {
-                        newPromise.Resolve(continuation(**result));
-                    }));
-            });
+                     executor](
+                        std::shared_ptr<std::optional<T>> result) mutable {
+                        executor(Continuation<void()>(
+                            [newPromise = std::move(newPromise),
+                             continuation = std::move(continuation),
+                             result]() mutable {
+                                newPromise.Resolve(continuation(**result));
+                            }));
+                    });
+                return newFuture;
+            }
+        }
 
+        // Already resolved: call executor outside the lock so that
+        // continuations which re-enter this future don't deadlock.
+        executor(Continuation<void()>(
+            [newPromise = std::move(newPromise),
+             continuation = std::move(continuation),
+             result = already_resolved]() mutable {
+                newPromise.Resolve(continuation(**result));
+            }));
         return newFuture;
     }
 
@@ -198,8 +212,6 @@ class PromiseInternal {
     Future<T2> Then(F&& continuation,
                     std::function<void(Continuation<void()>)> executor) {
         Promise<T2> outerPromise;
-        std::lock_guard lock(mutex_);
-
         Future<T2> outerFuture = outerPromise.GetFuture();
 
         auto do_work = [outerPromise = std::move(outerPromise),
@@ -215,23 +227,29 @@ class PromiseInternal {
                 executor);
         };
 
-        if (result_->has_value()) {
-            executor(Continuation<void()>(
-                [do_work = std::move(do_work), result = result_]() mutable {
-                    do_work(**result);
-                }));
-            return outerFuture;
+        std::shared_ptr<std::optional<T>> already_resolved;
+        {
+            std::lock_guard lock(mutex_);
+            if (result_->has_value()) {
+                already_resolved = result_;
+            } else {
+                continuations_.push_back(
+                    [do_work = std::move(do_work),
+                     executor](std::shared_ptr<std::optional<T>> result) mutable {
+                        executor(Continuation<void()>(
+                            [do_work = std::move(do_work), result]() mutable {
+                                do_work(**result);
+                            }));
+                    });
+                return outerFuture;
+            }
         }
 
-        continuations_.push_back(
+        // Already resolved: call executor outside the lock so that
+        // continuations which re-enter this future don't deadlock.
+        executor(Continuation<void()>(
             [do_work = std::move(do_work),
-             executor](std::shared_ptr<std::optional<T>> result) mutable {
-                executor(Continuation<void()>(
-                    [do_work = std::move(do_work), result]() mutable {
-                        do_work(**result);
-                    }));
-            });
-
+             result = already_resolved]() mutable { do_work(**result); }));
         return outerFuture;
     }
 
