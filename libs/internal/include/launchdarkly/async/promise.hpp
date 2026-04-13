@@ -159,7 +159,8 @@ class PromiseInternal {
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
-              // Disable when R is a Future so the flattening overload wins instead.
+              // Disable when R is a Future so the flattening overload wins
+              // instead.
               typename = std::enable_if_t<!is_future<R>::value>>
     Future<R> Then(F&& continuation,
                    std::function<void(Continuation<void()>)> executor) {
@@ -175,8 +176,7 @@ class PromiseInternal {
             } else {
                 continuations_.push_back(
                     [newPromise = std::move(newPromise),
-                     continuation = std::move(continuation),
-                     executor](
+                     continuation = std::move(continuation), executor](
                         std::shared_ptr<std::optional<T>> result) mutable {
                         executor(Continuation<void()>(
                             [newPromise = std::move(newPromise),
@@ -191,12 +191,11 @@ class PromiseInternal {
 
         // Already resolved: call executor outside the lock so that
         // continuations which re-enter this future don't deadlock.
-        executor(Continuation<void()>(
-            [newPromise = std::move(newPromise),
-             continuation = std::move(continuation),
-             result = already_resolved]() mutable {
-                newPromise.Resolve(continuation(**result));
-            }));
+        executor(Continuation<void()>([newPromise = std::move(newPromise),
+                                       continuation = std::move(continuation),
+                                       result = already_resolved]() mutable {
+            newPromise.Resolve(continuation(**result));
+        }));
         return newFuture;
     }
 
@@ -205,9 +204,11 @@ class PromiseInternal {
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
-              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not Future<Future<T2>>.
+              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not
+              // Future<Future<T2>>.
               typename T2 = typename future_value<R>::type,
-              // Only enabled when R is a Future; otherwise the direct overload wins.
+              // Only enabled when R is a Future; otherwise the direct overload
+              // wins.
               typename = std::enable_if_t<is_future<R>::value>>
     Future<T2> Then(F&& continuation,
                     std::function<void(Continuation<void()>)> executor) {
@@ -234,8 +235,8 @@ class PromiseInternal {
                 already_resolved = result_;
             } else {
                 continuations_.push_back(
-                    [do_work = std::move(do_work),
-                     executor](std::shared_ptr<std::optional<T>> result) mutable {
+                    [do_work = std::move(do_work), executor](
+                        std::shared_ptr<std::optional<T>> result) mutable {
                         executor(Continuation<void()>(
                             [do_work = std::move(do_work), result]() mutable {
                                 do_work(**result);
@@ -363,16 +364,15 @@ class Future {
         // The continuation ignores T entirely (returning a dummy int) so that
         // T is not required to be copyable. The executor signals the cv when
         // called, since being called means the original future has resolved.
-        Then(
-            [](T const&) { return 0; },
-            [state](Continuation<void()> work) {
-                {
-                    std::lock_guard<std::mutex> lock(state->mutex);
-                    state->ready = true;
-                }
-                state->cv.notify_one();
-                work();
-            });
+        Then([](T const&) { return 0; },
+             [state](Continuation<void()> work) {
+                 {
+                     std::lock_guard<std::mutex> lock(state->mutex);
+                     state->ready = true;
+                 }
+                 state->cv.notify_one();
+                 work();
+             });
 
         std::unique_lock<std::mutex> lock(state->mutex);
         state->cv.wait_for(lock, timeout, [&state] { return state->ready; });
@@ -393,7 +393,8 @@ class Future {
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
-              // Disable when R is a Future so the flattening overload wins instead.
+              // Disable when R is a Future so the flattening overload wins
+              // instead.
               typename = std::enable_if_t<!is_future<R>::value>>
     Future<R> Then(F&& continuation,
                    std::function<void(Continuation<void()>)> executor) {
@@ -409,7 +410,8 @@ class Future {
     //
     //   Future<tl::expected<Data, Err>> result = future.Then(
     //       [](tl::expected<Key, Err> const& key) {
-    //           return fetch(key);  // fetch returns Future<expected<Data, Err>>
+    //           return fetch(key);  // fetch returns Future<expected<Data,
+    //           Err>>
     //       },
     //       executor);
     //
@@ -423,9 +425,11 @@ class Future {
     template <typename F,
               // Deduce R from what F returns when called with T const&.
               typename R = std::invoke_result_t<F, T const&>,
-              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not Future<Future<T2>>.
+              // Unwrap Future<T2> -> T2 so the return type is Future<T2>, not
+              // Future<Future<T2>>.
               typename T2 = typename future_value<R>::type,
-              // Only enabled when R is a Future; otherwise the direct overload wins.
+              // Only enabled when R is a Future; otherwise the direct overload
+              // wins.
               typename = std::enable_if_t<is_future<R>::value>>
     Future<T2> Then(F&& continuation,
                     std::function<void(Continuation<void()>)> executor) {
