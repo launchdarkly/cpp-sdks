@@ -307,6 +307,43 @@ TEST(Promise, ExpectedFailure) {
     EXPECT_EQ(result->error(), "timed out");
 }
 
+// Verifies that Promise supports move assignment, consistent with it being
+// move-only.
+TEST(Promise, MoveAssignment) {
+    Promise<int> p1;
+    Future<int> future = p1.GetFuture();
+
+    Promise<int> p2;
+    p2 = std::move(p1);
+    p2.Resolve(42);
+
+    EXPECT_EQ(*future.GetResult(), 42);
+}
+
+// Verifies that Future supports move assignment.
+TEST(Promise, FutureMoveAssignment) {
+    Promise<int> promise;
+    Future<int> f1 = promise.GetFuture();
+    Future<int> f2 = promise.GetFuture();
+
+    f2 = std::move(f1);
+    promise.Resolve(42);
+
+    EXPECT_EQ(*f2.GetResult(), 42);
+}
+
+// Verifies that Future supports copy assignment.
+TEST(Promise, FutureCopyAssignment) {
+    Promise<int> promise;
+    Future<int> f1 = promise.GetFuture();
+    Future<int> f2 = promise.GetFuture();
+
+    f2 = f1;
+    promise.Resolve(42);
+
+    EXPECT_EQ(*f2.GetResult(), 42);
+}
+
 // Verifies that a Continuation can be constructed from an lvalue callable
 // (named lambda), not just from a temporary.
 TEST(Promise, LvalueLambdaContinuation) {

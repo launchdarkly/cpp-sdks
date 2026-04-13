@@ -283,7 +283,9 @@ class Promise {
     Promise() : internal_(new PromiseInternal<T>()) {}
     ~Promise() = default;
     Promise(Promise const&) = delete;
+    Promise& operator=(Promise const&) = delete;
     Promise(Promise&&) = default;
+    Promise& operator=(Promise&&) = default;
 
     // Sets the result to the given value and schedules any continuations that
     // were registered via Future::Then. Returns true if the result was set, or
@@ -336,7 +338,9 @@ class Future {
         : internal_(internal) {}
     ~Future() = default;
     Future(Future const&) = default;
+    Future& operator=(Future const&) = default;
     Future(Future&&) = default;
+    Future& operator=(Future&&) = default;
 
     // Returns true if the associated Promise has been resolved.
     bool IsFinished() const { return internal_->IsFinished(); }
