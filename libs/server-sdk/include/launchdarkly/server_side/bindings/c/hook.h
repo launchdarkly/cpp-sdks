@@ -10,8 +10,15 @@
  * - The function pointers and UserData pointer are copied when the hook is
  *   registered with the config builder
  * - UserData lifetime must extend for the entire lifetime of the SDK client
- * - All context parameters passed to callbacks are temporary - valid only
- *   during the callback execution
+ *
+ * WARNING: All pointers passed to callbacks by the SDK (series_context, data,
+ * detail, etc.) are owned by the SDK and may be freed after the callback
+ * returns. You MUST NOT retain, cache, or store these pointers, or any
+ * references to data within them, beyond the scope of the callback invocation.
+ * Any data needed outside the duration of a callback must be copied during the
+ * callback. Accessing a stored pointer or reference after the callback has
+ * returned results in undefined behavior.
+ *
  * - EvaluationSeriesData returned from callbacks transfers ownership to the SDK
  */
 // NOLINTBEGIN(modernize-use-using)
@@ -49,7 +56,8 @@ typedef struct p_LDServerSDKTrackSeriesContext* LDServerSDKTrackSeriesContext;
  *
  * LIFETIME:
  * - series_context: Valid only during callback execution - do not store
- * - data: Ownership transfers to SDK
+ * - data: Valid only during callback execution - do not store. Ownership of
+ *         the returned value transfers to the SDK.
  * - user_data: Managed by caller - must remain valid for SDK lifetime
  */
 typedef LDServerSDKEvaluationSeriesData (*LDServerSDKHook_BeforeEvaluation)(
@@ -77,10 +85,11 @@ typedef LDServerSDKEvaluationSeriesData (*LDServerSDKHook_BeforeEvaluation)(
  * If NULL is returned, an empty data object will be created.
  *
  * LIFETIME:
- * - series_context: Valid only during callback execution
- * - data: Ownership transfers to SDK
- * - detail: Valid only during callback execution
- * - user_data: Managed by caller
+ * - series_context: Valid only during callback execution - do not store
+ * - data: Valid only during callback execution - do not store. Ownership of
+ *         the returned value transfers to the SDK.
+ * - detail: Valid only during callback execution - do not store
+ * - user_data: Managed by caller - must remain valid for SDK lifetime
  */
 typedef LDServerSDKEvaluationSeriesData (*LDServerSDKHook_AfterEvaluation)(
     LDServerSDKEvaluationSeriesContext series_context,
@@ -102,8 +111,8 @@ typedef LDServerSDKEvaluationSeriesData (*LDServerSDKHook_AfterEvaluation)(
  * RETURNS: void (no data is passed between track stages)
  *
  * LIFETIME:
- * - series_context: Valid only during callback execution
- * - user_data: Managed by caller
+ * - series_context: Valid only during callback execution - do not store
+ * - user_data: Managed by caller - must remain valid for SDK lifetime
  */
 typedef void (*LDServerSDKHook_AfterTrack)(LDServerSDKTrackSeriesContext series_context,
                                            void* user_data);
