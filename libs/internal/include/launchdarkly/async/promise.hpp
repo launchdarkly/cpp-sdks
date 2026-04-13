@@ -150,9 +150,17 @@ class PromiseInternal {
     // Returns a const reference to the optional result. The optional contains
     // a value if resolved, or is empty if not yet resolved. The reference is
     // valid for the lifetime of any Future referring to this PromiseInternal.
+    //
+    // Thread-safety: if the future is already resolved, the reference points
+    // to write-once storage and is safe to read without holding the lock. If
+    // the future is not yet resolved, the reference points to empty_, a const
+    // member that is never written, so it is equally safe.
     std::optional<T> const& GetResult() const {
         std::lock_guard lock(mutex_);
-        return *result_;
+        if (result_->has_value()) {
+            return *result_;
+        }
+        return empty_;
     }
 
     // Then where the continuation returns R directly, yielding Future<R>.
@@ -260,6 +268,7 @@ class PromiseInternal {
         new std::optional<T>(std::nullopt)};
     std::vector<Continuation<void(std::shared_ptr<std::optional<T>>)>>
         continuations_;
+    std::optional<T> const empty_{};
 };
 
 // Promise is the write end of a one-shot async value, similar to std::promise.
