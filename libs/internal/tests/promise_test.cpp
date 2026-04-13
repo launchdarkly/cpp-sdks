@@ -307,6 +307,14 @@ TEST(Promise, ExpectedFailure) {
     EXPECT_EQ(result->error(), "timed out");
 }
 
+// Verifies that a Continuation can be constructed from an lvalue callable
+// (named lambda), not just from a temporary.
+TEST(Promise, LvalueLambdaContinuation) {
+    auto fn = [](int x) { return x * 2; };
+    Continuation<int(int)> c(fn);
+    EXPECT_EQ(c(21), 42);
+}
+
 TEST(WhenAll, NoFutures) {
     Future<std::monostate> result = WhenAll();
     EXPECT_TRUE(result.IsFinished());

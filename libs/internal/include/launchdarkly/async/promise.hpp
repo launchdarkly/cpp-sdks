@@ -43,7 +43,7 @@ class Continuation<R(Args...)> {
     template <typename F>
     struct Impl : Base {
         F f;
-        Impl(F&& f) : f(std::move(f)) {}
+        Impl(F f) : f(std::move(f)) {}
         R call(Args... args) override { return f(std::forward<Args>(args)...); }
     };
 
@@ -56,7 +56,7 @@ class Continuation<R(Args...)> {
     // then moves it into Impl<F> so Continuation itself owns the callable.
     template <typename F>
     Continuation(F&& f)
-        : impl_(std::make_unique<Impl<F>>(std::forward<F>(f))) {}
+        : impl_(std::make_unique<Impl<std::decay_t<F>>>(std::forward<F>(f))) {}
     Continuation(Continuation&&) = default;
     Continuation& operator=(Continuation&&) = default;
 
