@@ -51,7 +51,8 @@ typedef struct p_LDServerSDKTrackSeriesContext* LDServerSDKTrackSeriesContext;
  *
  * RETURNS:
  * EvaluationSeriesData to pass to afterEvaluation. Return the input data
- * unmodified if you don't need to add anything. Ownership transfers to SDK.
+ * unmodified if you don't need to add anything. Ownership transfers to SDK;
+ * the caller must not retain or access the returned pointer after returning.
  * If NULL is returned, an empty data object will be created.
  *
  * LIFETIME:
@@ -81,7 +82,8 @@ typedef LDServerSDKEvaluationSeriesData (*LDServerSDKHook_BeforeEvaluation)(
  *
  * RETURNS:
  * EvaluationSeriesData for potential future stages. Return the input data
- * unmodified if you don't need to modify it. Ownership transfers to SDK.
+ * unmodified if you don't need to modify it. Ownership transfers to SDK;
+ * the caller must not retain or access the returned pointer after returning.
  * If NULL is returned, an empty data object will be created.
  *
  * LIFETIME:
