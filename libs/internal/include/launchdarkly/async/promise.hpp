@@ -62,7 +62,7 @@ class Continuation<R(Args...)> {
 
     // Invokes the stored callable with the given arguments.
     // Returns whatever the callable returns.
-    R operator()(Args... args) {
+    R operator()(Args... args) const {
         return impl_->call(std::forward<Args>(args)...);
     }
 };
@@ -106,7 +106,9 @@ class PromiseInternal {
     PromiseInternal() = default;
     ~PromiseInternal() = default;
     PromiseInternal(PromiseInternal const&) = delete;
+    PromiseInternal& operator=(PromiseInternal const&) = delete;
     PromiseInternal(PromiseInternal&&) = delete;
+    PromiseInternal& operator=(PromiseInternal&&) = delete;
 
     // Sets the result and schedules all registered continuations via their
     // executors. Returns true if the result was set, or false if it was already
@@ -329,7 +331,7 @@ template <typename T>
 class Future {
    public:
     Future(std::shared_ptr<PromiseInternal<T>> internal)
-        : internal_(internal) {}
+        : internal_(std::move(internal)) {}
     ~Future() = default;
     Future(Future const&) = default;
     Future& operator=(Future const&) = default;
@@ -448,7 +450,7 @@ class Future {
 //   WhenAll(f1, f2).Then(
 //       [&](std::monostate const&) {
 //           // f1 and f2 are both finished here.
-//           use(*f1.GetResult(), *f2.GetResult());
+//           use(f1.GetResult().value(), f2.GetResult().value());
 //           return std::monostate{};
 //       },
 //       executor);
