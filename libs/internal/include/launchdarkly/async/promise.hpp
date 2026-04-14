@@ -276,7 +276,7 @@ class PromiseInternal {
 template <typename T>
 class Promise {
    public:
-    Promise() : internal_(new PromiseInternal<T>()) {}
+    Promise() : internal_(std::make_shared<PromiseInternal<T>>()) {}
     ~Promise() = default;
     Promise(Promise const&) = delete;
     Promise& operator=(Promise const&) = delete;
@@ -497,8 +497,8 @@ Future<std::monostate> WhenAll(Future<Ts>... futures) {
 //   Future<std::string> f1 = ...;
 //   WhenAny(f0, f1).Then(
 //       [&](std::size_t const& index) {
-//           if (index == 0) use(*f0.GetResult());
-//           else            use(*f1.GetResult());
+//           if (index == 0) use(f0.GetResult().value());
+//           else            use(f1.GetResult().value());
 //           return std::monostate{};
 //       },
 //       executor);
