@@ -100,8 +100,6 @@ struct future_value<Future<T>> {
 // copies all refer to the same underlying state, and lets Promise and Future
 // have independent lifetimes while the shared state remains alive as long as
 // either end holds it.
-//
-// TODO: Is it okay that the shared_ptr lets copies mutate the result??
 template <typename T>
 class PromiseInternal {
    public:
@@ -114,28 +112,26 @@ class PromiseInternal {
     // executors. Returns true if the result was set, or false if it was already
     // set by a previous call to Resolve.
     bool Resolve(T result) {
-        std::vector<Continuation<void(std::shared_ptr<std::optional<T>>)>>
-            to_call;
+        std::vector<Continuation<void(T const&)>> to_call;
         {
             std::lock_guard lock(mutex_);
-            if (result_->has_value()) {
+            if (result_.has_value()) {
                 return false;
             }
 
             // Move result into storage if possible; otherwise copy.
             if constexpr (std::is_move_assignable_v<T>) {
-                *result_ = std::move(result);
+                result_ = std::move(result);
             } else {
-                *result_ = result;
+                result_ = result;
             }
-
             to_call = std::move(continuations_);
         }
 
         // Call continuations outside the lock so that continuations which
         // re-enter this future (e.g. via GetResult or Then) don't deadlock.
         for (auto& continuation : to_call) {
-            continuation(result_);
+            continuation(*result_);
         }
 
         return true;
@@ -144,23 +140,13 @@ class PromiseInternal {
     // Returns true if Resolve has been called.
     bool IsFinished() const {
         std::lock_guard lock(mutex_);
-        return result_->has_value();
+        return result_.has_value();
     }
 
-    // Returns a const reference to the optional result. The optional contains
-    // a value if resolved, or is empty if not yet resolved. The reference is
-    // valid for the lifetime of any Future referring to this PromiseInternal.
-    //
-    // Thread-safety: if the future is already resolved, the reference points
-    // to write-once storage and is safe to read without holding the lock. If
-    // the future is not yet resolved, the reference points to empty_, a const
-    // member that is never written, so it is equally safe.
-    std::optional<T> const& GetResult() const {
+    // Returns a copy of the result, if resolved.
+    std::optional<T> GetResult() const {
         std::lock_guard lock(mutex_);
-        if (result_->has_value()) {
-            return *result_;
-        }
-        return empty_;
+        return result_;
     }
 
     // Then where the continuation returns R directly, yielding Future<R>.
@@ -175,22 +161,22 @@ class PromiseInternal {
         Promise<R> newPromise;
         Future<R> newFuture = newPromise.GetFuture();
 
-        std::shared_ptr<std::optional<T>> already_resolved;
+        T already_resolved;
         {
             std::lock_guard lock(mutex_);
 
-            if (result_->has_value()) {
-                already_resolved = result_;
+            if (result_.has_value()) {
+                already_resolved = *result_;
             } else {
                 continuations_.push_back(
                     [newPromise = std::move(newPromise),
-                     continuation = std::move(continuation), executor](
-                        std::shared_ptr<std::optional<T>> result) mutable {
+                     continuation = std::move(continuation),
+                     executor](T const& result) mutable {
                         executor(Continuation<void()>(
                             [newPromise = std::move(newPromise),
                              continuation = std::move(continuation),
                              result]() mutable {
-                                newPromise.Resolve(continuation(**result));
+                                newPromise.Resolve(continuation(result));
                             }));
                     });
                 return newFuture;
@@ -199,11 +185,12 @@ class PromiseInternal {
 
         // Already resolved: call executor outside the lock so that
         // continuations which re-enter this future don't deadlock.
-        executor(Continuation<void()>([newPromise = std::move(newPromise),
-                                       continuation = std::move(continuation),
-                                       result = already_resolved]() mutable {
-            newPromise.Resolve(continuation(**result));
-        }));
+        executor(Continuation<void()>(
+            [newPromise = std::move(newPromise),
+             continuation = std::move(continuation),
+             result = std::move(already_resolved)]() mutable {
+                newPromise.Resolve(continuation(result));
+            }));
         return newFuture;
     }
 
@@ -236,20 +223,19 @@ class PromiseInternal {
                 executor);
         };
 
-        std::shared_ptr<std::optional<T>> already_resolved;
+        T already_resolved;
         {
             std::lock_guard lock(mutex_);
-            if (result_->has_value()) {
-                already_resolved = result_;
+            if (result_.has_value()) {
+                already_resolved = *result_;
             } else {
-                continuations_.push_back(
-                    [do_work = std::move(do_work), executor](
-                        std::shared_ptr<std::optional<T>> result) mutable {
-                        executor(Continuation<void()>(
-                            [do_work = std::move(do_work), result]() mutable {
-                                do_work(**result);
-                            }));
-                    });
+                continuations_.push_back([do_work = std::move(do_work),
+                                          executor](T const& result) mutable {
+                    executor(Continuation<void()>(
+                        [do_work = std::move(do_work), result]() mutable {
+                            do_work(result);
+                        }));
+                });
                 return outerFuture;
             }
         }
@@ -258,17 +244,16 @@ class PromiseInternal {
         // continuations which re-enter this future don't deadlock.
         executor(Continuation<void()>(
             [do_work = std::move(do_work),
-             result = already_resolved]() mutable { do_work(**result); }));
+             result = std::move(already_resolved)]() mutable {
+                do_work(result);
+            }));
         return outerFuture;
     }
 
    private:
     mutable std::mutex mutex_;
-    std::shared_ptr<std::optional<T>> result_{
-        new std::optional<T>(std::nullopt)};
-    std::vector<Continuation<void(std::shared_ptr<std::optional<T>>)>>
-        continuations_;
-    std::optional<T> const empty_{};
+    std::optional<T> result_{std::nullopt};
+    std::vector<Continuation<void(T const&)>> continuations_;
 };
 
 // Promise is the write end of a one-shot async value, similar to std::promise.
@@ -299,13 +284,7 @@ class Promise {
     // Sets the result to the given value and schedules any continuations that
     // were registered via Future::Then. Returns true if the result was set, or
     // false if Resolve was already called.
-    bool Resolve(T result) {
-        if constexpr (std::is_move_constructible_v<T>) {
-            return internal_->Resolve(std::move(result));
-        } else {
-            return internal_->Resolve(result);
-        }
-    }
+    bool Resolve(T result) { return internal_->Resolve(result); }
 
     // Returns a Future that will resolve when this Promise is resolved.
     // May be called multiple times; each call returns a Future referring to
@@ -354,19 +333,13 @@ class Future {
     // Returns true if the associated Promise has been resolved.
     bool IsFinished() const { return internal_->IsFinished(); }
 
-    // Returns a const reference to the optional result. The optional contains
-    // a value if resolved, or is empty if not yet resolved. The reference is
-    // valid for the lifetime of this Future (or any copy of it).
-    std::optional<T> const& GetResult() const { return internal_->GetResult(); }
+    // Returns a copy of the result, if resolved.
+    std::optional<T> GetResult() const { return internal_->GetResult(); }
 
     // Blocks the calling thread until the future resolves or the timeout
-    // expires. Returns a const reference to the optional result: the optional
-    // contains a value if resolved within the timeout, or is empty if the
-    // timeout expired first. The reference is valid for the lifetime of this
-    // Future (or any copy of it).
+    // expires. Returns a copy of the result, if resolved within the timeout.
     template <typename Rep, typename Period>
-    std::optional<T> const& WaitForResult(
-        std::chrono::duration<Rep, Period> timeout) {
+    std::optional<T> WaitForResult(std::chrono::duration<Rep, Period> timeout) {
         struct State {
             std::mutex mutex;
             std::condition_variable cv;
@@ -374,9 +347,9 @@ class Future {
         };
         auto state = std::make_shared<State>();
 
-        // The continuation ignores T entirely (returning a dummy int) so that
-        // T is not required to be copyable. The executor signals the cv when
-        // called, since being called means the original future has resolved.
+        // The continuation ignores T entirely (returning a dummy int). The
+        // executor signals the cv when called, since being called means the
+        // original future has resolved.
         Then([](T const&) { return 0; },
              [state](Continuation<void()> work) {
                  {

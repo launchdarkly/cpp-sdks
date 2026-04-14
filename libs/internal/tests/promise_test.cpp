@@ -19,7 +19,7 @@ TEST(Promise, SimplePromise) {
 
     promise.Resolve(43);
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_FLOAT_EQ(*result, 86.0f);
 }
@@ -40,7 +40,7 @@ TEST(Promise, ASIOTest) {
 
     promise.Resolve(42);
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_FLOAT_EQ(*result, 84.0f);
 
@@ -52,7 +52,7 @@ TEST(Promise, GetResultNotFinished) {
     Promise<int> promise;
     Future<int> future = promise.GetFuture();
 
-    auto& result = future.GetResult();
+    auto result = future.GetResult();
     EXPECT_FALSE(result.has_value());
 }
 
@@ -62,7 +62,7 @@ TEST(Promise, GetResultFinished) {
 
     promise.Resolve(42);
 
-    auto& result = future.GetResult();
+    auto result = future.GetResult();
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
 }
@@ -82,7 +82,7 @@ TEST(Promise, CopyOnlyResult) {
 
     promise.Resolve(CopyOnly{42});
 
-    auto& result = future.GetResult();
+    auto result = future.GetResult();
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result->value, 42);
 }
@@ -99,7 +99,7 @@ TEST(Promise, ContinueByReturningFuture) {
     promise1.Resolve(0);
     promise2.Resolve(42);
 
-    auto& result = chained.WaitForResult(std::chrono::seconds(5));
+    auto result = chained.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
 }
@@ -113,7 +113,7 @@ TEST(Promise, ResolvedBeforeContinuation) {
     Future<int> future2 = future.Then([](int const& val) { return val * 2; },
                                       [](Continuation<void()> f) { f(); });
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
 }
@@ -127,20 +127,9 @@ TEST(Promise, ResolvedAfterContinuation) {
 
     promise.Resolve(21);
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
-}
-
-TEST(Promise, MoveOnlyResult) {
-    Promise<std::unique_ptr<int>> promise;
-    Future<std::unique_ptr<int>> future = promise.GetFuture();
-
-    promise.Resolve(std::make_unique<int>(42));
-
-    auto& result = future.GetResult();
-    ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(**result, 42);
 }
 
 // Verifies that a continuation which captures a copy-only type (deleted move
@@ -165,7 +154,7 @@ TEST(Promise, CopyOnlyCallback) {
 
     promise.Resolve(21);
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
 }
@@ -184,41 +173,9 @@ TEST(Promise, MoveOnlyCallback) {
 
     promise.Resolve(21);
 
-    auto& result = future2.WaitForResult(std::chrono::seconds(5));
+    auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(*result, 42);
-}
-
-// Verifies that when T is both moveable and copyable, resolving a promise
-// moves the value into storage rather than copying it.
-TEST(Promise, ResultMovedWhenPossible) {
-    int copies = 0;
-    struct Counted {
-        int value;
-        int* copy_count;
-        explicit Counted(int v, int* c) : value(v), copy_count(c) {}
-        Counted(Counted const& o) : value(o.value), copy_count(o.copy_count) {
-            ++(*copy_count);
-        }
-        Counted& operator=(Counted const& o) {
-            value = o.value;
-            copy_count = o.copy_count;
-            ++(*copy_count);
-            return *this;
-        }
-        Counted(Counted&&) noexcept = default;
-        Counted& operator=(Counted&&) noexcept = default;
-    };
-
-    Promise<Counted> promise;
-    Future<Counted> future = promise.GetFuture();
-
-    promise.Resolve(Counted{42, &copies});
-
-    auto& result = future.GetResult();
-    ASSERT_TRUE(result.has_value());
-    EXPECT_EQ(result->value, 42);
-    EXPECT_EQ(copies, 0);
 }
 
 // Verifies that when a continuation is both moveable and copyable, Then stores
@@ -274,7 +231,7 @@ TEST(Promise, MonostateVoidLike) {
 
     promise.Resolve(std::monostate{});
 
-    auto& result = future.WaitForResult(std::chrono::seconds(5));
+    auto result = future.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(ran);
 }
@@ -287,7 +244,7 @@ TEST(Promise, ExpectedSuccess) {
 
     promise.Resolve(42);
 
-    auto& result = future.GetResult();
+    auto result = future.GetResult();
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->has_value());
     EXPECT_EQ(**result, 42);
@@ -301,7 +258,7 @@ TEST(Promise, ExpectedFailure) {
 
     promise.Resolve(tl::unexpected(std::string("timed out")));
 
-    auto& result = future.GetResult();
+    auto result = future.GetResult();
     ASSERT_TRUE(result.has_value());
     ASSERT_FALSE(result->has_value());
     EXPECT_EQ(result->error(), "timed out");
@@ -366,7 +323,7 @@ TEST(WhenAll, AllAlreadyResolved) {
     p2.Resolve("hello");
 
     Future<std::monostate> result = WhenAll(p1.GetFuture(), p2.GetFuture());
-    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    auto r = result.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(r.has_value());
 }
 
@@ -386,7 +343,7 @@ TEST(WhenAll, ResolvesAfterAll) {
     EXPECT_FALSE(result.IsFinished());
     p2.Resolve("done");
 
-    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    auto r = result.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(r.has_value());
     EXPECT_EQ(*f1.GetResult(), 42);
     EXPECT_EQ(*f2.GetResult(), "done");
@@ -404,7 +361,7 @@ TEST(WhenAny, FirstResolved) {
     EXPECT_FALSE(result.IsFinished());
     p1.Resolve(42);
 
-    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    auto r = result.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(r.has_value());
     EXPECT_EQ(*r, 1u);
 }
@@ -431,7 +388,7 @@ TEST(WhenAny, MixedTypesFirstWins) {
     p1.Resolve("hello");
     p0.Resolve(99);
 
-    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    auto r = result.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(r.has_value());
     EXPECT_EQ(std::get<std::string>(*result.GetResult()), "hello");
 }
@@ -445,7 +402,7 @@ TEST(WhenAny, AlreadyResolved) {
 
     Future<std::size_t> result = WhenAny(p0.GetFuture(), p1.GetFuture());
 
-    auto& r = result.WaitForResult(std::chrono::seconds(5));
+    auto r = result.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(r.has_value());
     EXPECT_EQ(*r, 0u);
 }
