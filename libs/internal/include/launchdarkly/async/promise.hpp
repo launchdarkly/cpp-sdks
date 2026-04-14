@@ -161,12 +161,12 @@ class PromiseInternal {
         Promise<R> newPromise;
         Future<R> newFuture = newPromise.GetFuture();
 
-        T already_resolved;
+        std::optional<T> already_resolved;
         {
             std::lock_guard lock(mutex_);
 
             if (result_.has_value()) {
-                already_resolved = *result_;
+                already_resolved = result_;
             } else {
                 continuations_.push_back(
                     [newPromise = std::move(newPromise),
@@ -189,7 +189,7 @@ class PromiseInternal {
             [newPromise = std::move(newPromise),
              continuation = std::move(continuation),
              result = std::move(already_resolved)]() mutable {
-                newPromise.Resolve(continuation(result));
+                newPromise.Resolve(continuation(*result));
             }));
         return newFuture;
     }
@@ -216,18 +216,18 @@ class PromiseInternal {
             Future<T2> innerFuture = continuation(val);
             innerFuture.Then(
                 [outerPromise = std::move(outerPromise)](
-                    T2 const& inner_val) mutable -> T2 {
+                    T2 const& inner_val) mutable -> std::monostate {
                     outerPromise.Resolve(inner_val);
-                    return inner_val;
+                    return {};
                 },
                 executor);
         };
 
-        T already_resolved;
+        std::optional<T> already_resolved;
         {
             std::lock_guard lock(mutex_);
             if (result_.has_value()) {
-                already_resolved = *result_;
+                already_resolved = result_;
             } else {
                 continuations_.push_back([do_work = std::move(do_work),
                                           executor](T const& result) mutable {
@@ -245,14 +245,14 @@ class PromiseInternal {
         executor(Continuation<void()>(
             [do_work = std::move(do_work),
              result = std::move(already_resolved)]() mutable {
-                do_work(result);
+                do_work(*result);
             }));
         return outerFuture;
     }
 
    private:
     mutable std::mutex mutex_;
-    std::optional<T> result_{std::nullopt};
+    std::optional<T> result_{};
     std::vector<Continuation<void(T const&)>> continuations_;
 };
 
@@ -284,7 +284,13 @@ class Promise {
     // Sets the result to the given value and schedules any continuations that
     // were registered via Future::Then. Returns true if the result was set, or
     // false if Resolve was already called.
-    bool Resolve(T result) { return internal_->Resolve(result); }
+    bool Resolve(T result) {
+        if constexpr (std::is_move_constructible_v<T>) {
+            return internal_->Resolve(std::move(result));
+        } else {
+            return internal_->Resolve(result);
+        }
+    }
 
     // Returns a Future that will resolve when this Promise is resolved.
     // May be called multiple times; each call returns a Future referring to
