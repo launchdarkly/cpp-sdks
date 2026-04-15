@@ -122,7 +122,7 @@ class PromiseInternal {
             }
 
             // Move result into storage if possible; otherwise copy.
-            if constexpr (std::is_move_assignable_v<T>) {
+            if constexpr (std::is_move_constructible_v<T>) {
                 result_ = std::move(result);
             } else {
                 result_ = result;

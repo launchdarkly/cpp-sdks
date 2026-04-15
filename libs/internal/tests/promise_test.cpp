@@ -67,6 +67,30 @@ TEST(Promise, GetResultFinished) {
     EXPECT_EQ(*result, 42);
 }
 
+// Verifies that a type which is move-assignable but not move-constructible
+// can still be used as T. The optional assignment for an empty optional needs
+// move-constructibility, not move-assignability, so the if constexpr branch
+// must check the correct trait.
+TEST(Promise, MoveAssignableNotMoveConstructible) {
+    struct MoveAssignableOnly {
+        int value;
+        explicit MoveAssignableOnly(int v) : value(v) {}
+        MoveAssignableOnly(MoveAssignableOnly const&) = default;
+        MoveAssignableOnly& operator=(MoveAssignableOnly const&) = default;
+        MoveAssignableOnly(MoveAssignableOnly&&) = delete;
+        MoveAssignableOnly& operator=(MoveAssignableOnly&&) = default;
+    };
+
+    Promise<MoveAssignableOnly> promise;
+    Future<MoveAssignableOnly> future = promise.GetFuture();
+
+    promise.Resolve(MoveAssignableOnly{42});
+
+    auto result = future.GetResult();
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(result->value, 42);
+}
+
 TEST(Promise, CopyOnlyResult) {
     struct CopyOnly {
         int value;
