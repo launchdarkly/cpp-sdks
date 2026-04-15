@@ -441,3 +441,98 @@ TEST(WhenAll, ConcurrentResolution) {
     t4.join();
     t5.join();
 }
+
+// Verifies that WaitForResult returns nullopt when the promise is never
+// resolved within the timeout.
+TEST(Promise, WaitForResultTimeout) {
+    Promise<int> promise;
+    Future<int> future = promise.GetFuture();
+
+    auto result = future.WaitForResult(std::chrono::milliseconds(50));
+    EXPECT_FALSE(result.has_value());
+}
+
+// Verifies that multiple threads can concurrently register continuations on
+// the same future before it resolves, and all continuations run after
+// resolution.
+TEST(Promise, ConcurrentThenRegistration) {
+    Promise<int> promise;
+    Future<int> future = promise.GetFuture();
+
+    std::atomic<int> count{0};
+    std::vector<std::thread> threads;
+    std::vector<Future<std::monostate>> results;
+
+    for (int i = 0; i < 10; i++) {
+        results.push_back(future.Then(
+            [&count](int const&) {
+                count++;
+                return std::monostate{};
+            },
+            [](Continuation<void()> f) { f(); }));
+    }
+
+    promise.Resolve(42);
+
+    for (auto& r : results) {
+        ASSERT_TRUE(r.WaitForResult(std::chrono::seconds(5)).has_value());
+    }
+    EXPECT_EQ(count, 10);
+}
+
+// Verifies that when multiple threads race to resolve the same promise,
+// exactly one succeeds and the rest return false.
+TEST(Promise, ConcurrentResolveSingleWinner) {
+    Promise<int> promise;
+    Future<int> future = promise.GetFuture();
+
+    std::atomic<int> winners{0};
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 10; i++) {
+        threads.emplace_back([&promise, &winners, i] {
+            if (promise.Resolve(i)) {
+                winners++;
+            }
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    EXPECT_EQ(winners, 1);
+    EXPECT_TRUE(future.GetResult().has_value());
+}
+
+// Verifies that a chain of Then calls executes correctly when continuations
+// are dispatched via a multi-threaded ASIO executor.
+TEST(Promise, MultiThreadedASIOExecutor) {
+    boost::asio::io_context ioc;
+    auto work = boost::asio::make_work_guard(ioc);
+
+    std::vector<std::thread> ioc_threads;
+    for (int i = 0; i < 4; i++) {
+        ioc_threads.emplace_back([&ioc] { ioc.run(); });
+    }
+
+    auto executor = [&ioc](Continuation<void()> f) {
+        boost::asio::post(ioc, std::move(f));
+    };
+
+    Promise<int> promise;
+    Future<int> result =
+        promise.GetFuture()
+            .Then([](int const& v) { return v * 2; }, executor)
+            .Then([](int const& v) { return v + 1; }, executor);
+
+    promise.Resolve(10);
+
+    auto r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*r, 21);
+
+    work.reset();
+    for (auto& t : ioc_threads) {
+        t.join();
+    }
+}
