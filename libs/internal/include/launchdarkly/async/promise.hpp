@@ -133,6 +133,8 @@ class PromiseInternal {
         // Call continuations outside the lock so that continuations which
         // re-enter this future (e.g. via GetResult or Then) don't deadlock.
         for (auto& continuation : to_call) {
+            // It's safe to access result_ outside the lock here, because it
+            // can't be changed again.
             continuation(*result_);
         }
 
@@ -355,10 +357,10 @@ class Future {
         };
         auto state = std::make_shared<State>();
 
-        // The continuation ignores T entirely (returning a dummy int). The
-        // executor signals the cv when called, since being called means the
-        // original future has resolved.
-        Then([](T const&) { return 0; },
+        // The continuation ignores T entirely. The executor signals the cv
+        // when called, since being called means the original future has
+        // resolved.
+        Then([](T const&) { return std::monostate{}; },
              [state](Continuation<void()> work) {
                  {
                      std::lock_guard<std::mutex> lock(state->mutex);
