@@ -406,3 +406,38 @@ TEST(WhenAny, AlreadyResolved) {
     ASSERT_TRUE(r.has_value());
     EXPECT_EQ(*r, 0u);
 }
+
+TEST(WhenAll, ConcurrentResolution) {
+    auto spawn = [](int val) {
+        Promise<int> p;
+        Future<int> f = p.GetFuture();
+        return std::make_pair(
+            f, std::thread([p = std::move(p), val]() mutable {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                p.Resolve(val);
+            }));
+    };
+
+    auto [f1, t1] = spawn(1);
+    auto [f2, t2] = spawn(2);
+    auto [f3, t3] = spawn(3);
+    auto [f4, t4] = spawn(4);
+    auto [f5, t5] = spawn(5);
+
+    auto result = WhenAll(f1, f2, f3, f4, f5);
+
+    auto r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+
+    EXPECT_EQ(f1.GetResult().value(), 1);
+    EXPECT_EQ(f2.GetResult().value(), 2);
+    EXPECT_EQ(f3.GetResult().value(), 3);
+    EXPECT_EQ(f4.GetResult().value(), 4);
+    EXPECT_EQ(f5.GetResult().value(), 5);
+
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+    t5.join();
+}
