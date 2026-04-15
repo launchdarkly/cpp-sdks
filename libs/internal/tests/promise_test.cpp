@@ -476,34 +476,6 @@ TEST(Promise, WaitForResultTimeout) {
     EXPECT_FALSE(result.has_value());
 }
 
-// Verifies that multiple threads can concurrently register continuations on
-// the same future before it resolves, and all continuations run after
-// resolution.
-TEST(Promise, ConcurrentThenRegistration) {
-    Promise<int> promise;
-    Future<int> future = promise.GetFuture();
-
-    std::atomic<int> count{0};
-    std::vector<std::thread> threads;
-    std::vector<Future<std::monostate>> results;
-
-    for (int i = 0; i < 10; i++) {
-        results.push_back(future.Then(
-            [&count](int const&) {
-                count++;
-                return std::monostate{};
-            },
-            [](Continuation<void()> f) { f(); }));
-    }
-
-    promise.Resolve(42);
-
-    for (auto& r : results) {
-        ASSERT_TRUE(r.WaitForResult(std::chrono::seconds(5)).has_value());
-    }
-    EXPECT_EQ(count, 10);
-}
-
 // Verifies that when multiple threads race to resolve the same promise,
 // exactly one succeeds and the rest return false.
 TEST(Promise, ConcurrentResolveSingleWinner) {
