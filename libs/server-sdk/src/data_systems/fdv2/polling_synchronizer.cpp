@@ -1,16 +1,10 @@
 #include "polling_synchronizer.hpp"
 #include "fdv2_polling_impl.hpp"
 
+#include <launchdarkly/async/timer.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
-#include <boost/asio/bind_cancellation_slot.hpp>
-#include <boost/asio/deferred.hpp>
-#include <boost/asio/experimental/parallel_group.hpp>
-#include <boost/asio/post.hpp>
-
 #include <algorithm>
-#include <future>
-#include <memory>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -29,12 +23,12 @@ FDv2PollingSynchronizer::FDv2PollingSynchronizer(
     std::optional<std::string> filter_key,
     std::chrono::seconds poll_interval)
     : logger_(logger),
+      executor_(executor),
       requester_(executor, http_properties.Tls()),
       endpoints_(endpoints),
       http_properties_(http_properties),
       filter_key_(std::move(filter_key)),
-      poll_interval_(std::max(poll_interval, kMinPollInterval)),
-      timer_(executor) {
+      poll_interval_(std::max(poll_interval, kMinPollInterval)) {
     if (poll_interval < kMinPollInterval) {
         LD_LOG(logger_, LogLevel::kWarn)
             << kIdentity << ": polling interval too frequent, defaulting to "
@@ -48,145 +42,100 @@ network::HttpRequest FDv2PollingSynchronizer::MakeRequest(
                                filter_key_);
 }
 
-FDv2SourceResult FDv2PollingSynchronizer::Next(
+async::Future<FDv2SourceResult> FDv2PollingSynchronizer::Next(
     std::chrono::milliseconds timeout,
     data_model::Selector selector) {
     if (closed_) {
-        return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
-    }
-
-    auto promise = std::make_shared<std::promise<FDv2SourceResult>>();
-    auto future = promise->get_future();
-
-    // Post the actual work to the ASIO thread so that timer_ and
-    // cancel_signal_ are only ever accessed from the executor. Calling their
-    // methods directly here (on the orchestrator thread) would be a data race,
-    // since ASIO I/O objects and cancellation_signal are not thread-safe.
-    // future.get() below blocks the orchestrator thread until DoNext/DoPoll
-    // sets the promise from the ASIO thread.
-    boost::asio::post(
-        timer_.get_executor(),
-        [this, timeout, selector = std::move(selector), promise]() mutable {
-            DoNext(timeout, std::move(selector), std::move(promise));
-        });
-
-    return future.get();
-}
-
-void FDv2PollingSynchronizer::DoNext(
-    std::chrono::milliseconds timeout,
-    data_model::Selector selector,
-    std::shared_ptr<std::promise<FDv2SourceResult>> promise) {
-    if (closed_) {
-        promise->set_value(FDv2SourceResult{FDv2SourceResult::Shutdown{}});
-        return;
+        return async::MakeFuture(
+            FDv2SourceResult{FDv2SourceResult::Shutdown{}});
     }
 
     auto deadline = std::chrono::steady_clock::now() + timeout;
 
-    if (started_) {
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - last_poll_start_);
-        auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(
-                         poll_interval_) -
-                     elapsed;
-
-        if (delay.count() > 0) {
-            auto remaining =
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    deadline - std::chrono::steady_clock::now());
-
-            // timeout_timer must outlive this function: the io_context's
-            // internal timer heap holds a pointer to the timer's
-            // implementation until the async_wait completes, and the
-            // destructor cancels any pending async_wait (posting
-            // operation_aborted), which would make the parallel_group
-            // immediately complete as if the timeout had fired. Capturing
-            // the shared_ptr in the callback lambda keeps the timer alive
-            // until the group completes.
-            auto timeout_timer = std::make_shared<boost::asio::steady_timer>(
-                timer_.get_executor());
-            timer_.expires_after(delay);
-            timeout_timer->expires_after(remaining);
-
-            boost::asio::experimental::make_parallel_group(
-                timer_.async_wait(boost::asio::deferred),
-                timeout_timer->async_wait(boost::asio::deferred))
-                .async_wait(
-                    boost::asio::experimental::wait_for_one(),
-                    boost::asio::bind_cancellation_slot(
-                        cancel_signal_.slot(),
-                        [this, deadline, selector = std::move(selector),
-                         promise,
-                         timeout_timer](std::array<std::size_t, 2> order,
-                                        boost::system::error_code,
-                                        boost::system::error_code) mutable {
-                            if (closed_) {
-                                promise->set_value(FDv2SourceResult{
-                                    FDv2SourceResult::Shutdown{}});
-                                return;
-                            }
-                            if (order[0] == 1) {
-                                promise->set_value(FDv2SourceResult{
-                                    FDv2SourceResult::Timeout{}});
-                                return;
-                            }
-                            DoPoll(deadline, selector, std::move(promise));
-                        }));
-            return;
-        }
+    if (!started_) {
+        return DoPoll(deadline, selector);
     }
 
-    DoPoll(deadline, selector, std::move(promise));
+    auto elapsed = std::chrono::steady_clock::now() - last_poll_start_;
+    auto delay = poll_interval_ - elapsed;
+
+    if (delay.count() <= 0) {
+        return DoPoll(deadline, selector);
+    }
+
+    auto remaining = deadline - std::chrono::steady_clock::now();
+
+    // Use the smaller of the two durations. If the timeout fires
+    // first (timeout_first == true), return Timeout; otherwise the
+    // inter-poll delay elapsed, so proceed to DoPoll.
+    bool timeout_first = remaining <= delay;
+    auto effective_delay = timeout_first ? remaining : delay;
+
+    return async::WhenAny(close_promise_.GetFuture(),
+                          async::Delay(executor_, effective_delay))
+        .Then(
+            [this, deadline, selector = std::move(selector),
+             timeout_first](std::size_t const& idx) mutable
+                -> async::Future<FDv2SourceResult> {
+                if (idx == 0 || closed_) {
+                    return async::MakeFuture(
+                        FDv2SourceResult{FDv2SourceResult::Shutdown{}});
+                }
+                if (timeout_first) {
+                    return async::MakeFuture(
+                        FDv2SourceResult{FDv2SourceResult::Timeout{}});
+                }
+                return DoPoll(deadline, selector);
+            },
+            async::kInlineExecutor);
 }
 
-void FDv2PollingSynchronizer::DoPoll(
+async::Future<FDv2SourceResult> FDv2PollingSynchronizer::DoPoll(
     std::chrono::time_point<std::chrono::steady_clock> deadline,
-    data_model::Selector const& selector,
-    std::shared_ptr<std::promise<FDv2SourceResult>> promise) {
+    data_model::Selector const& selector) {
     if (closed_) {
-        promise->set_value(FDv2SourceResult{FDv2SourceResult::Shutdown{}});
-        return;
+        return async::MakeFuture(
+            FDv2SourceResult{FDv2SourceResult::Shutdown{}});
     }
 
     started_ = true;
     last_poll_start_ = std::chrono::steady_clock::now();
-    protocol_handler_.Reset();
+    {
+        std::lock_guard lock(protocol_handler_mutex_);
+        protocol_handler_.Reset();
+    }
 
-    auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-        deadline - std::chrono::steady_clock::now());
-    timer_.expires_after(remaining);
+    auto remaining = deadline - std::chrono::steady_clock::now();
 
-    boost::asio::experimental::make_parallel_group(
-        requester_.Request(MakeRequest(selector), boost::asio::deferred),
-        timer_.async_wait(boost::asio::deferred))
-        .async_wait(
-            boost::asio::experimental::wait_for_one(),
-            boost::asio::bind_cancellation_slot(
-                cancel_signal_.slot(),
-                [this, promise](std::array<std::size_t, 2> order,
-                                network::HttpResult poll_result,
-                                boost::system::error_code) mutable {
-                    if (closed_) {
-                        promise->set_value(
-                            FDv2SourceResult{FDv2SourceResult::Shutdown{}});
-                    } else if (order[0] == 0) {
-                        promise->set_value(HandlePollResult(poll_result));
-                    } else {
-                        promise->set_value(
-                            FDv2SourceResult{FDv2SourceResult::Timeout{}});
-                    }
-                }));
+    // Promisify the callback-based HTTP request.
+    auto http_promise = std::make_shared<async::Promise<network::HttpResult>>();
+    auto http_future = http_promise->GetFuture();
+    requester_.Request(MakeRequest(selector),
+                       [hp = http_promise](network::HttpResult res) mutable {
+                           hp->Resolve(std::move(res));
+                       });
+
+    // Race: close (0) vs HTTP result (1) vs timeout (2).
+    // The winner unblocks the orchestrator immediately; the losers complete
+    // in the background and their Resolve() calls are no-ops.
+    return async::WhenAny(close_promise_.GetFuture(), http_future,
+                          async::Delay(executor_, remaining))
+        .Then(
+            [this, http_future](std::size_t const& idx) -> FDv2SourceResult {
+                if (idx == 0 || closed_) {
+                    return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
+                }
+                if (idx == 1) {
+                    return HandlePollResult(*http_future.GetResult());
+                }
+                return FDv2SourceResult{FDv2SourceResult::Timeout{}};
+            },
+            async::kInlineExecutor);
 }
 
 void FDv2PollingSynchronizer::Close() {
     closed_ = true;
-    // cancel_signal_ is not thread-safe, so emit() must run on the ASIO
-    // thread. post() schedules it there rather than calling it directly,
-    // which would race with DoNext/DoPoll accessing the signal concurrently.
-    boost::asio::post(timer_.get_executor(), [this] {
-        cancel_signal_.emit(boost::asio::cancellation_type::all);
-    });
+    close_promise_.Resolve(std::monostate{});
 }
 
 std::string const& FDv2PollingSynchronizer::Identity() const {
@@ -196,6 +145,7 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
 
 FDv2SourceResult FDv2PollingSynchronizer::HandlePollResult(
     network::HttpResult const& res) {
+    std::lock_guard lock(protocol_handler_mutex_);
     return HandleFDv2PollResponse(res, protocol_handler_, logger_, kIdentity);
 }
 

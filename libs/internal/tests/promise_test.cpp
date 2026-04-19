@@ -15,7 +15,7 @@ TEST(Promise, SimplePromise) {
 
     Future<float> future2 = future.Then(
         [](int const& inner) { return static_cast<float>(inner * 2.0); },
-        [](Continuation<void()> f) { f(); });
+        kInlineExecutor);
 
     promise.Resolve(43);
 
@@ -116,9 +116,8 @@ TEST(Promise, ContinueByReturningFuture) {
     Promise<int> promise2;
     Future<int> future2 = promise2.GetFuture();
 
-    Future<int> chained =
-        promise1.GetFuture().Then([future2](int const&) { return future2; },
-                                  [](Continuation<void()> f) { f(); });
+    Future<int> chained = promise1.GetFuture().Then(
+        [future2](int const&) { return future2; }, kInlineExecutor);
 
     promise1.Resolve(0);
     promise2.Resolve(42);
@@ -134,8 +133,8 @@ TEST(Promise, ResolvedBeforeContinuation) {
 
     promise.Resolve(21);
 
-    Future<int> future2 = future.Then([](int const& val) { return val * 2; },
-                                      [](Continuation<void()> f) { f(); });
+    Future<int> future2 =
+        future.Then([](int const& val) { return val * 2; }, kInlineExecutor);
 
     auto result = future2.WaitForResult(std::chrono::seconds(5));
     ASSERT_TRUE(result.has_value());
@@ -146,8 +145,8 @@ TEST(Promise, ResolvedAfterContinuation) {
     Promise<int> promise;
     Future<int> future = promise.GetFuture();
 
-    Future<int> future2 = future.Then([](int const& val) { return val * 2; },
-                                      [](Continuation<void()> f) { f(); });
+    Future<int> future2 =
+        future.Then([](int const& val) { return val * 2; }, kInlineExecutor);
 
     promise.Resolve(21);
 
@@ -174,7 +173,7 @@ TEST(Promise, CopyOnlyCallback) {
     CopyOnlyInt multiplier{2};
     Future<int> future2 = future.Then(
         [multiplier](int const& val) { return val * multiplier.value; },
-        [](Continuation<void()> f) { f(); });
+        kInlineExecutor);
 
     promise.Resolve(21);
 
@@ -193,7 +192,7 @@ TEST(Promise, MoveOnlyCallback) {
     Future<int> future2 =
         future.Then([captured = std::move(captured)](
                         int const& val) { return val * *captured; },
-                    [](Continuation<void()> f) { f(); });
+                    kInlineExecutor);
 
     promise.Resolve(21);
 
@@ -231,7 +230,7 @@ TEST(Promise, CallbackMovedWhenPossible) {
 
     future.Then([multiplier = std::move(multiplier)](
                     int const& val) mutable { return val * multiplier.value; },
-                [](Continuation<void()> f) { f(); });
+                kInlineExecutor);
 
     EXPECT_EQ(copies, 0);
 
@@ -251,7 +250,7 @@ TEST(Promise, MonostateVoidLike) {
             ran = true;
             return std::monostate{};
         },
-        [](Continuation<void()> f) { f(); });
+        kInlineExecutor);
 
     promise.Resolve(std::monostate{});
 
@@ -407,7 +406,7 @@ TEST(WhenAny, MixedTypesFirstWins) {
                 return f1.GetResult().value();
             }
         },
-        [](Continuation<void()> f) { f(); });
+        kInlineExecutor);
 
     p1.Resolve("hello");
     p0.Resolve(99);

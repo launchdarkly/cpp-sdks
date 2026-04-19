@@ -3,8 +3,6 @@
 
 #include <launchdarkly/network/http_requester.hpp>
 
-#include <memory>
-
 namespace launchdarkly::server_side::data_systems {
 
 static char const* const kIdentity = "FDv2 polling initializer";
@@ -25,44 +23,41 @@ FDv2PollingInitializer::FDv2PollingInitializer(
                                    filter_key)),
       requester_(executor, http_properties.Tls()) {}
 
-FDv2SourceResult FDv2PollingInitializer::Run() {
+async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
     if (!request_.Valid()) {
         LD_LOG(logger_, LogLevel::kError)
             << kIdentity << ": invalid polling endpoint URL";
         using ErrorInfo = FDv2SourceResult::ErrorInfo;
-        return FDv2SourceResult{FDv2SourceResult::TerminalError{
-            ErrorInfo{ErrorInfo::ErrorKind::kUnknown, 0,
-                      "invalid polling endpoint URL",
-                      std::chrono::system_clock::now()},
-            false}};
+        return async::MakeFuture(
+            FDv2SourceResult{FDv2SourceResult::TerminalError{
+                ErrorInfo{ErrorInfo::ErrorKind::kUnknown, 0,
+                          "invalid polling endpoint URL",
+                          std::chrono::system_clock::now()},
+                false}});
     }
 
-    auto shared_result = std::make_shared<std::optional<network::HttpResult>>();
-
+    // Promisify the callback-based HTTP request.
+    auto http_promise = std::make_shared<async::Promise<network::HttpResult>>();
+    auto http_future = http_promise->GetFuture();
     requester_.Request(request_,
-                       [this, shared_result](network::HttpResult res) {
-                           std::lock_guard guard(mutex_);
-                           *shared_result = std::move(res);
-                           cv_.notify_one();
+                       [hp = http_promise](network::HttpResult res) mutable {
+                           hp->Resolve(std::move(res));
                        });
 
-    std::unique_lock lock(mutex_);
-    cv_.wait(lock, [&] { return shared_result->has_value() || closed_; });
-
-    if (closed_) {
-        return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
-    }
-
-    auto http_result = std::move(**shared_result);
-    lock.unlock();
-
-    return HandlePollResult(http_result);
+    // Race: HTTP result (0) vs close (1).
+    return async::WhenAny(http_future, close_promise_.GetFuture())
+        .Then(
+            [this, http_future](std::size_t const& idx) -> FDv2SourceResult {
+                if (idx == 1) {
+                    return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
+                }
+                return HandlePollResult(*http_future.GetResult());
+            },
+            async::kInlineExecutor);
 }
 
 void FDv2PollingInitializer::Close() {
-    std::lock_guard lock(mutex_);
-    closed_ = true;
-    cv_.notify_one();
+    close_promise_.Resolve(std::monostate{});
 }
 
 std::string const& FDv2PollingInitializer::Identity() const {

@@ -2,6 +2,7 @@
 
 #include "../../data_interfaces/source/ifdv2_initializer.hpp"
 
+#include <launchdarkly/async/promise.hpp>
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
@@ -10,8 +11,6 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <condition_variable>
-#include <mutex>
 #include <optional>
 #include <string>
 
@@ -20,16 +19,16 @@ namespace launchdarkly::server_side::data_systems {
 /**
  * FDv2 polling initializer. Makes a single HTTP GET to the FDv2 polling
  * endpoint, parses the response via the FDv2 protocol state machine, and
- * returns the result. Implements IFDv2Initializer (blocking, one-shot).
+ * returns the result. Implements IFDv2Initializer (async, one-shot).
  *
  * Threading model:
- *   Run() is called once from the orchestrator thread. It posts the HTTP
- *   request to the ASIO executor and blocks on a condition variable until
- *   the response arrives or Close() is called.
+ *   Run() is called once from the orchestrator thread. It fires the HTTP
+ *   request and returns a Future that resolves when the response arrives
+ *   or Close() is called.
  *   Close() may be called from any thread, concurrently with Run().
  *   Destroying this object is not safe until the ASIO thread has been
  *   joined, because the HTTP response callback posted to the executor
- *   captures a pointer to this object's mutex and condition variable.
+ *   captures member variables.
  */
 class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
    public:
@@ -40,7 +39,7 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
                            data_model::Selector selector,
                            std::optional<std::string> filter_key);
 
-    data_interfaces::FDv2SourceResult Run() override;
+    async::Future<data_interfaces::FDv2SourceResult> Run() override;
 
     void Close() override;
 
@@ -59,11 +58,8 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
     network::AsioRequester requester_;
     FDv2ProtocolHandler protocol_handler_;
 
-    // Cross-thread synchronization. Run() waits on cv_ for either a
-    // response from the ASIO thread or a Close() from any thread.
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    bool closed_ = false;  // guarded by mutex_
+    // Resolved when Close() is called, cancelling any outstanding Run().
+    async::Promise<std::monostate> close_promise_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
