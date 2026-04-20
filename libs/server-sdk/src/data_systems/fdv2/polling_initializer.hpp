@@ -19,13 +19,11 @@ namespace launchdarkly::server_side::data_systems {
 /**
  * FDv2 polling initializer. Makes a single HTTP GET to the FDv2 polling
  * endpoint, parses the response via the FDv2 protocol state machine, and
- * returns the result. Implements IFDv2Initializer (async, one-shot).
+ * returns the result.
  *
  * Threading model:
- *   Run() is called once from the orchestrator thread. It fires the HTTP
- *   request and returns a Future that resolves when the response arrives
- *   or Close() is called.
- *   Close() may be called from any thread, concurrently with Run().
+ *   Run() should only be called once at a time.
+ *   Close() may be called concurrently with Run().
  *   This object may be safely destroyed once no call to Run() or Close()
  *   is in progress.
  */

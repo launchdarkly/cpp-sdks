@@ -23,8 +23,10 @@ namespace launchdarkly::server_side::data_systems {
  * orchestrator to reflect applied changesets without any shared state.
  *
  * Threading model:
- *   Next() may be called from any thread. Close() may be called from any
- *   thread, concurrently with Next().
+ *   Next() should only be called once at a time.
+ *   Close() may be called concurrently with Next().
+ *   This object may be safely destroyed once no call to Next() or Close()
+ *   is in progress.
  */
 class FDv2PollingSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
