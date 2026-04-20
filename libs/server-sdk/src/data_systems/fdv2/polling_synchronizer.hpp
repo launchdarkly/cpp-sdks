@@ -95,8 +95,8 @@ class FDv2PollingSynchronizer final
 
         // Mutable state, guarded by mutex_.
         std::mutex mutex_;
-        bool started_ = false;
-        std::chrono::time_point<std::chrono::steady_clock> last_poll_start_;
+        std::optional<std::chrono::time_point<std::chrono::steady_clock>>
+            last_poll_start_;
     };
 
     /**

@@ -60,11 +60,11 @@ async::Future<bool> FDv2PollingSynchronizer::State::Delay(
 
 async::Future<bool> FDv2PollingSynchronizer::State::CreatePollDelayFuture() {
     std::lock_guard lock(mutex_);
-    if (!started_) {
+    if (!last_poll_start_) {
         return async::MakeFuture(true);
     }
     auto now = std::chrono::steady_clock::now();
-    auto elapsed = now - last_poll_start_;
+    auto elapsed = now - *last_poll_start_;
     if (elapsed >= poll_interval_) {
         return async::MakeFuture(true);
     }
@@ -73,7 +73,6 @@ async::Future<bool> FDv2PollingSynchronizer::State::CreatePollDelayFuture() {
 
 void FDv2PollingSynchronizer::State::RecordPollStarted() {
     std::lock_guard lock(mutex_);
-    started_ = true;
     last_poll_start_ = std::chrono::steady_clock::now();
 }
 
@@ -118,14 +117,14 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
     async::Future<std::monostate> closed,
     std::chrono::milliseconds timeout,
     data_model::Selector selector) {
-    auto now = std::chrono::steady_clock::now();
-    auto timeout_deadline = now + timeout;
-    auto timeout_future = state->Delay(timeout);
-
     if (closed.IsFinished()) {
         return async::MakeFuture(
             FDv2SourceResult{FDv2SourceResult::Shutdown{}});
     }
+
+    auto now = std::chrono::steady_clock::now();
+    auto timeout_deadline = now + timeout;
+    auto timeout_future = state->Delay(timeout);
 
     // Figure out how much to delay before starting.
     auto delay_future = state->CreatePollDelayFuture();
