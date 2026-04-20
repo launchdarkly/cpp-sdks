@@ -41,6 +41,8 @@ class FDv2PollingSynchronizer final
         std::optional<std::string> filter_key,
         std::chrono::seconds poll_interval);
 
+    ~FDv2PollingSynchronizer() override;
+
     async::Future<data_interfaces::FDv2SourceResult> Next(
         std::chrono::milliseconds timeout,
         data_model::Selector selector) override;
@@ -121,7 +123,8 @@ class FDv2PollingSynchronizer final
         std::chrono::time_point<std::chrono::steady_clock> timeout_deadline,
         data_model::Selector const& selector);
 
-    // Resolved by Close(), cancelling any outstanding Next() calls.
+    // Resolved by Close() or on destruction, cancelling any outstanding Next()
+    // calls.
     async::Promise<std::monostate> close_promise_;
 
     // Shared with async callbacks.

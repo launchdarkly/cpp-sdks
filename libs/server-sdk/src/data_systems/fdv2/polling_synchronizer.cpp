@@ -96,6 +96,10 @@ FDv2PollingSynchronizer::FDv2PollingSynchronizer(
     }
 }
 
+FDv2PollingSynchronizer::~FDv2PollingSynchronizer() {
+    Close();
+}
+
 async::Future<FDv2SourceResult> FDv2PollingSynchronizer::Next(
     std::chrono::milliseconds timeout,
     data_model::Selector selector) {
