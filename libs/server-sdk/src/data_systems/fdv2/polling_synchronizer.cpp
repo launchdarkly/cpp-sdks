@@ -49,7 +49,6 @@ async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
 
 FDv2SourceResult FDv2PollingSynchronizer::State::HandlePollResult(
     network::HttpResult const& res) {
-    std::lock_guard lock(mutex_);
     FDv2ProtocolHandler protocol_handler;
     return HandleFDv2PollResponse(res, protocol_handler, logger_, kIdentity);
 }

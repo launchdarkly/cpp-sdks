@@ -82,7 +82,7 @@ class FDv2PollingSynchronizer final
         async::Future<bool> Delay(std::chrono::nanoseconds duration);
 
        private:
-        // TODO: Is the logger thread-safe?
+        // Logger is itself thread-safe.
         Logger logger_;
 
         // Immutable state
