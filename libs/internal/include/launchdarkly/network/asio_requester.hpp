@@ -282,7 +282,7 @@ class AsioRequester {
     }
 
     template <typename CompletionToken>
-    auto Request(HttpRequest request, CompletionToken&& token) {
+    auto Request(HttpRequest request, CompletionToken&& token) const {
         return boost::asio::async_initiate<CompletionToken, void(HttpResult)>(
             [this](auto handler, HttpRequest req) {
                 InnerRequest(
@@ -307,7 +307,7 @@ class AsioRequester {
     void InnerRequest(boost::asio::any_io_executor exec,
                       std::optional<HttpRequest> request,
                       std::function<void(HttpResult)> callback,
-                      unsigned char redirect_count) {
+                      unsigned char redirect_count) const {
         if (redirect_count > kRedirectLimit) {
             boost::asio::post(exec, [callback, request]() mutable {
                 callback(

@@ -16,16 +16,20 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     config::built::HttpProperties const& http_properties,
     data_model::Selector selector,
     std::optional<std::string> filter_key)
-    : logger_(logger),
-      request_(MakeFDv2PollRequest(endpoints,
+    : request_(MakeFDv2PollRequest(endpoints,
                                    http_properties,
                                    selector,
                                    filter_key)),
-      requester_(executor, http_properties.Tls()) {}
+      requester_(executor, http_properties.Tls()),
+      state_(std::make_shared<State>(logger)) {}
+
+FDv2PollingInitializer::~FDv2PollingInitializer() {
+    close_promise_.Resolve(std::monostate{});
+}
 
 async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
     if (!request_.Valid()) {
-        LD_LOG(logger_, LogLevel::kError)
+        LD_LOG(state_->logger, LogLevel::kError)
             << kIdentity << ": invalid polling endpoint URL";
         using ErrorInfo = FDv2SourceResult::ErrorInfo;
         return async::MakeFuture(
@@ -47,11 +51,12 @@ async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
     // Race: HTTP result (0) vs close (1).
     return async::WhenAny(http_future, close_promise_.GetFuture())
         .Then(
-            [this, http_future](std::size_t const& idx) -> FDv2SourceResult {
+            [state = state_,
+             http_future](std::size_t const& idx) -> FDv2SourceResult {
                 if (idx == 1) {
                     return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
                 }
-                return HandlePollResult(*http_future.GetResult());
+                return HandlePollResult(state, *http_future.GetResult());
             },
             async::kInlineExecutor);
 }
@@ -66,8 +71,10 @@ std::string const& FDv2PollingInitializer::Identity() const {
 }
 
 FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
+    std::shared_ptr<State> state,
     network::HttpResult const& res) {
-    return HandleFDv2PollResponse(res, protocol_handler_, logger_, kIdentity);
+    return HandleFDv2PollResponse(res, state->protocol_handler, state->logger,
+                                  kIdentity);
 }
 
 }  // namespace launchdarkly::server_side::data_systems

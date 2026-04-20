@@ -11,6 +11,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -26,9 +27,8 @@ namespace launchdarkly::server_side::data_systems {
  *   request and returns a Future that resolves when the response arrives
  *   or Close() is called.
  *   Close() may be called from any thread, concurrently with Run().
- *   Destroying this object is not safe until the ASIO thread has been
- *   joined, because the HTTP response callback posted to the executor
- *   captures member variables.
+ *   This object may be safely destroyed once no call to Run() or Close()
+ *   is in progress.
  */
 class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
    public:
@@ -39,6 +39,8 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
                            data_model::Selector selector,
                            std::optional<std::string> filter_key);
 
+    ~FDv2PollingInitializer() override;
+
     async::Future<data_interfaces::FDv2SourceResult> Run() override;
 
     void Close() override;
@@ -46,20 +48,31 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
     [[nodiscard]] std::string const& Identity() const override;
 
    private:
-    data_interfaces::FDv2SourceResult HandlePollResult(
+    // State needed by async callbacks. Shared so callbacks can safely
+    // outlive 'this'.
+    struct State {
+        Logger logger;
+        FDv2ProtocolHandler protocol_handler;
+
+        explicit State(Logger logger) : logger(std::move(logger)) {}
+    };
+
+    static data_interfaces::FDv2SourceResult HandlePollResult(
+        std::shared_ptr<State> state,
         network::HttpResult const& res);
 
     // Immutable after construction; safe to read from any thread.
-    Logger const& logger_;
     network::HttpRequest const request_;
 
-    // Mutable state accessed only from the ASIO thread (via the
-    // requester_ callback).
+    // Accessed only synchronously from Run().
     network::AsioRequester requester_;
-    FDv2ProtocolHandler protocol_handler_;
 
-    // Resolved when Close() is called, cancelling any outstanding Run().
+    // Resolved when Close() is called (or this object is destroyed),
+    // cancelling any outstanding Run().
     async::Promise<std::monostate> close_promise_;
+
+    // Shared with async callbacks.
+    std::shared_ptr<State> state_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
