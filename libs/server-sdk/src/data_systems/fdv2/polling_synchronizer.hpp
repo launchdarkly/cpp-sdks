@@ -2,15 +2,12 @@
 
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
-#include <launchdarkly/async/timer.hpp>
-#include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
-#include <atomic>
 #include <chrono>
 #include <mutex>
 #include <optional>
@@ -32,6 +29,10 @@ namespace launchdarkly::server_side::data_systems {
 class FDv2PollingSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
    public:
+    /**
+     * Constructs a synchronizer that polls at the given interval.
+     * If filter_key is present, only the specified payload filter is requested.
+     */
     FDv2PollingSynchronizer(
         boost::asio::any_io_executor const& executor,
         Logger const& logger,
@@ -59,22 +60,26 @@ class FDv2PollingSynchronizer final
               std::chrono::seconds poll_interval,
               config::built::ServiceEndpoints const& endpoints,
               config::built::HttpProperties const& http_properties,
-              std::optional<std::string> filter_key,
-              async::Future<std::monostate> closed);
+              std::optional<std::string> filter_key);
 
+        /** Issues an async HTTP poll request and returns a Future resolving
+         * with the result. */
         async::Future<network::HttpResult> Request(
             data_model::Selector const& selector) const;
 
+        /** Interprets an HTTP response as a source result. */
         data_interfaces::FDv2SourceResult HandlePollResult(
             network::HttpResult const& res);
 
+        /** Returns a Future that resolves when it is time to start the next
+         * poll. */
         async::Future<bool> CreatePollDelayFuture();
+
+        /** Records that a poll has started, for interval scheduling. */
         void RecordPollStarted();
 
-        template <typename Rep, typename Period>
-        async::Future<bool> Delay(std::chrono::duration<Rep, Period> duration) {
-            return async::Delay(executor_, duration);
-        }
+        /** Returns a Future that resolves after the given duration. */
+        async::Future<bool> Delay(std::chrono::nanoseconds duration);
 
        private:
         // TODO: Is the logger thread-safe?
@@ -86,9 +91,7 @@ class FDv2PollingSynchronizer final
         config::built::HttpProperties const http_properties_;
         std::optional<std::string> const filter_key_;
         network::AsioRequester const requester_;
-
-        // Used to construct Delay() timers. This is a thread-safe value type.
-        boost::asio::any_io_executor executor_;
+        boost::asio::any_io_executor const executor_;
 
         // Mutable state, guarded by mutex_.
         std::mutex mutex_;
@@ -96,12 +99,22 @@ class FDv2PollingSynchronizer final
         std::chrono::time_point<std::chrono::steady_clock> last_poll_start_;
     };
 
+    /**
+     * Waits for the poll interval, then delegates to DoPoll.
+     * Resolves with Shutdown if closed, or Timeout if the timeout expires
+     * first.
+     */
     static async::Future<data_interfaces::FDv2SourceResult> DoNext(
         std::shared_ptr<State> state,
         async::Future<std::monostate> closed,
         std::chrono::milliseconds timeout,
-        data_model::Selector const& selector);
+        data_model::Selector selector);
 
+    /**
+     * Issues a single HTTP poll request and returns the result.
+     * Resolves with Shutdown if closed, or Timeout if timeout_deadline passes
+     * first.
+     */
     static async::Future<data_interfaces::FDv2SourceResult> DoPoll(
         std::shared_ptr<State> state,
         async::Future<std::monostate> closed,
@@ -111,6 +124,7 @@ class FDv2PollingSynchronizer final
     // Resolved by Close(), cancelling any outstanding Next() calls.
     async::Promise<std::monostate> close_promise_;
 
+    // Shared with async callbacks.
     std::shared_ptr<State> state_;
 };
 
