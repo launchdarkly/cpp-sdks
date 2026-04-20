@@ -5,7 +5,7 @@
 #include <launchdarkly/async/promise.hpp>
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -65,7 +65,7 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
 
     // Immutable state
     network::HttpRequest const request_;
-    network::AsioRequester const requester_;
+    network::Requester const requester_;
 
     // Resolved when Close() is called (or this object is destroyed),
     // cancelling any outstanding Run().

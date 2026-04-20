@@ -3,7 +3,7 @@
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
@@ -94,7 +94,7 @@ class FDv2PollingSynchronizer final
         config::built::ServiceEndpoints const endpoints_;
         config::built::HttpProperties const http_properties_;
         std::optional<std::string> const filter_key_;
-        network::AsioRequester const requester_;
+        network::Requester const requester_;
         boost::asio::any_io_executor const executor_;
 
         // Mutable state, guarded by mutex_.

@@ -5,7 +5,7 @@
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <optional>
