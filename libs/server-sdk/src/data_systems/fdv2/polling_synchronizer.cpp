@@ -54,11 +54,13 @@ FDv2SourceResult FDv2PollingSynchronizer::State::HandlePollResult(
 }
 
 async::Future<bool> FDv2PollingSynchronizer::State::Delay(
-    std::chrono::nanoseconds duration) {
-    return async::Delay(executor_, duration);
+    std::chrono::nanoseconds duration,
+    async::CancellationToken token) {
+    return async::Delay(executor_, duration, std::move(token));
 }
 
-async::Future<bool> FDv2PollingSynchronizer::State::CreatePollDelayFuture() {
+async::Future<bool> FDv2PollingSynchronizer::State::CreatePollDelayFuture(
+    async::CancellationToken token) {
     std::lock_guard lock(mutex_);
     if (!last_poll_start_) {
         return async::MakeFuture(true);
@@ -68,7 +70,7 @@ async::Future<bool> FDv2PollingSynchronizer::State::CreatePollDelayFuture() {
     if (elapsed >= poll_interval_) {
         return async::MakeFuture(true);
     }
-    return Delay(poll_interval_ - elapsed);
+    return Delay(poll_interval_ - elapsed, std::move(token));
 }
 
 void FDv2PollingSynchronizer::State::RecordPollStarted() {
@@ -126,20 +128,22 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
             FDv2SourceResult{FDv2SourceResult::Shutdown{}});
     }
 
+    async::CancellationSource cancel;
     auto now = std::chrono::steady_clock::now();
     auto timeout_deadline = now + timeout;
-    auto timeout_future = state->Delay(timeout);
+    auto timeout_future = state->Delay(timeout, cancel.GetToken());
 
     // Figure out how much to delay before starting.
-    auto delay_future = state->CreatePollDelayFuture();
+    auto delay_future = state->CreatePollDelayFuture(cancel.GetToken());
 
     return async::WhenAny(closed, std::move(timeout_future),
                           std::move(delay_future))
         .Then(
             [state = std::move(state), closed = std::move(closed),
-             timeout_deadline,
-             selector = std::move(selector)](std::size_t const& idx) mutable
+             timeout_deadline, selector = std::move(selector),
+             cancel = std::move(cancel)](std::size_t const& idx) mutable
                 -> async::Future<FDv2SourceResult> {
+                cancel.Cancel();
                 if (idx == 0) {
                     return async::MakeFuture(
                         FDv2SourceResult{FDv2SourceResult::Shutdown{}});
@@ -166,15 +170,21 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
 
     state->RecordPollStarted();
 
+    async::CancellationSource cancel;
     auto now = std::chrono::steady_clock::now();
-    auto timeout_future = state->Delay(timeout_deadline - now);
+    auto timeout_future =
+        state->Delay(timeout_deadline - now, cancel.GetToken());
+
+    // TODO: pass cancel.GetToken() to Request() once HTTP requests support it.
     auto http_future = state->Request(selector);
 
     return async::WhenAny(std::move(closed), std::move(timeout_future),
                           http_future)
         .Then(
-            [state = std::move(state), http_future = std::move(http_future)](
-                std::size_t const& idx) -> FDv2SourceResult {
+            [state = std::move(state), http_future = std::move(http_future),
+             cancel = std::move(cancel)](
+                std::size_t const& idx) mutable -> FDv2SourceResult {
+                cancel.Cancel();
                 if (idx == 0) {
                     return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
                 }
