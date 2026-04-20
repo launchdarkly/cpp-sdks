@@ -4,7 +4,6 @@
 
 #include <launchdarkly/async/promise.hpp>
 #include <launchdarkly/data_model/selector.hpp>
-#include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/asio_requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
@@ -32,6 +31,10 @@ namespace launchdarkly::server_side::data_systems {
  */
 class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
    public:
+    /**
+     * Constructs an initializer for a single poll request.
+     * If filter_key is present, only the specified payload filter is requested.
+     */
     FDv2PollingInitializer(boost::asio::any_io_executor const& executor,
                            Logger const& logger,
                            config::built::ServiceEndpoints const& endpoints,
@@ -51,21 +54,20 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
     // State needed by async callbacks. Shared so callbacks can safely
     // outlive 'this'.
     struct State {
+        // Logger is itself thread-safe.
         Logger logger;
-        FDv2ProtocolHandler protocol_handler;
 
         explicit State(Logger logger) : logger(std::move(logger)) {}
     };
 
+    /** Interprets an HTTP response as a source result. */
     static data_interfaces::FDv2SourceResult HandlePollResult(
         std::shared_ptr<State> state,
         network::HttpResult const& res);
 
-    // Immutable after construction; safe to read from any thread.
+    // Immutable state
     network::HttpRequest const request_;
-
-    // Accessed only synchronously from Run().
-    network::AsioRequester requester_;
+    network::AsioRequester const requester_;
 
     // Resolved when Close() is called (or this object is destroyed),
     // cancelling any outstanding Run().

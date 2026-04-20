@@ -1,6 +1,7 @@
 #include "polling_initializer.hpp"
 #include "fdv2_polling_impl.hpp"
 
+#include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/network/http_requester.hpp>
 
 namespace launchdarkly::server_side::data_systems {
@@ -18,8 +19,8 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     std::optional<std::string> filter_key)
     : request_(MakeFDv2PollRequest(endpoints,
                                    http_properties,
-                                   selector,
-                                   filter_key)),
+                                   std::move(selector),
+                                   std::move(filter_key))),
       requester_(executor, http_properties.Tls()),
       state_(std::make_shared<State>(logger)) {}
 
@@ -43,16 +44,16 @@ async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
     // Promisify the callback-based HTTP request.
     auto http_promise = std::make_shared<async::Promise<network::HttpResult>>();
     auto http_future = http_promise->GetFuture();
-    requester_.Request(request_,
-                       [hp = http_promise](network::HttpResult res) mutable {
-                           hp->Resolve(std::move(res));
-                       });
+    requester_.Request(request_, [hp = std::move(http_promise)](
+                                     network::HttpResult res) mutable {
+        hp->Resolve(std::move(res));
+    });
 
     // Race: HTTP result (0) vs close (1).
     return async::WhenAny(http_future, close_promise_.GetFuture())
         .Then(
-            [state = state_,
-             http_future](std::size_t const& idx) -> FDv2SourceResult {
+            [state = state_, http_future = std::move(http_future)](
+                std::size_t const& idx) -> FDv2SourceResult {
                 if (idx == 1) {
                     return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
                 }
@@ -73,7 +74,8 @@ std::string const& FDv2PollingInitializer::Identity() const {
 FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
     std::shared_ptr<State> state,
     network::HttpResult const& res) {
-    return HandleFDv2PollResponse(res, state->protocol_handler, state->logger,
+    FDv2ProtocolHandler protocol_handler;
+    return HandleFDv2PollResponse(res, protocol_handler, state->logger,
                                   kIdentity);
 }
 
