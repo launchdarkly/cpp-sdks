@@ -75,7 +75,7 @@ FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
     std::shared_ptr<State> state,
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
-    return HandleFDv2PollResponse(res, protocol_handler, state->logger,
+    return HandleFDv2PollResponse(res, &protocol_handler, state->logger,
                                   kIdentity);
 }
 

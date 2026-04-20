@@ -50,7 +50,7 @@ async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
 FDv2SourceResult FDv2PollingSynchronizer::State::HandlePollResult(
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
-    return HandleFDv2PollResponse(res, protocol_handler, logger_, kIdentity);
+    return HandleFDv2PollResponse(res, &protocol_handler, logger_, kIdentity);
 }
 
 async::Future<bool> FDv2PollingSynchronizer::State::Delay(

@@ -55,9 +55,93 @@ network::HttpRequest MakeFDv2PollRequest(
             network::HttpRequest::BodyType{}};
 }
 
+static FDv2SourceResult ParseFDv2PollEvents(
+    boost::json::array const& events,
+    FDv2ProtocolHandler* protocol_handler) {
+    for (auto const& event_val : events) {
+        auto const* event_obj = event_val.if_object();
+        if (!event_obj) {
+            continue;
+        }
+
+        auto const* event_type_val = event_obj->if_contains("event");
+        auto const* event_data_val = event_obj->if_contains("data");
+        if (!event_type_val || !event_data_val) {
+            continue;
+        }
+
+        auto const* event_type_str = event_type_val->if_string();
+        if (!event_type_str) {
+            continue;
+        }
+
+        auto result = protocol_handler->HandleEvent(
+            std::string_view{event_type_str->data(), event_type_str->size()},
+            *event_data_val);
+
+        if (auto* changeset = std::get_if<data_model::FDv2ChangeSet>(&result)) {
+            return FDv2SourceResult{
+                FDv2SourceResult::ChangeSet{std::move(*changeset), false}};
+        }
+        if (auto* goodbye = std::get_if<Goodbye>(&result)) {
+            return FDv2SourceResult{
+                FDv2SourceResult::Goodbye{goodbye->reason, false}};
+        }
+        if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
+            if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
+                auto const& id = error->server_error.value().id;
+                std::string msg =
+                    "An issue was encountered receiving updates for "
+                    "payload '" +
+                    id.value_or("") + "' with reason: '" + error->message +
+                    "'. Automatic retry will occur.";
+                return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                    MakeError(ErrorKind::kErrorResponse, 0, std::move(msg)),
+                    false}};
+            }
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, error->message), false}};
+        }
+    }
+
+    return FDv2SourceResult{FDv2SourceResult::Interrupted{
+        MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload), false}};
+}
+
+static FDv2SourceResult ParseFDv2PollResponse(
+    std::string const& body,
+    FDv2ProtocolHandler* protocol_handler) {
+    boost::system::error_code ec;
+    auto parsed = boost::json::parse(body, ec);
+    if (ec) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody), false}};
+    }
+
+    auto const* obj = parsed.if_object();
+    if (!obj) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody), false}};
+    }
+
+    auto const* events_val = obj->if_contains("events");
+    if (!events_val) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
+    }
+
+    auto const* events_arr = events_val->if_array();
+    if (!events_arr) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
+    }
+
+    return ParseFDv2PollEvents(*events_arr, protocol_handler);
+}
+
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
-    FDv2ProtocolHandler& protocol_handler,
+    FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
     std::string_view identity) {
     if (res.IsError()) {
@@ -85,97 +169,18 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                 false}};
         }
 
-        boost::system::error_code ec;
-        auto parsed = boost::json::parse(*body, ec);
-        if (ec) {
-            LD_LOG(logger, LogLevel::kError) << kErrorParsingBody;
-            return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
-                false}};
-        }
-
-        auto const* obj = parsed.if_object();
-        if (!obj) {
-            LD_LOG(logger, LogLevel::kError) << kErrorParsingBody;
-            return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody),
-                false}};
-        }
-
-        auto const* events_val = obj->if_contains("events");
-        if (!events_val) {
-            LD_LOG(logger, LogLevel::kError) << kErrorMissingEvents;
-            return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
-                false}};
-        }
-
-        auto const* events_arr = events_val->if_array();
-        if (!events_arr) {
-            LD_LOG(logger, LogLevel::kError) << kErrorMissingEvents;
-            return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents),
-                false}};
-        }
-
-        for (auto const& event_val : *events_arr) {
-            auto const* event_obj = event_val.if_object();
-            if (!event_obj) {
-                continue;
-            }
-
-            auto const* event_type_val = event_obj->if_contains("event");
-            auto const* event_data_val = event_obj->if_contains("data");
-            if (!event_type_val || !event_data_val) {
-                continue;
-            }
-
-            auto const* event_type_str = event_type_val->if_string();
-            if (!event_type_str) {
-                continue;
-            }
-
-            auto result = protocol_handler.HandleEvent(
-                std::string_view{event_type_str->data(),
-                                 event_type_str->size()},
-                *event_data_val);
-
-            if (auto* changeset =
-                    std::get_if<data_model::FDv2ChangeSet>(&result)) {
-                return FDv2SourceResult{
-                    FDv2SourceResult::ChangeSet{std::move(*changeset), false}};
-            }
-            if (auto* goodbye = std::get_if<Goodbye>(&result)) {
-                return FDv2SourceResult{
-                    FDv2SourceResult::Goodbye{goodbye->reason, false}};
-            }
-            if (auto* error =
-                    std::get_if<FDv2ProtocolHandler::Error>(&result)) {
-                if (error->kind ==
-                    FDv2ProtocolHandler::Error::Kind::kServerError) {
-                    auto const& id = error->server_error.value().id;
-                    std::string msg =
-                        "An issue was encountered receiving updates for "
-                        "payload '" +
-                        id.value_or("") + "' with reason: '" + error->message +
-                        "'. Automatic retry will occur.";
-                    LD_LOG(logger, LogLevel::kInfo) << identity << ": " << msg;
-                    return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                        MakeError(ErrorKind::kErrorResponse, 0, std::move(msg)),
-                        false}};
-                }
+        auto result = ParseFDv2PollResponse(*body, protocol_handler);
+        if (auto* interrupted =
+                std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
+            if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {
+                LD_LOG(logger, LogLevel::kInfo)
+                    << identity << ": " << interrupted->error.Message();
+            } else {
                 LD_LOG(logger, LogLevel::kError)
-                    << identity << ": " << error->message;
-                return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, error->message),
-                    false}};
+                    << identity << ": " << interrupted->error.Message();
             }
         }
-
-        LD_LOG(logger, LogLevel::kError) << kErrorIncompletePayload;
-        return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload),
-            false}};
+        return result;
     }
 
     if (network::IsRecoverableStatus(res.Status())) {

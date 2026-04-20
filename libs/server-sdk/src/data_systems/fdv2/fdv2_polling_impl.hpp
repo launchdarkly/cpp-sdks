@@ -26,7 +26,7 @@ network::HttpRequest MakeFDv2PollRequest(
 // to identify the caller (e.g. "FDv2 polling initializer").
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
-    FDv2ProtocolHandler& protocol_handler,
+    FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
     std::string_view identity);
 
