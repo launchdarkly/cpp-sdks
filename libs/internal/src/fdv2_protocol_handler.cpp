@@ -120,6 +120,10 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
     }
     auto const& intent = **result;
     if (intent.payloads.empty()) {
+        // The protocol requires exactly one payload per server-intent, so
+        // an empty payloads array is a spec violation. Reset to avoid
+        // leaking accumulated state from a prior incomplete transfer.
+        Reset();
         return std::monostate{};
     }
     // The protocol defines exactly one payload per intent.
@@ -242,6 +246,8 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleGoodbye(
     auto result =
         boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
             data);
+    // Parse failures are intentionally ignored: the caller should rotate
+    // sources regardless of whether the reason field is readable.
     if (!result) {
         return Goodbye{std::nullopt};
     }
