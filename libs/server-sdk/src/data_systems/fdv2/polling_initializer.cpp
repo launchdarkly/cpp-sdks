@@ -45,8 +45,8 @@ async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
     auto http_promise = std::make_shared<async::Promise<network::HttpResult>>();
     auto http_future = http_promise->GetFuture();
     requester_.Request(request_, [hp = std::move(http_promise)](
-                                     network::HttpResult res) mutable {
-        hp->Resolve(std::move(res));
+                                     network::HttpResult const& res) mutable {
+        hp->Resolve(res);
     });
 
     // Race: HTTP result (0) vs close (1).
@@ -75,7 +75,7 @@ FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
     std::shared_ptr<State> state,
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
-    return HandleFDv2PollResponse(res, protocol_handler, state->logger,
+    return HandleFDv2PollResponse(res, &protocol_handler, state->logger,
                                   kIdentity);
 }
 

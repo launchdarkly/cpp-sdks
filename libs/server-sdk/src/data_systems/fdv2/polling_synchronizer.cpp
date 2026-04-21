@@ -36,13 +36,13 @@ async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
     auto request = MakeFDv2PollRequest(endpoints_, http_properties_, selector,
                                        filter_key_);
 
-    // Promise must be in a shared_ptr because AsioRequester requires callbacks
+    // Promise must be in a shared_ptr because Requester requires callbacks
     // to be copy-constructible (stored in std::function).
     auto promise = std::make_shared<async::Promise<network::HttpResult>>();
     auto future = promise->GetFuture();
     requester_.Request(request, [promise = std::move(promise)](
-                                    network::HttpResult res) mutable {
-        promise->Resolve(std::move(res));
+                                    network::HttpResult const& res) mutable {
+        promise->Resolve(res);
     });
     return future;
 }
@@ -50,7 +50,7 @@ async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
 FDv2SourceResult FDv2PollingSynchronizer::State::HandlePollResult(
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
-    return HandleFDv2PollResponse(res, protocol_handler, logger_, kIdentity);
+    return HandleFDv2PollResponse(res, &protocol_handler, logger_, kIdentity);
 }
 
 async::Future<bool> FDv2PollingSynchronizer::State::Delay(

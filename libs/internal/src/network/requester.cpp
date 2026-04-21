@@ -10,37 +10,40 @@ namespace launchdarkly::network {
 
 // Abstract interface for the implementation
 class IRequesterImpl {
-public:
+   public:
     virtual ~IRequesterImpl() = default;
-    virtual void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) = 0;
+    virtual void Request(HttpRequest request,
+                         std::function<void(HttpResult const&)> cb) const = 0;
 };
 
 #ifdef LD_CURL_NETWORKING
 // CURL-based implementation
 class CurlRequesterImpl : public IRequesterImpl {
-public:
+   public:
     CurlRequesterImpl(net::any_io_executor ctx, TlsOptions const& tls_options)
         : requester_(ctx, tls_options) {}
 
-    void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) override {
+    void Request(HttpRequest request,
+                 std::function<void(HttpResult const&)> cb) const override {
         requester_.Request(std::move(request), std::move(cb));
     }
 
-private:
+   private:
     CurlRequester requester_;
 };
 #else
 // Boost.Beast-based implementation
 class AsioRequesterImpl : public IRequesterImpl {
-public:
+   public:
     AsioRequesterImpl(net::any_io_executor ctx, TlsOptions const& tls_options)
         : requester_(ctx, tls_options) {}
 
-    void Request(HttpRequest request, std::function<void(const HttpResult&)> cb) override {
+    void Request(HttpRequest request,
+                 std::function<void(HttpResult const&)> cb) const override {
         requester_.Request(std::move(request), std::move(cb));
     }
 
-private:
+   private:
     AsioRequester requester_;
 };
 #endif
@@ -59,8 +62,9 @@ Requester::~Requester() = default;
 Requester::Requester(Requester&&) noexcept = default;
 Requester& Requester::operator=(Requester&&) noexcept = default;
 
-void Requester::Request(HttpRequest request, std::function<void(const HttpResult&)> cb) {
+void Requester::Request(HttpRequest request,
+                        std::function<void(HttpResult const&)> cb) const {
     impl_->Request(std::move(request), std::move(cb));
 }
 
-} // namespace launchdarkly::network
+}  // namespace launchdarkly::network

@@ -5,7 +5,7 @@
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
-#include <launchdarkly/network/asio_requester.hpp>
+#include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
 #include <optional>
@@ -26,7 +26,7 @@ network::HttpRequest MakeFDv2PollRequest(
 // to identify the caller (e.g. "FDv2 polling initializer").
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
-    FDv2ProtocolHandler& protocol_handler,
+    FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
     std::string_view identity);
 
