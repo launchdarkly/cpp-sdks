@@ -29,27 +29,42 @@ Future<bool> Delay(boost::asio::any_io_executor executor,
     Promise<bool> promise;
     auto future = promise.GetFuture();
 
-    // cancel() is dispatched through post() rather than called directly to
-    // satisfy ASIO's thread-safety requirement: steady_timer operations must
-    // not be called concurrently from multiple threads.
-    //
-    // The callback is registered after async_wait is in flight so that an
-    // already-cancelled token cancels the in-progress operation rather than
-    // firing before async_wait has been called.
-    //
-    // The CancellationCallback is captured by the async_wait handler so its
-    // lifetime matches the timer's; it is released (and deregistered) when
-    // the handler fires.
-    auto cb = std::make_shared<CancellationCallback>(
-        std::move(token), [timer, executor] {
-            boost::asio::post(executor, [timer] { timer->cancel(); });
-        });
+    // This code is tricky because there are a few constraints that conflict.
+    // 1. We need to make sure timer->cancel isn't called _before_
+    //    timer->async_wait, or else it'll just be ignored.
+    // 2. The cancellation_callback has to be created _before_
+    //    timer->async_wait, because it has to be captured by async_wait's
+    //    handler, because it is an RAII type, and once it is destroyed, it
+    //    deregisters itself. It has to stay alive as long as the timer needs to
+    //    be cancellable.
 
-    timer->async_wait([p = std::move(promise), timer,
-                       cb](boost::system::error_code code) mutable {
-        cb.reset();
+    Promise<std::monostate> timer_started_promise;
+    Future<std::monostate> timer_started_future =
+        timer_started_promise.GetFuture();
+
+    auto cancel_timer = [timer, executor,
+                         timer_started_future =
+                             std::move(timer_started_future)]() mutable {
+        timer_started_future.Then(
+            [timer](auto const&) -> std::monostate {
+                timer->cancel();
+                return {};
+            },
+            [executor](Continuation<void()> f) {
+                boost::asio::post(executor, f);
+            });
+    };
+
+    auto cancellation_callback =
+        std::make_shared<CancellationCallback>(std::move(token), cancel_timer);
+
+    timer->async_wait([p = std::move(promise), timer, cancellation_callback](
+                          boost::system::error_code code) mutable {
+        cancellation_callback.reset();
         p.Resolve(code != boost::asio::error::operation_aborted);
     });
+
+    timer_started_promise.Resolve({});
 
     return future;
 }
