@@ -437,6 +437,10 @@ class Future {
     std::shared_ptr<PromiseInternal<T>> internal_;
 };
 
+// An executor that runs work immediately on the calling thread. Pass this
+// to Then() when no specific thread is required for the continuation.
+inline auto const kInlineExecutor = [](Continuation<void()> f) { f(); };
+
 // WhenAll takes a variadic list of Futures (each with potentially different
 // value types) and returns a Future<std::monostate> that resolves once all
 // of the input futures have resolved. The result carries no value; callers
@@ -526,6 +530,18 @@ Future<std::size_t> WhenAny(Future<Ts>... futures) {
     (attach(futures), ...);
 
     return result;
+}
+
+// MakeFuture returns an already-resolved Future<T>. Useful in flattening Then
+// continuations where some branches produce a result immediately and others
+// return a Future, requiring a uniform Future<T> return type across all
+// branches.
+template <typename T>
+Future<T> MakeFuture(T value) {
+    Promise<T> p;
+    auto f = p.GetFuture();
+    p.Resolve(std::move(value));
+    return f;
 }
 
 }  // namespace launchdarkly::async

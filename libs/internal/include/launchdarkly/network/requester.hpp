@@ -1,10 +1,10 @@
 #pragma once
 
-#include "http_requester.hpp"
-#include <launchdarkly/config/shared/built/http_properties.hpp>
-#include <functional>
-#include <memory>
 #include <boost/asio/any_io_executor.hpp>
+#include <functional>
+#include <launchdarkly/config/shared/built/http_properties.hpp>
+#include <memory>
+#include "http_requester.hpp"
 
 namespace launchdarkly::network {
 
@@ -15,30 +15,32 @@ using TlsOptions = config::shared::built::TlsOptions;
 class IRequesterImpl;
 
 /**
- * Requester provides HTTP request functionality using either CURL or Boost.Beast
- * depending on the LD_CURL_NETWORKING compile-time flag.
+ * Requester provides HTTP request functionality using either CURL or
+ * Boost.Beast depending on the LD_CURL_NETWORKING compile-time flag.
  *
  * When LD_CURL_NETWORKING is ON: Uses CurlRequester (CURL-based implementation)
- * When LD_CURL_NETWORKING is OFF: Uses AsioRequester (Boost.Beast-based implementation)
+ * When LD_CURL_NETWORKING is OFF: Uses AsioRequester (Boost.Beast-based
+ * implementation)
  *
- * The implementation choice is made at library compile-time and hidden from users
- * via the pimpl idiom to avoid ABI issues.
+ * The implementation choice is made at library compile-time and hidden from
+ * users via the pimpl idiom to avoid ABI issues.
  */
 class Requester {
-public:
+   public:
     Requester(net::any_io_executor ctx, TlsOptions const& tls_options);
     ~Requester();
 
     // Move-only type
     Requester(Requester&&) noexcept;
     Requester& operator=(Requester&&) noexcept;
-    Requester(const Requester&) = delete;
-    Requester& operator=(const Requester&) = delete;
+    Requester(Requester const&) = delete;
+    Requester& operator=(Requester const&) = delete;
 
-    void Request(HttpRequest request, std::function<void(const HttpResult&)> cb);
+    void Request(HttpRequest request,
+                 std::function<void(HttpResult const&)> cb) const;
 
-private:
+   private:
     std::unique_ptr<IRequesterImpl> impl_;
 };
 
-} // namespace launchdarkly::network
+}  // namespace launchdarkly::network
