@@ -20,11 +20,74 @@ jobs:
       package-server-otel-released: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
-      # https://github.com/googleapis/release-please-action/releases/tag/v4.3.0
-      - uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c
+      # Create any releases first, then create tags, and then optionally create any new PRs.
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          skip-github-pull-request: true
+
+      # Need the repository content to be able to create and push tags.
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        if: >-
+          steps.release.outputs['libs/client-sdk--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk-redis-source--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk-otel--release_created'] == 'true'
+
+      - name: Create release tags
+        if: >-
+          steps.release.outputs['libs/client-sdk--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk-redis-source--release_created'] == 'true' ||
+          steps.release.outputs['libs/server-sdk-otel--release_created'] == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLIENT_TAG: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
+          SERVER_TAG: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
+          SERVER_REDIS_TAG: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
+          SERVER_OTEL_TAG: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
+          CLIENT_RELEASED: ${{ steps.release.outputs['libs/client-sdk--release_created'] }}
+          SERVER_RELEASED: ${{ steps.release.outputs['libs/server-sdk--release_created'] }}
+          SERVER_REDIS_RELEASED: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
+          SERVER_OTEL_RELEASED: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          for pair in \
+            "${CLIENT_RELEASED}:${CLIENT_TAG}" \
+            "${SERVER_RELEASED}:${SERVER_TAG}" \
+            "${SERVER_REDIS_RELEASED}:${SERVER_REDIS_TAG}" \
+            "${SERVER_OTEL_RELEASED}:${SERVER_OTEL_TAG}"; do
+
+            RELEASED="${pair%%:*}"
+            TAG="${pair#*:}"
+
+            if [ "${RELEASED}" != "true" ] || [ -z "${TAG}" ]; then
+              continue
+            fi
+
+            if gh api "repos/${{ github.repository }}/git/ref/tags/${TAG}" >/dev/null 2>&1; then
+              echo "Tag ${TAG} already exists, skipping creation."
+            else
+              echo "Creating tag ${TAG}."
+              git tag "${TAG}"
+              git push origin "${TAG}"
+            fi
+          done
+
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+        if: >-
+          steps.release.outputs['libs/client-sdk--release_created'] != 'true' &&
+          steps.release.outputs['libs/server-sdk--release_created'] != 'true' &&
+          steps.release.outputs['libs/server-sdk-redis-source--release_created'] != 'true' &&
+          steps.release.outputs['libs/server-sdk-otel--release_created'] != 'true'
+        id: release-prs
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          skip-github-release: true
 
   release-client:
     strategy:
@@ -34,10 +97,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-client.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-client.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -50,13 +113,35 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-client.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-client.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-client.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-client-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-client.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -69,6 +154,17 @@ jobs:
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-client.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-server:
     strategy:
@@ -78,10 +174,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-server.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -94,13 +190,35 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-server-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-server.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -113,6 +231,17 @@ jobs:
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-server-redis:
     strategy:
@@ -122,10 +251,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-server-redis.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server-redis.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -138,13 +267,35 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/server-sdk-redis-source'
           sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server-redis.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server-redis.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server-redis.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
   release-server-redis-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-server-redis.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
@@ -157,93 +308,78 @@ jobs:
           sdk_path: 'libs/server-sdk-redis-source'
           sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server-redis.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      - name: Attest build provenance
+        uses: actions/attest@v4
+        with:
+          subject-checksums: checksums.txt
 
-  release-client-provenance:
-    needs: [ 'release-please', 'release-client' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
+  publish-release-client:
+    needs: ['release-please', 'release-client', 'release-client-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-client-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
-      provenance-name: ${{ format('{0}-client-multiple-provenance.intoto.jsonl', matrix.os) }}
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-client-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-client-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-client-mac-arm64' ]
+  publish-release-server:
+    needs: ['release-please', 'release-server', 'release-server-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-client-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
-      provenance-name: 'macos-arm64-client-multiple-provenance.intoto.jsonl'
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-server-provenance:
-    needs: [ 'release-please', 'release-server' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
+  publish-release-server-redis:
+    needs: ['release-please', 'release-server-redis', 'release-server-redis-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-redis-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
-      provenance-name: ${{ format('{0}-server-multiple-provenance.intoto.jsonl', matrix.os) }}
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-redis-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-server-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-server-mac-arm64' ]
+  publish-release-server-otel:
+    needs: ['release-please']
+    if: ${{ needs.release-please.outputs.package-server-otel-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
-      provenance-name: 'macos-arm64-server-multiple-provenance.intoto.jsonl'
-
-  release-server-redis-provenance:
-    needs: [ 'release-please', 'release-server-redis' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-redis.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
-      provenance-name: ${{ format('{0}-server-redis-multiple-provenance.intoto.jsonl', matrix.os) }}
-
-  release-server-redis-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-server-redis-mac-arm64' ]
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-redis-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
-      provenance-name: 'macos-arm64-server-redis-multiple-provenance.intoto.jsonl'
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-otel-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
