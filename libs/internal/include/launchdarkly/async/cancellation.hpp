@@ -13,20 +13,6 @@
 // owns the ability to trigger cancellation, lightweight tokens (derived from
 // the source) can be freely passed around, and CancellationCallback provides
 // RAII registration of a callback tied to a token.
-//
-// Significant differences from the C++20 design:
-//
-//   1. No stop_possible() semantics. C++20's stop_source / stop_token track
-//      whether any stop_source for the associated state is still alive; if not,
-//      stop_possible() returns false and stop_callback constructors become
-//      no-ops. CancellationSource has no such tracking: tokens and callbacks
-//      behave the same regardless of whether any source is still alive.
-//
-//   2. Heap-allocated callbacks. C++20's stop_callback<F> stores F inline in
-//      the callback object to avoid heap allocation. CancellationCallback
-//      stores its callable inside a Continuation<void()>, which heap-allocates
-//      via unique_ptr. This avoids a template parameter on CancellationCallback
-//      at the cost of one allocation per registration.
 
 namespace launchdarkly::async {
 
@@ -230,11 +216,6 @@ inline CancellationToken CancellationSource::GetToken() const {
 //     by the callback.
 //   - CancellationCallback is non-copyable and non-movable, matching C++20's
 //     stop_callback.
-//
-// Unlike C++20's stop_callback<F>, CancellationCallback is not a template:
-// the callable is accepted as any type that converts to Continuation<void()>,
-// and stored heap-allocated inside one. This avoids a template parameter at
-// the cost of one allocation per registration.
 class CancellationCallback {
    public:
     CancellationCallback(CancellationToken token, Continuation<void()> cb)
