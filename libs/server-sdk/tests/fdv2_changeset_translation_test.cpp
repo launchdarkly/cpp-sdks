@@ -170,7 +170,7 @@ TEST(FDv2ChangeSetTranslationTest, NullObjectInPutFlagIsSkipped) {
 
     FDv2ChangeSet raw{ChangeSetType::kFull,
                       {FDv2Change{FDv2Change::ChangeType::kPut, "flag",
-                                  "my-flag", 1, boost::json::value{nullptr}}},
+                                  "my-flag", 1, boost::json::value(nullptr)}},
                       Selector{}};
     auto result = TranslateChangeSet(raw, logger);
 
