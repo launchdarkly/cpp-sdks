@@ -2,6 +2,7 @@
 
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
+#include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
@@ -76,14 +77,19 @@ class FDv2PollingSynchronizer final
             network::HttpResult const& res);
 
         /** Returns a Future that resolves when it is time to start the next
-         * poll. */
-        async::Future<bool> CreatePollDelayFuture();
+         * poll. If a token is provided and cancelled before the delay elapses,
+         * the future resolves early with false. */
+        async::Future<bool> CreatePollDelayFuture(
+            async::CancellationToken token = {});
 
         /** Records that a poll has started, for interval scheduling. */
         void RecordPollStarted();
 
-        /** Returns a Future that resolves after the given duration. */
-        async::Future<bool> Delay(std::chrono::nanoseconds duration);
+        /** Returns a Future that resolves after the given duration. If a token
+         * is provided and cancelled before the duration elapses, the future
+         * resolves early with false. */
+        async::Future<bool> Delay(std::chrono::nanoseconds duration,
+                                  async::CancellationToken token = {});
 
        private:
         // Logger is itself thread-safe.
