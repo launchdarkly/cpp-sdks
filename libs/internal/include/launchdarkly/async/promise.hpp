@@ -54,7 +54,9 @@ class Continuation<R(Args...)> {
     // function pointer, or other callable; it need not be copy-constructible.
     // F&& is a forwarding reference: accepts any callable by move or copy,
     // then moves it into Impl<F> so Continuation itself owns the callable.
-    template <typename F>
+    template <typename F,
+              typename = std::enable_if_t<
+                  !std::is_same_v<std::decay_t<F>, Continuation>>>
     Continuation(F&& f)
         : impl_(std::make_unique<Impl<std::decay_t<F>>>(std::forward<F>(f))) {}
     Continuation(Continuation&&) = default;
