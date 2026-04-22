@@ -1,11 +1,14 @@
 #include <gtest/gtest.h>
 
+#include <boost/asio/io_context.hpp>
+
 #include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <thread>
 
 #include "launchdarkly/async/cancellation.hpp"
+#include "launchdarkly/async/timer.hpp"
 
 using namespace launchdarkly::async;
 
@@ -213,4 +216,26 @@ TEST(Cancellation, SameThreadDeregister_NoDeadlock) {
     cb2 = std::make_unique<CancellationCallback>(token, [] {});
 
     source.Cancel();  // cb1 fires, destroys cb2 from the same thread
+}
+
+TEST(Cancellation, TimerCancelDoesNotRecurseInContinuationConstructor) {
+    boost::asio::io_context ioc;
+    auto work = boost::asio::make_work_guard(ioc);
+    std::thread t([&] { ioc.run(); });
+
+    CancellationSource cancel;
+
+    auto future =
+        Delay(ioc.get_executor(), std::chrono::seconds(60), cancel.GetToken());
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    cancel.Cancel();
+
+    auto const result = future.WaitForResult(std::chrono::seconds(5));
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(*result);
+
+    work.reset();
+    t.join();
 }

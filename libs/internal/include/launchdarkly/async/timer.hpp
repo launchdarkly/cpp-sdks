@@ -51,7 +51,7 @@ Future<bool> Delay(boost::asio::any_io_executor executor,
                 return {};
             },
             [executor](Continuation<void()> f) {
-                boost::asio::post(executor, f);
+                boost::asio::post(executor, std::move(f));
             });
     };
 
