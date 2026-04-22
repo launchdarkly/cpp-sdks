@@ -1,4 +1,5 @@
 #include "fdv2_polling_impl.hpp"
+#include "fdv2_changeset_translator.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
@@ -17,6 +18,8 @@ static char const* const kErrorMissingEvents =
     "FDv2 polling response missing 'events' array";
 static char const* const kErrorIncompletePayload =
     "FDv2 polling response did not contain a complete payload";
+static char const* const kErrorTranslation =
+    "FDv2 polling response could not be translated";
 
 using data_interfaces::FDv2SourceResult;
 using ErrorInfo = FDv2SourceResult::ErrorInfo;
@@ -57,7 +60,9 @@ network::HttpRequest MakeFDv2PollRequest(
 
 static FDv2SourceResult ParseFDv2PollEvents(
     boost::json::array const& events,
-    FDv2ProtocolHandler* protocol_handler) {
+    FDv2ProtocolHandler* protocol_handler,
+    FDv2ChangeSetTranslator const& translator,
+    Logger const& logger) {
     for (auto const& event_val : events) {
         auto const* event_obj = event_val.if_object();
         if (!event_obj) {
@@ -79,9 +84,16 @@ static FDv2SourceResult ParseFDv2PollEvents(
             std::string_view{event_type_str->data(), event_type_str->size()},
             *event_data_val);
 
-        if (auto* changeset = std::get_if<data_model::FDv2ChangeSet>(&result)) {
+        if (auto* change_set =
+                std::get_if<data_model::FDv2ChangeSet>(&result)) {
+            auto typed = translator.Translate(*change_set, logger);
+            if (!typed) {
+                return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                    MakeError(ErrorKind::kInvalidData, 0, kErrorTranslation),
+                    false}};
+            }
             return FDv2SourceResult{
-                FDv2SourceResult::ChangeSet{std::move(*changeset), false}};
+                FDv2SourceResult::ChangeSet{std::move(*typed), false}};
         }
         if (auto* goodbye = std::get_if<Goodbye>(&result)) {
             return FDv2SourceResult{
@@ -110,7 +122,9 @@ static FDv2SourceResult ParseFDv2PollEvents(
 
 static FDv2SourceResult ParseFDv2PollResponse(
     std::string const& body,
-    FDv2ProtocolHandler* protocol_handler) {
+    FDv2ProtocolHandler* protocol_handler,
+    FDv2ChangeSetTranslator const& translator,
+    Logger const& logger) {
     boost::system::error_code ec;
     auto parsed = boost::json::parse(body, ec);
     if (ec) {
@@ -136,7 +150,8 @@ static FDv2SourceResult ParseFDv2PollResponse(
             MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
     }
 
-    return ParseFDv2PollEvents(*events_arr, protocol_handler);
+    return ParseFDv2PollEvents(*events_arr, protocol_handler, translator,
+                               logger);
 }
 
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
@@ -155,8 +170,8 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
 
     if (res.Status() == 304) {
         return FDv2SourceResult{FDv2SourceResult::ChangeSet{
-            data_model::FDv2ChangeSet{
-                data_model::FDv2ChangeSet::Type::kNone, {}, {}},
+            data_model::ChangeSet<data_interfaces::ChangeSetData>{
+                data_model::ChangeSetType::kNone, data_model::Selector{}, {}},
             false}};
     }
 
@@ -169,7 +184,9 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                 false}};
         }
 
-        auto result = ParseFDv2PollResponse(*body, protocol_handler);
+        FDv2ChangeSetTranslator translator;
+        auto result =
+            ParseFDv2PollResponse(*body, protocol_handler, translator, logger);
         if (auto* interrupted =
                 std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
             if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {

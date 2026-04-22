@@ -1,10 +1,14 @@
 #include <gtest/gtest.h>
 
 #include <data_components/memory_store/memory_store.hpp>
+#include <data_interfaces/item_change.hpp>
+
+#include <launchdarkly/data_model/change_set.hpp>
 #include <launchdarkly/data_model/fdv2_change.hpp>
 
 using namespace launchdarkly::data_model;
 using namespace launchdarkly::server_side::data_components;
+using namespace launchdarkly::server_side::data_interfaces;
 
 // ---------------------------------------------------------------------------
 // kNone tests
@@ -27,7 +31,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_IsNoOp) {
             {"segA", SegmentDescriptor(seg_a)}},
     });
 
-    store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kNone, {}, Selector{}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, Selector{}, {}});
 
     auto fetched_flag = store.GetFlag("flagA");
     ASSERT_TRUE(fetched_flag);
@@ -39,7 +43,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_IsNoOp) {
 
 TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
     MemoryStore store;
-    store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kNone, {}, Selector{}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, Selector{}, {}});
     EXPECT_FALSE(store.Initialized());
 }
 
@@ -50,7 +54,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
 TEST(MemoryStoreApplyTest, ApplyFull_SetsInitialized) {
     MemoryStore store;
     ASSERT_FALSE(store.Initialized());
-    store.Apply(FDv2ChangeSet{FDv2ChangeSet::Type::kFull, {}, Selector{}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kFull, Selector{}, {}});
     EXPECT_TRUE(store.Initialized());
 }
 
@@ -64,11 +68,11 @@ TEST(MemoryStoreApplyTest, ApplyFull_StoresItems) {
     seg_a.version = 1;
     seg_a.key = "segA";
 
-    store.Apply(FDv2ChangeSet{
-        FDv2ChangeSet::Type::kFull,
-        std::vector<FDv2Change>{{"flagA", FlagDescriptor(flag_a)},
-                                {"segA", SegmentDescriptor(seg_a)}},
+    store.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kFull,
         Selector{},
+        ChangeSetData{ItemChange{"flagA", FlagDescriptor(flag_a)},
+                      ItemChange{"segA", SegmentDescriptor(seg_a)}},
     });
 
     auto fetched_flag = store.GetFlag("flagA");
@@ -114,11 +118,11 @@ TEST(MemoryStoreApplyTest, ApplyFull_ClearsExistingItems) {
     seg_b.version = 1;
     seg_b.key = "segB";
 
-    store.Apply(FDv2ChangeSet{
-        FDv2ChangeSet::Type::kFull,
-        std::vector<FDv2Change>{{"flagC", FlagDescriptor(flag_c)},
-                                {"segB", SegmentDescriptor(seg_b)}},
+    store.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kFull,
         Selector{},
+        ChangeSetData{ItemChange{"flagC", FlagDescriptor(flag_c)},
+                      ItemChange{"segB", SegmentDescriptor(seg_b)}},
     });
 
     EXPECT_FALSE(store.GetFlag("flagA"));
@@ -157,11 +161,11 @@ TEST(MemoryStoreApplyTest, ApplyPartial_AppliesItems) {
     seg_a_new.version = 6;
     seg_a_new.key = "segA";
 
-    store.Apply(FDv2ChangeSet{
-        FDv2ChangeSet::Type::kPartial,
-        std::vector<FDv2Change>{{"flagA", FlagDescriptor(flag_a_new)},
-                                {"segA", SegmentDescriptor(seg_a_new)}},
+    store.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kPartial,
         Selector{},
+        ChangeSetData{ItemChange{"flagA", FlagDescriptor(flag_a_new)},
+                      ItemChange{"segA", SegmentDescriptor(seg_a_new)}},
     });
 
     ASSERT_TRUE(store.GetFlag("flagA"));
@@ -205,11 +209,11 @@ TEST(MemoryStoreApplyTest, ApplyPartial_PreservesUnchangedItems) {
     seg_b_new.version = 2;
     seg_b_new.key = "segB";
 
-    store.Apply(FDv2ChangeSet{
-        FDv2ChangeSet::Type::kPartial,
-        std::vector<FDv2Change>{{"flagB", FlagDescriptor(flag_b_new)},
-                                {"segB", SegmentDescriptor(seg_b_new)}},
+    store.Apply(ChangeSet<ChangeSetData>{
+        ChangeSetType::kPartial,
         Selector{},
+        ChangeSetData{ItemChange{"flagB", FlagDescriptor(flag_b_new)},
+                      ItemChange{"segB", SegmentDescriptor(seg_b_new)}},
     });
 
     ASSERT_TRUE(store.GetFlag("flagA"));
