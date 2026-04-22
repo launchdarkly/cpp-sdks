@@ -84,7 +84,7 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
     Logger const& logger) {
     if (change_set.type == ChangeSetType::kNone) {
         return ChangeSet<ChangeSetData>{
-            change_set.type, change_set.selector, {}};
+            change_set.type, {}, change_set.selector};
     }
 
     ChangeSetData changes;
@@ -112,8 +112,8 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
         }
     }
 
-    return ChangeSet<ChangeSetData>{change_set.type, change_set.selector,
-                                    std::move(changes)};
+    return ChangeSet<ChangeSetData>{change_set.type, std::move(changes),
+                                    change_set.selector};
 }
 
 }  // namespace launchdarkly::server_side::data_systems

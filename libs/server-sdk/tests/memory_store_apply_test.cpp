@@ -31,7 +31,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_IsNoOp) {
             {"segA", SegmentDescriptor(seg_a)}},
     });
 
-    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, Selector{}, {}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, {}, Selector{}});
 
     auto fetched_flag = store.GetFlag("flagA");
     ASSERT_TRUE(fetched_flag);
@@ -43,7 +43,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_IsNoOp) {
 
 TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
     MemoryStore store;
-    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, Selector{}, {}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kNone, {}, Selector{}});
     EXPECT_FALSE(store.Initialized());
 }
 
@@ -54,7 +54,7 @@ TEST(MemoryStoreApplyTest, ApplyNone_DoesNotInitialize) {
 TEST(MemoryStoreApplyTest, ApplyFull_SetsInitialized) {
     MemoryStore store;
     ASSERT_FALSE(store.Initialized());
-    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kFull, Selector{}, {}});
+    store.Apply(ChangeSet<ChangeSetData>{ChangeSetType::kFull, {}, Selector{}});
     EXPECT_TRUE(store.Initialized());
 }
 
@@ -70,9 +70,9 @@ TEST(MemoryStoreApplyTest, ApplyFull_StoresItems) {
 
     store.Apply(ChangeSet<ChangeSetData>{
         ChangeSetType::kFull,
-        Selector{},
         ChangeSetData{ItemChange{"flagA", FlagDescriptor(flag_a)},
                       ItemChange{"segA", SegmentDescriptor(seg_a)}},
+        Selector{},
     });
 
     auto fetched_flag = store.GetFlag("flagA");
@@ -120,9 +120,9 @@ TEST(MemoryStoreApplyTest, ApplyFull_ClearsExistingItems) {
 
     store.Apply(ChangeSet<ChangeSetData>{
         ChangeSetType::kFull,
-        Selector{},
         ChangeSetData{ItemChange{"flagC", FlagDescriptor(flag_c)},
                       ItemChange{"segB", SegmentDescriptor(seg_b)}},
+        Selector{},
     });
 
     EXPECT_FALSE(store.GetFlag("flagA"));
@@ -163,9 +163,9 @@ TEST(MemoryStoreApplyTest, ApplyPartial_AppliesItems) {
 
     store.Apply(ChangeSet<ChangeSetData>{
         ChangeSetType::kPartial,
-        Selector{},
         ChangeSetData{ItemChange{"flagA", FlagDescriptor(flag_a_new)},
                       ItemChange{"segA", SegmentDescriptor(seg_a_new)}},
+        Selector{},
     });
 
     ASSERT_TRUE(store.GetFlag("flagA"));
@@ -211,9 +211,9 @@ TEST(MemoryStoreApplyTest, ApplyPartial_PreservesUnchangedItems) {
 
     store.Apply(ChangeSet<ChangeSetData>{
         ChangeSetType::kPartial,
-        Selector{},
         ChangeSetData{ItemChange{"flagB", FlagDescriptor(flag_b_new)},
                       ItemChange{"segB", SegmentDescriptor(seg_b_new)}},
+        Selector{},
     });
 
     ASSERT_TRUE(store.GetFlag("flagA"));

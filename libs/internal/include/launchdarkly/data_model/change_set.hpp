@@ -13,8 +13,8 @@ enum class ChangeSetType {
 template <typename T>
 struct ChangeSet {
     ChangeSetType type;
-    Selector selector;
     T data;
+    Selector selector;
 };
 
 }  // namespace launchdarkly::data_model

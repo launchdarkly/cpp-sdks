@@ -168,7 +168,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     if (res.Status() == 304) {
         return FDv2SourceResult{FDv2SourceResult::ChangeSet{
             data_model::ChangeSet<data_interfaces::ChangeSetData>{
-                data_model::ChangeSetType::kNone, data_model::Selector{}, {}},
+                data_model::ChangeSetType::kNone, {}, data_model::Selector{}},
             false}};
     }
 
