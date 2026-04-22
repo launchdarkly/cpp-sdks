@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <data_systems/fdv2/fdv2_changeset_translator.hpp>
+#include <data_systems/fdv2/fdv2_changeset_translation.hpp>
 
 #include <launchdarkly/data_model/change_set.hpp>
 #include <launchdarkly/data_model/fdv2_change.hpp>
@@ -34,12 +34,11 @@ static Logger MakeNullLogger() {
 // kNone changeset
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, NoneChangeSetProducesEmptyTypedChangeSet) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, NoneChangeSetProducesEmptyTypedChangeSet) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{ChangeSetType::kNone, {}, Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(result->type, ChangeSetType::kNone);
@@ -50,15 +49,14 @@ TEST(FDv2ChangeSetTranslatorTest, NoneChangeSetProducesEmptyTypedChangeSet) {
 // Known kinds — put
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, PutFlagProducesTypedFlag) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, PutFlagProducesTypedFlag) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{ChangeSetType::kFull,
                       {FDv2Change{FDv2Change::ChangeType::kPut, "flag",
                                   "my-flag", 1, boost::json::parse(kFlagJson)}},
                       Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
@@ -67,8 +65,7 @@ TEST(FDv2ChangeSetTranslatorTest, PutFlagProducesTypedFlag) {
         std::holds_alternative<ItemDescriptor<Flag>>(result->data[0].object));
 }
 
-TEST(FDv2ChangeSetTranslatorTest, PutSegmentProducesTypedSegment) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, PutSegmentProducesTypedSegment) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
@@ -76,7 +73,7 @@ TEST(FDv2ChangeSetTranslatorTest, PutSegmentProducesTypedSegment) {
         {FDv2Change{FDv2Change::ChangeType::kPut, "segment", "my-seg", 2,
                     boost::json::parse(kSegmentJson)}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
@@ -89,15 +86,14 @@ TEST(FDv2ChangeSetTranslatorTest, PutSegmentProducesTypedSegment) {
 // Known kinds — delete
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, DeleteFlagProducesFlagTombstone) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, DeleteFlagProducesFlagTombstone) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
         ChangeSetType::kPartial,
         {FDv2Change{FDv2Change::ChangeType::kDelete, "flag", "my-flag", 5, {}}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
@@ -109,8 +105,7 @@ TEST(FDv2ChangeSetTranslatorTest, DeleteFlagProducesFlagTombstone) {
     EXPECT_FALSE(desc->item.has_value());
 }
 
-TEST(FDv2ChangeSetTranslatorTest, DeleteSegmentProducesSegmentTombstone) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, DeleteSegmentProducesSegmentTombstone) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
@@ -118,7 +113,7 @@ TEST(FDv2ChangeSetTranslatorTest, DeleteSegmentProducesSegmentTombstone) {
         {FDv2Change{
             FDv2Change::ChangeType::kDelete, "segment", "my-seg", 3, {}}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
@@ -133,8 +128,7 @@ TEST(FDv2ChangeSetTranslatorTest, DeleteSegmentProducesSegmentTombstone) {
 // Unknown kind — skipped
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, UnknownKindInPutIsSkipped) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, UnknownKindInPutIsSkipped) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
@@ -144,15 +138,14 @@ TEST(FDv2ChangeSetTranslatorTest, UnknownKindInPutIsSkipped) {
          FDv2Change{FDv2Change::ChangeType::kPut, "flag", "my-flag", 1,
                     boost::json::parse(kFlagJson)}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
     EXPECT_EQ(result->data[0].key, "my-flag");
 }
 
-TEST(FDv2ChangeSetTranslatorTest, UnknownKindInDeleteIsSkipped) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, UnknownKindInDeleteIsSkipped) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
@@ -161,7 +154,7 @@ TEST(FDv2ChangeSetTranslatorTest, UnknownKindInDeleteIsSkipped) {
              FDv2Change::ChangeType::kDelete, "experiment", "exp-1", 1, {}},
          FDv2Change{FDv2Change::ChangeType::kDelete, "flag", "my-flag", 2, {}}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_EQ(result->data.size(), 1u);
@@ -172,15 +165,14 @@ TEST(FDv2ChangeSetTranslatorTest, UnknownKindInDeleteIsSkipped) {
 // Null object on put — skipped
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, NullObjectInPutFlagIsSkipped) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, NullObjectInPutFlagIsSkipped) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{ChangeSetType::kFull,
                       {FDv2Change{FDv2Change::ChangeType::kPut, "flag",
                                   "my-flag", 1, boost::json::value{nullptr}}},
                       Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(result->data.empty());
@@ -190,21 +182,19 @@ TEST(FDv2ChangeSetTranslatorTest, NullObjectInPutFlagIsSkipped) {
 // Deserialization failure — abort
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, MalformedFlagAbortsTranslation) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, MalformedFlagAbortsTranslation) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{ChangeSetType::kFull,
                       {FDv2Change{FDv2Change::ChangeType::kPut, "flag",
                                   "bad-flag", 1, boost::json::parse(R"({})")}},
                       Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     EXPECT_FALSE(result.has_value());
 }
 
-TEST(FDv2ChangeSetTranslatorTest, MalformedSegmentAbortsTranslation) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, MalformedSegmentAbortsTranslation) {
     auto logger = MakeNullLogger();
 
     // A non-empty object missing required fields triggers a schema failure
@@ -214,7 +204,7 @@ TEST(FDv2ChangeSetTranslatorTest, MalformedSegmentAbortsTranslation) {
         {FDv2Change{FDv2Change::ChangeType::kPut, "segment", "bad-seg", 1,
                     boost::json::parse(R"({"key":"bad-seg"})")}},
         Selector{}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     EXPECT_FALSE(result.has_value());
 }
@@ -223,13 +213,12 @@ TEST(FDv2ChangeSetTranslatorTest, MalformedSegmentAbortsTranslation) {
 // Selector is preserved
 // ============================================================================
 
-TEST(FDv2ChangeSetTranslatorTest, SelectorIsPreserved) {
-    FDv2ChangeSetTranslator translator;
+TEST(FDv2ChangeSetTranslationTest, SelectorIsPreserved) {
     auto logger = MakeNullLogger();
 
     FDv2ChangeSet raw{
         ChangeSetType::kFull, {}, Selector{Selector::State{7, "state-abc"}}};
-    auto result = translator.Translate(raw, logger);
+    auto result = TranslateChangeSet(raw, logger);
 
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->selector.value.has_value());

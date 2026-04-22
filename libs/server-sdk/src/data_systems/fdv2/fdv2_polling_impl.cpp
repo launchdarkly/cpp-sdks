@@ -1,5 +1,5 @@
 #include "fdv2_polling_impl.hpp"
-#include "fdv2_changeset_translator.hpp"
+#include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
@@ -61,7 +61,6 @@ network::HttpRequest MakeFDv2PollRequest(
 static FDv2SourceResult ParseFDv2PollEvents(
     boost::json::array const& events,
     FDv2ProtocolHandler* protocol_handler,
-    FDv2ChangeSetTranslator const& translator,
     Logger const& logger) {
     for (auto const& event_val : events) {
         auto const* event_obj = event_val.if_object();
@@ -86,7 +85,7 @@ static FDv2SourceResult ParseFDv2PollEvents(
 
         if (auto* change_set =
                 std::get_if<data_model::FDv2ChangeSet>(&result)) {
-            auto typed = translator.Translate(*change_set, logger);
+            auto typed = TranslateChangeSet(*change_set, logger);
             if (!typed) {
                 return FDv2SourceResult{FDv2SourceResult::Interrupted{
                     MakeError(ErrorKind::kInvalidData, 0, kErrorTranslation),
@@ -123,7 +122,6 @@ static FDv2SourceResult ParseFDv2PollEvents(
 static FDv2SourceResult ParseFDv2PollResponse(
     std::string const& body,
     FDv2ProtocolHandler* protocol_handler,
-    FDv2ChangeSetTranslator const& translator,
     Logger const& logger) {
     boost::system::error_code ec;
     auto parsed = boost::json::parse(body, ec);
@@ -150,8 +148,7 @@ static FDv2SourceResult ParseFDv2PollResponse(
             MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
     }
 
-    return ParseFDv2PollEvents(*events_arr, protocol_handler, translator,
-                               logger);
+    return ParseFDv2PollEvents(*events_arr, protocol_handler, logger);
 }
 
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
@@ -184,9 +181,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                 false}};
         }
 
-        FDv2ChangeSetTranslator translator;
-        auto result =
-            ParseFDv2PollResponse(*body, protocol_handler, translator, logger);
+        auto result = ParseFDv2PollResponse(*body, protocol_handler, logger);
         if (auto* interrupted =
                 std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
             if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {

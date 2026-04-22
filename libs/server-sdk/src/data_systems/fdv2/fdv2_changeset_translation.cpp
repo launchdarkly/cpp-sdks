@@ -1,4 +1,4 @@
-#include "fdv2_changeset_translator.hpp"
+#include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/data_model/flag.hpp>
 #include <launchdarkly/data_model/item_descriptor.hpp>
@@ -17,9 +17,9 @@ using data_model::ChangeSet;
 using data_model::ChangeSetType;
 using data_model::FDv2ChangeSet;
 
-std::optional<ChangeSet<ChangeSetData>> FDv2ChangeSetTranslator::Translate(
+std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
     FDv2ChangeSet const& change_set,
-    Logger const& logger) const {
+    Logger const& logger) {
     if (change_set.type == ChangeSetType::kNone) {
         return ChangeSet<ChangeSetData>{
             change_set.type, change_set.selector, {}};
