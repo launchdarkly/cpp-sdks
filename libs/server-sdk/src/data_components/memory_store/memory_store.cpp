@@ -84,15 +84,16 @@ bool MemoryStore::RemoveSegment(std::string const& key) {
     return segments_.erase(key) == 1;
 }
 
-void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
+void MemoryStore::Apply(
+    data_model::ChangeSet<data_interfaces::ChangeSetData> changeSet) {
     std::lock_guard lock{data_mutex_};
 
     switch (changeSet.type) {
-        case data_model::FDv2ChangeSet::Type::kNone:
+        case data_model::ChangeSetType::kNone:
             return;
-        case data_model::FDv2ChangeSet::Type::kPartial:
+        case data_model::ChangeSetType::kPartial:
             break;
-        case data_model::FDv2ChangeSet::Type::kFull:
+        case data_model::ChangeSetType::kFull:
             initialized_ = true;
             flags_.clear();
             segments_.clear();
@@ -101,7 +102,7 @@ void MemoryStore::Apply(data_model::FDv2ChangeSet changeSet) {
             detail::unreachable();
     }
 
-    for (auto& change : changeSet.changes) {
+    for (auto& change : changeSet.data) {
         if (std::holds_alternative<data_model::FlagDescriptor>(change.object)) {
             flags_[change.key] = std::make_shared<data_model::FlagDescriptor>(
                 std::move(std::get<data_model::FlagDescriptor>(change.object)));

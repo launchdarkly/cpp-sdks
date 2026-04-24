@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/data_model/change_set.hpp>
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 
 #include <boost/json.hpp>
@@ -56,7 +57,7 @@ TEST(FDv2ProtocolHandlerTest, NoneIntentEmitsEmptyChangeSetImmediately) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kNone);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kNone);
     EXPECT_TRUE(cs->changes.empty());
     EXPECT_FALSE(cs->selector.value.has_value());
 }
@@ -81,7 +82,7 @@ TEST(FDv2ProtocolHandlerTest, FullIntentEmitsChangeSetOnPayloadTransferred) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&r3);
     ASSERT_NE(cs, nullptr);
-    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kFull);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kFull);
     EXPECT_EQ(cs->changes.size(), 1u);
     EXPECT_EQ(cs->changes[0].key, "my-flag");
     ASSERT_TRUE(cs->selector.value.has_value());
@@ -105,7 +106,7 @@ TEST(FDv2ProtocolHandlerTest, FullIntentAccumulatesMultipleObjects) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kFull);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kFull);
     EXPECT_EQ(cs->changes.size(), 3u);
 }
 
@@ -132,7 +133,7 @@ TEST(FDv2ProtocolHandlerTest,
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kPartial);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kPartial);
     ASSERT_EQ(cs->changes.size(), 1u);
     EXPECT_EQ(cs->changes[0].key, "flag-2");
 }
@@ -153,7 +154,7 @@ TEST(FDv2ProtocolHandlerTest, PartialIntentEmitsPartialChangeSet) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    EXPECT_EQ(cs->type, data_model::FDv2ChangeSet::Type::kPartial);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kPartial);
     EXPECT_EQ(cs->changes.size(), 1u);
     EXPECT_EQ(cs->changes[0].key, "my-seg");
     ASSERT_TRUE(cs->selector.value.has_value());
@@ -164,7 +165,7 @@ TEST(FDv2ProtocolHandlerTest, PartialIntentEmitsPartialChangeSet) {
 // Unknown kind in put-object → silently skipped
 // ============================================================================
 
-TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsSilentlySkipped) {
+TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsPassedThrough) {
     FDv2ProtocolHandler handler;
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
@@ -179,12 +180,11 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInPutObjectIsSilentlySkipped) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    // Only the known kind (flag) should appear.
-    EXPECT_EQ(cs->changes.size(), 1u);
-    EXPECT_EQ(cs->changes[0].key, "my-flag");
+    // All kinds pass through; filtering happens in the translator.
+    EXPECT_EQ(cs->changes.size(), 2u);
 }
 
-TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsSilentlySkipped) {
+TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsPassedThrough) {
     FDv2ProtocolHandler handler;
 
     handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
@@ -198,9 +198,8 @@ TEST(FDv2ProtocolHandlerTest, UnknownKindInDeleteObjectIsSilentlySkipped) {
 
     auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
     ASSERT_NE(cs, nullptr);
-    // Only the known kind (flag) should appear.
-    EXPECT_EQ(cs->changes.size(), 1u);
-    EXPECT_EQ(cs->changes[0].key, "my-flag");
+    // All kinds pass through; filtering happens in the translator.
+    EXPECT_EQ(cs->changes.size(), 2u);
 }
 
 // ============================================================================
@@ -250,23 +249,6 @@ TEST(FDv2ProtocolHandlerTest, ErrorEventWithIdSetsServerId) {
     ASSERT_TRUE(err->server_error->id.has_value());
     EXPECT_EQ(*err->server_error->id, "payload-123");
     EXPECT_EQ(err->server_error->reason, "overloaded");
-}
-
-TEST(FDv2ProtocolHandlerTest, MalformedPutObjectReturnsJsonError) {
-    FDv2ProtocolHandler handler;
-
-    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
-
-    // 'object' field is missing required flag fields — deserialisation fails.
-    auto result = handler.HandleEvent(
-        "put-object",
-        boost::json::parse(
-            R"({"version":1,"kind":"flag","key":"f","object":{}})"));
-
-    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
-    ASSERT_NE(err, nullptr);
-    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kJsonError);
-    EXPECT_TRUE(err->json_error.has_value());
 }
 
 // ============================================================================

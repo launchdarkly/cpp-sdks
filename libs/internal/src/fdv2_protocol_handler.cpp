@@ -1,11 +1,5 @@
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 
-#include <launchdarkly/data_model/flag.hpp>
-#include <launchdarkly/data_model/item_descriptor.hpp>
-#include <launchdarkly/data_model/segment.hpp>
-#include <launchdarkly/serialization/json_flag.hpp>
-#include <launchdarkly/serialization/json_segment.hpp>
-
 #include <boost/json.hpp>
 #include <tl/expected.hpp>
 
@@ -19,66 +13,6 @@ static char const* const kError = "error";
 static char const* const kGoodbye = "goodbye";
 
 using Error = FDv2ProtocolHandler::Error;
-
-// Returns the parsed FDv2Change on success, nullopt for unknown kinds (which
-// should be silently skipped for forward-compatibility), or an Error if
-// a known kind fails to deserialize.
-static tl::expected<std::optional<data_model::FDv2Change>, Error> ParsePut(
-    PutObject const& put) {
-    if (put.kind == "flag") {
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<data_model::Flag>, JsonError>>(
-            put.object);
-        // One bad flag aborts the entire transfer so the store is never
-        // left in a partially-updated state.
-        if (!result) {
-            return tl::make_unexpected(Error::JsonParseError(
-                result.error(),
-                "could not deserialize flag '" + put.key + "'"));
-        }
-        if (!result->has_value()) {
-            return tl::make_unexpected(Error::JsonParseError(
-                "flag '" + put.key + "' object was null"));
-        }
-        return data_model::FDv2Change{
-            put.key,
-            data_model::ItemDescriptor<data_model::Flag>{std::move(**result)}};
-    }
-    if (put.kind == "segment") {
-        auto result = boost::json::value_to<
-            tl::expected<std::optional<data_model::Segment>, JsonError>>(
-            put.object);
-        // One bad segment aborts the entire transfer so the store is never
-        // left in a partially-updated state.
-        if (!result) {
-            return tl::make_unexpected(Error::JsonParseError(
-                result.error(),
-                "could not deserialize segment '" + put.key + "'"));
-        }
-        if (!result->has_value()) {
-            return tl::make_unexpected(Error::JsonParseError(
-                "segment '" + put.key + "' object was null"));
-        }
-        return data_model::FDv2Change{
-            put.key, data_model::ItemDescriptor<data_model::Segment>{
-                         std::move(**result)}};
-    }
-    // Silently skip unknown kinds for forward-compatibility.
-    return std::nullopt;
-}
-
-static data_model::FDv2Change MakeDeleteChange(DeleteObject const& del) {
-    if (del.kind == "flag") {
-        return data_model::FDv2Change{
-            del.key,
-            data_model::ItemDescriptor<data_model::Flag>{
-                data_model::Tombstone{static_cast<uint64_t>(del.version)}}};
-    }
-    return data_model::FDv2Change{
-        del.key,
-        data_model::ItemDescriptor<data_model::Segment>{
-            data_model::Tombstone{static_cast<uint64_t>(del.version)}}};
-}
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     std::string_view event_type,
@@ -137,7 +71,7 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
         // kNone or kUnknown: emit an empty changeset immediately.
         state_ = State::kInactive;
         return data_model::FDv2ChangeSet{
-            data_model::FDv2ChangeSet::Type::kNone, {}, data_model::Selector{}};
+            data_model::ChangeSetType::kNone, {}, data_model::Selector{}};
     }
     return std::monostate{};
 }
@@ -158,14 +92,10 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
         Reset();
         return Error::JsonParseError("put-object data was null");
     }
-    auto change = ParsePut(**result);
-    if (!change) {
-        Reset();
-        return std::move(change.error());
-    }
-    if (*change) {
-        changes_.push_back(std::move(**change));
-    }
+    auto const& put = **result;
+    changes_.push_back(data_model::FDv2Change{
+        data_model::FDv2Change::ChangeType::kPut, put.kind, put.key,
+        static_cast<uint64_t>(put.version), put.object});
     return std::monostate{};
 }
 
@@ -186,11 +116,12 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleDeleteObject(
         return Error::JsonParseError("delete-object data was null");
     }
     auto const& del = **result;
-    // Silently skip unknown kinds for forward-compatibility.
-    if (del.kind != "flag" && del.kind != "segment") {
-        return std::monostate{};
-    }
-    changes_.push_back(MakeDeleteChange(del));
+    changes_.push_back(
+        data_model::FDv2Change{data_model::FDv2Change::ChangeType::kDelete,
+                               del.kind,
+                               del.key,
+                               static_cast<uint64_t>(del.version),
+                               {}});
     return std::monostate{};
 }
 
@@ -215,8 +146,8 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
     }
     auto const& transferred = **result;
     auto type = (state_ == State::kPartial)
-                    ? data_model::FDv2ChangeSet::Type::kPartial
-                    : data_model::FDv2ChangeSet::Type::kFull;
+                    ? data_model::ChangeSetType::kPartial
+                    : data_model::ChangeSetType::kFull;
     data_model::FDv2ChangeSet changeset{
         type, std::move(changes_),
         data_model::Selector{data_model::Selector::State{transferred.version,
