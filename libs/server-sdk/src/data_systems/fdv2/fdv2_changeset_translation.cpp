@@ -95,7 +95,8 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
             if (auto item = TranslateDelete(change, logger)) {
                 changes.push_back(std::move(*item));
             }
-        } else {
+        } else if (change.change_type ==
+                   data_model::FDv2Change::ChangeType::kPut) {
             if (change.kind == "flag") {
                 if (!TranslatePutFlag(change, &changes, logger)) {
                     return std::nullopt;
@@ -109,6 +110,10 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
                     << "FDv2: unknown kind '" << change.kind
                     << "' in put-object, skipping";
             }
+        } else {
+            LD_LOG(logger, LogLevel::kWarn)
+                << "FDv2: unrecognized change type "
+                << static_cast<int>(change.change_type) << ", skipping";
         }
     }
 
