@@ -35,47 +35,28 @@ static std::optional<ItemChange> TranslateDelete(
     return std::nullopt;
 }
 
-static bool TranslatePutFlag(data_model::FDv2Change const& change,
-                             ChangeSetData* changes,
-                             Logger const& logger) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<data_model::Flag>, JsonError>>(
-        change.object);
+template <typename T>
+static bool TranslatePut(data_model::FDv2Change const& change,
+                         char const* kind_name,
+                         ChangeSetData* changes,
+                         Logger const& logger) {
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<T>, JsonError>>(
+            change.object);
     if (!result) {
         LD_LOG(logger, LogLevel::kError)
-            << "FDv2: could not deserialize flag '" << change.key << "'";
+            << "FDv2: could not deserialize " << kind_name << " '" << change.key
+            << "'";
         return false;
     }
     if (!result->has_value()) {
         LD_LOG(logger, LogLevel::kWarn)
-            << "FDv2: flag '" << change.key << "' object was null, skipping";
+            << "FDv2: " << kind_name << " '" << change.key
+            << "' object was null, skipping";
         return true;
     }
     changes->push_back(ItemChange{
-        change.key,
-        data_model::ItemDescriptor<data_model::Flag>{std::move(**result)}});
-    return true;
-}
-
-static bool TranslatePutSegment(data_model::FDv2Change const& change,
-                                ChangeSetData* changes,
-                                Logger const& logger) {
-    auto result = boost::json::value_to<
-        tl::expected<std::optional<data_model::Segment>, JsonError>>(
-        change.object);
-    if (!result) {
-        LD_LOG(logger, LogLevel::kError)
-            << "FDv2: could not deserialize segment '" << change.key << "'";
-        return false;
-    }
-    if (!result->has_value()) {
-        LD_LOG(logger, LogLevel::kWarn)
-            << "FDv2: segment '" << change.key << "' object was null, skipping";
-        return true;
-    }
-    changes->push_back(ItemChange{
-        change.key,
-        data_model::ItemDescriptor<data_model::Segment>{std::move(**result)}});
+        change.key, data_model::ItemDescriptor<T>{std::move(**result)}});
     return true;
 }
 
@@ -95,13 +76,16 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
             if (auto item = TranslateDelete(change, logger)) {
                 changes.push_back(std::move(*item));
             }
-        } else {
+        } else if (change.change_type ==
+                   data_model::FDv2Change::ChangeType::kPut) {
             if (change.kind == "flag") {
-                if (!TranslatePutFlag(change, &changes, logger)) {
+                if (!TranslatePut<data_model::Flag>(change, "flag", &changes,
+                                                    logger)) {
                     return std::nullopt;
                 }
             } else if (change.kind == "segment") {
-                if (!TranslatePutSegment(change, &changes, logger)) {
+                if (!TranslatePut<data_model::Segment>(change, "segment",
+                                                       &changes, logger)) {
                     return std::nullopt;
                 }
             } else {
@@ -109,6 +93,10 @@ std::optional<ChangeSet<ChangeSetData>> TranslateChangeSet(
                     << "FDv2: unknown kind '" << change.kind
                     << "' in put-object, skipping";
             }
+        } else {
+            LD_LOG(logger, LogLevel::kWarn)
+                << "FDv2: unrecognized change type "
+                << static_cast<int>(change.change_type) << ", skipping";
         }
     }
 
