@@ -34,6 +34,8 @@ class Builder {
     using EventReceiver = std::function<void(Event)>;
     using LogCallback = std::function<void(std::string)>;
     using ErrorCallback = std::function<void(Error)>;
+    using ConnectionHook =
+        std::function<void(http::request<http::string_body>*)>;
 
     /**
      * Create a builder for the given URL. If the port is omitted, 443 is
@@ -161,17 +163,36 @@ class Builder {
      * - HTTP proxies: "http://proxy:port"
      * - HTTPS proxies: "https://proxy:port"
      * - SOCKS4 proxies: "socks4://proxy:port"
-     * - SOCKS5 proxies: "socks5://proxy:port" or "socks5://user:pass@proxy:port"
+     * - SOCKS5 proxies: "socks5://proxy:port" or
+     * "socks5://user:pass@proxy:port"
      * - SOCKS5 with DNS through proxy: "socks5h://proxy:port"
      *
-     * Passing an empty string explicitly disables proxy (overrides environment variables).
-     * Passing std::nullopt (or not calling this method) uses environment variables.
+     * Passing an empty string explicitly disables proxy (overrides environment
+     * variables). Passing std::nullopt (or not calling this method) uses
+     * environment variables.
      *
-     * @param url Proxy URL, empty string to disable, or std::nullopt for environment variables
+     * @param url Proxy URL, empty string to disable, or std::nullopt for
+     * environment variables
      * @return Reference to this builder.
-     * @throws std::runtime_error if proxy is configured without CURL networking support
+     * @throws std::runtime_error if proxy is configured without CURL networking
+     * support
      */
     Builder& proxy(std::optional<std::string> url);
+
+    /**
+     * Register a hook invoked immediately before each connection attempt,
+     * including the initial connect and every reconnect. The hook receives
+     * a mutable request seeded with the Builder's defaults; it may modify
+     * the request's target, headers, method, and body.
+     *
+     * Host, port, and scheme are fixed at build time and cannot be changed
+     * by the hook.
+     *
+     * @param hook Callback invoked with a mutable request before each
+     * connection attempt.
+     * @return Reference to this builder.
+     */
+    Builder& on_connect(ConnectionHook hook);
 
     /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
@@ -195,6 +216,7 @@ class Builder {
     bool skip_verify_peer_;
     std::optional<std::string> custom_ca_file_;
     std::optional<std::string> proxy_url_;
+    ConnectionHook connection_hook_;
 };
 
 /**
@@ -213,7 +235,8 @@ class Client {
      * when the SDK detects invalid data from the stream and needs to
      * reconnect. The backoff mechanism prevents rapid reconnection attempts
      * that could overload the service.
-     * @param reason A description of why the restart was triggered (for logging)
+     * @param reason A description of why the restart was triggered (for
+     * logging)
      */
     virtual void async_restart(std::string const& reason) = 0;
 };
