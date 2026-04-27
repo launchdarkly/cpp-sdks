@@ -283,6 +283,9 @@ class FoxyClient : public Client,
                     return;
                 }
 
+                host_ = new_url->host();
+                port_ =
+                    new_url->has_port() ? new_url->port() : new_url->scheme();
                 req_.set(http::field::host, new_url->host());
                 req_.target(new_url->encoded_target());
             } else {
@@ -665,7 +668,9 @@ std::shared_ptr<Client> Builder::build() {
     std::string host = uri_components->host();
 
     request.set(http::field::host, host);
-    request.target(uri_components->encoded_target());
+    // RFC 7230: an empty path in origin-form must be sent as "/".
+    auto target = uri_components->encoded_target();
+    request.target(target.empty() ? "/" : target);
 
     if (uri_components->has_scheme()) {
         if (!(uri_components->scheme_id() == boost::urls::scheme::http ||

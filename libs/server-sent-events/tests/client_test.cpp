@@ -1,4 +1,3 @@
-#ifdef LD_CURL_NETWORKING
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -121,7 +120,7 @@ class IoContextRunner {
 
 // Basic connectivity tests
 
-TEST(CurlClientTest, ConnectsToHttpServer) {
+TEST(ClientTest, ConnectsToHttpServer) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("hello world"));
 
@@ -149,7 +148,7 @@ TEST(CurlClientTest, ConnectsToHttpServer) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, HandlesMultipleEvents) {
+TEST(ClientTest, HandlesMultipleEvents) {
     MockSSEServer server;
     auto port = server.start(
         TestHandlers::multiple_events({"event1", "event2", "event3"}));
@@ -179,7 +178,7 @@ TEST(CurlClientTest, HandlesMultipleEvents) {
 
 // SSE parsing tests
 
-TEST(CurlClientTest, ParsesEventWithType) {
+TEST(ClientTest, ParsesEventWithType) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -215,7 +214,7 @@ TEST(CurlClientTest, ParsesEventWithType) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, ParsesEventWithId) {
+TEST(ClientTest, ParsesEventWithId) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -251,7 +250,7 @@ TEST(CurlClientTest, ParsesEventWithId) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, ParsesMultiLineData) {
+TEST(ClientTest, ParsesMultiLineData) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -286,7 +285,7 @@ TEST(CurlClientTest, ParsesMultiLineData) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, HandlesComments) {
+TEST(ClientTest, HandlesComments) {
     GTEST_SKIP()
         << "Comment filtering is not yet implemented in the SSE parser";
 
@@ -330,7 +329,7 @@ TEST(CurlClientTest, HandlesComments) {
 
 // HTTP method tests
 
-TEST(CurlClientTest, SupportsPostMethod) {
+TEST(ClientTest, SupportsPostMethod) {
     MockSSEServer server;
     std::string received_method;
 
@@ -369,7 +368,7 @@ TEST(CurlClientTest, SupportsPostMethod) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, SupportsReportMethod) {
+TEST(ClientTest, SupportsReportMethod) {
     MockSSEServer server;
     std::string received_method;
 
@@ -410,7 +409,7 @@ TEST(CurlClientTest, SupportsReportMethod) {
 
 // HTTP header tests
 
-TEST(CurlClientTest, SendsCustomHeaders) {
+TEST(ClientTest, SendsCustomHeaders) {
     MockSSEServer server;
     std::string custom_header_value;
 
@@ -453,7 +452,7 @@ TEST(CurlClientTest, SendsCustomHeaders) {
 
 // HTTP status code tests
 
-TEST(CurlClientTest, Handles404Error) {
+TEST(ClientTest, Handles404Error) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::http_error(http::status::not_found));
 
@@ -478,7 +477,7 @@ TEST(CurlClientTest, Handles404Error) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, Handles500Error) {
+TEST(ClientTest, Handles500Error) {
     // 500 errors are treated as transient server errors and should trigger
     // backoff/retry behavior, not error callbacks. This is correct SSE client
     // behavior.
@@ -527,7 +526,7 @@ TEST(CurlClientTest, Handles500Error) {
 
 // Redirect tests
 
-TEST(CurlClientTest, FollowsRedirects) {
+TEST(ClientTest, FollowsRedirects) {
     MockSSEServer redirect_server;
     MockSSEServer target_server;
 
@@ -559,7 +558,7 @@ TEST(CurlClientTest, FollowsRedirects) {
 
 // Connection lifecycle tests
 
-TEST(CurlClientTest, ShutdownStopsClient) {
+TEST(ClientTest, ShutdownStopsClient) {
     MockSSEServer server;
     auto port = server.start([](auto const&, auto send_response,
                                 auto send_sse_event, auto) {
@@ -600,7 +599,7 @@ TEST(CurlClientTest, ShutdownStopsClient) {
     EXPECT_LT(shutdown_duration, 2000ms);
 }
 
-TEST(CurlClientTest, CanShutdownBeforeConnection) {
+TEST(ClientTest, CanShutdownBeforeConnection) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("test"));
 
@@ -619,7 +618,7 @@ TEST(CurlClientTest, CanShutdownBeforeConnection) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, HandlesImmediateClose) {
+TEST(ClientTest, HandlesImmediateClose) {
     // Immediate connection close is treated as a transient network error and
     // should trigger backoff/retry behavior, not error callbacks. This is
     // correct SSE client behavior.
@@ -664,7 +663,7 @@ TEST(CurlClientTest, HandlesImmediateClose) {
 
 // Timeout tests
 
-TEST(CurlClientTest, RespectsReadTimeout) {
+TEST(ClientTest, RespectsReadTimeout) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto) {
@@ -711,7 +710,7 @@ TEST(CurlClientTest, RespectsReadTimeout) {
     EXPECT_TRUE(shutdown_latch.wait_for(100ms));
 }
 
-TEST(CurlClientTest, DestructorCleansUpProperly) {
+TEST(ClientTest, DestructorCleansUpProperly) {
     {
         MockSSEServer server;
         auto port = server.start(
@@ -746,7 +745,7 @@ TEST(CurlClientTest, DestructorCleansUpProperly) {
     // Test passing indicates proper cleanup in destructor
 }
 
-TEST(CurlClientTest, HandlesEmptyEventData) {
+TEST(ClientTest, HandlesEmptyEventData) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -781,7 +780,7 @@ TEST(CurlClientTest, HandlesEmptyEventData) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, HandlesEventWithOnlyType) {
+TEST(ClientTest, HandlesEventWithOnlyType) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -818,7 +817,7 @@ TEST(CurlClientTest, HandlesEventWithOnlyType) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, HandlesRapidEvents) {
+TEST(ClientTest, HandlesRapidEvents) {
     MockSSEServer server;
     constexpr int num_events = 100;
 
@@ -858,7 +857,7 @@ TEST(CurlClientTest, HandlesRapidEvents) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
+TEST(ClientTest, ShutdownDuringBackoffDelay) {
     // This ensures clean shutdown during backoff/retry wait period
     std::atomic<int> connection_attempts{0};
 
@@ -906,7 +905,7 @@ TEST(CurlClientTest, ShutdownDuringBackoffDelay) {
     EXPECT_EQ(1, connection_attempts.load());
 }
 
-TEST(CurlClientTest, ShutdownDuringDataReception) {
+TEST(ClientTest, ShutdownDuringDataReception) {
     // This covers the branch where we abort during SSE data parsing
     SimpleLatch server_sending(1);
     SimpleLatch client_received_some(1);
@@ -966,7 +965,7 @@ TEST(CurlClientTest, ShutdownDuringDataReception) {
     EXPECT_LT(shutdown_duration, 2000ms);
 }
 
-TEST(CurlClientTest, ShutdownDuringProgressCallback) {
+TEST(ClientTest, ShutdownDuringProgressCallback) {
     // This ensures we can abort during slow data transfer
     SimpleLatch server_started(1);
 
@@ -1016,7 +1015,7 @@ TEST(CurlClientTest, ShutdownDuringProgressCallback) {
     EXPECT_LT(shutdown_duration, 2000ms);
 }
 
-TEST(CurlClientTest, MultipleShutdownCalls) {
+TEST(ClientTest, MultipleShutdownCalls) {
     // Ensures multiple shutdown calls don't cause issues (idempotency test)
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("test"));
@@ -1048,7 +1047,7 @@ TEST(CurlClientTest, MultipleShutdownCalls) {
     EXPECT_TRUE(shutdown_latch3.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, ShutdownAfterConnectionClosed) {
+TEST(ClientTest, ShutdownAfterConnectionClosed) {
     // Tests shutdown when connection has already ended naturally
     MockSSEServer server;
     auto port = server.start(
@@ -1086,7 +1085,7 @@ TEST(CurlClientTest, ShutdownAfterConnectionClosed) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
+TEST(ClientTest, ShutdownDuringConnectionAttempt) {
     // Server that delays before responding to test shutdown during connection
     // phase
     SimpleLatch connection_started(1);
@@ -1141,7 +1140,7 @@ TEST(CurlClientTest, ShutdownDuringConnectionAttempt) {
 
 // on_connect hook tests
 
-TEST(CurlClientTest, OnConnectHookInvokedBeforeRequest) {
+TEST(ClientTest, OnConnectHookInvokedBeforeRequest) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("hello"));
 
@@ -1179,7 +1178,7 @@ TEST(CurlClientTest, OnConnectHookInvokedBeforeRequest) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, OnConnectHookCanMutateTarget) {
+TEST(ClientTest, OnConnectHookCanMutateTarget) {
     MockSSEServer server;
     std::string seen_target;
     std::mutex target_mutex;
@@ -1227,7 +1226,7 @@ TEST(CurlClientTest, OnConnectHookCanMutateTarget) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, OnConnectHookCanMutateHeaders) {
+TEST(ClientTest, OnConnectHookCanMutateHeaders) {
     MockSSEServer server;
     std::string seen_header;
     std::mutex header_mutex;
@@ -1274,7 +1273,7 @@ TEST(CurlClientTest, OnConnectHookCanMutateHeaders) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, OnConnectHookInvokedOnEachReconnect) {
+TEST(ClientTest, OnConnectHookInvokedOnEachReconnect) {
     MockSSEServer server;
     auto port = server.start(
         [](auto const&, auto send_response, auto send_sse_event, auto close) {
@@ -1313,7 +1312,7 @@ TEST(CurlClientTest, OnConnectHookInvokedOnEachReconnect) {
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
-TEST(CurlClientTest, OnConnectHookSeesPreviousMutations) {
+TEST(ClientTest, OnConnectHookSeesPreviousMutations) {
     MockSSEServer server;
     std::vector<std::string> seen_targets;
     std::mutex targets_mutex;
@@ -1371,4 +1370,3 @@ TEST(CurlClientTest, OnConnectHookSeesPreviousMutations) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
-#endif  // LD_CURL_NETWORKING
