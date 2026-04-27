@@ -186,7 +186,9 @@ class Builder {
      * the request's target, headers, method, and body.
      *
      * Host, port, and scheme are fixed at build time and cannot be changed
-     * by the hook.
+     * by the hook. The Last-Event-ID header is managed by the client and
+     * any value the hook sets for it will be replaced before the request
+     * is sent.
      *
      * @param hook Callback invoked with a mutable request before each
      * connection attempt.
