@@ -190,6 +190,9 @@ class FoxyClient : public Client,
         if (connection_hook_) {
             connection_hook_(&req_);
         }
+
+        req_.prepare_payload();
+
         session_->async_connect(
             host_, port_,
             beast::bind_front_handler(&FoxyClient::on_connect,
@@ -662,8 +665,6 @@ std::shared_ptr<Client> Builder::build() {
             request.set(http::field::content_type, "text/plain");
         }
     }
-
-    request.prepare_payload();
 
     std::string host = uri_components->host();
 

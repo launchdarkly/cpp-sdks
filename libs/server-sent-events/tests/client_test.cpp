@@ -1370,3 +1370,67 @@ TEST(ClientTest, OnConnectHookSeesPreviousMutations) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
+
+TEST(ClientTest, OnConnectHookCanMutateBody) {
+    MockSSEServer server;
+    std::string received_body;
+    std::string received_content_length;
+    std::mutex received_mutex;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(received_mutex);
+            received_body = req.body();
+            if (auto it = req.find(http::field::content_length);
+                it != req.end()) {
+                received_content_length = std::string(it->value());
+            }
+        }
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("ok"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    std::string const build_time_body = "short";
+    std::string const hook_body =
+        "this-body-is-much-longer-than-the-build-time-body";
+    ASSERT_GT(hook_body.size(), build_time_body.size());
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .method(http::verb::post)
+            .body(build_time_body)
+            .on_connect([&](http::request<http::string_body>* req) {
+                req->body() = hook_body;
+            })
+            .build();
+
+    // Connect; hook replaces the body with one larger than the build-time body.
+    client->async_connect();
+
+    // Verify the server received the full hook body and a matching
+    // Content-Length, not the stale build-time value.
+    ASSERT_TRUE(collector.wait_for_events(1));
+    {
+        std::lock_guard lock(received_mutex);
+        EXPECT_EQ(hook_body, received_body)
+            << "Server received a truncated body. Content-Length header was '"
+            << received_content_length << "' (hook set body of size "
+            << hook_body.size() << ").";
+        EXPECT_EQ(std::to_string(hook_body.size()), received_content_length);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}

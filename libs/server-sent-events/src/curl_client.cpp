@@ -93,6 +93,8 @@ void CurlClient::do_run() {
         request_context_->url = build_url(request_context_->req);
     }
 
+    request_context_->req.prepare_payload();
+
     auto ctx = request_context_;
     auto weak_self = weak_from_this();
     std::weak_ptr<RequestContext> weak_ctx = ctx;
