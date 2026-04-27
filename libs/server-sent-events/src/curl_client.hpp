@@ -94,8 +94,11 @@ class CurlClient final : public Client,
         std::chrono::steady_clock::time_point last_progress_time;
         curl_off_t last_download_amount;
 
-        // These are thread-safe, because they are only accessed from
-        // CurlClient's strand after construction.
+        // Mutated on the strand in do_run() before each transfer, and read by
+        // libcurl via raw pointers (CURLOPT_URL, CURLOPT_POSTFIELDS) for the
+        // duration of the transfer. Safe because the next do_run() only fires
+        // after the previous transfer's completion callback, so reads and
+        // writes never overlap.
         http::request<http::string_body> req;
         std::string url;
         std::optional<std::chrono::milliseconds> const connect_timeout;
