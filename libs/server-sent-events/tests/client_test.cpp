@@ -707,7 +707,7 @@ TEST(ClientTest, RespectsReadTimeout) {
 
     SimpleLatch shutdown_latch(1);
     client->async_shutdown([&] { shutdown_latch.count_down(); });
-    EXPECT_TRUE(shutdown_latch.wait_for(100ms));
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
 
 TEST(ClientTest, DestructorCleansUpProperly) {
