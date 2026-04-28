@@ -187,6 +187,10 @@ class FoxyClient : public Client,
     }
 
     void do_run() {
+        if (shutting_down_) {
+            return;
+        }
+
         if (connection_hook_) {
             connection_hook_(&req_);
         }
