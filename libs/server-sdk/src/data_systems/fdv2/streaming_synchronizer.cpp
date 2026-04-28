@@ -75,7 +75,7 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
     boost::urls::url u = parsed.value();
 
     // Safer way of appending /sdk/stream than string concatenation: avoids
-    // double slashes if the base URL has a trailing slash. TODO: add a test.
+    // double slashes if the base URL has a trailing slash.
     u.segments().push_back("sdk");
     u.segments().push_back("stream");
 
