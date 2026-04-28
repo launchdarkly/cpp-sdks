@@ -93,6 +93,16 @@ void CurlClient::do_run() {
         request_context_->url = build_url(request_context_->req);
     }
 
+    // Set Last-Event-ID if we have one from a previous connection, otherwise
+    // erase it to override any value set by the hook.
+    if (request_context_->last_event_id &&
+        !request_context_->last_event_id->empty()) {
+        request_context_->req.set("last-event-id",
+                                  *request_context_->last_event_id);
+    } else {
+        request_context_->req.erase("last-event-id");
+    }
+
     request_context_->req.prepare_payload();
 
     auto ctx = request_context_;
@@ -236,13 +246,6 @@ bool CurlClient::SetupCurlOptions(CURL* curl,
         std::string header = std::string(field.name_string()) + ": " +
                              std::string(field.value());
         headers = curl_slist_append(headers, header.c_str());
-    }
-
-    // Add Last-Event-ID if we have one from previous connection
-    if (context.last_event_id && !context.last_event_id->empty()) {
-        std::string last_event_header =
-            "Last-Event-ID: " + *context.last_event_id;
-        headers = curl_slist_append(headers, last_event_header.c_str());
     }
 
     if (headers) {

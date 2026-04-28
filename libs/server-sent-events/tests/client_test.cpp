@@ -1434,3 +1434,73 @@ TEST(ClientTest, OnConnectHookCanMutateBody) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
+
+TEST(ClientTest, OnConnectHookLastEventIdIsManagedByClient) {
+    MockSSEServer server;
+    std::vector<std::pair<std::size_t, std::string>> last_event_id_observations;
+    std::mutex received_mutex;
+    std::condition_variable received_cv;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(received_mutex);
+            std::size_t count = req.count("Last-Event-ID");
+            auto it = req.find("Last-Event-ID");
+            std::string value =
+                (it != req.end()) ? std::string(it->value()) : "";
+            last_event_id_observations.emplace_back(count, value);
+            received_cv.notify_all();
+        }
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("data", "", "evt-42"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(50ms)
+            .on_connect([](http::request<http::string_body>* req) {
+                req->set("last-event-id", "from-hook");
+            })
+            .build();
+
+    // Connect; the server closes after each event so the client reconnects.
+    client->async_connect();
+
+    // Verify the documented Last-Event-ID contract: the client manages this
+    // header and overrides any value set by the hook. On first connect no
+    // event ID has been seen, so the header should be absent. On reconnect
+    // the client should send exactly one Last-Event-ID with the most recent
+    // event's ID, not the hook's value.
+    {
+        std::unique_lock lock(received_mutex);
+        ASSERT_TRUE(received_cv.wait_for(lock, 5000ms, [&] {
+            return last_event_id_observations.size() >= 2;
+        }));
+    }
+
+    {
+        std::lock_guard lock(received_mutex);
+        EXPECT_EQ(0u, last_event_id_observations[0].first)
+            << "first connect should send no Last-Event-ID; got '"
+            << last_event_id_observations[0].second << "'";
+        EXPECT_EQ(1u, last_event_id_observations[1].first)
+            << "reconnect should send exactly one Last-Event-ID header";
+        EXPECT_EQ("evt-42", last_event_id_observations[1].second);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
