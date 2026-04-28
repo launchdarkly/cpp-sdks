@@ -1,0 +1,1506 @@
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include <launchdarkly/sse/client.hpp>
+
+#include "mock_sse_server.hpp"
+
+#include <boost/asio/io_context.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <vector>
+
+using namespace launchdarkly::sse;
+using namespace launchdarkly::sse::test;
+using namespace std::chrono_literals;
+
+namespace {
+
+// C++17-compatible latch replacement
+// https://en.cppreference.com/w/cpp/thread/latch.html
+class SimpleLatch {
+   public:
+    explicit SimpleLatch(std::size_t const count) : count_(count) {}
+
+    void count_down() {
+        std::lock_guard lock(mutex_);
+        if (count_ > 0) {
+            --count_;
+        }
+        cv_.notify_all();
+    }
+
+    template <typename Rep, typename Period>
+    bool wait_for(std::chrono::duration<Rep, Period> timeout) {
+        std::unique_lock lock(mutex_);
+        return cv_.wait_for(lock, timeout, [this] { return count_ == 0; });
+    }
+
+   private:
+    std::mutex mutex_;
+    std::condition_variable cv_;
+    std::size_t count_;
+};
+
+// Helper to synchronize event reception in tests
+class EventCollector {
+   public:
+    void add_event(Event event) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        events_.push_back(std::move(event));
+        cv_.notify_all();
+    }
+
+    void add_error(Error error) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        errors_.push_back(std::move(error));
+        cv_.notify_all();
+    }
+
+    bool wait_for_events(size_t count,
+                         std::chrono::milliseconds timeout = 5000ms) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        return cv_.wait_for(lock, timeout,
+                            [&] { return events_.size() >= count; });
+    }
+
+    bool wait_for_errors(size_t count,
+                         std::chrono::milliseconds timeout = 5000ms) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        return cv_.wait_for(lock, timeout,
+                            [&] { return errors_.size() >= count; });
+    }
+
+    std::vector<Event> events() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return events_;
+    }
+
+    std::vector<Error> errors() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return errors_;
+    }
+
+   private:
+    mutable std::mutex mutex_;
+    std::condition_variable cv_;
+    std::vector<Event> events_;
+    std::vector<Error> errors_;
+};
+
+// Helper to run io_context in background thread
+class IoContextRunner {
+   public:
+    IoContextRunner() : work_guard_(boost::asio::make_work_guard(ioc_)) {
+        thread_ = std::thread([this] { ioc_.run(); });
+    }
+
+    ~IoContextRunner() {
+        work_guard_.reset();
+        ioc_.stop();
+        if (thread_.joinable()) {
+            thread_.join();
+        }
+    }
+
+    boost::asio::io_context& context() { return ioc_; }
+
+   private:
+    boost::asio::io_context ioc_;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type>
+        work_guard_;
+    std::thread thread_;
+};
+
+}  // namespace
+
+// Basic connectivity tests
+
+TEST(ClientTest, ConnectsToHttpServer) {
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::simple_event("hello world"));
+
+    // Give server a moment to start accepting connections
+    std::this_thread::sleep_for(100ms);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("hello world", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, HandlesMultipleEvents) {
+    MockSSEServer server;
+    auto port = server.start(
+        TestHandlers::multiple_events({"event1", "event2", "event3"}));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(3));
+    auto events = collector.events();
+    ASSERT_EQ(3, events.size());
+    EXPECT_EQ("event1", events[0].data());
+    EXPECT_EQ("event2", events[1].data());
+    EXPECT_EQ("event3", events[2].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// SSE parsing tests
+
+TEST(ClientTest, ParsesEventWithType) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event("test data", "custom-type"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("test data", events[0].data());
+    EXPECT_EQ("custom-type", events[0].type());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, ParsesEventWithId) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event("test data", "", "event-123"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("test data", events[0].data());
+    EXPECT_EQ("event-123", events[0].id());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, ParsesMultiLineData) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event("line1\nline2\nline3"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("line1\nline2\nline3", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, HandlesComments) {
+    GTEST_SKIP()
+        << "Comment filtering is not yet implemented in the SSE parser";
+
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            // Send a comment (should be ignored)
+            send_sse_event(SSEFormatter::comment("this is a comment"));
+            // Send an actual event
+            send_sse_event(SSEFormatter::event("real data"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    // Should only receive the real event, not the comment
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("real data", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// HTTP method tests
+
+TEST(ClientTest, SupportsPostMethod) {
+    MockSSEServer server;
+    std::string received_method;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        received_method = std::string(req.method_string());
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("response"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .method(http::verb::post)
+            .body("test body")
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    EXPECT_EQ("POST", received_method);
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, SupportsReportMethod) {
+    MockSSEServer server;
+    std::string received_method;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        received_method = std::string(req.method_string());
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("response"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .method(http::verb::report)
+            .body("test body")
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    EXPECT_EQ("REPORT", received_method);
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// HTTP header tests
+
+TEST(ClientTest, SendsCustomHeaders) {
+    MockSSEServer server;
+    std::string custom_header_value;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        auto it = req.find("X-Custom-Header");
+        if (it != req.end()) {
+            custom_header_value = std::string(it->value());
+        }
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("response"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .header("X-Custom-Header", "custom-value")
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    EXPECT_EQ("custom-value", custom_header_value);
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// HTTP status code tests
+
+TEST(ClientTest, Handles404Error) {
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::http_error(http::status::not_found));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .errors([&](Error e) { collector.add_error(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_errors(1));
+    auto errors = collector.errors();
+    ASSERT_GE(errors.size(), 1);
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, Handles500Error) {
+    // 500 errors are treated as transient server errors and should trigger
+    // backoff/retry behavior, not error callbacks. This is correct SSE client
+    // behavior.
+    std::atomic<int> connection_attempts{0};
+
+    auto handler = [&](auto const&, auto send_response, auto, auto) {
+        ++connection_attempts;
+        http::response<http::string_body> res{
+            http::status::internal_server_error, 11};
+        res.body() = "Error";
+        res.prepare_payload();
+        send_response(res);
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .errors([&](Error e) { collector.add_error(std::move(e)); })
+            .initial_reconnect_delay(50ms)  // Short delay for test
+            .build();
+
+    client->async_connect();
+
+    // Should NOT receive error callbacks - should retry instead
+    // Wait a bit to let multiple reconnection attempts happen
+    std::this_thread::sleep_for(300ms);
+
+    // Verify that multiple reconnection attempts occurred (backoff/retry
+    // behavior)
+    EXPECT_GE(connection_attempts.load(), 2);
+
+    // Verify no error callbacks were invoked (5xx are not reported as errors)
+    EXPECT_EQ(0, collector.errors().size());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// Redirect tests
+
+TEST(ClientTest, FollowsRedirects) {
+    MockSSEServer redirect_server;
+    MockSSEServer target_server;
+
+    auto target_port =
+        target_server.start(TestHandlers::simple_event("redirected"));
+    auto redirect_port = redirect_server.start(TestHandlers::redirect(
+        "http://localhost:" + std::to_string(target_port) + "/"));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(redirect_port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("redirected", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// Connection lifecycle tests
+
+TEST(ClientTest, ShutdownStopsClient) {
+    MockSSEServer server;
+    auto port = server.start([](auto const&, auto send_response,
+                                auto send_sse_event, auto) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        // Keep sending events forever (until connection closes)
+        for (int i = 0; i < 1000; i++) {
+            send_sse_event(SSEFormatter::event("event " + std::to_string(i)));
+            std::this_thread::sleep_for(10ms);
+        }
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    // Wait for at least one event
+    ASSERT_TRUE(collector.wait_for_events(1));
+
+    // Shutdown should complete quickly
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should complete in reasonable time (less than 2 seconds)
+    EXPECT_LT(shutdown_duration, 2000ms);
+}
+
+TEST(ClientTest, CanShutdownBeforeConnection) {
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::simple_event("test"));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    // Shutdown immediately without connecting
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, HandlesImmediateClose) {
+    // Immediate connection close is treated as a transient network error and
+    // should trigger backoff/retry behavior, not error callbacks. This is
+    // correct SSE client behavior.
+    std::atomic<int> connection_attempts{0};
+
+    auto handler = [&](auto const&, auto, auto, auto close) {
+        ++connection_attempts;
+        close();  // Immediately close without sending headers
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .errors([&](Error e) { collector.add_error(std::move(e)); })
+            .initial_reconnect_delay(50ms)  // Short delay for test
+            .build();
+
+    client->async_connect();
+
+    // Should NOT receive error callbacks - should retry instead
+    // Wait a bit to let multiple reconnection attempts happen
+    std::this_thread::sleep_for(300ms);
+
+    // Verify that multiple reconnection attempts occurred (backoff/retry
+    // behavior)
+    EXPECT_GE(connection_attempts.load(), 2);
+
+    // Verify no error callbacks were invoked (connection errors trigger retry)
+    EXPECT_EQ(0, collector.errors().size());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+// Timeout tests
+
+TEST(ClientTest, RespectsReadTimeout) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            // Send one event
+            send_sse_event(SSEFormatter::event("first"));
+
+            // Then wait longer than read timeout without sending anything
+            std::this_thread::sleep_for(5000ms);
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .errors([&](Error e) {
+                std::cerr << "Error" << e.index() << std::endl;
+                collector.add_error(std::move(e));
+            })
+            .logger([&](std::string const& message) {
+                std::cerr << "log_message" << message << std::endl;
+            })
+            .read_timeout(500ms)  // Short timeout for test
+            .initial_reconnect_delay(50ms)
+            .build();
+
+    client->async_connect();
+
+    // Should receive the first event
+    ASSERT_TRUE(collector.wait_for_events(1, 100ms));
+
+    // Then should get a timeout error
+    ASSERT_TRUE(collector.wait_for_errors(1, 1000ms));
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, DestructorCleansUpProperly) {
+    {
+        MockSSEServer server;
+        auto port = server.start(
+            [](auto const&, auto send_response, auto send_sse_event, auto) {
+                http::response<http::string_body> res{http::status::ok, 11};
+                res.set(http::field::content_type, "text/event-stream");
+                res.chunked(true);
+                send_response(res);
+
+                // Keep sending events
+                for (int i = 0; i < 100; i++) {
+                    send_sse_event(
+                        SSEFormatter::event("event " + std::to_string(i)));
+                    std::this_thread::sleep_for(10ms);
+                }
+            });
+        EventCollector collector;
+        IoContextRunner runner;
+        auto client =
+            Builder(runner.context().get_executor(),
+                    "http://localhost:" + std::to_string(port))
+                .receiver([&](Event e) { collector.add_event(std::move(e)); })
+                .build();
+
+        client->async_connect();
+        ASSERT_TRUE(collector.wait_for_events(1));
+
+        // Let destructor run without explicit shutdown
+    }
+
+    // If destructor doesn't properly clean up, this could hang or crash
+    // Test passing indicates proper cleanup in destructor
+}
+
+TEST(ClientTest, HandlesEmptyEventData) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event(""));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, HandlesEventWithOnlyType) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            // Send event with type but empty data
+            send_sse_event("event: heartbeat\ndata: \n\n");
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(1));
+    auto events = collector.events();
+    ASSERT_EQ(1, events.size());
+    EXPECT_EQ("heartbeat", events[0].type());
+    EXPECT_EQ("", events[0].data());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, HandlesRapidEvents) {
+    MockSSEServer server;
+    constexpr int num_events = 100;
+
+    // num_events needs to be captured for MSVC.
+    auto port = server.start([num_events](auto const&, auto send_response,
+                                          auto send_sse_event, auto close) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        // Send many events rapidly
+        for (int i = 0; i < num_events; i++) {
+            send_sse_event(SSEFormatter::event("event" + std::to_string(i)));
+        }
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    ASSERT_TRUE(collector.wait_for_events(num_events, 10000ms));
+    auto events = collector.events();
+    EXPECT_EQ(num_events, events.size());
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, ShutdownDuringBackoffDelay) {
+    // This ensures clean shutdown during backoff/retry wait period
+    std::atomic<int> connection_attempts{0};
+
+    auto handler = [&](auto const&, auto send_response, auto, auto) {
+        ++connection_attempts;
+        // Return 500 to trigger backoff
+        http::response<http::string_body> res{
+            http::status::internal_server_error, 11};
+        res.body() = "Error";
+        res.prepare_payload();
+        send_response(res);
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(
+                2000ms)  // Long delay to ensure we shutdown during wait
+            .build();
+
+    client->async_connect();
+
+    // Wait for first connection attempt to complete
+    std::this_thread::sleep_for(200ms);
+    EXPECT_GE(connection_attempts.load(), 1);
+
+    // Now shutdown while it's waiting in backoff
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should complete quickly despite long backoff delay
+    EXPECT_LT(shutdown_duration, 1000ms);
+
+    // Should NOT have made another connection attempt during backoff
+    EXPECT_EQ(1, connection_attempts.load());
+}
+
+TEST(ClientTest, ShutdownDuringDataReception) {
+    // This covers the branch where we abort during SSE data parsing
+    SimpleLatch server_sending(1);
+    SimpleLatch client_received_some(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event,
+                       auto) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        // Send events continuously
+        for (int i = 0; i < 100; i++) {
+            if (!send_sse_event(
+                    SSEFormatter::event("event " + std::to_string(i)))) {
+                return;  // Connection closed or error - stop sending
+            }
+            if (i == 2) {
+                server_sending.count_down();
+            }
+            std::this_thread::sleep_for(
+                10ms);  // Slow enough to allow shutdown mid-stream
+        }
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    // Shared ptr to prevent handling events during destruction.
+    auto collector = std::make_shared<EventCollector>();
+
+    auto client = Builder(runner.context().get_executor(),
+                          "http://localhost:" + std::to_string(port))
+                      .receiver([collector, &client_received_some](Event e) {
+                          collector->add_event(std::move(e));
+                          if (collector->events().size() >= 2) {
+                              client_received_some.count_down();
+                          }
+                      })
+                      .build();
+
+    client->async_connect();
+
+    // Wait until server is sending and client has received some events
+    ASSERT_TRUE(server_sending.wait_for(5000ms));
+    ASSERT_TRUE(client_received_some.wait_for(5000ms));
+
+    // Shutdown while WriteCallback is actively processing data
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should complete quickly even during active data transfer
+    EXPECT_LT(shutdown_duration, 2000ms);
+}
+
+TEST(ClientTest, ShutdownDuringProgressCallback) {
+    // This ensures we can abort during slow data transfer
+    SimpleLatch server_started(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event,
+                       auto) {
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        server_started.count_down();
+
+        // Send one event then pause (simulating slow connection)
+        send_sse_event(SSEFormatter::event("first"));
+        std::this_thread::sleep_for(
+            5000ms);  // Pause to simulate slow connection
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .read_timeout(10000ms)  // Long timeout so ProgressCallback is
+                                    // called but doesn't abort
+            .build();
+
+    client->async_connect();
+
+    // Wait for first event and server pause
+    ASSERT_TRUE(server_started.wait_for(5000ms));
+    ASSERT_TRUE(collector.wait_for_events(1, 5000ms));
+
+    // Shutdown while ProgressCallback is being invoked during the pause
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should abort the transfer quickly
+    EXPECT_LT(shutdown_duration, 2000ms);
+}
+
+TEST(ClientTest, MultipleShutdownCalls) {
+    // Ensures multiple shutdown calls don't cause issues (idempotency test)
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::simple_event("test"));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+    ASSERT_TRUE(collector.wait_for_events(1));
+
+    // Call shutdown multiple times in rapid succession
+    SimpleLatch shutdown_latch1(1);
+    SimpleLatch shutdown_latch2(1);
+    SimpleLatch shutdown_latch3(1);
+
+    client->async_shutdown([&] { shutdown_latch1.count_down(); });
+    client->async_shutdown([&] { shutdown_latch2.count_down(); });
+    client->async_shutdown([&] { shutdown_latch3.count_down(); });
+
+    // All shutdown completions should be called
+    EXPECT_TRUE(shutdown_latch1.wait_for(5000ms));
+    EXPECT_TRUE(shutdown_latch2.wait_for(5000ms));
+    EXPECT_TRUE(shutdown_latch3.wait_for(5000ms));
+}
+
+TEST(ClientTest, ShutdownAfterConnectionClosed) {
+    // Tests shutdown when connection has already ended naturally
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event("only event"));
+            std::this_thread::sleep_for(10ms);
+            close();  // Server closes connection
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(
+                500ms)  // Will try to reconnect after close
+            .build();
+
+    client->async_connect();
+    ASSERT_TRUE(collector.wait_for_events(1));
+
+    // Wait for connection to close and reconnect attempt to start
+    std::this_thread::sleep_for(200ms);
+
+    // Shutdown after natural connection close
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, ShutdownDuringConnectionAttempt) {
+    // Server that delays before responding to test shutdown during connection
+    // phase
+    SimpleLatch connection_started(1);
+
+    auto handler = [&](auto const&, auto send_response, auto send_sse_event,
+                       auto close) {
+        connection_started.count_down();
+        // Delay before responding
+        std::this_thread::sleep_for(500ms);
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+
+        send_sse_event(SSEFormatter::event("test"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    };
+
+    MockSSEServer server;
+    auto port = server.start(handler);
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .build();
+
+    client->async_connect();
+
+    // Wait for connection to start but shutdown before it completes
+    ASSERT_TRUE(connection_started.wait_for(5000ms));
+    std::this_thread::sleep_for(
+        50ms);  // Give CURL time to start but not finish
+
+    auto shutdown_start = std::chrono::steady_clock::now();
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+    auto shutdown_duration = std::chrono::steady_clock::now() - shutdown_start;
+
+    // Shutdown should abort the pending connection quickly
+    EXPECT_LT(shutdown_duration, 2000ms);
+
+    // Should not have received any events since we shutdown during connection
+    EXPECT_EQ(0, collector.events().size());
+}
+
+// on_connect hook tests
+
+TEST(ClientTest, OnConnectHookInvokedBeforeRequest) {
+    MockSSEServer server;
+    auto port = server.start(TestHandlers::simple_event("hello"));
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    std::atomic<int> hook_calls{0};
+    std::string seen_target;
+    std::mutex target_mutex;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port) + "/initial-path")
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .on_connect([&](http::request<http::string_body>* req) {
+                ++hook_calls;
+                std::lock_guard lock(target_mutex);
+                seen_target = std::string(req->target());
+            })
+            .build();
+
+    // Connect and let the hook fire.
+    client->async_connect();
+
+    // Verify the hook ran and saw the construction-time target.
+    ASSERT_TRUE(collector.wait_for_events(1));
+    EXPECT_GE(hook_calls.load(), 1);
+    {
+        std::lock_guard lock(target_mutex);
+        EXPECT_EQ("/initial-path", seen_target);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookCanMutateTarget) {
+    MockSSEServer server;
+    std::string seen_target;
+    std::mutex target_mutex;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(target_mutex);
+            seen_target = std::string(req.target());
+        }
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("ok"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port) + "/original")
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .on_connect([](http::request<http::string_body>* req) {
+                req->target("/mutated?param=value");
+            })
+            .build();
+
+    // Connect; hook overrides the target before the request is sent.
+    client->async_connect();
+
+    // Verify the server received the mutated target, not the original URL's
+    // path.
+    ASSERT_TRUE(collector.wait_for_events(1));
+    {
+        std::lock_guard lock(target_mutex);
+        EXPECT_EQ("/mutated?param=value", seen_target);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookCanMutateHeaders) {
+    MockSSEServer server;
+    std::string seen_header;
+    std::mutex header_mutex;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        if (auto it = req.find("X-Hook-Header"); it != req.end()) {
+            std::lock_guard lock(header_mutex);
+            seen_header = std::string(it->value());
+        }
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("ok"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .on_connect([](http::request<http::string_body>* req) {
+                req->set("X-Hook-Header", "from-hook");
+            })
+            .build();
+
+    // Connect; hook adds a custom header before the request is sent.
+    client->async_connect();
+
+    // Verify the server received the hook-injected header.
+    ASSERT_TRUE(collector.wait_for_events(1));
+    {
+        std::lock_guard lock(header_mutex);
+        EXPECT_EQ("from-hook", seen_header);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookInvokedOnEachReconnect) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.chunked(true);
+            send_response(res);
+            send_sse_event(SSEFormatter::event("event"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    std::atomic<int> hook_calls{0};
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(50ms)
+            .on_connect(
+                [&](http::request<http::string_body>*) { ++hook_calls; })
+            .build();
+
+    // Connect; the server closes after each event so the client reconnects.
+    client->async_connect();
+
+    // Verify the hook fires on every connection attempt, not just the first.
+    ASSERT_TRUE(collector.wait_for_events(3));
+    EXPECT_GE(hook_calls.load(), 3);
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookSeesPreviousMutations) {
+    MockSSEServer server;
+    std::vector<std::string> seen_targets;
+    std::mutex targets_mutex;
+    std::condition_variable targets_cv;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(targets_mutex);
+            seen_targets.push_back(std::string(req.target()));
+            targets_cv.notify_all();
+        }
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("event"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port) + "/start")
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(50ms)
+            .on_connect([](http::request<http::string_body>* req) {
+                req->target(std::string(req->target()) + "/x");
+            })
+            .build();
+
+    // Connect; on each reconnect the hook appends "/x" to whatever target it
+    // sees.
+    client->async_connect();
+
+    // Verify successive hook invocations see their own previous mutations
+    // rather than a reset to the construction-time target.
+    {
+        std::unique_lock lock(targets_mutex);
+        ASSERT_TRUE(targets_cv.wait_for(
+            lock, 5000ms, [&] { return seen_targets.size() >= 3; }));
+    }
+
+    {
+        std::lock_guard lock(targets_mutex);
+        EXPECT_EQ("/start/x", seen_targets[0]);
+        EXPECT_EQ("/start/x/x", seen_targets[1]);
+        EXPECT_EQ("/start/x/x/x", seen_targets[2]);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookCanMutateBody) {
+    MockSSEServer server;
+    std::string received_body;
+    std::string received_content_length;
+    std::mutex received_mutex;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(received_mutex);
+            received_body = req.body();
+            if (auto it = req.find(http::field::content_length);
+                it != req.end()) {
+                received_content_length = std::string(it->value());
+            }
+        }
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("ok"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    std::string const build_time_body = "short";
+    std::string const hook_body =
+        "this-body-is-much-longer-than-the-build-time-body";
+    ASSERT_GT(hook_body.size(), build_time_body.size());
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .method(http::verb::post)
+            .body(build_time_body)
+            .on_connect([&](http::request<http::string_body>* req) {
+                req->body() = hook_body;
+            })
+            .build();
+
+    // Connect; hook replaces the body with one larger than the build-time body.
+    client->async_connect();
+
+    // Verify the server received the full hook body and a matching
+    // Content-Length, not the stale build-time value.
+    ASSERT_TRUE(collector.wait_for_events(1));
+    {
+        std::lock_guard lock(received_mutex);
+        EXPECT_EQ(hook_body, received_body)
+            << "Server received a truncated body. Content-Length header was '"
+            << received_content_length << "' (hook set body of size "
+            << hook_body.size() << ").";
+        EXPECT_EQ(std::to_string(hook_body.size()), received_content_length);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+TEST(ClientTest, OnConnectHookLastEventIdIsManagedByClient) {
+    MockSSEServer server;
+    std::vector<std::pair<std::size_t, std::string>> last_event_id_observations;
+    std::mutex received_mutex;
+    std::condition_variable received_cv;
+
+    auto port = server.start([&](auto const& req, auto send_response,
+                                 auto send_sse_event, auto close) {
+        {
+            std::lock_guard lock(received_mutex);
+            std::size_t count = req.count("Last-Event-ID");
+            auto it = req.find("Last-Event-ID");
+            std::string value =
+                (it != req.end()) ? std::string(it->value()) : "";
+            last_event_id_observations.emplace_back(count, value);
+            received_cv.notify_all();
+        }
+
+        http::response<http::string_body> res{http::status::ok, 11};
+        res.set(http::field::content_type, "text/event-stream");
+        res.chunked(true);
+        send_response(res);
+        send_sse_event(SSEFormatter::event("data", "", "evt-42"));
+        std::this_thread::sleep_for(10ms);
+        close();
+    });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .initial_reconnect_delay(50ms)
+            .on_connect([](http::request<http::string_body>* req) {
+                req->set("last-event-id", "from-hook");
+            })
+            .build();
+
+    // Connect; the server closes after each event so the client reconnects.
+    client->async_connect();
+
+    // Verify the documented Last-Event-ID contract: the client manages this
+    // header and overrides any value set by the hook. On first connect no
+    // event ID has been seen, so the header should be absent. On reconnect
+    // the client should send exactly one Last-Event-ID with the most recent
+    // event's ID, not the hook's value.
+    {
+        std::unique_lock lock(received_mutex);
+        ASSERT_TRUE(received_cv.wait_for(lock, 5000ms, [&] {
+            return last_event_id_observations.size() >= 2;
+        }));
+    }
+
+    {
+        std::lock_guard lock(received_mutex);
+        EXPECT_EQ(0u, last_event_id_observations[0].first)
+            << "first connect should send no Last-Event-ID; got '"
+            << last_event_id_observations[0].second << "'";
+        EXPECT_EQ(1u, last_event_id_observations[1].first)
+            << "reconnect should send exactly one Last-Event-ID header";
+        EXPECT_EQ("evt-42", last_event_id_observations[1].second);
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
