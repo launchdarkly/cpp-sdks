@@ -57,6 +57,8 @@ target_sources(${LIBNAME}
         data_systems/fdv2/polling_initializer.cpp
         data_systems/fdv2/polling_synchronizer.hpp
         data_systems/fdv2/polling_synchronizer.cpp
+        data_systems/fdv2/streaming_synchronizer.hpp
+        data_systems/fdv2/streaming_synchronizer.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/streaming/event_handler.hpp
