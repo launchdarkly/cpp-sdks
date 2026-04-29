@@ -157,9 +157,8 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
 
 void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
     std::lock_guard lock(mutex_);
-    if (!base_url_) {
-        return;
-    }
+    // base_url_ is guaranteed populated: EnsureStarted publishes it before
+    // calling async_connect, which is what eventually triggers this hook.
     boost::urls::url u = *base_url_;
     if (latest_selector_.value) {
         u.params().set("basis", latest_selector_.value->state);
@@ -252,29 +251,19 @@ void FDv2StreamingSynchronizer::State::OnError(sse::Error const& error) {
 
     LD_LOG(logger_, LogLevel::kError) << kIdentity << ": " << msg;
 
-    std::visit(
-        [this, &msg](auto const& e) {
-            using T = std::decay_t<decltype(e)>;
-            if constexpr (std::is_same_v<
-                              T, sse::errors::UnrecoverableClientError>) {
-                Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
-                    MakeError(ErrorKind::kErrorResponse,
-                              static_cast<ErrorInfo::StatusCodeType>(e.status),
-                              std::move(msg)),
-                    false}});
-            } else if constexpr (std::is_same_v<
-                                     T, sse::errors::InvalidRedirectLocation> ||
-                                 std::is_same_v<T,
-                                                sse::errors::NotRedirectable> ||
-                                 std::is_same_v<T, sse::errors::ReadTimeout>) {
-                Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
-                    MakeError(ErrorKind::kNetworkError, 0, std::move(msg)),
-                    false}});
-            } else {
-                static_assert(always_false_v<T>, "non-exhaustive visitor");
-            }
-        },
-        error);
+    if (auto const* client_error =
+            std::get_if<sse::errors::UnrecoverableClientError>(&error)) {
+        Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
+            MakeError(
+                ErrorKind::kErrorResponse,
+                static_cast<ErrorInfo::StatusCodeType>(client_error->status),
+                std::move(msg)),
+            false}});
+        return;
+    }
+
+    Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
+        MakeError(ErrorKind::kNetworkError, 0, std::move(msg)), false}});
 }
 
 void FDv2StreamingSynchronizer::State::Notify(FDv2SourceResult result) {
@@ -377,6 +366,9 @@ async::Future<FDv2SourceResult> FDv2StreamingSynchronizer::Next(
                 }
                 if (idx == 1) {
                     state->ClearPendingPromise();
+                    if (result_future.IsFinished()) {
+                        return *result_future.GetResult();
+                    }
                     return FDv2SourceResult{FDv2SourceResult::Timeout{}};
                 }
                 return *result_future.GetResult();

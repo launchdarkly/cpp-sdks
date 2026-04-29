@@ -319,6 +319,34 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectReconnectUsesLatestSelector) {
     EXPECT_EQ(req2.target(), "/sdk/stream?basis=s1");
 }
 
+TEST(FDv2StreamingSynchronizerTest, OnConnectSelectorStateIsPercentEncoded) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
+        std::nullopt, 1s);
+
+    boost::urls::url base =
+        boost::urls::parse_uri("https://stream.example.com").value();
+    base.segments().push_back("sdk");
+    base.segments().push_back("stream");
+    FDv2StreamingSynchronizerTestPeer::SetBaseUrl(synchronizer, base);
+    FDv2StreamingSynchronizerTestPeer::SetLatestSelector(
+        synchronizer,
+        data_model::Selector{data_model::Selector::State{1, "a&b"}});
+
+    boost::beast::http::request<boost::beast::http::string_body> req;
+
+    // Act: invoke the on_connect hook with a selector state containing '&',
+    // which would terminate the basis value if left raw.
+    FDv2StreamingSynchronizerTestPeer::OnConnect(synchronizer, &req);
+
+    // Assert: '&' is percent-encoded into the basis query param.
+    EXPECT_EQ(req.target(), "/sdk/stream?basis=a%26b");
+}
+
 // ============================================================================
 // SSE event translation
 // ============================================================================
