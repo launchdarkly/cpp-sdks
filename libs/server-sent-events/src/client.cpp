@@ -159,13 +159,13 @@ class FoxyClient : public Client,
 
     void async_connect() override {
         boost::asio::post(
-            session_->get_executor(),
+            backoff_timer_.get_executor(),
             beast::bind_front_handler(&FoxyClient::do_run, shared_from_this()));
     }
 
     void async_restart(std::string const& reason) override {
         boost::asio::post(
-            session_->get_executor(),
+            backoff_timer_.get_executor(),
             beast::bind_front_handler(&FoxyClient::do_restart,
                                       shared_from_this(), reason));
     }
@@ -368,9 +368,10 @@ class FoxyClient : public Client,
     }
 
     void async_shutdown(std::function<void()> completion) override {
-        // Get on the session's executor, otherwise the code in the completion
-        // handler could race.
-        boost::asio::post(session_->get_executor(),
+        // Post onto the strand to avoid races in the completion handler.
+        // session_ can be replaced by create_session(), so use
+        // backoff_timer_'s executor (same strand, never replaced) instead.
+        boost::asio::post(backoff_timer_.get_executor(),
                           beast::bind_front_handler(&FoxyClient::do_shutdown,
                                                     shared_from_this(),
                                                     std::move(completion)));
