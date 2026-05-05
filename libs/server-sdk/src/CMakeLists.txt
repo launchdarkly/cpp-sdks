@@ -39,6 +39,7 @@ target_sources(${LIBNAME}
         data_components/dependency_tracker/dependency_tracker.cpp
         data_components/expiration_tracker/expiration_tracker.hpp
         data_components/expiration_tracker/expiration_tracker.cpp
+        data_interfaces/destination/itransactional_destination.hpp
         data_components/memory_store/memory_store.hpp
         data_components/memory_store/memory_store.cpp
         data_components/serialization_adapters/json_deserializer.hpp
@@ -59,6 +60,8 @@ target_sources(${LIBNAME}
         data_systems/fdv2/polling_synchronizer.cpp
         data_systems/fdv2/streaming_synchronizer.hpp
         data_systems/fdv2/streaming_synchronizer.cpp
+        data_systems/fdv2/fdv2_data_system.hpp
+        data_systems/fdv2/fdv2_data_system.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/streaming/event_handler.hpp
