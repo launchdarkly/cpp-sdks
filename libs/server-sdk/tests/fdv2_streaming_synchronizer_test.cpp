@@ -5,6 +5,7 @@
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
+#include <launchdarkly/sse/client.hpp>
 #include <launchdarkly/sse/error.hpp>
 #include <launchdarkly/sse/event.hpp>
 
@@ -53,6 +54,11 @@ class FDv2StreamingSynchronizerTestPeer {
                                   data_model::Selector selector) {
         std::lock_guard lock(sync.state_->mutex_);
         sync.state_->latest_selector_ = std::move(selector);
+    }
+    static void SetSseClient(FDv2StreamingSynchronizer& sync,
+                             std::shared_ptr<sse::Client> client) {
+        std::lock_guard lock(sync.state_->mutex_);
+        sync.state_->sse_client_ = std::move(client);
     }
 };
 
@@ -103,6 +109,29 @@ config::shared::built::HttpProperties MakeHttpProperties() {
     return launchdarkly::server_side::config::builders::HttpPropertiesBuilder()
         .Build();
 }
+
+// Records calls to the sse::Client interface. Used to verify that the
+// synchronizer drives the underlying SSE connection correctly without
+// requiring a real network client.
+class MockSseClient : public sse::Client {
+   public:
+    void async_connect() override { ++connect_count_; }
+    void async_shutdown(std::function<void()> completion) override {
+        ++shutdown_count_;
+        if (completion) {
+            completion();
+        }
+    }
+    void async_restart(std::string const& reason) override {
+        ++restart_count_;
+        last_restart_reason_ = reason;
+    }
+
+    int connect_count_ = 0;
+    int shutdown_count_ = 0;
+    int restart_count_ = 0;
+    std::string last_restart_reason_;
+};
 
 }  // namespace
 
@@ -413,6 +442,99 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventReturnsGoodbye) {
     ASSERT_NE(g, nullptr);
     ASSERT_TRUE(g->reason.has_value());
     EXPECT_EQ(*g->reason, "bye");
+}
+
+TEST(FDv2StreamingSynchronizerTest, GoodbyeEventTriggersAsyncRestart) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    auto mock_client = std::make_shared<MockSseClient>();
+    FDv2StreamingSynchronizerTestPeer::SetSseClient(synchronizer, mock_client);
+
+    sse::Event goodbye("goodbye", R"({"reason":"bye"})");
+
+    // Act: deliver a goodbye event and drain the resulting Goodbye result.
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
+    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto result = future.WaitForResult(2s);
+    ASSERT_TRUE(result.has_value());
+
+    // Assert: the Goodbye handler drove the SSE client to restart with the
+    // documented reason string. Without this, the server's "we're about to
+    // disconnect" signal would lead to a stalled connection rather than a
+    // controlled reconnect.
+    EXPECT_EQ(mock_client->restart_count_, 1);
+    EXPECT_EQ(mock_client->last_restart_reason_, "FDv2 goodbye received");
+}
+
+TEST(FDv2StreamingSynchronizerTest,
+     GoodbyeMidPayloadDiscardsAccumulatedAndAcceptsFreshChangeset) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    // Begin accumulating a payload that we'll abandon mid-flight via Goodbye.
+    sse::Event server_intent_one("server-intent",
+                                 R"({"payloads":[{"id":"p1","target":1,)"
+                                 R"("intentCode":"xfer-full"}]})");
+    sse::Event abandoned_put(
+        "put-object",
+        R"({"version":1,"kind":"flag","key":"abandoned","object":)"
+        R"({"key":"abandoned","on":true,"fallthrough":{"variation":0},)"
+        R"("variations":[true,false],"version":1}})");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
+                                               server_intent_one);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, abandoned_put);
+
+    // Goodbye arrives mid-payload; expect a Goodbye result and the partial
+    // payload to be discarded.
+    sse::Event goodbye("goodbye", R"({"reason":"bye"})");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
+    auto goodbye_result =
+        synchronizer.Next(2s, data_model::Selector{}).WaitForResult(2s);
+    ASSERT_TRUE(goodbye_result.has_value());
+    ASSERT_NE(std::get_if<FDv2SourceResult::Goodbye>(&goodbye_result->value),
+              nullptr);
+
+    // Drive a fresh full changeset through. The protocol handler must be back
+    // in a clean state — neither carrying the abandoned put nor stuck in the
+    // previous accumulating state.
+    sse::Event server_intent_two("server-intent",
+                                 R"({"payloads":[{"id":"p2","target":2,)"
+                                 R"("intentCode":"xfer-full"}]})");
+    sse::Event fresh_put(
+        "put-object",
+        R"({"version":2,"kind":"flag","key":"fresh","object":)"
+        R"({"key":"fresh","on":true,"fallthrough":{"variation":0},)"
+        R"("variations":[true,false],"version":2}})");
+    sse::Event payload_transferred("payload-transferred",
+                                   R"({"state":"abc","version":2})");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
+                                               server_intent_two);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, fresh_put);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
+                                               payload_transferred);
+    auto changeset_result =
+        synchronizer.Next(2s, data_model::Selector{}).WaitForResult(2s);
+    ASSERT_TRUE(changeset_result.has_value());
+    auto* cs =
+        std::get_if<FDv2SourceResult::ChangeSet>(&changeset_result->value);
+    ASSERT_NE(cs, nullptr);
+
+    // Only the fresh put should be present; the abandoned put was discarded.
+    ASSERT_EQ(cs->change_set.data.size(), 1u);
+    EXPECT_EQ(cs->change_set.data[0].key, "fresh");
 }
 
 TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
