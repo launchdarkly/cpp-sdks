@@ -21,7 +21,7 @@ jobs:
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
       # https://github.com/googleapis/release-please-action/releases/tag/v4.3.0
-      - uses: googleapis/release-please-action@c2a5a2bd6a758a0937f1ddb1e8950609867ed15c
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
