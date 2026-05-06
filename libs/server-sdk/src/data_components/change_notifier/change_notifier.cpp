@@ -10,6 +10,7 @@ namespace launchdarkly::server_side::data_components {
 
 namespace {
 
+// Lets std::visit dispatch to a different lambda per variant alternative.
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;

@@ -210,6 +210,14 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     << r.reason.value_or("") << "'.";
                 Notify(FDv2SourceResult{
                     FDv2SourceResult::Goodbye{r.reason, false}});
+                // Drop the current connection and reconnect; the protocol
+                // handler is reset so the new connection starts in a clean
+                // state.
+                protocol_handler_.Reset();
+                std::lock_guard lock(mutex_);
+                if (sse_client_) {
+                    sse_client_->async_restart("FDv2 goodbye received");
+                }
             } else if constexpr (std::is_same_v<T,
                                                 FDv2ProtocolHandler::Error>) {
                 if (r.kind == FDv2ProtocolHandler::Error::Kind::kServerError) {

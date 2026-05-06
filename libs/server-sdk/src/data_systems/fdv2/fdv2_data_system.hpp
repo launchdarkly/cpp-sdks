@@ -12,6 +12,7 @@
 
 #include <boost/asio/any_io_executor.hpp>
 
+#include <atomic>
 #include <cstddef>
 #include <memory>
 #include <mutex>
@@ -105,7 +106,8 @@ namespace launchdarkly::server_side::data_systems {
  *     |  Synchronizer     |      ChangeSet      -> apply, loop
  *     |  phase            |      Interrupted    -> loop (source self-retries)
  *     |  M = 0, 1, 2, ... |      Timeout        -> loop
- *     |                   |      Goodbye/Term   -> M += 1
+ *     |                   |      Goodbye        -> loop (source self-restarts)
+ *     |                   |      TerminalError  -> M += 1
  *     |                   |      Shutdown       -> [Closed]
  *     +-------------------+
  *               |
@@ -121,9 +123,13 @@ namespace launchdarkly::server_side::data_systems {
  *                              kInterrupted on Interrupted / TerminalError
  *                              (filtered to kInitializing while still in
  *                              the initializer phase if not yet Valid).
- *   kValid                  -> kInterrupted on errors; kOff in destructor.
+ *                              kOff if all initializers exhaust without data
+ *                              and no synchronizers are configured.
+ *   kValid                  -> kInterrupted on errors; kOff in destructor or
+ *                              when synchronizers cycle through and exhaust.
  *   kInterrupted            -> kValid on next successful ChangeSet apply;
- *                              kOff in destructor.
+ *                              kOff in destructor or on synchronizer
+ *                              exhaustion.
  *   kOff                    -> terminal.
  */
 class FDv2DataSystem final : public data_interfaces::IDataSystem {
@@ -217,8 +223,10 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void Close();
 
     // Orchestration-loop methods. Each step chains the next via Future::Then,
-    // so at most one is in flight at a time. mutex_ guards shared state
-    // against the destructor's Close() running concurrently with a callback.
+    // so at most one step has a pending continuation at any time. mutex_
+    // provides mutual exclusion for orchestration state when callbacks run on
+    // different executor threads, and lets Close() safely tear down active
+    // sources from any thread.
 
     void RunNextInitializer();
     void OnInitializerResult(data_interfaces::FDv2SourceResult result);
@@ -249,6 +257,9 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     // Holds references to store_; declared after it so destruction order is
     // safe.
     data_components::ChangeNotifier change_notifier_;
+
+    // Set by Initialize() to detect repeat or concurrent calls.
+    std::atomic_bool initialize_called_;
 
     // Orchestration state, guarded by mutex_.
     std::mutex mutex_;

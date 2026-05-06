@@ -4,6 +4,7 @@
 
 #include <boost/asio/post.hpp>
 
+#include <cassert>
 #include <chrono>
 #include <utility>
 #include <variant>
@@ -12,6 +13,7 @@ namespace launchdarkly::server_side::data_systems {
 
 namespace {
 
+// Lets std::visit dispatch to a different lambda per variant alternative.
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
@@ -39,6 +41,7 @@ FDv2DataSystem::FDv2DataSystem(
       status_manager_(status_manager),
       store_(),
       change_notifier_(store_, store_),
+      initialize_called_(false),
       closed_(false),
       selector_(),
       initializer_index_(0),
@@ -88,6 +91,9 @@ std::string const& FDv2DataSystem::Identity() const {
 }
 
 void FDv2DataSystem::Initialize() {
+    bool const already_called = initialize_called_.exchange(true);
+    assert(!already_called && "Initialize() must be called at most once");
+
     LD_LOG(logger_, LogLevel::kInfo) << Identity() << ": starting";
     if (initializer_factories_.empty() && synchronizer_factories_.empty()) {
         // Offline mode: empty store is the canonical state.
@@ -98,8 +104,6 @@ void FDv2DataSystem::Initialize() {
 }
 
 void FDv2DataSystem::RunNextInitializer() {
-    auto future = async::MakeFuture(data_interfaces::FDv2SourceResult{
-        data_interfaces::FDv2SourceResult::Shutdown{}});
     bool exhausted = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -111,22 +115,21 @@ void FDv2DataSystem::RunNextInitializer() {
         } else {
             auto& factory = initializer_factories_[initializer_index_++];
             active_initializer_ = factory->Build();
-            future = active_initializer_->Run();
+            active_initializer_->Run().Then(
+                [this](data_interfaces::FDv2SourceResult const& result)
+                    -> std::monostate {
+                    OnInitializerResult(result);
+                    return {};
+                },
+                [ioc = ioc_](async::Continuation<void()> work) {
+                    boost::asio::post(ioc, std::move(work));
+                });
         }
     }
 
     if (exhausted) {
         StartSynchronizers();
-        return;
     }
-
-    std::move(future).Then(
-        [this](
-            data_interfaces::FDv2SourceResult const& result) -> std::monostate {
-            OnInitializerResult(result);
-            return {};
-        },
-        async::kInlineExecutor);
 }
 
 void FDv2DataSystem::OnInitializerResult(
@@ -164,13 +167,12 @@ void FDv2DataSystem::OnInitializerResult(
                     te.error.Kind(), te.error.Message());
             },
             [&](Result::Goodbye const&) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity()
-                    << ": initializer received unexpected goodbye";
+                LD_LOG(logger_, LogLevel::kDebug)
+                    << Identity() << ": ignoring goodbye from initializer";
             },
             [&](Result::Timeout const&) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity() << ": initializer timed out (unexpected)";
+                LD_LOG(logger_, LogLevel::kDebug)
+                    << Identity() << ": ignoring timeout from initializer";
             },
         },
         result.value);
@@ -192,6 +194,7 @@ void FDv2DataSystem::OnInitializerResult(
 
 void FDv2DataSystem::StartSynchronizers() {
     bool exhausted = false;
+    bool cycled_synchronizers = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_) {
@@ -199,6 +202,7 @@ void FDv2DataSystem::StartSynchronizers() {
         }
         if (synchronizer_index_ >= synchronizer_factories_.size()) {
             exhausted = true;
+            cycled_synchronizers = synchronizer_index_ > 0;
         } else {
             auto& factory = synchronizer_factories_[synchronizer_index_++];
             active_synchronizer_ = factory->Build();
@@ -206,8 +210,19 @@ void FDv2DataSystem::StartSynchronizers() {
     }
 
     if (exhausted) {
-        LD_LOG(logger_, LogLevel::kWarn)
-            << Identity() << ": no synchronizers available";
+        // kOff when we can't continue updating; init-only with data stays
+        // kValid.
+        if (cycled_synchronizers || !store_.Initialized()) {
+            std::string const message =
+                cycled_synchronizers
+                    ? "all data source acquisition methods have been exhausted"
+                    : "all initializers exhausted and no synchronizers "
+                      "configured";
+            LD_LOG(logger_, LogLevel::kWarn) << Identity() << ": " << message;
+            status_manager_->SetState(
+                DataSourceStatus::DataSourceState::kOff,
+                DataSourceStatus::ErrorInfo::ErrorKind::kUnknown, message);
+        }
         return;
     }
 
@@ -215,24 +230,20 @@ void FDv2DataSystem::StartSynchronizers() {
 }
 
 void FDv2DataSystem::RunSynchronizerNext() {
-    auto future = async::MakeFuture(data_interfaces::FDv2SourceResult{
-        data_interfaces::FDv2SourceResult::Shutdown{}});
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (closed_ || !active_synchronizer_) {
-            return;
-        }
-        future =
-            active_synchronizer_->Next(kSynchronizerNextTimeout, selector_);
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (closed_ || !active_synchronizer_) {
+        return;
     }
-
-    std::move(future).Then(
-        [this](
-            data_interfaces::FDv2SourceResult const& result) -> std::monostate {
-            OnSynchronizerResult(result);
-            return {};
-        },
-        async::kInlineExecutor);
+    active_synchronizer_->Next(kSynchronizerNextTimeout, selector_)
+        .Then(
+            [this](data_interfaces::FDv2SourceResult const& result)
+                -> std::monostate {
+                OnSynchronizerResult(result);
+                return {};
+            },
+            [ioc = ioc_](async::Continuation<void()> work) {
+                boost::asio::post(ioc, std::move(work));
+            });
 }
 
 void FDv2DataSystem::OnSynchronizerResult(
@@ -266,10 +277,11 @@ void FDv2DataSystem::OnSynchronizerResult(
                 advance = true;
             },
             [&](Result::Goodbye const& gb) {
-                LD_LOG(logger_, LogLevel::kInfo)
-                    << Identity() << ": synchronizer goodbye"
+                // The synchronizer handles goodbye internally (reconnects);
+                // the orchestrator just loops on the same source.
+                LD_LOG(logger_, LogLevel::kDebug)
+                    << Identity() << ": ignoring goodbye from synchronizer"
                     << (gb.reason ? ": " + *gb.reason : "");
-                advance = true;
             },
             [&](Result::Timeout const&) {
                 LD_LOG(logger_, LogLevel::kDebug)

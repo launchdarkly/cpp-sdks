@@ -380,6 +380,36 @@ TEST(FDv2DataSystemTest,
     EXPECT_EQ(0, second_factory_ptr->build_count_);
 }
 
+TEST(FDv2DataSystemTest, InitializerOnly_AllFail_TransitionsToOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    auto init = std::make_unique<MockInitializer>(
+        FDv2SourceResult{FDv2SourceResult::Interrupted{
+            FDv2SourceResult::ErrorInfo{
+                FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
+                "fail", std::chrono::system_clock::now()},
+            false,
+        }});
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(init)));
+
+    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
+                      &status_manager, logger);
+
+    // Run: initializer fails and there are no synchronizers to fall through to.
+    ds.Initialize();
+    ioc.run();
+
+    // No data was ever applied; status transitions to Off.
+    EXPECT_EQ(status_manager.Status().State(),
+              DataSourceStatus::DataSourceState::kOff);
+    EXPECT_FALSE(ds.Initialized());
+}
+
 // ============================================================================
 // Synchronizer phase
 // ============================================================================
@@ -420,11 +450,14 @@ TEST(FDv2DataSystemTest, SynchronizerChangeSet_AppliesAndStatusValid) {
     EXPECT_EQ(7u, fetched->version);
 }
 
-TEST(FDv2DataSystemTest, SynchronizerGoodbye_AdvancesToNextFactory) {
+TEST(FDv2DataSystemTest, SynchronizerGoodbye_StaysOnSameSynchronizer) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
 
+    // Synchronizer first emits Goodbye, then exhausts (returns Shutdown).
+    // The synchronizer is expected to handle the goodbye internally
+    // (reconnecting); the orchestrator must NOT rotate.
     auto first =
         std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{
             FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt, false}}});
@@ -432,8 +465,9 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_AdvancesToNextFactory) {
         std::make_unique<OneShotSynchronizerFactory>(std::move(first));
     auto* first_factory_ptr = first_factory.get();
 
-    auto second = std::make_unique<MockSynchronizer>(
-        std::vector<FDv2SourceResult>{});  // empty -> Shutdown
+    // Second factory should never be built; presence detects rotation.
+    auto second =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
     auto second_factory =
         std::make_unique<OneShotSynchronizerFactory>(std::move(second));
     auto* second_factory_ptr = second_factory.get();
@@ -445,13 +479,12 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_AdvancesToNextFactory) {
     FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
                       &status_manager, logger);
 
-    // First synchronizer says Goodbye; orchestrator should rotate to the
-    // next factory.
     ds.Initialize();
     ioc.run();
 
+    // Goodbye does not advance the factory cursor.
     EXPECT_EQ(1, first_factory_ptr->build_count_);
-    EXPECT_EQ(1, second_factory_ptr->build_count_);
+    EXPECT_EQ(0, second_factory_ptr->build_count_);
 }
 
 TEST(FDv2DataSystemTest, SynchronizerInterrupted_RetriesSameSynchronizer) {
@@ -587,4 +620,37 @@ TEST(FDv2DataSystemTest,
     EXPECT_EQ(1, second_factory_ptr->build_count_);
     EXPECT_EQ(status_manager.Status().State(),
               DataSourceStatus::DataSourceState::kInterrupted);
+}
+
+TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Single synchronizer that fails terminally on its first Next. The
+    // orchestrator advances past the only factory and finds no more,
+    // exhausting sources.
+    auto sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::TerminalError{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
+                    "unauthorized", std::chrono::system_clock::now()},
+                false,
+            }}});
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(
+        std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
+
+    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
+                      &status_manager, logger);
+
+    // Synchronizer fails terminally; no more factories to try.
+    ds.Initialize();
+    ioc.run();
+
+    // We cycled through all synchronizers; status transitions to Off.
+    EXPECT_EQ(status_manager.Status().State(),
+              DataSourceStatus::DataSourceState::kOff);
 }
