@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.10.1...launchdarkly-cpp-server-v3.11.0) (2026-05-06)
+
+
+### Features
+
+* add server FDv2 data system orchestrator ([#529](https://github.com/launchdarkly/cpp-sdks/issues/529)) ([65e110f](https://github.com/launchdarkly/cpp-sdks/commit/65e110fe118aa9f291c68a7d2e63435797ddcf73))
+
 ## [3.10.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.10.0...launchdarkly-cpp-server-v3.10.1) (2025-11-12)
 
 
