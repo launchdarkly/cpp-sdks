@@ -630,6 +630,70 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
     EXPECT_EQ("state-2", next_calls[1].second.value->state);
 }
 
+TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Initializer provides a basis with selector v1/state-1.
+    auto initializer = std::make_unique<MockInitializer>(
+        MakeFullChangeSetResult(ChangeSetData{}, MakeSelector(1, "state-1")));
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
+
+    // Synchronizer returns a partial changeset (selector advances to v2),
+    // then a Goodbye, then exhausts via Shutdown. The orchestrator must
+    // call Next a third time with the v2 selector — Goodbye is a transient
+    // event the synchronizer handles internally (reconnects), and the
+    // orchestrator must not regress the selector across it. Without this
+    // preservation, the SDK would reconnect with stale or empty payload
+    // state on every Goodbye, forcing the server into expensive xfer-full
+    // responses instead of efficient xfer-changes.
+    std::vector<MockSynchronizer::NextCall> next_calls;
+    std::vector<FDv2SourceResult> results;
+    results.push_back(FDv2SourceResult{FDv2SourceResult::ChangeSet{
+        data_model::ChangeSet<ChangeSetData>{
+            data_model::ChangeSetType::kPartial,
+            ChangeSetData{},
+            MakeSelector(2, "state-2"),
+        },
+        false,
+    }});
+    results.push_back(
+        FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt, false}});
+    auto sync = std::make_unique<MockSynchronizer>(std::move(results), nullptr,
+                                                   &next_calls);
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(
+        std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
+
+    FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
+                      ioc.get_executor(), &status_manager, logger);
+
+    ds.Initialize();
+    ioc.run();
+
+    // Three Next calls: first with v1 from the initializer, second with v2
+    // after the partial changeset, third with v2 still — Goodbye does not
+    // regress the selector.
+    ASSERT_EQ(3u, next_calls.size());
+
+    ASSERT_TRUE(next_calls[0].second.value.has_value());
+    EXPECT_EQ(1, next_calls[0].second.value->version);
+    EXPECT_EQ("state-1", next_calls[0].second.value->state);
+
+    ASSERT_TRUE(next_calls[1].second.value.has_value());
+    EXPECT_EQ(2, next_calls[1].second.value->version);
+    EXPECT_EQ("state-2", next_calls[1].second.value->state);
+
+    ASSERT_TRUE(next_calls[2].second.value.has_value());
+    EXPECT_EQ(2, next_calls[2].second.value->version);
+    EXPECT_EQ("state-2", next_calls[2].second.value->state);
+}
+
 TEST(FDv2DataSystemTest,
      SynchronizerTerminalError_StatusInterruptedAndAdvance) {
     auto logger = MakeNullLogger();
