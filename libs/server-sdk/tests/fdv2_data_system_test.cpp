@@ -138,6 +138,61 @@ class OneShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::unique_ptr<IFDv2Synchronizer> source_;
 };
 
+// Initializer whose Run() returns an unresolved Future. Used to exercise
+// destruction with orchestration in flight.
+class StalledInitializer : public IFDv2Initializer {
+   public:
+    explicit StalledInitializer(bool* closed_flag) : closed_flag_(closed_flag) {}
+
+    async::Future<FDv2SourceResult> Run() override {
+        return promise_.GetFuture();
+    }
+
+    void Close() override {
+        if (closed_flag_) {
+            *closed_flag_ = true;
+        }
+    }
+
+    std::string const& Identity() const override {
+        static std::string const id = "stalled initializer";
+        return id;
+    }
+
+   private:
+    async::Promise<FDv2SourceResult> promise_;
+    bool* closed_flag_;
+};
+
+// Synchronizer whose Next() returns an unresolved Future. Used to exercise
+// destruction with orchestration in flight.
+class StalledSynchronizer : public IFDv2Synchronizer {
+   public:
+    explicit StalledSynchronizer(bool* closed_flag)
+        : closed_flag_(closed_flag) {}
+
+    async::Future<FDv2SourceResult> Next(
+        std::chrono::milliseconds,
+        data_model::Selector) override {
+        return promise_.GetFuture();
+    }
+
+    void Close() override {
+        if (closed_flag_) {
+            *closed_flag_ = true;
+        }
+    }
+
+    std::string const& Identity() const override {
+        static std::string const id = "stalled synchronizer";
+        return id;
+    }
+
+   private:
+    async::Promise<FDv2SourceResult> promise_;
+    bool* closed_flag_;
+};
+
 data_model::Selector MakeSelector(std::int64_t version, std::string state) {
     return data_model::Selector{
         data_model::Selector::State{version, std::move(state)}};
@@ -651,6 +706,76 @@ TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
     ioc.run();
 
     // We cycled through all synchronizers; status transitions to Off.
+    EXPECT_EQ(status_manager.Status().State(),
+              DataSourceStatus::DataSourceState::kOff);
+}
+
+// ============================================================================
+// Destruction protocol: in-flight orchestration
+// ============================================================================
+//
+// The destructor contract (fdv2_data_system.hpp) requires the destructor to
+// cancel in-flight orchestration (close the active source, transition status
+// to kOff) without firing any continuation against the destroyed object. The
+// caller's responsibility is to ensure the executor is no longer running by
+// the time destruction begins; the orchestrator's responsibility is to leave
+// nothing dangling. These two tests pin that contract for both phases.
+
+TEST(FDv2DataSystemTest,
+     Destructor_WithInFlightInitializer_ClosesSourceAndStatusOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    bool initializer_closed = false;
+
+    auto initializer =
+        std::make_unique<StalledInitializer>(&initializer_closed);
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
+
+    {
+        FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
+                          &status_manager, logger);
+        ds.Initialize();
+        // RunNextInitializer runs, builds the source, calls Run().Then(...).
+        // Run() returns an unresolved Future; the orchestrator's continuation
+        // is registered but will never fire. ioc has no more pending work.
+        ioc.run();
+    }
+    // ~FDv2DataSystem ran with the initializer's Future still unresolved.
+
+    EXPECT_TRUE(initializer_closed);
+    EXPECT_EQ(status_manager.Status().State(),
+              DataSourceStatus::DataSourceState::kOff);
+}
+
+TEST(FDv2DataSystemTest,
+     Destructor_WithInFlightSynchronizer_ClosesSourceAndStatusOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    bool synchronizer_closed = false;
+
+    auto synchronizer =
+        std::make_unique<StalledSynchronizer>(&synchronizer_closed);
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
+        std::move(synchronizer)));
+
+    {
+        FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
+                          &status_manager, logger);
+        ds.Initialize();
+        // No initializers -> RunNextInitializer immediately exhausts ->
+        // StartSynchronizers builds the synchronizer and calls Next().
+        // Next() returns an unresolved Future; orchestration is mid-flight.
+        ioc.run();
+    }
+
+    EXPECT_TRUE(synchronizer_closed);
     EXPECT_EQ(status_manager.Status().State(),
               DataSourceStatus::DataSourceState::kOff);
 }
