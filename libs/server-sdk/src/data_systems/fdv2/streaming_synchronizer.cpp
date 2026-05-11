@@ -322,12 +322,6 @@ void FDv2StreamingSynchronizer::State::Shutdown() {
     }
 }
 
-async::Future<bool> FDv2StreamingSynchronizer::State::Delay(
-    std::chrono::milliseconds duration,
-    async::CancellationToken token) {
-    return async::Delay(executor_, duration, std::move(token));
-}
-
 FDv2StreamingSynchronizer::FDv2StreamingSynchronizer(
     boost::asio::any_io_executor const& executor,
     Logger const& logger,
@@ -347,7 +341,6 @@ FDv2StreamingSynchronizer::~FDv2StreamingSynchronizer() {
 }
 
 async::Future<FDv2SourceResult> FDv2StreamingSynchronizer::Next(
-    std::chrono::milliseconds timeout,
     data_model::Selector selector) {
     auto closed = close_promise_.GetFuture();
     if (closed.IsFinished()) {
@@ -360,24 +353,13 @@ async::Future<FDv2SourceResult> FDv2StreamingSynchronizer::Next(
         return result_future;
     }
 
-    async::CancellationSource cancel;
-    auto timeout_future = state_->Delay(timeout, cancel.GetToken());
-
-    return async::WhenAny(closed, timeout_future, result_future)
+    return async::WhenAny(closed, result_future)
         .Then(
-            [state = state_, cancel = std::move(cancel), result_future](
+            [state = state_, result_future](
                 std::size_t const& idx) mutable -> FDv2SourceResult {
-                cancel.Cancel();
                 if (idx == 0) {
                     state->ClearPendingPromise();
                     return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
-                }
-                if (idx == 1) {
-                    state->ClearPendingPromise();
-                    if (result_future.IsFinished()) {
-                        return *result_future.GetResult();
-                    }
-                    return FDv2SourceResult{FDv2SourceResult::Timeout{}};
                 }
                 return *result_future.GetResult();
             },

@@ -47,7 +47,6 @@ class FDv2PollingSynchronizer final
     ~FDv2PollingSynchronizer() override;
 
     async::Future<data_interfaces::FDv2SourceResult> Next(
-        std::chrono::milliseconds timeout,
         data_model::Selector selector) override;
 
     void Close() override;
@@ -110,25 +109,21 @@ class FDv2PollingSynchronizer final
     };
 
     /**
-     * Waits for the poll interval, then delegates to DoPoll.
-     * Resolves with Shutdown if closed, or Timeout if the timeout expires
-     * first.
+     * Waits for the poll interval, then delegates to DoPoll. Resolves with
+     * Shutdown if closed before the next poll begins.
      */
     static async::Future<data_interfaces::FDv2SourceResult> DoNext(
         std::shared_ptr<State> state,
         async::Future<std::monostate> closed,
-        std::chrono::milliseconds timeout,
         data_model::Selector selector);
 
     /**
-     * Issues a single HTTP poll request and returns the result.
-     * Resolves with Shutdown if closed, or Timeout if timeout_deadline passes
-     * first.
+     * Issues a single HTTP poll request and returns the result. Resolves
+     * with Shutdown if closed before the request completes.
      */
     static async::Future<data_interfaces::FDv2SourceResult> DoPoll(
         std::shared_ptr<State> state,
         async::Future<std::monostate> closed,
-        std::chrono::time_point<std::chrono::steady_clock> timeout_deadline,
         data_model::Selector const& selector);
 
     // Resolved by Close() or on destruction, cancelling any outstanding Next()

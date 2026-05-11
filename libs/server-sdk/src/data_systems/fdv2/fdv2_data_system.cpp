@@ -5,7 +5,6 @@
 #include <boost/asio/post.hpp>
 
 #include <cassert>
-#include <chrono>
 #include <utility>
 #include <variant>
 
@@ -21,9 +20,6 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-// Default until fallback/recovery is implemented.
-constexpr std::chrono::hours kSynchronizerNextTimeout{24};
-
 }  // namespace
 
 FDv2DataSystem::FDv2DataSystem(
@@ -31,6 +27,10 @@ FDv2DataSystem::FDv2DataSystem(
         initializer_factories,
     std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
         synchronizer_factories,
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+        fallback_condition_factory,
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+        recovery_condition_factory,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager* status_manager,
     Logger const& logger)
@@ -38,6 +38,8 @@ FDv2DataSystem::FDv2DataSystem(
       ioc_(std::move(ioc)),
       initializer_factories_(std::move(initializer_factories)),
       synchronizer_factories_(std::move(synchronizer_factories)),
+      fallback_condition_factory_(std::move(fallback_condition_factory)),
+      recovery_condition_factory_(std::move(recovery_condition_factory)),
       status_manager_(status_manager),
       store_(),
       change_notifier_(store_, store_),
@@ -47,7 +49,8 @@ FDv2DataSystem::FDv2DataSystem(
       initializer_index_(0),
       synchronizer_index_(0),
       active_initializer_(nullptr),
-      active_synchronizer_(nullptr) {}
+      active_synchronizer_(nullptr),
+      active_conditions_(nullptr) {}
 
 FDv2DataSystem::~FDv2DataSystem() {
     Close();
@@ -61,6 +64,9 @@ void FDv2DataSystem::Close() {
     }
     if (active_synchronizer_) {
         active_synchronizer_->Close();
+    }
+    if (active_conditions_) {
+        active_conditions_->Close();
     }
     status_manager_->SetState(DataSourceStatus::DataSourceState::kOff);
 }
@@ -170,10 +176,6 @@ void FDv2DataSystem::OnInitializerResult(
                 LD_LOG(logger_, LogLevel::kDebug)
                     << Identity() << ": ignoring goodbye from initializer";
             },
-            [&](Result::Timeout const&) {
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": ignoring timeout from initializer";
-            },
         },
         result.value);
 
@@ -204,8 +206,11 @@ void FDv2DataSystem::StartSynchronizers() {
             exhausted = true;
             cycled_synchronizers = synchronizer_index_ > 0;
         } else {
-            auto& factory = synchronizer_factories_[synchronizer_index_++];
+            auto& factory = synchronizer_factories_[synchronizer_index_];
             active_synchronizer_ = factory->Build();
+            active_conditions_ =
+                BuildConditionsForSynchronizer(synchronizer_index_);
+            ++synchronizer_index_;
         }
     }
 
@@ -234,11 +239,17 @@ void FDv2DataSystem::RunSynchronizerNext() {
     if (closed_ || !active_synchronizer_) {
         return;
     }
-    active_synchronizer_->Next(kSynchronizerNextTimeout, selector_)
+    auto next_future = active_synchronizer_->Next(selector_);
+    auto cond_future = active_conditions_->GetFuture();
+    async::WhenAny(cond_future, next_future)
         .Then(
-            [this](data_interfaces::FDv2SourceResult const& result)
-                -> std::monostate {
-                OnSynchronizerResult(result);
+            [this, cond_future,
+             next_future](std::size_t const& idx) -> std::monostate {
+                if (idx == 0) {
+                    OnConditionFired(*cond_future.GetResult());
+                } else {
+                    OnSynchronizerResult(*next_future.GetResult());
+                }
                 return {};
             },
             [ioc = ioc_](async::Continuation<void()> work) {
@@ -246,9 +257,57 @@ void FDv2DataSystem::RunSynchronizerNext() {
             });
 }
 
+void FDv2DataSystem::OnConditionFired(
+    data_interfaces::IFDv2Condition::Type type) {
+    using Type = data_interfaces::IFDv2Condition::Type;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        // Destructors close the active synchronizer and conditions.
+        active_synchronizer_.reset();
+        active_conditions_.reset();
+        if (type == Type::kRecovery) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": recovery condition met";
+            synchronizer_index_ = 0;
+        } else {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": fallback condition met";
+        }
+    }
+    StartSynchronizers();
+}
+
+std::unique_ptr<Conditions> FDv2DataSystem::BuildConditionsForSynchronizer(
+    std::size_t synchronizer_position) const {
+    std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions;
+    if (synchronizer_factories_.size() <= 1) {
+        return std::make_unique<Conditions>(std::move(conditions));
+    }
+    if (fallback_condition_factory_) {
+        conditions.push_back(fallback_condition_factory_->Build());
+    }
+    if (synchronizer_position > 0 && recovery_condition_factory_) {
+        conditions.push_back(recovery_condition_factory_->Build());
+    }
+    return std::make_unique<Conditions>(std::move(conditions));
+}
+
 void FDv2DataSystem::OnSynchronizerResult(
     data_interfaces::FDv2SourceResult result) {
     using Result = data_interfaces::FDv2SourceResult;
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        if (active_conditions_) {
+            active_conditions_->Inform(result);
+        }
+    }
 
     bool got_shutdown = false;
     bool advance = false;
@@ -283,10 +342,6 @@ void FDv2DataSystem::OnSynchronizerResult(
                     << Identity() << ": ignoring goodbye from synchronizer"
                     << (gb.reason ? ": " + *gb.reason : "");
             },
-            [&](Result::Timeout const&) {
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": synchronizer timed out; retrying";
-            },
         },
         result.value);
 
@@ -294,10 +349,12 @@ void FDv2DataSystem::OnSynchronizerResult(
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_ || got_shutdown) {
             active_synchronizer_.reset();
+            active_conditions_.reset();
             return;
         }
         if (advance) {
             active_synchronizer_.reset();
+            active_conditions_.reset();
         }
     }
 

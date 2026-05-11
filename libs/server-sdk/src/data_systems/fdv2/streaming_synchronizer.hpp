@@ -54,7 +54,6 @@ class FDv2StreamingSynchronizer final
     ~FDv2StreamingSynchronizer() override;
 
     async::Future<data_interfaces::FDv2SourceResult> Next(
-        std::chrono::milliseconds timeout,
         data_model::Selector selector) override;
 
     void Close() override;
@@ -103,14 +102,6 @@ class FDv2StreamingSynchronizer final
          * to start a new client. Idempotent.
          */
         void Shutdown();
-
-        /**
-         * Returns a Future that resolves after the given duration. Resolves
-         * early with false if the token is cancelled before the duration
-         * elapses.
-         */
-        async::Future<bool> Delay(std::chrono::milliseconds duration,
-                                  async::CancellationToken token = {});
 
        private:
         using HttpRequest =

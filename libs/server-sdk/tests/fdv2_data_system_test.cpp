@@ -64,26 +64,30 @@ class MockInitializer : public IFDv2Initializer {
 };
 
 // Synchronizer that resolves successive Next() calls from a queue of results.
-// Once the queue is exhausted, returns Shutdown to terminate orchestration.
+// Once the queue is exhausted, returns Shutdown to terminate orchestration —
+// unless `stall_after_results` is set, in which case the next Future never
+// resolves (useful for tests where a condition's timer must win the race).
 class MockSynchronizer : public IFDv2Synchronizer {
    public:
-    using NextCall = std::pair<std::chrono::milliseconds, data_model::Selector>;
-
     MockSynchronizer(std::vector<FDv2SourceResult> results,
                      bool* closed_flag = nullptr,
-                     std::vector<NextCall>* next_calls = nullptr)
+                     std::vector<data_model::Selector>* next_calls = nullptr,
+                     bool stall_after_results = false)
         : results_(std::move(results)),
           closed_flag_(closed_flag),
-          next_calls_(next_calls) {}
+          next_calls_(next_calls),
+          stall_after_results_(stall_after_results) {}
 
     async::Future<FDv2SourceResult> Next(
-        std::chrono::milliseconds timeout,
         data_model::Selector selector) override {
         if (next_calls_) {
-            next_calls_->push_back({timeout, selector});
+            next_calls_->push_back(selector);
         }
         if (call_index_ < results_.size()) {
             return async::MakeFuture(std::move(results_[call_index_++]));
+        }
+        if (stall_after_results_) {
+            return stall_promise_.GetFuture();
         }
         return async::MakeFuture(
             FDv2SourceResult{FDv2SourceResult::Shutdown{}});
@@ -104,7 +108,9 @@ class MockSynchronizer : public IFDv2Synchronizer {
     std::vector<FDv2SourceResult> results_;
     std::size_t call_index_ = 0;
     bool* closed_flag_;
-    std::vector<NextCall>* next_calls_;
+    std::vector<data_model::Selector>* next_calls_;
+    bool stall_after_results_;
+    async::Promise<FDv2SourceResult> stall_promise_;
 };
 
 // One-shot factory: returns a pre-supplied source on its first Build() call.
@@ -142,7 +148,8 @@ class OneShotSynchronizerFactory : public IFDv2SynchronizerFactory {
 // destruction with orchestration in flight.
 class StalledInitializer : public IFDv2Initializer {
    public:
-    explicit StalledInitializer(bool* closed_flag) : closed_flag_(closed_flag) {}
+    explicit StalledInitializer(bool* closed_flag)
+        : closed_flag_(closed_flag) {}
 
     async::Future<FDv2SourceResult> Run() override {
         return promise_.GetFuture();
@@ -171,9 +178,7 @@ class StalledSynchronizer : public IFDv2Synchronizer {
     explicit StalledSynchronizer(bool* closed_flag)
         : closed_flag_(closed_flag) {}
 
-    async::Future<FDv2SourceResult> Next(
-        std::chrono::milliseconds,
-        data_model::Selector) override {
+    async::Future<FDv2SourceResult> Next(data_model::Selector) override {
         return promise_.GetFuture();
     }
 
@@ -221,7 +226,8 @@ TEST(FDv2DataSystemTest, OfflineMode_NoFactories_StatusValid) {
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
 
-    FDv2DataSystem ds({}, {}, ioc.get_executor(), &status_manager, logger);
+    FDv2DataSystem ds({}, {}, nullptr, nullptr, ioc.get_executor(),
+                      &status_manager, logger);
 
     // Initialize with no sources; orchestration should not be posted.
     ds.Initialize();
@@ -238,7 +244,8 @@ TEST(FDv2DataSystemTest, Destructor_TransitionsStatusToOff) {
     data_components::DataSourceStatusManager status_manager;
 
     {
-        FDv2DataSystem ds({}, {}, ioc.get_executor(), &status_manager, logger);
+        FDv2DataSystem ds({}, {}, nullptr, nullptr, ioc.get_executor(),
+                          &status_manager, logger);
         ds.Initialize();
         ASSERT_EQ(status_manager.Status().State(),
                   DataSourceStatus::DataSourceState::kValid);
@@ -273,8 +280,8 @@ TEST(FDv2DataSystemTest, InitializerWithBasis_AppliesAndStatusValid) {
     initializers.push_back(
         std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
 
-    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // Run the initializer to completion.
     ds.Initialize();
@@ -322,8 +329,8 @@ TEST(FDv2DataSystemTest, InitializerInterrupted_AdvancesToNextInitializer) {
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // Run; first initializer fails, orchestrator should fall through to
     // the second.
@@ -385,8 +392,8 @@ TEST(FDv2DataSystemTest,
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -423,8 +430,8 @@ TEST(FDv2DataSystemTest,
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -452,8 +459,8 @@ TEST(FDv2DataSystemTest, InitializerOnly_AllFail_TransitionsToOff) {
     initializers.push_back(
         std::make_unique<OneShotInitializerFactory>(std::move(init)));
 
-    FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // Run: initializer fails and there are no synchronizers to fall through to.
     ds.Initialize();
@@ -490,8 +497,8 @@ TEST(FDv2DataSystemTest, SynchronizerChangeSet_AppliesAndStatusValid) {
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // No initializers; orchestrator should hand directly to the synchronizer.
     ds.Initialize();
@@ -531,8 +538,8 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_StaysOnSameSynchronizer) {
     synchronizers.push_back(std::move(first_factory));
     synchronizers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -568,8 +575,8 @@ TEST(FDv2DataSystemTest, SynchronizerInterrupted_RetriesSameSynchronizer) {
     auto* factory_ptr = factory.get();
     synchronizers.push_back(std::move(factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -596,7 +603,7 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
 
     // Synchronizer first returns a partial changeset with a NEW selector,
     // then exhausts (Shutdown) on the next call.
-    std::vector<MockSynchronizer::NextCall> next_calls;
+    std::vector<data_model::Selector> next_calls;
     std::vector<FDv2SourceResult> results;
     results.push_back(FDv2SourceResult{FDv2SourceResult::ChangeSet{
         data_model::ChangeSet<ChangeSetData>{
@@ -614,7 +621,8 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
     FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
-                      ioc.get_executor(), &status_manager, logger);
+                      nullptr, nullptr, ioc.get_executor(), &status_manager,
+                      logger);
 
     ds.Initialize();
     ioc.run();
@@ -622,12 +630,12 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
     // Two Next calls: first with the initializer's selector, second with the
     // selector updated by the partial changeset.
     ASSERT_EQ(2u, next_calls.size());
-    ASSERT_TRUE(next_calls[0].second.value.has_value());
-    EXPECT_EQ(1, next_calls[0].second.value->version);
-    EXPECT_EQ("state-1", next_calls[0].second.value->state);
-    ASSERT_TRUE(next_calls[1].second.value.has_value());
-    EXPECT_EQ(2, next_calls[1].second.value->version);
-    EXPECT_EQ("state-2", next_calls[1].second.value->state);
+    ASSERT_TRUE(next_calls[0].value.has_value());
+    EXPECT_EQ(1, next_calls[0].value->version);
+    EXPECT_EQ("state-1", next_calls[0].value->state);
+    ASSERT_TRUE(next_calls[1].value.has_value());
+    EXPECT_EQ(2, next_calls[1].value->version);
+    EXPECT_EQ("state-2", next_calls[1].value->state);
 }
 
 TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
@@ -651,7 +659,7 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
     // preservation, the SDK would reconnect with stale or empty payload
     // state on every Goodbye, forcing the server into expensive xfer-full
     // responses instead of efficient xfer-changes.
-    std::vector<MockSynchronizer::NextCall> next_calls;
+    std::vector<data_model::Selector> next_calls;
     std::vector<FDv2SourceResult> results;
     results.push_back(FDv2SourceResult{FDv2SourceResult::ChangeSet{
         data_model::ChangeSet<ChangeSetData>{
@@ -671,7 +679,8 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
     FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
-                      ioc.get_executor(), &status_manager, logger);
+                      nullptr, nullptr, ioc.get_executor(), &status_manager,
+                      logger);
 
     ds.Initialize();
     ioc.run();
@@ -681,17 +690,17 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
     // regress the selector.
     ASSERT_EQ(3u, next_calls.size());
 
-    ASSERT_TRUE(next_calls[0].second.value.has_value());
-    EXPECT_EQ(1, next_calls[0].second.value->version);
-    EXPECT_EQ("state-1", next_calls[0].second.value->state);
+    ASSERT_TRUE(next_calls[0].value.has_value());
+    EXPECT_EQ(1, next_calls[0].value->version);
+    EXPECT_EQ("state-1", next_calls[0].value->state);
 
-    ASSERT_TRUE(next_calls[1].second.value.has_value());
-    EXPECT_EQ(2, next_calls[1].second.value->version);
-    EXPECT_EQ("state-2", next_calls[1].second.value->state);
+    ASSERT_TRUE(next_calls[1].value.has_value());
+    EXPECT_EQ(2, next_calls[1].value->version);
+    EXPECT_EQ("state-2", next_calls[1].value->state);
 
-    ASSERT_TRUE(next_calls[2].second.value.has_value());
-    EXPECT_EQ(2, next_calls[2].second.value->version);
-    EXPECT_EQ("state-2", next_calls[2].second.value->state);
+    ASSERT_TRUE(next_calls[2].value.has_value());
+    EXPECT_EQ(2, next_calls[2].value->version);
+    EXPECT_EQ("state-2", next_calls[2].value->state);
 }
 
 TEST(FDv2DataSystemTest,
@@ -725,8 +734,8 @@ TEST(FDv2DataSystemTest,
     synchronizers.push_back(std::move(first_factory));
     synchronizers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -762,8 +771,8 @@ TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // Synchronizer fails terminally; no more factories to try.
     ds.Initialize();
@@ -772,6 +781,55 @@ TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
     // We cycled through all synchronizers; status transitions to Off.
     EXPECT_EQ(status_manager.Status().State(),
               DataSourceStatus::DataSourceState::kOff);
+}
+
+// ============================================================================
+// Fallback and recovery
+// ============================================================================
+
+TEST(FDv2DataSystemTest, FallbackConditionFires_AdvancesToNextSynchronizer) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Primary returns Interrupted once and then stalls, leaving the fallback
+    // condition's timer free to win the race.
+    auto primary_sync = std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::Interrupted{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
+                    "boom", std::chrono::system_clock::now()},
+                false,
+            }},
+        },
+        nullptr, nullptr, /*stall_after_results=*/true);
+    auto primary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(primary_sync));
+
+    // Secondary returns Shutdown on first call, ending orchestration cleanly.
+    auto secondary_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto secondary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(secondary_sync));
+    auto* secondary_factory_ptr = secondary_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(primary_factory));
+    synchronizers.push_back(std::move(secondary_factory));
+
+    auto fallback_factory =
+        std::make_unique<FallbackConditionFactory>(ioc.get_executor(), 50ms);
+
+    FDv2DataSystem ds({}, std::move(synchronizers), std::move(fallback_factory),
+                      nullptr, ioc.get_executor(), &status_manager, logger);
+
+    ds.Initialize();
+    ioc.run();
+
+    // Fallback condition fired after Interrupted, so the orchestrator
+    // advanced to the secondary.
+    EXPECT_EQ(1, secondary_factory_ptr->build_count_);
 }
 
 // ============================================================================
@@ -800,8 +858,8 @@ TEST(FDv2DataSystemTest,
         std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
 
     {
-        FDv2DataSystem ds(std::move(initializers), {}, ioc.get_executor(),
-                          &status_manager, logger);
+        FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+                          ioc.get_executor(), &status_manager, logger);
         ds.Initialize();
         // RunNextInitializer runs, builds the source, calls Run().Then(...).
         // Run() returns an unresolved Future; the orchestrator's continuation
@@ -826,12 +884,12 @@ TEST(FDv2DataSystemTest,
     auto synchronizer =
         std::make_unique<StalledSynchronizer>(&synchronizer_closed);
     std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
-    synchronizers.push_back(std::make_unique<OneShotSynchronizerFactory>(
-        std::move(synchronizer)));
+    synchronizers.push_back(
+        std::make_unique<OneShotSynchronizerFactory>(std::move(synchronizer)));
 
     {
-        FDv2DataSystem ds({}, std::move(synchronizers), ioc.get_executor(),
-                          &status_manager, logger);
+        FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+                          ioc.get_executor(), &status_manager, logger);
         ds.Initialize();
         // No initializers -> RunNextInitializer immediately exhausts ->
         // StartSynchronizers builds the synchronizer and calls Next().

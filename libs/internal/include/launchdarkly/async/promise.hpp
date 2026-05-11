@@ -534,6 +534,30 @@ Future<std::size_t> WhenAny(Future<Ts>... futures) {
     return result;
 }
 
+// Vector overload of WhenAny. Returns a Future<std::size_t> that resolves with
+// the 0-based index of whichever input future resolves first. If the vector is
+// empty, the returned future never resolves.
+template <typename T>
+Future<std::size_t> WhenAny(std::vector<Future<T>> const& futures) {
+    Promise<std::size_t> promise;
+    Future<std::size_t> result = promise.GetFuture();
+
+    auto shared_promise =
+        std::make_shared<Promise<std::size_t>>(std::move(promise));
+
+    for (std::size_t i = 0; i < futures.size(); ++i) {
+        Future<T> future = futures[i];
+        future.Then(
+            [shared_promise, i](T const&) -> std::monostate {
+                shared_promise->Resolve(i);
+                return std::monostate{};
+            },
+            [](Continuation<void()> f) { f(); });
+    }
+
+    return result;
+}
+
 // MakeFuture returns an already-resolved Future<T>. Useful in flattening Then
 // continuations where some branches produce a result immediately and others
 // return a Future, requiring a uniform Future<T> return type across all
