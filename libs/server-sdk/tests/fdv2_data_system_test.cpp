@@ -183,6 +183,7 @@ class StalledSynchronizer : public IFDv2Synchronizer {
     }
 
     void Close() override {
+        promise_.Resolve(FDv2SourceResult{FDv2SourceResult::Shutdown{}});
         if (closed_flag_) {
             *closed_flag_ = true;
         }
@@ -226,8 +227,9 @@ TEST(FDv2DataSystemTest, OfflineMode_NoFactories_StatusValid) {
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
 
-    FDv2DataSystem ds({}, {}, nullptr, nullptr, ioc.get_executor(),
-                      &status_manager, logger);
+    FDv2DataSystem ds({}, {}, /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     // Initialize with no sources; orchestration should not be posted.
     ds.Initialize();
@@ -244,8 +246,9 @@ TEST(FDv2DataSystemTest, Destructor_TransitionsStatusToOff) {
     data_components::DataSourceStatusManager status_manager;
 
     {
-        FDv2DataSystem ds({}, {}, nullptr, nullptr, ioc.get_executor(),
-                          &status_manager, logger);
+        FDv2DataSystem ds({}, {}, /*fallback_condition_factory=*/nullptr,
+                          /*recovery_condition_factory=*/nullptr,
+                          ioc.get_executor(), &status_manager, logger);
         ds.Initialize();
         ASSERT_EQ(status_manager.Status().State(),
                   DataSourceStatus::DataSourceState::kValid);
@@ -280,7 +283,9 @@ TEST(FDv2DataSystemTest, InitializerWithBasis_AppliesAndStatusValid) {
     initializers.push_back(
         std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
 
-    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+    FDv2DataSystem ds(std::move(initializers), {},
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     // Run the initializer to completion.
@@ -329,7 +334,9 @@ TEST(FDv2DataSystemTest, InitializerInterrupted_AdvancesToNextInitializer) {
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+    FDv2DataSystem ds(std::move(initializers), {},
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     // Run; first initializer fails, orchestrator should fall through to
@@ -392,7 +399,9 @@ TEST(FDv2DataSystemTest,
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+    FDv2DataSystem ds(std::move(initializers), {},
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
@@ -430,7 +439,9 @@ TEST(FDv2DataSystemTest,
     initializers.push_back(std::move(first_factory));
     initializers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+    FDv2DataSystem ds(std::move(initializers), {},
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
@@ -459,7 +470,9 @@ TEST(FDv2DataSystemTest, InitializerOnly_AllFail_TransitionsToOff) {
     initializers.push_back(
         std::make_unique<OneShotInitializerFactory>(std::move(init)));
 
-    FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+    FDv2DataSystem ds(std::move(initializers), {},
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     // Run: initializer fails and there are no synchronizers to fall through to.
@@ -497,7 +510,9 @@ TEST(FDv2DataSystemTest, SynchronizerChangeSet_AppliesAndStatusValid) {
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     // No initializers; orchestrator should hand directly to the synchronizer.
@@ -538,7 +553,9 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_StaysOnSameSynchronizer) {
     synchronizers.push_back(std::move(first_factory));
     synchronizers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
@@ -575,7 +592,9 @@ TEST(FDv2DataSystemTest, SynchronizerInterrupted_RetriesSameSynchronizer) {
     auto* factory_ptr = factory.get();
     synchronizers.push_back(std::move(factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
@@ -613,16 +632,17 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
         },
         false,
     }});
-    auto sync = std::make_unique<MockSynchronizer>(std::move(results), nullptr,
-                                                   &next_calls);
+    auto sync = std::make_unique<MockSynchronizer>(
+        std::move(results), /*closed_flag=*/nullptr, &next_calls);
 
     std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
     FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
-                      nullptr, nullptr, ioc.get_executor(), &status_manager,
-                      logger);
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -671,16 +691,17 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
     }});
     results.push_back(
         FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt, false}});
-    auto sync = std::make_unique<MockSynchronizer>(std::move(results), nullptr,
-                                                   &next_calls);
+    auto sync = std::make_unique<MockSynchronizer>(
+        std::move(results), /*closed_flag=*/nullptr, &next_calls);
 
     std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
     FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
-                      nullptr, nullptr, ioc.get_executor(), &status_manager,
-                      logger);
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -734,7 +755,9 @@ TEST(FDv2DataSystemTest,
     synchronizers.push_back(std::move(first_factory));
     synchronizers.push_back(std::move(second_factory));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
@@ -771,7 +794,9 @@ TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
     synchronizers.push_back(
         std::make_unique<OneShotSynchronizerFactory>(std::move(sync)));
 
-    FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
                       ioc.get_executor(), &status_manager, logger);
 
     // Synchronizer fails terminally; no more factories to try.
@@ -798,12 +823,14 @@ TEST(FDv2DataSystemTest, FallbackConditionFires_AdvancesToNextSynchronizer) {
         std::vector<FDv2SourceResult>{
             FDv2SourceResult{FDv2SourceResult::Interrupted{
                 FDv2SourceResult::ErrorInfo{
-                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
-                    "boom", std::chrono::system_clock::now()},
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+                    /*status_code=*/0, "boom",
+                    std::chrono::system_clock::now()},
                 false,
             }},
         },
-        nullptr, nullptr, /*stall_after_results=*/true);
+        /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true);
     auto primary_factory =
         std::make_unique<OneShotSynchronizerFactory>(std::move(primary_sync));
 
@@ -819,10 +846,12 @@ TEST(FDv2DataSystemTest, FallbackConditionFires_AdvancesToNextSynchronizer) {
     synchronizers.push_back(std::move(secondary_factory));
 
     auto fallback_factory =
-        std::make_unique<FallbackConditionFactory>(ioc.get_executor(), 50ms);
+        std::make_unique<FallbackConditionFactory>(ioc.get_executor(),
+                                                   /*timeout=*/50ms);
 
     FDv2DataSystem ds({}, std::move(synchronizers), std::move(fallback_factory),
-                      nullptr, ioc.get_executor(), &status_manager, logger);
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
 
     ds.Initialize();
     ioc.run();
@@ -858,7 +887,9 @@ TEST(FDv2DataSystemTest,
         std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
 
     {
-        FDv2DataSystem ds(std::move(initializers), {}, nullptr, nullptr,
+        FDv2DataSystem ds(std::move(initializers), {},
+                          /*fallback_condition_factory=*/nullptr,
+                          /*recovery_condition_factory=*/nullptr,
                           ioc.get_executor(), &status_manager, logger);
         ds.Initialize();
         // RunNextInitializer runs, builds the source, calls Run().Then(...).
@@ -888,7 +919,9 @@ TEST(FDv2DataSystemTest,
         std::make_unique<OneShotSynchronizerFactory>(std::move(synchronizer)));
 
     {
-        FDv2DataSystem ds({}, std::move(synchronizers), nullptr, nullptr,
+        FDv2DataSystem ds({}, std::move(synchronizers),
+                          /*fallback_condition_factory=*/nullptr,
+                          /*recovery_condition_factory=*/nullptr,
                           ioc.get_executor(), &status_manager, logger);
         ds.Initialize();
         // No initializers -> RunNextInitializer immediately exhausts ->

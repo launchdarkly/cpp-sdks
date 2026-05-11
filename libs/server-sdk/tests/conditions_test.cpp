@@ -47,13 +47,13 @@ class RunningIoContext {
 
 TEST(FallbackConditionTest, InterruptedArmsTimerWhichFiresAfterTimeout) {
     RunningIoContext ioc;
-    FallbackCondition condition(ioc.GetExecutor(), 100ms);
+    FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
         FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0, "boom",
-            std::chrono::system_clock::now()},
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
         false,
     }});
 
@@ -65,15 +65,15 @@ TEST(FallbackConditionTest, InterruptedArmsTimerWhichFiresAfterTimeout) {
 
 TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
     RunningIoContext ioc;
-    FallbackCondition condition(ioc.GetExecutor(), 100ms);
+    FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     // Arm the timer with Interrupted, then cancel via ChangeSet before it
     // fires.
     condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
         FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0, "boom",
-            std::chrono::system_clock::now()},
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
         false,
     }});
     condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
@@ -92,13 +92,13 @@ TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
 
 TEST(FallbackConditionTest, CloseCancelsActiveTimer) {
     RunningIoContext ioc;
-    FallbackCondition condition(ioc.GetExecutor(), 100ms);
+    FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
         FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0, "boom",
-            std::chrono::system_clock::now()},
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
         false,
     }});
     condition.Close();
@@ -113,7 +113,7 @@ TEST(FallbackConditionTest, CloseCancelsActiveTimer) {
 
 TEST(RecoveryConditionTest, TimerArmedAtConstructionFiresAfterTimeout) {
     RunningIoContext ioc;
-    RecoveryCondition condition(ioc.GetExecutor(), 100ms);
+    RecoveryCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
 
     auto result = condition.Execute().WaitForResult(1s);
 
@@ -123,15 +123,15 @@ TEST(RecoveryConditionTest, TimerArmedAtConstructionFiresAfterTimeout) {
 
 TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
     RunningIoContext ioc;
-    RecoveryCondition condition(ioc.GetExecutor(), 100ms);
+    RecoveryCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     // Recovery is purely time-based; results from the synchronizer should not
     // disturb the timer in either direction.
     condition.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
         FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0, "boom",
-            std::chrono::system_clock::now()},
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
         false,
     }});
     condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
@@ -150,7 +150,7 @@ TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
 
 TEST(RecoveryConditionTest, CloseCancelsActiveTimer) {
     RunningIoContext ioc;
-    RecoveryCondition condition(ioc.GetExecutor(), 100ms);
+    RecoveryCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     condition.Close();
@@ -176,9 +176,10 @@ TEST(ConditionsTest, AggregateResolvesWithTypeOfFirstFiringCondition) {
 
     // Recovery's timer is much shorter, so it should win the race.
     std::vector<std::unique_ptr<IFDv2Condition>> conds;
-    conds.push_back(std::make_unique<FallbackCondition>(ioc.GetExecutor(), 1s));
     conds.push_back(
-        std::make_unique<RecoveryCondition>(ioc.GetExecutor(), 100ms));
+        std::make_unique<FallbackCondition>(ioc.GetExecutor(), /*timeout=*/1s));
+    conds.push_back(std::make_unique<RecoveryCondition>(ioc.GetExecutor(),
+                                                        /*timeout=*/100ms));
     Conditions conditions(std::move(conds));
 
     auto result = conditions.GetFuture().WaitForResult(1s);
@@ -193,15 +194,16 @@ TEST(ConditionsTest, InformForwardsToAllUnderlyingConditions) {
     // Fallback's timer is shorter than recovery's; informing Interrupted arms
     // the fallback timer, which will then beat recovery.
     std::vector<std::unique_ptr<IFDv2Condition>> conds;
+    conds.push_back(std::make_unique<FallbackCondition>(ioc.GetExecutor(),
+                                                        /*timeout=*/100ms));
     conds.push_back(
-        std::make_unique<FallbackCondition>(ioc.GetExecutor(), 100ms));
-    conds.push_back(std::make_unique<RecoveryCondition>(ioc.GetExecutor(), 1s));
+        std::make_unique<RecoveryCondition>(ioc.GetExecutor(), /*timeout=*/1s));
     Conditions conditions(std::move(conds));
 
     conditions.Inform(FDv2SourceResult{FDv2SourceResult::Interrupted{
         FDv2SourceResult::ErrorInfo{
-            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0, "boom",
-            std::chrono::system_clock::now()},
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
         false,
     }});
 
@@ -215,10 +217,10 @@ TEST(ConditionsTest, CloseForwardsToAllUnderlyingConditions) {
     RunningIoContext ioc;
 
     std::vector<std::unique_ptr<IFDv2Condition>> conds;
-    conds.push_back(
-        std::make_unique<RecoveryCondition>(ioc.GetExecutor(), 100ms));
-    conds.push_back(
-        std::make_unique<RecoveryCondition>(ioc.GetExecutor(), 100ms));
+    conds.push_back(std::make_unique<RecoveryCondition>(ioc.GetExecutor(),
+                                                        /*timeout=*/100ms));
+    conds.push_back(std::make_unique<RecoveryCondition>(ioc.GetExecutor(),
+                                                        /*timeout=*/100ms));
     Conditions conditions(std::move(conds));
 
     conditions.Close();
