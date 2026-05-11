@@ -35,6 +35,7 @@ void TimedCondition::Close() {
         state_->timer_cancel->Cancel();
         state_->timer_cancel.reset();
     }
+    state_->promise.Resolve(IFDv2Condition::Type::kCancelled);
 }
 
 void TimedCondition::ArmTimer() {

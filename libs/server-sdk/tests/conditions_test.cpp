@@ -90,7 +90,7 @@ TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
     EXPECT_FALSE(future.IsFinished());
 }
 
-TEST(FallbackConditionTest, CloseCancelsActiveTimer) {
+TEST(FallbackConditionTest, CloseCancelsActiveTimerAndResolvesWithCancelled) {
     RunningIoContext ioc;
     FallbackCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
@@ -103,8 +103,9 @@ TEST(FallbackConditionTest, CloseCancelsActiveTimer) {
     }});
     condition.Close();
 
-    std::this_thread::sleep_for(200ms);
-    EXPECT_FALSE(future.IsFinished());
+    auto result = future.WaitForResult(200ms);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(IFDv2Condition::Type::kCancelled, *result);
 }
 
 // ============================================================================
@@ -148,15 +149,16 @@ TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
     EXPECT_EQ(IFDv2Condition::Type::kRecovery, *result);
 }
 
-TEST(RecoveryConditionTest, CloseCancelsActiveTimer) {
+TEST(RecoveryConditionTest, CloseCancelsActiveTimerAndResolvesWithCancelled) {
     RunningIoContext ioc;
     RecoveryCondition condition(ioc.GetExecutor(), /*timeout=*/100ms);
     auto future = condition.Execute();
 
     condition.Close();
 
-    std::this_thread::sleep_for(200ms);
-    EXPECT_FALSE(future.IsFinished());
+    auto result = future.WaitForResult(200ms);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(IFDv2Condition::Type::kCancelled, *result);
 }
 
 // ============================================================================
@@ -226,5 +228,6 @@ TEST(ConditionsTest, CloseForwardsToAllUnderlyingConditions) {
     conditions.Close();
 
     auto result = conditions.GetFuture().WaitForResult(200ms);
-    EXPECT_FALSE(result.has_value());
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(IFDv2Condition::Type::kCancelled, *result);
 }

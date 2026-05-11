@@ -260,6 +260,9 @@ void FDv2DataSystem::RunSynchronizerNext() {
 void FDv2DataSystem::OnConditionFired(
     data_interfaces::IFDv2Condition::Type type) {
     using Type = data_interfaces::IFDv2Condition::Type;
+    if (type == Type::kCancelled) {
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_) {

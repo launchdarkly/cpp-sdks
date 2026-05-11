@@ -33,8 +33,12 @@ namespace launchdarkly::server_side::data_interfaces {
 class IFDv2Condition {
    public:
     enum class Type {
+        /** Stop the active synchronizer and start the next-preferred one. */
         kFallback,
+        /** Return to the most-preferred synchronizer. */
         kRecovery,
+        /** The condition was Close()d before firing; orchestrator ignores. */
+        kCancelled,
     };
 
     /**
