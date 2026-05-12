@@ -314,38 +314,33 @@ void FDv2DataSystem::OnSynchronizerResult(
     bool got_shutdown = false;
     bool advance = false;
 
-    std::visit(
-        overloaded{
-            [&](Result::ChangeSet& cs) {
-                ApplyChangeSet(std::move(cs.change_set));
-            },
-            [&](Result::Shutdown&) { got_shutdown = true; },
-            [&](Result::Interrupted const& iv) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity()
-                    << ": synchronizer interrupted: " << iv.error.Message();
-                status_manager_->SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    iv.error.Kind(), iv.error.Message());
-            },
-            [&](Result::TerminalError const& te) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity()
-                    << ": synchronizer terminal error: " << te.error.Message();
-                status_manager_->SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    te.error.Kind(), te.error.Message());
-                advance = true;
-            },
-            [&](Result::Goodbye const& gb) {
-                // The synchronizer handles goodbye internally (reconnects);
-                // the orchestrator just loops on the same source.
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": ignoring goodbye from synchronizer"
-                    << (gb.reason ? ": " + *gb.reason : "");
-            },
-        },
-        result.value);
+    std::visit(overloaded{
+                   [&](Result::ChangeSet& cs) {
+                       ApplyChangeSet(std::move(cs.change_set));
+                   },
+                   [&](Result::Shutdown&) { got_shutdown = true; },
+                   [&](Result::Interrupted const& iv) {
+                       LD_LOG(logger_, LogLevel::kWarn)
+                           << Identity() << ": synchronizer interrupted: "
+                           << iv.error.Message();
+                       status_manager_->SetState(
+                           DataSourceStatus::DataSourceState::kInterrupted,
+                           iv.error.Kind(), iv.error.Message());
+                   },
+                   [&](Result::TerminalError const& te) {
+                       LD_LOG(logger_, LogLevel::kWarn)
+                           << Identity() << ": synchronizer terminal error: "
+                           << te.error.Message();
+                       status_manager_->SetState(
+                           DataSourceStatus::DataSourceState::kInterrupted,
+                           te.error.Kind(), te.error.Message());
+                       advance = true;
+                   },
+                   [&](Result::Goodbye const&) {
+                       // The synchronizer handles this internally.
+                   },
+               },
+               result.value);
 
     {
         std::lock_guard<std::mutex> lock(mutex_);

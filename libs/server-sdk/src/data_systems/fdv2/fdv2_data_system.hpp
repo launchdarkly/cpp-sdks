@@ -99,7 +99,7 @@ namespace launchdarkly::server_side::data_systems {
  *     |  Initializer phase|      ChangeSet(no selector) -> stay, N += 1
  *     |  N = 0, 1, 2, ... |      ChangeSet(selector)    -> go to Sync
  *     |                   |      Interrupted/Terminal   -> stay, N += 1
- *     |                   |      Goodbye/Timeout        -> stay, N += 1
+ *     |                   |      Goodbye                -> stay, N += 1
  *     |                   |      Shutdown               -> [Closed]
  *     +-------------------+
  *               |

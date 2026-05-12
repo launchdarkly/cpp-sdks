@@ -138,8 +138,7 @@ class RecoveryConditionFactory final
  * underlying condition. If constructed with no conditions, GetFuture()
  * returns a Future that never resolves.
  *
- * Not thread-safe: the caller is responsible for serializing all method
- * calls.
+ * Thread-safe: GetFuture, Inform, and Close may be called from any thread.
  */
 class Conditions final {
    public:

@@ -27,8 +27,8 @@ namespace launchdarkly::server_side::data_interfaces {
  * orchestrator builds a fresh condition for each synchronizer activation via
  * an IFDv2ConditionFactory.
  *
- * Close() cancels any pending internal work (e.g., a timer) without resolving
- * the future. After Close() returns the condition's future will not resolve.
+ * Close() cancels any pending internal work (e.g., a timer) and resolves the
+ * future with kCancelled.
  *
  * Implementations must be thread-safe: Execute, Inform, Close, and GetType
  * may be called from any thread.
@@ -58,8 +58,8 @@ class IFDv2Condition {
     virtual void Inform(FDv2SourceResult const& result) = 0;
 
     /**
-     * Cancels any pending internal work and ensures the future will not
-     * resolve. Idempotent.
+     * Cancels any pending internal work and resolves the future returned by
+     * Execute() with kCancelled if it has not already resolved. Idempotent.
      */
     virtual void Close() = 0;
 
