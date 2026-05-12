@@ -37,7 +37,6 @@ FDv2DataSystem::FDv2DataSystem(
     : logger_(logger),
       ioc_(std::move(ioc)),
       initializer_factories_(std::move(initializer_factories)),
-      synchronizer_factories_(std::move(synchronizer_factories)),
       fallback_condition_factory_(std::move(fallback_condition_factory)),
       recovery_condition_factory_(std::move(recovery_condition_factory)),
       status_manager_(status_manager),
@@ -47,7 +46,7 @@ FDv2DataSystem::FDv2DataSystem(
       closed_(false),
       selector_(),
       initializer_index_(0),
-      synchronizer_index_(0),
+      source_manager_(std::move(synchronizer_factories)),
       active_initializer_(nullptr),
       active_synchronizer_(nullptr),
       active_conditions_(nullptr) {}
@@ -101,7 +100,8 @@ void FDv2DataSystem::Initialize() {
     assert(!already_called && "Initialize() must be called at most once");
 
     LD_LOG(logger_, LogLevel::kInfo) << Identity() << ": starting";
-    if (initializer_factories_.empty() && synchronizer_factories_.empty()) {
+    if (initializer_factories_.empty() &&
+        source_manager_.SynchronizerCount() == 0) {
         // Offline mode: empty store is the canonical state.
         status_manager_->SetState(DataSourceStatus::DataSourceState::kValid);
         return;
@@ -196,30 +196,27 @@ void FDv2DataSystem::OnInitializerResult(
 
 void FDv2DataSystem::StartSynchronizers() {
     bool exhausted = false;
-    bool cycled_synchronizers = false;
+    // True if at least one synchronizer factory was configured at construction.
+    bool any_synchronizers_configured = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_) {
             return;
         }
-        if (synchronizer_index_ >= synchronizer_factories_.size()) {
-            exhausted = true;
-            cycled_synchronizers = synchronizer_index_ > 0;
+        active_synchronizer_ = source_manager_.NextSynchronizer();
+        if (active_synchronizer_) {
+            active_conditions_ = BuildActiveConditions();
         } else {
-            auto& factory = synchronizer_factories_[synchronizer_index_];
-            active_synchronizer_ = factory->Build();
-            active_conditions_ =
-                BuildConditionsForSynchronizer(synchronizer_index_);
-            ++synchronizer_index_;
+            exhausted = true;
+            any_synchronizers_configured =
+                source_manager_.SynchronizerCount() > 0;
         }
     }
 
     if (exhausted) {
-        // kOff when we can't continue updating; init-only with data stays
-        // kValid.
-        if (cycled_synchronizers || !store_.Initialized()) {
+        if (any_synchronizers_configured || !store_.Initialized()) {
             std::string const message =
-                cycled_synchronizers
+                any_synchronizers_configured
                     ? "all data source acquisition methods have been exhausted"
                     : "all initializers exhausted and no synchronizers "
                       "configured";
@@ -274,7 +271,7 @@ void FDv2DataSystem::OnConditionFired(
         if (type == Type::kRecovery) {
             LD_LOG(logger_, LogLevel::kInfo)
                 << Identity() << ": recovery condition met";
-            synchronizer_index_ = 0;
+            source_manager_.ResetSourceIndex();
         } else {
             LD_LOG(logger_, LogLevel::kInfo)
                 << Identity() << ": fallback condition met";
@@ -283,16 +280,18 @@ void FDv2DataSystem::OnConditionFired(
     StartSynchronizers();
 }
 
-std::unique_ptr<Conditions> FDv2DataSystem::BuildConditionsForSynchronizer(
-    std::size_t synchronizer_position) const {
+std::unique_ptr<Conditions> FDv2DataSystem::BuildActiveConditions() const {
     std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions;
-    if (synchronizer_factories_.size() <= 1) {
+    // With only one synchronizer available there's nothing to fall back to
+    // or recover from, so leave the conditions empty.
+    if (source_manager_.AvailableSynchronizerCount() == 1) {
         return std::make_unique<Conditions>(std::move(conditions));
     }
     if (fallback_condition_factory_) {
         conditions.push_back(fallback_condition_factory_->Build());
     }
-    if (synchronizer_position > 0 && recovery_condition_factory_) {
+    // The prime synchronizer has nothing more-preferred to recover to.
+    if (!source_manager_.IsPrimeSynchronizer() && recovery_condition_factory_) {
         conditions.push_back(recovery_condition_factory_->Build());
     }
     return std::make_unique<Conditions>(std::move(conditions));
@@ -356,6 +355,7 @@ void FDv2DataSystem::OnSynchronizerResult(
             return;
         }
         if (advance) {
+            source_manager_.BlockCurrentSynchronizer();
             active_synchronizer_.reset();
             active_conditions_.reset();
         }

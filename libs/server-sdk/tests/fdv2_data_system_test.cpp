@@ -144,6 +144,29 @@ class OneShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::unique_ptr<IFDv2Synchronizer> source_;
 };
 
+// Returns each pre-supplied source in order on successive Build() calls.
+// Returns nullptr once the supply is exhausted. Used in tests that exercise
+// wrap-around or recovery, where the same factory is built more than once.
+class MultiShotSynchronizerFactory : public IFDv2SynchronizerFactory {
+   public:
+    explicit MultiShotSynchronizerFactory(
+        std::vector<std::unique_ptr<IFDv2Synchronizer>> sources)
+        : sources_(std::move(sources)) {}
+
+    std::unique_ptr<IFDv2Synchronizer> Build() override {
+        ++build_count_;
+        if (build_count_ <= static_cast<int>(sources_.size())) {
+            return std::move(sources_[build_count_ - 1]);
+        }
+        return nullptr;
+    }
+
+    int build_count_ = 0;
+
+   private:
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> sources_;
+};
+
 // Initializer whose Run() returns an unresolved Future. Used to exercise
 // destruction with orchestration in flight.
 class StalledInitializer : public IFDv2Initializer {
@@ -859,6 +882,228 @@ TEST(FDv2DataSystemTest, FallbackConditionFires_AdvancesToNextSynchronizer) {
     // Fallback condition fired after Interrupted, so the orchestrator
     // advanced to the secondary.
     EXPECT_EQ(1, secondary_factory_ptr->build_count_);
+}
+
+TEST(FDv2DataSystemTest, FallbackConditionOnLastSynchronizerWrapsToPrimary) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Two synchronizers, both Interrupted-then-stall on the first build.
+    // The primary's second build returns Shutdown, which ends orchestration
+    // cleanly once the wrap brings us back to the primary.
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> primary_sources;
+    primary_sources.push_back(std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::Interrupted{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+                    /*status_code=*/0, "boom",
+                    std::chrono::system_clock::now()},
+                false,
+            }},
+        },
+        /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true));
+    primary_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{}));
+    auto primary_factory = std::make_unique<MultiShotSynchronizerFactory>(
+        std::move(primary_sources));
+    auto* primary_factory_ptr = primary_factory.get();
+
+    auto secondary_sync = std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::Interrupted{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+                    /*status_code=*/0, "boom",
+                    std::chrono::system_clock::now()},
+                false,
+            }},
+        },
+        /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true);
+    auto secondary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(secondary_sync));
+    auto* secondary_factory_ptr = secondary_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(primary_factory));
+    synchronizers.push_back(std::move(secondary_factory));
+
+    auto fallback_factory =
+        std::make_unique<FallbackConditionFactory>(ioc.get_executor(),
+                                                   /*timeout=*/5ms);
+
+    FDv2DataSystem ds({}, std::move(synchronizers), std::move(fallback_factory),
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+
+    ds.Initialize();
+    ioc.run();
+
+    // Primary built twice: once at startup, once after the wrap.
+    // Secondary built once: between the two primary builds.
+    EXPECT_EQ(2, primary_factory_ptr->build_count_);
+    EXPECT_EQ(1, secondary_factory_ptr->build_count_);
+}
+
+TEST(FDv2DataSystemTest, RecoveryConditionResetsToFirstAvailable) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Two synchronizers, both Interrupted-then-stall. Recovery fires before
+    // fallback on the secondary, so the orchestrator resets to the primary.
+    // The primary's second build returns Shutdown to end the test cleanly.
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> primary_sources;
+    primary_sources.push_back(std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::Interrupted{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+                    /*status_code=*/0, "boom",
+                    std::chrono::system_clock::now()},
+                false,
+            }},
+        },
+        /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true));
+    primary_sources.push_back(
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{}));
+    auto primary_factory = std::make_unique<MultiShotSynchronizerFactory>(
+        std::move(primary_sources));
+    auto* primary_factory_ptr = primary_factory.get();
+
+    auto secondary_sync = std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::Interrupted{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+                    /*status_code=*/0, "boom",
+                    std::chrono::system_clock::now()},
+                false,
+            }},
+        },
+        /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true);
+    auto secondary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(secondary_sync));
+    auto* secondary_factory_ptr = secondary_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(primary_factory));
+    synchronizers.push_back(std::move(secondary_factory));
+
+    // Recovery is shorter than fallback so it wins the race on the secondary.
+    auto fallback_factory =
+        std::make_unique<FallbackConditionFactory>(ioc.get_executor(),
+                                                   /*timeout=*/20ms);
+    auto recovery_factory =
+        std::make_unique<RecoveryConditionFactory>(ioc.get_executor(),
+                                                   /*timeout=*/5ms);
+
+    FDv2DataSystem ds({}, std::move(synchronizers), std::move(fallback_factory),
+                      std::move(recovery_factory), ioc.get_executor(),
+                      &status_manager, logger);
+
+    ds.Initialize();
+    ioc.run();
+
+    // Primary built twice: once at startup, once after recovery reset the
+    // index. Secondary built once in between.
+    EXPECT_EQ(2, primary_factory_ptr->build_count_);
+    EXPECT_EQ(1, secondary_factory_ptr->build_count_);
+}
+
+TEST(FDv2DataSystemTest, TerminalErrorsOnEverySynchronizerExhaustToOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Two synchronizers, each returning TerminalError on first Next. Block
+    // marks each as unavailable; once both are blocked, NextSynchronizer
+    // returns null and the orchestrator exhausts.
+    auto primary_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::TerminalError{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
+                    "unauthorized", std::chrono::system_clock::now()},
+                false,
+            }}});
+    auto primary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(primary_sync));
+
+    auto secondary_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{
+            FDv2SourceResult{FDv2SourceResult::TerminalError{
+                FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
+                    "unauthorized", std::chrono::system_clock::now()},
+                false,
+            }}});
+    auto secondary_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(secondary_sync));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(primary_factory));
+    synchronizers.push_back(std::move(secondary_factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_EQ(status_manager.Status().State(),
+              DataSourceStatus::DataSourceState::kOff);
+}
+
+TEST(FDv2DataSystemTest, SingleSynchronizerHasNoFallbackArmed) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Single synchronizer: applies a ChangeSet (status -> Valid), then
+    // returns Interrupted (status -> Interrupted), then stalls. A fallback
+    // factory is configured, but with only one synchronizer Available the
+    // orchestrator should arm no conditions, so the fallback never fires
+    // and the orchestrator stays put rather than exhausting to kOff.
+    std::vector<FDv2SourceResult> results;
+    results.push_back(
+        MakeFullChangeSetResult(ChangeSetData{}, MakeSelector(1, "state-1")));
+    results.push_back(FDv2SourceResult{FDv2SourceResult::Interrupted{
+        FDv2SourceResult::ErrorInfo{
+            FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
+            /*status_code=*/0, "boom", std::chrono::system_clock::now()},
+        false,
+    }});
+    auto sync = std::make_unique<MockSynchronizer>(
+        std::move(results), /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
+        /*stall_after_results=*/true);
+    auto factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(sync));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(factory));
+
+    auto fallback_factory =
+        std::make_unique<FallbackConditionFactory>(ioc.get_executor(),
+                                                   /*timeout=*/5ms);
+
+    FDv2DataSystem ds({}, std::move(synchronizers), std::move(fallback_factory),
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+
+    // run_for is an upper bound; ioc returns as soon as work drains.
+    ds.Initialize();
+    ioc.run_for(500ms);
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kInterrupted,
+              status_manager.Status().State());
 }
 
 // ============================================================================
