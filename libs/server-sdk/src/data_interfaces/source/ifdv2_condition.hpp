@@ -29,6 +29,9 @@ namespace launchdarkly::server_side::data_interfaces {
  *
  * Close() cancels any pending internal work (e.g., a timer) without resolving
  * the future. After Close() returns the condition's future will not resolve.
+ *
+ * Implementations must be thread-safe: Execute, Inform, Close, and GetType
+ * may be called from any thread.
  */
 class IFDv2Condition {
    public:
@@ -78,6 +81,9 @@ class IFDv2Condition {
 /**
  * Builds new IFDv2Condition instances on demand. Each call to Build() produces
  * a fresh condition with no prior state.
+ *
+ * Implementations must be thread-safe: Build and GetType may be called from
+ * any thread.
  */
 class IFDv2ConditionFactory {
    public:

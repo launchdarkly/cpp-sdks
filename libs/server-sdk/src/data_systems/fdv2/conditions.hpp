@@ -137,6 +137,9 @@ class RecoveryConditionFactory final
  * type of the first condition to fire. Inform() and Close() forward to every
  * underlying condition. If constructed with no conditions, GetFuture()
  * returns a Future that never resolves.
+ *
+ * Not thread-safe: the caller is responsible for serializing all method
+ * calls.
  */
 class Conditions final {
    public:
