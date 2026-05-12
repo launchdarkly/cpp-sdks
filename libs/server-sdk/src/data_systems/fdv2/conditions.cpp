@@ -26,14 +26,16 @@ async::Future<IFDv2Condition::Type> TimedCondition::Execute() {
 }
 
 void TimedCondition::Close() {
-    std::lock_guard lock(state_->mutex);
-    if (state_->closed) {
-        return;
-    }
-    state_->closed = true;
-    if (state_->timer_cancel) {
-        state_->timer_cancel->Cancel();
-        state_->timer_cancel.reset();
+    {
+        std::lock_guard lock(state_->mutex);
+        if (state_->closed) {
+            return;
+        }
+        state_->closed = true;
+        if (state_->timer_cancel) {
+            state_->timer_cancel->Cancel();
+            state_->timer_cancel.reset();
+        }
     }
     state_->promise.Resolve(IFDv2Condition::Type::kCancelled);
 }
