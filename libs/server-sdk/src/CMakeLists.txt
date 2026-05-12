@@ -20,6 +20,8 @@ target_sources(${LIBNAME}
         client.cpp
         client_impl.cpp
         data_source_status.cpp
+        instance_id.hpp
+        instance_id.cpp
         config/config.cpp
         config/config_builder.cpp
         config/builders/data_system/background_sync_builder.cpp

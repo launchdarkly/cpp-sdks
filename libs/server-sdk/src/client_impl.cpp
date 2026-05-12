@@ -5,6 +5,7 @@
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
 #include "evaluation/evaluation_stack.hpp"
+#include "instance_id.hpp"
 #include "prereq_event_recorder/prereq_event_recorder.hpp"
 
 #include "data_interfaces/system/idata_system.hpp"
@@ -119,6 +120,13 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
               .Header("user-agent", "CPPServer/" + version)
               .Header("authorization", config.SdkKey())
               .Header("x-launchdarkly-tags", config.ApplicationTag())
+              // Per SCMP-server-connection-minutes-polling, every polling
+              // request must carry a per-instance GUID v4. We attach it to the
+              // shared HTTP properties so it's also present on streaming and
+              // event requests, and we generate it here (once during
+              // ClientImpl construction) so it remains stable for the lifetime
+              // of the SDK instance.
+              .Header(kInstanceIdHeader, MakeInstanceId())
               .Build()),
       logger_(MakeLogger(config.Logging())),
       ioc_(kAsioConcurrencyHint),
