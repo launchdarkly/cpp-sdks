@@ -94,6 +94,7 @@ class MockSynchronizer : public IFDv2Synchronizer {
     }
 
     void Close() override {
+        stall_promise_.Resolve(FDv2SourceResult{FDv2SourceResult::Shutdown{}});
         if (closed_flag_) {
             *closed_flag_ = true;
         }
