@@ -1,0 +1,60 @@
+name: libs/server-sdk-dynamodb-source
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md' # Do not need to run CI for markdown changes.
+  pull_request:
+    branches: [ "main", "feat/**" ]
+    paths-ignore:
+      - '**.md'
+  schedule:
+    # Run daily at midnight PST
+    - cron: '0 8 * * *'
+
+jobs:
+  build-dynamodb:
+    runs-on: ubuntu-22.04
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: launchdarkly-cpp-server-dynamodb-source
+          # No tests yet; PR 1 is scaffold-only and proves the AWS SDK builds.
+          run_tests: false
+          # AWS C++ SDK requires libcurl at link time on Linux/macOS.
+          install_curl: true
+          simulate_release: false
+  build-dynamodb-mac:
+    runs-on: macos-15
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: launchdarkly-cpp-server-dynamodb-source
+          platform_version: 12
+          run_tests: false
+          install_curl: true
+          simulate_release: false
+  build-dynamodb-windows:
+    runs-on: windows-2022
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+      - uses: ./.github/actions/ci
+        env:
+          BOOST_LIBRARY_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3'
+          BOOST_LIBRARYDIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3'
+          Boost_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0'
+        with:
+          cmake_target: launchdarkly-cpp-server-dynamodb-source
+          platform_version: 2022
+          toolset: msvc
+          run_tests: false
+          install_curl: true
+          simulate_windows_release: false
