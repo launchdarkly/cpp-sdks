@@ -10,11 +10,6 @@ set(BUILD_ONLY "dynamodb" CACHE STRING "" FORCE)
 set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(AUTORUN_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 
-# Match the static-library default the rest of the SDK uses. When LD_BUILD_SHARED_LIBS
-# is ON at the top level, the surrounding CMake script may flip BUILD_SHARED_LIBS;
-# this cache entry only sets the default.
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
 # Don't install the AWS SDK headers/libs alongside our own.
 set(AWS_SDK_WARNINGS_ARE_ERRORS OFF CACHE BOOL "" FORCE)
 
