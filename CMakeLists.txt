@@ -108,6 +108,8 @@ option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
 
 option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
 
+option(LD_BUILD_DYNAMODB_SUPPORT "Build DynamoDB support." OFF)
+
 option(LD_BUILD_OTEL_SUPPORT "Build OpenTelemetry integration." OFF)
 
 option(LD_CURL_NETWORKING "Enable CURL-based networking for SSE client (alternative to Boost.Beast/Foxy)" OFF)
@@ -221,6 +223,11 @@ add_subdirectory(libs/server-sent-events)
 if (LD_BUILD_REDIS_SUPPORT)
     message("LaunchDarkly: building server-side redis support")
     add_subdirectory(libs/server-sdk-redis-source)
+endif ()
+
+if (LD_BUILD_DYNAMODB_SUPPORT)
+    message("LaunchDarkly: building server-side DynamoDB support")
+    add_subdirectory(libs/server-sdk-dynamodb-source)
 endif ()
 
 if (LD_BUILD_OTEL_SUPPORT)
