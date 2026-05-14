@@ -14,6 +14,8 @@ target_sources(${LIBNAME}
         PRIVATE
         ${HEADER_LIST}
         dynamodb_source.cpp
+        aws_sdk_guard.cpp
+        client_factory.cpp
 )
 
 

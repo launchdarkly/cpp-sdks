@@ -27,3 +27,7 @@ include(FetchContent)
 include(${CMAKE_FILES}/aws-sdk-cpp.cmake)
 
 add_subdirectory(src)
+
+if (LD_BUILD_UNIT_TESTS)
+    add_subdirectory(tests)
+endif ()
