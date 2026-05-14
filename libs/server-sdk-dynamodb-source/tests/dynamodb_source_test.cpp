@@ -420,6 +420,25 @@ TEST_F(DynamoDBTests, AllPaginatesAcrossMultiplePages) {
     ASSERT_EQ(result->size(), kFlagCount);
 }
 
+TEST_F(DynamoDBTests, GetReturnsErrorWhenRowIsMissingItemAttribute) {
+    WithPrefixedClient(prefix_, [&](auto const& client) {
+        client.PutRowWithoutItem("features", "foo");
+    });
+
+    auto const result = source->Get(FlagKind{}, "foo");
+    ASSERT_FALSE(result);
+}
+
+TEST_F(DynamoDBTests, AllReturnsErrorWhenRowIsMissingItemAttribute) {
+    WithPrefixedClient(prefix_, [&](auto const& client) {
+        client.PutFlag(Flag{"foo", 1, true});
+        client.PutRowWithoutItem("features", "bar");
+    });
+
+    auto const result = source->All(FlagKind{});
+    ASSERT_FALSE(result);
+}
+
 TEST_F(DynamoDBTests, IdentityReturnsDynamodb) {
     ASSERT_EQ(source->Identity(), "dynamodb");
 }

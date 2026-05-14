@@ -32,9 +32,13 @@ DynamoDBDataSource::Create(std::string table_name,
                            DynamoDBClientOptions options) {
     try {
         detail::AwsSdkGuard::Ensure();
-        auto client = detail::BuildDynamoDBClient(options);
-        return std::unique_ptr<DynamoDBDataSource>(new DynamoDBDataSource(
-            std::move(client), std::move(table_name), std::move(prefix)));
+        auto maybe_client = detail::BuildDynamoDBClient(options);
+        if (!maybe_client) {
+            return tl::make_unexpected(std::move(maybe_client.error()));
+        }
+        return std::unique_ptr<DynamoDBDataSource>(
+            new DynamoDBDataSource(std::move(*maybe_client),
+                                   std::move(table_name), std::move(prefix)));
     } catch (std::exception const& e) {
         return tl::make_unexpected(e.what());
     }
@@ -74,7 +78,8 @@ ISerializedDataReader::GetResult DynamoDBDataSource::Get(
 
     auto const it = item.find(kItemAttribute);
     if (it == item.end()) {
-        return std::nullopt;
+        return tl::make_unexpected(
+            Error{"DynamoDB row missing expected 'item' attribute"});
     }
 
     return SerializedItemDescriptor::Present(0, it->second.GetS());
@@ -102,9 +107,13 @@ ISerializedDataReader::AllResult DynamoDBDataSource::All(
         auto const& result = outcome.GetResult();
         for (auto const& row : result.GetItems()) {
             auto const key_it = row.find(kSortKey);
-            auto const item_it = row.find(kItemAttribute);
-            if (key_it == row.end() || item_it == row.end()) {
+            if (key_it == row.end()) {
                 continue;
+            }
+            auto const item_it = row.find(kItemAttribute);
+            if (item_it == row.end()) {
+                return tl::make_unexpected(
+                    Error{"DynamoDB row missing expected 'item' attribute"});
             }
             items.emplace(
                 key_it->second.GetS(),

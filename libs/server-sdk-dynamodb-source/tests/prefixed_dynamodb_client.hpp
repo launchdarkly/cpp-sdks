@@ -5,6 +5,7 @@
 
 #include <aws/core/utils/Outcome.h>
 #include <aws/dynamodb/DynamoDBClient.h>
+#include <aws/dynamodb/DynamoDBErrors.h>
 #include <aws/dynamodb/model/AttributeDefinition.h>
 #include <aws/dynamodb/model/AttributeValue.h>
 #include <aws/dynamodb/model/CreateTableRequest.h>
@@ -79,8 +80,13 @@ class PrefixedDynamoDBClient {
         request.SetTableName(table_name);
         auto outcome = client.DeleteTable(request);
         if (!outcome.IsSuccess()) {
-            // Ignore the not-found case (test may not have created the table).
-            return;
+            // Tolerate not-found so setup can call this unconditionally.
+            if (outcome.GetError().GetErrorType() ==
+                Aws::DynamoDB::DynamoDBErrors::RESOURCE_NOT_FOUND) {
+                return;
+            }
+            FAIL() << "couldn't delete DynamoDB table " << table_name << ": "
+                   << outcome.GetError().GetMessage();
         }
     }
 
@@ -113,6 +119,13 @@ class PrefixedDynamoDBClient {
     void PutDeletedSegment(std::string const& key,
                            std::string const& ts) const {
         PutRaw(Prefixed("segments"), key, ts);
+    }
+
+    // Writes a row with only namespace + key, no `item` attribute. Used to
+    // simulate corrupted/malformed rows in the table.
+    void PutRowWithoutItem(std::string const& ns_suffix,
+                           std::string const& key) const {
+        PutRaw(Prefixed(ns_suffix), key, std::nullopt);
     }
 
    private:
