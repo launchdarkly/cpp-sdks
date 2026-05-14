@@ -45,7 +45,7 @@ DynamoDBDataSource::Create(std::string table_name,
 }
 
 DynamoDBDataSource::DynamoDBDataSource(
-    std::shared_ptr<Aws::DynamoDB::DynamoDBClient> client,
+    std::unique_ptr<Aws::DynamoDB::DynamoDBClient> client,
     std::string table_name,
     std::string prefix)
     : client_(std::move(client)),

@@ -68,11 +68,11 @@ class DynamoDBDataSource final : public ISerializedDataReader {
     ~DynamoDBDataSource() override;
 
    private:
-    DynamoDBDataSource(std::shared_ptr<Aws::DynamoDB::DynamoDBClient> client,
+    DynamoDBDataSource(std::unique_ptr<Aws::DynamoDB::DynamoDBClient> client,
                        std::string table_name,
                        std::string prefix);
 
-    std::shared_ptr<Aws::DynamoDB::DynamoDBClient> client_;
+    std::unique_ptr<Aws::DynamoDB::DynamoDBClient> client_;
     std::string const table_name_;
     std::string const prefix_;
     std::string const inited_namespace_;

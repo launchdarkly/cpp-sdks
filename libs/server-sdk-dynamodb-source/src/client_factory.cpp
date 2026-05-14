@@ -61,7 +61,7 @@ Aws::Client::ClientConfiguration BuildConfig(
 
 }  // namespace
 
-tl::expected<std::shared_ptr<Aws::DynamoDB::DynamoDBClient>, std::string>
+tl::expected<std::unique_ptr<Aws::DynamoDB::DynamoDBClient>, std::string>
 BuildDynamoDBClient(DynamoDBClientOptions const& options) {
     if (auto err = ValidateCredentials(options)) {
         return tl::make_unexpected(std::move(*err));
@@ -73,11 +73,11 @@ BuildDynamoDBClient(DynamoDBClientOptions const& options) {
         Aws::Auth::AWSCredentials credentials{
             *options.aws_access_key_id, *options.aws_secret_access_key,
             options.aws_session_token.value_or("")};
-        return std::make_shared<Aws::DynamoDB::DynamoDBClient>(credentials,
+        return std::make_unique<Aws::DynamoDB::DynamoDBClient>(credentials,
                                                                config);
     }
 
-    return std::make_shared<Aws::DynamoDB::DynamoDBClient>(config);
+    return std::make_unique<Aws::DynamoDB::DynamoDBClient>(config);
 }
 
 }  // namespace launchdarkly::server_side::integrations::detail

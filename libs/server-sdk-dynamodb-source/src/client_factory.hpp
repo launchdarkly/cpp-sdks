@@ -18,7 +18,7 @@ namespace launchdarkly::server_side::integrations::detail {
 //
 // Caller is responsible for ensuring AwsSdkGuard::Ensure() has been called
 // first.
-tl::expected<std::shared_ptr<Aws::DynamoDB::DynamoDBClient>, std::string>
+tl::expected<std::unique_ptr<Aws::DynamoDB::DynamoDBClient>, std::string>
 BuildDynamoDBClient(DynamoDBClientOptions const& options);
 
 }  // namespace launchdarkly::server_side::integrations::detail
