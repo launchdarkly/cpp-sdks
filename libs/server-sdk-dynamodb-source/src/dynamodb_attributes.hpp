@@ -11,7 +11,6 @@ namespace launchdarkly::server_side::integrations::detail {
 // agree on what's in the table.
 inline constexpr char kPartitionKey[] = "namespace";
 inline constexpr char kSortKey[] = "key";
-inline constexpr char kVersionAttribute[] = "version";
 inline constexpr char kItemAttribute[] = "item";
 
 // Sentinel namespace marking the table as initialized. When a prefix is set,
