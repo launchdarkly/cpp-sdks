@@ -23,4 +23,22 @@ FetchContent_Declare(aws-sdk-cpp
         OVERRIDE_FIND_PACKAGE
 )
 
-FetchContent_MakeAvailable(aws-sdk-cpp)
+# Always build the AWS SDK as static archives, even when our own library is
+# being built shared (LD_BUILD_SHARED_LIBS=ON). Building aws-sdk-cpp as
+# BUILD_SHARED_LIBS=ON produces dylibs on macOS whose dynamodb component
+# fails to find AWS Core symbols at link time (the AWS SDK's visibility
+# configuration doesn't export them consistently across its FetchContent
+# build). Linking aws-sdk-cpp statically into our shared wrapper sidesteps
+# the issue and matches the redis pattern of pinning dep build shape via
+# a scoped variable rather than overwriting the global BUILD_SHARED_LIBS.
+#
+# Using a function for scope: `set(BUILD_SHARED_LIBS OFF)` inside the
+# function shadows any cached/parent value during FetchContent_MakeAvailable
+# without persisting after the call, so user `-D LD_BUILD_SHARED_LIBS=ON`
+# for the rest of the project remains untouched.
+function(_ld_fetch_aws_sdk_cpp_static)
+    set(BUILD_SHARED_LIBS OFF)
+    FetchContent_MakeAvailable(aws-sdk-cpp)
+endfunction()
+
+_ld_fetch_aws_sdk_cpp_static()
