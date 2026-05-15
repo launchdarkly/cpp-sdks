@@ -128,6 +128,32 @@ class PrefixedDynamoDBClient {
         PutRaw(Prefixed(ns_suffix), key, std::nullopt);
     }
 
+    // Writes a row where the `item` attribute is stored as a DynamoDB Number
+    // (type `N`), not a String (type `S`). DynamoDB does not enforce a type
+    // schema on non-key attributes, so a non-Relay writer (manual put-item,
+    // schema-migration tool, compromised writer) can produce rows with the
+    // wrong attribute type. Used to verify the source surfaces this as a
+    // structured error instead of silently producing an empty payload.
+    void PutRowWithNumericItem(std::string const& ns_suffix,
+                               std::string const& key) const {
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{
+                                         Prefixed(ns_suffix)});
+        request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{key});
+
+        Aws::DynamoDB::Model::AttributeValue numeric_item;
+        numeric_item.SetN("12345");
+        request.AddItem("item", numeric_item);
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put DynamoDB item ns=" << Prefixed(ns_suffix)
+                   << " key=" << key << ": "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
    private:
     std::string Prefixed(std::string const& base) const {
         if (prefix_.empty()) {

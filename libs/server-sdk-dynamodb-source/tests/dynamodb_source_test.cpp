@@ -439,6 +439,34 @@ TEST_F(DynamoDBTests, AllReturnsErrorWhenRowIsMissingItemAttribute) {
     ASSERT_FALSE(result);
 }
 
+// Bug-proving: DynamoDB does not enforce a type schema on non-key attributes,
+// so a row whose `item` attribute was written as a Number (not a String) is
+// readable. AttributeValue::GetS() on a Number-typed value silently returns
+// the default-constructed empty string. Without a type check, the source
+// returns Present(0, "") and the empty string flows into
+// JsonDeserializer::DeserializeJsonDescriptor's boost::json::parse, which
+// throws boost::system::system_error -- the throw is uncaught all the way to
+// the SDK's evaluation entry point. The source must surface this as a
+// structured error instead.
+TEST_F(DynamoDBTests, GetReturnsErrorWhenItemAttributeIsNotString) {
+    WithPrefixedClient(prefix_, [&](auto const& client) {
+        client.PutRowWithNumericItem("features", "foo");
+    });
+
+    auto const result = source->Get(FlagKind{}, "foo");
+    ASSERT_FALSE(result);
+}
+
+TEST_F(DynamoDBTests, AllReturnsErrorWhenItemAttributeIsNotString) {
+    WithPrefixedClient(prefix_, [&](auto const& client) {
+        client.PutFlag(Flag{"foo", 1, true});
+        client.PutRowWithNumericItem("features", "bar");
+    });
+
+    auto const result = source->All(FlagKind{});
+    ASSERT_FALSE(result);
+}
+
 TEST_F(DynamoDBTests, IdentityReturnsDynamodb) {
     ASSERT_EQ(source->Identity(), "dynamodb");
 }

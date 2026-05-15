@@ -82,7 +82,20 @@ ISerializedDataReader::GetResult DynamoDBDataSource::Get(
             Error{"DynamoDB row missing expected 'item' attribute"});
     }
 
-    return SerializedItemDescriptor::Present(0, it->second.GetS());
+    // AttributeValue::GetS() silently returns an empty string when the
+    // attribute is stored as any non-String type (N/B/NULL/BOOL/L/M/SS/etc.).
+    // DynamoDB does not enforce a type schema on non-key attributes, so a
+    // non-Relay writer (manual put-item, schema-migration tool, etc.) can
+    // produce a row whose 'item' is the wrong type. The downstream JSON
+    // deserializer would then attempt boost::json::parse(""), which throws
+    // out of the evaluation path.
+    auto const& serialized = it->second.GetS();
+    if (serialized.empty()) {
+        return tl::make_unexpected(
+            Error{"DynamoDB 'item' attribute is empty or not of type S"});
+    }
+
+    return SerializedItemDescriptor::Present(0, serialized);
 }
 
 ISerializedDataReader::AllResult DynamoDBDataSource::All(
@@ -115,9 +128,16 @@ ISerializedDataReader::AllResult DynamoDBDataSource::All(
                 return tl::make_unexpected(
                     Error{"DynamoDB row missing expected 'item' attribute"});
             }
+            // See note in Get(): a non-String 'item' attribute silently
+            // produces an empty GetS() and a downstream JSON parse throw.
+            auto const& serialized = item_it->second.GetS();
+            if (serialized.empty()) {
+                return tl::make_unexpected(
+                    Error{"DynamoDB 'item' attribute is empty or not of type S"});
+            }
             items.emplace(
                 key_it->second.GetS(),
-                SerializedItemDescriptor::Present(0, item_it->second.GetS()));
+                SerializedItemDescriptor::Present(0, serialized));
         }
 
         auto const& last_key = result.GetLastEvaluatedKey();
