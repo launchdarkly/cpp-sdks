@@ -96,5 +96,5 @@ Doxygen, configured per-library via a `Doxyfile`. Build with `scripts/build-docs
 
 ## Process
 
-- **Commit messages:** single-line conventional commits (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `test:`). No body unless asked. No `Co-Authored-By: Claude` trailer.
+- **Commit messages:** single-line conventional commits (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `test:`). No body unless asked.
 - **PR descriptions:** terse. One-sentence summary, a few bullets for what's in, design decisions only for non-obvious choices. Add a "not in scope" line only when a reviewer would reasonably expect that thing to be in this PR — don't manufacture exclusions.
