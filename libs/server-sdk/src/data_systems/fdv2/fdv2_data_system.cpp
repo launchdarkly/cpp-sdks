@@ -5,7 +5,6 @@
 #include <boost/asio/post.hpp>
 
 #include <cassert>
-#include <chrono>
 #include <utility>
 #include <variant>
 
@@ -21,9 +20,6 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-// Default until fallback/recovery is implemented.
-constexpr std::chrono::hours kSynchronizerNextTimeout{24};
-
 }  // namespace
 
 FDv2DataSystem::FDv2DataSystem(
@@ -31,13 +27,18 @@ FDv2DataSystem::FDv2DataSystem(
         initializer_factories,
     std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
         synchronizer_factories,
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+        fallback_condition_factory,
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+        recovery_condition_factory,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager* status_manager,
     Logger const& logger)
     : logger_(logger),
       ioc_(std::move(ioc)),
       initializer_factories_(std::move(initializer_factories)),
-      synchronizer_factories_(std::move(synchronizer_factories)),
+      fallback_condition_factory_(std::move(fallback_condition_factory)),
+      recovery_condition_factory_(std::move(recovery_condition_factory)),
       status_manager_(status_manager),
       store_(),
       change_notifier_(store_, store_),
@@ -45,9 +46,10 @@ FDv2DataSystem::FDv2DataSystem(
       closed_(false),
       selector_(),
       initializer_index_(0),
-      synchronizer_index_(0),
+      source_manager_(std::move(synchronizer_factories)),
       active_initializer_(nullptr),
-      active_synchronizer_(nullptr) {}
+      active_synchronizer_(nullptr),
+      active_conditions_(nullptr) {}
 
 FDv2DataSystem::~FDv2DataSystem() {
     Close();
@@ -61,6 +63,9 @@ void FDv2DataSystem::Close() {
     }
     if (active_synchronizer_) {
         active_synchronizer_->Close();
+    }
+    if (active_conditions_) {
+        active_conditions_->Close();
     }
     status_manager_->SetState(DataSourceStatus::DataSourceState::kOff);
 }
@@ -95,7 +100,8 @@ void FDv2DataSystem::Initialize() {
     assert(!already_called && "Initialize() must be called at most once");
 
     LD_LOG(logger_, LogLevel::kInfo) << Identity() << ": starting";
-    if (initializer_factories_.empty() && synchronizer_factories_.empty()) {
+    if (initializer_factories_.empty() &&
+        source_manager_.SynchronizerCount() == 0) {
         // Offline mode: empty store is the canonical state.
         status_manager_->SetState(DataSourceStatus::DataSourceState::kValid);
         return;
@@ -170,10 +176,6 @@ void FDv2DataSystem::OnInitializerResult(
                 LD_LOG(logger_, LogLevel::kDebug)
                     << Identity() << ": ignoring goodbye from initializer";
             },
-            [&](Result::Timeout const&) {
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": ignoring timeout from initializer";
-            },
         },
         result.value);
 
@@ -194,27 +196,27 @@ void FDv2DataSystem::OnInitializerResult(
 
 void FDv2DataSystem::StartSynchronizers() {
     bool exhausted = false;
-    bool cycled_synchronizers = false;
+    // True if at least one synchronizer factory was configured at construction.
+    bool any_synchronizers_configured = false;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_) {
             return;
         }
-        if (synchronizer_index_ >= synchronizer_factories_.size()) {
-            exhausted = true;
-            cycled_synchronizers = synchronizer_index_ > 0;
+        active_synchronizer_ = source_manager_.NextSynchronizer();
+        if (active_synchronizer_) {
+            active_conditions_ = BuildActiveConditions();
         } else {
-            auto& factory = synchronizer_factories_[synchronizer_index_++];
-            active_synchronizer_ = factory->Build();
+            exhausted = true;
+            any_synchronizers_configured =
+                source_manager_.SynchronizerCount() > 0;
         }
     }
 
     if (exhausted) {
-        // kOff when we can't continue updating; init-only with data stays
-        // kValid.
-        if (cycled_synchronizers || !store_.Initialized()) {
+        if (any_synchronizers_configured || !store_.Initialized()) {
             std::string const message =
-                cycled_synchronizers
+                any_synchronizers_configured
                     ? "all data source acquisition methods have been exhausted"
                     : "all initializers exhausted and no synchronizers "
                       "configured";
@@ -234,11 +236,17 @@ void FDv2DataSystem::RunSynchronizerNext() {
     if (closed_ || !active_synchronizer_) {
         return;
     }
-    active_synchronizer_->Next(kSynchronizerNextTimeout, selector_)
+    auto next_future = active_synchronizer_->Next(selector_);
+    auto cond_future = active_conditions_->GetFuture();
+    async::WhenAny(cond_future, next_future)
         .Then(
-            [this](data_interfaces::FDv2SourceResult const& result)
-                -> std::monostate {
-                OnSynchronizerResult(result);
+            [this, cond_future,
+             next_future](std::size_t const& idx) -> std::monostate {
+                if (idx == 0) {
+                    OnConditionFired(*cond_future.GetResult());
+                } else {
+                    OnSynchronizerResult(*next_future.GetResult());
+                }
                 return {};
             },
             [ioc = ioc_](async::Continuation<void()> work) {
@@ -246,58 +254,105 @@ void FDv2DataSystem::RunSynchronizerNext() {
             });
 }
 
+void FDv2DataSystem::OnConditionFired(
+    data_interfaces::IFDv2Condition::Type type) {
+    using Type = data_interfaces::IFDv2Condition::Type;
+    if (type == Type::kCancelled) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        // Destructors close the active synchronizer and conditions.
+        active_synchronizer_.reset();
+        active_conditions_.reset();
+        if (type == Type::kRecovery) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": recovery condition met";
+            source_manager_.ResetSourceIndex();
+        } else {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": fallback condition met";
+        }
+    }
+    StartSynchronizers();
+}
+
+std::unique_ptr<Conditions> FDv2DataSystem::BuildActiveConditions() const {
+    std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions;
+    // With only one synchronizer available there's nothing to fall back to
+    // or recover from, so leave the conditions empty.
+    if (source_manager_.AvailableSynchronizerCount() == 1) {
+        return std::make_unique<Conditions>(std::move(conditions));
+    }
+    if (fallback_condition_factory_) {
+        conditions.push_back(fallback_condition_factory_->Build());
+    }
+    // The prime synchronizer has nothing more-preferred to recover to.
+    if (!source_manager_.IsPrimeSynchronizer() && recovery_condition_factory_) {
+        conditions.push_back(recovery_condition_factory_->Build());
+    }
+    return std::make_unique<Conditions>(std::move(conditions));
+}
+
 void FDv2DataSystem::OnSynchronizerResult(
     data_interfaces::FDv2SourceResult result) {
     using Result = data_interfaces::FDv2SourceResult;
 
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        if (active_conditions_) {
+            active_conditions_->Inform(result);
+        }
+    }
+
     bool got_shutdown = false;
     bool advance = false;
 
-    std::visit(
-        overloaded{
-            [&](Result::ChangeSet& cs) {
-                ApplyChangeSet(std::move(cs.change_set));
-            },
-            [&](Result::Shutdown&) { got_shutdown = true; },
-            [&](Result::Interrupted const& iv) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity()
-                    << ": synchronizer interrupted: " << iv.error.Message();
-                status_manager_->SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    iv.error.Kind(), iv.error.Message());
-            },
-            [&](Result::TerminalError const& te) {
-                LD_LOG(logger_, LogLevel::kWarn)
-                    << Identity()
-                    << ": synchronizer terminal error: " << te.error.Message();
-                status_manager_->SetState(
-                    DataSourceStatus::DataSourceState::kInterrupted,
-                    te.error.Kind(), te.error.Message());
-                advance = true;
-            },
-            [&](Result::Goodbye const& gb) {
-                // The synchronizer handles goodbye internally (reconnects);
-                // the orchestrator just loops on the same source.
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": ignoring goodbye from synchronizer"
-                    << (gb.reason ? ": " + *gb.reason : "");
-            },
-            [&](Result::Timeout const&) {
-                LD_LOG(logger_, LogLevel::kDebug)
-                    << Identity() << ": synchronizer timed out; retrying";
-            },
-        },
-        result.value);
+    std::visit(overloaded{
+                   [&](Result::ChangeSet& cs) {
+                       ApplyChangeSet(std::move(cs.change_set));
+                   },
+                   [&](Result::Shutdown&) { got_shutdown = true; },
+                   [&](Result::Interrupted const& iv) {
+                       LD_LOG(logger_, LogLevel::kWarn)
+                           << Identity() << ": synchronizer interrupted: "
+                           << iv.error.Message();
+                       status_manager_->SetState(
+                           DataSourceStatus::DataSourceState::kInterrupted,
+                           iv.error.Kind(), iv.error.Message());
+                   },
+                   [&](Result::TerminalError const& te) {
+                       LD_LOG(logger_, LogLevel::kWarn)
+                           << Identity() << ": synchronizer terminal error: "
+                           << te.error.Message();
+                       status_manager_->SetState(
+                           DataSourceStatus::DataSourceState::kInterrupted,
+                           te.error.Kind(), te.error.Message());
+                       advance = true;
+                   },
+                   [&](Result::Goodbye const&) {
+                       // The synchronizer handles this internally.
+                   },
+               },
+               result.value);
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (closed_ || got_shutdown) {
             active_synchronizer_.reset();
+            active_conditions_.reset();
             return;
         }
         if (advance) {
+            source_manager_.BlockCurrentSynchronizer();
             active_synchronizer_.reset();
+            active_conditions_.reset();
         }
     }
 

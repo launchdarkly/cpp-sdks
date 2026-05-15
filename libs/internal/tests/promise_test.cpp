@@ -416,6 +416,34 @@ TEST(WhenAny, MixedTypesFirstWins) {
     EXPECT_EQ(std::get<std::string>(*result.GetResult()), "hello");
 }
 
+// Verifies that the vector overload of WhenAny resolves with the index of
+// the first future to resolve.
+TEST(WhenAny, VectorFirstResolved) {
+    Promise<int> p0;
+    Promise<int> p1;
+    Promise<int> p2;
+
+    std::vector<Future<int>> futures{p0.GetFuture(), p1.GetFuture(),
+                                     p2.GetFuture()};
+    Future<std::size_t> result = WhenAny(futures);
+
+    EXPECT_FALSE(result.IsFinished());
+    p2.Resolve(99);
+
+    auto r = result.WaitForResult(std::chrono::seconds(5));
+    ASSERT_TRUE(r.has_value());
+    EXPECT_EQ(*r, 2u);
+}
+
+// Verifies that an empty vector produces a future that never resolves.
+TEST(WhenAny, VectorEmptyNeverResolves) {
+    std::vector<Future<int>> futures;
+    Future<std::size_t> result = WhenAny(futures);
+
+    auto r = result.WaitForResult(std::chrono::milliseconds(50));
+    EXPECT_FALSE(r.has_value());
+}
+
 // Verifies that WhenAny resolves immediately if a future is already resolved.
 TEST(WhenAny, AlreadyResolved) {
     Promise<int> p0;

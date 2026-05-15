@@ -149,7 +149,7 @@ TEST(FDv2StreamingSynchronizerTest, NextBadEndpointUrlReturnsTerminalError) {
 
     // Act: trigger setup with a malformed streaming URL. URL parsing happens
     // inside EnsureStarted on the first Next call.
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: TerminalError tells the orchestrator not to retry, which is the
@@ -173,7 +173,7 @@ TEST(FDv2StreamingSynchronizerTest, CloseBeforeNextReturnsShutdown) {
     synchronizer.Close();
 
     // Act: call Next on an already-closed synchronizer.
-    auto future = synchronizer.Next(5s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: Shutdown is delivered immediately (the outer Next short-circuits
@@ -197,7 +197,7 @@ TEST(FDv2StreamingSynchronizerTest, CloseDuringPendingNextResolvesShutdown) {
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Act: start a pending Next, then Close while it is still pending.
-    auto future = synchronizer.Next(5s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     synchronizer.Close();
     auto result = future.WaitForResult(2s);
 
@@ -206,27 +206,6 @@ TEST(FDv2StreamingSynchronizerTest, CloseDuringPendingNextResolvesShutdown) {
     ASSERT_TRUE(result.has_value());
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Shutdown>(result->value));
-}
-
-TEST(FDv2StreamingSynchronizerTest, NextTimeoutReturnsTimeout) {
-    auto logger = MakeNullLogger();
-    IoContextRunner runner;
-
-    FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
-
-    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
-
-    // Act: call Next with a short timeout and never deliver any event.
-    auto future = synchronizer.Next(100ms, data_model::Selector{});
-    auto result = future.WaitForResult(2s);
-
-    // Assert: the timeout future wins the race and Next resolves with Timeout.
-    ASSERT_TRUE(result.has_value());
-    EXPECT_TRUE(
-        std::holds_alternative<FDv2SourceResult::Timeout>(result->value));
 }
 
 // ============================================================================
@@ -407,7 +386,7 @@ TEST(FDv2StreamingSynchronizerTest, FullChangesetEventsReturnsChangeSet) {
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, put_object);
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
                                                payload_transferred);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: a ChangeSet result is delivered, and the translated payload
@@ -432,7 +411,7 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventReturnsGoodbye) {
 
     // Act: deliver a goodbye event through OnEvent and read the queued result.
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: a Goodbye result with the wire reason is delivered, signaling
@@ -461,7 +440,7 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventTriggersAsyncRestart) {
 
     // Act: deliver a goodbye event and drain the resulting Goodbye result.
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
     ASSERT_TRUE(result.has_value());
 
@@ -493,8 +472,7 @@ TEST(FDv2StreamingSynchronizerTest,
         R"({"version":1,"kind":"flag","key":"abandoned","object":)"
         R"({"key":"abandoned","on":true,"fallthrough":{"variation":0},)"
         R"("variations":[true,false],"version":1}})");
-    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
-                                               server_intent_one);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, server_intent_one);
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, abandoned_put);
 
     // Goodbye arrives mid-payload; expect a Goodbye result and the partial
@@ -502,7 +480,7 @@ TEST(FDv2StreamingSynchronizerTest,
     sse::Event goodbye("goodbye", R"({"reason":"bye"})");
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, goodbye);
     auto goodbye_result =
-        synchronizer.Next(2s, data_model::Selector{}).WaitForResult(2s);
+        synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
     ASSERT_TRUE(goodbye_result.has_value());
     ASSERT_NE(std::get_if<FDv2SourceResult::Goodbye>(&goodbye_result->value),
               nullptr);
@@ -520,13 +498,12 @@ TEST(FDv2StreamingSynchronizerTest,
         R"("variations":[true,false],"version":2}})");
     sse::Event payload_transferred("payload-transferred",
                                    R"({"state":"abc","version":2})");
-    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
-                                               server_intent_two);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, server_intent_two);
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, fresh_put);
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
                                                payload_transferred);
     auto changeset_result =
-        synchronizer.Next(2s, data_model::Selector{}).WaitForResult(2s);
+        synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
     ASSERT_TRUE(changeset_result.has_value());
     auto* cs =
         std::get_if<FDv2SourceResult::ChangeSet>(&changeset_result->value);
@@ -551,7 +528,7 @@ TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
 
     // Act: deliver an FDv2 server-side error event.
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, server_error);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: the error is reported as Interrupted{kErrorResponse}, with the
@@ -583,7 +560,7 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
 
     // Act: deliver an event whose data field cannot be parsed as JSON.
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, bad_event);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: the synchronizer reports Interrupted{kInvalidData} so the
@@ -594,30 +571,6 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
     ASSERT_NE(interrupted, nullptr);
     EXPECT_EQ(interrupted->error.Kind(),
               FDv2SourceResult::ErrorInfo::ErrorKind::kInvalidData);
-}
-
-TEST(FDv2StreamingSynchronizerTest, HeartbeatEventNoResultDelivered) {
-    auto logger = MakeNullLogger();
-    IoContextRunner runner;
-
-    FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
-    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
-
-    sse::Event heartbeat("heartbeat", R"({})");
-
-    // Act: deliver a heartbeat event, then call Next with a short timeout.
-    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, heartbeat);
-    auto future = synchronizer.Next(100ms, data_model::Selector{});
-    auto result = future.WaitForResult(2s);
-
-    // Assert: the heartbeat does not produce any FDv2SourceResult, so Next
-    // resolves with Timeout instead.
-    ASSERT_TRUE(result.has_value());
-    EXPECT_TRUE(
-        std::holds_alternative<FDv2SourceResult::Timeout>(result->value));
 }
 
 TEST(FDv2StreamingSynchronizerTest, TranslationFailureReturnsInterrupted) {
@@ -649,7 +602,7 @@ TEST(FDv2StreamingSynchronizerTest, TranslationFailureReturnsInterrupted) {
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, put_object);
     FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
                                                payload_transferred);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: the changeset is rejected with Interrupted{kInvalidData}.
@@ -681,7 +634,7 @@ TEST(FDv2StreamingSynchronizerTest,
 
     // Act: deliver an unrecoverable HTTP 500 error from the SSE client.
     FDv2StreamingSynchronizerTestPeer::OnError(synchronizer, error);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: the synchronizer reports TerminalError{kErrorResponse} carrying
@@ -709,7 +662,7 @@ TEST(FDv2StreamingSynchronizerTest, RecoverableReadTimeoutReturnsInterrupted) {
 
     // Act: deliver a recoverable read-timeout error from the SSE client.
     FDv2StreamingSynchronizerTestPeer::OnError(synchronizer, error);
-    auto future = synchronizer.Next(2s, data_model::Selector{});
+    auto future = synchronizer.Next(data_model::Selector{});
     auto result = future.WaitForResult(2s);
 
     // Assert: the synchronizer reports Interrupted{kNetworkError} so the

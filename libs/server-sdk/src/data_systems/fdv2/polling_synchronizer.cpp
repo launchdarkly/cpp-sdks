@@ -103,10 +103,8 @@ FDv2PollingSynchronizer::~FDv2PollingSynchronizer() {
 }
 
 async::Future<FDv2SourceResult> FDv2PollingSynchronizer::Next(
-    std::chrono::milliseconds timeout,
     data_model::Selector selector) {
-    return DoNext(state_, close_promise_.GetFuture(), timeout,
-                  std::move(selector));
+    return DoNext(state_, close_promise_.GetFuture(), std::move(selector));
 }
 
 void FDv2PollingSynchronizer::Close() {
@@ -121,7 +119,6 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
 /* static */ async::Future<FDv2SourceResult> FDv2PollingSynchronizer::DoNext(
     std::shared_ptr<State> state,
     async::Future<std::monostate> closed,
-    std::chrono::milliseconds timeout,
     data_model::Selector selector) {
     if (closed.IsFinished()) {
         return async::MakeFuture(
@@ -129,18 +126,12 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
     }
 
     async::CancellationSource cancel;
-    auto now = std::chrono::steady_clock::now();
-    auto timeout_deadline = now + timeout;
-    auto timeout_future = state->Delay(timeout, cancel.GetToken());
-
-    // Figure out how much to delay before starting.
     auto delay_future = state->CreatePollDelayFuture(cancel.GetToken());
 
-    return async::WhenAny(closed, std::move(timeout_future),
-                          std::move(delay_future))
+    return async::WhenAny(closed, std::move(delay_future))
         .Then(
             [state = std::move(state), closed = std::move(closed),
-             timeout_deadline, selector = std::move(selector),
+             selector = std::move(selector),
              cancel = std::move(cancel)](std::size_t const& idx) mutable
                 -> async::Future<FDv2SourceResult> {
                 cancel.Cancel();
@@ -148,12 +139,7 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
                     return async::MakeFuture(
                         FDv2SourceResult{FDv2SourceResult::Shutdown{}});
                 }
-                if (idx == 1) {
-                    return async::MakeFuture(
-                        FDv2SourceResult{FDv2SourceResult::Timeout{}});
-                }
-                return DoPoll(std::move(state), std::move(closed),
-                              timeout_deadline, selector);
+                return DoPoll(std::move(state), std::move(closed), selector);
             },
             async::kInlineExecutor);
 }
@@ -161,7 +147,6 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
 /* static */ async::Future<FDv2SourceResult> FDv2PollingSynchronizer::DoPoll(
     std::shared_ptr<State> state,
     async::Future<std::monostate> closed,
-    std::chrono::time_point<std::chrono::steady_clock> timeout_deadline,
     data_model::Selector const& selector) {
     if (closed.IsFinished()) {
         return async::MakeFuture(
@@ -170,26 +155,14 @@ std::string const& FDv2PollingSynchronizer::Identity() const {
 
     state->RecordPollStarted();
 
-    async::CancellationSource cancel;
-    auto now = std::chrono::steady_clock::now();
-    auto timeout_future =
-        state->Delay(timeout_deadline - now, cancel.GetToken());
-
-    // TODO: pass cancel.GetToken() to Request() once HTTP requests support it.
     auto http_future = state->Request(selector);
 
-    return async::WhenAny(std::move(closed), std::move(timeout_future),
-                          http_future)
+    return async::WhenAny(std::move(closed), http_future)
         .Then(
-            [state = std::move(state), http_future = std::move(http_future),
-             cancel = std::move(cancel)](
+            [state = std::move(state), http_future = std::move(http_future)](
                 std::size_t const& idx) mutable -> FDv2SourceResult {
-                cancel.Cancel();
                 if (idx == 0) {
                     return FDv2SourceResult{FDv2SourceResult::Shutdown{}};
-                }
-                if (idx == 1) {
-                    return FDv2SourceResult{FDv2SourceResult::Timeout{}};
                 }
                 return state->HandlePollResult(*http_future.GetResult());
             },

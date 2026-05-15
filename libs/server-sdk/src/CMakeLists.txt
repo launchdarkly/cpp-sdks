@@ -60,6 +60,10 @@ target_sources(${LIBNAME}
         data_systems/fdv2/polling_synchronizer.cpp
         data_systems/fdv2/streaming_synchronizer.hpp
         data_systems/fdv2/streaming_synchronizer.cpp
+        data_systems/fdv2/conditions.hpp
+        data_systems/fdv2/conditions.cpp
+        data_systems/fdv2/source_manager.hpp
+        data_systems/fdv2/source_manager.cpp
         data_systems/fdv2/fdv2_data_system.hpp
         data_systems/fdv2/fdv2_data_system.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp

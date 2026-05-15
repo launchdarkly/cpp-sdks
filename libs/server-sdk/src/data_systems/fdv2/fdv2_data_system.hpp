@@ -3,9 +3,12 @@
 #include "../../data_components/change_notifier/change_notifier.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
+#include "../../data_interfaces/source/ifdv2_condition.hpp"
 #include "../../data_interfaces/source/ifdv2_initializer_factory.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer_factory.hpp"
 #include "../../data_interfaces/system/idata_system.hpp"
+#include "conditions.hpp"
+#include "source_manager.hpp"
 
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/logging/logger.hpp>
@@ -96,22 +99,24 @@ namespace launchdarkly::server_side::data_systems {
  *     |  Initializer phase|      ChangeSet(no selector) -> stay, N += 1
  *     |  N = 0, 1, 2, ... |      ChangeSet(selector)    -> go to Sync
  *     |                   |      Interrupted/Terminal   -> stay, N += 1
- *     |                   |      Goodbye/Timeout        -> stay, N += 1
+ *     |                   |      Goodbye                -> stay, N += 1
  *     |                   |      Shutdown               -> [Closed]
  *     +-------------------+
  *               |
  *               | (N exhausted, or basis received)
  *               v
- *     +-------------------+    synchronizer #M's Next returns:
+ *     +-------------------+    active synchronizer's Next returns:
  *     |  Synchronizer     |      ChangeSet      -> apply, loop
  *     |  phase            |      Interrupted    -> loop (source self-retries)
- *     |  M = 0, 1, 2, ... |      Timeout        -> loop
- *     |                   |      Goodbye        -> loop (source self-restarts)
- *     |                   |      TerminalError  -> M += 1
- *     |                   |      Shutdown       -> [Closed]
+ *     |  (cyclic;         |      Goodbye        -> loop (source self-restarts)
+ *     |   blocked sources |      TerminalError  -> block, advance
+ *     |   are skipped)    |      Shutdown       -> [Closed]
  *     +-------------------+
+ *                   ^   |     fallback condition  -> advance (with wrap)
+ *                   |   |     recovery condition  -> reset to first available
+ *                   +---+
  *               |
- *               | (M exhausted)
+ *               | (all synchronizers blocked)
  *               v
  *     [Done; final status preserved]
  *
@@ -141,6 +146,13 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
      *     order during the initialization phase.
      * @param synchronizer_factories Factories that build synchronizers, used
      *     in order for ongoing updates after initialization.
+     * @param fallback_condition_factory Factory for the per-synchronizer
+     *     fallback condition. May be null. If null, fallback transitions
+     *     are never triggered; synchronizers only rotate on terminal errors.
+     * @param recovery_condition_factory Factory for the per-synchronizer
+     *     recovery condition. May be null. If null, the orchestrator does
+     *     not return to a more-preferred synchronizer once it has fallen
+     *     back.
      * @param ioc Executor on which orchestration callbacks run.
      * @param status_manager Non-owning. Must outlive this object; the caller
      *     is responsible for ensuring this. Used to publish data-source
@@ -153,6 +165,10 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
             initializer_factories,
         std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
             synchronizer_factories,
+        std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+            fallback_condition_factory,
+        std::unique_ptr<data_interfaces::IFDv2ConditionFactory>
+            recovery_condition_factory,
         boost::asio::any_io_executor ioc,
         data_components::DataSourceStatusManager* status_manager,
         Logger const& logger);
@@ -233,6 +249,11 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void StartSynchronizers();
     void RunSynchronizerNext();
     void OnSynchronizerResult(data_interfaces::FDv2SourceResult result);
+    void OnConditionFired(data_interfaces::IFDv2Condition::Type type);
+
+    // Builds the conditions to apply to the currently active synchronizer.
+    // Must be called with mutex_ held; reads source_manager_ state.
+    std::unique_ptr<Conditions> BuildActiveConditions() const;
 
     // Applies a typed FDv2 changeset to the in-memory store and updates the
     // tracked selector if the changeset's selector is non-empty.
@@ -246,9 +267,10 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     boost::asio::any_io_executor const ioc_;
     std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>> const
         initializer_factories_;
-    std::vector<
-        std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>> const
-        synchronizer_factories_;
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory> const
+        fallback_condition_factory_;
+    std::unique_ptr<data_interfaces::IFDv2ConditionFactory> const
+        recovery_condition_factory_;
     // Non-owning. Lifetime guaranteed by the caller (see constructor doc).
     data_components::DataSourceStatusManager* const status_manager_;
 
@@ -266,9 +288,10 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     bool closed_;
     data_model::Selector selector_;
     std::size_t initializer_index_;
-    std::size_t synchronizer_index_;
+    SourceManager source_manager_;
     std::unique_ptr<data_interfaces::IFDv2Initializer> active_initializer_;
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> active_synchronizer_;
+    std::unique_ptr<Conditions> active_conditions_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
