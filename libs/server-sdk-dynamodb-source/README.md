@@ -10,8 +10,7 @@ This component will allow the Server-Side SDK to retrieve feature flag configura
 from LaunchDarkly.
 
 > [!NOTE]
-> This library currently contains only scaffolding. The functional `DynamoDBDataSource` and Big Segments store
-> implementation will land in subsequent releases.
+> The Big Segments store implementation will land in a subsequent release.
 
 LaunchDarkly overview
 -------------------------

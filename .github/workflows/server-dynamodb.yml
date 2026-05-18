@@ -14,19 +14,22 @@ on:
     - cron: '0 8 * * *'
 
 jobs:
-  build-dynamodb:
+  build-test-dynamodb:
     runs-on: ubuntu-22.04
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-dynamodb-source
-          # No tests yet; PR 1 is scaffold-only and proves the AWS SDK builds.
-          run_tests: false
           # AWS C++ SDK requires libcurl at link time on Linux/macOS.
           install_curl: true
-          simulate_release: false
+          simulate_release: true
   build-dynamodb-mac:
     runs-on: macos-15
     steps:
@@ -36,9 +39,9 @@ jobs:
         with:
           cmake_target: launchdarkly-cpp-server-dynamodb-source
           platform_version: 12
-          run_tests: false
+          run_tests: false # TODO: figure out how to run dynamodb-local on Mac
           install_curl: true
-          simulate_release: false
+          simulate_release: true
   build-dynamodb-windows:
     runs-on: windows-2022
     steps:
@@ -55,6 +58,6 @@ jobs:
           cmake_target: launchdarkly-cpp-server-dynamodb-source
           platform_version: 2022
           toolset: msvc
-          run_tests: false
+          run_tests: false # TODO: figure out how to run dynamodb-local on Windows
           install_curl: true
-          simulate_windows_release: false
+          simulate_windows_release: true
