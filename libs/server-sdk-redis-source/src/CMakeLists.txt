@@ -14,6 +14,7 @@ target_sources(${LIBNAME}
         PRIVATE
         ${HEADER_LIST}
         redis_source.cpp
+        redis_big_segment_store.cpp
         bindings/redis/redis_source.cpp
 )
 

@@ -18,4 +18,16 @@ inline constexpr char kItemAttribute[] = "item";
 //   {namespace: "myprefix:$inited", key: "myprefix:$inited"}.
 inline constexpr char kInitedNamespace[] = "$inited";
 
+// Big Segments schema. Membership rows use partition key
+// "{prefix}:big_segments_user" and sort key {context_hash}, with
+// "included" / "excluded" String Set attributes naming segment refs. The
+// metadata row uses partition key AND sort key both set to
+// "{prefix}:big_segments_metadata", with the sync timestamp stored as a
+// Number under "synchronizedOn".
+inline constexpr char kBigSegmentsUserNamespace[] = "big_segments_user";
+inline constexpr char kBigSegmentsMetadataNamespace[] = "big_segments_metadata";
+inline constexpr char kBigSegmentsIncludedAttribute[] = "included";
+inline constexpr char kBigSegmentsExcludedAttribute[] = "excluded";
+inline constexpr char kBigSegmentsSyncTimeAttribute[] = "synchronizedOn";
+
 }  // namespace launchdarkly::server_side::integrations::detail
