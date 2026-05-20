@@ -32,7 +32,6 @@ target_sources(${LIBNAME}
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
         integrations/data_reader/kinds.cpp
-        integrations/big_segments/big_segment_store_types.cpp
         prereq_event_recorder/prereq_event_recorder.cpp
         prereq_event_recorder/prereq_event_recorder.hpp
         data_components/change_notifier/change_notifier.hpp
