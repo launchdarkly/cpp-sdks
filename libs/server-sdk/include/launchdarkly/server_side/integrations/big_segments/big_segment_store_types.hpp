@@ -50,8 +50,6 @@ class Membership {
     [[nodiscard]] std::optional<bool> CheckMembership(
         std::string const& segment_ref) const;
 
-    Membership() = default;
-
    private:
     explicit Membership(std::unordered_map<std::string, bool> entries);
 

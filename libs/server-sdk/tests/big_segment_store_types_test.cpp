@@ -37,8 +37,3 @@ TEST(MembershipTests, DifferentGenerationsAreDistinct) {
     ASSERT_EQ(m.CheckMembership("seg.g1"), false);
     ASSERT_EQ(m.CheckMembership("seg.g2"), true);
 }
-
-TEST(MembershipTests, DefaultConstructedIsEmpty) {
-    Membership const m;
-    ASSERT_FALSE(m.CheckMembership("seg.g1").has_value());
-}

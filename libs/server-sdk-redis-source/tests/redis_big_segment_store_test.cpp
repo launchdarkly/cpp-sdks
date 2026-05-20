@@ -33,7 +33,13 @@ class RedisBigSegmentTests : public ::testing::Test {
 
     void AddIncludes(std::string const& context_hash,
                      std::vector<std::string> const& refs) {
-        auto const key = prefix_ + ":big_segment_include:" + context_hash;
+        AddIncludesUnderPrefix(prefix_, context_hash, refs);
+    }
+
+    void AddIncludesUnderPrefix(std::string const& prefix,
+                                std::string const& context_hash,
+                                std::vector<std::string> const& refs) {
+        auto const key = prefix + ":big_segment_include:" + context_hash;
         for (auto const& ref : refs) {
             client_.sadd(key, ref);
         }
@@ -48,8 +54,11 @@ class RedisBigSegmentTests : public ::testing::Test {
     }
 
     void SetSyncTime(std::int64_t millis) {
-        client_.set(prefix_ + ":big_segments_synchronized_on",
-                    std::to_string(millis));
+        SetSyncTimeRaw(std::to_string(millis));
+    }
+
+    void SetSyncTimeRaw(std::string const& value) {
+        client_.set(prefix_ + ":big_segments_synchronized_on", value);
     }
 
    protected:
@@ -58,8 +67,6 @@ class RedisBigSegmentTests : public ::testing::Test {
    private:
     std::string const uri_;
     std::string const prefix_;
-
-   protected:
     sw::redis::Redis client_;
 };
 
@@ -113,8 +120,7 @@ TEST_F(RedisBigSegmentTests, GetMembershipInclusionWinsOverExclusion) {
 
 TEST_F(RedisBigSegmentTests, GetMembershipIsPrefixScoped) {
     // Write under a different prefix; same-named test store should not see it.
-    auto const other_prefix_key = "otherprefix:big_segment_include:alice";
-    client_.sadd(other_prefix_key, "seg1.g1");
+    AddIncludesUnderPrefix("otherprefix", "alice", {"seg1.g1"});
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
@@ -132,8 +138,7 @@ TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataRejectsMalformedSyncTime) {
-    client_.set(std::string("testprefix:big_segments_synchronized_on"),
-                "not-a-number");
+    SetSyncTimeRaw("not-a-number");
 
     auto const result = store_->GetMetadata();
     ASSERT_FALSE(result);

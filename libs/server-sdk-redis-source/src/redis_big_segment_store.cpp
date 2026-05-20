@@ -14,13 +14,13 @@ namespace {
 
 // Schema strings from the LaunchDarkly Big Segments spec; must match what
 // Relay writes byte-for-byte.
-constexpr char kIncludeKeyPrefix[] = "big_segment_include:";
-constexpr char kExcludeKeyPrefix[] = "big_segment_exclude:";
+//
+// Membership keys are three-part: {user-prefix}:{namespace}:{context-hash},
+// where each membership state has its own namespace. Sync-time is two-part:
+// {user-prefix}:big_segments_synchronized_on.
+constexpr char kIncludeKeyNamespace[] = "big_segment_include";
+constexpr char kExcludeKeyNamespace[] = "big_segment_exclude";
 constexpr char kSyncTimeKey[] = "big_segments_synchronized_on";
-
-std::string PrefixedKey(std::string const& prefix, std::string const& base) {
-    return prefix + ":" + base;
-}
 
 }  // namespace
 
@@ -40,16 +40,16 @@ RedisBigSegmentStore::RedisBigSegmentStore(
     std::string prefix)
     : redis_(std::move(redis)),
       prefix_(std::move(prefix)),
-      sync_time_key_(PrefixedKey(prefix_, kSyncTimeKey)) {}
+      sync_time_key_(prefix_ + ":" + kSyncTimeKey) {}
 
 RedisBigSegmentStore::~RedisBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
     std::string const& context_hash) const {
     std::string const include_key =
-        PrefixedKey(prefix_, kIncludeKeyPrefix + context_hash);
+        prefix_ + ":" + kIncludeKeyNamespace + ":" + context_hash;
     std::string const exclude_key =
-        PrefixedKey(prefix_, kExcludeKeyPrefix + context_hash);
+        prefix_ + ":" + kExcludeKeyNamespace + ":" + context_hash;
 
     std::vector<std::string> included;
     std::vector<std::string> excluded;
