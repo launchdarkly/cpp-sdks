@@ -49,17 +49,20 @@ class CurlClient final : public Client,
         std::function<void(Error)> on_error;
         std::function<void()> reset_backoff;
         std::function<void(std::string)> log_message;
+        std::function<void(http::response_header<>)> on_response;
 
         Callbacks(std::function<void(std::string)> do_backoff,
                   std::function<void(Event)> on_receive,
                   std::function<void(Error)> on_error,
                   std::function<void()> reset_backoff,
-                  std::function<void(std::string)> log_message)
+                  std::function<void(std::string)> log_message,
+                  std::function<void(http::response_header<>)> on_response)
             : do_backoff(std::move(do_backoff)),
               on_receive(std::move(on_receive)),
               on_error(std::move(on_error)),
               reset_backoff(std::move(reset_backoff)),
-              log_message(std::move(log_message)) {}
+              log_message(std::move(log_message)),
+              on_response(std::move(on_response)) {}
     };
 
     /**
@@ -93,6 +96,10 @@ class CurlClient final : public Client,
         // Progress tracking for read timeout
         std::chrono::steady_clock::time_point last_progress_time;
         curl_off_t last_download_amount;
+
+        // Accumulator for the current response's headers; reset on each new
+        // status line, emitted on the empty terminator line.
+        http::response_header<> current_response;
 
         // Mutated on the strand in do_run() before each transfer, and read by
         // libcurl via raw pointers (CURLOPT_URL, CURLOPT_POSTFIELDS) for the
@@ -155,6 +162,16 @@ class CurlClient final : public Client,
             }
             if (callbacks_) {
                 callbacks_->log_message(message);
+            }
+        }
+
+        void response(http::response_header<> headers) {
+            std::lock_guard lock(mutex_);
+            if (shutting_down_) {
+                return;
+            }
+            if (callbacks_) {
+                callbacks_->on_response(std::move(headers));
             }
         }
 
@@ -238,6 +255,7 @@ class CurlClient final : public Client,
                Builder::LogCallback logger,
                Builder::ErrorCallback errors,
                Builder::ConnectionHook connection_hook,
+               Builder::ResponseHook response_hook,
                bool skip_verify_peer,
                std::optional<std::string> custom_ca_file,
                bool use_https,
@@ -294,6 +312,7 @@ class CurlClient final : public Client,
     Builder::LogCallback logger_;
     Builder::ErrorCallback errors_;
     Builder::ConnectionHook connection_hook_;
+    Builder::ResponseHook response_hook_;
 
     bool use_https_;
     boost::asio::steady_timer backoff_timer_;

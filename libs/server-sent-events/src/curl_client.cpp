@@ -3,10 +3,13 @@
 #include "curl_client.hpp"
 
 #include <boost/asio/post.hpp>
+#include <boost/beast/core/string.hpp>
 #include <boost/beast/http/status.hpp>
 #include <boost/url/url.hpp>
 
+#include <charconv>
 #include <sstream>
+#include <system_error>
 
 namespace launchdarkly::sse {
 namespace beast = boost::beast;
@@ -41,6 +44,7 @@ CurlClient::CurlClient(
     Builder::LogCallback logger,
     Builder::ErrorCallback errors,
     Builder::ConnectionHook connection_hook,
+    Builder::ResponseHook response_hook,
     bool skip_verify_peer,
     std::optional<std::string> custom_ca_file,
     bool use_https,
@@ -51,6 +55,7 @@ CurlClient::CurlClient(
       logger_(std::move(logger)),
       errors_(std::move(errors)),
       connection_hook_(std::move(connection_hook)),
+      response_hook_(std::move(response_hook)),
       use_https_(use_https),
       backoff_timer_(executor),
       multi_manager_(CurlMultiManager::create(executor)),
@@ -147,6 +152,19 @@ void CurlClient::do_run() {
             if (auto ctx = weak_ctx.lock()) {
                 if (auto const self = weak_self.lock()) {
                     self->log_message(message);
+                }
+            }
+        },
+        [weak_self, weak_ctx](http::response_header<> headers) {
+            if (auto ctx = weak_ctx.lock()) {
+                if (auto const self = weak_self.lock()) {
+                    if (self->response_hook_) {
+                        boost::asio::post(
+                            self->backoff_timer_.get_executor(),
+                            [self, headers = std::move(headers)]() {
+                                self->response_hook_(headers);
+                            });
+                    }
                 }
             }
         }));
@@ -397,6 +415,11 @@ size_t CurlClient::WriteCallback(char const* data,
 // Callback for reading request headers
 //
 // https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
+//
+// libcurl invokes this once per CRLF-terminated response line: the HTTP status
+// line, then each header, then an empty terminator. With
+// CURLOPT_FOLLOWLOCATION enabled the cycle repeats for each response in the
+// redirect chain.
 size_t CurlClient::HeaderCallback(char const* buffer,
                                   size_t size,
                                   size_t nitems,
@@ -404,12 +427,53 @@ size_t CurlClient::HeaderCallback(char const* buffer,
     size_t const total_size = size * nitems;
     auto* context = static_cast<RequestContext*>(userdata);
 
-    // Check for Content-Type header
-    if (std::string const header(buffer, total_size);
-        header.find("Content-Type:") == 0 ||
-        header.find("content-type:") == 0) {
-        if (header.find("text/event-stream") == std::string::npos) {
-            context->log_message("warning: unexpected Content-Type: " + header);
+    std::string_view line(buffer, total_size);
+    if (line.size() >= 2 && line[line.size() - 2] == '\r' &&
+        line.back() == '\n') {
+        line.remove_suffix(2);
+    }
+
+    if (line.empty()) {
+        // End-of-headers terminator: emit and reset.
+        context->response(std::move(context->current_response));
+        context->current_response = http::response_header<>{};
+        return total_size;
+    }
+
+    if (line.substr(0, 5) == "HTTP/") {
+        // Status line: "HTTP/X.Y CODE REASON". Start a fresh response.
+        context->current_response = http::response_header<>{};
+        auto const code_start = line.find(' ');
+        if (code_start != std::string_view::npos) {
+            unsigned code = 0;
+            auto const result = std::from_chars(
+                line.data() + code_start + 1, line.data() + line.size(), code);
+            if (result.ec == std::errc{} && code != 0) {
+                context->current_response.result(code);
+            }
+        }
+        return total_size;
+    }
+
+    auto const colon = line.find(':');
+    if (colon != std::string_view::npos) {
+        std::string_view name = line.substr(0, colon);
+        // HTTP optional whitespace (OWS) per RFC 7230 §3.2.3 is SP or HTAB.
+        std::string_view value = line.substr(colon + 1);
+        while (!value.empty() &&
+               (value.front() == ' ' || value.front() == '\t')) {
+            value.remove_prefix(1);
+        }
+        while (!value.empty() &&
+               (value.back() == ' ' || value.back() == '\t')) {
+            value.remove_suffix(1);
+        }
+        context->current_response.set(std::string(name), std::string(value));
+
+        if (beast::iequals(name, "Content-Type") &&
+            value.find("text/event-stream") == std::string_view::npos) {
+            context->log_message("warning: unexpected Content-Type: " +
+                                 std::string(line));
         }
     }
 
