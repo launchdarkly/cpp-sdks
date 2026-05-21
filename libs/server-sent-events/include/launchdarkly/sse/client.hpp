@@ -36,6 +36,8 @@ class Builder {
     using ErrorCallback = std::function<void(Error)>;
     using ConnectionHook =
         std::function<void(http::request<http::string_body>*)>;
+    using ResponseHook =
+        std::function<void(http::response_header<> const& headers)>;
 
     /**
      * Create a builder for the given URL. If the port is omitted, 443 is
@@ -197,6 +199,20 @@ class Builder {
     Builder& on_connect(ConnectionHook hook);
 
     /**
+     * Register a hook invoked once per (re)connect attempt after the response
+     * headers have been received, before any branching on status. Fires for
+     * every HTTP response (any status code, including redirects and errors).
+     * Does NOT fire if the connection failed before any response arrived
+     * (e.g. TCP error, read timeout).
+     *
+     * The hook is invoked on the client's executor; callers must not block.
+     *
+     * @param hook Callback invoked with the response header.
+     * @return Reference to this builder.
+     */
+    Builder& on_response(ResponseHook hook);
+
+    /**
      * Builds a Client. The shared pointer is necessary to extend the lifetime
      * of the Client to encompass each asynchronous operation that it performs.
      * @return New client; call run() to kickoff the connection process and
@@ -219,6 +235,7 @@ class Builder {
     std::optional<std::string> custom_ca_file_;
     std::optional<std::string> proxy_url_;
     ConnectionHook connection_hook_;
+    ResponseHook response_hook_;
 };
 
 /**
