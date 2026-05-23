@@ -145,6 +145,15 @@ class OneShotSynchronizerFactory : public IFDv2SynchronizerFactory {
     std::unique_ptr<IFDv2Synchronizer> source_;
 };
 
+class FDv1FallbackOneShotFactory : public OneShotSynchronizerFactory {
+   public:
+    explicit FDv1FallbackOneShotFactory(
+        std::unique_ptr<IFDv2Synchronizer> source)
+        : OneShotSynchronizerFactory(std::move(source)) {}
+
+    bool IsFDv1Fallback() const override { return true; }
+};
+
 // Returns each pre-supplied source in order on successive Build() calls.
 // Returns nullptr once the supply is exhausted. Used in tests that exercise
 // wrap-around or recovery, where the same factory is built more than once.
@@ -1088,6 +1097,129 @@ TEST(FDv2DataSystemTest, SingleSynchronizerHasNoFallbackArmed) {
 
     EXPECT_EQ(DataSourceStatus::DataSourceState::kInterrupted,
               status_manager.Status().State());
+}
+
+// ============================================================================
+// FDv1 fallback directive
+// ============================================================================
+
+TEST(FDv2DataSystemTest, SynchronizerFdv1FlagSwitchesToFdv1Adapter) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // FDv2 synchronizer emits a ChangeSet with the directive, then closes.
+    auto fdv2_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{FDv2SourceResult::ChangeSet{
+                data_model::ChangeSet<ChangeSetData>{
+                    data_model::ChangeSetType::kNone,
+                    {},
+                    data_model::Selector{}}}};
+            r.fdv1_fallback = true;
+            return r;
+        }()});
+    auto fdv2_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(fdv2_sync));
+
+    // FDv1 adapter returns Shutdown when reached, ending orchestration.
+    auto fdv1_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto fdv1_factory =
+        std::make_unique<FDv1FallbackOneShotFactory>(std::move(fdv1_sync));
+    auto* fdv1_factory_ptr = fdv1_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(fdv2_factory));
+    synchronizers.push_back(std::move(fdv1_factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
+}
+
+TEST(FDv2DataSystemTest, SynchronizerFdv1FlagWithoutAdapterTransitionsOff) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    auto fdv2_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{
+                FDv2SourceResult::Interrupted{FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
+                    /*status_code=*/418, "directive",
+                    std::chrono::system_clock::now()}}};
+            r.fdv1_fallback = true;
+            return r;
+        }()});
+    auto fdv2_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(fdv2_sync));
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(fdv2_factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kOff,
+              status_manager.Status().State());
+}
+
+TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Initializer returns Interrupted with the directive set.
+    FDv2SourceResult init_result{
+        FDv2SourceResult::Interrupted{FDv2SourceResult::ErrorInfo{
+            FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
+            /*status_code=*/418, "directive",
+            std::chrono::system_clock::now()}}};
+    init_result.fdv1_fallback = true;
+    auto initializer =
+        std::make_unique<MockInitializer>(std::move(init_result));
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
+
+    auto fdv2_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto fdv2_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(fdv2_sync));
+    auto* fdv2_factory_ptr = fdv2_factory.get();
+
+    auto fdv1_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto fdv1_factory =
+        std::make_unique<FDv1FallbackOneShotFactory>(std::move(fdv1_sync));
+    auto* fdv1_factory_ptr = fdv1_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(fdv2_factory));
+    synchronizers.push_back(std::move(fdv1_factory));
+
+    FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    // FDv2 synchronizer was skipped; FDv1 adapter was built and ran.
+    EXPECT_EQ(0, fdv2_factory_ptr->build_count_);
+    EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
 
 // ============================================================================

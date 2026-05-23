@@ -185,6 +185,12 @@ void FDv2DataSystem::OnInitializerResult(
         if (closed_ || got_shutdown) {
             return;
         }
+        if (result.fdv1_fallback) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": FDv1 fallback engaged";
+            source_manager_.SwitchToFDv1Fallback();
+            got_basis = true;
+        }
     }
 
     if (got_basis) {
@@ -349,7 +355,14 @@ void FDv2DataSystem::OnSynchronizerResult(
             active_conditions_.reset();
             return;
         }
-        if (advance) {
+        if (result.fdv1_fallback) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": FDv1 fallback engaged";
+            source_manager_.SwitchToFDv1Fallback();
+            active_synchronizer_.reset();
+            active_conditions_.reset();
+            advance = true;
+        } else if (advance) {
             source_manager_.BlockCurrentSynchronizer();
             active_synchronizer_.reset();
             active_conditions_.reset();

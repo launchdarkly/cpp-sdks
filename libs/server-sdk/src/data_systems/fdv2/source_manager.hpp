@@ -23,8 +23,7 @@ namespace launchdarkly::server_side::data_systems {
  * by recovery, which wants to fall back to the most-preferred Available
  * synchronizer.
  *
- * Each factory also carries an is_fdv1_fallback flag, currently always
- * false. TODO: populate when the FDv1 fallback directive is implemented.
+ * Factories whose IsFDv1Fallback() returns true start in the Blocked state.
  *
  * Not thread-safe. The caller is responsible for serializing all calls.
  */
@@ -55,6 +54,14 @@ class SourceManager {
     void ResetSourceIndex();
 
     /**
+     * Blocks every non-FDv1 factory and unblocks the FDv1 fallback factory,
+     * if one was configured. Resets the iteration cursor so the next call to
+     * NextSynchronizer returns the FDv1 fallback. If no FDv1 fallback factory
+     * was configured, every factory is left blocked.
+     */
+    void SwitchToFDv1Fallback();
+
+    /**
      * Returns true if the currently tracked factory is the first Available
      * factory in the list. Returns false if no factory is currently tracked.
      */
@@ -73,9 +80,8 @@ class SourceManager {
     [[nodiscard]] std::size_t SynchronizerCount() const;
 
     /**
-     * Returns true if the currently tracked factory was configured as the
-     * FDv1 fallback synchronizer. Always false until the FDv1 fallback
-     * directive is implemented.
+     * Returns true if the currently tracked factory is the FDv1 fallback
+     * synchronizer.
      */
     [[nodiscard]] bool IsCurrentSynchronizerFDv1Fallback() const;
 
