@@ -41,6 +41,11 @@ class FDv2StreamingSynchronizerTestPeer {
         boost::beast::http::request<boost::beast::http::string_body>* req) {
         sync.state_->OnConnect(req);
     }
+    static void OnResponse(
+        FDv2StreamingSynchronizer& sync,
+        boost::beast::http::response_header<> const& headers) {
+        sync.state_->OnResponse(headers);
+    }
     static void MarkStarted(FDv2StreamingSynchronizer& sync) {
         std::lock_guard lock(sync.state_->mutex_);
         sync.state_->started_ = true;
@@ -674,4 +679,75 @@ TEST(FDv2StreamingSynchronizerTest, RecoverableReadTimeoutReturnsInterrupted) {
     ASSERT_NE(interrupted, nullptr);
     EXPECT_EQ(interrupted->error.Kind(),
               FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError);
+}
+
+// ============================================================================
+// FDv1 fallback directive
+// ============================================================================
+
+TEST(FDv2StreamingSynchronizerTest, OnResponseDirectivePropagatesToChangeSet) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    boost::beast::http::response_header<> headers;
+    headers.result(200);
+    headers.set("X-LD-FD-Fallback", "true");
+
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+    FDv2StreamingSynchronizerTestPeer::OnEvent(
+        synchronizer,
+        sse::Event("server-intent", R"({"payloads":[{"id":"p1","target":1,)"
+                                    R"("intentCode":"xfer-full"}]})"));
+    FDv2StreamingSynchronizerTestPeer::OnEvent(
+        synchronizer,
+        sse::Event(
+            "put-object",
+            R"({"version":1,"kind":"flag","key":"my-flag","object":)"
+            R"({"key":"my-flag","on":true,"fallthrough":{"variation":0},)"
+            R"("variations":[true,false],"version":1}})"));
+    FDv2StreamingSynchronizerTestPeer::OnEvent(
+        synchronizer,
+        sse::Event("payload-transferred", R"({"state":"abc","version":1})"));
+
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2SourceResult::ChangeSet>(result->value));
+    EXPECT_TRUE(result->fdv1_fallback);
+}
+
+TEST(FDv2StreamingSynchronizerTest, SecondResponseWithoutDirectiveClearsFlag) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    boost::beast::http::response_header<> first;
+    first.result(200);
+    first.set("X-LD-FD-Fallback", "true");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, first);
+
+    boost::beast::http::response_header<> second;
+    second.result(200);
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, second);
+
+    FDv2StreamingSynchronizerTestPeer::OnError(
+        synchronizer,
+        sse::Error{sse::errors::ReadTimeout{std::chrono::milliseconds(0)}});
+
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result->fdv1_fallback);
 }

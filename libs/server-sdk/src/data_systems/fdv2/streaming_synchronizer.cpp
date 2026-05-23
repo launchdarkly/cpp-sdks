@@ -3,6 +3,7 @@
 
 #include <launchdarkly/async/timer.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/json.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
@@ -67,8 +68,7 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
             << kIdentity << ": could not parse streaming endpoint URL";
         Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
             MakeError(ErrorKind::kNetworkError, 0,
-                      "could not parse streaming endpoint URL"),
-            false}});
+                      "could not parse streaming endpoint URL")}});
         return;
     }
 
@@ -116,6 +116,12 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
             s->OnConnect(req);
         }
     });
+    client_builder.on_response(
+        [weak](boost::beast::http::response_header<> const& headers) {
+            if (auto s = weak.lock()) {
+                s->OnResponse(headers);
+            }
+        });
     client_builder.receiver([weak](sse::Event const& event) {
         if (auto s = weak.lock()) {
             s->OnEvent(event);
@@ -137,10 +143,8 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
         // started_ intentionally left true: same reasoning as above.
         LD_LOG(logger_, LogLevel::kError)
             << kIdentity << ": could not build SSE client";
-        Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
-            MakeError(ErrorKind::kNetworkError, 0,
-                      "could not build SSE client"),
-            false}});
+        Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{MakeError(
+            ErrorKind::kNetworkError, 0, "could not build SSE client")}});
         return;
     }
 
@@ -169,6 +173,15 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
     req->target(u.encoded_target());
 }
 
+void FDv2StreamingSynchronizer::State::OnResponse(
+    HttpResponseHeader const& headers) {
+    auto const it = headers.find("X-LD-FD-Fallback");
+    bool const directive =
+        it != headers.end() && boost::iequals(it->value(), "true");
+    std::lock_guard lock(mutex_);
+    latest_fdv1_fallback_ = directive;
+}
+
 void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
     boost::system::error_code ec;
     auto data = boost::json::parse(event.data(), ec);
@@ -177,7 +190,7 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
         std::string msg = "could not parse FDv2 streaming event payload";
         LD_LOG(logger_, LogLevel::kError) << kIdentity << ": " << msg;
         Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, std::move(msg)), false}});
+            MakeError(ErrorKind::kInvalidData, 0, std::move(msg))}});
         return;
     }
 
@@ -195,21 +208,20 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                         "FDv2 streaming changeset could not be translated";
                     LD_LOG(logger_, LogLevel::kError)
                         << kIdentity << ": " << msg;
-                    Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
-                        MakeError(ErrorKind::kInvalidData, 0, std::move(msg)),
-                        false}});
+                    Notify(FDv2SourceResult{
+                        FDv2SourceResult::Interrupted{MakeError(
+                            ErrorKind::kInvalidData, 0, std::move(msg))}});
                     return;
                 }
                 Notify(FDv2SourceResult{
-                    FDv2SourceResult::ChangeSet{std::move(*typed), false}});
+                    FDv2SourceResult::ChangeSet{std::move(*typed)}});
             } else if constexpr (std::is_same_v<T, Goodbye>) {
                 LD_LOG(logger_, LogLevel::kInfo)
                     << kIdentity
                     << ": Goodbye was received from the LaunchDarkly "
                        "connection with reason: '"
                     << r.reason.value_or("") << "'.";
-                Notify(FDv2SourceResult{
-                    FDv2SourceResult::Goodbye{r.reason, false}});
+                Notify(FDv2SourceResult{FDv2SourceResult::Goodbye{r.reason}});
                 // Drop the current connection and reconnect; the protocol
                 // handler is reset so the new connection starts in a clean
                 // state.
@@ -229,15 +241,15 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                         "'. Automatic retry will occur.";
                     LD_LOG(logger_, LogLevel::kInfo)
                         << kIdentity << ": " << msg;
-                    Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
-                        MakeError(ErrorKind::kErrorResponse, 0, std::move(msg)),
-                        false}});
+                    Notify(FDv2SourceResult{
+                        FDv2SourceResult::Interrupted{MakeError(
+                            ErrorKind::kErrorResponse, 0, std::move(msg))}});
                     return;
                 }
                 LD_LOG(logger_, LogLevel::kError)
                     << kIdentity << ": " << r.message;
                 Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, r.message), false}});
+                    MakeError(ErrorKind::kInvalidData, 0, r.message)}});
             } else {
                 static_assert(always_false_v<T>, "non-exhaustive visitor");
             }
@@ -253,7 +265,7 @@ void FDv2StreamingSynchronizer::State::OnError(sse::Error const& error) {
     if (sse::IsRecoverable(error)) {
         LD_LOG(logger_, LogLevel::kWarn) << kIdentity << ": " << msg;
         Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kNetworkError, 0, std::move(msg)), false}});
+            MakeError(ErrorKind::kNetworkError, 0, std::move(msg))}});
         return;
     }
 
@@ -261,23 +273,22 @@ void FDv2StreamingSynchronizer::State::OnError(sse::Error const& error) {
 
     if (auto const* client_error =
             std::get_if<sse::errors::UnrecoverableClientError>(&error)) {
-        Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
-            MakeError(
-                ErrorKind::kErrorResponse,
-                static_cast<ErrorInfo::StatusCodeType>(client_error->status),
-                std::move(msg)),
-            false}});
+        Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{MakeError(
+            ErrorKind::kErrorResponse,
+            static_cast<ErrorInfo::StatusCodeType>(client_error->status),
+            std::move(msg))}});
         return;
     }
 
     Notify(FDv2SourceResult{FDv2SourceResult::TerminalError{
-        MakeError(ErrorKind::kNetworkError, 0, std::move(msg)), false}});
+        MakeError(ErrorKind::kNetworkError, 0, std::move(msg))}});
 }
 
 void FDv2StreamingSynchronizer::State::Notify(FDv2SourceResult result) {
     std::optional<async::Promise<FDv2SourceResult>> promise;
     {
         std::lock_guard lock(mutex_);
+        result.fdv1_fallback = latest_fdv1_fallback_;
         if (pending_promise_) {
             promise = std::move(pending_promise_);
             pending_promise_.reset();

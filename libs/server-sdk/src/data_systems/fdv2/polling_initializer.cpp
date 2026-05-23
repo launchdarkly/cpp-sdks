@@ -37,8 +37,7 @@ async::Future<FDv2SourceResult> FDv2PollingInitializer::Run() {
             FDv2SourceResult{FDv2SourceResult::TerminalError{
                 ErrorInfo{ErrorInfo::ErrorKind::kUnknown, 0,
                           "invalid polling endpoint URL",
-                          std::chrono::system_clock::now()},
-                false}});
+                          std::chrono::system_clock::now()}}});
     }
 
     // Promisify the callback-based HTTP request.
