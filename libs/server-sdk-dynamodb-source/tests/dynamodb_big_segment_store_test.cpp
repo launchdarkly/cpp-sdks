@@ -136,6 +136,36 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipIsPrefixScoped) {
     ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
 }
 
+TEST_F(DynamoDBBigSegmentTests, GetMembershipWithEmptyPrefix) {
+    auto maybe_store =
+        DynamoDBBigSegmentStore::Create(table_name_, "", options_);
+    ASSERT_TRUE(maybe_store) << maybe_store.error();
+    auto const store = std::move(*maybe_store);
+
+    PrefixedDynamoDBClient(*client_, "", table_name_)
+        .PutBigSegmentMembership("alice", {"seg1.g1"}, {});
+
+    auto const result = store->GetMembership("alice");
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), true);
+}
+
+TEST_F(DynamoDBBigSegmentTests, GetMetadataWithEmptyPrefix) {
+    auto maybe_store =
+        DynamoDBBigSegmentStore::Create(table_name_, "", options_);
+    ASSERT_TRUE(maybe_store) << maybe_store.error();
+    auto const store = std::move(*maybe_store);
+
+    PrefixedDynamoDBClient(*client_, "", table_name_)
+        .PutBigSegmentSyncTime(1700000000000LL);
+
+    auto const result = store->GetMetadata();
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+    ASSERT_EQ(result->value().last_up_to_date,
+              std::chrono::milliseconds{1700000000000LL});
+}
+
 TEST_F(DynamoDBBigSegmentTests, GetMembershipRejectsMalformedIncluded) {
     PrefixedDynamoDBClient(*client_, prefix_, table_name_)
         .PutMalformedBigSegmentMembership("dave");
