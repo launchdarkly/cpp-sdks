@@ -22,6 +22,15 @@ constexpr char kIncludeKeyNamespace[] = "big_segment_include";
 constexpr char kExcludeKeyNamespace[] = "big_segment_exclude";
 constexpr char kSyncTimeKey[] = "big_segments_synchronized_on";
 
+// Matches Relay's key shape: `{prefix}:{base}` when a prefix is configured,
+// and just `{base}` when no prefix is configured.
+std::string Prefixed(std::string const& prefix, std::string const& base) {
+    if (prefix.empty()) {
+        return base;
+    }
+    return prefix + ":" + base;
+}
+
 }  // namespace
 
 tl::expected<std::unique_ptr<RedisBigSegmentStore>, std::string>
@@ -32,6 +41,8 @@ RedisBigSegmentStore::Create(std::string uri, std::string prefix) {
             std::move(prefix)));
     } catch (sw::redis::Error const& e) {
         return tl::make_unexpected(e.what());
+    } catch (std::exception const& e) {
+        return tl::make_unexpected(e.what());
     }
 }
 
@@ -40,16 +51,16 @@ RedisBigSegmentStore::RedisBigSegmentStore(
     std::string prefix)
     : redis_(std::move(redis)),
       prefix_(std::move(prefix)),
-      sync_time_key_(prefix_ + ":" + kSyncTimeKey) {}
+      sync_time_key_(Prefixed(prefix_, kSyncTimeKey)) {}
 
 RedisBigSegmentStore::~RedisBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
     std::string const& context_hash) const {
     std::string const include_key =
-        prefix_ + ":" + kIncludeKeyNamespace + ":" + context_hash;
+        Prefixed(prefix_, kIncludeKeyNamespace) + ":" + context_hash;
     std::string const exclude_key =
-        prefix_ + ":" + kExcludeKeyNamespace + ":" + context_hash;
+        Prefixed(prefix_, kExcludeKeyNamespace) + ":" + context_hash;
 
     std::vector<std::string> included;
     std::vector<std::string> excluded;
@@ -58,6 +69,8 @@ IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
         redis_->smembers(include_key, std::back_inserter(included));
         redis_->smembers(exclude_key, std::back_inserter(excluded));
     } catch (sw::redis::Error const& e) {
+        return tl::make_unexpected(e.what());
+    } catch (std::exception const& e) {
         return tl::make_unexpected(e.what());
     }
 
@@ -69,6 +82,8 @@ IBigSegmentStore::GetMetadataResult RedisBigSegmentStore::GetMetadata() const {
     try {
         raw = redis_->get(sync_time_key_);
     } catch (sw::redis::Error const& e) {
+        return tl::make_unexpected(e.what());
+    } catch (std::exception const& e) {
         return tl::make_unexpected(e.what());
     }
 

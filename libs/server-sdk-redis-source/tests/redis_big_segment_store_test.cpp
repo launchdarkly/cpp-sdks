@@ -63,8 +63,6 @@ class RedisBigSegmentTests : public ::testing::Test {
 
    protected:
     std::unique_ptr<RedisBigSegmentStore> store_;
-
-   private:
     std::string const uri_;
     std::string const prefix_;
     sw::redis::Redis client_;
@@ -119,6 +117,33 @@ TEST_F(RedisBigSegmentTests, GetMembershipIsPrefixScoped) {
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
     ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
+}
+
+TEST_F(RedisBigSegmentTests, GetMembershipWithEmptyPrefix) {
+    auto maybe_store = RedisBigSegmentStore::Create(uri_, "");
+    ASSERT_TRUE(maybe_store) << maybe_store.error();
+    auto const store = std::move(*maybe_store);
+
+    // Relay writes keys with no leading colon when no prefix is configured.
+    client_.sadd("big_segment_include:alice", "seg1.g1");
+
+    auto const result = store->GetMembership("alice");
+    ASSERT_TRUE(result);
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), true);
+}
+
+TEST_F(RedisBigSegmentTests, GetMetadataWithEmptyPrefix) {
+    auto maybe_store = RedisBigSegmentStore::Create(uri_, "");
+    ASSERT_TRUE(maybe_store) << maybe_store.error();
+    auto const store = std::move(*maybe_store);
+
+    client_.set("big_segments_synchronized_on", "1700000000000");
+
+    auto const result = store->GetMetadata();
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result->has_value());
+    ASSERT_EQ(result->value().last_up_to_date,
+              std::chrono::milliseconds{1700000000000LL});
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {
