@@ -65,7 +65,8 @@ class RedisBigSegmentStore final : public IBigSegmentStore {
                          std::string prefix);
 
     std::unique_ptr<sw::redis::Redis> redis_;
-    std::string const prefix_;
+    std::string const include_key_prefix_;
+    std::string const exclude_key_prefix_;
     std::string const sync_time_key_;
 };
 

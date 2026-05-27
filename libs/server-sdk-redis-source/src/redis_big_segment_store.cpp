@@ -50,17 +50,16 @@ RedisBigSegmentStore::RedisBigSegmentStore(
     std::unique_ptr<sw::redis::Redis> redis,
     std::string prefix)
     : redis_(std::move(redis)),
-      prefix_(std::move(prefix)),
-      sync_time_key_(Prefixed(prefix_, kSyncTimeKey)) {}
+      include_key_prefix_(Prefixed(prefix, kIncludeKeyNamespace) + ":"),
+      exclude_key_prefix_(Prefixed(prefix, kExcludeKeyNamespace) + ":"),
+      sync_time_key_(Prefixed(prefix, kSyncTimeKey)) {}
 
 RedisBigSegmentStore::~RedisBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
     std::string const& context_hash) const {
-    std::string const include_key =
-        Prefixed(prefix_, kIncludeKeyNamespace) + ":" + context_hash;
-    std::string const exclude_key =
-        Prefixed(prefix_, kExcludeKeyNamespace) + ":" + context_hash;
+    std::string const include_key = include_key_prefix_ + context_hash;
+    std::string const exclude_key = exclude_key_prefix_ + context_hash;
 
     std::vector<std::string> included;
     std::vector<std::string> excluded;
