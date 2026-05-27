@@ -224,6 +224,24 @@ class PrefixedDynamoDBClient {
         }
     }
 
+    // Writes a metadata row that has no `synchronizedOn` attribute at all.
+    // The metadata row exists but is incomplete; the spec treats absent
+    // sync-time as "never synchronized" rather than an error.
+    void PutBigSegmentMetadataWithoutSyncTime() const {
+        std::string const ns = Prefixed("big_segments_metadata");
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{ns});
+        request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{ns});
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put DynamoDB big-segments metadata without "
+                      "sync time: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
     // Writes a metadata row whose `synchronizedOn` is stored as a String
     // instead of a Number. DynamoDB does not enforce non-key attribute types,
     // so a non-Relay writer can produce this shape; we want the store to

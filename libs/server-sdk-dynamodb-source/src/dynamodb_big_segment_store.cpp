@@ -137,8 +137,10 @@ IBigSegmentStore::GetMetadataResult DynamoDBBigSegmentStore::GetMetadata()
 
     auto const it = item.find(kBigSegmentsSyncTimeAttribute);
     if (it == item.end()) {
-        return tl::make_unexpected(
-            "DynamoDB Big Segments metadata row missing 'synchronizedOn'");
+        // "absent" sync time is treated as never synchronized rather than
+        // an error; the wrapper marks the store stale based on the
+        // resulting nullopt.
+        return std::nullopt;
     }
 
     auto const& raw = it->second.GetN();

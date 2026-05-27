@@ -185,6 +185,15 @@ TEST_F(DynamoDBBigSegmentTests, GetMetadataReturnsSyncTime) {
               std::chrono::milliseconds{1700000000000LL});
 }
 
+TEST_F(DynamoDBBigSegmentTests, GetMetadataAbsentSyncTimeReturnsNoMetadata) {
+    PrefixedDynamoDBClient(*client_, prefix_, table_name_)
+        .PutBigSegmentMetadataWithoutSyncTime();
+
+    auto const result = store_->GetMetadata();
+    ASSERT_TRUE(result);
+    ASSERT_FALSE(result->has_value());
+}
+
 TEST_F(DynamoDBBigSegmentTests, GetMetadataRejectsMalformedSyncTime) {
     PrefixedDynamoDBClient(*client_, prefix_, table_name_)
         .PutMalformedBigSegmentSyncTime();
