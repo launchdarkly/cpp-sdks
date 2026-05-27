@@ -75,8 +75,7 @@ class RedisBigSegmentTests : public ::testing::Test {
 TEST_F(RedisBigSegmentTests, EmptyStoreReturnsEmptyMembership) {
     auto const result = store_->GetMembership("nobody");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-    ASSERT_FALSE(result->value().CheckMembership("seg1.g1").has_value());
+    ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(RedisBigSegmentTests, EmptyStoreReturnsNoMetadata) {
@@ -90,12 +89,10 @@ TEST_F(RedisBigSegmentTests, GetMembershipWithIncludesOnly) {
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
 
-    auto const& m = result->value();
-    ASSERT_EQ(m.CheckMembership("seg1.g1"), true);
-    ASSERT_EQ(m.CheckMembership("seg2.g3"), true);
-    ASSERT_FALSE(m.CheckMembership("seg3.g1").has_value());
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), true);
+    ASSERT_EQ(result->CheckMembership("seg2.g3"), true);
+    ASSERT_FALSE(result->CheckMembership("seg3.g1").has_value());
 }
 
 TEST_F(RedisBigSegmentTests, GetMembershipWithExcludesOnly) {
@@ -103,10 +100,7 @@ TEST_F(RedisBigSegmentTests, GetMembershipWithExcludesOnly) {
 
     auto const result = store_->GetMembership("bob");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-
-    auto const& m = result->value();
-    ASSERT_EQ(m.CheckMembership("seg1.g1"), false);
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), false);
 }
 
 TEST_F(RedisBigSegmentTests, GetMembershipInclusionWinsOverExclusion) {
@@ -115,8 +109,7 @@ TEST_F(RedisBigSegmentTests, GetMembershipInclusionWinsOverExclusion) {
 
     auto const result = store_->GetMembership("carol");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-    ASSERT_EQ(result->value().CheckMembership("seg.g1"), true);
+    ASSERT_EQ(result->CheckMembership("seg.g1"), true);
 }
 
 TEST_F(RedisBigSegmentTests, GetMembershipIsPrefixScoped) {
@@ -125,8 +118,7 @@ TEST_F(RedisBigSegmentTests, GetMembershipIsPrefixScoped) {
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-    ASSERT_FALSE(result->value().CheckMembership("seg1.g1").has_value());
+    ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {

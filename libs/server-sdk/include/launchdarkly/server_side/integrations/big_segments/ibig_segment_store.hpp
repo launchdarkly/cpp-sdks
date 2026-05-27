@@ -38,8 +38,7 @@ class IBigSegmentStore {
     IBigSegmentStore& operator=(IBigSegmentStore const&) = delete;
     IBigSegmentStore& operator=(IBigSegmentStore&&) = delete;
 
-    using GetMembershipResult =
-        tl::expected<std::optional<Membership>, std::string>;
+    using GetMembershipResult = tl::expected<Membership, std::string>;
     using GetMetadataResult =
         tl::expected<std::optional<StoreMetadata>, std::string>;
 
@@ -49,10 +48,10 @@ class IBigSegmentStore {
      * @param context_hash Base64-encoded SHA-256 of the context key.
      * Implementations should treat this as an opaque identifier.
      *
-     * @return A @ref Membership snapshot if the store has any record for this
-     * context hash, `std::nullopt` if there is no record (which is a normal
-     * case — most contexts are in no Big Segments), or an error if the lookup
-     * itself failed.
+     * @return A @ref Membership snapshot. Most contexts are in no Big
+     * Segments, in which case the returned Membership has no entries (every
+     * @ref Membership::CheckMembership call against it returns
+     * `std::nullopt`). Returns an error if the lookup itself failed.
      */
     [[nodiscard]] virtual GetMembershipResult GetMembership(
         std::string const& context_hash) const = 0;

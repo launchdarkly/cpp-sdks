@@ -79,9 +79,6 @@ IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
     }
 
     auto const& item = outcome.GetResult().GetItem();
-    if (item.empty()) {
-        return std::nullopt;
-    }
 
     std::vector<std::string> included;
     std::vector<std::string> excluded;

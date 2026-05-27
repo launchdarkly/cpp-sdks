@@ -85,10 +85,10 @@ class DynamoDBBigSegmentTests : public ::testing::Test {
 
 }  // namespace
 
-TEST_F(DynamoDBBigSegmentTests, EmptyStoreReturnsNoMembership) {
+TEST_F(DynamoDBBigSegmentTests, EmptyStoreReturnsEmptyMembership) {
     auto const result = store_->GetMembership("nobody");
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->has_value());
+    ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(DynamoDBBigSegmentTests, EmptyStoreReturnsNoMetadata) {
@@ -103,12 +103,10 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipWithIncludesOnly) {
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
 
-    auto const& m = result->value();
-    ASSERT_EQ(m.CheckMembership("seg1.g1"), true);
-    ASSERT_EQ(m.CheckMembership("seg2.g3"), true);
-    ASSERT_FALSE(m.CheckMembership("seg3.g1").has_value());
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), true);
+    ASSERT_EQ(result->CheckMembership("seg2.g3"), true);
+    ASSERT_FALSE(result->CheckMembership("seg3.g1").has_value());
 }
 
 TEST_F(DynamoDBBigSegmentTests, GetMembershipWithExcludesOnly) {
@@ -117,8 +115,7 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipWithExcludesOnly) {
 
     auto const result = store_->GetMembership("bob");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-    ASSERT_EQ(result->value().CheckMembership("seg1.g1"), false);
+    ASSERT_EQ(result->CheckMembership("seg1.g1"), false);
 }
 
 TEST_F(DynamoDBBigSegmentTests, GetMembershipInclusionWinsOverExclusion) {
@@ -127,8 +124,7 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipInclusionWinsOverExclusion) {
 
     auto const result = store_->GetMembership("carol");
     ASSERT_TRUE(result);
-    ASSERT_TRUE(result->has_value());
-    ASSERT_EQ(result->value().CheckMembership("seg.g1"), true);
+    ASSERT_EQ(result->CheckMembership("seg.g1"), true);
 }
 
 TEST_F(DynamoDBBigSegmentTests, GetMembershipIsPrefixScoped) {
@@ -137,7 +133,7 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipIsPrefixScoped) {
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->has_value());
+    ASSERT_FALSE(result->CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(DynamoDBBigSegmentTests, GetMembershipRejectsMalformedIncluded) {
