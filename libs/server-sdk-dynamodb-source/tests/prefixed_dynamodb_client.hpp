@@ -183,6 +183,29 @@ class PrefixedDynamoDBClient {
         }
     }
 
+    // Writes a membership row where `included` is stored as a String (S)
+    // instead of a String Set (SS). DynamoDB does not enforce non-key
+    // attribute types, so a non-Relay writer can produce this shape; we want
+    // the store to surface it as an error rather than silently producing an
+    // empty membership.
+    void PutMalformedBigSegmentMembership(
+        std::string const& context_hash) const {
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{
+                                         Prefixed("big_segments_user")});
+        request.AddItem("key",
+                        Aws::DynamoDB::Model::AttributeValue{context_hash});
+        request.AddItem("included",
+                        Aws::DynamoDB::Model::AttributeValue{"seg1.g1"});
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put malformed DynamoDB big-segments membership: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
     void PutBigSegmentSyncTime(std::int64_t millis) const {
         std::string const ns = Prefixed("big_segments_metadata");
         Aws::DynamoDB::Model::PutItemRequest request;

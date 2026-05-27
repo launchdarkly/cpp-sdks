@@ -86,14 +86,30 @@ IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
     std::vector<std::string> included;
     std::vector<std::string> excluded;
 
+    // GetSS() silently returns an empty vector if the attribute is not
+    // actually a String Set, so check the type explicitly before reading.
     if (auto const it = item.find(kBigSegmentsIncludedAttribute);
         it != item.end()) {
+        if (it->second.GetType() !=
+            Aws::DynamoDB::Model::ValueType::STRING_SET) {
+            return tl::make_unexpected(
+                std::string("DynamoDB Big Segments '") +
+                kBigSegmentsIncludedAttribute +
+                "' is not of type STRING_SET");
+        }
         for (auto const& ref : it->second.GetSS()) {
             included.emplace_back(ref);
         }
     }
     if (auto const it = item.find(kBigSegmentsExcludedAttribute);
         it != item.end()) {
+        if (it->second.GetType() !=
+            Aws::DynamoDB::Model::ValueType::STRING_SET) {
+            return tl::make_unexpected(
+                std::string("DynamoDB Big Segments '") +
+                kBigSegmentsExcludedAttribute +
+                "' is not of type STRING_SET");
+        }
         for (auto const& ref : it->second.GetSS()) {
             excluded.emplace_back(ref);
         }

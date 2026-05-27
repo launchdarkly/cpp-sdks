@@ -140,6 +140,14 @@ TEST_F(DynamoDBBigSegmentTests, GetMembershipIsPrefixScoped) {
     ASSERT_FALSE(result->has_value());
 }
 
+TEST_F(DynamoDBBigSegmentTests, GetMembershipRejectsMalformedIncluded) {
+    PrefixedDynamoDBClient(*client_, prefix_, table_name_)
+        .PutMalformedBigSegmentMembership("dave");
+
+    auto const result = store_->GetMembership("dave");
+    ASSERT_FALSE(result);
+}
+
 TEST_F(DynamoDBBigSegmentTests, GetMetadataReturnsSyncTime) {
     PrefixedDynamoDBClient(*client_, prefix_, table_name_)
         .PutBigSegmentSyncTime(1700000000000LL);
