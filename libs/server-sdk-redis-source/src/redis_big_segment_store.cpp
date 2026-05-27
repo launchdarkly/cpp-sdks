@@ -61,9 +61,6 @@ IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
         return tl::make_unexpected(e.what());
     }
 
-    if (included.empty() && excluded.empty()) {
-        return std::nullopt;
-    }
     return Membership::FromSegmentRefs(included, excluded);
 }
 

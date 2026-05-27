@@ -72,10 +72,11 @@ class RedisBigSegmentTests : public ::testing::Test {
 
 }  // namespace
 
-TEST_F(RedisBigSegmentTests, EmptyStoreReturnsNoMembership) {
+TEST_F(RedisBigSegmentTests, EmptyStoreReturnsEmptyMembership) {
     auto const result = store_->GetMembership("nobody");
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->has_value());
+    ASSERT_TRUE(result->has_value());
+    ASSERT_FALSE(result->value().CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(RedisBigSegmentTests, EmptyStoreReturnsNoMetadata) {
@@ -124,7 +125,8 @@ TEST_F(RedisBigSegmentTests, GetMembershipIsPrefixScoped) {
 
     auto const result = store_->GetMembership("alice");
     ASSERT_TRUE(result);
-    ASSERT_FALSE(result->has_value());
+    ASSERT_TRUE(result->has_value());
+    ASSERT_FALSE(result->value().CheckMembership("seg1.g1").has_value());
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {
