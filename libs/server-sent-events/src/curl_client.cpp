@@ -428,20 +428,11 @@ size_t CurlClient::HeaderCallback(char const* buffer,
     auto* context = static_cast<RequestContext*>(userdata);
 
     std::string_view line(buffer, total_size);
-    if (line.size() >= 2 && line[line.size() - 2] == '\r' &&
-        line.back() == '\n') {
-        line.remove_suffix(2);
-    }
 
-    if (line.empty()) {
-        // End-of-headers terminator: emit and reset.
-        context->response(std::move(context->current_response));
-        context->current_response = http::response_header<>{};
     // Strip the line terminator. Allow bare LF or bare CR per RFC 9112 §2.2;
     // libcurl preserves the original wire bytes for HTTP/1.x (only HTTP/2
     // synthesizes CRLF), so a non-compliant origin can deliver bare LF here.
-    while (!line.empty() &&
-           (line.back() == '\r' || line.back() == '\n')) {
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
         line.remove_suffix(1);
     }
 
