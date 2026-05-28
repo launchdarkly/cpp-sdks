@@ -428,30 +428,54 @@ size_t CurlClient::HeaderCallback(char const* buffer,
     auto* context = static_cast<RequestContext*>(userdata);
 
     std::string_view line(buffer, total_size);
-    if (line.size() >= 2 && line[line.size() - 2] == '\r' &&
-        line.back() == '\n') {
-        line.remove_suffix(2);
+    // Strip the line terminator. Allow bare LF or bare CR per RFC 9112 §2.2;
+    // libcurl preserves the original wire bytes for HTTP/1.x (only HTTP/2
+    // synthesizes CRLF), so a non-compliant origin can deliver bare LF here.
+    while (!line.empty() &&
+           (line.back() == '\r' || line.back() == '\n')) {
+        line.remove_suffix(1);
     }
 
     if (line.empty()) {
-        // End-of-headers terminator: emit and reset.
-        context->response(std::move(context->current_response));
-        context->current_response = http::response_header<>{};
+        // Terminator. If we're between responses (e.g., the line ends a
+        // chunked-transfer trailer block), there's nothing to emit.
+        if (context->reading_headers) {
+            context->response(std::move(context->current_response));
+            context->current_response = http::response_header<>{};
+            context->reading_headers = false;
+        }
         return total_size;
     }
 
     if (line.substr(0, 5) == "HTTP/") {
-        // Status line: "HTTP/X.Y CODE REASON". Start a fresh response.
+        // Status line: "HTTP/X.Y CODE REASON". Only legitimate before any
+        // header has been seen for this response — an interior HTTP/ line
+        // would otherwise wipe accumulated state.
+        if (context->reading_headers) {
+            return total_size;
+        }
+        // Beast default-constructs result_ to status::ok (200); reset to 0
+        // so an unparseable status line surfaces as result_int() == 0.
         context->current_response = http::response_header<>{};
+        context->current_response.result(0);
         auto const code_start = line.find(' ');
         if (code_start != std::string_view::npos) {
             unsigned code = 0;
             auto const result = std::from_chars(
                 line.data() + code_start + 1, line.data() + line.size(), code);
-            if (result.ec == std::errc{} && code != 0) {
+            // Three-digit status per RFC 7231 §6; the tight bound avoids
+            // result(unsigned) throwing across the libcurl C frame.
+            if (result.ec == std::errc{} && code >= 100 && code <= 999) {
                 context->current_response.result(code);
             }
         }
+        context->reading_headers = true;
+        return total_size;
+    }
+
+    if (!context->reading_headers) {
+        // Header line received outside an active response — chunked trailer
+        // or protocol-level junk. Ignore.
         return total_size;
     }
 
@@ -468,7 +492,9 @@ size_t CurlClient::HeaderCallback(char const* buffer,
                (value.back() == ' ' || value.back() == '\t')) {
             value.remove_suffix(1);
         }
-        context->current_response.set(std::string(name), std::string(value));
+        // insert() preserves duplicate-name headers (Set-Cookie, Via, …);
+        // set() would collapse them and diverge from the Foxy backend.
+        context->current_response.insert(std::string(name), std::string(value));
 
         if (beast::iequals(name, "Content-Type") &&
             value.find("text/event-stream") == std::string_view::npos) {
