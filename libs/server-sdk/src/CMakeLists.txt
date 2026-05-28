@@ -2,6 +2,7 @@
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/*.hpp"
+        "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/big_segments/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/hooks/*.hpp"
 )
 

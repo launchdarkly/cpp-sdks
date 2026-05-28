@@ -21,7 +21,9 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 // PrefixedDynamoDBClient is a test fixture helper that writes flags and
 // segments directly into a DynamoDB table using the LaunchDarkly schema
@@ -58,8 +60,7 @@ class PrefixedDynamoDBClient {
 
         Aws::DynamoDB::Model::AttributeDefinition sort_def;
         sort_def.SetAttributeName("key");
-        sort_def.SetAttributeType(
-            Aws::DynamoDB::Model::ScalarAttributeType::S);
+        sort_def.SetAttributeType(Aws::DynamoDB::Model::ScalarAttributeType::S);
         request.AddAttributeDefinitions(sort_def);
 
         Aws::DynamoDB::Model::ProvisionedThroughput throughput;
@@ -149,7 +150,114 @@ class PrefixedDynamoDBClient {
         auto outcome = client_.PutItem(request);
         if (!outcome.IsSuccess()) {
             FAIL() << "couldn't put DynamoDB item ns=" << Prefixed(ns_suffix)
-                   << " key=" << key << ": "
+                   << " key=" << key << ": " << outcome.GetError().GetMessage();
+        }
+    }
+
+    void PutBigSegmentMembership(
+        std::string const& context_hash,
+        std::vector<std::string> const& included,
+        std::vector<std::string> const& excluded) const {
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{
+                                         Prefixed("big_segments_user")});
+        request.AddItem("key",
+                        Aws::DynamoDB::Model::AttributeValue{context_hash});
+        if (!included.empty()) {
+            Aws::DynamoDB::Model::AttributeValue value;
+            value.SetSS(
+                Aws::Vector<Aws::String>(included.begin(), included.end()));
+            request.AddItem("included", value);
+        }
+        if (!excluded.empty()) {
+            Aws::DynamoDB::Model::AttributeValue value;
+            value.SetSS(
+                Aws::Vector<Aws::String>(excluded.begin(), excluded.end()));
+            request.AddItem("excluded", value);
+        }
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put DynamoDB big-segments membership: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
+    // Writes a membership row where `included` is stored as a String (S)
+    // instead of a String Set (SS). DynamoDB does not enforce non-key
+    // attribute types, so a non-Relay writer can produce this shape; we want
+    // the store to surface it as an error rather than silently producing an
+    // empty membership.
+    void PutMalformedBigSegmentMembership(
+        std::string const& context_hash) const {
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{
+                                         Prefixed("big_segments_user")});
+        request.AddItem("key",
+                        Aws::DynamoDB::Model::AttributeValue{context_hash});
+        request.AddItem("included",
+                        Aws::DynamoDB::Model::AttributeValue{"seg1.g1"});
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put malformed DynamoDB big-segments membership: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
+    void PutBigSegmentSyncTime(std::int64_t millis) const {
+        std::string const ns = Prefixed("big_segments_metadata");
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{ns});
+        request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{ns});
+
+        Aws::DynamoDB::Model::AttributeValue value;
+        value.SetN(std::to_string(millis));
+        request.AddItem("synchronizedOn", value);
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put DynamoDB big-segments metadata: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
+    // Writes a metadata row that has no `synchronizedOn` attribute at all.
+    // The metadata row exists but is incomplete; the spec treats absent
+    // sync-time as "never synchronized" rather than an error.
+    void PutBigSegmentMetadataWithoutSyncTime() const {
+        std::string const ns = Prefixed("big_segments_metadata");
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{ns});
+        request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{ns});
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put DynamoDB big-segments metadata without "
+                      "sync time: "
+                   << outcome.GetError().GetMessage();
+        }
+    }
+
+    // Writes a metadata row whose `synchronizedOn` is stored as a String
+    // instead of a Number. DynamoDB does not enforce non-key attribute types,
+    // so a non-Relay writer can produce this shape; we want the store to
+    // surface it as an error rather than silently returning 0.
+    void PutMalformedBigSegmentSyncTime() const {
+        std::string const ns = Prefixed("big_segments_metadata");
+        Aws::DynamoDB::Model::PutItemRequest request;
+        request.SetTableName(table_name_);
+        request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{ns});
+        request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{ns});
+        request.AddItem("synchronizedOn",
+                        Aws::DynamoDB::Model::AttributeValue{"not-a-number"});
+
+        auto outcome = client_.PutItem(request);
+        if (!outcome.IsSuccess()) {
+            FAIL() << "couldn't put malformed DynamoDB big-segments metadata: "
                    << outcome.GetError().GetMessage();
         }
     }
@@ -170,14 +278,13 @@ class PrefixedDynamoDBClient {
         request.AddItem("namespace", Aws::DynamoDB::Model::AttributeValue{ns});
         request.AddItem("key", Aws::DynamoDB::Model::AttributeValue{key});
         if (item_attribute) {
-            request.AddItem("item",
-                            Aws::DynamoDB::Model::AttributeValue{*item_attribute});
+            request.AddItem(
+                "item", Aws::DynamoDB::Model::AttributeValue{*item_attribute});
         }
         auto outcome = client_.PutItem(request);
         if (!outcome.IsSuccess()) {
-            FAIL() << "couldn't put DynamoDB item ns=" << ns
-                   << " key=" << key << ": "
-                   << outcome.GetError().GetMessage();
+            FAIL() << "couldn't put DynamoDB item ns=" << ns << " key=" << key
+                   << ": " << outcome.GetError().GetMessage();
         }
     }
 
