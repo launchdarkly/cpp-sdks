@@ -442,7 +442,11 @@ size_t CurlClient::HeaderCallback(char const* buffer,
 
     if (line.substr(0, 5) == "HTTP/") {
         // Status line: "HTTP/X.Y CODE REASON". Start a fresh response.
+        // Status line: "HTTP/X.Y CODE REASON". Start a fresh response.
+        // Beast default-constructs result_ to status::ok (200); reset to 0
+        // so an unparseable status line surfaces as result_int() == 0.
         context->current_response = http::response_header<>{};
+        context->current_response.result(0);
         auto const code_start = line.find(' ');
         if (code_start != std::string_view::npos) {
             unsigned code = 0;
