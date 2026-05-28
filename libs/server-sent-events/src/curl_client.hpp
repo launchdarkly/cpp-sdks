@@ -101,6 +101,12 @@ class CurlClient final : public Client,
         // status line, emitted on the empty terminator line.
         http::response_header<> current_response;
 
+        // True while accumulating headers between an `HTTP/` status line and
+        // the empty terminator. Gates `HeaderCallback` against chunked
+        // trailers (which arrive without a fresh status line) and against
+        // interior `HTTP/` lines that would otherwise wipe accumulated state.
+        bool reading_headers = false;
+
         // Mutated on the strand in do_run() before each transfer, and read by
         // libcurl via raw pointers (CURLOPT_URL, CURLOPT_POSTFIELDS) for the
         // duration of the transfer. Safe because the next do_run() only fires
