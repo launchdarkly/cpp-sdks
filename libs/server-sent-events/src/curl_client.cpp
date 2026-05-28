@@ -516,6 +516,11 @@ void CurlClient::PerformRequestWithMulti(
     // Initialize parser for new connection (last_event_id is tracked
     // separately)
     context->init_parser();
+    // Reset header-accumulator state in case the previous transfer dropped
+    // mid-headers, which would otherwise leave reading_headers=true and
+    // cause the new response's HTTP/ status line to be skipped.
+    context->current_response = http::response_header<>{};
+    context->reading_headers = false;
 
     std::shared_ptr<CURL> curl(curl_easy_init(), curl_easy_cleanup);
     if (!curl) {
