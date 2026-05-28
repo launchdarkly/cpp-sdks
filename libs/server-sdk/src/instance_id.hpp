@@ -9,8 +9,6 @@ namespace launchdarkly::server_side {
  * estimating server-connection-minutes when polling. The value is a v4 UUID
  * that is generated once per SDK instance and remains constant for the
  * lifetime of the client.
- *
- * See: sdk-specs / SCMP-server-connection-minutes-polling.
  */
 inline constexpr char const* kInstanceIdHeader = "X-LaunchDarkly-Instance-Id";
 
