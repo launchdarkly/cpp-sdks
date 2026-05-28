@@ -76,6 +76,8 @@ target_sources(${LIBNAME}
         data_systems/fdv2/source_manager.cpp
         data_systems/fdv2/fdv2_data_system.hpp
         data_systems/fdv2/fdv2_data_system.cpp
+        data_systems/fdv2/fdv1_adapter_synchronizer.hpp
+        data_systems/fdv2/fdv1_adapter_synchronizer.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/streaming/event_handler.hpp
