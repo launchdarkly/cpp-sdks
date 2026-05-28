@@ -34,6 +34,16 @@ public:
         std::function<void()> close_connection
     )>;
 
+    // Handler that writes raw bytes directly to the socket, bypassing Beast's
+    // serializer. Used when a test needs to emit wire content Beast won't
+    // produce: invalid status lines, bare-LF terminators, chunked trailers,
+    // interior HTTP/ status-line injections, etc.
+    using RawRequestHandler = std::function<void(
+        http::request<http::string_body> const& req,
+        std::function<void(std::string)> send_raw,
+        std::function<void()> close_connection
+    )>;
+
     MockSSEServer()
         : ioc_(),
           acceptor_(ioc_),
@@ -51,25 +61,16 @@ public:
      */
     uint16_t start(RequestHandler handler, bool use_ssl = false) {
         handler_ = std::move(handler);
-        use_ssl_ = use_ssl;
+        raw_handler_ = nullptr;
+        return start_listening(use_ssl);
+    }
 
-        // Bind to port 0 to get a random available port
-        tcp::endpoint endpoint(tcp::v4(), 0);
-        acceptor_.open(endpoint.protocol());
-        acceptor_.set_option(net::socket_base::reuse_address(true));
-        acceptor_.bind(endpoint);
-        acceptor_.listen();
-
-        port_ = acceptor_.local_endpoint().port();
-        running_ = true;
-
-        // Start accepting connections in a background thread
-        server_thread_ = std::thread([this]() {
-            do_accept();
-            ioc_.run();
-        });
-
-        return port_;
+    // Start in raw mode: the handler writes wire bytes directly. See
+    // RawRequestHandler.
+    uint16_t start_raw(RawRequestHandler handler, bool use_ssl = false) {
+        handler_ = nullptr;
+        raw_handler_ = std::move(handler);
+        return start_listening(use_ssl);
     }
 
     void stop() {
@@ -108,6 +109,28 @@ public:
     }
 
 private:
+    uint16_t start_listening(bool use_ssl) {
+        use_ssl_ = use_ssl;
+
+        // Bind to port 0 to get a random available port
+        tcp::endpoint endpoint(tcp::v4(), 0);
+        acceptor_.open(endpoint.protocol());
+        acceptor_.set_option(net::socket_base::reuse_address(true));
+        acceptor_.bind(endpoint);
+        acceptor_.listen();
+
+        port_ = acceptor_.local_endpoint().port();
+        running_ = true;
+
+        // Start accepting connections in a background thread
+        server_thread_ = std::thread([this]() {
+            do_accept();
+            ioc_.run();
+        });
+
+        return port_;
+    }
+
     void do_accept() {
         if (!running_) {
             return;
@@ -127,7 +150,7 @@ private:
 
     void handle_connection(tcp::socket socket) {
         auto conn = std::make_shared<Connection>(
-            std::move(socket), handler_);
+            std::move(socket), handler_, raw_handler_);
 
         // Track active connections
         {
@@ -143,11 +166,15 @@ private:
         beast::flat_buffer buffer_;
         http::request<http::string_body> req_;
         RequestHandler handler_;
+        RawRequestHandler raw_handler_;
         std::atomic<bool> closed_;
 
-        Connection(tcp::socket socket, RequestHandler handler)
+        Connection(tcp::socket socket,
+                   RequestHandler handler,
+                   RawRequestHandler raw_handler)
             : socket_(std::move(socket)),
               handler_(std::move(handler)),
+              raw_handler_(std::move(raw_handler)),
               closed_(false) {
         }
 
@@ -177,6 +204,32 @@ private:
 
         void handle_request() {
             auto self = shared_from_this();
+
+            if (raw_handler_) {
+                auto send_raw = [self](std::string bytes) {
+                    if (self->closed_) {
+                        return;
+                    }
+                    boost::system::error_code ec;
+                    net::write(self->socket_, net::buffer(bytes), ec);
+                    if (ec) {
+                        self->closed_ = true;
+                    }
+                };
+
+                auto close_connection = [self]() {
+                    if (self->closed_) {
+                        return;
+                    }
+                    self->closed_ = true;
+                    boost::system::error_code ec;
+                    self->socket_.shutdown(tcp::socket::shutdown_both, ec);
+                    self->socket_.close(ec);
+                };
+
+                raw_handler_(req_, send_raw, close_connection);
+                return;
+            }
 
             auto send_response = [self](http::response<http::string_body> res) {
                 if (self->closed_) {
@@ -249,6 +302,7 @@ private:
     tcp::acceptor acceptor_;
     std::thread server_thread_;
     RequestHandler handler_;
+    RawRequestHandler raw_handler_;
     std::atomic<bool> running_;
     std::atomic<uint16_t> port_;
     bool use_ssl_;

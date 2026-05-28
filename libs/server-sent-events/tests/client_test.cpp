@@ -1560,3 +1560,182 @@ TEST(ClientTest, OnResponseHookFiresWithCustomHeader) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
+
+// Regression tests for issues identified in the on_response review.
+// Each test asserts the *desired* behavior so it goes red on the unfixed
+// HeaderCallback (curl backend) and green after the fix.
+//
+// Tests cover only the bugs reachable through libcurl 8.5.0:
+//
+//   - H3: set() collapses duplicate-name headers (e.g. Set-Cookie).
+//   - L1: bare-LF line terminators leave a trailing \n in header values.
+//
+// Other defenses in the comprehensive fix (status-code bounds, status-line
+// parse-failure surfacing, interior HTTP/ rejection, trailer/state machine)
+// guard against libcurl behavior we cannot reproduce from this version:
+//
+//   - 4-digit status codes:   libcurl 8.5.0 rejects with UNSUPPORTED_PROTOCOL
+//                             (requires ISSPACE after 3 digits; http.c:4430).
+//   - Malformed status lines: libcurl 8.5.0 rejects (fine_statusline = FALSE).
+//   - Interior HTTP/ lines:   libcurl 8.5.0 reports "Weird server reply".
+//   - Chunked trailers:       libcurl forwards trailer LINES but does NOT
+//                             emit a separate empty-terminator line after
+//                             them, so no phantom second hook fire occurs.
+//
+// Those defenses are still applied because libcurl filtering behavior varies
+// across versions; the fix is cheap and correctness should not depend on
+// downstream parsing quirks.
+
+namespace {
+
+// Captures each invocation of the response hook so a test can assert on
+// fire count and per-fire content. Designed for tests that need to verify
+// the hook fires exactly N times (e.g. M1 trailers) or that header values
+// arrive intact (H3, L1) or that the status is reported correctly (H1, H2).
+struct ResponseHookCaptures {
+    struct Capture {
+        unsigned status;
+        std::vector<std::pair<std::string, std::string>> fields;
+    };
+
+    void operator()(http::response_header<> const& h) {
+        std::lock_guard lock(mutex);
+        Capture c;
+        c.status = h.result_int();
+        for (auto const& field : h) {
+            c.fields.emplace_back(std::string(field.name_string()),
+                                  std::string(field.value()));
+        }
+        captures.push_back(std::move(c));
+        cv.notify_all();
+    }
+
+    bool wait_for_at_least(std::size_t n,
+                           std::chrono::milliseconds timeout = 5000ms) {
+        std::unique_lock lock(mutex);
+        return cv.wait_for(lock, timeout,
+                           [&] { return captures.size() >= n; });
+    }
+
+    std::size_t size() {
+        std::lock_guard lock(mutex);
+        return captures.size();
+    }
+
+    std::vector<Capture> snapshot() {
+        std::lock_guard lock(mutex);
+        return captures;
+    }
+
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::vector<Capture> captures;
+};
+
+}  // namespace
+
+// H3 — When a server emits two headers with the same field-name (e.g.
+// Set-Cookie, which RFC 6265 §3 forbids merging), the hook must see both
+// values. The Foxy backend already does this via Beast's parser; the curl
+// backend uses set() which collapses duplicates.
+TEST(ClientTest, OnResponseHookPreservesDuplicateSetCookieHeaders) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.insert("Set-Cookie", "a=1");
+            res.insert("Set-Cookie", "b=2");
+            res.chunked(true);
+            send_response(res);
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    ResponseHookCaptures captures;
+
+    auto client = Builder(runner.context().get_executor(),
+                          "http://localhost:" + std::to_string(port))
+                      .receiver([](Event) {})
+                      .on_response(std::ref(captures))
+                      .build();
+
+    client->async_connect();
+    ASSERT_TRUE(captures.wait_for_at_least(1));
+
+    auto const fields = captures.snapshot().front().fields;
+    std::vector<std::string> set_cookies;
+    for (auto const& [name, value] : fields) {
+        std::string lowered;
+        lowered.reserve(name.size());
+        for (char c : name) {
+            lowered.push_back(static_cast<char>(std::tolower(c)));
+        }
+        if (lowered == "set-cookie") {
+            set_cookies.push_back(value);
+        }
+    }
+
+    EXPECT_THAT(set_cookies, ::testing::UnorderedElementsAre("a=1", "b=2"))
+        << "Both Set-Cookie values must reach the hook; set() collapses them";
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+
+#ifdef LD_CURL_NETWORKING
+// L1 — Per RFC 9112 §2.2 a recipient MAY recognize bare LF as a line
+// terminator. libcurl preserves the original wire bytes for HTTP/1.x, so
+// a non-compliant origin can deliver bare-LF lines to HEADERFUNCTION. The
+// SDK must strip them; otherwise the trailing \n remains inside the value.
+//
+// Curl-backend only: Beast's parser (used by the Foxy backend) rejects bare
+// LF outright at the protocol level — the response never reaches the hook
+// — so this test is meaningful only against the libcurl HeaderCallback path.
+TEST(ClientTest, OnResponseHookHandlesBareLFLineEndings) {
+    MockSSEServer server;
+    auto port = server.start_raw(
+        [](auto const&, auto send_raw, auto close) {
+            // Bare LF (no CR) on every line.
+            send_raw(
+                "HTTP/1.1 200 OK\n"
+                "Content-Type: text/event-stream\n"
+                "X-Custom: value\n"
+                "Transfer-Encoding: chunked\n"
+                "\n");
+            std::this_thread::sleep_for(100ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    ResponseHookCaptures captures;
+
+    auto client = Builder(runner.context().get_executor(),
+                          "http://localhost:" + std::to_string(port))
+                      .receiver([](Event) {})
+                      .on_response(std::ref(captures))
+                      .build();
+
+    client->async_connect();
+    ASSERT_TRUE(captures.wait_for_at_least(1));
+
+    auto const fields = captures.snapshot().front().fields;
+    std::string custom_value;
+    for (auto const& [name, value] : fields) {
+        if (name == "X-Custom") {
+            custom_value = value;
+            break;
+        }
+    }
+
+    EXPECT_EQ("value", custom_value)
+        << "Bare-LF line terminator must be stripped before storing the value";
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
+#endif  // LD_CURL_NETWORKING
+
