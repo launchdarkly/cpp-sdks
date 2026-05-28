@@ -751,3 +751,30 @@ TEST(FDv2StreamingSynchronizerTest, SecondResponseWithoutDirectiveClearsFlag) {
     ASSERT_TRUE(result.has_value());
     EXPECT_FALSE(result->fdv1_fallback);
 }
+
+TEST(FDv2StreamingSynchronizerTest, ErrorAfterDirectiveCarriesFlag) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    boost::beast::http::response_header<> headers;
+    headers.result(200);
+    headers.set("X-LD-FD-Fallback", "true");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    FDv2StreamingSynchronizerTestPeer::OnError(
+        synchronizer,
+        sse::Error{sse::errors::ReadTimeout{std::chrono::milliseconds(0)}});
+
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    ASSERT_TRUE(result.has_value());
+    EXPECT_TRUE(
+        std::holds_alternative<FDv2SourceResult::Interrupted>(result->value));
+    EXPECT_TRUE(result->fdv1_fallback);
+}

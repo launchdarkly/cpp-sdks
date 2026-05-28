@@ -71,6 +71,32 @@ TEST(HandleFDv2PollResponseTest, TerminalErrorPropagatesFlag) {
     EXPECT_TRUE(result.fdv1_fallback);
 }
 
+TEST(HandleFDv2PollResponseTest, OkWithChangeSetBodyPropagatesFlag) {
+    auto logger = MakeNullLogger();
+    FDv2ProtocolHandler handler;
+
+    std::string const body =
+        R"({"events":[)"
+        R"({"event":"server-intent","data":{"payloads":[)"
+        R"({"id":"p1","target":1,"intentCode":"xfer-full"}]}},)"
+        R"({"event":"put-object","data":{"version":1,"kind":"flag",)"
+        R"("key":"my-flag","object":{"key":"my-flag","on":true,)"
+        R"("fallthrough":{"variation":0},"variations":[true,false],)"
+        R"("version":1}}},)"
+        R"({"event":"payload-transferred","data":{"state":"abc","version":1}})"
+        R"(]})";
+
+    network::HttpResult::HeadersType headers{{"X-LD-FD-Fallback", "true"}};
+    network::HttpResult res{200, body, std::move(headers)};
+
+    auto result = HandleFDv2PollResponse(res, &handler, logger, "test");
+
+    auto* change_set = std::get_if<FDv2SourceResult::ChangeSet>(&result.value);
+    ASSERT_NE(change_set, nullptr);
+    EXPECT_FALSE(change_set->change_set.data.empty());
+    EXPECT_TRUE(result.fdv1_fallback);
+}
+
 TEST(HandleFDv2PollResponseTest, OkWithMissingBodyPropagatesFlag) {
     auto logger = MakeNullLogger();
     FDv2ProtocolHandler handler;
