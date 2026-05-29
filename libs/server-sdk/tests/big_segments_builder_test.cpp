@@ -15,6 +15,8 @@ using launchdarkly::server_side::integrations::StoreMetadata;
 
 namespace {
 
+using namespace std::chrono_literals;
+
 // Minimal stub used only to obtain a shared_ptr<IBigSegmentStore>. The builder
 // never invokes the store; it only stores the pointer for later use by the
 // wrapper, so the methods here are unreachable in these tests.
@@ -39,13 +41,10 @@ TEST(BigSegmentsBuilderTest, DefaultsMatchSpec) {
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store).Build();
 
-    EXPECT_EQ(cfg.context_cache_size,
-              BigSegmentsBuilder::kDefaultContextCacheSize);
-    EXPECT_EQ(cfg.context_cache_time,
-              BigSegmentsBuilder::kDefaultContextCacheTime);
-    EXPECT_EQ(cfg.status_poll_interval,
-              BigSegmentsBuilder::kDefaultStatusPollInterval);
-    EXPECT_EQ(cfg.stale_after, BigSegmentsBuilder::kDefaultStaleAfter);
+    EXPECT_EQ(cfg.context_cache_size, 1000u);
+    EXPECT_EQ(cfg.context_cache_time, 5s);
+    EXPECT_EQ(cfg.status_poll_interval, 5s);
+    EXPECT_EQ(cfg.stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, BuildPreservesStoreIdentity) {
@@ -62,7 +61,6 @@ TEST(BigSegmentsBuilderTest, AcceptsNullStore) {
 }
 
 TEST(BigSegmentsBuilderTest, SettersOverrideEachField) {
-    using namespace std::chrono_literals;
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store)
                          .ContextCacheSize(7)
@@ -80,37 +78,32 @@ TEST(BigSegmentsBuilderTest, SettersOverrideEachField) {
 TEST(BigSegmentsBuilderTest, ZeroDurationsAreCoercedToDefaults) {
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store)
-                         .ContextCacheTime(std::chrono::milliseconds::zero())
-                         .StatusPollInterval(std::chrono::milliseconds::zero())
-                         .StaleAfter(std::chrono::milliseconds::zero())
+                         .ContextCacheTime(0ms)
+                         .StatusPollInterval(0ms)
+                         .StaleAfter(0ms)
                          .Build();
 
-    EXPECT_EQ(cfg.context_cache_time,
-              BigSegmentsBuilder::kDefaultContextCacheTime);
-    EXPECT_EQ(cfg.status_poll_interval,
-              BigSegmentsBuilder::kDefaultStatusPollInterval);
-    EXPECT_EQ(cfg.stale_after, BigSegmentsBuilder::kDefaultStaleAfter);
+    EXPECT_EQ(cfg.context_cache_time, 5s);
+    EXPECT_EQ(cfg.status_poll_interval, 5s);
+    EXPECT_EQ(cfg.stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, NegativeDurationsAreCoercedToDefaults) {
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store)
-                         .ContextCacheTime(std::chrono::milliseconds{-1})
-                         .StatusPollInterval(std::chrono::milliseconds{-1})
-                         .StaleAfter(std::chrono::milliseconds{-1})
+                         .ContextCacheTime(-1ms)
+                         .StatusPollInterval(-1ms)
+                         .StaleAfter(-1ms)
                          .Build();
 
-    EXPECT_EQ(cfg.context_cache_time,
-              BigSegmentsBuilder::kDefaultContextCacheTime);
-    EXPECT_EQ(cfg.status_poll_interval,
-              BigSegmentsBuilder::kDefaultStatusPollInterval);
-    EXPECT_EQ(cfg.stale_after, BigSegmentsBuilder::kDefaultStaleAfter);
+    EXPECT_EQ(cfg.context_cache_time, 5s);
+    EXPECT_EQ(cfg.status_poll_interval, 5s);
+    EXPECT_EQ(cfg.stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, BuildClampsPollIntervalToStaleAfter) {
-    // BIGSEG §1.4.6: when poll interval > stale-after, clamp poll to
-    // stale-after so the SDK detects staleness within one poll cycle.
-    using namespace std::chrono_literals;
+    // When poll interval > stale-after, clamp poll to stale-after so the
+    // SDK detects staleness within one poll cycle.
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store)
                          .StatusPollInterval(10s)
@@ -122,7 +115,6 @@ TEST(BigSegmentsBuilderTest, BuildClampsPollIntervalToStaleAfter) {
 }
 
 TEST(BigSegmentsBuilderTest, BuildPreservesPollIntervalWhenWithinStaleAfter) {
-    using namespace std::chrono_literals;
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store)
                          .StatusPollInterval(3s)
@@ -134,7 +126,6 @@ TEST(BigSegmentsBuilderTest, BuildPreservesPollIntervalWhenWithinStaleAfter) {
 }
 
 TEST(BigSegmentsBuilderTest, BuildIsRepeatable) {
-    using namespace std::chrono_literals;
     auto store = MakeStubStore();
     BigSegmentsBuilder builder(store);
     builder.ContextCacheSize(42).ContextCacheTime(2s);

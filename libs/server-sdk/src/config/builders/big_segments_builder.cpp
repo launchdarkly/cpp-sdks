@@ -1,9 +1,21 @@
 #include "big_segments_builder.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <utility>
 
 namespace launchdarkly::server_side::config::builders {
+
+namespace {
+
+using namespace std::chrono_literals;
+
+constexpr std::size_t kDefaultContextCacheSize = 1000;
+constexpr std::chrono::milliseconds kDefaultContextCacheTime = 5s;
+constexpr std::chrono::milliseconds kDefaultStatusPollInterval = 5s;
+constexpr std::chrono::milliseconds kDefaultStaleAfter = 2min;
+
+}  // namespace
 
 BigSegmentsBuilder::BigSegmentsBuilder(
     std::shared_ptr<integrations::IBigSegmentStore> store)

@@ -12,24 +12,11 @@ namespace launchdarkly::server_side::config::builders {
 /**
  * @brief Configures the SDK's Big Segments behavior.
  *
- * A Big Segments store implementation is required at construction. The
- * tunables that control the SDK's Big Segments caching and staleness
- * detection have sensible defaults and can be overridden via the fluent
- * setters.
- *
- * Non-positive durations passed to a setter are coerced back to the
- * default for that field.
- *
  * Not thread-safe. Construct, configure, and call @ref Build on a single
  * thread; the resulting @ref built::BigSegmentsConfig is safe to share.
  */
 class BigSegmentsBuilder {
    public:
-    static constexpr std::size_t kDefaultContextCacheSize = 1000;
-    static constexpr std::chrono::milliseconds kDefaultContextCacheTime{5000};
-    static constexpr std::chrono::milliseconds kDefaultStatusPollInterval{5000};
-    static constexpr std::chrono::milliseconds kDefaultStaleAfter{120000};
-
     /**
      * @brief Constructs a builder for the given Big Segments store.
      *
@@ -41,7 +28,7 @@ class BigSegmentsBuilder {
 
     /**
      * @brief Sets the maximum number of context membership lookups cached
-     * by the SDK.
+     * by the SDK. Defaults to 1000.
      *
      * To reduce store traffic, the SDK maintains an LRU cache keyed by
      * context key. A higher value reduces store queries for
@@ -50,31 +37,31 @@ class BigSegmentsBuilder {
     BigSegmentsBuilder& ContextCacheSize(std::size_t size);
 
     /**
-     * @brief Sets the time-to-live for cached membership lookups.
+     * @brief Sets the time-to-live for cached membership lookups. Defaults
+     * to 5 seconds.
      *
      * A higher value reduces store queries for any given context, but
      * delays the SDK noticing membership changes. Zero or negative
-     * durations are coerced to @ref kDefaultContextCacheTime.
+     * durations are coerced to the default.
      */
     BigSegmentsBuilder& ContextCacheTime(std::chrono::milliseconds ttl);
 
     /**
      * @brief Sets the interval at which the SDK polls the store's metadata
-     * to determine availability and staleness.
+     * to determine availability and staleness. Defaults to 5 seconds.
      *
-     * Zero or negative durations are coerced to
-     * @ref kDefaultStatusPollInterval.
+     * Zero or negative durations are coerced to the default.
      */
     BigSegmentsBuilder& StatusPollInterval(std::chrono::milliseconds interval);
 
     /**
      * @brief Sets how long the SDK waits before treating store data as
-     * stale.
+     * stale. Defaults to 2 minutes.
      *
      * If the store's last-updated timestamp falls behind the current time
      * by more than this duration, evaluations report a big segments status
      * of `STALE` and the status provider reports the store as stale. Zero
-     * or negative durations are coerced to @ref kDefaultStaleAfter.
+     * or negative durations are coerced to the default.
      */
     BigSegmentsBuilder& StaleAfter(std::chrono::milliseconds threshold);
 
@@ -82,8 +69,9 @@ class BigSegmentsBuilder {
      * @brief Resolves the configuration.
      *
      * If the configured @ref StatusPollInterval exceeds @ref StaleAfter,
-     * the poll interval is clamped to the stale-after value so the SDK can
-     * detect staleness within one poll cycle (per BIGSEG §1.4.6).
+     * the poll interval in the returned config is clamped to the
+     * stale-after value so the SDK can detect staleness within one poll
+     * cycle.
      */
     [[nodiscard]] built::BigSegmentsConfig Build() const;
 
