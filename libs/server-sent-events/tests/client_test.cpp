@@ -1523,8 +1523,8 @@ TEST(ClientTest, OnResponseHookFiresWithCustomHeader) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     std::mutex hook_mutex;
     std::condition_variable hook_cv;
