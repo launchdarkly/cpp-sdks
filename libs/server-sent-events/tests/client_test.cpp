@@ -92,7 +92,10 @@ class EventCollector {
     std::vector<Error> errors_;
 };
 
-// Helper to run io_context in background thread
+// Helper to run io_context in background thread. ~IoContextRunner joins the
+// worker thread, so any state captured by receiver callbacks (e.g. an
+// EventCollector) must be declared *before* the runner so it outlives the
+// thread that may invoke those callbacks.
 class IoContextRunner {
    public:
     IoContextRunner() : work_guard_(boost::asio::make_work_guard(ioc_)) {
@@ -127,8 +130,8 @@ TEST(ClientTest, ConnectsToHttpServer) {
     // Give server a moment to start accepting connections
     std::this_thread::sleep_for(100ms);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -153,8 +156,8 @@ TEST(ClientTest, HandlesMultipleEvents) {
     auto port = server.start(
         TestHandlers::multiple_events({"event1", "event2", "event3"}));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -192,8 +195,8 @@ TEST(ClientTest, ParsesEventWithType) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -228,8 +231,8 @@ TEST(ClientTest, ParsesEventWithId) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -264,8 +267,8 @@ TEST(ClientTest, ParsesMultiLineData) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -305,8 +308,8 @@ TEST(ClientTest, HandlesComments) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -347,8 +350,8 @@ TEST(ClientTest, SupportsPostMethod) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -386,8 +389,8 @@ TEST(ClientTest, SupportsReportMethod) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -430,8 +433,8 @@ TEST(ClientTest, SendsCustomHeaders) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -456,8 +459,8 @@ TEST(ClientTest, Handles404Error) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::http_error(http::status::not_found));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -495,8 +498,8 @@ TEST(ClientTest, Handles500Error) {
     MockSSEServer server;
     auto port = server.start(handler);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -535,8 +538,8 @@ TEST(ClientTest, FollowsRedirects) {
     auto redirect_port = redirect_server.start(TestHandlers::redirect(
         "http://localhost:" + std::to_string(target_port) + "/"));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -574,8 +577,8 @@ TEST(ClientTest, ShutdownStopsClient) {
         }
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -603,8 +606,8 @@ TEST(ClientTest, CanShutdownBeforeConnection) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("test"));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -632,8 +635,8 @@ TEST(ClientTest, HandlesImmediateClose) {
     MockSSEServer server;
     auto port = server.start(handler);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -679,8 +682,8 @@ TEST(ClientTest, RespectsReadTimeout) {
             std::this_thread::sleep_for(5000ms);
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -759,8 +762,8 @@ TEST(ClientTest, HandlesEmptyEventData) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -795,8 +798,8 @@ TEST(ClientTest, HandlesEventWithOnlyType) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -837,8 +840,8 @@ TEST(ClientTest, HandlesRapidEvents) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -874,8 +877,8 @@ TEST(ClientTest, ShutdownDuringBackoffDelay) {
     MockSSEServer server;
     auto port = server.start(handler);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -987,8 +990,8 @@ TEST(ClientTest, ShutdownDuringProgressCallback) {
     MockSSEServer server;
     auto port = server.start(handler);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1020,8 +1023,8 @@ TEST(ClientTest, MultipleShutdownCalls) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("test"));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1062,8 +1065,8 @@ TEST(ClientTest, ShutdownAfterConnectionClosed) {
             close();  // Server closes connection
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1109,8 +1112,8 @@ TEST(ClientTest, ShutdownDuringConnectionAttempt) {
     MockSSEServer server;
     auto port = server.start(handler);
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1144,8 +1147,8 @@ TEST(ClientTest, OnConnectHookInvokedBeforeRequest) {
     MockSSEServer server;
     auto port = server.start(TestHandlers::simple_event("hello"));
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     std::atomic<int> hook_calls{0};
     std::string seen_target;
@@ -1198,8 +1201,8 @@ TEST(ClientTest, OnConnectHookCanMutateTarget) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1246,8 +1249,8 @@ TEST(ClientTest, OnConnectHookCanMutateHeaders) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1286,8 +1289,8 @@ TEST(ClientTest, OnConnectHookInvokedOnEachReconnect) {
             close();
         });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     std::atomic<int> hook_calls{0};
 
@@ -1334,8 +1337,8 @@ TEST(ClientTest, OnConnectHookSeesPreviousMutations) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
@@ -1396,8 +1399,8 @@ TEST(ClientTest, OnConnectHookCanMutateBody) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     std::string const build_time_body = "short";
     std::string const hook_body =
@@ -1462,8 +1465,8 @@ TEST(ClientTest, OnConnectHookLastEventIdIsManagedByClient) {
         close();
     });
 
-    IoContextRunner runner;
     EventCollector collector;
+    IoContextRunner runner;
 
     auto client =
         Builder(runner.context().get_executor(),
