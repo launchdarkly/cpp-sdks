@@ -3,10 +3,13 @@
 #include "curl_client.hpp"
 
 #include <boost/asio/post.hpp>
+#include <boost/beast/core/string.hpp>
 #include <boost/beast/http/status.hpp>
 #include <boost/url/url.hpp>
 
+#include <charconv>
 #include <sstream>
+#include <system_error>
 
 namespace launchdarkly::sse {
 namespace beast = boost::beast;
@@ -41,6 +44,7 @@ CurlClient::CurlClient(
     Builder::LogCallback logger,
     Builder::ErrorCallback errors,
     Builder::ConnectionHook connection_hook,
+    Builder::ResponseHook response_hook,
     bool skip_verify_peer,
     std::optional<std::string> custom_ca_file,
     bool use_https,
@@ -51,6 +55,7 @@ CurlClient::CurlClient(
       logger_(std::move(logger)),
       errors_(std::move(errors)),
       connection_hook_(std::move(connection_hook)),
+      response_hook_(std::move(response_hook)),
       use_https_(use_https),
       backoff_timer_(executor),
       multi_manager_(CurlMultiManager::create(executor)),
@@ -147,6 +152,19 @@ void CurlClient::do_run() {
             if (auto ctx = weak_ctx.lock()) {
                 if (auto const self = weak_self.lock()) {
                     self->log_message(message);
+                }
+            }
+        },
+        [weak_self, weak_ctx](http::response_header<> headers) {
+            if (auto ctx = weak_ctx.lock()) {
+                if (auto const self = weak_self.lock()) {
+                    if (self->response_hook_) {
+                        boost::asio::post(
+                            self->backoff_timer_.get_executor(),
+                            [self, headers = std::move(headers)]() {
+                                self->response_hook_(headers);
+                            });
+                    }
                 }
             }
         }));
@@ -397,6 +415,11 @@ size_t CurlClient::WriteCallback(char const* data,
 // Callback for reading request headers
 //
 // https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html
+//
+// libcurl invokes this once per CRLF-terminated response line: the HTTP status
+// line, then each header, then an empty terminator. With
+// CURLOPT_FOLLOWLOCATION enabled the cycle repeats for each response in the
+// redirect chain.
 size_t CurlClient::HeaderCallback(char const* buffer,
                                   size_t size,
                                   size_t nitems,
@@ -404,12 +427,86 @@ size_t CurlClient::HeaderCallback(char const* buffer,
     size_t const total_size = size * nitems;
     auto* context = static_cast<RequestContext*>(userdata);
 
-    // Check for Content-Type header
-    if (std::string const header(buffer, total_size);
-        header.find("Content-Type:") == 0 ||
-        header.find("content-type:") == 0) {
-        if (header.find("text/event-stream") == std::string::npos) {
-            context->log_message("warning: unexpected Content-Type: " + header);
+    std::string_view line(buffer, total_size);
+
+    // Strip the line terminator. Allow bare LF or bare CR per RFC 9112 §2.2;
+    // libcurl preserves the original wire bytes for HTTP/1.x (only HTTP/2
+    // synthesizes CRLF), so a non-compliant origin can deliver bare LF here.
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
+        line.remove_suffix(1);
+    }
+
+    if (line.empty()) {
+        // Terminator. If we're between responses (e.g., the line ends a
+        // chunked-transfer trailer block), there's nothing to emit.
+        if (context->reading_headers) {
+            context->response(std::move(context->current_response));
+            context->current_response = http::response_header<>{};
+            context->reading_headers = false;
+        }
+        return total_size;
+    }
+
+    if (line.substr(0, 5) == "HTTP/") {
+        // Status line: "HTTP/X.Y CODE REASON". Only legitimate before any
+        // header has been seen for this response — an interior HTTP/ line
+        // would otherwise wipe accumulated state.
+        if (context->reading_headers) {
+            return total_size;
+        }
+        // Beast default-constructs result_ to status::ok (200); reset to 0
+        // so an unparseable status line surfaces as result_int() == 0.
+        context->current_response = http::response_header<>{};
+        context->current_response.result(0);
+        auto const code_start = line.find(' ');
+        if (code_start != std::string_view::npos) {
+            unsigned code = 0;
+            auto const result = std::from_chars(
+                line.data() + code_start + 1, line.data() + line.size(), code);
+            // Three-digit status per RFC 7231 §6; the tight bound avoids
+            // result(unsigned) throwing across the libcurl C frame.
+            if (result.ec == std::errc{} && code >= 100 && code <= 999) {
+                context->current_response.result(code);
+            }
+        }
+        context->reading_headers = true;
+        return total_size;
+    }
+
+    if (!context->reading_headers) {
+        // Header line received outside an active response — chunked trailer
+        // or protocol-level junk. Ignore.
+        return total_size;
+    }
+
+    auto const colon = line.find(':');
+    if (colon != std::string_view::npos) {
+        std::string_view name = line.substr(0, colon);
+        // HTTP optional whitespace (OWS) per RFC 7230 §3.2.3 is SP or HTAB.
+        std::string_view value = line.substr(colon + 1);
+        while (!value.empty() &&
+               (value.front() == ' ' || value.front() == '\t')) {
+            value.remove_prefix(1);
+        }
+        while (!value.empty() &&
+               (value.back() == ' ' || value.back() == '\t')) {
+            value.remove_suffix(1);
+        }
+        // insert() preserves duplicate-name headers (Set-Cookie, Via, …);
+        // set() would collapse them and diverge from the Foxy backend.
+        try {
+            context->current_response.insert(std::string(name),
+                                             std::string(value));
+        } catch (std::exception const&) {
+            // insert() throws if the name isn't a valid RFC 7230 token.
+            context->log_message("ignoring response header with invalid name");
+            return total_size;
+        }
+
+        if (beast::iequals(name, "Content-Type") &&
+            value.find("text/event-stream") == std::string_view::npos) {
+            context->log_message("warning: unexpected Content-Type: " +
+                                 std::string(line));
         }
     }
 
@@ -426,6 +523,11 @@ void CurlClient::PerformRequestWithMulti(
     // Initialize parser for new connection (last_event_id is tracked
     // separately)
     context->init_parser();
+    // Reset header-accumulator state in case the previous transfer dropped
+    // mid-headers, which would otherwise leave reading_headers=true and
+    // cause the new response's HTTP/ status line to be skipped.
+    context->current_response = http::response_header<>{};
+    context->reading_headers = false;
 
     std::shared_ptr<CURL> curl(curl_easy_init(), curl_easy_cleanup);
     if (!curl) {

@@ -75,6 +75,7 @@ class FoxyClient : public Client,
                Builder::LogCallback logger,
                Builder::ErrorCallback errors,
                Builder::ConnectionHook connection_hook,
+               Builder::ResponseHook response_hook,
                std::optional<net::ssl::context> maybe_ssl)
         : ssl_context_(std::move(maybe_ssl)),
           host_(std::move(host)),
@@ -87,6 +88,7 @@ class FoxyClient : public Client,
           logger_(std::move(logger)),
           errors_(std::move(errors)),
           connection_hook_(std::move(connection_hook)),
+          response_hook_(std::move(response_hook)),
           body_parser_(std::nullopt),
           session_(std::nullopt),
           last_event_id_(std::nullopt),
@@ -256,6 +258,9 @@ class FoxyClient : public Client,
 
         /* headers are finished, body is ready */
         auto response = body_parser_->get();
+        if (response_hook_) {
+            response_hook_(response.base());
+        }
         auto status_class = beast::http::to_status_class(response.result());
 
         if (status_class == beast::http::status_class::successful) {
@@ -517,6 +522,10 @@ class FoxyClient : public Client,
     // updating query parameters from external state).
     Builder::ConnectionHook connection_hook_;
 
+    // Optional hook invoked once per (re)connect after the response headers
+    // have been received, before any branching on status.
+    Builder::ResponseHook response_hook_;
+
     // Customized parser (see parser.hpp) which repeatedly receives chunks of
     // data and parses them into SSE events. It cannot be reused across
     // connections, hence the optional so it can be destroyed easily.
@@ -650,6 +659,11 @@ Builder& Builder::on_connect(ConnectionHook hook) {
     return *this;
 }
 
+Builder& Builder::on_response(ResponseHook hook) {
+    response_hook_ = std::move(hook);
+    return *this;
+}
+
 std::shared_ptr<Client> Builder::build() {
     auto uri_components = boost::urls::parse_uri(url_);
     if (!uri_components) {
@@ -697,8 +711,8 @@ std::shared_ptr<Client> Builder::build() {
     return std::make_shared<CurlClient>(
         net::make_strand(executor_), request, host, service, connect_timeout_,
         read_timeout_, write_timeout_, initial_reconnect_delay_, receiver_,
-        logging_cb_, error_cb_, connection_hook_, skip_verify_peer_,
-        custom_ca_file_, use_https, proxy_url_);
+        logging_cb_, error_cb_, connection_hook_, response_hook_,
+        skip_verify_peer_, custom_ca_file_, use_https, proxy_url_);
 #else
     std::optional<ssl::context> ssl;
     if (uri_components->scheme_id() == boost::urls::scheme::https) {
@@ -720,7 +734,8 @@ std::shared_ptr<Client> Builder::build() {
     return std::make_shared<FoxyClient>(
         net::make_strand(executor_), request, host, service, connect_timeout_,
         read_timeout_, write_timeout_, initial_reconnect_delay_, receiver_,
-        logging_cb_, error_cb_, connection_hook_, std::move(ssl));
+        logging_cb_, error_cb_, connection_hook_, response_hook_,
+        std::move(ssl));
 #endif
 }
 

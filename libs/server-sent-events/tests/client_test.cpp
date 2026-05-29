@@ -1507,3 +1507,59 @@ TEST(ClientTest, OnConnectHookLastEventIdIsManagedByClient) {
     client->async_shutdown([&] { shutdown_latch.count_down(); });
     EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
 }
+
+TEST(ClientTest, OnResponseHookFiresWithCustomHeader) {
+    MockSSEServer server;
+    auto port = server.start(
+        [](auto const&, auto send_response, auto send_sse_event, auto close) {
+            http::response<http::string_body> res{http::status::ok, 11};
+            res.set(http::field::content_type, "text/event-stream");
+            res.set("X-LD-FD-Fallback", "true");
+            res.chunked(true);
+            send_response(res);
+
+            send_sse_event(SSEFormatter::event("hello"));
+            std::this_thread::sleep_for(10ms);
+            close();
+        });
+
+    IoContextRunner runner;
+    EventCollector collector;
+
+    std::mutex hook_mutex;
+    std::condition_variable hook_cv;
+    std::vector<unsigned> observed_statuses;
+    std::vector<std::string> observed_fallback_values;
+
+    // Connect with an on_response hook that records the status and the
+    // X-LD-FD-Fallback header value for each response.
+    auto client =
+        Builder(runner.context().get_executor(),
+                "http://localhost:" + std::to_string(port))
+            .receiver([&](Event e) { collector.add_event(std::move(e)); })
+            .on_response([&](http::response_header<> const& headers) {
+                std::lock_guard lock(hook_mutex);
+                observed_statuses.push_back(headers.result_int());
+                auto it = headers.find("x-ld-fd-fallback");
+                observed_fallback_values.emplace_back(
+                    it != headers.end() ? std::string(it->value()) : "");
+                hook_cv.notify_all();
+            })
+            .build();
+
+    client->async_connect();
+
+    // The hook should fire with status 200 and the custom header readable
+    // case-insensitively.
+    {
+        std::unique_lock lock(hook_mutex);
+        ASSERT_TRUE(hook_cv.wait_for(
+            lock, 5000ms, [&] { return !observed_statuses.empty(); }));
+        EXPECT_EQ(200u, observed_statuses.front());
+        EXPECT_EQ("true", observed_fallback_values.front());
+    }
+
+    SimpleLatch shutdown_latch(1);
+    client->async_shutdown([&] { shutdown_latch.count_down(); });
+    EXPECT_TRUE(shutdown_latch.wait_for(5000ms));
+}
