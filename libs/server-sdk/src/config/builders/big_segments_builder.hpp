@@ -72,10 +72,9 @@ class BigSegmentsBuilder {
      * stale.
      *
      * If the store's last-updated timestamp falls behind the current time
-     * by more than this duration, evaluations report
-     * @ref launchdarkly::EvaluationReason::BigSegmentsStatus::STALE and the
-     * status provider reports the store as stale. Zero or negative
-     * durations are coerced to @ref kDefaultStaleAfter.
+     * by more than this duration, evaluations report a big segments status
+     * of `STALE` and the status provider reports the store as stale. Zero
+     * or negative durations are coerced to @ref kDefaultStaleAfter.
      */
     BigSegmentsBuilder& StaleAfter(std::chrono::milliseconds threshold);
 
