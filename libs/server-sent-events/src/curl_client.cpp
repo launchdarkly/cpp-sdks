@@ -494,7 +494,14 @@ size_t CurlClient::HeaderCallback(char const* buffer,
         }
         // insert() preserves duplicate-name headers (Set-Cookie, Via, …);
         // set() would collapse them and diverge from the Foxy backend.
-        context->current_response.insert(std::string(name), std::string(value));
+        try {
+            context->current_response.insert(std::string(name),
+                                             std::string(value));
+        } catch (std::exception const&) {
+            // insert() throws if the name isn't a valid RFC 7230 token.
+            context->log_message("ignoring response header with invalid name");
+            return total_size;
+        }
 
         if (beast::iequals(name, "Content-Type") &&
             value.find("text/event-stream") == std::string_view::npos) {
