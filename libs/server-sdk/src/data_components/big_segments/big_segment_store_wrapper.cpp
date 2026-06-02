@@ -53,7 +53,6 @@ BigSegmentStoreWrapper::GetMembership(std::string const& context_key) {
             return {integrations::Membership::FromSegmentRefs({}, {}),
                     BigSegmentsStatus::kStoreError};
         }
-        cache_.Set(context_key, *result);
         membership = *result;
     }
 
@@ -87,6 +86,9 @@ BigSegmentStoreWrapper::StoreMembership BigSegmentStoreWrapper::LoadMembership(
     // Query the store outside any lock, then publish the result to waiters and
     // drop the in-flight entry.
     auto result = store_->GetMembership(HashContextKey(context_key));
+    if (result.has_value()) {
+        cache_.Set(context_key, *result);
+    }
     {
         std::lock_guard lock(load_mutex_);
         in_flight_.erase(context_key);
