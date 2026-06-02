@@ -43,6 +43,7 @@ FDv2DataSystem::FDv2DataSystem(
       store_(),
       change_notifier_(store_, store_),
       initialize_called_(false),
+      last_logged_synchronizer_interrupted_(false),
       closed_(false),
       selector_(),
       initializer_index_(0),
@@ -121,6 +122,9 @@ void FDv2DataSystem::RunNextInitializer() {
         } else {
             auto& factory = initializer_factories_[initializer_index_++];
             active_initializer_ = factory->Build();
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": starting initializer "
+                << active_initializer_->Identity();
             active_initializer_->Run().Then(
                 [this](data_interfaces::FDv2SourceResult const& result)
                     -> std::monostate {
@@ -152,6 +156,8 @@ void FDv2DataSystem::OnInitializerResult(
                     cs.change_set.selector.value.has_value();
                 ApplyChangeSet(std::move(cs.change_set));
                 if (has_selector) {
+                    LD_LOG(logger_, LogLevel::kInfo)
+                        << Identity() << ": initializer succeeded";
                     got_basis = true;
                 }
             },
@@ -211,6 +217,10 @@ void FDv2DataSystem::StartSynchronizers() {
         }
         active_synchronizer_ = source_manager_.NextSynchronizer();
         if (active_synchronizer_) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": starting synchronizer "
+                << active_synchronizer_->Identity();
+            last_logged_synchronizer_interrupted_.store(false);
             active_conditions_ = BuildActiveConditions();
         } else {
             exhausted = true;
@@ -320,33 +330,37 @@ void FDv2DataSystem::OnSynchronizerResult(
     bool got_shutdown = false;
     bool advance = false;
 
-    std::visit(overloaded{
-                   [&](Result::ChangeSet& cs) {
-                       ApplyChangeSet(std::move(cs.change_set));
-                   },
-                   [&](Result::Shutdown&) { got_shutdown = true; },
-                   [&](Result::Interrupted const& iv) {
-                       LD_LOG(logger_, LogLevel::kWarn)
-                           << Identity() << ": synchronizer interrupted: "
-                           << iv.error.Message();
-                       status_manager_->SetState(
-                           DataSourceStatus::DataSourceState::kInterrupted,
-                           iv.error.Kind(), iv.error.Message());
-                   },
-                   [&](Result::TerminalError const& te) {
-                       LD_LOG(logger_, LogLevel::kWarn)
-                           << Identity() << ": synchronizer terminal error: "
-                           << te.error.Message();
-                       status_manager_->SetState(
-                           DataSourceStatus::DataSourceState::kInterrupted,
-                           te.error.Kind(), te.error.Message());
-                       advance = true;
-                   },
-                   [&](Result::Goodbye const&) {
-                       // The synchronizer handles this internally.
-                   },
-               },
-               result.value);
+    std::visit(
+        overloaded{
+            [&](Result::ChangeSet& cs) {
+                last_logged_synchronizer_interrupted_.store(false);
+                ApplyChangeSet(std::move(cs.change_set));
+            },
+            [&](Result::Shutdown&) { got_shutdown = true; },
+            [&](Result::Interrupted const& iv) {
+                if (!last_logged_synchronizer_interrupted_.exchange(true)) {
+                    LD_LOG(logger_, LogLevel::kInfo)
+                        << Identity()
+                        << ": synchronizer interrupted: " << iv.error.Message();
+                }
+                status_manager_->SetState(
+                    DataSourceStatus::DataSourceState::kInterrupted,
+                    iv.error.Kind(), iv.error.Message());
+            },
+            [&](Result::TerminalError const& te) {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": synchronizer terminal error: " << te.error.Message();
+                status_manager_->SetState(
+                    DataSourceStatus::DataSourceState::kInterrupted,
+                    te.error.Kind(), te.error.Message());
+                advance = true;
+            },
+            [&](Result::Goodbye const&) {
+                // The synchronizer handles this internally.
+            },
+        },
+        result.value);
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
