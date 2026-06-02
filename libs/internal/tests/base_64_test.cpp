@@ -6,7 +6,7 @@ using launchdarkly::encoding::Base64Encode;
 using launchdarkly::encoding::Base64UrlEncode;
 
 TEST(Base64Encoding, CanEncodeString) {
-    // Test vectors from RFC4668
+    // Test vectors from RFC4648
     // https://datatracker.ietf.org/doc/html/rfc4648#section-10
     EXPECT_EQ("", Base64UrlEncode(""));
     EXPECT_EQ("Zg==", Base64UrlEncode("f"));
@@ -18,7 +18,7 @@ TEST(Base64Encoding, CanEncodeString) {
 }
 
 TEST(Base64Encoding, StandardCanEncodeString) {
-    // Test vectors from RFC4668
+    // Test vectors from RFC4648
     // https://datatracker.ietf.org/doc/html/rfc4648#section-10
     EXPECT_EQ("", Base64Encode(""));
     EXPECT_EQ("Zg==", Base64Encode("f"));
