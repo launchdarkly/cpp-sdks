@@ -89,10 +89,9 @@ IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
         it != item.end()) {
         if (it->second.GetType() !=
             Aws::DynamoDB::Model::ValueType::STRING_SET) {
-            return tl::make_unexpected(
-                std::string("DynamoDB Big Segments '") +
-                kBigSegmentsIncludedAttribute +
-                "' is not of type STRING_SET");
+            return tl::make_unexpected(std::string("DynamoDB Big Segments '") +
+                                       kBigSegmentsIncludedAttribute +
+                                       "' is not of type STRING_SET");
         }
         for (auto const& ref : it->second.GetSS()) {
             included.emplace_back(ref);
@@ -102,10 +101,9 @@ IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
         it != item.end()) {
         if (it->second.GetType() !=
             Aws::DynamoDB::Model::ValueType::STRING_SET) {
-            return tl::make_unexpected(
-                std::string("DynamoDB Big Segments '") +
-                kBigSegmentsExcludedAttribute +
-                "' is not of type STRING_SET");
+            return tl::make_unexpected(std::string("DynamoDB Big Segments '") +
+                                       kBigSegmentsExcludedAttribute +
+                                       "' is not of type STRING_SET");
         }
         for (auto const& ref : it->second.GetSS()) {
             excluded.emplace_back(ref);
@@ -157,7 +155,9 @@ IBigSegmentStore::GetMetadataResult DynamoDBBigSegmentStore::GetMetadata()
             "DynamoDB Big Segments 'synchronizedOn' is not a valid integer");
     }
 
-    return StoreMetadata{std::chrono::milliseconds{parsed}};
+    // The stored value is a Unix-epoch millisecond count: system_clock's epoch.
+    return StoreMetadata{std::chrono::system_clock::time_point{
+        std::chrono::milliseconds{parsed}}};
 }
 
 }  // namespace launchdarkly::server_side::integrations

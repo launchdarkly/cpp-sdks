@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <variant>
 #include <vector>
 
 namespace launchdarkly::async {

@@ -98,7 +98,9 @@ IBigSegmentStore::GetMetadataResult RedisBigSegmentStore::GetMetadata() const {
             "Redis Big Segments synchronized_on is not a valid integer");
     }
 
-    return StoreMetadata{std::chrono::milliseconds{parsed}};
+    // The stored value is a Unix-epoch millisecond count: system_clock's epoch.
+    return StoreMetadata{std::chrono::system_clock::time_point{
+        std::chrono::milliseconds{parsed}}};
 }
 
 }  // namespace launchdarkly::server_side::integrations
