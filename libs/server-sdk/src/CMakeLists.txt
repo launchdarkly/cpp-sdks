@@ -4,6 +4,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/integrations/big_segments/*.hpp"
         "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/hooks/*.hpp"
+        "${LaunchDarklyCPPServer_SOURCE_DIR}/include/launchdarkly/server_side/config/built/*.hpp"
 )
 
 if (LD_BUILD_SHARED_LIBS)
@@ -30,6 +31,7 @@ target_sources(${LIBNAME}
         config/builders/data_system/data_system_builder.cpp
         config/builders/data_system/lazy_load_builder.cpp
         config/builders/data_system/data_destination_builder.cpp
+        config/builders/big_segments_builder.cpp
         all_flags_state/all_flags_state.cpp
         all_flags_state/json_all_flags_state.cpp
         all_flags_state/all_flags_state_builder.cpp
