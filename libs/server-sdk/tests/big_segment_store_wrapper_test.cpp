@@ -307,7 +307,7 @@ TEST(BigSegmentStoreWrapperMembershipTest,
     EXPECT_FALSE(wrapper->GetStatus().available);
 
     // The error was not cached, so the next lookup queries the store again.
-    wrapper->GetMembership("ctx");
+    (void)wrapper->GetMembership("ctx");
     EXPECT_EQ(2, store->MembershipCalls());
 }
 
