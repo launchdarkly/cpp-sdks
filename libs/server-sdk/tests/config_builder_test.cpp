@@ -102,6 +102,76 @@ TEST_F(ConfigBuilderTest, CanSetPollingPayloadFilterKey) {
     EXPECT_EQ(polling_config.filter_key, "foo");
 }
 
+TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2());
+
+    auto cfg = builder.Build();
+
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config>(
+        cfg->DataSystemConfig().system_));
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    EXPECT_EQ(fdv2_config.streaming, Defaults::FDv2StreamingConfig());
+    EXPECT_EQ(fdv2_config.polling.poll_interval,
+              Defaults::FDv2PollingConfig().poll_interval);
+    ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
+    EXPECT_EQ(*fdv2_config.fdv1_fallback, Defaults::FDv2StreamingConfig());
+    EXPECT_EQ(fdv2_config.fallback_timeout, std::chrono::minutes{2});
+    EXPECT_EQ(fdv2_config.recovery_timeout, std::chrono::minutes{5});
+}
+
+TEST_F(ConfigBuilderTest, FDv2_StreamingFilterFlowsThrough) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Streaming(
+        builders::FDv2Builder::StreamingSource().Filter("flag-subset")));
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    EXPECT_EQ(fdv2_config.streaming.filter_key, "flag-subset");
+}
+
+TEST_F(ConfigBuilderTest, FDv2_PollingFilterFlowsThrough) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Polling(
+        builders::FDv2Builder::PollingSource().Filter("flag-subset")));
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    EXPECT_EQ(fdv2_config.polling.filter_key, "flag-subset");
+}
+
+TEST_F(ConfigBuilderTest, FDv2_DisableFDv1FallbackClearsIt) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::FDv2().DisableFDv1Fallback());
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    EXPECT_FALSE(fdv2_config.fdv1_fallback.has_value());
+}
+
+TEST_F(ConfigBuilderTest, FDv2_FallbackAndRecoveryTimeouts) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2()
+                                    .FallbackTimeout(std::chrono::seconds{30})
+                                    .RecoveryTimeout(std::chrono::seconds{90}));
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    EXPECT_EQ(fdv2_config.fallback_timeout, std::chrono::seconds{30});
+    EXPECT_EQ(fdv2_config.recovery_timeout, std::chrono::seconds{90});
+}
+
 TEST_F(ConfigBuilderTest, DefaultConstruction_HttpPropertyDefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
     auto cfg = builder.Build();

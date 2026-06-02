@@ -2,6 +2,9 @@
 
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_systems/background_sync/background_sync_system.hpp"
+#include "data_systems/fdv2/conditions.hpp"
+#include "data_systems/fdv2/fdv2_data_system.hpp"
+#include "data_systems/fdv2/synchronizer_factories.hpp"
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
 #include "evaluation/evaluation_stack.hpp"
@@ -39,16 +42,84 @@ auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
 // Hook method names
 // Method names for hooks
-static const std::string kMethodBoolVariation = "BoolVariation";
-static const std::string kMethodBoolVariationDetail = "BoolVariationDetail";
-static const std::string kMethodStringVariation = "StringVariation";
-static const std::string kMethodStringVariationDetail = "StringVariationDetail";
-static const std::string kMethodDoubleVariation = "DoubleVariation";
-static const std::string kMethodDoubleVariationDetail = "DoubleVariationDetail";
-static const std::string kMethodIntVariation = "IntVariation";
-static const std::string kMethodIntVariationDetail = "IntVariationDetail";
-static const std::string kMethodJsonVariation = "JsonVariation";
-static const std::string kMethodJsonVariationDetail = "JsonVariationDetail";
+static std::string const kMethodBoolVariation = "BoolVariation";
+static std::string const kMethodBoolVariationDetail = "BoolVariationDetail";
+static std::string const kMethodStringVariation = "StringVariation";
+static std::string const kMethodStringVariationDetail = "StringVariationDetail";
+static std::string const kMethodDoubleVariation = "DoubleVariation";
+static std::string const kMethodDoubleVariationDetail = "DoubleVariationDetail";
+static std::string const kMethodIntVariation = "IntVariation";
+static std::string const kMethodIntVariationDetail = "IntVariationDetail";
+static std::string const kMethodJsonVariation = "JsonVariation";
+static std::string const kMethodJsonVariationDetail = "JsonVariationDetail";
+
+namespace {
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+}  // namespace
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeBackgroundSyncSystem(
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig const& cfg,
+    config::built::HttpProperties const& http_properties,
+    boost::asio::any_io_executor const& executor,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    return std::make_unique<data_systems::BackgroundSync>(
+        endpoints, cfg, http_properties, executor, status_manager, logger);
+}
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeLazyLoadSystem(
+    config::built::LazyLoadConfig const& cfg,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    return std::make_unique<data_systems::LazyLoad>(logger, cfg,
+                                                    status_manager);
+}
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::FDv2Config const& cfg,
+    config::built::HttpProperties const& http_properties,
+    boost::asio::any_io_executor const& executor,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger const& logger) {
+    std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>>
+        initializer_factories;
+
+    std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
+        synchronizer_factories;
+    synchronizer_factories.push_back(
+        std::make_unique<data_systems::FDv2StreamingSynchronizerFactory>(
+            executor, logger, endpoints, http_properties, cfg.streaming));
+    synchronizer_factories.push_back(
+        std::make_unique<data_systems::FDv2PollingSynchronizerFactory>(
+            executor, logger, endpoints, http_properties, cfg.polling));
+    if (cfg.fdv1_fallback) {
+        synchronizer_factories.push_back(
+            std::make_unique<data_systems::FDv1StreamingAdapterFactory>(
+                executor, logger, &status_manager, endpoints,
+                *cfg.fdv1_fallback, http_properties));
+    }
+
+    auto fallback_cond_factory =
+        std::make_unique<data_systems::FallbackConditionFactory>(
+            executor, cfg.fallback_timeout);
+    auto recovery_cond_factory =
+        std::make_unique<data_systems::RecoveryConditionFactory>(
+            executor, cfg.recovery_timeout);
+
+    return std::make_unique<data_systems::FDv2DataSystem>(
+        std::move(initializer_factories), std::move(synchronizer_factories),
+        std::move(fallback_cond_factory), std::move(recovery_cond_factory),
+        executor, &status_manager, logger);
+}
 
 static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
@@ -60,24 +131,24 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
         return std::make_unique<data_systems::OfflineSystem>(status_manager);
     }
 
-    auto const builder =
-        config::builders::HttpPropertiesBuilder(http_properties);
-
-    auto data_source_properties = builder.Build();
+    auto data_source_properties =
+        config::builders::HttpPropertiesBuilder(http_properties).Build();
 
     return std::visit(
-        [&](auto&& arg) -> std::unique_ptr<data_interfaces::IDataSystem> {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T,
-                                         config::built::BackgroundSyncConfig>) {
-                return std::make_unique<data_systems::BackgroundSync>(
-                    config.ServiceEndpoints(), arg, data_source_properties,
+        overloaded{
+            [&](config::built::BackgroundSyncConfig const& cfg) {
+                return MakeBackgroundSyncSystem(
+                    config.ServiceEndpoints(), cfg, data_source_properties,
                     executor, status_manager, logger);
-            } else if constexpr (std::is_same_v<
-                                     T, config::built::LazyLoadConfig>) {
-                return std::make_unique<data_systems::LazyLoad>(logger, arg,
-                                                                status_manager);
-            }
+            },
+            [&](config::built::LazyLoadConfig const& cfg) {
+                return MakeLazyLoadSystem(cfg, status_manager, logger);
+            },
+            [&](config::built::FDv2Config const& cfg) {
+                return MakeFDv2System(config.ServiceEndpoints(), cfg,
+                                      data_source_properties, executor,
+                                      status_manager, logger);
+            },
         },
         config.DataSystemConfig().system_);
 }
@@ -247,9 +318,9 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::optional<Value> data,
                                std::optional<double> metric_value,
                                hooks::HookContext const& hook_context) {
-
     if (!ctx.Valid()) {
-        LD_LOG(logger_, LogLevel::kWarn) << "Track method called with an invalid context";
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Track method called with an invalid context";
         return;
     }
     // Execute afterTrack hooks before moving the data
@@ -259,8 +330,8 @@ void ClientImpl::TrackInternal(Context const& ctx,
     // In this SDK the data is type-safe, and will be enqueued, so it makes
     // minimal functional difference.
     if (!config_.Hooks().empty()) {
-        hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
-                                                  data, hook_context, std::nullopt);
+        hooks::TrackSeriesContext series_context(
+            ctx, event_name, metric_value, data, hook_context, std::nullopt);
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 
@@ -367,7 +438,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     std::optional<hooks::EvaluationSeriesExecutor> executor;
     if (!config_.Hooks().empty()) {
         hooks::EvaluationSeriesContext series_context(
-            key, context, default_value, method_name, hook_context, std::nullopt);
+            key, context, default_value, method_name, hook_context,
+            std::nullopt);
         // Executor only created if there are hooks.
         executor.emplace(config_.Hooks(), logger_);
         executor->BeforeEvaluation(series_context);
@@ -380,7 +452,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         // Execute afterEvaluation hooks
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
-                key, context, default_value, method_name, hook_context, std::nullopt);
+                key, context, default_value, method_name, hook_context,
+                std::nullopt);
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -401,7 +474,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         // Execute afterEvaluation hooks
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
-                key, context, default_value, method_name, hook_context, std::nullopt);
+                key, context, default_value, method_name, hook_context,
+                std::nullopt);
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -416,7 +490,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     // Execute afterEvaluation hooks
     if (executor) {
         hooks::EvaluationSeriesContext series_context(
-            key, context, default_value, method_name, hook_context, std::nullopt);
+            key, context, default_value, method_name, hook_context,
+            std::nullopt);
         executor->AfterEvaluation(series_context, detail);
     }
 
@@ -484,7 +559,8 @@ EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
     bool default_value) {
     static hooks::HookContext empty_hook_context;
     return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value,
-                                 empty_hook_context, kMethodBoolVariationDetail);
+                                 empty_hook_context,
+                                 kMethodBoolVariationDetail);
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
@@ -508,8 +584,8 @@ bool ClientImpl::BoolVariation(Context const& ctx,
                                IClient::FlagKey const& key,
                                bool default_value,
                                hooks::HookContext const& hook_context) {
-    return Variation(ctx, Value::Type::kBool, key, default_value,
-                     hook_context, kMethodBoolVariation);
+    return Variation(ctx, Value::Type::kBool, key, default_value, hook_context,
+                     kMethodBoolVariation);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
@@ -540,10 +616,11 @@ std::string ClientImpl::StringVariation(Context const& ctx,
                      empty_hook_context, kMethodStringVariation);
 }
 
-std::string ClientImpl::StringVariation(Context const& ctx,
-                                        IClient::FlagKey const& key,
-                                        std::string default_value,
-                                        hooks::HookContext const& hook_context) {
+std::string ClientImpl::StringVariation(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    std::string default_value,
+    hooks::HookContext const& hook_context) {
     return Variation(ctx, Value::Type::kString, key, default_value,
                      hook_context, kMethodStringVariation);
 }
