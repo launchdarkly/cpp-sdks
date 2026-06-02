@@ -283,6 +283,9 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     // Set by Initialize() to detect repeat or concurrent calls.
     std::atomic_bool initialize_called_;
 
+    // Suppresses consecutive "interrupted" logs from the active synchronizer.
+    std::atomic_bool last_logged_synchronizer_interrupted_;
+
     // Orchestration state, guarded by mutex_.
     std::mutex mutex_;
     bool closed_;
