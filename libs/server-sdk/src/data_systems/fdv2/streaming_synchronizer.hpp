@@ -106,6 +106,7 @@ class FDv2StreamingSynchronizer final
        private:
         using HttpRequest =
             boost::beast::http::request<boost::beast::http::string_body>;
+        using HttpResponseHeader = boost::beast::http::response_header<>;
 
         /**
          * Starts the SSE client if not already running, and updates the stored
@@ -121,13 +122,9 @@ class FDv2StreamingSynchronizer final
          */
         void Notify(data_interfaces::FDv2SourceResult result);
 
-        /**
-         * Per-connect hook for the SSE client. Overwrites the request target
-         * with the streaming path plus query parameters built from the latest
-         * stored selector and the (immutable) filter key.
-         */
+        // SSE client callbacks.
         void OnConnect(HttpRequest* req);
-
+        void OnResponse(HttpResponseHeader const& headers);
         void OnEvent(sse::Event const& event);
         void OnError(sse::Error const& error);
 
@@ -149,6 +146,8 @@ class FDv2StreamingSynchronizer final
         std::mutex mutex_;
         bool started_ = false;
         bool closed_ = false;
+        // FDv1 fallback directive from the most recent SSE response.
+        bool latest_fdv1_fallback_ = false;
         data_model::Selector latest_selector_;
         std::optional<boost::urls::url> base_url_;
         std::shared_ptr<sse::Client> sse_client_;

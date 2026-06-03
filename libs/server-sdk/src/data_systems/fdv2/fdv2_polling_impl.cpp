@@ -4,6 +4,7 @@
 #include <launchdarkly/network/http_error_messages.hpp>
 #include <launchdarkly/server_side/config/builders/all_builders.hpp>
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/json.hpp>
 #include <boost/url/parse.hpp>
 #include <boost/url/url.hpp>
@@ -11,6 +12,7 @@
 namespace launchdarkly::server_side::data_systems {
 
 static char const* const kFDv2PollPath = "/sdk/poll";
+static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
 
 static char const* const kErrorParsingBody =
     "Could not parse FDv2 polling response";
@@ -30,6 +32,12 @@ static ErrorInfo MakeError(ErrorKind kind,
                            std::string message) {
     return ErrorInfo{kind, status, std::move(message),
                      std::chrono::system_clock::now()};
+}
+
+static bool ReadFDv1FallbackDirective(
+    network::HttpResult::HeadersType const& headers) {
+    auto const it = headers.find(kFDv1FallbackHeader);
+    return it != headers.end() && boost::iequals(it->second, "true");
 }
 
 network::HttpRequest MakeFDv2PollRequest(
@@ -88,15 +96,13 @@ static FDv2SourceResult ParseFDv2PollEvents(
             auto typed = TranslateChangeSet(*change_set, logger);
             if (!typed) {
                 return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kInvalidData, 0, kErrorTranslation),
-                    false}};
+                    MakeError(ErrorKind::kInvalidData, 0, kErrorTranslation)}};
             }
             return FDv2SourceResult{
-                FDv2SourceResult::ChangeSet{std::move(*typed), false}};
+                FDv2SourceResult::ChangeSet{std::move(*typed)}};
         }
         if (auto* goodbye = std::get_if<Goodbye>(&result)) {
-            return FDv2SourceResult{
-                FDv2SourceResult::Goodbye{goodbye->reason, false}};
+            return FDv2SourceResult{FDv2SourceResult::Goodbye{goodbye->reason}};
         }
         if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
             if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
@@ -107,16 +113,15 @@ static FDv2SourceResult ParseFDv2PollEvents(
                     id.value_or("") + "' with reason: '" + error->message +
                     "'. Automatic retry will occur.";
                 return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                    MakeError(ErrorKind::kErrorResponse, 0, std::move(msg)),
-                    false}};
+                    MakeError(ErrorKind::kErrorResponse, 0, std::move(msg))}};
             }
             return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0, error->message), false}};
+                MakeError(ErrorKind::kInvalidData, 0, error->message)}};
         }
     }
 
     return FDv2SourceResult{FDv2SourceResult::Interrupted{
-        MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload), false}};
+        MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload)}};
 }
 
 static FDv2SourceResult ParseFDv2PollResponse(
@@ -127,25 +132,25 @@ static FDv2SourceResult ParseFDv2PollResponse(
     auto parsed = boost::json::parse(body, ec);
     if (ec) {
         return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody), false}};
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody)}};
     }
 
     auto const* obj = parsed.if_object();
     if (!obj) {
         return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody), false}};
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody)}};
     }
 
     auto const* events_val = obj->if_contains("events");
     if (!events_val) {
         return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents)}};
     }
 
     auto const* events_arr = events_val->if_array();
     if (!events_arr) {
         return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents), false}};
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents)}};
     }
 
     return ParseFDv2PollEvents(*events_arr, protocol_handler, logger);
@@ -161,24 +166,28 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
         std::string error_msg = msg.has_value() ? *msg : "unknown error";
         LD_LOG(logger, LogLevel::kWarn) << identity << ": " << error_msg;
         return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg)),
-            false}};
+            MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg))}};
     }
 
+    bool const fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
+
     if (res.Status() == 304) {
-        return FDv2SourceResult{FDv2SourceResult::ChangeSet{
-            data_model::ChangeSet<data_interfaces::ChangeSetData>{
-                data_model::ChangeSetType::kNone, {}, data_model::Selector{}},
-            false}};
+        return FDv2SourceResult{
+            FDv2SourceResult::ChangeSet{
+                data_model::ChangeSet<data_interfaces::ChangeSetData>{
+                    data_model::ChangeSetType::kNone,
+                    {},
+                    data_model::Selector{}}},
+            fdv1_fallback};
     }
 
     if (res.Status() == 200) {
         auto const& body = res.Body();
         if (!body) {
-            return FDv2SourceResult{FDv2SourceResult::Interrupted{
-                MakeError(ErrorKind::kInvalidData, 0,
-                          "polling response contained no body"),
-                false}};
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{MakeError(
+                                        ErrorKind::kInvalidData, 0,
+                                        "polling response contained no body")},
+                                    fdv1_fallback};
         }
 
         auto result = ParseFDv2PollResponse(*body, protocol_handler, logger);
@@ -192,6 +201,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     << identity << ": " << interrupted->error.Message();
             }
         }
+        result.fdv1_fallback = fdv1_fallback;
         return result;
     }
 
@@ -199,17 +209,19 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
         std::string msg = network::ErrorForStatusCode(
             res.Status(), "FDv2 polling request", "will retry");
         LD_LOG(logger, LogLevel::kWarn) << identity << ": " << msg;
-        return FDv2SourceResult{FDv2SourceResult::Interrupted{
-            MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg)),
-            false}};
+        return FDv2SourceResult{
+            FDv2SourceResult::Interrupted{MakeError(
+                ErrorKind::kErrorResponse, res.Status(), std::move(msg))},
+            fdv1_fallback};
     }
 
     std::string msg = network::ErrorForStatusCode(
         res.Status(), "FDv2 polling request", std::nullopt);
     LD_LOG(logger, LogLevel::kError) << identity << ": " << msg;
-    return FDv2SourceResult{FDv2SourceResult::TerminalError{
-        MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg)),
-        false}};
+    return FDv2SourceResult{
+        FDv2SourceResult::TerminalError{
+            MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg))},
+        fdv1_fallback};
 }
 
 }  // namespace launchdarkly::server_side::data_systems
