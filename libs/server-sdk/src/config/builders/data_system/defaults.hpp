@@ -46,8 +46,10 @@ struct Defaults {
 
     static auto FDv2Config() -> built::FDv2Config {
         return {FDv2StreamingConfig(), FDv2PollingConfig(),
-                FDv2StreamingConfig(), std::chrono::minutes{2},
-                std::chrono::minutes{5}};
+                std::variant<built::FDv2Config::StreamingConfig,
+                             built::FDv2Config::PollingConfig>{
+                    FDv2StreamingConfig()},
+                std::chrono::minutes{2}, std::chrono::minutes{5}};
     }
 
     static auto DataSystemConfig() -> built::DataSystemConfig {

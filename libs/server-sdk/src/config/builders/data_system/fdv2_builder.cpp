@@ -21,6 +21,11 @@ FDv2Builder& FDv2Builder::FDv1Fallback(StreamingSource source) {
     return *this;
 }
 
+FDv2Builder& FDv2Builder::FDv1Fallback(PollingSource source) {
+    config_.fdv1_fallback = source.Build();
+    return *this;
+}
+
 FDv2Builder& FDv2Builder::DisableFDv1Fallback() {
     config_.fdv1_fallback = std::nullopt;
     return *this;

@@ -102,10 +102,25 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
         std::make_unique<data_systems::FDv2PollingSynchronizerFactory>(
             executor, logger, endpoints, http_properties, cfg.polling));
     if (cfg.fdv1_fallback) {
-        synchronizer_factories.push_back(
-            std::make_unique<data_systems::FDv1StreamingAdapterFactory>(
-                executor, logger, &status_manager, endpoints,
-                *cfg.fdv1_fallback, http_properties));
+        std::visit(
+            overloaded{
+                [&](config::built::FDv2Config::StreamingConfig const&
+                        streaming) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv1StreamingAdapterFactory>(
+                            executor, logger, &status_manager, endpoints,
+                            streaming, http_properties));
+                },
+                [&](config::built::FDv2Config::PollingConfig const& polling) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv1PollingAdapterFactory>(
+                            executor, logger, &status_manager, endpoints,
+                            polling, http_properties));
+                },
+            },
+            *cfg.fdv1_fallback);
     }
 
     auto fallback_cond_factory =

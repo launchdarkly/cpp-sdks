@@ -117,9 +117,33 @@ TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
     EXPECT_EQ(fdv2_config.polling.poll_interval,
               Defaults::FDv2PollingConfig().poll_interval);
     ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
-    EXPECT_EQ(*fdv2_config.fdv1_fallback, Defaults::FDv2StreamingConfig());
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
+        *fdv2_config.fdv1_fallback));
+    EXPECT_EQ(std::get<built::FDv2Config::StreamingConfig>(
+                  *fdv2_config.fdv1_fallback),
+              Defaults::FDv2StreamingConfig());
     EXPECT_EQ(fdv2_config.fallback_timeout, std::chrono::minutes{2});
     EXPECT_EQ(fdv2_config.recovery_timeout, std::chrono::minutes{5});
+}
+
+TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::FDv2().FDv1Fallback(
+            builders::FDv2Builder::PollingSource().PollInterval(
+                std::chrono::seconds{45})));
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::PollingConfig>(
+        *fdv2_config.fdv1_fallback));
+    EXPECT_EQ(
+        std::get<built::FDv2Config::PollingConfig>(*fdv2_config.fdv1_fallback)
+            .poll_interval,
+        std::chrono::seconds{45});
 }
 
 TEST_F(ConfigBuilderTest, FDv2_StreamingFilterFlowsThrough) {

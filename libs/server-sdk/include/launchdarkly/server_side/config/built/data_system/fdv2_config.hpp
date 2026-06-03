@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <optional>
+#include <variant>
 
 namespace launchdarkly::server_side::config::built {
 
@@ -17,7 +18,7 @@ struct FDv2Config {
 
     StreamingConfig streaming;
     PollingConfig polling;
-    std::optional<StreamingConfig> fdv1_fallback;
+    std::optional<std::variant<StreamingConfig, PollingConfig>> fdv1_fallback;
     std::chrono::milliseconds fallback_timeout;
     std::chrono::milliseconds recovery_timeout;
 };

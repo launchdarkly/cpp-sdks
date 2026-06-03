@@ -38,8 +38,8 @@ class FDv2Builder {
     /**
      * @brief Configures the FDv1 streaming source used as a last-resort
      * fallback when the LaunchDarkly service signals (via the
-     * X-LD-FD-Fallback header) that the SDK should switch to FDv1. Enabled
-     * by default with standard settings.
+     * X-LD-FD-Fallback header) that the SDK should switch to FDv1.
+     * Enabled by default with standard streaming settings.
      * @param source Streaming source configuration to use for the FDv1
      *     fallback connection.
      * @return Reference to this.
@@ -47,8 +47,18 @@ class FDv2Builder {
     FDv2Builder& FDv1Fallback(StreamingSource source);
 
     /**
-     * @brief Disables the FDv1 streaming fallback. After this call, an
-     * FDv1 fallback directive from the service transitions the SDK to
+     * @brief Configures the FDv1 polling source used as a last-resort
+     * fallback when the LaunchDarkly service signals (via the
+     * X-LD-FD-Fallback header) that the SDK should switch to FDv1.
+     * @param source Polling source configuration to use for the FDv1
+     *     fallback connection.
+     * @return Reference to this.
+     */
+    FDv2Builder& FDv1Fallback(PollingSource source);
+
+    /**
+     * @brief Disables the FDv1 fallback. After this call, an FDv1
+     * fallback directive from the service transitions the SDK to
      * OFFLINE rather than reconnecting via FDv1.
      * @return Reference to this.
      */

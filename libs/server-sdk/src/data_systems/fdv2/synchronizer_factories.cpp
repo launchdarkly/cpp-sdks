@@ -1,5 +1,6 @@
 #include "synchronizer_factories.hpp"
 
+#include "../background_sync/sources/polling/polling_data_source.hpp"
 #include "../background_sync/sources/streaming/streaming_data_source.hpp"
 #include "fdv1_adapter_synchronizer.hpp"
 #include "polling_synchronizer.hpp"
@@ -65,6 +66,28 @@ std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv1StreamingAdapterFactory::Build() {
     auto fdv1_source = std::make_unique<StreamingDataSource>(
         executor_, logger_, *status_manager_, endpoints_, streaming_,
+        http_properties_);
+    return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source));
+}
+
+FDv1PollingAdapterFactory::FDv1PollingAdapterFactory(
+    boost::asio::any_io_executor executor,
+    Logger logger,
+    data_components::DataSourceStatusManager* status_manager,
+    config::built::ServiceEndpoints endpoints,
+    config::built::FDv2Config::PollingConfig polling,
+    config::built::HttpProperties http_properties)
+    : executor_(std::move(executor)),
+      logger_(std::move(logger)),
+      status_manager_(status_manager),
+      endpoints_(std::move(endpoints)),
+      polling_(std::move(polling)),
+      http_properties_(std::move(http_properties)) {}
+
+std::unique_ptr<data_interfaces::IFDv2Synchronizer>
+FDv1PollingAdapterFactory::Build() {
+    auto fdv1_source = std::make_unique<PollingDataSource>(
+        executor_, logger_, *status_manager_, endpoints_, polling_,
         http_properties_);
     return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source));
 }
