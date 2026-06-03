@@ -41,14 +41,14 @@ static bool ReadFDv1FallbackDirective(
 }
 
 network::HttpRequest MakeFDv2PollRequest(
-    config::built::ServiceEndpoints const& endpoints,
+    std::string const& polling_base_url,
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
     std::optional<std::string> const& filter_key,
     Logger const& logger) {
     config::builders::HttpPropertiesBuilder const builder(http_properties);
 
-    auto parsed = boost::urls::parse_uri(endpoints.PollingBaseUrl());
+    auto parsed = boost::urls::parse_uri(polling_base_url);
     if (!parsed) {
         return {"", network::HttpMethod::kGet, builder.Build(),
                 network::HttpRequest::BodyType{}};

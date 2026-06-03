@@ -45,11 +45,15 @@ struct Defaults {
     }
 
     static auto FDv2Config() -> built::FDv2Config {
-        return {FDv2StreamingConfig(), FDv2PollingConfig(),
-                std::variant<built::FDv2Config::StreamingConfig,
-                             built::FDv2Config::PollingConfig>{
-                    FDv2StreamingConfig()},
-                std::chrono::minutes{2}, std::chrono::minutes{5}};
+        using StreamingConfig = built::FDv2Config::StreamingConfig;
+        using PollingConfig = built::FDv2Config::PollingConfig;
+        using SyncVariant = std::variant<StreamingConfig, PollingConfig>;
+        return {{FDv2PollingConfig()},
+                std::vector<SyncVariant>{FDv2StreamingConfig(),
+                                         FDv2PollingConfig()},
+                SyncVariant{FDv2StreamingConfig()},
+                std::chrono::minutes{2},
+                std::chrono::minutes{5}};
     }
 
     static auto DataSystemConfig() -> built::DataSystemConfig {

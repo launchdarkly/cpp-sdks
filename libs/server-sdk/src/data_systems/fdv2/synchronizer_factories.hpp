@@ -29,7 +29,7 @@ class FDv2StreamingSynchronizerFactory final
    private:
     boost::asio::any_io_executor const executor_;
     Logger const logger_;
-    config::built::ServiceEndpoints const endpoints_;
+    std::string const streaming_base_url_;
     config::built::HttpProperties const http_properties_;
     config::built::FDv2Config::StreamingConfig const streaming_;
 };
@@ -52,7 +52,7 @@ class FDv2PollingSynchronizerFactory final
    private:
     boost::asio::any_io_executor const executor_;
     Logger const logger_;
-    config::built::ServiceEndpoints const endpoints_;
+    std::string const polling_base_url_;
     config::built::HttpProperties const http_properties_;
     config::built::FDv2Config::PollingConfig const polling_;
 };

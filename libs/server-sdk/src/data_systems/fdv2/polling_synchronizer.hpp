@@ -39,7 +39,7 @@ class FDv2PollingSynchronizer final
     FDv2PollingSynchronizer(
         boost::asio::any_io_executor const& executor,
         Logger const& logger,
-        config::built::ServiceEndpoints const& endpoints,
+        std::string polling_base_url,
         config::built::HttpProperties const& http_properties,
         std::optional<std::string> filter_key,
         std::chrono::seconds poll_interval);
@@ -62,7 +62,7 @@ class FDv2PollingSynchronizer final
         State(Logger logger,
               boost::asio::any_io_executor const& executor,
               std::chrono::seconds poll_interval,
-              config::built::ServiceEndpoints const& endpoints,
+              std::string polling_base_url,
               config::built::HttpProperties const& http_properties,
               std::optional<std::string> filter_key);
 
@@ -96,7 +96,7 @@ class FDv2PollingSynchronizer final
 
         // Immutable state
         std::chrono::seconds const poll_interval_;
-        config::built::ServiceEndpoints const endpoints_;
+        std::string const polling_base_url_;
         config::built::HttpProperties const http_properties_;
         std::optional<std::string> const filter_key_;
         network::Requester const requester_;

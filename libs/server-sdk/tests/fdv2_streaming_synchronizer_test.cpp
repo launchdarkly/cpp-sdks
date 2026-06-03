@@ -105,11 +105,6 @@ class IoContextRunner {
     std::thread thread_;
 };
 
-config::shared::built::ServiceEndpoints MakeEndpoints(std::string streaming) {
-    return config::shared::built::ServiceEndpoints(
-        "polling", std::move(streaming), "events");
-}
-
 config::shared::built::HttpProperties MakeHttpProperties() {
     return launchdarkly::server_side::config::builders::HttpPropertiesBuilder()
         .Build();
@@ -149,7 +144,7 @@ TEST(FDv2StreamingSynchronizerTest, NextBadEndpointUrlReturnsTerminalError) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger, MakeEndpoints("not a url"),
+        runner.context().get_executor(), logger, "not a url",
         MakeHttpProperties(), std::nullopt, 1s);
 
     // Act: trigger setup with a malformed streaming URL. URL parsing happens
@@ -172,9 +167,8 @@ TEST(FDv2StreamingSynchronizerTest, CloseBeforeNextReturnsShutdown) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     synchronizer.Close();
 
     // Act: call Next on an already-closed synchronizer.
@@ -193,9 +187,8 @@ TEST(FDv2StreamingSynchronizerTest, CloseDuringPendingNextResolvesShutdown) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
 
     // Skip the SSE setup; we want Next to be pending purely on the
     // close/timeout race, not on real network activity.
@@ -222,9 +215,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectEmptySelectorNoBasisParam) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::nullopt, 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::nullopt, 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -247,9 +239,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithSelectorAppendsBasis) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::nullopt, 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::nullopt, 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -274,9 +265,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithFilterKeyAppendsFilter) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::string("my-filter"), 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::string("my-filter"), 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -322,9 +312,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectReconnectUsesLatestSelector) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::nullopt, 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::nullopt, 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -360,9 +349,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectSelectorStateIsPercentEncoded) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::nullopt, 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::nullopt, 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -392,9 +380,8 @@ TEST(FDv2StreamingSynchronizerTest, FullChangesetEventsReturnsChangeSet) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event server_intent("server-intent",
@@ -430,9 +417,8 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventReturnsGoodbye) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event goodbye("goodbye", R"({"reason":"bye"})");
@@ -456,9 +442,8 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventTriggersAsyncRestart) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -486,9 +471,8 @@ TEST(FDv2StreamingSynchronizerTest,
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Begin accumulating a payload that we'll abandon mid-flight via Goodbye.
@@ -547,9 +531,8 @@ TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event server_error("error", R"({"id":"abc","reason":"oops"})");
@@ -599,9 +582,8 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -659,9 +641,8 @@ TEST(FDv2StreamingSynchronizerTest, TranslationFailureReturnsInterrupted) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // A non-empty segment object missing required fields triggers a schema
@@ -705,9 +686,8 @@ TEST(FDv2StreamingSynchronizerTest,
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Error error{sse::errors::UnrecoverableClientError{
@@ -734,9 +714,8 @@ TEST(FDv2StreamingSynchronizerTest, RecoverableReadTimeoutReturnsInterrupted) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Error error{sse::errors::ReadTimeout{std::chrono::milliseconds(100)}};
@@ -766,9 +745,8 @@ TEST(FDv2StreamingSynchronizerTest, OnResponseDirectivePropagatesToChangeSet) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> headers;
@@ -804,9 +782,8 @@ TEST(FDv2StreamingSynchronizerTest, SecondResponseWithoutDirectiveClearsFlag) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> first;
@@ -833,9 +810,8 @@ TEST(FDv2StreamingSynchronizerTest, ErrorAfterDirectiveCarriesFlag) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> headers;

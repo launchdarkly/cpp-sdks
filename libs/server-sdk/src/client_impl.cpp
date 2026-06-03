@@ -4,6 +4,7 @@
 #include "data_systems/background_sync/background_sync_system.hpp"
 #include "data_systems/fdv2/conditions.hpp"
 #include "data_systems/fdv2/fdv2_data_system.hpp"
+#include "data_systems/fdv2/initializer_factories.hpp"
 #include "data_systems/fdv2/synchronizer_factories.hpp"
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
@@ -92,15 +93,35 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
     Logger const& logger) {
     std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>>
         initializer_factories;
+    for (auto const& initializer : cfg.initializers) {
+        initializer_factories.push_back(
+            std::make_unique<data_systems::FDv2PollingInitializerFactory>(
+                executor, logger, endpoints, http_properties, initializer));
+    }
 
     std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
         synchronizer_factories;
-    synchronizer_factories.push_back(
-        std::make_unique<data_systems::FDv2StreamingSynchronizerFactory>(
-            executor, logger, endpoints, http_properties, cfg.streaming));
-    synchronizer_factories.push_back(
-        std::make_unique<data_systems::FDv2PollingSynchronizerFactory>(
-            executor, logger, endpoints, http_properties, cfg.polling));
+    for (auto const& sync : cfg.synchronizers) {
+        std::visit(
+            overloaded{
+                [&](config::built::FDv2Config::StreamingConfig const&
+                        streaming) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv2StreamingSynchronizerFactory>(
+                            executor, logger, endpoints, http_properties,
+                            streaming));
+                },
+                [&](config::built::FDv2Config::PollingConfig const& polling) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv2PollingSynchronizerFactory>(
+                            executor, logger, endpoints, http_properties,
+                            polling));
+                },
+            },
+            sync);
+    }
     if (cfg.fdv1_fallback) {
         std::visit(
             overloaded{

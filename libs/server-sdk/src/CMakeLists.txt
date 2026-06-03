@@ -81,6 +81,8 @@ target_sources(${LIBNAME}
         data_systems/fdv2/fdv1_adapter_synchronizer.cpp
         data_systems/fdv2/synchronizer_factories.hpp
         data_systems/fdv2/synchronizer_factories.cpp
+        data_systems/fdv2/initializer_factories.hpp
+        data_systems/fdv2/initializer_factories.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/streaming/event_handler.hpp

@@ -113,9 +113,19 @@ TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
     auto const fdv2_config =
         std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
 
-    EXPECT_EQ(fdv2_config.streaming, Defaults::FDv2StreamingConfig());
-    EXPECT_EQ(fdv2_config.polling.poll_interval,
+    ASSERT_EQ(fdv2_config.initializers.size(), 1u);
+    EXPECT_EQ(fdv2_config.initializers[0].poll_interval,
               Defaults::FDv2PollingConfig().poll_interval);
+
+    ASSERT_EQ(fdv2_config.synchronizers.size(), 2u);
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
+        fdv2_config.synchronizers[0]));
+    EXPECT_EQ(std::get<built::FDv2Config::StreamingConfig>(
+                  fdv2_config.synchronizers[0]),
+              Defaults::FDv2StreamingConfig());
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::PollingConfig>(
+        fdv2_config.synchronizers[1]));
+
     ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
     ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
         *fdv2_config.fdv1_fallback));
@@ -130,7 +140,7 @@ TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
         builders::DataSystemBuilder::FDv2().FDv1Fallback(
-            builders::FDv2Builder::PollingSource().PollInterval(
+            builders::FDv2Builder::Polling().PollInterval(
                 std::chrono::seconds{45})));
 
     auto cfg = builder.Build();
@@ -146,28 +156,58 @@ TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
         std::chrono::seconds{45});
 }
 
-TEST_F(ConfigBuilderTest, FDv2_StreamingFilterFlowsThrough) {
+TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {
     ConfigBuilder builder("sdk-123");
-    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Streaming(
-        builders::FDv2Builder::StreamingSource().Filter("flag-subset")));
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::FDv2()
+            .Synchronizer(builders::FDv2Builder::Polling().PollInterval(
+                std::chrono::seconds{45}))
+            .Synchronizer(builders::FDv2Builder::Streaming().Filter("filt")));
 
     auto cfg = builder.Build();
     auto const fdv2_config =
         std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
 
-    EXPECT_EQ(fdv2_config.streaming.filter_key, "flag-subset");
+    ASSERT_EQ(fdv2_config.synchronizers.size(), 2u);
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::PollingConfig>(
+        fdv2_config.synchronizers[0]));
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
+        fdv2_config.synchronizers[1]));
+    EXPECT_EQ(std::get<built::FDv2Config::StreamingConfig>(
+                  fdv2_config.synchronizers[1])
+                  .filter_key,
+              "filt");
 }
 
-TEST_F(ConfigBuilderTest, FDv2_PollingFilterFlowsThrough) {
+TEST_F(ConfigBuilderTest, FDv2_AddingInitializerClearsDefaults) {
     ConfigBuilder builder("sdk-123");
-    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Polling(
-        builders::FDv2Builder::PollingSource().Filter("flag-subset")));
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Initializer(
+        builders::FDv2Builder::Polling().Filter("flag-subset")));
 
     auto cfg = builder.Build();
     auto const fdv2_config =
         std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
 
-    EXPECT_EQ(fdv2_config.polling.filter_key, "flag-subset");
+    ASSERT_EQ(fdv2_config.initializers.size(), 1u);
+    EXPECT_EQ(fdv2_config.initializers[0].filter_key, "flag-subset");
+}
+
+TEST_F(ConfigBuilderTest, FDv2_PerSourceBaseUrlOverride) {
+    ConfigBuilder builder("sdk-123");
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::FDv2().Synchronizer(
+            builders::FDv2Builder::Streaming().BaseUrl(
+                "https://example.test")));
+
+    auto cfg = builder.Build();
+    auto const fdv2_config =
+        std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
+
+    ASSERT_EQ(fdv2_config.synchronizers.size(), 1u);
+    auto const& sync = std::get<built::FDv2Config::StreamingConfig>(
+        fdv2_config.synchronizers[0]);
+    ASSERT_TRUE(sync.base_url_override.has_value());
+    EXPECT_EQ(*sync.base_url_override, "https://example.test");
 }
 
 TEST_F(ConfigBuilderTest, FDv2_DisableFDv1FallbackClearsIt) {

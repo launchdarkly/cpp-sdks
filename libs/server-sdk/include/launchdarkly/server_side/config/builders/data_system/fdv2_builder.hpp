@@ -10,30 +10,41 @@ namespace launchdarkly::server_side::config::builders {
 
 class FDv2Builder {
    public:
-    using StreamingSource =
-        launchdarkly::config::shared::builders::StreamingBuilder<
-            launchdarkly::config::shared::ServerSDK>;
-    using PollingSource =
-        launchdarkly::config::shared::builders::PollingBuilder<
-            launchdarkly::config::shared::ServerSDK>;
+    using Streaming = launchdarkly::config::shared::builders::StreamingBuilder<
+        launchdarkly::config::shared::ServerSDK>;
+    using Polling = launchdarkly::config::shared::builders::PollingBuilder<
+        launchdarkly::config::shared::ServerSDK>;
 
     FDv2Builder();
 
     /**
-     * @brief Configures the primary FDv2 streaming synchronizer.
-     * Defaults to the standard FDv2 streaming endpoint with no payload filter.
+     * @brief Appends a polling initializer to the initializers list. The
+     * first call to this method on a default-constructed builder replaces
+     * the spec-default initializer list; subsequent calls append.
+     * @param source Polling source configuration for the initializer.
+     * @return Reference to this.
+     */
+    FDv2Builder& Initializer(Polling source);
+
+    /**
+     * @brief Appends a streaming synchronizer to the synchronizers list.
+     * Order in the list determines preference: the first entry is the
+     * primary synchronizer, subsequent entries are fallbacks. The first
+     * call to a Synchronizer overload on a default-constructed builder
+     * replaces the spec-default synchronizer list; subsequent calls append.
      * @param source Streaming source configuration.
      * @return Reference to this.
      */
-    FDv2Builder& Streaming(StreamingSource source);
+    FDv2Builder& Synchronizer(Streaming source);
 
     /**
-     * @brief Configures the secondary FDv2 polling synchronizer used as a
-     * fallback when streaming is unavailable.
+     * @brief Appends a polling synchronizer to the synchronizers list. See
+     * Synchronizer(Streaming) for ordering and default-replacement
+     * semantics.
      * @param source Polling source configuration.
      * @return Reference to this.
      */
-    FDv2Builder& Polling(PollingSource source);
+    FDv2Builder& Synchronizer(Polling source);
 
     /**
      * @brief Configures the FDv1 streaming source used as a last-resort
@@ -44,7 +55,7 @@ class FDv2Builder {
      *     fallback connection.
      * @return Reference to this.
      */
-    FDv2Builder& FDv1Fallback(StreamingSource source);
+    FDv2Builder& FDv1Fallback(Streaming source);
 
     /**
      * @brief Configures the FDv1 polling source used as a last-resort
@@ -54,7 +65,7 @@ class FDv2Builder {
      *     fallback connection.
      * @return Reference to this.
      */
-    FDv2Builder& FDv1Fallback(PollingSource source);
+    FDv2Builder& FDv1Fallback(Polling source);
 
     /**
      * @brief Disables the FDv1 fallback. After this call, an FDv1
@@ -87,6 +98,8 @@ class FDv2Builder {
 
    private:
     built::FDv2Config config_;
+    bool initializers_explicit_;
+    bool synchronizers_explicit_;
 };
 
 }  // namespace launchdarkly::server_side::config::builders

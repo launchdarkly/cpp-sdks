@@ -46,7 +46,7 @@ class FDv2StreamingSynchronizer final
     FDv2StreamingSynchronizer(
         boost::asio::any_io_executor const& executor,
         Logger const& logger,
-        config::built::ServiceEndpoints const& endpoints,
+        std::string streaming_base_url,
         config::built::HttpProperties const& http_properties,
         std::optional<std::string> filter_key,
         std::chrono::milliseconds initial_reconnect_delay);
@@ -70,7 +70,7 @@ class FDv2StreamingSynchronizer final
        public:
         State(Logger logger,
               boost::asio::any_io_executor const& executor,
-              config::built::ServiceEndpoints const& endpoints,
+              std::string streaming_base_url,
               config::built::HttpProperties const& http_properties,
               std::optional<std::string> filter_key,
               std::chrono::milliseconds initial_reconnect_delay);
@@ -132,7 +132,7 @@ class FDv2StreamingSynchronizer final
         Logger logger_;
 
         // Immutable state
-        config::built::ServiceEndpoints const endpoints_;
+        std::string const streaming_base_url_;
         config::built::HttpProperties const http_properties_;
         std::optional<std::string> const filter_key_;
         std::chrono::milliseconds const initial_reconnect_delay_;
