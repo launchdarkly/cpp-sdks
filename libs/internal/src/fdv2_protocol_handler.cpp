@@ -78,9 +78,6 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
     boost::json::value const& data) {
-    if (state_ == State::kInactive) {
-        return std::monostate{};
-    }
     auto result = boost::json::value_to<
         tl::expected<std::optional<PutObject>, JsonError>>(data);
     if (!result) {
@@ -101,9 +98,6 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleDeleteObject(
     boost::json::value const& data) {
-    if (state_ == State::kInactive) {
-        return std::monostate{};
-    }
     auto result = boost::json::value_to<
         tl::expected<std::optional<DeleteObject>, JsonError>>(data);
     if (!result) {
@@ -152,7 +146,10 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
         type, std::move(changes_),
         data_model::Selector{data_model::Selector::State{transferred.version,
                                                          transferred.state}}};
-    Reset();
+    // Transition to kPartial so subsequent put-object/payload-transferred
+    // cycles work without requiring a new server-intent.
+    changes_.clear();
+    state_ = State::kPartial;
     return changeset;
 }
 

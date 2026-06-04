@@ -353,3 +353,30 @@ TEST(FDv2ProtocolHandlerTest, PayloadTransferredWithoutServerIntentIsError) {
     ASSERT_NE(err, nullptr);
     EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kProtocolError);
 }
+
+TEST(FDv2ProtocolHandlerTest, ConsecutivePayloadsWithoutNewServerIntent) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "first", kFlagJson));
+    auto first = handler.HandleEvent("payload-transferred",
+                                     MakePayloadTransferred("s1", 1));
+    auto* cs1 = std::get_if<data_model::FDv2ChangeSet>(&first);
+    ASSERT_NE(cs1, nullptr);
+    ASSERT_EQ(cs1->changes.size(), 1u);
+    EXPECT_EQ(cs1->changes[0].key, "first");
+
+    // A subsequent payload arrives without an intervening server-intent
+    // (streaming incremental update). Java's state machine transitions to
+    // CHANGES after payload-transferred so this case continues to work.
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "second", kFlagJson));
+    auto second = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s2", 2));
+    auto* cs2 = std::get_if<data_model::FDv2ChangeSet>(&second);
+    ASSERT_NE(cs2, nullptr);
+    ASSERT_EQ(cs2->changes.size(), 1u);
+    EXPECT_EQ(cs2->changes[0].key, "second");
+    EXPECT_EQ(cs2->type, data_model::ChangeSetType::kPartial);
+}
