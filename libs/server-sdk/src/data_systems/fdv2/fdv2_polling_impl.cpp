@@ -1,4 +1,5 @@
 #include "fdv2_polling_impl.hpp"
+#include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
@@ -11,7 +12,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-static char const* const kFDv2PollPath = "/sdk/poll";
 static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
 
 static char const* const kErrorParsingBody =
@@ -54,11 +54,14 @@ network::HttpRequest MakeFDv2PollRequest(
     }
 
     boost::urls::url u = parsed.value();
-    u.set_path(u.path() + kFDv2PollPath);
+    // Use segments to join the path; string concatenation would produce a
+    // double slash when the base URL ends in '/'.
+    u.segments().push_back("sdk");
+    u.segments().push_back("poll");
     if (selector.value) {
         u.params().append({"basis", selector.value->state});
     }
-    if (filter_key) {
+    if (filter_key && detail::ValidateFilterKey(*filter_key)) {
         u.params().append({"filter", *filter_key});
     }
 

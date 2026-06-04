@@ -2,6 +2,7 @@
 
 #include <data_systems/fdv2/fdv2_polling_impl.hpp>
 
+#include <launchdarkly/config/shared/defaults.hpp>
 #include <launchdarkly/fdv2_protocol_handler.hpp>
 #include <launchdarkly/logging/logger.hpp>
 #include <launchdarkly/network/http_requester.hpp>
@@ -106,4 +107,34 @@ TEST(HandleFDv2PollResponseTest, NetworkErrorDoesNotSetFlag) {
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result.value));
     EXPECT_FALSE(result.fdv1_fallback);
+}
+
+TEST(MakeFDv2PollRequestTest, BaseWithTrailingSlashDoesNotProduceDoubleSlash) {
+    config::shared::built::ServiceEndpoints endpoints{"http://example.com/", "",
+                                                      ""};
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
+                                   std::nullopt);
+    EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
+}
+
+TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
+    config::shared::built::ServiceEndpoints endpoints{"http://example.com", "",
+                                                      ""};
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
+                                   std::string{"my-filter_1.0"});
+    EXPECT_EQ(req.Url(), "http://example.com/sdk/poll?filter=my-filter_1.0");
+}
+
+TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {
+    config::shared::built::ServiceEndpoints endpoints{"http://example.com", "",
+                                                      ""};
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
+                                   std::string{"has spaces"});
+    EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
 }
