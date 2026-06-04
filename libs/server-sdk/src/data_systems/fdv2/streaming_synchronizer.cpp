@@ -75,10 +75,14 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
 
     boost::urls::url u = parsed.value();
 
-    // Safer way of appending /sdk/stream than string concatenation: avoids
-    // double slashes if the base URL has a trailing slash.
-    u.segments().push_back("sdk");
-    u.segments().push_back("stream");
+    // A trailing '/' on the base URL appears as an empty final segment;
+    // remove it so subsequent push_backs don't produce a double slash.
+    auto segs = u.segments();
+    if (!segs.empty() && segs.back().empty()) {
+        segs.pop_back();
+    }
+    segs.push_back("sdk");
+    segs.push_back("stream");
 
     // basis and filter are not added here — they are appended per-connect by
     // the on_connect hook (OnConnect), so that each (re)connection uses the
@@ -184,6 +188,10 @@ void FDv2StreamingSynchronizer::State::OnResponse(
 }
 
 void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
+    if (!FDv2ProtocolHandler::IsKnownEvent(event.type())) {
+        return;
+    }
+
     boost::system::error_code ec;
     auto data = boost::json::parse(event.data(), ec);
     if (ec) {

@@ -54,10 +54,14 @@ network::HttpRequest MakeFDv2PollRequest(
     }
 
     boost::urls::url u = parsed.value();
-    // Use segments to join the path; string concatenation would produce a
-    // double slash when the base URL ends in '/'.
-    u.segments().push_back("sdk");
-    u.segments().push_back("poll");
+    // A trailing '/' on the base URL appears as an empty final segment;
+    // remove it so subsequent push_backs don't produce a double slash.
+    auto segs = u.segments();
+    if (!segs.empty() && segs.back().empty()) {
+        segs.pop_back();
+    }
+    segs.push_back("sdk");
+    segs.push_back("poll");
     if (selector.value) {
         u.params().append({"basis", selector.value->state});
     }

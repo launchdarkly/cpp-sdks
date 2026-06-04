@@ -119,6 +119,16 @@ TEST(MakeFDv2PollRequestTest, BaseWithTrailingSlashDoesNotProduceDoubleSlash) {
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
 }
 
+TEST(MakeFDv2PollRequestTest, BaseWithSubpathTrailingSlashJoinsCleanly) {
+    config::shared::built::ServiceEndpoints endpoints{
+        "http://example.com/relay/", "", ""};
+    auto props =
+        config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
+    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
+                                   std::nullopt);
+    EXPECT_EQ(req.Url(), "http://example.com/relay/sdk/poll");
+}
+
 TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
     config::shared::built::ServiceEndpoints endpoints{"http://example.com", "",
                                                       ""};
