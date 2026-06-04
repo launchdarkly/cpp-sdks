@@ -51,9 +51,8 @@ namespace launchdarkly::server_side::data_systems {
  * Destruction protocol:
  *
  *   The destructor cancels in-flight orchestration (closes the active
- *   source, emits status kOff), but does NOT block to drain executor
- *   callbacks that may already be queued. Before destroying, the caller
- *   must ensure both of:
+ *   source) but does NOT block to drain executor callbacks that may
+ *   already be queued. Before destroying, the caller must ensure both of:
  *
  *     1. The executor that orchestration callbacks run on has been stopped
  *        AND any thread running it has been joined. Otherwise a previously-
@@ -120,8 +119,6 @@ namespace launchdarkly::server_side::data_systems {
  *               v
  *     [Done; final status preserved]
  *
- *     Calling the destructor at any time -> [Closed; status kOff].
- *
  * Status transitions:
  *
  *   kInitializing (initial) -> kValid on first successful ChangeSet apply.
@@ -130,11 +127,10 @@ namespace launchdarkly::server_side::data_systems {
  *                              the initializer phase if not yet Valid).
  *                              kOff if all initializers exhaust without data
  *                              and no synchronizers are configured.
- *   kValid                  -> kInterrupted on errors; kOff in destructor or
- *                              when synchronizers cycle through and exhaust.
+ *   kValid                  -> kInterrupted on errors; kOff when
+ *                              synchronizers cycle through and exhaust.
  *   kInterrupted            -> kValid on next successful ChangeSet apply;
- *                              kOff in destructor or on synchronizer
- *                              exhaustion.
+ *                              kOff on synchronizer exhaustion.
  *   kOff                    -> terminal.
  */
 class FDv2DataSystem final : public data_interfaces::IDataSystem {

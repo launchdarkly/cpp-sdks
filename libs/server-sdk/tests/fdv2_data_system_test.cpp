@@ -272,25 +272,6 @@ TEST(FDv2DataSystemTest, OfflineMode_NoFactories_StatusValid) {
     EXPECT_FALSE(ds.Initialized());
 }
 
-TEST(FDv2DataSystemTest, Destructor_TransitionsStatusToOff) {
-    auto logger = MakeNullLogger();
-    boost::asio::io_context ioc;
-    data_components::DataSourceStatusManager status_manager;
-
-    {
-        FDv2DataSystem ds({}, {}, /*fallback_condition_factory=*/nullptr,
-                          /*recovery_condition_factory=*/nullptr,
-                          ioc.get_executor(), &status_manager, logger);
-        ds.Initialize();
-        ASSERT_EQ(status_manager.Status().State(),
-                  DataSourceStatus::DataSourceState::kValid);
-    }
-
-    // After ~FDv2DataSystem, status is Off.
-    EXPECT_EQ(status_manager.Status().State(),
-              DataSourceStatus::DataSourceState::kOff);
-}
-
 // ============================================================================
 // Initializer phase
 // ============================================================================
@@ -1227,14 +1208,13 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
 // ============================================================================
 //
 // The destructor contract (fdv2_data_system.hpp) requires the destructor to
-// cancel in-flight orchestration (close the active source, transition status
-// to kOff) without firing any continuation against the destroyed object. The
-// caller's responsibility is to ensure the executor is no longer running by
-// the time destruction begins; the orchestrator's responsibility is to leave
-// nothing dangling. These two tests pin that contract for both phases.
+// cancel in-flight orchestration (close the active source) without firing
+// any continuation against the destroyed object. The caller's responsibility
+// is to ensure the executor is no longer running by the time destruction
+// begins; the orchestrator's responsibility is to leave nothing dangling.
+// These two tests pin that contract for both phases.
 
-TEST(FDv2DataSystemTest,
-     Destructor_WithInFlightInitializer_ClosesSourceAndStatusOff) {
+TEST(FDv2DataSystemTest, Destructor_WithInFlightInitializer_ClosesSource) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
@@ -1261,12 +1241,9 @@ TEST(FDv2DataSystemTest,
     // ~FDv2DataSystem ran with the initializer's Future still unresolved.
 
     EXPECT_TRUE(initializer_closed);
-    EXPECT_EQ(status_manager.Status().State(),
-              DataSourceStatus::DataSourceState::kOff);
 }
 
-TEST(FDv2DataSystemTest,
-     Destructor_WithInFlightSynchronizer_ClosesSourceAndStatusOff) {
+TEST(FDv2DataSystemTest, Destructor_WithInFlightSynchronizer_ClosesSource) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
@@ -1292,6 +1269,4 @@ TEST(FDv2DataSystemTest,
     }
 
     EXPECT_TRUE(synchronizer_closed);
-    EXPECT_EQ(status_manager.Status().State(),
-              DataSourceStatus::DataSourceState::kOff);
 }

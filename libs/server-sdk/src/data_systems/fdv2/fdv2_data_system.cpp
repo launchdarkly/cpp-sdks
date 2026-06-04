@@ -68,7 +68,6 @@ void FDv2DataSystem::Close() {
     if (active_conditions_) {
         active_conditions_->Close();
     }
-    status_manager_->SetState(DataSourceStatus::DataSourceState::kOff);
 }
 
 std::shared_ptr<data_model::FlagDescriptor> FDv2DataSystem::GetFlag(
