@@ -38,12 +38,22 @@ class FDv2Builder {
         std::optional<std::string> base_url_override_;
     };
 
+    /**
+     * Constructs a builder with no initializers, no synchronizers, and no
+     * FDv1 fallback. Use Default() for the spec-recommended configuration.
+     */
     FDv2Builder();
 
     /**
-     * @brief Appends a polling initializer to the initializers list. The
-     * first call to this method on a default-constructed builder replaces
-     * the spec-default initializer list; subsequent calls append.
+     * @return A builder pre-populated with the spec-recommended initializers,
+     *     synchronizers, and FDv1 fallback. Equivalent to calling
+     *     Initializer(), Synchronizer(), and FDv1Fallback() with the
+     *     standard sources.
+     */
+    static FDv2Builder Default();
+
+    /**
+     * @brief Appends a polling initializer to the initializers list.
      * @param source Polling source configuration for the initializer.
      * @return Reference to this.
      */
@@ -52,9 +62,7 @@ class FDv2Builder {
     /**
      * @brief Appends a streaming synchronizer to the synchronizers list.
      * Order in the list determines preference: the first entry is the
-     * primary synchronizer, subsequent entries are fallbacks. The first
-     * call to a Synchronizer overload on a default-constructed builder
-     * replaces the spec-default synchronizer list; subsequent calls append.
+     * primary synchronizer, subsequent entries are fallbacks.
      * @param source Streaming source configuration.
      * @return Reference to this.
      */
@@ -62,8 +70,7 @@ class FDv2Builder {
 
     /**
      * @brief Appends a polling synchronizer to the synchronizers list. See
-     * Synchronizer(Streaming) for ordering and default-replacement
-     * semantics.
+     * Synchronizer(Streaming) for ordering semantics.
      * @param source Polling source configuration.
      * @return Reference to this.
      */
@@ -130,8 +137,6 @@ class FDv2Builder {
 
    private:
     built::FDv2Config config_;
-    bool initializers_explicit_;
-    bool synchronizers_explicit_;
 };
 
 }  // namespace launchdarkly::server_side::config::builders

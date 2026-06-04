@@ -45,33 +45,31 @@ built::FDv2Config::PollingConfig FDv2Builder::Polling::Build() const {
 }
 
 FDv2Builder::FDv2Builder()
-    : config_(Defaults::FDv2Config()),
-      initializers_explicit_(false),
-      synchronizers_explicit_(false) {}
+    : config_{{},
+              {},
+              std::nullopt,
+              std::chrono::minutes{2},
+              std::chrono::minutes{5}} {}
+
+FDv2Builder FDv2Builder::Default() {
+    return FDv2Builder()
+        .Initializer(Polling{})
+        .Synchronizer(Streaming{})
+        .Synchronizer(Polling{})
+        .FDv1Fallback(FDv1Streaming{});
+}
 
 FDv2Builder& FDv2Builder::Initializer(Polling source) {
-    if (!initializers_explicit_) {
-        config_.initializers.clear();
-        initializers_explicit_ = true;
-    }
     config_.initializers.push_back(source.Build());
     return *this;
 }
 
 FDv2Builder& FDv2Builder::Synchronizer(Streaming source) {
-    if (!synchronizers_explicit_) {
-        config_.synchronizers.clear();
-        synchronizers_explicit_ = true;
-    }
     config_.synchronizers.push_back(source.Build());
     return *this;
 }
 
 FDv2Builder& FDv2Builder::Synchronizer(Polling source) {
-    if (!synchronizers_explicit_) {
-        config_.synchronizers.clear();
-        synchronizers_explicit_ = true;
-    }
     config_.synchronizers.push_back(source.Build());
     return *this;
 }

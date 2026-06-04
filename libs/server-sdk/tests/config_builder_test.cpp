@@ -104,7 +104,7 @@ TEST_F(ConfigBuilderTest, CanSetPollingPayloadFilterKey) {
 
 TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
     ConfigBuilder builder("sdk-123");
-    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2());
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2::Default());
 
     auto cfg = builder.Build();
 
