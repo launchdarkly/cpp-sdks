@@ -391,8 +391,8 @@ TEST(FDv2ProtocolHandlerTest, ConsecutivePayloadsWithoutNewServerIntent) {
     EXPECT_EQ(cs1->changes[0].key, "first");
 
     // A subsequent payload arrives without an intervening server-intent
-    // (streaming incremental update). Java's state machine transitions to
-    // CHANGES after payload-transferred so this case continues to work.
+    // (streaming incremental update): the handler emits a kPartial
+    // changeset reusing the prior intent.
     handler.HandleEvent("put-object",
                         MakePutObject("flag", "second", kFlagJson));
     auto second = handler.HandleEvent("payload-transferred",
