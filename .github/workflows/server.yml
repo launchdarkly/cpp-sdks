@@ -36,6 +36,27 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  contract-tests-fdv2:
+    runs-on: ubuntu-22.04
+    env:
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
+      SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: server-tests
+          run_tests: false
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      - name: 'Run v3 SDK test harness'
+        run: |
+          curl -s https://raw.githubusercontent.com/launchdarkly/sdk-test-harness/v3.0.0-alpha.3/downloader/run.sh \
+            | VERSION=v3.0.0-alpha.3 \
+              PARAMS="-url http://localhost:$TEST_SERVICE_PORT -debug -stop-service-at-end -skip-from=$SUPPRESSION_FILE" \
+              sh
+
   contract-tests-curl:
     runs-on: ubuntu-22.04
     env:
