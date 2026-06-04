@@ -192,6 +192,10 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
         LD_LOG(logger_, LogLevel::kError) << kIdentity << ": " << msg;
         Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
             MakeError(ErrorKind::kInvalidData, 0, std::move(msg))}});
+        std::lock_guard lock(mutex_);
+        if (sse_client_) {
+            sse_client_->async_restart("FDv2 parse error");
+        }
         return;
     }
 
@@ -251,6 +255,10 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     << kIdentity << ": " << r.message;
                 Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
                     MakeError(ErrorKind::kInvalidData, 0, r.message)}});
+                std::lock_guard lock(mutex_);
+                if (sse_client_) {
+                    sse_client_->async_restart("FDv2 protocol error");
+                }
             } else {
                 static_assert(always_false_v<T>, "non-exhaustive visitor");
             }
