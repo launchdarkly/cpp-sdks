@@ -127,11 +127,12 @@ TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
         fdv2_config.synchronizers[1]));
 
     ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
-    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::FDv1StreamingConfig>(
         *fdv2_config.fdv1_fallback));
-    EXPECT_EQ(std::get<built::FDv2Config::StreamingConfig>(
+    EXPECT_EQ(std::get<built::FDv2Config::FDv1StreamingConfig>(
                   *fdv2_config.fdv1_fallback),
-              Defaults::FDv2StreamingConfig());
+              launchdarkly::config::shared::Defaults<
+                  launchdarkly::config::shared::ServerSDK>::StreamingConfig());
     EXPECT_EQ(fdv2_config.fallback_timeout, std::chrono::minutes{2});
     EXPECT_EQ(fdv2_config.recovery_timeout, std::chrono::minutes{5});
 }
@@ -140,7 +141,7 @@ TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
         builders::DataSystemBuilder::FDv2().FDv1Fallback(
-            builders::FDv2Builder::Polling().PollInterval(
+            builders::FDv2Builder::FDv1Polling().PollInterval(
                 std::chrono::seconds{45})));
 
     auto cfg = builder.Build();
@@ -148,12 +149,12 @@ TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
         std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
 
     ASSERT_TRUE(fdv2_config.fdv1_fallback.has_value());
-    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::PollingConfig>(
+    ASSERT_TRUE(std::holds_alternative<built::FDv2Config::FDv1PollingConfig>(
         *fdv2_config.fdv1_fallback));
-    EXPECT_EQ(
-        std::get<built::FDv2Config::PollingConfig>(*fdv2_config.fdv1_fallback)
-            .poll_interval,
-        std::chrono::seconds{45});
+    EXPECT_EQ(std::get<built::FDv2Config::FDv1PollingConfig>(
+                  *fdv2_config.fdv1_fallback)
+                  .poll_interval,
+              std::chrono::seconds{45});
 }
 
 TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {

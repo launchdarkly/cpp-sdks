@@ -69,7 +69,7 @@ class FDv1StreamingAdapterFactory final
         Logger logger,
         data_components::DataSourceStatusManager* status_manager,
         config::built::ServiceEndpoints endpoints,
-        config::built::FDv2Config::StreamingConfig streaming,
+        config::built::FDv2Config::FDv1StreamingConfig streaming,
         config::built::HttpProperties http_properties);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
@@ -82,7 +82,7 @@ class FDv1StreamingAdapterFactory final
     // Non-owning. Provided by the orchestrator; must outlive this factory.
     data_components::DataSourceStatusManager* const status_manager_;
     config::built::ServiceEndpoints const endpoints_;
-    config::built::FDv2Config::StreamingConfig const streaming_;
+    config::built::FDv2Config::FDv1StreamingConfig const streaming_;
     config::built::HttpProperties const http_properties_;
 };
 
@@ -98,7 +98,7 @@ class FDv1PollingAdapterFactory final
         Logger logger,
         data_components::DataSourceStatusManager* status_manager,
         config::built::ServiceEndpoints endpoints,
-        config::built::FDv2Config::PollingConfig polling,
+        config::built::FDv2Config::FDv1PollingConfig polling,
         config::built::HttpProperties http_properties);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
@@ -111,7 +111,7 @@ class FDv1PollingAdapterFactory final
     // Non-owning. Provided by the orchestrator; must outlive this factory.
     data_components::DataSourceStatusManager* const status_manager_;
     config::built::ServiceEndpoints const endpoints_;
-    config::built::FDv2Config::PollingConfig const polling_;
+    config::built::FDv2Config::FDv1PollingConfig const polling_;
     config::built::HttpProperties const http_properties_;
 };
 

@@ -6,6 +6,8 @@
 #include "polling_synchronizer.hpp"
 #include "streaming_synchronizer.hpp"
 
+#include <launchdarkly/config/shared/defaults.hpp>
+
 #include <utility>
 
 namespace launchdarkly::server_side::data_systems {
@@ -55,7 +57,7 @@ FDv1StreamingAdapterFactory::FDv1StreamingAdapterFactory(
     Logger logger,
     data_components::DataSourceStatusManager* status_manager,
     config::built::ServiceEndpoints endpoints,
-    config::built::FDv2Config::StreamingConfig streaming,
+    config::built::FDv2Config::FDv1StreamingConfig streaming,
     config::built::HttpProperties http_properties)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
@@ -77,7 +79,7 @@ FDv1PollingAdapterFactory::FDv1PollingAdapterFactory(
     Logger logger,
     data_components::DataSourceStatusManager* status_manager,
     config::built::ServiceEndpoints endpoints,
-    config::built::FDv2Config::PollingConfig polling,
+    config::built::FDv2Config::FDv1PollingConfig polling,
     config::built::HttpProperties http_properties)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),

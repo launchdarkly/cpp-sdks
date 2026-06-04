@@ -5,15 +5,38 @@
 #include <launchdarkly/server_side/config/built/data_system/fdv2_config.hpp>
 
 #include <chrono>
+#include <optional>
+#include <string>
 
 namespace launchdarkly::server_side::config::builders {
 
 class FDv2Builder {
    public:
-    using Streaming = launchdarkly::config::shared::builders::StreamingBuilder<
-        launchdarkly::config::shared::ServerSDK>;
-    using Polling = launchdarkly::config::shared::builders::PollingBuilder<
-        launchdarkly::config::shared::ServerSDK>;
+    class Streaming {
+       public:
+        Streaming& InitialReconnectDelay(std::chrono::milliseconds delay);
+        Streaming& Filter(std::string filter_key);
+        Streaming& BaseUrl(std::string base_url);
+        [[nodiscard]] built::FDv2Config::StreamingConfig Build() const;
+
+       private:
+        std::chrono::milliseconds initial_reconnect_delay_{1000};
+        std::optional<std::string> filter_key_;
+        std::optional<std::string> base_url_override_;
+    };
+
+    class Polling {
+       public:
+        Polling& PollInterval(std::chrono::seconds interval);
+        Polling& Filter(std::string filter_key);
+        Polling& BaseUrl(std::string base_url);
+        [[nodiscard]] built::FDv2Config::PollingConfig Build() const;
+
+       private:
+        std::chrono::seconds poll_interval_{30};
+        std::optional<std::string> filter_key_;
+        std::optional<std::string> base_url_override_;
+    };
 
     FDv2Builder();
 
@@ -46,26 +69,35 @@ class FDv2Builder {
      */
     FDv2Builder& Synchronizer(Polling source);
 
+    using FDv1Streaming =
+        launchdarkly::config::shared::builders::StreamingBuilder<
+            launchdarkly::config::shared::ServerSDK>;
+    using FDv1Polling = launchdarkly::config::shared::builders::PollingBuilder<
+        launchdarkly::config::shared::ServerSDK>;
+
     /**
      * @brief Configures the FDv1 streaming source used as a last-resort
      * fallback when the LaunchDarkly service signals (via the
-     * X-LD-FD-Fallback header) that the SDK should switch to FDv1.
-     * Enabled by default with standard streaming settings.
-     * @param source Streaming source configuration to use for the FDv1
-     *     fallback connection.
+     * X-LD-FD-Fallback header) that the SDK should switch to FDv1. The
+     * fallback reads its endpoint from the top-level ServiceEndpoints; to
+     * point the fallback at a custom URL, configure ServiceEndpoints
+     * accordingly.
+     * @param source FDv1 streaming source configuration.
      * @return Reference to this.
      */
-    FDv2Builder& FDv1Fallback(Streaming source);
+    FDv2Builder& FDv1Fallback(FDv1Streaming source);
 
     /**
      * @brief Configures the FDv1 polling source used as a last-resort
      * fallback when the LaunchDarkly service signals (via the
-     * X-LD-FD-Fallback header) that the SDK should switch to FDv1.
-     * @param source Polling source configuration to use for the FDv1
-     *     fallback connection.
+     * X-LD-FD-Fallback header) that the SDK should switch to FDv1. The
+     * fallback reads its endpoint from the top-level ServiceEndpoints; to
+     * point the fallback at a custom URL, configure ServiceEndpoints
+     * accordingly.
+     * @param source FDv1 polling source configuration.
      * @return Reference to this.
      */
-    FDv2Builder& FDv1Fallback(Polling source);
+    FDv2Builder& FDv1Fallback(FDv1Polling source);
 
     /**
      * @brief Disables the FDv1 fallback. After this call, an FDv1

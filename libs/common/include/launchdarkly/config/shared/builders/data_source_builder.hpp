@@ -70,22 +70,6 @@ class StreamingBuilder {
     }
 
     /**
-     * Overrides the streaming base URL for this specific source. When unset,
-     * the synchronizer uses the top-level ServiceEndpoints streaming URL.
-     * Intended for FDv2 configurations where individual synchronizers may
-     * target different endpoints.
-     *
-     * @param base_url The base URL to use for this source.
-     * @return Reference to this builder.
-     */
-    template <typename T = SDK>
-    std::enable_if_t<is_server_sdk<T>::value, StreamingBuilder&> BaseUrl(
-        std::string base_url) {
-        config_.base_url_override = std::move(base_url);
-        return *this;
-    }
-
-    /**
      * Build the streaming config. Used internal to the SDK.
      * @return The built config.
      */
@@ -132,22 +116,6 @@ class PollingBuilder {
     std::enable_if_t<is_server_sdk<T>::value, PollingBuilder&> Filter(
         std::string filter_key) {
         config_.filter_key = std::move(filter_key);
-        return *this;
-    }
-
-    /**
-     * Overrides the polling base URL for this specific source. When unset,
-     * the synchronizer uses the top-level ServiceEndpoints polling URL.
-     * Intended for FDv2 configurations where individual synchronizers may
-     * target different endpoints.
-     *
-     * @param base_url The base URL to use for this source.
-     * @return Reference to this builder.
-     */
-    template <typename T = SDK>
-    std::enable_if_t<is_server_sdk<T>::value, PollingBuilder&> BaseUrl(
-        std::string base_url) {
-        config_.base_url_override = std::move(base_url);
         return *this;
     }
 
