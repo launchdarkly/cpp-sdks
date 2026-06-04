@@ -163,7 +163,9 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleError(
     boost::json::value const& data) {
     auto result = boost::json::value_to<
         tl::expected<std::optional<FDv2Error>, JsonError>>(data);
-    Reset();
+    // Discard any partial-payload accumulation but keep state intact so
+    // the next put-object/payload-transferred cycle continues normally.
+    changes_.clear();
     if (!result) {
         return Error::JsonParseError(result.error(),
                                      "could not deserialize error event");

@@ -235,6 +235,29 @@ TEST(FDv2ProtocolHandlerTest,
     EXPECT_TRUE(cs->changes.empty());
 }
 
+TEST(FDv2ProtocolHandlerTest, ErrorMidPayloadDiscardsPartialAcceptsSubsequent) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "abandoned", kFlagJson));
+    handler.HandleEvent(
+        "error", boost::json::parse(R"({"reason":"something went wrong"})"));
+
+    // After the error, a fresh put + payload-transferred (without an
+    // intervening server-intent) emits a changeset containing only the
+    // post-error put.
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "fresh", kFlagJson));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
+
+    auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+    ASSERT_NE(cs, nullptr);
+    ASSERT_EQ(cs->changes.size(), 1u);
+    EXPECT_EQ(cs->changes[0].key, "fresh");
+}
+
 TEST(FDv2ProtocolHandlerTest, ErrorEventWithIdSetsServerId) {
     FDv2ProtocolHandler handler;
 
