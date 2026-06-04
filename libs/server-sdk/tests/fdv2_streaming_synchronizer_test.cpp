@@ -574,6 +574,26 @@ TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
               std::string::npos);
 }
 
+TEST(FDv2StreamingSynchronizerTest, UnknownEventWithGarbageBodyIsIgnored) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    auto mock_client = std::make_shared<MockSseClient>();
+    FDv2StreamingSynchronizerTestPeer::SetSseClient(synchronizer, mock_client);
+
+    sse::Event unknown_with_garbage("whatever", "not json");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
+                                               unknown_with_garbage);
+
+    EXPECT_EQ(mock_client->restart_count_, 0);
+}
+
 TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;

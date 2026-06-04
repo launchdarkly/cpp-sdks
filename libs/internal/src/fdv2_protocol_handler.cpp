@@ -14,6 +14,12 @@ static char const* const kGoodbye = "goodbye";
 
 using Error = FDv2ProtocolHandler::Error;
 
+bool FDv2ProtocolHandler::IsKnownEvent(std::string_view event_type) {
+    return event_type == kServerIntent || event_type == kPutObject ||
+           event_type == kDeleteObject || event_type == kPayloadTransferred ||
+           event_type == kError || event_type == kGoodbye;
+}
+
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     std::string_view event_type,
     boost::json::value const& data) {

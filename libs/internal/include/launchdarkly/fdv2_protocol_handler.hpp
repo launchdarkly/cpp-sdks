@@ -95,6 +95,13 @@ class FDv2ProtocolHandler {
      */
     void Reset();
 
+    /**
+     * @return true if event_type is one that the protocol handler recognizes
+     * and may dispatch on. Events outside this set are spec-defined as
+     * "unrecognized data that can be safely ignored".
+     */
+    static bool IsKnownEvent(std::string_view event_type);
+
     FDv2ProtocolHandler() = default;
 
    private:
