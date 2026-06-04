@@ -19,7 +19,8 @@ network::HttpRequest MakeFDv2PollRequest(
     config::built::ServiceEndpoints const& endpoints,
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
-    std::optional<std::string> const& filter_key);
+    std::optional<std::string> const& filter_key,
+    Logger const& logger);
 
 // Parse an HTTP response from the FDv2 polling endpoint through the protocol
 // handler and return the appropriate result. identity is used in log messages

@@ -44,7 +44,8 @@ network::HttpRequest MakeFDv2PollRequest(
     config::built::ServiceEndpoints const& endpoints,
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
-    std::optional<std::string> const& filter_key) {
+    std::optional<std::string> const& filter_key,
+    Logger const& logger) {
     config::builders::HttpPropertiesBuilder const builder(http_properties);
 
     auto parsed = boost::urls::parse_uri(endpoints.PollingBaseUrl());
@@ -65,8 +66,14 @@ network::HttpRequest MakeFDv2PollRequest(
     if (selector.value) {
         u.params().append({"basis", selector.value->state});
     }
-    if (filter_key && detail::ValidateFilterKey(*filter_key)) {
-        u.params().append({"filter", *filter_key});
+    if (filter_key) {
+        if (detail::ValidateFilterKey(*filter_key)) {
+            u.params().append({"filter", *filter_key});
+        } else {
+            LD_LOG(logger, LogLevel::kError)
+                << "data source config: provided filter is invalid, will "
+                   "request full environment instead";
+        }
     }
 
     return {std::string(u.buffer()), network::HttpMethod::kGet, builder.Build(),

@@ -172,8 +172,14 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
     if (latest_selector_.value) {
         u.params().set("basis", latest_selector_.value->state);
     }
-    if (filter_key_ && detail::ValidateFilterKey(*filter_key_)) {
-        u.params().set("filter", *filter_key_);
+    if (filter_key_) {
+        if (detail::ValidateFilterKey(*filter_key_)) {
+            u.params().set("filter", *filter_key_);
+        } else {
+            LD_LOG(logger_, LogLevel::kError)
+                << "data source config: provided filter is invalid, will "
+                   "request full environment instead";
+        }
     }
     req->target(u.encoded_target());
 }

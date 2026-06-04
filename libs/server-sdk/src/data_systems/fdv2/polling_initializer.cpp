@@ -20,7 +20,8 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     : request_(MakeFDv2PollRequest(endpoints,
                                    http_properties,
                                    std::move(selector),
-                                   std::move(filter_key))),
+                                   std::move(filter_key),
+                                   logger)),
       requester_(executor, http_properties.Tls()),
       state_(std::make_shared<State>(logger)) {}
 
