@@ -13,7 +13,8 @@ using namespace launchdarkly::server_side;
 namespace {
 
 config::builders::DataSystemBuilder::FDv2 BuildFDv2(
-    ConfigDataSystemParams const& cfg) {
+    ConfigDataSystemParams const& cfg,
+    config::builders::EndpointsBuilder* endpoints) {
     auto fdv2 = config::builders::DataSystemBuilder::FDv2();
 
     if (cfg.synchronizers) {
@@ -65,14 +66,45 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
         }
     }
 
+    using FDv2Builder = config::builders::DataSystemBuilder::FDv2;
     if (cfg.fdv1Fallback) {
-        auto p = decltype(fdv2)::Polling();
         if (cfg.fdv1Fallback->baseUri) {
-            p.BaseUrl(*cfg.fdv1Fallback->baseUri);
+            endpoints->PollingBaseUrl(*cfg.fdv1Fallback->baseUri);
         }
+        FDv2Builder::FDv1Polling p;
         if (cfg.fdv1Fallback->pollIntervalMs) {
             p.PollInterval(std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::milliseconds(*cfg.fdv1Fallback->pollIntervalMs)));
+        }
+        fdv2.FDv1Fallback(std::move(p));
+    } else if (cfg.synchronizers && !cfg.synchronizers->empty()) {
+        // Derive an FDv1 fallback from the synchronizers list: prefer the
+        // first polling sync, otherwise reuse the first synchronizer's
+        // baseUri. The fallback is always polling. The fallback reads its
+        // URL from the global ServiceEndpoints, so set the polling endpoint
+        // to the selected baseUri.
+        ConfigDataSynchronizerParams const* selected = nullptr;
+        for (auto const& sync : *cfg.synchronizers) {
+            if (sync.polling) {
+                selected = &sync;
+                break;
+            }
+        }
+        if (!selected) {
+            selected = &cfg.synchronizers->front();
+        }
+        FDv2Builder::FDv1Polling p;
+        if (selected->polling) {
+            if (selected->polling->baseUri) {
+                endpoints->PollingBaseUrl(*selected->polling->baseUri);
+            }
+            if (selected->polling->pollIntervalMs) {
+                p.PollInterval(std::chrono::duration_cast<std::chrono::seconds>(
+                    std::chrono::milliseconds(
+                        *selected->polling->pollIntervalMs)));
+            }
+        } else if (selected->streaming && selected->streaming->baseUri) {
+            endpoints->PollingBaseUrl(*selected->streaming->baseUri);
         }
         fdv2.FDv1Fallback(std::move(p));
     }
@@ -163,7 +195,8 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
     }
 
     if (in.dataSystem) {
-        config_builder.DataSystem().Method(BuildFDv2(*in.dataSystem));
+        config_builder.DataSystem().Method(
+            BuildFDv2(*in.dataSystem, &endpoints));
     } else {
         config_builder.DataSystem().Method(BuildBackgroundSync(in, &endpoints));
     }
