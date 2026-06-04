@@ -1,4 +1,5 @@
 #include "streaming_synchronizer.hpp"
+#include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/async/timer.hpp>
@@ -167,7 +168,7 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
     if (latest_selector_.value) {
         u.params().set("basis", latest_selector_.value->state);
     }
-    if (filter_key_) {
+    if (filter_key_ && detail::ValidateFilterKey(*filter_key_)) {
         u.params().set("filter", *filter_key_);
     }
     req->target(u.encoded_target());

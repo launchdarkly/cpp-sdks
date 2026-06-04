@@ -294,6 +294,29 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithFilterKeyAppendsFilter) {
     EXPECT_EQ(req.target(), "/sdk/stream?filter=my-filter");
 }
 
+TEST(FDv2StreamingSynchronizerTest, OnConnectInvalidFilterKeyIsDropped) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
+        std::string("has spaces"), 1s);
+
+    boost::urls::url base =
+        boost::urls::parse_uri("https://stream.example.com").value();
+    base.segments().push_back("sdk");
+    base.segments().push_back("stream");
+    FDv2StreamingSynchronizerTestPeer::SetBaseUrl(synchronizer, base);
+
+    boost::beast::http::request<boost::beast::http::string_body> req;
+
+    FDv2StreamingSynchronizerTestPeer::OnConnect(synchronizer, &req);
+
+    // A filter key that fails validation is silently dropped from the URL.
+    EXPECT_EQ(req.target(), "/sdk/stream");
+}
+
 TEST(FDv2StreamingSynchronizerTest, OnConnectReconnectUsesLatestSelector) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
