@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
         srv.add_capability("track-hooks");
         srv.add_capability("wrapper");
         srv.add_capability("instance-id");
+        srv.add_capability("fdv1-fallback");
 
         net::signal_set signals{ioc, SIGINT, SIGTERM};
 
