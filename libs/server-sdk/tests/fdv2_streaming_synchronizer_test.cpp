@@ -289,9 +289,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectInvalidFilterKeyIsDropped) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
-        std::string("has spaces"), 1s);
+        runner.context().get_executor(), logger, "https://stream.example.com",
+        MakeHttpProperties(), std::string("has spaces"), 1s);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -562,9 +561,8 @@ TEST(FDv2StreamingSynchronizerTest, UnknownEventWithGarbageBodyIsIgnored) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -614,9 +612,8 @@ TEST(FDv2StreamingSynchronizerTest,
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
