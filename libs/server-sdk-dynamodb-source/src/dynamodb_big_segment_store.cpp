@@ -64,7 +64,7 @@ DynamoDBBigSegmentStore::DynamoDBBigSegmentStore(
 DynamoDBBigSegmentStore::~DynamoDBBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
-    std::string const& context_hash) const {
+    std::string const& context_hash) const noexcept {
     Aws::DynamoDB::Model::GetItemRequest request;
     request.SetTableName(table_name_);
     request.SetConsistentRead(true);
@@ -114,7 +114,7 @@ IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
 }
 
 IBigSegmentStore::GetMetadataResult DynamoDBBigSegmentStore::GetMetadata()
-    const {
+    const noexcept {
     Aws::DynamoDB::Model::GetItemRequest request;
     request.SetTableName(table_name_);
     request.SetConsistentRead(true);

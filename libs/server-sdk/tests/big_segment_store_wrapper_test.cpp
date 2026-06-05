@@ -27,7 +27,8 @@ namespace {
 // times GetMetadata was called and lets a test block until a target count.
 class FakeBigSegmentStore : public integrations::IBigSegmentStore {
    public:
-    GetMembershipResult GetMembership(std::string const&) const override {
+    GetMembershipResult GetMembership(
+        std::string const&) const noexcept override {
         std::unique_lock lock(mutex_);
         ++membership_calls_;
         cv_.notify_all();
@@ -37,7 +38,7 @@ class FakeBigSegmentStore : public integrations::IBigSegmentStore {
         return membership_;
     }
 
-    GetMetadataResult GetMetadata() const override {
+    GetMetadataResult GetMetadata() const noexcept override {
         std::lock_guard lock(mutex_);
         ++metadata_calls_;
         cv_.notify_all();
