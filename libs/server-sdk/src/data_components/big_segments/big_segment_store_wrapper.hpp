@@ -93,7 +93,8 @@ class BigSegmentStoreWrapper
 
     /**
      * @brief Registers a listener invoked whenever the store status changes
-     * (not on every poll). The returned connection unregisters on destruction.
+     * (not on every poll). Call Disconnect() on the returned connection to
+     * stop receiving events.
      */
     std::unique_ptr<IConnection> OnStatusChange(
         std::function<void(BigSegmentStoreStatus)> handler);
