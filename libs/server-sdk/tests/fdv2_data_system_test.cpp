@@ -236,7 +236,6 @@ FDv2SourceResult MakeFullChangeSetResult(std::vector<ItemChange> items,
             std::move(items),
             std::move(selector),
         },
-        false,
     }};
 }
 
@@ -339,7 +338,6 @@ TEST(FDv2DataSystemTest, InitializerInterrupted_AdvancesToNextInitializer) {
             FDv2SourceResult::ErrorInfo{
                 FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
                 "boom", std::chrono::system_clock::now()},
-            false,
         }});
     auto first_factory =
         std::make_unique<OneShotInitializerFactory>(std::move(first));
@@ -413,7 +411,6 @@ TEST(FDv2DataSystemTest,
                 },
                 MakeSelector(1, "state-1"),
             },
-            false,
         }});
     auto second_factory =
         std::make_unique<OneShotInitializerFactory>(std::move(second));
@@ -487,7 +484,6 @@ TEST(FDv2DataSystemTest, InitializerOnly_AllFail_TransitionsToOff) {
             FDv2SourceResult::ErrorInfo{
                 FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
                 "fail", std::chrono::system_clock::now()},
-            false,
         }});
 
     std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
@@ -561,7 +557,7 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_StaysOnSameSynchronizer) {
     // (reconnecting); the orchestrator must NOT rotate.
     auto first =
         std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{
-            FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt, false}}});
+            FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt}}});
     auto first_factory =
         std::make_unique<OneShotSynchronizerFactory>(std::move(first));
     auto* first_factory_ptr = first_factory.get();
@@ -604,7 +600,6 @@ TEST(FDv2DataSystemTest, SynchronizerInterrupted_RetriesSameSynchronizer) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError, 0,
             "transient", std::chrono::system_clock::now()},
-        false,
     }});
     results.push_back(
         MakeFullChangeSetResult(ChangeSetData{}, MakeSelector(1, "state-1")));
@@ -654,7 +649,6 @@ TEST(FDv2DataSystemTest, SynchronizerNext_ReceivesUpdatedSelector) {
             ChangeSetData{},
             MakeSelector(2, "state-2"),
         },
-        false,
     }});
     auto sync = std::make_unique<MockSynchronizer>(
         std::move(results), /*closed_flag=*/nullptr, &next_calls);
@@ -711,10 +705,9 @@ TEST(FDv2DataSystemTest, SynchronizerGoodbye_PreservesSelectorOnNextCall) {
             ChangeSetData{},
             MakeSelector(2, "state-2"),
         },
-        false,
     }});
     results.push_back(
-        FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt, false}});
+        FDv2SourceResult{FDv2SourceResult::Goodbye{std::nullopt}});
     auto sync = std::make_unique<MockSynchronizer>(
         std::move(results), /*closed_flag=*/nullptr, &next_calls);
 
@@ -762,7 +755,6 @@ TEST(FDv2DataSystemTest,
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
             "unauthorized", std::chrono::system_clock::now()},
-        false,
     }});
     auto first = std::make_unique<MockSynchronizer>(std::move(first_results));
     auto first_factory =
@@ -811,7 +803,6 @@ TEST(FDv2DataSystemTest, SynchronizerCycledExhaustion_TransitionsToOff) {
                 FDv2SourceResult::ErrorInfo{
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
                     "unauthorized", std::chrono::system_clock::now()},
-                false,
             }}});
 
     std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
@@ -850,7 +841,6 @@ TEST(FDv2DataSystemTest, FallbackConditionFires_AdvancesToNextSynchronizer) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
                     /*status_code=*/0, "boom",
                     std::chrono::system_clock::now()},
-                false,
             }},
         },
         /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
@@ -901,7 +891,6 @@ TEST(FDv2DataSystemTest, FallbackConditionOnLastSynchronizerWrapsToPrimary) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
                     /*status_code=*/0, "boom",
                     std::chrono::system_clock::now()},
-                false,
             }},
         },
         /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
@@ -919,7 +908,6 @@ TEST(FDv2DataSystemTest, FallbackConditionOnLastSynchronizerWrapsToPrimary) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
                     /*status_code=*/0, "boom",
                     std::chrono::system_clock::now()},
-                false,
             }},
         },
         /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
@@ -965,7 +953,6 @@ TEST(FDv2DataSystemTest, RecoveryConditionResetsToFirstAvailable) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
                     /*status_code=*/0, "boom",
                     std::chrono::system_clock::now()},
-                false,
             }},
         },
         /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
@@ -983,7 +970,6 @@ TEST(FDv2DataSystemTest, RecoveryConditionResetsToFirstAvailable) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
                     /*status_code=*/0, "boom",
                     std::chrono::system_clock::now()},
-                false,
             }},
         },
         /*closed_flag=*/nullptr, /*next_calls=*/nullptr,
@@ -1031,7 +1017,6 @@ TEST(FDv2DataSystemTest, TerminalErrorsOnEverySynchronizerExhaustToOff) {
                 FDv2SourceResult::ErrorInfo{
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
                     "unauthorized", std::chrono::system_clock::now()},
-                false,
             }}});
     auto primary_factory =
         std::make_unique<OneShotSynchronizerFactory>(std::move(primary_sync));
@@ -1042,7 +1027,6 @@ TEST(FDv2DataSystemTest, TerminalErrorsOnEverySynchronizerExhaustToOff) {
                 FDv2SourceResult::ErrorInfo{
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse, 401,
                     "unauthorized", std::chrono::system_clock::now()},
-                false,
             }}});
     auto secondary_factory =
         std::make_unique<OneShotSynchronizerFactory>(std::move(secondary_sync));
@@ -1080,7 +1064,6 @@ TEST(FDv2DataSystemTest, SingleSynchronizerHasNoFallbackArmed) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
     auto sync = std::make_unique<MockSynchronizer>(
         std::move(results), /*closed_flag=*/nullptr, /*next_calls=*/nullptr,

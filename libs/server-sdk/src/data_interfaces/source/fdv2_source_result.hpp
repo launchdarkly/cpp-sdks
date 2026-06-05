@@ -22,9 +22,6 @@ struct FDv2SourceResult {
      */
     struct ChangeSet {
         data_model::ChangeSet<ChangeSetData> change_set;
-        /** If true, the server signaled that the client should fall back to
-         * FDv1. */
-        bool fdv1_fallback;
     };
 
     /**
@@ -32,7 +29,6 @@ struct FDv2SourceResult {
      */
     struct Interrupted {
         ErrorInfo error;
-        bool fdv1_fallback;
     };
 
     /**
@@ -40,7 +36,6 @@ struct FDv2SourceResult {
      */
     struct TerminalError {
         ErrorInfo error;
-        bool fdv1_fallback;
     };
 
     /**
@@ -53,13 +48,18 @@ struct FDv2SourceResult {
      */
     struct Goodbye {
         std::optional<std::string> reason;
-        bool fdv1_fallback;
     };
 
     using Value =
         std::variant<ChangeSet, Interrupted, TerminalError, Shutdown, Goodbye>;
 
     Value value;
+
+    /**
+     * If true, the server signaled (via the X-LD-FD-Fallback response header)
+     * that the client should fall back to FDv1.
+     */
+    bool fdv1_fallback = false;
 };
 
 }  // namespace launchdarkly::server_side::data_interfaces

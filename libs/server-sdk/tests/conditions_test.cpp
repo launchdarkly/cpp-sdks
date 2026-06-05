@@ -54,7 +54,6 @@ TEST(FallbackConditionTest, InterruptedArmsTimerWhichFiresAfterTimeout) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
 
     auto result = future.WaitForResult(1s);
@@ -74,7 +73,6 @@ TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
     condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
         launchdarkly::data_model::ChangeSet<ChangeSetData>{
@@ -82,7 +80,6 @@ TEST(FallbackConditionTest, ChangeSetCancelsActiveTimer) {
             {},
             launchdarkly::data_model::Selector{},
         },
-        false,
     }});
 
     // Wait well past the 100ms threshold; future should remain unresolved.
@@ -99,7 +96,6 @@ TEST(FallbackConditionTest, CloseCancelsActiveTimerAndResolvesWithCancelled) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
     condition.Close();
 
@@ -133,7 +129,6 @@ TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
     condition.Inform(FDv2SourceResult{FDv2SourceResult::ChangeSet{
         launchdarkly::data_model::ChangeSet<ChangeSetData>{
@@ -141,7 +136,6 @@ TEST(RecoveryConditionTest, InformDoesNotAffectTimer) {
             {},
             launchdarkly::data_model::Selector{},
         },
-        false,
     }});
 
     auto result = future.WaitForResult(1s);
@@ -206,7 +200,6 @@ TEST(ConditionsTest, InformForwardsToAllUnderlyingConditions) {
         FDv2SourceResult::ErrorInfo{
             FDv2SourceResult::ErrorInfo::ErrorKind::kNetworkError,
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
-        false,
     }});
 
     auto result = conditions.GetFuture().WaitForResult(1s);
