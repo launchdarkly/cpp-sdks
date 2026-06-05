@@ -1,4 +1,5 @@
 #include "streaming_synchronizer.hpp"
+#include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/async/timer.hpp>
@@ -74,10 +75,14 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
 
     boost::urls::url u = parsed.value();
 
-    // Safer way of appending /sdk/stream than string concatenation: avoids
-    // double slashes if the base URL has a trailing slash.
-    u.segments().push_back("sdk");
-    u.segments().push_back("stream");
+    // A trailing '/' on the base URL appears as an empty final segment;
+    // remove it so subsequent push_backs don't produce a double slash.
+    auto segs = u.segments();
+    if (!segs.empty() && segs.back().empty()) {
+        segs.pop_back();
+    }
+    segs.push_back("sdk");
+    segs.push_back("stream");
 
     // basis and filter are not added here — they are appended per-connect by
     // the on_connect hook (OnConnect), so that each (re)connection uses the
@@ -168,7 +173,13 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
         u.params().set("basis", latest_selector_.value->state);
     }
     if (filter_key_) {
-        u.params().set("filter", *filter_key_);
+        if (detail::ValidateFilterKey(*filter_key_)) {
+            u.params().set("filter", *filter_key_);
+        } else {
+            LD_LOG(logger_, LogLevel::kError)
+                << "data source config: provided filter is invalid, will "
+                   "request full environment instead";
+        }
     }
     req->target(u.encoded_target());
 }
@@ -183,6 +194,10 @@ void FDv2StreamingSynchronizer::State::OnResponse(
 }
 
 void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
+    if (!FDv2ProtocolHandler::IsKnownEvent(event.type())) {
+        return;
+    }
+
     boost::system::error_code ec;
     auto data = boost::json::parse(event.data(), ec);
     if (ec) {
@@ -191,6 +206,10 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
         LD_LOG(logger_, LogLevel::kError) << kIdentity << ": " << msg;
         Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
             MakeError(ErrorKind::kInvalidData, 0, std::move(msg))}});
+        std::lock_guard lock(mutex_);
+        if (sse_client_) {
+            sse_client_->async_restart("FDv2 parse error");
+        }
         return;
     }
 
@@ -250,6 +269,10 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     << kIdentity << ": " << r.message;
                 Notify(FDv2SourceResult{FDv2SourceResult::Interrupted{
                     MakeError(ErrorKind::kInvalidData, 0, r.message)}});
+                std::lock_guard lock(mutex_);
+                if (sse_client_) {
+                    sse_client_->async_restart("FDv2 protocol error");
+                }
             } else {
                 static_assert(always_false_v<T>, "non-exhaustive visitor");
             }

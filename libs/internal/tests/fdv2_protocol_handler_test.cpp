@@ -235,6 +235,29 @@ TEST(FDv2ProtocolHandlerTest,
     EXPECT_TRUE(cs->changes.empty());
 }
 
+TEST(FDv2ProtocolHandlerTest, ErrorMidPayloadDiscardsPartialAcceptsSubsequent) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "abandoned", kFlagJson));
+    handler.HandleEvent(
+        "error", boost::json::parse(R"({"reason":"something went wrong"})"));
+
+    // After the error, a fresh put + payload-transferred (without an
+    // intervening server-intent) emits a changeset containing only the
+    // post-error put.
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "fresh", kFlagJson));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s", 1));
+
+    auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+    ASSERT_NE(cs, nullptr);
+    ASSERT_EQ(cs->changes.size(), 1u);
+    EXPECT_EQ(cs->changes[0].key, "fresh");
+}
+
 TEST(FDv2ProtocolHandlerTest, ErrorEventWithIdSetsServerId) {
     FDv2ProtocolHandler handler;
 
@@ -352,4 +375,31 @@ TEST(FDv2ProtocolHandlerTest, PayloadTransferredWithoutServerIntentIsError) {
     auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
     ASSERT_NE(err, nullptr);
     EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kProtocolError);
+}
+
+TEST(FDv2ProtocolHandlerTest, ConsecutivePayloadsWithoutNewServerIntent) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("xfer-full"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "first", kFlagJson));
+    auto first = handler.HandleEvent("payload-transferred",
+                                     MakePayloadTransferred("s1", 1));
+    auto* cs1 = std::get_if<data_model::FDv2ChangeSet>(&first);
+    ASSERT_NE(cs1, nullptr);
+    ASSERT_EQ(cs1->changes.size(), 1u);
+    EXPECT_EQ(cs1->changes[0].key, "first");
+
+    // A subsequent payload arrives without an intervening server-intent
+    // (streaming incremental update): the handler emits a kPartial
+    // changeset reusing the prior intent.
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "second", kFlagJson));
+    auto second = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s2", 2));
+    auto* cs2 = std::get_if<data_model::FDv2ChangeSet>(&second);
+    ASSERT_NE(cs2, nullptr);
+    ASSERT_EQ(cs2->changes.size(), 1u);
+    EXPECT_EQ(cs2->changes[0].key, "second");
+    EXPECT_EQ(cs2->type, data_model::ChangeSetType::kPartial);
 }

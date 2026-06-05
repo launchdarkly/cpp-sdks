@@ -14,8 +14,11 @@ namespace launchdarkly {
 /**
  * Protocol state machine for the FDv2 wire format.
  *
- * Accumulates put-object and delete-object events between a server-intent
- * and payload-transferred event, then emits a complete FDv2ChangeSet.
+ * A server-intent opens a transfer cycle: put-object and delete-object
+ * events accumulate until a payload-transferred event, which emits an
+ * FDv2ChangeSet. The handler then remains active — subsequent put/delete
+ * + payload-transferred cycles emit kPartial changesets reusing the prior
+ * intent, until the server sends a new server-intent, error, or goodbye.
  *
  * Shared between the polling and streaming synchronizers.
  */
@@ -94,6 +97,13 @@ class FDv2ProtocolHandler {
      * Reset accumulated state. Call on reconnect before processing new events.
      */
     void Reset();
+
+    /**
+     * @return true if event_type is one that the protocol handler recognizes
+     * and may dispatch on. Events outside this set are spec-defined as
+     * "unrecognized data that can be safely ignored".
+     */
+    static bool IsKnownEvent(std::string_view event_type);
 
     FDv2ProtocolHandler() = default;
 

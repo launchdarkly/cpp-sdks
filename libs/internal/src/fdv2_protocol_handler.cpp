@@ -14,6 +14,12 @@ static char const* const kGoodbye = "goodbye";
 
 using Error = FDv2ProtocolHandler::Error;
 
+bool FDv2ProtocolHandler::IsKnownEvent(std::string_view event_type) {
+    return event_type == kServerIntent || event_type == kPutObject ||
+           event_type == kDeleteObject || event_type == kPayloadTransferred ||
+           event_type == kError || event_type == kGoodbye;
+}
+
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleEvent(
     std::string_view event_type,
     boost::json::value const& data) {
@@ -78,9 +84,6 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
     boost::json::value const& data) {
-    if (state_ == State::kInactive) {
-        return std::monostate{};
-    }
     auto result = boost::json::value_to<
         tl::expected<std::optional<PutObject>, JsonError>>(data);
     if (!result) {
@@ -101,9 +104,6 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePutObject(
 
 FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleDeleteObject(
     boost::json::value const& data) {
-    if (state_ == State::kInactive) {
-        return std::monostate{};
-    }
     auto result = boost::json::value_to<
         tl::expected<std::optional<DeleteObject>, JsonError>>(data);
     if (!result) {
@@ -152,7 +152,10 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandlePayloadTransferred(
         type, std::move(changes_),
         data_model::Selector{data_model::Selector::State{transferred.version,
                                                          transferred.state}}};
-    Reset();
+    // Transition to kPartial so subsequent put-object/payload-transferred
+    // cycles work without requiring a new server-intent.
+    changes_.clear();
+    state_ = State::kPartial;
     return changeset;
 }
 
@@ -160,7 +163,9 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleError(
     boost::json::value const& data) {
     auto result = boost::json::value_to<
         tl::expected<std::optional<FDv2Error>, JsonError>>(data);
-    Reset();
+    // Discard any partial-payload accumulation but keep state intact so
+    // the next put-object/payload-transferred cycle continues normally.
+    changes_.clear();
     if (!result) {
         return Error::JsonParseError(result.error(),
                                      "could not deserialize error event");

@@ -34,7 +34,7 @@ FDv2PollingSynchronizer::State::State(
 async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
     data_model::Selector const& selector) const {
     auto request = MakeFDv2PollRequest(endpoints_, http_properties_, selector,
-                                       filter_key_);
+                                       filter_key_, logger_);
 
     // Promise must be in a shared_ptr because Requester requires callbacks
     // to be copy-constructible (stored in std::function).

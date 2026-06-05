@@ -1,4 +1,5 @@
 #include "fdv2_polling_impl.hpp"
+#include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
 #include "fdv2_changeset_translation.hpp"
 
 #include <launchdarkly/network/http_error_messages.hpp>
@@ -11,7 +12,6 @@
 
 namespace launchdarkly::server_side::data_systems {
 
-static char const* const kFDv2PollPath = "/sdk/poll";
 static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
 
 static char const* const kErrorParsingBody =
@@ -44,7 +44,8 @@ network::HttpRequest MakeFDv2PollRequest(
     config::built::ServiceEndpoints const& endpoints,
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
-    std::optional<std::string> const& filter_key) {
+    std::optional<std::string> const& filter_key,
+    Logger const& logger) {
     config::builders::HttpPropertiesBuilder const builder(http_properties);
 
     auto parsed = boost::urls::parse_uri(endpoints.PollingBaseUrl());
@@ -54,12 +55,25 @@ network::HttpRequest MakeFDv2PollRequest(
     }
 
     boost::urls::url u = parsed.value();
-    u.set_path(u.path() + kFDv2PollPath);
+    // A trailing '/' on the base URL appears as an empty final segment;
+    // remove it so subsequent push_backs don't produce a double slash.
+    auto segs = u.segments();
+    if (!segs.empty() && segs.back().empty()) {
+        segs.pop_back();
+    }
+    segs.push_back("sdk");
+    segs.push_back("poll");
     if (selector.value) {
         u.params().append({"basis", selector.value->state});
     }
     if (filter_key) {
-        u.params().append({"filter", *filter_key});
+        if (detail::ValidateFilterKey(*filter_key)) {
+            u.params().append({"filter", *filter_key});
+        } else {
+            LD_LOG(logger, LogLevel::kError)
+                << "data source config: provided filter is invalid, will "
+                   "request full environment instead";
+        }
     }
 
     return {std::string(u.buffer()), network::HttpMethod::kGet, builder.Build(),

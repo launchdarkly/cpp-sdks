@@ -294,6 +294,29 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithFilterKeyAppendsFilter) {
     EXPECT_EQ(req.target(), "/sdk/stream?filter=my-filter");
 }
 
+TEST(FDv2StreamingSynchronizerTest, OnConnectInvalidFilterKeyIsDropped) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("https://stream.example.com"), MakeHttpProperties(),
+        std::string("has spaces"), 1s);
+
+    boost::urls::url base =
+        boost::urls::parse_uri("https://stream.example.com").value();
+    base.segments().push_back("sdk");
+    base.segments().push_back("stream");
+    FDv2StreamingSynchronizerTestPeer::SetBaseUrl(synchronizer, base);
+
+    boost::beast::http::request<boost::beast::http::string_body> req;
+
+    FDv2StreamingSynchronizerTestPeer::OnConnect(synchronizer, &req);
+
+    // A filter key that fails validation is silently dropped from the URL.
+    EXPECT_EQ(req.target(), "/sdk/stream");
+}
+
 TEST(FDv2StreamingSynchronizerTest, OnConnectReconnectUsesLatestSelector) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
@@ -551,6 +574,26 @@ TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
               std::string::npos);
 }
 
+TEST(FDv2StreamingSynchronizerTest, UnknownEventWithGarbageBodyIsIgnored) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    auto mock_client = std::make_shared<MockSseClient>();
+    FDv2StreamingSynchronizerTestPeer::SetSseClient(synchronizer, mock_client);
+
+    sse::Event unknown_with_garbage("whatever", "not json");
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer,
+                                               unknown_with_garbage);
+
+    EXPECT_EQ(mock_client->restart_count_, 0);
+}
+
 TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
     auto logger = MakeNullLogger();
     IoContextRunner runner;
@@ -561,6 +604,9 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
         1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
+    auto mock_client = std::make_shared<MockSseClient>();
+    FDv2StreamingSynchronizerTestPeer::SetSseClient(synchronizer, mock_client);
+
     sse::Event bad_event("server-intent", "this is not json");
 
     // Act: deliver an event whose data field cannot be parsed as JSON.
@@ -569,13 +615,43 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
     auto result = future.WaitForResult(2s);
 
     // Assert: the synchronizer reports Interrupted{kInvalidData} so the
-    // orchestrator knows the stream produced unparseable bytes.
+    // orchestrator knows the stream produced unparseable bytes, and drives
+    // the SSE client to restart so the next connection starts clean.
     ASSERT_TRUE(result.has_value());
     auto* interrupted =
         std::get_if<FDv2SourceResult::Interrupted>(&result->value);
     ASSERT_NE(interrupted, nullptr);
     EXPECT_EQ(interrupted->error.Kind(),
               FDv2SourceResult::ErrorInfo::ErrorKind::kInvalidData);
+    EXPECT_EQ(mock_client->restart_count_, 1);
+}
+
+TEST(FDv2StreamingSynchronizerTest,
+     SchemaViolationServerIntentTriggersRestart) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    auto mock_client = std::make_shared<MockSseClient>();
+    FDv2StreamingSynchronizerTestPeer::SetSseClient(synchronizer, mock_client);
+
+    // Well-formed JSON, but the shape doesn't match a server-intent payload.
+    sse::Event bad_event("server-intent",
+                         R"({"data":{"flags":true,"segments":{}}})");
+
+    FDv2StreamingSynchronizerTestPeer::OnEvent(synchronizer, bad_event);
+    auto future = synchronizer.Next(data_model::Selector{});
+    auto result = future.WaitForResult(2s);
+
+    ASSERT_TRUE(result.has_value());
+    ASSERT_NE(std::get_if<FDv2SourceResult::Interrupted>(&result->value),
+              nullptr);
+    EXPECT_EQ(mock_client->restart_count_, 1);
 }
 
 TEST(FDv2StreamingSynchronizerTest, TranslationFailureReturnsInterrupted) {
