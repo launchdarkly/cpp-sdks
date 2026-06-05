@@ -83,21 +83,46 @@ BigSegmentStoreWrapper::StoreMembership BigSegmentStoreWrapper::LoadMembership(
         return *query->result;
     }
 
-    // Query the store outside any lock, then publish the result to waiters and
-    // drop the in-flight entry.
+    // Ensures the in-flight entry is removed and waiters are notified on every
+    // leader exit, including throws. If the leader exits without completing,
+    // waiters receive a sentinel error rather than blocking forever.
+    struct QueryCleanup {
+        std::mutex& load_mutex;
+        std::unordered_map<std::string, std::shared_ptr<InFlightQuery>>&
+            in_flight;
+        std::string const& key;
+        std::shared_ptr<InFlightQuery> query;
+        bool completed = false;
+
+        ~QueryCleanup() {
+            {
+                std::lock_guard lock(load_mutex);
+                in_flight.erase(key);
+            }
+            if (!completed) {
+                std::lock_guard lock(query->mutex);
+                if (!query->result.has_value()) {
+                    query->result = tl::make_unexpected(std::string(
+                        "Big Segment lookup leader exited without setting a "
+                        "result"));
+                }
+            }
+            query->cv.notify_all();
+        }
+    };
+    QueryCleanup cleanup{load_mutex_, in_flight_, context_key, query};
+
+    // Query the store outside any lock, then publish the result. The cleanup
+    // drops the in-flight entry on return (or throw).
     auto result = store_->GetMembership(HashContextKey(context_key));
     if (result.has_value()) {
         cache_.Set(context_key, *result);
     }
     {
-        std::lock_guard lock(load_mutex_);
-        in_flight_.erase(context_key);
-    }
-    {
         std::lock_guard lock(query->mutex);
         query->result = result;
+        cleanup.completed = true;
     }
-    query->cv.notify_all();
     return result;
 }
 
