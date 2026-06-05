@@ -142,8 +142,12 @@ BigSegmentStoreStatus BigSegmentStoreWrapper::GetStatus() {
         }
     }
     // No poll has completed yet; do one now so the caller gets an accurate
-    // staleness reading rather than a default.
-    return PollStoreAndUpdateStatus();
+    // staleness reading rather than a default. call_once coalesces concurrent
+    // first-callers onto a single store query.
+    std::call_once(first_poll_once_,
+                   [this] { PollStoreAndUpdateStatus(); });
+    std::lock_guard lock(status_mutex_);
+    return *last_status_;
 }
 
 BigSegmentStoreStatus BigSegmentStoreWrapper::PollStoreAndUpdateStatus() {

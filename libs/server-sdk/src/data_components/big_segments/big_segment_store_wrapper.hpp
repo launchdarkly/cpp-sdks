@@ -138,7 +138,14 @@ class BigSegmentStoreWrapper
     // Cancels the pending poll delay on destruction, ending the poll loop.
     async::CancellationSource poll_cancel_;
 
+    // Internally thread-safe.
     MembershipCache cache_;
+
+    // Broadcasts status changes to listeners registered via OnStatusChange.
+    boost::signals2::signal<void(BigSegmentStoreStatus)> status_signal_;
+
+    // Coalesces the cold-start fallback poll in GetStatus().
+    std::once_flag first_poll_once_;
 
     // In-flight store queries keyed by context key. Protected by load_mutex_.
     std::mutex load_mutex_;
@@ -147,8 +154,6 @@ class BigSegmentStoreWrapper
     // Protected by status_mutex_; nullopt until the first poll completes.
     std::mutex status_mutex_;
     std::optional<BigSegmentStoreStatus> last_status_;
-
-    boost::signals2::signal<void(BigSegmentStoreStatus)> status_signal_;
 };
 
 }  // namespace launchdarkly::server_side::data_components
