@@ -1,10 +1,13 @@
 #include <launchdarkly/encoding/base_64.hpp>
 
+#include <openssl/evp.h>
+
 #include <algorithm>
 #include <array>
 #include <bitset>
 #include <climits>
 #include <cstddef>
+#include <vector>
 
 static unsigned char const kEncodeSize = 4;
 static unsigned char const kInputBytesPerEncodeSize = 3;
@@ -73,6 +76,19 @@ std::string Base64UrlEncode(std::string const& input) {
         out.append(kEncodeSize - (out.size()) % kEncodeSize, '=');
     }
     return out;
+}
+
+std::string Base64Encode(std::string const& input) {
+    if (input.empty()) {
+        return {};
+    }
+    // EVP_EncodeBlock writes 4 output characters per 3 input bytes (rounded up)
+    // plus a NUL terminator.
+    std::vector<unsigned char> out(4 * ((input.size() + 2) / 3) + 1);
+    int const written = EVP_EncodeBlock(
+        out.data(), reinterpret_cast<unsigned char const*>(input.data()),
+        static_cast<int>(input.size()));
+    return std::string(reinterpret_cast<char const*>(out.data()), written);
 }
 
 }  // namespace launchdarkly::encoding

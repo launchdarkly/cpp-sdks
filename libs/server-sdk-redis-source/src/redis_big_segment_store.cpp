@@ -57,7 +57,7 @@ RedisBigSegmentStore::RedisBigSegmentStore(
 RedisBigSegmentStore::~RedisBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
-    std::string const& context_hash) const {
+    std::string const& context_hash) const noexcept {
     std::string const include_key = include_key_prefix_ + context_hash;
     std::string const exclude_key = exclude_key_prefix_ + context_hash;
 
@@ -76,7 +76,8 @@ IBigSegmentStore::GetMembershipResult RedisBigSegmentStore::GetMembership(
     return Membership::FromSegmentRefs(included, excluded);
 }
 
-IBigSegmentStore::GetMetadataResult RedisBigSegmentStore::GetMetadata() const {
+IBigSegmentStore::GetMetadataResult RedisBigSegmentStore::GetMetadata()
+    const noexcept {
     sw::redis::OptionalString raw;
     try {
         raw = redis_->get(sync_time_key_);
@@ -98,7 +99,9 @@ IBigSegmentStore::GetMetadataResult RedisBigSegmentStore::GetMetadata() const {
             "Redis Big Segments synchronized_on is not a valid integer");
     }
 
-    return StoreMetadata{std::chrono::milliseconds{parsed}};
+    // The stored value is a Unix-epoch millisecond count: system_clock's epoch.
+    return StoreMetadata{std::chrono::system_clock::time_point{
+        std::chrono::milliseconds{parsed}}};
 }
 
 }  // namespace launchdarkly::server_side::integrations

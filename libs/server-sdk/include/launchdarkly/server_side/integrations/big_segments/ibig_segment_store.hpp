@@ -54,7 +54,7 @@ class IBigSegmentStore {
      * `std::nullopt`). Returns an error if the lookup itself failed.
      */
     [[nodiscard]] virtual GetMembershipResult GetMembership(
-        std::string const& context_hash) const = 0;
+        std::string const& context_hash) const noexcept = 0;
 
     /**
      * @brief Returns store-level metadata used by the SDK to detect staleness.
@@ -63,7 +63,7 @@ class IBigSegmentStore {
      * `std::nullopt` if no metadata has ever been written (the store was
      * never populated), or an error if the lookup itself failed.
      */
-    [[nodiscard]] virtual GetMetadataResult GetMetadata() const = 0;
+    [[nodiscard]] virtual GetMetadataResult GetMetadata() const noexcept = 0;
 
    protected:
     IBigSegmentStore() = default;

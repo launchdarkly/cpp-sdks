@@ -23,10 +23,10 @@ using namespace std::chrono_literals;
 class StubStore final : public IBigSegmentStore {
    public:
     GetMembershipResult GetMembership(
-        std::string const& /*context_hash*/) const override {
+        std::string const& /*context_hash*/) const noexcept override {
         return Membership::FromSegmentRefs({}, {});
     }
-    GetMetadataResult GetMetadata() const override {
+    GetMetadataResult GetMetadata() const noexcept override {
         return std::optional<StoreMetadata>{};
     }
 };

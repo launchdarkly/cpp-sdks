@@ -87,11 +87,11 @@ class Membership {
  */
 struct StoreMetadata {
     /**
-     * @brief Wall-clock timestamp (Unix epoch) at which the data populator
-     * (e.g. the LaunchDarkly Relay Proxy) last confirmed it had pushed all
-     * pending Big Segments updates to the store.
+     * @brief Wall-clock instant at which the data populator (e.g. the
+     * LaunchDarkly Relay Proxy) last confirmed it had pushed all pending Big
+     * Segments updates to the store.
      */
-    std::chrono::milliseconds last_up_to_date;
+    std::chrono::system_clock::time_point last_up_to_date;
 };
 
 }  // namespace launchdarkly::server_side::integrations

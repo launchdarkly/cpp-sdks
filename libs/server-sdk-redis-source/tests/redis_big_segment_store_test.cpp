@@ -143,7 +143,8 @@ TEST_F(RedisBigSegmentTests, GetMetadataWithEmptyPrefix) {
     ASSERT_TRUE(result);
     ASSERT_TRUE(result->has_value());
     ASSERT_EQ(result->value().last_up_to_date,
-              std::chrono::milliseconds{1700000000000LL});
+              std::chrono::system_clock::time_point{
+                  std::chrono::milliseconds{1700000000000LL}});
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {
@@ -153,7 +154,8 @@ TEST_F(RedisBigSegmentTests, GetMetadataReturnsSyncTime) {
     ASSERT_TRUE(result);
     ASSERT_TRUE(result->has_value());
     ASSERT_EQ(result->value().last_up_to_date,
-              std::chrono::milliseconds{1700000000000LL});
+              std::chrono::system_clock::time_point{
+                  std::chrono::milliseconds{1700000000000LL}});
 }
 
 TEST_F(RedisBigSegmentTests, GetMetadataRejectsMalformedSyncTime) {

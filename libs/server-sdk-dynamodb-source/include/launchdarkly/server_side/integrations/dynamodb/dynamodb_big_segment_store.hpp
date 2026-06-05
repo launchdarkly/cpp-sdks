@@ -61,8 +61,8 @@ class DynamoDBBigSegmentStore final : public IBigSegmentStore {
            DynamoDBClientOptions options = {});
 
     [[nodiscard]] GetMembershipResult GetMembership(
-        std::string const& context_hash) const override;
-    [[nodiscard]] GetMetadataResult GetMetadata() const override;
+        std::string const& context_hash) const noexcept override;
+    [[nodiscard]] GetMetadataResult GetMetadata() const noexcept override;
 
     ~DynamoDBBigSegmentStore() override;
 

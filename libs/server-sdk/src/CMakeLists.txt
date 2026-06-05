@@ -44,6 +44,11 @@ target_sources(${LIBNAME}
         data_components/dependency_tracker/dependency_tracker.cpp
         data_components/expiration_tracker/expiration_tracker.hpp
         data_components/expiration_tracker/expiration_tracker.cpp
+        data_components/big_segments/big_segments_status.hpp
+        data_components/big_segments/membership_cache.hpp
+        data_components/big_segments/membership_cache.cpp
+        data_components/big_segments/big_segment_store_wrapper.hpp
+        data_components/big_segments/big_segment_store_wrapper.cpp
         data_interfaces/destination/itransactional_destination.hpp
         data_components/memory_store/memory_store.hpp
         data_components/memory_store/memory_store.cpp

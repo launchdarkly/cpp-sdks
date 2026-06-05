@@ -55,8 +55,8 @@ class RedisBigSegmentStore final : public IBigSegmentStore {
     Create(std::string uri, std::string prefix);
 
     [[nodiscard]] GetMembershipResult GetMembership(
-        std::string const& context_hash) const override;
-    [[nodiscard]] GetMetadataResult GetMetadata() const override;
+        std::string const& context_hash) const noexcept override;
+    [[nodiscard]] GetMetadataResult GetMetadata() const noexcept override;
 
     ~RedisBigSegmentStore() override;
 
