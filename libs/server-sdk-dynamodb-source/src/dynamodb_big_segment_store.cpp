@@ -65,99 +65,114 @@ DynamoDBBigSegmentStore::~DynamoDBBigSegmentStore() = default;
 
 IBigSegmentStore::GetMembershipResult DynamoDBBigSegmentStore::GetMembership(
     std::string const& context_hash) const noexcept {
-    Aws::DynamoDB::Model::GetItemRequest request;
-    request.SetTableName(table_name_);
-    request.SetConsistentRead(true);
-    request.AddKey(kPartitionKey,
-                   Aws::DynamoDB::Model::AttributeValue{user_namespace_});
-    request.AddKey(kSortKey,
-                   Aws::DynamoDB::Model::AttributeValue{context_hash});
+    try {
+        Aws::DynamoDB::Model::GetItemRequest request;
+        request.SetTableName(table_name_);
+        request.SetConsistentRead(true);
+        request.AddKey(kPartitionKey,
+                       Aws::DynamoDB::Model::AttributeValue{user_namespace_});
+        request.AddKey(kSortKey,
+                       Aws::DynamoDB::Model::AttributeValue{context_hash});
 
-    auto outcome = client_->GetItem(request);
-    if (!outcome.IsSuccess()) {
-        return tl::make_unexpected(outcome.GetError().GetMessage());
+        auto outcome = client_->GetItem(request);
+        if (!outcome.IsSuccess()) {
+            return tl::make_unexpected(outcome.GetError().GetMessage());
+        }
+
+        auto const& item = outcome.GetResult().GetItem();
+
+        std::vector<std::string> included;
+        std::vector<std::string> excluded;
+
+        // GetSS() silently returns an empty vector if the attribute is not
+        // actually a String Set, so check the type explicitly before reading.
+        if (auto const it = item.find(kBigSegmentsIncludedAttribute);
+            it != item.end()) {
+            if (it->second.GetType() !=
+                Aws::DynamoDB::Model::ValueType::STRING_SET) {
+                return tl::make_unexpected(
+                    std::string("DynamoDB Big Segments '") +
+                    kBigSegmentsIncludedAttribute +
+                    "' is not of type STRING_SET");
+            }
+            for (auto const& ref : it->second.GetSS()) {
+                included.emplace_back(ref);
+            }
+        }
+        if (auto const it = item.find(kBigSegmentsExcludedAttribute);
+            it != item.end()) {
+            if (it->second.GetType() !=
+                Aws::DynamoDB::Model::ValueType::STRING_SET) {
+                return tl::make_unexpected(
+                    std::string("DynamoDB Big Segments '") +
+                    kBigSegmentsExcludedAttribute +
+                    "' is not of type STRING_SET");
+            }
+            for (auto const& ref : it->second.GetSS()) {
+                excluded.emplace_back(ref);
+            }
+        }
+
+        return Membership::FromSegmentRefs(included, excluded);
+    } catch (std::exception const& e) {
+        return tl::make_unexpected(e.what());
     }
-
-    auto const& item = outcome.GetResult().GetItem();
-
-    std::vector<std::string> included;
-    std::vector<std::string> excluded;
-
-    // GetSS() silently returns an empty vector if the attribute is not
-    // actually a String Set, so check the type explicitly before reading.
-    if (auto const it = item.find(kBigSegmentsIncludedAttribute);
-        it != item.end()) {
-        if (it->second.GetType() !=
-            Aws::DynamoDB::Model::ValueType::STRING_SET) {
-            return tl::make_unexpected(std::string("DynamoDB Big Segments '") +
-                                       kBigSegmentsIncludedAttribute +
-                                       "' is not of type STRING_SET");
-        }
-        for (auto const& ref : it->second.GetSS()) {
-            included.emplace_back(ref);
-        }
-    }
-    if (auto const it = item.find(kBigSegmentsExcludedAttribute);
-        it != item.end()) {
-        if (it->second.GetType() !=
-            Aws::DynamoDB::Model::ValueType::STRING_SET) {
-            return tl::make_unexpected(std::string("DynamoDB Big Segments '") +
-                                       kBigSegmentsExcludedAttribute +
-                                       "' is not of type STRING_SET");
-        }
-        for (auto const& ref : it->second.GetSS()) {
-            excluded.emplace_back(ref);
-        }
-    }
-
-    return Membership::FromSegmentRefs(included, excluded);
 }
 
 IBigSegmentStore::GetMetadataResult DynamoDBBigSegmentStore::GetMetadata()
     const noexcept {
-    Aws::DynamoDB::Model::GetItemRequest request;
-    request.SetTableName(table_name_);
-    request.SetConsistentRead(true);
-    request.AddKey(kPartitionKey,
-                   Aws::DynamoDB::Model::AttributeValue{metadata_namespace_});
-    request.AddKey(kSortKey,
-                   Aws::DynamoDB::Model::AttributeValue{metadata_namespace_});
+    try {
+        Aws::DynamoDB::Model::GetItemRequest request;
+        request.SetTableName(table_name_);
+        request.SetConsistentRead(true);
+        request.AddKey(
+            kPartitionKey,
+            Aws::DynamoDB::Model::AttributeValue{metadata_namespace_});
+        request.AddKey(
+            kSortKey,
+            Aws::DynamoDB::Model::AttributeValue{metadata_namespace_});
 
-    auto outcome = client_->GetItem(request);
-    if (!outcome.IsSuccess()) {
-        return tl::make_unexpected(outcome.GetError().GetMessage());
+        auto outcome = client_->GetItem(request);
+        if (!outcome.IsSuccess()) {
+            return tl::make_unexpected(outcome.GetError().GetMessage());
+        }
+
+        auto const& item = outcome.GetResult().GetItem();
+        if (item.empty()) {
+            return std::nullopt;
+        }
+
+        auto const it = item.find(kBigSegmentsSyncTimeAttribute);
+        if (it == item.end()) {
+            // "absent" sync time is treated as never synchronized rather than
+            // an error; the wrapper marks the store stale based on the
+            // resulting nullopt.
+            return std::nullopt;
+        }
+
+        auto const& raw = it->second.GetN();
+        if (raw.empty()) {
+            return tl::make_unexpected(
+                "DynamoDB Big Segments 'synchronizedOn' is empty or not type "
+                "N");
+        }
+
+        errno = 0;
+        char* end = nullptr;
+        long long const parsed = std::strtoll(raw.c_str(), &end, 10);
+        if (errno != 0 || end == raw.c_str() || *end != '\0') {
+            return tl::make_unexpected(
+                "DynamoDB Big Segments 'synchronizedOn' is not a valid "
+                "integer");
+        }
+
+        // The stored value is a Unix-epoch millisecond count: system_clock's
+        // epoch.
+        return StoreMetadata{std::chrono::system_clock::time_point{
+            std::chrono::milliseconds{parsed}}};
+    } catch (std::exception const& e) {
+        return tl::make_unexpected(e.what());
     }
-
-    auto const& item = outcome.GetResult().GetItem();
-    if (item.empty()) {
-        return std::nullopt;
-    }
-
-    auto const it = item.find(kBigSegmentsSyncTimeAttribute);
-    if (it == item.end()) {
-        // "absent" sync time is treated as never synchronized rather than
-        // an error; the wrapper marks the store stale based on the
-        // resulting nullopt.
-        return std::nullopt;
-    }
-
-    auto const& raw = it->second.GetN();
-    if (raw.empty()) {
-        return tl::make_unexpected(
-            "DynamoDB Big Segments 'synchronizedOn' is empty or not type N");
-    }
-
-    errno = 0;
-    char* end = nullptr;
-    long long const parsed = std::strtoll(raw.c_str(), &end, 10);
-    if (errno != 0 || end == raw.c_str() || *end != '\0') {
-        return tl::make_unexpected(
-            "DynamoDB Big Segments 'synchronizedOn' is not a valid integer");
-    }
-
-    // The stored value is a Unix-epoch millisecond count: system_clock's epoch.
-    return StoreMetadata{std::chrono::system_clock::time_point{
-        std::chrono::milliseconds{parsed}}};
 }
 
 }  // namespace launchdarkly::server_side::integrations
