@@ -10,12 +10,14 @@
 #include "conditions.hpp"
 #include "source_manager.hpp"
 
+#include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <mutex>
@@ -247,6 +249,14 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void OnSynchronizerResult(data_interfaces::FDv2SourceResult result);
     void OnConditionFired(data_interfaces::IFDv2Condition::Type type);
 
+    // Schedules an FDv2 recovery attempt after the given TTL. Called with
+    // mutex_ held. TTL of 0 disables the recovery and is a no-op.
+    void ScheduleFDv2RetryLocked(std::chrono::seconds ttl);
+
+    // Invoked when the FDv1 fallback TTL expires. Switches the source list
+    // back to FDv2 and restarts the synchronizer phase.
+    void OnFDv1RetryTimer();
+
     // Builds the conditions to apply to the currently active synchronizer.
     // Must be called with mutex_ held; reads source_manager_ state.
     std::unique_ptr<Conditions> BuildActiveConditions() const;
@@ -291,6 +301,9 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     std::unique_ptr<data_interfaces::IFDv2Initializer> active_initializer_;
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> active_synchronizer_;
     std::unique_ptr<Conditions> active_conditions_;
+
+    // Cancelled in Close() to abort any pending FDv1 fallback retry delay.
+    async::CancellationSource fdv1_fallback_retry_cancel_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
