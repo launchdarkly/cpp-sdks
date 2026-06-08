@@ -191,9 +191,16 @@ void FDv2DataSystem::OnInitializerResult(
             return;
         }
         if (result.fdv1_fallback) {
-            LD_LOG(logger_, LogLevel::kInfo)
-                << Identity() << ": FDv1 fallback engaged";
             source_manager_.SwitchToFDv1Fallback();
+            if (source_manager_.AvailableSynchronizerCount() > 0) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << Identity() << ": FDv1 fallback engaged";
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": FDv1 fallback directive received; no FDv1 "
+                       "fallback synchronizer configured";
+            }
             got_basis = true;
         }
     }
@@ -369,9 +376,16 @@ void FDv2DataSystem::OnSynchronizerResult(
             return;
         }
         if (result.fdv1_fallback) {
-            LD_LOG(logger_, LogLevel::kInfo)
-                << Identity() << ": FDv1 fallback engaged";
             source_manager_.SwitchToFDv1Fallback();
+            if (source_manager_.AvailableSynchronizerCount() > 0) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << Identity() << ": FDv1 fallback engaged";
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": FDv1 fallback directive received; no FDv1 "
+                       "fallback synchronizer configured";
+            }
             active_synchronizer_.reset();
             active_conditions_.reset();
             advance = true;
