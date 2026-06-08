@@ -253,7 +253,14 @@ void FDv2StreamingSynchronizer::State::OnEvent(sse::Event const& event) {
                     << ": Goodbye was received from the LaunchDarkly "
                        "connection with reason: '"
                     << r.reason.value_or("") << "'.";
-                Notify(FDv2SourceResult{FDv2SourceResult::Goodbye{r.reason}});
+                FDv2SourceResult goodbye_result{
+                    FDv2SourceResult::Goodbye{r.reason}};
+                if (r.protocol_fallback_ttl) {
+                    goodbye_result.fdv1_fallback =
+                        data_interfaces::FDv1FallbackDirective{
+                            std::chrono::seconds(*r.protocol_fallback_ttl)};
+                }
+                Notify(std::move(goodbye_result));
                 // Drop the current connection and reconnect; the protocol
                 // handler is reset so the new connection starts in a clean
                 // state.
@@ -324,7 +331,12 @@ void FDv2StreamingSynchronizer::State::Notify(FDv2SourceResult result) {
     std::optional<async::Promise<FDv2SourceResult>> promise;
     {
         std::lock_guard lock(mutex_);
-        result.fdv1_fallback = latest_fdv1_fallback_;
+        // An explicit directive on the result (e.g. parsed from a goodbye
+        // message) takes precedence over the most recent HTTP response
+        // header.
+        if (!result.fdv1_fallback) {
+            result.fdv1_fallback = latest_fdv1_fallback_;
+        }
         if (pending_promise_) {
             promise = std::move(pending_promise_);
             pending_promise_.reset();

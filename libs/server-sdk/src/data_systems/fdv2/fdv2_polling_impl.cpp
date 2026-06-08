@@ -129,7 +129,12 @@ static FDv2SourceResult ParseFDv2PollEvents(
                 FDv2SourceResult::ChangeSet{std::move(*typed)}};
         }
         if (auto* goodbye = std::get_if<Goodbye>(&result)) {
-            return FDv2SourceResult{FDv2SourceResult::Goodbye{goodbye->reason}};
+            FDv2SourceResult result{FDv2SourceResult::Goodbye{goodbye->reason}};
+            if (goodbye->protocol_fallback_ttl) {
+                result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{
+                    std::chrono::seconds(*goodbye->protocol_fallback_ttl)};
+            }
+            return result;
         }
         if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
             if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
@@ -228,7 +233,11 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     << identity << ": " << interrupted->error.Message();
             }
         }
-        result.fdv1_fallback = fdv1_fallback;
+        // An explicit directive parsed from the response body (e.g. via a
+        // goodbye event) takes precedence over the HTTP response header.
+        if (!result.fdv1_fallback) {
+            result.fdv1_fallback = fdv1_fallback;
+        }
         return result;
     }
 
