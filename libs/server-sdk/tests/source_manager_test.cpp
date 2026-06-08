@@ -255,3 +255,44 @@ TEST(SourceManagerTest, SwitchToFDv1FallbackUnblocksPreviouslyBlockedFDv2) {
     EXPECT_EQ(1, fdv1_ptr->build_count);
     EXPECT_TRUE(mgr.IsCurrentSynchronizerFDv1Fallback());
 }
+
+TEST(SourceManagerTest, SwitchBackToFDv2UnblocksFDv2AndBlocksFDv1) {
+    auto fdv2 = std::make_unique<CountingFactory>();
+    auto* fdv2_ptr = fdv2.get();
+    auto fdv1 = std::make_unique<FDv1FallbackFactory>();
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    factories.push_back(std::move(fdv2));
+    factories.push_back(std::move(fdv1));
+    SourceManager mgr(std::move(factories));
+
+    // Switch to FDv1 first, then back to FDv2.
+    mgr.SwitchToFDv1Fallback();
+    mgr.SwitchBackToFDv2();
+
+    EXPECT_EQ(1u, mgr.AvailableSynchronizerCount());
+    auto sync = mgr.NextSynchronizer();
+    ASSERT_NE(sync, nullptr);
+    EXPECT_EQ(1, fdv2_ptr->build_count);
+    EXPECT_FALSE(mgr.IsCurrentSynchronizerFDv1Fallback());
+}
+
+TEST(SourceManagerTest, SwitchBackToFDv2UnblocksTerminallyFailedFDv2Factory) {
+    auto fdv2 = std::make_unique<CountingFactory>();
+    auto* fdv2_ptr = fdv2.get();
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories;
+    factories.push_back(std::move(fdv2));
+    SourceManager mgr(std::move(factories));
+
+    // Simulate a terminal error blocking the FDv2 factory.
+    mgr.NextSynchronizer();
+    mgr.BlockCurrentSynchronizer();
+    EXPECT_EQ(0u, mgr.AvailableSynchronizerCount());
+
+    mgr.SwitchBackToFDv2();
+
+    // Previously-blocked FDv2 factory is now available again.
+    EXPECT_EQ(1u, mgr.AvailableSynchronizerCount());
+    auto sync = mgr.NextSynchronizer();
+    ASSERT_NE(sync, nullptr);
+    EXPECT_EQ(2, fdv2_ptr->build_count);
+}

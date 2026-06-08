@@ -62,6 +62,12 @@ class SourceManager {
     void SwitchToFDv1Fallback();
 
     /**
+     * Returns synchronizer state to the initial configuration, including
+     * unblocking factories previously blocked by terminal errors.
+     */
+    void SwitchBackToFDv2();
+
+    /**
      * Returns true if the currently tracked factory is the first Available
      * factory in the list. Returns false if no factory is currently tracked.
      */

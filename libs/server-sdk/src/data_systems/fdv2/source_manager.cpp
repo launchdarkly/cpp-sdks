@@ -54,6 +54,14 @@ void SourceManager::SwitchToFDv1Fallback() {
     synchronizer_index_ = -1;
 }
 
+void SourceManager::SwitchBackToFDv2() {
+    for (auto& entry : synchronizers_) {
+        entry.state =
+            entry.is_fdv1_fallback ? State::kBlocked : State::kAvailable;
+    }
+    synchronizer_index_ = -1;
+}
+
 bool SourceManager::IsPrimeSynchronizer() const {
     for (std::size_t i = 0; i < synchronizers_.size(); ++i) {
         if (synchronizers_[i].state == State::kAvailable) {
