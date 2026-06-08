@@ -375,7 +375,8 @@ void FDv2DataSystem::OnSynchronizerResult(
             active_conditions_.reset();
             return;
         }
-        if (result.fdv1_fallback) {
+        if (result.fdv1_fallback &&
+            !source_manager_.IsCurrentSynchronizerFDv1Fallback()) {
             source_manager_.SwitchToFDv1Fallback();
             if (source_manager_.AvailableSynchronizerCount() > 0) {
                 LD_LOG(logger_, LogLevel::kInfo)

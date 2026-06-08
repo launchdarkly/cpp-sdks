@@ -1203,6 +1203,57 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
 
+TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // FDv2 source emits a ChangeSet with the directive, switching to the
+    // FDv1 fallback.
+    auto fdv2_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{FDv2SourceResult::ChangeSet{
+                data_model::ChangeSet<ChangeSetData>{
+                    data_model::ChangeSetType::kNone,
+                    {},
+                    data_model::Selector{}}}};
+            r.fdv1_fallback = true;
+            return r;
+        }()});
+    auto fdv2_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(fdv2_sync));
+
+    // FDv1 source then emits a result also carrying the directive. Once
+    // FDv1 is active, the directive is silently ignored and the source is
+    // not rebuilt.
+    auto fdv1_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{
+                FDv2SourceResult::Interrupted{FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
+                    /*status_code=*/418, "self-trigger",
+                    std::chrono::system_clock::now()}}};
+            r.fdv1_fallback = true;
+            return r;
+        }()});
+    auto fdv1_factory =
+        std::make_unique<FDv1FallbackOneShotFactory>(std::move(fdv1_sync));
+    auto* fdv1_factory_ptr = fdv1_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(fdv2_factory));
+    synchronizers.push_back(std::move(fdv1_factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
+}
+
 // ============================================================================
 // Destruction protocol: in-flight orchestration
 // ============================================================================
