@@ -25,6 +25,12 @@ if [ "$1" == "launchdarkly-cpp-server-redis-source" ] || [ "$1" == "gtest_launch
   build_redis="ON"
 fi
 
+# Special case: enabling DynamoDB support fetches the AWS C++ SDK at configuration time. Only enable when asked.
+build_dynamodb="OFF"
+if [ "$1" == "launchdarkly-cpp-server-dynamodb-source" ] || [ "$1" == "gtest_launchdarkly-cpp-server-dynamodb-source" ]; then
+  build_dynamodb="ON"
+fi
+
 # Check for CURL networking option
 build_curl="OFF"
 if [ "$3" == "true" ]; then
@@ -53,6 +59,7 @@ echo "BUILD_TESTING: $2"
 echo "LD_BUILD_UNIT_TESTS: $2"
 echo "LD_BUILD_CONTRACT_TESTS: $2"
 echo "LD_BUILD_REDIS_SUPPORT: $build_redis"
+echo "LD_BUILD_DYNAMODB_SUPPORT: $build_dynamodb"
 echo "LD_CURL_NETWORKING: $build_curl"
 echo "LD_BUILD_OTEL_SUPPORT: $build_otel"
 echo "LD_BUILD_OTEL_FETCH_DEPS: $build_otel_fetch_deps"
@@ -64,6 +71,7 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE="$build_type" \
                -D LD_BUILD_UNIT_TESTS="$2" \
                -D LD_BUILD_CONTRACT_TESTS="$2" \
                -D LD_BUILD_REDIS_SUPPORT="$build_redis" \
+               -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" \
                -D LD_CURL_NETWORKING="$build_curl" \
                -D LD_BUILD_OTEL_SUPPORT="$build_otel" \
                -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" ..

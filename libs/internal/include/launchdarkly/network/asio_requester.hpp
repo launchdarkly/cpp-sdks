@@ -282,23 +282,17 @@ class AsioRequester {
     }
 
     template <typename CompletionToken>
-    auto Request(HttpRequest request, CompletionToken&& token) {
-        // TODO: Clang-tidy wants to pass the request by reference, but I am not
-        // confident that lifetime would make sense.
-
-        namespace asio = boost::asio;
-        namespace system = boost::system;
-
-        using Sig = void(HttpResult result);
-        using Result = asio::async_result<std::decay_t<CompletionToken>, Sig>;
-        using Handler = typename Result::completion_handler_type;
-
-        Handler handler(std::forward<decltype(token)>(token));
-        Result result(handler);
-
-        InnerRequest(net::make_strand(ctx_), request, std::move(handler), 0);
-
-        return result.get();
+    auto Request(HttpRequest request, CompletionToken&& token) const {
+        return boost::asio::async_initiate<CompletionToken, void(HttpResult)>(
+            [this](auto handler, HttpRequest req) {
+                InnerRequest(
+                    net::make_strand(ctx_), std::move(req),
+                    [h = std::move(handler)](HttpResult result) mutable {
+                        std::move(h)(std::move(result));
+                    },
+                    0);
+            },
+            token, std::move(request));
     }
 
    private:
@@ -313,7 +307,7 @@ class AsioRequester {
     void InnerRequest(boost::asio::any_io_executor exec,
                       std::optional<HttpRequest> request,
                       std::function<void(HttpResult)> callback,
-                      unsigned char redirect_count) {
+                      unsigned char redirect_count) const {
         if (redirect_count > kRedirectLimit) {
             boost::asio::post(exec, [callback, request]() mutable {
                 callback(
@@ -336,7 +330,7 @@ class AsioRequester {
                                  redirect_count]() mutable {
             auto beast_request = MakeBeastRequest(*request);
 
-            const auto& properties = request->Properties();
+            auto const& properties = request->Properties();
 
             std::string service =
                 request->Port().value_or(request->Https() ? "https" : "http");

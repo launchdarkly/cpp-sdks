@@ -16,6 +16,7 @@ on:
           - libs/client-sdk:launchdarkly-cpp-client
           - libs/server-sdk:launchdarkly-cpp-server
           - libs/server-sdk-redis-source:launchdarkly-cpp-server-redis-source
+          - libs/server-sdk-dynamodb-source:launchdarkly-cpp-server-dynamodb-source
       publish_release:
         description: 'Publish (un-draft) the release after all artifacts are uploaded?'
         type: boolean

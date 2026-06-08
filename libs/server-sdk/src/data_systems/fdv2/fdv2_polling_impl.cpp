@@ -1,0 +1,241 @@
+#include "fdv2_polling_impl.hpp"
+#include "../background_sync/detail/payload_filter_validation/payload_filter_validation.hpp"
+#include "fdv2_changeset_translation.hpp"
+
+#include <launchdarkly/network/http_error_messages.hpp>
+#include <launchdarkly/server_side/config/builders/all_builders.hpp>
+
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/json.hpp>
+#include <boost/url/parse.hpp>
+#include <boost/url/url.hpp>
+
+namespace launchdarkly::server_side::data_systems {
+
+static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
+
+static char const* const kErrorParsingBody =
+    "Could not parse FDv2 polling response";
+static char const* const kErrorMissingEvents =
+    "FDv2 polling response missing 'events' array";
+static char const* const kErrorIncompletePayload =
+    "FDv2 polling response did not contain a complete payload";
+static char const* const kErrorTranslation =
+    "FDv2 polling response could not be translated";
+
+using data_interfaces::FDv2SourceResult;
+using ErrorInfo = FDv2SourceResult::ErrorInfo;
+using ErrorKind = ErrorInfo::ErrorKind;
+
+static ErrorInfo MakeError(ErrorKind kind,
+                           ErrorInfo::StatusCodeType status,
+                           std::string message) {
+    return ErrorInfo{kind, status, std::move(message),
+                     std::chrono::system_clock::now()};
+}
+
+static bool ReadFDv1FallbackDirective(
+    network::HttpResult::HeadersType const& headers) {
+    auto const it = headers.find(kFDv1FallbackHeader);
+    return it != headers.end() && boost::iequals(it->second, "true");
+}
+
+network::HttpRequest MakeFDv2PollRequest(
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::HttpProperties const& http_properties,
+    data_model::Selector const& selector,
+    std::optional<std::string> const& filter_key,
+    Logger const& logger) {
+    config::builders::HttpPropertiesBuilder const builder(http_properties);
+
+    auto parsed = boost::urls::parse_uri(endpoints.PollingBaseUrl());
+    if (!parsed) {
+        return {"", network::HttpMethod::kGet, builder.Build(),
+                network::HttpRequest::BodyType{}};
+    }
+
+    boost::urls::url u = parsed.value();
+    // A trailing '/' on the base URL appears as an empty final segment;
+    // remove it so subsequent push_backs don't produce a double slash.
+    auto segs = u.segments();
+    if (!segs.empty() && segs.back().empty()) {
+        segs.pop_back();
+    }
+    segs.push_back("sdk");
+    segs.push_back("poll");
+    if (selector.value) {
+        u.params().append({"basis", selector.value->state});
+    }
+    if (filter_key) {
+        if (detail::ValidateFilterKey(*filter_key)) {
+            u.params().append({"filter", *filter_key});
+        } else {
+            LD_LOG(logger, LogLevel::kError)
+                << "data source config: provided filter is invalid, will "
+                   "request full environment instead";
+        }
+    }
+
+    return {std::string(u.buffer()), network::HttpMethod::kGet, builder.Build(),
+            network::HttpRequest::BodyType{}};
+}
+
+static FDv2SourceResult ParseFDv2PollEvents(
+    boost::json::array const& events,
+    FDv2ProtocolHandler* protocol_handler,
+    Logger const& logger) {
+    for (auto const& event_val : events) {
+        auto const* event_obj = event_val.if_object();
+        if (!event_obj) {
+            continue;
+        }
+
+        auto const* event_type_val = event_obj->if_contains("event");
+        auto const* event_data_val = event_obj->if_contains("data");
+        if (!event_type_val || !event_data_val) {
+            continue;
+        }
+
+        auto const* event_type_str = event_type_val->if_string();
+        if (!event_type_str) {
+            continue;
+        }
+
+        auto result = protocol_handler->HandleEvent(
+            std::string_view{event_type_str->data(), event_type_str->size()},
+            *event_data_val);
+
+        if (auto* change_set =
+                std::get_if<data_model::FDv2ChangeSet>(&result)) {
+            auto typed = TranslateChangeSet(*change_set, logger);
+            if (!typed) {
+                return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                    MakeError(ErrorKind::kInvalidData, 0, kErrorTranslation)}};
+            }
+            return FDv2SourceResult{
+                FDv2SourceResult::ChangeSet{std::move(*typed)}};
+        }
+        if (auto* goodbye = std::get_if<Goodbye>(&result)) {
+            return FDv2SourceResult{FDv2SourceResult::Goodbye{goodbye->reason}};
+        }
+        if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
+            if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
+                auto const& id = error->server_error.value().id;
+                std::string msg =
+                    "An issue was encountered receiving updates for "
+                    "payload '" +
+                    id.value_or("") + "' with reason: '" + error->message +
+                    "'. Automatic retry will occur.";
+                return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                    MakeError(ErrorKind::kErrorResponse, 0, std::move(msg))}};
+            }
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{
+                MakeError(ErrorKind::kInvalidData, 0, error->message)}};
+        }
+    }
+
+    return FDv2SourceResult{FDv2SourceResult::Interrupted{
+        MakeError(ErrorKind::kInvalidData, 0, kErrorIncompletePayload)}};
+}
+
+static FDv2SourceResult ParseFDv2PollResponse(
+    std::string const& body,
+    FDv2ProtocolHandler* protocol_handler,
+    Logger const& logger) {
+    boost::system::error_code ec;
+    auto parsed = boost::json::parse(body, ec);
+    if (ec) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody)}};
+    }
+
+    auto const* obj = parsed.if_object();
+    if (!obj) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorParsingBody)}};
+    }
+
+    auto const* events_val = obj->if_contains("events");
+    if (!events_val) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents)}};
+    }
+
+    auto const* events_arr = events_val->if_array();
+    if (!events_arr) {
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kInvalidData, 0, kErrorMissingEvents)}};
+    }
+
+    return ParseFDv2PollEvents(*events_arr, protocol_handler, logger);
+}
+
+data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
+    network::HttpResult const& res,
+    FDv2ProtocolHandler* protocol_handler,
+    Logger const& logger,
+    std::string_view identity) {
+    if (res.IsError()) {
+        auto const& msg = res.ErrorMessage();
+        std::string error_msg = msg.has_value() ? *msg : "unknown error";
+        LD_LOG(logger, LogLevel::kWarn) << identity << ": " << error_msg;
+        return FDv2SourceResult{FDv2SourceResult::Interrupted{
+            MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg))}};
+    }
+
+    bool const fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
+
+    if (res.Status() == 304) {
+        return FDv2SourceResult{
+            FDv2SourceResult::ChangeSet{
+                data_model::ChangeSet<data_interfaces::ChangeSetData>{
+                    data_model::ChangeSetType::kNone,
+                    {},
+                    data_model::Selector{}}},
+            fdv1_fallback};
+    }
+
+    if (res.Status() == 200) {
+        auto const& body = res.Body();
+        if (!body) {
+            return FDv2SourceResult{FDv2SourceResult::Interrupted{MakeError(
+                                        ErrorKind::kInvalidData, 0,
+                                        "polling response contained no body")},
+                                    fdv1_fallback};
+        }
+
+        auto result = ParseFDv2PollResponse(*body, protocol_handler, logger);
+        if (auto* interrupted =
+                std::get_if<FDv2SourceResult::Interrupted>(&result.value)) {
+            if (interrupted->error.Kind() == ErrorKind::kErrorResponse) {
+                LD_LOG(logger, LogLevel::kInfo)
+                    << identity << ": " << interrupted->error.Message();
+            } else {
+                LD_LOG(logger, LogLevel::kError)
+                    << identity << ": " << interrupted->error.Message();
+            }
+        }
+        result.fdv1_fallback = fdv1_fallback;
+        return result;
+    }
+
+    if (network::IsRecoverableStatus(res.Status())) {
+        std::string msg = network::ErrorForStatusCode(
+            res.Status(), "FDv2 polling request", "will retry");
+        LD_LOG(logger, LogLevel::kWarn) << identity << ": " << msg;
+        return FDv2SourceResult{
+            FDv2SourceResult::Interrupted{MakeError(
+                ErrorKind::kErrorResponse, res.Status(), std::move(msg))},
+            fdv1_fallback};
+    }
+
+    std::string msg = network::ErrorForStatusCode(
+        res.Status(), "FDv2 polling request", std::nullopt);
+    LD_LOG(logger, LogLevel::kError) << identity << ": " << msg;
+    return FDv2SourceResult{
+        FDv2SourceResult::TerminalError{
+            MakeError(ErrorKind::kErrorResponse, res.Status(), std::move(msg))},
+        fdv1_fallback};
+}
+
+}  // namespace launchdarkly::server_side::data_systems

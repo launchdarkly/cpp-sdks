@@ -2,9 +2,9 @@
 
 #include "fdv2_source_result.hpp"
 
+#include <launchdarkly/async/promise.hpp>
 #include <launchdarkly/data_model/selector.hpp>
 
-#include <chrono>
 #include <string>
 
 namespace launchdarkly::server_side::data_interfaces {
@@ -19,24 +19,20 @@ namespace launchdarkly::server_side::data_interfaces {
 class IFDv2Synchronizer {
    public:
     /**
-     * Block until the next result is available or the timeout expires.
+     * Returns a Future that resolves with the next result once it is
+     * available.
      *
      * On the first call, the synchronizer starts its underlying connection.
      * Subsequent calls continue reading from the same connection.
      *
-     * If the timeout expires before a result arrives, returns
-     * FDv2SourceResult::Timeout. The orchestrator uses this to evaluate
-     * fallback conditions.
-     *
      * Close() may be called from another thread to unblock Next(), in which
-     * case Next() returns FDv2SourceResult::Shutdown.
+     * case the future resolves with FDv2SourceResult::Shutdown.
      *
-     * @param timeout  Maximum time to wait for the next result.
      * @param selector The selector to send with the request, reflecting any
      *                 changesets applied since the previous call.
      */
-    virtual FDv2SourceResult Next(std::chrono::milliseconds timeout,
-                                  data_model::Selector selector) = 0;
+    virtual async::Future<FDv2SourceResult> Next(
+        data_model::Selector selector) = 0;
 
     /**
      * Unblocks any in-progress Next() call, causing it to return

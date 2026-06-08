@@ -1,6 +1,7 @@
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/*.hpp"
+        "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/async/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/events/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/network/*.hpp"
         "${LaunchDarklyInternalSdk_SOURCE_DIR}/include/launchdarkly/serialization/*.hpp"
@@ -35,6 +36,7 @@ set(INTERNAL_SOURCES
         serialization/value_mapping.cpp
         serialization/json_evaluation_result.cpp
         serialization/json_fdv2_events.cpp
+        fdv2_protocol_handler.cpp
         serialization/json_sdk_data_set.cpp
         serialization/json_segment.cpp
         serialization/json_primitives.cpp

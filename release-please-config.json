@@ -31,6 +31,14 @@
       ],
       "force-tag-creation": true
     },
+    "libs/server-sdk-dynamodb-source": {
+      "component": "launchdarkly-cpp-server-dynamodb-source",
+      "bump-minor-pre-major": true,
+      "extra-files": [
+        "CMakeLists.txt"
+      ],
+      "force-tag-creation": true
+    },
     "libs/server-sdk-otel": {
       "component": "launchdarkly-cpp-server-otel",
       "bump-minor-pre-major": true,

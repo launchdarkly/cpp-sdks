@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../data_interfaces/destination/idestination.hpp"
+#include "../../data_interfaces/destination/itransactional_destination.hpp"
 #include "../../data_interfaces/store/istore.hpp"
 #include "../dependency_tracker/dependency_tracker.hpp"
 
@@ -13,7 +13,7 @@
 
 namespace launchdarkly::server_side::data_components {
 
-class ChangeNotifier final : public data_interfaces::IDestination,
+class ChangeNotifier final : public data_interfaces::ITransactionalDestination,
                              public IChangeNotifier {
    public:
     template <typename Storage>
@@ -26,7 +26,8 @@ class ChangeNotifier final : public data_interfaces::IDestination,
     using SharedCollection =
         std::unordered_map<std::string, SharedItem<Storage>>;
 
-    ChangeNotifier(IDestination& sink, data_interfaces::IStore const& source);
+    ChangeNotifier(data_interfaces::ITransactionalDestination& sink,
+                   data_interfaces::IStore const& source);
 
     std::unique_ptr<IConnection> OnFlagChange(ChangeHandler handler) override;
 
@@ -35,6 +36,8 @@ class ChangeNotifier final : public data_interfaces::IDestination,
                 data_model::FlagDescriptor flag) override;
     void Upsert(std::string const& key,
                 data_model::SegmentDescriptor segment) override;
+    void Apply(data_model::ChangeSet<data_interfaces::ChangeSetData> change_set)
+        override;
 
     [[nodiscard]] std::string const& Identity() const override;
 
@@ -105,7 +108,7 @@ class ChangeNotifier final : public data_interfaces::IDestination,
 
     void NotifyChanges(DependencySet changes);
 
-    IDestination& sink_;
+    data_interfaces::ITransactionalDestination& sink_;
     data_interfaces::IStore const& source_;
 
     boost::signals2::signal<void(std::shared_ptr<ChangeSet>)> signals_;

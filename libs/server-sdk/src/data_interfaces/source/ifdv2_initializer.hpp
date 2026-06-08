@@ -2,6 +2,8 @@
 
 #include "fdv2_source_result.hpp"
 
+#include <launchdarkly/async/promise.hpp>
+
 #include <string>
 
 namespace launchdarkly::server_side::data_interfaces {
@@ -14,13 +16,13 @@ namespace launchdarkly::server_side::data_interfaces {
 class IFDv2Initializer {
    public:
     /**
-     * Run the initializer to completion. Blocks until a result is available.
-     * Called at most once per instance.
+     * Returns a Future that resolves with the result once the initializer
+     * completes. Called at most once per instance.
      *
      * Close() may be called from another thread to unblock Run(), in which
-     * case Run() returns FDv2SourceResult::Shutdown.
+     * case the future resolves with FDv2SourceResult::Shutdown.
      */
-    virtual FDv2SourceResult Run() = 0;
+    virtual async::Future<FDv2SourceResult> Run() = 0;
 
     /**
      * Unblocks any in-progress Run() call, causing it to return

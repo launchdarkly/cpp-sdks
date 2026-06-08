@@ -21,7 +21,8 @@ jobs:
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
       # Create any releases first, then create tags, and then optionally create any new PRs.
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+      # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +79,8 @@ jobs:
             fi
           done
 
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4.4.0
+      # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         if: >-
           steps.release.outputs['libs/client-sdk--release_created'] != 'true' &&
           steps.release.outputs['libs/server-sdk--release_created'] != 'true' &&
