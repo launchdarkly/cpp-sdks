@@ -187,8 +187,21 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
 void FDv2StreamingSynchronizer::State::OnResponse(
     HttpResponseHeader const& headers) {
     auto const it = headers.find("X-LD-FD-Fallback");
-    bool const directive =
-        it != headers.end() && boost::iequals(it->value(), "true");
+    if (it == headers.end() || !boost::iequals(it->value(), "true")) {
+        std::lock_guard lock(mutex_);
+        latest_fdv1_fallback_.reset();
+        return;
+    }
+    data_interfaces::FDv1FallbackDirective directive;
+    auto const ttl_it = headers.find("X-LD-FD-Fallback-TTL");
+    if (ttl_it != headers.end()) {
+        auto const value = ttl_it->value();
+        auto const ttl = data_interfaces::FDv1FallbackDirective::ParseTtl(
+            std::string_view{value.data(), value.size()});
+        if (ttl) {
+            directive.ttl = *ttl;
+        }
+    }
     std::lock_guard lock(mutex_);
     latest_fdv1_fallback_ = directive;
 }

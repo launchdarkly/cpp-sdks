@@ -1097,7 +1097,7 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagSwitchesToFdv1Adapter) {
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}}};
-            r.fdv1_fallback = true;
+            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
             return r;
         }()});
     auto fdv2_factory =
@@ -1136,7 +1136,7 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagWithoutAdapterTransitionsOff) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
                     /*status_code=*/418, "directive",
                     std::chrono::system_clock::now()}}};
-            r.fdv1_fallback = true;
+            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
             return r;
         }()});
     auto fdv2_factory =
@@ -1167,7 +1167,7 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
             FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
             /*status_code=*/418, "directive",
             std::chrono::system_clock::now()}}};
-    init_result.fdv1_fallback = true;
+    init_result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
     auto initializer =
         std::make_unique<MockInitializer>(std::move(init_result));
 
@@ -1221,7 +1221,7 @@ TEST(FDv2DataSystemTest,
             ItemChange{"flagA", data_model::FlagDescriptor(flag_a)},
         },
         MakeSelector(1, "state-1"));
-    init_result.fdv1_fallback = true;
+    init_result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
 
     auto initializer =
         std::make_unique<MockInitializer>(std::move(init_result));
@@ -1278,7 +1278,7 @@ TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}}};
-            r.fdv1_fallback = true;
+            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
             return r;
         }()});
     auto fdv2_factory =
@@ -1294,7 +1294,7 @@ TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
                     /*status_code=*/418, "self-trigger",
                     std::chrono::system_clock::now()}}};
-            r.fdv1_fallback = true;
+            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
             return r;
         }()});
     auto fdv1_factory =
