@@ -1097,7 +1097,8 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagSwitchesToFdv1Adapter) {
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}}};
-            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
             return r;
         }()});
     auto fdv2_factory =
@@ -1124,11 +1125,13 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagSwitchesToFdv1Adapter) {
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
 
-TEST(FDv2DataSystemTest, SynchronizerFdv1FlagWithoutAdapterTransitionsOff) {
+TEST(FDv2DataSystemTest,
+     SynchronizerFdv1FlagWithoutAdapterDoesNotTransitionToOff) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
     data_components::DataSourceStatusManager status_manager;
 
+    // Directive with TTL=0: indefinite, no automatic FDv2 retry.
     auto fdv2_sync =
         std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
             FDv2SourceResult r{
@@ -1136,7 +1139,8 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagWithoutAdapterTransitionsOff) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
                     /*status_code=*/418, "directive",
                     std::chrono::system_clock::now()}}};
-            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
             return r;
         }()});
     auto fdv2_factory =
@@ -1152,7 +1156,7 @@ TEST(FDv2DataSystemTest, SynchronizerFdv1FlagWithoutAdapterTransitionsOff) {
     ds.Initialize();
     ioc.run();
 
-    EXPECT_EQ(DataSourceStatus::DataSourceState::kOff,
+    EXPECT_NE(DataSourceStatus::DataSourceState::kOff,
               status_manager.Status().State());
 }
 
@@ -1167,7 +1171,8 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
             FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
             /*status_code=*/418, "directive",
             std::chrono::system_clock::now()}}};
-    init_result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+    init_result.fdv1_fallback =
+        data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
     auto initializer =
         std::make_unique<MockInitializer>(std::move(init_result));
 
@@ -1221,7 +1226,8 @@ TEST(FDv2DataSystemTest,
             ItemChange{"flagA", data_model::FlagDescriptor(flag_a)},
         },
         MakeSelector(1, "state-1"));
-    init_result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+    init_result.fdv1_fallback =
+        data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
 
     auto initializer =
         std::make_unique<MockInitializer>(std::move(init_result));
@@ -1264,6 +1270,105 @@ TEST(FDv2DataSystemTest,
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
 
+TEST(FDv2DataSystemTest, DirectiveTtlElapseRebuildsFDv2) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // First build: source emits the directive with a 1s TTL. Second build
+    // (after the TTL elapses): source returns no results, so MockSynchronizer
+    // emits Shutdown and orchestration ends.
+    auto first_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{
+                FDv2SourceResult::Interrupted{FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
+                    /*status_code=*/418, "directive",
+                    std::chrono::system_clock::now()}}};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{1}};
+            return r;
+        }()});
+    auto second_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> sources;
+    sources.push_back(std::move(first_sync));
+    sources.push_back(std::move(second_sync));
+    auto factory =
+        std::make_unique<MultiShotSynchronizerFactory>(std::move(sources));
+    auto* factory_ptr = factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    EXPECT_EQ(2, factory_ptr->build_count_);
+}
+
+TEST(FDv2DataSystemTest, FDv2RecoveryAfterTtlAcceptsValidData) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // First build: emits directive with 1s TTL. Second build (recovery):
+    // emits a valid ChangeSet without the directive.
+    auto first_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{[]() {
+            FDv2SourceResult r{
+                FDv2SourceResult::Interrupted{FDv2SourceResult::ErrorInfo{
+                    FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
+                    /*status_code=*/418, "directive",
+                    std::chrono::system_clock::now()}}};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{1}};
+            return r;
+        }()});
+
+    data_model::Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    auto second_sync = std::make_unique<MockSynchronizer>(
+        std::vector<FDv2SourceResult>{MakeFullChangeSetResult(
+            ChangeSetData{
+                ItemChange{"flagA", data_model::FlagDescriptor(flag_a)},
+            },
+            MakeSelector(1, "state-1"))});
+
+    std::vector<std::unique_ptr<IFDv2Synchronizer>> sources;
+    sources.push_back(std::move(first_sync));
+    sources.push_back(std::move(second_sync));
+    auto factory =
+        std::make_unique<MultiShotSynchronizerFactory>(std::move(sources));
+    auto* factory_ptr = factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(factory));
+
+    FDv2DataSystem ds({}, std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    // FDv2 was rebuilt after the TTL elapsed, the new ChangeSet was applied,
+    // and the data system is in the valid state.
+    EXPECT_EQ(2, factory_ptr->build_count_);
+    EXPECT_TRUE(ds.Initialized());
+    EXPECT_EQ(DataSourceStatus::DataSourceState::kValid,
+              status_manager.Status().State());
+    auto fetched = ds.GetFlag("flagA");
+    ASSERT_TRUE(fetched);
+}
+
 TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
@@ -1278,7 +1383,8 @@ TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}}};
-            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
             return r;
         }()});
     auto fdv2_factory =
@@ -1294,7 +1400,8 @@ TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
                     FDv2SourceResult::ErrorInfo::ErrorKind::kErrorResponse,
                     /*status_code=*/418, "self-trigger",
                     std::chrono::system_clock::now()}}};
-            r.fdv1_fallback = data_interfaces::FDv1FallbackDirective{};
+            r.fdv1_fallback =
+                data_interfaces::FDv1FallbackDirective{std::chrono::seconds{0}};
             return r;
         }()});
     auto fdv1_factory =
