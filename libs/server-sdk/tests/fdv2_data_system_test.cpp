@@ -1203,6 +1203,67 @@ TEST(FDv2DataSystemTest, InitializerFdv1FlagSwitchesToFdv1Adapter) {
     EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
 }
 
+TEST(FDv2DataSystemTest,
+     InitializerChangeSetWithDirectiveAppliesBasisThenSwitches) {
+    auto logger = MakeNullLogger();
+    boost::asio::io_context ioc;
+    data_components::DataSourceStatusManager status_manager;
+
+    // Initializer returns a Full changeset carrying a flag AND the directive.
+    // The basis must be applied to the store before the orchestrator
+    // transitions to the FDv1 fallback.
+    data_model::Flag flag_a;
+    flag_a.key = "flagA";
+    flag_a.version = 1;
+
+    FDv2SourceResult init_result = MakeFullChangeSetResult(
+        ChangeSetData{
+            ItemChange{"flagA", data_model::FlagDescriptor(flag_a)},
+        },
+        MakeSelector(1, "state-1"));
+    init_result.fdv1_fallback = true;
+
+    auto initializer =
+        std::make_unique<MockInitializer>(std::move(init_result));
+
+    std::vector<std::unique_ptr<IFDv2InitializerFactory>> initializers;
+    initializers.push_back(
+        std::make_unique<OneShotInitializerFactory>(std::move(initializer)));
+
+    auto fdv2_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto fdv2_factory =
+        std::make_unique<OneShotSynchronizerFactory>(std::move(fdv2_sync));
+    auto* fdv2_factory_ptr = fdv2_factory.get();
+
+    auto fdv1_sync =
+        std::make_unique<MockSynchronizer>(std::vector<FDv2SourceResult>{});
+    auto fdv1_factory =
+        std::make_unique<FDv1FallbackOneShotFactory>(std::move(fdv1_sync));
+    auto* fdv1_factory_ptr = fdv1_factory.get();
+
+    std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> synchronizers;
+    synchronizers.push_back(std::move(fdv2_factory));
+    synchronizers.push_back(std::move(fdv1_factory));
+
+    FDv2DataSystem ds(std::move(initializers), std::move(synchronizers),
+                      /*fallback_condition_factory=*/nullptr,
+                      /*recovery_condition_factory=*/nullptr,
+                      ioc.get_executor(), &status_manager, logger);
+    ds.Initialize();
+    ioc.run();
+
+    // Basis applied before the switch.
+    EXPECT_TRUE(ds.Initialized());
+    auto fetched = ds.GetFlag("flagA");
+    ASSERT_TRUE(fetched);
+    EXPECT_EQ(1u, fetched->version);
+
+    // FDv2 synchronizer skipped; FDv1 adapter built and ran.
+    EXPECT_EQ(0, fdv2_factory_ptr->build_count_);
+    EXPECT_EQ(1, fdv1_factory_ptr->build_count_);
+}
+
 TEST(FDv2DataSystemTest, FDv1SourceSelfDirectiveDoesNotRebuildFDv1) {
     auto logger = MakeNullLogger();
     boost::asio::io_context ioc;
