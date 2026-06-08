@@ -834,7 +834,7 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithTtlHeaderParsesValue) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        "http://localhost", MakeHttpProperties(), std::nullopt,
         1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
@@ -863,7 +863,7 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger,
-        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        "http://localhost", MakeHttpProperties(), std::nullopt,
         1s);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
