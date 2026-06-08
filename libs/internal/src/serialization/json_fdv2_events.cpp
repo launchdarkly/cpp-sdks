@@ -132,6 +132,9 @@ tl::expected<std::optional<Goodbye>, JsonError> tag_invoke(
     Goodbye goodbye{};
 
     PARSE_CONDITIONAL_FIELD(goodbye.reason, obj, "reason");
+    PARSE_CONDITIONAL_FIELD(goodbye.protocol_fallback_ttl, obj,
+                            "protocolFallbackTTL");
+    PARSE_CONDITIONAL_FIELD(goodbye.retry_after, obj, "retryAfter");
 
     return goodbye;
 }

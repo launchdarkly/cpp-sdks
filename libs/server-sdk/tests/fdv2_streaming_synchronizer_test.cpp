@@ -827,3 +827,60 @@ TEST(FDv2StreamingSynchronizerTest, ErrorAfterDirectiveCarriesFlag) {
         std::holds_alternative<FDv2SourceResult::Interrupted>(result->value));
     EXPECT_TRUE(result->fdv1_fallback);
 }
+
+TEST(FDv2StreamingSynchronizerTest, DirectiveWithTtlHeaderParsesValue) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    // Server sends the directive with an explicit TTL.
+    boost::beast::http::response_header<> headers;
+    headers.result(200);
+    headers.set("X-LD-FD-Fallback", "true");
+    headers.set("X-LD-FD-Fallback-TTL", "60");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    // Drive the source to surface the directive on its next result.
+    FDv2StreamingSynchronizerTestPeer::OnError(
+        synchronizer,
+        sse::Error{sse::errors::ReadTimeout{std::chrono::milliseconds(0)}});
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    // The parsed TTL is propagated on the result.
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result->fdv1_fallback);
+    EXPECT_EQ(std::chrono::seconds{60}, result->fdv1_fallback->ttl);
+}
+
+TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger,
+        MakeEndpoints("http://localhost"), MakeHttpProperties(), std::nullopt,
+        1s);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    // Server sends the directive with no TTL header.
+    boost::beast::http::response_header<> headers;
+    headers.result(200);
+    headers.set("X-LD-FD-Fallback", "true");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    // Drive the source to surface the directive on its next result.
+    FDv2StreamingSynchronizerTestPeer::OnError(
+        synchronizer,
+        sse::Error{sse::errors::ReadTimeout{std::chrono::milliseconds(0)}});
+    auto result = synchronizer.Next(data_model::Selector{}).WaitForResult(2s);
+
+    // The result carries the default TTL.
+    ASSERT_TRUE(result.has_value());
+    ASSERT_TRUE(result->fdv1_fallback);
+    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result->fdv1_fallback->ttl);
+}
