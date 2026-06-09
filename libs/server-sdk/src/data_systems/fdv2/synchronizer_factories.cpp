@@ -71,7 +71,8 @@ FDv1StreamingAdapterFactory::Build() {
     auto fdv1_source = std::make_unique<StreamingDataSource>(
         executor_, logger_, *status_manager_, endpoints_, streaming_,
         http_properties_);
-    return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source));
+    return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source),
+                                                     status_manager_);
 }
 
 FDv1PollingAdapterFactory::FDv1PollingAdapterFactory(
@@ -93,7 +94,8 @@ FDv1PollingAdapterFactory::Build() {
     auto fdv1_source = std::make_unique<PollingDataSource>(
         executor_, logger_, *status_manager_, endpoints_, polling_,
         http_properties_);
-    return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source));
+    return std::make_unique<FDv1AdapterSynchronizer>(std::move(fdv1_source),
+                                                     status_manager_);
 }
 
 }  // namespace launchdarkly::server_side::data_systems
