@@ -5,6 +5,7 @@
 namespace launchdarkly::server_side::data_systems {
 
 using data_interfaces::FDv2SourceResult;
+using DataSourceState = DataSourceStatus::DataSourceState;
 
 // ----- State -----
 
@@ -132,9 +133,32 @@ std::string const& FDv1AdapterSynchronizer::ConvertingDestination::Identity()
 // ----- FDv1AdapterSynchronizer -----
 
 FDv1AdapterSynchronizer::FDv1AdapterSynchronizer(
-    std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source)
+    std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source,
+    data_components::DataSourceStatusManager* status_manager)
     : state_(std::make_shared<State>()),
       destination_(std::make_unique<ConvertingDestination>(state_)),
+      status_manager_(status_manager),
+      status_subscription_(status_manager_->OnDataSourceStatusChange(
+          [state = state_](DataSourceStatus status) {
+              auto error = status.LastError();
+              if (!error) {
+                  return;
+              }
+              switch (status.State()) {
+                  case DataSourceState::kInterrupted:
+                      state->Notify(FDv2SourceResult{
+                          FDv2SourceResult::Interrupted{*error}});
+                      break;
+                  case DataSourceState::kOff:
+                      state->Notify(FDv2SourceResult{
+                          FDv2SourceResult::TerminalError{*error}});
+                      break;
+                  case DataSourceState::kInitializing:
+                  case DataSourceState::kValid:
+                      // No FDv2 result for these states.
+                      break;
+              }
+          })),
       fdv1_source_(std::move(fdv1_source)) {}
 
 FDv1AdapterSynchronizer::~FDv1AdapterSynchronizer() {

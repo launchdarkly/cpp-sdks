@@ -1,10 +1,12 @@
 #pragma once
 
+#include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/destination/idestination.hpp"
 #include "../../data_interfaces/source/idata_synchronizer.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
 #include <launchdarkly/async/promise.hpp>
+#include <launchdarkly/connection.hpp>
 
 #include <deque>
 #include <memory>
@@ -23,15 +25,26 @@ namespace launchdarkly::server_side::data_systems {
  * and fdv1_fallback = false (the directive does not re-fire from FDv1 data).
  *
  * Threading: Next() and Close() may be called from any thread; only one
- * Next() may be outstanding at a time. The adapter blocks in its destructor
- * waiting for the FDv1 source's ShutdownAsync completion, so no callbacks
- * are in flight when the wrapped source is destroyed.
+ * Next() may be outstanding at a time. Member declaration order ensures
+ * the wrapped FDv1 source destructs before destination_ and state_, so any
+ * in-flight FDv1 callbacks land on live objects during teardown. This
+ * relies on the wrapped IDataSynchronizer blocking on its in-flight work
+ * in its destructor.
  */
 class FDv1AdapterSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
    public:
-    explicit FDv1AdapterSynchronizer(
-        std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source);
+    /**
+     * @param fdv1_source The wrapped source. Must have been constructed
+     *                    with status_manager as its status sink so that
+     *                    state changes flow back into this adapter.
+     * @param status_manager Non-owning. The caller retains ownership and
+     *                       must keep it alive for the lifetime of the
+     *                       wrapped source and this adapter.
+     */
+    FDv1AdapterSynchronizer(
+        std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source,
+        data_components::DataSourceStatusManager* status_manager);
 
     ~FDv1AdapterSynchronizer() override;
 
@@ -95,9 +108,17 @@ class FDv1AdapterSynchronizer final
         std::weak_ptr<State> state_;
     };
 
-    // const after construction.
+    // shared_ptr so async callbacks that may fire after this is destroyed
+    // can hold their own reference.
     std::shared_ptr<State> const state_;
     std::unique_ptr<ConvertingDestination> const destination_;
+
+    // Non-owning. The caller must keep this alive for the lifetime of
+    // the wrapped source, which holds a reference to it for status
+    // reporting.
+    data_components::DataSourceStatusManager* const status_manager_;
+    std::unique_ptr<IConnection> const status_subscription_;
+
     std::unique_ptr<data_interfaces::IDataSynchronizer> const fdv1_source_;
 
     // Thread-safe primitive.
