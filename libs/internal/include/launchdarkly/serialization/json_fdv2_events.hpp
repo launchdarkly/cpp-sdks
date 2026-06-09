@@ -47,8 +47,6 @@ struct Goodbye {
     std::optional<std::string> reason;
     // If set, indicates an FDv1 fallback directive with this TTL in seconds.
     std::optional<std::int64_t> protocol_fallback_ttl;
-    // If set, indicates a Retry-After equivalent in seconds.
-    std::optional<std::int64_t> retry_after;
 };
 
 struct FDv2Error {
