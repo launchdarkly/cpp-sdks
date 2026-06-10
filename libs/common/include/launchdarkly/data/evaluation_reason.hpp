@@ -190,6 +190,9 @@ class EvaluationReason {
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 
+    friend bool operator==(EvaluationReason const& lhs,
+                           EvaluationReason const& rhs);
+
    private:
     enum Kind kind_;
     std::optional<enum ErrorKind> error_kind_;

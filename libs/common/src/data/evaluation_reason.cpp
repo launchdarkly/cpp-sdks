@@ -164,7 +164,7 @@ bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
     return lhs.Kind() == rhs.Kind() && lhs.ErrorKind() == rhs.ErrorKind() &&
            lhs.InExperiment() == rhs.InExperiment() &&
            lhs.BigSegmentsStatus() == rhs.BigSegmentsStatus() &&
-           lhs.BigSegmentStatus() == rhs.BigSegmentStatus() &&
+           lhs.big_segment_status_ == rhs.big_segment_status_ &&
            lhs.PrerequisiteKey() == rhs.PrerequisiteKey() &&
            lhs.RuleId() == rhs.RuleId() && lhs.RuleIndex() == rhs.RuleIndex();
 }
