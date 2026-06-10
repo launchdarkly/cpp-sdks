@@ -53,8 +53,9 @@ EvaluationDetail<Value> Evaluator::Evaluate(
     EventScope const& event_scope) {
     EvaluationStack stack{big_segment_store_};
     auto detail = Evaluate(std::nullopt, flag, context, stack, event_scope);
-    if (auto status = stack.BigSegmentsStatus()) {
-        return WithBigSegmentsStatus(std::move(detail), *status);
+    auto status = stack.BigSegmentsStatus();
+    if (status != EvaluationReason::BigSegmentsStatus::kNone) {
+        return WithBigSegmentsStatus(std::move(detail), status);
     }
     return detail;
 }

@@ -84,10 +84,11 @@ class EvaluationStack {
     void RecordBigSegmentsStatus(enum EvaluationReason::BigSegmentsStatus status);
 
     /**
-     * @return The aggregated Big Segments status, or std::nullopt if no Big
-     * Segment was queried during this evaluation.
+     * @return The aggregated Big Segments status, or kNone if no Big Segment
+     * was queried during this evaluation.
      */
-    [[nodiscard]] std::optional<enum EvaluationReason::BigSegmentsStatus> BigSegmentsStatus() const;
+    [[nodiscard]] enum EvaluationReason::BigSegmentsStatus BigSegmentsStatus()
+        const;
 
     /**
      * Returns the cached membership for a context key looked up earlier in this
@@ -121,7 +122,8 @@ class EvaluationStack {
     std::unordered_set<std::string> segments_seen_;
 
     data_components::BigSegmentStoreWrapper* big_segment_store_;
-    std::optional<enum EvaluationReason::BigSegmentsStatus> big_segments_status_;
+    enum EvaluationReason::BigSegmentsStatus big_segments_status_ =
+        EvaluationReason::BigSegmentsStatus::kNone;
     // Keyed by unhashed context key. Empty until the first Big Segment lookup.
     std::unordered_map<std::string, integrations::Membership> memberships_;
     std::unordered_set<std::string> store_error_keys_;

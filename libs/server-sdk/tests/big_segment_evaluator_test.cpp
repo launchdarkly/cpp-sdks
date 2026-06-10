@@ -207,7 +207,8 @@ TEST_F(BigSegmentEvaluatorTest, ContextLacksUnboundedKindDoesNotQuery) {
         eval.Evaluate(store_.GetFlag("flag")->item.value(), AliceUser());
 
     EXPECT_EQ(*detail, Value(true));
-    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(), std::nullopt);
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kNone);
     EXPECT_EQ(fake_->MembershipCalls(), 0);
 }
 

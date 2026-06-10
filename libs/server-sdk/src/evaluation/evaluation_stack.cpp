@@ -9,14 +9,16 @@ namespace {
 // independent of the enum's underlying values.
 int Precedence(enum EvaluationReason::BigSegmentsStatus status) {
     switch (status) {
-        case EvaluationReason::BigSegmentsStatus::kHealthy:
+        case EvaluationReason::BigSegmentsStatus::kNone:
             return 0;
-        case EvaluationReason::BigSegmentsStatus::kStale:
+        case EvaluationReason::BigSegmentsStatus::kHealthy:
             return 1;
-        case EvaluationReason::BigSegmentsStatus::kStoreError:
+        case EvaluationReason::BigSegmentsStatus::kStale:
             return 2;
-        case EvaluationReason::BigSegmentsStatus::kNotConfigured:
+        case EvaluationReason::BigSegmentsStatus::kStoreError:
             return 3;
+        case EvaluationReason::BigSegmentsStatus::kNotConfigured:
+            return 4;
     }
     return 0;
 }
@@ -56,14 +58,14 @@ data_components::BigSegmentStoreWrapper* EvaluationStack::BigSegmentStore()
     return big_segment_store_;
 }
 
-void EvaluationStack::RecordBigSegmentsStatus(enum EvaluationReason::BigSegmentsStatus status) {
-    if (!big_segments_status_ ||
-        Precedence(status) > Precedence(*big_segments_status_)) {
+void EvaluationStack::RecordBigSegmentsStatus(
+    enum EvaluationReason::BigSegmentsStatus status) {
+    if (Precedence(status) > Precedence(big_segments_status_)) {
         big_segments_status_ = status;
     }
 }
 
-std::optional<enum EvaluationReason::BigSegmentsStatus>
+enum EvaluationReason::BigSegmentsStatus
 EvaluationStack::BigSegmentsStatus() const {
     return big_segments_status_;
 }
