@@ -227,9 +227,10 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
             auto parsed = boost::json::value_to<tl::expected<
                 enum EvaluationReason::BigSegmentsStatus, JsonError>>(
                 big_segments_status_iter->value());
-            if (parsed) {
-                big_segments_status = *parsed;
+            if (!parsed) {
+                return tl::make_unexpected(parsed.error());
             }
+            big_segments_status = parsed.value();
         }
 
         return EvaluationReason{*kind,
