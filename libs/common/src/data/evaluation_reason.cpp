@@ -32,6 +32,10 @@ EvaluationReason::BigSegmentsStatus() const {
     return big_segments_status_;
 }
 
+std::optional<std::string> EvaluationReason::BigSegmentStatus() const {
+    return std::nullopt;
+}
+
 EvaluationReason::EvaluationReason(
     enum Kind kind,
     std::optional<enum ErrorKind> error_kind,

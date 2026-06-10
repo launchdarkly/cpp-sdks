@@ -92,6 +92,13 @@ class EvaluationReason {
     [[nodiscard]] std::optional<BigSegmentsStatus> BigSegmentsStatus() const;
 
     /**
+     * Deprecated; use BigSegmentsStatus() instead. Always returns std::nullopt.
+     */
+    [[deprecated("use BigSegmentsStatus()")]] [[nodiscard]] std::optional<
+        std::string>
+    BigSegmentStatus() const;
+
+    /**
      * The index of the matched rule (0 for the first), if the kind was
      * `"RULE_MATCH"`.
      */
