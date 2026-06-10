@@ -27,8 +27,9 @@ bool EvaluationReason::InExperiment() const {
     return in_experiment_;
 }
 
-std::optional<std::string> EvaluationReason::BigSegmentStatus() const {
-    return big_segment_status_;
+std::optional<enum EvaluationReason::BigSegmentsStatus>
+EvaluationReason::BigSegmentsStatus() const {
+    return big_segments_status_;
 }
 
 EvaluationReason::EvaluationReason(
@@ -38,14 +39,14 @@ EvaluationReason::EvaluationReason(
     std::optional<std::string> rule_id,
     std::optional<std::string> prerequisite_key,
     bool in_experiment,
-    std::optional<std::string> big_segment_status)
+    std::optional<enum BigSegmentsStatus> big_segments_status)
     : kind_(kind),
       error_kind_(error_kind),
       rule_index_(rule_index),
       rule_id_(std::move(rule_id)),
       prerequisite_key_(std::move(prerequisite_key)),
       in_experiment_(in_experiment),
-      big_segment_status_(std::move(big_segment_status)) {}
+      big_segments_status_(std::move(big_segments_status)) {}
 
 EvaluationReason::EvaluationReason(enum ErrorKind error_kind)
     : EvaluationReason(Kind::kError,
@@ -105,8 +106,8 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
         out << " prerequisiteKey: " << reason.prerequisite_key_.value();
     }
     out << " inExperiment: " << reason.in_experiment_;
-    if (reason.big_segment_status_.has_value()) {
-        out << " bigSegmentStatus: " << reason.big_segment_status_.value();
+    if (reason.big_segments_status_.has_value()) {
+        out << " bigSegmentsStatus: " << reason.big_segments_status_.value();
     }
     out << "}";
     return out;
@@ -115,7 +116,7 @@ std::ostream& operator<<(std::ostream& out, EvaluationReason const& reason) {
 bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs) {
     return lhs.Kind() == rhs.Kind() && lhs.ErrorKind() == rhs.ErrorKind() &&
            lhs.InExperiment() == rhs.InExperiment() &&
-           lhs.BigSegmentStatus() == rhs.BigSegmentStatus() &&
+           lhs.BigSegmentsStatus() == rhs.BigSegmentsStatus() &&
            lhs.PrerequisiteKey() == rhs.PrerequisiteKey() &&
            lhs.RuleId() == rhs.RuleId() && lhs.RuleIndex() == rhs.RuleIndex();
 }
@@ -144,6 +145,26 @@ std::ostream& operator<<(std::ostream& out,
             break;
         case EvaluationReason::Kind::kError:
             out << "ERROR";
+            break;
+    }
+    return out;
+}
+
+std::ostream& operator<<(
+    std::ostream& out,
+    enum EvaluationReason::BigSegmentsStatus const& status) {
+    switch (status) {
+        case EvaluationReason::BigSegmentsStatus::kHealthy:
+            out << "HEALTHY";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kStale:
+            out << "STALE";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kNotConfigured:
+            out << "NOT_CONFIGURED";
+            break;
+        case EvaluationReason::BigSegmentsStatus::kStoreError:
+            out << "STORE_ERROR";
             break;
     }
     return out;

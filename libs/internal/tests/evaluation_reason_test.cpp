@@ -18,7 +18,7 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
                                "\"ruleId\":\"RULE_ID\","
                                "\"prerequisiteKey\":\"PREREQ_KEY\","
                                "\"inExperiment\":true,"
-                               "\"bigSegmentStatus\":\"STORE_ERROR\""
+                               "\"bigSegmentsStatus\":\"STORE_ERROR\""
                                "}"));
 
     EXPECT_EQ(EvaluationReason::Kind::kOff, reason.value().Kind());
@@ -27,7 +27,8 @@ TEST(EvaluationReasonsTests, FromJsonAllFields) {
     EXPECT_EQ(12, reason.value().RuleIndex());
     EXPECT_EQ("RULE_ID", reason.value().RuleId());
     EXPECT_EQ("PREREQ_KEY", reason.value().PrerequisiteKey());
-    EXPECT_EQ("STORE_ERROR", reason.value().BigSegmentStatus());
+    EXPECT_EQ(EvaluationReason::BigSegmentsStatus::kStoreError,
+              reason.value().BigSegmentsStatus());
     EXPECT_TRUE(reason.value().InExperiment());
 }
 
@@ -43,7 +44,7 @@ TEST(EvaluationReasonsTests, FromMinimalJson) {
     EXPECT_EQ(std::nullopt, reason.value().RuleIndex());
     EXPECT_EQ(std::nullopt, reason.value().RuleId());
     EXPECT_EQ(std::nullopt, reason.value().PrerequisiteKey());
-    EXPECT_EQ(std::nullopt, reason.value().BigSegmentStatus());
+    EXPECT_EQ(std::nullopt, reason.value().BigSegmentsStatus());
     EXPECT_FALSE(reason.value().InExperiment());
 }
 
