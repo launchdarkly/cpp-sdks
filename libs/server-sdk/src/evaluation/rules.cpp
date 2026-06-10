@@ -2,9 +2,87 @@
 #include "bucketing.hpp"
 #include "operators.hpp"
 
+#include "../data_components/big_segments/big_segment_store_wrapper.hpp"
+
+#include <optional>
+#include <string>
+#include <utility>
+
 namespace launchdarkly::server_side::evaluation {
 
 using namespace data_model;
+
+namespace {
+
+// Maps the wrapper's internal status to the public reason status.
+enum EvaluationReason::BigSegmentsStatus ToBigSegmentsStatus(
+    data_components::BigSegmentsStatus status) {
+    switch (status) {
+        case data_components::BigSegmentsStatus::kHealthy:
+            return EvaluationReason::BigSegmentsStatus::kHealthy;
+        case data_components::BigSegmentsStatus::kStale:
+            return EvaluationReason::BigSegmentsStatus::kStale;
+        case data_components::BigSegmentsStatus::kStoreError:
+            return EvaluationReason::BigSegmentsStatus::kStoreError;
+        case data_components::BigSegmentsStatus::kNotConfigured:
+            return EvaluationReason::BigSegmentsStatus::kNotConfigured;
+    }
+    return EvaluationReason::BigSegmentsStatus::kHealthy;
+}
+
+std::string MakeBigSegmentRef(Segment const& segment) {
+    return segment.key + ".g" + std::to_string(*segment.generation);
+}
+
+// Evaluates membership in an unbounded (Big) segment. Returns true/false for a
+// definite match/non-match, or std::nullopt when the membership has no entry
+// for this segment and evaluation should fall through to the segment's rules.
+std::optional<bool> MatchBigSegment(Segment const& segment,
+                                    Context const& context,
+                                    EvaluationStack& stack) {
+    if (!segment.generation) {
+        // Without a generation the segment ref can't be formed.
+        stack.RecordBigSegmentsStatus(EvaluationReason::BigSegmentsStatus::kNotConfigured);
+        return false;
+    }
+
+    // An absent or empty unboundedContextKind defaults to "user".
+    ContextKind const kind =
+        (segment.unboundedContextKind && !segment.unboundedContextKind->t.empty())
+            ? *segment.unboundedContextKind
+            : ContextKind{"user"};
+    Value const& context_key = context.Get(kind, "key");
+    if (!context_key.IsString()) {
+        return false;
+    }
+    std::string const& key = context_key.AsString();
+
+    if (stack.DidStoreError(key)) {
+        return false;
+    }
+
+    integrations::Membership const* membership = stack.FindMembership(key);
+    if (!membership) {
+        auto* store = stack.BigSegmentStore();
+        if (!store) {
+            stack.RecordBigSegmentsStatus(EvaluationReason::BigSegmentsStatus::kNotConfigured);
+            return false;
+        }
+        auto result = store->GetMembership(key);
+        auto const status = ToBigSegmentsStatus(result.status);
+        stack.RecordBigSegmentsStatus(status);
+        if (status == EvaluationReason::BigSegmentsStatus::kStoreError) {
+            stack.RecordStoreError(key);
+            return false;
+        }
+        stack.StoreMembership(key, std::move(result.membership));
+        membership = stack.FindMembership(key);
+    }
+
+    return membership->CheckMembership(MakeBigSegmentRef(segment));
+}
+
+}  // namespace
 
 bool MaybeNegate(Clause const& clause, bool value) {
     if (clause.negate) {
@@ -161,8 +239,11 @@ tl::expected<bool, Error> Contains(Segment const& segment,
     }
 
     if (segment.unbounded) {
-        // TODO(sc209881): set big segment status to NOT_CONFIGURED.
-        return false;
+        if (auto match = MatchBigSegment(segment, context, stack)) {
+            return *match;
+        }
+        // The membership had no entry for this segment; fall through to its
+        // include/exclude lists and rules.
     }
 
     if (IsTargeted(context, segment.included, segment.includedContexts)) {
