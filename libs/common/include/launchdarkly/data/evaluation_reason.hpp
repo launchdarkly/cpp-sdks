@@ -59,16 +59,18 @@ class EvaluationReason {
      * Do not change these values. They must remain stable for the C API.
      */
     enum class BigSegmentsStatus {
+        // The evaluation did not query any Big Segments.
+        kNone = 0,
         // The query was successful and the segment state is up to date.
-        kHealthy = 0,
+        kHealthy = 1,
         // The query was successful, but the segment state may not be up to
         // date.
-        kStale = 1,
+        kStale = 2,
         // Big Segments could not be queried because the SDK configuration did
         // not include a Big Segment store.
-        kNotConfigured = 2,
+        kNotConfigured = 3,
         // The query failed, for instance due to a database error.
-        kStoreError = 3,
+        kStoreError = 4,
     };
 
     friend std::ostream& operator<<(std::ostream& out,
@@ -87,12 +89,14 @@ class EvaluationReason {
 
     /**
      * The validity of the Big Segment information used in this evaluation, or
-     * std::nullopt if the evaluation did not query any Big Segments.
+     * BigSegmentsStatus::kNone if the evaluation did not query any Big
+     * Segments.
      */
-    [[nodiscard]] std::optional<BigSegmentsStatus> BigSegmentsStatus() const;
+    [[nodiscard]] enum BigSegmentsStatus BigSegmentsStatus() const;
 
     /**
-     * Deprecated; use BigSegmentsStatus() instead. Always returns std::nullopt.
+     * Deprecated; use BigSegmentsStatus() instead. Returns the string passed
+     * to the deprecated string-typed constructor, or std::nullopt otherwise.
      */
     [[deprecated("use BigSegmentsStatus()")]] [[nodiscard]] std::optional<
         std::string>
@@ -131,7 +135,19 @@ class EvaluationReason {
                      std::optional<std::string> rule_id,
                      std::optional<std::string> prerequisite_key,
                      bool in_experiment,
-                     std::optional<enum BigSegmentsStatus> big_segments_status);
+                     enum BigSegmentsStatus big_segments_status);
+
+    /**
+     * Deprecated; use the overload taking @ref BigSegmentsStatus instead.
+     */
+    [[deprecated("use the BigSegmentsStatus overload")]] EvaluationReason(
+        enum Kind kind,
+        std::optional<enum ErrorKind> error_kind,
+        std::optional<std::size_t> rule_index,
+        std::optional<std::string> rule_id,
+        std::optional<std::string> prerequisite_key,
+        bool in_experiment,
+        std::optional<std::string> big_segment_status);
 
     explicit EvaluationReason(enum ErrorKind error_kind);
 
@@ -181,7 +197,8 @@ class EvaluationReason {
     std::optional<std::string> rule_id_;
     std::optional<std::string> prerequisite_key_;
     bool in_experiment_;
-    std::optional<enum BigSegmentsStatus> big_segments_status_;
+    enum BigSegmentsStatus big_segments_status_;
+    std::optional<std::string> big_segment_status_;
 };
 
 bool operator==(EvaluationReason const& lhs, EvaluationReason const& rhs);

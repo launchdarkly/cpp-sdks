@@ -44,7 +44,8 @@ TEST(EvaluationReasonsTests, FromMinimalJson) {
     EXPECT_EQ(std::nullopt, reason.value().RuleIndex());
     EXPECT_EQ(std::nullopt, reason.value().RuleId());
     EXPECT_EQ(std::nullopt, reason.value().PrerequisiteKey());
-    EXPECT_EQ(std::nullopt, reason.value().BigSegmentsStatus());
+    EXPECT_EQ(EvaluationReason::BigSegmentsStatus::kNone,
+              reason.value().BigSegmentsStatus());
     EXPECT_FALSE(reason.value().InExperiment());
 }
 

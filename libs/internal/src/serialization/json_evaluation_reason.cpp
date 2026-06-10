@@ -158,6 +158,10 @@ void tag_invoke(boost::json::value_from_tag const& unused,
 
     auto& str = json_value.emplace_string();
     switch (status) {
+        case EvaluationReason::BigSegmentsStatus::kNone:
+            // kNone is the "no status" sentinel and shouldn't reach the wire;
+            // callers guard. If it ever does, emit an empty string.
+            break;
         case EvaluationReason::BigSegmentsStatus::kHealthy:
             str = "HEALTHY";
             break;
@@ -221,8 +225,7 @@ tl::expected<EvaluationReason, JsonError> tag_invoke(
             ValueOrDefault(in_experiment_iter, json_obj.end(), false);
 
         auto* big_segments_status_iter = json_obj.find("bigSegmentsStatus");
-        std::optional<enum EvaluationReason::BigSegmentsStatus>
-            big_segments_status;
+        auto big_segments_status = EvaluationReason::BigSegmentsStatus::kNone;
         if (big_segments_status_iter != json_obj.end()) {
             auto parsed = boost::json::value_to<tl::expected<
                 enum EvaluationReason::BigSegmentsStatus, JsonError>>(
@@ -254,9 +257,10 @@ void tag_invoke(boost::json::value_from_tag const& unused,
     if (auto error_kind = reason.ErrorKind()) {
         obj.emplace("errorKind", boost::json::value_from(*error_kind));
     }
-    if (auto big_segments_status = reason.BigSegmentsStatus()) {
+    auto big_segments_status = reason.BigSegmentsStatus();
+    if (big_segments_status != EvaluationReason::BigSegmentsStatus::kNone) {
         obj.emplace("bigSegmentsStatus",
-                    boost::json::value_from(*big_segments_status));
+                    boost::json::value_from(big_segments_status));
     }
     if (auto rule_id = reason.RuleId()) {
         obj.emplace("ruleId", *rule_id);
