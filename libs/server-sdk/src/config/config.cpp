@@ -10,6 +10,7 @@ Config::Config(std::string sdk_key,
                built::Events events,
                std::optional<std::string> application_tag,
                config::built::DataSystemConfig data_system_config,
+               std::optional<config::built::BigSegmentsConfig> big_segments,
                built::HttpProperties http_properties,
                std::vector<std::shared_ptr<hooks::Hook>> hooks)
     : sdk_key_(std::move(sdk_key)),
@@ -18,6 +19,7 @@ Config::Config(std::string sdk_key,
       events_(std::move(events)),
       application_tag_(std::move(application_tag)),
       data_system_config_(std::move(data_system_config)),
+      big_segments_(std::move(big_segments)),
       http_properties_(std::move(http_properties)),
       hooks_(std::move(hooks)) {}
 
@@ -39,6 +41,11 @@ std::optional<std::string> const& Config::ApplicationTag() const {
 
 config::built::DataSystemConfig const& Config::DataSystemConfig() const {
     return data_system_config_;
+}
+
+std::optional<config::built::BigSegmentsConfig> const& Config::BigSegments()
+    const {
+    return big_segments_;
 }
 
 built::HttpProperties const& Config::HttpProperties() const {

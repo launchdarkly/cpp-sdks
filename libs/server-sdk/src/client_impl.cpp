@@ -39,16 +39,16 @@ auto const kDataSourceShutdownWait = std::chrono::milliseconds(100);
 
 // Hook method names
 // Method names for hooks
-static const std::string kMethodBoolVariation = "BoolVariation";
-static const std::string kMethodBoolVariationDetail = "BoolVariationDetail";
-static const std::string kMethodStringVariation = "StringVariation";
-static const std::string kMethodStringVariationDetail = "StringVariationDetail";
-static const std::string kMethodDoubleVariation = "DoubleVariation";
-static const std::string kMethodDoubleVariationDetail = "DoubleVariationDetail";
-static const std::string kMethodIntVariation = "IntVariation";
-static const std::string kMethodIntVariationDetail = "IntVariationDetail";
-static const std::string kMethodJsonVariation = "JsonVariation";
-static const std::string kMethodJsonVariationDetail = "JsonVariationDetail";
+static std::string const kMethodBoolVariation = "BoolVariation";
+static std::string const kMethodBoolVariationDetail = "BoolVariationDetail";
+static std::string const kMethodStringVariation = "StringVariation";
+static std::string const kMethodStringVariationDetail = "StringVariationDetail";
+static std::string const kMethodDoubleVariation = "DoubleVariation";
+static std::string const kMethodDoubleVariationDetail = "DoubleVariationDetail";
+static std::string const kMethodIntVariation = "IntVariation";
+static std::string const kMethodIntVariationDetail = "IntVariationDetail";
+static std::string const kMethodJsonVariation = "JsonVariation";
+static std::string const kMethodJsonVariationDetail = "JsonVariationDetail";
 
 static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
@@ -141,7 +141,15 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                                           ioc_.get_executor(),
                                           http_properties_,
                                           logger_)),
-      evaluator_(logger_, *data_system_),
+      big_segment_store_(
+          config_.BigSegments()
+              ? std::make_shared<data_components::BigSegmentStoreWrapper>(
+                    *config_.BigSegments(),
+                    ioc_.get_executor(),
+                    logger_)
+              : nullptr),
+      big_segment_status_provider_(big_segment_store_),
+      evaluator_(logger_, *data_system_, big_segment_store_.get()),
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
@@ -156,6 +164,10 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
         launchdarkly::config::shared::built::TlsOptions::VerifyMode::
             kVerifyNone) {
         LD_LOG(logger_, LogLevel::kInfo) << "TLS peer verification disabled";
+    }
+
+    if (big_segment_store_) {
+        big_segment_store_->Start();
     }
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
@@ -247,9 +259,9 @@ void ClientImpl::TrackInternal(Context const& ctx,
                                std::optional<Value> data,
                                std::optional<double> metric_value,
                                hooks::HookContext const& hook_context) {
-
     if (!ctx.Valid()) {
-        LD_LOG(logger_, LogLevel::kWarn) << "Track method called with an invalid context";
+        LD_LOG(logger_, LogLevel::kWarn)
+            << "Track method called with an invalid context";
         return;
     }
     // Execute afterTrack hooks before moving the data
@@ -259,8 +271,8 @@ void ClientImpl::TrackInternal(Context const& ctx,
     // In this SDK the data is type-safe, and will be enqueued, so it makes
     // minimal functional difference.
     if (!config_.Hooks().empty()) {
-        hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
-                                                  data, hook_context, std::nullopt);
+        hooks::TrackSeriesContext series_context(
+            ctx, event_name, metric_value, data, hook_context, std::nullopt);
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 
@@ -367,7 +379,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     std::optional<hooks::EvaluationSeriesExecutor> executor;
     if (!config_.Hooks().empty()) {
         hooks::EvaluationSeriesContext series_context(
-            key, context, default_value, method_name, hook_context, std::nullopt);
+            key, context, default_value, method_name, hook_context,
+            std::nullopt);
         // Executor only created if there are hooks.
         executor.emplace(config_.Hooks(), logger_);
         executor->BeforeEvaluation(series_context);
@@ -380,7 +393,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         // Execute afterEvaluation hooks
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
-                key, context, default_value, method_name, hook_context, std::nullopt);
+                key, context, default_value, method_name, hook_context,
+                std::nullopt);
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -401,7 +415,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         // Execute afterEvaluation hooks
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
-                key, context, default_value, method_name, hook_context, std::nullopt);
+                key, context, default_value, method_name, hook_context,
+                std::nullopt);
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -416,7 +431,8 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     // Execute afterEvaluation hooks
     if (executor) {
         hooks::EvaluationSeriesContext series_context(
-            key, context, default_value, method_name, hook_context, std::nullopt);
+            key, context, default_value, method_name, hook_context,
+            std::nullopt);
         executor->AfterEvaluation(series_context, detail);
     }
 
@@ -484,7 +500,8 @@ EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
     bool default_value) {
     static hooks::HookContext empty_hook_context;
     return VariationDetail<bool>(ctx, Value::Type::kBool, key, default_value,
-                                 empty_hook_context, kMethodBoolVariationDetail);
+                                 empty_hook_context,
+                                 kMethodBoolVariationDetail);
 }
 
 EvaluationDetail<bool> ClientImpl::BoolVariationDetail(
@@ -508,8 +525,8 @@ bool ClientImpl::BoolVariation(Context const& ctx,
                                IClient::FlagKey const& key,
                                bool default_value,
                                hooks::HookContext const& hook_context) {
-    return Variation(ctx, Value::Type::kBool, key, default_value,
-                     hook_context, kMethodBoolVariation);
+    return Variation(ctx, Value::Type::kBool, key, default_value, hook_context,
+                     kMethodBoolVariation);
 }
 
 EvaluationDetail<std::string> ClientImpl::StringVariationDetail(
@@ -540,10 +557,11 @@ std::string ClientImpl::StringVariation(Context const& ctx,
                      empty_hook_context, kMethodStringVariation);
 }
 
-std::string ClientImpl::StringVariation(Context const& ctx,
-                                        IClient::FlagKey const& key,
-                                        std::string default_value,
-                                        hooks::HookContext const& hook_context) {
+std::string ClientImpl::StringVariation(
+    Context const& ctx,
+    IClient::FlagKey const& key,
+    std::string default_value,
+    hooks::HookContext const& hook_context) {
     return Variation(ctx, Value::Type::kString, key, default_value,
                      hook_context, kMethodStringVariation);
 }
@@ -654,6 +672,10 @@ Value ClientImpl::JsonVariation(Context const& ctx,
 
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
+}
+
+IBigSegmentStoreStatusProvider& ClientImpl::BigSegmentStoreStatus() {
+    return big_segment_status_provider_;
 }
 
 ClientImpl::~ClientImpl() {

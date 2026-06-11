@@ -7,6 +7,7 @@
 #include <launchdarkly/value.hpp>
 
 #include <launchdarkly/server_side/all_flags_state.hpp>
+#include <launchdarkly/server_side/big_segment_store_status.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
 #include <chrono>
@@ -277,10 +278,11 @@ class IClient {
      * @return The variation for the selected context, or default_value if the
      * flag is disabled in the LaunchDarkly control panel
      */
-    virtual std::string StringVariation(Context const& ctx,
-                                        FlagKey const& key,
-                                        std::string default_value,
-                                        hooks::HookContext const& hook_context) = 0;
+    virtual std::string StringVariation(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) = 0;
 
     /**
      * Returns the string value of a feature flag for a given flag key, in an
@@ -499,6 +501,14 @@ class IClient {
      */
     virtual IDataSourceStatusProvider& DataSourceStatus() = 0;
 
+    /**
+     * Returns an interface for querying the status of a Big Segment store and
+     * subscribing to status changes. If Big Segments are not configured, the
+     * provider reports the store as unavailable.
+     * @return A Big Segment store status provider.
+     */
+    virtual IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() = 0;
+
     virtual ~IClient() = default;
     IClient(IClient const& item) = delete;
     IClient(IClient&& item) = delete;
@@ -574,10 +584,11 @@ class Client : public IClient {
                                 FlagKey const& key,
                                 std::string default_value) override;
 
-    std::string StringVariation(Context const& ctx,
-                                FlagKey const& key,
-                                std::string default_value,
-                                hooks::HookContext const& hook_context) override;
+    std::string StringVariation(
+        Context const& ctx,
+        FlagKey const& key,
+        std::string default_value,
+        hooks::HookContext const& hook_context) override;
 
     EvaluationDetail<std::string> StringVariationDetail(
         Context const& ctx,
@@ -649,6 +660,8 @@ class Client : public IClient {
         hooks::HookContext const& hook_context) override;
 
     IDataSourceStatusProvider& DataSourceStatus() override;
+
+    IBigSegmentStoreStatusProvider& BigSegmentStoreStatus() override;
 
     /**
      * Returns the version of the SDK.

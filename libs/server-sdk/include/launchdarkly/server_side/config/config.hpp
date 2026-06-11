@@ -1,10 +1,12 @@
 #pragma once
 
 #include <launchdarkly/server_side/config/built/all_built.hpp>
+#include <launchdarkly/server_side/config/built/big_segments_config.hpp>
 #include <launchdarkly/server_side/config/built/data_system/data_system_config.hpp>
 #include <launchdarkly/server_side/hooks/hook.hpp>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace launchdarkly::server_side {
@@ -17,6 +19,7 @@ struct Config {
            config::built::Events events,
            std::optional<std::string> application_tag,
            config::built::DataSystemConfig data_system_config,
+           std::optional<config::built::BigSegmentsConfig> big_segments,
            config::built::HttpProperties http_properties,
            std::vector<std::shared_ptr<hooks::Hook>> hooks);
 
@@ -30,6 +33,13 @@ struct Config {
     [[nodiscard]] std::optional<std::string> const& ApplicationTag() const;
 
     config::built::DataSystemConfig const& DataSystemConfig() const;
+
+    /**
+     * The Big Segments configuration, or nullopt if Big Segments were not
+     * enabled via ConfigBuilder::BigSegments.
+     */
+    [[nodiscard]] std::optional<config::built::BigSegmentsConfig> const&
+    BigSegments() const;
 
     [[nodiscard]] config::built::HttpProperties const& HttpProperties() const;
 
@@ -46,6 +56,7 @@ struct Config {
     std::optional<std::string> application_tag_;
     config::built::Events events_;
     config::built::DataSystemConfig data_system_config_;
+    std::optional<config::built::BigSegmentsConfig> big_segments_;
     config::built::HttpProperties http_properties_;
     std::vector<std::shared_ptr<hooks::Hook>> hooks_;
 };
