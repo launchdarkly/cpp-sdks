@@ -47,41 +47,53 @@ class MockFDv1Source final : public IDataSynchronizer {
     bool bootstrap_was_null = false;
 };
 
+// Returns a SourceBuilder closure that constructs a MockFDv1Source. The
+// resulting source and the adapter's internal status manager are exposed
+// through the out parameters; pass nullptr for either to skip.
+FDv1AdapterSynchronizer::SourceBuilder MakeMockBuilder(
+    MockFDv1Source** out_source = nullptr,
+    DataSourceStatusManager** out_sm = nullptr) {
+    return [out_source, out_sm](DataSourceStatusManager& sm) {
+        if (out_sm) {
+            *out_sm = &sm;
+        }
+        auto source = std::make_unique<MockFDv1Source>(sm);
+        if (out_source) {
+            *out_source = source.get();
+        }
+        return source;
+    };
+}
+
 }  // namespace
 
 TEST(FDv1AdapterSynchronizerTest, FirstNextStartsFDv1Source) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     auto future = adapter.Next(data_model::Selector{});
 
-    EXPECT_EQ(1, source_ptr->start_count);
-    EXPECT_TRUE(source_ptr->bootstrap_was_null);
+    EXPECT_EQ(1, source->start_count);
+    EXPECT_TRUE(source->bootstrap_was_null);
     EXPECT_FALSE(future.IsFinished());
 }
 
 TEST(FDv1AdapterSynchronizerTest, SecondNextDoesNotRestartSource) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     auto first = adapter.Next(data_model::Selector{});
-    source_ptr->destination_->Init(data_model::SDKDataSet{});
+    source->destination_->Init(data_model::SDKDataSet{});
     auto result = first.WaitForResult(1s);
     ASSERT_TRUE(result.has_value());
     adapter.Next(data_model::Selector{});
 
-    EXPECT_EQ(1, source_ptr->start_count);
+    EXPECT_EQ(1, source->start_count);
 }
 
 TEST(FDv1AdapterSynchronizerTest, FDv1InitProducesFullChangeSet) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     auto future = adapter.Next(data_model::Selector{});
 
@@ -90,7 +102,7 @@ TEST(FDv1AdapterSynchronizerTest, FDv1InitProducesFullChangeSet) {
     flag.key = "flagA";
     flag.version = 1;
     data_set.flags.emplace("flagA", data_model::FlagDescriptor(flag));
-    source_ptr->destination_->Init(std::move(data_set));
+    source->destination_->Init(std::move(data_set));
 
     auto result = future.WaitForResult(1s);
     ASSERT_TRUE(result.has_value());
@@ -104,17 +116,15 @@ TEST(FDv1AdapterSynchronizerTest, FDv1InitProducesFullChangeSet) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, FDv1UpsertProducesPartialChangeSet) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     // Flag upsert.
     auto flag_future = adapter.Next(data_model::Selector{});
     data_model::Flag flag;
     flag.key = "flagA";
     flag.version = 2;
-    source_ptr->destination_->Upsert("flagA", data_model::FlagDescriptor(flag));
+    source->destination_->Upsert("flagA", data_model::FlagDescriptor(flag));
 
     auto flag_result = flag_future.WaitForResult(1s);
     ASSERT_TRUE(flag_result.has_value());
@@ -131,8 +141,7 @@ TEST(FDv1AdapterSynchronizerTest, FDv1UpsertProducesPartialChangeSet) {
     data_model::Segment seg;
     seg.key = "segA";
     seg.version = 3;
-    source_ptr->destination_->Upsert("segA",
-                                     data_model::SegmentDescriptor(seg));
+    source->destination_->Upsert("segA", data_model::SegmentDescriptor(seg));
 
     auto seg_result = seg_future.WaitForResult(1s);
     ASSERT_TRUE(seg_result.has_value());
@@ -146,9 +155,7 @@ TEST(FDv1AdapterSynchronizerTest, FDv1UpsertProducesPartialChangeSet) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, ClosePendingNextReturnsShutdown) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder());
 
     auto future = adapter.Next(data_model::Selector{});
     EXPECT_FALSE(future.IsFinished());
@@ -162,39 +169,33 @@ TEST(FDv1AdapterSynchronizerTest, ClosePendingNextReturnsShutdown) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, CloseShutsDownStartedFDv1Source) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     adapter.Next(data_model::Selector{});
     adapter.Close();
 
-    EXPECT_EQ(1, source_ptr->shutdown_count);
+    EXPECT_EQ(1, source->shutdown_count);
 }
 
 TEST(FDv1AdapterSynchronizerTest, CloseWithoutStartDoesNotShutDownFDv1Source) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     // No Next() call — FDv1 source was never started.
     adapter.Close();
 
-    EXPECT_EQ(0, source_ptr->start_count);
-    EXPECT_EQ(0, source_ptr->shutdown_count);
+    EXPECT_EQ(0, source->start_count);
+    EXPECT_EQ(0, source->shutdown_count);
 }
 
 TEST(FDv1AdapterSynchronizerTest, QueuedResultsDrainInFifoOrder) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    auto* source_ptr = source.get();
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
 
     // Start the source by satisfying one Next() with an Init.
     auto first = adapter.Next(data_model::Selector{});
-    source_ptr->destination_->Init(data_model::SDKDataSet{});
+    source->destination_->Init(data_model::SDKDataSet{});
     first.WaitForResult(1s);
 
     // Two upserts queue with no Next() in flight.
@@ -202,8 +203,8 @@ TEST(FDv1AdapterSynchronizerTest, QueuedResultsDrainInFifoOrder) {
     flag_a.key = "a";
     data_model::Flag flag_b;
     flag_b.key = "b";
-    source_ptr->destination_->Upsert("a", data_model::FlagDescriptor(flag_a));
-    source_ptr->destination_->Upsert("b", data_model::FlagDescriptor(flag_b));
+    source->destination_->Upsert("a", data_model::FlagDescriptor(flag_a));
+    source->destination_->Upsert("b", data_model::FlagDescriptor(flag_b));
 
     // Drain in FIFO order.
     auto r1 = adapter.Next(data_model::Selector{}).WaitForResult(1s);
@@ -221,15 +222,14 @@ TEST(FDv1AdapterSynchronizerTest, QueuedResultsDrainInFifoOrder) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, InterruptedStatusProducesInterruptedResult) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    DataSourceStatusManager* source_manager = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(nullptr, &source_manager));
 
     // kInterrupted from kInitializing stays kInitializing; drive past first.
-    status_manager.SetState(DataSourceStatus::DataSourceState::kValid);
+    source_manager->SetState(DataSourceStatus::DataSourceState::kValid);
 
     auto future = adapter.Next(data_model::Selector{});
-    status_manager.SetState(
+    source_manager->SetState(
         DataSourceStatus::DataSourceState::kInterrupted,
         DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError, "boom");
 
@@ -243,12 +243,11 @@ TEST(FDv1AdapterSynchronizerTest, InterruptedStatusProducesInterruptedResult) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, OffStatusProducesTerminalErrorResult) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    DataSourceStatusManager* source_manager = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(nullptr, &source_manager));
 
     auto future = adapter.Next(data_model::Selector{});
-    status_manager.SetState(
+    source_manager->SetState(
         DataSourceStatus::DataSourceState::kOff,
         DataSourceStatus::ErrorInfo::ErrorKind::kErrorResponse, "401");
 
@@ -262,9 +261,7 @@ TEST(FDv1AdapterSynchronizerTest, OffStatusProducesTerminalErrorResult) {
 }
 
 TEST(FDv1AdapterSynchronizerTest, NextAfterCloseReturnsShutdown) {
-    DataSourceStatusManager status_manager;
-    auto source = std::make_unique<MockFDv1Source>(status_manager);
-    FDv1AdapterSynchronizer adapter(std::move(source), &status_manager);
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder());
 
     adapter.Close();
     auto future = adapter.Next(data_model::Selector{});
