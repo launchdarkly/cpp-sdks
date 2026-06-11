@@ -9,20 +9,9 @@ using DataSourceState = DataSourceStatus::DataSourceState;
 
 // ----- State -----
 
-bool FDv1AdapterSynchronizer::State::TryStart() {
-    std::lock_guard lock(mutex_);
-    if (started_ || closed_) {
-        return false;
-    }
-    started_ = true;
-    return true;
-}
-
-bool FDv1AdapterSynchronizer::State::MarkClosed() {
-    std::lock_guard lock(mutex_);
-    closed_ = true;
-    return started_;
-}
+FDv1AdapterSynchronizer::State::State(
+    async::Future<std::monostate> closed_future)
+    : closed_future_(std::move(closed_future)) {}
 
 async::Future<FDv2SourceResult> FDv1AdapterSynchronizer::State::GetNext() {
     std::lock_guard lock(mutex_);
@@ -52,7 +41,7 @@ void FDv1AdapterSynchronizer::State::Notify(FDv2SourceResult result) {
     std::optional<async::Promise<FDv2SourceResult>> promise;
     {
         std::lock_guard lock(mutex_);
-        if (closed_) {
+        if (closed_future_.IsFinished()) {
             return;
         }
         if (pending_promise_) {
@@ -135,7 +124,7 @@ std::string const& FDv1AdapterSynchronizer::ConvertingDestination::Identity()
 FDv1AdapterSynchronizer::FDv1AdapterSynchronizer(
     std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source,
     data_components::DataSourceStatusManager* status_manager)
-    : state_(std::make_shared<State>()),
+    : state_(std::make_shared<State>(close_promise_.GetFuture())),
       destination_(std::make_unique<ConvertingDestination>(state_)),
       status_manager_(status_manager),
       status_subscription_(status_manager_->OnDataSourceStatusChange(
@@ -172,9 +161,13 @@ async::Future<FDv2SourceResult> FDv1AdapterSynchronizer::Next(
         return async::MakeFuture(
             FDv2SourceResult{FDv2SourceResult::Shutdown{}});
     }
-    if (state_->TryStart()) {
-        fdv1_source_->StartAsync(destination_.get(),
-                                 /*bootstrap_data=*/nullptr);
+    {
+        std::lock_guard lock(lifecycle_mutex_);
+        if (!started_) {
+            started_ = true;
+            fdv1_source_->StartAsync(destination_.get(),
+                                     /*bootstrap_data=*/nullptr);
+        }
     }
     auto result_future = state_->GetNext();
     if (result_future.IsFinished()) {
@@ -198,7 +191,10 @@ void FDv1AdapterSynchronizer::Close() {
     if (!close_promise_.Resolve(std::monostate{})) {
         return;
     }
-    if (state_->MarkClosed()) {
+    std::lock_guard lock(lifecycle_mutex_);
+    bool const was_started = started_;
+    started_ = true;
+    if (was_started) {
         fdv1_source_->ShutdownAsync([] {});
     }
 }
