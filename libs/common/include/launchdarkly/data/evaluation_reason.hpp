@@ -56,6 +56,27 @@ class EvaluationReason {
     friend std::ostream& operator<<(std::ostream& out, ErrorKind const& kind);
 
     /**
+     * Do not change these values. They must remain stable for the C API.
+     */
+    enum class BigSegmentsStatus {
+        // The evaluation did not query any Big Segments.
+        kNone = 0,
+        // The query was successful and the segment state is up to date.
+        kHealthy = 1,
+        // The query was successful, but the segment state may not be up to
+        // date.
+        kStale = 2,
+        // Big Segments could not be queried because the SDK configuration did
+        // not include a Big Segment store.
+        kNotConfigured = 3,
+        // The query failed, for instance due to a database error.
+        kStoreError = 4,
+    };
+
+    friend std::ostream& operator<<(std::ostream& out,
+                                    BigSegmentsStatus const& status);
+
+    /**
      * @return The general category of the reason.
      */
     [[nodiscard]] enum Kind const& Kind() const;
@@ -65,6 +86,21 @@ class EvaluationReason {
      * Kind::kError.
      */
     [[nodiscard]] std::optional<ErrorKind> ErrorKind() const;
+
+    /**
+     * The validity of the Big Segment information used in this evaluation, or
+     * BigSegmentsStatus::kNone if the evaluation did not query any Big
+     * Segments.
+     */
+    [[nodiscard]] enum BigSegmentsStatus BigSegmentsStatus() const;
+
+    /**
+     * Deprecated; use BigSegmentsStatus() instead. Returns the string passed
+     * to the deprecated string-typed constructor, or std::nullopt otherwise.
+     */
+    [[deprecated("use BigSegmentsStatus()")]] [[nodiscard]] std::optional<
+        std::string>
+    BigSegmentStatus() const;
 
     /**
      * The index of the matched rule (0 for the first), if the kind was
@@ -93,29 +129,25 @@ class EvaluationReason {
      */
     [[nodiscard]] bool InExperiment() const;
 
-    /**
-     * Describes the validity of Big Segment information, if and only if the
-     * flag evaluation required querying at least one Big Segment.
-     *
-     * - `"HEALTHY"`: The Big Segment query involved in the flag evaluation was
-     * successful, and the segment state is considered up to date.
-     * - `"STALE"`: The Big Segment query involved in the flag evaluation was
-     * successful, but the segment state may not be up to date
-     * - `"NOT_CONFIGURED"`: Big Segments could not be queried for the flag
-     * evaluation because the SDK configuration did not include a Big Segment
-     * store.
-     * - `"STORE_ERROR"`: The Big Segment query involved in the flag evaluation
-     * failed, for instance due to a database error.
-     */
-    [[nodiscard]] std::optional<std::string> BigSegmentStatus() const;
-
     EvaluationReason(enum Kind kind,
                      std::optional<enum ErrorKind> error_kind,
                      std::optional<std::size_t> rule_index,
                      std::optional<std::string> rule_id,
                      std::optional<std::string> prerequisite_key,
                      bool in_experiment,
-                     std::optional<std::string> big_segment_status);
+                     enum BigSegmentsStatus big_segments_status);
+
+    /**
+     * Deprecated; use the overload taking @ref BigSegmentsStatus instead.
+     */
+    [[deprecated("use the BigSegmentsStatus overload")]] EvaluationReason(
+        enum Kind kind,
+        std::optional<enum ErrorKind> error_kind,
+        std::optional<std::size_t> rule_index,
+        std::optional<std::string> rule_id,
+        std::optional<std::string> prerequisite_key,
+        bool in_experiment,
+        std::optional<std::string> big_segment_status);
 
     explicit EvaluationReason(enum ErrorKind error_kind);
 
@@ -158,6 +190,9 @@ class EvaluationReason {
     friend std::ostream& operator<<(std::ostream& out,
                                     EvaluationReason const& reason);
 
+    friend bool operator==(EvaluationReason const& lhs,
+                           EvaluationReason const& rhs);
+
    private:
     enum Kind kind_;
     std::optional<enum ErrorKind> error_kind_;
@@ -165,6 +200,7 @@ class EvaluationReason {
     std::optional<std::string> rule_id_;
     std::optional<std::string> prerequisite_key_;
     bool in_experiment_;
+    enum BigSegmentsStatus big_segments_status_;
     std::optional<std::string> big_segment_status_;
 };
 
