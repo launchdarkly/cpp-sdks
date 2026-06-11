@@ -21,6 +21,12 @@ config::builders::DataSystemBuilder& ConfigBuilder::DataSystem() {
     return data_system_builder_;
 }
 
+ConfigBuilder& ConfigBuilder::BigSegments(
+    config::builders::BigSegmentsBuilder builder) {
+    big_segments_builder_ = std::move(builder);
+    return *this;
+}
+
 config::builders::HttpPropertiesBuilder& ConfigBuilder::HttpProperties() {
     return http_properties_builder_;
 }
@@ -76,6 +82,15 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
 
     auto logging = logging_config_builder_.Build();
 
+    std::optional<config::built::BigSegmentsConfig> big_segments_config;
+    if (big_segments_builder_) {
+        auto built = big_segments_builder_->Build();
+        if (!built) {
+            return tl::make_unexpected(built.error());
+        }
+        big_segments_config = std::move(*built);
+    }
+
     return {tl::in_place,
             sdk_key,
             logging,
@@ -83,6 +98,7 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
             *events_config,
             app_tag,
             std::move(*data_system_config),
+            std::move(big_segments_config),
             std::move(http_properties),
             hooks_};
 }
