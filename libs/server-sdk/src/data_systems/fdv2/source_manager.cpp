@@ -11,9 +11,11 @@ SourceManager::SourceManager(
     std::vector<std::unique_ptr<IFDv2SynchronizerFactory>> factories) {
     synchronizers_.reserve(factories.size());
     for (auto& factory : factories) {
-        synchronizers_.push_back(
-            SynchronizerFactoryWithState{std::move(factory), State::kAvailable,
-                                         /*is_fdv1_fallback=*/false});
+        bool const is_fdv1_fallback = factory->IsFDv1Fallback();
+        synchronizers_.push_back(SynchronizerFactoryWithState{
+            std::move(factory),
+            is_fdv1_fallback ? State::kBlocked : State::kAvailable,
+            is_fdv1_fallback});
     }
 }
 
@@ -41,6 +43,22 @@ void SourceManager::BlockCurrentSynchronizer() {
 }
 
 void SourceManager::ResetSourceIndex() {
+    synchronizer_index_ = -1;
+}
+
+void SourceManager::SwitchToFDv1Fallback() {
+    for (auto& entry : synchronizers_) {
+        entry.state =
+            entry.is_fdv1_fallback ? State::kAvailable : State::kBlocked;
+    }
+    synchronizer_index_ = -1;
+}
+
+void SourceManager::SwitchBackToFDv2() {
+    for (auto& entry : synchronizers_) {
+        entry.state =
+            entry.is_fdv1_fallback ? State::kBlocked : State::kAvailable;
+    }
     synchronizer_index_ = -1;
 }
 

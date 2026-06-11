@@ -13,6 +13,7 @@
 namespace launchdarkly::server_side::data_systems {
 
 static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
+static char const* const kFDv1FallbackTtlHeader = "X-LD-FD-Fallback-TTL";
 
 static char const* const kErrorParsingBody =
     "Could not parse FDv2 polling response";
@@ -34,10 +35,22 @@ static ErrorInfo MakeError(ErrorKind kind,
                      std::chrono::system_clock::now()};
 }
 
-static bool ReadFDv1FallbackDirective(
-    network::HttpResult::HeadersType const& headers) {
+static std::optional<data_interfaces::FDv1FallbackDirective>
+ReadFDv1FallbackDirective(network::HttpResult::HeadersType const& headers) {
     auto const it = headers.find(kFDv1FallbackHeader);
-    return it != headers.end() && boost::iequals(it->second, "true");
+    if (it == headers.end() || !boost::iequals(it->second, "true")) {
+        return std::nullopt;
+    }
+    data_interfaces::FDv1FallbackDirective directive;
+    auto const ttl_it = headers.find(kFDv1FallbackTtlHeader);
+    if (ttl_it != headers.end()) {
+        auto const ttl =
+            data_interfaces::FDv1FallbackDirective::ParseTtl(ttl_it->second);
+        if (ttl) {
+            directive.ttl = *ttl;
+        }
+    }
+    return directive;
 }
 
 network::HttpRequest MakeFDv2PollRequest(
@@ -116,7 +129,12 @@ static FDv2SourceResult ParseFDv2PollEvents(
                 FDv2SourceResult::ChangeSet{std::move(*typed)}};
         }
         if (auto* goodbye = std::get_if<Goodbye>(&result)) {
-            return FDv2SourceResult{FDv2SourceResult::Goodbye{goodbye->reason}};
+            FDv2SourceResult result{FDv2SourceResult::Goodbye{goodbye->reason}};
+            if (goodbye->protocol_fallback_ttl) {
+                result.fdv1_fallback = data_interfaces::FDv1FallbackDirective{
+                    std::chrono::seconds(*goodbye->protocol_fallback_ttl)};
+            }
+            return result;
         }
         if (auto* error = std::get_if<FDv2ProtocolHandler::Error>(&result)) {
             if (error->kind == FDv2ProtocolHandler::Error::Kind::kServerError) {
@@ -183,7 +201,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
             MakeError(ErrorKind::kNetworkError, 0, std::move(error_msg))}};
     }
 
-    bool const fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
+    auto fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
 
     if (res.Status() == 304) {
         return FDv2SourceResult{
@@ -215,7 +233,11 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     << identity << ": " << interrupted->error.Message();
             }
         }
-        result.fdv1_fallback = fdv1_fallback;
+        // An explicit directive parsed from the response body (e.g. via a
+        // goodbye event) takes precedence over the HTTP response header.
+        if (!result.fdv1_fallback) {
+            result.fdv1_fallback = fdv1_fallback;
+        }
         return result;
     }
 

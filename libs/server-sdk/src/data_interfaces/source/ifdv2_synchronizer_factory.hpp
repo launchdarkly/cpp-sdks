@@ -14,6 +14,8 @@ class IFDv2SynchronizerFactory {
    public:
     virtual std::unique_ptr<IFDv2Synchronizer> Build() = 0;
 
+    [[nodiscard]] virtual bool IsFDv1Fallback() const { return false; }
+
     virtual ~IFDv2SynchronizerFactory() = default;
     IFDv2SynchronizerFactory(IFDv2SynchronizerFactory const&) = delete;
     IFDv2SynchronizerFactory(IFDv2SynchronizerFactory&&) = delete;

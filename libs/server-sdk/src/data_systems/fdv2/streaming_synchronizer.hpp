@@ -147,7 +147,8 @@ class FDv2StreamingSynchronizer final
         bool started_ = false;
         bool closed_ = false;
         // FDv1 fallback directive from the most recent SSE response.
-        bool latest_fdv1_fallback_ = false;
+        std::optional<data_interfaces::FDv1FallbackDirective>
+            latest_fdv1_fallback_;
         data_model::Selector latest_selector_;
         std::optional<boost::urls::url> base_url_;
         std::shared_ptr<sse::Client> sse_client_;
