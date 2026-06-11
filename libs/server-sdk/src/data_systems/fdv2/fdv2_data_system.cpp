@@ -198,6 +198,9 @@ void FDv2DataSystem::OnInitializerResult(
             if (source_manager_.AvailableSynchronizerCount() > 0) {
                 LD_LOG(logger_, LogLevel::kInfo)
                     << Identity() << ": FDv1 fallback engaged";
+                // No basis yet; reuse the flag to fall through to
+                // StartSynchronizers so the FDv1 fallback synchronizer can
+                // produce it.
                 got_basis = true;
             } else {
                 LD_LOG(logger_, LogLevel::kWarn)
@@ -430,6 +433,11 @@ void FDv2DataSystem::ScheduleFDv2RetryLocked(std::chrono::seconds ttl) {
     if (ttl == std::chrono::seconds::zero()) {
         return;
     }
+    // Cancel any in-flight retry and start fresh; CancellationSource is
+    // one-shot, so reusing the same source for successive schedules would
+    // leak prior timers.
+    fdv1_fallback_retry_cancel_.Cancel();
+    fdv1_fallback_retry_cancel_ = async::CancellationSource{};
     LD_LOG(logger_, LogLevel::kInfo)
         << Identity() << ": FDv2 retry scheduled in " << ttl.count() << "s";
     async::Delay(ioc_, ttl, fdv1_fallback_retry_cancel_.GetToken())
