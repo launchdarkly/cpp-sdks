@@ -55,21 +55,13 @@ class FDv1AdapterSynchronizer final
 
    private:
     /**
-     * Holds the lifecycle, result queue, and pending Next() promise; shared
-     * with the FDv1 source's IDestination via the inner ConvertingDestination.
+     * Holds the result queue and pending Next() promise; shared with the
+     * FDv1 source's IDestination via the inner ConvertingDestination.
      * All methods are thread-safe.
      */
     class State {
        public:
-        // Returns true if this call transitioned Initial → Started; false if
-        // already started or already closed. Used to gate the one-time
-        // StartAsync call on the wrapped FDv1 source.
-        bool TryStart();
-
-        // Marks the state closed and returns whether the source was started
-        // before the transition (so the caller knows whether ShutdownAsync
-        // needs to be called).
-        bool MarkClosed();
+        explicit State(async::Future<std::monostate> closed_future);
 
         async::Future<data_interfaces::FDv2SourceResult> GetNext();
 
@@ -81,10 +73,12 @@ class FDv1AdapterSynchronizer final
         void Notify(data_interfaces::FDv2SourceResult result);
 
        private:
-        // Protected by mutex_.
+        // Finished once the owning FDv1AdapterSynchronizer's close_promise_
+        // is resolved. Read in Notify to drop late results.
+        async::Future<std::monostate> const closed_future_;
+
         mutable std::mutex mutex_;
-        bool started_ = false;
-        bool closed_ = false;
+        // Protected by mutex_.
         std::optional<async::Promise<data_interfaces::FDv2SourceResult>>
             pending_promise_;
         std::deque<data_interfaces::FDv2SourceResult> result_queue_;
@@ -108,6 +102,10 @@ class FDv1AdapterSynchronizer final
         std::weak_ptr<State> state_;
     };
 
+    // Thread-safe primitive. Declared before state_ so state_'s constructor
+    // can take a future from it.
+    async::Promise<std::monostate> close_promise_;
+
     // shared_ptr so async callbacks that may fire after this is destroyed
     // can hold their own reference.
     std::shared_ptr<State> const state_;
@@ -121,8 +119,13 @@ class FDv1AdapterSynchronizer final
 
     std::unique_ptr<data_interfaces::IDataSynchronizer> const fdv1_source_;
 
-    // Thread-safe primitive.
-    async::Promise<std::monostate> close_promise_;
+    // Serializes StartAsync and ShutdownAsync on fdv1_source_ across
+    // concurrent Next() and Close() calls.
+    std::mutex lifecycle_mutex_;
+    // Protected by lifecycle_mutex_. Set when Next() calls StartAsync, or
+    // when Close() runs without a prior start (to gate any later Next()
+    // from calling StartAsync after Close).
+    bool started_ = false;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
