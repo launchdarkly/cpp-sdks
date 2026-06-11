@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer_factory.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
@@ -67,7 +66,6 @@ class FDv1StreamingAdapterFactory final
     FDv1StreamingAdapterFactory(
         boost::asio::any_io_executor executor,
         Logger logger,
-        data_components::DataSourceStatusManager* status_manager,
         config::built::ServiceEndpoints endpoints,
         config::built::FDv2Config::FDv1StreamingConfig streaming,
         config::built::HttpProperties http_properties);
@@ -79,8 +77,6 @@ class FDv1StreamingAdapterFactory final
    private:
     boost::asio::any_io_executor const executor_;
     Logger const logger_;
-    // Non-owning. Provided by the orchestrator; must outlive this factory.
-    data_components::DataSourceStatusManager* const status_manager_;
     config::built::ServiceEndpoints const endpoints_;
     config::built::FDv2Config::FDv1StreamingConfig const streaming_;
     config::built::HttpProperties const http_properties_;
@@ -96,7 +92,6 @@ class FDv1PollingAdapterFactory final
     FDv1PollingAdapterFactory(
         boost::asio::any_io_executor executor,
         Logger logger,
-        data_components::DataSourceStatusManager* status_manager,
         config::built::ServiceEndpoints endpoints,
         config::built::FDv2Config::FDv1PollingConfig polling,
         config::built::HttpProperties http_properties);
@@ -108,8 +103,6 @@ class FDv1PollingAdapterFactory final
    private:
     boost::asio::any_io_executor const executor_;
     Logger const logger_;
-    // Non-owning. Provided by the orchestrator; must outlive this factory.
-    data_components::DataSourceStatusManager* const status_manager_;
     config::built::ServiceEndpoints const endpoints_;
     config::built::FDv2Config::FDv1PollingConfig const polling_;
     config::built::HttpProperties const http_properties_;

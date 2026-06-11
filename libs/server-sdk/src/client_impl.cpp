@@ -129,16 +129,16 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
                            synchronizer_factories.push_back(
                                std::make_unique<
                                    data_systems::FDv1StreamingAdapterFactory>(
-                                   executor, logger, &status_manager, endpoints,
-                                   streaming, http_properties));
+                                   executor, logger, endpoints, streaming,
+                                   http_properties));
                        },
                        [&](config::built::FDv2Config::FDv1PollingConfig const&
                                polling) {
                            synchronizer_factories.push_back(
                                std::make_unique<
                                    data_systems::FDv1PollingAdapterFactory>(
-                                   executor, logger, &status_manager, endpoints,
-                                   polling, http_properties));
+                                   executor, logger, endpoints, polling,
+                                   http_properties));
                        },
                    },
                    *cfg.fdv1_fallback);

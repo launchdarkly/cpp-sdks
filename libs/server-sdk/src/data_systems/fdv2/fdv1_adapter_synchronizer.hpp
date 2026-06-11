@@ -9,6 +9,7 @@
 #include <launchdarkly/connection.hpp>
 
 #include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -34,17 +35,17 @@ namespace launchdarkly::server_side::data_systems {
 class FDv1AdapterSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
    public:
+    using SourceBuilder =
+        std::function<std::unique_ptr<data_interfaces::IDataSynchronizer>(
+            data_components::DataSourceStatusManager&)>;
+
     /**
-     * @param fdv1_source The wrapped source. Must have been constructed
-     *                    with status_manager as its status sink so that
-     *                    state changes flow back into this adapter.
-     * @param status_manager Non-owning. The caller retains ownership and
-     *                       must keep it alive for the lifetime of the
-     *                       wrapped source and this adapter.
+     * @param source_builder Called once during construction with the
+     *                       adapter's status manager. Returns the wrapped
+     *                       FDv1 source, which must be constructed against
+     *                       the provided manager as its status sink.
      */
-    FDv1AdapterSynchronizer(
-        std::unique_ptr<data_interfaces::IDataSynchronizer> fdv1_source,
-        data_components::DataSourceStatusManager* status_manager);
+    explicit FDv1AdapterSynchronizer(SourceBuilder source_builder);
 
     ~FDv1AdapterSynchronizer() override;
 
@@ -111,10 +112,8 @@ class FDv1AdapterSynchronizer final
     std::shared_ptr<State> const state_;
     std::unique_ptr<ConvertingDestination> const destination_;
 
-    // Non-owning. The caller must keep this alive for the lifetime of
-    // the wrapped source, which holds a reference to it for status
-    // reporting.
-    data_components::DataSourceStatusManager* const status_manager_;
+    std::unique_ptr<data_components::DataSourceStatusManager> const
+        status_manager_;
     std::unique_ptr<IConnection> const status_subscription_;
 
     std::unique_ptr<data_interfaces::IDataSynchronizer> const fdv1_source_;

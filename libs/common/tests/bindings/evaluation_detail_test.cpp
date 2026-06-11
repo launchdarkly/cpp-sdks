@@ -22,8 +22,12 @@ TEST(EvaluationDetailBindings, EvaluationReasonError) {
 
 TEST(EvaluationDetailBindings, EvaluationReasonFallthrough) {
     auto reason = EvaluationReason(EvaluationReason::Kind::kFallthrough,
-                                   std::nullopt, std::nullopt, std::nullopt,
-                                   std::nullopt, true, std::nullopt);
+                                   /* error_kind= */ std::nullopt,
+                                   /* rule_index= */ std::nullopt,
+                                   /* rule_id= */ std::nullopt,
+                                   /* prerequisite_key= */ std::nullopt,
+                                   /* in_experiment= */ true,
+                                   EvaluationReason::BigSegmentsStatus::kNone);
     auto ld_reason = reinterpret_cast<LDEvalReason>(&reason);
 
     ASSERT_EQ(LDEvalReason_Kind(ld_reason), LD_EVALREASON_FALLTHROUGH);
@@ -52,9 +56,13 @@ TEST(EvaluationDetailBindings, EvaluationDetailError) {
 TEST(EvaluationDetailBindings, EvaluationDetailSuccess) {
     auto detail = CEvaluationDetail(EvaluationDetail<bool>(
         true, 42,
-        EvaluationReason(EvaluationReason::Kind::kFallthrough, std::nullopt,
-                         std::nullopt, std::nullopt, std::nullopt, true,
-                         std::nullopt)));
+        EvaluationReason(EvaluationReason::Kind::kFallthrough,
+                         /* error_kind= */ std::nullopt,
+                         /* rule_index= */ std::nullopt,
+                         /* rule_id= */ std::nullopt,
+                         /* prerequisite_key= */ std::nullopt,
+                         /* in_experiment= */ true,
+                         EvaluationReason::BigSegmentsStatus::kNone)));
 
     auto ld_detail = reinterpret_cast<LDEvalDetail>(&detail);
 
