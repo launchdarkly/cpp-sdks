@@ -433,6 +433,11 @@ void FDv2DataSystem::ScheduleFDv2RetryLocked(std::chrono::seconds ttl) {
     if (ttl == std::chrono::seconds::zero()) {
         return;
     }
+    // Cancel any in-flight retry and start fresh; CancellationSource is
+    // one-shot, so reusing the same source for successive schedules would
+    // leak prior timers.
+    fdv1_fallback_retry_cancel_.Cancel();
+    fdv1_fallback_retry_cancel_ = async::CancellationSource{};
     LD_LOG(logger_, LogLevel::kInfo)
         << Identity() << ": FDv2 retry scheduled in " << ttl.count() << "s";
     async::Delay(ioc_, ttl, fdv1_fallback_retry_cancel_.GetToken())
