@@ -198,6 +198,9 @@ void FDv2DataSystem::OnInitializerResult(
             if (source_manager_.AvailableSynchronizerCount() > 0) {
                 LD_LOG(logger_, LogLevel::kInfo)
                     << Identity() << ": FDv1 fallback engaged";
+                // No basis yet; reuse the flag to fall through to
+                // StartSynchronizers so the FDv1 fallback synchronizer can
+                // produce it.
                 got_basis = true;
             } else {
                 LD_LOG(logger_, LogLevel::kWarn)
