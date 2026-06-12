@@ -223,7 +223,8 @@ TEST_F(BigSegmentEvaluatorTest, IncludedMembershipMatches) {
 
     EXPECT_EQ(*detail, Value(false));  // Segment match -> rule variation.
     EXPECT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
-    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(), EvaluationReason::BigSegmentsStatus::kHealthy);
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kHealthy);
 }
 
 TEST_F(BigSegmentEvaluatorTest, ExcludedMembershipDoesNotMatch) {
@@ -236,7 +237,8 @@ TEST_F(BigSegmentEvaluatorTest, ExcludedMembershipDoesNotMatch) {
         eval.Evaluate(store_.GetFlag("flag")->item.value(), AliceUser());
 
     EXPECT_EQ(*detail, Value(true));  // Excluded -> fallthrough.
-    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(), EvaluationReason::BigSegmentsStatus::kHealthy);
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kHealthy);
 }
 
 TEST_F(BigSegmentEvaluatorTest, NoMembershipEntryFallsThroughToRules) {
@@ -252,7 +254,30 @@ TEST_F(BigSegmentEvaluatorTest, NoMembershipEntryFallsThroughToRules) {
 
     EXPECT_EQ(*detail, Value(false));  // Segment rule matches alice.
     EXPECT_EQ(detail.Reason()->Kind(), EvaluationReason::Kind::kRuleMatch);
-    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(), EvaluationReason::BigSegmentsStatus::kHealthy);
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kHealthy);
+}
+
+TEST_F(BigSegmentEvaluatorTest, RegularIncludeListIgnoredForBigSegment) {
+    // A big segment's regular include list must be ignored; only store
+    // membership (and then the segment's rules) decide matching.
+    std::string const segment =
+        R"({"key":"bigseg","unbounded":true,"unboundedContextKind":"user",)"
+        R"("included":["alice"],"excluded":[],"rules":[],"salt":"salty",)"
+        R"("version":1,"generation":1})";
+    UpsertSegment("bigseg", segment);
+    UpsertFlag(FlagMatchingSegments({"bigseg"}));
+    // The store has no entry for alice, so the regular include list must not
+    // produce a match.
+    fake_->PushMembership(integrations::Membership::FromSegmentRefs({}, {}));
+
+    auto eval = EvaluatorWithStore();
+    auto detail =
+        eval.Evaluate(store_.GetFlag("flag")->item.value(), AliceUser());
+
+    EXPECT_EQ(*detail, Value(true));  // Include list ignored -> fallthrough.
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kHealthy);
 }
 
 TEST_F(BigSegmentEvaluatorTest, StaleStoreReportsStale) {
@@ -268,7 +293,8 @@ TEST_F(BigSegmentEvaluatorTest, StaleStoreReportsStale) {
         eval.Evaluate(store_.GetFlag("flag")->item.value(), AliceUser());
 
     EXPECT_EQ(*detail, Value(false));  // Still matches; only trust differs.
-    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(), EvaluationReason::BigSegmentsStatus::kStale);
+    EXPECT_EQ(detail.Reason()->BigSegmentsStatus(),
+              EvaluationReason::BigSegmentsStatus::kStale);
 }
 
 TEST_F(BigSegmentEvaluatorTest, StoreErrorReportsStoreError) {

@@ -42,15 +42,16 @@ std::optional<bool> MatchBigSegment(Segment const& segment,
                                     EvaluationStack& stack) {
     if (!segment.generation) {
         // Without a generation the segment ref can't be formed.
-        stack.RecordBigSegmentsStatus(EvaluationReason::BigSegmentsStatus::kNotConfigured);
+        stack.RecordBigSegmentsStatus(
+            EvaluationReason::BigSegmentsStatus::kNotConfigured);
         return false;
     }
 
     // An absent or empty unboundedContextKind defaults to "user".
-    ContextKind const kind =
-        (segment.unboundedContextKind && !segment.unboundedContextKind->t.empty())
-            ? *segment.unboundedContextKind
-            : ContextKind{"user"};
+    ContextKind const kind = (segment.unboundedContextKind &&
+                              !segment.unboundedContextKind->t.empty())
+                                 ? *segment.unboundedContextKind
+                                 : ContextKind{"user"};
     Value const& context_key = context.Get(kind, "key");
     if (!context_key.IsString()) {
         return false;
@@ -65,7 +66,8 @@ std::optional<bool> MatchBigSegment(Segment const& segment,
     if (!membership) {
         auto* store = stack.BigSegmentStore();
         if (!store) {
-            stack.RecordBigSegmentsStatus(EvaluationReason::BigSegmentsStatus::kNotConfigured);
+            stack.RecordBigSegmentsStatus(
+                EvaluationReason::BigSegmentsStatus::kNotConfigured);
             return false;
         }
         auto result = store->GetMembership(key);
@@ -242,16 +244,16 @@ tl::expected<bool, Error> Contains(Segment const& segment,
         if (auto match = MatchBigSegment(segment, context, stack)) {
             return *match;
         }
-        // The membership had no entry for this segment; fall through to its
-        // include/exclude lists and rules.
-    }
+        // Big segments don't use the regular include/exclude target lists; a
+        // membership miss falls through directly to the segment's rules.
+    } else {
+        if (IsTargeted(context, segment.included, segment.includedContexts)) {
+            return true;
+        }
 
-    if (IsTargeted(context, segment.included, segment.includedContexts)) {
-        return true;
-    }
-
-    if (IsTargeted(context, segment.excluded, segment.excludedContexts)) {
-        return false;
+        if (IsTargeted(context, segment.excluded, segment.excludedContexts)) {
+            return false;
+        }
     }
 
     for (auto const& rule : segment.rules) {
