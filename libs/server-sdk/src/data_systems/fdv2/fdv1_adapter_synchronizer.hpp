@@ -36,7 +36,7 @@ class FDv1AdapterSynchronizer final
     : public data_interfaces::IFDv2Synchronizer {
    public:
     using SourceBuilder =
-        std::function<std::unique_ptr<data_interfaces::IDataSynchronizer>(
+        std::function<std::shared_ptr<data_interfaces::IDataSynchronizer>(
             data_components::DataSourceStatusManager&)>;
 
     /**
@@ -116,7 +116,7 @@ class FDv1AdapterSynchronizer final
         status_manager_;
     std::unique_ptr<IConnection> const status_subscription_;
 
-    std::unique_ptr<data_interfaces::IDataSynchronizer> const fdv1_source_;
+    std::shared_ptr<data_interfaces::IDataSynchronizer> const fdv1_source_;
 
     // Serializes StartAsync and ShutdownAsync on fdv1_source_ across
     // concurrent Next() and Close() calls.

@@ -134,16 +134,18 @@ FDv1AdapterSynchronizer::FDv1AdapterSynchronizer(SourceBuilder source_builder)
               }
               switch (status.State()) {
                   case DataSourceState::kInterrupted:
+                  case DataSourceState::kInitializing:
+                      // Recoverable error.
                       state->Notify(FDv2SourceResult{
                           FDv2SourceResult::Interrupted{*error}});
                       break;
                   case DataSourceState::kOff:
+                      // Terminal error.
                       state->Notify(FDv2SourceResult{
                           FDv2SourceResult::TerminalError{*error}});
                       break;
-                  case DataSourceState::kInitializing:
                   case DataSourceState::kValid:
-                      // No FDv2 result for these states.
+                      // Recovery; no FDv2 result.
                       break;
               }
           })),

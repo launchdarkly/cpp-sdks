@@ -57,7 +57,7 @@ FDv1AdapterSynchronizer::SourceBuilder MakeMockBuilder(
         if (out_sm) {
             *out_sm = &sm;
         }
-        auto source = std::make_unique<MockFDv1Source>(sm);
+        auto source = std::make_shared<MockFDv1Source>(sm);
         if (out_source) {
             *out_source = source.get();
         }
@@ -227,6 +227,25 @@ TEST(FDv1AdapterSynchronizerTest, InterruptedStatusProducesInterruptedResult) {
 
     // kInterrupted from kInitializing stays kInitializing; drive past first.
     source_manager->SetState(DataSourceStatus::DataSourceState::kValid);
+
+    auto future = adapter.Next(data_model::Selector{});
+    source_manager->SetState(
+        DataSourceStatus::DataSourceState::kInterrupted,
+        DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError, "boom");
+
+    auto result = future.WaitForResult(1s);
+    ASSERT_TRUE(result.has_value());
+    auto* interrupted =
+        std::get_if<FDv2SourceResult::Interrupted>(&result->value);
+    ASSERT_NE(interrupted, nullptr);
+    EXPECT_EQ(DataSourceStatus::ErrorInfo::ErrorKind::kNetworkError,
+              interrupted->error.Kind());
+}
+
+TEST(FDv1AdapterSynchronizerTest,
+     InitializingWithErrorProducesInterruptedResult) {
+    DataSourceStatusManager* source_manager = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(nullptr, &source_manager));
 
     auto future = adapter.Next(data_model::Selector{});
     source_manager->SetState(
