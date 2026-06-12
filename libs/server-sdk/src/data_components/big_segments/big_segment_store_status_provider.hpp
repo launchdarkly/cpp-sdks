@@ -28,7 +28,7 @@ class BigSegmentStoreStatusProvider : public IBigSegmentStoreStatusProvider {
    public:
     /**
      * @param wrapper The wrapper to delegate to, or nullptr if Big Segments are
-     * not configured. Must outlive this provider.
+     * not configured.
      */
     explicit BigSegmentStoreStatusProvider(
         std::shared_ptr<BigSegmentStoreWrapper> wrapper);
