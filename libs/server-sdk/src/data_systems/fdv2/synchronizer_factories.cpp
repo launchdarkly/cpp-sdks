@@ -68,7 +68,7 @@ std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv1StreamingAdapterFactory::Build() {
     return std::make_unique<FDv1AdapterSynchronizer>(
         [this](data_components::DataSourceStatusManager& status_manager) {
-            return std::make_unique<StreamingDataSource>(
+            return std::make_shared<StreamingDataSource>(
                 executor_, logger_, status_manager, endpoints_, streaming_,
                 http_properties_);
         });
@@ -90,7 +90,7 @@ std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv1PollingAdapterFactory::Build() {
     return std::make_unique<FDv1AdapterSynchronizer>(
         [this](data_components::DataSourceStatusManager& status_manager) {
-            return std::make_unique<PollingDataSource>(
+            return std::make_shared<PollingDataSource>(
                 executor_, logger_, status_manager, endpoints_, polling_,
                 http_properties_);
         });
