@@ -73,11 +73,15 @@ FDv2ProtocolHandler::Result FDv2ProtocolHandler::HandleServerIntent(
         state_ = State::kFull;
     } else if (code == IntentCode::kTransferChanges) {
         state_ = State::kPartial;
-    } else {
-        // kNone or kUnknown: emit an empty changeset immediately.
-        state_ = State::kInactive;
+    } else if (code == IntentCode::kNone) {
+        state_ = State::kPartial;
         return data_model::FDv2ChangeSet{
             data_model::ChangeSetType::kNone, {}, data_model::Selector{}};
+    } else {
+        // kUnknown: an intent code we don't recognise.
+        Reset();
+        return Error::ProtocolError(
+            "server-intent had an unrecognized intent code");
     }
     return std::monostate{};
 }

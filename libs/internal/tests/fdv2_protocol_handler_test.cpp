@@ -62,6 +62,37 @@ TEST(FDv2ProtocolHandlerTest, NoneIntentEmitsEmptyChangeSetImmediately) {
     EXPECT_FALSE(cs->selector.value.has_value());
 }
 
+TEST(FDv2ProtocolHandlerTest, NoneIntentAllowsSubsequentPartialCycle) {
+    FDv2ProtocolHandler handler;
+
+    handler.HandleEvent("server-intent", MakeServerIntent("none"));
+    handler.HandleEvent("put-object",
+                        MakePutObject("flag", "my-flag", kFlagJson));
+    auto result = handler.HandleEvent("payload-transferred",
+                                      MakePayloadTransferred("s1", 1));
+
+    auto* cs = std::get_if<data_model::FDv2ChangeSet>(&result);
+    ASSERT_NE(cs, nullptr);
+    EXPECT_EQ(cs->type, data_model::ChangeSetType::kPartial);
+    ASSERT_EQ(cs->changes.size(), 1u);
+    EXPECT_EQ(cs->changes[0].key, "my-flag");
+}
+
+// ============================================================================
+// Unknown intent
+// ============================================================================
+
+TEST(FDv2ProtocolHandlerTest, UnknownIntentReturnsProtocolError) {
+    FDv2ProtocolHandler handler;
+
+    auto result =
+        handler.HandleEvent("server-intent", MakeServerIntent("future-code"));
+
+    auto* err = std::get_if<FDv2ProtocolHandler::Error>(&result);
+    ASSERT_NE(err, nullptr);
+    EXPECT_EQ(err->kind, FDv2ProtocolHandler::Error::Kind::kProtocolError);
+}
+
 // ============================================================================
 // kTransferFull intent
 // ============================================================================
