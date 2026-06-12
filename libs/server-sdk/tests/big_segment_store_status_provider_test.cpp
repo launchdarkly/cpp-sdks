@@ -44,8 +44,7 @@ class FakeBigSegmentStore : public integrations::IBigSegmentStore {
 
    private:
     mutable std::mutex mutex_;
-    GetMetadataResult metadata_ =
-        std::optional<integrations::StoreMetadata>{std::nullopt};
+    GetMetadataResult metadata_;
 };
 
 built::BigSegmentsConfig MakeConfig(
@@ -78,43 +77,7 @@ TEST(BigSegmentStoreStatusProviderTest, UnconfiguredReportsUnavailable) {
     EXPECT_FALSE(fired);
 }
 
-TEST(BigSegmentStoreStatusProviderTest, DelegatesStatusToWrapper) {
-    auto store = std::make_shared<FakeBigSegmentStore>();
-    store->SetMetadata(
-        integrations::StoreMetadata{std::chrono::system_clock::now()});
-
-    auto logger = launchdarkly::logging::NullLogger();
-    boost::asio::io_context ioc;
-    auto wrapper = std::make_shared<BigSegmentStoreWrapper>(
-        MakeConfig(store, /*poll_interval=*/5s), ioc.get_executor(), logger);
-
-    BigSegmentStoreStatusProvider provider(wrapper);
-
-    // The wrapper polls inline on the first GetStatus, so fresh metadata is
-    // reported as available and not stale.
-    auto const status = provider.Status();
-    EXPECT_TRUE(status.IsAvailable());
-    EXPECT_FALSE(status.IsStale());
-}
-
-TEST(BigSegmentStoreStatusProviderTest, StaleMetadataReportedAsStale) {
-    auto store = std::make_shared<FakeBigSegmentStore>();
-    store->SetMetadata(
-        integrations::StoreMetadata{std::chrono::system_clock::now() - 5min});
-
-    auto logger = launchdarkly::logging::NullLogger();
-    boost::asio::io_context ioc;
-    auto wrapper = std::make_shared<BigSegmentStoreWrapper>(
-        MakeConfig(store, /*poll_interval=*/5s), ioc.get_executor(), logger);
-
-    BigSegmentStoreStatusProvider provider(wrapper);
-
-    auto const status = provider.Status();
-    EXPECT_TRUE(status.IsAvailable());
-    EXPECT_TRUE(status.IsStale());
-}
-
-TEST(BigSegmentStoreStatusProviderTest, ListenerReceivesConvertedPublicStatus) {
+TEST(BigSegmentStoreStatusProviderTest, StatusAndListenerReflectStoreTransitions) {
     auto store = std::make_shared<FakeBigSegmentStore>();
     store->SetMetadata(
         integrations::StoreMetadata{std::chrono::system_clock::now()});
@@ -141,21 +104,34 @@ TEST(BigSegmentStoreStatusProviderTest, ListenerReceivesConvertedPublicStatus) {
 
     wrapper->Start();
 
-    // First poll broadcasts the initial healthy status through the adapter.
+    // Fresh metadata is reported as available and not stale.
+    {
+        std::unique_lock lock(mutex);
+        ASSERT_TRUE(cv.wait_for(lock, 1s, [&] {
+            return last.has_value() && last->IsAvailable() && !last->IsStale();
+        }));
+        EXPECT_EQ(provider.Status(), *last);
+    }
+
+    // Old metadata is reported as available but stale.
+    store->SetMetadata(
+        integrations::StoreMetadata{std::chrono::system_clock::now() - 5min});
     {
         std::unique_lock lock(mutex);
         ASSERT_TRUE(cv.wait_for(
-            lock, 1s, [&] { return last.has_value() && last->IsAvailable(); }));
-        EXPECT_FALSE(last->IsStale());
+            lock, 1s, [&] { return last.has_value() && last->IsStale(); }));
+        EXPECT_TRUE(last->IsAvailable());
+        EXPECT_EQ(provider.Status(), *last);
     }
 
-    // A store error flips availability, which the listener observes.
+    // A store error flips availability.
     store->SetMetadata(tl::make_unexpected("boom"));
     {
         std::unique_lock lock(mutex);
         ASSERT_TRUE(cv.wait_for(lock, 1s, [&] {
             return last.has_value() && !last->IsAvailable();
         }));
+        EXPECT_EQ(provider.Status(), *last);
     }
 
     connection->Disconnect();
