@@ -4,10 +4,10 @@
 #include <boost/json.hpp>
 
 #include <launchdarkly/context_builder.hpp>
-#include <launchdarkly/serialization/json_context.hpp>
-#include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
 #include <launchdarkly/detail/serialization/json_value.hpp>
+#include <launchdarkly/serialization/json_context.hpp>
+#include <launchdarkly/serialization/json_evaluation_reason.hpp>
 #include <launchdarkly/server_side/serialization/json_all_flags_state.hpp>
 #include <launchdarkly/value.hpp>
 
@@ -170,6 +170,15 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Custom(
     client_->Track(*maybe_ctx, params.eventKey, std::move(*data),
                    *params.metricValue);
     return nlohmann::json{};
+}
+
+tl::expected<nlohmann::json, std::string>
+ClientEntity::GetBigSegmentStoreStatus() {
+    auto status = client_->BigSegmentStoreStatus().Status();
+    BigSegmentStoreStatusResponse resp{};
+    resp.available = status.IsAvailable();
+    resp.stale = status.IsStale();
+    return resp;
 }
 
 tl::expected<nlohmann::json, std::string> ClientEntity::EvaluateAll(
@@ -388,6 +397,8 @@ tl::expected<nlohmann::json, std::string> ClientEntity::Command(
                 return tl::make_unexpected("contextConvert params must be set");
             }
             return ContextConvert(*params.contextConvert);
+        case Command::GetBigSegmentStoreStatus:
+            return GetBigSegmentStoreStatus();
     }
     return tl::make_unexpected("unrecognized command");
 }

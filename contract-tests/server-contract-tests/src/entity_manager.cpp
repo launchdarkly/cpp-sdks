@@ -1,8 +1,10 @@
 #include "entity_manager.hpp"
+#include "contract_test_big_segment_store.hpp"
 #include "contract_test_hook.hpp"
 
 #include <launchdarkly/context_builder.hpp>
 #include <launchdarkly/serialization/json_context.hpp>
+#include <launchdarkly/server_side/config/builders/big_segments_builder.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
 
 #include <boost/json.hpp>
@@ -140,7 +142,8 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
 
     if (in.hooks) {
         for (auto const& hook_config : in.hooks->hooks) {
-            auto hook = std::make_shared<ContractTestHook>(executor_, hook_config);
+            auto hook =
+                std::make_shared<ContractTestHook>(executor_, hook_config);
             config_builder.Hooks(hook);
         }
     }
@@ -152,6 +155,28 @@ std::optional<std::string> EntityManager::create(ConfigParams const& in) {
         if (!in.wrapper->version.empty()) {
             config_builder.HttpProperties().WrapperVersion(in.wrapper->version);
         }
+    }
+
+    if (in.bigSegments) {
+        auto store = std::make_shared<ContractTestBigSegmentStore>(
+            in.bigSegments->callbackUri);
+        auto big_segments = config::builders::BigSegmentsBuilder(store);
+        if (in.bigSegments->userCacheSize) {
+            big_segments.ContextCacheSize(*in.bigSegments->userCacheSize);
+        }
+        if (in.bigSegments->userCacheTimeMs) {
+            big_segments.ContextCacheTime(
+                std::chrono::milliseconds(*in.bigSegments->userCacheTimeMs));
+        }
+        if (in.bigSegments->statusPollIntervalMs) {
+            big_segments.StatusPollInterval(std::chrono::milliseconds(
+                *in.bigSegments->statusPollIntervalMs));
+        }
+        if (in.bigSegments->staleAfterMs) {
+            big_segments.StaleAfter(
+                std::chrono::milliseconds(*in.bigSegments->staleAfterMs));
+        }
+        config_builder.BigSegments(std::move(big_segments));
     }
 
     auto config = config_builder.Build();
