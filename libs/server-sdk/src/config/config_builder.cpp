@@ -84,11 +84,11 @@ tl::expected<Config, Error> ConfigBuilder::Build() const {
 
     std::optional<config::built::BigSegmentsConfig> big_segments_config;
     if (big_segments_builder_) {
-        auto built = big_segments_builder_->Build();
-        if (!built) {
-            return tl::make_unexpected(built.error());
+        auto big_segments = big_segments_builder_->Build();
+        if (!big_segments) {
+            return tl::make_unexpected(big_segments.error());
         }
-        big_segments_config = std::move(*built);
+        big_segments_config = std::move(*big_segments);
     }
 
     return {tl::in_place,
