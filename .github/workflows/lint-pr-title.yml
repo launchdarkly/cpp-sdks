@@ -10,4 +10,4 @@ on:
 jobs:
   lint-pr-title:
     # https://github.com/launchdarkly/gh-actions/commit/f1760cc538c362c2ab826a3bd22611743ef8f82c
-    uses: launchdarkly/gh-actions/.github/workflows/lint-pr-title.yml@f1760cc538c362c2ab826a3bd22611743ef8f82c
+    uses: launchdarkly/gh-actions/.github/workflows/lint-pr-title.yml@a848aec9c87c29470093b22154107b83a7696374
