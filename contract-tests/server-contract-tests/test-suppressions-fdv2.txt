@@ -1,0 +1,2 @@
+# C++ implements TTL-based FDv1 fallback; this scenario tests the older terminal semantics. Tracked in SDK-2527.
+streaming/fdv2/FDv1 fallback directive/directive without FDv1 fallback configured halts the data system
