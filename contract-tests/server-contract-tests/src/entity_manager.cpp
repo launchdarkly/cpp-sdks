@@ -15,7 +15,7 @@ namespace {
 config::builders::DataSystemBuilder::FDv2 BuildFDv2(
     ConfigDataSystemParams const& cfg,
     config::builders::EndpointsBuilder* endpoints) {
-    auto fdv2 = config::builders::DataSystemBuilder::FDv2();
+    auto fdv2 = config::builders::DataSystemBuilder::FDv2::Custom();
 
     if (cfg.synchronizers) {
         for (auto const& sync : *cfg.synchronizers) {
