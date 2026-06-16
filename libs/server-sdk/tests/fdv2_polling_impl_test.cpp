@@ -98,6 +98,29 @@ TEST(HandleFDv2PollResponseTest, HeaderValueOtherThanTrueDoesNotSetFlag) {
     EXPECT_FALSE(result.fdv1_fallback);
 }
 
+TEST(HandleFDv2PollResponseTest, DirectiveWithoutTtlHeaderUsesDefault) {
+    auto result =
+        HandleResponse(304, std::nullopt, {{"X-LD-FD-Fallback", "true"}});
+    ASSERT_TRUE(result.fdv1_fallback);
+    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result.fdv1_fallback->ttl);
+}
+
+TEST(HandleFDv2PollResponseTest, DirectiveWithTtlHeaderParsesValue) {
+    auto result = HandleResponse(
+        304, std::nullopt,
+        {{"X-LD-FD-Fallback", "true"}, {"X-LD-FD-Fallback-TTL", "60"}});
+    ASSERT_TRUE(result.fdv1_fallback);
+    EXPECT_EQ(std::chrono::seconds{60}, result.fdv1_fallback->ttl);
+}
+
+TEST(HandleFDv2PollResponseTest, DirectiveWithMalformedTtlFallsBackToDefault) {
+    auto result = HandleResponse(304, std::nullopt,
+                                 {{"X-LD-FD-Fallback", "true"},
+                                  {"X-LD-FD-Fallback-TTL", "not-a-number"}});
+    ASSERT_TRUE(result.fdv1_fallback);
+    EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result.fdv1_fallback->ttl);
+}
+
 TEST(HandleFDv2PollResponseTest, NetworkErrorDoesNotSetFlag) {
     auto logger = MakeNullLogger();
     FDv2ProtocolHandler handler;

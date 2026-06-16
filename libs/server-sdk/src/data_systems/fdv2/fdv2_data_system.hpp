@@ -10,12 +10,14 @@
 #include "conditions.hpp"
 #include "source_manager.hpp"
 
+#include <launchdarkly/async/cancellation.hpp>
 #include <launchdarkly/data_model/selector.hpp>
 #include <launchdarkly/logging/logger.hpp>
 
 #include <boost/asio/any_io_executor.hpp>
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <mutex>
@@ -51,9 +53,8 @@ namespace launchdarkly::server_side::data_systems {
  * Destruction protocol:
  *
  *   The destructor cancels in-flight orchestration (closes the active
- *   source, emits status kOff), but does NOT block to drain executor
- *   callbacks that may already be queued. Before destroying, the caller
- *   must ensure both of:
+ *   source) but does NOT block to drain executor callbacks that may
+ *   already be queued. Before destroying, the caller must ensure both of:
  *
  *     1. The executor that orchestration callbacks run on has been stopped
  *        AND any thread running it has been joined. Otherwise a previously-
@@ -120,8 +121,6 @@ namespace launchdarkly::server_side::data_systems {
  *               v
  *     [Done; final status preserved]
  *
- *     Calling the destructor at any time -> [Closed; status kOff].
- *
  * Status transitions:
  *
  *   kInitializing (initial) -> kValid on first successful ChangeSet apply.
@@ -130,11 +129,10 @@ namespace launchdarkly::server_side::data_systems {
  *                              the initializer phase if not yet Valid).
  *                              kOff if all initializers exhaust without data
  *                              and no synchronizers are configured.
- *   kValid                  -> kInterrupted on errors; kOff in destructor or
- *                              when synchronizers cycle through and exhaust.
+ *   kValid                  -> kInterrupted on errors; kOff when
+ *                              synchronizers cycle through and exhaust.
  *   kInterrupted            -> kValid on next successful ChangeSet apply;
- *                              kOff in destructor or on synchronizer
- *                              exhaustion.
+ *                              kOff on synchronizer exhaustion.
  *   kOff                    -> terminal.
  */
 class FDv2DataSystem final : public data_interfaces::IDataSystem {
@@ -251,6 +249,14 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     void OnSynchronizerResult(data_interfaces::FDv2SourceResult result);
     void OnConditionFired(data_interfaces::IFDv2Condition::Type type);
 
+    // Schedules an FDv2 recovery attempt after the given TTL. Called with
+    // mutex_ held. TTL of 0 disables the recovery and is a no-op.
+    void ScheduleFDv2RetryLocked(std::chrono::seconds ttl);
+
+    // Invoked when the FDv1 fallback TTL expires. Switches the source list
+    // back to FDv2 and restarts the synchronizer phase.
+    void OnFDv1RetryTimer();
+
     // Builds the conditions to apply to the currently active synchronizer.
     // Must be called with mutex_ held; reads source_manager_ state.
     std::unique_ptr<Conditions> BuildActiveConditions() const;
@@ -283,6 +289,9 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     // Set by Initialize() to detect repeat or concurrent calls.
     std::atomic_bool initialize_called_;
 
+    // Suppresses consecutive "interrupted" logs from the active synchronizer.
+    std::atomic_bool last_logged_synchronizer_interrupted_;
+
     // Orchestration state, guarded by mutex_.
     std::mutex mutex_;
     bool closed_;
@@ -292,6 +301,9 @@ class FDv2DataSystem final : public data_interfaces::IDataSystem {
     std::unique_ptr<data_interfaces::IFDv2Initializer> active_initializer_;
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> active_synchronizer_;
     std::unique_ptr<Conditions> active_conditions_;
+
+    // Cancelled in Close() to abort any pending FDv1 fallback retry delay.
+    async::CancellationSource fdv1_fallback_retry_cancel_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems

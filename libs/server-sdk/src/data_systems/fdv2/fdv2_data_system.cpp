@@ -1,6 +1,7 @@
 #include "fdv2_data_system.hpp"
 
 #include <launchdarkly/async/promise.hpp>
+#include <launchdarkly/async/timer.hpp>
 
 #include <boost/asio/post.hpp>
 
@@ -43,6 +44,7 @@ FDv2DataSystem::FDv2DataSystem(
       store_(),
       change_notifier_(store_, store_),
       initialize_called_(false),
+      last_logged_synchronizer_interrupted_(false),
       closed_(false),
       selector_(),
       initializer_index_(0),
@@ -58,6 +60,7 @@ FDv2DataSystem::~FDv2DataSystem() {
 void FDv2DataSystem::Close() {
     std::lock_guard<std::mutex> lock(mutex_);
     closed_ = true;
+    fdv1_fallback_retry_cancel_.Cancel();
     if (active_initializer_) {
         active_initializer_->Close();
     }
@@ -67,7 +70,6 @@ void FDv2DataSystem::Close() {
     if (active_conditions_) {
         active_conditions_->Close();
     }
-    status_manager_->SetState(DataSourceStatus::DataSourceState::kOff);
 }
 
 std::shared_ptr<data_model::FlagDescriptor> FDv2DataSystem::GetFlag(
@@ -121,6 +123,9 @@ void FDv2DataSystem::RunNextInitializer() {
         } else {
             auto& factory = initializer_factories_[initializer_index_++];
             active_initializer_ = factory->Build();
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": starting initializer "
+                << active_initializer_->Identity();
             active_initializer_->Run().Then(
                 [this](data_interfaces::FDv2SourceResult const& result)
                     -> std::monostate {
@@ -144,6 +149,7 @@ void FDv2DataSystem::OnInitializerResult(
 
     bool got_basis = false;
     bool got_shutdown = false;
+    bool disconnected = false;
 
     std::visit(
         overloaded{
@@ -152,6 +158,8 @@ void FDv2DataSystem::OnInitializerResult(
                     cs.change_set.selector.value.has_value();
                 ApplyChangeSet(std::move(cs.change_set));
                 if (has_selector) {
+                    LD_LOG(logger_, LogLevel::kInfo)
+                        << Identity() << ": initializer succeeded";
                     got_basis = true;
                 }
             },
@@ -185,8 +193,33 @@ void FDv2DataSystem::OnInitializerResult(
         if (closed_ || got_shutdown) {
             return;
         }
+        if (result.fdv1_fallback) {
+            source_manager_.SwitchToFDv1Fallback();
+            if (source_manager_.AvailableSynchronizerCount() > 0) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << Identity() << ": FDv1 fallback engaged";
+                // No basis yet; reuse the flag to fall through to
+                // StartSynchronizers so the FDv1 fallback synchronizer can
+                // produce it.
+                got_basis = true;
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": FDv1 fallback directive received; no FDv1 "
+                       "fallback synchronizer configured";
+                disconnected = true;
+            }
+            ScheduleFDv2RetryLocked(result.fdv1_fallback->ttl);
+        }
     }
 
+    if (disconnected) {
+        status_manager_->SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+            "FDv1 fallback directive received; no FDv1 fallback configured");
+        return;
+    }
     if (got_basis) {
         StartSynchronizers();
     } else {
@@ -205,6 +238,10 @@ void FDv2DataSystem::StartSynchronizers() {
         }
         active_synchronizer_ = source_manager_.NextSynchronizer();
         if (active_synchronizer_) {
+            LD_LOG(logger_, LogLevel::kInfo)
+                << Identity() << ": starting synchronizer "
+                << active_synchronizer_->Identity();
+            last_logged_synchronizer_interrupted_.store(false);
             active_conditions_ = BuildActiveConditions();
         } else {
             exhausted = true;
@@ -313,34 +350,39 @@ void FDv2DataSystem::OnSynchronizerResult(
 
     bool got_shutdown = false;
     bool advance = false;
+    bool disconnected = false;
 
-    std::visit(overloaded{
-                   [&](Result::ChangeSet& cs) {
-                       ApplyChangeSet(std::move(cs.change_set));
-                   },
-                   [&](Result::Shutdown&) { got_shutdown = true; },
-                   [&](Result::Interrupted const& iv) {
-                       LD_LOG(logger_, LogLevel::kWarn)
-                           << Identity() << ": synchronizer interrupted: "
-                           << iv.error.Message();
-                       status_manager_->SetState(
-                           DataSourceStatus::DataSourceState::kInterrupted,
-                           iv.error.Kind(), iv.error.Message());
-                   },
-                   [&](Result::TerminalError const& te) {
-                       LD_LOG(logger_, LogLevel::kWarn)
-                           << Identity() << ": synchronizer terminal error: "
-                           << te.error.Message();
-                       status_manager_->SetState(
-                           DataSourceStatus::DataSourceState::kInterrupted,
-                           te.error.Kind(), te.error.Message());
-                       advance = true;
-                   },
-                   [&](Result::Goodbye const&) {
-                       // The synchronizer handles this internally.
-                   },
-               },
-               result.value);
+    std::visit(
+        overloaded{
+            [&](Result::ChangeSet& cs) {
+                last_logged_synchronizer_interrupted_.store(false);
+                ApplyChangeSet(std::move(cs.change_set));
+            },
+            [&](Result::Shutdown&) { got_shutdown = true; },
+            [&](Result::Interrupted const& iv) {
+                if (!last_logged_synchronizer_interrupted_.exchange(true)) {
+                    LD_LOG(logger_, LogLevel::kInfo)
+                        << Identity()
+                        << ": synchronizer interrupted: " << iv.error.Message();
+                }
+                status_manager_->SetState(
+                    DataSourceStatus::DataSourceState::kInterrupted,
+                    iv.error.Kind(), iv.error.Message());
+            },
+            [&](Result::TerminalError const& te) {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": synchronizer terminal error: " << te.error.Message();
+                status_manager_->SetState(
+                    DataSourceStatus::DataSourceState::kInterrupted,
+                    te.error.Kind(), te.error.Message());
+                advance = true;
+            },
+            [&](Result::Goodbye const&) {
+                // The synchronizer handles this internally.
+            },
+        },
+        result.value);
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -349,18 +391,84 @@ void FDv2DataSystem::OnSynchronizerResult(
             active_conditions_.reset();
             return;
         }
-        if (advance) {
+        if (result.fdv1_fallback &&
+            !source_manager_.IsCurrentSynchronizerFDv1Fallback()) {
+            source_manager_.SwitchToFDv1Fallback();
+            active_synchronizer_.reset();
+            active_conditions_.reset();
+            if (source_manager_.AvailableSynchronizerCount() > 0) {
+                LD_LOG(logger_, LogLevel::kInfo)
+                    << Identity() << ": FDv1 fallback engaged";
+                advance = true;
+            } else {
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << Identity()
+                    << ": FDv1 fallback directive received; no FDv1 "
+                       "fallback synchronizer configured";
+                disconnected = true;
+            }
+            ScheduleFDv2RetryLocked(result.fdv1_fallback->ttl);
+        } else if (advance) {
             source_manager_.BlockCurrentSynchronizer();
             active_synchronizer_.reset();
             active_conditions_.reset();
         }
     }
 
+    if (disconnected) {
+        status_manager_->SetState(
+            DataSourceStatus::DataSourceState::kInterrupted,
+            DataSourceStatus::ErrorInfo::ErrorKind::kUnknown,
+            "FDv1 fallback directive received; no FDv1 fallback configured");
+        return;
+    }
     if (advance) {
         StartSynchronizers();
     } else {
         RunSynchronizerNext();
     }
+}
+
+void FDv2DataSystem::ScheduleFDv2RetryLocked(std::chrono::seconds ttl) {
+    if (ttl == std::chrono::seconds::zero()) {
+        return;
+    }
+    // Cancel any in-flight retry and start fresh; CancellationSource is
+    // one-shot, so reusing the same source for successive schedules would
+    // leak prior timers.
+    fdv1_fallback_retry_cancel_.Cancel();
+    fdv1_fallback_retry_cancel_ = async::CancellationSource{};
+    LD_LOG(logger_, LogLevel::kInfo)
+        << Identity() << ": FDv2 retry scheduled in " << ttl.count() << "s";
+    async::Delay(ioc_, ttl, fdv1_fallback_retry_cancel_.GetToken())
+        .Then(
+            [this](bool fired) -> std::monostate {
+                if (fired) {
+                    OnFDv1RetryTimer();
+                }
+                return {};
+            },
+            [ioc = ioc_](async::Continuation<void()> work) {
+                boost::asio::post(ioc, std::move(work));
+            });
+}
+
+void FDv2DataSystem::OnFDv1RetryTimer() {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (closed_) {
+            return;
+        }
+        LD_LOG(logger_, LogLevel::kInfo)
+            << Identity() << ": FDv2 retry timer fired; re-engaging FDv2";
+        source_manager_.SwitchBackToFDv2();
+        if (active_synchronizer_) {
+            active_synchronizer_->Close();
+            active_synchronizer_.reset();
+        }
+        active_conditions_.reset();
+    }
+    StartSynchronizers();
 }
 
 void FDv2DataSystem::ApplyChangeSet(

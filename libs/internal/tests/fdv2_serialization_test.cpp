@@ -363,6 +363,16 @@ TEST(GoodbyeTests, DeserializesWithoutReason) {
     ASSERT_FALSE(result.value()->reason);
 }
 
+TEST(GoodbyeTests, DeserializesWithProtocolFallbackTtl) {
+    auto result =
+        boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
+            boost::json::parse(R"({"protocolFallbackTTL":60})"));
+    ASSERT_TRUE(result);
+    ASSERT_TRUE(result.value());
+    ASSERT_TRUE(result.value()->protocol_fallback_ttl);
+    ASSERT_EQ(60, *result.value()->protocol_fallback_ttl);
+}
+
 TEST(GoodbyeTests, WrongTypeReturnsSchemaFailure) {
     auto result =
         boost::json::value_to<tl::expected<std::optional<Goodbye>, JsonError>>(
