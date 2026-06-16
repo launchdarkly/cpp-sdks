@@ -1,4 +1,4 @@
-#include "big_segments_builder.hpp"
+#include <launchdarkly/server_side/config/builders/big_segments_builder.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -55,7 +55,10 @@ BigSegmentsBuilder& BigSegmentsBuilder::StaleAfter(
     return *this;
 }
 
-built::BigSegmentsConfig BigSegmentsBuilder::Build() const {
+tl::expected<built::BigSegmentsConfig, Error> BigSegmentsBuilder::Build() const {
+    if (!store_) {
+        return tl::make_unexpected(Error::kConfig_BigSegments_NullStore);
+    }
     auto const poll = std::min(status_poll_interval_, stale_after_);
     return built::BigSegmentsConfig{store_, context_cache_size_,
                                     context_cache_time_, poll, stale_after_};

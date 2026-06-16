@@ -22,6 +22,7 @@ target_sources(${LIBNAME}
         client.cpp
         client_impl.cpp
         data_source_status.cpp
+        big_segment_store_status.cpp
         instance_id.hpp
         instance_id.cpp
         config/config.cpp
@@ -50,6 +51,8 @@ target_sources(${LIBNAME}
         data_components/big_segments/membership_cache.cpp
         data_components/big_segments/big_segment_store_wrapper.hpp
         data_components/big_segments/big_segment_store_wrapper.cpp
+        data_components/big_segments/big_segment_store_status_provider.hpp
+        data_components/big_segments/big_segment_store_status_provider.cpp
         data_interfaces/destination/itransactional_destination.hpp
         data_components/memory_store/memory_store.hpp
         data_components/memory_store/memory_store.cpp
