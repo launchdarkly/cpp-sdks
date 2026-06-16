@@ -108,8 +108,9 @@ class FDv2Builder {
 
     /**
      * @brief Disables the FDv1 fallback. After this call, an FDv1
-     * fallback directive from the service transitions the SDK to
-     * OFFLINE rather than reconnecting via FDv1.
+     * fallback directive from the service leaves the data source in
+     * the interrupted state and schedules an FDv2 retry on the
+     * directive's TTL.
      * @return Reference to this.
      */
     FDv2Builder& DisableFDv1Fallback();
