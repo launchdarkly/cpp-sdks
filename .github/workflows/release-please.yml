@@ -20,76 +20,14 @@ jobs:
       package-server-otel-released: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
-      # Create any releases first, then create tags, and then optionally create any new PRs.
+      # release-please-action v5+ (release-please >= 17) honors `force-tag-creation`
+      # for draft releases by creating the tag ref via the GitHub API before the
+      # release object, so a single invocation handles both releases and PRs.
       # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          skip-github-pull-request: true
-
-      # Need the repository content to be able to create and push tags.
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
-        if: >-
-          steps.release.outputs['libs/client-sdk--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk-redis-source--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk-otel--release_created'] == 'true'
-
-      - name: Create release tags
-        if: >-
-          steps.release.outputs['libs/client-sdk--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk-redis-source--release_created'] == 'true' ||
-          steps.release.outputs['libs/server-sdk-otel--release_created'] == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CLIENT_TAG: ${{ steps.release.outputs['libs/client-sdk--tag_name'] }}
-          SERVER_TAG: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
-          SERVER_REDIS_TAG: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
-          SERVER_OTEL_TAG: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
-          CLIENT_RELEASED: ${{ steps.release.outputs['libs/client-sdk--release_created'] }}
-          SERVER_RELEASED: ${{ steps.release.outputs['libs/server-sdk--release_created'] }}
-          SERVER_REDIS_RELEASED: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
-          SERVER_OTEL_RELEASED: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          for pair in \
-            "${CLIENT_RELEASED}:${CLIENT_TAG}" \
-            "${SERVER_RELEASED}:${SERVER_TAG}" \
-            "${SERVER_REDIS_RELEASED}:${SERVER_REDIS_TAG}" \
-            "${SERVER_OTEL_RELEASED}:${SERVER_OTEL_TAG}"; do
-
-            RELEASED="${pair%%:*}"
-            TAG="${pair#*:}"
-
-            if [ "${RELEASED}" != "true" ] || [ -z "${TAG}" ]; then
-              continue
-            fi
-
-            if gh api "repos/${{ github.repository }}/git/ref/tags/${TAG}" >/dev/null 2>&1; then
-              echo "Tag ${TAG} already exists, skipping creation."
-            else
-              echo "Creating tag ${TAG}."
-              git tag "${TAG}"
-              git push origin "${TAG}"
-            fi
-          done
-
-      # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-        if: >-
-          steps.release.outputs['libs/client-sdk--release_created'] != 'true' &&
-          steps.release.outputs['libs/server-sdk--release_created'] != 'true' &&
-          steps.release.outputs['libs/server-sdk-redis-source--release_created'] != 'true' &&
-          steps.release.outputs['libs/server-sdk-otel--release_created'] != 'true'
-        id: release-prs
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          skip-github-release: true
 
   release-client:
     strategy:
@@ -131,8 +69,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
@@ -163,8 +102,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
@@ -208,8 +148,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
@@ -240,8 +181,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
@@ -285,8 +227,9 @@ jobs:
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
@@ -317,8 +260,9 @@ jobs:
           # This job always runs on macOS, so use -D (BSD base64 decode).
           echo "${HASHES}" | base64 -D > checksums.txt
         shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-checksums: checksums.txt
 
