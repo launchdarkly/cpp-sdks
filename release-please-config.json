@@ -2,7 +2,6 @@
   "plugins": [
     "node-workspace"
   ],
-  "draft": true,
   "packages": {
     "libs/client-sdk": {
       "component": "launchdarkly-cpp-client",
@@ -12,6 +11,7 @@
         "tests/client_test.cpp",
         "CMakeLists.txt"
       ],
+      "draft": true,
       "force-tag-creation": true
     },
     "libs/server-sdk": {
@@ -22,6 +22,7 @@
         "tests/client_test.cpp",
         "CMakeLists.txt"
       ],
+      "draft": true,
       "force-tag-creation": true
     },
     "libs/server-sdk-redis-source": {
@@ -29,6 +30,7 @@
       "extra-files": [
         "CMakeLists.txt"
       ],
+      "draft": true,
       "force-tag-creation": true
     },
     "libs/server-sdk-dynamodb-source": {
@@ -45,6 +47,7 @@
       "extra-files": [
         "CMakeLists.txt"
       ],
+      "draft": true,
       "force-tag-creation": true
     },
     "libs/server-sent-events": {
