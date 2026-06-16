@@ -39,18 +39,18 @@ class FDv2Builder {
     };
 
     /**
-     * Constructs a builder with no initializers, no synchronizers, and no
-     * FDv1 fallback. Use Default() for the spec-recommended configuration.
-     */
-    FDv2Builder();
-
-    /**
      * @return A builder pre-populated with the spec-recommended initializers,
      *     synchronizers, and FDv1 fallback. Equivalent to calling
      *     Initializer(), Synchronizer(), and FDv1Fallback() with the
      *     standard sources.
      */
     static FDv2Builder Default();
+
+    /**
+     * @return A builder with no initializers, no synchronizers, and no
+     *     FDv1 fallback. Callers must add sources explicitly.
+     */
+    static FDv2Builder Custom();
 
     /**
      * @brief Appends a polling initializer to the initializers list.
@@ -137,6 +137,8 @@ class FDv2Builder {
     [[nodiscard]] built::FDv2Config Build() const;
 
    private:
+    FDv2Builder();
+
     built::FDv2Config config_;
 };
 

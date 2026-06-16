@@ -59,6 +59,10 @@ FDv2Builder FDv2Builder::Default() {
         .FDv1Fallback(FDv1Streaming{});
 }
 
+FDv2Builder FDv2Builder::Custom() {
+    return FDv2Builder();
+}
+
 FDv2Builder& FDv2Builder::Initializer(Polling source) {
     config_.initializers.push_back(source.Build());
     return *this;

@@ -158,7 +158,7 @@ TEST_F(ConfigBuilderTest, FDv2_DefaultsAreUsed) {
 TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
-        builders::DataSystemBuilder::FDv2().FDv1Fallback(
+        builders::DataSystemBuilder::FDv2::Custom().FDv1Fallback(
             builders::FDv2Builder::FDv1Polling().PollInterval(
                 std::chrono::seconds{45})));
 
@@ -178,7 +178,7 @@ TEST_F(ConfigBuilderTest, FDv2_FDv1FallbackPolling) {
 TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
-        builders::DataSystemBuilder::FDv2()
+        builders::DataSystemBuilder::FDv2::Custom()
             .Synchronizer(builders::FDv2Builder::Polling().PollInterval(
                 std::chrono::seconds{45}))
             .Synchronizer(builders::FDv2Builder::Streaming().Filter("filt")));
@@ -200,8 +200,9 @@ TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {
 
 TEST_F(ConfigBuilderTest, FDv2_AddingInitializerClearsDefaults) {
     ConfigBuilder builder("sdk-123");
-    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2().Initializer(
-        builders::FDv2Builder::Polling().Filter("flag-subset")));
+    builder.DataSystem().Method(
+        builders::DataSystemBuilder::FDv2::Custom().Initializer(
+            builders::FDv2Builder::Polling().Filter("flag-subset")));
 
     auto cfg = builder.Build();
     auto const fdv2_config =
@@ -214,7 +215,7 @@ TEST_F(ConfigBuilderTest, FDv2_AddingInitializerClearsDefaults) {
 TEST_F(ConfigBuilderTest, FDv2_PerSourceBaseUrlOverride) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
-        builders::DataSystemBuilder::FDv2().Synchronizer(
+        builders::DataSystemBuilder::FDv2::Custom().Synchronizer(
             builders::FDv2Builder::Streaming().BaseUrl(
                 "https://example.test")));
 
@@ -232,7 +233,7 @@ TEST_F(ConfigBuilderTest, FDv2_PerSourceBaseUrlOverride) {
 TEST_F(ConfigBuilderTest, FDv2_DisableFDv1FallbackClearsIt) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
-        builders::DataSystemBuilder::FDv2().DisableFDv1Fallback());
+        builders::DataSystemBuilder::FDv2::Custom().DisableFDv1Fallback());
 
     auto cfg = builder.Build();
     auto const fdv2_config =
@@ -243,7 +244,7 @@ TEST_F(ConfigBuilderTest, FDv2_DisableFDv1FallbackClearsIt) {
 
 TEST_F(ConfigBuilderTest, FDv2_FallbackAndRecoveryTimeouts) {
     ConfigBuilder builder("sdk-123");
-    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2()
+    builder.DataSystem().Method(builders::DataSystemBuilder::FDv2::Custom()
                                     .FallbackTimeout(std::chrono::seconds{30})
                                     .RecoveryTimeout(std::chrono::seconds{90}));
 
