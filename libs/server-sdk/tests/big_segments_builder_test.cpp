@@ -3,7 +3,7 @@
 #include <launchdarkly/server_side/integrations/big_segments/big_segment_store_types.hpp>
 #include <launchdarkly/server_side/integrations/big_segments/ibig_segment_store.hpp>
 
-#include "config/builders/big_segments_builder.hpp"
+#include <launchdarkly/server_side/config/builders/big_segments_builder.hpp>
 
 #include <chrono>
 #include <memory>
@@ -40,24 +40,25 @@ std::shared_ptr<IBigSegmentStore> MakeStubStore() {
 TEST(BigSegmentsBuilderTest, DefaultsMatchSpec) {
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store).Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.context_cache_size, 1000u);
-    EXPECT_EQ(cfg.context_cache_time, 5s);
-    EXPECT_EQ(cfg.status_poll_interval, 5s);
-    EXPECT_EQ(cfg.stale_after, 2min);
+    EXPECT_EQ(cfg->context_cache_size, 1000u);
+    EXPECT_EQ(cfg->context_cache_time, 5s);
+    EXPECT_EQ(cfg->status_poll_interval, 5s);
+    EXPECT_EQ(cfg->stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, BuildPreservesStoreIdentity) {
     auto store = MakeStubStore();
     auto const cfg = BigSegmentsBuilder(store).Build();
-    EXPECT_EQ(cfg.store.get(), store.get());
+    ASSERT_TRUE(cfg);
+    EXPECT_EQ(cfg->store.get(), store.get());
 }
 
-TEST(BigSegmentsBuilderTest, AcceptsNullStore) {
-    // The builder doesn't validate the store; downstream components treat a
-    // null store as "Big Segments not configured".
+TEST(BigSegmentsBuilderTest, NullStoreIsRejected) {
     auto const cfg = BigSegmentsBuilder(nullptr).Build();
-    EXPECT_EQ(cfg.store, nullptr);
+    ASSERT_FALSE(cfg);
+    EXPECT_EQ(cfg.error(), launchdarkly::Error::kConfig_BigSegments_NullStore);
 }
 
 TEST(BigSegmentsBuilderTest, SettersOverrideEachField) {
@@ -68,11 +69,12 @@ TEST(BigSegmentsBuilderTest, SettersOverrideEachField) {
                          .StatusPollInterval(13s)
                          .StaleAfter(60s)
                          .Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.context_cache_size, 7u);
-    EXPECT_EQ(cfg.context_cache_time, 11s);
-    EXPECT_EQ(cfg.status_poll_interval, 13s);
-    EXPECT_EQ(cfg.stale_after, 60s);
+    EXPECT_EQ(cfg->context_cache_size, 7u);
+    EXPECT_EQ(cfg->context_cache_time, 11s);
+    EXPECT_EQ(cfg->status_poll_interval, 13s);
+    EXPECT_EQ(cfg->stale_after, 60s);
 }
 
 TEST(BigSegmentsBuilderTest, ZeroDurationsAreCoercedToDefaults) {
@@ -82,10 +84,11 @@ TEST(BigSegmentsBuilderTest, ZeroDurationsAreCoercedToDefaults) {
                          .StatusPollInterval(0ms)
                          .StaleAfter(0ms)
                          .Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.context_cache_time, 5s);
-    EXPECT_EQ(cfg.status_poll_interval, 5s);
-    EXPECT_EQ(cfg.stale_after, 2min);
+    EXPECT_EQ(cfg->context_cache_time, 5s);
+    EXPECT_EQ(cfg->status_poll_interval, 5s);
+    EXPECT_EQ(cfg->stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, NegativeDurationsAreCoercedToDefaults) {
@@ -95,10 +98,11 @@ TEST(BigSegmentsBuilderTest, NegativeDurationsAreCoercedToDefaults) {
                          .StatusPollInterval(-1ms)
                          .StaleAfter(-1ms)
                          .Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.context_cache_time, 5s);
-    EXPECT_EQ(cfg.status_poll_interval, 5s);
-    EXPECT_EQ(cfg.stale_after, 2min);
+    EXPECT_EQ(cfg->context_cache_time, 5s);
+    EXPECT_EQ(cfg->status_poll_interval, 5s);
+    EXPECT_EQ(cfg->stale_after, 2min);
 }
 
 TEST(BigSegmentsBuilderTest, BuildClampsPollIntervalToStaleAfter) {
@@ -109,9 +113,10 @@ TEST(BigSegmentsBuilderTest, BuildClampsPollIntervalToStaleAfter) {
                          .StatusPollInterval(10s)
                          .StaleAfter(3s)
                          .Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.status_poll_interval, 3s);
-    EXPECT_EQ(cfg.stale_after, 3s);
+    EXPECT_EQ(cfg->status_poll_interval, 3s);
+    EXPECT_EQ(cfg->stale_after, 3s);
 }
 
 TEST(BigSegmentsBuilderTest, BuildPreservesPollIntervalWhenWithinStaleAfter) {
@@ -120,9 +125,10 @@ TEST(BigSegmentsBuilderTest, BuildPreservesPollIntervalWhenWithinStaleAfter) {
                          .StatusPollInterval(3s)
                          .StaleAfter(10s)
                          .Build();
+    ASSERT_TRUE(cfg);
 
-    EXPECT_EQ(cfg.status_poll_interval, 3s);
-    EXPECT_EQ(cfg.stale_after, 10s);
+    EXPECT_EQ(cfg->status_poll_interval, 3s);
+    EXPECT_EQ(cfg->stale_after, 10s);
 }
 
 TEST(BigSegmentsBuilderTest, BuildIsRepeatable) {
@@ -132,8 +138,10 @@ TEST(BigSegmentsBuilderTest, BuildIsRepeatable) {
 
     auto const cfg1 = builder.Build();
     auto const cfg2 = builder.Build();
+    ASSERT_TRUE(cfg1);
+    ASSERT_TRUE(cfg2);
 
-    EXPECT_EQ(cfg1.context_cache_size, cfg2.context_cache_size);
-    EXPECT_EQ(cfg1.context_cache_time, cfg2.context_cache_time);
-    EXPECT_EQ(cfg1.store.get(), cfg2.store.get());
+    EXPECT_EQ(cfg1->context_cache_size, cfg2->context_cache_size);
+    EXPECT_EQ(cfg1->context_cache_time, cfg2->context_cache_time);
+    EXPECT_EQ(cfg1->store.get(), cfg2->store.get());
 }
