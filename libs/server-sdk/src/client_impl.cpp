@@ -248,7 +248,15 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
                                           ioc_.get_executor(),
                                           http_properties_,
                                           logger_)),
-      evaluator_(logger_, *data_system_),
+      big_segment_store_(
+          config_.BigSegments()
+              ? std::make_shared<data_components::BigSegmentStoreWrapper>(
+                    *config_.BigSegments(),
+                    ioc_.get_executor(),
+                    logger_)
+              : nullptr),
+      big_segment_status_provider_(big_segment_store_),
+      evaluator_(logger_, *data_system_, big_segment_store_.get()),
       events_default_(event_processor_.get(), EventFactory::WithoutReasons()),
       events_with_reasons_(event_processor_.get(),
                            EventFactory::WithReasons()) {
@@ -263,6 +271,10 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
         launchdarkly::config::shared::built::TlsOptions::VerifyMode::
             kVerifyNone) {
         LD_LOG(logger_, LogLevel::kInfo) << "TLS peer verification disabled";
+    }
+
+    if (big_segment_store_) {
+        big_segment_store_->Start();
     }
 
     run_thread_ = std::move(std::thread([&]() { ioc_.run(); }));
@@ -767,6 +779,10 @@ Value ClientImpl::JsonVariation(Context const& ctx,
 
 IDataSourceStatusProvider& ClientImpl::DataSourceStatus() {
     return status_manager_;
+}
+
+IBigSegmentStoreStatusProvider& ClientImpl::BigSegmentStoreStatus() {
+    return big_segment_status_provider_;
 }
 
 ClientImpl::~ClientImpl() {

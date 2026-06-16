@@ -32,6 +32,8 @@ char const* ErrorToString(Error err) {
             return "sdk key: cannot be empty";
         case Error::kConfig_DataSystem_LazyLoad_MissingSource:
             return "data system: lazy load config requires a source";
+        case Error::kConfig_BigSegments_NullStore:
+            return "big segments: store must not be null";
         case Error::kMax:
             break;
     }

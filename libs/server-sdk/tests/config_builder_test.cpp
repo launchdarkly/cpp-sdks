@@ -3,13 +3,31 @@
 #include <launchdarkly/logging/null_logger.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/config/config_builder.hpp>
+#include <launchdarkly/server_side/integrations/big_segments/ibig_segment_store.hpp>
 
 #include "config/builders/data_system/defaults.hpp"
 #include "data_systems/background_sync/sources/streaming/streaming_data_source.hpp"
 
+#include <chrono>
+
 using namespace launchdarkly;
 using namespace launchdarkly::server_side;
 using namespace launchdarkly::server_side::config;
+
+namespace {
+// Minimal store so a non-null pointer can be threaded through the config.
+class StubBigSegmentStore : public server_side::integrations::IBigSegmentStore {
+   public:
+    GetMembershipResult GetMembership(
+        std::string const&) const noexcept override {
+        return server_side::integrations::Membership::FromSegmentRefs({}, {});
+    }
+    GetMetadataResult GetMetadata() const noexcept override {
+        return std::optional<server_side::integrations::StoreMetadata>{
+            std::nullopt};
+    }
+};
+}  // namespace
 
 class ConfigBuilderTest : public ::testing::Test {
     // NOLINT(cppcoreguidelines-non-private-member-variables-in-classes)
@@ -261,6 +279,43 @@ TEST_F(ConfigBuilderTest, DefaultConstruction_EventDefaultsAreUsed) {
     ASSERT_EQ(cfg->Events(),
               ::launchdarkly::config::shared::Defaults<
                   launchdarkly::config::shared::ServerSDK>::Defaults::Events());
+}
+
+TEST_F(ConfigBuilderTest, BigSegmentsAbsentByDefault) {
+    ConfigBuilder builder("sdk-123");
+    auto cfg = builder.Build();
+    ASSERT_TRUE(cfg);
+    EXPECT_FALSE(cfg->BigSegments().has_value());
+}
+
+TEST_F(ConfigBuilderTest, BigSegmentsRoundTripsBuilderTunables) {
+    using namespace std::chrono_literals;
+    auto store = std::make_shared<StubBigSegmentStore>();
+
+    ConfigBuilder builder("sdk-123");
+    builder.BigSegments(builders::BigSegmentsBuilder(store)
+                            .ContextCacheSize(50)
+                            .ContextCacheTime(10s)
+                            .StatusPollInterval(20s)
+                            .StaleAfter(3min));
+
+    auto cfg = builder.Build();
+    ASSERT_TRUE(cfg);
+    ASSERT_TRUE(cfg->BigSegments().has_value());
+    EXPECT_EQ(cfg->BigSegments()->store, store);
+    EXPECT_EQ(cfg->BigSegments()->context_cache_size, 50u);
+    EXPECT_EQ(cfg->BigSegments()->context_cache_time, 10s);
+    EXPECT_EQ(cfg->BigSegments()->status_poll_interval, 20s);
+    EXPECT_EQ(cfg->BigSegments()->stale_after, 3min);
+}
+
+TEST_F(ConfigBuilderTest, BigSegmentsWithNullStoreFailsBuild) {
+    ConfigBuilder builder("sdk-123");
+    builder.BigSegments(builders::BigSegmentsBuilder(nullptr));
+
+    auto cfg = builder.Build();
+    ASSERT_FALSE(cfg);
+    EXPECT_EQ(cfg.error(), Error::kConfig_BigSegments_NullStore);
 }
 
 TEST_F(ConfigBuilderTest, CanDisableDataSystem) {

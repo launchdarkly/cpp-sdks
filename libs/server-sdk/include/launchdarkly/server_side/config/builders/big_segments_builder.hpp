@@ -3,6 +3,10 @@
 #include <launchdarkly/server_side/config/built/big_segments_config.hpp>
 #include <launchdarkly/server_side/integrations/big_segments/ibig_segment_store.hpp>
 
+#include <launchdarkly/error.hpp>
+
+#include <tl/expected.hpp>
+
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -68,12 +72,14 @@ class BigSegmentsBuilder {
     /**
      * @brief Resolves the configuration.
      *
+     * Returns an error if the store passed to the constructor was null.
+     *
      * If the configured @ref StatusPollInterval exceeds @ref StaleAfter,
      * the poll interval in the returned config is clamped to the
      * stale-after value so the SDK can detect staleness within one poll
      * cycle.
      */
-    [[nodiscard]] built::BigSegmentsConfig Build() const;
+    [[nodiscard]] tl::expected<built::BigSegmentsConfig, Error> Build() const;
 
    private:
     std::shared_ptr<integrations::IBigSegmentStore> store_;
