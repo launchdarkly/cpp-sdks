@@ -1,6 +1,7 @@
 #pragma once
 
 #include <launchdarkly/server_side/config/builders/data_system/background_sync_builder.hpp>
+#include <launchdarkly/server_side/config/builders/data_system/fdv2_builder.hpp>
 #include <launchdarkly/server_side/config/builders/data_system/lazy_load_builder.hpp>
 #include <launchdarkly/server_side/config/built/data_system/data_system_config.hpp>
 
@@ -13,6 +14,7 @@ class DataSystemBuilder {
     DataSystemBuilder();
     using BackgroundSync = BackgroundSyncBuilder;
     using LazyLoad = LazyLoadBuilder;
+    using FDv2 = FDv2Builder;
 
     /**
      * @brief Alias for Enabled(false).
@@ -46,10 +48,19 @@ class DataSystemBuilder {
      */
     DataSystemBuilder& Method(LazyLoad lazy_load);
 
+    /**
+     * @brief Configures the FDv2 data system, which receives flag delivery
+     * updates over the new changeset-based protocol with built-in fallback
+     * and recovery semantics.
+     * @param fdv2 FDv2 configuration.
+     * @return Reference to this.
+     */
+    DataSystemBuilder& Method(FDv2 fdv2);
+
     [[nodiscard]] tl::expected<built::DataSystemConfig, Error> Build() const;
 
    private:
-    std::optional<std::variant<BackgroundSync, LazyLoad>> method_builder_;
+    std::optional<std::variant<BackgroundSync, LazyLoad, FDv2>> method_builder_;
     built::DataSystemConfig config_;
 };
 

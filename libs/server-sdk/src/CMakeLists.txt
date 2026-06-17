@@ -30,6 +30,7 @@ target_sources(${LIBNAME}
         config/builders/data_system/background_sync_builder.cpp
         config/builders/data_system/bootstrap_builder.cpp
         config/builders/data_system/data_system_builder.cpp
+        config/builders/data_system/fdv2_builder.cpp
         config/builders/data_system/lazy_load_builder.cpp
         config/builders/data_system/data_destination_builder.cpp
         config/builders/big_segments_builder.cpp
@@ -81,6 +82,10 @@ target_sources(${LIBNAME}
         data_systems/fdv2/fdv2_data_system.cpp
         data_systems/fdv2/fdv1_adapter_synchronizer.hpp
         data_systems/fdv2/fdv1_adapter_synchronizer.cpp
+        data_systems/fdv2/synchronizer_factories.hpp
+        data_systems/fdv2/synchronizer_factories.cpp
+        data_systems/fdv2/initializer_factories.hpp
+        data_systems/fdv2/initializer_factories.cpp
         data_systems/background_sync/sources/streaming/streaming_data_source.hpp
         data_systems/background_sync/sources/streaming/streaming_data_source.cpp
         data_systems/background_sync/sources/streaming/event_handler.hpp

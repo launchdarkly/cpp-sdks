@@ -13,11 +13,11 @@ using data_interfaces::FDv2SourceResult;
 FDv2PollingInitializer::FDv2PollingInitializer(
     boost::asio::any_io_executor const& executor,
     Logger const& logger,
-    config::built::ServiceEndpoints const& endpoints,
+    std::string const& polling_base_url,
     config::built::HttpProperties const& http_properties,
     data_model::Selector selector,
     std::optional<std::string> filter_key)
-    : request_(MakeFDv2PollRequest(endpoints,
+    : request_(MakeFDv2PollRequest(polling_base_url,
                                    http_properties,
                                    std::move(selector),
                                    std::move(filter_key),
