@@ -15,7 +15,6 @@ class FDv2Builder {
     class Streaming {
        public:
         Streaming& InitialReconnectDelay(std::chrono::milliseconds delay);
-        Streaming& Filter(std::string filter_key);
         Streaming& BaseUrl(std::string base_url);
         [[nodiscard]] built::FDv2Config::StreamingConfig Build() const;
 
@@ -28,7 +27,6 @@ class FDv2Builder {
     class Polling {
        public:
         Polling& PollInterval(std::chrono::seconds interval);
-        Polling& Filter(std::string filter_key);
         Polling& BaseUrl(std::string base_url);
         [[nodiscard]] built::FDv2Config::PollingConfig Build() const;
 

@@ -10,28 +10,18 @@ FDv2Builder::Streaming& FDv2Builder::Streaming::InitialReconnectDelay(
     return *this;
 }
 
-FDv2Builder::Streaming& FDv2Builder::Streaming::Filter(std::string filter_key) {
-    filter_key_ = std::move(filter_key);
-    return *this;
-}
-
 FDv2Builder::Streaming& FDv2Builder::Streaming::BaseUrl(std::string base_url) {
     base_url_override_ = std::move(base_url);
     return *this;
 }
 
 built::FDv2Config::StreamingConfig FDv2Builder::Streaming::Build() const {
-    return {initial_reconnect_delay_, filter_key_, base_url_override_};
+    return {initial_reconnect_delay_, base_url_override_};
 }
 
 FDv2Builder::Polling& FDv2Builder::Polling::PollInterval(
     std::chrono::seconds interval) {
     poll_interval_ = interval;
-    return *this;
-}
-
-FDv2Builder::Polling& FDv2Builder::Polling::Filter(std::string filter_key) {
-    filter_key_ = std::move(filter_key);
     return *this;
 }
 
@@ -41,7 +31,7 @@ FDv2Builder::Polling& FDv2Builder::Polling::BaseUrl(std::string base_url) {
 }
 
 built::FDv2Config::PollingConfig FDv2Builder::Polling::Build() const {
-    return {poll_interval_, filter_key_, base_url_override_};
+    return {poll_interval_, base_url_override_};
 }
 
 FDv2Builder::FDv2Builder()
