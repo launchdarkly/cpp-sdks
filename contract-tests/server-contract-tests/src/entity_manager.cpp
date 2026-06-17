@@ -28,9 +28,6 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
                     s.InitialReconnectDelay(std::chrono::milliseconds(
                         *sync.streaming->initialRetryDelayMs));
                 }
-                if (cfg.payloadFilter) {
-                    s.Filter(*cfg.payloadFilter);
-                }
                 fdv2.Synchronizer(std::move(s));
             } else if (sync.polling) {
                 auto p = decltype(fdv2)::Polling();
@@ -43,9 +40,6 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
                             std::chrono::milliseconds(
                                 *sync.polling->pollIntervalMs)));
                 }
-                if (cfg.payloadFilter) {
-                    p.Filter(*cfg.payloadFilter);
-                }
                 fdv2.Synchronizer(std::move(p));
             }
         }
@@ -57,9 +51,6 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
                 auto p = decltype(fdv2)::Polling();
                 if (init.polling->baseUri) {
                     p.BaseUrl(*init.polling->baseUri);
-                }
-                if (cfg.payloadFilter) {
-                    p.Filter(*cfg.payloadFilter);
                 }
                 fdv2.Initializer(std::move(p));
             }
