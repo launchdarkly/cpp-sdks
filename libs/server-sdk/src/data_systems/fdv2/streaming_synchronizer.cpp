@@ -37,12 +37,12 @@ inline constexpr bool always_false_v = false;
 FDv2StreamingSynchronizer::State::State(
     Logger logger,
     boost::asio::any_io_executor const& executor,
-    config::built::ServiceEndpoints const& endpoints,
+    std::string streaming_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
     std::chrono::milliseconds initial_reconnect_delay)
     : logger_(std::move(logger)),
-      endpoints_(endpoints),
+      streaming_base_url_(std::move(streaming_base_url)),
       http_properties_(http_properties),
       filter_key_(std::move(filter_key)),
       initial_reconnect_delay_(initial_reconnect_delay),
@@ -60,7 +60,7 @@ void FDv2StreamingSynchronizer::State::EnsureStarted(
         started_ = true;
     }
 
-    auto parsed = boost::urls::parse_uri(endpoints_.StreamingBaseUrl());
+    auto parsed = boost::urls::parse_uri(streaming_base_url_);
     if (!parsed) {
         // started_ intentionally left true: a bad endpoint URL is a
         // configuration error that won't fix itself. The TerminalError
@@ -384,13 +384,13 @@ void FDv2StreamingSynchronizer::State::Shutdown() {
 FDv2StreamingSynchronizer::FDv2StreamingSynchronizer(
     boost::asio::any_io_executor const& executor,
     Logger const& logger,
-    config::built::ServiceEndpoints const& endpoints,
+    std::string streaming_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
     std::chrono::milliseconds initial_reconnect_delay)
     : state_(std::make_shared<State>(logger,
                                      executor,
-                                     endpoints,
+                                     std::move(streaming_base_url),
                                      http_properties,
                                      std::move(filter_key),
                                      initial_reconnect_delay)) {}

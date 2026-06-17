@@ -134,44 +134,40 @@ TEST(HandleFDv2PollResponseTest, NetworkErrorDoesNotSetFlag) {
 
 TEST(MakeFDv2PollRequestTest, BaseWithTrailingSlashDoesNotProduceDoubleSlash) {
     auto logger = MakeNullLogger();
-    config::shared::built::ServiceEndpoints endpoints{"http://example.com/", "",
-                                                      ""};
     auto props =
         config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
-    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
-                                   std::nullopt, logger);
+    auto req =
+        MakeFDv2PollRequest("http://example.com/", props,
+                            data_model::Selector{}, std::nullopt, logger);
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
 }
 
 TEST(MakeFDv2PollRequestTest, BaseWithSubpathTrailingSlashJoinsCleanly) {
     auto logger = MakeNullLogger();
-    config::shared::built::ServiceEndpoints endpoints{
-        "http://example.com/relay/", "", ""};
     auto props =
         config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
-    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
-                                   std::nullopt, logger);
+    auto req =
+        MakeFDv2PollRequest("http://example.com/relay/", props,
+                            data_model::Selector{}, std::nullopt, logger);
     EXPECT_EQ(req.Url(), "http://example.com/relay/sdk/poll");
 }
 
 TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
     auto logger = MakeNullLogger();
-    config::shared::built::ServiceEndpoints endpoints{"http://example.com", "",
-                                                      ""};
     auto props =
         config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
-    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
-                                   std::string{"my-filter_1.0"}, logger);
+    auto req =
+        MakeFDv2PollRequest("http://example.com", props, data_model::Selector{},
+                            std::string{"my-filter_1.0"}, logger);
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll?filter=my-filter_1.0");
 }
 
 TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {
     auto logger = MakeNullLogger();
-    config::shared::built::ServiceEndpoints endpoints{"http://example.com", "",
-                                                      ""};
     auto props =
         config::shared::Defaults<config::shared::ServerSDK>::HttpProperties();
-    auto req = MakeFDv2PollRequest(endpoints, props, data_model::Selector{},
-                                   std::string{"has spaces"}, logger);
+    auto req =
+        MakeFDv2PollRequest("http://example.com", props, data_model::Selector{},
+                            std::string{"has spaces"}, logger);
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
 }
