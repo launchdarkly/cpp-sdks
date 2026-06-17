@@ -213,6 +213,18 @@ void Conditions::Close() {
     for (auto const& condition : conditions_) {
         condition->Close();
     }
+    // Resolve any promises still pending.
+    std::vector<PendingEntry> drained;
+    {
+        std::lock_guard lock(state_->mutex);
+        if (!state_->aggregate_result) {
+            state_->aggregate_result = IFDv2Condition::Type::kCancelled;
+        }
+        drained = std::move(state_->pending);
+    }
+    for (auto& entry : drained) {
+        entry.promise.Resolve(IFDv2Condition::Type::kCancelled);
+    }
 }
 
 }  // namespace launchdarkly::server_side::data_systems
