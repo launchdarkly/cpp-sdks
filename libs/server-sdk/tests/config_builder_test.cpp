@@ -181,7 +181,8 @@ TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {
         builders::DataSystemBuilder::FDv2::Custom()
             .Synchronizer(builders::FDv2Builder::Polling().PollInterval(
                 std::chrono::seconds{45}))
-            .Synchronizer(builders::FDv2Builder::Streaming().Filter("filt")));
+            .Synchronizer(builders::FDv2Builder::Streaming()
+                          /* .Filter("filt") -- public API removed */));
 
     auto cfg = builder.Build();
     auto const fdv2_config =
@@ -192,24 +193,29 @@ TEST_F(ConfigBuilderTest, FDv2_MultipleSynchronizers) {
         fdv2_config.synchronizers[0]));
     ASSERT_TRUE(std::holds_alternative<built::FDv2Config::StreamingConfig>(
         fdv2_config.synchronizers[1]));
+    /* filter_key field removed from public StreamingConfig
     EXPECT_EQ(std::get<built::FDv2Config::StreamingConfig>(
                   fdv2_config.synchronizers[1])
                   .filter_key,
               "filt");
+    */
 }
 
 TEST_F(ConfigBuilderTest, FDv2_AddingInitializerClearsDefaults) {
     ConfigBuilder builder("sdk-123");
     builder.DataSystem().Method(
         builders::DataSystemBuilder::FDv2::Custom().Initializer(
-            builders::FDv2Builder::Polling().Filter("flag-subset")));
+            builders::FDv2Builder::Polling()
+            /* .Filter("flag-subset") -- public API removed */));
 
     auto cfg = builder.Build();
     auto const fdv2_config =
         std::get<built::FDv2Config>(cfg->DataSystemConfig().system_);
 
     ASSERT_EQ(fdv2_config.initializers.size(), 1u);
+    /* filter_key field removed from public PollingConfig
     EXPECT_EQ(fdv2_config.initializers[0].filter_key, "flag-subset");
+    */
 }
 
 TEST_F(ConfigBuilderTest, FDv2_PerSourceBaseUrlOverride) {

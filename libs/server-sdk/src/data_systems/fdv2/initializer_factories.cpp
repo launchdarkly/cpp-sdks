@@ -25,7 +25,7 @@ std::unique_ptr<data_interfaces::IFDv2Initializer>
 FDv2PollingInitializerFactory::Build() {
     return std::make_unique<FDv2PollingInitializer>(
         executor_, logger_, polling_base_url_, http_properties_,
-        data_model::Selector{}, polling_.filter_key);
+        data_model::Selector{}, std::nullopt);
 }
 
 }  // namespace launchdarkly::server_side::data_systems

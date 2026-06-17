@@ -28,8 +28,8 @@ FDv2StreamingSynchronizerFactory::FDv2StreamingSynchronizerFactory(
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv2StreamingSynchronizerFactory::Build() {
     return std::make_unique<FDv2StreamingSynchronizer>(
-        executor_, logger_, streaming_base_url_, http_properties_,
-        streaming_.filter_key, streaming_.initial_reconnect_delay);
+        executor_, logger_, streaming_base_url_, http_properties_, std::nullopt,
+        streaming_.initial_reconnect_delay);
 }
 
 FDv2PollingSynchronizerFactory::FDv2PollingSynchronizerFactory(
@@ -48,8 +48,8 @@ FDv2PollingSynchronizerFactory::FDv2PollingSynchronizerFactory(
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv2PollingSynchronizerFactory::Build() {
     return std::make_unique<FDv2PollingSynchronizer>(
-        executor_, logger_, polling_base_url_, http_properties_,
-        polling_.filter_key, polling_.poll_interval);
+        executor_, logger_, polling_base_url_, http_properties_, std::nullopt,
+        polling_.poll_interval);
 }
 
 FDv1StreamingAdapterFactory::FDv1StreamingAdapterFactory(
