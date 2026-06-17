@@ -2,6 +2,10 @@
 
 #include "all_flags_state/all_flags_state_builder.hpp"
 #include "data_systems/background_sync/background_sync_system.hpp"
+#include "data_systems/fdv2/conditions.hpp"
+#include "data_systems/fdv2/fdv2_data_system.hpp"
+#include "data_systems/fdv2/initializer_factories.hpp"
+#include "data_systems/fdv2/synchronizer_factories.hpp"
 #include "data_systems/lazy_load/lazy_load_system.hpp"
 #include "data_systems/offline.hpp"
 #include "evaluation/evaluation_stack.hpp"
@@ -50,6 +54,109 @@ static std::string const kMethodIntVariationDetail = "IntVariationDetail";
 static std::string const kMethodJsonVariation = "JsonVariation";
 static std::string const kMethodJsonVariationDetail = "JsonVariationDetail";
 
+namespace {
+
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
+}  // namespace
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeBackgroundSyncSystem(
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::BackgroundSyncConfig const& cfg,
+    config::built::HttpProperties const& http_properties,
+    boost::asio::any_io_executor const& executor,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    return std::make_unique<data_systems::BackgroundSync>(
+        endpoints, cfg, http_properties, executor, status_manager, logger);
+}
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeLazyLoadSystem(
+    config::built::LazyLoadConfig const& cfg,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger& logger) {
+    return std::make_unique<data_systems::LazyLoad>(logger, cfg,
+                                                    status_manager);
+}
+
+static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
+    config::built::ServiceEndpoints const& endpoints,
+    config::built::FDv2Config const& cfg,
+    config::built::HttpProperties const& http_properties,
+    boost::asio::any_io_executor const& executor,
+    data_components::DataSourceStatusManager& status_manager,
+    Logger const& logger) {
+    std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>>
+        initializer_factories;
+    for (auto const& initializer : cfg.initializers) {
+        initializer_factories.push_back(
+            std::make_unique<data_systems::FDv2PollingInitializerFactory>(
+                executor, logger, endpoints, http_properties, initializer));
+    }
+
+    std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
+        synchronizer_factories;
+    for (auto const& sync : cfg.synchronizers) {
+        std::visit(
+            overloaded{
+                [&](config::built::FDv2Config::StreamingConfig const&
+                        streaming) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv2StreamingSynchronizerFactory>(
+                            executor, logger, endpoints, http_properties,
+                            streaming));
+                },
+                [&](config::built::FDv2Config::PollingConfig const& polling) {
+                    synchronizer_factories.push_back(
+                        std::make_unique<
+                            data_systems::FDv2PollingSynchronizerFactory>(
+                            executor, logger, endpoints, http_properties,
+                            polling));
+                },
+            },
+            sync);
+    }
+    if (cfg.fdv1_fallback) {
+        std::visit(overloaded{
+                       [&](config::built::FDv2Config::FDv1StreamingConfig const&
+                               streaming) {
+                           synchronizer_factories.push_back(
+                               std::make_unique<
+                                   data_systems::FDv1StreamingAdapterFactory>(
+                                   executor, logger, endpoints, streaming,
+                                   http_properties));
+                       },
+                       [&](config::built::FDv2Config::FDv1PollingConfig const&
+                               polling) {
+                           synchronizer_factories.push_back(
+                               std::make_unique<
+                                   data_systems::FDv1PollingAdapterFactory>(
+                                   executor, logger, endpoints, polling,
+                                   http_properties));
+                       },
+                   },
+                   *cfg.fdv1_fallback);
+    }
+
+    auto fallback_cond_factory =
+        std::make_unique<data_systems::FallbackConditionFactory>(
+            executor, cfg.fallback_timeout);
+    auto recovery_cond_factory =
+        std::make_unique<data_systems::RecoveryConditionFactory>(
+            executor, cfg.recovery_timeout);
+
+    return std::make_unique<data_systems::FDv2DataSystem>(
+        std::move(initializer_factories), std::move(synchronizer_factories),
+        std::move(fallback_cond_factory), std::move(recovery_cond_factory),
+        executor, &status_manager, logger);
+}
+
 static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     config::built::HttpProperties const& http_properties,
     Config const& config,
@@ -60,24 +167,24 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
         return std::make_unique<data_systems::OfflineSystem>(status_manager);
     }
 
-    auto const builder =
-        config::builders::HttpPropertiesBuilder(http_properties);
-
-    auto data_source_properties = builder.Build();
+    auto data_source_properties =
+        config::builders::HttpPropertiesBuilder(http_properties).Build();
 
     return std::visit(
-        [&](auto&& arg) -> std::unique_ptr<data_interfaces::IDataSystem> {
-            using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T,
-                                         config::built::BackgroundSyncConfig>) {
-                return std::make_unique<data_systems::BackgroundSync>(
-                    config.ServiceEndpoints(), arg, data_source_properties,
+        overloaded{
+            [&](config::built::BackgroundSyncConfig const& cfg) {
+                return MakeBackgroundSyncSystem(
+                    config.ServiceEndpoints(), cfg, data_source_properties,
                     executor, status_manager, logger);
-            } else if constexpr (std::is_same_v<
-                                     T, config::built::LazyLoadConfig>) {
-                return std::make_unique<data_systems::LazyLoad>(logger, arg,
-                                                                status_manager);
-            }
+            },
+            [&](config::built::LazyLoadConfig const& cfg) {
+                return MakeLazyLoadSystem(cfg, status_manager, logger);
+            },
+            [&](config::built::FDv2Config const& cfg) {
+                return MakeFDv2System(config.ServiceEndpoints(), cfg,
+                                      data_source_properties, executor,
+                                      status_manager, logger);
+            },
         },
         config.DataSystemConfig().system_);
 }

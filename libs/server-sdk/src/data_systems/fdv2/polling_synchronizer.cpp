@@ -20,12 +20,12 @@ FDv2PollingSynchronizer::State::State(
     Logger logger,
     boost::asio::any_io_executor const& executor,
     std::chrono::seconds poll_interval,
-    config::built::ServiceEndpoints const& endpoints,
+    std::string polling_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key)
     : logger_(std::move(logger)),
       poll_interval_(std::max(poll_interval, kMinPollInterval)),
-      endpoints_(endpoints),
+      polling_base_url_(std::move(polling_base_url)),
       http_properties_(http_properties),
       filter_key_(std::move(filter_key)),
       requester_(executor, http_properties.Tls()),
@@ -33,8 +33,8 @@ FDv2PollingSynchronizer::State::State(
 
 async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
     data_model::Selector const& selector) const {
-    auto request = MakeFDv2PollRequest(endpoints_, http_properties_, selector,
-                                       filter_key_, logger_);
+    auto request = MakeFDv2PollRequest(polling_base_url_, http_properties_,
+                                       selector, filter_key_, logger_);
 
     // Promise must be in a shared_ptr because Requester requires callbacks
     // to be copy-constructible (stored in std::function).
@@ -81,14 +81,14 @@ void FDv2PollingSynchronizer::State::RecordPollStarted() {
 FDv2PollingSynchronizer::FDv2PollingSynchronizer(
     boost::asio::any_io_executor const& executor,
     Logger const& logger,
-    config::built::ServiceEndpoints const& endpoints,
+    std::string polling_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
     std::chrono::seconds poll_interval)
     : state_(std::make_shared<State>(logger,
                                      executor,
                                      poll_interval,
-                                     endpoints,
+                                     std::move(polling_base_url),
                                      http_properties,
                                      std::move(filter_key))) {
     if (poll_interval < kMinPollInterval) {

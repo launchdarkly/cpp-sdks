@@ -16,6 +16,11 @@ DataSystemBuilder& DataSystemBuilder::Method(LazyLoad lazy_load) {
     return *this;
 }
 
+DataSystemBuilder& DataSystemBuilder::Method(FDv2 fdv2) {
+    method_builder_ = std::move(fdv2);
+    return *this;
+}
+
 DataSystemBuilder& DataSystemBuilder::Enabled(bool const enabled) {
     config_.disabled = !enabled;
     return *this;
@@ -27,10 +32,11 @@ DataSystemBuilder& DataSystemBuilder::Disable() {
 
 tl::expected<built::DataSystemConfig, Error> DataSystemBuilder::Build() const {
     if (method_builder_) {
-        auto lazy_or_background_cfg = std::visit(
+        auto system_cfg = std::visit(
             [](auto&& arg)
                 -> tl::expected<std::variant<built::LazyLoadConfig,
-                                             built::BackgroundSyncConfig>,
+                                             built::BackgroundSyncConfig,
+                                             built::FDv2Config>,
                                 Error> {
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, BackgroundSync>) {
@@ -39,14 +45,16 @@ tl::expected<built::DataSystemConfig, Error> DataSystemBuilder::Build() const {
                     return arg
                         .Build();  // -> tl::expected<built::LazyLoadConfig,
                                    // Error>
+                } else if constexpr (std::is_same_v<T, FDv2>) {
+                    return arg.Build();  // -> built::FDv2Config
                 }
             },
             *method_builder_);
-        if (!lazy_or_background_cfg) {
-            return tl::make_unexpected(lazy_or_background_cfg.error());
+        if (!system_cfg) {
+            return tl::make_unexpected(system_cfg.error());
         }
         return built::DataSystemConfig{config_.disabled,
-                                       std::move(*lazy_or_background_cfg)};
+                                       std::move(*system_cfg)};
     }
     return config_;
 }

@@ -16,7 +16,7 @@ namespace launchdarkly::server_side::data_systems {
 
 // Build a polling HTTP GET request for the FDv2 endpoint.
 network::HttpRequest MakeFDv2PollRequest(
-    config::built::ServiceEndpoints const& endpoints,
+    std::string const& polling_base_url,
     config::built::HttpProperties const& http_properties,
     data_model::Selector const& selector,
     std::optional<std::string> const& filter_key,
