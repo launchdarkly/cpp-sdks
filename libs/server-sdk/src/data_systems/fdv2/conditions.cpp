@@ -137,8 +137,12 @@ Conditions::Conditions(std::vector<std::unique_ptr<IFDv2Condition>> conditions)
     : conditions_(std::move(conditions)), state_(std::make_shared<State>()) {
     MakeAggregateFuture(conditions_)
         .Then(
-            [state =
-                 state_](IFDv2Condition::Type const& type) -> std::monostate {
+            [weak_state = std::weak_ptr<State>(state_)](
+                IFDv2Condition::Type const& type) -> std::monostate {
+                auto state = weak_state.lock();
+                if (!state) {
+                    return {};
+                }
                 std::vector<PendingEntry> drained;
                 {
                     std::lock_guard lock(state->mutex);
@@ -177,7 +181,11 @@ async::Future<IFDv2Condition::Type> Conditions::GetFuture(
     // callback fires synchronously inside the ctor and needs to acquire
     // state_->mutex.
     auto cb = std::make_unique<async::CancellationCallback>(
-        token, [state = state_, id]() {
+        token, [weak_state = std::weak_ptr<State>(state_), id]() {
+            auto state = weak_state.lock();
+            if (!state) {
+                return;
+            }
             std::lock_guard lock(state->mutex);
             state->pending.erase(
                 std::remove_if(
