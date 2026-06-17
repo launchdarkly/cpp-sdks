@@ -274,11 +274,13 @@ void FDv2DataSystem::RunSynchronizerNext() {
         return;
     }
     auto next_future = active_synchronizer_->Next(selector_);
-    auto cond_future = active_conditions_->GetFuture();
+    auto cond_cancel = std::make_shared<async::CancellationSource>();
+    auto cond_future = active_conditions_->GetFuture(cond_cancel->GetToken());
     async::WhenAny(cond_future, next_future)
         .Then(
-            [this, cond_future,
-             next_future](std::size_t const& idx) -> std::monostate {
+            [this, cond_future, next_future,
+             cond_cancel](std::size_t const& idx) -> std::monostate {
+                cond_cancel->Cancel();
                 if (idx == 0) {
                     OnConditionFired(*cond_future.GetResult());
                 } else {
