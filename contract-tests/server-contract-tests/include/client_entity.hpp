@@ -27,6 +27,8 @@ class ClientEntity {
 
     tl::expected<nlohmann::json, std::string> Custom(CustomEventParams const&);
 
+    tl::expected<nlohmann::json, std::string> GetBigSegmentStoreStatus();
+
     std::unique_ptr<launchdarkly::server_side::Client> client_;
 };
 
