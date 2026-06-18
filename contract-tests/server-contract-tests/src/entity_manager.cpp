@@ -63,6 +63,24 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
     if (cfg.fdv1Fallback) {
         if (cfg.fdv1Fallback->baseUri) {
             endpoints->PollingBaseUrl(*cfg.fdv1Fallback->baseUri);
+        } else if (cfg.synchronizers && !cfg.synchronizers->empty()) {
+            // No explicit baseUri: derive from the synchronizers list, matching
+            // the no-fdv1Fallback branch below.
+            ConfigDataSynchronizerParams const* selected = nullptr;
+            for (auto const& sync : *cfg.synchronizers) {
+                if (sync.polling) {
+                    selected = &sync;
+                    break;
+                }
+            }
+            if (!selected) {
+                selected = &cfg.synchronizers->front();
+            }
+            if (selected->polling && selected->polling->baseUri) {
+                endpoints->PollingBaseUrl(*selected->polling->baseUri);
+            } else if (selected->streaming && selected->streaming->baseUri) {
+                endpoints->PollingBaseUrl(*selected->streaming->baseUri);
+            }
         }
         FDv2Builder::FDv1Polling p;
         if (cfg.fdv1Fallback->pollIntervalMs) {
