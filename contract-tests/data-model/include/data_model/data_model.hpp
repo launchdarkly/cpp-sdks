@@ -178,6 +178,21 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
                                                 fdv1Fallback,
                                                 payloadFilter);
 
+struct ConfigBigSegmentsParams {
+    std::string callbackUri;
+    std::optional<uint32_t> userCacheSize;
+    std::optional<uint64_t> userCacheTimeMs;
+    std::optional<uint64_t> statusPollIntervalMs;
+    std::optional<uint64_t> staleAfterMs;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigBigSegmentsParams,
+                                                callbackUri,
+                                                userCacheSize,
+                                                userCacheTimeMs,
+                                                statusPollIntervalMs,
+                                                staleAfterMs);
+
 struct ConfigParams {
     std::string credential;
     std::optional<uint32_t> startWaitTimeMs;
@@ -193,6 +208,7 @@ struct ConfigParams {
     std::optional<ConfigProxyParams> proxy;
     std::optional<ConfigHooksParams> hooks;
     std::optional<ConfigWrapper> wrapper;
+    std::optional<ConfigBigSegmentsParams> bigSegments;
 };
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
@@ -209,7 +225,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 tls,
                                                 proxy,
                                                 hooks,
-                                                wrapper);
+                                                wrapper,
+                                                bigSegments);
 
 struct ContextSingleParams {
     std::optional<std::string> kind;
@@ -358,6 +375,15 @@ struct IdentifyEventParams {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(IdentifyEventParams, context);
 
+struct BigSegmentStoreStatusResponse {
+    bool available;
+    bool stale;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(BigSegmentStoreStatusResponse,
+                                                available,
+                                                stale);
+
 enum class Command {
     Unknown = -1,
     EvaluateFlag,
@@ -366,7 +392,8 @@ enum class Command {
     CustomEvent,
     FlushEvents,
     ContextBuild,
-    ContextConvert
+    ContextConvert,
+    GetBigSegmentStoreStatus
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(Command,
@@ -377,7 +404,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(Command,
                               {Command::CustomEvent, "customEvent"},
                               {Command::FlushEvents, "flushEvents"},
                               {Command::ContextBuild, "contextBuild"},
-                              {Command::ContextConvert, "contextConvert"}});
+                              {Command::ContextConvert, "contextConvert"},
+                              {Command::GetBigSegmentStoreStatus,
+                               "getBigSegmentStoreStatus"}});
 
 struct CommandParams {
     Command command;
