@@ -2,6 +2,7 @@
 
 #include <launchdarkly/async/timer.hpp>
 
+#include <algorithm>
 #include <utility>
 #include <variant>
 
@@ -133,15 +134,81 @@ async::Future<IFDv2Condition::Type> MakeAggregateFuture(
 }  // namespace
 
 Conditions::Conditions(std::vector<std::unique_ptr<IFDv2Condition>> conditions)
-    : conditions_(std::move(conditions)),
-      future_(MakeAggregateFuture(conditions_)) {}
+    : conditions_(std::move(conditions)), state_(std::make_shared<State>()) {
+    MakeAggregateFuture(conditions_)
+        .Then(
+            [weak_state = std::weak_ptr<State>(state_)](
+                IFDv2Condition::Type const& type) -> std::monostate {
+                auto state = weak_state.lock();
+                if (!state) {
+                    return {};
+                }
+                std::vector<PendingEntry> drained;
+                {
+                    std::lock_guard lock(state->mutex);
+                    state->aggregate_result = type;
+                    drained = std::move(state->pending);
+                }
+                for (auto& entry : drained) {
+                    entry.promise.Resolve(type);
+                }
+                return {};
+            },
+            async::kInlineExecutor);
+}
 
 Conditions::~Conditions() {
     Close();
 }
 
-async::Future<IFDv2Condition::Type> Conditions::GetFuture() const {
-    return future_;
+async::Future<IFDv2Condition::Type> Conditions::GetFuture(
+    async::CancellationToken token) {
+    async::Promise<IFDv2Condition::Type> promise;
+    auto future = promise.GetFuture();
+    std::int64_t id;
+
+    {
+        std::lock_guard lock(state_->mutex);
+        if (state_->aggregate_result) {
+            promise.Resolve(*state_->aggregate_result);
+            return future;
+        }
+        id = state_->next_id++;
+        state_->pending.push_back({id, std::move(promise), nullptr});
+    }
+
+    // Construct cb outside the lock: if the token is already cancelled, the
+    // callback fires synchronously inside the ctor and needs to acquire
+    // state_->mutex.
+    auto cb = std::make_unique<async::CancellationCallback>(
+        token, [weak_state = std::weak_ptr<State>(state_), id]() {
+            auto state = weak_state.lock();
+            if (!state) {
+                return;
+            }
+            std::lock_guard lock(state->mutex);
+            state->pending.erase(
+                std::remove_if(
+                    state->pending.begin(), state->pending.end(),
+                    [id](PendingEntry const& e) { return e.id == id; }),
+                state->pending.end());
+        });
+
+    // Re-find the entry under the lock and attach cb. Between the push above
+    // and here, the aggregate may have fired and drained the vector, or cb's
+    // callback may have fired synchronously during construction and erased
+    // the entry. If gone, drop cb.
+    {
+        std::lock_guard lock(state_->mutex);
+        auto it =
+            std::find_if(state_->pending.begin(), state_->pending.end(),
+                         [id](PendingEntry const& e) { return e.id == id; });
+        if (it != state_->pending.end()) {
+            it->cancel_cb = std::move(cb);
+        }
+    }
+
+    return future;
 }
 
 void Conditions::Inform(FDv2SourceResult const& result) {
@@ -153,6 +220,18 @@ void Conditions::Inform(FDv2SourceResult const& result) {
 void Conditions::Close() {
     for (auto const& condition : conditions_) {
         condition->Close();
+    }
+    // Resolve any promises still pending.
+    std::vector<PendingEntry> drained;
+    {
+        std::lock_guard lock(state_->mutex);
+        if (!state_->aggregate_result) {
+            state_->aggregate_result = IFDv2Condition::Type::kCancelled;
+        }
+        drained = std::move(state_->pending);
+    }
+    for (auto& entry : drained) {
+        entry.promise.Resolve(IFDv2Condition::Type::kCancelled);
     }
 }
 

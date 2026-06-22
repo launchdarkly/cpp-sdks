@@ -12,6 +12,8 @@ using namespace launchdarkly::server_side::data_interfaces;
 using namespace launchdarkly::server_side::data_systems;
 using namespace std::chrono_literals;
 
+using launchdarkly::async::CancellationToken;
+
 namespace {
 
 // Holds an io_context running on a worker thread; the executor produced by
@@ -162,7 +164,7 @@ TEST(RecoveryConditionTest, CloseCancelsActiveTimerAndResolvesWithCancelled) {
 TEST(ConditionsTest, EmptyAggregateNeverResolves) {
     Conditions conditions({});
 
-    auto result = conditions.GetFuture().WaitForResult(50ms);
+    auto result = conditions.GetFuture(CancellationToken{}).WaitForResult(50ms);
 
     EXPECT_FALSE(result.has_value());
 }
@@ -178,7 +180,7 @@ TEST(ConditionsTest, AggregateResolvesWithTypeOfFirstFiringCondition) {
                                                         /*timeout=*/100ms));
     Conditions conditions(std::move(conds));
 
-    auto result = conditions.GetFuture().WaitForResult(1s);
+    auto result = conditions.GetFuture(CancellationToken{}).WaitForResult(1s);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(IFDv2Condition::Type::kRecovery, *result);
@@ -202,7 +204,7 @@ TEST(ConditionsTest, InformForwardsToAllUnderlyingConditions) {
             /*status_code=*/0, "boom", std::chrono::system_clock::now()},
     }});
 
-    auto result = conditions.GetFuture().WaitForResult(1s);
+    auto result = conditions.GetFuture(CancellationToken{}).WaitForResult(1s);
 
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(IFDv2Condition::Type::kFallback, *result);
@@ -220,7 +222,8 @@ TEST(ConditionsTest, CloseForwardsToAllUnderlyingConditions) {
 
     conditions.Close();
 
-    auto result = conditions.GetFuture().WaitForResult(200ms);
+    auto result =
+        conditions.GetFuture(CancellationToken{}).WaitForResult(200ms);
     ASSERT_TRUE(result.has_value());
     EXPECT_EQ(IFDv2Condition::Type::kCancelled, *result);
 }
