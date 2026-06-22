@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-sse-client
@@ -38,7 +38,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - uses: ./.github/actions/ci
         with:
           cmake_target: sse-tests
@@ -61,7 +61,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - uses: ./.github/actions/ci
         with:
           cmake_target: sse-tests

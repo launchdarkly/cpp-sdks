@@ -40,7 +40,7 @@ jobs:
       hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-client
         name: Full release of libs/client-sdk
         uses: ./.github/actions/sdk-release
@@ -59,7 +59,7 @@ jobs:
       hashes-macos-arm64: ${{ steps.release-client.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-client
         name: Full release of libs/client-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -84,7 +84,7 @@ jobs:
       hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-server
         name: Full release of libs/server-sdk
         uses: ./.github/actions/sdk-release
@@ -103,7 +103,7 @@ jobs:
       hashes-macos-arm64: ${{ steps.release-server.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-server
         name: Full release of libs/server-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -128,7 +128,7 @@ jobs:
       hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source
         uses: ./.github/actions/sdk-release
@@ -147,7 +147,7 @@ jobs:
       hashes-macos-arm64: ${{ steps.release-server-redis.outputs.hashes-macos }}
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source (macOS arm64)
         uses: ./.github/actions/sdk-release
