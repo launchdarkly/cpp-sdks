@@ -54,6 +54,12 @@ config::builders::DataSystemBuilder::FDv2 BuildFDv2(
                 if (init.polling->baseUri) {
                     p.BaseUrl(*init.polling->baseUri);
                 }
+                if (init.polling->pollIntervalMs) {
+                    p.PollInterval(
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                            std::chrono::milliseconds(
+                                *init.polling->pollIntervalMs)));
+                }
                 fdv2.Initializer(std::move(p));
             }
         }
