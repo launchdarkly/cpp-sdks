@@ -8,9 +8,11 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <vector>
 
 namespace launchdarkly::server_side::data_systems {
 
@@ -136,7 +138,7 @@ class RecoveryConditionFactory final
  * Aggregates a set of conditions into a single Future that resolves with the
  * type of the first condition to fire. Inform() and Close() forward to every
  * underlying condition. If constructed with no conditions, GetFuture()
- * returns a Future that never resolves.
+ * returns a Future that never resolves (until Close).
  *
  * Thread-safe: GetFuture, Inform, and Close may be called from any thread.
  */
@@ -153,16 +155,35 @@ class Conditions final {
     Conditions& operator=(Conditions const&) = delete;
     Conditions& operator=(Conditions&&) = delete;
 
+    /**
+     * Returns a fresh Future that resolves with the type of the first
+     * condition to fire. The caller must cancel the source corresponding to
+     * `token` once the result is no longer needed, so that the per-call
+     * Promise (and its registered continuations) can be released.
+     */
     [[nodiscard]] async::Future<data_interfaces::IFDv2Condition::Type>
-    GetFuture() const;
+    GetFuture(async::CancellationToken token);
 
     void Inform(data_interfaces::FDv2SourceResult const& result);
 
     void Close();
 
    private:
+    struct PendingEntry {
+        std::int64_t id;
+        async::Promise<data_interfaces::IFDv2Condition::Type> promise;
+        std::unique_ptr<async::CancellationCallback> cancel_cb;
+    };
+
+    struct State {
+        std::mutex mutex;
+        std::int64_t next_id = 0;
+        std::vector<PendingEntry> pending;
+        std::optional<data_interfaces::IFDv2Condition::Type> aggregate_result;
+    };
+
     std::vector<std::unique_ptr<data_interfaces::IFDv2Condition>> conditions_;
-    async::Future<data_interfaces::IFDv2Condition::Type> future_;
+    std::shared_ptr<State> const state_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems
