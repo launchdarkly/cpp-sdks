@@ -50,12 +50,15 @@ jobs:
           run_tests: false
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - name: 'Run v3 SDK test harness'
-        run: |
-          curl -s https://raw.githubusercontent.com/launchdarkly/sdk-test-harness/v3.0.0-alpha.3/downloader/run.sh \
-            | VERSION=v3.0.0-alpha.3 \
-              PARAMS="-url http://localhost:$TEST_SERVICE_PORT -debug -stop-service-at-end -skip-from=$SUPPRESSION_FILE" \
-              sh
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v3
+          branch: v3
+          debug_logging: 'true'
+          extra_params: -skip-from=${{ env.SUPPRESSION_FILE }}
 
   contract-tests-curl:
     runs-on: ubuntu-22.04
@@ -95,12 +98,15 @@ jobs:
           use_curl: true
       - name: 'Launch test service as background task'
         run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
-      - name: 'Run v3 SDK test harness'
-        run: |
-          curl -s https://raw.githubusercontent.com/launchdarkly/sdk-test-harness/v3.0.0-alpha.3/downloader/run.sh \
-            | VERSION=v3.0.0-alpha.3 \
-              PARAMS="-url http://localhost:$TEST_SERVICE_PORT -debug -stop-service-at-end -skip-from=$SUPPRESSION_FILE" \
-              sh
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v3
+          branch: v3
+          debug_logging: 'true'
+          extra_params: -skip-from=${{ env.SUPPRESSION_FILE }}
 
   build-test-server:
     runs-on: ubuntu-22.04
