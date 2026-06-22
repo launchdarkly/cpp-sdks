@@ -113,11 +113,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigTags,
                                                 applicationId,
                                                 applicationVersion);
 
-enum class HookStage {
-    BeforeEvaluation,
-    AfterEvaluation,
-    AfterTrack
-};
+enum class HookStage { BeforeEvaluation, AfterEvaluation, AfterTrack };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(HookStage,
                              {{HookStage::BeforeEvaluation, "beforeEvaluation"},
@@ -127,7 +123,10 @@ NLOHMANN_JSON_SERIALIZE_ENUM(HookStage,
 struct ConfigHookInstance {
     std::string name;
     std::string callbackUri;
-    std::optional<std::unordered_map<std::string, std::unordered_map<std::string, nlohmann::json>>> data;
+    std::optional<
+        std::unordered_map<std::string,
+                           std::unordered_map<std::string, nlohmann::json>>>
+        data;
     std::optional<std::unordered_map<std::string, std::string>> errors;
 };
 
@@ -150,6 +149,35 @@ struct ConfigWrapper {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigWrapper, name, version);
 
+struct ConfigDataSynchronizerParams {
+    std::optional<ConfigStreamingParams> streaming;
+    std::optional<ConfigPollingParams> polling;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSynchronizerParams,
+                                                streaming,
+                                                polling);
+
+struct ConfigDataInitializerParams {
+    std::optional<ConfigPollingParams> polling;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataInitializerParams,
+                                                polling);
+
+struct ConfigDataSystemParams {
+    std::optional<std::vector<ConfigDataInitializerParams>> initializers;
+    std::optional<std::vector<ConfigDataSynchronizerParams>> synchronizers;
+    std::optional<ConfigPollingParams> fdv1Fallback;
+    std::optional<std::string> payloadFilter;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigDataSystemParams,
+                                                initializers,
+                                                synchronizers,
+                                                fdv1Fallback,
+                                                payloadFilter);
+
 struct ConfigBigSegmentsParams {
     std::string callbackUri;
     std::optional<uint32_t> userCacheSize;
@@ -171,6 +199,7 @@ struct ConfigParams {
     std::optional<bool> initCanFail;
     std::optional<ConfigStreamingParams> streaming;
     std::optional<ConfigPollingParams> polling;
+    std::optional<ConfigDataSystemParams> dataSystem;
     std::optional<ConfigEventParams> events;
     std::optional<ConfigServiceEndpointsParams> serviceEndpoints;
     std::optional<ConfigClientSideParams> clientSide;
@@ -188,6 +217,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(ConfigParams,
                                                 initCanFail,
                                                 streaming,
                                                 polling,
+                                                dataSystem,
                                                 events,
                                                 serviceEndpoints,
                                                 clientSide,

@@ -36,6 +36,30 @@ jobs:
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  contract-tests-fdv2:
+    runs-on: ubuntu-22.04
+    env:
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
+      SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: server-tests
+          run_tests: false
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v3
+          branch: v3
+          debug_logging: 'true'
+          extra_params: -skip-from=${{ env.SUPPRESSION_FILE }}
+
   contract-tests-curl:
     runs-on: ubuntu-22.04
     env:
@@ -58,6 +82,31 @@ jobs:
           # Inform the test harness of test service's port.
           test_service_port: ${{ env.TEST_SERVICE_PORT }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  contract-tests-fdv2-curl:
+    runs-on: ubuntu-22.04
+    env:
+      TEST_SERVICE_PORT: 8123
+      TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
+      SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: ./.github/actions/ci
+        with:
+          cmake_target: server-tests
+          run_tests: false
+          use_curl: true
+      - name: 'Launch test service as background task'
+        run: $TEST_SERVICE_BINARY $TEST_SERVICE_PORT 2>&1 &
+      # https://github.com/launchdarkly/gh-actions/releases/tag/contract-tests-v1.1.0
+      - uses: launchdarkly/gh-actions/actions/contract-tests@2715574e04448246bc529a23a81766491bbc4aae
+        with:
+          test_service_port: ${{ env.TEST_SERVICE_PORT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v3
+          branch: v3
+          debug_logging: 'true'
+          extra_params: -skip-from=${{ env.SUPPRESSION_FILE }}
 
   build-test-server:
     runs-on: ubuntu-22.04
