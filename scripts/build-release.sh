@@ -38,10 +38,15 @@ else
   suffix=""
 fi
 
+sccache_args=()
+if command -v sccache >/dev/null 2>&1; then
+  sccache_args=(-D CMAKE_C_COMPILER_LAUNCHER=sccache -D CMAKE_CXX_COMPILER_LAUNCHER=sccache)
+fi
+
 # Build a static release.
 mkdir -p "build-static${suffix}" && cd "build-static${suffix}"
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" -D LD_CURL_NETWORKING="$build_curl" -D BUILD_TESTING=OFF -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" -D LD_CURL_NETWORKING="$build_curl" -D BUILD_TESTING=OFF -D CMAKE_INSTALL_PREFIX=./release "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .
@@ -50,7 +55,7 @@ cd ..
 # Build a dynamic release.
 mkdir -p "build-dynamic${suffix}" && cd "build-dynamic${suffix}"
 mkdir -p release
-cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" -D LD_CURL_NETWORKING="$build_curl" -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release ..
+cmake -G Ninja -D CMAKE_BUILD_TYPE=Release -D LD_BUILD_REDIS_SUPPORT="$build_redis" -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" -D LD_CURL_NETWORKING="$build_curl" -D BUILD_TESTING=OFF -D LD_BUILD_SHARED_LIBS=ON -D CMAKE_INSTALL_PREFIX=./release "${sccache_args[@]}" ..
 
 cmake --build . --target "$TARGET"
 cmake --install .

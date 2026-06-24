@@ -52,6 +52,11 @@ if [ "$1" == "launchdarkly-cpp-server-otel" ] || [ "$1" == "gtest_launchdarkly-c
   build_otel_fetch_deps="ON"
 fi
 
+sccache_args=()
+if command -v sccache >/dev/null 2>&1; then
+  sccache_args=(-D CMAKE_C_COMPILER_LAUNCHER=sccache -D CMAKE_CXX_COMPILER_LAUNCHER=sccache)
+fi
+
 echo "==== Build Configuration ===="
 echo "Target: $1"
 echo "CMAKE_BUILD_TYPE: $build_type"
@@ -63,6 +68,7 @@ echo "LD_BUILD_DYNAMODB_SUPPORT: $build_dynamodb"
 echo "LD_CURL_NETWORKING: $build_curl"
 echo "LD_BUILD_OTEL_SUPPORT: $build_otel"
 echo "LD_BUILD_OTEL_FETCH_DEPS: $build_otel_fetch_deps"
+echo "sccache: ${sccache_args[*]:-not detected}"
 echo "============================="
 
 cmake -G Ninja -D CMAKE_BUILD_TYPE="$build_type" \
@@ -74,6 +80,7 @@ cmake -G Ninja -D CMAKE_BUILD_TYPE="$build_type" \
                -D LD_BUILD_DYNAMODB_SUPPORT="$build_dynamodb" \
                -D LD_CURL_NETWORKING="$build_curl" \
                -D LD_BUILD_OTEL_SUPPORT="$build_otel" \
-               -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" ..
+               -D LD_BUILD_OTEL_FETCH_DEPS="$build_otel_fetch_deps" \
+               "${sccache_args[@]}" ..
 
 cmake --build . --target "$1"
