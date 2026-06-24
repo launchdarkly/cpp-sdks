@@ -23,7 +23,7 @@ jobs:
           - 6379:6379
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -32,7 +32,7 @@ jobs:
     runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server-redis-source
@@ -43,7 +43,7 @@ jobs:
     runs-on: windows-2022
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci

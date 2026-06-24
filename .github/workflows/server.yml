@@ -22,7 +22,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -43,7 +43,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
       SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -68,7 +68,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -90,7 +90,7 @@ jobs:
       TEST_SERVICE_BINARY: ./build/contract-tests/server-contract-tests/server-tests
       SUPPRESSION_FILE: contract-tests/server-contract-tests/test-suppressions-fdv2.txt
     steps:
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: server-tests
@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -133,7 +133,7 @@ jobs:
     runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -144,7 +144,7 @@ jobs:
     runs-on: macos-15
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: ./.github/actions/ci
         with:
           cmake_target: launchdarkly-cpp-server
@@ -156,7 +156,7 @@ jobs:
     runs-on: windows-2022
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci
@@ -170,7 +170,7 @@ jobs:
     runs-on: windows-2022
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       # https://github.com/ilammy/msvc-dev-cmd/releases/tag/v1.13.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
       - uses: ./.github/actions/ci

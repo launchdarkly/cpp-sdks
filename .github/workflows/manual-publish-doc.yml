@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - run: sudo apt-get install doxygen graphviz
       - id: build
         # Build using the same steps from CI.
