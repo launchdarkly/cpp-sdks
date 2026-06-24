@@ -28,7 +28,7 @@ jobs:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -S . -B /home/runner/build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       # https://github.com/cpp-linter/cpp-linter-action/releases/tag/v2.4.2
-      - uses: cpp-linter/cpp-linter-action@e84192cfd882b66bc5b84d5d6f80fe7802161f34
+      - uses: cpp-linter/cpp-linter-action@77c390c5ba9c947ebc185a3e49cc754f1558abb5
         id: linter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
