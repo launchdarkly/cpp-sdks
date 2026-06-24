@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # Install dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -7,6 +7,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ninja-build \
     libboost-all-dev \
     libssl-dev \
+    libjitterentropy3-dev \
     libcurl4-openssl-dev \
     git \
     curl \
