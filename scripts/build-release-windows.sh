@@ -40,7 +40,12 @@ fi
 
 sccache_args=()
 if command -v sccache >/dev/null 2>&1; then
-  sccache_args=(-D CMAKE_C_COMPILER_LAUNCHER=sccache -D CMAKE_CXX_COMPILER_LAUNCHER=sccache)
+  sccache_args=(
+    -D CMAKE_C_COMPILER_LAUNCHER=sccache
+    -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
+    -D CMAKE_POLICY_DEFAULT_CMP0141=NEW
+    -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
+  )
 fi
 
 # Build a static release.
