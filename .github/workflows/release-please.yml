@@ -17,6 +17,8 @@ jobs:
       package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
       package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
       package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
+      package-server-dynamodb-released: ${{ steps.release.outputs['libs/server-sdk-dynamodb-source--release_created'] }}
+      package-server-dynamodb-tag: ${{ steps.release.outputs['libs/server-sdk-dynamodb-source--tag_name'] }}
       package-server-otel-released: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
@@ -266,6 +268,85 @@ jobs:
         with:
           subject-checksums: checksums.txt
 
+  release-server-dynamodb:
+    strategy:
+      matrix:
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ ubuntu-22.04, windows-2022, macos-15-large ]
+    runs-on: ${{ matrix.os }}
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released  == 'true'}}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server-dynamodb
+        name: Full release of libs/server-sdk-dynamodb-source
+        uses: ./.github/actions/sdk-release
+        with:
+          # The tag of the release to upload artifacts to.
+          tag_name: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk-dynamodb-source'
+          sdk_cmake_target: 'launchdarkly-cpp-server-dynamodb-source'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server-dynamodb.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server-dynamodb.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server-dynamodb.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
+
+  release-server-dynamodb-mac-arm64:
+    runs-on: macos-15
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released  == 'true'}}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server-dynamodb
+        name: Full release of libs/server-sdk-dynamodb-source (macOS arm64)
+        uses: ./.github/actions/sdk-release
+        with:
+          tag_name: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk-dynamodb-source'
+          sdk_cmake_target: 'launchdarkly-cpp-server-dynamodb-source'
+          mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server-dynamodb.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
+
   publish-release-client:
     needs: ['release-please', 'release-client', 'release-client-mac-arm64']
     if: ${{ needs.release-please.outputs.package-client-released == 'true' }}
@@ -309,6 +390,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_NAME: ${{ needs.release-please.outputs.package-server-redis-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
+
+  publish-release-server-dynamodb:
+    needs: ['release-please', 'release-server-dynamodb', 'release-server-dynamodb-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
         run: >
           gh release edit "$TAG_NAME"
           --repo ${{ github.repository }}
