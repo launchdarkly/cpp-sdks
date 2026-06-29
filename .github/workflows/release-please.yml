@@ -17,10 +17,15 @@ jobs:
       package-server-tag: ${{ steps.release.outputs['libs/server-sdk--tag_name'] }}
       package-server-redis-released: ${{ steps.release.outputs['libs/server-sdk-redis-source--release_created'] }}
       package-server-redis-tag: ${{ steps.release.outputs['libs/server-sdk-redis-source--tag_name'] }}
+      package-server-dynamodb-released: ${{ steps.release.outputs['libs/server-sdk-dynamodb-source--release_created'] }}
+      package-server-dynamodb-tag: ${{ steps.release.outputs['libs/server-sdk-dynamodb-source--tag_name'] }}
       package-server-otel-released: ${{ steps.release.outputs['libs/server-sdk-otel--release_created'] }}
       package-server-otel-tag: ${{ steps.release.outputs['libs/server-sdk-otel--tag_name'] }}
     steps:
-      # https://github.com/googleapis/release-please-action/releases/tag/v4.3.0
+      # release-please-action v5+ (release-please >= 17) honors `force-tag-creation`
+      # for draft releases by creating the tag ref via the GitHub API before the
+      # release object, so a single invocation handles both releases and PRs.
+      # https://github.com/googleapis/release-please-action/releases/tag/v5.0.0
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
@@ -34,10 +39,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-client.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-client.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-client.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -50,13 +55,36 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-client.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-client.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-client.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
   release-client-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-client-released == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-client.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -69,6 +97,18 @@ jobs:
           sdk_path: 'libs/client-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-client'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-client.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
   release-server:
     strategy:
@@ -78,10 +118,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-server.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -94,13 +134,36 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
   release-server-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-released == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-server.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -113,6 +176,18 @@ jobs:
           sdk_path: 'libs/server-sdk'
           sdk_cmake_target: 'launchdarkly-cpp-server'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
   release-server-redis:
     strategy:
@@ -122,10 +197,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
-    outputs:
-      hashes-linux: ${{ steps.release-server-redis.outputs.hashes-linux }}
-      hashes-windows: ${{ steps.release-server-redis.outputs.hashes-windows }}
-      hashes-macos: ${{ steps.release-server-redis.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -138,13 +213,36 @@ jobs:
           github_token: ${{secrets.GITHUB_TOKEN}}
           sdk_path: 'libs/server-sdk-redis-source'
           sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server-redis.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server-redis.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server-redis.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
   release-server-redis-mac-arm64:
     runs-on: macos-15
     needs: [ 'release-please' ]
     if: ${{ needs.release-please.outputs.package-server-redis-released  == 'true'}}
-    outputs:
-      hashes-macos-arm64: ${{ steps.release-server-redis.outputs.hashes-macos }}
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -157,93 +255,174 @@ jobs:
           sdk_path: 'libs/server-sdk-redis-source'
           sdk_cmake_target: 'launchdarkly-cpp-server-redis-source'
           mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server-redis.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
-  release-client-provenance:
-    needs: [ 'release-please', 'release-client' ]
+  release-server-dynamodb:
     strategy:
       matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
+        # Each of the platforms for which release-artifacts need generated.
+        os: [ ubuntu-22.04, windows-2022, macos-15-large ]
+    runs-on: ${{ matrix.os }}
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released  == 'true'}}
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-client.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
-      provenance-name: ${{ format('{0}-client-multiple-provenance.intoto.jsonl', matrix.os) }}
+      attestations: write
+      id-token: write
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server-dynamodb
+        name: Full release of libs/server-sdk-dynamodb-source
+        uses: ./.github/actions/sdk-release
+        with:
+          # The tag of the release to upload artifacts to.
+          tag_name: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk-dynamodb-source'
+          sdk_cmake_target: 'launchdarkly-cpp-server-dynamodb-source'
+      - name: Generate checksums file
+        env:
+          HASHES_LINUX: ${{ steps.release-server-dynamodb.outputs.hashes-linux }}
+          HASHES_WINDOWS: ${{ steps.release-server-dynamodb.outputs.hashes-windows }}
+          HASHES_MACOS: ${{ steps.release-server-dynamodb.outputs.hashes-macos }}
+        run: |
+          # BSD base64 (macOS) uses -D to decode; GNU base64 (Linux/Windows) uses -d.
+          if [[ "$OSTYPE" == darwin* ]]; then B64_DECODE="base64 -D"; else B64_DECODE="base64 -d"; fi
+          if [ -n "${HASHES_LINUX}" ]; then
+            echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_WINDOWS}" ]; then
+            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+          elif [ -n "${HASHES_MACOS}" ]; then
+            echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
+          fi
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
-  release-client-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-client-mac-arm64' ]
+  release-server-dynamodb-mac-arm64:
+    runs-on: macos-15
+    needs: [ 'release-please' ]
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released  == 'true'}}
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-client-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-client-tag }}
-      provenance-name: 'macos-arm64-client-multiple-provenance.intoto.jsonl'
+      attestations: write
+      id-token: write
+    steps:
+      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - id: release-server-dynamodb
+        name: Full release of libs/server-sdk-dynamodb-source (macOS arm64)
+        uses: ./.github/actions/sdk-release
+        with:
+          tag_name: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          sdk_path: 'libs/server-sdk-dynamodb-source'
+          sdk_cmake_target: 'launchdarkly-cpp-server-dynamodb-source'
+          mac_artifact_arch: 'arm64'
+      - name: Generate checksums file
+        env:
+          HASHES: ${{ steps.release-server-dynamodb.outputs.hashes-macos }}
+        run: |
+          # This job always runs on macOS, so use -D (BSD base64 decode).
+          echo "${HASHES}" | base64 -D > checksums.txt
+        shell: bash
+      # https://github.com/actions/attest/releases/tag/v4.1.0
+      - name: Attest build provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-checksums: checksums.txt
 
-  release-server-provenance:
-    needs: [ 'release-please', 'release-server' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
+  publish-release-client:
+    needs: ['release-please', 'release-client', 'release-client-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-client-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
-      provenance-name: ${{ format('{0}-server-multiple-provenance.intoto.jsonl', matrix.os) }}
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-client-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-server-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-server-mac-arm64' ]
+  publish-release-server:
+    needs: ['release-please', 'release-server', 'release-server-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-tag }}
-      provenance-name: 'macos-arm64-server-multiple-provenance.intoto.jsonl'
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-server-redis-provenance:
-    needs: [ 'release-please', 'release-server-redis' ]
-    strategy:
-      matrix:
-        # Generates a combined attestation for each platform
-        os: [ linux, windows, macos ]
+  publish-release-server-redis:
+    needs: ['release-please', 'release-server-redis', 'release-server-redis-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-redis-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-redis.outputs[format('hashes-{0}', matrix.os)] }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
-      provenance-name: ${{ format('{0}-server-redis-multiple-provenance.intoto.jsonl', matrix.os) }}
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-redis-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
 
-  release-server-redis-mac-arm64-provenance:
-    needs: [ 'release-please', 'release-server-redis-mac-arm64' ]
+  publish-release-server-dynamodb:
+    needs: ['release-please', 'release-server-dynamodb', 'release-server-dynamodb-mac-arm64']
+    if: ${{ needs.release-please.outputs.package-server-dynamodb-released == 'true' }}
+    runs-on: ubuntu-latest
     permissions:
-      actions: read
-      id-token: write
       contents: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
-    with:
-      base64-subjects: "${{ needs.release-server-redis-mac-arm64.outputs.hashes-macos-arm64 }}"
-      upload-assets: true
-      upload-tag-name: ${{ needs.release-please.outputs.package-server-redis-tag }}
-      provenance-name: 'macos-arm64-server-redis-multiple-provenance.intoto.jsonl'
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-dynamodb-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
+
+  publish-release-server-otel:
+    needs: ['release-please']
+    if: ${{ needs.release-please.outputs.package-server-otel-released == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.package-server-otel-tag }}
+        run: >
+          gh release edit "$TAG_NAME"
+          --repo ${{ github.repository }}
+          --draft=false
