@@ -59,6 +59,9 @@ runs:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        # aws-sdk-cpp (dynamodb-source) calls find_package(CURL) on Linux/macOS, regardless of LD_CURL_NETWORKING.
+        CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+        CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
 
     - name: Build Linux Artifacts (CURL)
       if: runner.os == 'Linux'
@@ -253,6 +256,9 @@ runs:
         WORKSPACE: ${{ inputs.sdk_path }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         OPENSSL_ROOT_DIR: ${{ steps.install-openssl.outputs.OPENSSL_ROOT_DIR }}
+        # aws-sdk-cpp (dynamodb-source) calls find_package(CURL) on Linux/macOS, regardless of LD_CURL_NETWORKING.
+        CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
+        CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
 
     - name: Build Mac Artifacts (CURL)
       if: runner.os == 'macOS'
