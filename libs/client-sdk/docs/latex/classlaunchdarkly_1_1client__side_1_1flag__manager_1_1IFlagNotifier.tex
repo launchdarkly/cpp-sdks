@@ -1,0 +1,66 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{}\doxysection{launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::IFlag\+Notifier Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}\index{launchdarkly::client\_side::flag\_manager::IFlagNotifier@{launchdarkly::client\_side::flag\_manager::IFlagNotifier}}
+
+
+{\ttfamily \#include $<$flag\+\_\+notifier.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::IFlag\+Notifier\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a5004ae4a5987ddc782653d5d315d8330}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a5004ae4a5987ddc782653d5d315d8330}} 
+using {\bfseries Change\+Handler} = std\+::function$<$ void(std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1FlagValueChangeEvent}{Flag\+Value\+Change\+Event}} $>$)$>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a8a4feeace8dd8ec170055361a8b98036}{On\+Flag\+Change}} (std\+::string const \&key, Change\+Handler handler)=0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a5cf5238e7c42fd6bdbe4cf44541f844c}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a5cf5238e7c42fd6bdbe4cf44541f844c}} 
+{\bfseries IFlag\+Notifier} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} const \&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a3a0f5b7e5d68ca5d7f036c3f413771f8}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a3a0f5b7e5d68ca5d7f036c3f413771f8}} 
+{\bfseries IFlag\+Notifier} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} \&\&item)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a8cd63e6d6d9c9deab79b3d31a892f69a}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a8cd63e6d6d9c9deab79b3d31a892f69a}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a0441cbb7c6289643253a1818330c370b}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a0441cbb7c6289643253a1818330c370b}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier}{IFlag\+Notifier}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface to allow listening for flag changes. Notification events should be distributed after the store has been updated. Meaning that the \char`\"{}new\char`\"{} value will correspond to the current value in the store, and the \char`\"{}old\char`\"{} value will be what the value was before the update. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a8a4feeace8dd8ec170055361a8b98036}\label{classlaunchdarkly_1_1client__side_1_1flag__manager_1_1IFlagNotifier_a8a4feeace8dd8ec170055361a8b98036}} 
+\index{launchdarkly::client\_side::flag\_manager::IFlagNotifier@{launchdarkly::client\_side::flag\_manager::IFlagNotifier}!OnFlagChange@{OnFlagChange}}
+\index{OnFlagChange@{OnFlagChange}!launchdarkly::client\_side::flag\_manager::IFlagNotifier@{launchdarkly::client\_side::flag\_manager::IFlagNotifier}}
+\doxysubsubsection{\texorpdfstring{OnFlagChange()}{OnFlagChange()}}
+{\footnotesize\ttfamily virtual std\+::unique\+\_\+ptr$<$\mbox{\hyperlink{classlaunchdarkly_1_1IConnection}{IConnection}}$>$ launchdarkly\+::client\+\_\+side\+::flag\+\_\+manager\+::\+IFlag\+Notifier\+::\+On\+Flag\+Change (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{key,  }\item[{Change\+Handler}]{handler }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Listen for changes for the specific flag. 
+\begin{DoxyParams}{Parameters}
+{\em key} & The flag to listen to changes for. \\
+\hline
+{\em signal} & The handler for the changes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A connection which can be used to stop listening. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/client\+\_\+side/flag\+\_\+notifier.\+hpp\end{DoxyCompactItemize}

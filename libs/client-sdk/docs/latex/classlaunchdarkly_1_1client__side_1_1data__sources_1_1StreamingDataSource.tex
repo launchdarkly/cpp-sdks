@@ -1,0 +1,40 @@
+\hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource}{}\doxysection{launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Streaming\+Data\+Source Class Reference}
+\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource}\index{launchdarkly::client\_side::data\_sources::StreamingDataSource@{launchdarkly::client\_side::data\_sources::StreamingDataSource}}
+
+
+Inheritance diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Streaming\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::client\+\_\+side\+::data\+\_\+sources\+::Streaming\+Data\+Source\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_ab6553b3c8609c6710d4d733cb665552c}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_ab6553b3c8609c6710d4d733cb665552c}} 
+{\bfseries Streaming\+Data\+Source} (\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1ServiceEndpoints}{config\+::shared\+::built\+::\+Service\+Endpoints}} const \&endpoints, \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1built_1_1DataSourceConfig}{config\+::shared\+::built\+::\+Data\+Source\+Config}}$<$ \mbox{\hyperlink{structlaunchdarkly_1_1config_1_1shared_1_1ClientSDK}{config\+::shared\+::\+Client\+SDK}} $>$ const \&data\+\_\+source\+\_\+config, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::shared\+::built\+::\+Http\+Properties}} const \&http\+\_\+properties, boost\+::asio\+::any\+\_\+io\+\_\+executor ioc, \mbox{\hyperlink{classlaunchdarkly_1_1Context}{Context}} context, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1IDataSourceUpdateSink}{IData\+Source\+Update\+Sink}} \&handler, \mbox{\hyperlink{classlaunchdarkly_1_1client__side_1_1data__sources_1_1DataSourceStatusManager}{Data\+Source\+Status\+Manager}} \&status\+\_\+manager, Logger const \&logger)
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_a5025b457916503b8538d20b72c164b99}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_a5025b457916503b8538d20b72c164b99}} 
+void {\bfseries Start} () override
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_a6743a5a0654f2a30ecab1164590311af}\label{classlaunchdarkly_1_1client__side_1_1data__sources_1_1StreamingDataSource_a6743a5a0654f2a30ecab1164590311af}} 
+void {\bfseries Shutdown\+Async} (std\+::function$<$ void()$>$) override
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+sources/streaming\+\_\+data\+\_\+source.\+hpp\item 
+src/data\+\_\+sources/streaming\+\_\+data\+\_\+source.\+cpp\end{DoxyCompactItemize}
