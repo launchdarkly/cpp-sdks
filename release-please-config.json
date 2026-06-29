@@ -39,7 +39,6 @@
       "extra-files": [
         "CMakeLists.txt"
       ],
-      "draft": true,
       "force-tag-creation": true
     },
     "libs/server-sdk-otel": {
