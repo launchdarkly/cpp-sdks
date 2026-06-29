@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.10.1...launchdarkly-cpp-server-v3.11.0) (2026-06-29)
+
+
+### Features
+
+* add FDv1AdapterSynchronizer wrapping IDataSynchronizer as IFDv2Synchronizer ([#540](https://github.com/launchdarkly/cpp-sdks/issues/540)) ([d6368b8](https://github.com/launchdarkly/cpp-sdks/commit/d6368b81c6e336e830564d2cb1d00d00d4b89786))
+* add FDv2 configuration builder ([#545](https://github.com/launchdarkly/cpp-sdks/issues/545)) ([43850ce](https://github.com/launchdarkly/cpp-sdks/commit/43850ce06767d16c8cd4a7274bcbcc6920e5b50e))
+* add IBigSegmentStore interface + Redis and DynamoDB stores ([#536](https://github.com/launchdarkly/cpp-sdks/issues/536)) ([136aca7](https://github.com/launchdarkly/cpp-sdks/commit/136aca7ea0bc1a057db0bd7aac7838d2bc838d74))
+* add internal BigSegmentsBuilder + config struct ([#541](https://github.com/launchdarkly/cpp-sdks/issues/541)) ([3c88c2a](https://github.com/launchdarkly/cpp-sdks/commit/3c88c2a7a1f4262ecbdf36b7039bffcbf452738a))
+* add internal BigSegmentStoreWrapper with caching and status polling ([#543](https://github.com/launchdarkly/cpp-sdks/issues/543)) ([47fa5c2](https://github.com/launchdarkly/cpp-sdks/commit/47fa5c25054372fa3fca2b2149a0695866316e87))
+* add server FDv2 data system orchestrator ([#529](https://github.com/launchdarkly/cpp-sdks/issues/529)) ([65e110f](https://github.com/launchdarkly/cpp-sdks/commit/65e110fe118aa9f291c68a7d2e63435797ddcf73))
+* add X-LaunchDarkly-Instance-Id header to server SDK (SDK-2353) ([#532](https://github.com/launchdarkly/cpp-sdks/issues/532)) ([fd0c761](https://github.com/launchdarkly/cpp-sdks/commit/fd0c76194542be654aa21b45c8aac3e84418b3ff))
+* evaluate big segments ([#550](https://github.com/launchdarkly/cpp-sdks/issues/550)) ([505ee46](https://github.com/launchdarkly/cpp-sdks/commit/505ee4668bd428394e27ff85e6e7ec998a76abe2))
+* expose Big Segments via public Client and Config APIs ([#552](https://github.com/launchdarkly/cpp-sdks/issues/552)) ([c5fd239](https://github.com/launchdarkly/cpp-sdks/commit/c5fd23900c461e342fd4c2813c466565e799392a))
+* orchestrator switches to FDv1 fallback on directive ([#539](https://github.com/launchdarkly/cpp-sdks/issues/539)) ([44f2522](https://github.com/launchdarkly/cpp-sdks/commit/44f2522d56227fd4d2d0b8f84592c5ef8e51a532))
+* propagate FDv1 fallback directive from FDv2 polling and streaming sources ([#538](https://github.com/launchdarkly/cpp-sdks/issues/538)) ([edd96fe](https://github.com/launchdarkly/cpp-sdks/commit/edd96fe54a18286b5066db040fed4a2135da240f))
+
+
+### Bug Fixes
+
+* FDv2 fixes surfaced by v3 contract test harness ([#547](https://github.com/launchdarkly/cpp-sdks/issues/547)) ([e9c3c04](https://github.com/launchdarkly/cpp-sdks/commit/e9c3c04f83a5d16520c4790afa540262a17614cf))
+* stop accumulating WhenAny continuations on the Conditions aggregate ([#562](https://github.com/launchdarkly/cpp-sdks/issues/562)) ([5f8bf79](https://github.com/launchdarkly/cpp-sdks/commit/5f8bf79a12b49af0ace147088fe0b14c113bc052))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-internal bumped from 0.13.0 to 0.14.0
+    * @launchdarkly/cpp-common bumped from 1.11.0 to 1.12.0
+    * @launchdarkly/cpp-sse-client bumped from 0.6.1 to 0.7.0
+
 ## [3.10.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.10.0...launchdarkly-cpp-server-v3.10.1) (2025-11-12)
 
 

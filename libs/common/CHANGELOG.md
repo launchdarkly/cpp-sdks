@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.12.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.11.0...launchdarkly-cpp-common-v1.12.0) (2026-06-29)
+
+
+### Features
+
+* expose Big Segments via public Client and Config APIs ([#552](https://github.com/launchdarkly/cpp-sdks/issues/552)) ([c5fd239](https://github.com/launchdarkly/cpp-sdks/commit/c5fd23900c461e342fd4c2813c466565e799392a))
+
 ## [1.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-common-v1.10.0...launchdarkly-cpp-common-v1.11.0) (2025-11-03)
 
 

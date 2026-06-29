@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.14.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.13.0...launchdarkly-cpp-internal-v0.14.0) (2026-06-29)
+
+
+### Features
+
+* add internal BigSegmentStoreWrapper with caching and status polling ([#543](https://github.com/launchdarkly/cpp-sdks/issues/543)) ([47fa5c2](https://github.com/launchdarkly/cpp-sdks/commit/47fa5c25054372fa3fca2b2149a0695866316e87))
+* orchestrator switches to FDv1 fallback on directive ([#539](https://github.com/launchdarkly/cpp-sdks/issues/539)) ([44f2522](https://github.com/launchdarkly/cpp-sdks/commit/44f2522d56227fd4d2d0b8f84592c5ef8e51a532))
+
+
+### Bug Fixes
+
+* FDv2 fixes surfaced by v3 contract test harness ([#547](https://github.com/launchdarkly/cpp-sdks/issues/547)) ([e9c3c04](https://github.com/launchdarkly/cpp-sdks/commit/e9c3c04f83a5d16520c4790afa540262a17614cf))
+* handle FDv2 intentCode none as listening, reject unknown codes ([#555](https://github.com/launchdarkly/cpp-sdks/issues/555)) ([42e8ecd](https://github.com/launchdarkly/cpp-sdks/commit/42e8ecd3282279e7b7937bb31df75f94a324cfb3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-common bumped from 1.11.0 to 1.12.0
+
 ## [0.13.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.12.1...launchdarkly-cpp-internal-v0.13.0) (2025-11-03)
 
 

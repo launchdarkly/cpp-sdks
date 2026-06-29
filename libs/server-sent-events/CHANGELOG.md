@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.6.1...launchdarkly-cpp-sse-client-v0.7.0) (2026-06-29)
+
+
+### Features
+
+* propagate FDv1 fallback directive from FDv2 polling and streaming sources ([#538](https://github.com/launchdarkly/cpp-sdks/issues/538)) ([edd96fe](https://github.com/launchdarkly/cpp-sdks/commit/edd96fe54a18286b5066db040fed4a2135da240f))
+
 ## [0.6.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.6.0...launchdarkly-cpp-sse-client-v0.6.1) (2025-11-12)
 
 
