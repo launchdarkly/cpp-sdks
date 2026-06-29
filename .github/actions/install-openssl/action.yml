@@ -27,12 +27,24 @@ runs:
     # The Windows runner has an older version of OpenSSL and needs to be upgraded.
     # Additionally, it seems to randomly be installed in OpenSSL-Win64 or OpenSSL depending on
     # the runner Github gives us.
+    - name: Cache OpenSSL (Windows)
+      if: runner.os == 'Windows'
+      id: cache-openssl-windows
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      with:
+        path: |
+          C:\Program Files\OpenSSL-Win64
+          C:\Program Files\OpenSSL
+        key: openssl-windows-4.0.1
+
     - name: Install for Windows
       id: choco-action
       if: runner.os == 'Windows'
       shell: bash
       run: |
-        choco install openssl --version 4.0.1 -y --no-progress
+        if [ "${{ steps.cache-openssl-windows.outputs.cache-hit }}" != "true" ]; then
+          choco install openssl --version 4.0.1 -y --no-progress
+        fi
         if [ -d "C:\Program Files\OpenSSL-Win64" ]; then
           echo "OPENSSL_ROOT_DIR=C:\Program Files\OpenSSL-Win64" >> $GITHUB_OUTPUT
         else
