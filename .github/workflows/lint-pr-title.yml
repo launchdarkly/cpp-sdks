@@ -7,7 +7,10 @@ on:
       - edited
       - synchronize
 
+permissions:
+  pull-requests: read
+
 jobs:
   lint-pr-title:
-    # https://github.com/launchdarkly/gh-actions/commit/f1760cc538c362c2ab826a3bd22611743ef8f82c
+    # https://github.com/launchdarkly/gh-actions/commit/de4859c8d07c097d573fbcc4bd10b77efed0f5cc
     uses: launchdarkly/gh-actions/.github/workflows/lint-pr-title.yml@de4859c8d07c097d573fbcc4bd10b77efed0f5cc
