@@ -1,0 +1,40 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}{}\doxysection{launchdarkly\+::server\+\_\+side\+::Big\+Segment\+Store\+Status Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus}\index{launchdarkly::server\_side::BigSegmentStoreStatus@{launchdarkly::server\_side::BigSegmentStoreStatus}}
+
+
+{\ttfamily \#include $<$big\+\_\+segment\+\_\+store\+\_\+status.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a328e35350057f4828c7ca3a8a6e34f22}\label{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a328e35350057f4828c7ca3a8a6e34f22}} 
+{\bfseries Big\+Segment\+Store\+Status} (bool available, bool stale)
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a54bca00cb201cb339fbb182115a5f797}{Is\+Available}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a248bad7379a67efbd26241623e3dbfbf}{Is\+Stale}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+The current health of a Big Segments store, independent of any single context\textquotesingle{}s membership. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a54bca00cb201cb339fbb182115a5f797}\label{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a54bca00cb201cb339fbb182115a5f797}} 
+\index{launchdarkly::server\_side::BigSegmentStoreStatus@{launchdarkly::server\_side::BigSegmentStoreStatus}!IsAvailable@{IsAvailable}}
+\index{IsAvailable@{IsAvailable}!launchdarkly::server\_side::BigSegmentStoreStatus@{launchdarkly::server\_side::BigSegmentStoreStatus}}
+\doxysubsubsection{\texorpdfstring{IsAvailable()}{IsAvailable()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::\+Big\+Segment\+Store\+Status\+::\+Is\+Available (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+True if the most recent store query or metadata poll succeeded. If false, Big Segments membership cannot currently be evaluated reliably. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a248bad7379a67efbd26241623e3dbfbf}\label{classlaunchdarkly_1_1server__side_1_1BigSegmentStoreStatus_a248bad7379a67efbd26241623e3dbfbf}} 
+\index{launchdarkly::server\_side::BigSegmentStoreStatus@{launchdarkly::server\_side::BigSegmentStoreStatus}!IsStale@{IsStale}}
+\index{IsStale@{IsStale}!launchdarkly::server\_side::BigSegmentStoreStatus@{launchdarkly::server\_side::BigSegmentStoreStatus}}
+\doxysubsubsection{\texorpdfstring{IsStale()}{IsStale()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::\+Big\+Segment\+Store\+Status\+::\+Is\+Stale (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+True if the store\textquotesingle{}s data has not been updated within the configured stale-\/after threshold. The data may still be queried; it is just older than desired. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/big\+\_\+segment\+\_\+store\+\_\+status.\+hpp\item 
+src/big\+\_\+segment\+\_\+store\+\_\+status.\+cpp\end{DoxyCompactItemize}
