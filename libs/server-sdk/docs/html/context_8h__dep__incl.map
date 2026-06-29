@@ -1,8 +1,0 @@
-<map id="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/context.h" name="/home/runner/work/cpp&#45;sdks/cpp&#45;sdks/libs/common/include/launchdarkly/bindings/c/context.h">
-<area shape="rect" id="node1" title=" " alt="" coords="444,5,664,76"/>
-<area shape="rect" id="node2" href="$evaluation__series__context_8h.html" title="C bindings for read&#45;only evaluation context passed to hooks." alt="" coords="5,131,225,187"/>
-<area shape="rect" id="node3" href="$evaluation__series__data_8h.html" title="C bindings for hook data passed between evaluation stages." alt="" coords="250,131,450,187"/>
-<area shape="rect" id="node4" href="$sdk_8h.html" title="LaunchDarkly Server&#45;side C Bindings." alt="" coords="474,131,634,187"/>
-<area shape="rect" id="node5" href="$track__series__context_8h.html" title="C bindings for read&#45;only track context passed to afterTrack hooks." alt="" coords="658,131,842,187"/>
-<area shape="rect" id="node6" href="$context__builder_8h.html" title=" " alt="" coords="867,124,1087,195"/>
-</map>
