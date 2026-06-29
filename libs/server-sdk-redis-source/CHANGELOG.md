@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.2.2...launchdarkly-cpp-server-redis-source-v2.3.0) (2026-06-29)
+
+
+### Features
+
+* add IBigSegmentStore interface + Redis and DynamoDB stores ([#536](https://github.com/launchdarkly/cpp-sdks/issues/536)) ([136aca7](https://github.com/launchdarkly/cpp-sdks/commit/136aca7ea0bc1a057db0bd7aac7838d2bc838d74))
+* add internal BigSegmentStoreWrapper with caching and status polling ([#543](https://github.com/launchdarkly/cpp-sdks/issues/543)) ([47fa5c2](https://github.com/launchdarkly/cpp-sdks/commit/47fa5c25054372fa3fca2b2149a0695866316e87))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-server bumped from 3.10.1 to 3.11.0
+
 ## [2.2.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.2.1...launchdarkly-cpp-server-redis-source-v2.2.2) (2025-11-12)
 
 
