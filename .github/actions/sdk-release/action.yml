@@ -235,7 +235,7 @@ runs:
       id: hash-windows
       run: |
         CURL_SUFFIX="${{ steps.curl-suffix-windows.outputs.suffix }}"
-        echo "hashes-windows=$(sha256sum windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip windows-msvc-x64-static-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-curl${CURL_SUFFIX}.zip windows-msvc-x64-static-debug-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-debug-curl${CURL_SUFFIX}.zip | base64 -w0)" >> "$GITHUB_OUTPUT"
+        echo "hashes-windows=$(sha256sum windows-msvc-x64-static.zip windows-msvc-x64-dynamic.zip windows-msvc-x64-static-debug.zip windows-msvc-x64-dynamic-debug.zip windows-msvc-x64-static-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-curl${CURL_SUFFIX}.zip windows-msvc-x64-static-debug-curl${CURL_SUFFIX}.zip windows-msvc-x64-dynamic-debug-curl${CURL_SUFFIX}.zip | sed 's/ \*/  /' | base64 -w0)" >> "$GITHUB_OUTPUT"
 
     - name: Upload Windows Build Artifacts
       if: runner.os == 'Windows'
