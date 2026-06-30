@@ -75,7 +75,7 @@ jobs:
           if [ -n "${HASHES_LINUX}" ]; then
             echo "${HASHES_LINUX}" | $B64_DECODE > checksums.txt
           elif [ -n "${HASHES_WINDOWS}" ]; then
-            echo "${HASHES_WINDOWS}" | $B64_DECODE > checksums.txt
+            echo "${HASHES_WINDOWS}" | $B64_DECODE | sed 's/$/\r/' > checksums.txt
           elif [ -n "${HASHES_MACOS}" ]; then
             echo "${HASHES_MACOS}" | $B64_DECODE > checksums.txt
           fi
