@@ -4,6 +4,7 @@
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/server_side/config/config.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
+#include <launchdarkly/server_side/integrations/big_segments/ibig_segment_store.hpp>
 
 #include <launchdarkly/bindings/c/context_builder.h>
 
@@ -12,6 +13,24 @@
 #include <boost/json/parse.hpp>
 
 #include <chrono>
+
+namespace {
+
+class NoopBigSegmentStore
+    : public launchdarkly::server_side::integrations::IBigSegmentStore {
+   public:
+    [[nodiscard]] GetMembershipResult GetMembership(
+        std::string const&) const noexcept override {
+        return launchdarkly::server_side::integrations::Membership::
+            FromSegmentRefs({}, {});
+    }
+
+    [[nodiscard]] GetMetadataResult GetMetadata() const noexcept override {
+        return std::nullopt;
+    }
+};
+
+}  // namespace
 
 TEST(ClientBindings, MinimalInstantiation) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
@@ -448,4 +467,92 @@ TEST(ClientBindings, FDv2DisableFDv1FallbackAndTimeouts) {
     ASSERT_TRUE(LDStatus_Ok(status));
 
     LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, BigSegmentsBuilderAttachesToConfig) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    auto* store = new NoopBigSegmentStore();
+    LDServerBigSegmentsBuilder bs_builder = LDServerBigSegmentsBuilder_New(
+        reinterpret_cast<LDServerBigSegmentStorePtr>(store));
+    LDServerBigSegmentsBuilder_ContextCacheSize(bs_builder, 500);
+    LDServerBigSegmentsBuilder_ContextCacheTimeMs(bs_builder, 10000);
+    LDServerBigSegmentsBuilder_StatusPollIntervalMs(bs_builder, 15000);
+    LDServerBigSegmentsBuilder_StaleAfterMs(bs_builder, 60000);
+
+    LDServerConfigBuilder_BigSegments(cfg_builder, bs_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, BigSegmentStoreStatusWithoutStoreReportsUnavailable) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    LDServerBigSegmentStoreStatus bs_status =
+        LDServerSDK_BigSegmentStoreStatus_Status(sdk);
+    EXPECT_FALSE(LDServerBigSegmentStoreStatus_Available(bs_status));
+    EXPECT_FALSE(LDServerBigSegmentStoreStatus_Stale(bs_status));
+
+    LDServerBigSegmentStoreStatus_Free(bs_status);
+    LDServerSDK_Free(sdk);
+}
+
+TEST(ClientBindings, BigSegmentStoreStatusListenerReturnsNullWithoutCallback) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+
+    EXPECT_EQ(nullptr, connection);
+
+    LDServerSDK_Free(sdk);
+}
+
+void BigSegmentStoreStatusListenerFunction(LDServerBigSegmentStoreStatus,
+                                           void*) {}
+
+TEST(ClientBindings, BigSegmentStoreStatusListenerRegistersWithCallback) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+    listener.StatusChanged = BigSegmentStoreStatusListenerFunction;
+    listener.UserData = const_cast<char*>("cabbage");
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+
+    EXPECT_NE(nullptr, connection);
+
+    LDListenerConnection_Disconnect(connection);
+    LDListenerConnection_Free(connection);
+    LDServerSDK_Free(sdk);
 }

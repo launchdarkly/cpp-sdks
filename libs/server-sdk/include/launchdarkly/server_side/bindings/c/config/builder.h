@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <launchdarkly/server_side/bindings/c/config/big_segments_builder/big_segments_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/config.h>
 #include <launchdarkly/server_side/bindings/c/config/fdv2_builder/fdv2_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/lazy_load_builder/lazy_load_builder.h>
@@ -277,6 +278,21 @@ LDServerConfigBuilder_DataSystem_LazyLoad(
 LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_FDv2(LDServerConfigBuilder b,
                                       LDServerFDv2Builder fdv2_builder);
+
+/**
+ * Configures the SDK's Big Segments behavior. The builder is automatically
+ * consumed.
+ *
+ * WARNING: Do not call any other LDServerBigSegmentsBuilder function on the
+ * provided builder after calling this function. It is undefined behavior.
+ *
+ * @param b Server config builder. Must not be NULL.
+ * @param big_segments The Big Segments builder. The builder is consumed; do
+ * not free it. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_BigSegments(LDServerConfigBuilder b,
+                                  LDServerBigSegmentsBuilder big_segments);
 
 /**
  * Specify if the SDK's data system should be enabled or not.
