@@ -1,4 +1,0 @@
-<map id="launchdarkly::server_side::integrations::FlagKind" name="launchdarkly::server_side::integrations::FlagKind">
-<area shape="rect" id="node1" title=" " alt="" coords="5,109,160,165"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind.html" title="Represents the kind of a serialized item. The purpose of this interface is to allow for determining a..." alt="" coords="5,5,160,61"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="launchdarkly::server_side::data_systems::LazyLoad::Kinds" name="launchdarkly::server_side::data_systems::LazyLoad::Kinds">
-<area shape="rect" id="node1" title=" " alt="" coords="475,41,637,97"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1FlagKind.html" title=" " alt="" coords="209,5,364,61"/>
-<area shape="rect" id="node3" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1ISerializedItemKind.html" title="Represents the kind of a serialized item. The purpose of this interface is to allow for determining a..." alt="" coords="5,47,160,103"/>
-<area shape="rect" id="node4" href="$classlaunchdarkly_1_1server__side_1_1integrations_1_1SegmentKind.html" title=" " alt="" coords="209,85,364,141"/>
-</map>
