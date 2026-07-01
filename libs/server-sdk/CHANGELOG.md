@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.11.0...launchdarkly-cpp-server-v3.12.0) (2026-07-01)
+
+
+### Features
+
+* Add C bindings for FDv2 data system ([#572](https://github.com/launchdarkly/cpp-sdks/issues/572)) ([c8af14d](https://github.com/launchdarkly/cpp-sdks/commit/c8af14d9cc7760dc941c70a08c36c3f79048273b))
+
 ## [3.11.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-v3.10.1...launchdarkly-cpp-server-v3.11.0) (2026-06-29)
 
 
