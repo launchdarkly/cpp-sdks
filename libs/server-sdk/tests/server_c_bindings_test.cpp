@@ -356,7 +356,7 @@ TEST(ClientBindings, FDv2CustomWithStreamingSynchronizer) {
 
     LDServerFDv2StreamingBuilder streaming = LDServerFDv2StreamingBuilder_New();
     LDServerFDv2StreamingBuilder_InitialReconnectDelayMs(streaming, 500);
-    LDServerFDv2StreamingBuilder_BaseUrl(streaming,
+    LDServerFDv2StreamingBuilder_BaseURL(streaming,
                                          "https://stream.example.com");
 
     LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
@@ -375,10 +375,10 @@ TEST(ClientBindings, FDv2CustomWithPollingInitializerAndSynchronizer) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
 
     LDServerFDv2PollingBuilder initializer = LDServerFDv2PollingBuilder_New();
-    LDServerFDv2PollingBuilder_PollIntervalS(initializer, 30);
+    LDServerFDv2PollingBuilder_IntervalS(initializer, 30);
 
     LDServerFDv2PollingBuilder synchronizer = LDServerFDv2PollingBuilder_New();
-    LDServerFDv2PollingBuilder_BaseUrl(synchronizer,
+    LDServerFDv2PollingBuilder_BaseURL(synchronizer,
                                        "https://poll.example.com");
 
     LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();

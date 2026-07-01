@@ -91,7 +91,7 @@ LDServerFDv2StreamingBuilder_InitialReconnectDelayMs(
  * @param base_url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
-LDServerFDv2StreamingBuilder_BaseUrl(LDServerFDv2StreamingBuilder b,
+LDServerFDv2StreamingBuilder_BaseURL(LDServerFDv2StreamingBuilder b,
                                      char const* base_url);
 
 /**
@@ -122,7 +122,7 @@ LDServerFDv2PollingBuilder_New(void);
  * @param seconds Polling interval in seconds.
  */
 LD_EXPORT(void)
-LDServerFDv2PollingBuilder_PollIntervalS(LDServerFDv2PollingBuilder b,
+LDServerFDv2PollingBuilder_IntervalS(LDServerFDv2PollingBuilder b,
                                          unsigned int seconds);
 
 /**
@@ -134,7 +134,7 @@ LDServerFDv2PollingBuilder_PollIntervalS(LDServerFDv2PollingBuilder b,
  * @param base_url Target URL. Must not be NULL.
  */
 LD_EXPORT(void)
-LDServerFDv2PollingBuilder_BaseUrl(LDServerFDv2PollingBuilder b,
+LDServerFDv2PollingBuilder_BaseURL(LDServerFDv2PollingBuilder b,
                                    char const* base_url);
 
 /**

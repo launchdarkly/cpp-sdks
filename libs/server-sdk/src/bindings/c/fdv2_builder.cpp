@@ -64,7 +64,7 @@ LDServerFDv2StreamingBuilder_InitialReconnectDelayMs(
 }
 
 LD_EXPORT(void)
-LDServerFDv2StreamingBuilder_BaseUrl(LDServerFDv2StreamingBuilder b,
+LDServerFDv2StreamingBuilder_BaseURL(LDServerFDv2StreamingBuilder b,
                                      char const* base_url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(base_url);
@@ -83,15 +83,15 @@ LDServerFDv2PollingBuilder_New(void) {
 }
 
 LD_EXPORT(void)
-LDServerFDv2PollingBuilder_PollIntervalS(LDServerFDv2PollingBuilder b,
-                                         unsigned int seconds) {
+LDServerFDv2PollingBuilder_IntervalS(LDServerFDv2PollingBuilder b,
+                                     unsigned int seconds) {
     LD_ASSERT_NOT_NULL(b);
 
     TO_FDV2_POLL_BUILDER(b)->PollInterval(std::chrono::seconds{seconds});
 }
 
 LD_EXPORT(void)
-LDServerFDv2PollingBuilder_BaseUrl(LDServerFDv2PollingBuilder b,
+LDServerFDv2PollingBuilder_BaseURL(LDServerFDv2PollingBuilder b,
                                    char const* base_url) {
     LD_ASSERT_NOT_NULL(b);
     LD_ASSERT_NOT_NULL(base_url);
