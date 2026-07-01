@@ -56,6 +56,8 @@ runs:
       if: inputs.use_curl == 'true' || inputs.install_curl == 'true'
       uses: ./.github/actions/install-curl
       id: install-curl
+    - name: Install sccache
+      uses: mozilla-actions/sccache-action@1583d6b38d7be47f593cb472781bbb21cab4321e # v0.0.10
     - name: Build Library
       shell: bash
       run: ./scripts/build.sh ${{ inputs.cmake_target }} ON ${{ inputs.use_curl }}
@@ -82,6 +84,11 @@ runs:
       # This uses the binary, versus "make tests" because the binary
       # has better performance and output.
       run: ./build/gtest_${{ inputs.cmake_target }}
+
+    - name: sccache stats (after unit-test build)
+      if: always()
+      shell: bash
+      run: sccache --show-stats || true
 
     - name: Simulate Release (Linux/MacOS)
       if: inputs.simulate_release == 'true'
@@ -113,3 +120,8 @@ runs:
         Boost_DIR: 'C:\local\boost_1_87_0\lib64-msvc-14.3\cmake\Boost-1.87.0'
         CURL_ROOT: ${{ steps.install-curl.outputs.CURL_ROOT }}
         CMAKE_PREFIX_PATH: ${{ steps.install-curl.outputs.CURL_ROOT }}
+
+    - name: sccache stats (final)
+      if: always()
+      shell: bash
+      run: sccache --show-stats || true
