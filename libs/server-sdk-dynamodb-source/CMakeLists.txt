@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.19)
 
 project(
         LaunchDarklyCPPServerDynamoDBSource
-        VERSION 0.2.0 # {x-release-please-version}
+        VERSION 0.2.1 # {x-release-please-version}
         DESCRIPTION "LaunchDarkly C++ Server SDK DynamoDB Source"
         LANGUAGES CXX C
 )
