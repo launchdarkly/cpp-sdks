@@ -46,7 +46,7 @@ TEST(ClientBindings, RegisterDataSourceStatusChangeListener) {
 
     LDServerSDK sdk = LDServerSDK_New(config);
 
-    struct LDServerDataSourceStatusListener listener {};
+    struct LDServerDataSourceStatusListener listener{};
     LDServerDataSourceStatusListener_Init(&listener);
 
     listener.UserData = const_cast<char*>("Potato");
@@ -330,6 +330,118 @@ TEST(ClientBindings, PollingPayloadFilters) {
 
     LDServerConfigBuilder_DataSystem_BackgroundSync_Polling(cfg_builder,
                                                             poll_builder);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2DefaultBuilds) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Default();
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2CustomWithStreamingSynchronizer) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2StreamingBuilder streaming = LDServerFDv2StreamingBuilder_New();
+    LDServerFDv2StreamingBuilder_InitialReconnectDelayMs(streaming, 500);
+    LDServerFDv2StreamingBuilder_BaseUrl(streaming,
+                                         "https://stream.example.com");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_Synchronizer_Streaming(fdv2, streaming);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2CustomWithPollingInitializerAndSynchronizer) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2PollingBuilder initializer = LDServerFDv2PollingBuilder_New();
+    LDServerFDv2PollingBuilder_PollIntervalS(initializer, 30);
+
+    LDServerFDv2PollingBuilder synchronizer = LDServerFDv2PollingBuilder_New();
+    LDServerFDv2PollingBuilder_BaseUrl(synchronizer,
+                                       "https://poll.example.com");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_Initializer_Polling(fdv2, initializer);
+    LDServerFDv2Builder_Synchronizer_Polling(fdv2, synchronizer);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2FDv1FallbackStreamingReusesBackgroundSyncHandle) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourceStreamBuilder fdv1_streaming =
+        LDServerDataSourceStreamBuilder_New();
+    LDServerDataSourceStreamBuilder_InitialReconnectDelayMs(fdv1_streaming,
+                                                            1000);
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_FDv1Fallback_Streaming(fdv2, fdv1_streaming);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2FDv1FallbackPollingReusesBackgroundSyncHandle) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerDataSourcePollBuilder fdv1_polling =
+        LDServerDataSourcePollBuilder_New();
+    LDServerDataSourcePollBuilder_IntervalS(fdv1_polling, 30);
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Custom();
+    LDServerFDv2Builder_FDv1Fallback_Polling(fdv2, fdv1_polling);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerConfig_Free(config);
+}
+
+TEST(ClientBindings, FDv2DisableFDv1FallbackAndTimeouts) {
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+
+    LDServerFDv2Builder fdv2 = LDServerFDv2Builder_Default();
+    LDServerFDv2Builder_DisableFDv1Fallback(fdv2);
+    LDServerFDv2Builder_FallbackTimeoutMs(fdv2, 60000);
+    LDServerFDv2Builder_RecoveryTimeoutMs(fdv2, 300000);
+
+    LDServerConfigBuilder_DataSystem_FDv2(cfg_builder, fdv2);
 
     LDServerConfig config;
     LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);

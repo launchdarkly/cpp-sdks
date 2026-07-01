@@ -4,6 +4,7 @@
 #pragma once
 
 #include <launchdarkly/server_side/bindings/c/config/config.h>
+#include <launchdarkly/server_side/bindings/c/config/fdv2_builder/fdv2_builder.h>
 #include <launchdarkly/server_side/bindings/c/config/lazy_load_builder/lazy_load_builder.h>
 #include <launchdarkly/server_side/bindings/c/hook.h>
 
@@ -255,6 +256,27 @@ LD_EXPORT(void)
 LDServerConfigBuilder_DataSystem_LazyLoad(
     LDServerConfigBuilder b,
     LDServerLazyLoadBuilder lazy_load_builder);
+
+/**
+ * Configures the FDv2 data system. The builder is automatically consumed.
+ *
+ * This method is mutually exclusive with the BackgroundSync_Streaming,
+ * BackgroundSync_Polling, and LazyLoad builders.
+ *
+ * WARNING: Do not call any other LDServerFDv2Builder function on the provided
+ * builder after calling this function. It is undefined behavior.
+ *
+ * FDv2 receives flag delivery updates over the changeset-based protocol with
+ * built-in fallback and recovery semantics. An optional FDv1 fallback may be
+ * configured on the FDv2 builder for service-directed protocol fallback.
+ *
+ * @param b Server config builder. Must not be NULL.
+ * @param fdv2_builder The FDv2 builder. The builder is consumed; do not free
+ * it. Must not be NULL.
+ */
+LD_EXPORT(void)
+LDServerConfigBuilder_DataSystem_FDv2(LDServerConfigBuilder b,
+                                      LDServerFDv2Builder fdv2_builder);
 
 /**
  * Specify if the SDK's data system should be enabled or not.
