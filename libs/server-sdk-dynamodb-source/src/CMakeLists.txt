@@ -17,6 +17,8 @@ target_sources(${LIBNAME}
         dynamodb_big_segment_store.cpp
         aws_sdk_guard.cpp
         client_factory.cpp
+        bindings/dynamodb/client_options.cpp
+        bindings/dynamodb/dynamodb_source.cpp
 )
 
 
