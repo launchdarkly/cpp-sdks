@@ -1,0 +1,116 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::Source\+Manager Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+
+
+{\ttfamily \#include $<$source\+\_\+manager.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a0d1e0d0b0b88a015409efae73e073d84}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a0d1e0d0b0b88a015409efae73e073d84}} 
+{\bfseries Source\+Manager} (std\+::vector$<$ std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2SynchronizerFactory}{data\+\_\+interfaces\+::\+IFDv2\+Synchronizer\+Factory}} $>$$>$ factories)
+\item 
+std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aac75b17e87312a8d31774b6f8efcea08}{Next\+Synchronizer}} ()
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a232459843c2aba30c108b62e17171263}{Block\+Current\+Synchronizer}} ()
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a19f0630b030a948bf9f37868834e7c85}{Reset\+Source\+Index}} ()
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a13dfe9f483d9171fd9cf7ba80cd7875c}{Switch\+To\+FDv1\+Fallback}} ()
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a58ca1db8bce5703f26da39b0e46e8d37}{Switch\+Back\+To\+FDv2}} ()
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ab5ed20558c0961638c948c7c3f4cb8c5}{Is\+Prime\+Synchronizer}} () const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ae47b03432122f7ffad8ae088a1ef6166}{Available\+Synchronizer\+Count}} () const
+\item 
+std\+::size\+\_\+t \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_af9fc1ae3d03fb1c7e8698e2e01180bda}{Synchronizer\+Count}} () const
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a35d4683a3835d6c208e9b02fa17de428}{Is\+Current\+Synchronizer\+FDv1\+Fallback}} () const
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a77b6a69af0e1950cc485f59efa1d9806}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a77b6a69af0e1950cc485f59efa1d9806}} 
+{\bfseries Source\+Manager} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aadea8517f7e608fc4aed054f1fb78b95}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aadea8517f7e608fc4aed054f1fb78b95}} 
+{\bfseries Source\+Manager} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a4dd134ead31f3d5eacb39088b62ac640}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a4dd134ead31f3d5eacb39088b62ac640}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aafd55db14fb1929b142a98e7fa89c85e}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aafd55db14fb1929b142a98e7fa89c85e}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages a list of synchronizer factories together with per-\/factory state (Available / Blocked) and the index of the currently active factory.
+
+Iteration is cyclic\+: Next\+Synchronizer advances past the end and wraps to the beginning, skipping any factory in the Blocked state. A factory enters the Blocked state when Block\+Current\+Synchronizer is called (typically on a terminal error). Once blocked, a factory is not eligible to be built again until unblocked.
+
+Reset\+Source\+Index causes the next call to start iteration at index 0 — used by recovery, which wants to fall back to the most-\/preferred Available synchronizer.
+
+Factories whose Is\+FDv1\+Fallback() returns true start in the Blocked state.
+
+Not thread-\/safe. The caller is responsible for serializing all calls. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ae47b03432122f7ffad8ae088a1ef6166}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ae47b03432122f7ffad8ae088a1ef6166}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!AvailableSynchronizerCount@{AvailableSynchronizerCount}}
+\index{AvailableSynchronizerCount@{AvailableSynchronizerCount}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{AvailableSynchronizerCount()}{AvailableSynchronizerCount()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Available\+Synchronizer\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the count of factories not in the Blocked state. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a232459843c2aba30c108b62e17171263}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a232459843c2aba30c108b62e17171263}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!BlockCurrentSynchronizer@{BlockCurrentSynchronizer}}
+\index{BlockCurrentSynchronizer@{BlockCurrentSynchronizer}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{BlockCurrentSynchronizer()}{BlockCurrentSynchronizer()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Block\+Current\+Synchronizer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Marks the currently tracked factory as Blocked. No-\/op if no factory is currently tracked. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a35d4683a3835d6c208e9b02fa17de428}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a35d4683a3835d6c208e9b02fa17de428}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!IsCurrentSynchronizerFDv1Fallback@{IsCurrentSynchronizerFDv1Fallback}}
+\index{IsCurrentSynchronizerFDv1Fallback@{IsCurrentSynchronizerFDv1Fallback}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{IsCurrentSynchronizerFDv1Fallback()}{IsCurrentSynchronizerFDv1Fallback()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Is\+Current\+Synchronizer\+FDv1\+Fallback (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns true if the currently tracked factory is the FDv1 fallback synchronizer. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ab5ed20558c0961638c948c7c3f4cb8c5}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_ab5ed20558c0961638c948c7c3f4cb8c5}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!IsPrimeSynchronizer@{IsPrimeSynchronizer}}
+\index{IsPrimeSynchronizer@{IsPrimeSynchronizer}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{IsPrimeSynchronizer()}{IsPrimeSynchronizer()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Is\+Prime\+Synchronizer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns true if the currently tracked factory is the first Available factory in the list. Returns false if no factory is currently tracked. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aac75b17e87312a8d31774b6f8efcea08}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_aac75b17e87312a8d31774b6f8efcea08}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!NextSynchronizer@{NextSynchronizer}}
+\index{NextSynchronizer@{NextSynchronizer}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{NextSynchronizer()}{NextSynchronizer()}}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}} $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Next\+Synchronizer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Advances to the next Available synchronizer factory (wrapping past the end), builds a synchronizer instance from it, and records that factory as the current one for subsequent queries. Returns nullptr if no Available factory exists. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a19f0630b030a948bf9f37868834e7c85}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a19f0630b030a948bf9f37868834e7c85}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!ResetSourceIndex@{ResetSourceIndex}}
+\index{ResetSourceIndex@{ResetSourceIndex}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{ResetSourceIndex()}{ResetSourceIndex()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Reset\+Source\+Index (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Resets the iteration cursor so that the next call to Next\+Synchronizer begins searching from index 0. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a58ca1db8bce5703f26da39b0e46e8d37}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a58ca1db8bce5703f26da39b0e46e8d37}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!SwitchBackToFDv2@{SwitchBackToFDv2}}
+\index{SwitchBackToFDv2@{SwitchBackToFDv2}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{SwitchBackToFDv2()}{SwitchBackToFDv2()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Switch\+Back\+To\+FDv2 (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns synchronizer state to the initial configuration, including unblocking factories previously blocked by terminal errors. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a13dfe9f483d9171fd9cf7ba80cd7875c}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_a13dfe9f483d9171fd9cf7ba80cd7875c}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!SwitchToFDv1Fallback@{SwitchToFDv1Fallback}}
+\index{SwitchToFDv1Fallback@{SwitchToFDv1Fallback}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{SwitchToFDv1Fallback()}{SwitchToFDv1Fallback()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Switch\+To\+FDv1\+Fallback (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Blocks every non-\/\+FDv1 factory and unblocks the FDv1 fallback factory, if one was configured. Resets the iteration cursor so the next call to Next\+Synchronizer returns the FDv1 fallback. If no FDv1 fallback factory was configured, every factory is left blocked. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_af9fc1ae3d03fb1c7e8698e2e01180bda}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager_af9fc1ae3d03fb1c7e8698e2e01180bda}} 
+\index{launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}!SynchronizerCount@{SynchronizerCount}}
+\index{SynchronizerCount@{SynchronizerCount}!launchdarkly::server\_side::data\_systems::SourceManager@{launchdarkly::server\_side::data\_systems::SourceManager}}
+\doxysubsubsection{\texorpdfstring{SynchronizerCount()}{SynchronizerCount()}}
+{\footnotesize\ttfamily std\+::size\+\_\+t launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+Source\+Manager\+::\+Synchronizer\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns the total number of factories configured at construction (including any currently in the Blocked state). Constant for the lifetime of the \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager}{Source\+Manager}}. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/source\+\_\+manager.\+hpp\item 
+src/data\+\_\+systems/fdv2/source\+\_\+manager.\+cpp\end{DoxyCompactItemize}

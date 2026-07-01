@@ -1,0 +1,18 @@
+var searchData=
+[
+  ['read_1414',['Read',['../classIPersistence.html#abc818d945557122efce5a3b5b96cb37f',1,'IPersistence']]],
+  ['readtimeout_1415',['ReadTimeout',['../classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder.html#a3533b06fa4f7c84f3a4ce0091ed7ebcf',1,'launchdarkly::config::shared::builders::HttpPropertiesBuilder']]],
+  ['reason_1416',['Reason',['../classlaunchdarkly_1_1server__side_1_1AllFlagsState_1_1State.html#a40aa53a1bdbfb84b5ccb900b25b2c30f',1,'launchdarkly::server_side::AllFlagsState::State::Reason()'],['../classlaunchdarkly_1_1EvaluationDetail.html#a0f94fa72e433131874d6e5160efef179',1,'launchdarkly::EvaluationDetail::Reason()'],['../classlaunchdarkly_1_1EvaluationDetailInternal.html#a9714740800390e1439e654ee87ab2bc4',1,'launchdarkly::EvaluationDetailInternal::Reason()']]],
+  ['recordbigsegmentsstatus_1417',['RecordBigSegmentsStatus',['../classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack.html#a162b2493cedfd585efc4e0e20886c4c3',1,'launchdarkly::server_side::evaluation::EvaluationStack']]],
+  ['recordstoreerror_1418',['RecordStoreError',['../classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack.html#a16cb9dd45c6dd67e25c81eda72cacd29',1,'launchdarkly::server_side::evaluation::EvaluationStack']]],
+  ['recoverytimeout_1419',['RecoveryTimeout',['../classlaunchdarkly_1_1server__side_1_1config_1_1builders_1_1FDv2Builder.html#ab4729f12b152223d26b55d9343e96a38',1,'launchdarkly::server_side::config::builders::FDv2Builder']]],
+  ['redactionname_1420',['RedactionName',['../classlaunchdarkly_1_1AttributeReference.html#a5023e1850c4283d4b1eaf8d654482b05',1,'launchdarkly::AttributeReference']]],
+  ['relayproxybaseurl_1421',['RelayProxyBaseURL',['../classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1EndpointsBuilder.html#a8f8eec460b9d0a21474b93e38a638020',1,'launchdarkly::config::shared::builders::EndpointsBuilder']]],
+  ['remove_1422',['Remove',['../classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker.html#a1efd05a50c667724dff8f161444d7adf',1,'launchdarkly::server_side::data_components::ExpirationTracker::Remove()'],['../classIPersistence.html#a3993308cf6fef5590110df8d7f47668a',1,'IPersistence::Remove()'],['../classlaunchdarkly_1_1server__side_1_1data__components_1_1ExpirationTracker.html#aee567015d1ed2e54a32b5bc1ad9d67ba',1,'launchdarkly::server_side::data_components::ExpirationTracker::Remove()']]],
+  ['resetsourceindex_1423',['ResetSourceIndex',['../classlaunchdarkly_1_1server__side_1_1data__systems_1_1SourceManager.html#a19f0630b030a948bf9f37868834e7c85',1,'launchdarkly::server_side::data_systems::SourceManager']]],
+  ['responsetimeout_1424',['ResponseTimeout',['../classlaunchdarkly_1_1config_1_1shared_1_1builders_1_1HttpPropertiesBuilder.html#ac47156e751cc529e0caf8cb4cb387bf5',1,'launchdarkly::config::shared::builders::HttpPropertiesBuilder']]],
+  ['ruleid_1425',['RuleId',['../classlaunchdarkly_1_1EvaluationReason.html#ac28b7fc02915caae210520905dcf6817',1,'launchdarkly::EvaluationReason']]],
+  ['ruleindex_1426',['RuleIndex',['../classlaunchdarkly_1_1EvaluationReason.html#af28717d93f3f68f4c0f1b01a47631f84',1,'launchdarkly::EvaluationReason']]],
+  ['rulematch_1427',['RuleMatch',['../classlaunchdarkly_1_1EvaluationReason.html#a4448e164c34787ca0b62661602852a08',1,'launchdarkly::EvaluationReason']]],
+  ['run_1428',['Run',['../classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer.html#a019bb72c783d2ed1cc244137ffd6dddb',1,'launchdarkly::server_side::data_interfaces::IFDv2Initializer::Run()'],['../classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingInitializer.html#a83b3bf96e8c7f6018aef8727b4dc0fe1',1,'launchdarkly::server_side::data_systems::FDv2PollingInitializer::Run()']]]
+];

@@ -1,0 +1,110 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Streaming\+Synchronizer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer}\index{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}}
+
+
+{\ttfamily \#include $<$streaming\+\_\+synchronizer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Streaming\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=235pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::FDv2\+Streaming\+Synchronizer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=235pt]{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a9a4b775b6536878958ad18d3de7f629d}{FDv2\+Streaming\+Synchronizer}} (boost\+::asio\+::any\+\_\+io\+\_\+executor const \&executor, Logger const \&logger, std\+::string streaming\+\_\+base\+\_\+url, \mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} const \&http\+\_\+properties, std\+::optional$<$ std\+::string $>$ filter\+\_\+key, std\+::chrono\+::milliseconds initial\+\_\+reconnect\+\_\+delay)
+\item 
+async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{data\+\_\+interfaces\+::\+FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next}} (data\+\_\+model\+::\+Selector selector) override
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}{Close}} () override
+\item 
+std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a1331d5db49e5917ad10e50b78970ecaa}{Identity}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4e060e43592c5a5f9c9e73c1de48c864}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4e060e43592c5a5f9c9e73c1de48c864}} 
+class {\bfseries FDv2\+Streaming\+Synchronizer\+Test\+Peer}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+FDv2 streaming synchronizer. Opens an SSE connection to the FDv2 streaming endpoint and translates the push-\/based event stream into the pull-\/based \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{IFDv2\+Synchronizer\+::\+Next()}} interface.
+
+Threading model\+: \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next()}} should only be called once at a time. \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}{Close()}} may be called concurrently with \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next()}}. This object may be safely destroyed once no call to \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next()}} or \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}{Close()}} is in progress. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a9a4b775b6536878958ad18d3de7f629d}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a9a4b775b6536878958ad18d3de7f629d}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}!FDv2StreamingSynchronizer@{FDv2StreamingSynchronizer}}
+\index{FDv2StreamingSynchronizer@{FDv2StreamingSynchronizer}!launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{FDv2StreamingSynchronizer()}{FDv2StreamingSynchronizer()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer\+::\+FDv2\+Streaming\+Synchronizer (\begin{DoxyParamCaption}\item[{boost\+::asio\+::any\+\_\+io\+\_\+executor const \&}]{executor,  }\item[{Logger const \&}]{logger,  }\item[{std\+::string}]{streaming\+\_\+base\+\_\+url,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1config_1_1shared_1_1built_1_1HttpProperties}{config\+::built\+::\+Http\+Properties}} const \&}]{http\+\_\+properties,  }\item[{std\+::optional$<$ std\+::string $>$}]{filter\+\_\+key,  }\item[{std\+::chrono\+::milliseconds}]{initial\+\_\+reconnect\+\_\+delay }\end{DoxyParamCaption})}
+
+Constructs a synchronizer that streams from the FDv2 streaming endpoint. If filter\+\_\+key is present, only the specified payload filter is requested. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next()}} call, causing it to return FDv2\+Source\+Result\+::\+Shutdown, and releases underlying resources. 
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_aa50569af87e47e3f0eb7308cbbe73514}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a1331d5db49e5917ad10e50b78970ecaa}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a1331d5db49e5917ad10e50b78970ecaa}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily std\+::string const  \& launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the synchronizer. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a524cf4899f10535da622a3d1e4dab7f3}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}\label{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}} 
+\index{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}!Next@{Next}}
+\index{Next@{Next}!launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer@{launchdarkly::server\_side::data\_systems::FDv2StreamingSynchronizer}}
+\doxysubsubsection{\texorpdfstring{Next()}{Next()}}
+{\footnotesize\ttfamily async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Streaming\+Synchronizer\+::\+Next (\begin{DoxyParamCaption}\item[{data\+\_\+model\+::\+Selector}]{selector }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a Future that resolves with the next result once it is available.
+
+On the first call, the synchronizer starts its underlying connection. Subsequent calls continue reading from the same connection.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a30c355eb3f40bebb6a6a3b46786df157}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2StreamingSynchronizer_a4d43ebac197ab33f07e6553466262fe7}{Next()}}, in which case the future resolves with FDv2\+Source\+Result\+::\+Shutdown.
+
+
+\begin{DoxyParams}{Parameters}
+{\em selector} & The selector to send with the request, reflecting any changesets applied since the previous call. \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer_a24a4d0d4a77f467eaf55a5016a1bc9bc}{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Synchronizer}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+systems/fdv2/streaming\+\_\+synchronizer.\+hpp\item 
+src/data\+\_\+systems/fdv2/streaming\+\_\+synchronizer.\+cpp\end{DoxyCompactItemize}

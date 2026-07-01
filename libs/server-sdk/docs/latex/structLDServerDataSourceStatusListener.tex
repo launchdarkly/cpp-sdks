@@ -1,0 +1,45 @@
+\hypertarget{structLDServerDataSourceStatusListener}{}\doxysection{LDServer\+Data\+Source\+Status\+Listener Struct Reference}
+\label{structLDServerDataSourceStatusListener}\index{LDServerDataSourceStatusListener@{LDServerDataSourceStatusListener}}
+
+
+{\ttfamily \#include $<$sdk.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Server\+Data\+Source\+Status\+Callback\+Fn \mbox{\hyperlink{structLDServerDataSourceStatusListener_aedc7bf6fae8a332ea58f4edf6d7b38f6}{Status\+Changed}}
+\item 
+void $\ast$ \mbox{\hyperlink{structLDServerDataSourceStatusListener_a43f796fb55d3c5d82fa8597987ec8e0b}{User\+Data}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a data source status listener which may be used to listen for changes to the data source status. The struct should be initialized using LDServer\+Data\+Source\+Status\+Listener\+\_\+\+Init before use. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structLDServerDataSourceStatusListener_aedc7bf6fae8a332ea58f4edf6d7b38f6}\label{structLDServerDataSourceStatusListener_aedc7bf6fae8a332ea58f4edf6d7b38f6}} 
+\index{LDServerDataSourceStatusListener@{LDServerDataSourceStatusListener}!StatusChanged@{StatusChanged}}
+\index{StatusChanged@{StatusChanged}!LDServerDataSourceStatusListener@{LDServerDataSourceStatusListener}}
+\doxysubsubsection{\texorpdfstring{StatusChanged}{StatusChanged}}
+{\footnotesize\ttfamily Server\+Data\+Source\+Status\+Callback\+Fn LDServer\+Data\+Source\+Status\+Listener\+::\+Status\+Changed}
+
+Callback function which is invoked for data source status changes.
+
+The provided pointers are only valid for the duration of the function call (excluding User\+Data, whose lifetime is controlled by the caller).
+
+
+\begin{DoxyParams}{Parameters}
+{\em status} & The updated data source status. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structLDServerDataSourceStatusListener_a43f796fb55d3c5d82fa8597987ec8e0b}\label{structLDServerDataSourceStatusListener_a43f796fb55d3c5d82fa8597987ec8e0b}} 
+\index{LDServerDataSourceStatusListener@{LDServerDataSourceStatusListener}!UserData@{UserData}}
+\index{UserData@{UserData}!LDServerDataSourceStatusListener@{LDServerDataSourceStatusListener}}
+\doxysubsubsection{\texorpdfstring{UserData}{UserData}}
+{\footnotesize\ttfamily void$\ast$ LDServer\+Data\+Source\+Status\+Listener\+::\+User\+Data}
+
+User\+Data is forwarded into callback functions. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/launchdarkly/server\+\_\+side/bindings/c/\mbox{\hyperlink{sdk_8h}{sdk.\+h}}\end{DoxyCompactItemize}

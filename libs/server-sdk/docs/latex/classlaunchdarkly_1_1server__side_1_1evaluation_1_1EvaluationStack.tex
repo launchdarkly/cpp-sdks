@@ -1,0 +1,140 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}{}\doxysection{launchdarkly\+::server\+\_\+side\+::evaluation\+::Evaluation\+Stack Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+
+
+{\ttfamily \#include $<$evaluation\+\_\+stack.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a90d8123ed515855b92a95a859a30292e}{Evaluation\+Stack}} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{data\+\_\+components\+::\+Big\+Segment\+Store\+Wrapper}} $\ast$big\+\_\+segment\+\_\+store=nullptr)
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d}{Notice\+Prerequisite}} (std\+::string prerequisite\+\_\+key)
+\item 
+std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a}{Notice\+Segment}} (std\+::string segment\+\_\+key)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{data\+\_\+components\+::\+Big\+Segment\+Store\+Wrapper}} $\ast$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_aa6602e8291ccaf8f993a016efb39d5d0}{Big\+Segment\+Store}} () const
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a162b2493cedfd585efc4e0e20886c4c3}{Record\+Big\+Segments\+Status}} (enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a3c50b73b889d5afb32f5c709985319fd}{Evaluation\+Reason\+::\+Big\+Segments\+Status}} status)
+\item 
+enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a3c50b73b889d5afb32f5c709985319fd}{Evaluation\+Reason\+::\+Big\+Segments\+Status}} \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ace82071f2234df3b54be62deb08758b1}{Big\+Segments\+Status}} () const
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1Membership}{integrations\+::\+Membership}} const  $\ast$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a662b719793891a0afe1f892d66d1f9d9}{Find\+Membership}} (std\+::string const \&context\+\_\+key) const
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a7a198c6c2c1d09d0f731fc6106065317}{Store\+Membership}} (std\+::string context\+\_\+key, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1Membership}{integrations\+::\+Membership}} membership)
+\item 
+void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a16cb9dd45c6dd67e25c81eda72cacd29}{Record\+Store\+Error}} (std\+::string context\+\_\+key)
+\item 
+bool \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ad62b1373fae8fa8aa4491a59ece1d520}{Did\+Store\+Error}} (std\+::string const \&context\+\_\+key) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack}{Evaluation\+Stack}} holds the per-\/evaluation state for a single top-\/level flag evaluation\+: the prerequisite/segment chains used for circular-\/reference detection, plus the Big Segments status and membership cache that a Big Segment lookup populates.
+
+Not thread-\/safe\+: a fresh instance is created per top-\/level evaluation and is never shared across threads. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a90d8123ed515855b92a95a859a30292e}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a90d8123ed515855b92a95a859a30292e}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!EvaluationStack@{EvaluationStack}}
+\index{EvaluationStack@{EvaluationStack}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{EvaluationStack()}{EvaluationStack()}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Evaluation\+Stack (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{data\+\_\+components\+::\+Big\+Segment\+Store\+Wrapper}} $\ast$}]{big\+\_\+segment\+\_\+store = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em big\+\_\+segment\+\_\+store} & Non-\/owning pointer to the Big Segment store wrapper, or nullptr if no store is configured. Must outlive the stack. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ace82071f2234df3b54be62deb08758b1}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ace82071f2234df3b54be62deb08758b1}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!BigSegmentsStatus@{BigSegmentsStatus}}
+\index{BigSegmentsStatus@{BigSegmentsStatus}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{BigSegmentsStatus()}{BigSegmentsStatus()}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a3c50b73b889d5afb32f5c709985319fd}{Evaluation\+Reason\+::\+Big\+Segments\+Status}} launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Big\+Segments\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The aggregated Big Segments status, or k\+None if no Big Segment was queried during this evaluation. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_aa6602e8291ccaf8f993a016efb39d5d0}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_aa6602e8291ccaf8f993a016efb39d5d0}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!BigSegmentStore@{BigSegmentStore}}
+\index{BigSegmentStore@{BigSegmentStore}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{BigSegmentStore()}{BigSegmentStore()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__components_1_1BigSegmentStoreWrapper}{data\+\_\+components\+::\+Big\+Segment\+Store\+Wrapper}} $\ast$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Big\+Segment\+Store (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+The Big Segment store wrapper, or nullptr if none is configured. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ad62b1373fae8fa8aa4491a59ece1d520}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ad62b1373fae8fa8aa4491a59ece1d520}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!DidStoreError@{DidStoreError}}
+\index{DidStoreError@{DidStoreError}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{DidStoreError()}{DidStoreError()}}
+{\footnotesize\ttfamily bool launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Did\+Store\+Error (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{context\+\_\+key }\end{DoxyParamCaption}) const}
+
+\begin{DoxyReturn}{Returns}
+True if a Big Segment store lookup for the given context key has already errored during this evaluation. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a662b719793891a0afe1f892d66d1f9d9}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a662b719793891a0afe1f892d66d1f9d9}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!FindMembership@{FindMembership}}
+\index{FindMembership@{FindMembership}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{FindMembership()}{FindMembership()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1Membership}{integrations\+::\+Membership}} const  $\ast$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Find\+Membership (\begin{DoxyParamCaption}\item[{std\+::string const \&}]{context\+\_\+key }\end{DoxyParamCaption}) const}
+
+Returns the cached membership for a context key looked up earlier in this evaluation, or nullptr if that key has not been queried yet. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_acef47a7d2f88fe7e4cf7e2a3dcb40e5d}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!NoticePrerequisite@{NoticePrerequisite}}
+\index{NoticePrerequisite@{NoticePrerequisite}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{NoticePrerequisite()}{NoticePrerequisite()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Notice\+Prerequisite (\begin{DoxyParamCaption}\item[{std\+::string}]{prerequisite\+\_\+key }\end{DoxyParamCaption})}
+
+If the given prerequisite key has not been seen, marks it as seen and returns a \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} object. Otherwise, returns std\+::nullopt.
+
+
+\begin{DoxyParams}{Parameters}
+{\em prerequisite\+\_\+key} & Key of the prerequisite. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} object if not seen before, otherwise std\+::nullopt. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_ae11bbf288e5b8cf1514e346d0808735a}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!NoticeSegment@{NoticeSegment}}
+\index{NoticeSegment@{NoticeSegment}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{NoticeSegment()}{NoticeSegment()}}
+{\footnotesize\ttfamily std\+::optional$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} $>$ launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Notice\+Segment (\begin{DoxyParamCaption}\item[{std\+::string}]{segment\+\_\+key }\end{DoxyParamCaption})}
+
+If the given segment key has not been seen, marks it as seen and returns a \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} object. Otherwise, returns std\+::nullopt.
+
+
+\begin{DoxyParams}{Parameters}
+{\em prerequisite\+\_\+key} & Key of the segment. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1Guard}{Guard}} object if not seen before, otherwise std\+::nullopt. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a162b2493cedfd585efc4e0e20886c4c3}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a162b2493cedfd585efc4e0e20886c4c3}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!RecordBigSegmentsStatus@{RecordBigSegmentsStatus}}
+\index{RecordBigSegmentsStatus@{RecordBigSegmentsStatus}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{RecordBigSegmentsStatus()}{RecordBigSegmentsStatus()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Record\+Big\+Segments\+Status (\begin{DoxyParamCaption}\item[{enum \mbox{\hyperlink{classlaunchdarkly_1_1EvaluationReason_a3c50b73b889d5afb32f5c709985319fd}{Evaluation\+Reason\+::\+Big\+Segments\+Status}}}]{status }\end{DoxyParamCaption})}
+
+Records the status of a Big Segment lookup. If multiple lookups occur in one evaluation, the least-\/trustworthy status wins (NOT\+\_\+\+CONFIGURED $>$ STORE\+\_\+\+ERROR $>$ STALE $>$ HEALTHY). \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a16cb9dd45c6dd67e25c81eda72cacd29}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a16cb9dd45c6dd67e25c81eda72cacd29}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!RecordStoreError@{RecordStoreError}}
+\index{RecordStoreError@{RecordStoreError}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{RecordStoreError()}{RecordStoreError()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Record\+Store\+Error (\begin{DoxyParamCaption}\item[{std\+::string}]{context\+\_\+key }\end{DoxyParamCaption})}
+
+Records that the Big Segment store returned an error for the given context key during this evaluation. Subsequent Big Segment lookups for the same key must be treated as non-\/matches without re-\/querying. \mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a7a198c6c2c1d09d0f731fc6106065317}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1EvaluationStack_a7a198c6c2c1d09d0f731fc6106065317}} 
+\index{launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}!StoreMembership@{StoreMembership}}
+\index{StoreMembership@{StoreMembership}!launchdarkly::server\_side::evaluation::EvaluationStack@{launchdarkly::server\_side::evaluation::EvaluationStack}}
+\doxysubsubsection{\texorpdfstring{StoreMembership()}{StoreMembership()}}
+{\footnotesize\ttfamily void launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Evaluation\+Stack\+::\+Store\+Membership (\begin{DoxyParamCaption}\item[{std\+::string}]{context\+\_\+key,  }\item[{\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1integrations_1_1Membership}{integrations\+::\+Membership}}}]{membership }\end{DoxyParamCaption})}
+
+Caches a context key\textquotesingle{}s membership so later Big Segment lookups for the same key in this evaluation reuse it instead of re-\/querying the store. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/evaluation/evaluation\+\_\+stack.\+hpp\item 
+src/evaluation/evaluation\+\_\+stack.\+cpp\end{DoxyCompactItemize}
