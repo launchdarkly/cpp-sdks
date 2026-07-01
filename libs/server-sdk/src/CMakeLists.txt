@@ -111,6 +111,7 @@ target_sources(${LIBNAME}
         hooks/hook_executor.cpp
         bindings/c/sdk.cpp
         bindings/c/builder.cpp
+        bindings/c/big_segments_builder.cpp
         bindings/c/fdv2_builder.cpp
         bindings/c/config.cpp
         bindings/c/all_flags_state/all_flags_state.cpp

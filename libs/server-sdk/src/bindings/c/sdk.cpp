@@ -4,6 +4,7 @@
 #include <launchdarkly/bindings/c/array_builder.h>
 #include <launchdarkly/server_side/bindings/c/sdk.h>
 #include <launchdarkly/detail/c_binding_helpers.hpp>
+#include <launchdarkly/server_side/big_segment_store_status.hpp>
 #include <launchdarkly/server_side/client.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
@@ -36,6 +37,11 @@ struct Detail;
 
 #define TO_ALLFLAGS(ptr) (reinterpret_cast<AllFlagsState*>(ptr))
 #define FROM_ALLFLAGS(ptr) (reinterpret_cast<LDAllFlagsState>(ptr))
+
+#define TO_BIGSEGMENTSTORESTATUS(ptr) \
+    (reinterpret_cast<BigSegmentStoreStatus*>(ptr))
+#define FROM_BIGSEGMENTSTORESTATUS(ptr) \
+    (reinterpret_cast<LDServerBigSegmentStoreStatus>(ptr))
 
 /*
  * Helper to perform the common functionality of checking if the user
@@ -407,6 +413,58 @@ LD_EXPORT(void) LDServerDataSourceStatus_Free(LDServerDataSourceStatus status) {
     delete TO_DATASOURCESTATUS(status);
 }
 
+LD_EXPORT(bool)
+LDServerBigSegmentStoreStatus_Available(LDServerBigSegmentStoreStatus status) {
+    LD_ASSERT_NOT_NULL(status);
+    return TO_BIGSEGMENTSTORESTATUS(status)->IsAvailable();
+}
+
+LD_EXPORT(bool)
+LDServerBigSegmentStoreStatus_Stale(LDServerBigSegmentStoreStatus status) {
+    LD_ASSERT_NOT_NULL(status);
+    return TO_BIGSEGMENTSTORESTATUS(status)->IsStale();
+}
+
+LD_EXPORT(void)
+LDServerBigSegmentStoreStatus_Free(LDServerBigSegmentStoreStatus status) {
+    delete TO_BIGSEGMENTSTORESTATUS(status);
+}
+
+LD_EXPORT(void)
+LDServerBigSegmentStoreStatusListener_Init(
+    struct LDServerBigSegmentStoreStatusListener* listener) {
+    listener->StatusChanged = nullptr;
+    listener->UserData = nullptr;
+}
+
+LD_EXPORT(LDListenerConnection)
+LDServerSDK_BigSegmentStoreStatus_OnStatusChange(
+    LDServerSDK sdk,
+    struct LDServerBigSegmentStoreStatusListener listener) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    if (listener.StatusChanged) {
+        auto connection =
+            TO_SDK(sdk)->BigSegmentStoreStatus().OnBigSegmentStoreStatusChange(
+                [listener](BigSegmentStoreStatus status) {
+                    listener.StatusChanged(FROM_BIGSEGMENTSTORESTATUS(&status),
+                                           listener.UserData);
+                });
+
+        return reinterpret_cast<LDListenerConnection>(connection.release());
+    }
+
+    return nullptr;
+}
+
+LD_EXPORT(LDServerBigSegmentStoreStatus)
+LDServerSDK_BigSegmentStoreStatus_Status(LDServerSDK sdk) {
+    LD_ASSERT_NOT_NULL(sdk);
+
+    return FROM_BIGSEGMENTSTORESTATUS(new BigSegmentStoreStatus(
+        TO_SDK(sdk)->BigSegmentStoreStatus().Status()));
+}
+
 // HookContext variations
 
 #define AS_HOOK_CONTEXT(ptr) \
@@ -423,7 +481,7 @@ LDServerSDK_TrackEvent_WithHookContext(LDServerSDK sdk,
 
     if (hook_context) {
         TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
-                          *AS_HOOK_CONTEXT(hook_context));
+                           *AS_HOOK_CONTEXT(hook_context));
     } else {
         TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name);
     }
@@ -442,12 +500,11 @@ LDServerSDK_TrackMetric_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(data);
 
     if (hook_context) {
-        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
-                          *TO_VALUE(data), metric_value,
-                          *AS_HOOK_CONTEXT(hook_context));
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, *TO_VALUE(data),
+                           metric_value, *AS_HOOK_CONTEXT(hook_context));
     } else {
-        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
-                          *TO_VALUE(data), metric_value);
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, *TO_VALUE(data),
+                           metric_value);
     }
 
     LDValue_Free(data);
@@ -465,11 +522,10 @@ LDServerSDK_TrackData_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(data);
 
     if (hook_context) {
-        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
-                          *TO_VALUE(data), *AS_HOOK_CONTEXT(hook_context));
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, *TO_VALUE(data),
+                           *AS_HOOK_CONTEXT(hook_context));
     } else {
-        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name,
-                          *TO_VALUE(data));
+        TO_SDK(sdk)->Track(*TO_CONTEXT(context), event_name, *TO_VALUE(data));
     }
 
     LDValue_Free(data);
@@ -487,11 +543,11 @@ LDServerSDK_BoolVariation_WithHookContext(LDServerSDK sdk,
 
     if (hook_context) {
         return TO_SDK(sdk)->BoolVariation(*TO_CONTEXT(context), flag_key,
-                                         default_value,
-                                         *AS_HOOK_CONTEXT(hook_context));
+                                          default_value,
+                                          *AS_HOOK_CONTEXT(hook_context));
     } else {
         return TO_SDK(sdk)->BoolVariation(*TO_CONTEXT(context), flag_key,
-                                         default_value);
+                                          default_value);
     }
 }
 
@@ -508,11 +564,11 @@ LDServerSDK_BoolVariationDetail_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(out_detail);
 
     auto result = hook_context
-        ? TO_SDK(sdk)->BoolVariationDetail(*TO_CONTEXT(context),
-                                          flag_key, default_value,
-                                          *AS_HOOK_CONTEXT(hook_context))
-        : TO_SDK(sdk)->BoolVariationDetail(*TO_CONTEXT(context),
-                                          flag_key, default_value);
+                      ? TO_SDK(sdk)->BoolVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value,
+                            *AS_HOOK_CONTEXT(hook_context))
+                      : TO_SDK(sdk)->BoolVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value);
 
     *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
     return result.Value();
@@ -558,11 +614,11 @@ LDServerSDK_StringVariationDetail_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(out_detail);
 
     auto result = hook_context
-        ? TO_SDK(sdk)->StringVariationDetail(*TO_CONTEXT(context),
-                                            flag_key, default_value,
-                                            *AS_HOOK_CONTEXT(hook_context))
-        : TO_SDK(sdk)->StringVariationDetail(*TO_CONTEXT(context),
-                                            flag_key, default_value);
+                      ? TO_SDK(sdk)->StringVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value,
+                            *AS_HOOK_CONTEXT(hook_context))
+                      : TO_SDK(sdk)->StringVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value);
 
     *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
 
@@ -583,11 +639,11 @@ LDServerSDK_IntVariation_WithHookContext(LDServerSDK sdk,
 
     if (hook_context) {
         return TO_SDK(sdk)->IntVariation(*TO_CONTEXT(context), flag_key,
-                                        default_value,
-                                        *AS_HOOK_CONTEXT(hook_context));
+                                         default_value,
+                                         *AS_HOOK_CONTEXT(hook_context));
     } else {
         return TO_SDK(sdk)->IntVariation(*TO_CONTEXT(context), flag_key,
-                                        default_value);
+                                         default_value);
     }
 }
 
@@ -604,11 +660,11 @@ LDServerSDK_IntVariationDetail_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(out_detail);
 
     auto result = hook_context
-        ? TO_SDK(sdk)->IntVariationDetail(*TO_CONTEXT(context),
-                                         flag_key, default_value,
-                                         *AS_HOOK_CONTEXT(hook_context))
-        : TO_SDK(sdk)->IntVariationDetail(*TO_CONTEXT(context),
-                                         flag_key, default_value);
+                      ? TO_SDK(sdk)->IntVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value,
+                            *AS_HOOK_CONTEXT(hook_context))
+                      : TO_SDK(sdk)->IntVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value);
 
     *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
     return result.Value();
@@ -626,11 +682,11 @@ LDServerSDK_DoubleVariation_WithHookContext(LDServerSDK sdk,
 
     if (hook_context) {
         return TO_SDK(sdk)->DoubleVariation(*TO_CONTEXT(context), flag_key,
-                                           default_value,
-                                           *AS_HOOK_CONTEXT(hook_context));
+                                            default_value,
+                                            *AS_HOOK_CONTEXT(hook_context));
     } else {
         return TO_SDK(sdk)->DoubleVariation(*TO_CONTEXT(context), flag_key,
-                                           default_value);
+                                            default_value);
     }
 }
 
@@ -647,11 +703,11 @@ LDServerSDK_DoubleVariationDetail_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(out_detail);
 
     auto result = hook_context
-        ? TO_SDK(sdk)->DoubleVariationDetail(*TO_CONTEXT(context),
-                                            flag_key, default_value,
-                                            *AS_HOOK_CONTEXT(hook_context))
-        : TO_SDK(sdk)->DoubleVariationDetail(*TO_CONTEXT(context),
-                                            flag_key, default_value);
+                      ? TO_SDK(sdk)->DoubleVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value,
+                            *AS_HOOK_CONTEXT(hook_context))
+                      : TO_SDK(sdk)->DoubleVariationDetail(
+                            *TO_CONTEXT(context), flag_key, default_value);
 
     *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
     return result.Value();
@@ -694,14 +750,13 @@ LDServerSDK_JsonVariationDetail_WithHookContext(LDServerSDK sdk,
     LD_ASSERT_NOT_NULL(default_value);
     LD_ASSERT_NOT_NULL(out_detail);
 
-    auto result = hook_context
-        ? TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context),
-                                          flag_key,
-                                          *TO_VALUE(default_value),
-                                          *AS_HOOK_CONTEXT(hook_context))
-        : TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context),
-                                          flag_key,
-                                          *TO_VALUE(default_value));
+    auto result =
+        hook_context
+            ? TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context), flag_key,
+                                               *TO_VALUE(default_value),
+                                               *AS_HOOK_CONTEXT(hook_context))
+            : TO_SDK(sdk)->JsonVariationDetail(*TO_CONTEXT(context), flag_key,
+                                               *TO_VALUE(default_value));
 
     *out_detail = FROM_DETAIL(new CEvaluationDetail(result));
     return FROM_VALUE(new Value(std::move(result.Value())));
