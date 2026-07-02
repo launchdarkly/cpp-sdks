@@ -19,6 +19,7 @@ target_sources(${LIBNAME}
         client_factory.cpp
         bindings/dynamodb/client_options.cpp
         bindings/dynamodb/dynamodb_source.cpp
+        bindings/dynamodb/dynamodb_big_segment_store.cpp
 )
 
 
