@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_big_segment_store.h>
 #include <launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_client_options.h>
 #include <launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_source.h>
 
@@ -17,8 +18,11 @@
 #include <aws/core/http/Scheme.h>
 #include <aws/dynamodb/DynamoDBClient.h>
 
+#include <chrono>
+#include <condition_variable>
 #include <cstdlib>
 #include <memory>
+#include <mutex>
 #include <string>
 
 using namespace launchdarkly::data_model;
@@ -170,6 +174,103 @@ TEST(DynamoDBBindings, CanUseInSDKLazyLoadDataSource) {
     LDAllFlagsState_Free(state);
 
     LDContext_Free(context);
+    LDServerSDK_Free(sdk);
+
+    PrefixedDynamoDBClient::DeleteTable(*raw_client, table_name);
+}
+
+TEST(DynamoDBBindings, BigSegmentsStorePointerIsStoredOnSuccessfulCreation) {
+    LDServerBigSegmentsDynamoDBResult result;
+    ASSERT_TRUE(LDServerBigSegmentsDynamoDBStore_New(
+        "any-table", "foo", LocalOptionsBuilder(), &result));
+    ASSERT_NE(result.store, nullptr);
+    LDServerBigSegmentsDynamoDBStore_Free(result.store);
+}
+
+TEST(DynamoDBBindings, BigSegmentsStoreAcceptsNullOptions) {
+    LDServerBigSegmentsDynamoDBResult result;
+    ASSERT_TRUE(LDServerBigSegmentsDynamoDBStore_New("any-table", "foo",
+                                                     nullptr, &result));
+    ASSERT_NE(result.store, nullptr);
+    LDServerBigSegmentsDynamoDBStore_Free(result.store);
+}
+
+// End-to-end test that uses an actual DynamoDB (Local) instance with
+// provisioned Big Segments metadata. The store is passed into the SDK's Big
+// Segments configuration, and the SDK's Big Segment store status listener is
+// used to verify that the store is reachable and reports available.
+TEST(DynamoDBBindings, CanUseInSDKBigSegmentsConfig) {
+    std::string const table_name = "ld-dynamodb-c-bindings-bs-test";
+    std::string const prefix = "testprefix";
+
+    auto raw_client = MakeRawClient();
+    PrefixedDynamoDBClient::DeleteTable(*raw_client, table_name);
+    PrefixedDynamoDBClient::CreateTable(*raw_client, table_name);
+
+    // Set the store's sync timestamp so the poll reports available.
+    auto const now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now().time_since_epoch())
+                            .count();
+    PrefixedDynamoDBClient(*raw_client, prefix, table_name)
+        .PutBigSegmentSyncTime(now_ms);
+
+    LDServerBigSegmentsDynamoDBResult result;
+    ASSERT_TRUE(LDServerBigSegmentsDynamoDBStore_New(
+        table_name.c_str(), prefix.c_str(), LocalOptionsBuilder(), &result));
+
+    LDServerBigSegmentsBuilder bs_builder = LDServerBigSegmentsBuilder_New(
+        reinterpret_cast<LDServerBigSegmentStorePtr>(result.store));
+    LDServerBigSegmentsBuilder_StatusPollIntervalMs(bs_builder, 50);
+
+    LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
+    LDServerConfigBuilder_BigSegments(cfg_builder, bs_builder);
+    LDServerConfigBuilder_Offline(cfg_builder, true);
+
+    LDServerConfig config;
+    LDStatus status = LDServerConfigBuilder_Build(cfg_builder, &config);
+    ASSERT_TRUE(LDStatus_Ok(status));
+
+    LDServerSDK sdk = LDServerSDK_New(config);
+
+    std::mutex mu;
+    std::condition_variable cv;
+    bool available = false;
+
+    struct ListenerCtx {
+        std::mutex* mu;
+        std::condition_variable* cv;
+        bool* available;
+    };
+    ListenerCtx ctx{&mu, &cv, &available};
+
+    struct LDServerBigSegmentStoreStatusListener listener{};
+    LDServerBigSegmentStoreStatusListener_Init(&listener);
+    listener.UserData = &ctx;
+    listener.StatusChanged =
+        +[](LDServerBigSegmentStoreStatus s, void* user_data) {
+            auto* c = static_cast<ListenerCtx*>(user_data);
+            {
+                std::lock_guard<std::mutex> lk(*c->mu);
+                *c->available = LDServerBigSegmentStoreStatus_Available(s);
+            }
+            c->cv->notify_all();
+        };
+
+    LDListenerConnection connection =
+        LDServerSDK_BigSegmentStoreStatus_OnStatusChange(sdk, listener);
+    ASSERT_NE(connection, nullptr);
+
+    LDServerSDK_Start(sdk, LD_NONBLOCKING, nullptr);
+
+    {
+        std::unique_lock<std::mutex> lk(mu);
+        cv.wait_for(lk, std::chrono::seconds(3), [&] { return available; });
+    }
+
+    EXPECT_TRUE(available);
+
+    LDListenerConnection_Disconnect(connection);
+    LDListenerConnection_Free(connection);
     LDServerSDK_Free(sdk);
 
     PrefixedDynamoDBClient::DeleteTable(*raw_client, table_name);
