@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Install boost
         # https://github.com/MarkusJx/install-boost/releases/tag/v2.4.4
-        uses: MarkusJx/install-boost@3039450bb3dd2e8630d1cf10ec39cb1da3054bbd
+        uses: MarkusJx/install-boost@f9d34f6fe427b8f2ae424d7bf2a3ebccb0dae5a3
         id: install-boost
         with:
           boost_version: 1.81.0
