@@ -73,7 +73,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -106,7 +106,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -152,7 +152,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -185,7 +185,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -231,7 +231,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -264,7 +264,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -310,7 +310,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
@@ -343,7 +343,7 @@ jobs:
         shell: bash
       # https://github.com/actions/attest/releases/tag/v4.1.0
       - name: Attest build provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
         with:
           subject-checksums: checksums.txt
 
