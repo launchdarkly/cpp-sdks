@@ -29,17 +29,26 @@ runs:
         echo "CURL_ROOT=$(brew --prefix curl)" >> $GITHUB_OUTPUT
 
     # Windows: Build CURL from source with MSVC using helper script
+    - name: Cache CURL (Windows)
+      if: runner.os == 'Windows'
+      id: cache-curl-windows
+      uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      with:
+        path: 'C:\curl-install'
+        key: curl-windows-8.11.1-${{ hashFiles('scripts/build-curl-windows.ps1') }}
+
     - name: Install CURL for Windows
       if: runner.os == 'Windows'
       id: windows-action
       shell: pwsh
       run: |
-        # Use the build script from the repository
-        & "${{ github.workspace }}\scripts\build-curl-windows.ps1" -Version "8.11.1" -InstallPrefix "C:\curl-install"
+        if ("${{ steps.cache-curl-windows.outputs.cache-hit }}" -ne "true") {
+          & "${{ github.workspace }}\scripts\build-curl-windows.ps1" -Version "8.11.1" -InstallPrefix "C:\curl-install"
 
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "CURL build failed"
-          exit 1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "CURL build failed"
+            exit 1
+          }
         }
 
         echo "CURL_ROOT=C:\curl-install" >> $env:GITHUB_OUTPUT
