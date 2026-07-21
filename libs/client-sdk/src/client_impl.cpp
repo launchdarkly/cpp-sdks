@@ -247,7 +247,8 @@ template <typename T>
 EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
                                                   Value default_value,
                                                   bool check_type,
-                                                  bool detailed) {
+                                                  bool detailed,
+                                                  std::unordered_set<std::string>* visited) {
     auto desc = flag_manager_.Store().Get(key);
 
     events::FeatureEventParams event = {
@@ -308,19 +309,41 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     // prerequisites (recursively), which is necessary to ensure LaunchDarkly
     // analytics functions properly.
     //
-    // We're using JsonVariation because the type of the
-    // prerequisite is both unknown and irrelevant to emitting the events.
-    //
-    // We're passing Value::Null() to match a server-side SDK's behavior when
-    // evaluating prerequisites.
+    // `visited` tracks the chain of prerequisite dependencies from the
+    // top-level evaluation to (but not including) the current flag. It is
+    // allocated lazily: variation calls on prereq-less flags allocate no
+    // set. Once created it is shared for the rest of the walk via
+    // insert-before-recurse / erase-after-recurse (guarded by a scope-exit
+    // erase so an exception below cannot leave a stale ancestor entry
+    // visible to a sibling branch). A prerequisite already in `visited`
+    // closes a cycle; descent is skipped and the loop continues with the
+    // remaining prerequisites at the current level.
     //
     // NOTE: if "hooks" functionality is implemented into this SDK, take care
     // that evaluating prerequisites does not trigger hooks. This may require
-    // refactoring the code below to not use JsonVariation.
-    if (auto const prereqs = flag.Prerequisites()) {
-        for (auto const& prereq : *prereqs) {
-            JsonVariation(prereq, Value::Null());
+    // refactoring the code below.
+    if (auto const prereqs = flag.Prerequisites();
+        prereqs && !prereqs->empty()) {
+        std::unordered_set<std::string> local_visited;
+        auto* ancestors = visited ? visited : &local_visited;
+        ancestors->insert(key);
+        try {
+            for (auto const& prereq : *prereqs) {
+                if (ancestors->count(prereq) != 0) {
+                    // Cyclic edge: skip descent, continue with remaining
+                    // prerequisites at this level. The requested flag's value
+                    // and reason (below) are unaffected.
+                    continue;
+                }
+                (void)VariationInternal<Value>(prereq, Value::Null(),
+                                               /*check_type=*/false,
+                                               /*detailed=*/false, ancestors);
+            }
+        } catch (...) {
+            ancestors->erase(key);
+            throw;
         }
+        ancestors->erase(key);
     }
 
     if (check_type && default_value.Type() != Value::Type::kNull &&
