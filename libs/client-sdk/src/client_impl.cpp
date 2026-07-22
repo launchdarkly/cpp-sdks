@@ -315,8 +315,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     // NOTE: if "hooks" functionality is implemented into this SDK, take care
     // that evaluating prerequisites does not trigger hooks. This may require
     // refactoring the code below.
-    if (auto const prereqs = flag.Prerequisites();
-        prereqs && !prereqs->empty()) {
+    auto const prereqs = flag.Prerequisites();
+    if (prereqs && !prereqs->empty()) {
         std::unordered_set<std::string> local_visited;
         auto* ancestors = visited ? visited : &local_visited;
         ancestors->insert(key);
