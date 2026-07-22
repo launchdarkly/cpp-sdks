@@ -309,15 +309,8 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     // prerequisites (recursively), which is necessary to ensure LaunchDarkly
     // analytics functions properly.
     //
-    // `visited` tracks the chain of prerequisite dependencies from the
-    // top-level evaluation to (but not including) the current flag. It is
-    // allocated lazily: variation calls on prereq-less flags allocate no
-    // set. Once created it is shared for the rest of the walk via
-    // insert-before-recurse / erase-after-recurse (guarded by a scope-exit
-    // erase so an exception below cannot leave a stale ancestor entry
-    // visible to a sibling branch). A prerequisite already in `visited`
-    // closes a cycle; descent is skipped and the loop continues with the
-    // remaining prerequisites at the current level.
+    // `visited` tracks the current path so a cyclic prerequisite graph
+    // terminates instead of recursing without bound.
     //
     // NOTE: if "hooks" functionality is implemented into this SDK, take care
     // that evaluating prerequisites does not trigger hooks. This may require
