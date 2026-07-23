@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-dynamodb-source-v0.2.1...launchdarkly-cpp-server-dynamodb-source-v0.2.2) (2026-07-23)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-server bumped from 3.12.0 to 3.12.1
+
 ## [0.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-dynamodb-source-v0.2.0...launchdarkly-cpp-server-dynamodb-source-v0.2.1) (2026-07-01)
 
 

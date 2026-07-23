@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.14.0...launchdarkly-cpp-internal-v0.14.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* Redact anonymous context attributes in server-side custom events ([#583](https://github.com/launchdarkly/cpp-sdks/issues/583)) ([55f7eaf](https://github.com/launchdarkly/cpp-sdks/commit/55f7eaf60ec7e615e0ba11b60323db3743217488))
+
 ## [0.14.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.13.0...launchdarkly-cpp-internal-v0.14.0) (2026-06-29)
 
 
