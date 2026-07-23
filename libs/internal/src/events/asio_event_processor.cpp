@@ -284,10 +284,15 @@ std::vector<OutputEvent> AsioEventProcessor<SDK>::Process(
                     }
                 }
 
+                auto filtered_context =
+                    std::is_same<SDK, config::shared::ServerSDK>::value
+                        ? filter_.FilterWithAnonymousRedaction(event.context)
+                        : filter_.Filter(event.context);
+
                 out.emplace_back(TrackEvent{
                     event.creation_date,
                     event.key,
-                    filter_.Filter(event.context),
+                    std::move(filtered_context),
                     event.data,
                     event.metric_value,
                 });
