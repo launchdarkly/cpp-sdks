@@ -1,0 +1,5 @@
+<map id="include/launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_client_options.h" name="include/launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_client_options.h">
+<area shape="rect" id="node1" title="LaunchDarkly Server&#45;side DynamoDB Client Options C Binding." alt="" coords="141,5,346,76"/>
+<area shape="rect" id="node2" href="$dynamodb__big__segment__store_8h.html" title="LaunchDarkly Server&#45;side DynamoDB Big Segments Store C Binding." alt="" coords="5,124,244,195"/>
+<area shape="rect" id="node3" href="$dynamodb__source_8h.html" title="LaunchDarkly Server&#45;side DynamoDB Source C Binding." alt="" coords="268,124,456,195"/>
+</map>
