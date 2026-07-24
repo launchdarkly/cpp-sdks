@@ -18,6 +18,7 @@
 #include <aws/dynamodb/DynamoDBClient.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <string>
 
@@ -95,6 +96,21 @@ TEST(DynamoDBBindings, LazyLoadSourceAcceptsNullOptions) {
                                                    &result));
     ASSERT_NE(result.source, nullptr);
     LDServerLazyLoadDynamoDBSource_Free(result.source);
+}
+
+TEST(DynamoDBBindings, LazyLoadSourceRejectsPartialCredentials) {
+    LDServerDynamoDBClientOptionsBuilder opts =
+        LDServerDynamoDBClientOptionsBuilder_New();
+    LDServerDynamoDBClientOptionsBuilder_Region(opts, LocalRegion().c_str());
+    LDServerDynamoDBClientOptionsBuilder_Endpoint(opts,
+                                                  LocalEndpoint().c_str());
+    LDServerDynamoDBClientOptionsBuilder_AccessKeyId(opts, "dummy");
+
+    LDServerLazyLoadDynamoDBResult result;
+    ASSERT_FALSE(
+        LDServerLazyLoadDynamoDBSource_New("any-table", "foo", opts, &result));
+    ASSERT_EQ(result.source, nullptr);
+    EXPECT_GT(std::strlen(result.error_message), 0u);
 }
 
 // End-to-end test that uses an actual DynamoDB (Local) instance with

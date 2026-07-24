@@ -8,6 +8,8 @@
 
 #include <launchdarkly/bindings/c/export.h>
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 // only need to export C interface if

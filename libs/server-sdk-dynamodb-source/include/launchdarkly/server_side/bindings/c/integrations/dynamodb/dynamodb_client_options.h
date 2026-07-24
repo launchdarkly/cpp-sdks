@@ -69,9 +69,16 @@ LDServerDynamoDBClientOptionsBuilder_Endpoint(
 /**
  * @brief Sets the AWS access key ID for the DynamoDB client.
  *
- * When none of AccessKeyId, SecretAccessKey, or SessionToken are set, the
- * AWS SDK's default credential provider chain is used (environment
- * variables, shared credentials file, EC2/ECS roles).
+ * The only valid credential combinations are:
+ *   - none of AccessKeyId, SecretAccessKey, or SessionToken set: the AWS
+ *     SDK's default credential provider chain is used (environment
+ *     variables, shared credentials file, EC2/ECS roles).
+ *   - AccessKeyId + SecretAccessKey (long-lived IAM keys).
+ *   - AccessKeyId + SecretAccessKey + SessionToken (STS temporary
+ *     credentials).
+ *
+ * Any other partial combination is rejected when the factory that consumes
+ * this builder is invoked.
  *
  * @param b Builder. Must not be NULL.
  * @param access_key_id AWS access key ID. Must not be NULL.
@@ -82,7 +89,10 @@ LDServerDynamoDBClientOptionsBuilder_AccessKeyId(
     char const* access_key_id);
 
 /**
- * @brief Sets the AWS secret access key for the DynamoDB client.
+ * @brief Sets the AWS secret access key for the DynamoDB client. Must be
+ * paired with AccessKeyId; see
+ * @ref LDServerDynamoDBClientOptionsBuilder_AccessKeyId for the valid
+ * credential combinations.
  *
  * @param b Builder. Must not be NULL.
  * @param secret_access_key AWS secret access key. Must not be NULL.
@@ -94,7 +104,9 @@ LDServerDynamoDBClientOptionsBuilder_SecretAccessKey(
 
 /**
  * @brief Sets the AWS session token for the DynamoDB client (for temporary
- * credentials).
+ * credentials). Requires AccessKeyId and SecretAccessKey to also be set; see
+ * @ref LDServerDynamoDBClientOptionsBuilder_AccessKeyId for the valid
+ * credential combinations.
  *
  * @param b Builder. Must not be NULL.
  * @param session_token AWS session token. Must not be NULL.
