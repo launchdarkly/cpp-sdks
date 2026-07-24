@@ -211,6 +211,21 @@ TEST(DynamoDBBindings, BigSegmentsStoreAcceptsNullOptions) {
     LDServerBigSegmentsDynamoDBStore_Free(result.store);
 }
 
+TEST(DynamoDBBindings, BigSegmentsStoreRejectsPartialCredentials) {
+    LDServerDynamoDBClientOptionsBuilder opts =
+        LDServerDynamoDBClientOptionsBuilder_New();
+    LDServerDynamoDBClientOptionsBuilder_Region(opts, LocalRegion().c_str());
+    LDServerDynamoDBClientOptionsBuilder_Endpoint(opts,
+                                                  LocalEndpoint().c_str());
+    LDServerDynamoDBClientOptionsBuilder_AccessKeyId(opts, "dummy");
+
+    LDServerBigSegmentsDynamoDBResult result;
+    ASSERT_FALSE(LDServerBigSegmentsDynamoDBStore_New("any-table", "foo", opts,
+                                                      &result));
+    ASSERT_EQ(result.store, nullptr);
+    EXPECT_GT(std::strlen(result.error_message), 0u);
+}
+
 // End-to-end test that uses an actual DynamoDB (Local) instance with
 // provisioned Big Segments metadata. The store is passed into the SDK's Big
 // Segments configuration, and the SDK's Big Segment store status listener is

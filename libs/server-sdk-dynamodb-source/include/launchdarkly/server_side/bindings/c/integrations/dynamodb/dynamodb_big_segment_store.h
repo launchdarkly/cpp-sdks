@@ -80,6 +80,11 @@ typedef struct _LDServerBigSegmentsDynamoDBStore*
  *
  * The message may be truncated if it was originally longer than
  * error_message's buffer size.
+ *
+ * The message originates from the underlying AWS SDK and may echo back
+ * portions of the client configuration, including endpoint and region.
+ * Callers that surface this message (logs, telemetry, user-facing errors)
+ * may want to sanitize it accordingly.
  */
 struct LDServerBigSegmentsDynamoDBResult {
     LDServerBigSegmentsDynamoDBStore store;
