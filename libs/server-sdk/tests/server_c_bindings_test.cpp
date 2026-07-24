@@ -530,7 +530,9 @@ TEST(ClientBindings, BigSegmentStoreStatusListenerReturnsNullWithoutCallback) {
 }
 
 void BigSegmentStoreStatusListenerFunction(LDServerBigSegmentStoreStatus,
-                                           void*) {}
+                                           void* user_data) {
+    EXPECT_STREQ("cabbage", static_cast<char const*>(user_data));
+}
 
 TEST(ClientBindings, BigSegmentStoreStatusListenerRegistersWithCallback) {
     LDServerConfigBuilder cfg_builder = LDServerConfigBuilder_New("sdk-123");
