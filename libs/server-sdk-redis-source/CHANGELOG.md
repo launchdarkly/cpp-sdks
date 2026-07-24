@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.4.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.3.1...launchdarkly-cpp-server-redis-source-v2.4.0) (2026-07-24)
+
+
+### Features
+
+* Add C bindings for DynamoDB Big Segments store ([#579](https://github.com/launchdarkly/cpp-sdks/issues/579)) ([fc6c075](https://github.com/launchdarkly/cpp-sdks/commit/fc6c0752ebb70d206b7d506d1cfcbcb8862d0a9f))
+* Add C bindings for DynamoDB LazyLoad source ([#576](https://github.com/launchdarkly/cpp-sdks/issues/576)) ([65efc69](https://github.com/launchdarkly/cpp-sdks/commit/65efc6956945ee7c13f287da1555d296c245be66))
+* Add C bindings for Redis Big Segments store ([#574](https://github.com/launchdarkly/cpp-sdks/issues/574)) ([52a1898](https://github.com/launchdarkly/cpp-sdks/commit/52a1898621bcc65caab08c0e1f46b02655c5e5f3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-server bumped from 3.12.0 to 3.13.0
+
 ## [2.3.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-redis-source-v2.3.0...launchdarkly-cpp-server-redis-source-v2.3.1) (2026-07-01)
 
 

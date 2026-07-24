@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-dynamodb-source-v0.2.1...launchdarkly-cpp-server-dynamodb-source-v0.3.0) (2026-07-24)
+
+
+### Features
+
+* Add C bindings for DynamoDB Big Segments store ([#579](https://github.com/launchdarkly/cpp-sdks/issues/579)) ([fc6c075](https://github.com/launchdarkly/cpp-sdks/commit/fc6c0752ebb70d206b7d506d1cfcbcb8862d0a9f))
+* Add C bindings for DynamoDB LazyLoad source ([#576](https://github.com/launchdarkly/cpp-sdks/issues/576)) ([65efc69](https://github.com/launchdarkly/cpp-sdks/commit/65efc6956945ee7c13f287da1555d296c245be66))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-server bumped from 3.12.0 to 3.13.0
+
 ## [0.2.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-server-dynamodb-source-v0.2.0...launchdarkly-cpp-server-dynamodb-source-v0.2.1) (2026-07-01)
 
 
