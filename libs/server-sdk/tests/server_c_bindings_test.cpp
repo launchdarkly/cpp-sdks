@@ -43,7 +43,7 @@ TEST(ClientBindings, MinimalInstantiation) {
 
     char const* version = LDServerSDK_Version();
     ASSERT_TRUE(version);
-    ASSERT_STREQ(version, "3.12.0");  // {x-release-please-version}
+    ASSERT_STREQ(version, "3.13.0");  // {x-release-please-version}
 
     LDServerSDK_Free(sdk);
 }
