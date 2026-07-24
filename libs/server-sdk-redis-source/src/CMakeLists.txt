@@ -16,6 +16,7 @@ target_sources(${LIBNAME}
         redis_source.cpp
         redis_big_segment_store.cpp
         bindings/redis/redis_source.cpp
+        bindings/redis/redis_big_segment_store.cpp
 )
 
 
