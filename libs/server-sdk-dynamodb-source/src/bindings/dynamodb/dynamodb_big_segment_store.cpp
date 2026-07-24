@@ -1,6 +1,6 @@
-#include <launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_source.h>
+#include <launchdarkly/server_side/bindings/c/integrations/dynamodb/dynamodb_big_segment_store.h>
 
-#include <launchdarkly/server_side/integrations/dynamodb/dynamodb_source.hpp>
+#include <launchdarkly/server_side/integrations/dynamodb/dynamodb_big_segment_store.hpp>
 #include <launchdarkly/server_side/integrations/dynamodb/options.hpp>
 
 #include <launchdarkly/detail/c_binding_helpers.hpp>
@@ -11,10 +11,11 @@
 using namespace launchdarkly::server_side::integrations;
 
 LD_EXPORT(bool)
-LDServerLazyLoadDynamoDBSource_New(char const* table_name,
-                                   char const* prefix,
-                                   LDServerDynamoDBClientOptionsBuilder options,
-                                   LDServerLazyLoadDynamoDBResult* out_result) {
+LDServerBigSegmentsDynamoDBStore_New(
+    char const* table_name,
+    char const* prefix,
+    LDServerDynamoDBClientOptionsBuilder options,
+    LDServerBigSegmentsDynamoDBResult* out_result) {
     LD_ASSERT_NOT_NULL(table_name);
     LD_ASSERT_NOT_NULL(prefix);
     LD_ASSERT_NOT_NULL(out_result);
@@ -22,10 +23,10 @@ LDServerLazyLoadDynamoDBSource_New(char const* table_name,
     // Explicitly zero out the error_message buffer in case the error is
     // shorter than the buffer.
     memset(out_result->error_message, 0,
-           sizeof(LDServerLazyLoadDynamoDBResult::error_message));
+           sizeof(LDServerBigSegmentsDynamoDBResult::error_message));
 
-    // Ensure the source pointer isn't garbage.
-    out_result->source = nullptr;
+    // Ensure the store pointer isn't garbage.
+    out_result->store = nullptr;
 
     DynamoDBClientOptions opts{};
     if (options != nullptr) {
@@ -34,13 +35,13 @@ LDServerLazyLoadDynamoDBSource_New(char const* table_name,
         LDServerDynamoDBClientOptionsBuilder_Free(options);
     }
 
-    auto maybe_source =
-        DynamoDBDataSource::Create(table_name, prefix, std::move(opts));
-    if (!maybe_source) {
+    auto maybe_store =
+        DynamoDBBigSegmentStore::Create(table_name, prefix, std::move(opts));
+    if (!maybe_store) {
         // Avoid heap allocating another string to pass back to the caller;
         // instead, we copy into the buffer and ensure a terminator is present.
         // This does mean the message may be truncated.
-        std::size_t const len = maybe_source.error().copy(
+        std::size_t const len = maybe_store.error().copy(
             out_result->error_message, sizeof(out_result->error_message) - 1);
         out_result->error_message[len] = '\0';
         return false;
@@ -48,12 +49,12 @@ LDServerLazyLoadDynamoDBSource_New(char const* table_name,
 
     // The pointer is no longer managed and must either be freed by the caller,
     // or passed into the SDK which will take ownership.
-    out_result->source = reinterpret_cast<LDServerLazyLoadDynamoDBSource>(
-        maybe_source->release());
+    out_result->store = reinterpret_cast<LDServerBigSegmentsDynamoDBStore>(
+        maybe_store->release());
     return true;
 }
 
 LD_EXPORT(void)
-LDServerLazyLoadDynamoDBSource_Free(LDServerLazyLoadDynamoDBSource source) {
-    delete reinterpret_cast<DynamoDBDataSource*>(source);
+LDServerBigSegmentsDynamoDBStore_Free(LDServerBigSegmentsDynamoDBStore store) {
+    delete reinterpret_cast<DynamoDBBigSegmentStore*>(store);
 }
