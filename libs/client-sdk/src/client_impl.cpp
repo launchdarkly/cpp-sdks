@@ -309,6 +309,9 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
     // prerequisites (recursively), which is necessary to ensure LaunchDarkly
     // analytics functions properly.
     //
+    // We're passing Value::Null() to match a server-side SDK's behavior when
+    // evaluating prerequisites.
+    //
     // `visited` tracks the current path so a cyclic prerequisite graph
     // terminates instead of recursing without bound.
     //
@@ -320,21 +323,19 @@ EvaluationDetail<T> ClientImpl::VariationInternal(FlagKey const& key,
         std::unordered_set<std::string> local_visited;
         auto* ancestors = visited ? visited : &local_visited;
         ancestors->insert(key);
-        try {
-            for (auto const& prereq : *prereqs) {
-                if (ancestors->count(prereq) != 0) {
-                    // Cyclic edge: skip descent, continue with remaining
-                    // prerequisites at this level. The requested flag's value
-                    // and reason (below) are unaffected.
-                    continue;
-                }
-                (void)VariationInternal<Value>(prereq, Value::Null(),
-                                               /*check_type=*/false,
-                                               /*detailed=*/false, ancestors);
+        for (auto const& prereq : *prereqs) {
+            if (ancestors->count(prereq) != 0) {
+                // Cyclic edge: skip descent, continue with remaining
+                // prerequisites at this level. The requested flag's value
+                // and reason (below) are unaffected.
+                LD_LOG(logger_, LogLevel::kWarn)
+                    << "prerequisite cycle detected: skipping edge from '"
+                    << key << "' to '" << prereq << "'";
+                continue;
             }
-        } catch (...) {
-            ancestors->erase(key);
-            throw;
+            (void)VariationInternal<Value>(prereq, Value::Null(),
+                                           /*check_type=*/false,
+                                           /*detailed=*/false, ancestors);
         }
         ancestors->erase(key);
     }
