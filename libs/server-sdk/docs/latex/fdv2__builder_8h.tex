@@ -1,0 +1,371 @@
+\hypertarget{fdv2__builder_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/config/fdv2\+\_\+builder/fdv2\+\_\+builder.h File Reference}
+\label{fdv2__builder_8h}\index{include/launchdarkly/server\_side/bindings/c/config/fdv2\_builder/fdv2\_builder.h@{include/launchdarkly/server\_side/bindings/c/config/fdv2\_builder/fdv2\_builder.h}}
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+Include dependency graph for fdv2\+\_\+builder.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=284pt]{fdv2__builder_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{fdv2__builder_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{fdv2__builder_8h_a98d8c73728e96b139345551dd7d7e772}\label{fdv2__builder_8h_a98d8c73728e96b139345551dd7d7e772}} 
+typedef struct \+\_\+\+LDServer\+FDv2\+Builder $\ast$ {\bfseries LDServer\+FDv2\+Builder}
+\item 
+\mbox{\Hypertarget{fdv2__builder_8h_ae126f7a2142c67c5976f2555a9409d36}\label{fdv2__builder_8h_ae126f7a2142c67c5976f2555a9409d36}} 
+typedef struct \+\_\+\+LDServer\+FDv2\+Streaming\+Builder $\ast$ {\bfseries LDServer\+FDv2\+Streaming\+Builder}
+\item 
+\mbox{\Hypertarget{fdv2__builder_8h_af9bdb48c26b53fc373449380f560c6d9}\label{fdv2__builder_8h_af9bdb48c26b53fc373449380f560c6d9}} 
+typedef struct \+\_\+\+LDServer\+FDv2\+Polling\+Builder $\ast$ {\bfseries LDServer\+FDv2\+Polling\+Builder}
+\item 
+\mbox{\Hypertarget{fdv2__builder_8h_a6be58858e3854ced5bb8bbac446cfc6e}\label{fdv2__builder_8h_a6be58858e3854ced5bb8bbac446cfc6e}} 
+typedef struct \+\_\+\+LDServer\+Data\+Source\+Stream\+Builder $\ast$ {\bfseries LDServer\+Data\+Source\+Stream\+Builder}
+\item 
+\mbox{\Hypertarget{fdv2__builder_8h_afdf8f8af7e131f81ffedbced91688cbc}\label{fdv2__builder_8h_afdf8f8af7e131f81ffedbced91688cbc}} 
+typedef struct \+\_\+\+LDServer\+Data\+Source\+Poll\+Builder $\ast$ {\bfseries LDServer\+Data\+Source\+Poll\+Builder}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a5517d8cf5a4ef55087c8e01ac560470a}{LDServer\+FDv2\+Builder\+\_\+\+Default}} (void)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a9bedb855eaa2c624dec28f458f5d6b23}{LDServer\+FDv2\+Builder\+\_\+\+Custom}} (void)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_ace7b37bd4f4c66cd6dc52d73ecaf71c3}{LDServer\+FDv2\+Builder\+\_\+\+Free}} (LDServer\+FDv2\+Builder b)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a5dafb289648055d2a5b9fe5bceac2303}{LDServer\+FDv2\+Streaming\+Builder\+\_\+\+New}} (void)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a73fdb3b5c150cf5ae02fd99f0b60a2a6}{LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Initial\+Reconnect\+Delay\+Ms}} (LDServer\+FDv2\+Streaming\+Builder b, unsigned int milliseconds)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_aa9ed2db5cf42e8836360085f692c8b72}{LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Base\+URL}} (LDServer\+FDv2\+Streaming\+Builder b, char const $\ast$base\+\_\+url)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a167b4fa02e6ba5406ba026c537207143}{LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Free}} (LDServer\+FDv2\+Streaming\+Builder b)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_aadf200556d0668bf929b98f894f53849}{LDServer\+FDv2\+Polling\+Builder\+\_\+\+New}} (void)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a719db4e38e418079512f4591afd237df}{LDServer\+FDv2\+Polling\+Builder\+\_\+\+IntervalS}} (LDServer\+FDv2\+Polling\+Builder b, unsigned int seconds)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_accee2bcce2428e9c88e2556843e0ce19}{LDServer\+FDv2\+Polling\+Builder\+\_\+\+Base\+URL}} (LDServer\+FDv2\+Polling\+Builder b, char const $\ast$base\+\_\+url)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a2fc2dca1b4f742516d5be8fae451b9e3}{LDServer\+FDv2\+Polling\+Builder\+\_\+\+Free}} (LDServer\+FDv2\+Polling\+Builder b)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_adf0cf96ec1c21345d6773a234ea65633}{LDServer\+FDv2\+Builder\+\_\+\+Initializer\+\_\+\+Polling}} (LDServer\+FDv2\+Builder b, LDServer\+FDv2\+Polling\+Builder polling)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a47b40aa52fea95681ba544ec2e78588e}{LDServer\+FDv2\+Builder\+\_\+\+Synchronizer\+\_\+\+Streaming}} (LDServer\+FDv2\+Builder b, LDServer\+FDv2\+Streaming\+Builder streaming)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a65760625528bb401e0e9fff823c61105}{LDServer\+FDv2\+Builder\+\_\+\+Synchronizer\+\_\+\+Polling}} (LDServer\+FDv2\+Builder b, LDServer\+FDv2\+Polling\+Builder polling)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a317bce4154fc891056e29b5322aaa065}{LDServer\+FDv2\+Builder\+\_\+\+FDv1\+Fallback\+\_\+\+Streaming}} (LDServer\+FDv2\+Builder b, LDServer\+Data\+Source\+Stream\+Builder fdv1\+\_\+streaming)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a32fa4bb31152189371ad0a2f8d8ce088}{LDServer\+FDv2\+Builder\+\_\+\+FDv1\+Fallback\+\_\+\+Polling}} (LDServer\+FDv2\+Builder b, LDServer\+Data\+Source\+Poll\+Builder fdv1\+\_\+polling)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a501339e90954615adadabffe8136e4ad}{LDServer\+FDv2\+Builder\+\_\+\+Disable\+FDv1\+Fallback}} (LDServer\+FDv2\+Builder b)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_a1088a8c28e176136ee33295817cb6a8d}{LDServer\+FDv2\+Builder\+\_\+\+Fallback\+Timeout\+Ms}} (LDServer\+FDv2\+Builder b, unsigned int milliseconds)
+\item 
+\mbox{\hyperlink{fdv2__builder_8h_aee8bca41d15bbcf60ad23c5da5558801}{LDServer\+FDv2\+Builder\+\_\+\+Recovery\+Timeout\+Ms}} (LDServer\+FDv2\+Builder b, unsigned int milliseconds)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{fdv2__builder_8h_a9bedb855eaa2c624dec28f458f5d6b23}\label{fdv2__builder_8h_a9bedb855eaa2c624dec28f458f5d6b23}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Custom@{LDServerFDv2Builder\_Custom}}
+\index{LDServerFDv2Builder\_Custom@{LDServerFDv2Builder\_Custom}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Custom()}{LDServerFDv2Builder\_Custom()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Custom (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Creates an FDv2 builder with no initializers, no synchronizers, and no FDv1 fallback. Sources must be added explicitly via Initializer\+\_\+$\ast$, Synchronizer\+\_\+$\ast$, and FDv1\+Fallback\+\_\+$\ast$ methods.
+
+If not passed into the config builder, must be manually freed with LDServer\+FDv2\+Builder\+\_\+\+Free.
+
+\begin{DoxyReturn}{Returns}
+A new empty FDv2 builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{fdv2__builder_8h_a5517d8cf5a4ef55087c8e01ac560470a}\label{fdv2__builder_8h_a5517d8cf5a4ef55087c8e01ac560470a}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Default@{LDServerFDv2Builder\_Default}}
+\index{LDServerFDv2Builder\_Default@{LDServerFDv2Builder\_Default}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Default()}{LDServerFDv2Builder\_Default()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Default (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Creates an FDv2 builder pre-\/populated with the spec-\/recommended initializers, synchronizers, and FDv1 fallback. Suitable for most applications without further configuration.
+
+If not passed into the config builder, must be manually freed with LDServer\+FDv2\+Builder\+\_\+\+Free.
+
+\begin{DoxyReturn}{Returns}
+A new FDv2 builder with default sources. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{fdv2__builder_8h_a501339e90954615adadabffe8136e4ad}\label{fdv2__builder_8h_a501339e90954615adadabffe8136e4ad}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_DisableFDv1Fallback@{LDServerFDv2Builder\_DisableFDv1Fallback}}
+\index{LDServerFDv2Builder\_DisableFDv1Fallback@{LDServerFDv2Builder\_DisableFDv1Fallback}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_DisableFDv1Fallback()}{LDServerFDv2Builder\_DisableFDv1Fallback()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Disable\+FDv1\+Fallback (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b }\end{DoxyParamCaption})}
+
+Disables the FDv1 fallback. After this call, an FDv1 fallback directive from the service leaves the data source in the interrupted state and schedules an FDv2 retry on the directive\textquotesingle{}s TTL.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a1088a8c28e176136ee33295817cb6a8d}\label{fdv2__builder_8h_a1088a8c28e176136ee33295817cb6a8d}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_FallbackTimeoutMs@{LDServerFDv2Builder\_FallbackTimeoutMs}}
+\index{LDServerFDv2Builder\_FallbackTimeoutMs@{LDServerFDv2Builder\_FallbackTimeoutMs}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_FallbackTimeoutMs()}{LDServerFDv2Builder\_FallbackTimeoutMs()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Fallback\+Timeout\+Ms (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{unsigned int}]{milliseconds }\end{DoxyParamCaption})}
+
+Sets how long the active synchronizer may remain interrupted before the orchestrator falls back to the next-\/preferred synchronizer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em milliseconds} & Duration the synchronizer must be continuously interrupted for before fallback fires. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a32fa4bb31152189371ad0a2f8d8ce088}\label{fdv2__builder_8h_a32fa4bb31152189371ad0a2f8d8ce088}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_FDv1Fallback\_Polling@{LDServerFDv2Builder\_FDv1Fallback\_Polling}}
+\index{LDServerFDv2Builder\_FDv1Fallback\_Polling@{LDServerFDv2Builder\_FDv1Fallback\_Polling}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_FDv1Fallback\_Polling()}{LDServerFDv2Builder\_FDv1Fallback\_Polling()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+FDv1\+Fallback\+\_\+\+Polling (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{LDServer\+Data\+Source\+Poll\+Builder}]{fdv1\+\_\+polling }\end{DoxyParamCaption})}
+
+Configures the FDv1 polling source used as a last-\/resort fallback when the Launch\+Darkly service signals (via the X-\/\+LD-\/\+FD-\/\+Fallback header) that the SDK should switch to FDv1. The fallback reads its endpoint from the top-\/level Service\+Endpoints configuration. The source builder is automatically freed.
+
+The fdv1\+\_\+polling parameter uses the same handle type as the Background\+Sync polling synchronizer (LDServer\+Data\+Source\+Poll\+Builder\+\_\+\+New); the underlying C++ type is shared.
+
+WARNING\+: Do not call any other LDServer\+Data\+Source\+Poll\+Builder function on the provided builder after calling this function. It is undefined behavior.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em fdv1\+\_\+polling} & The FDv1 Polling source builder. The builder is consumed; do not free it. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a317bce4154fc891056e29b5322aaa065}\label{fdv2__builder_8h_a317bce4154fc891056e29b5322aaa065}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_FDv1Fallback\_Streaming@{LDServerFDv2Builder\_FDv1Fallback\_Streaming}}
+\index{LDServerFDv2Builder\_FDv1Fallback\_Streaming@{LDServerFDv2Builder\_FDv1Fallback\_Streaming}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_FDv1Fallback\_Streaming()}{LDServerFDv2Builder\_FDv1Fallback\_Streaming()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+FDv1\+Fallback\+\_\+\+Streaming (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{LDServer\+Data\+Source\+Stream\+Builder}]{fdv1\+\_\+streaming }\end{DoxyParamCaption})}
+
+Configures the FDv1 streaming source used as a last-\/resort fallback when the Launch\+Darkly service signals (via the X-\/\+LD-\/\+FD-\/\+Fallback header) that the SDK should switch to FDv1. The fallback reads its endpoint from the top-\/level Service\+Endpoints configuration. The source builder is automatically freed.
+
+The fdv1\+\_\+streaming parameter uses the same handle type as the Background\+Sync streaming synchronizer (LDServer\+Data\+Source\+Stream\+Builder\+\_\+\+New); the underlying C++ type is shared.
+
+WARNING\+: Do not call any other LDServer\+Data\+Source\+Stream\+Builder function on the provided builder after calling this function. It is undefined behavior.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em fdv1\+\_\+streaming} & The FDv1 Streaming source builder. The builder is consumed; do not free it. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_ace7b37bd4f4c66cd6dc52d73ecaf71c3}\label{fdv2__builder_8h_ace7b37bd4f4c66cd6dc52d73ecaf71c3}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Free@{LDServerFDv2Builder\_Free}}
+\index{LDServerFDv2Builder\_Free@{LDServerFDv2Builder\_Free}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Free()}{LDServerFDv2Builder\_Free()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b }\end{DoxyParamCaption})}
+
+Frees an FDv2 builder. Do not call if the builder was consumed by the config builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_adf0cf96ec1c21345d6773a234ea65633}\label{fdv2__builder_8h_adf0cf96ec1c21345d6773a234ea65633}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Initializer\_Polling@{LDServerFDv2Builder\_Initializer\_Polling}}
+\index{LDServerFDv2Builder\_Initializer\_Polling@{LDServerFDv2Builder\_Initializer\_Polling}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Initializer\_Polling()}{LDServerFDv2Builder\_Initializer\_Polling()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Initializer\+\_\+\+Polling (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{LDServer\+FDv2\+Polling\+Builder}]{polling }\end{DoxyParamCaption})}
+
+Appends an FDv2 polling initializer to the FDv2 builder\textquotesingle{}s initializers list. The source builder is automatically freed.
+
+WARNING\+: Do not call any other LDServer\+FDv2\+Polling\+Builder function on the provided builder after calling this function. It is undefined behavior.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em polling} & The FDv2 Polling source builder. The builder is consumed; do not free it. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_aee8bca41d15bbcf60ad23c5da5558801}\label{fdv2__builder_8h_aee8bca41d15bbcf60ad23c5da5558801}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_RecoveryTimeoutMs@{LDServerFDv2Builder\_RecoveryTimeoutMs}}
+\index{LDServerFDv2Builder\_RecoveryTimeoutMs@{LDServerFDv2Builder\_RecoveryTimeoutMs}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_RecoveryTimeoutMs()}{LDServerFDv2Builder\_RecoveryTimeoutMs()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Recovery\+Timeout\+Ms (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{unsigned int}]{milliseconds }\end{DoxyParamCaption})}
+
+Sets how long a fallback synchronizer must run successfully before the orchestrator attempts to recover to the primary synchronizer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em milliseconds} & Duration the fallback synchronizer must run before a recovery attempt is made. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a65760625528bb401e0e9fff823c61105}\label{fdv2__builder_8h_a65760625528bb401e0e9fff823c61105}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Synchronizer\_Polling@{LDServerFDv2Builder\_Synchronizer\_Polling}}
+\index{LDServerFDv2Builder\_Synchronizer\_Polling@{LDServerFDv2Builder\_Synchronizer\_Polling}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Synchronizer\_Polling()}{LDServerFDv2Builder\_Synchronizer\_Polling()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Synchronizer\+\_\+\+Polling (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{LDServer\+FDv2\+Polling\+Builder}]{polling }\end{DoxyParamCaption})}
+
+Appends an FDv2 polling synchronizer to the FDv2 builder\textquotesingle{}s synchronizers list. The source builder is automatically freed.
+
+See LDServer\+FDv2\+Builder\+\_\+\+Synchronizer\+\_\+\+Streaming for ordering semantics.
+
+WARNING\+: Do not call any other LDServer\+FDv2\+Polling\+Builder function on the provided builder after calling this function. It is undefined behavior.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em polling} & The FDv2 Polling source builder. The builder is consumed; do not free it. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a47b40aa52fea95681ba544ec2e78588e}\label{fdv2__builder_8h_a47b40aa52fea95681ba544ec2e78588e}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2Builder\_Synchronizer\_Streaming@{LDServerFDv2Builder\_Synchronizer\_Streaming}}
+\index{LDServerFDv2Builder\_Synchronizer\_Streaming@{LDServerFDv2Builder\_Synchronizer\_Streaming}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2Builder\_Synchronizer\_Streaming()}{LDServerFDv2Builder\_Synchronizer\_Streaming()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Builder\+\_\+\+Synchronizer\+\_\+\+Streaming (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Builder}]{b,  }\item[{LDServer\+FDv2\+Streaming\+Builder}]{streaming }\end{DoxyParamCaption})}
+
+Appends an FDv2 streaming synchronizer to the FDv2 builder\textquotesingle{}s synchronizers list. The source builder is automatically freed.
+
+Order in the list determines preference\+: the first entry is the primary synchronizer, subsequent entries are fallbacks.
+
+WARNING\+: Do not call any other LDServer\+FDv2\+Streaming\+Builder function on the provided builder after calling this function. It is undefined behavior.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 builder. Must not be NULL. \\
+\hline
+{\em streaming} & The FDv2 Streaming source builder. The builder is consumed; do not free it. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_accee2bcce2428e9c88e2556843e0ce19}\label{fdv2__builder_8h_accee2bcce2428e9c88e2556843e0ce19}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2PollingBuilder\_BaseURL@{LDServerFDv2PollingBuilder\_BaseURL}}
+\index{LDServerFDv2PollingBuilder\_BaseURL@{LDServerFDv2PollingBuilder\_BaseURL}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2PollingBuilder\_BaseURL()}{LDServerFDv2PollingBuilder\_BaseURL()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Polling\+Builder\+\_\+\+Base\+URL (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Polling\+Builder}]{b,  }\item[{char const $\ast$}]{base\+\_\+url }\end{DoxyParamCaption})}
+
+Overrides the base URL used by this FDv2 polling source. By default the polling source reads its endpoint from the top-\/level Service\+Endpoints configuration; this override takes precedence for this source only.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 Polling source builder. Must not be NULL. \\
+\hline
+{\em base\+\_\+url} & Target URL. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a2fc2dca1b4f742516d5be8fae451b9e3}\label{fdv2__builder_8h_a2fc2dca1b4f742516d5be8fae451b9e3}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2PollingBuilder\_Free@{LDServerFDv2PollingBuilder\_Free}}
+\index{LDServerFDv2PollingBuilder\_Free@{LDServerFDv2PollingBuilder\_Free}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2PollingBuilder\_Free()}{LDServerFDv2PollingBuilder\_Free()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Polling\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Polling\+Builder}]{b }\end{DoxyParamCaption})}
+
+Frees an FDv2 Polling source builder. Do not call if the builder was consumed by an FDv2 builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a719db4e38e418079512f4591afd237df}\label{fdv2__builder_8h_a719db4e38e418079512f4591afd237df}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2PollingBuilder\_IntervalS@{LDServerFDv2PollingBuilder\_IntervalS}}
+\index{LDServerFDv2PollingBuilder\_IntervalS@{LDServerFDv2PollingBuilder\_IntervalS}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2PollingBuilder\_IntervalS()}{LDServerFDv2PollingBuilder\_IntervalS()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Polling\+Builder\+\_\+\+IntervalS (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Polling\+Builder}]{b,  }\item[{unsigned int}]{seconds }\end{DoxyParamCaption})}
+
+Sets the interval at which this FDv2 polling source will poll for flag updates.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 Polling source builder. Must not be NULL. \\
+\hline
+{\em seconds} & Polling interval in seconds. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_aadf200556d0668bf929b98f894f53849}\label{fdv2__builder_8h_aadf200556d0668bf929b98f894f53849}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2PollingBuilder\_New@{LDServerFDv2PollingBuilder\_New}}
+\index{LDServerFDv2PollingBuilder\_New@{LDServerFDv2PollingBuilder\_New}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2PollingBuilder\_New()}{LDServerFDv2PollingBuilder\_New()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Polling\+Builder\+\_\+\+New (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Creates a new FDv2 Polling source builder.
+
+If not passed into an FDv2 builder, must be manually freed with LDServer\+FDv2\+Polling\+Builder\+\_\+\+Free.
+
+\begin{DoxyReturn}{Returns}
+A new FDv2 Polling source builder. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{fdv2__builder_8h_aa9ed2db5cf42e8836360085f692c8b72}\label{fdv2__builder_8h_aa9ed2db5cf42e8836360085f692c8b72}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2StreamingBuilder\_BaseURL@{LDServerFDv2StreamingBuilder\_BaseURL}}
+\index{LDServerFDv2StreamingBuilder\_BaseURL@{LDServerFDv2StreamingBuilder\_BaseURL}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2StreamingBuilder\_BaseURL()}{LDServerFDv2StreamingBuilder\_BaseURL()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Base\+URL (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Streaming\+Builder}]{b,  }\item[{char const $\ast$}]{base\+\_\+url }\end{DoxyParamCaption})}
+
+Overrides the base URL used by this FDv2 streaming source. By default the streaming source reads its endpoint from the top-\/level Service\+Endpoints configuration; this override takes precedence for this source only.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 Streaming source builder. Must not be NULL. \\
+\hline
+{\em base\+\_\+url} & Target URL. Must not be NULL. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a167b4fa02e6ba5406ba026c537207143}\label{fdv2__builder_8h_a167b4fa02e6ba5406ba026c537207143}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2StreamingBuilder\_Free@{LDServerFDv2StreamingBuilder\_Free}}
+\index{LDServerFDv2StreamingBuilder\_Free@{LDServerFDv2StreamingBuilder\_Free}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2StreamingBuilder\_Free()}{LDServerFDv2StreamingBuilder\_Free()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Free (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Streaming\+Builder}]{b }\end{DoxyParamCaption})}
+
+Frees an FDv2 Streaming source builder. Do not call if the builder was consumed by an FDv2 builder.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & Builder to free. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a73fdb3b5c150cf5ae02fd99f0b60a2a6}\label{fdv2__builder_8h_a73fdb3b5c150cf5ae02fd99f0b60a2a6}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs@{LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs}}
+\index{LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs@{LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs()}{LDServerFDv2StreamingBuilder\_InitialReconnectDelayMs()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Initial\+Reconnect\+Delay\+Ms (\begin{DoxyParamCaption}\item[{LDServer\+FDv2\+Streaming\+Builder}]{b,  }\item[{unsigned int}]{milliseconds }\end{DoxyParamCaption})}
+
+Sets the initial reconnect delay for the FDv2 streaming connection.
+
+The streaming service uses a backoff algorithm (with jitter) every time the connection needs to be reestablished. The delay for the first reconnection will start near this value, and then increase exponentially for any subsequent connection failures.
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & FDv2 Streaming source builder. Must not be NULL. \\
+\hline
+{\em milliseconds} & Initial delay for a reconnection attempt. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{fdv2__builder_8h_a5dafb289648055d2a5b9fe5bceac2303}\label{fdv2__builder_8h_a5dafb289648055d2a5b9fe5bceac2303}} 
+\index{fdv2\_builder.h@{fdv2\_builder.h}!LDServerFDv2StreamingBuilder\_New@{LDServerFDv2StreamingBuilder\_New}}
+\index{LDServerFDv2StreamingBuilder\_New@{LDServerFDv2StreamingBuilder\_New}!fdv2\_builder.h@{fdv2\_builder.h}}
+\doxysubsubsection{\texorpdfstring{LDServerFDv2StreamingBuilder\_New()}{LDServerFDv2StreamingBuilder\_New()}}
+{\footnotesize\ttfamily LDServer\+FDv2\+Streaming\+Builder\+\_\+\+New (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+Creates a new FDv2 Streaming source builder.
+
+If not passed into an FDv2 builder, must be manually freed with LDServer\+FDv2\+Streaming\+Builder\+\_\+\+Free.
+
+\begin{DoxyReturn}{Returns}
+A new FDv2 Streaming source builder. 
+\end{DoxyReturn}

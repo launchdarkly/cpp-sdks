@@ -1,0 +1,66 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix}{}\doxysection{launchdarkly\+::server\+\_\+side\+::evaluation\+::Bucket\+Prefix Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix}\index{launchdarkly::server\_side::evaluation::BucketPrefix@{launchdarkly::server\_side::evaluation::BucketPrefix}}
+
+
+{\ttfamily \#include $<$bucketing.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_1_1KeyAndSalt}{Key\+And\+Salt}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a03a2a7458da4d9c2902653ea425a7934}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a03a2a7458da4d9c2902653ea425a7934}} 
+using {\bfseries Seed} = std\+::int64\+\_\+t
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a36a3a93677ea434018e8f6c4b52001ab}{Bucket\+Prefix}} (Seed seed)
+\item 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a77f92ec224a70b9f92a5e72a8a0fc463}{Bucket\+Prefix}} (std\+::string key, std\+::string salt)
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_ab3ebc11acc8b5a96859c2783dcc0ebee}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_ab3ebc11acc8b5a96859c2783dcc0ebee}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&os, \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix}{Bucket\+Prefix}} const \&prefix)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Bucketing is performed by hashing an input string. This string may be comprised of a seed (if the flag rule has a seed) or a combined key/salt pair. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a36a3a93677ea434018e8f6c4b52001ab}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a36a3a93677ea434018e8f6c4b52001ab}} 
+\index{launchdarkly::server\_side::evaluation::BucketPrefix@{launchdarkly::server\_side::evaluation::BucketPrefix}!BucketPrefix@{BucketPrefix}}
+\index{BucketPrefix@{BucketPrefix}!launchdarkly::server\_side::evaluation::BucketPrefix@{launchdarkly::server\_side::evaluation::BucketPrefix}}
+\doxysubsubsection{\texorpdfstring{BucketPrefix()}{BucketPrefix()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Bucket\+Prefix\+::\+Bucket\+Prefix (\begin{DoxyParamCaption}\item[{Seed}]{seed }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Constructs a \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix}{Bucket\+Prefix}} from a seed value. 
+\begin{DoxyParams}{Parameters}
+{\em seed} & \mbox{\hyperlink{classlaunchdarkly_1_1Value}{Value}} of the seed. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a77f92ec224a70b9f92a5e72a8a0fc463}\label{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix_a77f92ec224a70b9f92a5e72a8a0fc463}} 
+\index{launchdarkly::server\_side::evaluation::BucketPrefix@{launchdarkly::server\_side::evaluation::BucketPrefix}!BucketPrefix@{BucketPrefix}}
+\index{BucketPrefix@{BucketPrefix}!launchdarkly::server\_side::evaluation::BucketPrefix@{launchdarkly::server\_side::evaluation::BucketPrefix}}
+\doxysubsubsection{\texorpdfstring{BucketPrefix()}{BucketPrefix()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily launchdarkly\+::server\+\_\+side\+::evaluation\+::\+Bucket\+Prefix\+::\+Bucket\+Prefix (\begin{DoxyParamCaption}\item[{std\+::string}]{key,  }\item[{std\+::string}]{salt }\end{DoxyParamCaption})}
+
+Constructs a \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1evaluation_1_1BucketPrefix}{Bucket\+Prefix}} from a key and salt. 
+\begin{DoxyParams}{Parameters}
+{\em key} & Key to use. \\
+\hline
+{\em salt} & Salt to use. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/evaluation/bucketing.\+hpp\item 
+src/evaluation/bucketing.\+cpp\end{DoxyCompactItemize}
