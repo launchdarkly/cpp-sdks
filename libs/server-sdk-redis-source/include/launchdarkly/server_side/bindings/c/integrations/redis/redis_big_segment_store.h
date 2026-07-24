@@ -6,6 +6,8 @@
 
 #include <launchdarkly/bindings/c/export.h>
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 // only need to export C interface if
@@ -67,6 +69,11 @@ typedef struct _LDServerBigSegmentsRedisStore* LDServerBigSegmentsRedisStore;
  *
  * The message may be truncated if it was originally longer than
  * error_message's buffer size.
+ *
+ * The message originates from the underlying Redis client and may echo back
+ * portions of the URI, including query parameters. Callers that surface this
+ * message (logs, telemetry, user-facing errors) may want to sanitize it
+ * accordingly.
  */
 struct LDServerBigSegmentsRedisResult {
     LDServerBigSegmentsRedisStore store;
