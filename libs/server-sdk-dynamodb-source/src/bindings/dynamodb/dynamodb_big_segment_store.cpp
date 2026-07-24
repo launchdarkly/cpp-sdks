@@ -20,7 +20,7 @@ LDServerBigSegmentsDynamoDBStore_New(
     LD_ASSERT_NOT_NULL(prefix);
     LD_ASSERT_NOT_NULL(out_result);
 
-    // Explicitely zero out the error_message buffer in case the error is
+    // Explicitly zero out the error_message buffer in case the error is
     // shorter than the buffer.
     memset(out_result->error_message, 0,
            sizeof(LDServerBigSegmentsDynamoDBResult::error_message));

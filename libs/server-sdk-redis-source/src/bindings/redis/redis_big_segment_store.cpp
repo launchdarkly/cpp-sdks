@@ -16,7 +16,7 @@ LDServerBigSegmentsRedisStore_New(char const* uri,
     LD_ASSERT_NOT_NULL(prefix);
     LD_ASSERT_NOT_NULL(out_result);
 
-    // Explicitely zero out the exception_msg buffer in case the exception is
+    // Explicitly zero out the exception_msg buffer in case the exception is
     // shorter than the buffer.
     memset(out_result->error_message, 0,
            sizeof(LDServerBigSegmentsRedisResult::error_message));
