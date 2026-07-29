@@ -45,7 +45,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-client
         name: Full release of libs/client-sdk
         uses: ./.github/actions/sdk-release
@@ -87,7 +87,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-client
         name: Full release of libs/client-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -124,7 +124,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server
         name: Full release of libs/server-sdk
         uses: ./.github/actions/sdk-release
@@ -166,7 +166,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server
         name: Full release of libs/server-sdk (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -203,7 +203,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source
         uses: ./.github/actions/sdk-release
@@ -245,7 +245,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server-redis
         name: Full release of libs/server-sdk-redis-source (macOS arm64)
         uses: ./.github/actions/sdk-release
@@ -282,7 +282,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server-dynamodb
         name: Full release of libs/server-sdk-dynamodb-source
         uses: ./.github/actions/sdk-release
@@ -324,7 +324,7 @@ jobs:
       id-token: write
     steps:
       # https://github.com/actions/checkout/releases/tag/v4.3.0
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - id: release-server-dynamodb
         name: Full release of libs/server-sdk-dynamodb-source (macOS arm64)
         uses: ./.github/actions/sdk-release
