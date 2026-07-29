@@ -34,8 +34,10 @@ jobs:
     steps:
       - name: Determine CMake target and SDK library path
         id: split-string
+        env:
+          SDK_TARGET: ${{ inputs.sdk_target }}
         run: |
-          INPUT="${{ inputs.sdk_target }}"
+          INPUT="$SDK_TARGET"
           IFS=':' read -ra PATH_AND_TARGET <<< "$INPUT"
           echo "SDK_PATH=${PATH_AND_TARGET[0]}" >> $GITHUB_OUTPUT
           echo "SDK_CMAKE_TARGET=${PATH_AND_TARGET[1]}" >> $GITHUB_OUTPUT
