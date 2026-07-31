@@ -43,8 +43,10 @@
       "features": {
         "allFlags": { "introduced": "1.0" },
         "appMetadata": { "introduced": "3.0" },
+        "bigSegments": { "introduced": "3.13" },
         "contexts": { "introduced": "3.0" },
         "experimentation": { "introduced": "2.4" },
+        "fdv2": { "introduced": "3.12" },
         "fileDataSource": { "introduced": "2.6" },
         "hooks": { "introduced": "3.10" },
         "inlineContextCustomEvents": { "introduced": "3.9" },
