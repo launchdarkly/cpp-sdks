@@ -1,0 +1,83 @@
+\hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{}\doxysection{launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IFDv2\+Initializer Class Reference}
+\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}\index{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}}
+
+
+{\ttfamily \#include $<$ifdv2\+\_\+initializer.\+hpp$>$}
+
+
+
+Inheritance diagram for launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::IFDv2\+Initializer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual async\+::\+Future$<$ \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}} $>$ \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}{Run}} ()=0
+\item 
+virtual void \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_abea81cbbe9d40f5b79ba1f99d601647f}{Close}} ()=0
+\item 
+virtual std\+::string const  \& \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_acfce18d94db9d96aee559987851dc8c4}{Identity}} () const =0
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_ab3d172f9234f183d4c94e9baceb86704}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_ab3d172f9234f183d4c94e9baceb86704}} 
+{\bfseries IFDv2\+Initializer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a3d9bd17c40aaa14f56965208cdbc00f2}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a3d9bd17c40aaa14f56965208cdbc00f2}} 
+{\bfseries IFDv2\+Initializer} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} \&\&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a3ff5d433c2040027872c565def29e585}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a3ff5d433c2040027872c565def29e585}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} const \&)=delete
+\item 
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_aec67679af3564247535866c286695c01}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_aec67679af3564247535866c286695c01}} 
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} \& {\bfseries operator=} (\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer}{IFDv2\+Initializer}} \&\&)=delete
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Defines a one-\/shot data source that runs to completion and returns a single result. Used during the initialization phase of FDv2, before handing off to an \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Synchronizer}{IFDv2\+Synchronizer}}. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_abea81cbbe9d40f5b79ba1f99d601647f}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_abea81cbbe9d40f5b79ba1f99d601647f}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}!Close@{Close}}
+\index{Close@{Close}!launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Close()}{Close()}}
+{\footnotesize\ttfamily virtual void launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Initializer\+::\+Close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Unblocks any in-\/progress \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}{Run()}} call, causing it to return \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingInitializer_a926234985ff2665d09d8eaaa873dcda1}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_acfce18d94db9d96aee559987851dc8c4}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_acfce18d94db9d96aee559987851dc8c4}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}!Identity@{Identity}}
+\index{Identity@{Identity}!launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Identity()}{Identity()}}
+{\footnotesize\ttfamily virtual std\+::string const\& launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Initializer\+::\+Identity (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+\begin{DoxyReturn}{Returns}
+A display-\/suitable name of the initializer. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingInitializer_a41ed65fb57facb8b6a6ba820bdda23b9}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Initializer}}.
+
+\mbox{\Hypertarget{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}\label{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}} 
+\index{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}!Run@{Run}}
+\index{Run@{Run}!launchdarkly::server\_side::data\_interfaces::IFDv2Initializer@{launchdarkly::server\_side::data\_interfaces::IFDv2Initializer}}
+\doxysubsubsection{\texorpdfstring{Run()}{Run()}}
+{\footnotesize\ttfamily virtual async\+::\+Future$<$\mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult}{FDv2\+Source\+Result}}$>$ launchdarkly\+::server\+\_\+side\+::data\+\_\+interfaces\+::\+IFDv2\+Initializer\+::\+Run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns a Future that resolves with the result once the initializer completes. Called at most once per instance.
+
+\mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_abea81cbbe9d40f5b79ba1f99d601647f}{Close()}} may be called from another thread to unblock \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__interfaces_1_1IFDv2Initializer_a019bb72c783d2ed1cc244137ffd6dddb}{Run()}}, in which case the future resolves with \mbox{\hyperlink{structlaunchdarkly_1_1server__side_1_1data__interfaces_1_1FDv2SourceResult_1_1Shutdown}{FDv2\+Source\+Result\+::\+Shutdown}}. 
+
+Implemented in \mbox{\hyperlink{classlaunchdarkly_1_1server__side_1_1data__systems_1_1FDv2PollingInitializer_a83b3bf96e8c7f6018aef8727b4dc0fe1}{launchdarkly\+::server\+\_\+side\+::data\+\_\+systems\+::\+FDv2\+Polling\+Initializer}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/data\+\_\+interfaces/source/ifdv2\+\_\+initializer.\+hpp\end{DoxyCompactItemize}
