@@ -2,8 +2,8 @@
   "name": "@launchdarkly/cpp-sse-client",
   "description": "This package.json exists for modeling dependencies for the release process.",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.7.1",
   "dependencies": {
-    "@launchdarkly/cpp-networking": "0.2.0"
+    "@launchdarkly/cpp-networking": "0.2.1"
   }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.7.0...launchdarkly-cpp-sse-client-v0.7.1) (2026-08-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-networking bumped from 0.2.0 to 0.2.1
+
 ## [0.7.0](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-sse-client-v0.6.1...launchdarkly-cpp-sse-client-v0.7.0) (2026-06-29)
 
 
