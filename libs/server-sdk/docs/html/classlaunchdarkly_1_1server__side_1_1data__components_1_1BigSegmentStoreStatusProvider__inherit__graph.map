@@ -1,4 +1,0 @@
-<map id="launchdarkly::server_side::data_components::BigSegmentStoreStatusProvider" name="launchdarkly::server_side::data_components::BigSegmentStoreStatusProvider">
-<area shape="rect" id="node1" title="Adapts a BigSegmentStoreWrapper to the public IBigSegmentStoreStatusProvider, converting the internal..." alt="" coords="5,109,244,165"/>
-<area shape="rect" id="node2" href="$classlaunchdarkly_1_1server__side_1_1IBigSegmentStoreStatusProvider.html" title=" " alt="" coords="13,5,236,61"/>
-</map>

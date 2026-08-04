@@ -1,4 +1,0 @@
-<map id="launchdarkly::server_side::data_components::BigSegmentStoreWrapper" name="launchdarkly::server_side::data_components::BigSegmentStoreWrapper">
-<area shape="rect" id="node1" title="Internal layer between the evaluator and a customer&#45;provided integrations::IBigSegmentStore." alt="" coords="15,109,214,165"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,5,224,61"/>
-</map>
