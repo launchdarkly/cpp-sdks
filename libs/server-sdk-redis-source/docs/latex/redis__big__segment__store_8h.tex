@@ -1,0 +1,115 @@
+\hypertarget{redis__big__segment__store_8h}{}\doxysection{include/launchdarkly/server\+\_\+side/bindings/c/integrations/redis/redis\+\_\+big\+\_\+segment\+\_\+store.h File Reference}
+\label{redis__big__segment__store_8h}\index{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_big\_segment\_store.h@{include/launchdarkly/server\_side/bindings/c/integrations/redis/redis\_big\_segment\_store.h}}
+
+
+Launch\+Darkly Server-\/side Redis Big Segments Store C Binding.  
+
+
+{\ttfamily \#include $<$launchdarkly/bindings/c/export.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+Include dependency graph for redis\+\_\+big\+\_\+segment\+\_\+store.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=284pt]{redis__big__segment__store_8h__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structLDServerBigSegmentsRedisResult}{LDServer\+Big\+Segments\+Redis\+Result}}
+\begin{DoxyCompactList}\small\item\em Stores the result of calling \mbox{\hyperlink{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+New}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{redis__big__segment__store_8h_ac461c453ed1246154e5d66d50fcbcd7d}\label{redis__big__segment__store_8h_ac461c453ed1246154e5d66d50fcbcd7d}} 
+\#define {\bfseries LDSERVER\+\_\+\+BIGSEGMENTS\+\_\+\+REDISSTORE\+\_\+\+ERROR\+\_\+\+MESSAGE\+\_\+\+SIZE}~256
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \+\_\+\+LDServer\+Big\+Segments\+Redis\+Store $\ast$ \mbox{\hyperlink{redis__big__segment__store_8h_a0264b83ac95c7b1e483c449bdbf113e1}{LDServer\+Big\+Segments\+Redis\+Store}}
+\begin{DoxyCompactList}\small\item\em LDServer\+Big\+Segments\+Redis\+Store is a Big Segments persistent store for the Server-\/\+Side SDK backed by Redis. It is meant to be passed to the SDK via the Big Segments config builder. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+New}} (char const $\ast$uri, char const $\ast$prefix, struct \mbox{\hyperlink{structLDServerBigSegmentsRedisResult}{LDServer\+Big\+Segments\+Redis\+Result}} $\ast$out\+\_\+result)
+\begin{DoxyCompactList}\small\item\em Creates a new Redis Big Segment store suitable for usage in the SDK\textquotesingle{}s Big Segments configuration. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{redis__big__segment__store_8h_a8a8e8c4428d0fe0057b1713d5e934d4b}\label{redis__big__segment__store_8h_a8a8e8c4428d0fe0057b1713d5e934d4b}} 
+\mbox{\hyperlink{redis__big__segment__store_8h_a8a8e8c4428d0fe0057b1713d5e934d4b}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+Free}} (\mbox{\hyperlink{redis__big__segment__store_8h_a0264b83ac95c7b1e483c449bdbf113e1}{LDServer\+Big\+Segments\+Redis\+Store}} store)
+\begin{DoxyCompactList}\small\item\em Frees a Redis Big Segment store pointer. Only necessary to call if not passing ownership to the SDK\textquotesingle{}s Big Segments configuration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Launch\+Darkly Server-\/side Redis Big Segments Store C Binding. 
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{redis__big__segment__store_8h_a0264b83ac95c7b1e483c449bdbf113e1}\label{redis__big__segment__store_8h_a0264b83ac95c7b1e483c449bdbf113e1}} 
+\index{redis\_big\_segment\_store.h@{redis\_big\_segment\_store.h}!LDServerBigSegmentsRedisStore@{LDServerBigSegmentsRedisStore}}
+\index{LDServerBigSegmentsRedisStore@{LDServerBigSegmentsRedisStore}!redis\_big\_segment\_store.h@{redis\_big\_segment\_store.h}}
+\doxysubsubsection{\texorpdfstring{LDServerBigSegmentsRedisStore}{LDServerBigSegmentsRedisStore}}
+{\footnotesize\ttfamily typedef struct \+\_\+\+LDServer\+Big\+Segments\+Redis\+Store$\ast$ \mbox{\hyperlink{redis__big__segment__store_8h_a0264b83ac95c7b1e483c449bdbf113e1}{LDServer\+Big\+Segments\+Redis\+Store}}}
+
+
+
+LDServer\+Big\+Segments\+Redis\+Store is a Big Segments persistent store for the Server-\/\+Side SDK backed by Redis. It is meant to be passed to the SDK via the Big Segments config builder. 
+
+Call \mbox{\hyperlink{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+New}} to obtain a new instance. This instance is passed into the SDK\textquotesingle{}s Big Segments configuration.
+
+Example\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{// Stack allocate the result struct, which will hold the result pointer or}}
+\DoxyCodeLine{\textcolor{comment}{// an error message.}}
+\DoxyCodeLine{\textcolor{keyword}{struct }\mbox{\hyperlink{structLDServerBigSegmentsRedisResult}{LDServerBigSegmentsRedisResult}} result;}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Create the Redis Big Segment store, passing in arguments for the URI,}}
+\DoxyCodeLine{\textcolor{comment}{// prefix, and pointer to the result.}}
+\DoxyCodeLine{\textcolor{keywordflow}{if} (!\mbox{\hyperlink{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}{LDServerBigSegmentsRedisStore\_New}}(\textcolor{stringliteral}{"{}redis://localhost:6379"{}},}
+\DoxyCodeLine{                                       \textcolor{stringliteral}{"{}testprefix"{}}, \&result)) \{}
+\DoxyCodeLine{    \textcolor{comment}{// On failure, you may print the error message (result.error\_message),}}
+\DoxyCodeLine{    \textcolor{comment}{// then exit or return.}}
+\DoxyCodeLine{\}}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Create the Big Segments builder, taking ownership of the store pointer.}}
+\DoxyCodeLine{LDServerBigSegmentsBuilder bs\_builder = LDServerBigSegmentsBuilder\_New(}
+\DoxyCodeLine{    (LDServerBigSegmentStorePtr)result.store);}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{comment}{// Attach the Big Segments builder to the SDK config.}}
+\DoxyCodeLine{LDServerConfigBuilder cfg\_builder = LDServerConfigBuilder\_New(\textcolor{stringliteral}{"{}sdk-\/123"{}});}
+\DoxyCodeLine{LDServerConfigBuilder\_BigSegments(cfg\_builder, bs\_builder);}
+
+\end{DoxyCode}
+
+
+This implementation is backed by \href{https://github.com/sewenew/redis-plus-plus}{\texttt{ Redis++}}, a C++ wrapper for the \href{https://github.com/redis/hiredis}{\texttt{ hiredis}} library. 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}\label{redis__big__segment__store_8h_a062094bf22a43368946091666114e4c3}} 
+\index{redis\_big\_segment\_store.h@{redis\_big\_segment\_store.h}!LDServerBigSegmentsRedisStore\_New@{LDServerBigSegmentsRedisStore\_New}}
+\index{LDServerBigSegmentsRedisStore\_New@{LDServerBigSegmentsRedisStore\_New}!redis\_big\_segment\_store.h@{redis\_big\_segment\_store.h}}
+\doxysubsubsection{\texorpdfstring{LDServerBigSegmentsRedisStore\_New()}{LDServerBigSegmentsRedisStore\_New()}}
+{\footnotesize\ttfamily LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+New (\begin{DoxyParamCaption}\item[{char const $\ast$}]{uri,  }\item[{char const $\ast$}]{prefix,  }\item[{struct \mbox{\hyperlink{structLDServerBigSegmentsRedisResult}{LDServer\+Big\+Segments\+Redis\+Result}} $\ast$}]{out\+\_\+result }\end{DoxyParamCaption})}
+
+
+
+Creates a new Redis Big Segment store suitable for usage in the SDK\textquotesingle{}s Big Segments configuration. 
+
+In this system, the SDK will query Redis for Big Segments membership as required, with an in-\/memory cache to reduce the number of queries.
+
+Data is never written back to Redis by the SDK; the Launch\+Darkly Relay Proxy populates the store.
+
+
+\begin{DoxyParams}{Parameters}
+{\em uri} & Redis URI string. Must not be NULL or empty string.\\
+\hline
+{\em prefix} & Prefix to use when reading SDK data from Redis. This allows multiple SDK environments to coexist in the same database, or for the SDK\textquotesingle{}s data to coexist with other unrelated data. Must not be NULL.\\
+\hline
+{\em out\+\_\+result} & Pointer to struct where the store pointer or an error message should be stored.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the store was created successfully; out\+\_\+result-\/$>$store will contain the pointer. The caller must either free the pointer with \mbox{\hyperlink{redis__big__segment__store_8h_a8a8e8c4428d0fe0057b1713d5e934d4b}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+Free}}, OR pass it into the SDK\textquotesingle{}s Big Segments configuration which will take ownership (in which case do not call \mbox{\hyperlink{redis__big__segment__store_8h_a8a8e8c4428d0fe0057b1713d5e934d4b}{LDServer\+Big\+Segments\+Redis\+Store\+\_\+\+Free}}.) 
+\end{DoxyReturn}
