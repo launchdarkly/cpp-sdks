@@ -205,6 +205,12 @@ find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
 message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
 
 set(FOXY_BUILD_TESTING OFF)
+
+# Keep Boost.Asio header-only, matching how consumers compile it. Foxy's
+# separate-compilation mode bakes Asio internals into our library whose layout can
+# diverge from a consumer's build, causing ODR violations when linked. Force off.
+set(FOXY_FAST_BUILD OFF CACHE BOOL "Keep Boost.Asio header-only for ABI compatibility with consumers" FORCE)
+
 add_subdirectory(vendor/foxy)
 
 
