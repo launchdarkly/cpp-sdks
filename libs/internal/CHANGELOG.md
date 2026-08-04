@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.14.2](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.14.1...launchdarkly-cpp-internal-v0.14.2) (2026-08-04)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-networking bumped from 0.2.0 to 0.2.1
+
 ## [0.14.1](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-internal-v0.14.0...launchdarkly-cpp-internal-v0.14.1) (2026-07-24)
 
 

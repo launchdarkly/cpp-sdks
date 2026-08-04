@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.11.4](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.11.3...launchdarkly-cpp-client-v3.11.4) (2026-08-04)
+
+
+### Bug Fixes
+
+* add defensive cycle guard to prerequisite evaluation ([#582](https://github.com/launchdarkly/cpp-sdks/issues/582)) ([c43057c](https://github.com/launchdarkly/cpp-sdks/commit/c43057c7b2d3578959d97198a6a7a5a354077527))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @launchdarkly/cpp-internal bumped from 0.14.1 to 0.14.2
+    * @launchdarkly/cpp-sse-client bumped from 0.7.0 to 0.7.1
+
 ## [3.11.3](https://github.com/launchdarkly/cpp-sdks/compare/launchdarkly-cpp-client-v3.11.2...launchdarkly-cpp-client-v3.11.3) (2026-07-24)
 
 
