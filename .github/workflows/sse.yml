@@ -14,7 +14,7 @@ jobs:
   build-test-sse:
     runs-on: ubuntu-22.04
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
@@ -23,7 +23,7 @@ jobs:
   build-test-sse-curl:
     runs-on: ubuntu-22.04
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
@@ -37,7 +37,7 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:
@@ -60,7 +60,7 @@ jobs:
       TEST_SERVICE_PORT: 8123
       TEST_SERVICE_BINARY: ./build/contract-tests/sse-contract-tests/sse-tests
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: ./.github/actions/ci
         with:

@@ -13,7 +13,7 @@ jobs:
   cpp-linter:
     runs-on: ubuntu-22.04
     steps:
-      # https://github.com/actions/checkout/releases/tag/v4.3.0
+      # https://github.com/actions/checkout/releases/tag/v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Install boost
         # https://github.com/MarkusJx/install-boost/releases/tag/v2.4.4
