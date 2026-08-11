@@ -6,11 +6,8 @@ LaunchDarkly Server-Side SDK - DynamoDB Source for C/C++
 
 The LaunchDarkly Server-Side SDK DynamoDB Source for C/C++ is designed for use with the Server-Side SDK.
 
-This component will allow the Server-Side SDK to retrieve feature flag configurations from DynamoDB, rather than
+This component allows the Server-Side SDK to retrieve feature flag configurations from DynamoDB, rather than
 from LaunchDarkly.
-
-> [!NOTE]
-> The Big Segments store implementation will land in a subsequent release.
 
 LaunchDarkly overview
 -------------------------
