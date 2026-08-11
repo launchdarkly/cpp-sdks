@@ -55,6 +55,7 @@
         "relayProxyDaemon": { "introduced": "1.2" },
         "relayProxyProxy": { "introduced": "1.0" },
         "storingData": { "introduced": "1.2" },
+        "storingDataDynamodb": { "introduced": "3.13" },
         "storingDataRedis": { "introduced": "1.2" },
         "testDataSource": { "introduced": "2.6" },
         "track": { "introduced": "1.0" },
