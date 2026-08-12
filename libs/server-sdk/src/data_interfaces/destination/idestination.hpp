@@ -36,6 +36,13 @@ class IDestination {
                         data_model::SegmentDescriptor segment) = 0;
 
     /**
+     * \brief Record the environment ID that LaunchDarkly reported alongside
+     * the data. Destinations which do not track it ignore the value.
+     * \param environment_id The environment ID.
+     */
+    virtual void SetEnvironmentId(std::string environment_id) = 0;
+
+    /**
      * \return Identity of the destination. Used in logs.
      */
     [[nodiscard]] virtual std::string const& Identity() const = 0;

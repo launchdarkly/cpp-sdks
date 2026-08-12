@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../../../data_components/environment_id/environment_id.hpp"
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../../../data_interfaces/destination/idestination.hpp"
 #include "../../../../data_interfaces/source/idata_synchronizer.hpp"
@@ -20,15 +19,13 @@ class PollingDataSource
     : public data_interfaces::IDataSynchronizer,
       public std::enable_shared_from_this<PollingDataSource> {
    public:
-    PollingDataSource(
-        boost::asio::any_io_executor const& ioc,
-        Logger const& logger,
-        data_components::DataSourceStatusManager& status_manager,
-        config::built::ServiceEndpoints const& endpoints,
-        config::built::BackgroundSyncConfig::PollingConfig const&
-            data_source_config,
-        config::built::HttpProperties const& http_properties,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+    PollingDataSource(boost::asio::any_io_executor const& ioc,
+                      Logger const& logger,
+                      data_components::DataSourceStatusManager& status_manager,
+                      config::built::ServiceEndpoints const& endpoints,
+                      config::built::BackgroundSyncConfig::PollingConfig const&
+                          data_source_config,
+                      config::built::HttpProperties const& http_properties);
 
     void StartAsync(data_interfaces::IDestination* dest,
                     data_model::SDKDataSet const* bootstrap_data) override;
@@ -48,10 +45,6 @@ class PollingDataSource
     // operations, so a completion handler might invoke the status manager after
     // it has been destroyed.
     data_components::DataSourceStatusManager& status_manager_;
-
-    // Records the environment ID reported by LaunchDarkly. Shared with the
-    // client, which reads it when building hook contexts.
-    std::shared_ptr<data_components::EnvironmentId> environment_id_;
 
     // Responsible for performing HTTP requests using boost::asio.
     network::AsioRequester requester_;

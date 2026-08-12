@@ -115,6 +115,20 @@ TEST(FDv1AdapterSynchronizerTest, FDv1InitProducesFullChangeSet) {
     EXPECT_FALSE(result->fdv1_fallback);
 }
 
+TEST(FDv1AdapterSynchronizerTest, FDv1EnvironmentIdIsReportedWithChangeSet) {
+    MockFDv1Source* source = nullptr;
+    FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));
+
+    auto future = adapter.Next(data_model::Selector{});
+
+    source->destination_->SetEnvironmentId("env-123");
+    source->destination_->Init(data_model::SDKDataSet{});
+
+    auto result = future.WaitForResult(1s);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, result->environment_id);
+}
+
 TEST(FDv1AdapterSynchronizerTest, FDv1UpsertProducesPartialChangeSet) {
     MockFDv1Source* source = nullptr;
     FDv1AdapterSynchronizer adapter(MakeMockBuilder(&source));

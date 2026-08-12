@@ -22,16 +22,14 @@ FDv2PollingSynchronizer::State::State(
     std::chrono::seconds poll_interval,
     std::string polling_base_url,
     config::built::HttpProperties const& http_properties,
-    std::optional<std::string> filter_key,
-    std::shared_ptr<data_components::EnvironmentId> environment_id)
+    std::optional<std::string> filter_key)
     : logger_(std::move(logger)),
       poll_interval_(std::max(poll_interval, kMinPollInterval)),
       polling_base_url_(std::move(polling_base_url)),
       http_properties_(http_properties),
       filter_key_(std::move(filter_key)),
       requester_(executor, http_properties.Tls()),
-      executor_(executor),
-      environment_id_(std::move(environment_id)) {}
+      executor_(executor) {}
 
 async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
     data_model::Selector const& selector) const {
@@ -52,8 +50,7 @@ async::Future<network::HttpResult> FDv2PollingSynchronizer::State::Request(
 FDv2SourceResult FDv2PollingSynchronizer::State::HandlePollResult(
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
-    return HandleFDv2PollResponse(res, &protocol_handler, logger_, kIdentity,
-                                  environment_id_);
+    return HandleFDv2PollResponse(res, &protocol_handler, logger_, kIdentity);
 }
 
 async::Future<bool> FDv2PollingSynchronizer::State::Delay(
@@ -87,15 +84,13 @@ FDv2PollingSynchronizer::FDv2PollingSynchronizer(
     std::string polling_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
-    std::chrono::seconds poll_interval,
-    std::shared_ptr<data_components::EnvironmentId> environment_id)
+    std::chrono::seconds poll_interval)
     : state_(std::make_shared<State>(logger,
                                      executor,
                                      poll_interval,
                                      std::move(polling_base_url),
                                      http_properties,
-                                     std::move(filter_key),
-                                     std::move(environment_id))) {
+                                     std::move(filter_key))) {
     if (poll_interval < kMinPollInterval) {
         LD_LOG(logger, LogLevel::kWarn)
             << kIdentity << ": polling interval too frequent, defaulting to "

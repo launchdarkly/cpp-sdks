@@ -13,21 +13,19 @@ FDv2PollingInitializerFactory::FDv2PollingInitializerFactory(
     Logger logger,
     config::built::ServiceEndpoints endpoints,
     config::built::HttpProperties http_properties,
-    config::built::FDv2Config::PollingConfig polling,
-    std::shared_ptr<data_components::EnvironmentId> environment_id)
+    config::built::FDv2Config::PollingConfig polling)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
       polling_base_url_(
           polling.base_url_override.value_or(endpoints.PollingBaseUrl())),
       http_properties_(std::move(http_properties)),
-      polling_(std::move(polling)),
-      environment_id_(std::move(environment_id)) {}
+      polling_(std::move(polling)) {}
 
 std::unique_ptr<data_interfaces::IFDv2Initializer>
 FDv2PollingInitializerFactory::Build() {
     return std::make_unique<FDv2PollingInitializer>(
         executor_, logger_, polling_base_url_, http_properties_,
-        data_model::Selector{}, std::nullopt, environment_id_);
+        data_model::Selector{}, std::nullopt);
 }
 
 }  // namespace launchdarkly::server_side::data_systems

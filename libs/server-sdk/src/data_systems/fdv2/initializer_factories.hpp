@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_initializer_factory.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
@@ -22,8 +21,7 @@ class FDv2PollingInitializerFactory final
         Logger logger,
         config::built::ServiceEndpoints endpoints,
         config::built::HttpProperties http_properties,
-        config::built::FDv2Config::PollingConfig polling,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::FDv2Config::PollingConfig polling);
 
     std::unique_ptr<data_interfaces::IFDv2Initializer> Build() override;
 
@@ -33,7 +31,6 @@ class FDv2PollingInitializerFactory final
     std::string const polling_base_url_;
     config::built::HttpProperties const http_properties_;
     config::built::FDv2Config::PollingConfig const polling_;
-    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems

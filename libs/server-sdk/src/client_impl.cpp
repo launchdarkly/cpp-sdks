@@ -71,11 +71,9 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeBackgroundSyncSystem(
     config::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
-    Logger& logger,
-    std::shared_ptr<data_components::EnvironmentId> environment_id) {
+    Logger& logger) {
     return std::make_unique<data_systems::BackgroundSync>(
-        endpoints, cfg, http_properties, executor, status_manager, logger,
-        std::move(environment_id));
+        endpoints, cfg, http_properties, executor, status_manager, logger);
 }
 
 static std::unique_ptr<data_interfaces::IDataSystem> MakeLazyLoadSystem(
@@ -92,15 +90,13 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
     config::built::HttpProperties const& http_properties,
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
-    Logger const& logger,
-    std::shared_ptr<data_components::EnvironmentId> const& environment_id) {
+    Logger const& logger) {
     std::vector<std::unique_ptr<data_interfaces::IFDv2InitializerFactory>>
         initializer_factories;
     for (auto const& initializer : cfg.initializers) {
         initializer_factories.push_back(
             std::make_unique<data_systems::FDv2PollingInitializerFactory>(
-                executor, logger, endpoints, http_properties, initializer,
-                environment_id));
+                executor, logger, endpoints, http_properties, initializer));
     }
 
     std::vector<std::unique_ptr<data_interfaces::IFDv2SynchronizerFactory>>
@@ -114,14 +110,14 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
                         std::make_unique<
                             data_systems::FDv2StreamingSynchronizerFactory>(
                             executor, logger, endpoints, http_properties,
-                            streaming, environment_id));
+                            streaming));
                 },
                 [&](config::built::FDv2Config::PollingConfig const& polling) {
                     synchronizer_factories.push_back(
                         std::make_unique<
                             data_systems::FDv2PollingSynchronizerFactory>(
                             executor, logger, endpoints, http_properties,
-                            polling, environment_id));
+                            polling));
                 },
             },
             sync);
@@ -134,7 +130,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
                                std::make_unique<
                                    data_systems::FDv1StreamingAdapterFactory>(
                                    executor, logger, endpoints, streaming,
-                                   http_properties, environment_id));
+                                   http_properties));
                        },
                        [&](config::built::FDv2Config::FDv1PollingConfig const&
                                polling) {
@@ -142,7 +138,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeFDv2System(
                                std::make_unique<
                                    data_systems::FDv1PollingAdapterFactory>(
                                    executor, logger, endpoints, polling,
-                                   http_properties, environment_id));
+                                   http_properties));
                        },
                    },
                    *cfg.fdv1_fallback);
@@ -166,8 +162,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
     Config const& config,
     boost::asio::any_io_executor const& executor,
     data_components::DataSourceStatusManager& status_manager,
-    Logger& logger,
-    std::shared_ptr<data_components::EnvironmentId> environment_id) {
+    Logger& logger) {
     if (config.DataSystemConfig().disabled) {
         return std::make_unique<data_systems::OfflineSystem>(status_manager);
     }
@@ -180,7 +175,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
             [&](config::built::BackgroundSyncConfig const& cfg) {
                 return MakeBackgroundSyncSystem(
                     config.ServiceEndpoints(), cfg, data_source_properties,
-                    executor, status_manager, logger, environment_id);
+                    executor, status_manager, logger);
             },
             [&](config::built::LazyLoadConfig const& cfg) {
                 return MakeLazyLoadSystem(cfg, status_manager, logger);
@@ -188,7 +183,7 @@ static std::unique_ptr<data_interfaces::IDataSystem> MakeDataSystem(
             [&](config::built::FDv2Config const& cfg) {
                 return MakeFDv2System(config.ServiceEndpoints(), cfg,
                                       data_source_properties, executor,
-                                      status_manager, logger, environment_id);
+                                      status_manager, logger);
             },
         },
         config.DataSystemConfig().system_);
@@ -244,13 +239,11 @@ ClientImpl::ClientImpl(Config config, std::string const& version)
       ioc_(kAsioConcurrencyHint),
       work_(boost::asio::make_work_guard(ioc_)),
       status_manager_(),
-      environment_id_(std::make_shared<data_components::EnvironmentId>()),
       data_system_(MakeDataSystem(http_properties_,
                                   config_,
                                   ioc_.get_executor(),
                                   status_manager_,
-                                  logger_,
-                                  environment_id_)),
+                                  logger_)),
       event_processor_(MakeEventProcessor(config,
                                           ioc_.get_executor(),
                                           http_properties_,
@@ -387,7 +380,7 @@ void ClientImpl::TrackInternal(Context const& ctx,
     if (!config_.Hooks().empty()) {
         hooks::TrackSeriesContext series_context(ctx, event_name, metric_value,
                                                  data, hook_context,
-                                                 environment_id_->Get());
+                                                 data_system_->EnvironmentId());
         hooks::ExecuteAfterTrack(config_.Hooks(), series_context, logger_);
     }
 
@@ -495,7 +488,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     if (!config_.Hooks().empty()) {
         hooks::EvaluationSeriesContext series_context(
             key, context, default_value, method_name, hook_context,
-            environment_id_->Get());
+            data_system_->EnvironmentId());
         // Executor only created if there are hooks.
         executor.emplace(config_.Hooks(), logger_);
         executor->BeforeEvaluation(series_context);
@@ -509,7 +502,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
                 key, context, default_value, method_name, hook_context,
-                std::nullopt);
+                data_system_->EnvironmentId());
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -531,7 +524,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
         if (executor) {
             hooks::EvaluationSeriesContext series_context(
                 key, context, default_value, method_name, hook_context,
-                std::nullopt);
+                data_system_->EnvironmentId());
             executor->AfterEvaluation(series_context, detail);
         }
 
@@ -547,7 +540,7 @@ EvaluationDetail<Value> ClientImpl::VariationInternal(
     if (executor) {
         hooks::EvaluationSeriesContext series_context(
             key, context, default_value, method_name, hook_context,
-            environment_id_->Get());
+            data_system_->EnvironmentId());
         executor->AfterEvaluation(series_context, detail);
     }
 

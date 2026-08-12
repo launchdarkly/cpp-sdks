@@ -42,8 +42,6 @@ target_sources(${LIBNAME}
         prereq_event_recorder/prereq_event_recorder.hpp
         data_components/change_notifier/change_notifier.hpp
         data_components/change_notifier/change_notifier.cpp
-        data_components/environment_id/environment_id.hpp
-        data_components/environment_id/environment_id.cpp
         data_components/dependency_tracker/dependency_tracker.hpp
         data_components/dependency_tracker/dependency_tracker.cpp
         data_components/expiration_tracker/expiration_tracker.hpp

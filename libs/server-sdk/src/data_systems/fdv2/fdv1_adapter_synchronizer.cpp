@@ -44,6 +44,7 @@ void FDv1AdapterSynchronizer::State::Notify(FDv2SourceResult result) {
         if (closed_future_.IsFinished()) {
             return;
         }
+        result.environment_id = environment_id_;
         if (pending_promise_) {
             promise = std::move(pending_promise_);
             pending_promise_.reset();
@@ -55,6 +56,12 @@ void FDv1AdapterSynchronizer::State::Notify(FDv2SourceResult result) {
     // Resolve outside the lock — Promise::Resolve may invoke inline
     // continuations that could call back into Notify or GetNext.
     promise->Resolve(std::move(result));
+}
+
+void FDv1AdapterSynchronizer::State::SetEnvironmentId(
+    std::string environment_id) {
+    std::lock_guard lock(mutex_);
+    environment_id_ = std::move(environment_id);
 }
 
 // ----- ConvertingDestination -----
@@ -111,6 +118,13 @@ void FDv1AdapterSynchronizer::ConvertingDestination::Upsert(
         data_model::ChangeSet<data_interfaces::ChangeSetData>{
             data_model::ChangeSetType::kPartial, std::move(changes),
             data_model::Selector{}}}});
+}
+
+void FDv1AdapterSynchronizer::ConvertingDestination::SetEnvironmentId(
+    std::string environment_id) {
+    if (auto state = state_.lock()) {
+        state->SetEnvironmentId(std::move(environment_id));
+    }
 }
 
 std::string const& FDv1AdapterSynchronizer::ConvertingDestination::Identity()

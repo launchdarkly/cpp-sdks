@@ -34,12 +34,10 @@ StreamingDataSource::StreamingDataSource(
     data_components::DataSourceStatusManager& status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
-    config::built::HttpProperties const& http_properties,
-    std::shared_ptr<data_components::EnvironmentId> environment_id)
+    config::built::HttpProperties const& http_properties)
     : io_(std::move(io)),
       logger_(logger),
       status_manager_(status_manager),
-      environment_id_(std::move(environment_id)),
       http_config_(http_properties),
       streaming_endpoint_(endpoints.StreamingBaseUrl()),
       streaming_config_(streaming) {}
@@ -49,6 +47,7 @@ void StreamingDataSource::StartAsync(
     data_model::SDKDataSet const* bootstrap_data) {
     boost::ignore_unused(bootstrap_data);
 
+    sink_ = dest;
     event_handler_.emplace(*dest, logger_, status_manager_);
 
     status_manager_.SetState(DataSourceStatus::DataSourceState::kInitializing);
@@ -130,15 +129,13 @@ void StreamingDataSource::StartAsync(
     client_builder.on_response(
         [weak_self](boost::beast::http::response_header<> const& headers) {
             auto self = weak_self.lock();
-            if (!self || !self->environment_id_ ||
-                headers.result_int() != 200) {
+            if (!self || headers.result_int() != 200) {
                 return;
             }
-            if (auto const it =
-                    headers.find(data_components::EnvironmentId::kHeader);
-                it != headers.end()) {
-                self->environment_id_->Set(
-                    std::string_view{it->value().data(), it->value().size()});
+            if (auto const it = headers.find("X-LD-EnvID");
+                it != headers.end() && !it->value().empty()) {
+                self->sink_->SetEnvironmentId(
+                    std::string(it->value().data(), it->value().size()));
             }
         });
 

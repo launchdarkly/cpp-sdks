@@ -143,6 +143,10 @@ void ChangeNotifier::Apply(
     }
 }
 
+void ChangeNotifier::SetEnvironmentId(std::string environment_id) {
+    sink_.SetEnvironmentId(std::move(environment_id));
+}
+
 bool ChangeNotifier::HasListeners() const {
     std::lock_guard lock{signal_mutex_};
     return !signals_.empty();

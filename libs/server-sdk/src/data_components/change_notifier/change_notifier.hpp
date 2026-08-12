@@ -38,6 +38,7 @@ class ChangeNotifier final : public data_interfaces::ITransactionalDestination,
                 data_model::SegmentDescriptor segment) override;
     void Apply(data_model::ChangeSet<data_interfaces::ChangeSetData> change_set)
         override;
+    void SetEnvironmentId(std::string environment_id) override;
 
     [[nodiscard]] std::string const& Identity() const override;
 

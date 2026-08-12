@@ -22,14 +22,11 @@ static Logger MakeNullLogger() {
 static FDv2SourceResult HandleResponse(
     unsigned status,
     std::optional<std::string> body,
-    network::HttpResult::HeadersType headers,
-    std::shared_ptr<server_side::data_components::EnvironmentId>
-        environment_id = nullptr) {
+    network::HttpResult::HeadersType headers) {
     auto logger = MakeNullLogger();
     FDv2ProtocolHandler handler;
     network::HttpResult res{status, std::move(body), std::move(headers)};
-    return HandleFDv2PollResponse(res, &handler, logger, "test",
-                                  environment_id);
+    return HandleFDv2PollResponse(res, &handler, logger, "test");
 }
 
 TEST(HandleFDv2PollResponseTest, NotModifiedSetsFdv1FallbackWhenHeaderPresent) {
@@ -128,8 +125,7 @@ TEST(HandleFDv2PollResponseTest, NetworkErrorDoesNotSetFlag) {
     auto logger = MakeNullLogger();
     FDv2ProtocolHandler handler;
     network::HttpResult res{std::optional<std::string>{"connection refused"}};
-    auto result = HandleFDv2PollResponse(res, &handler, logger, "test",
-                                         /* environment_id= */ nullptr);
+    auto result = HandleFDv2PollResponse(res, &handler, logger, "test");
 
     EXPECT_TRUE(
         std::holds_alternative<FDv2SourceResult::Interrupted>(result.value));
@@ -166,6 +162,34 @@ TEST(MakeFDv2PollRequestTest, ValidFilterKeyIsIncluded) {
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll?filter=my-filter_1.0");
 }
 
+TEST(HandleFDv2PollResponseTest, OkReportsEnvironmentId) {
+    auto result =
+        HandleResponse(200, R"({"events":[]})", {{"X-LD-EnvID", "env-123"}});
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, result.environment_id);
+}
+
+TEST(HandleFDv2PollResponseTest, NotModifiedReportsEnvironmentId) {
+    auto result =
+        HandleResponse(304, std::nullopt, {{"X-LD-EnvID", "env-123"}});
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, result.environment_id);
+}
+
+TEST(HandleFDv2PollResponseTest, ErrorStatusDoesNotReportEnvironmentId) {
+    auto result =
+        HandleResponse(503, std::nullopt, {{"X-LD-EnvID", "env-123"}});
+    EXPECT_FALSE(result.environment_id);
+}
+
+TEST(HandleFDv2PollResponseTest, MissingHeaderDoesNotReportEnvironmentId) {
+    auto result = HandleResponse(200, R"({"events":[]})", {});
+    EXPECT_FALSE(result.environment_id);
+}
+
+TEST(HandleFDv2PollResponseTest, EmptyHeaderDoesNotReportEnvironmentId) {
+    auto result = HandleResponse(200, R"({"events":[]})", {{"X-LD-EnvID", ""}});
+    EXPECT_FALSE(result.environment_id);
+}
+
 TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {
     auto logger = MakeNullLogger();
     auto props =
@@ -174,35 +198,4 @@ TEST(MakeFDv2PollRequestTest, InvalidFilterKeyIsDropped) {
         MakeFDv2PollRequest("http://example.com", props, data_model::Selector{},
                             std::string{"has spaces"}, logger);
     EXPECT_EQ(req.Url(), "http://example.com/sdk/poll");
-}
-
-TEST(HandleFDv2PollResponseTest, OkRecordsEnvironmentId) {
-    auto environment_id =
-        std::make_shared<server_side::data_components::EnvironmentId>();
-    HandleResponse(200, R"({"events":[]})", {{"X-LD-EnvID", "env-123"}},
-                   environment_id);
-    EXPECT_EQ(std::optional<std::string>{"env-123"}, environment_id->Get());
-}
-
-TEST(HandleFDv2PollResponseTest, NotModifiedRecordsEnvironmentId) {
-    auto environment_id =
-        std::make_shared<server_side::data_components::EnvironmentId>();
-    HandleResponse(304, std::nullopt, {{"X-LD-EnvID", "env-123"}},
-                   environment_id);
-    EXPECT_EQ(std::optional<std::string>{"env-123"}, environment_id->Get());
-}
-
-TEST(HandleFDv2PollResponseTest, ErrorStatusDoesNotRecordEnvironmentId) {
-    auto environment_id =
-        std::make_shared<server_side::data_components::EnvironmentId>();
-    HandleResponse(503, std::nullopt, {{"X-LD-EnvID", "env-123"}},
-                   environment_id);
-    EXPECT_FALSE(environment_id->Get());
-}
-
-TEST(HandleFDv2PollResponseTest, MissingHeaderDoesNotRecordEnvironmentId) {
-    auto environment_id =
-        std::make_shared<server_side::data_components::EnvironmentId>();
-    HandleResponse(200, R"({"events":[]})", {}, environment_id);
-    EXPECT_FALSE(environment_id->Get());
 }

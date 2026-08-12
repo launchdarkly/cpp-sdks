@@ -73,6 +73,9 @@ class FDv1AdapterSynchronizer final
 
         void Notify(data_interfaces::FDv2SourceResult result);
 
+        // Stamped onto subsequently notified results.
+        void SetEnvironmentId(std::string environment_id);
+
        private:
         // Finished once the owning FDv1AdapterSynchronizer's close_promise_
         // is resolved. Read in Notify to drop late results.
@@ -83,6 +86,7 @@ class FDv1AdapterSynchronizer final
         std::optional<async::Promise<data_interfaces::FDv2SourceResult>>
             pending_promise_;
         std::deque<data_interfaces::FDv2SourceResult> result_queue_;
+        std::optional<std::string> environment_id_;
     };
 
     /**
@@ -97,6 +101,7 @@ class FDv1AdapterSynchronizer final
                     data_model::FlagDescriptor flag) override;
         void Upsert(std::string const& key,
                     data_model::SegmentDescriptor segment) override;
+        void SetEnvironmentId(std::string environment_id) override;
         [[nodiscard]] std::string const& Identity() const override;
 
        private:

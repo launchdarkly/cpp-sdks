@@ -69,11 +69,9 @@ PollingDataSource::PollingDataSource(
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
-    config::built::HttpProperties const& http_properties,
-    std::shared_ptr<data_components::EnvironmentId> environment_id)
+    config::built::HttpProperties const& http_properties)
     : logger_(logger),
       status_manager_(status_manager),
-      environment_id_(std::move(environment_id)),
       requester_(ioc, http_properties.Tls()),
       polling_interval_(data_source_config.poll_interval),
       request_(
@@ -104,12 +102,10 @@ void PollingDataSource::DoPoll() {
 }
 
 void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
-    if (environment_id_ && !res.IsError() &&
-        (res.Status() == 200 || res.Status() == 304)) {
-        if (auto const it =
-                res.Headers().find(data_components::EnvironmentId::kHeader);
-            it != res.Headers().end()) {
-            environment_id_->Set(it->second);
+    if (!res.IsError() && (res.Status() == 200 || res.Status() == 304)) {
+        if (auto const it = res.Headers().find("X-LD-EnvID");
+            it != res.Headers().end() && !it->second.empty()) {
+            sink_->SetEnvironmentId(it->second);
         }
     }
 

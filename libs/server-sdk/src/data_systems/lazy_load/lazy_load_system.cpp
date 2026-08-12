@@ -142,6 +142,10 @@ bool LazyLoad::Initialized() const {
     return initialized_.value_or(false);
 }
 
+std::optional<std::string> LazyLoad::EnvironmentId() const {
+    return std::nullopt;
+}
+
 void LazyLoad::RefreshAllFlags() const {
     RefreshAll<data_model::Flag>(Keys::kAllFlags,
                                  data_components::DataKind::kFlag,

@@ -2,7 +2,6 @@
 
 #include "event_handler.hpp"
 
-#include "../../../../data_components/environment_id/environment_id.hpp"
 #include "../../../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../../../data_interfaces/destination/idestination.hpp"
 #include "../../../../data_interfaces/source/idata_synchronizer.hpp"
@@ -25,8 +24,7 @@ class StreamingDataSource final
         data_components::DataSourceStatusManager& status_manager,
         config::built::ServiceEndpoints const& endpoints,
         config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
-        config::built::HttpProperties const& http_properties,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::HttpProperties const& http_properties);
 
     void StartAsync(data_interfaces::IDestination* dest,
                     data_model::SDKDataSet const* bootstrap_data) override;
@@ -41,17 +39,15 @@ class StreamingDataSource final
     Logger const& logger_;
 
     data_components::DataSourceStatusManager& status_manager_;
-
-    // Records the environment ID reported by LaunchDarkly. Shared with the
-    // client, which reads it when building hook contexts.
-    std::shared_ptr<data_components::EnvironmentId> environment_id_;
-
     config::built::HttpProperties http_config_;
 
     std::optional<DataSourceEventHandler> event_handler_;
     std::string streaming_endpoint_;
 
     config::built::BackgroundSyncConfig::StreamingConfig streaming_config_;
+
+    // Destination for all data obtained via streaming. Set by StartAsync.
+    data_interfaces::IDestination* sink_ = nullptr;
 
     std::shared_ptr<sse::Client> client_;
 };

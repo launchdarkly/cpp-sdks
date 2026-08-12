@@ -74,6 +74,19 @@ void MemoryStore::Upsert(std::string const& key,
         std::make_shared<data_model::SegmentDescriptor>(std::move(segment));
 }
 
+void MemoryStore::SetEnvironmentId(std::string environment_id) {
+    std::lock_guard lock{data_mutex_};
+    environment_id_ = std::move(environment_id);
+}
+
+std::optional<std::string> MemoryStore::EnvironmentId() const {
+    std::lock_guard lock{data_mutex_};
+    if (!initialized_) {
+        return std::nullopt;
+    }
+    return environment_id_;
+}
+
 bool MemoryStore::RemoveFlag(std::string const& key) {
     std::lock_guard lock{data_mutex_};
     return flags_.erase(key) == 1;

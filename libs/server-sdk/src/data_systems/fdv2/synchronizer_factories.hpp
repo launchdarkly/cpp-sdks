@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer_factory.hpp"
 
 #include <launchdarkly/logging/logger.hpp>
@@ -22,8 +21,7 @@ class FDv2StreamingSynchronizerFactory final
         Logger logger,
         config::built::ServiceEndpoints endpoints,
         config::built::HttpProperties http_properties,
-        config::built::FDv2Config::StreamingConfig streaming,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::FDv2Config::StreamingConfig streaming);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
 
@@ -33,7 +31,6 @@ class FDv2StreamingSynchronizerFactory final
     std::string const streaming_base_url_;
     config::built::HttpProperties const http_properties_;
     config::built::FDv2Config::StreamingConfig const streaming_;
-    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 };
 
 /**
@@ -47,8 +44,7 @@ class FDv2PollingSynchronizerFactory final
         Logger logger,
         config::built::ServiceEndpoints endpoints,
         config::built::HttpProperties http_properties,
-        config::built::FDv2Config::PollingConfig polling,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::FDv2Config::PollingConfig polling);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
 
@@ -58,7 +54,6 @@ class FDv2PollingSynchronizerFactory final
     std::string const polling_base_url_;
     config::built::HttpProperties const http_properties_;
     config::built::FDv2Config::PollingConfig const polling_;
-    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 };
 
 /**
@@ -73,8 +68,7 @@ class FDv1StreamingAdapterFactory final
         Logger logger,
         config::built::ServiceEndpoints endpoints,
         config::built::FDv2Config::FDv1StreamingConfig streaming,
-        config::built::HttpProperties http_properties,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::HttpProperties http_properties);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
 
@@ -86,7 +80,6 @@ class FDv1StreamingAdapterFactory final
     config::built::ServiceEndpoints const endpoints_;
     config::built::FDv2Config::FDv1StreamingConfig const streaming_;
     config::built::HttpProperties const http_properties_;
-    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 };
 
 /**
@@ -101,8 +94,7 @@ class FDv1PollingAdapterFactory final
         Logger logger,
         config::built::ServiceEndpoints endpoints,
         config::built::FDv2Config::FDv1PollingConfig polling,
-        config::built::HttpProperties http_properties,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        config::built::HttpProperties http_properties);
 
     std::unique_ptr<data_interfaces::IFDv2Synchronizer> Build() override;
 
@@ -114,7 +106,6 @@ class FDv1PollingAdapterFactory final
     config::built::ServiceEndpoints const endpoints_;
     config::built::FDv2Config::FDv1PollingConfig const polling_;
     config::built::HttpProperties const http_properties_;
-    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 };
 
 }  // namespace launchdarkly::server_side::data_systems

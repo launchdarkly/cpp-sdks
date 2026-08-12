@@ -147,6 +147,10 @@ void FDv2DataSystem::OnInitializerResult(
     data_interfaces::FDv2SourceResult result) {
     using Result = data_interfaces::FDv2SourceResult;
 
+    if (result.environment_id) {
+        change_notifier_.SetEnvironmentId(*result.environment_id);
+    }
+
     bool got_basis = false;
     bool got_shutdown = false;
     bool disconnected = false;
@@ -350,6 +354,10 @@ void FDv2DataSystem::OnSynchronizerResult(
         }
     }
 
+    if (result.environment_id) {
+        change_notifier_.SetEnvironmentId(*result.environment_id);
+    }
+
     bool got_shutdown = false;
     bool advance = false;
     bool disconnected = false;
@@ -485,6 +493,10 @@ void FDv2DataSystem::ApplyChangeSet(
 
 bool FDv2DataSystem::Initialized() const {
     return store_.Initialized();
+}
+
+std::optional<std::string> FDv2DataSystem::EnvironmentId() const {
+    return store_.EnvironmentId();
 }
 
 }  // namespace launchdarkly::server_side::data_systems

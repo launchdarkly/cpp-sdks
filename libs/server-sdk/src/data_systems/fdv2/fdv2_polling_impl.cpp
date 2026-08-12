@@ -12,6 +12,7 @@
 
 namespace launchdarkly::server_side::data_systems {
 
+static char const* const kEnvironmentIdHeader = "X-LD-EnvID";
 static char const* const kFDv1FallbackHeader = "X-LD-FD-Fallback";
 static char const* const kFDv1FallbackTtlHeader = "X-LD-FD-Fallback-TTL";
 
@@ -51,6 +52,15 @@ ReadFDv1FallbackDirective(network::HttpResult::HeadersType const& headers) {
         }
     }
     return directive;
+}
+
+static std::optional<std::string> ReadEnvironmentId(
+    network::HttpResult::HeadersType const& headers) {
+    auto const it = headers.find(kEnvironmentIdHeader);
+    if (it == headers.end() || it->second.empty()) {
+        return std::nullopt;
+    }
+    return it->second;
 }
 
 network::HttpRequest MakeFDv2PollRequest(
@@ -192,8 +202,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
     FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
-    std::string_view identity,
-    std::shared_ptr<data_components::EnvironmentId> const& environment_id) {
+    std::string_view identity) {
     if (res.IsError()) {
         auto const& msg = res.ErrorMessage();
         std::string error_msg = msg.has_value() ? *msg : "unknown error";
@@ -204,14 +213,6 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
 
     auto fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
 
-    if (environment_id && (res.Status() == 200 || res.Status() == 304)) {
-        if (auto const it =
-                res.Headers().find(data_components::EnvironmentId::kHeader);
-            it != res.Headers().end()) {
-            environment_id->Set(it->second);
-        }
-    }
-
     if (res.Status() == 304) {
         return FDv2SourceResult{
             FDv2SourceResult::ChangeSet{
@@ -219,7 +220,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
                     data_model::ChangeSetType::kNone,
                     {},
                     data_model::Selector{}}},
-            fdv1_fallback};
+            fdv1_fallback, ReadEnvironmentId(res.Headers())};
     }
 
     if (res.Status() == 200) {
@@ -247,6 +248,7 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
         if (!result.fdv1_fallback) {
             result.fdv1_fallback = fdv1_fallback;
         }
+        result.environment_id = ReadEnvironmentId(res.Headers());
         return result;
     }
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
 #include <launchdarkly/async/cancellation.hpp>
@@ -50,8 +49,7 @@ class FDv2StreamingSynchronizer final
         std::string streaming_base_url,
         config::built::HttpProperties const& http_properties,
         std::optional<std::string> filter_key,
-        std::chrono::milliseconds initial_reconnect_delay,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+        std::chrono::milliseconds initial_reconnect_delay);
 
     ~FDv2StreamingSynchronizer() override;
 
@@ -75,8 +73,7 @@ class FDv2StreamingSynchronizer final
               std::string streaming_base_url,
               config::built::HttpProperties const& http_properties,
               std::optional<std::string> filter_key,
-              std::chrono::milliseconds initial_reconnect_delay,
-              std::shared_ptr<data_components::EnvironmentId> environment_id);
+              std::chrono::milliseconds initial_reconnect_delay);
 
         /**
          * Updates the stored selector, starts the SSE client if not already
@@ -140,8 +137,6 @@ class FDv2StreamingSynchronizer final
         std::optional<std::string> const filter_key_;
         std::chrono::milliseconds const initial_reconnect_delay_;
         boost::asio::any_io_executor const executor_;
-        // EnvironmentId is itself thread-safe.
-        std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 
         // Touched only from SSE callbacks, which all run on the same strand.
         // No lock required.
@@ -154,6 +149,8 @@ class FDv2StreamingSynchronizer final
         // FDv1 fallback directive from the most recent SSE response.
         std::optional<data_interfaces::FDv1FallbackDirective>
             latest_fdv1_fallback_;
+        // Environment ID reported by the most recent successful SSE response.
+        std::optional<std::string> environment_id_;
         data_model::Selector latest_selector_;
         std::optional<boost::urls::url> base_url_;
         std::shared_ptr<sse::Client> sse_client_;

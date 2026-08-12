@@ -299,6 +299,29 @@ TEST(MemoryStoreTest, CanDeleteExistingSegment) {
     ASSERT_FALSE(store.RemoveSegment("segmentA"));
 }
 
+TEST(MemoryStoreTest, HasNoEnvironmentIdByDefault) {
+    MemoryStore store;
+    store.Init(SDKDataSet());
+    EXPECT_FALSE(store.EnvironmentId());
+}
+
+TEST(MemoryStoreTest, EnvironmentIdIsNotVisibleBeforeInit) {
+    MemoryStore store;
+    store.SetEnvironmentId("env-123");
+    EXPECT_FALSE(store.EnvironmentId());
+
+    store.Init(SDKDataSet());
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
+}
+
+TEST(MemoryStoreTest, EnvironmentIdIsRetainedAcrossInit) {
+    MemoryStore store;
+    store.SetEnvironmentId("env-123");
+    store.Init(SDKDataSet());
+    store.Init(SDKDataSet());
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, store.EnvironmentId());
+}
+
 TEST(MemoryStoreTest, CanDeleteExistingFlag) {
     MemoryStore store;
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_initializer.hpp"
 
 #include <launchdarkly/async/promise.hpp>
@@ -34,14 +33,12 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
      * Constructs an initializer for a single poll request.
      * If filter_key is present, only the specified payload filter is requested.
      */
-    FDv2PollingInitializer(
-        boost::asio::any_io_executor const& executor,
-        Logger const& logger,
-        std::string const& polling_base_url,
-        config::built::HttpProperties const& http_properties,
-        data_model::Selector selector,
-        std::optional<std::string> filter_key,
-        std::shared_ptr<data_components::EnvironmentId> environment_id);
+    FDv2PollingInitializer(boost::asio::any_io_executor const& executor,
+                           Logger const& logger,
+                           std::string const& polling_base_url,
+                           config::built::HttpProperties const& http_properties,
+                           data_model::Selector selector,
+                           std::optional<std::string> filter_key);
 
     ~FDv2PollingInitializer() override;
 
@@ -58,13 +55,7 @@ class FDv2PollingInitializer final : public data_interfaces::IFDv2Initializer {
         // Logger is itself thread-safe.
         Logger logger;
 
-        // EnvironmentId is itself thread-safe.
-        std::shared_ptr<data_components::EnvironmentId> environment_id;
-
-        State(Logger logger,
-              std::shared_ptr<data_components::EnvironmentId> environment_id)
-            : logger(std::move(logger)),
-              environment_id(std::move(environment_id)) {}
+        explicit State(Logger logger) : logger(std::move(logger)) {}
     };
 
     /** Interprets an HTTP response as a source result. */
