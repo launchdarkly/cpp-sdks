@@ -3,8 +3,8 @@
 #include <launchdarkly/encoding/base_64.hpp>
 #include <launchdarkly/network/http_error_messages.hpp>
 
-#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/detail/serialization/json_primitives.hpp>
+#include <launchdarkly/serialization/json_flag.hpp>
 #include <launchdarkly/serialization/json_sdk_data_set.hpp>
 #include <launchdarkly/server_side/data_source_status.hpp>
 
@@ -69,9 +69,11 @@ PollingDataSource::PollingDataSource(
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::PollingConfig const&
         data_source_config,
-    config::built::HttpProperties const& http_properties)
+    config::built::HttpProperties const& http_properties,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : logger_(logger),
       status_manager_(status_manager),
+      environment_id_(std::move(environment_id)),
       requester_(ioc, http_properties.Tls()),
       polling_interval_(data_source_config.poll_interval),
       request_(
@@ -102,6 +104,15 @@ void PollingDataSource::DoPoll() {
 }
 
 void PollingDataSource::HandlePollResult(network::HttpResult const& res) {
+    if (environment_id_ && !res.IsError() &&
+        (res.Status() == 200 || res.Status() == 304)) {
+        if (auto const it =
+                res.Headers().find(data_components::EnvironmentId::kHeader);
+            it != res.Headers().end()) {
+            environment_id_->Set(it->second);
+        }
+    }
+
     auto header_etag = res.Headers().find("etag");
     bool has_etag = header_etag != res.Headers().end();
 

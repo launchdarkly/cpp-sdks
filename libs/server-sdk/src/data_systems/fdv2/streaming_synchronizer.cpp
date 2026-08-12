@@ -40,13 +40,15 @@ FDv2StreamingSynchronizer::State::State(
     std::string streaming_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
-    std::chrono::milliseconds initial_reconnect_delay)
+    std::chrono::milliseconds initial_reconnect_delay,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : logger_(std::move(logger)),
       streaming_base_url_(std::move(streaming_base_url)),
       http_properties_(http_properties),
       filter_key_(std::move(filter_key)),
       initial_reconnect_delay_(initial_reconnect_delay),
-      executor_(executor) {}
+      executor_(executor),
+      environment_id_(std::move(environment_id)) {}
 
 void FDv2StreamingSynchronizer::State::EnsureStarted(
     data_model::Selector const& selector,
@@ -186,6 +188,15 @@ void FDv2StreamingSynchronizer::State::OnConnect(HttpRequest* req) {
 
 void FDv2StreamingSynchronizer::State::OnResponse(
     HttpResponseHeader const& headers) {
+    if (environment_id_ && headers.result_int() == 200) {
+        if (auto const env_it =
+                headers.find(data_components::EnvironmentId::kHeader);
+            env_it != headers.end()) {
+            environment_id_->Set(std::string_view{env_it->value().data(),
+                                                  env_it->value().size()});
+        }
+    }
+
     auto const it = headers.find("X-LD-FD-Fallback");
     if (it == headers.end() || !boost::iequals(it->value(), "true")) {
         std::lock_guard lock(mutex_);
@@ -387,13 +398,15 @@ FDv2StreamingSynchronizer::FDv2StreamingSynchronizer(
     std::string streaming_base_url,
     config::built::HttpProperties const& http_properties,
     std::optional<std::string> filter_key,
-    std::chrono::milliseconds initial_reconnect_delay)
+    std::chrono::milliseconds initial_reconnect_delay,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : state_(std::make_shared<State>(logger,
                                      executor,
                                      std::move(streaming_base_url),
                                      http_properties,
                                      std::move(filter_key),
-                                     initial_reconnect_delay)) {}
+                                     initial_reconnect_delay,
+                                     std::move(environment_id))) {}
 
 FDv2StreamingSynchronizer::~FDv2StreamingSynchronizer() {
     Close();

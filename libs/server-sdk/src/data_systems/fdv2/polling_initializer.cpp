@@ -16,14 +16,15 @@ FDv2PollingInitializer::FDv2PollingInitializer(
     std::string const& polling_base_url,
     config::built::HttpProperties const& http_properties,
     data_model::Selector selector,
-    std::optional<std::string> filter_key)
+    std::optional<std::string> filter_key,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : request_(MakeFDv2PollRequest(polling_base_url,
                                    http_properties,
                                    std::move(selector),
                                    std::move(filter_key),
                                    logger)),
       requester_(executor, http_properties.Tls()),
-      state_(std::make_shared<State>(logger)) {}
+      state_(std::make_shared<State>(logger, std::move(environment_id))) {}
 
 FDv2PollingInitializer::~FDv2PollingInitializer() {
     close_promise_.Resolve(std::monostate{});
@@ -76,7 +77,7 @@ FDv2SourceResult FDv2PollingInitializer::HandlePollResult(
     network::HttpResult const& res) {
     FDv2ProtocolHandler protocol_handler;
     return HandleFDv2PollResponse(res, &protocol_handler, state->logger,
-                                  kIdentity);
+                                  kIdentity, state->environment_id);
 }
 
 }  // namespace launchdarkly::server_side::data_systems

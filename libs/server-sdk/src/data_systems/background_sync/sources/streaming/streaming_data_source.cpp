@@ -34,10 +34,12 @@ StreamingDataSource::StreamingDataSource(
     data_components::DataSourceStatusManager& status_manager,
     config::built::ServiceEndpoints const& endpoints,
     config::built::BackgroundSyncConfig::StreamingConfig const& streaming,
-    config::built::HttpProperties const& http_properties)
+    config::built::HttpProperties const& http_properties,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : io_(std::move(io)),
       logger_(logger),
       status_manager_(status_manager),
+      environment_id_(std::move(environment_id)),
       http_config_(http_properties),
       streaming_endpoint_(endpoints.StreamingBaseUrl()),
       streaming_config_(streaming) {}
@@ -125,16 +127,33 @@ void StreamingDataSource::StartAsync(
 
     auto weak_self = weak_from_this();
 
+    client_builder.on_response(
+        [weak_self](boost::beast::http::response_header<> const& headers) {
+            auto self = weak_self.lock();
+            if (!self || !self->environment_id_ ||
+                headers.result_int() != 200) {
+                return;
+            }
+            if (auto const it =
+                    headers.find(data_components::EnvironmentId::kHeader);
+                it != headers.end()) {
+                self->environment_id_->Set(
+                    std::string_view{it->value().data(), it->value().size()});
+            }
+        });
+
     client_builder.receiver([weak_self](launchdarkly::sse::Event const& event) {
         if (auto self = weak_self.lock()) {
             auto status =
                 self->event_handler_->HandleMessage(event.type(), event.data());
-            if (status == DataSourceEventHandler::MessageStatus::kInvalidMessage) {
+            if (status ==
+                DataSourceEventHandler::MessageStatus::kInvalidMessage) {
                 // Invalid data received - restart the connection with backoff
                 // to get a fresh stream. The backoff mechanism prevents rapid
                 // reconnection attempts.
                 LD_LOG(self->logger_, LogLevel::kWarn)
-                    << "Received invalid data from stream, restarting connection";
+                    << "Received invalid data from stream, restarting "
+                       "connection";
                 if (self->client_) {
                     self->client_->async_restart("invalid data in stream");
                 }

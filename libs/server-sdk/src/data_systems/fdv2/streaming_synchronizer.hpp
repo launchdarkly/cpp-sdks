@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
 #include <launchdarkly/async/cancellation.hpp>
@@ -49,7 +50,8 @@ class FDv2StreamingSynchronizer final
         std::string streaming_base_url,
         config::built::HttpProperties const& http_properties,
         std::optional<std::string> filter_key,
-        std::chrono::milliseconds initial_reconnect_delay);
+        std::chrono::milliseconds initial_reconnect_delay,
+        std::shared_ptr<data_components::EnvironmentId> environment_id);
 
     ~FDv2StreamingSynchronizer() override;
 
@@ -73,7 +75,8 @@ class FDv2StreamingSynchronizer final
               std::string streaming_base_url,
               config::built::HttpProperties const& http_properties,
               std::optional<std::string> filter_key,
-              std::chrono::milliseconds initial_reconnect_delay);
+              std::chrono::milliseconds initial_reconnect_delay,
+              std::shared_ptr<data_components::EnvironmentId> environment_id);
 
         /**
          * Updates the stored selector, starts the SSE client if not already
@@ -137,6 +140,8 @@ class FDv2StreamingSynchronizer final
         std::optional<std::string> const filter_key_;
         std::chrono::milliseconds const initial_reconnect_delay_;
         boost::asio::any_io_executor const executor_;
+        // EnvironmentId is itself thread-safe.
+        std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 
         // Touched only from SSE callbacks, which all run on the same strand.
         // No lock required.

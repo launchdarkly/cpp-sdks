@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/ifdv2_synchronizer.hpp"
 
 #include <launchdarkly/async/cancellation.hpp>
@@ -10,6 +11,7 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -42,7 +44,8 @@ class FDv2PollingSynchronizer final
         std::string polling_base_url,
         config::built::HttpProperties const& http_properties,
         std::optional<std::string> filter_key,
-        std::chrono::seconds poll_interval);
+        std::chrono::seconds poll_interval,
+        std::shared_ptr<data_components::EnvironmentId> environment_id);
 
     ~FDv2PollingSynchronizer() override;
 
@@ -64,7 +67,8 @@ class FDv2PollingSynchronizer final
               std::chrono::seconds poll_interval,
               std::string polling_base_url,
               config::built::HttpProperties const& http_properties,
-              std::optional<std::string> filter_key);
+              std::optional<std::string> filter_key,
+              std::shared_ptr<data_components::EnvironmentId> environment_id);
 
         /** Issues an async HTTP poll request and returns a Future resolving
          * with the result. */
@@ -101,6 +105,8 @@ class FDv2PollingSynchronizer final
         std::optional<std::string> const filter_key_;
         network::Requester const requester_;
         boost::asio::any_io_executor const executor_;
+        // EnvironmentId is itself thread-safe.
+        std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 
         // Mutable state, guarded by mutex_.
         std::mutex mutex_;

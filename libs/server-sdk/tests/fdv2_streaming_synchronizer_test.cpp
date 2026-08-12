@@ -145,7 +145,8 @@ TEST(FDv2StreamingSynchronizerTest, NextBadEndpointUrlReturnsTerminalError) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "not a url",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     // Act: trigger setup with a malformed streaming URL. URL parsing happens
     // inside EnsureStarted on the first Next call.
@@ -168,7 +169,8 @@ TEST(FDv2StreamingSynchronizerTest, CloseBeforeNextReturnsShutdown) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     synchronizer.Close();
 
     // Act: call Next on an already-closed synchronizer.
@@ -188,7 +190,8 @@ TEST(FDv2StreamingSynchronizerTest, CloseDuringPendingNextResolvesShutdown) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     // Skip the SSE setup; we want Next to be pending purely on the
     // close/timeout race, not on real network activity.
@@ -216,7 +219,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectEmptySelectorNoBasisParam) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -240,7 +244,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithSelectorAppendsBasis) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -266,7 +271,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectWithFilterKeyAppendsFilter) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::string("my-filter"), 1s);
+        MakeHttpProperties(), std::string("my-filter"), 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -290,7 +296,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectInvalidFilterKeyIsDropped) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::string("has spaces"), 1s);
+        MakeHttpProperties(), std::string("has spaces"), 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -312,7 +319,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectReconnectUsesLatestSelector) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -349,7 +357,8 @@ TEST(FDv2StreamingSynchronizerTest, OnConnectSelectorStateIsPercentEncoded) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "https://stream.example.com",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
 
     boost::urls::url base =
         boost::urls::parse_uri("https://stream.example.com").value();
@@ -380,7 +389,8 @@ TEST(FDv2StreamingSynchronizerTest, FullChangesetEventsReturnsChangeSet) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event server_intent("server-intent",
@@ -417,7 +427,8 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventReturnsGoodbye) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event goodbye("goodbye", R"({"reason":"bye"})");
@@ -442,7 +453,8 @@ TEST(FDv2StreamingSynchronizerTest, GoodbyeEventTriggersAsyncRestart) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -471,7 +483,8 @@ TEST(FDv2StreamingSynchronizerTest,
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Begin accumulating a payload that we'll abandon mid-flight via Goodbye.
@@ -531,7 +544,8 @@ TEST(FDv2StreamingSynchronizerTest, ServerErrorEventReturnsInterrupted) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Event server_error("error", R"({"id":"abc","reason":"oops"})");
@@ -562,7 +576,8 @@ TEST(FDv2StreamingSynchronizerTest, UnknownEventWithGarbageBodyIsIgnored) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -581,7 +596,8 @@ TEST(FDv2StreamingSynchronizerTest, MalformedJsonEventReturnsInterrupted) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -613,7 +629,8 @@ TEST(FDv2StreamingSynchronizerTest,
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     auto mock_client = std::make_shared<MockSseClient>();
@@ -639,7 +656,8 @@ TEST(FDv2StreamingSynchronizerTest, TranslationFailureReturnsInterrupted) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // A non-empty segment object missing required fields triggers a schema
@@ -684,7 +702,8 @@ TEST(FDv2StreamingSynchronizerTest,
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Error error{sse::errors::UnrecoverableClientError{
@@ -712,7 +731,8 @@ TEST(FDv2StreamingSynchronizerTest, RecoverableReadTimeoutReturnsInterrupted) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     sse::Error error{sse::errors::ReadTimeout{std::chrono::milliseconds(100)}};
@@ -743,7 +763,8 @@ TEST(FDv2StreamingSynchronizerTest, OnResponseDirectivePropagatesToChangeSet) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> headers;
@@ -780,7 +801,8 @@ TEST(FDv2StreamingSynchronizerTest, SecondResponseWithoutDirectiveClearsFlag) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> first;
@@ -808,7 +830,8 @@ TEST(FDv2StreamingSynchronizerTest, ErrorAfterDirectiveCarriesFlag) {
 
     FDv2StreamingSynchronizer synchronizer(
         runner.context().get_executor(), logger, "http://localhost",
-        MakeHttpProperties(), std::nullopt, 1s);
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     boost::beast::http::response_header<> headers;
@@ -833,9 +856,9 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithTtlHeaderParsesValue) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        "http://localhost", MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Server sends the directive with an explicit TTL.
@@ -862,9 +885,9 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
     IoContextRunner runner;
 
     FDv2StreamingSynchronizer synchronizer(
-        runner.context().get_executor(), logger,
-        "http://localhost", MakeHttpProperties(), std::nullopt,
-        1s);
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s,
+        /* environment_id= */ nullptr);
     FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
 
     // Server sends the directive with no TTL header.
@@ -883,4 +906,42 @@ TEST(FDv2StreamingSynchronizerTest, DirectiveWithoutTtlHeaderUsesDefault) {
     ASSERT_TRUE(result.has_value());
     ASSERT_TRUE(result->fdv1_fallback);
     EXPECT_EQ(FDv1FallbackDirective::kDefaultTtl, result->fdv1_fallback->ttl);
+}
+
+TEST(FDv2StreamingSynchronizerTest, SuccessfulResponseRecordsEnvironmentId) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    auto environment_id =
+        std::make_shared<server_side::data_components::EnvironmentId>();
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s, environment_id);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    boost::beast::http::response_header<> headers;
+    headers.result(200);
+    headers.set("X-LD-EnvID", "env-123");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    EXPECT_EQ(std::optional<std::string>{"env-123"}, environment_id->Get());
+}
+
+TEST(FDv2StreamingSynchronizerTest, ErrorResponseDoesNotRecordEnvironmentId) {
+    auto logger = MakeNullLogger();
+    IoContextRunner runner;
+
+    auto environment_id =
+        std::make_shared<server_side::data_components::EnvironmentId>();
+    FDv2StreamingSynchronizer synchronizer(
+        runner.context().get_executor(), logger, "http://localhost",
+        MakeHttpProperties(), std::nullopt, 1s, environment_id);
+    FDv2StreamingSynchronizerTestPeer::MarkStarted(synchronizer);
+
+    boost::beast::http::response_header<> headers;
+    headers.result(401);
+    headers.set("X-LD-EnvID", "env-123");
+    FDv2StreamingSynchronizerTestPeer::OnResponse(synchronizer, headers);
+
+    EXPECT_FALSE(environment_id->Get());
 }

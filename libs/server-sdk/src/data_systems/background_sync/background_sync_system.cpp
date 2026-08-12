@@ -11,7 +11,8 @@ BackgroundSync::BackgroundSync(
     config::built::HttpProperties http_properties,
     boost::asio::any_io_executor ioc,
     data_components::DataSourceStatusManager& status_manager,
-    Logger const& logger)
+    Logger const& logger,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : store_(), change_notifier_(store_, store_), synchronizer_() {
     std::visit(
         [&](auto&& method_config) {
@@ -21,13 +22,13 @@ BackgroundSync::BackgroundSync(
                                              StreamingConfig>) {
                 synchronizer_ = std::make_shared<StreamingDataSource>(
                     ioc, logger, status_manager, endpoints, method_config,
-                    http_properties);
+                    http_properties, environment_id);
             } else if constexpr (std::is_same_v<
                                      T, config::built::BackgroundSyncConfig::
                                             PollingConfig>) {
                 synchronizer_ = std::make_shared<PollingDataSource>(
                     ioc, logger, status_manager, endpoints, method_config,
-                    http_properties);
+                    http_properties, environment_id);
             }
         },
         background_sync_config.synchronizer_);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_interfaces/source/fdv2_source_result.hpp"
 
 #include <launchdarkly/data_model/selector.hpp>
@@ -8,6 +9,7 @@
 #include <launchdarkly/network/http_requester.hpp>
 #include <launchdarkly/server_side/config/built/all_built.hpp>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -24,11 +26,13 @@ network::HttpRequest MakeFDv2PollRequest(
 
 // Parse an HTTP response from the FDv2 polling endpoint through the protocol
 // handler and return the appropriate result. identity is used in log messages
-// to identify the caller (e.g. "FDv2 polling initializer").
+// to identify the caller (e.g. "FDv2 polling initializer"). If environment_id
+// is present, it records the environment ID of a successful response.
 data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
     FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
-    std::string_view identity);
+    std::string_view identity,
+    std::shared_ptr<data_components::EnvironmentId> const& environment_id);
 
 }  // namespace launchdarkly::server_side::data_systems

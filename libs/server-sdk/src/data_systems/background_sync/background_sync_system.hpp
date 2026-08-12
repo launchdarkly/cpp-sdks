@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../data_components/change_notifier/change_notifier.hpp"
+#include "../../data_components/environment_id/environment_id.hpp"
 #include "../../data_components/memory_store/memory_store.hpp"
 #include "../../data_components/status_notifications/data_source_status_manager.hpp"
 #include "../../data_interfaces/source/idata_synchronizer.hpp"
@@ -32,7 +33,8 @@ class BackgroundSync final : public data_interfaces::IDataSystem {
         config::built::HttpProperties http_properties,
         boost::asio::any_io_executor ioc,
         data_components::DataSourceStatusManager& status_manager,
-        Logger const& logger);
+        Logger const& logger,
+        std::shared_ptr<data_components::EnvironmentId> environment_id);
 
     BackgroundSync(BackgroundSync const& item) = delete;
     BackgroundSync(BackgroundSync&& item) = delete;

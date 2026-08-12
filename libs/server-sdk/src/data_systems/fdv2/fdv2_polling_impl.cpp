@@ -192,7 +192,8 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     network::HttpResult const& res,
     FDv2ProtocolHandler* protocol_handler,
     Logger const& logger,
-    std::string_view identity) {
+    std::string_view identity,
+    std::shared_ptr<data_components::EnvironmentId> const& environment_id) {
     if (res.IsError()) {
         auto const& msg = res.ErrorMessage();
         std::string error_msg = msg.has_value() ? *msg : "unknown error";
@@ -202,6 +203,14 @@ data_interfaces::FDv2SourceResult HandleFDv2PollResponse(
     }
 
     auto fdv1_fallback = ReadFDv1FallbackDirective(res.Headers());
+
+    if (environment_id && (res.Status() == 200 || res.Status() == 304)) {
+        if (auto const it =
+                res.Headers().find(data_components::EnvironmentId::kHeader);
+            it != res.Headers().end()) {
+            environment_id->Set(it->second);
+        }
+    }
 
     if (res.Status() == 304) {
         return FDv2SourceResult{

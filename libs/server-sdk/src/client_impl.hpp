@@ -2,6 +2,7 @@
 
 #include "data_components/big_segments/big_segment_store_status_provider.hpp"
 #include "data_components/big_segments/big_segment_store_wrapper.hpp"
+#include "data_components/environment_id/environment_id.hpp"
 #include "data_components/status_notifications/data_source_status_manager.hpp"
 #include "data_interfaces/system/idata_system.hpp"
 #include "evaluation/evaluator.hpp"
@@ -251,6 +252,11 @@ class ClientImpl : public IClient {
         work_;
 
     data_components::DataSourceStatusManager status_manager_;
+
+    // Populated by the data system's sources with the environment ID reported
+    // by LaunchDarkly; read when building hook series contexts. Declared
+    // before data_system_, which shares it with its data sources.
+    std::shared_ptr<data_components::EnvironmentId> const environment_id_;
 
     // This is the main polymorphic component that constitutes the
     // guts of how data is retrieved (polling, streaming, persistent stores,

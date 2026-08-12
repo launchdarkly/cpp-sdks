@@ -17,19 +17,21 @@ FDv2StreamingSynchronizerFactory::FDv2StreamingSynchronizerFactory(
     Logger logger,
     config::built::ServiceEndpoints endpoints,
     config::built::HttpProperties http_properties,
-    config::built::FDv2Config::StreamingConfig streaming)
+    config::built::FDv2Config::StreamingConfig streaming,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
       streaming_base_url_(
           streaming.base_url_override.value_or(endpoints.StreamingBaseUrl())),
       http_properties_(std::move(http_properties)),
-      streaming_(std::move(streaming)) {}
+      streaming_(std::move(streaming)),
+      environment_id_(std::move(environment_id)) {}
 
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv2StreamingSynchronizerFactory::Build() {
     return std::make_unique<FDv2StreamingSynchronizer>(
         executor_, logger_, streaming_base_url_, http_properties_, std::nullopt,
-        streaming_.initial_reconnect_delay);
+        streaming_.initial_reconnect_delay, environment_id_);
 }
 
 FDv2PollingSynchronizerFactory::FDv2PollingSynchronizerFactory(
@@ -37,19 +39,21 @@ FDv2PollingSynchronizerFactory::FDv2PollingSynchronizerFactory(
     Logger logger,
     config::built::ServiceEndpoints endpoints,
     config::built::HttpProperties http_properties,
-    config::built::FDv2Config::PollingConfig polling)
+    config::built::FDv2Config::PollingConfig polling,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
       polling_base_url_(
           polling.base_url_override.value_or(endpoints.PollingBaseUrl())),
       http_properties_(std::move(http_properties)),
-      polling_(std::move(polling)) {}
+      polling_(std::move(polling)),
+      environment_id_(std::move(environment_id)) {}
 
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv2PollingSynchronizerFactory::Build() {
     return std::make_unique<FDv2PollingSynchronizer>(
         executor_, logger_, polling_base_url_, http_properties_, std::nullopt,
-        polling_.poll_interval);
+        polling_.poll_interval, environment_id_);
 }
 
 FDv1StreamingAdapterFactory::FDv1StreamingAdapterFactory(
@@ -57,12 +61,14 @@ FDv1StreamingAdapterFactory::FDv1StreamingAdapterFactory(
     Logger logger,
     config::built::ServiceEndpoints endpoints,
     config::built::FDv2Config::FDv1StreamingConfig streaming,
-    config::built::HttpProperties http_properties)
+    config::built::HttpProperties http_properties,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
       endpoints_(std::move(endpoints)),
       streaming_(std::move(streaming)),
-      http_properties_(std::move(http_properties)) {}
+      http_properties_(std::move(http_properties)),
+      environment_id_(std::move(environment_id)) {}
 
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv1StreamingAdapterFactory::Build() {
@@ -70,7 +76,7 @@ FDv1StreamingAdapterFactory::Build() {
         [this](data_components::DataSourceStatusManager& status_manager) {
             return std::make_shared<StreamingDataSource>(
                 executor_, logger_, status_manager, endpoints_, streaming_,
-                http_properties_);
+                http_properties_, environment_id_);
         });
 }
 
@@ -79,12 +85,14 @@ FDv1PollingAdapterFactory::FDv1PollingAdapterFactory(
     Logger logger,
     config::built::ServiceEndpoints endpoints,
     config::built::FDv2Config::FDv1PollingConfig polling,
-    config::built::HttpProperties http_properties)
+    config::built::HttpProperties http_properties,
+    std::shared_ptr<data_components::EnvironmentId> environment_id)
     : executor_(std::move(executor)),
       logger_(std::move(logger)),
       endpoints_(std::move(endpoints)),
       polling_(std::move(polling)),
-      http_properties_(std::move(http_properties)) {}
+      http_properties_(std::move(http_properties)),
+      environment_id_(std::move(environment_id)) {}
 
 std::unique_ptr<data_interfaces::IFDv2Synchronizer>
 FDv1PollingAdapterFactory::Build() {
@@ -92,7 +100,7 @@ FDv1PollingAdapterFactory::Build() {
         [this](data_components::DataSourceStatusManager& status_manager) {
             return std::make_shared<PollingDataSource>(
                 executor_, logger_, status_manager, endpoints_, polling_,
-                http_properties_);
+                http_properties_, environment_id_);
         });
 }
 
